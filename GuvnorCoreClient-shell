@@ -1,0 +1,3 @@
+#!/bin/sh
+APPDIR=`dirname $0`;
+java -XstartOnFirstThread -cp "$APPDIR/src:$APPDIR/bin:/Users/christopherbrock/Projects/gwt-mac-1.4.62/gwt-user.jar:/Users/christopherbrock/Projects/gwt-mac-1.4.62/gwt-dev-mac.jar" com.google.gwt.dev.GWTShell -out "$APPDIR/www" "$@" org.jboss.guvnor.ui.core.GuvnorCoreClient/GuvnorCoreClient.html;
