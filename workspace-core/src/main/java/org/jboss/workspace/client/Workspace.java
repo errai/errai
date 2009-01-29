@@ -21,12 +21,19 @@ public class Workspace implements EntryPoint {
      * This is the entry point method.
      */
     public void onModuleLoad() {
+        init(null);
+    }
+
+    public WorkspaceLayout init(String rootId) {
         Window.enableScrolling(false);
 
         final Viewport viewport = new Viewport();
         viewport.add(WORKSPACE.createLayout());
 
-        RootPanel.get().add(viewport);
+        //  RootPanel.get().add(viewport);
+
+        if (rootId != null) RootPanel.get(rootId).add(viewport);
+        else RootPanel.get().add(viewport);
 
         dragController = new PickupDragController(RootPanel.get(), true);
 
@@ -37,7 +44,10 @@ public class Workspace implements EntryPoint {
          * Get any session state information from the server.
          */
         WORKSPACE.pullSessionState();
+
+        return WORKSPACE;
     }
+
 
     public static void addToolSet(ToolSet toolSet) {
         WORKSPACE.addToolSet(toolSet);
@@ -45,5 +55,9 @@ public class Workspace implements EntryPoint {
 
     public static void notifyState(StatePacket packet) {
         WORKSPACE.notifySessionState(packet);
+    }
+
+    public WorkspaceLayout getWorkspaceLayout() {
+        return WORKSPACE;
     }
 }

@@ -1,0 +1,8 @@
+<module>
+
+    <inherits name='com.google.gwt.user.User'/>
+    <inherits name="org.jboss.workspace.Workspace"/>
+
+    <entry-point class='org.jboss.workspace.sampler.client.WorkspaceSampler'/>
+
+</module>

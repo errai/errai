@@ -20,7 +20,14 @@ public class WSLauncherPanel extends Composite {
     }
 
     public void addLink(String name, Tool tool) {
-        Image newIcon = new Image(tool.getIcon().getUrl());
+        Image newIcon;
+        if (tool.getIcon() != null) {
+            newIcon = new Image(tool.getIcon().getUrl());
+        }
+        else {
+            newIcon = new Image("images/ui/icons/questioncube.png");
+        }
+        
         newIcon.setSize("16px", "16px");
 
         WSLaunchButton button = new WSLaunchButton(newIcon, name);

@@ -263,7 +263,23 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
      * @param toolSet -
      */
     public void addToolSet(ToolSet toolSet) {
-        navigation.add(toolSet.getWidget(), toolSet.getToolSetName());
+        if (toolSet.getWidget() != null) {
+            navigation.add(toolSet.getWidget(), toolSet.getToolSetName());
+        }
+        else {
+            /**
+             * Create a default launcher panel.
+             */
+
+            WSLauncherPanel launcherPanel = new WSLauncherPanel();
+
+            for (Tool t : toolSet.getAllProvidedTools()) {
+                launcherPanel.addLink(t.getName(), t);
+            }
+
+            navigation.add(launcherPanel, toolSet.getToolSetName());
+        }
+
 
         for (Tool tool : toolSet.getAllProvidedTools()) {
             availableTools.put(tool.getId(), tool);
@@ -310,7 +326,7 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
 
                             forceOpenTab(tool, packet, icon);
                         }
-                        else if (!"WindowClosed".equals(message)){
+                        else if (!"WindowClosed".equals(message)) {
                             Set<WSTab> s = Workspace.WORKSPACE.getActiveByType(packet.getId());
 
                             if (s.size() > 1) {
@@ -348,7 +364,7 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
         Image newIcon = new Image(icon.getUrl());
         newIcon.setSize("16px", "16px");
 
-    //    int currentWidth = tabPanel.getOffsetWidth();
+        //    int currentWidth = tabPanel.getOffsetWidth();
 
         WSTab blt = new WSTab(this, flowpanel, newIcon, packet, tabPanel);
 
@@ -369,7 +385,7 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
         activateTool(packet.getId());
 
         notifySessionState(packet);
-    }                                
+    }
 
 
     public void closeTab(StatePacket packet) {
