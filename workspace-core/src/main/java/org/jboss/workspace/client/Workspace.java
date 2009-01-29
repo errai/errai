@@ -14,8 +14,10 @@ import org.gwt.mosaic.ui.client.Viewport;
  * Entry point classes define <code>onModuleLoad()</code>.
  */
 public class Workspace implements EntryPoint {
-    public static final WorkspaceLayout WORKSPACE = new WorkspaceLayout();
+  //  public static final WorkspaceLayout WORKSPACE = new WorkspaceLayout();
     public static PickupDragController dragController;
+
+    private WorkspaceLayout workspaceLayout;
 
     /**
      * This is the entry point method.
@@ -25,10 +27,13 @@ public class Workspace implements EntryPoint {
     }
 
     public WorkspaceLayout init(String rootId) {
+
+        workspaceLayout = new WorkspaceLayout();
+
         Window.enableScrolling(false);
 
         final Viewport viewport = new Viewport();
-        viewport.add(WORKSPACE.createLayout());
+        viewport.add(workspaceLayout.createLayout());
 
         //  RootPanel.get().add(viewport);
 
@@ -38,26 +43,26 @@ public class Workspace implements EntryPoint {
         dragController = new PickupDragController(RootPanel.get(), true);
 
         ModuleLoaderBootstrap mlb = GWT.create(ModuleLoaderBootstrap.class);
-        mlb.initAll(WORKSPACE);
+        mlb.initAll(workspaceLayout);
 
         /**
          * Get any session state information from the server.
          */
-        WORKSPACE.pullSessionState();
+        workspaceLayout.pullSessionState();
 
-        return WORKSPACE;
+        return workspaceLayout;
     }
 
 
-    public static void addToolSet(ToolSet toolSet) {
-        WORKSPACE.addToolSet(toolSet);
+    public void addToolSet(ToolSet toolSet) {
+        workspaceLayout.addToolSet(toolSet);
     }
 
-    public static void notifyState(StatePacket packet) {
-        WORKSPACE.notifySessionState(packet);
+    public void notifyState(StatePacket packet) {
+        workspaceLayout.notifySessionState(packet);
     }
 
     public WorkspaceLayout getWorkspaceLayout() {
-        return WORKSPACE;
+        return workspaceLayout;
     }
 }

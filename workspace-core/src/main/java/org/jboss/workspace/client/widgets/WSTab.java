@@ -16,6 +16,7 @@ import org.jboss.workspace.client.widgets.dnd.TabDropController;
  * A WorkspaceTab is the actual implementation of the rendered tabs along the top of the workspace.
  */
 public class WSTab extends Composite {
+    WorkspaceLayout layout;
     StatePacket packet;
     Widget widgetRef;
     final Label label;
@@ -27,6 +28,7 @@ public class WSTab extends Composite {
                         WSTabPanel tabPanel) {
         super();
 
+        this.layout = bl;
         this.packet = packet;
         this.widgetRef = widgetRef;
 
@@ -60,7 +62,7 @@ public class WSTab extends Composite {
         if (!packet.isModifiedFlag()) {
             packet.setModifiedFlag(modified);
             decorateModified();
-            Workspace.notifyState(packet);
+            layout.notifySessionState(packet);
         }
     }
 
@@ -224,6 +226,6 @@ public class WSTab extends Composite {
     }
 
     public void activate() {
-        Workspace.WORKSPACE.tabPanel.selectTab(Workspace.WORKSPACE.tabPanel.getWidgetIndex(widgetRef));
+        layout.tabPanel.selectTab(layout.tabPanel.getWidgetIndex(widgetRef));
     }
 }

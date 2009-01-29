@@ -4,6 +4,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import com.google.gwt.user.client.ui.Widget;
 import org.jboss.workspace.client.framework.Tool;
 import static org.jboss.workspace.client.rpc.AdapterRegistry.getAdapter;
+import org.jboss.workspace.client.layout.WorkspaceLayout;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -22,11 +23,15 @@ public class StatePacket implements IsSerializable, Serializable {
     private int size = 0;
 
     private transient Map<String, Integer> hash;
+    private transient WorkspaceLayout layout;
 
-    public StatePacket() {
+
+    public StatePacket(WorkspaceLayout layout) {
+        this.layout = layout;
     }
 
-    public StatePacket(Tool tool) {
+    public StatePacket(WorkspaceLayout layout, Tool tool) {
+        this.layout = layout;
         this.id = tool.getId();
         this.instanceId = id;
         this.name = tool.getName();
@@ -135,7 +140,14 @@ public class StatePacket implements IsSerializable, Serializable {
         getAdapter(widget.getClass()).attach(id, widget, this);
     }
 
- 
+    public void notifySessionState() {
+        layout.notifySessionState(this);
+    }
+
+    public WorkspaceLayout getActiveLayout() {
+        return layout;
+    }
+
     public String toString() {
         StringBuffer sbuf = new StringBuffer();
         sbuf.append("Packet [compenentId:").append(id).append("][instance:").append(instanceId).append("]\n");

@@ -11,11 +11,7 @@ import org.jboss.workspace.client.layout.WorkspaceLayout;
 
 public class WorkspaceSampler implements EntryPoint {
     public void onModuleLoad() {
-
-        Workspace workspace = new Workspace();
- 
-        workspace.getWorkspaceLayout().addToolSet(new ToolSet() {
-
+        new Workspace().getWorkspaceLayout().addToolSet(new ToolSet() {
             public Tool[] getAllProvidedTools() {
                 return new Tool[] {
                        new Tool() {
@@ -44,15 +40,13 @@ public class WorkspaceSampler implements EntryPoint {
             }
 
             public String getToolSetName() {
-                return "Samples";  //To change body of implemented methods use File | Settings | File Templates.
+                return "Samples"; 
             }
 
             public Widget getWidget() {
                 return null;
             }
         });
-
-
     }
 }
 

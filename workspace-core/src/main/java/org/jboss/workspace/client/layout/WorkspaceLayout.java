@@ -69,7 +69,7 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
         mainLayoutPanel.add(createHeader(), LayoutUtil.position(LayoutUtil.NORTH));
 
         tabDragController.setBehaviorBoundaryPanelDrop(false);
-        tabDragController.addDragHandler(new TabDragHandler());
+        tabDragController.addDragHandler(new TabDragHandler(this));
 
         mainLayoutPanel.add(createNavigator(),
                 navigationLayout = new BorderLayoutData(BorderLayout.Region.WEST));
@@ -271,7 +271,7 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
              * Create a default launcher panel.
              */
 
-            WSLauncherPanel launcherPanel = new WSLauncherPanel();
+            WSLauncherPanel launcherPanel = new WSLauncherPanel(this);
 
             for (Tool t : toolSet.getAllProvidedTools()) {
                 launcherPanel.addLink(t.getName(), t);
@@ -310,6 +310,8 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
                 dialog.getOkButton().setText("Open New");
                 dialog.getCancelButton().setText("Goto");
 
+                final WorkspaceLayout layout = this;
+
                 AcceptsCallback openCallback = new AcceptsCallback() {
                     public void callback(String message) {
                         if (MESSAGE_OK.equals(message)) {
@@ -327,7 +329,7 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
                             forceOpenTab(tool, packet, icon);
                         }
                         else if (!"WindowClosed".equals(message)) {
-                            Set<WSTab> s = Workspace.WORKSPACE.getActiveByType(packet.getId());
+                            Set<WSTab> s = layout.getActiveByType(packet.getId());
 
                             if (s.size() > 1) {
                                 WSTabSelectorDialog wsd = new WSTabSelectorDialog(s);

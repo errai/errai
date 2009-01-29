@@ -15,7 +15,7 @@ public class TextBoxAttach implements Attachable {
                 new ChangeListener() {
                     public void onChange(Widget widget) {
                         packet.setParameter(id, w.getText());
-                        Workspace.notifyState(packet);
+                        packet.notifySessionState();
                     }
                 }
         );

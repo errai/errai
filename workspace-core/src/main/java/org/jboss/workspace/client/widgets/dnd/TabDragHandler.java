@@ -5,12 +5,15 @@ import com.allen_sauer.gwt.dnd.client.DragHandler;
 import com.allen_sauer.gwt.dnd.client.DragStartEvent;
 import com.allen_sauer.gwt.dnd.client.VetoDragException;
 import org.jboss.workspace.client.Workspace;
+import org.jboss.workspace.client.layout.WorkspaceLayout;
 import org.jboss.workspace.client.widgets.WSTab;
 import org.jboss.workspace.client.widgets.WSTabPanel;
 
 public class TabDragHandler implements DragHandler {
+    private WorkspaceLayout layout;
 
-    public TabDragHandler() {
+    public TabDragHandler(WorkspaceLayout layout) {
+        this.layout = layout;
     }
 
     /**
@@ -21,7 +24,7 @@ public class TabDragHandler implements DragHandler {
     public void onDragEnd(DragEndEvent event) {
         WSTab tab = (WSTab) event.getContext().draggable;
 
-        WSTabPanel panel = Workspace.WORKSPACE.tabPanel;
+        WSTabPanel panel = layout.tabPanel;
         /**
          * If the tab has been dragged outside the boundaries, we need to catch it, so it doesn't get thrown
          * away.
