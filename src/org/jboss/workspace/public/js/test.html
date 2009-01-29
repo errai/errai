@@ -1,0 +1,204 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<title></title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<script type="text/javascript" src="shadedborder.js"></script>
+
+<style type="text/css">
+/* <![CDATA[ */
+
+html { font-family:Arial, sans-serif; background:#444; color:#ddd; }
+html, body { margin:0; padding:0; }
+p { margin:5px 0; }
+.headfoot { text-align:right; padding:10px; margin:0; position:relative; }
+.headfoot h1 { font-size:1.3em; padding:0; margin:0; }
+.headfoot a { color:#fff; }
+#content { background:url(back.jpg); padding:10px 0; }
+* html #content { posititon:relative; }
+
+/* For the first shadowed border */
+#shadowed-border { padding:20px; width:80%; margin:20px auto; color:#fff; }
+#shadowed-border, #shadowed-border .sb-inner { background:#444 url(grad.png) repeat-x; }
+
+/* The split heading/content element */
+#split { margin:20px auto; width:33%; }
+#split h3 { padding:4px; text-align:center; margin:0; color:#fff; }
+#split h3, #split h3 .sb-inner { background:#222 url(grad2.png) repeat-x; }
+#split .content { padding:4px 10px; color:#444; }
+#split .content, #split .content .sb-inner { background:#ddd url(grad3.png) repeat-x; }
+
+#trans-border { width:280px; margin:20px auto; padding:14px 20px; background:#444; color:#222; }
+#trans-border .sb-border { background:#000; }
+
+/* Partial stuff */
+ul#partial { overflow:hidden; width:490px; margin:20px auto; padding:0; list-style:none; }
+* html ul#partial { height:1%; }
+ul#partial li { float:left; width:50px; padding:12px 0; text-align:center;
+                margin:0 5px; color:#4c2; }
+ul#partial li, ul#partial li .sb-inner { background:#444; }
+ul#partial li .sb-border { background:#fff; }
+
+/* The tabs */
+#tabs { overflow:hidden; padding:0; margin:20px auto 0 auto; width:400px; color:#444; }
+* html #tabs { height:1%; }
+#tabs li { float:left; color:#000; list-style:none; padding:0; margin:0 0 0 5px; }
+* html #tabs li { display:inline-block; }
+#tabs li a { display:block; float:left; text-decoration:none; padding:5px; color:#000; }
+#tabs li, #tabs li .sb-inner { background:#ccc; }
+#tabs li:hover, #tabs li:hover .sb-inner { background:#eee; }
+#tabs li.hover, #tabs li.hover .sb-inner { background:#eee; } /* for ie6 */
+#tabs li .sb-border { background:#fff; }
+#tabs-content { background:#ccc; width:380px; margin:-1px auto 20px auto; padding:10px; 
+                border:1px solid #fff; color:#000; }
+
+/* The links */
+#links { color:#4c2; padding:20px; margin:20px; width:400px; margin:0 auto; }
+#links, #links .sb-inner { background:#444 url(grad.png) repeat-x; }
+#links .sb-border { background:#fff; }
+#links a { color:#9f2; }
+#links a .sb-shadow { background:transparent; }
+#links a:hover .sb-shadow { background:#777; }
+#links a.hover .sb-shadow { background:#777; } /* for ie6 */
+
+#change-border { color:#fff; padding:20px; margin:20px auto; width:300px; }
+.change-border0, .change-border0 .sb-inner { background:#444; }
+.change-border1, .change-border1 .sb-inner { background:#888; }
+
+/* ]]> */
+</style>
+
+<script language="javascript" type="text/javascript">
+  var t = new Date().getTime();
+
+  var shadowedBorder    = RUZEE.ShadedBorder.create({ corner:8, shadow:16 });
+  var splitBorderTop    = RUZEE.ShadedBorder.create({ corner:10, edges:"tlr" });
+  var splitBorderBottom = RUZEE.ShadedBorder.create({ corner:10, edges:"blr" });
+  var transBorder       = RUZEE.ShadedBorder.create({ corner:15, border:8, borderOpacity:0.4 });
+  var tabBorder         = RUZEE.ShadedBorder.create({ corner:8, edges:"tlr", border:1 });
+  var linksBorder       = RUZEE.ShadedBorder.create({ corner:10, border:2 });
+  var linkBorder        = RUZEE.ShadedBorder.create({ shadow:4 });
+
+  var changeBorders = [
+    RUZEE.ShadedBorder.create({ corner:20 }),
+    RUZEE.ShadedBorder.create({ corner:10, shadow:20 })
+  ];
+  
+  var partialIDs = ["tl", "tr", "bl", "br", "tlr", "blr", "tbl", "tbr"];
+  var partialBorders = {};
+  for (var i=0; i<partialIDs.length; ++i) {
+    partialBorders[partialIDs[i]] = RUZEE.ShadedBorder.create({
+        corner:10, border:2, edges:partialIDs[i] });
+  }
+  var calcTime = "Calculation time: " + ((new Date().getTime() - t) / 1000.0) + "s";
+</script>
+
+</head>
+<body>
+  <div class="headfoot">
+    <h1><a href="http://www.ruzee.com/blog/shadedborder">
+      RUZEE.ShadedBorder</a> Examples</h1>
+  </div>
+
+  <div id="content">
+
+  <div id="shadowed-border">
+    <p>This shadowed border has a width of 80% and scales with the size of
+       your browser window. Try it! ;-) Resize your browser window now, it's fun.</p>
+  </div>
+
+  <div id="split">
+    <h3><span>A Headline With Its Own Style</span></h3>
+    <div class="content">
+      <p>The height of the heading gives its background the height.</p/>
+      <p>And the content height is determined by the content.</p>
+    </div>
+  </div>
+
+  <div id="trans-border">
+    <p>A semi-transparent fat border. Thanks, Ryan, for the idea and the code!</p>
+  </div>
+
+  <ul id="partial">
+    <li id="tl"><span>tl</span></li>
+    <li id="tr"><span>tr</span></li>
+    <li id="bl"><span>bl</span></li>
+    <li id="br"><span>br</span></li>
+    <li id="tlr"><span>tlr</span></li>
+    <li id="blr"><span>blr</span></li>
+    <li id="tbl"><span>tbl</span></li>
+    <li id="tbr"><span>tbr</span></li>
+  </ul>
+
+  <ul id="tabs">
+    <li><a href="#">Tab 1</a></li>
+    <li><a href="#">Tab 2</a></li>
+    <li><a href="#">And a third tab</a></li>
+  </ul>
+  <div id="tabs-content">
+    Tabs that change the color when hovered over (also works in Internet Explorer 6.0 thanks to NewTrax).
+  </div>
+
+  <div id="links">
+    <p>Links that "glow" when hovered over - this is alpha code...
+       A <a href="#" class="sbi"><span>link</span></a> and another <a href="#" class="sbi"><span>link</span></a> 
+       and yet another <a href="#" class="sbi"><span>link</span></a>.</p>
+  </div>
+
+  <div id="change-border">
+    <button onclick="changeBorder()">Change this border</button>
+    <p>Some Text</p>
+  </div>
+
+  </div>
+
+  <div class="headfoot">  
+    <div id="calcTime"></div>
+    <div id="renderTime"></div>
+  </div>
+  
+  <script language="javascript" type="text/javascript">
+    if (!window.$) {
+      window.$ = function(id) { return document.getElementById(id); }
+    }
+  
+    var currentChangeBorder=0;
+  
+    function changeBorder() {
+      currentChangeBorder = (currentChangeBorder + 1) % changeBorders.length;
+      $('change-border').className = 'sb change-border' + currentChangeBorder;
+      changeBorders[currentChangeBorder].render('change-border');
+    }
+
+    var t = new Date().getTime();
+    shadowedBorder.render('shadowed-border');
+
+    // we have to render the bottom first because we need to exist JUST ONE DIV
+    // for getElementsByTagName and rendering top will insert loads of them ...
+    splitBorderBottom.render($('split').getElementsByTagName('div')[0]);
+    splitBorderTop.render($('split').getElementsByTagName('h3')[0]);
+
+    transBorder.render('trans-border');
+  
+    linksBorder.render('links');
+    linkBorder.render($('links').getElementsByTagName('a'));
+
+    for (id in partialBorders) {
+      partialBorders[id].render(id);
+    }
+
+    var tabs = $('tabs').getElementsByTagName("li");
+    for (var i=0; i < tabs.length; ++i) {
+      tabBorder.render(tabs[i]);
+    }
+
+    changeBorder();
+  
+    $('calcTime').innerHTML = calcTime;
+    $('renderTime').innerHTML = "Render time: " + ((new Date().getTime() - t) / 1000.0) + "s";
+  </script>
+
+</body>
+</html>
