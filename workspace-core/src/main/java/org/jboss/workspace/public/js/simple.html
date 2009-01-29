@@ -1,0 +1,50 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<title></title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<script type="text/javascript" src="shadedborder.js"></script>
+
+<style type="text/css">
+/* <![CDATA[ */
+
+/* One simple border definition */
+#my-border { padding:20px; width:30%; margin:200px auto; color:#fff; }
+#my-border, #my-border .sb-inner { background:#444 url(grad.png) repeat-x; }
+
+
+/* The following is just for making the page look "cool" - simply ignore it */
+html { font-family:sans-serif; background:#444; color:#ddd; }
+html, body { margin:0; padding:0; }
+p { margin:5px 0; }
+.headfoot { text-align:right; padding:10px; margin:0; }
+.headfoot h1 { font-size:1.3em; padding:0; margin:0; }
+.headfoot a { color:#fff; }
+#content { background:url(back.jpg); padding:10px 0; }
+
+/* ]]> */
+</style>
+
+</head>
+<body>
+  <div class="headfoot">
+    <h1><a href="http://www.ruzee.com/blog/shadedborder">
+      RUZEE.ShadedBorder</a> Simple Example</h1>
+  </div>
+
+  <div id="content">
+    <div id="my-border">
+      <p>That's a simple border example.</p>
+      <p>And from version 0.4 on it even supports gracefull degradation - try to disable JavaScript and see what happens.</p>
+    </div>
+  </div>
+
+  <script language="javascript" type="text/javascript">
+    var myBorder = RUZEE.ShadedBorder.create({ corner:8, shadow:16 });
+    myBorder.render('my-border');
+  </script>
+
+</body>
+</html>

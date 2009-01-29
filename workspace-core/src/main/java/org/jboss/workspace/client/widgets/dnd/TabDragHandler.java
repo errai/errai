@@ -1,0 +1,60 @@
+package org.jboss.workspace.client.widgets.dnd;
+
+import com.allen_sauer.gwt.dnd.client.DragEndEvent;
+import com.allen_sauer.gwt.dnd.client.DragHandler;
+import com.allen_sauer.gwt.dnd.client.DragStartEvent;
+import com.allen_sauer.gwt.dnd.client.VetoDragException;
+import org.jboss.workspace.client.Workspace;
+import org.jboss.workspace.client.widgets.WSTab;
+import org.jboss.workspace.client.widgets.WSTabPanel;
+
+public class TabDragHandler implements DragHandler {
+
+    public TabDragHandler() {
+    }
+
+    /**
+     * Log the drag end event.
+     *
+     * @param event the event to log
+     */                           
+    public void onDragEnd(DragEndEvent event) {
+        WSTab tab = (WSTab) event.getContext().draggable;
+
+        WSTabPanel panel = Workspace.WORKSPACE.tabPanel;
+        /**
+         * If the tab has been dragged outside the boundaries, we need to catch it, so it doesn't get thrown
+         * away.
+         */
+        if (panel.getWidgetIndex(tab.getWidgetRef()) == -1) {
+            panel.add(panel.getWidget(panel.getWidgetCount()-1),tab);
+        }
+    }
+
+    /**
+     * Log the drag start event.
+     *
+     * @param event the event to log
+     */
+    public void onDragStart(DragStartEvent event) {
+    }
+
+    /**
+     * Log the preview drag end event.
+     *
+     * @param event the event to log
+     * @throws VetoDragException exception which may be thrown by any drag handler
+     */
+    public void onPreviewDragEnd(DragEndEvent event) throws VetoDragException {
+    }
+
+    /**
+     * Log the preview drag start event.
+     *
+     * @param event the event to log
+     * @throws VetoDragException exception which may be thrown by any drag handler
+     */
+    public void onPreviewDragStart(DragStartEvent event) throws VetoDragException {
+    }
+
+}
