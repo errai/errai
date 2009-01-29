@@ -1,0 +1,114 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html><head><title>test</title>
+<style><!--
+
+* { padding: 0px; margin: 0px; background: green; color: white; }
+.hr { background:#000; height:1px; font-size:1px; }
+.bgimg { float:left; padding: 30px; margin: 10px; background: url(bgimg.gif) #CEDEA5; }
+.width120 { width: 120px; margin: 0 10px; }
+.width200 { width: 200px; margin: 0 10px; }
+.width300 { width: 300px; margin: 0 10px; }
+.width80p { width: 80%; margin: 0 auto; }
+#test { border:3px solid red; padding:1em; }
+.element { background: gray; padding: 16px; }
+/* #glow { border: solid 1px red; } */
+.someclassContainer { width: 160px; float: left; margin:0 10px; height:160px; }
+.someclass { background: #7B3; border: solid 5px yellow; padding: 22px; height:100px; }
+.left { width: 80px; float: left; }
+.clear { clear: both; }
+#onlyTop { background: #7B3; border: solid 3px yellow; border-bottom: none; padding: 20px; }
+#onlyBottom { background: #362; border: solid 3px yellow; border-top: none; padding: 20px; }
+#onlyLeft { background: #7B3; border: solid 2px yellow; border-right: none; padding: 20px; }
+#onlyRight { background: #362; border: solid 2px yellow; border-left: none; padding: 20px; }
+#withbgimg1 { color: white; border: solid 1px #85ADC3; padding:3em;
+  background: url(gradient.gif) #003B62; background-repeat: repeat-x; }
+#withbgimg1 * { color: white; }
+
+#withbgimg2 {
+  background: #CEDEA5 url(bgimg.gif); background-repeat: repeat-x;
+  padding: 30px; color: black; }
+#withbgimg2 * { color: black; }
+
+//-->
+</style>
+<script type="text/javascript" type="text/javascript" src="cssquery2-p.js"></script>
+<script type="text/javascript" type="text/javascript" src="ruzeeborders.js"></script>
+<script type="text/javascript" type="text/javascript"><!--
+
+RUZEE.Borders.add({
+  '#test': { borderType:'shadow', cornerRadius:10, shadowWidth:20 },
+  '#glow': { borderType:'glow', cornerRadius:4, glowRadius:5, glowColor:'white' },
+  '.someclass': { borderType:'simple', cornerRadius:20, height:100 },
+  '#onlyTop, #onlyBottom, #onlyLeft, #onlyRight':
+      { borderType:'shadow', cornerRadius:5, shadowWidth:7 },
+  '#onlyTop': { edges:'lrt' },
+  '#onlyBottom': { edges:'lrb' },
+  '#onlyLeft': { edges:'ltb' },
+  '#onlyRight': { edges:'rtb' },
+  '#withbgimg1': { borderType:'simple', cornerRadius:20 },
+  '#withbgimg2': { borderType:'shadow', cornerRadius:10, shadowWidth: 10 }
+});
+
+window.onload=function(){
+//alert("sd");
+  RUZEE.Borders.render();
+};
+
+//-->
+</script>
+</head>
+<body>
+  <div class="width200">
+    <div id="test">
+    a b c d e f g h i j k l m n o p q r s t u v w x y z
+    q w e r t z u i o p a s d f g h j k l y x c v b n m
+    a b c d e f g h i j k l m n o p q r s t u v w x y z
+    q w e r t z u i o p a s d f g h j k l y x c v b n m
+    </div>
+  </div>
+  <div class="hr"></div>
+  <div class="width200">
+    <div id="glow" class="element">Some glowing border</div>
+  </div>
+  <div class="hr"></div>
+
+  <div class="someclassContainer"><div class="someclass">Number 1 in someclass where all have height:100px </div></div>
+  <div class="someclassContainer"><div class="someclass">Number 2 in someclass</div></div>
+  <div class="someclassContainer"><div class="someclass">Number 3 in someclass sdfklj sdlfkjds fkl skdljf aslkfd</div></div>
+  <div class="clear"></div>
+  <div class="hr"></div>
+
+  <div class="width120">
+    <div id="onlyTop">The top</div>
+    <div id="onlyBottom">The bottom.<br/>Plus some more text.</div>
+  </div>
+  <div class="hr"></div>
+
+  <div class="width200">
+    <div class="left"><div id="onlyLeft">Left</div></div>
+    <div class="left"><div id="onlyRight">Right</div></div>
+    <div class="clear"></div>
+  </div>
+  <div class="hr"></div>
+
+  <div class="width300 bgimg">
+    <div id="withbgimg1">
+      This is a border on top of a DIV with a background image set outside and
+      a gradient image set inside. SOMETIMES KONQUEROR AND SAFARI DO REPEAT-Y EVEN
+      WHEN THEY ARE NOT SUPPOSED TO!
+    </div>
+  </div>
+  <div class="clear"></div>
+  <div class="hr"></div>
+
+  <div class="clear"></div>
+  <div class="width80p">
+    <div id="withbgimg2">
+      This is a border on top of a DIV with a background image set inside plus some more text so you can see that the repeat is only repeat-x - and nothing else is allowed! Try resizing your browser window to see what happens...
+    </div>
+  </div>
+  <div class="hr"></div>
+
+  Hello, this is the end...
+</body></html>
