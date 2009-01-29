@@ -26,6 +26,9 @@ public class StatePacket implements IsSerializable, Serializable {
     private transient WorkspaceLayout layout;
 
 
+    public StatePacket() {
+    }
+
     public StatePacket(WorkspaceLayout layout) {
         this.layout = layout;
     }
