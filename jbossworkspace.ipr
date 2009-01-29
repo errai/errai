@@ -247,7 +247,7 @@
   </component>
   <component name="ProjectFileVersion" converted="true" />
   <component name="ProjectKey">
-    <option name="state" value="project:///Users/christopherbrock/Projects/jbossworkspace/jbossworkspace.ipr" />
+    <option name="state" value="https://svn.jboss.org/repos/jbossworkspace/trunk/jbossworkspace.ipr" />
   </component>
   <component name="ProjectModuleManager">
     <modules>
