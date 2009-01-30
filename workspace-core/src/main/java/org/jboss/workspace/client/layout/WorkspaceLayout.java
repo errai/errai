@@ -284,6 +284,7 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
         for (Tool tool : toolSet.getAllProvidedTools()) {
             availableTools.put(tool.getId(), tool);
         }
+
     }
 
     /**
@@ -537,6 +538,7 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
     private void openNavPanel() {
         navigation.setVisible(true);
         navigationLabel.setVisible(true);
+
 
         navigation.setWidth("175px");
 

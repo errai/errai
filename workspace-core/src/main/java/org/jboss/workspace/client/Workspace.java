@@ -16,20 +16,17 @@ import org.gwt.mosaic.ui.client.Viewport;
 public class Workspace implements EntryPoint {
   //  public static final WorkspaceLayout WORKSPACE = new WorkspaceLayout();
     public static PickupDragController dragController;
-
     private WorkspaceLayout workspaceLayout;
 
     /**
      * This is the entry point method.
      */
     public void onModuleLoad() {
-        init(null);
+    //    init(null);
     }
 
     public WorkspaceLayout init(String rootId) {
-
         workspaceLayout = new WorkspaceLayout();
-
         Window.enableScrolling(false);
 
         final Viewport viewport = new Viewport();
@@ -62,7 +59,4 @@ public class Workspace implements EntryPoint {
         workspaceLayout.notifySessionState(packet);
     }
 
-    public WorkspaceLayout getWorkspaceLayout() {
-        return workspaceLayout;
-    }
 }
