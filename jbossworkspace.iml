@@ -117,7 +117,9 @@
           <root url="jar://$MODULE_DIR$/lib/gwt-mosaic-0.1.7.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="file://$MODULE_DIR$/../gwt-mosaic-read-only/src" />
+        </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library">

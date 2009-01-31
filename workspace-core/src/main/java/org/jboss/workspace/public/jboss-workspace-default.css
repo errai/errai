@@ -551,4 +551,17 @@ span {
     color: white; /*border: 1px dotted gray;*/
 }
 
+.gwt-ScrollTable {
+    font-size: 11px;
 
+}
+.gwt-ScrollTable .headerTable tr {
+    background-image: url('images/titlegradient.png');
+
+}
+
+.gwt-ScrollTable .headerWrapper,
+.mosaic-ColumnWidget .headerWrapper,
+.mosaic-ScrollTreeTable .headerWrapper {
+    background-image: url('images/titlegradient.png');
+}
