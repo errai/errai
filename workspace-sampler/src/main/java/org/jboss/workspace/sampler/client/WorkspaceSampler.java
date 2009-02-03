@@ -5,11 +5,13 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.widgetideas.table.client.FixedWidthFlexTable;
 
 
 import org.jboss.workspace.client.ToolSet;
 import org.jboss.workspace.client.Workspace;
+import org.jboss.workspace.client.widgets.WSGrid;
 import org.jboss.workspace.client.framework.Tool;
 import org.jboss.workspace.client.layout.WorkspaceLayout;
 import org.jboss.workspace.client.rpc.StatePacket;
@@ -26,32 +28,32 @@ public class WorkspaceSampler implements EntryPoint {
 
         layout.addToolSet(new ToolSet() {
             public Tool[] getAllProvidedTools() {
-                return new Tool[] {
-                       new Tool() {
-                           public Widget getWidget(StatePacket packet) {
-                               return new HTML("Hello World");
-                           }
+                return new Tool[]{
+                        new Tool() {
+                            public Widget getWidget(StatePacket packet) {
+                                return new HTML("Hello World");
+                            }
 
-                           public String getName() {
-                               return "Hello World";
-                           }
+                            public String getName() {
+                                return "Hello World";
+                            }
 
-                           public String getId() {
-                               return "helloWorldTool";
-                           }
+                            public String getId() {
+                                return "helloWorldTool";
+                            }
 
-                           public Image getIcon() {
-                               return null;
-                           }
+                            public Image getIcon() {
+                                return null;
+                            }
 
-                           public boolean multipleAllowed() {
-                               return false;
-                           }
-                       },
+                            public boolean multipleAllowed() {
+                                return false;
+                            }
+                        },
 
                         new Tool() {
                             public Widget getWidget(StatePacket packet) {
-                                DateTimeFormat dtf  =  DateTimeFormat.getFormat("K:mm a, vvv");
+                                DateTimeFormat dtf = DateTimeFormat.getFormat("K:mm a, vvv");
                                 return new HTML("Opened at: " + dtf.format(new Date(System.currentTimeMillis())));
                             }
 
@@ -76,27 +78,22 @@ public class WorkspaceSampler implements EntryPoint {
                         new Tool() {
 
                             public Widget getWidget(StatePacket packet) {
+                                WSGrid wsGrid = new WSGrid();
+                                wsGrid.setColumnHeader(0, 0, "UserId");
+                                wsGrid.setColumnHeader(0, 1, "Name");
+                                wsGrid.setColumnHeader(0, 2, "User Type");
 
-                                FixedWidthFlexTable header = new FixedWidthFlexTable();
-                                header.setHTML(0, 1, "User ID");
-                                header.setHTML(0, 2, "Name");
-                                header.setHTML(0, 3, "User Type");
-                                
-                                ScrollTable.DataGrid dataGrid = new ScrollTable.DataGrid();
+                                wsGrid.setCell(0, 0, "1");
+                                wsGrid.setCell(0, 1, "John Doe");
+                                wsGrid.setCell(0, 2, "Regular User");
 
-                                dataGrid.setHTML(0, 1, "1");
-                                dataGrid.setHTML(0, 2, "John Doe");
-                                dataGrid.setHTML(0, 3, "Regular User");
+                                wsGrid.setCell(1, 0, "2");
+                                wsGrid.setCell(1, 1, "Jane Doe");
+                                wsGrid.setCell(1, 2, "Super User");
 
-                                dataGrid.setHTML(1, 1, "2");
-                                dataGrid.setHTML(1, 2, "Jane Doe");
-                                dataGrid.setHTML(1, 3, "Super User");
+                                Window.alert("size:" + wsGrid.getCols());
 
-
-                                ScrollTable scrollTable = new ScrollTable(dataGrid, header);
-
-
-                                return scrollTable;
+                                return wsGrid;
 
                             }
 
@@ -121,7 +118,7 @@ public class WorkspaceSampler implements EntryPoint {
             }
 
             public String getToolSetName() {
-                return "Samples"; 
+                return "Samples";
             }
 
             public Widget getWidget() {
