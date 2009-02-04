@@ -594,6 +594,10 @@ span {
     margin:0;
 }
 
+.WSGrid-datagrid {
+    
+}
+
 .WSCell {
     height: 100%;
     width: 100%;
@@ -610,6 +614,12 @@ span {
 .WSCell-hover {
     background-color: #eeeeff;
     border: 1px solid #cccccc;
+}
+
+.WSCell-selected {
+    background-color: #ddddff;
+    color: white;
+    border: 1px solid lightsteelblue; 
 }
 
 .WSCell-editbox {

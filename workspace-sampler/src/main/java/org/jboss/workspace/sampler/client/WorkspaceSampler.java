@@ -25,7 +25,6 @@ public class WorkspaceSampler implements EntryPoint {
         Workspace ws = new Workspace();
         WorkspaceLayout layout = ws.init(null);
 
-
         layout.addToolSet(new ToolSet() {
             public Tool[] getAllProvidedTools() {
                 return new Tool[]{
@@ -80,7 +79,7 @@ public class WorkspaceSampler implements EntryPoint {
                             public Widget getWidget(StatePacket packet) {
                                 WSGrid wsGrid = new WSGrid();
                                 wsGrid.setColumnHeader(0, 0, "UserId");
-                                wsGrid.setColumnHeader(0, 1, "Name");
+                                wsGrid.setColumnHeader(0, 1, "Name");                                                                                        
                                 wsGrid.setColumnHeader(0, 2, "User Type");
 
                                 wsGrid.setCell(0, 0, "1");
@@ -96,19 +95,19 @@ public class WorkspaceSampler implements EntryPoint {
                             }
 
                             public String getName() {
-                                return "Grid Demo";  //To change body of implemented methods use File | Settings | File Templates.
+                                return "Grid Demo";
                             }
 
                             public String getId() {
-                                return "gridDemo";  //To change body of implemented methods use File | Settings | File Templates.
+                                return "gridDemo";
                             }
 
                             public Image getIcon() {
-                                return null;  //To change body of implemented methods use File | Settings | File Templates.
+                                return null;
                             }
 
                             public boolean multipleAllowed() {
-                                return false;  //To change body of implemented methods use File | Settings | File Templates.
+                                return false;
                             }
                         }
 

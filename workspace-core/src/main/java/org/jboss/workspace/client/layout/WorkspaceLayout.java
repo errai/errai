@@ -364,7 +364,7 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
 
         flowpanel.add(toolWidget);
 
-        Image newIcon = new Image(icon.getUrl());
+        Image newIcon = new Image(icon != null ? icon.getUrl() : "images/ui/icons/questioncube.png");
         newIcon.setSize("16px", "16px");
 
         //    int currentWidth = tabPanel.getOffsetWidth();

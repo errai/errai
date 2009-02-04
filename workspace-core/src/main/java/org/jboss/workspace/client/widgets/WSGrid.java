@@ -3,13 +3,15 @@ package org.jboss.workspace.client.widgets;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.EventPreview;
 import com.google.gwt.core.client.GWT;
 
 import java.util.ArrayList;
 
+import org.gwt.mosaic.core.client.DOM;
+
 
 public class WSGrid extends Composite {
-    private VerticalPanel panel;
     private WSAbstractGrid titleBar;
     private WSAbstractGrid dataGrid;
 
@@ -19,12 +21,14 @@ public class WSGrid extends Composite {
 
     private WSCell currentFocus;
 
+    private ArrayList<ArrayList<WSCell>> tableIndex;
+
     public WSGrid() {
         this(true);
     }
 
     public WSGrid(boolean scrollable) {
-        panel = new VerticalPanel();
+        VerticalPanel panel = new VerticalPanel();
 
         panel.setWidth("100%");
 
@@ -38,46 +42,66 @@ public class WSGrid extends Composite {
         dataGrid.setStylePrimaryName("WSGrid-datagrid");
 
         columnWidths = new ArrayList<Integer>();
+        tableIndex = new ArrayList<ArrayList<WSCell>>();
+        tableIndex.add(new ArrayList<WSCell>());
 
         initWidget(panel);
+
+        DOM.addEventPreview(new EventPreview() {
+            public boolean onEventPreview(Event event) {
+                switch (event.getTypeInt()) {
+                    case Event.ONKEYPRESS:
+                        if (currentFocus == null) return false;
+
+                        switch (event.getKeyCode()) {
+                            case KeyboardListener.KEY_TAB:
+                                if (event.getShiftKey()) {
+                                    if (currentFocus.getCol() == 0 && currentFocus.getRow() > 0) {
+                                        tableIndex.get(currentFocus.getRow() - 1).get(cols - 1).focus();
+                                    }
+                                    else {
+                                        tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() - 1).focus();
+                                    }
+                                }
+                                else {
+                                    if (currentFocus.getCol() == cols - 1 && currentFocus.getRow() < tableIndex.size()) {
+                                        tableIndex.get(currentFocus.getRow() + 1).get(0).focus();
+                                    }
+                                    else {
+                                        tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() + 1).focus();
+                                    }
+                                }
+
+                        }
+                }
+
+
+                return true;
+            }
+        });
+
+
     }
 
 
     public void setColumnHeader(int row, int column, String html) {
         cols = titleBar.ensureRowsAndCols(row, column);
 
-        Widget newWidget = new WSCell(new HTML(html));
+        Widget newWidget = new WSCell(new HTML(html), row, column);
         newWidget.setWidth(checkWidth(column) + "px");
 
         titleBar.getTable().setWidget(row, column, newWidget);
     }
 
-//    public void setColumnHeader(int row, int column, Widget widget) {
-//        cols = titleBar.ensureRowsAndCols(row, column);
-//
-//        Widget newWidget = new WSCell(widget);
-//        newWidget.setWidth(checkWidth(column) + "px");
-//
-//        titleBar.getTable().setWidget(row, column, newWidget);
-//    }
 
     public void setCell(int row, int column, String html) {
         cols = dataGrid.ensureRowsAndCols(row, column);
 
-        Widget newWidget = new WSCell(new HTML(html));
+        Widget newWidget = new WSCell(new HTML(html), row, column);
         newWidget.setWidth(checkWidth(column) + "px");
 
         dataGrid.getTable().setWidget(row, column, newWidget);
     }
-
-//    public void setCell(int row, int column, Widget widget) {
-//        cols = dataGrid.ensureRowsAndCols(row, column);
-//
-//        Widget newWidget = new WSCell(widget);
-//        newWidget.setWidth(checkWidth(column) + "px");
-//
-//        dataGrid.getTable().setWidget(row, column, newWidget);
-//    }
 
     public void setCols(int cols) {
         this.cols = cols;
@@ -107,6 +131,7 @@ public class WSGrid extends Composite {
         checkWidth(column);
         columnWidths.set(column, width);
     }
+
 
     public class WSAbstractGrid extends Composite {
         private ScrollPanel scrollPanel;
@@ -141,7 +166,8 @@ public class WSGrid extends Composite {
             }
 
             table.addCell(row);
-            table.setWidget(row, table.getCellCount(row), new WSCell(w));
+            int col;
+            table.setWidget(row, col = table.getCellCount(row), new WSCell(w, row, col));
         }
 
         public void addRow() {
@@ -182,17 +208,38 @@ public class WSGrid extends Composite {
         private boolean edit;
         private TextBox textBox;
 
-        public WSCell(HTML widget) {
+        private int row;
+        private int col;
+
+        public WSCell(HTML widget, int row, int col) {
             panel = new SimplePanel();
             textBox = new TextBox();
             textBox.setStylePrimaryName("WSCell-editbox");
 
+            if (tableIndex.size() - 1 < row) {
+                while (tableIndex.size() - 1 < row) {
+                    tableIndex.add(new ArrayList<WSCell>());
+                }
+            }
+            ArrayList<WSCell> cols = tableIndex.get(row);
+
+            if (cols.size() == 0 || cols.size() - 1 < col) {
+                cols.add(this);
+            }
+            else {
+                cols.set(col, this);
+            }
+
+
             this.wrappedWidget = widget;
             panel.add(wrappedWidget);
 
+            this.row = row;
+            this.col = col;
+
             initWidget(panel);
             setStyleName("WSCell");
-            sinkEvents(Event.MOUSEEVENTS | Event.FOCUSEVENTS);
+            sinkEvents(Event.MOUSEEVENTS | Event.FOCUSEVENTS | Event.ONCLICK | Event.ONDBLCLICK);
         }
 
         public void blur() {
@@ -203,12 +250,28 @@ public class WSGrid extends Composite {
 
                 edit = false;
             }
+            removeStyleDependentName("selected");
+        }
+
+        public void focus() {
+            if (currentFocus != null && currentFocus != this) {
+                currentFocus.blur();
+            }
+            currentFocus = this;
+
+            addStyleDependentName("selected");
+        }
+
+        public int getRow() {
+            return row;
+        }
+
+        public int getCol() {
+            return col;
         }
 
         @Override
         public void onBrowserEvent(Event event) {
-
-
             switch (event.getTypeInt()) {
                 case Event.ONMOUSEOVER:
                     addStyleDependentName("hover");
@@ -218,15 +281,12 @@ public class WSGrid extends Composite {
                     break;
 
                 case Event.ONFOCUS:
-
                     break;
 
-                case Event.ONMOUSEUP:
-                    if (currentFocus != null && currentFocus != this) {
-                        currentFocus.blur();
-                    }
-                    currentFocus = this;
+                case Event.ONCLICK:
+                    break;
 
+                case Event.ONDBLCLICK:
                     panel.remove(wrappedWidget);
 
                     textBox.setWidth(getOffsetWidth() + "px");
@@ -237,10 +297,12 @@ public class WSGrid extends Composite {
 
                     textBox.selectAll();
                     textBox.setFocus(true);
-
-
                     break;
 
+                case Event.ONMOUSEUP:
+                    focus();
+
+                    break;
             }
         }
     }
