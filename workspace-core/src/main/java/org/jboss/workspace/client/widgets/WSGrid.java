@@ -71,6 +71,24 @@ public class WSGrid extends Composite {
                                         tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() + 1).focus();
                                     }
                                 }
+                                break;
+                            case KeyboardListener.KEY_UP:
+                                if (currentFocus.getRow() > 0)
+                                    tableIndex.get(currentFocus.getRow()-1).get(currentFocus.getCol()).focus();
+                                break;
+                            case KeyboardListener.KEY_RIGHT:
+                                if (currentFocus.getCol() < cols)
+                                    tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol()+1).focus();
+                                break;
+                            case KeyboardListener.KEY_DOWN:
+                                if (currentFocus.getRow() < tableIndex.size())
+                                    tableIndex.get(currentFocus.getRow()+1).get(currentFocus.getCol()).focus();
+                                break;
+                            case KeyboardListener.KEY_LEFT:
+                                if (currentFocus.getCol() > 0)
+                                    tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol()-1).focus();
+                                break;
+
 
                         }
                 }
