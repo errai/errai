@@ -2,8 +2,8 @@ package org.jboss.workspace.client.widgets;
 
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventPreview;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.*;
-import org.gwt.mosaic.core.client.DOM;
 
 import java.util.ArrayList;
 
