@@ -111,27 +111,34 @@ public class WSGrid extends Composite {
             }
         });
 
-
     }
 
 
     public void setColumnHeader(int row, int column, String html) {
-        cols = titleBar.ensureRowsAndCols(row, column);
+        cols = titleBar.ensureRowsAndCols(row+1, column+1);
 
-        Widget newWidget = new WSCell(new HTML(html), row, column);
-        newWidget.setWidth(checkWidth(column) + "px");
+        System.out.println("set header:" + row + "; col:" + column);
 
-        titleBar.getTable().setWidget(row, column, newWidget);
+        tableIndex.get(row).get(column).getWrappedWidget().setHTML(html);
+
+//        Widget newWidget = new WSCell(new HTML(html), row, column);
+//        newWidget.setWidth(checkWidth(column) + "px");
+//
+//        titleBar.getTable().setWidget(row, column, newWidget);
     }
 
 
     public void setCell(int row, int column, String html) {
-        cols = dataGrid.ensureRowsAndCols(row, column);
+        cols = dataGrid.ensureRowsAndCols(row+1, column);
 
-        Widget newWidget = new WSCell(new HTML(html), row, column);
-        newWidget.setWidth(checkWidth(column) + "px");
+        System.out.println("set row:" + row + "; col:" + column);
 
-        dataGrid.getTable().setWidget(row, column, newWidget);
+        tableIndex.get(row).get(column).getWrappedWidget().setHTML(html);
+
+       // Widget newWidget = new WSCell(new HTML(html), row, column);
+       // newWidget.setWidth(checkWidth(column) + "px");
+
+       // dataGrid.getTable().setWidget(row, column, newWidget);
     }
 
     public void setCols(int cols) {
@@ -190,38 +197,51 @@ public class WSGrid extends Composite {
         }
 
         public void addCell(int row, HTML w) {
-            if (row >= table.getRowCount() - 1) {
-                for (int i = table.getRowCount() - 1; i < row; i++) {
+            if (row > table.getRowCount()) {
+                for (int i = table.getRowCount(); i <= row; i++) {
                     table.insertRow(i);
                 }
             }
 
+            int col = table.getCellCount(row);
             table.addCell(row);
-            int col;
-            table.setWidget(row, col = table.getCellCount(row), new WSCell(w, row, col));
+
+            table.setWidget(row, col , new WSCell(w, row, col));
         }
 
         public void addRow() {
+            table.insertRow(table.getRowCount());
             for (int i = 0; i < cols; i++) {
-                addCell(dataGrid.getTable().getRowCount() - 1, new HTML(""));
+                addCell(table.getRowCount()-1, new HTML());
             }
+
         }
 
         public int ensureRowsAndCols(int rows, int cols) {
+            System.out.println("ensure rows=" + rows + "; cols=" + cols);
             FlexTable flexTable = dataGrid.getTable();
-            while (flexTable.getRowCount() < rows) addRow();
+            if (flexTable.getRowCount() == 0) {
+                addRow();
+            }
+
+            while (flexTable.getRowCount() < rows) {
+                addRow();
+            }
 
             if (flexTable.getCellCount(0) < cols) {
                 int newCols = cols - flexTable.getCellCount(0);
 
                 for (int i = 0; i < flexTable.getRowCount(); i++) {
                     for (int x = 0; x < newCols; x++) {
-                        flexTable.addCell(i);
+                        addCell(i, new HTML());
                     }
                 }
 
-
                 return cols;
+            }
+            else if (cols == 0) {
+                addCell(0, new HTML());
+                return 1;
             }
             else {
                 return flexTable.getCellCount(0);

@@ -599,6 +599,7 @@ span {
 }
 
 .WSCell {
+    min-height: 11px;
     height: 100%;
     width: 100%;
 
