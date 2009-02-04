@@ -241,10 +241,7 @@ public class WSGrid extends Composite {
 
                     break;
 
-
             }
-
-
         }
     }
 }
