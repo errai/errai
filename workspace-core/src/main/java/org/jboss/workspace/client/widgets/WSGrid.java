@@ -1,14 +1,11 @@
 package org.jboss.workspace.client.widgets;
 
-import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.EventPreview;
-import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.ui.*;
+import org.gwt.mosaic.core.client.DOM;
 
 import java.util.ArrayList;
-
-import org.gwt.mosaic.core.client.DOM;
 
 
 public class WSGrid extends Composite {
@@ -51,7 +48,7 @@ public class WSGrid extends Composite {
             public boolean onEventPreview(Event event) {
                 switch (event.getTypeInt()) {
                     case Event.ONKEYPRESS:
-                        if (currentFocus == null) return false;
+                        if (currentFocus == null || currentFocus.edit) return true;
 
                         switch (event.getKeyCode()) {
                             case KeyboardListener.KEY_TAB:
@@ -72,25 +69,41 @@ public class WSGrid extends Composite {
                                     }
                                 }
                                 break;
+
+                            case 63232:
                             case KeyboardListener.KEY_UP:
                                 if (currentFocus.getRow() > 0)
-                                    tableIndex.get(currentFocus.getRow()-1).get(currentFocus.getCol()).focus();
+                                    tableIndex.get(currentFocus.getRow() - 1).get(currentFocus.getCol()).focus();
                                 break;
+                            case 63235:
                             case KeyboardListener.KEY_RIGHT:
                                 if (currentFocus.getCol() < cols)
-                                    tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol()+1).focus();
+                                    tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() + 1).focus();
                                 break;
+                            case 63233:
+                            case KeyboardListener.KEY_ENTER:
                             case KeyboardListener.KEY_DOWN:
                                 if (currentFocus.getRow() < tableIndex.size())
-                                    tableIndex.get(currentFocus.getRow()+1).get(currentFocus.getCol()).focus();
+                                    tableIndex.get(currentFocus.getRow() + 1).get(currentFocus.getCol()).focus();
                                 break;
+                            case 63234:
                             case KeyboardListener.KEY_LEFT:
                                 if (currentFocus.getCol() > 0)
-                                    tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol()-1).focus();
+                                    tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() - 1).focus();
                                 break;
 
+                            case 63272:
+                            case KeyboardListener.KEY_DELETE:
+                                currentFocus.getWrappedWidget().setHTML("");
+                                break;
+
+                            case 32: // spacebar
+                                currentFocus.edit();
+                                break;
 
                         }
+
+
                 }
 
 
@@ -234,6 +247,15 @@ public class WSGrid extends Composite {
             textBox = new TextBox();
             textBox.setStylePrimaryName("WSCell-editbox");
 
+            textBox.addFocusListener(new FocusListener() {
+                public void onFocus(Widget sender) {
+                }
+
+                public void onLostFocus(Widget sender) {
+                   stopedit(); 
+                }
+            });
+
             if (tableIndex.size() - 1 < row) {
                 while (tableIndex.size() - 1 < row) {
                     tableIndex.add(new ArrayList<WSCell>());
@@ -260,14 +282,32 @@ public class WSGrid extends Composite {
             sinkEvents(Event.MOUSEEVENTS | Event.FOCUSEVENTS | Event.ONCLICK | Event.ONDBLCLICK);
         }
 
-        public void blur() {
-            if (edit) {
+        public void edit() {
+            panel.remove(wrappedWidget);
+
+            textBox.setWidth(getOffsetWidth() + "px");
+            textBox.setText(wrappedWidget.getHTML());
+            panel.add(textBox);
+
+            edit = true;
+
+            textBox.selectAll();
+            textBox.setFocus(true);
+        }
+
+        public void stopedit() {
+                      if (edit) {
                 wrappedWidget.setHTML(textBox.getText());
                 panel.remove(textBox);
                 panel.add(wrappedWidget);
 
                 edit = false;
             }
+        }
+
+        public void blur() {
+            stopedit();
+
             removeStyleDependentName("selected");
         }
 
@@ -288,6 +328,10 @@ public class WSGrid extends Composite {
             return col;
         }
 
+        public HTML getWrappedWidget() {
+            return wrappedWidget;
+        }
+
         @Override
         public void onBrowserEvent(Event event) {
             switch (event.getTypeInt()) {
@@ -305,16 +349,7 @@ public class WSGrid extends Composite {
                     break;
 
                 case Event.ONDBLCLICK:
-                    panel.remove(wrappedWidget);
-
-                    textBox.setWidth(getOffsetWidth() + "px");
-                    textBox.setText(wrappedWidget.getHTML());
-                    panel.add(textBox);
-
-                    edit = true;
-
-                    textBox.selectAll();
-                    textBox.setFocus(true);
+                    edit();
                     break;
 
                 case Event.ONMOUSEUP:
