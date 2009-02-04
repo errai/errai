@@ -118,16 +118,19 @@ span {
     margin-bottom: 0;
     padding: 0;
 
+    color: black;
+
     background-image: url( "images/ui/layout/DockLink.png" );
 
     cursor: default;
 }
 
 .WSLaunchButton-hover {
+    border: 1px solid darkblue;
     background-color: #5a98e0;
     color: white;
 
-    height: 22px;
+    height: 20px;
 
     cursor: default;
 
@@ -177,7 +180,7 @@ span {
     font-size: 8px;
     color: darkgray;
 
-    background-color: #ffffff;
+    background-color: #FAFAFA;
 
     padding: 0;
 }
@@ -187,15 +190,21 @@ span {
     cursor: pointer;
     color: black;
     font-size: 10px;
-    font-weight: bold;
 
     height: 20px;
-    padding-right: 0;
+
+    border-top: 1px solid #cccccc;
+    margin-bottom:1px;
+    margin-left:2px;
+    margin-right:2px;
+
 
     /*border-top: 1px solid darkgray;*/
     /*boder-bottom: 1px solid gray;*/
 
-    text-align: right;
+    padding-left: 1px;
+
+    text-align: left;
     -moz-user-select: none;
     -khtml-user-select: none;
     user-select: none;
@@ -282,7 +291,10 @@ span {
 }
 
 .gwt-TabBarItem {
-    background-image: url( 'images/ui/layout/tabselected.png' );
+    background-image: url("images/ui/layout/navbar.png");
+
+
+    /*background-image: url( 'images/ui/layout/tabselected.png' );*/
     cursor: default;
     height: 16px;
     filter: alpha( opacity = 70 );
@@ -317,7 +329,10 @@ span {
 }
 
 .gwt-TabBar .gwt-TabBarItem-selected {
-    background-image: url( 'images/ui/layout/tabselected.png' );
+    /*background-image: url( 'images/ui/layout/tabselected.png' );*/
+
+    background-image: url("images/ui/layout/navbar.png");
+    
 
     height: 18px;
 
@@ -564,4 +579,41 @@ span {
 .mosaic-ColumnWidget .headerWrapper,
 .mosaic-ScrollTreeTable .headerWrapper {
     background-image: url('images/titlegradient.png');
+}
+
+.WSGrid-header, .WSGrid-header td {
+    background-image: url("images/ui/layout/navbar.png");
+    border-top: 1px solid whitesmoke;
+    font-weight: bold;
+    padding:0;
+    margin:0;
+}
+
+.WSGrid, .WSGrid td {
+    padding:0;
+    margin:0;
+}
+
+.WSCell {
+    height: 100%;
+    width: 100%;
+
+    border: 1px solid transparent;
+    border-bottom-color: #efefef;
+    border-left-color: #efefef;
+
+    padding: 2px;
+    margin:0;
+    font-size: 11px;
+}
+
+.WSCell-hover {
+    background-color: #eeeeff;
+    border: 1px solid #cccccc;
+}
+
+.WSCell-editbox {
+    background: transparent;
+    border: 0;
+    font-size: 11px;
 }

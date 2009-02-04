@@ -90,9 +90,7 @@ public class WorkspaceSampler implements EntryPoint {
                                 wsGrid.setCell(1, 0, "2");
                                 wsGrid.setCell(1, 1, "Jane Doe");
                                 wsGrid.setCell(1, 2, "Super User");
-
-                                Window.alert("size:" + wsGrid.getCols());
-
+                                
                                 return wsGrid;
 
                             }
@@ -123,6 +121,21 @@ public class WorkspaceSampler implements EntryPoint {
 
             public Widget getWidget() {
                 return null;
+            }
+        });
+
+
+        layout.addToolSet(new ToolSet() {
+            public Tool[] getAllProvidedTools() {
+                return new Tool[0];
+            }
+
+            public String getToolSetName() {
+                return "Sample 2";
+            }
+
+            public Widget getWidget() {
+                return new HTML("SAMPLE");
             }
         });
     }

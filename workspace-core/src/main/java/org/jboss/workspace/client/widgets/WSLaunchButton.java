@@ -34,6 +34,7 @@ public class WSLaunchButton extends HTML {
         super();
 
         this.icon = icon;
+
         this.name = name;
 
         sinkEvents(Event.MOUSEEVENTS);
@@ -91,7 +92,7 @@ public class WSLaunchButton extends HTML {
     }
 
     private String createButtonMarkup() {
-        return "<span class=\"" + CSS_NAME + "-contents\"> <img class=\"" + CSS_NAME + "-contents\" src=\"" + icon.getUrl() + "\" width=\"16\" height=\"16\"/>" +
+        return "<span class=\"" + CSS_NAME + "-contents\"> <img class=\"" + CSS_NAME + "-contents\" src=\"" + icon.getUrl() + "\" width=\"16\" height=\"16\" style=\"padding-right:2px; padding-left:2px;\"/>" +
                 name + "</span>";
     }
 
