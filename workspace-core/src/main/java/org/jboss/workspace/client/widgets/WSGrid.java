@@ -116,29 +116,13 @@ public class WSGrid extends Composite {
 
     public void setColumnHeader(int row, int column, String html) {
         cols = titleBar.ensureRowsAndCols(row+1, column+1);
-
-        System.out.println("set header:" + row + "; col:" + column);
-
         tableIndex.get(row).get(column).getWrappedWidget().setHTML(html);
-
-//        Widget newWidget = new WSCell(new HTML(html), row, column);
-//        newWidget.setWidth(checkWidth(column) + "px");
-//
-//        titleBar.getTable().setWidget(row, column, newWidget);
     }
 
 
     public void setCell(int row, int column, String html) {
-        cols = dataGrid.ensureRowsAndCols(row+1, column);
-
-        System.out.println("set row:" + row + "; col:" + column);
-
+        cols = dataGrid.ensureRowsAndCols(row+1, column+1);
         tableIndex.get(row).get(column).getWrappedWidget().setHTML(html);
-
-       // Widget newWidget = new WSCell(new HTML(html), row, column);
-       // newWidget.setWidth(checkWidth(column) + "px");
-
-       // dataGrid.getTable().setWidget(row, column, newWidget);
     }
 
     public void setCols(int cols) {
@@ -197,16 +181,11 @@ public class WSGrid extends Composite {
         }
 
         public void addCell(int row, HTML w) {
-            if (row > table.getRowCount()) {
-                for (int i = table.getRowCount(); i <= row; i++) {
-                    table.insertRow(i);
-                }
-            }
+            int currentColSize = table.getCellCount(row);
 
-            int col = table.getCellCount(row);
             table.addCell(row);
 
-            table.setWidget(row, col , new WSCell(w, row, col));
+            table.setWidget(row, currentColSize , new WSCell(w, row, currentColSize));
         }
 
         public void addRow() {
@@ -218,34 +197,30 @@ public class WSGrid extends Composite {
         }
 
         public int ensureRowsAndCols(int rows, int cols) {
-            System.out.println("ensure rows=" + rows + "; cols=" + cols);
-            FlexTable flexTable = dataGrid.getTable();
-            if (flexTable.getRowCount() == 0) {
+
+            if (table.getRowCount() == 0) {
                 addRow();
             }
 
-            while (flexTable.getRowCount() < rows) {
+            while (table.getRowCount() < rows) {
                 addRow();
             }
 
-            if (flexTable.getCellCount(0) < cols) {
-                int newCols = cols - flexTable.getCellCount(0);
 
-                for (int i = 0; i < flexTable.getRowCount(); i++) {
-                    for (int x = 0; x < newCols; x++) {
-                        addCell(i, new HTML());
+            for (int r = 0; r < table.getRowCount(); r++) {
+                if (table.getCellCount(r) < cols) {
+                    int growthDelta = cols - table.getCellCount(r);
+
+                    for (int c = 0; c < growthDelta; c++) {
+                        addCell(r, new HTML());
                     }
+
+                    assert table.getCellCount(r) == cols : "New size is wrong: " + table.getCellCount(r);
                 }
 
-                return cols;
             }
-            else if (cols == 0) {
-                addCell(0, new HTML());
-                return 1;
-            }
-            else {
-                return flexTable.getCellCount(0);
-            }
+
+            return cols == 0 ? 1 : cols;
         }
 
         public FlexTable getTable() {
@@ -297,7 +272,10 @@ public class WSGrid extends Composite {
             this.row = row;
             this.col = col;
 
+
             initWidget(panel);
+
+            setWidth(checkWidth(col) + "px");
             setStyleName("WSCell");
             sinkEvents(Event.MOUSEEVENTS | Event.FOCUSEVENTS | Event.ONCLICK | Event.ONDBLCLICK);
         }
