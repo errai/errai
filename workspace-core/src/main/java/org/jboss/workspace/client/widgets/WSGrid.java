@@ -1,14 +1,16 @@
 package org.jboss.workspace.client.widgets;
 
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventPreview;
-import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 
 import java.util.ArrayList;
 
 
 public class WSGrid extends Composite {
+    private VerticalPanel panel;
     private WSAbstractGrid titleBar;
     private WSAbstractGrid dataGrid;
 
@@ -25,7 +27,7 @@ public class WSGrid extends Composite {
     }
 
     public WSGrid(boolean scrollable) {
-        VerticalPanel panel = new VerticalPanel();
+        panel = new VerticalPanel();
 
         panel.setWidth("100%");
 
@@ -99,13 +101,9 @@ public class WSGrid extends Composite {
 
                             case 32: // spacebar
                                 currentFocus.edit();
-                                break;
-
+                                return false;
                         }
-
-
                 }
-
 
                 return true;
             }
@@ -113,12 +111,10 @@ public class WSGrid extends Composite {
 
     }
 
-
     public void setColumnHeader(int row, int column, String html) {
         cols = titleBar.ensureRowsAndCols(row+1, column+1);
         tableIndex.get(row).get(column).getWrappedWidget().setHTML(html);
     }
-
 
     public void setCell(int row, int column, String html) {
         cols = dataGrid.ensureRowsAndCols(row+1, column+1);
@@ -153,7 +149,6 @@ public class WSGrid extends Composite {
         checkWidth(column);
         columnWidths.set(column, width);
     }
-
 
     public class WSAbstractGrid extends Composite {
         private ScrollPanel scrollPanel;
@@ -193,11 +188,9 @@ public class WSGrid extends Composite {
             for (int i = 0; i < cols; i++) {
                 addCell(table.getRowCount()-1, new HTML());
             }
-
         }
 
         public int ensureRowsAndCols(int rows, int cols) {
-
             if (table.getRowCount() == 0) {
                 addRow();
             }
@@ -205,7 +198,6 @@ public class WSGrid extends Composite {
             while (table.getRowCount() < rows) {
                 addRow();
             }
-
 
             for (int r = 0; r < table.getRowCount(); r++) {
                 if (table.getCellCount(r) < cols) {
@@ -217,7 +209,6 @@ public class WSGrid extends Composite {
 
                     assert table.getCellCount(r) == cols : "New size is wrong: " + table.getCellCount(r);
                 }
-
             }
 
             return cols == 0 ? 1 : cols;
@@ -226,6 +217,25 @@ public class WSGrid extends Composite {
         public FlexTable getTable() {
             return table;
         }
+
+        public void setHeight(String height) {
+            if (scrollPanel != null) scrollPanel.setHeight(height);
+        }
+
+        public void setWidth(String width) {
+            if (scrollPanel != null) scrollPanel.setWidth(width);
+        }
+
+        public int getOffsetHeight() {
+            if (scrollPanel != null) return scrollPanel.getOffsetHeight();
+            else return table.getOffsetHeight();
+        }
+
+        public int getOffsetWidth() {
+            if (scrollPanel != null) return scrollPanel.getOffsetWidth();
+            else return table.getOffsetWidth();
+        }
+
     }
 
     public class WSCell extends Composite {
@@ -265,16 +275,13 @@ public class WSGrid extends Composite {
                 cols.set(col, this);
             }
 
-
             this.wrappedWidget = widget;
             panel.add(wrappedWidget);
 
             this.row = row;
             this.col = col;
 
-
             initWidget(panel);
-
             setWidth(checkWidth(col) + "px");
             setStyleName("WSCell");
             sinkEvents(Event.MOUSEEVENTS | Event.FOCUSEVENTS | Event.ONCLICK | Event.ONDBLCLICK);
@@ -352,9 +359,24 @@ public class WSGrid extends Composite {
 
                 case Event.ONMOUSEUP:
                     focus();
-
                     break;
             }
         }
+    }
+
+    public void setHeight(String height) {
+        panel.setHeight(height);
+        dataGrid.setHeight("100%");
+    }
+
+    public void setWidth(String width) {
+        panel.setWidth(width);
+        dataGrid.setWidth("100%");
+    }
+
+    @Override
+    protected void onAttach() {
+        super.onAttach();
+        panel.setCellHeight(titleBar, titleBar.getOffsetHeight() + "px");
     }
 }

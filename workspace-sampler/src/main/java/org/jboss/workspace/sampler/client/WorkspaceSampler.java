@@ -1,6 +1,7 @@
 package org.jboss.workspace.sampler.client;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Image;
@@ -78,6 +79,9 @@ public class WorkspaceSampler implements EntryPoint {
 
                             public Widget getWidget(StatePacket packet) {
                                 WSGrid wsGrid = new WSGrid();
+                                wsGrid.setHeight("100%");
+                                wsGrid.setWidth("100%");
+
                                 wsGrid.setColumnHeader(0, 0, "UserId");
                                 wsGrid.setColumnHeader(0, 1, "Name");                                                                                        
                                 wsGrid.setColumnHeader(0, 2, "User Type");
@@ -93,6 +97,11 @@ public class WorkspaceSampler implements EntryPoint {
                                 wsGrid.setCell(20, 0, "2000");
                                 wsGrid.setCell(20, 1, "Foo");
                                 wsGrid.setCell(20, 2, "Bar");
+
+
+
+
+
 
                                 return wsGrid;
 
