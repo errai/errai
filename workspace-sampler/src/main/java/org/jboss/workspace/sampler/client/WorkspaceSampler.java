@@ -89,11 +89,9 @@ public class WorkspaceSampler implements EntryPoint {
                                 wsGrid.setCell(0, 0, "1");
                                 wsGrid.setCell(0, 1, "John Doe");
 
-                                wsGrid.setCellStyle(0, 1, "font-weight", "bold");
-
+                                wsGrid.getCell(0, 1).getStyle().setProperty("font-weight", "bold");
 
                                 wsGrid.setCell(0, 2, "Regular User");
-
                                 
                                 wsGrid.setCell(1, 0, "2");
                                 wsGrid.setCell(1, 1, "Jane Doe");
@@ -103,10 +101,7 @@ public class WorkspaceSampler implements EntryPoint {
                                 wsGrid.setCell(20, 1, "Foo");
                                 wsGrid.setCell(20, 2, "Bar");
 
-
-
                                 return wsGrid;
-
                             }
 
                             public String getName() {

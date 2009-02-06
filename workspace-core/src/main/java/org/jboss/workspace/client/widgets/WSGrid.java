@@ -5,6 +5,7 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventPreview;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.dom.client.Style;
 
 import java.util.ArrayList;
 
@@ -154,10 +155,10 @@ public class WSGrid extends Composite {
         return tableIndex.get(row).get(col);
     }
 
-    public void setCellStyle(int row, int col, String styleProperty, String styleValue) {
-        getCell(row, col).getWrappedWidget().getElement().getStyle()
-                .setProperty(styleProperty, styleValue);
-    }
+//    public void setCellStyle(int row, int col, String styleProperty, String styleValue) {
+//        getCell(row, col).getWrappedWidget().getElement().getStyle()
+//                .setProperty(styleProperty, styleValue);
+//    }
 
     public class WSAbstractGrid extends Composite {
         private ScrollPanel scrollPanel;
@@ -344,6 +345,10 @@ public class WSGrid extends Composite {
 
         public HTML getWrappedWidget() {
             return wrappedWidget;
+        }
+
+        public Style getStyle() {
+            return wrappedWidget.getElement().getStyle();
         }
 
         @Override
