@@ -150,6 +150,15 @@ public class WSGrid extends Composite {
         columnWidths.set(column, width);
     }
 
+    public WSCell getCell(int row, int col) {
+        return tableIndex.get(row).get(col);
+    }
+
+    public void setCellStyle(int row, int col, String styleProperty, String styleValue) {
+        getCell(row, col).getWrappedWidget().getElement().getStyle()
+                .setProperty(styleProperty, styleValue);
+    }
+
     public class WSAbstractGrid extends Composite {
         private ScrollPanel scrollPanel;
         private FlexTable table;
