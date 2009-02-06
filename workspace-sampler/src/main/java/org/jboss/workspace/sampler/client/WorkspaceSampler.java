@@ -80,7 +80,6 @@ public class WorkspaceSampler implements EntryPoint {
                             public Widget getWidget(StatePacket packet) {
                                 WSGrid wsGrid = new WSGrid();
                                 wsGrid.setHeight("100%");
-                                wsGrid.setWidth("100%");
 
                                 wsGrid.setColumnHeader(0, 0, "UserId");
                                 wsGrid.setColumnHeader(0, 1, "Name");                                                                                        
@@ -89,17 +88,15 @@ public class WorkspaceSampler implements EntryPoint {
                                 wsGrid.setCell(0, 0, "1");
                                 wsGrid.setCell(0, 1, "John Doe");
 
-                                wsGrid.getCell(0, 1).getStyle().setProperty("font-weight", "bold");
-
                                 wsGrid.setCell(0, 2, "Regular User");
                                 
                                 wsGrid.setCell(1, 0, "2");
                                 wsGrid.setCell(1, 1, "Jane Doe");
                                 wsGrid.setCell(1, 2, "Super User");
 
-                                wsGrid.setCell(20, 0, "2000");
-                                wsGrid.setCell(20, 1, "Foo");
-                                wsGrid.setCell(20, 2, "Bar");
+                                wsGrid.setCell(200, 0, "2000");
+                                wsGrid.setCell(200, 1, "Foo");
+                                wsGrid.setCell(200, 2, "Bar");
 
                                 return wsGrid;
                             }

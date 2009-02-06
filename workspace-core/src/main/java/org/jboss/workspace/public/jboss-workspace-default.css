@@ -582,6 +582,7 @@ span {
 }
 
 .WSGrid-header, .WSGrid-header td {
+    height:20px;
     background-image: url("images/ui/layout/navbar.png");
     border-top: 1px solid whitesmoke;
     font-weight: bold;
@@ -601,13 +602,12 @@ span {
 .WSCell {
     min-height: 11px;
     height: 100%;
-    width: 100%;
 
     border: 1px solid transparent;
     border-bottom-color: #efefef;
     border-left-color: #efefef;
 
-    padding: 2px;
+    padding: 0px;
     margin:0;
     font-size: 11px;
 
@@ -629,4 +629,18 @@ span {
     background: transparent;
     border: 0;
     font-size: 11px;
+    width:100%;
+}
+
+.WSCell-resize-right {
+    cursor: e-resize;
+}
+
+.WSCell-resize-left {
+    cursor: w-resize;
+}
+
+.WSGrid-resize-line {
+    border: 1px solid lightblue;
+    height: 100%;
 }
