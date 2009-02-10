@@ -396,7 +396,6 @@ public class WSGrid extends Composite {
             int leftG = getAbsoluteLeft() + 5;
             int rightG = getAbsoluteLeft() + colSizes.get(col) - 5;
 
-
             switch (event.getTypeInt()) {
                 case Event.ONMOUSEOVER:
                     if (!_resizing) addStyleDependentName("hover");
@@ -431,7 +430,6 @@ public class WSGrid extends Composite {
 
                     if (_resizeArmed) {
                         if (!_resizing) {
-                        //    cancelMove();
                             disableTextSelection(RootPanel.getBodyElement(), true);
 
                             focus();
