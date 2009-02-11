@@ -21,7 +21,7 @@ h3 {
 }
 
 .headerStyle {
-    background-image: url( "images/titlegradient.png" );
+    background-image: url("images/titlegradient.png");
     background-repeat: repeat-x;
     padding: 0;
     margin: 0;
@@ -38,7 +38,7 @@ span {
 }
 
 .workspace-NavCollapseButton:hover {
-    filter: alpha( opacity = 50 );
+    filter: alpha(opacity = 50);
     -moz-opacity: 0.5;
     -khtml-opacity: 0.5;
     opacity: 0.5;
@@ -67,12 +67,12 @@ span {
 }
 
 .workspace-NavHeader {
-    background-image: url( 'images/ui/layout/navbartitle.png' );
+    background-image: url('images/ui/layout/navbartitle.png');
     border-top: 1px solid gray;
 }
 
 .workspace-DialogBox {
-    background-image: url( 'images/ui/layout/dialogbg.png' );
+    background-image: url('images/ui/layout/dialogbg.png');
     background-position: center;
     background-repeat: repeat-x;
 
@@ -120,7 +120,7 @@ span {
 
     color: black;
 
-    background-image: url( "images/ui/layout/DockLink.png" );
+    background-image: url("images/ui/layout/DockLink.png");
 
     cursor: default;
 }
@@ -166,8 +166,8 @@ span {
 }
 
 /*.guvnor-NavButton {*/
-    /*display: inline-block;*/
-    /*vertical-align: middle;*/
+/*display: inline-block;*/
+/*vertical-align: middle;*/
 /*}*/
 
 .gwt-StackPanel {
@@ -194,13 +194,10 @@ span {
     height: 20px;
 
     border-top: 1px solid #cccccc;
-    margin-bottom:1px;
-    margin-left:2px;
-    margin-right:2px;
-
-
-    /*border-top: 1px solid darkgray;*/
-    /*boder-bottom: 1px solid gray;*/
+    margin-bottom: 1px;
+    margin-left: 2px;
+    margin-right: 2px; /*border-top: 1px solid darkgray;*/
+/*boder-bottom: 1px solid gray;*/
 
     padding-left: 1px;
 
@@ -211,7 +208,7 @@ span {
 }
 
 .gwt-StackPanelItem:hover {
-    filter: alpha( opacity = 50 );
+    filter: alpha(opacity = 50);
     -moz-opacity: 0.5;
     -khtml-opacity: 0.5;
     opacity: 0.5;
@@ -291,19 +288,15 @@ span {
 }
 
 .gwt-TabBarItem {
-    background-image: url("images/ui/layout/navbar.png");
-
-
-    /*background-image: url( 'images/ui/layout/tabselected.png' );*/
+    background-image: url("images/ui/layout/navbar.png"); /*background-image: url( 'images/ui/layout/tabselected.png' );*/
     cursor: default;
     height: 16px;
-    filter: alpha( opacity = 70 );
+    filter: alpha(opacity = 70);
     -moz-opacity: 0.7;
     -khtml-opacity: 0.7;
     opacity: 0.7;
-    border: 0;
-    /*border-top: 1px solid gray;*/
-    /*border-left: 1px solid gray;*/
+    border: 0; /*border-top: 1px solid gray;*/
+/*border-left: 1px solid gray;*/
 
     -moz-user-select: none;
     -khtml-user-select: none;
@@ -316,7 +309,7 @@ span {
 }
 
 .gwt-TabBarItem:hover {
-    filter: alpha( opacity = 80 );
+    filter: alpha(opacity = 80);
     -moz-opacity: 0.8;
     -khtml-opacity: 0.8;
     opacity: 0.8;
@@ -329,14 +322,13 @@ span {
 }
 
 .gwt-TabBar .gwt-TabBarItem-selected {
-    /*background-image: url( 'images/ui/layout/tabselected.png' );*/
+/*background-image: url( 'images/ui/layout/tabselected.png' );*/
 
     background-image: url("images/ui/layout/navbar.png");
-    
 
     height: 18px;
 
-    filter: alpha( opacity = 100 );
+    filter: alpha(opacity = 100);
     -moz-opacity: 1.0;
     -khtml-opacity: 1.0;
     opacity: 1.0;
@@ -347,8 +339,6 @@ span {
     -khtml-user-select: none;
     user-select: none;
 }
-
-
 
 .workspace-TabLabelText {
     font-size: 11px;
@@ -371,7 +361,7 @@ span {
 }
 
 .workspace-tabCloseButton:hover {
-    filter: alpha( opacity = 50 );
+    filter: alpha(opacity = 50);
     -moz-opacity: 0.5;
     -khtml-opacity: 0.5;
     opacity: 0.5;
@@ -387,7 +377,7 @@ span {
 }
 
 .mosaic-Caption {
-    background: #e3e8f3 url( images/hborder.png ) repeat-x 0px -2003px;
+    background: #e3e8f3 url(images/hborder.png) repeat-x 0px -2003px;
     border-bottom: 1px solid #bbbbbb;
 }
 
@@ -504,7 +494,7 @@ span {
 
 .mosaic-InfoPanel {
 /*background-color: black;*/
-    background-image: url( 'images/traynotifybg.png' );
+    background-image: url('images/traynotifybg.png');
     background-position: top;
     background-repeat: repeat-x;
 
@@ -561,7 +551,7 @@ span {
 
 .gwt-Tree .gwt-TreeItem-selected {
     user-select: none; /*background-color: whitesmoke;*/
-    background-image: url( 'images/listhighlightbg.png' );
+    background-image: url('images/listhighlightbg.png');
     padding: 3px;
     color: white; /*border: 1px dotted gray;*/
 }
@@ -570,66 +560,93 @@ span {
     font-size: 11px;
 
 }
+
 .gwt-ScrollTable .headerTable tr {
     background-image: url('images/titlegradient.png');
 
 }
 
 .gwt-ScrollTable .headerWrapper,
-.mosaic-ColumnWidget .headerWrapper,
-.mosaic-ScrollTreeTable .headerWrapper {
+    .mosaic-ColumnWidget .headerWrapper,
+    .mosaic-ScrollTreeTable .headerWrapper {
     background-image: url('images/titlegradient.png');
 }
 
-.WSGrid-header, .WSGrid-header td {
-    height:20px;
+.WSGrid-header {
+    border-collapse: collapse;
+    border-spacing: 0;
+    height: 20px;
     background-image: url("images/ui/layout/navbar.png");
-    border-top: 1px solid whitesmoke;
-    font-weight: bold;
-    padding:0;
-    margin:0;
 }
 
-.WSGrid, .WSGrid td {
+.WSGrid-header td {
+    font-weight: bold;
+    margin: 0;
     padding:0;
-    margin:0;
+}
+
+.WSGrid {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+.WSGrid td {
+    padding:0;    
 }
 
 .WSGrid-datagrid {
-    
+
 }
 
 .WSCell {
     min-height: 11px;
     height: 100%;
 
+    margin: 0;
+    font-size: 12px;
+
+    cursor: default;
+
     border: 1px solid transparent;
     border-bottom-color: #efefef;
     border-left-color: #efefef;
 
-    padding: 0px;
-    margin:0;
-    font-size: 11px;
-
-    cursor: default;
+    vertical-align: top;
 }
 
 .WSCell-hover {
     background-color: #eeeeff;
-    border: 1px solid #cccccc;
 }
 
 .WSCell-selected {
     background-color: #ddddff;
     color: white;
-    border: 1px solid lightsteelblue; 
+    border: 1px solid lightsteelblue;
+}
+
+.WSCell-colselect {
+    background-color: #ddddff;
+    border: 1px solid #ddddff;
+
+    border-bottom-color: lightgray;
+    border-right-color: lightsteelblue;
+    border-left-color: lightsteelblue;
+}
+
+.WSCell-hcolselect {
+    background-color: #aaaaff;
+    border: 1px solid #aaaaff;
+
+    border-bottom-color: lightgray;
+    border-right-color: lightsteelblue;
+    border-left-color: lightsteelblue;
 }
 
 .WSCell-editbox {
     background: transparent;
     border: 0;
     font-size: 11px;
-    width:100%;
+    width: 100%;
 }
 
 .WSCell-resize-right {
@@ -641,6 +658,6 @@ span {
 }
 
 .WSGrid-resize-line {
-    border: 1px solid lightblue;
+    border-left: 1px solid lightblue;
     height: 100%;
 }

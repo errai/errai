@@ -10,7 +10,6 @@ import com.google.gwt.user.client.ui.*;
 
 import java.util.ArrayList;
 
-
 public class WSGrid extends Composite {
     private VerticalPanel panel;
     private WSAbstractGrid titleBar;
@@ -21,6 +20,7 @@ public class WSGrid extends Composite {
     private int cols;
 
     private WSCell currentFocus;
+    private boolean currentFocusRowColSpan;
     private int _rsize = 0;
     private boolean _resizeArmed = false;
     private boolean _resizing = false;
@@ -42,11 +42,11 @@ public class WSGrid extends Composite {
     public WSGrid(boolean scrollable) {
         panel = new VerticalPanel();
         panel.setWidth("100%");
-        panel.add(titleBar = new WSAbstractGrid(false));
+        panel.add(titleBar = new WSAbstractGrid(false, GridType.TITLEBAR));
         titleBar.setStylePrimaryName("WSGrid-header");
         panel.setCellHeight(titleBar, titleBar.getOffsetHeight() + "px");
 
-        panel.add(dataGrid = new WSAbstractGrid(scrollable));
+        panel.add(dataGrid = new WSAbstractGrid(scrollable, GridType.EDITABLE_GRID));
         panel.setCellVerticalAlignment(dataGrid, HasVerticalAlignment.ALIGN_TOP);
 
         dataGrid.setStylePrimaryName("WSGrid-datagrid");
@@ -109,18 +109,48 @@ public class WSGrid extends Composite {
         return dataGrid.getCell(row, col);
     }
 
+    private void selectColumn(int col) {
+        for (ArrayList<WSCell> row : titleBar.getTableIndex()) {
+           row.get(col).addStyleDependentName("hcolselect");
+        //    row.get(col).getParent().addStyleName("WSCell-selected");
+        }
+
+        for (ArrayList<WSCell> row : dataGrid.getTableIndex()) {
+            row.get(col).addStyleDependentName("colselect");
+     //       row.get(col).getParent().addStyleName("WSCell-selected");
+
+        }
+    }
+
+    private void blurColumn(int col) {
+        for (ArrayList<WSCell> row : titleBar.getTableIndex()) {
+            row.get(col).removeStyleDependentName("hcolselect");
+        }
+
+        for (ArrayList<WSCell> row : dataGrid.getTableIndex()) {
+            row.get(col).removeStyleDependentName("colselect");
+        }
+    }
+
 
     public class WSAbstractGrid extends Composite {
         private ScrollPanel scrollPanel;
         private FlexTable table;
         private ArrayList<ArrayList<WSCell>> tableIndex;
 
+        private GridType type;
+
 
         public WSAbstractGrid() {
-            this(false);
+            this(false, GridType.EDITABLE_GRID);
         }
 
-        public WSAbstractGrid(boolean scrollable) {
+        public WSAbstractGrid(GridType type) {
+            this(false, type);
+        }
+
+        public WSAbstractGrid(boolean scrollable, GridType type) {
+            this.type = type;
             table = new FlexTable();
 
             table.setStylePrimaryName("WSGrid");
@@ -285,6 +315,8 @@ public class WSGrid extends Composite {
         public WSCell getCell(int row, int col) {
             return tableIndex.get(row).get(col);
         }
+
+
     }
 
     public class WSCell extends Composite {
@@ -296,7 +328,10 @@ public class WSGrid extends Composite {
         private int row;
         private int col;
 
+        private WSAbstractGrid grid;
+
         public WSCell(WSAbstractGrid grid, HTML widget, int row, int col) {
+            this.grid = grid;
             panel = new SimplePanel();
             textBox = new TextBox();
             textBox.setStylePrimaryName("WSCell-editbox");
@@ -362,8 +397,12 @@ public class WSGrid extends Composite {
 
         public void blur() {
             stopedit();
-
             removeStyleDependentName("selected");
+
+            if (currentFocusRowColSpan) {
+                blurColumn(col);
+                currentFocusRowColSpan = false;
+            }
         }
 
         public void focus() {
@@ -393,8 +432,8 @@ public class WSGrid extends Composite {
 
         @Override
         public void onBrowserEvent(Event event) {
-            int leftG = getAbsoluteLeft() + 5;
-            int rightG = getAbsoluteLeft() + colSizes.get(col) - 5;
+            int leftG = getAbsoluteLeft() + 10;
+            int rightG = getAbsoluteLeft() + colSizes.get(col) - 10;
 
             switch (event.getTypeInt()) {
                 case Event.ONMOUSEOVER:
@@ -407,7 +446,7 @@ public class WSGrid extends Composite {
                 case Event.ONMOUSEMOVE:
 
                     if (_resizing) {
-                        DOM.setStyleAttribute(resizeLine.getElement(), "left", event.getClientX() + 1 + "px");
+                //        DOM.setStyleAttribute(resizeLine.getElement(), "left", event.getClientX() + 1 + "px");
                     }
                     else {
                         if (event.getClientX() < leftG) {
@@ -427,15 +466,14 @@ public class WSGrid extends Composite {
                     break;
 
                 case Event.ONMOUSEDOWN:
-
                     if (_resizeArmed) {
                         if (!_resizing) {
+                            _resizing = true;
                             disableTextSelection(RootPanel.getBodyElement(), true);
 
                             focus();
                             resizeLine.show();
                             resizeLine.setPopupPosition(event.getClientX() + 1, 0);
-                             _resizing = true;
                             _rsize = event.getClientX();
                         }
 
@@ -450,11 +488,30 @@ public class WSGrid extends Composite {
                     break;
 
                 case Event.ONDBLCLICK:
-                    edit();
+                    switch (grid.type) {
+                        case EDITABLE_GRID:
+                            edit();
+                            break;
+                        case TITLEBAR:
+                            // do sorting here
+                            break;
+                    }
                     break;
 
                 case Event.ONMOUSEUP:
-                    if (!_resizing) focus();
+                    switch (grid.type) {
+                        case EDITABLE_GRID:
+                            if (!_resizing) focus();
+                            break;
+                        case TITLEBAR:
+                            if (!_resizing) {
+                                focus();
+                                currentFocusRowColSpan = true;
+                                selectColumn(col);
+                            }
+                            break;
+                    }
+
                     break;
             }
         }
@@ -463,6 +520,10 @@ public class WSGrid extends Composite {
     @Override
     public void onBrowserEvent(Event event) {
         switch (event.getTypeInt()) {
+            case Event.ONMOUSEMOVE: {
+                DOM.setStyleAttribute(resizeLine.getElement(), "left", event.getClientX() + "px");
+                break;
+            }
             case Event.ONMOUSEUP: {
                 if (_resizing) {
                     cancelMove();
@@ -486,7 +547,6 @@ public class WSGrid extends Composite {
                     disableTextSelection(RootPanel.getBodyElement(), false);
                 }
             }
-
         }
     }
 
@@ -517,8 +577,7 @@ public class WSGrid extends Composite {
         disableTextSelectInternal(elem, disable);
     }
 
-    private native static void disableTextSelectInternal(Element e,
-                                                         boolean disable)/*-{
+    private native static void disableTextSelectInternal(Element e, boolean disable)/*-{
       if (disable) {
         e.ondrag = function () { return false; };
         e.onselectstart = function () { return false; };
@@ -528,5 +587,25 @@ public class WSGrid extends Composite {
       }
     }-*/;
 
+    private static final int EDITABLE = 1;
+    private static final int TITLEGRID = 1 << 1;
 
+    public enum GridType {
+        EDITABLE_GRID(EDITABLE),
+        TITLEBAR(TITLEGRID);
+
+        private int options;
+
+        GridType(int options) {
+            this.options = options;
+        }
+
+        public boolean isEditable() {
+            return (EDITABLE & options) != 0;
+        }
+
+        public boolean isTitleGrid() {
+            return (TITLEGRID & options) != 0;
+        }
+    }
 }
