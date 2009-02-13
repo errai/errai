@@ -1,22 +1,16 @@
 package org.jboss.workspace.sampler.client;
 
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.widgetideas.table.client.FixedWidthFlexTable;
-
-
 import org.jboss.workspace.client.ToolSet;
 import org.jboss.workspace.client.Workspace;
-import org.jboss.workspace.client.widgets.WSGrid;
 import org.jboss.workspace.client.framework.Tool;
 import org.jboss.workspace.client.layout.WorkspaceLayout;
 import org.jboss.workspace.client.rpc.StatePacket;
-import org.gwt.mosaic.ui.client.table.ScrollTable;
+import org.jboss.workspace.client.widgets.WSGrid;
 
 import java.util.Date;
 

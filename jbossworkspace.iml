@@ -6,11 +6,12 @@
         <setting name="additionalCompilerParameters" value="" />
         <setting name="compilerMaxHeapSize" value="768" />
         <setting name="compilerOutputPath" value="" />
-        <setting name="gwtScriptOutputStyle" value="DETAILED" />
+        <setting name="gwtScriptOutputStyle" value="PRETTY" />
         <setting name="gwtSdkUrl" value="file://$MODULE_DIR$/../gwt-mac-1.5.3" />
         <setting name="runGwtCompilerOnMake" value="true" />
         <packaging>
           <module name="org.jboss.workspace.Workspace" path="/org.jboss.workspace.Workspace" />
+          <module name="org.jboss.workspace.sampler.WorkspaceSampler" path="/org.jboss.workspace.sampler.WorkspaceSampler" />
         </packaging>
       </configuration>
     </facet>

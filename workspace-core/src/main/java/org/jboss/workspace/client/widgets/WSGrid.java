@@ -1,11 +1,10 @@
 package org.jboss.workspace.client.widgets;
 
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventPreview;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 
 import java.util.ArrayList;
@@ -41,12 +40,18 @@ public class WSGrid extends Composite {
 
     public WSGrid(boolean scrollable) {
         panel = new VerticalPanel();
-        panel.setWidth("100%");
-        panel.add(titleBar = new WSAbstractGrid(false, GridType.TITLEBAR));
-        titleBar.setStylePrimaryName("WSGrid-header");
-        panel.setCellHeight(titleBar, titleBar.getOffsetHeight() + "px");
 
-        panel.add(dataGrid = new WSAbstractGrid(scrollable, GridType.EDITABLE_GRID));
+        initWidget(panel);
+
+        titleBar = new WSAbstractGrid(false, GridType.TITLEBAR);
+
+        panel.add(titleBar);
+
+        titleBar.setStylePrimaryName("WSGrid-header");
+        dataGrid = new WSAbstractGrid(scrollable, GridType.EDITABLE_GRID);
+
+        panel.add(dataGrid);
+
         panel.setCellVerticalAlignment(dataGrid, HasVerticalAlignment.ALIGN_TOP);
 
         dataGrid.setStylePrimaryName("WSGrid-datagrid");
@@ -57,11 +62,76 @@ public class WSGrid extends Composite {
         resizeLine.setHeight("800px");
         resizeLine.setStyleName("WSGrid-resize-line");
 
-
-        initWidget(panel);
-
         sinkEvents(Event.MOUSEEVENTS);
         resizeLine.sinkEvents(Event.MOUSEEVENTS);
+
+        DOM.sinkEvents(RootPanel.getBodyElement(), Event.ONKEYDOWN |
+                DOM.getEventsSunk(RootPanel.getBodyElement()));
+
+        DOM.addEventPreview(new EventPreview() {
+            public boolean onEventPreview(Event event) {
+
+                switch (event.getTypeInt()) {
+                    case Event.ONKEYPRESS:
+                        if (currentFocus == null || currentFocus.edit) return true;
+
+                        dataGrid.tableIndex.get(0).get(0).wrappedWidget.setHTML(event.getKeyCode() + "");
+
+                        switch (event.getKeyCode()) {
+                            case KeyboardListener.KEY_TAB:
+                                if (event.getShiftKey()) {
+                                    if (currentFocus.getCol() == 0 && currentFocus.getRow() > 0) {
+                                        dataGrid.tableIndex.get(currentFocus.getRow() - 1).get(cols - 1).focus();
+                                    }
+                                    else {
+                                        dataGrid.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() - 1).focus();
+                                    }
+                                }
+                                else {
+                                    if (currentFocus.getCol() == cols - 1 && currentFocus.getRow() < dataGrid.tableIndex.size()) {
+                                        dataGrid.tableIndex.get(currentFocus.getRow() + 1).get(0).focus();
+                                    }
+                                    else {
+                                        dataGrid.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() + 1).focus();
+                                    }
+                                }
+                                break;
+
+                            case 63232:
+                            case KeyboardListener.KEY_UP:
+                                if (currentFocus.getRow() > 0)
+                                    dataGrid.tableIndex.get(currentFocus.getRow() - 1).get(currentFocus.getCol()).focus();
+                                break;
+                            case 63235:
+                            case KeyboardListener.KEY_RIGHT:
+                                if (currentFocus.getCol() < cols)
+                                    dataGrid.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() + 1).focus();
+                                break;
+                            case 63233:
+                            case KeyboardListener.KEY_ENTER:
+                            case KeyboardListener.KEY_DOWN:
+                                if (currentFocus.getRow() < dataGrid.tableIndex.size())
+                                    dataGrid.tableIndex.get(currentFocus.getRow() + 1).get(currentFocus.getCol()).focus();
+                                break;
+                            case 63234:
+                            case KeyboardListener.KEY_LEFT:
+                                if (currentFocus.getCol() > 0)
+                                    dataGrid.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() - 1).focus();
+                                break;
+
+                            case 63272:
+                            case KeyboardListener.KEY_DELETE:
+                                currentFocus.getWrappedWidget().setHTML("");
+                                break;
+
+                            case 32: // spacebar
+                                currentFocus.edit();
+                                return false;
+                        }
+                }
+                return true;
+            }
+        });
 
 
     }
@@ -111,14 +181,11 @@ public class WSGrid extends Composite {
 
     private void selectColumn(int col) {
         for (ArrayList<WSCell> row : titleBar.getTableIndex()) {
-           row.get(col).addStyleDependentName("hcolselect");
-        //    row.get(col).getParent().addStyleName("WSCell-selected");
+            row.get(col).addStyleDependentName("hcolselect");
         }
 
         for (ArrayList<WSCell> row : dataGrid.getTableIndex()) {
             row.get(col).addStyleDependentName("colselect");
-     //       row.get(col).getParent().addStyleName("WSCell-selected");
-
         }
     }
 
@@ -140,7 +207,6 @@ public class WSGrid extends Composite {
 
         private GridType type;
 
-
         public WSAbstractGrid() {
             this(false, GridType.EDITABLE_GRID);
         }
@@ -150,11 +216,11 @@ public class WSGrid extends Composite {
         }
 
         public WSAbstractGrid(boolean scrollable, GridType type) {
+            //   initWidget(table = new FlexTable());
+
             this.type = type;
             table = new FlexTable();
-
             table.setStylePrimaryName("WSGrid");
-
             table.insertRow(0);
 
             if (scrollable) {
@@ -169,67 +235,6 @@ public class WSGrid extends Composite {
             tableIndex = new ArrayList<ArrayList<WSCell>>();
             tableIndex.add(new ArrayList<WSCell>());
 
-            DOM.addEventPreview(new EventPreview() {
-                public boolean onEventPreview(Event event) {
-                    switch (event.getTypeInt()) {
-                        case Event.ONKEYPRESS:
-                            if (currentFocus == null || currentFocus.edit) return true;
-
-                            switch (event.getKeyCode()) {
-                                case KeyboardListener.KEY_TAB:
-                                    if (event.getShiftKey()) {
-                                        if (currentFocus.getCol() == 0 && currentFocus.getRow() > 0) {
-                                            tableIndex.get(currentFocus.getRow() - 1).get(cols - 1).focus();
-                                        }
-                                        else {
-                                            tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() - 1).focus();
-                                        }
-                                    }
-                                    else {
-                                        if (currentFocus.getCol() == cols - 1 && currentFocus.getRow() < tableIndex.size()) {
-                                            tableIndex.get(currentFocus.getRow() + 1).get(0).focus();
-                                        }
-                                        else {
-                                            tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() + 1).focus();
-                                        }
-                                    }
-                                    break;
-
-                                case 63232:
-                                case KeyboardListener.KEY_UP:
-                                    if (currentFocus.getRow() > 0)
-                                        tableIndex.get(currentFocus.getRow() - 1).get(currentFocus.getCol()).focus();
-                                    break;
-                                case 63235:
-                                case KeyboardListener.KEY_RIGHT:
-                                    if (currentFocus.getCol() < cols)
-                                        tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() + 1).focus();
-                                    break;
-                                case 63233:
-                                case KeyboardListener.KEY_ENTER:
-                                case KeyboardListener.KEY_DOWN:
-                                    if (currentFocus.getRow() < tableIndex.size())
-                                        tableIndex.get(currentFocus.getRow() + 1).get(currentFocus.getCol()).focus();
-                                    break;
-                                case 63234:
-                                case KeyboardListener.KEY_LEFT:
-                                    if (currentFocus.getCol() > 0)
-                                        tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() - 1).focus();
-                                    break;
-
-                                case 63272:
-                                case KeyboardListener.KEY_DELETE:
-                                    currentFocus.getWrappedWidget().setHTML("");
-                                    break;
-
-                                case 32: // spacebar
-                                    currentFocus.edit();
-                                    return false;
-                            }
-                    }
-                    return true;
-                }
-            });
 
         }
 
@@ -446,7 +451,7 @@ public class WSGrid extends Composite {
                 case Event.ONMOUSEMOVE:
 
                     if (_resizing) {
-                //        DOM.setStyleAttribute(resizeLine.getElement(), "left", event.getClientX() + 1 + "px");
+                        //        DOM.setStyleAttribute(resizeLine.getElement(), "left", event.getClientX() + 1 + "px");
                     }
                     else {
                         if (event.getClientX() < leftG) {

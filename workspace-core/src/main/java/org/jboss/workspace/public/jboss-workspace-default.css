@@ -599,8 +599,8 @@ span {
 }
 
 .WSCell {
+    height: 11px;
     min-height: 11px;
-    height: 100%;
 
     margin: 0;
     font-size: 12px;
