@@ -4,7 +4,6 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.EventPreview;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.*;
 
@@ -21,6 +20,8 @@ public class WSGrid extends Composite {
 
     private WSCell currentFocus;
     private boolean currentFocusRowColSpan;
+    private boolean _leftGrow = false;
+
     private int _rsize = 0;
     private boolean _resizeArmed = false;
     private boolean _resizing = false;
@@ -52,7 +53,6 @@ public class WSGrid extends Composite {
         dataGrid = new WSAbstractGrid(scrollable, GridType.EDITABLE_GRID);
 
         panel.add(dataGrid);
-
         panel.setCellVerticalAlignment(dataGrid, HasVerticalAlignment.ALIGN_TOP);
 
         dataGrid.setStylePrimaryName("WSGrid-datagrid");
@@ -65,9 +65,6 @@ public class WSGrid extends Composite {
 
         sinkEvents(Event.MOUSEEVENTS | Event.ONKEYPRESS);
         resizeLine.sinkEvents(Event.MOUSEEVENTS);
-
-//        DOM.sinkEvents(RootPanel.getBodyElement(), Event.ONKEYDOWN |
-//                DOM.getEventsSunk(RootPanel.getBodyElement()));
 
         DOM.setEventListener(getElement(),
                 new EventListener() {
@@ -233,33 +230,29 @@ public class WSGrid extends Composite {
         }
 
         public WSAbstractGrid(boolean scrollable, GridType type) {
-            //   initWidget(table = new FlexTable());
-
             this.type = type;
             table = new FlexTable();
             table.setStylePrimaryName("WSGrid");
             table.insertRow(0);
 
             if (scrollable) {
-                scrollPanel = new ScrollPanel(table);
+                scrollPanel = new ScrollPanel();
                 initWidget(scrollPanel);
+                scrollPanel.setAlwaysShowScrollBars(true);
+                scrollPanel.add(table);
+                
             }
             else {
                 initWidget(table);
             }
 
-
             tableIndex = new ArrayList<ArrayList<WSCell>>();
             tableIndex.add(new ArrayList<WSCell>());
-
-
         }
 
         public void addCell(int row, HTML w) {
             int currentColSize = table.getCellCount(row);
-
             table.addCell(row);
-
             table.setWidget(row, currentColSize, new WSCell(this, w, row, currentColSize));
         }
 
@@ -466,18 +459,16 @@ public class WSGrid extends Composite {
                     break;
 
                 case Event.ONMOUSEMOVE:
-
-                    if (_resizing) {
-                        //        DOM.setStyleAttribute(resizeLine.getElement(), "left", event.getClientX() + 1 + "px");
-                    }
-                    else {
+                    if (!_resizing) {
                         if (event.getClientX() < leftG) {
                             addStyleDependentName("resize-left");
                             _resizeArmed = true;
+                            _leftGrow = true;
                         }
                         else if (event.getClientX() > rightG) {
                             addStyleDependentName("resize-right");
                             _resizeArmed = true;
+                            _leftGrow = false;
                         }
                         else {
                             removeStyleDependentName("resize-left");
@@ -550,20 +541,24 @@ public class WSGrid extends Composite {
                 if (_resizing) {
                     cancelMove();
 
-                    int width = colSizes.get(currentFocus.col);
+                    int selCol = (_leftGrow ? currentFocus.col - 1 : currentFocus.col);
+
+                    if (selCol == -1) return;
+
+                    int width = colSizes.get(selCol);
 
                     _rsize -= event.getClientX();
                     width -= _rsize;
 
-                    colSizes.set(currentFocus.col, width);
+                    colSizes.set(selCol, width);
 
-                    titleBar.getTable().getColumnFormatter().setWidth(currentFocus.col, width + "px");
-                    dataGrid.getTable().getColumnFormatter().setWidth(currentFocus.col, width + "px");
+                    titleBar.getTable().getColumnFormatter().setWidth(selCol, width + "px");
+                    dataGrid.getTable().getColumnFormatter().setWidth(selCol, width + "px");
 
-                    titleBar.tableIndex.get(0).get(currentFocus.col).setWidth(width + "px");
+                    titleBar.tableIndex.get(0).get(selCol).setWidth(width + "px");
 
                     for (int cX = 0; cX < dataGrid.tableIndex.size(); cX++) {
-                        dataGrid.tableIndex.get(cX).get(currentFocus.col).setWidth(width + "px");
+                        dataGrid.tableIndex.get(cX).get(selCol).setWidth(width + "px");
                     }
 
                     disableTextSelection(RootPanel.getBodyElement(), false);

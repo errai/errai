@@ -358,7 +358,8 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
     }
 
     public void forceOpenTab(Tool tool, StatePacket packet, Image icon) {
-        FlowPanel flowpanel = new FlowPanel();
+        ScrollPanel flowpanel = new ScrollPanel();
+        flowpanel.setHeight("100%");
 
         Widget toolWidget = tool.getWidget(packet);
 

@@ -70,10 +70,9 @@ public class WorkspaceSampler implements EntryPoint {
                         ,
 
                         new Tool() {
-
                             public Widget getWidget(StatePacket packet) {
                                 WSGrid wsGrid = new WSGrid();
-                                wsGrid.setHeight("100%");
+                                wsGrid.setHeight("400px");
 
                                 wsGrid.setColumnHeader(0, 0, "UserId");
                                 wsGrid.setColumnHeader(0, 1, "Name");                                                                                        
