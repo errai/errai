@@ -35,7 +35,6 @@ public class WSTabPanel extends Composite {
             }
         });
 
-        deckPanel.setAnimationEnabled(true);
 
         initWidget(layoutPanel);
     }

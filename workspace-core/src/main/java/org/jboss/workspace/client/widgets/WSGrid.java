@@ -5,6 +5,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventPreview;
+import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.*;
 
 import java.util.ArrayList;
@@ -58,80 +59,96 @@ public class WSGrid extends Composite {
 
         columnWidths = new ArrayList<Integer>();
 
-        resizeLine.setWidth("1px");
+        resizeLine.setWidth("5px");
         resizeLine.setHeight("800px");
         resizeLine.setStyleName("WSGrid-resize-line");
 
-        sinkEvents(Event.MOUSEEVENTS);
+        sinkEvents(Event.MOUSEEVENTS | Event.ONKEYPRESS);
         resizeLine.sinkEvents(Event.MOUSEEVENTS);
 
-        DOM.sinkEvents(RootPanel.getBodyElement(), Event.ONKEYDOWN |
-                DOM.getEventsSunk(RootPanel.getBodyElement()));
+//        DOM.sinkEvents(RootPanel.getBodyElement(), Event.ONKEYDOWN |
+//                DOM.getEventsSunk(RootPanel.getBodyElement()));
 
-        DOM.addEventPreview(new EventPreview() {
-            public boolean onEventPreview(Event event) {
+        DOM.setEventListener(getElement(),
+                new EventListener() {
+                    public void onBrowserEvent(Event event) {
+                        switch (event.getTypeInt()) {
+                            case Event.ONKEYPRESS:
+                                if (currentFocus == null || currentFocus.edit) return;
 
-                switch (event.getTypeInt()) {
-                    case Event.ONKEYPRESS:
-                        if (currentFocus == null || currentFocus.edit) return true;
+                                dataGrid.tableIndex.get(0).get(0).wrappedWidget.setHTML(event.getKeyCode() + "");
 
-                        dataGrid.tableIndex.get(0).get(0).wrappedWidget.setHTML(event.getKeyCode() + "");
+                                switch (event.getKeyCode()) {
+                                    case KeyboardListener.KEY_TAB:
+                                        if (event.getShiftKey()) {
+                                            if (currentFocus.getCol() == 0 && currentFocus.getRow() > 0) {
+                                                dataGrid.tableIndex.get(currentFocus.getRow() - 1).get(cols - 1).focus();
+                                            }
+                                            else {
+                                                dataGrid.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() - 1).focus();
+                                            }
+                                        }
+                                        else {
+                                            if (currentFocus.getCol() == cols - 1 && currentFocus.getRow() < dataGrid.tableIndex.size()) {
+                                                dataGrid.tableIndex.get(currentFocus.getRow() + 1).get(0).focus();
+                                            }
+                                            else {
+                                                dataGrid.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() + 1).focus();
+                                            }
+                                        }
+                                        break;
+                                       // return false;
 
-                        switch (event.getKeyCode()) {
-                            case KeyboardListener.KEY_TAB:
-                                if (event.getShiftKey()) {
-                                    if (currentFocus.getCol() == 0 && currentFocus.getRow() > 0) {
-                                        dataGrid.tableIndex.get(currentFocus.getRow() - 1).get(cols - 1).focus();
-                                    }
-                                    else {
-                                        dataGrid.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() - 1).focus();
-                                    }
+                                    case 63232:
+                                    case KeyboardListener.KEY_UP:
+                                        if (currentFocus.getRow() > 0)
+                                            dataGrid.tableIndex.get(currentFocus.getRow() - 1).get(currentFocus.getCol()).focus();
+                                        break;
+                                     //   return false;
+                                    case 63235:
+                                    case KeyboardListener.KEY_RIGHT:
+                                        if (currentFocus.getCol() < cols)
+                                            dataGrid.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() + 1).focus();
+                                        break;
+                                        //    return false;
+                                    case 63233:
+                                    case KeyboardListener.KEY_ENTER:
+                                    case KeyboardListener.KEY_DOWN:
+                                        if (currentFocus.getRow() < dataGrid.tableIndex.size())
+                                            dataGrid.tableIndex.get(currentFocus.getRow() + 1).get(currentFocus.getCol()).focus();
+                                        break;
+                                        //   return false;
+                                    case 63234:
+                                    case KeyboardListener.KEY_LEFT:
+                                        if (currentFocus.getCol() > 0)
+                                            dataGrid.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() - 1).focus();
+                                        break;
+                                        //      return false;
+
+                                    case 63272:
+                                    case KeyboardListener.KEY_DELETE:
+                                        currentFocus.getWrappedWidget().setHTML("");
+                                        break;
+
+                                    case 32: // spacebar
+                                        currentFocus.edit();
+                                        break;
+                                     //   return false;
                                 }
-                                else {
-                                    if (currentFocus.getCol() == cols - 1 && currentFocus.getRow() < dataGrid.tableIndex.size()) {
-                                        dataGrid.tableIndex.get(currentFocus.getRow() + 1).get(0).focus();
-                                    }
-                                    else {
-                                        dataGrid.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() + 1).focus();
-                                    }
-                                }
-                                break;
-
-                            case 63232:
-                            case KeyboardListener.KEY_UP:
-                                if (currentFocus.getRow() > 0)
-                                    dataGrid.tableIndex.get(currentFocus.getRow() - 1).get(currentFocus.getCol()).focus();
-                                break;
-                            case 63235:
-                            case KeyboardListener.KEY_RIGHT:
-                                if (currentFocus.getCol() < cols)
-                                    dataGrid.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() + 1).focus();
-                                break;
-                            case 63233:
-                            case KeyboardListener.KEY_ENTER:
-                            case KeyboardListener.KEY_DOWN:
-                                if (currentFocus.getRow() < dataGrid.tableIndex.size())
-                                    dataGrid.tableIndex.get(currentFocus.getRow() + 1).get(currentFocus.getCol()).focus();
-                                break;
-                            case 63234:
-                            case KeyboardListener.KEY_LEFT:
-                                if (currentFocus.getCol() > 0)
-                                    dataGrid.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() - 1).focus();
-                                break;
-
-                            case 63272:
-                            case KeyboardListener.KEY_DELETE:
-                                currentFocus.getWrappedWidget().setHTML("");
-                                break;
-
-                            case 32: // spacebar
-                                currentFocus.edit();
-                                return false;
                         }
+                    //    return true;
+                    }
                 }
-                return true;
-            }
-        });
+
+        );
+
+
+//        DOM.addEventPreview(new EventPreview() {
+//            public boolean onEventPreview(Event event) {
+//
+//
+//            }
+//        });
 
 
     }

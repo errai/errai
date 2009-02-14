@@ -575,12 +575,13 @@ span {
 .WSGrid-header {
     border-collapse: collapse;
     border-spacing: 0;
-    height: 20px;
-    background-image: url("images/ui/layout/navbar.png");
+    height: 11px;
+    background-image: url("images/ui/layout/column-header.png");
 }
 
 .WSGrid-header td {
     font-weight: bold;
+    font-size: 9px;
     margin: 0;
     padding:0;
 }
@@ -607,6 +608,7 @@ span {
 
     cursor: default;
 
+    padding:1px;
     border: 1px solid transparent;
     border-bottom-color: #efefef;
     border-left-color: #efefef;
