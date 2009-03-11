@@ -173,7 +173,6 @@ public class WSGrid extends Composite {
                     case 63235:
                     case KeyboardListener.KEY_RIGHT:
                         if (currentFocus.getCol() < cols-1) {
-                            System.out.println(currentFocus.getCol()  +  ":" + cols);
                             if (currentFocusRowColSpan) {
                                 titleBar.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() + 1).focus();
                             }
