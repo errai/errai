@@ -625,6 +625,10 @@ span {
     border: 1px solid lightsteelblue;
 }
 
+.WSCell-click {
+    background-color: #ddddff;
+}
+
 .WSCell-colselect {
     background-color: #ddddff;
     border: 1px solid #ddddff;
