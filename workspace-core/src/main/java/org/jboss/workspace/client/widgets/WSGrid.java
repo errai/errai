@@ -5,6 +5,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventPreview;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import static com.google.gwt.user.client.ui.RootPanel.getBodyElement;
 
@@ -78,7 +79,7 @@ public class WSGrid extends Composite {
                 if (_resizeArmed) {
                     if (!_resizing) {
                         _resizing = true;
-                        disableTextSelection(getBodyElement(), true);
+                      disableTextSelection(getBodyElement(), true);
 
                         _startpos = _fpanel_offset + x;
 
@@ -135,7 +136,7 @@ public class WSGrid extends Composite {
                         dataGrid.tableIndex.get(cX).get(selCol).setWidth(width + "px");
                     }
 
-                    disableTextSelection(getBodyElement(), false);
+                   disableTextSelection(getBodyElement(), false);
                 }
             }
         });
@@ -224,6 +225,9 @@ public class WSGrid extends Composite {
                     case Event.ONKEYDOWN:
                         switch (event.getKeyCode()) {
                             case KeyboardListener.KEY_TAB:
+                                if (currentFocus != null && currentFocus.isEdit()) {
+                                    currentFocus.stopedit();
+                                }
                             case 63232:
                             case KeyboardListener.KEY_UP:
                             case 63235:
@@ -456,7 +460,7 @@ public class WSGrid extends Composite {
                 public void onKeyDown(Widget sender, char keyCode, int modifiers) {
                 }
 
-                public void onKeyPress(Widget sender, char keyCode, int modifiers) {
+                public void onKeyPress(Widget sender, char keyCode, int modifiers) {                    
                     switch (keyCode) {
                         case KeyboardListener.KEY_TAB:
                             stopedit();
@@ -506,8 +510,8 @@ public class WSGrid extends Composite {
 
             edit = true;
 
-            textBox.selectAll();
             textBox.setFocus(true);
+      //      textBox.selectAll();
         }
 
         public void stopedit() {
@@ -552,6 +556,10 @@ public class WSGrid extends Composite {
 
         public int getCol() {
             return col;
+        }
+
+        public boolean isEdit() {
+            return edit;
         }
 
         public HTML getWrappedWidget() {
