@@ -599,8 +599,8 @@ span {
 }
 
 .WSCell {
-    height: 11px;
-    min-height: 11px;
+    height: 12px;
+    min-height: 12px;
 
     margin: 0;
     font-size: 12px;
@@ -624,7 +624,7 @@ span {
     /**
      * This is needed to fix a Firefox rendering bug.
      */
-    overflow: hidden;
+    overflow: auto;
 }
 
 .WSCell-hover {
@@ -664,6 +664,9 @@ span {
     border: 0;
     font-size: 11px;
     width: 100%;
+    overflow: auto;
+    position:absolute;
+    
 }
 
 

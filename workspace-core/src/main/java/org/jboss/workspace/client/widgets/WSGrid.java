@@ -451,6 +451,10 @@ public class WSGrid extends Composite {
 
             textBox = new TextBox();
             textBox.setStylePrimaryName("WSCell-editbox");
+            textBox.setVisible(false);
+
+            RootPanel.get().add(textBox);
+
 
             textBox.addKeyboardListener(new KeyboardListener() {
                 public void onKeyDown(Widget sender, char keyCode, int modifiers) {
@@ -502,12 +506,16 @@ public class WSGrid extends Composite {
          * Calling this method will place the cell into edit mode.
          */
         public void edit() {
-            panel.remove(wrappedWidget);
+          //  panel.remove(wrappedWidget);
             textBox.setWidth(getOffsetWidth() + "px");
             textBox.setText(wrappedWidget.getHTML());
             textBox.setReadOnly(false);
 
-            panel.add(textBox);
+         //   panel.add(textBox);
+
+            textBox.setVisible(true);
+            textBox.getElement().getStyle().setProperty("left", getAbsoluteLeft() + "px");
+            textBox.getElement().getStyle().setProperty("top", getAbsoluteTop() + "px");
 
             edit = true;
 
@@ -520,9 +528,10 @@ public class WSGrid extends Composite {
         public void stopedit() {
             if (edit) {
                 wrappedWidget.setHTML(textBox.getText());
-                panel.remove(textBox);
-                panel.add(wrappedWidget);
-
+                textBox.setVisible(false);
+            //    RootPanel.get().remove(textBox);
+             //   panel.remove(textBox);
+             //   panel.add(wrappedWidget);
                 edit = false;
 
                 fPanel.setFocus(true);
@@ -619,6 +628,7 @@ public class WSGrid extends Composite {
                 case Event.ONCLICK:
                     if (edit) {
                         textBox.setFocus(true);
+                        textBox.onBrowserEvent(event);
                     }
                     break;
 
@@ -659,18 +669,18 @@ public class WSGrid extends Composite {
     public static void disableTextSelection(Element elem, boolean
             disable) {
         // setStyleName(elem, "my-no-selection", disable);
-        // disableTextSelectInternal(elem, disable);
+         disableTextSelectInternal(elem, disable);
     }
 
-//    private native static void disableTextSelectInternal(Element e, boolean disable)/*-{
-//      if (disable) {
-//        e.ondrag = function () { return false; };
-//        e.onselectstart = function () { return false; };
-//      } else {
-//        e.ondrag = null;
-//        e.onselectstart = null;
-//      }
-//    }-*/;
+    private native static void disableTextSelectInternal(Element e, boolean disable)/*-{
+      if (disable) {
+        e.ondrag = function () { return false; };
+        e.onselectstart = function () { return false; };
+      } else {
+        e.ondrag = null;
+        e.onselectstart = null;
+      }
+    }-*/;
 
     private static final int EDITABLE = 1;
     private static final int TITLEGRID = 1 << 1;
