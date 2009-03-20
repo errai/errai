@@ -517,7 +517,9 @@ public class WSGrid extends Composite {
 
             edit = true;
 
+            textBox.setCursorPos(textBox.getText().length());            
             textBox.setFocus(true);
+
         }
 
         public void stopedit() {
