@@ -507,17 +507,17 @@ public class WSGrid extends Composite {
             textBox.setText(wrappedWidget.getHTML());
 
             textBox.setVisible(true);
-            textBox.getElement().getStyle().setProperty("left", getAbsoluteLeft() + "px");
-            textBox.getElement().getStyle().setProperty("top", getAbsoluteTop() + "px");
-            
-            textBox.setWidth(getOffsetWidth() + "px");
-            textBox.setHeight(getOffsetHeight() + "px");
 
-            panel.getElement().setAttribute("contentEditable", "true");
+            Style s = textBox.getElement().getStyle();
+
+            s.setProperty("left", getAbsoluteLeft() + "px");
+            s.setProperty("top", getAbsoluteTop() + "px");
+
+            textBox.setSize(getOffsetWidth() + "px", getOffsetHeight() + "px");
 
             edit = true;
 
-            textBox.setCursorPos(textBox.getText().length());            
+            textBox.setCursorPos(textBox.getText().length());
             textBox.setFocus(true);
 
         }
@@ -664,7 +664,7 @@ public class WSGrid extends Composite {
     public static void disableTextSelection(Element elem, boolean
             disable) {
         // setStyleName(elem, "my-no-selection", disable);
-         disableTextSelectInternal(elem, disable);
+        disableTextSelectInternal(elem, disable);
     }
 
     private native static void disableTextSelectInternal(Element e, boolean disable)/*-{
