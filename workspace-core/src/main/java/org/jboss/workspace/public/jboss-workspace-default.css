@@ -661,7 +661,7 @@ span {
 
 .WSCell-editbox {
     /*background: transparent;*/
-    border: 0;
+    border: 2px cornflowerblue solid;
     font-size: 11px;
     width: 100%;
     overflow: auto;

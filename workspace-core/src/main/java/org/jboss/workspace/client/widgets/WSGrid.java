@@ -72,7 +72,6 @@ public class WSGrid extends Composite {
 
             public void onMouseDown(Widget sender, int x, int y) {
                 if (currentFocus != null && currentFocus.isEdit()) {
-                    System.out.println("edit!");
                     return;
                 }
 
@@ -455,7 +454,6 @@ public class WSGrid extends Composite {
 
             RootPanel.get().add(textBox);
 
-
             textBox.addKeyboardListener(new KeyboardListener() {
                 public void onKeyDown(Widget sender, char keyCode, int modifiers) {
                 }
@@ -506,34 +504,29 @@ public class WSGrid extends Composite {
          * Calling this method will place the cell into edit mode.
          */
         public void edit() {
-          //  panel.remove(wrappedWidget);
-            textBox.setWidth(getOffsetWidth() + "px");
             textBox.setText(wrappedWidget.getHTML());
-            textBox.setReadOnly(false);
-
-         //   panel.add(textBox);
 
             textBox.setVisible(true);
             textBox.getElement().getStyle().setProperty("left", getAbsoluteLeft() + "px");
             textBox.getElement().getStyle().setProperty("top", getAbsoluteTop() + "px");
+            
+            textBox.setWidth(getOffsetWidth() + "px");
+            textBox.setHeight(getOffsetHeight() + "px");
+
+            panel.getElement().setAttribute("contentEditable", "true");
 
             edit = true;
 
             textBox.setFocus(true);
-
-            // for IE
-            textBox.setCursorPos(textBox.getText().length());
         }
 
         public void stopedit() {
             if (edit) {
                 wrappedWidget.setHTML(textBox.getText());
-                textBox.setVisible(false);
-            //    RootPanel.get().remove(textBox);
-             //   panel.remove(textBox);
-             //   panel.add(wrappedWidget);
-                edit = false;
 
+                textBox.setVisible(false);
+
+                edit = false;
                 fPanel.setFocus(true);
             }
         }
@@ -627,8 +620,8 @@ public class WSGrid extends Composite {
 
                 case Event.ONCLICK:
                     if (edit) {
-                        textBox.setFocus(true);
-                        textBox.onBrowserEvent(event);
+//                        textBox.setFocus(true);
+//                        textBox.onBrowserEvent(event);
                     }
                     break;
 
