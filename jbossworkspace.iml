@@ -35,6 +35,11 @@
             <attribute name="method" value="1" />
             <attribute name="URI" value="/WEB-INF/classes" />
           </containerElement>
+          <containerElement type="library" level="module">
+            <attribute name="method" value="1" />
+            <attribute name="URI" value="/WEB-INF/lib" />
+            <url>jar://$MODULE_DIR$/lib/gwt-incubator-march-02-2009.jar!/</url>
+          </containerElement>
         </packaging>
       </configuration>
     </facet>
@@ -48,29 +53,10 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="gwt-user" level="project" />
     <orderEntry type="module-library">
       <library>
         <CLASSES>
           <root url="jar://$MODULE_DIR$/lib/gwt-dnd-2.5.6.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../gwt-mac-1.5.3/gwt-dev-mac.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../gwt-mac-1.5.3/gwt-servlet.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -89,15 +75,6 @@
       <library>
         <CLASSES>
           <root url="jar://$MODULE_DIR$/lib/gwt-beans-binding-0.2.2.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/gwt-incubator_1-5_Dec_28.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -127,6 +104,16 @@
       <library>
         <CLASSES>
           <root url="jar://$APPLICATION_HOME_DIR$/lib/javaee.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="library" name="gwt-user" level="project" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/gwt-incubator_1-5_Dec_28.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

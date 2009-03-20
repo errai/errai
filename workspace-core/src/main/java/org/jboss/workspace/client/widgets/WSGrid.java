@@ -5,7 +5,6 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventPreview;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import static com.google.gwt.user.client.ui.RootPanel.getBodyElement;
 
@@ -72,6 +71,11 @@ public class WSGrid extends Composite {
             private int _startpos = 0;
 
             public void onMouseDown(Widget sender, int x, int y) {
+                if (currentFocus != null && currentFocus.isEdit()) {
+                    System.out.println("edit!");
+                    return;
+                }
+
                 if (_fpanel_offset == -1) {
                     _fpanel_offset = DOM.getAbsoluteLeft(sender.getElement());
                 }
@@ -79,7 +83,8 @@ public class WSGrid extends Composite {
                 if (_resizeArmed) {
                     if (!_resizing) {
                         _resizing = true;
-                      disableTextSelection(getBodyElement(), true);
+
+                        disableTextSelection(getBodyElement(), true);
 
                         _startpos = _fpanel_offset + x;
 
@@ -107,14 +112,12 @@ public class WSGrid extends Composite {
 
             public void onMouseUp(Widget sender, int x, int y) {
                 if (_resizing) {
-
                     cancelMove();
 
                     int selCol = (_leftGrow ? currentFocus.col - 1 : currentFocus.col);
                     if (selCol == -1) return;
 
                     int width = colSizes.get(selCol);
-
                     int offset = x + _fpanel_offset;
 
                     /**
@@ -122,8 +125,7 @@ public class WSGrid extends Composite {
                      */
                     if (offset - _startpos == 0) return;
 
-                    _startpos -= x + _fpanel_offset;
-                    width -= _startpos;
+                    width -= (_startpos -= x + _fpanel_offset);
 
                     colSizes.set(selCol, width);
 
@@ -135,8 +137,6 @@ public class WSGrid extends Composite {
                     for (int cX = 0; cX < dataGrid.tableIndex.size(); cX++) {
                         dataGrid.tableIndex.get(cX).get(selCol).setWidth(width + "px");
                     }
-
-                   disableTextSelection(getBodyElement(), false);
                 }
             }
         });
@@ -173,7 +173,7 @@ public class WSGrid extends Composite {
                         break;
                     case 63235:
                     case KeyboardListener.KEY_RIGHT:
-                        if (currentFocus.getCol() < cols-1) {
+                        if (currentFocus.getCol() < cols - 1) {
                             if (currentFocusRowColSpan) {
                                 titleBar.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() + 1).focus();
                             }
@@ -221,6 +221,10 @@ public class WSGrid extends Composite {
 
         DOM.addEventPreview(new EventPreview() {
             public boolean onEventPreview(Event event) {
+                if (currentFocus != null && currentFocus.isEdit()) {
+                    return true;
+                }
+
                 switch (event.getTypeInt()) {
                     case Event.ONKEYDOWN:
                         switch (event.getKeyCode()) {
@@ -426,12 +430,11 @@ public class WSGrid extends Composite {
         public WSCell getCell(int row, int col) {
             return tableIndex.get(row).get(col);
         }
-
-
     }
 
     public class WSCell extends Composite {
-        private SimplePanel panel;
+        private FlowPanel panel;
+
         private HTML wrappedWidget;
         private boolean edit;
         private TextBox textBox;
@@ -443,24 +446,17 @@ public class WSGrid extends Composite {
 
         public WSCell(WSAbstractGrid grid, HTML widget, int row, int col) {
             this.grid = grid;
-            panel = new SimplePanel();
+            panel = new FlowPanel();
+            panel.setStyleName("WSCell-panel");
+
             textBox = new TextBox();
             textBox.setStylePrimaryName("WSCell-editbox");
-
-            textBox.addFocusListener(new FocusListener() {
-                public void onFocus(Widget sender) {
-                }
-
-                public void onLostFocus(Widget sender) {
-                    stopedit();
-                }
-            });
 
             textBox.addKeyboardListener(new KeyboardListener() {
                 public void onKeyDown(Widget sender, char keyCode, int modifiers) {
                 }
 
-                public void onKeyPress(Widget sender, char keyCode, int modifiers) {                    
+                public void onKeyPress(Widget sender, char keyCode, int modifiers) {
                     switch (keyCode) {
                         case KeyboardListener.KEY_TAB:
                             stopedit();
@@ -502,16 +498,23 @@ public class WSGrid extends Composite {
             sinkEvents(Event.MOUSEEVENTS | Event.FOCUSEVENTS | Event.ONCLICK | Event.ONDBLCLICK);
         }
 
+        /**
+         * Calling this method will place the cell into edit mode.
+         */
         public void edit() {
             panel.remove(wrappedWidget);
             textBox.setWidth(getOffsetWidth() + "px");
             textBox.setText(wrappedWidget.getHTML());
+            textBox.setReadOnly(false);
+
             panel.add(textBox);
 
             edit = true;
 
             textBox.setFocus(true);
-      //      textBox.selectAll();
+
+            // for IE
+            textBox.setCursorPos(textBox.getText().length());
         }
 
         public void stopedit() {
@@ -603,6 +606,10 @@ public class WSGrid extends Composite {
                     }
                     break;
                 case Event.ONMOUSEDOWN:
+                    if (edit) {
+                        return;
+                    }
+
                     focus();
                     break;
 
@@ -610,6 +617,9 @@ public class WSGrid extends Composite {
                     break;
 
                 case Event.ONCLICK:
+                    if (edit) {
+                        textBox.setFocus(true);
+                    }
                     break;
 
                 case Event.ONDBLCLICK:
@@ -621,22 +631,6 @@ public class WSGrid extends Composite {
                             break;
                     }
                     break;
-
-//                case Event.ONMOUSEUP:
-//                    switch (grid.type) {
-//                        case EDITABLE_GRID:
-//                            if (!_resizing) {
-//                                focus();
-//                            }
-//                            break;
-//                        case TITLEBAR:
-//                            if (!_resizing) {
-//                                focus();
-//                            }
-//                            break;
-//                    }
-
-                //       break;
             }
         }
     }
@@ -664,19 +658,19 @@ public class WSGrid extends Composite {
 
     public static void disableTextSelection(Element elem, boolean
             disable) {
-        setStyleName(elem, "my-no-selection", disable);
-        disableTextSelectInternal(elem, disable);
+        // setStyleName(elem, "my-no-selection", disable);
+        // disableTextSelectInternal(elem, disable);
     }
 
-    private native static void disableTextSelectInternal(Element e, boolean disable)/*-{
-      if (disable) {
-        e.ondrag = function () { return false; };
-        e.onselectstart = function () { return false; };
-      } else {
-        e.ondrag = null;
-        e.onselectstart = null;
-      }
-    }-*/;
+//    private native static void disableTextSelectInternal(Element e, boolean disable)/*-{
+//      if (disable) {
+//        e.ondrag = function () { return false; };
+//        e.onselectstart = function () { return false; };
+//      } else {
+//        e.ondrag = null;
+//        e.onselectstart = null;
+//      }
+//    }-*/;
 
     private static final int EDITABLE = 1;
     private static final int TITLEGRID = 1 << 1;

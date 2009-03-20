@@ -338,10 +338,26 @@
     <library name="gwt-user">
       <CLASSES>
         <root url="jar://$PROJECT_DIR$/../gwt-mac-1.5.3/gwt-user.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../gwt-mac-1.5.3/gwt-dev-mac.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../gwt-mac-1.5.3/gwt-servlet.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES>
         <root url="jar://$PROJECT_DIR$/../gwt-mac-1.5.3/gwt-user.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="gwt1.6">
+      <CLASSES>
+        <root url="jar://$PROJECT_DIR$/../gwt-mac-1.6.1/gwt-dev-mac.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../gwt-mac-1.6.1/gwt-servlet.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../gwt-mac-1.6.1/gwt-user.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../gwt-mac-1.6.1/gwt-api-checker.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="jar://$PROJECT_DIR$/../gwt-mac-1.6.1/gwt-dev-mac.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../gwt-mac-1.6.1/gwt-servlet.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../gwt-mac-1.6.1/gwt-user.jar!/" />
       </SOURCES>
     </library>
   </component>

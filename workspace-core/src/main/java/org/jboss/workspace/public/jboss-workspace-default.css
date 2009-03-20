@@ -615,6 +615,18 @@ span {
     vertical-align: top;
 }
 
+
+.WSCell-panel {
+    overflow: auto;
+}
+
+.WSCell-innerpanel {
+    /**
+     * This is needed to fix a Firefox rendering bug.
+     */
+    overflow: hidden;
+}
+
 .WSCell-hover {
     background-color: #eeeeff;
 }
@@ -648,11 +660,12 @@ span {
 }
 
 .WSCell-editbox {
-    background: transparent;
+    /*background: transparent;*/
     border: 0;
     font-size: 11px;
     width: 100%;
 }
+
 
 .WSCell-resize-right {
     cursor: e-resize;
