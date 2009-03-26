@@ -67,7 +67,6 @@ public class WSGrid extends Composite {
                     public void onScroll(Widget widget, int scrollLeft, int scrollTop) {
                         titleBar.getScrollPanel().setHorizontalScrollPosition(scrollLeft);
                     }
-
                 }
         );
 
@@ -697,9 +696,9 @@ public class WSGrid extends Composite {
 
         panel.setCellHeight(titleBar, titleHeight + "px");
 
-        setHeight("400px");
+        setHeight("450px");
         setWidth("100%");
-        dataGrid.setHeight("400px");
+        dataGrid.setHeight("450px");
 
         super.onAttach();
     }
