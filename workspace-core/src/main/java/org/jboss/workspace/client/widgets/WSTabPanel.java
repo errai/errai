@@ -8,22 +8,22 @@ import org.jboss.workspace.client.util.LayoutUtil;
 import static org.jboss.workspace.client.util.LayoutUtil.position;
 
 public class WSTabPanel extends Composite {
-    private LayoutPanel layoutPanel;
+    private DockPanel layoutPanel;
 
     private final TabBar tabBar;
     private final DeckPanel deckPanel;
 
     public WSTabPanel() {
-        layoutPanel = new LayoutPanel();
-        layoutPanel.setLayout(new BorderLayout());
-        layoutPanel.setWidgetSpacing(0);
+        layoutPanel = new DockPanel();
+        layoutPanel.setSize("98%", "100%");
 
         tabBar = new TabBar();
         deckPanel = new DeckPanel();
+        deckPanel.setSize("100%", "100%");
         deckPanel.addStyleName("gwt-TabPanelBottom");
 
-        layoutPanel.add(tabBar, position(LayoutUtil.NORTH));
-        layoutPanel.add(deckPanel, new BorderLayoutData(true));
+        layoutPanel.add(tabBar, DockPanel.NORTH);
+        layoutPanel.add(deckPanel, DockPanel.CENTER);
 
         tabBar.addTabListener(new TabListener() {
             public boolean onBeforeTabSelected(SourcesTabEvents sender, int tabIndex) {
@@ -74,7 +74,6 @@ public class WSTabPanel extends Composite {
         deckPanel.showWidget(idx);
     }
 
-
     public void insert(Widget panel, Widget tab, int beforeIndex) {
         int idx = getWidgetIndex(panel);
         if (idx != -1) {
@@ -86,5 +85,11 @@ public class WSTabPanel extends Composite {
         deckPanel.insert(panel, beforeIndex);
 
         selectTab(beforeIndex);
+    }
+
+    @Override
+    protected void onAttach() {
+        super.onAttach();
+        layoutPanel.setCellHeight(tabBar, tabBar.getOffsetHeight() + "px");
     }
 }

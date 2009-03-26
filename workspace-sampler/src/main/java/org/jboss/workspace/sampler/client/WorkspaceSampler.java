@@ -8,6 +8,7 @@ import com.google.gwt.user.client.ui.Widget;
 import org.jboss.workspace.client.ToolSet;
 import org.jboss.workspace.client.Workspace;
 import org.jboss.workspace.client.framework.Tool;
+import org.jboss.workspace.client.framework.WorkspaceSizeChangeListener;
 import org.jboss.workspace.client.layout.WorkspaceLayout;
 import org.jboss.workspace.client.rpc.StatePacket;
 import org.jboss.workspace.client.widgets.WSGrid;
@@ -18,7 +19,7 @@ import java.util.Date;
 public class WorkspaceSampler implements EntryPoint {
     public void onModuleLoad() {
         Workspace ws = new Workspace();
-        WorkspaceLayout layout = ws.init(null);
+        final WorkspaceLayout layout = ws.init(null);
 
         layout.addToolSet(new ToolSet() {
             public Tool[] getAllProvidedTools() {
@@ -71,18 +72,18 @@ public class WorkspaceSampler implements EntryPoint {
 
                         new Tool() {
                             public Widget getWidget(StatePacket packet) {
-                                WSGrid wsGrid = new WSGrid();
+                                final WSGrid wsGrid = new WSGrid();
                                 wsGrid.setHeight("400px");
 
                                 wsGrid.setColumnHeader(0, 0, "UserId");
-                                wsGrid.setColumnHeader(0, 1, "Name");                                                                                        
+                                wsGrid.setColumnHeader(0, 1, "Name");
                                 wsGrid.setColumnHeader(0, 2, "User Type");
 
                                 wsGrid.setCell(0, 0, "1");
                                 wsGrid.setCell(0, 1, "John Doe");
 
                                 wsGrid.setCell(0, 2, "Regular User");
-                                
+
                                 wsGrid.setCell(1, 0, "2");
                                 wsGrid.setCell(1, 1, "Jane Doe");
                                 wsGrid.setCell(1, 2, "Super User");
@@ -90,6 +91,12 @@ public class WorkspaceSampler implements EntryPoint {
                                 wsGrid.setCell(200, 0, "2000");
                                 wsGrid.setCell(200, 1, "Foo");
                                 wsGrid.setCell(200, 2, "Bar");
+
+                                layout.addWorkspaceSizeChangeListener(new WorkspaceSizeChangeListener() {
+                                    public void onSizeChange(int deltaW, int actualW, int deltaH, int actualH) {
+                                        wsGrid.growWidth(deltaW);                                        
+                                    }
+                                });
 
                                 return wsGrid;
                             }

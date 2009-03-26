@@ -5,22 +5,20 @@ import static com.google.gwt.core.client.GWT.create;
 import static com.google.gwt.core.client.GWT.getModuleBaseURL;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.WindowResizeListener;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.*;
-import org.gwt.mosaic.ui.client.layout.BorderLayout;
-import org.gwt.mosaic.ui.client.layout.LayoutPanel;
 import org.gwt.mosaic.ui.client.layout.BorderLayoutData;
+import org.jboss.workspace.client.ToolSet;
+import org.jboss.workspace.client.framework.AcceptsCallback;
+import org.jboss.workspace.client.framework.Tool;
+import org.jboss.workspace.client.framework.WorkspaceSizeChangeListener;
 import org.jboss.workspace.client.rpc.LayoutStateService;
-import org.jboss.workspace.client.rpc.StatePacket;
 import org.jboss.workspace.client.rpc.LayoutStateServiceAsync;
+import org.jboss.workspace.client.rpc.StatePacket;
 import org.jboss.workspace.client.widgets.*;
 import org.jboss.workspace.client.widgets.dnd.TabDragHandler;
-import org.jboss.workspace.client.framework.Tool;
-import org.jboss.workspace.client.framework.AcceptsCallback;
-import org.jboss.workspace.client.util.LayoutUtil;
-import org.jboss.workspace.client.ToolSet;
-import org.jboss.workspace.client.Workspace;
 
 import java.util.*;
 
@@ -32,7 +30,9 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
     /**
      * The main layout panel.
      */
-    public final LayoutPanel mainLayoutPanel = new LayoutPanel(new BorderLayout());
+    // public final LayoutPanel mainLayoutPanel = new LayoutPanel(new BorderLayout());
+
+    public final DockPanel mainLayoutPanel = new DockPanel();
 
     public final HorizontalPanel header = new HorizontalPanel();
 
@@ -52,34 +52,56 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
 
     public PickupDragController tabDragController = new PickupDragController(RootPanel.get(), false);
 
+    public List<WorkspaceSizeChangeListener> workspaceSizeChangeListers = new ArrayList<WorkspaceSizeChangeListener>();
+
     public int tabs = 0;
 
-    public LayoutPanel createLayout() {
+    private int currSizeW;
+    private int currSizeH;
+
+    public Panel createLayout() {
         /**
          * Create main layout panel using a border layout.
          */
         mainLayoutPanel.setHeight("100%");
         mainLayoutPanel.setWidth("100%");
 
-        mainLayoutPanel.setPadding(0);
 
         /**
          * Add the titlebar area
          */
-        mainLayoutPanel.add(createHeader(), LayoutUtil.position(LayoutUtil.NORTH));
+        Widget area;
+        mainLayoutPanel.add(createHeader(), DockPanel.NORTH);
+
 
         tabDragController.setBehaviorBoundaryPanelDrop(false);
         tabDragController.addDragHandler(new TabDragHandler(this));
 
-        mainLayoutPanel.add(createNavigator(),
-                navigationLayout = new BorderLayoutData(BorderLayout.Region.WEST));
+        mainLayoutPanel.add(area = createNavigator(), DockPanel.WEST);
+        mainLayoutPanel.setCellHeight(area, "100%");
+        mainLayoutPanel.setCellVerticalAlignment(area, HasVerticalAlignment.ALIGN_TOP);
 
-        mainLayoutPanel.add(createAppPanel(), LayoutUtil.position(LayoutUtil.CENTER));
 
-        final int w = Window.getClientWidth();
-        final int h = Window.getClientHeight();
+        mainLayoutPanel.add(area = createAppPanel(), DockPanel.CENTER);
+        mainLayoutPanel.setCellHeight(area, "100%");
+        mainLayoutPanel.setCellWidth(area, "100%");
+        mainLayoutPanel.setCellVerticalAlignment(area, HasVerticalAlignment.ALIGN_TOP);
 
-        RootPanel.get("rootPanel").setPixelSize(w, h);
+        currSizeW = Window.getClientWidth();
+        currSizeH = Window.getClientHeight();
+
+        RootPanel.get("rootPanel").setPixelSize(currSizeW, currSizeH);
+
+        Window.addWindowResizeListener(new WindowResizeListener() {
+            public void onWindowResized(int width, int height) {
+                RootPanel.get("rootPanel").setPixelSize(width, height);
+
+                fireWorkspaceSizeChangeListeners(width - currSizeW, height - currSizeH);
+
+                currSizeW = width;
+                currSizeH = height;
+            }
+        });
 
         return mainLayoutPanel;
     }
@@ -202,6 +224,8 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
 
         navigation.setWidth("175px");
         navigation.setHeight("100%");
+
+        leftPanel.setHeight("100%");
 
         leftPanel.setArmed(false);
 
@@ -367,8 +391,6 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
 
         Image newIcon = new Image(icon != null ? icon.getUrl() : "images/ui/icons/questioncube.png");
         newIcon.setSize("16px", "16px");
-
-        //    int currentWidth = tabPanel.getOffsetWidth();
 
         WSTab blt = new WSTab(this, flowpanel, newIcon, packet, tabPanel);
 
@@ -537,13 +559,15 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
     }
 
     private void openNavPanel() {
+        System.out.println("OPEN!");
+
         navigation.setVisible(true);
         navigationLabel.setVisible(true);
 
-
+        leftPanel.setWidth("175px");
         navigation.setWidth("175px");
 
-        mainLayoutPanel.layout();
+        //  mainLayoutPanel.layout();
 
     }
 
@@ -551,8 +575,32 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
         navigation.setVisible(false);
         navigationLabel.setVisible(false);
         leftPanel.setWidth("12px");
-
-        mainLayoutPanel.layout();
     }
+
+
+    private void fireWorkspaceSizeChangeListeners(int deltaW, int deltaH) {
+        int w = Window.getClientWidth();
+        int h = Window.getClientHeight();
+
+        for (WorkspaceSizeChangeListener wscl : workspaceSizeChangeListers) {
+            wscl.onSizeChange(deltaW, w, deltaH, h);
+        }
+    }
+
+    public void addWorkspaceSizeChangeListener(WorkspaceSizeChangeListener wscl) {
+        workspaceSizeChangeListers.add(wscl);  
+    }
+
+
+//    private void calculatePanelSize() {
+//        int leftPanelOffset = leftPanel.getOffsetWidth();
+//
+//        System.out.println("leftPanelOffset=" + leftPanelOffset);
+//
+////        mainLayoutPanel.setCellWidth(tabPanel, (Window.getClientWidth() - leftPanelOffset - 5) + "px");
+//
+//        mainLayoutPanel.setCellWidth(tabPanel, "100%");
+//
+//    }
 
 }

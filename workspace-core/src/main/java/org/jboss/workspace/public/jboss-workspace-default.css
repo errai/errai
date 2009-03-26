@@ -1,11 +1,12 @@
-body {
+html, body {
     min-height: 100%;
-    height: 100%;
     background-color: #efefef;
-}
 
-html {
     height: 100%;
+    margin: 0;
+    overflow: hidden;
+    padding: 0;
+    width: 100%;
 }
 
 h2 {
@@ -274,6 +275,8 @@ span {
 
     padding: 3px;
     height: 100%;
+
+    overflow: visible;
 
 }
 
@@ -583,7 +586,7 @@ span {
     font-weight: bold;
     font-size: 9px;
     margin: 0;
-    padding:0;
+    padding: 0;
 }
 
 .WSGrid {
@@ -592,7 +595,7 @@ span {
 }
 
 .WSGrid td {
-    padding:0;    
+    padding: 0;
 }
 
 .WSGrid-datagrid {
@@ -607,14 +610,13 @@ span {
 
     cursor: default;
 
-    padding:1px;
+    padding: 1px;
     border: 1px solid transparent;
     border-bottom-color: #efefef;
     border-left-color: #efefef;
 
     vertical-align: top;
 }
-
 
 .WSCell-panel {
     overflow: auto;
@@ -660,15 +662,14 @@ span {
 }
 
 .WSCell-editbox {
-    /*background: transparent;*/
+/*background: transparent;*/
     border: 2px cornflowerblue solid;
     font-size: 11px;
     width: 100%;
     overflow: auto;
-    position:absolute;
-    
-}
+    position: absolute;
 
+}
 
 .WSCell-resize-right {
     cursor: e-resize;
