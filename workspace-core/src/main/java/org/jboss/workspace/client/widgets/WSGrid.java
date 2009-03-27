@@ -459,7 +459,6 @@ public class WSGrid extends Composite {
         RootPanel.get().add(textBox);
     }
 
-
     public class WSCell extends Composite {
         private FlowPanel panel;
 
@@ -560,7 +559,7 @@ public class WSGrid extends Composite {
                 else {
                     wrappedWidget.setHTML(textBox.getText());
                 }
-                
+
                 textBox.setVisible(false);
 
                 edit = false;
@@ -587,6 +586,59 @@ public class WSGrid extends Composite {
             if (grid.type == GridType.TITLEBAR) {
                 currentFocusRowColSpan = true;
                 selectColumn(col);
+            }
+            else {
+
+                int scrollPos = grid.getScrollPanel().getScrollPosition();
+                int scrollPosH = grid.getScrollPanel().getHorizontalScrollPosition();
+
+                int cellHeight = getOffsetHeight();
+                int cellWidth = getOffsetWidth();
+
+                int bottomCell = DOM.getAbsoluteTop(getElement()) + cellHeight
+                        - DOM.getAbsoluteTop(grid.getScrollPanel().getElement()) + scrollPos;
+                int rightCell = DOM.getAbsoluteLeft(getElement()) + cellWidth
+                        - DOM.getAbsoluteLeft(grid.getScrollPanel().getElement()) + scrollPosH;
+
+                int bottomVisible = grid.getScrollPanel().getOffsetHeight() + scrollPos - 1;
+                int topVisible = bottomVisible - grid.getScrollPanel().getOffsetHeight() + 2;
+
+                int rightVisible = grid.getScrollPanel().getOffsetWidth() + scrollPosH - 1;
+                int leftVisible = rightVisible - grid.getScrollPanel().getOffsetWidth() + 2;
+
+//                System.out.println("rightVisible:" + rightVisible
+//                        + ";leftVisible:" + leftVisible + ";scrollPosH:" + scrollPosH
+//                        + ";rightCell:" + rightCell);
+
+                if (bottomCell >= (bottomVisible - cellHeight)) {
+                    // make sure the cell lines up properly
+                    if (scrollPos % cellHeight != 0) {
+                       scrollPos += (scrollPos % cellHeight);
+                    }
+
+                    grid.getScrollPanel().setScrollPosition(scrollPos + getOffsetHeight());
+                }
+                else if (bottomCell <= (topVisible)) {
+                    // make sure the cell lines up properly
+                    if (scrollPos % cellHeight != 0) {
+                        scrollPos -= (scrollPos % cellHeight);
+                    }
+                    grid.getScrollPanel().setScrollPosition(scrollPos - getOffsetHeight());
+                }
+                else if (rightCell >= (rightVisible - cellWidth)) {
+                    if (scrollPosH % cellWidth != 0) {
+                        scrollPosH += (scrollPosH % cellWidth);
+                    }
+
+                    grid.getScrollPanel().setHorizontalScrollPosition(scrollPosH + getOffsetWidth());
+                }
+                else if (rightCell <= (leftVisible)) {
+                    if (scrollPosH % cellWidth != 0) {
+                        scrollPosH -= (scrollPosH % cellWidth);
+                    }
+
+                    grid.getScrollPanel().setHorizontalScrollPosition(scrollPosH - getOffsetWidth());
+                }
             }
 
             addStyleDependentName("selected");

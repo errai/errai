@@ -96,8 +96,6 @@ public class WorkspaceSampler implements EntryPoint {
                                     public void onSizeChange(int deltaW, int actualW, int deltaH, int actualH) {
                                         wsGrid.setPreciseHeight(actualH - layout.getAppPanelOffsetHeight() - 5);
                                         wsGrid.setPreciseWidth(actualW - layout.getNavPanelOffsetWidth() - 5);
-
-                                        System.out.println("FireWSCL");
                                     }
                                 });
 
