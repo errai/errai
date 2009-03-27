@@ -21,6 +21,7 @@ import org.jboss.workspace.client.widgets.*;
 import org.jboss.workspace.client.widgets.dnd.TabDragHandler;
 
 import java.util.*;
+import java.sql.Time;
 
 
 /**
@@ -30,8 +31,6 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
     /**
      * The main layout panel.
      */
-    // public final LayoutPanel mainLayoutPanel = new LayoutPanel(new BorderLayout());
-
     public final DockPanel mainLayoutPanel = new DockPanel();
 
     public final HorizontalPanel header = new HorizontalPanel();
@@ -66,13 +65,11 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
         mainLayoutPanel.setHeight("100%");
         mainLayoutPanel.setWidth("100%");
 
-
         /**
          * Add the titlebar area
          */
         Widget area;
         mainLayoutPanel.add(createHeader(), DockPanel.NORTH);
-
 
         tabDragController.setBehaviorBoundaryPanelDrop(false);
         tabDragController.addDragHandler(new TabDragHandler(this));
@@ -80,7 +77,6 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
         mainLayoutPanel.add(area = createNavigator(), DockPanel.WEST);
         mainLayoutPanel.setCellHeight(area, "100%");
         mainLayoutPanel.setCellVerticalAlignment(area, HasVerticalAlignment.ALIGN_TOP);
-
 
         mainLayoutPanel.add(area = createAppPanel(), DockPanel.CENTER);
         mainLayoutPanel.setCellHeight(area, "100%");
@@ -105,7 +101,6 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
 
         return mainLayoutPanel;
     }
-
 
     /**
      * Create the titlebar area of the interface.
@@ -210,7 +205,6 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
                 }
         );
 
-
         topNavPanel.add(collapseButton);
         topNavPanel.setCellWidth(collapseButton, "21px");
         topNavPanel.setCellVerticalAlignment(collapseButton, HasVerticalAlignment.ALIGN_MIDDLE);
@@ -304,11 +298,9 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
             navigation.add(launcherPanel, toolSet.getToolSetName());
         }
 
-
         for (Tool tool : toolSet.getAllProvidedTools()) {
             availableTools.put(tool.getId(), tool);
         }
-
     }
 
     /**
@@ -395,7 +387,6 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
         WSTab blt = new WSTab(this, flowpanel, newIcon, packet, tabPanel);
 
         tabPanel.add(flowpanel, blt);
-
         tabPanel.selectTab(tabPanel.getWidgetIndex(flowpanel));
 
         tabLookup.put(flowpanel, blt);
@@ -411,8 +402,15 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
         activateTool(packet.getId());
 
         notifySessionState(packet);
-    }
 
+        Timer t = new Timer() {
+            public void run() {
+                pack();
+            }
+        };
+
+        t.schedule(10);
+    }
 
     public void closeTab(StatePacket packet) {
         deleteSessionState(packet);
@@ -436,7 +434,6 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
 
         tabPanel.selectTab(idx);
     }
-
 
     public void selectTab(String id) {
         Widget w = tabIds.get(id);
@@ -543,7 +540,6 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
         return false;
     }
 
-
     public boolean isToolActive(String id) {
         return activeTools.containsKey(id);
     }
@@ -559,16 +555,11 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
     }
 
     private void openNavPanel() {
-        System.out.println("OPEN!");
-
         navigation.setVisible(true);
         navigationLabel.setVisible(true);
 
         leftPanel.setWidth("175px");
         navigation.setWidth("175px");
-
-        //  mainLayoutPanel.layout();
-
     }
 
     private void closeNavPanel() {
@@ -576,7 +567,6 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
         navigationLabel.setVisible(false);
         leftPanel.setWidth("12px");
     }
-
 
     private void fireWorkspaceSizeChangeListeners(int deltaW, int deltaH) {
         int w = Window.getClientWidth();
@@ -591,16 +581,15 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
         workspaceSizeChangeListers.add(wscl);  
     }
 
+    public int getAppPanelOffsetHeight() {
+        return tabPanel.getDeckPanel().getAbsoluteTop();
+    }
 
-//    private void calculatePanelSize() {
-//        int leftPanelOffset = leftPanel.getOffsetWidth();
-//
-//        System.out.println("leftPanelOffset=" + leftPanelOffset);
-//
-////        mainLayoutPanel.setCellWidth(tabPanel, (Window.getClientWidth() - leftPanelOffset - 5) + "px");
-//
-//        mainLayoutPanel.setCellWidth(tabPanel, "100%");
-//
-//    }
+    public int getNavPanelOffsetWidth() {
+        return navigation.getOffsetWidth();
+    }
 
+    public void pack() {
+        fireWorkspaceSizeChangeListeners(Window.getClientWidth()-currSizeW,Window.getClientHeight()-currSizeH );
+    }
 }

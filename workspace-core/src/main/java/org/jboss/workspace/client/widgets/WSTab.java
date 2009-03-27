@@ -91,19 +91,6 @@ public class WSTab extends Composite {
 
     @Override
     public void onBrowserEvent(Event event) {
-//        switch (event.getTypeInt()) {
-//            case Event.ONMOUSEOVER:
-//                if (animTimer.isRunning()) {
-//                    return;
-//                }
-//                animTimer.updateTarget();
-//                animTimer.scheduleRepeating(10);
-//                break;
-//            case Event.ONMOUSEOUT:
-//                animTimer.setRunning(false);
-//                break;
-//
-//        }
     }
 
 
@@ -197,10 +184,7 @@ public class WSTab extends Composite {
             Effects.setOpacity(s, target);
 
         }
-
-
     }
-
 
     public void reset() {
         sinkEvents(Event.ONMOUSEOVER | Event.ONMOUSEOUT);
@@ -210,7 +194,6 @@ public class WSTab extends Composite {
             animTimer = new AnimationTimer(this, hPanel);
         }
     }
-
 
     @Override
     public String toString() {

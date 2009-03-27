@@ -94,7 +94,10 @@ public class WorkspaceSampler implements EntryPoint {
 
                                 layout.addWorkspaceSizeChangeListener(new WorkspaceSizeChangeListener() {
                                     public void onSizeChange(int deltaW, int actualW, int deltaH, int actualH) {
-                                        wsGrid.growWidth(deltaW);                                        
+                                        wsGrid.setPreciseHeight(actualH - layout.getAppPanelOffsetHeight() - 5);
+                                        wsGrid.setPreciseWidth(actualW - layout.getNavPanelOffsetWidth() - 5);
+
+                                        System.out.println("FireWSCL");
                                     }
                                 });
 
@@ -144,6 +147,8 @@ public class WorkspaceSampler implements EntryPoint {
                 return new HTML("SAMPLE");
             }
         });
+
+        layout.pack();
     }
 }
 

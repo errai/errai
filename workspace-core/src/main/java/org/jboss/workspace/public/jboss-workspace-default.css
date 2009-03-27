@@ -29,12 +29,12 @@ h3 {
 }
 
 .gwt-Label {
-    font-family: Arial, Tahoma, Verdana, sans-serif;
+    font-family: sans-serif;
     font-size: 11px;
 }
 
 span {
-    font-family: Arial, Tahoma, Verdana, sans-serif;
+    font-family: sans-serif;
     font-size: 11px;
 }
 
@@ -578,8 +578,11 @@ span {
 .WSGrid-header {
     border-collapse: collapse;
     border-spacing: 0;
-    height: 11px;
+    height: 18px;
     background-image: url("images/ui/layout/column-header.png");
+
+    border-top: 1px solid #EFEFEF;
+    border-bottom: 1px solid #BABABA;
 }
 
 .WSGrid-header td {
@@ -587,11 +590,15 @@ span {
     font-size: 9px;
     margin: 0;
     padding: 0;
+    height: 18px;
+
 }
 
 .WSGrid {
     border-collapse: collapse;
     border-spacing: 0;
+    border-left: #EDEDED;
+    border-right:#EAEAEA;
 }
 
 .WSGrid td {
@@ -620,6 +627,7 @@ span {
 
 .WSCell-panel {
     overflow: auto;
+    height: 12pt;
 }
 
 .WSCell-innerpanel {
@@ -656,9 +664,9 @@ span {
     background-color: #aaaaff;
     border: 1px solid #aaaaff;
 
-    border-bottom-color: lightgray;
-    border-right-color: lightsteelblue;
-    border-left-color: lightsteelblue;
+    /*border-bottom-color: lightgray;*/
+    /*border-right-color: lightsteelblue;*/
+    /*border-left-color: lightsteelblue;*/
 }
 
 .WSCell-editbox {

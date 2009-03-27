@@ -41,8 +41,9 @@ public class WSGrid extends Composite {
     }
 
     public WSGrid(boolean scrollable) {
-        initWidget(fPanel = new FocusPanel(panel = new VerticalPanel()));
-
+        panel = new VerticalPanel();
+        fPanel = new FocusPanel(panel);
+        initWidget(fPanel);
         titleBar = new WSAbstractGrid(false, GridType.TITLEBAR);
 
         panel.add(titleBar);
@@ -146,7 +147,6 @@ public class WSGrid extends Composite {
                 }
             }
         });
-
 
         fPanel.addKeyboardListener(new KeyboardListener() {
             public void onKeyDown(Widget sender, char keyCode, int modifiers) {
@@ -255,9 +255,7 @@ public class WSGrid extends Composite {
                 return true;
             }
         });
-
     }
-
 
     public void setColumnHeader(int row, int column, String html) {
         cols = titleBar.ensureRowsAndCols(row + 1, column + 1);
@@ -343,18 +341,19 @@ public class WSGrid extends Composite {
             table.setStylePrimaryName("WSGrid");
             table.insertRow(0);
 
-            initWidget(scrollPanel = new ScrollPanel());
+            scrollPanel = new ScrollPanel();
+
+            initWidget(scrollPanel);
             scrollPanel.setAlwaysShowScrollBars(scrollable);
 
             if (!scrollable) {
                 setStyleAttribute(scrollPanel.getElement(), "overflowY", "hidden");
                 setStyleAttribute(scrollPanel.getElement(), "overflowX", "hidden");
 
-                scrollPanel.setScrollPosition(0);
-                scrollPanel.setHeight("16px");
+                scrollPanel.setHeight("18px");
             }
 
-            scrollPanel.setWidget(table);
+            scrollPanel.add(table);
 
             tableIndex = new ArrayList<ArrayList<WSCell>>();
             tableIndex.add(new ArrayList<WSCell>());
@@ -429,22 +428,6 @@ public class WSGrid extends Composite {
         @Override
         protected void onAttach() {
             super.onAttach();
-
-
-        }
-
-        private void calculateSize() {
-//            int parentWidth = getParent().getParent().getParent().getParent().getOffsetWidth();
-//            System.out.println("rz:"+parentWidth + "(" + getParent().getParent().getParent().getParent().getClass().getName() + ")");
-//            switch (type) {
-//                case EDITABLE_GRID:
-//                    scrollPanel.setWidth("100%");
-//                    break;
-//                case TITLEBAR:
-//                    scrollPanel.setWidth("100%");
-//                    break;
-//            }
-
         }
 
         public ArrayList<ArrayList<WSCell>> getTableIndex() {
@@ -464,12 +447,24 @@ public class WSGrid extends Composite {
 
     } //end WSAbstractGrid
 
+
+    private static TextBox textBox;
+    private boolean _msie_compatibility = getUserAgent().contains("msie");
+
+    static {
+        textBox = new TextBox();
+        textBox.setStylePrimaryName("WSCell-editbox");
+        textBox.setVisible(false);
+
+        RootPanel.get().add(textBox);
+    }
+
+
     public class WSCell extends Composite {
         private FlowPanel panel;
 
         private HTML wrappedWidget;
         private boolean edit;
-        private TextBox textBox;
 
         private int row;
         private int col;
@@ -480,12 +475,6 @@ public class WSGrid extends Composite {
             this.grid = grid;
             panel = new FlowPanel();
             panel.setStyleName("WSCell-panel");
-
-            textBox = new TextBox();
-            textBox.setStylePrimaryName("WSCell-editbox");
-            textBox.setVisible(false);
-
-            RootPanel.get().add(textBox);
 
             textBox.addKeyboardListener(new KeyboardListener() {
                 public void onKeyDown(Widget sender, char keyCode, int modifiers) {
@@ -526,6 +515,10 @@ public class WSGrid extends Composite {
             this.row = row;
             this.col = col;
 
+            if (_msie_compatibility) {
+                wrappedWidget.setHTML("&nbsp;");
+            }
+
             initWidget(panel);
             setWidth(colSizes.get(col) + "px");
             setStyleName("WSCell");
@@ -537,8 +530,11 @@ public class WSGrid extends Composite {
          * Calling this method will place the cell into edit mode.
          */
         public void edit() {
-            textBox.setText(wrappedWidget.getHTML());
+            String text = wrappedWidget.getHTML();
 
+            if (_msie_compatibility && text.equals("&nbsp;")) text = "";
+
+            textBox.setText(text);
             textBox.setVisible(true);
 
             Style s = textBox.getElement().getStyle();
@@ -552,13 +548,19 @@ public class WSGrid extends Composite {
 
             textBox.setCursorPos(textBox.getText().length());
             textBox.setFocus(true);
-
         }
 
         public void stopedit() {
             if (edit) {
-                wrappedWidget.setHTML(textBox.getText());
+                String text = textBox.getText();
 
+                if (_msie_compatibility && text.trim().length() == 0) {
+                    wrappedWidget.setHTML("&nbsp;");
+                }
+                else {
+                    wrappedWidget.setHTML(textBox.getText());
+                }
+                
                 textBox.setVisible(false);
 
                 edit = false;
@@ -675,12 +677,28 @@ public class WSGrid extends Composite {
         _resizeArmed = false;
     }
 
+    public int getTitlebarOffsetHeight() {
+        return titleBar.getOffsetHeight();
+    }
+
     public void setHeight(String height) {
         panel.setHeight(height);
     }
 
+    public void setPreciseHeight(int height) {
+        int offsetHeight = height - getTitlebarOffsetHeight();
+        setHeight(height + "px");
+        dataGrid.getScrollPanel().setHeight(offsetHeight + "px");
+    }
+
     public void setWidth(String width) {
         panel.setWidth(width);
+    }
+
+    public void setPreciseWidth(int width) {
+        setWidth(width + "px");
+        titleBar.getScrollPanel().setWidth(width - 20 + "px");
+        dataGrid.getScrollPanel().setWidth(width + "px");
     }
 
     public void growWidth(int amount) {
@@ -738,4 +756,8 @@ public class WSGrid extends Composite {
             return (TITLEGRID & options) != 0;
         }
     }
+
+    public static native String getUserAgent() /*-{
+        return navigator.userAgent.toLowerCase();
+    }-*/;
 }

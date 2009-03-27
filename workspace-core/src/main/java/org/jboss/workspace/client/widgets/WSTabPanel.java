@@ -35,7 +35,6 @@ public class WSTabPanel extends Composite {
             }
         });
 
-
         initWidget(layoutPanel);
     }
 
@@ -85,6 +84,10 @@ public class WSTabPanel extends Composite {
         deckPanel.insert(panel, beforeIndex);
 
         selectTab(beforeIndex);
+    }
+
+    public DeckPanel getDeckPanel() {
+        return deckPanel;
     }
 
     @Override
