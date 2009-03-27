@@ -608,7 +608,7 @@ public class WSGrid extends Composite {
 
 //                System.out.println("rightVisible:" + rightVisible
 //                        + ";leftVisible:" + leftVisible + ";scrollPosH:" + scrollPosH
-//                        + ";rightCell:" + rightCell);
+//                        + ";rightCell:" + rightCell + ";cellWidth:" + cellWidth );
 
                 if (bottomCell >= (bottomVisible - cellHeight)) {
                     // make sure the cell lines up properly
@@ -618,21 +618,21 @@ public class WSGrid extends Composite {
 
                     grid.getScrollPanel().setScrollPosition(scrollPos + getOffsetHeight());
                 }
-                else if (bottomCell <= (topVisible)) {
+                else if (bottomCell-cellHeight <= (topVisible)) {
                     // make sure the cell lines up properly
                     if (scrollPos % cellHeight != 0) {
                         scrollPos -= (scrollPos % cellHeight);
                     }
                     grid.getScrollPanel().setScrollPosition(scrollPos - getOffsetHeight());
                 }
-                else if (rightCell >= (rightVisible - cellWidth)) {
+                else if (rightCell >= (rightVisible)) {
                     if (scrollPosH % cellWidth != 0) {
                         scrollPosH += (scrollPosH % cellWidth);
                     }
 
                     grid.getScrollPanel().setHorizontalScrollPosition(scrollPosH + getOffsetWidth());
                 }
-                else if (rightCell <= (leftVisible)) {
+                else if (rightCell-cellWidth <= (leftVisible)) {
                     if (scrollPosH % cellWidth != 0) {
                         scrollPosH -= (scrollPosH % cellWidth);
                     }
