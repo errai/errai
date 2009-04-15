@@ -623,6 +623,8 @@ span {
     border-left-color: #efefef;
 
     vertical-align: top;
+
+    overflow:hidden;
 }
 
 .WSCell-panel {

@@ -1,9 +1,7 @@
-<module>
+<module rename-to="jboss_workspace_sampler">
 
     <inherits name='com.google.gwt.user.User'/>
     <inherits name="org.jboss.workspace.Workspace"/>
     <inherits name="com.google.gwt.gen2.table.ScrollTable"/>
-
     <entry-point class='org.jboss.workspace.sampler.client.WorkspaceSampler'/>
-
 </module>

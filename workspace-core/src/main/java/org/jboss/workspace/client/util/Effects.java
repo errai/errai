@@ -10,9 +10,14 @@ public class Effects {
         String sf = valueOf(factor);
 
         s.setProperty("filter", "alpha(opacity=" + ((int) factor * 100) + ")");
-        s.setProperty("-moz-opacity", sf);
-        s.setProperty("-khtml-opacity", sf);
-        s.setProperty("opacity", sf);
+
+        setOpacityDirect(s, "-moz-opacity", sf);
+        setOpacityDirect(s, "-khtml-opacity", sf);
+        setOpacityDirect(s, "opacity", sf);
     }
+
+    static native void setOpacityDirect(Style style, String name, String opacity) /*-{
+        style[name] = opacity;
+    }-*/;
 
 }

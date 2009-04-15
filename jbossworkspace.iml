@@ -7,7 +7,7 @@
         <setting name="compilerMaxHeapSize" value="768" />
         <setting name="compilerOutputPath" value="" />
         <setting name="gwtScriptOutputStyle" value="PRETTY" />
-        <setting name="gwtSdkUrl" value="file://$MODULE_DIR$/../gwt-mac-1.5.3" />
+        <setting name="gwtSdkUrl" value="file://$MODULE_DIR$/../gwt-mac-1.6.4" />
         <setting name="runGwtCompilerOnMake" value="true" />
         <packaging>
           <module name="org.jboss.workspace.Workspace" path="/org.jboss.workspace.Workspace" />
@@ -109,11 +109,31 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="gwt-user" level="project" />
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/gwt-incubator_1-5_Dec_28.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/gwt-incubator-march-02-2009.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../gwt-mac-1.6.4/gwt-servlet.jar!/" />
+          <root url="jar://$MODULE_DIR$/../gwt-mac-1.6.4/gwt-dev-mac.jar!/" />
+          <root url="jar://$MODULE_DIR$/../gwt-mac-1.6.4/gwt-benchmark-viewer.war!/" />
+          <root url="jar://$MODULE_DIR$/../gwt-mac-1.6.4/gwt-api-checker.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../gwt-mac-1.6.4/gwt-user.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

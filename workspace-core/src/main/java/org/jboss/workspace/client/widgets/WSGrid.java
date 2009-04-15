@@ -148,6 +148,8 @@ public class WSGrid extends Composite {
             }
         });
 
+       
+
         fPanel.addKeyboardListener(new KeyboardListener() {
             public void onKeyDown(Widget sender, char keyCode, int modifiers) {
                 if (currentFocus == null || currentFocus.edit) {
@@ -606,12 +608,7 @@ public class WSGrid extends Composite {
                 int rightVisible = grid.getScrollPanel().getOffsetWidth() + scrollPosH - 1;
                 int leftVisible = rightVisible - grid.getScrollPanel().getOffsetWidth() + 2;
 
-//                System.out.println("rightVisible:" + rightVisible
-//                        + ";leftVisible:" + leftVisible + ";scrollPosH:" + scrollPosH
-//                        + ";rightCell:" + rightCell + ";cellWidth:" + cellWidth );
-
                 if (bottomCell >= (bottomVisible - cellHeight)) {
-                    // make sure the cell lines up properly
                     if (scrollPos % cellHeight != 0) {
                        scrollPos += (scrollPos % cellHeight);
                     }
@@ -619,7 +616,6 @@ public class WSGrid extends Composite {
                     grid.getScrollPanel().setScrollPosition(scrollPos + getOffsetHeight());
                 }
                 else if (bottomCell-cellHeight <= (topVisible)) {
-                    // make sure the cell lines up properly
                     if (scrollPos % cellHeight != 0) {
                         scrollPos -= (scrollPos % cellHeight);
                     }

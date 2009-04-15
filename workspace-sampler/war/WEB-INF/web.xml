@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+		  http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+         version="2.5">
+
+    <servlet>
+        <servlet-name>guvnorUIstate</servlet-name>
+        <servlet-class>org.jboss.workspace.server.LayoutStateServiceImpl</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>guvnorUIstate</servlet-name>
+        <url-pattern>/org.jboss.guvnor.ui.GuvnorUI/guvnorUIstate</url-pattern>
+    </servlet-mapping>
+
+    <!--<servlet>-->
+        <!--<servlet-name>remoteLoggingService</servlet-name>-->
+        <!--<servlet-class>com.google.gwt.gen2.logging.server.RemoteLoggingService</servlet-class>-->
+    <!--</servlet>-->
+    <!--<servlet-mapping>-->
+        <!--<servlet-name>remoteLoggingService</servlet-name>-->
+        <!--<url-pattern>/jboss_workspace_sampler/logging</url-pattern>-->
+    <!--</servlet-mapping>-->
+    <!---->
+</web-app>

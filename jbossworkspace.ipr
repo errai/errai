@@ -106,6 +106,29 @@
     <option name="OPEN_IN_BROWSER" value="true" />
     <option name="OUTPUT_DIRECTORY" value="$PROJECT_DIR$/exportToHTML" />
   </component>
+  <component name="FacetAutodetectingManager">
+    <autodetection-disabled>
+      <facet-type id="gwt">
+        <modules>
+          <module name="jbossworkspace">
+            <files>
+              <file url="file://$PROJECT_DIR$/workspace-core/src/main/java/org/jboss/workspace/Workspace.gwt.xml" />
+              <file url="file://$PROJECT_DIR$/workspace-sampler/src/main/java/org/jboss/workspace/sampler/WorkspaceSampler.gwt.xml" />
+            </files>
+          </module>
+        </modules>
+      </facet-type>
+      <facet-type id="web">
+        <modules>
+          <module name="jbossworkspace">
+            <files>
+              <file url="file://$PROJECT_DIR$/web/WEB-INF/web.xml" />
+            </files>
+          </module>
+        </modules>
+      </facet-type>
+    </autodetection-disabled>
+  </component>
   <component name="HierarchyBrowserManager">
     <option name="IS_AUTOSCROLL_TO_SOURCE" value="false" />
     <option name="SORT_ALPHABETICALLY" value="false" />
@@ -286,7 +309,8 @@
   </component>
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/jbossworkspace.iml" filepath="$PROJECT_DIR$/jbossworkspace.iml" />
+      <module fileurl="file://$PROJECT_DIR$/workspace-core/workspace-core.iml" filepath="$PROJECT_DIR$/workspace-core/workspace-core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/workspace-sampler/workspace-sampler.iml" filepath="$PROJECT_DIR$/workspace-sampler/workspace-sampler.iml" />
     </modules>
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_5" assert-keyword="true" jdk-15="true" project-jdk-name="1.5" project-jdk-type="JavaSDK">
@@ -335,29 +359,23 @@
     <find-history />
   </component>
   <component name="libraryTable">
-    <library name="gwt-user">
+    <library name="gwt1.6.4">
       <CLASSES>
-        <root url="jar://$PROJECT_DIR$/../gwt-mac-1.5.3/gwt-user.jar!/" />
-        <root url="jar://$PROJECT_DIR$/../gwt-mac-1.5.3/gwt-dev-mac.jar!/" />
-        <root url="jar://$PROJECT_DIR$/../gwt-mac-1.5.3/gwt-servlet.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../gwt-mac-1.6.4/gwt-servlet.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../gwt-mac-1.6.4/gwt-dev-mac.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../gwt-mac-1.6.4/gwt-user.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../gwt-mac-1.6.4/gwt-benchmark-viewer.war!/" />
+        <root url="jar://$PROJECT_DIR$/../gwt-mac-1.6.4/gwt-api-checker.jar!/" />
       </CLASSES>
-      <JAVADOC />
+      <JAVADOC>
+        <root url="file://$PROJECT_DIR$/../gwt-mac-1.6.4/doc/javadoc" />
+      </JAVADOC>
       <SOURCES>
-        <root url="jar://$PROJECT_DIR$/../gwt-mac-1.5.3/gwt-user.jar!/" />
-      </SOURCES>
-    </library>
-    <library name="gwt1.6">
-      <CLASSES>
-        <root url="jar://$PROJECT_DIR$/../gwt-mac-1.6.1/gwt-dev-mac.jar!/" />
-        <root url="jar://$PROJECT_DIR$/../gwt-mac-1.6.1/gwt-servlet.jar!/" />
-        <root url="jar://$PROJECT_DIR$/../gwt-mac-1.6.1/gwt-user.jar!/" />
-        <root url="jar://$PROJECT_DIR$/../gwt-mac-1.6.1/gwt-api-checker.jar!/" />
-      </CLASSES>
-      <JAVADOC />
-      <SOURCES>
-        <root url="jar://$PROJECT_DIR$/../gwt-mac-1.6.1/gwt-dev-mac.jar!/" />
-        <root url="jar://$PROJECT_DIR$/../gwt-mac-1.6.1/gwt-servlet.jar!/" />
-        <root url="jar://$PROJECT_DIR$/../gwt-mac-1.6.1/gwt-user.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../gwt-mac-1.6.4/gwt-servlet.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../gwt-mac-1.6.4/gwt-dev-mac.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../gwt-mac-1.6.4/gwt-user.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../gwt-mac-1.6.4/gwt-benchmark-viewer.war!/" />
+        <root url="jar://$PROJECT_DIR$/../gwt-mac-1.6.4/gwt-api-checker.jar!/" />
       </SOURCES>
     </library>
   </component>
