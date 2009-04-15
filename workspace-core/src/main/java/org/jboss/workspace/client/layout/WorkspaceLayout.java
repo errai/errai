@@ -3,6 +3,7 @@ package org.jboss.workspace.client.layout;
 import com.allen_sauer.gwt.dnd.client.PickupDragController;
 import static com.google.gwt.core.client.GWT.create;
 import static com.google.gwt.core.client.GWT.getModuleBaseURL;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.WindowResizeListener;
@@ -108,7 +109,9 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
      * @return -
      */
     private Panel createHeader() {
-        Image img = new Image("images/workspacelogo.png");
+
+
+        Image img = new Image(GWT.getModuleBaseURL()+ "/images/workspacelogo.png");
         img.setHeight("45px");
         img.setWidth("193px");
 
@@ -132,7 +135,7 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
         navigationLabel.setStyleName("workspace-NavHeaderText");
         topNavPanel.add(navigationLabel);
 
-        final Image collapseButton = new Image("images/collapseleft.png");
+        final Image collapseButton = new Image(GWT.getModuleBaseURL() + "/images/collapseleft.png");
         collapseButton.setStyleName("workspace-NavCollapseButton");
 
         collapseButton.addClickListener(
@@ -381,7 +384,7 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
 
         flowpanel.add(toolWidget);
 
-        Image newIcon = new Image(icon != null ? icon.getUrl() : "images/ui/icons/questioncube.png");
+        Image newIcon = new Image(icon != null ? icon.getUrl() : GWT.getModuleBaseURL() + "/images/ui/icons/questioncube.png");
         newIcon.setSize("16px", "16px");
 
         WSTab blt = new WSTab(this, flowpanel, newIcon, packet, tabPanel);

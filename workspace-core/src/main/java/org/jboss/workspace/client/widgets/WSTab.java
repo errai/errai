@@ -4,6 +4,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.core.client.GWT;
 import org.jboss.workspace.client.Workspace;
 import org.jboss.workspace.client.layout.WorkspaceLayout;
 import org.jboss.workspace.client.listeners.TabCloseListener;
@@ -41,7 +42,7 @@ public class WSTab extends Composite {
 
         hPanel.add(label);
 
-        Image closeButton = new Image("images/close-icon.png");
+        Image closeButton = new Image(GWT.getModuleBaseURL() + "/images/close-icon.png");
         closeButton.addStyleName("workspace-tabCloseButton");
         closeButton.addClickListener(new TabCloseListener(this, bl));
 

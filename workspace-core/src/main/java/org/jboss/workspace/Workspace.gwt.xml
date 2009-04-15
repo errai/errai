@@ -24,5 +24,6 @@
     <stylesheet src="gwt/chrome/Mosaic.css"/>
 
 
+
     <servlet path="/workspaceUIstate" class="org.jboss.workspace.server.LayoutStateServiceImpl"/>
 </module>

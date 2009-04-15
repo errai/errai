@@ -12,16 +12,16 @@
 
     <servlet-mapping>
         <servlet-name>guvnorUIstate</servlet-name>
-        <url-pattern>/org.jboss.guvnor.ui.GuvnorUI/guvnorUIstate</url-pattern>
+        <url-pattern>/jboss_workspace_sampler/workspaceUIstate</url-pattern>
     </servlet-mapping>
 
-    <!--<servlet>-->
-        <!--<servlet-name>remoteLoggingService</servlet-name>-->
-        <!--<servlet-class>com.google.gwt.gen2.logging.server.RemoteLoggingService</servlet-class>-->
-    <!--</servlet>-->
-    <!--<servlet-mapping>-->
-        <!--<servlet-name>remoteLoggingService</servlet-name>-->
-        <!--<url-pattern>/jboss_workspace_sampler/logging</url-pattern>-->
-    <!--</servlet-mapping>-->
-    <!---->
+    <servlet>
+        <servlet-name>remoteLoggingService</servlet-name>
+        <servlet-class>com.google.gwt.gen2.logging.server.RemoteLoggingService</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>remoteLoggingService</servlet-name>
+        <url-pattern>/jboss_workspace_sampler/logging</url-pattern>
+    </servlet-mapping>
+
 </web-app>

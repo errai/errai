@@ -2,6 +2,7 @@ package org.jboss.workspace.client.widgets;
 
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.WindowCloseListener;
+import com.google.gwt.core.client.GWT;
 import org.gwt.mosaic.ui.client.WindowPanel;
 import org.jboss.workspace.client.framework.AcceptsCallback;
 import org.jboss.workspace.client.listeners.ClickCallbackListener;
@@ -22,7 +23,11 @@ public class WSModalDialog implements AcceptsCallback {
     WindowPanel window;
 
     public WSModalDialog() {
-        window = new WindowPanel("Alert!");
+        this("Alert!");
+    }
+
+    public WSModalDialog(String title) {
+        window = new WindowPanel(title);
         window.setWidth("400px");
 
         window.setAnimationEnabled(true);
@@ -30,7 +35,7 @@ public class WSModalDialog implements AcceptsCallback {
 
         dockPanel = new DockPanel();
 
-        dockPanel.add(new Image("images/ui/icons/redflag.png"), DockPanel.WEST);
+        dockPanel.add(new Image(GWT.getModuleBaseURL() + "/images/ui/icons/redflag.png"), DockPanel.WEST);
         dockPanel.add(message, DockPanel.CENTER);
 
         message.getElement().getStyle().setProperty("padding", "5px");
@@ -93,6 +98,10 @@ public class WSModalDialog implements AcceptsCallback {
 
     public void setCancelButton(Button cancelButton) {
         this.cancelButton = cancelButton;
+    }
+
+    public void setTitle(String title) {
+        this.window.setTitle(title);
     }
 
     public void showModal() {

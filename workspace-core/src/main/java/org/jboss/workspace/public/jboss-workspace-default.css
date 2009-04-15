@@ -38,6 +38,7 @@ span {
     font-size: 11px;
 }
 
+
 .workspace-NavCollapseButton:hover {
     filter: alpha(opacity = 50);
     -moz-opacity: 0.5;

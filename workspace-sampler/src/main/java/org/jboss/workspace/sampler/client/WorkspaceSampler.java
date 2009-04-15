@@ -9,9 +9,11 @@ import org.jboss.workspace.client.ToolSet;
 import org.jboss.workspace.client.Workspace;
 import org.jboss.workspace.client.framework.Tool;
 import org.jboss.workspace.client.framework.WorkspaceSizeChangeListener;
+import org.jboss.workspace.client.framework.AcceptsCallback;
 import org.jboss.workspace.client.layout.WorkspaceLayout;
 import org.jboss.workspace.client.rpc.StatePacket;
 import org.jboss.workspace.client.widgets.WSGrid;
+import org.jboss.workspace.client.widgets.WSModalDialog;
 
 import java.util.Date;
 
@@ -53,7 +55,7 @@ public class WorkspaceSampler implements EntryPoint {
                             }
 
                             public String getName() {
-                                return "Open Me";
+                                return "Open a Tab";
                             }
 
                             public String getId() {
@@ -147,6 +149,14 @@ public class WorkspaceSampler implements EntryPoint {
         });
 
         layout.pack();
+
+        WSModalDialog welcome = new WSModalDialog("Welcome to JBoss Workspace!");
+        welcome.ask("Have a look around!" , new AcceptsCallback() {
+            public void callback(String message) {
+            }
+        });
+
+        welcome.showModal();
     }
 }
 
