@@ -90,9 +90,9 @@ public class WorkspaceSampler implements EntryPoint {
                                 wsGrid.setCell(1, 1, "Jane Doe");
                                 wsGrid.setCell(1, 2, "Super User");
 
-                                wsGrid.setCell(200, 0, "2000");
-                                wsGrid.setCell(200, 1, "Foo");
-                                wsGrid.setCell(200, 2, "Bar");
+                                wsGrid.setCell(4, 0, "2000");
+                                wsGrid.setCell(4, 1, "Foo");
+                                wsGrid.setCell(4, 2, "Bar");
 
                                 layout.addWorkspaceSizeChangeListener(new WorkspaceSizeChangeListener() {
                                     public void onSizeChange(int deltaW, int actualW, int deltaH, int actualH) {
