@@ -45,7 +45,7 @@ public class WSGrid extends Composite {
         this(true);
     }
 
-  //  private int _fpanel_offset = -1;
+    //  private int _fpanel_offset = -1;
     private int _startpos = 0;
 
     public WSGrid(boolean scrollable) {
@@ -71,7 +71,7 @@ public class WSGrid extends Composite {
         resizeLine.setStyleName("WSGrid-resize-line");
         resizeLine.sinkEvents(Event.MOUSEEVENTS);
 
- 
+
         dataGrid.getScrollPanel().addScrollHandler(new ScrollHandler() {
             public void onScroll(ScrollEvent event) {
                 titleBar.getScrollPanel().setHorizontalScrollPosition(dataGrid.getScrollPanel().getHorizontalScrollPosition());
@@ -206,7 +206,7 @@ public class WSGrid extends Composite {
 
                     case 63272:
                     case KeyCodes.KEY_DELETE:
-                        currentFocus.getWrappedWidget().setHTML("");
+                        currentFocus.setValue("");
                         break;
 
                     case 32: // spacebar
@@ -253,12 +253,12 @@ public class WSGrid extends Composite {
 
     public void setColumnHeader(int row, int column, String html) {
         cols = titleBar.ensureRowsAndCols(row + 1, column + 1);
-        titleBar.getTableIndex().get(row).get(column).getWrappedWidget().setHTML(html);
+        titleBar.getTableIndex().get(row).get(column).setValue(html);
     }
 
     public void setCell(int row, int column, String html) {
         cols = dataGrid.ensureRowsAndCols(row + 1, column + 1);
-        dataGrid.getTableIndex().get(row).get(column).getWrappedWidget().setHTML(html);
+        dataGrid.getTableIndex().get(row).get(column).setValue(html);
     }
 
     public void setCols(int cols) {
@@ -446,7 +446,9 @@ public class WSGrid extends Composite {
         }
 
         private int _sort_partition(int col, boolean ascending, int low, int high) {
-            String pvtStr = valueAt(low, col);
+            //    String pvtStr = valueAt(low, col);
+
+            WSCell pvtStr = cellAt(low, col);
 
             int i = low - 1;
             int j = high + 1;
@@ -454,11 +456,11 @@ public class WSGrid extends Composite {
             if (ascending) {
                 while (i < j) {
                     i++;
-                    while (_sort_lt(valueAt(i, col), pvtStr)) {
+                    while (_sort_lt(cellAt(i, col), pvtStr)) {
                         i++;
                     }
                     j--;
-                    while (_sort_gt(valueAt(j, col), pvtStr)) {
+                    while (_sort_gt(cellAt(j, col), pvtStr)) {
                         j--;
                     }
                     if (i < j) _sort_swap(i, j);
@@ -467,11 +469,11 @@ public class WSGrid extends Composite {
             else {
                 while (i < j) {
                     i++;
-                    while (_sort_gt(valueAt(i, col), pvtStr)) {
+                    while (_sort_gt(cellAt(i, col), pvtStr)) {
                         i++;
                     }
                     j--;
-                    while (_sort_lt(valueAt(j, col), pvtStr)) {
+                    while (_sort_lt(cellAt(j, col), pvtStr)) {
                         j--;
                     }
                     if (i < j) _sort_swap(i, j);
@@ -481,22 +483,37 @@ public class WSGrid extends Composite {
             return j;
         }
 
-        private boolean _sort_gt(String l, String r) {
-            for (int i = 0; i < l.length() && i < r.length(); i++) {
-                if (l.charAt(i) > r.charAt(i)) return true;
-                else if (l.charAt(i) < r.charAt(i)) return false;
+        private boolean _sort_gt(WSCell l, WSCell r) {
+            if (l.numeric && r.numeric) {
+                return Double.parseDouble(l.getValue()) > Double.parseDouble(r.getValue());
             }
-            return l.length() == 0 && r.length() != 0;
+            else {
+                String ll = l.getValue();
+                String rr = r.getValue();
+
+                for (int i = 0; i < ll.length() && i < rr.length(); i++) {
+                    if (ll.charAt(i) > rr.charAt(i)) return true;
+                    else if (ll.charAt(i) < rr.charAt(i)) return false;
+                }
+                return ll.length() == 0 && rr.length() != 0;
+            }
         }
 
-        private boolean _sort_lt(String l, String r) {
-            for (int i = 0; i < l.length() && i < r.length(); i++) {
-                if (l.charAt(i) < r.charAt(i)) return true;
-                else if (l.charAt(i) > r.charAt(i)) return false;
+        private boolean _sort_lt(WSCell l, WSCell r) {
+            if (l.numeric && r.numeric) {
+                return Double.parseDouble(l.getValue()) < Double.parseDouble(r.getValue());
             }
-            return l.length() == 0 && r.length() != 0;
-        }
+            else {
+                String ll = l.getValue();
+                String rr = r.getValue();
 
+                for (int i = 0; i < ll.length() && i < rr.length(); i++) {
+                    if (ll.charAt(i) < rr.charAt(i)) return true;
+                    else if (ll.charAt(i) > rr.charAt(i)) return false;
+                }
+                return ll.length() == 0 && rr.length() != 0;
+            }
+        }
 
         private void _sort_swap(int i, int j) {
             String t;
@@ -516,7 +533,7 @@ public class WSGrid extends Composite {
         }
 
         public void setValueAt(int row, int col, String html) {
-            cellAt(row, col).wrappedWidget.setHTML(html);
+            cellAt(row, col).setValue(html);
         }
 
 
@@ -542,6 +559,8 @@ public class WSGrid extends Composite {
         private FlowPanel panel;
 
         private HTML wrappedWidget;
+
+        private boolean numeric;
         private boolean edit;
 
         private int row;
@@ -625,14 +644,7 @@ public class WSGrid extends Composite {
 
         public void stopedit() {
             if (edit) {
-                String text = textBox.getText();
-
-                if (_msie_compatibility && text.trim().length() == 0) {
-                    wrappedWidget.setHTML("&nbsp;");
-                }
-                else {
-                    wrappedWidget.setHTML(textBox.getText());
-                }
+                setValue(textBox.getText());
 
                 textBox.setVisible(false);
 
@@ -666,7 +678,7 @@ public class WSGrid extends Composite {
                 if (!isFocus) {
                     selectColumn(col);
                 }
-                else {
+                else if (!_resizeArmed) {
                     boolean asc;
                     if (sortedColumns.containsKey(col)) {
                         sortedColumns.put(col, asc = !sortedColumns.get(col));
@@ -739,6 +751,21 @@ public class WSGrid extends Composite {
 
         public boolean isEdit() {
             return edit;
+        }
+
+        public void setValue(String html) {
+            if (_msie_compatibility && html.trim().length() == 0) {
+                wrappedWidget.setHTML("nbsp;");
+            }
+            else {
+                wrappedWidget.setHTML(html);
+            }
+
+            numeric = isNumeric(html);
+        }
+
+        public String getValue() {
+            return wrappedWidget.getHTML();
         }
 
         public HTML getWrappedWidget() {
@@ -896,5 +923,9 @@ public class WSGrid extends Composite {
 
     public static native String getUserAgent() /*-{
         return navigator.userAgent.toLowerCase();
+    }-*/;
+
+    public static native boolean isNumeric(String input) /*-{
+        return (input - 0) == input && input.length > 0;
     }-*/;
 }
