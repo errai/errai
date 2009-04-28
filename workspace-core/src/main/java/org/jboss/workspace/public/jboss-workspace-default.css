@@ -110,16 +110,16 @@ span {
 }
 
 .WSLaunchButton {
+    border: 1px solid transparent;
+
     width: 100%;
-    height: 22px;
+    height: 20px;
 
     position: relative;
 
     vertical-align: middle;
     text-align: left;
     font-size: 11px;
-
-    padding:1px;
 
     margin-bottom: 0;
 
