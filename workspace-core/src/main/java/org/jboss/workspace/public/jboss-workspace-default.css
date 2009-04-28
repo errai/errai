@@ -610,11 +610,11 @@ span {
 }
 
 .WSCell {
-    height: 12px;
-    min-height: 12px;
+    height: 16px;
+    min-height: 16px;
 
     margin: 0;
-    font-size: 12px;
+    font-size: 11px;
 
     cursor: default;
 

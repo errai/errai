@@ -9,6 +9,7 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.*;
 import static com.google.gwt.user.client.ui.RootPanel.getBodyElement;
 
+import static java.lang.Double.parseDouble;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -102,8 +103,6 @@ public class WSGrid extends Composite {
         fPanel.addMouseMoveHandler(new MouseMoveHandler() {
             public void onMouseMove(MouseMoveEvent event) {
                 if (_resizing) {
-
-
                     setStyleAttribute(resizeLine.getElement(), "left", (event.getClientX()) + "px");
                 }
             }
@@ -283,8 +282,8 @@ public class WSGrid extends Composite {
         HTMLTable.ColumnFormatter colFormatter = titleBar.getTable().getColumnFormatter();
         colFormatter.setWidth(column, width + "px");
 
-        colFormatter = dataGrid.getTable().getColumnFormatter();
-        colFormatter.setWidth(column, width + "px");
+        // colFormatter = dataGrid.getTable().getColumnFormatter();
+        dataGrid.getTable().getColumnFormatter().setWidth(column, width + "px");
 
         checkWidth(column);
         columnWidths.set(column, width);
@@ -484,34 +483,52 @@ public class WSGrid extends Composite {
         }
 
         private boolean _sort_gt(WSCell l, WSCell r) {
+            if (l == null) return false;
+
             if (l.numeric && r.numeric) {
-                return Double.parseDouble(l.getValue()) > Double.parseDouble(r.getValue());
+                return parseDouble(l.getValue()) > parseDouble(r.getValue());
             }
             else {
                 String ll = l.getValue();
                 String rr = r.getValue();
+
+                // Internet Explorer is very annoying
+                if (_msie_compatibility) {
+                    ll = ll.equals("&nbsp;") ? "" : ll;
+                    rr = rr.equals("&nbsp;") ? "" : rr;
+                }
 
                 for (int i = 0; i < ll.length() && i < rr.length(); i++) {
                     if (ll.charAt(i) > rr.charAt(i)) return true;
                     else if (ll.charAt(i) < rr.charAt(i)) return false;
                 }
-                return ll.length() == 0 && rr.length() != 0;
+
+                return isEmpty(ll) && !isEmpty(rr);
             }
         }
 
         private boolean _sort_lt(WSCell l, WSCell r) {
+            if (l == null) return false;
+
             if (l.numeric && r.numeric) {
-                return Double.parseDouble(l.getValue()) < Double.parseDouble(r.getValue());
+                return parseDouble(l.getValue()) < parseDouble(r.getValue());
             }
             else {
                 String ll = l.getValue();
                 String rr = r.getValue();
 
+                // Internet Explorer is very annoying
+                if (_msie_compatibility) {
+                    ll = ll.equals("&nbsp;") ? "" : ll;
+                    rr = rr.equals("&nbsp;") ? "" : rr;
+                }
+
                 for (int i = 0; i < ll.length() && i < rr.length(); i++) {
                     if (ll.charAt(i) < rr.charAt(i)) return true;
                     else if (ll.charAt(i) > rr.charAt(i)) return false;
                 }
-                return ll.length() == 0 && rr.length() != 0;
+                
+                return isEmpty(ll) && !isEmpty(rr);
             }
         }
 
@@ -525,7 +542,7 @@ public class WSGrid extends Composite {
         }
 
         public WSCell cellAt(int row, int col) {
-            return tableIndex.get(row).get(col);
+            return tableIndex.size() > row ? tableIndex.get(row).get(col) : null;
         }
 
         public String valueAt(int row, int col) {
@@ -585,7 +602,6 @@ public class WSGrid extends Composite {
                     }
                 }
             });
-
 
             if (grid.tableIndex.size() - 1 < row) {
                 while (grid.tableIndex.size() - 1 < row) {
@@ -755,7 +771,7 @@ public class WSGrid extends Composite {
 
         public void setValue(String html) {
             if (_msie_compatibility && html.trim().length() == 0) {
-                wrappedWidget.setHTML("nbsp;");
+                wrappedWidget.setHTML("&nbsp;");
             }
             else {
                 wrappedWidget.setHTML(html);
@@ -927,5 +943,9 @@ public class WSGrid extends Composite {
 
     public static native boolean isNumeric(String input) /*-{
         return (input - 0) == input && input.length > 0;
+    }-*/;
+
+    public static native boolean isEmpty(String input) /*-{
+        return input == null || input == "";
     }-*/;
 }

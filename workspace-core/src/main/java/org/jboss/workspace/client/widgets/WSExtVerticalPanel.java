@@ -1,58 +1,81 @@
 package org.jboss.workspace.client.widgets;
 
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.MouseListener;
-import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Element;
-import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import org.gwt.mosaic.core.client.DOM;
+import org.jboss.workspace.client.layout.WorkspaceLayout;
 
 public class WSExtVerticalPanel extends VerticalPanel {
-    private MouseListener mouseListener;
-    private boolean armed;
 
-    public WSExtVerticalPanel() {
+    private boolean armed;
+    private WorkspaceLayout workspaceLayout;
+
+    Timer t = new Timer() {
+        public void run() {
+            if (armed) workspaceLayout.openNavPanel();
+        }
+    };
+
+    int range = -1;
+    
+    public WSExtVerticalPanel(WorkspaceLayout layout) {
         super();
 
         sinkEvents(Event.MOUSEEVENTS);
+
+        this.workspaceLayout = layout;
     }
 
     @Override
     public void onBrowserEvent(Event event) {
         if (!armed) return;
-        if (mouseListener == null) return;
+
+
 
         switch (event.getTypeInt()) {
             case Event.ONMOUSEOVER:
-                mouseListener.onMouseEnter(null);
                 break;
             case Event.ONMOUSEUP:
-                mouseListener.onMouseUp(null, event.getClientX(), event.getClientY());
+                if (range == -1) {
+                    range = getAbsoluteTop() + 20;
+                }
+
+                if (event.getClientY() > range) {
+                    t.cancel();
+                    workspaceLayout.openNavPanel();
+                }
                 break;
 
             case Event.ONCLICK:
                 break;
 
             case Event.ONMOUSEMOVE:
-                mouseListener.onMouseMove(null, event.getClientX(), event.getClientY());
+
+                if (range == -1) {
+                    range = getAbsoluteTop() + 20;
+                }
+
+                if (event.getClientY() > range) {
+                    getElement().setClassName("workspace-LeftNavArea-MouseOver");
+                    t.schedule(200);
+                }
+
                 break;
 
 
-            case Event.ONMOUSEOUT:                
+            case Event.ONMOUSEOUT:
                 Element to = DOM.eventGetToElement(event);
-                if (to == null || !DOM.isOrHasChild(this.getElement(), to)) mouseListener.onMouseLeave(null);
+                if (to == null || !DOM.isOrHasChild(this.getElement(), to)) {
+                    getElement().setClassName("workspace-LeftNavArea");
+                    t.cancel();
+                    workspaceLayout.closeNavPanel();
+                }
                 break;
         }
     }
 
-    public MouseListener getMouseListener() {
-        return mouseListener;
-    }
-
-    public void setMouseListener(MouseListener mouseListener) {
-        this.mouseListener = mouseListener;
-    }
 
     public boolean isArmed() {
         return armed;

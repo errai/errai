@@ -1,12 +1,15 @@
 package org.jboss.workspace.client.layout;
 
 import com.allen_sauer.gwt.dnd.client.PickupDragController;
+import com.google.gwt.core.client.GWT;
 import static com.google.gwt.core.client.GWT.create;
 import static com.google.gwt.core.client.GWT.getModuleBaseURL;
-import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.WindowResizeListener;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.*;
@@ -22,7 +25,6 @@ import org.jboss.workspace.client.widgets.*;
 import org.jboss.workspace.client.widgets.dnd.TabDragHandler;
 
 import java.util.*;
-import java.sql.Time;
 
 
 /**
@@ -36,7 +38,7 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
 
     public final HorizontalPanel header = new HorizontalPanel();
 
-    public final WSExtVerticalPanel leftPanel = new WSExtVerticalPanel();
+    public final WSExtVerticalPanel leftPanel = new WSExtVerticalPanel(this);
     public final WSStackPanel navigation = new WSStackPanel();
     public BorderLayoutData navigationLayout;
     public final Label navigationLabel = new Label("Navigate");
@@ -89,14 +91,13 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
 
         RootPanel.get("rootPanel").setPixelSize(currSizeW, currSizeH);
 
-        Window.addWindowResizeListener(new WindowResizeListener() {
-            public void onWindowResized(int width, int height) {
-                RootPanel.get("rootPanel").setPixelSize(width, height);
+        Window.addResizeHandler(new ResizeHandler() {
+            public void onResize(ResizeEvent event) {
+                RootPanel.get("rootPanel").setPixelSize(event.getWidth(), event.getHeight());
+                fireWorkspaceSizeChangeListeners(event.getWidth() - currSizeW, event.getHeight() - currSizeH);
 
-                fireWorkspaceSizeChangeListeners(width - currSizeW, height - currSizeH);
-
-                currSizeW = width;
-                currSizeH = height;
+                currSizeW = event.getWidth();
+                currSizeH = event.getHeight();
             }
         });
 
@@ -111,7 +112,7 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
     private Panel createHeader() {
 
 
-        Image img = new Image(GWT.getModuleBaseURL()+ "/images/workspacelogo.png");
+        Image img = new Image(GWT.getModuleBaseURL() + "/images/workspacelogo.png");
         img.setHeight("45px");
         img.setWidth("193px");
 
@@ -138,75 +139,74 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
         final Image collapseButton = new Image(GWT.getModuleBaseURL() + "/images/collapseleft.png");
         collapseButton.setStyleName("workspace-NavCollapseButton");
 
-        collapseButton.addClickListener(
-                new ClickListener() {
-                    private boolean collapse = false;
+        collapseButton.addClickHandler(new ClickHandler() {
+            private boolean collapse = false;
 
-                    public void onClick(Widget sender) {
-                        if (!collapse) {
-                            Timer timer = new Timer() {
-                                int i = navigation.getOffsetWidth();
-                                int step = 10;
+            public void onClick(ClickEvent event) {
+                if (!collapse) {
+                    Timer timer = new Timer() {
+                        int i = navigation.getOffsetWidth();
+                        int step = 10;
 
-                                public void run() {
-                                    i -= step;
+                        public void run() {
+                            i -= step;
 
-                                    setSize();
+                            setSize();
 
-                                    if (i <= 12) {
-                                        cancel();
-                                        i = 12;
-                                        setSize();
-                                        navigation.setWidth(i + "px");
-                                        leftPanel.setArmed(true);
-                                        closeNavPanel();
-                                    }
-                                }
-
-                                private void setSize() {
-                                    leftPanel.setWidth(i + "px");
-                                }
-                            };
-
-                            timer.scheduleRepeating(10);
-
-                            navigation.setVisible(false);
-                            navigationLabel.setVisible(false);
-
-                            collapseButton.setUrl("images/collapseright.png");
-                        }
-                        else {
-                            leftPanel.setArmed(false);
-                            Timer timer = new Timer() {
-                                int i = 12;
-                                int step = 1;
-
-                                public void run() {
-                                    i += step++;
-
-                                    setSize();
-
-                                    if (i >= 175) {
-                                        cancel();
-                                        i = 175;
-                                        setSize();
-                                        openNavPanel();
-                                    }
-                                }
-
-                                private void setSize() {
-                                    leftPanel.setWidth(i + "px");
-                                }
-                            };
-
-                            if (navigation.getOffsetWidth() == 0) timer.scheduleRepeating(20);
-                            collapseButton.setUrl("images/collapseleft.png");
+                            if (i <= 12) {
+                                cancel();
+                                i = 12;
+                                setSize();
+                                navigation.setWidth(i + "px");
+                                leftPanel.setArmed(true);
+                                closeNavPanel();
+                            }
                         }
 
-                        collapse = !collapse;
-                    }
+                        private void setSize() {
+                            leftPanel.setWidth(i + "px");
+                        }
+                    };
+
+                    timer.scheduleRepeating(10);
+
+                    navigation.setVisible(false);
+                    navigationLabel.setVisible(false);
+
+                    collapseButton.setUrl(GWT.getModuleBaseURL() + "/images/collapseright.png");
                 }
-        );
+                else {
+                    leftPanel.setArmed(false);
+                    Timer timer = new Timer() {
+                        int i = 12;
+                        int step = 1;
+
+                        public void run() {
+                            i += step++;
+
+                            setSize();
+
+                            if (i >= 175) {
+                                cancel();
+                                i = 175;
+                                setSize();
+                                openNavPanel();
+                            }
+                        }
+
+                        private void setSize() {
+                            leftPanel.setWidth(i + "px");
+                        }
+                    };
+
+                    if (navigation.getOffsetWidth() == 0) timer.scheduleRepeating(20);
+                    collapseButton.setUrl(GWT.getModuleBaseURL() + "/images/collapseleft.png");
+                }
+
+                collapse = !collapse;
+            }
+        });
+
 
         topNavPanel.add(collapseButton);
         topNavPanel.setCellWidth(collapseButton, "21px");
@@ -223,53 +223,52 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
         navigation.setHeight("100%");
 
         leftPanel.setHeight("100%");
-
         leftPanel.setArmed(false);
 
-        leftPanel.setMouseListener(new MouseListener() {
-            int range = -1;
-
-            Timer t = new Timer() {
-                public void run() {
-                    if (leftPanel.isArmed()) openNavPanel();
-                }
-            };
-
-            public void onMouseDown(Widget sender, int x, int y) {
-            }
-
-            public void onMouseEnter(Widget sender) {
-
-            }
-
-            public void onMouseLeave(Widget sender) {
-                leftPanel.getElement().setClassName("workspace-LeftNavArea");
-                t.cancel();
-                closeNavPanel();
-            }
-
-            public void onMouseMove(Widget sender, int x, int y) {
-                if (range == -1) {
-                    range = leftPanel.getAbsoluteTop() + 20;
-                }
-
-                if (y > range) {
-                    leftPanel.getElement().setClassName("workspace-LeftNavArea-MouseOver");
-                    t.schedule(200);
-                }
-            }
-
-            public void onMouseUp(Widget sender, int x, int y) {
-                if (range == -1) {
-                    range = leftPanel.getAbsoluteTop() + 20;
-                }
-
-                if (y > range) {
-                    t.cancel();
-                    openNavPanel();
-                }
-            }
-        });
+//        leftPanel.setMouseListener(new MouseListener() {
+//            int range = -1;
+//
+//            Timer t = new Timer() {
+//                public void run() {
+//                    if (leftPanel.isArmed()) openNavPanel();
+//                }
+//            };
+//
+//            public void onMouseDown(Widget sender, int x, int y) {
+//            }
+//
+//            public void onMouseEnter(Widget sender) {
+//
+//            }
+//
+//            public void onMouseLeave(Widget sender) {
+//                leftPanel.getElement().setClassName("workspace-LeftNavArea");
+//                t.cancel();
+//                closeNavPanel();
+//            }
+//
+//            public void onMouseMove(Widget sender, int x, int y) {
+//                if (range == -1) {
+//                    range = leftPanel.getAbsoluteTop() + 20;
+//                }
+//
+//                if (y > range) {
+//                    leftPanel.getElement().setClassName("workspace-LeftNavArea-MouseOver");
+//                    t.schedule(200);
+//                }
+//            }
+//
+//            public void onMouseUp(Widget sender, int x, int y) {
+//                if (range == -1) {
+//                    range = leftPanel.getAbsoluteTop() + 20;
+//                }
+//
+//                if (y > range) {
+//                    t.cancel();
+//                    openNavPanel();
+//                }
+//            }
+//        });
 
         return leftPanel;
     }
@@ -557,7 +556,7 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
         return set;
     }
 
-    private void openNavPanel() {
+    public void openNavPanel() {
         navigation.setVisible(true);
         navigationLabel.setVisible(true);
 
@@ -565,7 +564,7 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
         navigation.setWidth("175px");
     }
 
-    private void closeNavPanel() {
+    public void closeNavPanel() {
         navigation.setVisible(false);
         navigationLabel.setVisible(false);
         leftPanel.setWidth("12px");
@@ -581,7 +580,7 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
     }
 
     public void addWorkspaceSizeChangeListener(WorkspaceSizeChangeListener wscl) {
-        workspaceSizeChangeListers.add(wscl);  
+        workspaceSizeChangeListers.add(wscl);
     }
 
     public int getAppPanelOffsetHeight() {
@@ -593,6 +592,6 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
     }
 
     public void pack() {
-        fireWorkspaceSizeChangeListeners(Window.getClientWidth()-currSizeW,Window.getClientHeight()-currSizeH );
+        fireWorkspaceSizeChangeListeners(Window.getClientWidth() - currSizeW, Window.getClientHeight() - currSizeH);
     }
 }

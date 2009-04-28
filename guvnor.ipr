@@ -322,14 +322,11 @@
   </component>
   <component name="ProjectFileVersion" converted="true" />
   <component name="ProjectKey">
-    <option name="state" value="https://svn.jboss.org/repos/guvnor/sandbox/ui/guvnor.ipr" />
+    <option name="state" value="https://svn.jboss.org/repos/jbossworkspace/trunk/guvnor.ipr" />
   </component>
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/guvnor.iml" filepath="$PROJECT_DIR$/guvnor.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../guvnor-mvel/guvnor-mvel.iml" filepath="$PROJECT_DIR$/../guvnor-mvel/guvnor-mvel.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../guvnor-security/guvnor-security.iml" filepath="$PROJECT_DIR$/../guvnor-security/guvnor-security.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../mvel/mvel.iml" filepath="$PROJECT_DIR$/../mvel/mvel.iml" />
     </modules>
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_5" assert-keyword="true" jdk-15="true" project-jdk-name="1.5" project-jdk-type="JavaSDK">
@@ -377,13 +374,6 @@
             </SvnBranchConfiguration>
           </value>
         </entry>
-        <entry key="$PROJECT_DIR$">
-          <value>
-            <SvnBranchConfiguration>
-              <option name="trunkUrl" value="https://svn.jboss.org/repos/guvnor/sandbox/ui" />
-            </SvnBranchConfiguration>
-          </value>
-        </entry>
         <entry key="$PROJECT_DIR$/../gwt-mosaic-read-only">
           <value>
             <SvnBranchConfiguration>
@@ -395,6 +385,13 @@
                 </list>
               </option>
               <option name="trunkUrl" value="http://gwt-mosaic.googlecode.com/svn/trunk" />
+            </SvnBranchConfiguration>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$">
+          <value>
+            <SvnBranchConfiguration>
+              <option name="trunkUrl" value="https://svn.jboss.org/repos/guvnor/sandbox/ui" />
             </SvnBranchConfiguration>
           </value>
         </entry>
@@ -456,8 +453,5 @@
       </SOURCES>
     </library>
   </component>
-  <UsedPathMacros>
-    <macro name="MAVEN_REPOSITORY" description="Maven Local Repostiry" />
-  </UsedPathMacros>
 </project>
 
