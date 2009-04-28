@@ -97,8 +97,8 @@ public class WorkspaceSampler implements EntryPoint {
 
                                 layout.addWorkspaceSizeChangeListener(new WorkspaceSizeChangeListener() {
                                     public void onSizeChange(int deltaW, int actualW, int deltaH, int actualH) {
-                                        wsGrid.setPreciseHeight(actualH - layout.getAppPanelOffsetHeight() - 5);
-                                        wsGrid.setPreciseWidth(actualW - layout.getNavPanelOffsetWidth() - 5);
+                                        wsGrid.setPreciseHeight(actualH - layout.getAppPanelOffsetHeight() - 8);
+                                        wsGrid.setPreciseWidth(actualW - layout.getNavPanelOffsetWidth() - 8);
                                     }
                                 });
 

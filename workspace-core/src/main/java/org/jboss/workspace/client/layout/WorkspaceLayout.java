@@ -8,6 +8,8 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
+import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -225,55 +227,16 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
         leftPanel.setHeight("100%");
         leftPanel.setArmed(false);
 
-//        leftPanel.setMouseListener(new MouseListener() {
-//            int range = -1;
-//
-//            Timer t = new Timer() {
-//                public void run() {
-//                    if (leftPanel.isArmed()) openNavPanel();
-//                }
-//            };
-//
-//            public void onMouseDown(Widget sender, int x, int y) {
-//            }
-//
-//            public void onMouseEnter(Widget sender) {
-//
-//            }
-//
-//            public void onMouseLeave(Widget sender) {
-//                leftPanel.getElement().setClassName("workspace-LeftNavArea");
-//                t.cancel();
-//                closeNavPanel();
-//            }
-//
-//            public void onMouseMove(Widget sender, int x, int y) {
-//                if (range == -1) {
-//                    range = leftPanel.getAbsoluteTop() + 20;
-//                }
-//
-//                if (y > range) {
-//                    leftPanel.getElement().setClassName("workspace-LeftNavArea-MouseOver");
-//                    t.schedule(200);
-//                }
-//            }
-//
-//            public void onMouseUp(Widget sender, int x, int y) {
-//                if (range == -1) {
-//                    range = leftPanel.getAbsoluteTop() + 20;
-//                }
-//
-//                if (y > range) {
-//                    t.cancel();
-//                    openNavPanel();
-//                }
-//            }
-//        });
-
         return leftPanel;
     }
 
     private Widget createAppPanel() {
+        tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {
+            public void onSelection(SelectionEvent<Integer> integerSelectionEvent) {
+                  pack();
+            }
+        });
+
         return tabPanel;
     }
 
@@ -445,6 +408,7 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
     public void selectTab(Widget widget) {
         int idx = tabPanel.getWidgetIndex(widget);
         tabPanel.selectTab(idx);
+        pack();
     }
 
     /**
@@ -475,10 +439,19 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
                     Tool tool = availableTools.get(packet.getId());
                     forceOpenTab(tool, packet, tool.getIcon());
                 }
+
             }
         };
 
         guvSvc.getAllLayoutPackets(callback);
+
+        Timer t = new Timer() {
+            public void run() {
+                pack();
+            }
+        };
+
+        t.schedule(25);
     }
 
     public void notifySessionState(StatePacket packet) {
@@ -573,6 +546,8 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
     private void fireWorkspaceSizeChangeListeners(int deltaW, int deltaH) {
         int w = Window.getClientWidth();
         int h = Window.getClientHeight();
+
+        System.out.println("FOO!");
 
         for (WorkspaceSizeChangeListener wscl : workspaceSizeChangeListers) {
             wscl.onSizeChange(deltaW, w, deltaH, h);

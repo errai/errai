@@ -1,6 +1,8 @@
 package org.jboss.workspace.client.widgets;
 
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.event.logical.shared.SelectionEvent;
 import org.gwt.mosaic.ui.client.layout.LayoutPanel;
 import org.gwt.mosaic.ui.client.layout.BorderLayoutData;
 import org.gwt.mosaic.ui.client.layout.BorderLayout;
@@ -25,21 +27,18 @@ public class WSTabPanel extends Composite {
         layoutPanel.add(tabBar, DockPanel.NORTH);
         layoutPanel.add(deckPanel, DockPanel.CENTER);
 
-        tabBar.addTabListener(new TabListener() {
-            public boolean onBeforeTabSelected(SourcesTabEvents sender, int tabIndex) {
-                return true; 
-            }
-
-            public void onTabSelected(SourcesTabEvents sender, int tabIndex) {
-                deckPanel.showWidget(tabIndex);
+        tabBar.addSelectionHandler(new SelectionHandler<Integer>() {
+            public void onSelection(SelectionEvent<Integer> integerSelectionEvent) {
+               deckPanel.showWidget(integerSelectionEvent.getSelectedItem());
             }
         });
 
         initWidget(layoutPanel);
     }
 
-    public void addTabListener(TabListener listener) {
-        tabBar.addTabListener(listener);
+
+    public void addSelectionHandler(SelectionHandler<Integer> handler) {
+        tabBar.addSelectionHandler(handler);
     }
 
     public void add(Widget panel, Widget tab) {

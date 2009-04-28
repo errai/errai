@@ -12,9 +12,9 @@
     <!--<inherits name="org.mvel.guvnorui.MVELModule"/>-->
     <!--<inherits name="org.jboss.guvnor.security.GuvnorSecurity"/>-->
     <inherits name="org.gwt.mosaic.actions.Actions"/>
-    <!--<inherits name="com.google.gwt.user.theme.chrome.Chrome"/>-->
+    <inherits name="com.google.gwt.user.theme.chrome.Chrome"/>
 
-    <inherits name='org.gwt.mosaic.theme.chrome.Chrome'/>
+    <!--<inherits name="org.gwt.mosaic.theme.standard.Standard"/>-->
 
     <generate-with class="org.jboss.workspace.rebind.GuvnorLoaderBootstrapGenerator">
         <when-type-assignable
