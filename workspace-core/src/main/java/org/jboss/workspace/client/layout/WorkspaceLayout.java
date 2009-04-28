@@ -407,11 +407,11 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
 
         Timer t = new Timer() {
             public void run() {
-                pack();
+               pack();
             }
         };
 
-        t.schedule(10);
+        t.schedule(25);
     }
 
     public void closeTab(StatePacket packet) {
@@ -577,6 +577,7 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
         for (WorkspaceSizeChangeListener wscl : workspaceSizeChangeListers) {
             wscl.onSizeChange(deltaW, w, deltaH, h);
         }
+
     }
 
     public void addWorkspaceSizeChangeListener(WorkspaceSizeChangeListener wscl) {

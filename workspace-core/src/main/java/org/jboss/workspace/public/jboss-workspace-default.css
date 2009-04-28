@@ -7,6 +7,8 @@ html, body {
     overflow: hidden;
     padding: 0;
     width: 100%;
+
+    font-family: sans-serif;
 }
 
 h2 {
@@ -117,6 +119,8 @@ span {
     text-align: left;
     font-size: 11px;
 
+
+
     margin-bottom: 0;
     padding: 0;
 
@@ -129,7 +133,8 @@ span {
 
 .WSLaunchButton-hover {
     border: 1px solid darkblue;
-    background-color: #5a98e0;
+    background: #5a98e0 none;
+
     color: white;
 
     height: 20px;
@@ -148,19 +153,20 @@ span {
 .WSLaunchButton-contents {
     display: inline-block;
     vertical-align: top;
-    line-height: 20px;
+    line-height: 22px;
     margin: 0;
     padding: 0;
 }
 
 .WSLaunchButton-down {
     border: 1px solid black;
-    background-color: #333333;
+    background: #333333 none;
+
     color: white;
 
     cursor: default;
 
-    height: 20px;
+    height: 22px;
     font-size: 11px;
 
     margin-bottom: 0px;

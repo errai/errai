@@ -1,13 +1,10 @@
 package org.jboss.workspace.client.widgets;
 
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Event;
+import static com.google.gwt.user.client.Event.*;
 import com.google.gwt.user.client.Timer;
-import static com.google.gwt.user.client.Event.ONMOUSEUP;
-import static com.google.gwt.user.client.Event.ONMOUSEDOWN;
-import static com.google.gwt.user.client.Event.ONMOUSEOUT;
-import static com.google.gwt.user.client.Event.ONMOUSEOVER;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Image;
@@ -41,7 +38,9 @@ public class WSLaunchButton extends HTML {
 
         setHTML(createButtonMarkup());
 
-        addStyleName(CSS_NAME);
+        //  addStyleName(CSS_NAME);
+        setStylePrimaryName(CSS_NAME);
+
     }
 
 
@@ -60,7 +59,7 @@ public class WSLaunchButton extends HTML {
 
         switch (event.getTypeInt()) {
             case ONMOUSEOVER:
-                setStyleName(CSS_NAME_HOVER);
+                addStyleDependentName("hover");
 
                 if (animTimer.isRunning()) {
                     animTimer.cancel();
@@ -70,12 +69,11 @@ public class WSLaunchButton extends HTML {
 
                 break;
             case ONMOUSEOUT:
-                setStyleName(CSS_NAME);
+                removeStyleDependentName("hover");
 
                 break;
             case ONMOUSEDOWN:
-                setStyleName(CSS_NAME_DOWN);
-
+                addStyleDependentName("down");
                 break;
             case ONMOUSEUP:
                 if (clickListeners != null) {
@@ -120,6 +118,7 @@ public class WSLaunchButton extends HTML {
         boolean running = true;
         boolean _running = true;
 
+
         Style s;
 
         public AnimationTimer(Style s) {
@@ -143,7 +142,10 @@ public class WSLaunchButton extends HTML {
             }
 
             Effects.setOpacity(s, i);
-            if (!_running) cancel();
+            if (!_running) {
+                cancel();
+
+            }
         }
 
         public void schedule(int i) {

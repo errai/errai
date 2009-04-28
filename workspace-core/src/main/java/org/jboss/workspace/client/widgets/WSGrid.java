@@ -445,8 +445,6 @@ public class WSGrid extends Composite {
         }
 
         private int _sort_partition(int col, boolean ascending, int low, int high) {
-            //    String pvtStr = valueAt(low, col);
-
             WSCell pvtStr = cellAt(low, col);
 
             int i = low - 1;
@@ -499,8 +497,12 @@ public class WSGrid extends Composite {
                 }
 
                 for (int i = 0; i < ll.length() && i < rr.length(); i++) {
-                    if (ll.charAt(i) > rr.charAt(i)) return true;
-                    else if (ll.charAt(i) < rr.charAt(i)) return false;
+                    if (ll.charAt(i) > rr.charAt(i)) {
+                        return true;
+                    }
+                    else if (ll.charAt(i) < rr.charAt(i)) {
+                        return false;
+                    }
                 }
 
                 return isEmpty(ll) && !isEmpty(rr);
@@ -524,8 +526,12 @@ public class WSGrid extends Composite {
                 }
 
                 for (int i = 0; i < ll.length() && i < rr.length(); i++) {
-                    if (ll.charAt(i) < rr.charAt(i)) return true;
-                    else if (ll.charAt(i) > rr.charAt(i)) return false;
+                    if (ll.charAt(i) < rr.charAt(i))  {
+                        return true;
+                    }
+                    else if (ll.charAt(i) > rr.charAt(i)) {
+                        return false;
+                    }
                 }
                 
                 return isEmpty(ll) && !isEmpty(rr);

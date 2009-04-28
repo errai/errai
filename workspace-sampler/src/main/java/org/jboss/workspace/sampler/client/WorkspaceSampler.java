@@ -5,6 +5,7 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.Window;
 import org.jboss.workspace.client.ToolSet;
 import org.jboss.workspace.client.Workspace;
 import org.jboss.workspace.client.framework.Tool;
@@ -149,15 +150,8 @@ public class WorkspaceSampler implements EntryPoint {
         });
 
         layout.pack();
-
-        WSModalDialog welcome = new WSModalDialog("Welcome to JBoss Workspace!");
-        welcome.ask("Have a look around!" , new AcceptsCallback() {
-            public void callback(String message) {
-            }
-        });
-
-        welcome.showModal();
     }
+
 }
 
 
