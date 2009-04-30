@@ -6,6 +6,7 @@ import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.DOM;
 import static com.google.gwt.user.client.DOM.setStyleAttribute;
 import com.google.gwt.user.client.Event;
+import static com.google.gwt.user.client.Event.addNativePreviewHandler;
 import com.google.gwt.user.client.ui.*;
 import static com.google.gwt.user.client.ui.RootPanel.getBodyElement;
 
@@ -46,7 +47,6 @@ public class WSGrid extends Composite {
         this(true);
     }
 
-    //  private int _fpanel_offset = -1;
     private int _startpos = 0;
 
     public WSGrid(boolean scrollable) {
@@ -212,13 +212,11 @@ public class WSGrid extends Composite {
                         currentFocus.edit();
                         break;
                 }
-
-
             }
         });
 
 
-        Event.addNativePreviewHandler(new Event.NativePreviewHandler() {
+        addNativePreviewHandler(new Event.NativePreviewHandler() {
             public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
                 if (currentFocus != null && currentFocus.isEdit()) {
                     return;
@@ -244,8 +242,6 @@ public class WSGrid extends Composite {
                                 event.getNativeEvent().preventDefault();
                         }
                 }
-
-
             }
         });
     }
@@ -526,14 +522,14 @@ public class WSGrid extends Composite {
                 }
 
                 for (int i = 0; i < ll.length() && i < rr.length(); i++) {
-                    if (ll.charAt(i) < rr.charAt(i))  {
+                    if (ll.charAt(i) < rr.charAt(i)) {
                         return true;
                     }
                     else if (ll.charAt(i) > rr.charAt(i)) {
                         return false;
                     }
                 }
-                
+
                 return isEmpty(ll) && !isEmpty(rr);
             }
         }
@@ -558,7 +554,6 @@ public class WSGrid extends Composite {
         public void setValueAt(int row, int col, String html) {
             cellAt(row, col).setValue(html);
         }
-
 
         public ScrollPanel getScrollPanel() {
             return scrollPanel;
@@ -713,7 +708,6 @@ public class WSGrid extends Composite {
                 }
             }
             else {
-
                 int scrollPos = grid.getScrollPanel().getScrollPosition();
                 int scrollPosH = grid.getScrollPanel().getHorizontalScrollPosition();
 
@@ -859,8 +853,7 @@ public class WSGrid extends Composite {
 
     private void cancelMove() {
         resizeLine.hide();
-        _resizing = false;
-        _resizeArmed = false;
+        _resizing = _resizeArmed = false;
     }
 
     public int getTitlebarOffsetHeight() {
@@ -911,16 +904,6 @@ public class WSGrid extends Composite {
         disableTextSelectInternal(elem, disable);
     }
 
-    private native static void disableTextSelectInternal(Element e, boolean disable)/*-{
-      if (disable) {
-        e.ondrag = function () { return false; };
-        e.onselectstart = function () { return false; };
-      } else {
-        e.ondrag = null;
-        e.onselectstart = null;
-      }
-    }-*/;
-
     private static final int EDITABLE = 1;
     private static final int TITLEGRID = 1 << 1;
 
@@ -942,6 +925,16 @@ public class WSGrid extends Composite {
             return (TITLEGRID & options) != 0;
         }
     }
+
+    private native static void disableTextSelectInternal(Element e, boolean disable)/*-{
+      if (disable) {
+        e.ondrag = function () { return false; };
+        e.onselectstart = function () { return false; };
+      } else {
+        e.ondrag = null;
+        e.onselectstart = null;
+      }
+    }-*/;
 
     public static native String getUserAgent() /*-{
         return navigator.userAgent.toLowerCase();

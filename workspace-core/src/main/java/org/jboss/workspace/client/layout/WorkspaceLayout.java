@@ -8,10 +8,11 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
-import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
+import static com.google.gwt.user.client.Window.addResizeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.*;
@@ -37,7 +38,6 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
      * The main layout panel.
      */
     public final DockPanel mainLayoutPanel = new DockPanel();
-
     public final HorizontalPanel header = new HorizontalPanel();
 
     public final WSExtVerticalPanel leftPanel = new WSExtVerticalPanel(this);
@@ -93,7 +93,7 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
 
         RootPanel.get("rootPanel").setPixelSize(currSizeW, currSizeH);
 
-        Window.addResizeHandler(new ResizeHandler() {
+        addResizeHandler(new ResizeHandler() {
             public void onResize(ResizeEvent event) {
                 RootPanel.get("rootPanel").setPixelSize(event.getWidth(), event.getHeight());
                 fireWorkspaceSizeChangeListeners(event.getWidth() - currSizeW, event.getHeight() - currSizeH);
@@ -233,7 +233,7 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
     private Widget createAppPanel() {
         tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {
             public void onSelection(SelectionEvent<Integer> integerSelectionEvent) {
-                  pack();
+                pack();
             }
         });
 
@@ -370,7 +370,7 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
 
         Timer t = new Timer() {
             public void run() {
-               pack();
+                pack();
             }
         };
 
@@ -503,8 +503,7 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
                 activeTools.remove(id);
             }
             else {
-                count--;
-                activeTools.put(id, count);
+                activeTools.put(id, --count);
                 return true;
             }
         }
@@ -546,8 +545,6 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
     private void fireWorkspaceSizeChangeListeners(int deltaW, int deltaH) {
         int w = Window.getClientWidth();
         int h = Window.getClientHeight();
-
-        System.out.println("FOO!");
 
         for (WorkspaceSizeChangeListener wscl : workspaceSizeChangeListers) {
             wscl.onSizeChange(deltaW, w, deltaH, h);
