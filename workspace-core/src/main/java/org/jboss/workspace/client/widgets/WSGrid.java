@@ -6,6 +6,7 @@ import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.DOM;
 import static com.google.gwt.user.client.DOM.setStyleAttribute;
 import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.Timer;
 import static com.google.gwt.user.client.Event.addNativePreviewHandler;
 import com.google.gwt.user.client.ui.*;
 import static com.google.gwt.user.client.ui.RootPanel.getBodyElement;
@@ -203,14 +204,25 @@ public class WSGrid extends Composite {
                         }
                         break;
 
+                    case KeyCodes.KEY_BACKSPACE:
                     case 63272:
                     case KeyCodes.KEY_DELETE:
                         currentFocus.setValue("");
                         break;
 
                     case 32: // spacebar
-                        currentFocus.edit();
+                        Timer t = new Timer() {
+                            public void run() {
+                                currentFocus.edit();
+                            }
+                        };
+
+                        t.schedule(15);
                         break;
+
+                    default:
+                        currentFocus.setValue("");
+                        currentFocus.edit();
                 }
             }
         });
