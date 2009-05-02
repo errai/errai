@@ -312,6 +312,8 @@ public class WSGrid extends Composite {
     }
 
     private void blurColumn(int col) {
+        sortedColumns.put(col, false);
+
         for (ArrayList<WSCell> row : titleBar.getTableIndex()) {
             row.get(col).removeStyleDependentName("hcolselect");
         }
@@ -441,7 +443,13 @@ public class WSGrid extends Composite {
         }
 
         public void sort(int col, boolean ascending) {
+            boolean secondPass = isEmpty(valueAt(col, 0));
+
             _sort(col, ascending, 0, tableIndex.size() - 1);
+            if (secondPass) {
+                // resort
+                _sort(col, ascending, 0, tableIndex.size() - 1);
+            }
         }
 
         private void _sort(int col, boolean ascending, int low, int high) {
@@ -464,10 +472,12 @@ public class WSGrid extends Composite {
                     while (_sort_lt(cellAt(i, col), pvtStr)) {
                         i++;
                     }
+
                     j--;
                     while (_sort_gt(cellAt(j, col), pvtStr)) {
                         j--;
                     }
+
                     if (i < j) _sort_swap(i, j);
                 }
             }
@@ -519,6 +529,7 @@ public class WSGrid extends Composite {
 
         private boolean _sort_lt(WSCell l, WSCell r) {
             if (l == null) return false;
+
 
             if (l.numeric && r.numeric) {
                 return parseDouble(l.getValue()) < parseDouble(r.getValue());
@@ -782,7 +793,9 @@ public class WSGrid extends Composite {
         }
 
         public void setValue(String html) {
-            if (_msie_compatibility && html.trim().length() == 0) {
+            html = html.trim();
+
+            if (_msie_compatibility && html.length() == 0) {
                 wrappedWidget.setHTML("&nbsp;");
             }
             else {

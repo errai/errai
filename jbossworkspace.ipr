@@ -134,8 +134,6 @@
       </facet-type>
     </autodetection-disabled>
   </component>
-  <component name="FacetManager" />
-  <component name="HierarchyBrowserManager" />
   <component name="IdProvider" IDEtalkID="53AC6731E7747FD9AF2B416FC185B959" />
   <component name="InspectionProjectProfileManager">
     <option name="PROJECT_PROFILE" value="Project Default" />
@@ -181,7 +179,6 @@
     <option name="IS_EMACS_ERRORS_MODE" value="true" />
     <option name="ADDITIONAL_OPTIONS_STRING" value="" />
   </component>
-  <component name="NewModuleRootManager" />
   <component name="Palette2">
     <group name="Swing">
       <item class="com.intellij.uiDesigner.HSpacer" tooltip-text="Horizontal Spacer" icon="/com/intellij/uiDesigner/icons/hspacer.png" removable="false" auto-create-binding="false" can-attach-label="false">
