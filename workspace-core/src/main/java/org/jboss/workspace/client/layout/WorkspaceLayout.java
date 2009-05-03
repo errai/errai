@@ -112,9 +112,7 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
      * @return -
      */
     private Panel createHeader() {
-
-
-        Image img = new Image(GWT.getModuleBaseURL() + "/images/workspacelogo.png");
+        Image img = new Image(getModuleBaseURL() + "/images/workspacelogo.png");
         img.setHeight("45px");
         img.setWidth("193px");
 

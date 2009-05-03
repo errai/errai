@@ -434,7 +434,7 @@ public class WSGrid extends Composite {
             super.onAttach();
         }
 
-        public ArrayList<ArrayList<WSCell>> getTableIndex() {
+        public ArrayList<ArrayList<WSCell>> getTableIndex() { 
             return tableIndex;
         }
 
