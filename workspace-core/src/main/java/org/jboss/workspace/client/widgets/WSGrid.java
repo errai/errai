@@ -1,7 +1,6 @@
 package org.jboss.workspace.client.widgets;
 
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.DOM;
 import static com.google.gwt.user.client.DOM.setStyleAttribute;
@@ -10,13 +9,13 @@ import static com.google.gwt.user.client.Event.addNativePreviewHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.*;
 import static com.google.gwt.user.client.ui.RootPanel.getBodyElement;
+import org.jboss.workspace.client.widgets.format.WSCellFormatter;
+import org.jboss.workspace.client.widgets.format.WSCellSimpleFormat;
 
 import static java.lang.Double.parseDouble;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.jboss.workspace.client.widgets.format.WSCellFormatter;
 
 public class WSGrid extends Composite {
     private FocusPanel fPanel;
@@ -241,7 +240,7 @@ public class WSGrid extends Composite {
                         switch (event.getNativeEvent().getKeyCode()) {
                             case KeyCodes.KEY_TAB:
                                 if (currentFocus != null && currentFocus.isEdit()) {
-                                    currentFocus.stopedit();
+                                    currentFocus.cellFormat.stopedit();
                                 }
                             case 63232:
                             case KeyCodes.KEY_UP:
@@ -271,7 +270,7 @@ public class WSGrid extends Composite {
     }
 
     public void setCell(int row, int column, WSCellFormatter formatter) {
-       dataGrid.getTableIndex().get(row).get(column).cellFormat = formatter;
+        dataGrid.getTableIndex().get(row).get(column).cellFormat = formatter;
     }
 
     public void setCols(int cols) {
@@ -371,7 +370,7 @@ public class WSGrid extends Composite {
         public void addCell(int row, String w) {
             int currentColSize = table.getCellCount(row);
             table.addCell(row);
-            table.setWidget(row, currentColSize, new WSCell(this, new WSCellFormatter(w), row, currentColSize));
+            table.setWidget(row, currentColSize, new WSCell(this, new WSCellSimpleFormat(w), row, currentColSize));
         }
 
         public void addRow() {
@@ -590,16 +589,8 @@ public class WSGrid extends Composite {
     } //end WSAbstractGrid
 
 
-    private static TextBox textBox;
     private boolean _msie_compatibility = getUserAgent().contains("msie");
 
-    static {
-        textBox = new TextBox();
-        textBox.setStylePrimaryName("WSCell-editbox");
-        textBox.setVisible(false);
-
-        RootPanel.get().add(textBox);
-    }
 
     public class WSCell extends Composite {
         private FlowPanel panel;
@@ -619,18 +610,6 @@ public class WSGrid extends Composite {
             panel = new FlowPanel();
             panel.setStyleName("WSCell-panel");
 
-            textBox.addKeyPressHandler(new KeyPressHandler() {
-                public void onKeyPress(KeyPressEvent event) {
-                    switch (event.getCharCode()) {
-                        case KeyCodes.KEY_TAB:
-                            stopedit();
-                            break;
-                        case KeyCodes.KEY_ENTER:
-                            stopedit();
-                            break;
-                    }
-                }
-            });
 
             if (grid.tableIndex.size() - 1 < row) {
                 while (grid.tableIndex.size() - 1 < row) {
@@ -650,7 +629,7 @@ public class WSGrid extends Composite {
 
             if (_msie_compatibility) {
                 if (cellFormat.getTextValue() == null || cellFormat.getTextValue().equals("")) {
-                    cellFormat.setTextValue("&nbsp;");
+                    cellFormat.setValue("&nbsp;");
                 }
             }
 
@@ -673,29 +652,30 @@ public class WSGrid extends Composite {
         public void edit() {
             String text = cellFormat.getTextValue();
 
-            if (_msie_compatibility && text.equals("&nbsp;")) text = "";
+            if (_msie_compatibility && text.equals("&nbsp;")) cellFormat.setValue("");
 
-            textBox.setText(text);
-            textBox.setVisible(true);
+//            textBox.setText(text);
+//            textBox.setVisible(true);
+//
+//            Style s = textBox.getElement().getStyle();
+//
+//            s.setProperty("left", getAbsoluteLeft() + "px");
+//            s.setProperty("top", getAbsoluteTop() + "px");
+//
+//            textBox.setSize(getOffsetWidth() + "px", getOffsetHeight() + "px");
 
-            Style s = textBox.getElement().getStyle();
-
-            s.setProperty("left", getAbsoluteLeft() + "px");
-            s.setProperty("top", getAbsoluteTop() + "px");
-
-            textBox.setSize(getOffsetWidth() + "px", getOffsetHeight() + "px");
-
+            cellFormat.edit(this);
             edit = true;
 
-            textBox.setCursorPos(textBox.getText().length());
-            textBox.setFocus(true);
+//            textBox.setCursorPos(textBox.getText().length());
+//            textBox.setFocus(true);
         }
 
         public void stopedit() {
             if (edit) {
-                setValue(textBox.getText());
-
-                textBox.setVisible(false);
+//                setValue(textBox.getText());
+//
+//                textBox.setVisible(false);
 
                 edit = false;
                 fPanel.setFocus(true);
@@ -703,7 +683,7 @@ public class WSGrid extends Composite {
         }
 
         public void blur() {
-            stopedit();
+            if (edit) cellFormat.stopedit();
             removeStyleDependentName("selected");
 
             if (currentFocusRowColSpan) {
@@ -805,10 +785,10 @@ public class WSGrid extends Composite {
             html = html.trim();
 
             if (_msie_compatibility && html.length() == 0) {
-                cellFormat.setTextValue("&nbsp;");
+                cellFormat.setValue("&nbsp;");
             }
             else {
-                cellFormat.setTextValue(html);
+                cellFormat.setValue(html);
                 panel.clear();
                 panel.add(cellFormat.getWidget());
             }
@@ -818,13 +798,13 @@ public class WSGrid extends Composite {
 
         public void setValue(WSCellFormatter formatter) {
             if (_msie_compatibility && (formatter.getTextValue() == null || formatter.getTextValue().length() == 0)) {
-                formatter.setTextValue("&nbsp;");
+                formatter.setValue("&nbsp;");
             }
             this.cellFormat = formatter;
             panel.clear();
             panel.add(formatter.getWidget());
         }
-        
+
 
         public String getValue() {
             return cellFormat.getTextValue();

@@ -1,25 +1,13 @@
 package org.jboss.workspace.client.widgets.format;
 
-import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.ui.HTML;
+import org.jboss.workspace.client.widgets.WSGrid;
 
-public class WSCellFormatter extends Composite {
-    private String value;
-
-    public WSCellFormatter(String value) {
-        this.value = value;
-    }
-
-    public void setTextValue(String value) {
-        this.value = value;
-    }
-
-    public String getTextValue() {
-        return value;
-    }
-
-    public Widget getWidget() {
-        return new HTML(value);
-    }
+public abstract class WSCellFormatter {
+    public abstract void setValue(String value);
+    public abstract String getTextValue();
+    public abstract Widget getWidget();
+    public abstract void edit(WSGrid.WSCell element);
+    public abstract void stopedit();
 }
