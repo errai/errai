@@ -6,8 +6,8 @@ import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.DOM;
 import static com.google.gwt.user.client.DOM.setStyleAttribute;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.Timer;
 import static com.google.gwt.user.client.Event.addNativePreviewHandler;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.*;
 import static com.google.gwt.user.client.ui.RootPanel.getBodyElement;
 
@@ -15,6 +15,8 @@ import static java.lang.Double.parseDouble;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.jboss.workspace.client.widgets.format.WSCellFormatter;
 
 public class WSGrid extends Composite {
     private FocusPanel fPanel;
@@ -268,6 +270,10 @@ public class WSGrid extends Composite {
         dataGrid.getTableIndex().get(row).get(column).setValue(html);
     }
 
+    public void setCell(int row, int column, WSCellFormatter formatter) {
+       dataGrid.getTableIndex().get(row).get(column).cellFormat = formatter;
+    }
+
     public void setCols(int cols) {
         this.cols = cols;
     }
@@ -290,7 +296,6 @@ public class WSGrid extends Composite {
         HTMLTable.ColumnFormatter colFormatter = titleBar.getTable().getColumnFormatter();
         colFormatter.setWidth(column, width + "px");
 
-        // colFormatter = dataGrid.getTable().getColumnFormatter();
         dataGrid.getTable().getColumnFormatter().setWidth(column, width + "px");
 
         checkWidth(column);
@@ -363,16 +368,16 @@ public class WSGrid extends Composite {
             tableIndex.add(new ArrayList<WSCell>());
         }
 
-        public void addCell(int row, HTML w) {
+        public void addCell(int row, String w) {
             int currentColSize = table.getCellCount(row);
             table.addCell(row);
-            table.setWidget(row, currentColSize, new WSCell(this, w, row, currentColSize));
+            table.setWidget(row, currentColSize, new WSCell(this, new WSCellFormatter(w), row, currentColSize));
         }
 
         public void addRow() {
             table.insertRow(table.getRowCount());
             for (int i = 0; i < cols; i++) {
-                addCell(table.getRowCount() - 1, new HTML());
+                addCell(table.getRowCount() - 1, "");
             }
         }
 
@@ -397,7 +402,7 @@ public class WSGrid extends Composite {
 
                     for (int c = 0; c < growthDelta; c++) {
                         table.getColumnFormatter().setWidth(c, colSizes.get(c) + "px");
-                        addCell(r, new HTML());
+                        addCell(r, "");
                     }
 
                     assert table.getCellCount(r) == cols : "New size is wrong: " + table.getCellCount(r);
@@ -434,7 +439,7 @@ public class WSGrid extends Composite {
             super.onAttach();
         }
 
-        public ArrayList<ArrayList<WSCell>> getTableIndex() { 
+        public ArrayList<ArrayList<WSCell>> getTableIndex() {
             return tableIndex;
         }
 
@@ -571,7 +576,7 @@ public class WSGrid extends Composite {
         }
 
         public String valueAt(int row, int col) {
-            return tableIndex.get(row).get(col).wrappedWidget.getHTML();
+            return tableIndex.get(row).get(col).cellFormat.getTextValue();
         }
 
         public void setValueAt(int row, int col, String html) {
@@ -599,7 +604,7 @@ public class WSGrid extends Composite {
     public class WSCell extends Composite {
         private FlowPanel panel;
 
-        private HTML wrappedWidget;
+        private WSCellFormatter cellFormat;
 
         private boolean numeric;
         private boolean edit;
@@ -609,7 +614,7 @@ public class WSGrid extends Composite {
 
         private WSAbstractGrid grid;
 
-        public WSCell(WSAbstractGrid grid, HTML widget, int row, int column) {
+        public WSCell(WSAbstractGrid grid, WSCellFormatter cellFormat, int row, int column) {
             this.grid = grid;
             panel = new FlowPanel();
             panel.setStyleName("WSCell-panel");
@@ -641,15 +646,19 @@ public class WSGrid extends Composite {
                 cols.set(column, this);
             }
 
-            this.wrappedWidget = widget;
-            panel.add(wrappedWidget);
+            this.cellFormat = cellFormat;
+
+            if (_msie_compatibility) {
+                if (cellFormat.getTextValue() == null || cellFormat.getTextValue().equals("")) {
+                    cellFormat.setTextValue("&nbsp;");
+                }
+            }
+
+            panel.add(cellFormat.getWidget());
 
             this.row = row;
             this.col = column;
 
-            if (_msie_compatibility) {
-                wrappedWidget.setHTML("&nbsp;");
-            }
 
             initWidget(panel);
             setWidth(colSizes.get(column) + "px");
@@ -662,7 +671,7 @@ public class WSGrid extends Composite {
          * Calling this method will place the cell into edit mode.
          */
         public void edit() {
-            String text = wrappedWidget.getHTML();
+            String text = cellFormat.getTextValue();
 
             if (_msie_compatibility && text.equals("&nbsp;")) text = "";
 
@@ -796,26 +805,31 @@ public class WSGrid extends Composite {
             html = html.trim();
 
             if (_msie_compatibility && html.length() == 0) {
-                wrappedWidget.setHTML("&nbsp;");
+                cellFormat.setTextValue("&nbsp;");
             }
             else {
-                wrappedWidget.setHTML(html);
+                cellFormat.setTextValue(html);
+                panel.clear();
+                panel.add(cellFormat.getWidget());
             }
 
             numeric = isNumeric(html);
         }
 
+        public void setValue(WSCellFormatter formatter) {
+            if (_msie_compatibility && (formatter.getTextValue() == null || formatter.getTextValue().length() == 0)) {
+                formatter.setTextValue("&nbsp;");
+            }
+            this.cellFormat = formatter;
+            panel.clear();
+            panel.add(formatter.getWidget());
+        }
+        
+
         public String getValue() {
-            return wrappedWidget.getHTML();
+            return cellFormat.getTextValue();
         }
 
-        public HTML getWrappedWidget() {
-            return wrappedWidget;
-        }
-
-        public Style getStyle() {
-            return wrappedWidget.getElement().getStyle();
-        }
 
         @Override
         public void onBrowserEvent(Event event) {

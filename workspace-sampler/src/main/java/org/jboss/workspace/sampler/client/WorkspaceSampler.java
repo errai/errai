@@ -15,6 +15,7 @@ import org.jboss.workspace.client.layout.WorkspaceLayout;
 import org.jboss.workspace.client.rpc.StatePacket;
 import org.jboss.workspace.client.widgets.WSGrid;
 import org.jboss.workspace.client.widgets.WSModalDialog;
+import org.jboss.workspace.client.widgets.format.WSCellDateFormat;
 
 import java.util.Date;
 
@@ -94,6 +95,8 @@ public class WorkspaceSampler implements EntryPoint {
                                 wsGrid.setCell(4, 0, "2000");
                                 wsGrid.setCell(4, 1, "Foo");
                                 wsGrid.setCell(4, 2, "Bar");
+
+                                wsGrid.setCell(3, 0, new WSCellDateFormat(System.currentTimeMillis() + ""));
 
                                 layout.addWorkspaceSizeChangeListener(new WorkspaceSizeChangeListener() {
                                     public void onSizeChange(int deltaW, int actualW, int deltaH, int actualH) {
