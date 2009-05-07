@@ -13,6 +13,4 @@ public abstract class WSCellFormatter {
     public abstract Widget getWidget();
     public abstract void edit(WSGrid.WSCell element);
     public abstract void stopedit();
-
-    public abstract WSCellFormatter newFormatter();
 }

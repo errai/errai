@@ -14,8 +14,12 @@ import org.jboss.workspace.client.layout.WorkspaceLayout;
 import org.jboss.workspace.client.rpc.StatePacket;
 import org.jboss.workspace.client.widgets.WSGrid;
 import org.jboss.workspace.client.widgets.format.WSCellDateFormat;
+import org.jboss.workspace.client.widgets.format.WSCellMultiSelector;
+import org.jboss.workspace.client.widgets.format.WSCellSimpleTextCell;
 
 import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 
 public class WorkspaceSampler implements EntryPoint {
@@ -77,24 +81,40 @@ public class WorkspaceSampler implements EntryPoint {
                                 final WSGrid wsGrid = new WSGrid();
                                 wsGrid.setHeight("400px");
 
+                                Set<String> userTypes = new LinkedHashSet<String>();
+                                userTypes.add("Regular User");
+                                userTypes.add("Super User");
+                                userTypes.add("Mark Proctor");
+
+
                                 wsGrid.setColumnHeader(0, 0, "UserId");
                                 wsGrid.setColumnHeader(0, 1, "Name");
                                 wsGrid.setColumnHeader(0, 2, "User Type");
                                 wsGrid.setColumnHeader(0, 3, "Date Created");
 
-                                wsGrid.setCell(0, 0, "1");
+                                wsGrid.setCell(0, 0, new WSCellSimpleTextCell("1", true));
                                 wsGrid.setCell(0, 1, "John Doe");
-                                wsGrid.setCell(0, 2, "Regular User");
+                                wsGrid.setCell(0, 2, new WSCellMultiSelector(userTypes, "Regular User"));
                                 wsGrid.setCell(0, 3, new WSCellDateFormat(getShortDateFormat().parse("2/10/07")));
 
-                                wsGrid.setCell(1, 0, "2");
+                                wsGrid.setCell(1, 0, new WSCellSimpleTextCell("2", true));
                                 wsGrid.setCell(1, 1, "Jane Doe");
-                                wsGrid.setCell(1, 2, "Super User");
+                                wsGrid.setCell(1, 2, new WSCellMultiSelector(userTypes, "Mark Proctor"));
                                 wsGrid.setCell(1, 3, new WSCellDateFormat(getShortDateFormat().parse("5/20/05")));
 
-                                wsGrid.setCell(4, 0, "2000");
+                                wsGrid.setCell(2, 0, new WSCellSimpleTextCell("3", true));
+                                wsGrid.setCell(2, 1, "Mike Rawlings");
+                                wsGrid.setCell(2, 2, new WSCellMultiSelector(userTypes, "Regular User"));
+                                wsGrid.setCell(2, 3, new WSCellDateFormat(getShortDateFormat().parse("1/2/01")));
+
+                                wsGrid.setCell(3, 0, new WSCellSimpleTextCell("4", true));
+                                wsGrid.setCell(3, 1, "Adam Smith");
+                                wsGrid.setCell(3, 2, new WSCellMultiSelector(userTypes, "Regular User"));
+                                wsGrid.setCell(3, 3, new WSCellDateFormat(getShortDateFormat().parse("9/17/02")));
+
+                                wsGrid.setCell(4, 0, new WSCellSimpleTextCell("5", true));
                                 wsGrid.setCell(4, 1, "Foo");
-                                wsGrid.setCell(4, 2, "Bar");
+                                wsGrid.setCell(4, 2, new WSCellMultiSelector(userTypes, "Super User"));
                                 wsGrid.setCell(4, 3, new WSCellDateFormat(getShortDateFormat().parse("7/15/06")));
 
                                 layout.addWorkspaceSizeChangeListener(new WorkspaceSizeChangeListener() {

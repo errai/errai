@@ -11,12 +11,12 @@ import com.google.gwt.user.client.ui.Widget;
 import org.jboss.workspace.client.widgets.WSGrid;
 
 
-public class WSCellSimpleFormat extends WSCellFormatter {
+public class WSCellSimpleTextCell extends WSCellFormatter {
     private HTML html;
 
     private static TextBox textBox;
-    private static WSCellSimpleFormat editCellReference;
-    
+    private static WSCellSimpleTextCell editCellReference;
+    private boolean readonly = false;
 
     static {
         textBox = new TextBox();
@@ -40,8 +40,13 @@ public class WSCellSimpleFormat extends WSCellFormatter {
 
     }
 
-    public WSCellSimpleFormat(String value) {
+    public WSCellSimpleTextCell(String value) {
         this.html = new HTML(value);
+    }
+
+    public WSCellSimpleTextCell(String value, boolean readonly) {
+        this.html = new HTML(value);
+        this.readonly = readonly;
     }
 
     public void setValue(String value) {
@@ -57,6 +62,8 @@ public class WSCellSimpleFormat extends WSCellFormatter {
     }
 
     public void edit(WSGrid.WSCell element) {
+        if (readonly) return;
+        
         editCellReference = this;
         wsCellReference = element;
 
@@ -75,13 +82,13 @@ public class WSCellSimpleFormat extends WSCellFormatter {
     }
 
     public void stopedit() {
-        setValue(textBox.getText());
+        if (!readonly) setValue(textBox.getText());
 
         textBox.setVisible(false);
         wsCellReference.stopedit();
     }
 
     public WSCellFormatter newFormatter() {
-        return new WSCellSimpleFormat("");
+        return new WSCellSimpleTextCell("");
     }
 }

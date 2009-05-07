@@ -7,11 +7,10 @@ import static com.google.gwt.user.client.DOM.setStyleAttribute;
 import com.google.gwt.user.client.Event;
 import static com.google.gwt.user.client.Event.addNativePreviewHandler;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import static com.google.gwt.user.client.ui.RootPanel.getBodyElement;
 import org.jboss.workspace.client.widgets.format.WSCellFormatter;
-import org.jboss.workspace.client.widgets.format.WSCellSimpleFormat;
+import org.jboss.workspace.client.widgets.format.WSCellSimpleTextCell;
 
 import static java.lang.Double.parseDouble;
 import java.util.ArrayList;
@@ -286,7 +285,7 @@ public class WSGrid extends Composite {
     private int checkWidth(int column) {
         if (columnWidths.size() - 1 < column) {
             for (int i = 0; i <= column; i++) {
-                columnWidths.add(150);
+                columnWidths.add(125);
             }
         }
 
@@ -372,7 +371,7 @@ public class WSGrid extends Composite {
         public void addCell(int row, String w) {
             int currentColSize = table.getCellCount(row);
             table.addCell(row);
-            table.setWidget(row, currentColSize, new WSCell(this, new WSCellSimpleFormat(w), row, currentColSize));
+            table.setWidget(row, currentColSize, new WSCell(this, new WSCellSimpleTextCell(w), row, currentColSize));
         }
 
         public void addRow() {
@@ -385,7 +384,7 @@ public class WSGrid extends Composite {
         public int ensureRowsAndCols(int rows, int cols) {
             if (colSizes.size() < cols) {
                 for (int i = 0; i < cols; i++) {
-                    colSizes.add(200);
+                    colSizes.add(125);
                 }
             }
 
