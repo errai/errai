@@ -7,6 +7,7 @@ import static com.google.gwt.user.client.DOM.setStyleAttribute;
 import com.google.gwt.user.client.Event;
 import static com.google.gwt.user.client.Event.addNativePreviewHandler;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import static com.google.gwt.user.client.ui.RootPanel.getBodyElement;
 import org.jboss.workspace.client.widgets.format.WSCellFormatter;
@@ -270,7 +271,8 @@ public class WSGrid extends Composite {
     }
 
     public void setCell(int row, int column, WSCellFormatter formatter) {
-        dataGrid.getTableIndex().get(row).get(column).cellFormat = formatter;
+        cols = dataGrid.ensureRowsAndCols(row + 1, column + 1);        
+        dataGrid.getTableIndex().get(row).get(column).setValue(formatter);
     }
 
     public void setCols(int cols) {
@@ -562,10 +564,10 @@ public class WSGrid extends Composite {
         }
 
         private void _sort_swap(int i, int j) {
-            String t;
+            WSCellFormatter t;
             for (int z = 0; z < cols; z++) {
-                t = valueAt(i, z);
-                setValueAt(i, z, valueAt(j, z));
+                t = cellFmtAt(i, z);
+                setValueAt(i, z, cellFmtAt(j, z));
                 setValueAt(j, z, t);
             }
         }
@@ -574,12 +576,20 @@ public class WSGrid extends Composite {
             return tableIndex.size() > row ? tableIndex.get(row).get(col) : null;
         }
 
+        public WSCellFormatter cellFmtAt(int row, int col) {
+            return cellAt(row, col).cellFormat;
+        }
+
         public String valueAt(int row, int col) {
             return tableIndex.get(row).get(col).cellFormat.getTextValue();
         }
 
         public void setValueAt(int row, int col, String html) {
             cellAt(row, col).setValue(html);
+        }
+
+        public void setValueAt(int row, int col, WSCellFormatter cellFmt) {
+            cellAt(row, col).setValue(cellFmt);
         }
 
         public ScrollPanel getScrollPanel() {
@@ -775,8 +785,8 @@ public class WSGrid extends Composite {
                 panel.clear();
                 panel.add(cellFormat.getWidget());
             }
-
             numeric = isNumeric(html);
+
         }
 
         public void setValue(WSCellFormatter formatter) {
@@ -786,6 +796,8 @@ public class WSGrid extends Composite {
             this.cellFormat = formatter;
             panel.clear();
             panel.add(formatter.getWidget());
+
+            numeric = isNumeric(formatter.getTextValue());
         }
 
 

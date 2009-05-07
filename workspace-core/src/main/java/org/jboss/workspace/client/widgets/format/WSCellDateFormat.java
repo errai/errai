@@ -4,6 +4,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import static com.google.gwt.i18n.client.DateTimeFormat.getShortDateFormat;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -12,6 +13,7 @@ import org.jboss.workspace.client.widgets.WSGrid;
 
 import static java.lang.String.valueOf;
 import java.util.Date;
+
 
 public class WSCellDateFormat extends WSCellFormatter {
     private HTML html;
@@ -28,20 +30,21 @@ public class WSCellDateFormat extends WSCellFormatter {
 
         datePicker.addValueChangeHandler(new ValueChangeHandler() {
             public void onValueChange(ValueChangeEvent valueChangeEvent) {
-                wsCellReference.setValue(valueOf(((Date)valueChangeEvent.getValue()).getTime()));
+                wsCellReference.setValue(valueOf(((Date) valueChangeEvent.getValue()).getTime()));
                 datePicker.setVisible(false);
                 editCellReference.stopedit();
             }
         });
     }
 
-    public WSCellDateFormat(String value) {                                          
+    public WSCellDateFormat(String value) {
         this.html = new HTML(value);
         setValue(value);
     }
 
     public WSCellDateFormat(Date date) {
         this.date = date;
+        this.html = new HTML();
         setValue(date);
     }
 
@@ -76,8 +79,15 @@ public class WSCellDateFormat extends WSCellFormatter {
         datePicker.setValue(date);
 
         Style s = datePicker.getElement().getStyle();
-        s.setProperty("left", element.getAbsoluteLeft() + "px");
-        s.setProperty("top", element.getAbsoluteTop() + "px");
+
+        int left = (element.getAbsoluteLeft() + element.getOffsetWidth() - 20);
+
+        if ((left + datePicker.getOffsetWidth()) > Window.getClientHeight()) {
+             left = Window.getClientHeight() - datePicker.getOffsetHeight();
+        }
+
+        s.setProperty("left", left + "px");
+        s.setProperty("top", (element.getAbsoluteTop() + element.getOffsetHeight()) + "px");
 
         datePicker.setVisible(true);
     }
@@ -85,5 +95,9 @@ public class WSCellDateFormat extends WSCellFormatter {
     public void stopedit() {
         datePicker.setVisible(false);
         wsCellReference.stopedit();
+    }
+
+    public WSCellFormatter newFormatter() {
+        return new WSCellDateFormat(System.currentTimeMillis() + "");
     }
 }

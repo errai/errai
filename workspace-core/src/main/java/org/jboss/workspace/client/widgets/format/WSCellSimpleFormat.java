@@ -80,4 +80,8 @@ public class WSCellSimpleFormat extends WSCellFormatter {
         textBox.setVisible(false);
         wsCellReference.stopedit();
     }
+
+    public WSCellFormatter newFormatter() {
+        return new WSCellSimpleFormat("");
+    }
 }
