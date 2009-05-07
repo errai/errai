@@ -5,16 +5,13 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.Window;
 import org.jboss.workspace.client.ToolSet;
 import org.jboss.workspace.client.Workspace;
 import org.jboss.workspace.client.framework.Tool;
 import org.jboss.workspace.client.framework.WorkspaceSizeChangeListener;
-import org.jboss.workspace.client.framework.AcceptsCallback;
 import org.jboss.workspace.client.layout.WorkspaceLayout;
 import org.jboss.workspace.client.rpc.StatePacket;
 import org.jboss.workspace.client.widgets.WSGrid;
-import org.jboss.workspace.client.widgets.WSModalDialog;
 import org.jboss.workspace.client.widgets.format.WSCellDateFormat;
 
 import java.util.Date;

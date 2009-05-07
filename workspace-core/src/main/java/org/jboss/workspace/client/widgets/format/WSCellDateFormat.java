@@ -18,6 +18,7 @@ public class WSCellDateFormat extends WSCellFormatter {
     private Date date;
 
     private static DatePicker datePicker;
+    private static WSCellDateFormat editCellReference;
 
     static {
         datePicker = new DatePicker();
@@ -29,13 +30,12 @@ public class WSCellDateFormat extends WSCellFormatter {
             public void onValueChange(ValueChangeEvent valueChangeEvent) {
                 wsCellReference.setValue(valueOf(((Date)valueChangeEvent.getValue()).getTime()));
                 datePicker.setVisible(false);
-                wsCellReference.stopedit();
+                editCellReference.stopedit();
             }
         });
     }
 
-
-    public WSCellDateFormat(String value) {
+    public WSCellDateFormat(String value) {                                          
         this.html = new HTML(value);
         setValue(value);
     }
@@ -71,6 +71,7 @@ public class WSCellDateFormat extends WSCellFormatter {
 
     public void edit(WSGrid.WSCell element) {
         wsCellReference = element;
+        editCellReference = this;
 
         datePicker.setValue(date);
 
@@ -82,5 +83,7 @@ public class WSCellDateFormat extends WSCellFormatter {
     }
 
     public void stopedit() {
+        datePicker.setVisible(false);
+        wsCellReference.stopedit();
     }
 }
