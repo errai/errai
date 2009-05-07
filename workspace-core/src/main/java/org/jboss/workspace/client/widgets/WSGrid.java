@@ -654,29 +654,12 @@ public class WSGrid extends Composite {
 
             if (_msie_compatibility && text.equals("&nbsp;")) cellFormat.setValue("");
 
-//            textBox.setText(text);
-//            textBox.setVisible(true);
-//
-//            Style s = textBox.getElement().getStyle();
-//
-//            s.setProperty("left", getAbsoluteLeft() + "px");
-//            s.setProperty("top", getAbsoluteTop() + "px");
-//
-//            textBox.setSize(getOffsetWidth() + "px", getOffsetHeight() + "px");
-
             cellFormat.edit(this);
             edit = true;
-
-//            textBox.setCursorPos(textBox.getText().length());
-//            textBox.setFocus(true);
         }
 
         public void stopedit() {
             if (edit) {
-//                setValue(textBox.getText());
-//
-//                textBox.setVisible(false);
-
                 edit = false;
                 fPanel.setFocus(true);
             }

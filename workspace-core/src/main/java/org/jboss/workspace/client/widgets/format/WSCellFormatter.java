@@ -5,6 +5,8 @@ import com.google.gwt.user.client.ui.Widget;
 import org.jboss.workspace.client.widgets.WSGrid;
 
 public abstract class WSCellFormatter {
+    protected static WSGrid.WSCell wsCellReference;
+
     public abstract void setValue(String value);
     public abstract String getTextValue();
     public abstract Widget getWidget();

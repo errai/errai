@@ -1,6 +1,5 @@
 package org.jboss.workspace.client.widgets.format;
 
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
@@ -17,7 +16,7 @@ public class WSCellSimpleFormat extends WSCellFormatter {
 
     private static TextBox textBox;
     private static WSCellSimpleFormat editCellReference;
-    private static WSGrid.WSCell wsCellReference;
+    
 
     static {
         textBox = new TextBox();
