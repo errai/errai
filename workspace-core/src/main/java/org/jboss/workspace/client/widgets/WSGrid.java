@@ -16,7 +16,7 @@ import static java.lang.Double.parseDouble;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
+import java.util.Stack;
 
 public class WSGrid extends Composite {
     private FocusPanel fPanel;
@@ -28,10 +28,14 @@ public class WSGrid extends Composite {
 
     private int cols;
 
-    private Set<WSCell> selectionList;
-    private WSCell currentFocus;
+    private Stack<WSCell> selectionList = new Stack<WSCell>();
+    private int startSelX;
+    private int startSelY;
+    private int fillX;
+    private int fillY;
+
     private boolean currentFocusRowColSpan;
-    
+
     private boolean _leftGrow = false;
     private boolean _resizeArmed = false;
     private boolean _resizing = false;
@@ -85,7 +89,7 @@ public class WSGrid extends Composite {
 
         fPanel.addMouseDownHandler(new MouseDownHandler() {
             public void onMouseDown(MouseDownEvent event) {
-                if (currentFocus != null && currentFocus.isEdit()) {
+                if (!selectionList.isEmpty() && selectionList.lastElement().isEdit()) {
                     return;
                 }
 
@@ -116,6 +120,9 @@ public class WSGrid extends Composite {
             public void onMouseUp(MouseUpEvent event) {
                 if (_resizing) {
                     cancelMove();
+
+                    WSCell currentFocus = selectionList.isEmpty() ? null :
+                            selectionList.lastElement();
 
                     int selCol = (_leftGrow ? currentFocus.col - 1 : currentFocus.col);
                     if (selCol == -1) return;
@@ -150,12 +157,15 @@ public class WSGrid extends Composite {
 
         fPanel.addKeyDownHandler(new KeyDownHandler() {
             public void onKeyDown(KeyDownEvent event) {
+                final WSCell currentFocus = selectionList.isEmpty() ? null : selectionList.lastElement();
+
                 if (currentFocus == null || currentFocus.edit) {
                     return;
                 }
 
                 switch (event.getNativeKeyCode()) {
                     case KeyCodes.KEY_TAB:
+                        blurAll();
                         if (event.getNativeEvent().getShiftKey()) {
                             if (currentFocus.getCol() == 0 && currentFocus.getRow() > 0) {
                                 dataGrid.tableIndex.get(currentFocus.getRow() - 1).get(cols - 1).focus();
@@ -175,34 +185,81 @@ public class WSGrid extends Composite {
                         break;
                     case 63232:
                     case KeyCodes.KEY_UP:
-                        if (currentFocus.getRow() > 0)
-                            dataGrid.tableIndex.get(currentFocus.getRow() - 1).get(currentFocus.getCol()).focus();
+                        if (currentFocus.getRow() > 0) {
+                            if (!event.getNativeEvent().getShiftKey()) blurAll();
+
+                            dataGrid.tableIndex.get(currentFocus.getRow() - 1).get(currentFocus.getCol())
+                                    .focus();
+
+                            int fill = startSelX - currentFocus.getCol();
+
+
+                            for (int x = currentFocus.getCol(); x < fill; x++) {
+                                dataGrid.tableIndex.get(currentFocus.getRow() - 1).get(x).focus();
+                            }
+
+                        }
                         break;
                     case 63235:
                     case KeyCodes.KEY_RIGHT:
                         if (currentFocus.getCol() < cols - 1) {
+                            if (!event.getNativeEvent().getShiftKey()) blurAll();
+
                             if (currentFocusRowColSpan) {
                                 titleBar.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() + 1).focus();
                             }
                             else {
-                                dataGrid.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() + 1).focus();
+                                dataGrid.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() + 1)
+                                        .focus();
+                                int fill = currentFocus.getRow() - startSelY;
+                                System.out.println("fill=" + fill);
+                                int y;
+                                if (fill < 0) {
+                                    fill *= -1;
+                                    y = currentFocus.getRow();
+                                }
+                                else {
+                                    y = startSelY;
+                                }
+
+                                fill += y;
+
+                                for (; y < fill; y++) {
+                                    System.out.println("*y:"+y);
+                                    dataGrid.tableIndex.get(y).get(currentFocus.getCol() + 1).focus();
+                                }
                             }
                         }
                         break;
                     case 63233:
                     case KeyCodes.KEY_ENTER:
                     case KeyCodes.KEY_DOWN:
-                        if (currentFocus.getRow() < dataGrid.tableIndex.size())
+                        if (currentFocus.getRow() < dataGrid.tableIndex.size()) {
+                            if (!event.getNativeEvent().getShiftKey()) blurAll();
+
                             dataGrid.tableIndex.get(currentFocus.getRow() + 1).get(currentFocus.getCol()).focus();
+
+                            int fill = currentFocus.getCol() - startSelX;
+                            for (int x = startSelX; x < fill; x++) {
+                                dataGrid.tableIndex.get(currentFocus.getRow() + 1).get(x).focus();
+                            }
+                        }
                         break;
                     case 63234:
                     case KeyCodes.KEY_LEFT:
                         if (currentFocus.getCol() > 0) {
+                            if (!event.getNativeEvent().getShiftKey()) blurAll();
+
                             if (currentFocusRowColSpan) {
                                 titleBar.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() - 1).focus();
                             }
                             else {
                                 dataGrid.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() - 1).focus();
+
+                                int fill = currentFocus.getRow() - startSelY;
+                                for (int y = startSelY; y < fill; y++) {
+                                    dataGrid.tableIndex.get(y).get(currentFocus.getCol() - 1).focus();
+                                }
                             }
                         }
                         break;
@@ -233,6 +290,9 @@ public class WSGrid extends Composite {
 
         addNativePreviewHandler(new Event.NativePreviewHandler() {
             public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
+                final WSCell currentFocus = selectionList.isEmpty() ? null :
+                        selectionList.lastElement();
+
                 if (currentFocus != null && currentFocus.isEdit()) {
                     return;
                 }
@@ -272,7 +332,7 @@ public class WSGrid extends Composite {
     }
 
     public void setCell(int row, int column, WSCellFormatter formatter) {
-        cols = dataGrid.ensureRowsAndCols(row + 1, column + 1);        
+        cols = dataGrid.ensureRowsAndCols(row + 1, column + 1);
         dataGrid.getTableIndex().get(row).get(column).setValue(formatter);
     }
 
@@ -282,6 +342,13 @@ public class WSGrid extends Composite {
 
     public int getCols() {
         return cols;
+    }
+
+    public void blurAll() {
+        for (WSCell cell : selectionList) {
+            cell.blur();
+        }
+        selectionList.clear();
     }
 
     private int checkWidth(int column) {
@@ -687,13 +754,19 @@ public class WSGrid extends Composite {
         }
 
         public void focus() {
-            if (currentFocus != null && currentFocus != this) {
-                currentFocus.blur();
-            }
+
+            WSCell currentFocus = selectionList.isEmpty() ? null :
+                    selectionList.lastElement();
 
             boolean isFocus = currentFocus == this;
 
-            currentFocus = this;
+
+            if (selectionList.isEmpty()) {
+                startSelX = col;
+                startSelY = row;
+            }
+
+            selectionList.add(this);
 
             if (grid.type == GridType.TITLEBAR) {
                 currentFocusRowColSpan = true;
@@ -844,6 +917,7 @@ public class WSGrid extends Composite {
                         return;
                     }
 
+                    if (!event.getMetaKey()) blurAll();
                     focus();
                     break;
 
