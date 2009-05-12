@@ -16,6 +16,7 @@ import static java.lang.Double.parseDouble;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class WSGrid extends Composite {
     private FocusPanel fPanel;
@@ -27,10 +28,11 @@ public class WSGrid extends Composite {
 
     private int cols;
 
+    private Set<WSCell> selectionList;
     private WSCell currentFocus;
     private boolean currentFocusRowColSpan;
+    
     private boolean _leftGrow = false;
-
     private boolean _resizeArmed = false;
     private boolean _resizing = false;
 
