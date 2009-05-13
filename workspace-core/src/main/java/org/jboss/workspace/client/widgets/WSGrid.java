@@ -428,7 +428,6 @@ public class WSGrid extends Composite {
                 setStyleAttribute(scrollPanel.getElement(), "overflowX", "hidden");
 
                 scrollPanel.setHeight("18px");
-
             }
 
             scrollPanel.add(table);
@@ -604,7 +603,6 @@ public class WSGrid extends Composite {
         private boolean _sort_lt(WSCell l, WSCell r) {
             if (l == null) return false;
 
-
             if (l.numeric && r.numeric) {
                 return parseDouble(l.getValue()) < parseDouble(r.getValue());
             }
@@ -666,9 +664,7 @@ public class WSGrid extends Composite {
 
     } //end WSAbstractGrid
 
-
     private boolean _msie_compatibility = getUserAgent().contains("msie");
-
 
     public class WSCell extends Composite {
         private FlowPanel panel;
@@ -759,7 +755,6 @@ public class WSGrid extends Composite {
                     selectionList.lastElement();
 
             boolean isFocus = currentFocus == this;
-
 
             if (selectionList.isEmpty()) {
                 startSelX = col;
@@ -917,7 +912,10 @@ public class WSGrid extends Composite {
                         return;
                     }
 
-                    if (!event.getMetaKey()) blurAll();
+                    if (!event.getMetaKey() && !selectionList.isEmpty() && selectionList.lastElement() != this) {
+                        blurAll();
+                    }
+
                     focus();
                     break;
 
