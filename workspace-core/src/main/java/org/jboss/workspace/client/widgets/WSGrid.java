@@ -203,7 +203,9 @@ public class WSGrid extends Composite {
                     case 63235:
                     case KeyCodes.KEY_RIGHT:
                         if (currentFocus.getCol() < cols - 1) {
-                            if (!event.getNativeEvent().getShiftKey()) blurAll();
+                            if (!event.getNativeEvent().getShiftKey()) {
+                                blurAll();
+                            }
 
                             if (currentFocusRowColSpan) {
                                 titleBar.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() + 1).focus();
@@ -211,23 +213,6 @@ public class WSGrid extends Composite {
                             else {
                                 dataGrid.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() + 1)
                                         .focus();
-                                int fill = currentFocus.getRow() - startSelY;
-                                System.out.println("fill=" + fill);
-                                int y;
-                                if (fill < 0) {
-                                    fill *= -1;
-                                    y = currentFocus.getRow();
-                                }
-                                else {
-                                    y = startSelY;
-                                }
-
-                                fill += y;
-
-                                for (; y < fill; y++) {
-                                    System.out.println("*y:"+y);
-                                    dataGrid.tableIndex.get(y).get(currentFocus.getCol() + 1).focus();
-                                }
                             }
                         }
                         break;
