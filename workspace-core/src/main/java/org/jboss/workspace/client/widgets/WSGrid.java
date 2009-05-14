@@ -7,6 +7,7 @@ import static com.google.gwt.user.client.DOM.setStyleAttribute;
 import com.google.gwt.user.client.Event;
 import static com.google.gwt.user.client.Event.addNativePreviewHandler;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import static com.google.gwt.user.client.ui.RootPanel.getBodyElement;
 import org.jboss.workspace.client.widgets.format.WSCellFormatter;
@@ -163,6 +164,8 @@ public class WSGrid extends Composite {
                     return;
                 }
 
+         //       Window.alert("Keycode: " + event.getNativeKeyCode());
+
                 switch (event.getNativeKeyCode()) {
                     case KeyCodes.KEY_TAB:
                         blurAll();
@@ -256,6 +259,8 @@ public class WSGrid extends Composite {
                     case 63233:
                     case KeyCodes.KEY_ENTER:
                     case KeyCodes.KEY_DOWN:
+                        
+
                         if (currentFocus.getRow() < dataGrid.tableIndex.size()) {
                             if (!event.getNativeEvent().getShiftKey()) blurAll();
 
@@ -318,6 +323,10 @@ public class WSGrid extends Composite {
                                 }
                             }
                         }
+                        break;
+
+                    case 16:
+                    //    Window.alert("SHIFT");
                         break;
 
                     case KeyCodes.KEY_BACKSPACE:
