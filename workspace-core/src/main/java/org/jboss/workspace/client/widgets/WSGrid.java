@@ -191,20 +191,22 @@ public class WSGrid extends Composite {
                             dataGrid.tableIndex.get(currentFocus.getRow() - 1).get(currentFocus.getCol())
                                     .focus();
 
-                            int fill, x;
+                            int fill, x = startSelX;
                             if (fillX == 0) {
                                 fill = fillX = startSelX - currentFocus.getCol();
+                                if (fill > 0) {
+                                    x = currentFocus.getCol();
+                                }
                             }
                             else {
                                 fill = fillX;
+                                if (fill > 0) {
+                                    x = currentFocus.getCol() - fill;
+                                }
                             }
 
                             if (fill < 0) {
                                 fill *= -1;
-                                x = startSelX;
-                            }
-                            else {
-                                x = currentFocus.getCol();
                             }
 
                             for (int fillend = x + fill + 1; x < fillend; x++) {
@@ -227,20 +229,22 @@ public class WSGrid extends Composite {
                                 dataGrid.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() + 1)
                                         .focus();
 
-                                int fill, y;
+                                int fill, y = startSelY;
                                 if (fillY == 0) {
                                     fill = fillY = startSelY - currentFocus.getRow();
+                                    if (fill > 0) {
+                                        y = currentFocus.getRow();
+                                    }
                                 }
                                 else {
                                     fill = fillY;
+                                    if (fill > 0) {
+                                        y = currentFocus.getRow() - fill;
+                                    }
                                 }
 
                                 if (fill < 0) {
                                     fill *= -1;
-                                    y = startSelY;
-                                }
-                                else {
-                                    y = currentFocus.getRow();
                                 }
 
                                 for (int fillend = y + fill + 1; y < fillend; y++) {
@@ -257,20 +261,22 @@ public class WSGrid extends Composite {
 
                             dataGrid.tableIndex.get(currentFocus.getRow() + 1).get(currentFocus.getCol()).focus();
 
-                            int fill, x;
+                            int fill, x = startSelX;
                             if (fillX == 0) {
                                 fill = fillX = startSelX - currentFocus.getCol();
+                                if (fill > 0) {
+                                    x = currentFocus.getCol();
+                                }
                             }
                             else {
                                 fill = fillX;
+                                if (fill > 0) {
+                                    x = currentFocus.getCol() - fill;
+                                }
                             }
 
                             if (fill < 0) {
                                 fill *= -1;
-                                x = startSelX;
-                            }
-                            else {
-                                x = currentFocus.getCol();
                             }
 
                             for (int fillend = x + fill + 1; x < fillend; x++) {
@@ -289,20 +295,22 @@ public class WSGrid extends Composite {
                             else {
                                 dataGrid.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() - 1).focus();
 
-                                int fill, y;
+                                int fill, y = startSelY;
                                 if (fillY == 0) {
                                     fill = fillY = startSelY - currentFocus.getRow();
+                                    if (fill > 0) {
+                                        y = currentFocus.getRow();
+                                    }
                                 }
                                 else {
                                     fill = fillY;
+                                    if (fill > 0) {
+                                        y = currentFocus.getRow() - fill;
+                                    }
                                 }
 
                                 if (fill < 0) {
                                     fill *= -1;
-                                    y = startSelY;
-                                }
-                                else {
-                                    y = currentFocus.getRow();
                                 }
 
                                 for (int fillend = y + fill + 1; y < fillend; y++) {
