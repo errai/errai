@@ -26,6 +26,7 @@ public class WorkspaceSampler implements EntryPoint {
     public void onModuleLoad() {
         Workspace ws = new Workspace();
         final WorkspaceLayout layout = ws.init(null);
+        layout.setRpcSync(false);
 
         layout.addToolSet(new ToolSet() {
             public Tool[] getAllProvidedTools() {

@@ -58,6 +58,8 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
 
     public List<WorkspaceSizeChangeListener> workspaceSizeChangeListers = new ArrayList<WorkspaceSizeChangeListener>();
 
+    private boolean rpcSync = true;
+
     public int tabs = 0;
 
     private int currSizeW;
@@ -424,6 +426,8 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
     }
 
     public void pullSessionState() {
+        if (!rpcSync) return;         
+
         LayoutStateServiceAsync guvSvc = (LayoutStateServiceAsync) create(LayoutStateService.class);
         ServiceDefTarget endpoint = (ServiceDefTarget) guvSvc;
         endpoint.setServiceEntryPoint(getModuleBaseURL() + "workspaceUIstate");
@@ -453,6 +457,8 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
     }
 
     public void notifySessionState(StatePacket packet) {
+        if (!rpcSync) return;
+
         LayoutStateServiceAsync guvSvc = (LayoutStateServiceAsync) create(LayoutStateService.class);
         ServiceDefTarget endpoint = (ServiceDefTarget) guvSvc;
         endpoint.setServiceEntryPoint(getModuleBaseURL() + "workspaceUIstate");
@@ -469,6 +475,9 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
     }
 
     public void deleteSessionState(StatePacket packet) {
+        if (!rpcSync) return;
+
+
         LayoutStateServiceAsync guvSvc = (LayoutStateServiceAsync) create(LayoutStateService.class);
         ServiceDefTarget endpoint = (ServiceDefTarget) guvSvc;
         endpoint.setServiceEntryPoint(getModuleBaseURL() + "workspaceUIstate");
@@ -560,6 +569,14 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
 
     public int getNavPanelOffsetWidth() {
         return navigation.getOffsetWidth();
+    }
+
+    public boolean isRpcSync() {
+        return rpcSync;
+    }
+
+    public void setRpcSync(boolean rpcSync) {
+        this.rpcSync = rpcSync;
     }
 
     public void pack() {
