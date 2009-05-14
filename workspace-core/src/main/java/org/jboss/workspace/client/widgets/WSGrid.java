@@ -191,10 +191,23 @@ public class WSGrid extends Composite {
                             dataGrid.tableIndex.get(currentFocus.getRow() - 1).get(currentFocus.getCol())
                                     .focus();
 
-                            int fill = startSelX - currentFocus.getCol();
+                            int fill, x;
+                            if (fillX == 0) {
+                                fill = fillX = startSelX - currentFocus.getCol();
+                            }
+                            else {
+                                fill = fillX;
+                            }
 
+                            if (fill < 0) {
+                                fill *= -1;
+                                x = startSelX;
+                            }
+                            else {
+                                x = currentFocus.getCol();
+                            }
 
-                            for (int x = currentFocus.getCol(); x < fill; x++) {
+                            for (int fillend = x + fill + 1; x < fillend; x++) {
                                 dataGrid.tableIndex.get(currentFocus.getRow() - 1).get(x).focus();
                             }
 
@@ -213,6 +226,26 @@ public class WSGrid extends Composite {
                             else {
                                 dataGrid.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() + 1)
                                         .focus();
+
+                                int fill, y;
+                                if (fillY == 0) {
+                                    fill = fillY = startSelY - currentFocus.getRow();
+                                }
+                                else {
+                                    fill = fillY;
+                                }
+
+                                if (fill < 0) {
+                                    fill *= -1;
+                                    y = startSelY;
+                                }
+                                else {
+                                    y = currentFocus.getRow();
+                                }
+
+                                for (int fillend = y + fill + 1; y < fillend; y++) {
+                                    dataGrid.tableIndex.get(y).get(currentFocus.getCol() + 1).focus();
+                                }
                             }
                         }
                         break;
@@ -224,8 +257,23 @@ public class WSGrid extends Composite {
 
                             dataGrid.tableIndex.get(currentFocus.getRow() + 1).get(currentFocus.getCol()).focus();
 
-                            int fill = currentFocus.getCol() - startSelX;
-                            for (int x = startSelX; x < fill; x++) {
+                            int fill, x;
+                            if (fillX == 0) {
+                                fill = fillX = startSelX - currentFocus.getCol();
+                            }
+                            else {
+                                fill = fillX;
+                            }
+
+                            if (fill < 0) {
+                                fill *= -1;
+                                x = startSelX;
+                            }
+                            else {
+                                x = currentFocus.getCol();
+                            }
+
+                            for (int fillend = x + fill + 1; x < fillend; x++) {
                                 dataGrid.tableIndex.get(currentFocus.getRow() + 1).get(x).focus();
                             }
                         }
@@ -241,8 +289,23 @@ public class WSGrid extends Composite {
                             else {
                                 dataGrid.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() - 1).focus();
 
-                                int fill = currentFocus.getRow() - startSelY;
-                                for (int y = startSelY; y < fill; y++) {
+                                int fill, y;
+                                if (fillY == 0) {
+                                    fill = fillY = startSelY - currentFocus.getRow();
+                                }
+                                else {
+                                    fill = fillY;
+                                }
+
+                                if (fill < 0) {
+                                    fill *= -1;
+                                    y = startSelY;
+                                }
+                                else {
+                                    y = currentFocus.getRow();
+                                }
+
+                                for (int fillend = y + fill + 1; y < fillend; y++) {
                                     dataGrid.tableIndex.get(y).get(currentFocus.getCol() - 1).focus();
                                 }
                             }
@@ -334,6 +397,8 @@ public class WSGrid extends Composite {
             cell.blur();
         }
         selectionList.clear();
+        fillX = 0;
+        fillY = 0;
     }
 
     private int checkWidth(int column) {
@@ -735,7 +800,6 @@ public class WSGrid extends Composite {
         }
 
         public void focus() {
-
             WSCell currentFocus = selectionList.isEmpty() ? null :
                     selectionList.lastElement();
 
