@@ -28,6 +28,10 @@ public class WSCellSimpleTextCell extends WSCellFormatter {
         textBox.addKeyPressHandler(new KeyPressHandler() {
             public void onKeyPress(KeyPressEvent event) {
                 switch (event.getCharCode()) {
+                    case KeyCodes.KEY_ESCAPE:
+                        editCellReference.stopedit();
+                        wsCellReference.focus();
+                        break;
                     case KeyCodes.KEY_TAB:
                         editCellReference.stopedit();
                         break;

@@ -163,8 +163,6 @@ public class WSGrid extends Composite {
                     return;
                 }
 
-         //       Window.alert("Keycode: " + event.getNativeKeyCode());
-
                 switch (event.getNativeKeyCode()) {
                     case KeyCodes.KEY_TAB:
                         blurAll();

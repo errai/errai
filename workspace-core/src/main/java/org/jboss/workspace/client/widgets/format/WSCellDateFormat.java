@@ -4,6 +4,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import static com.google.gwt.i18n.client.DateTimeFormat.getShortDateFormat;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -18,6 +19,7 @@ import java.util.Date;
 public class WSCellDateFormat extends WSCellFormatter {
     private HTML html;
     private Date date;
+    private String formatPattern = "MMM dd, yyyy";
 
     private static DatePicker datePicker;
     private static WSCellDateFormat editCellReference;
@@ -35,6 +37,7 @@ public class WSCellDateFormat extends WSCellFormatter {
                 editCellReference.stopedit();
             }
         });
+        
     }
 
     public WSCellDateFormat(String value) {
@@ -46,6 +49,14 @@ public class WSCellDateFormat extends WSCellFormatter {
         this.date = date;
         this.html = new HTML();
         setValue(date);
+    }
+
+    public String getFormatPattern() {
+        return formatPattern;
+    }
+
+    public void setFormatPattern(String formatPattern) {
+        this.formatPattern = formatPattern;
     }
 
     @Override
@@ -65,7 +76,7 @@ public class WSCellDateFormat extends WSCellFormatter {
     }
 
     public void setValue(Date date) {
-        html.setHTML(getShortDateFormat().format(date));
+        html.setHTML(DateTimeFormat.getFormat(formatPattern).format(date));
     }
 
     public String getTextValue() {
@@ -77,6 +88,7 @@ public class WSCellDateFormat extends WSCellFormatter {
         editCellReference = this;
 
         datePicker.setValue(date);
+        datePicker.setCurrentMonth(date);
 
         Style s = datePicker.getElement().getStyle();
 
