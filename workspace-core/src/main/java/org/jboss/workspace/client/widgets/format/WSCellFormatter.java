@@ -10,7 +10,7 @@ public abstract class WSCellFormatter {
 
     public abstract void setValue(String value);
     public abstract String getTextValue();
-    public abstract Widget getWidget();
+    public abstract Widget getWidget(WSGrid grid);
     public abstract void edit(WSGrid.WSCell element);
     public abstract void stopedit();
 }

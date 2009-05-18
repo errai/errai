@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.*;
 import static com.google.gwt.user.client.ui.RootPanel.getBodyElement;
 import org.jboss.workspace.client.widgets.format.WSCellFormatter;
 import org.jboss.workspace.client.widgets.format.WSCellSimpleTextCell;
+import org.jboss.workspace.client.widgets.format.WSCellTitle;
 
 import static java.lang.Double.parseDouble;
 import java.util.ArrayList;
@@ -29,6 +30,11 @@ public class WSGrid extends Composite {
     private int cols;
 
     private Stack<WSCell> selectionList = new Stack<WSCell>();
+    private ArrayList<Integer> colSizes = new ArrayList<Integer>();
+    private Map<Integer, Boolean> sortedColumns = new HashMap<Integer, Boolean>();
+
+    private WSCell sortedColumnHeader;
+
     private int startSelX;
     private int startSelY;
     private int fillX;
@@ -48,8 +54,6 @@ public class WSGrid extends Composite {
         }
     };
 
-    private ArrayList<Integer> colSizes = new ArrayList<Integer>();
-    private Map<Integer, Boolean> sortedColumns = new HashMap<Integer, Boolean>();
 
     public WSGrid() {
         this(true);
@@ -333,6 +337,14 @@ public class WSGrid extends Composite {
                                 c.setValue("");
                             }
                         }
+                        else {
+                            /**
+                             * Wipe the whole column.
+                             */
+                            for (int i = 0; i < dataGrid.tableIndex.size(); i++) {
+                                dataGrid.tableIndex.get(i).get(currentFocus.getCol()).setValue("");
+                            }
+                        }
                         break;
 
                     case 32: // spacebar
@@ -388,7 +400,8 @@ public class WSGrid extends Composite {
 
     public void setColumnHeader(int row, int column, String html) {
         cols = titleBar.ensureRowsAndCols(row + 1, column + 1);
-        titleBar.getTableIndex().get(row).get(column).setValue(html);
+        WSCell wsc = titleBar.getTableIndex().get(row).get(column);
+        wsc.setValue(new WSCellTitle(wsc, html));
     }
 
     public void setCell(int row, int column, String html) {
@@ -774,7 +787,7 @@ public class WSGrid extends Composite {
                 }
             }
 
-            panel.add(cellFormat.getWidget());
+            panel.add(cellFormat.getWidget(wsGrid));
 
             this.row = row;
             this.col = column;
@@ -836,14 +849,19 @@ public class WSGrid extends Composite {
                     selectColumn(col);
                 }
                 else if (!_resizeArmed) {
-                    boolean asc;
-                    if (sortedColumns.containsKey(col)) {
-                        sortedColumns.put(col, asc = !sortedColumns.get(col));
+                    boolean asc = getColumnSortOrder(col);
+
+                    if (sortedColumnHeader != null) {
+                        WSCell old = sortedColumnHeader;
+                        sortedColumnHeader = this;
+                        old.cellFormat.getWidget(wsGrid);
                     }
                     else {
-                        sortedColumns.put(col, asc = true);
+                        sortedColumnHeader = this;
                     }
+                    cellFormat.getWidget(wsGrid);
 
+                    sortedColumns.put(col, !asc);
                     dataGrid.sort(col, asc);
                 }
             }
@@ -918,7 +936,7 @@ public class WSGrid extends Composite {
             else {
                 cellFormat.setValue(html);
                 panel.clear();
-                panel.add(cellFormat.getWidget());
+                panel.add(cellFormat.getWidget(wsGrid));
             }
             numeric = isNumeric(html);
 
@@ -930,7 +948,7 @@ public class WSGrid extends Composite {
             }
             this.cellFormat = formatter;
             panel.clear();
-            panel.add(formatter.getWidget());
+            panel.add(formatter.getWidget(wsGrid));
 
             numeric = isNumeric(formatter.getTextValue());
         }
@@ -1040,6 +1058,28 @@ public class WSGrid extends Composite {
         dataGrid.getScrollPanel().setWidth(newWidth + "px");
     }
 
+    public Map<Integer, Boolean> getSortedColumns() {
+        return sortedColumns;
+    }
+
+    public WSCell getSortedColumnHeader() {
+        return sortedColumnHeader;
+    }
+
+    /**
+     * @param col
+     * @return true if ascending
+     */
+    public boolean getColumnSortOrder(int col) {
+        if (sortedColumns.containsKey(col)) {
+            return sortedColumns.get(col);
+        }
+        else {
+            sortedColumns.put(col, true);
+            return true;
+        }
+    }
+
     @Override
     protected void onAttach() {
         int titleHeight = titleBar.getOffsetHeight();
@@ -1048,6 +1088,7 @@ public class WSGrid extends Composite {
 
         setHeight("450px");
         setWidth("100%");
+        dataGrid.setHeight("450px");
         dataGrid.setHeight("450px");
 
         super.onAttach();

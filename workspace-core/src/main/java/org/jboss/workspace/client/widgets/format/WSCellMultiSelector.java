@@ -65,7 +65,7 @@ public class WSCellMultiSelector extends WSCellFormatter {
         return selection.getHTML();
     }
 
-    public Widget getWidget() {
+    public Widget getWidget(WSGrid wsGrid) {
         return selection;
     }
 

@@ -40,7 +40,7 @@ public class WSCellSimpleTextCell extends WSCellFormatter {
                         break;
                 }
             }
-        });
+        });                                                                                                                                               
 
     }
 
@@ -62,7 +62,7 @@ public class WSCellSimpleTextCell extends WSCellFormatter {
         return this.html.getHTML();
     }
 
-    public Widget getWidget() {
+    public Widget getWidget(WSGrid wsGrid) {
         return html;
     }
 

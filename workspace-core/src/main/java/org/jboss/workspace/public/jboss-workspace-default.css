@@ -599,8 +599,8 @@ span {
     margin: 0;
     padding: 0;
     height: 18px;
-
 }
+
 
 .WSGrid {
     border-collapse: collapse;
@@ -634,6 +634,8 @@ span {
 
     overflow:hidden;
 }
+
+
 
 .WSCell-panel {
     overflow: auto;

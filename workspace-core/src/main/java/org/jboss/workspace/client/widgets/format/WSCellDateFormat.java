@@ -60,7 +60,7 @@ public class WSCellDateFormat extends WSCellFormatter {
     }
 
     @Override
-    public Widget getWidget() {
+    public Widget getWidget(WSGrid wsGrid) {
         return html;
     }
 
