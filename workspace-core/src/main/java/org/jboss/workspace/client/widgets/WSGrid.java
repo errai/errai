@@ -329,7 +329,9 @@ public class WSGrid extends Composite {
                     case 63272:
                     case KeyCodes.KEY_DELETE:
                         if (currentFocus.grid.type != GridType.TITLEBAR) {
-                            currentFocus.setValue("");
+                            for (WSCell c : selectionList) {
+                                c.setValue("");
+                            }
                         }
                         break;
 

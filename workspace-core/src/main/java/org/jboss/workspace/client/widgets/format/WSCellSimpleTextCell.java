@@ -54,6 +54,7 @@ public class WSCellSimpleTextCell extends WSCellFormatter {
     }
 
     public void setValue(String value) {
+        if (readonly) return;
         this.html.setHTML(value);
     }
 
