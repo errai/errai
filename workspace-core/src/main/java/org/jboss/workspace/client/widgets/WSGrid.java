@@ -256,7 +256,7 @@ public class WSGrid extends Composite {
                     case 63233:
                     case KeyCodes.KEY_ENTER:
                     case KeyCodes.KEY_DOWN:
-                        
+
 
                         if (currentFocus.getRow() < dataGrid.tableIndex.size()) {
                             if (!event.getNativeEvent().getShiftKey()) blurAll();
@@ -323,13 +323,14 @@ public class WSGrid extends Composite {
                         break;
 
                     case 16:
-                    //    Window.alert("SHIFT");
                         break;
 
                     case KeyCodes.KEY_BACKSPACE:
                     case 63272:
                     case KeyCodes.KEY_DELETE:
-                        currentFocus.setValue("");
+                        if (currentFocus.grid.type != GridType.TITLEBAR) {
+                            currentFocus.setValue("");
+                        }
                         break;
 
                     case 32: // spacebar
