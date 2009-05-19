@@ -32,8 +32,6 @@ public class WSExtVerticalPanel extends VerticalPanel {
     public void onBrowserEvent(Event event) {
         if (!armed) return;
 
-
-
         switch (event.getTypeInt()) {
             case Event.ONMOUSEOVER:
                 break;

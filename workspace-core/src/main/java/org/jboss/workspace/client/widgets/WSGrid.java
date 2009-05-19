@@ -260,8 +260,6 @@ public class WSGrid extends Composite {
                     case 63233:
                     case KeyCodes.KEY_ENTER:
                     case KeyCodes.KEY_DOWN:
-
-
                         if (currentFocus.getRow() < dataGrid.tableIndex.size()-1) {
                             if (!event.getNativeEvent().getShiftKey()) blurAll();
 
@@ -1069,7 +1067,7 @@ public class WSGrid extends Composite {
     }
 
     /**
-     * @param col
+     * @param col -
      * @return true if ascending
      */
     public boolean getColumnSortOrder(int col) {

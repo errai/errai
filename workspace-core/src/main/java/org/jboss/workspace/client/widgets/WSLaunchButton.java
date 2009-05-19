@@ -38,9 +38,7 @@ public class WSLaunchButton extends HTML {
 
         setHTML(createButtonMarkup());
 
-        //  addStyleName(CSS_NAME);
         setStylePrimaryName(CSS_NAME);
-
     }
 
 

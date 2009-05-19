@@ -351,6 +351,10 @@ span {
     user-select: none;
 }
 
+.gwt-ListBox {
+    font-size: 11px;
+}
+
 .workspace-TabLabelText {
     font-size: 11px;
     padding-right: 10px;

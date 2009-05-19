@@ -24,7 +24,6 @@ public class WSCellMultiSelector extends WSCellFormatter {
         listBox.setVisible(false);
         listBox.getElement().getStyle().setProperty("position", "absolute");
 
-
         RootPanel.get().add(listBox);
 
         listBox.addChangeHandler(new ChangeHandler() {
