@@ -83,7 +83,7 @@ public class WSCellDateFormat extends WSCellFormatter {
         return valueOf(date.getTime());
     }
 
-    public void edit(WSGrid.WSCell element) {
+    public boolean edit(WSGrid.WSCell element) {
         wsCellReference = element;
         editCellReference = this;
 
@@ -102,6 +102,7 @@ public class WSCellDateFormat extends WSCellFormatter {
         s.setProperty("top", (element.getAbsoluteTop() + element.getOffsetHeight()) + "px");
 
         datePicker.setVisible(true);
+        return true;
     }
 
     public void stopedit() {

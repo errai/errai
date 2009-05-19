@@ -66,8 +66,8 @@ public class WSCellSimpleTextCell extends WSCellFormatter {
         return html;
     }
 
-    public void edit(WSGrid.WSCell element) {
-        if (readonly) return;
+    public boolean edit(WSGrid.WSCell element) {
+        if (readonly) return false;
         
         editCellReference = this;
         wsCellReference = element;
@@ -84,6 +84,8 @@ public class WSCellSimpleTextCell extends WSCellFormatter {
 
         textBox.setCursorPos(textBox.getText().length());
         textBox.setFocus(true);
+
+        return true;
     }
 
     public void stopedit() {

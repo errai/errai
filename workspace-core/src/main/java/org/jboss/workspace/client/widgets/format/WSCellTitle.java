@@ -50,7 +50,8 @@ public class WSCellTitle extends WSCellFormatter {
         return hPanel;
     }
 
-    public void edit(WSGrid.WSCell element) {
+    public boolean edit(WSGrid.WSCell element) {
+        return false;
     }
 
     public void stopedit() {

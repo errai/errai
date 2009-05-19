@@ -68,7 +68,7 @@ public class WSCellMultiSelector extends WSCellFormatter {
         return selection;
     }
 
-    public void edit(WSGrid.WSCell element) {
+    public boolean edit(WSGrid.WSCell element) {
         wsCellReference = element;
         editCellReference = this;
 
@@ -88,6 +88,7 @@ public class WSCellMultiSelector extends WSCellFormatter {
         
         listBox.setVisible(true);
         listBox.setFocus(true);
+        return true;
     }
 
     public void stopedit() {
