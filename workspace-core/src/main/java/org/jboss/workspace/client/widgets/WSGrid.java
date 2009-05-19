@@ -7,7 +7,6 @@ import static com.google.gwt.user.client.DOM.setStyleAttribute;
 import com.google.gwt.user.client.Event;
 import static com.google.gwt.user.client.Event.addNativePreviewHandler;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import static com.google.gwt.user.client.ui.RootPanel.getBodyElement;
 import org.jboss.workspace.client.widgets.format.WSCellFormatter;
@@ -263,7 +262,7 @@ public class WSGrid extends Composite {
                     case KeyCodes.KEY_DOWN:
 
 
-                        if (currentFocus.getRow() < dataGrid.tableIndex.size()) {
+                        if (currentFocus.getRow() < dataGrid.tableIndex.size()-1) {
                             if (!event.getNativeEvent().getShiftKey()) blurAll();
 
                             dataGrid.tableIndex.get(currentFocus.getRow() + 1).get(currentFocus.getCol()).focus();
@@ -360,9 +359,7 @@ public class WSGrid extends Composite {
                         t.schedule(15);
                         break;
 
-                    default:
-                        Window.alert("Keycode[" + event.getNativeKeyCode() + "]");
-                        
+                    default:                        
                         currentFocus.setValue("");
                         currentFocus.edit();
                 }
