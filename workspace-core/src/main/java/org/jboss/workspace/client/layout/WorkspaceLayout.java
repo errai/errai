@@ -477,7 +477,6 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
     public void deleteSessionState(StatePacket packet) {
         if (!rpcSync) return;
 
-
         LayoutStateServiceAsync guvSvc = (LayoutStateServiceAsync) create(LayoutStateService.class);
         ServiceDefTarget endpoint = (ServiceDefTarget) guvSvc;
         endpoint.setServiceEntryPoint(getModuleBaseURL() + "workspaceUIstate");

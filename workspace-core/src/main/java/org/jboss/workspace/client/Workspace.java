@@ -3,7 +3,6 @@ package org.jboss.workspace.client;
 import com.allen_sauer.gwt.dnd.client.PickupDragController;
 import com.google.gwt.core.client.EntryPoint;
 import static com.google.gwt.core.client.GWT.create;
-import com.google.gwt.user.client.Window;
 import static com.google.gwt.user.client.Window.enableScrolling;
 import com.google.gwt.user.client.ui.RootPanel;
 import org.gwt.mosaic.ui.client.Viewport;
