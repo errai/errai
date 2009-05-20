@@ -809,7 +809,6 @@ public class WSGrid extends Composite {
             if (_msie_compatibility && text.equals("&nbsp;")) cellFormat.setValue("");
 
             edit = cellFormat.edit(this);
-         //   edit = true;
         }
 
         public void stopedit() {
