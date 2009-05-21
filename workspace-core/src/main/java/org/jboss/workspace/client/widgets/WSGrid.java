@@ -431,7 +431,6 @@ public class WSGrid extends Composite {
             }
         });
 
-
         addNativePreviewHandler(new Event.NativePreviewHandler() {
             public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
                 final WSCell currentFocus = selectionList.isEmpty() ? null :
@@ -498,7 +497,7 @@ public class WSGrid extends Composite {
         stk.addAll(selectionList);
 
         for (WSCell cell : stk) {
-            cell.blur();
+            cell.blur();                                    
         }
         selectionList.clear();
         fillX = 0;

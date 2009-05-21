@@ -118,8 +118,6 @@ public class WorkspaceSampler implements EntryPoint {
                                 wsGrid.setCell(4, 2, new WSCellMultiSelector(userTypes, "Super User"));
                                 wsGrid.setCell(4, 3, new WSCellDateFormat(getShortDateFormat().parse("7/15/06")));
 
-                                wsGrid.setCell(200, 0, new WSCellSimpleTextCell("2000", true));
-
                                 layout.addWorkspaceSizeChangeListener(new WorkspaceSizeChangeListener() {
                                     public void onSizeChange(int deltaW, int actualW, int deltaH, int actualH) {
                                         wsGrid.setPreciseHeight(actualH - layout.getAppPanelOffsetHeight() - 8);
