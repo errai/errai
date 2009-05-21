@@ -1,6 +1,7 @@
 package org.jboss.workspace.client.widgets;
 
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.DOM;
 import static com.google.gwt.user.client.DOM.setStyleAttribute;
@@ -45,6 +46,7 @@ public class WSGrid extends Composite {
     private boolean _leftGrow = false;
     private boolean _resizeArmed = false;
     private boolean _resizing = false;
+    private boolean _rangeSelect = false;
 
     private WSGrid wsGrid = this;
     private PopupPanel resizeLine = new PopupPanel() {
@@ -430,6 +432,14 @@ public class WSGrid extends Composite {
                 }
             }
         });
+
+        fPanel.addBlurHandler(new BlurHandler() {
+            public void onBlur(BlurEvent event) {
+                _rangeSelect = false;
+            }
+        });
+
+
 
         addNativePreviewHandler(new Event.NativePreviewHandler() {
             public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
@@ -992,6 +1002,33 @@ public class WSGrid extends Composite {
             addStyleDependentName("selected");
         }
 
+        public void focusRange() {
+
+            fillX = col - startSelX;
+            fillY = row - startSelY;
+
+            int startX = startSelX;
+            int startY = startSelY;
+
+            if (fillX < 0) {
+                startX = startSelX + fillX;
+                fillX *= -1;
+            }
+            if (fillY < 0) {
+                startY = startSelY + fillY;
+                fillY *= -1;
+            }
+
+            int endX = startX + fillX + 1;
+            int endY = startY + fillY + 1;
+
+            for (int x = startX; x < endX; x++) {
+                for (int y = startY; y < endY; y++) {
+                    dataGrid.tableIndex.get(y).get(x).focus();
+                }
+            }
+        }
+
         public int getRow() {
             return row;
         }
@@ -1044,6 +1081,10 @@ public class WSGrid extends Composite {
             switch (event.getTypeInt()) {
                 case Event.ONMOUSEOVER:
                     if (!_resizing) addStyleDependentName("hover");
+                    if (_rangeSelect) {
+                        focusRange();
+                    }
+
                     break;
                 case Event.ONMOUSEOUT:
                     if (!_resizing) removeStyleDependentName("hover");
@@ -1067,46 +1108,31 @@ public class WSGrid extends Composite {
                             _resizeArmed = false;
                         }
                     }
+
                     break;
                 case Event.ONMOUSEDOWN:
                     if (edit) {
                         return;
                     }
 
+                    _rangeSelect = true;
 
                     if (event.getShiftKey()) {
-                        fillX = col - startSelX;
-                        fillY = row - startSelY;
-
-                        int startX = startSelX;
-                        int startY = startSelY;
-
-                        if (fillX < 0) {
-                            startX = startSelX + fillX;
-                            fillX *= -1;
-                        }
-                        if (fillY < 0) {
-                            startY = startSelY + fillY;
-                            fillY *= -1;
-                        }
-
-                        int endX = startX + fillX + 1;
-                        int endY = startY + fillY + 1;
-
-                        for (int x = startX; x < endX; x++) {
-                            for (int y = startY; y < endY; y++) {
-                                dataGrid.tableIndex.get(y).get(x).focus();
-                            }
-                        }
+                        focusRange();
                         break;
-
                     }
-                    else if (!event.getMetaKey() && !event.getCtrlKey() && !selectionList.isEmpty() && selectionList.lastElement() != this) {
+                    else if (!event.getMetaKey() && !event.getCtrlKey()
+                            && !selectionList.isEmpty() && selectionList.lastElement() != this) {
                         blurAll();
                     }
 
-
                     focus();
+
+                    break;
+
+                case Event.ONMOUSEUP:
+                    System.out.println("MO_FIRE");
+                    _rangeSelect = false;
                     break;
 
                 case Event.ONFOCUS:
