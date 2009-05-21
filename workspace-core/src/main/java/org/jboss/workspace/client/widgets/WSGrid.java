@@ -497,7 +497,7 @@ public class WSGrid extends Composite {
         stk.addAll(selectionList);
 
         for (WSCell cell : stk) {
-            cell.blur();                                    
+            cell.blur();
         }
         selectionList.clear();
         fillX = 0;
@@ -1073,9 +1073,38 @@ public class WSGrid extends Composite {
                         return;
                     }
 
-                    if (!event.getMetaKey() && !event.getCtrlKey() && !selectionList.isEmpty() && selectionList.lastElement() != this) {
+
+                    if (event.getShiftKey()) {
+                        fillX = col - startSelX;
+                        fillY = row - startSelY;
+
+                        int startX = startSelX;
+                        int startY = startSelY;
+
+                        if (fillX < 0) {
+                            startX = startSelX + fillX;
+                            fillX *= -1;
+                        }
+                        if (fillY < 0) {
+                            startY = startSelY + fillY;
+                            fillY *= -1;
+                        }
+
+                        int endX = startX + fillX + 1;
+                        int endY = startY + fillY + 1;
+
+                        for (int x = startX; x < endX; x++) {
+                            for (int y = startY; y < endY; y++) {
+                                dataGrid.tableIndex.get(y).get(x).focus();
+                            }
+                        }
+                        break;
+
+                    }
+                    else if (!event.getMetaKey() && !event.getCtrlKey() && !selectionList.isEmpty() && selectionList.lastElement() != this) {
                         blurAll();
                     }
+
 
                     focus();
                     break;
