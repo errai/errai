@@ -472,12 +472,16 @@ public class WSGrid extends Composite {
     }
 
     public void setCell(int row, int column, String html) {
-        cols = dataGrid.ensureRowsAndCols(row + 1, column + 1);
+        int col = dataGrid.ensureRowsAndCols(row + 1, column + 1);
+        if (col > cols) cols = col;
+
         dataGrid.getTableIndex().get(row).get(column).setValue(html);
     }
 
     public void setCell(int row, int column, WSCellFormatter formatter) {
-        cols = dataGrid.ensureRowsAndCols(row + 1, column + 1);
+        int col = dataGrid.ensureRowsAndCols(row + 1, column + 1);
+        if (col > cols) cols = col;
+
         dataGrid.getTableIndex().get(row).get(column).setValue(formatter);
     }
 
