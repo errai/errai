@@ -1131,7 +1131,6 @@ public class WSGrid extends Composite {
                     break;
 
                 case Event.ONMOUSEUP:
-                    System.out.println("MO_FIRE");
                     _rangeSelect = false;
                     break;
 

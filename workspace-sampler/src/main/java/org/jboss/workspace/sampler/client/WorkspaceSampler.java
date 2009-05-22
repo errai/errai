@@ -37,7 +37,7 @@ public class WorkspaceSampler implements EntryPoint {
                             }
 
                             public String getName() {
-                                return "Hello World";
+                                return "Service Control";
                             }
 
                             public String getId() {
