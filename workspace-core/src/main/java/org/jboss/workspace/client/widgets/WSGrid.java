@@ -1,7 +1,6 @@
 package org.jboss.workspace.client.widgets;
 
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.DOM;
 import static com.google.gwt.user.client.DOM.setStyleAttribute;
@@ -157,6 +156,8 @@ public class WSGrid extends Composite {
                     titleBar.getScrollPanel().setWidth(currTableWidth - 20 + "px");
                     dataGrid.getScrollPanel().setWidth(currTableWidth + "px");
                 }
+
+                _rangeSelect = false;
             }
         });
 
@@ -201,19 +202,9 @@ public class WSGrid extends Composite {
 
                                 if (fillX == 0) {
                                     fill = fillX = startSelX - currentFocus.getCol();
-
-//                                    System.out.println("[KEY_UP_1 - startSelX: " + startSelX + "; col:"
-//                                            + currentFocus.getCol() + "; row: " + currentFocus.getRow()
-//                                            + "; fillX: " + fillX + "; fillY: " + fillY + "]");
-
                                 }
                                 else {
                                     fill = fillX;
-
-//                                    System.out.println("[KEY_UP_2 - startSelX: " + startSelX + "; col:"
-//                                            + currentFocus.getCol() + "; row: " + currentFocus.getRow()
-//                                            + "; fillX: " + fillX + "; fillY: " + fillY + "]");
-
                                 }
 
                                 if (fill < 0) {
@@ -254,17 +245,9 @@ public class WSGrid extends Composite {
                                     int fill;
                                     if (fillY == 0) {
                                         fill = fillY = currentFocus.getRow() - startSelY;
-
-//                                        System.out.println("[KEY_RIGHT_1 - startSelY: " + startSelY + "; col:"
-//                                                + currentFocus.getCol() + "; row: " + currentFocus.getRow()
-//                                                + "; fillX: " + fillX + "; fillY: " + fillY + "]");
-
                                     }
                                     else {
                                         fill = fillY;
-//                                        System.out.println("[KEY_RIGHT_2 - startSelY: " + startSelY + "; col:"
-//                                                + currentFocus.getCol() + "; row: " + currentFocus.getRow()
-//                                                + "; fillX: " + fillX + "; fillY: " + fillY + "]");
                                     }
 
                                     if (fill < 0) {
@@ -304,16 +287,9 @@ public class WSGrid extends Composite {
 
                                 if (fillX == 0) {
                                     fill = fillX = currentFocus.getCol() - startSelX;
-//                                    System.out.println("[KEY_DOWN_1 - startSelX: " + startSelX + "; col:"
-//                                            + currentFocus.getCol() + "; row: " + currentFocus.getRow()
-//                                            + "; fillX: " + fillX + "; fillY: " + fillY + "]");
                                 }
                                 else {
                                     fill = fillX;
-
-//                                    System.out.println("[KEY_DOWN_2 - startSelX: " + startSelX + "; col:"
-//                                            + currentFocus.getCol() + "; row: " + currentFocus.getRow()
-//                                            + "; fillX: " + fillX + "; fillY: " + fillY + "]");
                                 }
 
                                 if (fill < 0) {
@@ -354,17 +330,9 @@ public class WSGrid extends Composite {
 
                                     if (fillY == 0) {
                                         fill = fillY = startSelY - currentFocus.getRow();
-//                                        System.out.println("[KEY_LEFT_1 - startSelY: " + startSelY + "; col:"
-//                                                + currentFocus.getCol() + "; row: " + currentFocus.getRow()
-//                                                + "; fillX: " + fillX + "; fillY: " + fillY + "]");
-
                                     }
                                     else {
                                         fill = fillY;
-
-//                                        System.out.println("[KEY_LEFT_2 - startSelY: " + startSelY + "; col:" + currentFocus.getCol()
-//                                                + "; row: " + currentFocus.getRow()
-//                                                + "; fillX: " + fillX + "; fillY: " + fillY + "]");
                                     }
 
                                     if (fill < 0) {
@@ -432,14 +400,6 @@ public class WSGrid extends Composite {
                 }
             }
         });
-
-        fPanel.addBlurHandler(new BlurHandler() {
-            public void onBlur(BlurEvent event) {
-                _rangeSelect = false;
-            }
-        });
-
-
 
         addNativePreviewHandler(new Event.NativePreviewHandler() {
             public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
@@ -1080,9 +1040,11 @@ public class WSGrid extends Composite {
 
             switch (event.getTypeInt()) {
                 case Event.ONMOUSEOVER:
-                    if (!_resizing) addStyleDependentName("hover");
-                    if (_rangeSelect) {
-                        focusRange();
+                    if (!_resizing) {
+                        addStyleDependentName("hover");
+                        if (_rangeSelect) {
+                            focusRange();
+                        }
                     }
 
                     break;
