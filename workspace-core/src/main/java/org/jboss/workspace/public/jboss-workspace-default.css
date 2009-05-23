@@ -639,8 +639,6 @@ span {
     overflow:hidden;
 }
 
-
-
 .WSCell-panel {
     overflow: auto;
     height: 12pt;
@@ -705,4 +703,19 @@ span {
 .WSGrid-resize-line {
     border-left: 1px solid lightblue;
     height: 100%;
+}
+
+.WS-WorkPanel-title {
+    background: url('images/ui/layout/section-header.png') repeat-x;
+    border-bottom: 1px #cccccc solid;
+    vertical-align: middle;
+
+    font-size: 11px;
+    font-weight: bold;
+    color: #999999;
+
+}
+
+.WS-WorkPanel-area {
+    background: url('images/bgfade.png') repeat-x;
 }

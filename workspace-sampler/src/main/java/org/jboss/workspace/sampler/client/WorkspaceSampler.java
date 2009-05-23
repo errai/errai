@@ -16,6 +16,7 @@ import org.jboss.workspace.client.widgets.WSGrid;
 import org.jboss.workspace.client.widgets.format.WSCellDateFormat;
 import org.jboss.workspace.client.widgets.format.WSCellMultiSelector;
 import org.jboss.workspace.client.widgets.format.WSCellSimpleTextCell;
+import org.jboss.workspace.sampler.client.servicecontrol.ServiceControlTool;
 
 import java.util.Date;
 import java.util.LinkedHashSet;
@@ -31,27 +32,8 @@ public class WorkspaceSampler implements EntryPoint {
         layout.addToolSet(new ToolSet() {
             public Tool[] getAllProvidedTools() {
                 return new Tool[]{
-                        new Tool() {
-                            public Widget getWidget(StatePacket packet) {
-                                return new HTML("Hello World");
-                            }
-
-                            public String getName() {
-                                return "Service Control";
-                            }
-
-                            public String getId() {
-                                return "helloWorldTool";
-                            }
-
-                            public Image getIcon() {
-                                return null;
-                            }
-
-                            public boolean multipleAllowed() {
-                                return false;
-                            }
-                        },
+                        new ServiceControlTool()
+                        ,
 
                         new Tool() {
                             public Widget getWidget(StatePacket packet) {

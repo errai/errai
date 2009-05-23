@@ -16,6 +16,16 @@
     </servlet-mapping>
 
     <servlet>
+        <servlet-name>serviceControlImpl</servlet-name>
+        <servlet-class>org.jboss.workspace.sampler.server.servicecontrol.ServiceControlImpl</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>serviceControlImpl</servlet-name>
+        <url-pattern>/jboss_workspace_sampler/serviceControl</url-pattern>
+    </servlet-mapping>
+
+
+    <servlet>
         <servlet-name>remoteLoggingService</servlet-name>
         <servlet-class>com.google.gwt.gen2.logging.server.RemoteLoggingService</servlet-class>
     </servlet>
