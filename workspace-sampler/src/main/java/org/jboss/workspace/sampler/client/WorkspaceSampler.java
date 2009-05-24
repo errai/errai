@@ -32,32 +32,7 @@ public class WorkspaceSampler implements EntryPoint {
         layout.addToolSet(new ToolSet() {
             public Tool[] getAllProvidedTools() {
                 return new Tool[]{
-                        new ServiceControlTool()
-                        ,
-
-                        new Tool() {
-                            public Widget getWidget(StatePacket packet) {
-                                DateTimeFormat dtf = DateTimeFormat.getFormat("K:mm a, vvv");
-                                return new HTML("Opened at: " + dtf.format(new Date(System.currentTimeMillis())));
-                            }
-
-                            public String getName() {
-                                return "Open a Tab";
-                            }
-
-                            public String getId() {
-                                return "openMe";
-                            }
-
-                            public Image getIcon() {
-                                return null;
-                            }
-
-                            public boolean multipleAllowed() {
-                                return true;
-                            }
-                        }
-                        ,
+                        new ServiceControlTool()        ,
 
                         new Tool() {
                             public Widget getWidget(StatePacket packet) {
@@ -123,7 +98,7 @@ public class WorkspaceSampler implements EntryPoint {
                             }
 
                             public boolean multipleAllowed() {
-                                return false;
+                                return true;
                             }
                         }
 

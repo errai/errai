@@ -809,7 +809,6 @@ public class WSGrid extends Composite {
             panel = new FlowPanel();
             panel.setStyleName("WSCell-panel");
 
-
             if (grid.tableIndex.size() - 1 < row) {
                 while (grid.tableIndex.size() - 1 < row) {
                     grid.tableIndex.add(new ArrayList<WSCell>());
@@ -826,23 +825,23 @@ public class WSGrid extends Composite {
 
             this.cellFormat = cellFormat;
 
-            if (_msie_compatibility) {
-                if (cellFormat.getTextValue() == null || cellFormat.getTextValue().equals("")) {
-                    cellFormat.setValue("&nbsp;");
-                }
-            }
-
             panel.add(cellFormat.getWidget(wsGrid));
 
             this.row = row;
             this.col = column;
 
-
             initWidget(panel);
             setWidth(colSizes.get(column) + "px");
             setStyleName("WSCell");
-
             sinkEvents(Event.MOUSEEVENTS | Event.FOCUSEVENTS | Event.ONCLICK | Event.ONDBLCLICK);
+
+                        if (_msie_compatibility) {
+                if (cellFormat.getTextValue() == null || cellFormat.getTextValue().equals("")) {
+                    cellFormat.setValue("&nbsp;");
+                }
+
+                disableTextSelectInternal(panel.getElement(), true);
+            }
         }
 
         /**
@@ -1043,6 +1042,14 @@ public class WSGrid extends Composite {
                     if (!_resizing) {
                         addStyleDependentName("hover");
                         if (_rangeSelect) {
+//                            int sX = startSelX;
+//                            int sY = startSelY;
+                   //         blurAll();
+
+                            // copy back values
+//                            startSelX = sX;
+//                            startSelY = sY;
+
                             focusRange();
                         }
                     }
