@@ -20,7 +20,7 @@ public class ServiceControlTool implements Tool {
     }
 
     public Image getIcon() {
-        return new Image(GWT.getModuleBaseURL() + "/images/ui/icons/system.gif");
+        return new Image(GWT.getModuleBaseURL() + "/images/ui/icons/server_go.png");
     }
 
     public boolean multipleAllowed() {

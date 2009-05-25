@@ -1,10 +1,12 @@
 package org.jboss.workspace.client.widgets;
 
-import com.google.gwt.user.client.ui.*;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.*;
+import org.gwt.mosaic.ui.client.WindowPanel;
 import org.jboss.workspace.client.framework.AcceptsCallback;
 import org.jboss.workspace.client.listeners.ClickCallbackListener;
-import org.gwt.mosaic.ui.client.WindowPanel;
 
 import java.util.Set;
 
@@ -23,39 +25,37 @@ public class WSTabSelectorDialog extends WSModalDialog {
     Button cancelButton;
     ClickCallbackListener cancelListener;
 
-    final WindowPanel window =  new WindowPanel("Select Window");
+    final WindowPanel window = new WindowPanel("Select Window");
 
     String id;
 
     public WSTabSelectorDialog(Set<WSTab> tabs) {
-
         hPanel = new HorizontalPanel();
-
         hPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
         vPanel = new VerticalPanel();
         hPanel.add(vPanel);
         vPanel.add(message);
 
-        for (final WSTab tab : tabs)  {
+        for (final WSTab tab : tabs) {
+            Button b = new Button("<span><img src='" + tab.getIcon().getUrl() + "' align='left'/>" + tab.getLabel() + "</span>"
+                    , new ClickHandler() {
 
-            Button b = new Button(tab.getPacket().getName(), new ClickListener() {
-                public void onClick(Widget sender) {
-                    tab.activate();
-                    window.close();
-                }
-            });
+                        public void onClick(ClickEvent event) {
+                            tab.activate();
+                            window.hide();
+                        }
+                    });
 
             if (tab.getPacket().isModifiedFlag()) {
                 b.getElement().getStyle().setProperty("color", "blue");
             }
 
             b.getElement().getStyle().setProperty("background", "transparent");
-            b.getElement().getStyle().setProperty("text-align", "left");
+            b.getElement().getStyle().setProperty("textAlign", "left");
             b.setWidth("100%");
 
             vPanel.add(b);
         }
-
 
         HorizontalPanel innerContainer = new HorizontalPanel();
         vPanel.add(innerContainer);
@@ -66,19 +66,19 @@ public class WSTabSelectorDialog extends WSModalDialog {
 
         okButton = new Button("OK");
         okListener = new ClickCallbackListener(this, AcceptsCallback.MESSAGE_OK);
-        okButton.addClickListener(okListener);
+        okButton.addClickHandler(okListener);
         buttonPanel.add(okButton);
 
         cancelButton = new Button("Cancel");
         cancelListener = new ClickCallbackListener(this, AcceptsCallback.MESSAGE_CANCEL);
-        cancelButton.addClickListener(cancelListener);
+        cancelButton.addClickHandler(cancelListener);
         buttonPanel.add(cancelButton);
 
         innerContainer.add(buttonPanel);
 
         Style s = message.getElement().getStyle();
         s.setProperty("padding", "8px");
-        s.setProperty("vertical-align", "top");
+        s.setProperty("verticalAlign", "top");
 
         window.add(hPanel);
 
