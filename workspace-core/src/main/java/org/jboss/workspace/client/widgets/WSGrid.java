@@ -1262,7 +1262,6 @@ public class WSGrid extends Composite {
 
         if (resizeOnAttach) {
             for (int i = 0; i < colSizes.size(); i++) {
-                System.out.println("<" + colSizes.get(i) + ">");
                 setColumnWidth(i, colSizes.get(i));
             }
         }
