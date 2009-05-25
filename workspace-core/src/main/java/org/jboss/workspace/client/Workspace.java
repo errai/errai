@@ -24,9 +24,7 @@ public class Workspace implements EntryPoint {
     }
                      
     public WorkspaceLayout init(String rootId) {
-        
         workspaceLayout = new WorkspaceLayout();
-
 
         enableScrolling(false);
 
