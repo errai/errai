@@ -25,8 +25,6 @@ public class WSGrid extends Composite {
     private WSAbstractGrid titleBar;
     private WSAbstractGrid dataGrid;
 
-    private ArrayList<Integer> columnWidths;
-
     private int cols;
 
     private Stack<WSCell> selectionList = new Stack<WSCell>();
@@ -79,8 +77,6 @@ public class WSGrid extends Composite {
         panel.setCellVerticalAlignment(dataGrid, HasVerticalAlignment.ALIGN_TOP);
 
         dataGrid.setStylePrimaryName("WSGrid-datagrid");
-
-        columnWidths = new ArrayList<Integer>();
 
         resizeLine.setWidth("5px");
         resizeLine.setHeight("800px");
@@ -137,7 +133,7 @@ public class WSGrid extends Composite {
         fPanel.addMouseUpHandler(new MouseUpHandler() {
             public void onMouseUp(MouseUpEvent event) {
                 if (_resizing) {
-                    cancelMove();
+                    cancelResize();
 
                     WSCell currentFocus = selectionList.isEmpty() ? null :
                             selectionList.lastElement();
@@ -486,8 +482,8 @@ public class WSGrid extends Composite {
 
     /**
      * Sets a column width (in pixels). Columns start from 0.
-     * @param column
-     * @param width
+     * @param column - the column
+     * @param width - the width in pixels
      */
     public void setColumnWidth(int column, int width) {
         colSizes.set(column, width);
@@ -516,9 +512,9 @@ public class WSGrid extends Composite {
 
     /**
      * Returns an instance of the WSCell based on the row and col specified.
-     * @param row
-     * @param col
-     * @return
+     * @param row - the row
+     * @param col - the column
+     * @return Instance of WSCell.
      */
     public WSCell getCell(int row, int col) {
         return dataGrid.getCell(row, col);
@@ -526,7 +522,7 @@ public class WSGrid extends Composite {
 
     /**
      * Highlights a vertical column.
-     * @param col
+     * @param col - the column
      */
     private void selectColumn(int col) {
         for (ArrayList<WSCell> row : titleBar.getTableIndex()) {
@@ -540,7 +536,7 @@ public class WSGrid extends Composite {
 
     /**
      * Blurs a vertical column.
-     * @param col
+     * @param col - the column
      */
     private void blurColumn(int col) {
         sortedColumns.put(col, false);
@@ -890,6 +886,9 @@ public class WSGrid extends Composite {
             edit = cellFormat.edit(this);
         }
 
+        /**
+         * Ends a current edit operation.
+         */
         public void stopedit() {
             if (edit) {
                 edit = false;
@@ -897,6 +896,9 @@ public class WSGrid extends Composite {
             }
         }
 
+        /**
+         * Blurs the current cell.
+         */
         public void blur() {
             if (edit) cellFormat.stopedit();
             removeStyleDependentName("selected");
@@ -910,6 +912,9 @@ public class WSGrid extends Composite {
             }
         }
 
+        /**
+         * Focuses the curren cell.
+         */
         public void focus() {
             WSCell currentFocus = selectionList.isEmpty() ? null :
                     selectionList.lastElement();
@@ -996,6 +1001,9 @@ public class WSGrid extends Composite {
             addStyleDependentName("selected");
         }
 
+        /**
+         * Focuses a range between this cell and the currently selected cell.
+         */
         public void focusRange() {
             fillX = col - startSelX;
             fillY = row - startSelY;
@@ -1146,35 +1154,63 @@ public class WSGrid extends Composite {
         }
     }
 
-    private void cancelMove() {
+    /**
+     * Ends resizing operation.
+     */
+    private void cancelResize() {
         resizeLine.hide();
         _resizing = _resizeArmed = false;
     }
 
+    /**
+     * Returns the offsite high of the title row
+     * @return The offset height in pixels
+     */
     public int getTitlebarOffsetHeight() {
         return titleBar.getOffsetHeight();
     }
 
+    /**
+     * Sets the height of the grid.
+     * @param height CSS height string.
+     */
     public void setHeight(String height) {
         panel.setHeight(height);
     }
 
+    /**
+     * Sets the height of the grid in pixels
+     * @param height The height in pixels
+     */
     public void setPreciseHeight(int height) {
         int offsetHeight = height - getTitlebarOffsetHeight();
         setHeight(height + "px");
         dataGrid.getScrollPanel().setHeight(offsetHeight + "px");
     }
 
+    /**
+     * Set thes the width of the grid.
+     * @param width The CSS width string.
+     */
     public void setWidth(String width) {
         panel.setWidth(width);
     }
 
+    /**
+     * Sets the width of the grid in pixels.
+     * @param width The width in pixels.
+     */
     public void setPreciseWidth(int width) {
         setWidth(width + "px");
         titleBar.getScrollPanel().setWidth(width - 20 + "px");
         dataGrid.getScrollPanel().setWidth(width + "px");
     }
 
+    /**
+     * Increase or decrease the width by a relative amount.  A positive value will increase the size of the grid,
+     * while a negative value will shrink the size.
+     * @param amount Size in pixels.
+     */
     public void growWidth(int amount) {
         int newWidth = dataGrid.getScrollPanel().getOffsetWidth() + amount;
         setWidth(newWidth + "px");
@@ -1186,12 +1222,19 @@ public class WSGrid extends Composite {
         return sortedColumns;
     }
 
+    /**
+     * If there is a sorted column, this will return an instance of the header cell for that sorted column.
+     * @return An instance of WSCell.
+     */
     public WSCell getSortedColumnHeader() {
         return sortedColumnHeader;
     }
 
     /**
-     * @param col -
+     * Returns the sort order of the specified column.  The boolean value <tt>true</tt> if the order is ascending,
+     * <tt>false</em> if it's decending or not sorted at all.
+     *
+     * @param col The column.
      * @return true if ascending
      */
     public boolean getColumnSortOrder(int col) {
