@@ -56,7 +56,7 @@ span {
 
 .workspace-LeftNavArea {
     background-color: #efefef;
-    border-right: 1px solid gray;
+    border-right: 1px solid #d0d0d0;
 }
 
 .workspace-LeftNavArea-MouseOver {
@@ -72,7 +72,7 @@ span {
 
 .workspace-NavHeader {
     background-image: url('images/ui/layout/navbartitle.png');
-    border-top: 1px solid gray;
+    border-top: 1px solid #d5d5d5;
 }
 
 .workspace-DialogBox {

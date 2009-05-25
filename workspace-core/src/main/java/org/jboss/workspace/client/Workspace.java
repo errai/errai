@@ -22,7 +22,7 @@ public class Workspace implements EntryPoint {
      */
     public void onModuleLoad() {
     }
-
+                     
     public WorkspaceLayout init(String rootId) {
         
         workspaceLayout = new WorkspaceLayout();
