@@ -305,7 +305,7 @@ public class WSStackPanel extends ComplexPanel {
         getWidget(index).setVisible(visible);
 
         if (visible) {
-            Effects.fade(w.getElement(), 1, 20, 100);    
+            Effects.fade(w.getElement(), 1, 2, 20, 100);    
         }
 
 //
