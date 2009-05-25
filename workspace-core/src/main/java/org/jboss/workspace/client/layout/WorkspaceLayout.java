@@ -18,6 +18,7 @@ import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.*;
 import org.gwt.mosaic.ui.client.layout.BorderLayoutData;
 import org.jboss.workspace.client.ToolSet;
+import org.jboss.workspace.client.util.Effects;
 import org.jboss.workspace.client.framework.AcceptsCallback;
 import org.jboss.workspace.client.framework.Tool;
 import org.jboss.workspace.client.framework.WorkspaceSizeChangeListener;
@@ -340,6 +341,7 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
 
     public void forceOpenTab(Tool tool, StatePacket packet, Image icon) {
         ScrollPanel flowpanel = new ScrollPanel();
+        Effects.setOpacity(flowpanel.getElement().getStyle(), 0);
         flowpanel.setHeight("100%");
 
         Widget toolWidget = tool.getWidget(packet);
@@ -375,6 +377,8 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
         };
 
         t.schedule(25);
+
+        Effects.fade(flowpanel.getElement(), 1, 2, 0, 100);
     }
 
     public void closeTab(StatePacket packet) {

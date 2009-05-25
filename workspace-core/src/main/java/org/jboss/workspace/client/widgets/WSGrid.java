@@ -962,7 +962,6 @@ public class WSGrid extends Composite {
         }
 
         public void focusRange() {
-
             fillX = col - startSelX;
             fillY = row - startSelY;
 
@@ -1026,11 +1025,9 @@ public class WSGrid extends Composite {
             numeric = isNumeric(formatter.getTextValue());
         }
 
-
         public String getValue() {
             return cellFormat.getTextValue();
         }
-
 
         @Override
         public void onBrowserEvent(Event event) {
@@ -1042,14 +1039,6 @@ public class WSGrid extends Composite {
                     if (!_resizing) {
                         addStyleDependentName("hover");
                         if (_rangeSelect) {
-//                            int sX = startSelX;
-//                            int sY = startSelY;
-                   //         blurAll();
-
-                            // copy back values
-//                            startSelX = sX;
-//                            startSelY = sY;
-
                             focusRange();
                         }
                     }

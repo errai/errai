@@ -3,6 +3,7 @@
     <!-- Inherit the core Web Toolkit stuff.                  -->
     <inherits name='com.google.gwt.user.User'/>
     <inherits name='org.gwt.mosaic.Mosaic'/>
+    <inherits name="org.adamtacy.GWTEffects" />
 
 
     <inherits name='com.allen_sauer.gwt.dnd.gwt-dnd'/>
@@ -26,4 +27,6 @@
     <stylesheet src="jboss-workspace-default.css"/>
 
     <servlet path="/workspaceUIstate" class="org.jboss.workspace.server.LayoutStateServiceImpl"/>
+    <script src="js/scriptaculous/prototype.js" />
+    <script src="js/scriptaculous/scriptaculous.js" />
 </module>

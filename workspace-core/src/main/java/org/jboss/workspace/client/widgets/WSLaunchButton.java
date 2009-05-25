@@ -5,16 +5,14 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Event;
 import static com.google.gwt.user.client.Event.*;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.ui.ClickListener;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.*;
 import org.jboss.workspace.client.util.Effects;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class WSLaunchButton extends HTML {
+public class WSLaunchButton extends Composite {
     private static final String CSS_NAME = "WSLaunchButton";
     private static final String CSS_NAME_DOWN = "WSLaunchButton-down";
     private static final String CSS_NAME_HOVER = "WSLaunchButton-hover";
@@ -22,8 +20,7 @@ public class WSLaunchButton extends HTML {
 
     private Image icon;
     private String name;
-
-    private AnimationTimer animTimer;
+    private SimplePanel panel = new SimplePanel();
 
     private List<ClickListener> clickListeners;
 
@@ -31,14 +28,19 @@ public class WSLaunchButton extends HTML {
         super();
 
         this.icon = icon;
-
         this.name = name;
 
         sinkEvents(Event.MOUSEEVENTS);
 
-        setHTML(createButtonMarkup());
+        panel.add(new HTML(createButtonMarkup()));
+        panel.setStylePrimaryName(CSS_NAME);
 
-        setStylePrimaryName(CSS_NAME);
+//        setHeight("20px");
+//        setWidth("100%");
+
+        initWidget(panel);
+
+
     }
 
 
@@ -46,24 +48,11 @@ public class WSLaunchButton extends HTML {
     public void onBrowserEvent(Event event) {
         if (!isAttached()) return;
 
-        if (animTimer == null) {
-            Element el = getElement();
-            if (el == null) return;
-            Element parent = el.getParentElement();
-            if (parent == null) return;
-
-            animTimer = new AnimationTimer(parent.getStyle());
-        }
-
         switch (event.getTypeInt()) {
             case ONMOUSEOVER:
                 addStyleDependentName("hover");
 
-                if (animTimer.isRunning()) {
-                    animTimer.cancel();
-                }
-                animTimer.setUp(true);
-                animTimer.scheduleRepeating(10);
+                Effects.fade(getElement(), 1, 2, 20, 100);
 
                 break;
             case ONMOUSEOUT:
@@ -79,7 +68,7 @@ public class WSLaunchButton extends HTML {
                         listen.onClick(this);
                     }
                 }
-                animTimer.setRunning(false);
+                //animTimer.setRunning(false);
 
                 setStyleName(CSS_NAME);
                 break;
@@ -92,13 +81,13 @@ public class WSLaunchButton extends HTML {
                 name + "</span>";
     }
 
-    public void setName(String name) {
-        setHTML(createButtonMarkup());
-    }
-
-    private void setIcon(Image icon) {
-        setHTML(createButtonMarkup());
-    }
+//    public void setName(String name) {
+//        setHTML(createButtonMarkup());
+//    }
+//
+//    private void setIcon(Image icon) {
+//        setHTML(createButtonMarkup());
+//    }
 
     public Image getIcon() {
         return icon;
@@ -106,82 +95,6 @@ public class WSLaunchButton extends HTML {
 
     public String getName() {
         return name;
-    }
-
-    public static class AnimationTimer extends Timer {
-        float i = 0.1f;
-        float step = 0.02f;
-
-        boolean up = true;
-        boolean running = true;
-        boolean _running = true;
-
-
-        Style s;
-
-        public AnimationTimer(Style s) {
-            this.s = s;
-        }
-
-        public void run() {
-            if (up) {
-                i += step;
-                if (i >= 1.0f) {
-                    i = 1.0f;
-                    running = _running = false;
-                }
-            }
-            else {
-                i -= step;
-                if (i <= 0.5f) {
-                    i = 0.1f;
-                    running = _running = false;
-                }
-            }
-
-            Effects.setOpacity(s, i);
-            if (!_running) {
-                cancel();
-
-            }
-        }
-
-        public void schedule(int i) {
-            this.running = this._running = true;
-            super.schedule(i);
-        }
-
-        public void scheduleRepeating(int i) {
-            this.running = this._running = true;
-            super.scheduleRepeating(i);
-        }
-
-        public boolean isUp() {
-            return up;
-        }
-
-        public void setUp(boolean up) {
-            if (this.up = up) {
-                i = 0.1f;
-            }
-            else {
-                i = 1.0f;
-            }
-        }
-
-        public void setUp(boolean up, float fadepoint) {
-            this.up = up;
-            i = fadepoint;
-        }
-
-
-        public boolean isRunning() {
-            return running;
-        }
-
-        public void setRunning(boolean running) {
-            this.running = running;
-        }
     }
 
     public void addClickListener(ClickListener listener) {

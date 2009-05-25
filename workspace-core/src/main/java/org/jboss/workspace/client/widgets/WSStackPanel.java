@@ -296,38 +296,48 @@ public class WSStackPanel extends ComplexPanel {
     }
 
     private void setStackContentVisible(final int index, final boolean visible) {
+
+
         final Element tr = DOM.getChild(body, (index * 2) + 1);
         final Widget w = getWidget(index);
 
+        UIObject.setVisible(tr, visible);
+        getWidget(index).setVisible(visible);
 
         if (visible) {
-            Timer timer = new Timer() {
-                float i = 0.0f;
-                Style s = w.getElement().getStyle();
-                boolean x = false;
-
-                public void run() {
-                    i += 0.02f;
-                    if (i < 1.0f) {
-                        Effects.setOpacity(s, i);
-
-                        if (!x) {
-                            UIObject.setVisible(tr, visible);
-                            getWidget(index).setVisible(visible);
-                            x=true;
-                        }
-                    }
-                    else {
-                        cancel();
-                    }
-                }
-            };
-            timer.scheduleRepeating(10);
+            Effects.fade(w.getElement(), 1, 20, 100);    
         }
-        else {
-            UIObject.setVisible(tr, visible);
-            getWidget(index).setVisible(visible);
-        }
+
+//
+//
+//        if (visible) {
+//            Timer timer = new Timer() {
+//                float i = 0.0f;
+//                Style s = w.getElement().getStyle();
+//                boolean x = false;
+//
+//                public void run() {
+//                    i += 0.02f;
+//                    if (i < 1.0f) {
+//                        Effects.setOpacity(s, i);
+//
+//                        if (!x) {
+//                            UIObject.setVisible(tr, visible);
+//                            getWidget(index).setVisible(visible);
+//                            x=true;
+//                        }
+//                    }
+//                    else {
+//                        cancel();
+//                    }
+//                }
+//            };
+//            timer.scheduleRepeating(10);
+//        }
+//        else {
+//            UIObject.setVisible(tr, visible);
+//            getWidget(index).setVisible(visible);
+//        }
 
     }
 
