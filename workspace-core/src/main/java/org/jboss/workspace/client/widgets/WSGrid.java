@@ -47,6 +47,8 @@ public class WSGrid extends Composite {
     private boolean _resizing = false;
     private boolean _rangeSelect = false;
 
+    private boolean resizeOnAttach = false;
+
     private WSGrid wsGrid = this;
     private PopupPanel resizeLine = new PopupPanel() {
         @Override
@@ -92,6 +94,10 @@ public class WSGrid extends Composite {
             }
         });
 
+
+        /**
+         * This is the handler that is responsible for resizing columns.
+         */
         fPanel.addMouseDownHandler(new MouseDownHandler() {
             public void onMouseDown(MouseDownEvent event) {
                 if (!selectionList.isEmpty() && selectionList.lastElement().isEdit()) {
@@ -113,6 +119,9 @@ public class WSGrid extends Composite {
             }
         });
 
+        /**
+         * This handler traces the mouse movement, drawing the vertical resizing indicator.
+         */
         fPanel.addMouseMoveHandler(new MouseMoveHandler() {
             public void onMouseMove(MouseMoveEvent event) {
                 if (_resizing) {
@@ -121,6 +130,10 @@ public class WSGrid extends Composite {
             }
         });
 
+        /**
+         * This is the mouse release handler that resizes a column once the left mouse button is released
+         * in a resizing operation.
+         */
         fPanel.addMouseUpHandler(new MouseUpHandler() {
             public void onMouseUp(MouseUpEvent event) {
                 if (_resizing) {
@@ -140,21 +153,9 @@ public class WSGrid extends Composite {
                      */
                     if (offset - _startpos == 0) return;
 
-                    colSizes.set(selCol, (width -= (_startpos -= event.getClientX())));
+                    width -= (_startpos -= event.getClientX());
 
-                    int currTableWidth = dataGrid.getScrollPanel().getOffsetWidth();
-
-                    titleBar.getTable().getColumnFormatter().setWidth(selCol, width + "px");
-                    dataGrid.getTable().getColumnFormatter().setWidth(selCol, width + "px");
-
-                    titleBar.tableIndex.get(0).get(selCol).setWidth(width + "px");
-
-                    for (int cX = 0; cX < dataGrid.tableIndex.size(); cX++) {
-                        dataGrid.tableIndex.get(cX).get(selCol).setWidth(width + "px");
-                    }
-
-                    titleBar.getScrollPanel().setWidth(currTableWidth - 20 + "px");
-                    dataGrid.getScrollPanel().setWidth(currTableWidth + "px");
+                    setColumnWidth(selCol, width);
                 }
 
                 _rangeSelect = false;
@@ -162,6 +163,9 @@ public class WSGrid extends Composite {
         });
 
 
+        /**
+         * This handler is responsible for all the keyboard input handlers for the grid.
+         */
         fPanel.addKeyDownHandler(new KeyDownHandler() {
             public void onKeyDown(KeyDownEvent event) {
                 final WSCell currentFocus = selectionList.isEmpty() ? null : selectionList.lastElement();
@@ -357,7 +361,6 @@ public class WSGrid extends Composite {
 
                                 dataGrid.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() - 1).focus();
                             }
-
                         }
                         break;
 
@@ -401,6 +404,10 @@ public class WSGrid extends Composite {
             }
         });
 
+        /**
+         * This handler is to prevent certain default browser behaviors when interacting with the grid using
+         * keyboard operations.
+         */
         addNativePreviewHandler(new Event.NativePreviewHandler() {
             public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
                 final WSCell currentFocus = selectionList.isEmpty() ? null :
@@ -476,30 +483,51 @@ public class WSGrid extends Composite {
         startSelY = -1;
     }
 
-    private int checkWidth(int column) {
-        if (columnWidths.size() - 1 < column) {
-            for (int i = 0; i <= column; i++) {
-                columnWidths.add(125);
+
+    /**
+     * Sets a column width (in pixels). Columns start from 0.
+     * @param column
+     * @param width
+     */
+    public void setColumnWidth(int column, int width) {
+        colSizes.set(column, width);
+
+        if (column >= cols) return;
+
+        if (isAttached()) {
+            int currTableWidth = dataGrid.getScrollPanel().getOffsetWidth();
+
+            titleBar.getTable().getColumnFormatter().setWidth(column, width + "px");
+            dataGrid.getTable().getColumnFormatter().setWidth(column, width + "px");
+
+            titleBar.tableIndex.get(0).get(column).setWidth(width + "px");
+
+            for (int cX = 0; cX < dataGrid.tableIndex.size(); cX++) {
+                dataGrid.tableIndex.get(cX).get(column).setWidth(width + "px");
             }
+
+            titleBar.getScrollPanel().setWidth(currTableWidth - 20 + "px");
+            dataGrid.getScrollPanel().setWidth(currTableWidth + "px");
         }
-
-        return columnWidths.get(column);
+        else {
+            resizeOnAttach = true;
+        }
     }
 
-    public void updateWidth(int column, int width) {
-        HTMLTable.ColumnFormatter colFormatter = titleBar.getTable().getColumnFormatter();
-        colFormatter.setWidth(column, width + "px");
-
-        dataGrid.getTable().getColumnFormatter().setWidth(column, width + "px");
-
-        checkWidth(column);
-        columnWidths.set(column, width);
-    }
-
+    /**
+     * Returns an instance of the WSCell based on the row and col specified.
+     * @param row
+     * @param col
+     * @return
+     */
     public WSCell getCell(int row, int col) {
         return dataGrid.getCell(row, col);
     }
 
+    /**
+     * Highlights a vertical column.
+     * @param col
+     */
     private void selectColumn(int col) {
         for (ArrayList<WSCell> row : titleBar.getTableIndex()) {
             row.get(col).addStyleDependentName("hcolselect");
@@ -510,6 +538,10 @@ public class WSGrid extends Composite {
         }
     }
 
+    /**
+     * Blurs a vertical column.
+     * @param col
+     */
     private void blurColumn(int col) {
         sortedColumns.put(col, false);
 
@@ -522,6 +554,9 @@ public class WSGrid extends Composite {
         }
     }
 
+    /**
+     * This is the actual grid implementation.
+     */
     public class WSAbstractGrid extends Composite {
         private ScrollPanel scrollPanel;
         private FlexTable table;
@@ -835,7 +870,7 @@ public class WSGrid extends Composite {
             setStyleName("WSCell");
             sinkEvents(Event.MOUSEEVENTS | Event.FOCUSEVENTS | Event.ONCLICK | Event.ONDBLCLICK);
 
-                        if (_msie_compatibility) {
+            if (_msie_compatibility) {
                 if (cellFormat.getTextValue() == null || cellFormat.getTextValue().equals("")) {
                     cellFormat.setValue("&nbsp;");
                 }
@@ -1171,6 +1206,8 @@ public class WSGrid extends Composite {
 
     @Override
     protected void onAttach() {
+        super.onAttach();
+
         int titleHeight = titleBar.getOffsetHeight();
 
         panel.setCellHeight(titleBar, titleHeight + "px");
@@ -1180,7 +1217,12 @@ public class WSGrid extends Composite {
         dataGrid.setHeight("450px");
         dataGrid.setHeight("450px");
 
-        super.onAttach();
+        if (resizeOnAttach) {
+            for (int i = 0; i < colSizes.size(); i++) {
+                System.out.println("<" + colSizes.get(i) + ">");
+                setColumnWidth(i, colSizes.get(i));
+            }
+        }
     }
 
     public static void disableTextSelection(Element elem, boolean disable) {

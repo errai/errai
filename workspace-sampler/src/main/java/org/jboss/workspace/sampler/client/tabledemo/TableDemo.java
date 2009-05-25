@@ -64,6 +64,8 @@ public class TableDemo implements Tool {
             }
         });
 
+        wsGrid.setColumnWidth(0, 80);
+
         return wsGrid;
     }
 
