@@ -94,11 +94,11 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
         currSizeW = Window.getClientWidth();
         currSizeH = Window.getClientHeight();
 
-        RootPanel.get("rootPanel").setPixelSize(currSizeW, currSizeH);
+        RootPanel.get().setPixelSize(currSizeW, currSizeH);
 
         addResizeHandler(new ResizeHandler() {
             public void onResize(ResizeEvent event) {
-                RootPanel.get("rootPanel").setPixelSize(event.getWidth(), event.getHeight());
+                RootPanel.get().setPixelSize(event.getWidth(), event.getHeight());
                 fireWorkspaceSizeChangeListeners(event.getWidth() - currSizeW, event.getHeight() - currSizeH);
 
                 currSizeW = event.getWidth();
