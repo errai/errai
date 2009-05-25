@@ -44,13 +44,13 @@ public class WSModalDialog implements AcceptsCallback {
 
         okButton = new Button("OK");
         okListener = new ClickCallbackListener(this, AcceptsCallback.MESSAGE_OK);
-        okButton.addClickListener(okListener);
+        okButton.addClickHandler(okListener);
 
         buttonPanel.add(okButton);
 
         cancelButton = new Button("Cancel");
         cancelListener = new ClickCallbackListener(this, AcceptsCallback.MESSAGE_CANCEL);
-        cancelButton.addClickListener(cancelListener);
+        cancelButton.addClickHandler(cancelListener);
 
         dockPanel.add(cancelButton, DockPanel.SOUTH);
 
