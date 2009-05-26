@@ -1,6 +1,5 @@
 package org.jboss.workspace.client.widgets.format;
 
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.Widget;
 import org.jboss.workspace.client.widgets.WSGrid;
 
