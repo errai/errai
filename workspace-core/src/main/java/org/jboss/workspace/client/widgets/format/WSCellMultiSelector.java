@@ -1,19 +1,17 @@
 package org.jboss.workspace.client.widgets.format;
 
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.*;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.user.client.ui.*;
 import org.jboss.workspace.client.widgets.WSGrid;
 
-import java.util.Set;
 import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class WSCellMultiSelector extends WSCellFormatter {
     private Set<String> values;
-    private HTML selection;
+    //  private HTML selection;
     private boolean updateble = true;
 
     private static ListBox listBox;
@@ -41,10 +39,10 @@ public class WSCellMultiSelector extends WSCellFormatter {
 
     public WSCellMultiSelector(Set<String> values, String defaultSelection) {
         this.values = new LinkedHashSet<String>();
-        this.selection = new HTML();
+        this.html = new HTML();
         if (defaultSelection != null) {
             this.values.add(defaultSelection);
-            this.selection.setHTML(defaultSelection);
+            this.html.setHTML(defaultSelection);
         }
         this.values.addAll(values);
 
@@ -52,20 +50,12 @@ public class WSCellMultiSelector extends WSCellFormatter {
 
     public void setValue(String value) {
         if (values.contains(value)) {
-            this.selection.setHTML(value);
+            super.setValue(value);
         }
         else if (updateble) {
+            super.setValue(value);
             values.add(value);
-            this.selection.setHTML(value);
         }
-    }
-
-    public String getTextValue() {
-        return selection.getHTML();
-    }
-
-    public Widget getWidget(WSGrid wsGrid) {
-        return selection;
     }
 
     public boolean edit(WSGrid.WSCell element) {
@@ -82,13 +72,18 @@ public class WSCellMultiSelector extends WSCellFormatter {
         int i = 0;
         for (String v : values) {
             listBox.addItem(v);
-            if (selection.getHTML().equals(v)) listBox.setSelectedIndex(i);
+            if (html.getHTML().equals(v)) listBox.setSelectedIndex(i);
             i++;
         }
-        
+
         listBox.setVisible(true);
         listBox.setFocus(true);
         return true;
+    }
+
+    @Override
+    public Widget getWidget(WSGrid grid) {
+        return new Label("foo!");
     }
 
     public void stopedit() {

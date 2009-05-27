@@ -25,6 +25,4 @@
     <stylesheet src="jboss-workspace-default.css"/>
 
     <servlet path="/workspaceUIstate" class="org.jboss.workspace.server.LayoutStateServiceImpl"/>
-    <script src="js/scriptaculous/prototype.js" />
-    <script src="js/scriptaculous/scriptaculous.js" />
 </module>

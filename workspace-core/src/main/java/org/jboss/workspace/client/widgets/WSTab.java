@@ -3,10 +3,13 @@ package org.jboss.workspace.client.widgets;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.event.dom.client.MouseEvent;
+import org.adamtacy.client.ui.NEffectPanel;
 import org.jboss.workspace.client.layout.WorkspaceLayout;
 import org.jboss.workspace.client.listeners.TabCloseListener;
 import org.jboss.workspace.client.rpc.StatePacket;
 import org.jboss.workspace.client.widgets.dnd.TabDropController;
+import org.jboss.workspace.client.util.Effects;
 
 
 /**
@@ -20,7 +23,6 @@ public class WSTab extends Composite {
     final Label label;
     TabDropController tabDropController;
     Image icon;
-
 
     final HorizontalPanel hPanel = new HorizontalPanel();
 
@@ -87,19 +89,6 @@ public class WSTab extends Composite {
         this.widgetRef = widgetRef;
     }
 
-
-
-    @Override
-    public void onBrowserEvent(Event event) {
-    }
-
-
-    public void blink() {
-    }
-
-    public void stopAnimation() {
-    }
-
     public void reset() {
         sinkEvents(Event.ONMOUSEOVER | Event.ONMOUSEOUT);
     }
@@ -121,6 +110,9 @@ public class WSTab extends Composite {
         return icon;
     }
 
+    public boolean isActivated() {
+        return layout.tabPanel.getWidgetIndex(widgetRef) == layout.tabPanel.getActiveTab();
+    }
 
     public void activate() {
         layout.tabPanel.selectTab(layout.tabPanel.getWidgetIndex(widgetRef));

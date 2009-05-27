@@ -379,7 +379,7 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
 
         t.schedule(25);
 
-        Effects.fade(flowpanel.getElement(), 1, 2, 0, 100);
+        Effects.fade(flowpanel.getElement(), 1, 5, 0, 100);
     }
 
     public void closeTab(StatePacket packet) {

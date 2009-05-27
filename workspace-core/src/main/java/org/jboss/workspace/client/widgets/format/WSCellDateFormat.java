@@ -17,7 +17,6 @@ import java.util.Date;
 
 
 public class WSCellDateFormat extends WSCellFormatter {
-    private HTML html;
     private Date date;
     private String formatPattern = "MMM dd, yyyy";
 
@@ -42,6 +41,7 @@ public class WSCellDateFormat extends WSCellFormatter {
 
     public WSCellDateFormat(String value) {
         this.html = new HTML(value);
+
         setValue(value);
     }
 
@@ -59,26 +59,21 @@ public class WSCellDateFormat extends WSCellFormatter {
         this.formatPattern = formatPattern;
     }
 
-    @Override
-    public Widget getWidget(WSGrid wsGrid) {
-        return html;
-    }
-
     public void setValue(String value) {
         if (value == null || value.length() == 0) {
-            html.setHTML("&nbsp;");
             return;
         }
 
-        date = new Date(Long.parseLong(value));
-
-        setValue(date);
+        setValue(new Date(Long.parseLong(value)));
     }
 
     public void setValue(Date date) {
+        notifyCellUpdate(valueOf(date.getTime()));
+        this.date = date;
         html.setHTML(DateTimeFormat.getFormat(formatPattern).format(date));
     }
 
+    @Override
     public String getTextValue() {
         return valueOf(date.getTime());
     }
@@ -108,9 +103,5 @@ public class WSCellDateFormat extends WSCellFormatter {
     public void stopedit() {
         datePicker.setVisible(false);
         wsCellReference.stopedit();
-    }
-
-    public WSCellFormatter newFormatter() {
-        return new WSCellDateFormat(System.currentTimeMillis() + "");
     }
 }

@@ -1,19 +1,16 @@
 package org.jboss.workspace.client.widgets;
 
-import com.google.gwt.user.client.ui.*;
-import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
-import org.gwt.mosaic.ui.client.layout.LayoutPanel;
-import org.gwt.mosaic.ui.client.layout.BorderLayoutData;
-import org.gwt.mosaic.ui.client.layout.BorderLayout;
-import org.jboss.workspace.client.util.LayoutUtil;
-import static org.jboss.workspace.client.util.LayoutUtil.position;
+import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.user.client.ui.*;
 
 public class WSTabPanel extends Composite {
     private DockPanel layoutPanel;
 
     private final TabBar tabBar;
     private final DeckPanel deckPanel;
+
+    private int activeTab;
 
     public WSTabPanel() {
         layoutPanel = new DockPanel();
@@ -29,9 +26,11 @@ public class WSTabPanel extends Composite {
 
         tabBar.addSelectionHandler(new SelectionHandler<Integer>() {
             public void onSelection(SelectionEvent<Integer> integerSelectionEvent) {
-               deckPanel.showWidget(integerSelectionEvent.getSelectedItem());
+                deckPanel.showWidget(integerSelectionEvent.getSelectedItem());
             }
         });
+
+
 
         initWidget(layoutPanel);
     }
@@ -41,7 +40,7 @@ public class WSTabPanel extends Composite {
         tabBar.addSelectionHandler(handler);
     }
 
-    public void add(Widget panel, Widget tab) {
+    public void add(Widget panel, WSTab tab) {
         tabBar.addTab(tab);
         deckPanel.add(panel);
     }
@@ -68,8 +67,14 @@ public class WSTabPanel extends Composite {
     }
 
     public void selectTab(int idx) {
+        activeTab = idx;
+
         tabBar.selectTab(idx);
         deckPanel.showWidget(idx);
+    }
+
+    public int getActiveTab() {
+        return tabBar.getSelectedTab();
     }
 
     public void insert(Widget panel, Widget tab, int beforeIndex) {

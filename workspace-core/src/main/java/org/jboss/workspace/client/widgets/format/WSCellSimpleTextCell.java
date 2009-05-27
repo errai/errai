@@ -7,16 +7,12 @@ import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.Widget;
 import org.jboss.workspace.client.widgets.WSGrid;
 
 
 public class WSCellSimpleTextCell extends WSCellFormatter {
-    private HTML html;
-
     private static TextBox textBox;
     private static WSCellSimpleTextCell editCellReference;
-    private boolean readonly = false;
 
     static {
         textBox = new TextBox();
@@ -53,26 +49,13 @@ public class WSCellSimpleTextCell extends WSCellFormatter {
         this.readonly = readonly;
     }
 
-    public void setValue(String value) {
-        if (readonly) return;
-        this.html.setHTML(value);
-    }
-
-    public String getTextValue() {
-        return this.html.getHTML();
-    }
-
-    public Widget getWidget(WSGrid wsGrid) {
-        return html;
-    }
-
     public boolean edit(WSGrid.WSCell element) {
         if (readonly) return false;
         
         editCellReference = this;
         wsCellReference = element;
 
-        textBox.setText(html.getHTML());
+        textBox.setText(getTextValue());
         textBox.setVisible(true);
 
         Style s = textBox.getElement().getStyle();
@@ -95,7 +78,4 @@ public class WSCellSimpleTextCell extends WSCellFormatter {
         wsCellReference.stopedit();
     }
 
-    public WSCellFormatter newFormatter() {
-        return new WSCellSimpleTextCell("");
-    }
 }

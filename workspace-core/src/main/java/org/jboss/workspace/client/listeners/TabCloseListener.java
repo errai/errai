@@ -47,11 +47,6 @@ public class TabCloseListener implements ClickListener, AcceptsCallback {
                     this);
 
 
-            /**
-             * Flash the tab
-             */
-            tab.blink();    
-
 
             /**
              * Prompt the user.
@@ -79,8 +74,6 @@ public class TabCloseListener implements ClickListener, AcceptsCallback {
              * Do nothing.
              */
         }
-
-        tab.stopAnimation();
     }
 
     /**

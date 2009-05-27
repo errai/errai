@@ -64,6 +64,13 @@ public class TableDemo implements Tool {
             }
         });
 
+//        wsGrid.addCellChangeHandler(new CellChangeHandler() {
+//            public void onCellChange(CellChangeEvent event) {
+//                Window.alert("Cell value changed! (Old value: " + event.getOldValue() + "; New value: " + event.getNewValue() + ")");
+//
+//            }
+//        });
+
         wsGrid.setColumnWidth(0, 80);
 
         return wsGrid;

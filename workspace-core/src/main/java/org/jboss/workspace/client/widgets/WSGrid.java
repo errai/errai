@@ -12,12 +12,10 @@ import static com.google.gwt.user.client.ui.RootPanel.getBodyElement;
 import org.jboss.workspace.client.widgets.format.WSCellFormatter;
 import org.jboss.workspace.client.widgets.format.WSCellSimpleTextCell;
 import org.jboss.workspace.client.widgets.format.WSCellTitle;
+import org.jboss.workspace.client.listeners.CellChangeEvent;
 
 import static java.lang.Double.parseDouble;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 
 public class WSGrid extends Composite {
     private FocusPanel fPanel;
@@ -55,6 +53,7 @@ public class WSGrid extends Composite {
         }
     };
 
+    private List<ChangeHandler> cellChangeHandlers = new LinkedList<ChangeHandler>();
 
     public WSGrid() {
         this(true);
@@ -912,6 +911,10 @@ public class WSGrid extends Composite {
             }
         }
 
+        public void notifyCellUpdate(String newValue) {
+            fireAllCellChangeHandlers(this, newValue);
+        }
+
         /**
          * Focuses the curren cell.
          */
@@ -935,20 +938,20 @@ public class WSGrid extends Composite {
                     selectColumn(col);
                 }
                 else if (!_resizeArmed) {
-                    boolean asc = getColumnSortOrder(col);
-
-                    if (sortedColumnHeader != null) {
-                        WSCell old = sortedColumnHeader;
-                        sortedColumnHeader = this;
-                        old.cellFormat.getWidget(wsGrid);
-                    }
-                    else {
-                        sortedColumnHeader = this;
-                    }
-                    cellFormat.getWidget(wsGrid);
-
-                    sortedColumns.put(col, !asc);
-                    dataGrid.sort(col, asc);
+//                    boolean asc = getColumnSortOrder(col);
+//
+//                    if (sortedColumnHeader != null) {
+//                        WSCell old = sortedColumnHeader;
+//                        sortedColumnHeader = this;
+//                        old.cellFormat.getWidget(wsGrid);
+//                    }
+//                    else {
+//                        sortedColumnHeader = this;
+//                    }
+//                    cellFormat.getWidget(wsGrid);
+//
+//                    sortedColumns.put(col, !asc);
+//                    dataGrid.sort(col, asc);
                 }
             }
             else {
@@ -1139,6 +1142,23 @@ public class WSGrid extends Composite {
                     break;
 
                 case Event.ONCLICK:
+                    if (grid.type == GridType.TITLEBAR) {
+                        boolean asc = getColumnSortOrder(col);
+
+                        if (sortedColumnHeader != null) {
+                            WSCell old = sortedColumnHeader;
+                            sortedColumnHeader = this;
+                            old.cellFormat.getWidget(wsGrid);
+                        }
+                        else {
+                            sortedColumnHeader = this;
+                        }
+                        cellFormat.getWidget(wsGrid);
+
+                        sortedColumns.put(col, !asc);
+                        dataGrid.sort(col, asc);
+                    }
+                    
                     break;
 
                 case Event.ONDBLCLICK:
@@ -1245,6 +1265,27 @@ public class WSGrid extends Composite {
             sortedColumns.put(col, true);
             return true;
         }
+    }
+
+    /**
+     * Registers a {@link ChangeHandler} with the grid.
+     * @param handler
+     */
+    public void addCellChangeHandler(ChangeHandler handler) {
+        cellChangeHandlers.add(handler);
+    }
+
+    /**
+     * Removes a {@link ChangeHandler} from the grid.
+     * @param handler
+     */
+    public void removeCellChangeHandler(ChangeHandler handler) {
+        cellChangeHandlers.remove(handler);
+    }
+
+
+    private void fireAllCellChangeHandlers(WSCell cell, String newValue) {
+        for (ChangeHandler c : cellChangeHandlers) c.onChange(new CellChangeEvent(cell, newValue));
     }
 
     @Override
