@@ -2,7 +2,6 @@ package org.jboss.workspace.client.widgets;
 
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.ui.*;
-import org.jboss.workspace.client.listeners.TabOpeningClickHandler;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -58,7 +57,7 @@ public class WSTree extends Composite {
 
         tree.addMouseUpHandler(new MouseUpHandler() {
             public void onMouseUp(MouseUpEvent event) {
-                               long elapsed = System.currentTimeMillis() - last;
+                long elapsed = System.currentTimeMillis() - last;
 
                 TreeItem fti = tree.getSelectedItem();
 
@@ -108,31 +107,28 @@ public class WSTree extends Composite {
         return gTree;
     }
 
-    public TreeItem addItem(Image icon, Widget content, ClickHandler handler) {
+    public WSTreeItem addItem(Image icon, Widget content) {
         HorizontalPanel hPanel = new HorizontalPanel();
         hPanel.add(icon);
         hPanel.add(content);
 
         hPanel.setCellWidth(icon, "16px");
 
-        TreeItem item = new TreeItem(hPanel);
-        addItem(item, handler);
+        WSTreeItem item = new WSTreeItem(hPanel);
+        tree.addItem(item);
         return item;
     }
 
-    public void addItem(TreeItem item) {
+    public void addItem(WSTreeItem item) {
         item.getElement().getStyle().setProperty("marginTop", "1px");
         item.getElement().getStyle().setProperty("userSelect", "none");
         tree.addItem(item);
     }
 
-    public void addItem(TreeItem item, ClickHandler handler) {
-        addItem(item);
-        clickListeners.put(item, handler);
-    }
 
-    public void attachListener(TreeItem item, ClickHandler handler) {
-        clickListeners.put(item, handler);
+    public void attachListener(WSTreeItem item, ClickHandler handler) {
+        if (handler != null)
+            clickListeners.put(item, handler);
     }
 
     public static native String getUserAgent() /*-{

@@ -545,12 +545,16 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
 
         leftPanel.setWidth("175px");
         navigation.setWidth("175px");
+
+        fireWorkspaceSizeChangeListeners(0, 0);
     }
 
     public void closeNavPanel() {
         navigation.setVisible(false);
         navigationLabel.setVisible(false);
         leftPanel.setWidth("12px");
+
+        fireWorkspaceSizeChangeListeners(0, 0);
     }
 
     private void fireWorkspaceSizeChangeListeners(int deltaW, int deltaH) {

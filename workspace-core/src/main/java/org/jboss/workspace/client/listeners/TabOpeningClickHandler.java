@@ -16,6 +16,13 @@ public class TabOpeningClickHandler implements ClickHandler {
     private Image icon;
     private boolean multipleAllowed;
 
+       public TabOpeningClickHandler(WorkspaceLayout layout, Tool tool) {
+        this.layout = layout;
+        this.tabName = tool.getName();
+        this.tool = tool;
+        this.icon = tool.getIcon();
+    }
+
     public TabOpeningClickHandler(WorkspaceLayout layout, String tabName, Tool tool, Image icon) {
         this.layout = layout;
         this.tabName = tabName;
