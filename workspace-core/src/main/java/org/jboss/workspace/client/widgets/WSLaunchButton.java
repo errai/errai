@@ -1,11 +1,10 @@
 package org.jboss.workspace.client.widgets;
 
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Event;
 import static com.google.gwt.user.client.Event.*;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
 import org.jboss.workspace.client.util.Effects;
 
 import java.util.ArrayList;
@@ -22,7 +21,7 @@ public class WSLaunchButton extends Composite {
     private String name;
     private SimplePanel panel = new SimplePanel();
 
-    private List<ClickListener> clickListeners;
+    private List<ClickHandler> clickHandlers;
 
     public WSLaunchButton(Image icon, String name) {
         super();
@@ -35,12 +34,7 @@ public class WSLaunchButton extends Composite {
         panel.add(new HTML(createButtonMarkup()));
         panel.setStylePrimaryName(CSS_NAME);
 
-//        setHeight("20px");
-//        setWidth("100%");
-
         initWidget(panel);
-
-
     }
 
 
@@ -63,13 +57,11 @@ public class WSLaunchButton extends Composite {
                 addStyleDependentName("down");
                 break;
             case ONMOUSEUP:
-                if (clickListeners != null) {
-                    for (ClickListener listen : clickListeners) {
-                        listen.onClick(this);
+                if (clickHandlers != null) {
+                    for (ClickHandler listen : clickHandlers) {
+                        listen.onClick(null);
                     }
                 }
-                //animTimer.setRunning(false);
-
                 setStyleName(CSS_NAME);
                 break;
         }
@@ -81,14 +73,6 @@ public class WSLaunchButton extends Composite {
                 name + "</span>";
     }
 
-//    public void setName(String name) {
-//        setHTML(createButtonMarkup());
-//    }
-//
-//    private void setIcon(Image icon) {
-//        setHTML(createButtonMarkup());
-//    }
-
     public Image getIcon() {
         return icon;
     }
@@ -97,8 +81,8 @@ public class WSLaunchButton extends Composite {
         return name;
     }
 
-    public void addClickListener(ClickListener listener) {
-        if (clickListeners == null) clickListeners = new ArrayList<ClickListener>();
-        clickListeners.add(listener);
+    public void addClickListener(ClickHandler handler) {
+        if (clickHandlers == null) clickHandlers = new ArrayList<ClickHandler>();
+        clickHandlers.add(handler);
     }
 }

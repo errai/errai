@@ -3,25 +3,27 @@ package org.jboss.workspace.client.listeners;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
 import org.jboss.workspace.client.framework.Tool;
 import org.jboss.workspace.client.rpc.StatePacket;
 import org.jboss.workspace.client.layout.WorkspaceLayout;
 
-public class TabOpeningClickListener implements ClickListener {
+public class TabOpeningClickHandler implements ClickHandler {
     private WorkspaceLayout layout;
     private String tabName;
     private Tool tool;
     private Image icon;
     private boolean multipleAllowed;
 
-    public TabOpeningClickListener(WorkspaceLayout layout, String tabName, Tool tool, Image icon) {
+    public TabOpeningClickHandler(WorkspaceLayout layout, String tabName, Tool tool, Image icon) {
         this.layout = layout;
         this.tabName = tabName;
         this.tool = tool;
         this.icon = icon;
     }
 
-    public TabOpeningClickListener(WorkspaceLayout layout, String tabName, Tool tool, Image icon,
+    public TabOpeningClickHandler(WorkspaceLayout layout, String tabName, Tool tool, Image icon,
                                    boolean multipleAllowed) {
         this.layout = layout;
         this.tabName = tabName;
@@ -30,10 +32,10 @@ public class TabOpeningClickListener implements ClickListener {
         this.multipleAllowed = multipleAllowed;
     }
 
-    public void onClick(Widget sender) {
-        //todo: abstract this better.
+    public void onClick(ClickEvent event) {
         layout.openTab(tool, new StatePacket(layout, tool), icon, multipleAllowed);
     }
+
 
     public String getTabName() {
         return tabName;

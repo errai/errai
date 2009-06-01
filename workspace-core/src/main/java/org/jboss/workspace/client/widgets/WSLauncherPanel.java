@@ -5,7 +5,7 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.core.client.GWT;
 import org.jboss.workspace.client.framework.Tool;
-import org.jboss.workspace.client.listeners.TabOpeningClickListener;
+import org.jboss.workspace.client.listeners.TabOpeningClickHandler;
 import org.jboss.workspace.client.layout.WorkspaceLayout;
 
 
@@ -35,7 +35,7 @@ public class WSLauncherPanel extends Composite {
         newIcon.setSize("16px", "16px");
 
         WSLaunchButton button = new WSLaunchButton(newIcon, name);
-        button.addClickListener(new TabOpeningClickListener(layout, name, tool, newIcon, tool.multipleAllowed()));
+        button.addClickListener(new TabOpeningClickHandler(layout, name, tool, newIcon, tool.multipleAllowed()));
         vPanel.add(button);
 
     }

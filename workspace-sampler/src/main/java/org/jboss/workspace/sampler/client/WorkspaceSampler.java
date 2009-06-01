@@ -1,12 +1,14 @@
 package org.jboss.workspace.sampler.client;
 
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.TreeItem;
 import org.jboss.workspace.client.ToolSet;
 import org.jboss.workspace.client.Workspace;
+import org.jboss.workspace.client.widgets.WSTree;
 import org.jboss.workspace.client.framework.Tool;
 import org.jboss.workspace.client.layout.WorkspaceLayout;
+import org.jboss.workspace.sampler.client.minibrowser.MiniBrowserWidget;
 import org.jboss.workspace.sampler.client.servicecontrol.ServiceControlTool;
 import org.jboss.workspace.sampler.client.tabledemo.TableDemo;
 
@@ -19,7 +21,7 @@ public class WorkspaceSampler implements EntryPoint {
 
         layout.addToolSet(new ToolSet() {
             public Tool[] getAllProvidedTools() {
-                return new Tool[]{  new ServiceControlTool(), new TableDemo()  };
+                return new Tool[]{new ServiceControlTool(), new TableDemo()};
             }
 
             public String getToolSetName() {
@@ -42,7 +44,13 @@ public class WorkspaceSampler implements EntryPoint {
             }
 
             public Widget getWidget() {
-                return new HTML("SAMPLE");
+                MiniBrowserWidget widget = new MiniBrowserWidget();
+                WSTree tree = widget.getTree();
+
+               
+
+
+                return widget;
             }
         });
 

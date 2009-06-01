@@ -81,11 +81,6 @@ public class WSCellMultiSelector extends WSCellFormatter {
         return true;
     }
 
-    @Override
-    public Widget getWidget(WSGrid grid) {
-        return new Label("foo!");
-    }
-
     public void stopedit() {
         listBox.setVisible(false);
         wsCellReference.stopedit();

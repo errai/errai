@@ -82,13 +82,11 @@ public class WSGrid extends Composite {
         resizeLine.setStyleName("WSGrid-resize-line");
         resizeLine.sinkEvents(Event.MOUSEEVENTS);
 
-
         dataGrid.getScrollPanel().addScrollHandler(new ScrollHandler() {
             public void onScroll(ScrollEvent event) {
                 titleBar.getScrollPanel().setHorizontalScrollPosition(dataGrid.getScrollPanel().getHorizontalScrollPosition());
             }
         });
-
 
         /**
          * This is the handler that is responsible for resizing columns.
@@ -340,7 +338,6 @@ public class WSGrid extends Composite {
 
                                     int currRow = currentFocus.getRow() > startSelY ? startSelY : currentFocus.getRow();
                                     if (startSelX < currentFocus.getCol()) {
-
                                         for (int fillend = currRow + fill + 1; currRow < fillend; currRow++) {
                                             dataGrid.tableIndex.get(currRow).get(currentFocus.getCol()).blur();
                                         }
@@ -936,22 +933,6 @@ public class WSGrid extends Composite {
 
                 if (!isFocus) {
                     selectColumn(col);
-                }
-                else if (!_resizeArmed) {
-//                    boolean asc = getColumnSortOrder(col);
-//
-//                    if (sortedColumnHeader != null) {
-//                        WSCell old = sortedColumnHeader;
-//                        sortedColumnHeader = this;
-//                        old.cellFormat.getWidget(wsGrid);
-//                    }
-//                    else {
-//                        sortedColumnHeader = this;
-//                    }
-//                    cellFormat.getWidget(wsGrid);
-//
-//                    sortedColumns.put(col, !asc);
-//                    dataGrid.sort(col, asc);
                 }
             }
             else {
