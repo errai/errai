@@ -3,13 +3,10 @@ package org.jboss.workspace.client.widgets;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.*;
-import com.google.gwt.event.dom.client.MouseEvent;
-import org.adamtacy.client.ui.NEffectPanel;
 import org.jboss.workspace.client.layout.WorkspaceLayout;
 import org.jboss.workspace.client.listeners.TabCloseListener;
 import org.jboss.workspace.client.rpc.StatePacket;
 import org.jboss.workspace.client.widgets.dnd.TabDropController;
-import org.jboss.workspace.client.util.Effects;
 
 
 /**

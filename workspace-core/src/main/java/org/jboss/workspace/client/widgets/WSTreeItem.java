@@ -49,7 +49,5 @@ public class WSTreeItem extends TreeItem {
 
     private String createHTML() {
         return "<span><img src='" + icon.getUrl() + "' align='left'/> " + label + "</span>";
-
     }
-
 }

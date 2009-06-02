@@ -172,6 +172,12 @@ span {
 
 }
 
+.WSToolbar {
+    background: url("images/ui/layout/navbar.png");
+    vertical-align: middle;
+    color:gray;
+}
+
 /*.guvnor-NavButton {*/
 /*display: inline-block;*/
 /*vertical-align: middle;*/
