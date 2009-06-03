@@ -730,3 +730,17 @@ span {
 .WS-WorkPanel-area {
     background: url('images/bgfade.png') repeat-x;
 }
+
+.WSWindowPanel {
+    background: white;
+    border: 1px solid #cecece;
+}
+
+.WSWindowPanel-titlearea {
+    background: url('images/ui/layout/section-header.png') repeat-x;
+    vertical-align: middle;
+    font-size: 10px;
+    font-weight: bold;
+
+    padding: 1px;
+}

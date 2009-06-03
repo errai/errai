@@ -9,6 +9,7 @@ import com.google.gwt.user.client.ui.*;
 import org.gwt.mosaic.ui.client.WindowPanel;
 import org.jboss.workspace.client.framework.Tool;
 import org.jboss.workspace.client.rpc.StatePacket;
+import org.jboss.workspace.client.widgets.WSWindowPanel;
 
 
 public class ImageBrowser implements Tool {
@@ -78,18 +79,19 @@ public class ImageBrowser implements Tool {
 
         i.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                WindowPanel panel = new WindowPanel();
+                final WSWindowPanel panel = new WSWindowPanel();
 
-
-                panel.setAnimationEnabled(true);
-                Image wImg = new Image(i.getUrl());
+                final SimplePanel containerPanel = new SimplePanel();
+                final Image wImg = new Image(i.getUrl());
                 wImg.getElement().getStyle().setProperty("margin", "5px;");
-                panel.add(wImg);
 
-                panel.showModal();                
+                containerPanel.add(wImg);
+                panel.add(containerPanel);
 
-                int height = wImg.getHeight();
-                int width = wImg.getWidth();
+                panel.show();
+
+                int height = wImg.getElement().getOffsetHeight();
+                int width = wImg.getElement().getOffsetWidth();
 
                 int windowHeight = Window.getClientHeight();
                 int windowWidth = Window.getClientWidth();
@@ -98,25 +100,26 @@ public class ImageBrowser implements Tool {
                 int newWidth = (int) Math.round(windowWidth * 0.8);
 
                 double ratio;
-                if (height >= newHeight) {
+                if (height > newHeight) {
                     ratio = ((double) newHeight) / ((double) height);
 
                     height = newHeight;
                     width = (int) Math.round(width * ratio);
                 }
-                if (width >= newWidth) {
-                    ratio = ((double)newWidth) / ((double) width);
+                if (width > newWidth) {
+                    ratio = ((double) newWidth) / ((double) width);
                     width = newWidth;
                     height = (int) Math.round(height * ratio);
                 }
 
 
+                containerPanel.setSize(width + "px", height + "px");
                 wImg.setSize(width + "px", height + "px");
-                panel.setSize(width+2 + "px", height+2 + "px");
+                panel.setSize(width + 5 + "px", height + 5 + "px");
 
                 panel.center();
-
             }
+
         });
         return i;
     }
