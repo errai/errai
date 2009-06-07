@@ -7,6 +7,8 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.DeferredCommand;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.workspace.client.framework.Tool;
 import org.jboss.workspace.client.rpc.StatePacket;
@@ -43,9 +45,8 @@ public class ImageBrowser implements Tool {
                 thumbs.setWidth("100%");
                 viewArea.add(thumbs);
 
-
-                thumbs.add(decorateImage(new Image(GWT.getModuleBaseURL() + "/imagebrowser/toronto1.jpg")));
-                thumbs.add(decorateImage(new Image(GWT.getModuleBaseURL() + "/imagebrowser/toronto2.jpg")));
+                thumbs.add(decorateImage(GWT.getModuleBaseURL() + "/imagebrowser/toronto1.jpg"));
+                thumbs.add(decorateImage(GWT.getModuleBaseURL() + "/imagebrowser/toronto2.jpg"));
 
 
                 dockPanel.setSize("100%", "100%");
@@ -71,67 +72,104 @@ public class ImageBrowser implements Tool {
         return true;
     }
 
-    private Image decorateImage(final Image i) {
-        Style s = i.getElement().getStyle();
-        s.setProperty("border", "1px solid gray");
-        s.setProperty("margin", "2px");
+    private Image decorateImage(final String imageURL) {
 
-        i.setWidth("150px");
+        final Image i = new Image();
 
-        i.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                final WSWindowPanel panel = new WSWindowPanel();
+        i.addLoadHandler(new LoadHandler() {
+            public void onLoad(LoadEvent event) {
 
-                final SimplePanel containerPanel = new SimplePanel();
-                final Image wImg = new Image(i.getUrl());
-                wImg.getElement().getStyle().setProperty("margin", "5px;");
+                int width = i.getWidth();
+                int height = i.getHeight();
 
-                containerPanel.add(wImg);
-                panel.add(containerPanel);
+                i.setHeight(dimRatio(width, 150, height) + "px");
+                i.setWidth("150px");
 
-                wImg.addLoadHandler(new LoadHandler() {
-                    public void onLoad(LoadEvent event) {
-                        panel.show();
+                i.setVisible(true);
 
-                        int height = wImg.getElement().getOffsetHeight();
-                        int width = wImg.getElement().getOffsetWidth();
+                i.addClickHandler(new ClickHandler() {
+                    public void onClick(ClickEvent event) {
+                        final WSWindowPanel panel = new WSWindowPanel();
 
-                        if (height == 0 || width == 0) {
-                            Window.alert("Image has no width/height!");
-                        }
+                        final SimplePanel containerPanel = new SimplePanel();
+                        final Image wImg = new Image();
 
-                        int windowHeight = Window.getClientHeight();
-                        int windowWidth = Window.getClientWidth();
+                        wImg.addLoadHandler(new LoadHandler() {
+                            public void onLoad(LoadEvent event) {
 
-                        int newHeight = (int) Math.round(windowHeight * 0.8);
-                        int newWidth = (int) Math.round(windowWidth * 0.8);
+                                panel.show();
 
-                        double ratio;
-                        if (height > newHeight) {
-                            ratio = ((double) newHeight) / ((double) height);
+                                int height = wImg.getElement().getOffsetHeight();
+                                int width = wImg.getElement().getOffsetWidth();
 
-                            height = newHeight;
-                            width = (int) Math.round(width * ratio);
-                        }
-                        if (width > newWidth) {
-                            ratio = ((double) newWidth) / ((double) width);
-                            width = newWidth;
-                            height = (int) Math.round(height * ratio);
-                        }
+                                if (height == 0 || width == 0) {
+                                    Window.alert("Image has no width/height!");
+                                }
 
-                        containerPanel.setSize(width + "px", height + "px");
-                        wImg.setSize(width + "px", height + "px");
-                        panel.setSize(width + 5 + "px", height + 5 + "px");
+                                int windowHeight = Window.getClientHeight();
+                                int windowWidth = Window.getClientWidth();
 
-                        panel.center();
+                                int newHeight = (int) Math.round(windowHeight * 0.8);
+                                int newWidth = (int) Math.round(windowWidth * 0.8);
+
+                                double ratio;
+                                if (height > newHeight) {
+                                    ratio = ((double) newHeight) / ((double) height);
+
+                                    height = newHeight;
+                                    width = (int) Math.round(width * ratio);
+                                }
+                                if (width > newWidth) {
+                                    ratio = ((double) newWidth) / ((double) width);
+                                    width = newWidth;
+                                    height = (int) Math.round(height * ratio);
+                                }
+
+                                containerPanel.setSize(width + "px", height + "px");
+                                wImg.setSize(width + "px", height + "px");
+                                panel.setSize(width + 5 + "px", height + 5 + "px");
+
+                                panel.center();
+                            }
+                        });
+                        wImg.getElement().getStyle().setProperty("margin", "5px;");
+
+                        containerPanel.add(wImg);
+                        panel.add(containerPanel);
+
+                        /**
+                         * In order to deal with caching problems in IE, we don't set the URL for the
+                         * image until after we've finished building up the DOM.  
+                         */
+                        DeferredCommand.addCommand(new Command() {
+                            public void execute() {
+                                wImg.setUrl(i.getUrl());
+                            }
+                        });
 
                     }
                 });
 
-
             }
-
         });
+
+
+        DeferredCommand.addCommand(new Command() {
+            public void execute() {
+                i.setUrl(imageURL);
+            }
+        });
+
+        Style s = i.getElement().getStyle();
+        s.setProperty("border", "1px solid gray");
+        s.setProperty("margin", "2px");
+
+
         return i;
+    }
+
+
+    private int dimRatio(double value, double newValue, double sourceValue) {
+        return (int) Math.round(sourceValue * (newValue / value));
     }
 }

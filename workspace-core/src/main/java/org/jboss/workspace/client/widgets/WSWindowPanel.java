@@ -9,6 +9,7 @@ import static com.google.gwt.user.client.Window.getClientHeight;
 import static com.google.gwt.user.client.Window.getClientWidth;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.workspace.client.util.Effects;
+import org.jboss.workspace.client.util.LayoutUtil;
 
 public class WSWindowPanel extends Composite {
     private DockPanel dockPanel = new DockPanel();
@@ -93,6 +94,7 @@ public class WSWindowPanel extends Composite {
             }
         });
 
+        LayoutUtil.disableTextSelection(label.getElement(), true);
     }
 
     public void hide() {

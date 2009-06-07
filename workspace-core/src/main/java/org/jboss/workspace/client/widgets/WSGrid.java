@@ -1289,9 +1289,6 @@ public class WSGrid extends Composite {
         }
     }
 
-    public static void disableTextSelection(Element elem, boolean disable) {
-        disableTextSelectInternal(elem, disable);
-    }
 
     private static final int EDITABLE = 1;
     private static final int TITLEGRID = 1 << 1;
@@ -1313,6 +1310,10 @@ public class WSGrid extends Composite {
         public boolean isTitleGrid() {
             return (TITLEGRID & options) != 0;
         }
+    }
+    
+    public static void disableTextSelection(Element elem, boolean disable) {
+        disableTextSelectInternal(elem, disable);
     }
 
     private native static void disableTextSelectInternal(Element e, boolean disable)/*-{
