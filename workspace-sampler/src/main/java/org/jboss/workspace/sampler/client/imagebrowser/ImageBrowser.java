@@ -4,9 +4,10 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.LoadEvent;
+import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
-import org.gwt.mosaic.ui.client.WindowPanel;
 import org.jboss.workspace.client.framework.Tool;
 import org.jboss.workspace.client.rpc.StatePacket;
 import org.jboss.workspace.client.widgets.WSWindowPanel;
@@ -88,36 +89,46 @@ public class ImageBrowser implements Tool {
                 containerPanel.add(wImg);
                 panel.add(containerPanel);
 
-                panel.show();
+                wImg.addLoadHandler(new LoadHandler() {
+                    public void onLoad(LoadEvent event) {
+                        panel.show();
 
-                int height = wImg.getElement().getOffsetHeight();
-                int width = wImg.getElement().getOffsetWidth();
+                        int height = wImg.getElement().getOffsetHeight();
+                        int width = wImg.getElement().getOffsetWidth();
 
-                int windowHeight = Window.getClientHeight();
-                int windowWidth = Window.getClientWidth();
+                        if (height == 0 || width == 0) {
+                            Window.alert("Image has no width/height!");
+                        }
 
-                int newHeight = (int) Math.round(windowHeight * 0.8);
-                int newWidth = (int) Math.round(windowWidth * 0.8);
+                        int windowHeight = Window.getClientHeight();
+                        int windowWidth = Window.getClientWidth();
 
-                double ratio;
-                if (height > newHeight) {
-                    ratio = ((double) newHeight) / ((double) height);
+                        int newHeight = (int) Math.round(windowHeight * 0.8);
+                        int newWidth = (int) Math.round(windowWidth * 0.8);
 
-                    height = newHeight;
-                    width = (int) Math.round(width * ratio);
-                }
-                if (width > newWidth) {
-                    ratio = ((double) newWidth) / ((double) width);
-                    width = newWidth;
-                    height = (int) Math.round(height * ratio);
-                }
+                        double ratio;
+                        if (height > newHeight) {
+                            ratio = ((double) newHeight) / ((double) height);
+
+                            height = newHeight;
+                            width = (int) Math.round(width * ratio);
+                        }
+                        if (width > newWidth) {
+                            ratio = ((double) newWidth) / ((double) width);
+                            width = newWidth;
+                            height = (int) Math.round(height * ratio);
+                        }
+
+                        containerPanel.setSize(width + "px", height + "px");
+                        wImg.setSize(width + "px", height + "px");
+                        panel.setSize(width + 5 + "px", height + 5 + "px");
+
+                        panel.center();
+
+                    }
+                });
 
 
-                containerPanel.setSize(width + "px", height + "px");
-                wImg.setSize(width + "px", height + "px");
-                panel.setSize(width + 5 + "px", height + 5 + "px");
-
-                panel.center();
             }
 
         });

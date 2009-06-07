@@ -1,18 +1,30 @@
 package org.jboss.workspace.client.widgets;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.Event;
 import static com.google.gwt.user.client.Window.getClientHeight;
 import static com.google.gwt.user.client.Window.getClientWidth;
 import com.google.gwt.user.client.ui.*;
-import com.google.gwt.core.client.GWT;
 import org.jboss.workspace.client.util.Effects;
 
 public class WSWindowPanel extends Composite {
     private DockPanel dockPanel = new DockPanel();
     private Image icon = new Image(GWT.getModuleBaseURL() + "/images/ui/icons/flag_blue.png");
     private Label label = new Label("Workspace Popup");
+
+    private int offsetX;
+    private int offsetY;
+
+    private boolean drag;
+
+    private Style windowStyle;
+    private MouseMover mouseMover = new MouseMover();
+    private HandlerRegistration mouseMoverReg;
+
+    private static int zIndex = 1;
 
     public WSWindowPanel() {
         dockPanel.getElement().getStyle().setProperty("position", "absolute");
@@ -45,12 +57,42 @@ public class WSWindowPanel extends Composite {
         titleArea.add(closeButton);
         titleArea.setCellHorizontalAlignment(closeButton, HasHorizontalAlignment.ALIGN_RIGHT);
 
-        dockPanel.add(titleArea, DockPanel.NORTH);
-        dockPanel.setCellVerticalAlignment(titleArea, HasVerticalAlignment.ALIGN_MIDDLE);
+        FocusPanel fPanel = new FocusPanel();
+        fPanel.add(titleArea);
+
+        dockPanel.add(fPanel, DockPanel.NORTH);
+        dockPanel.setCellVerticalAlignment(fPanel, HasVerticalAlignment.ALIGN_MIDDLE);
 
         initWidget(dockPanel);
         setVisible(false);
         RootPanel.get().add(this);
+
+        final WSWindowPanel windowPanel = this;
+        windowStyle = getElement().getStyle();
+
+        fPanel.addMouseDownHandler(new MouseDownHandler() {
+            public void onMouseDown(MouseDownEvent event) {
+                offsetX = event.getClientX() - windowPanel.getAbsoluteLeft();
+                offsetY = event.getClientY() - windowPanel.getAbsoluteTop();
+                drag = true;
+
+                windowStyle.setProperty("zIndex", zIndex++ + "");
+
+                mouseMoverReg = Event.addNativePreviewHandler(mouseMover);
+
+                Effects.setOpacity(windowStyle, 50);
+            }
+        });
+
+        fPanel.addMouseUpHandler(new MouseUpHandler() {
+            public void onMouseUp(MouseUpEvent event) {
+                drag = false;
+                mouseMoverReg.removeHandler();
+
+                Effects.setOpacity(windowStyle, 100);
+            }
+        });
+
     }
 
     public void hide() {
@@ -59,9 +101,11 @@ public class WSWindowPanel extends Composite {
     }
 
     public void show() {
-        Effects.setOpacity(getElement().getStyle(), 0);
+        Effects.setOpacity(windowStyle, 0);
         setVisible(true);
         Effects.fade(getElement(), 1, 5, 0, 100);
+
+        windowStyle.setProperty("zIndex", zIndex++ + "");
     }
 
     public void add(Widget w) {
@@ -78,4 +122,15 @@ public class WSWindowPanel extends Composite {
         s.setProperty("top", top + "px");
         s.setProperty("left", left + "px");
     }
+
+    public class MouseMover implements Event.NativePreviewHandler {
+        public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
+            if (event.getTypeInt() == Event.ONMOUSEMOVE && drag) {
+                windowStyle.setProperty("top", (event.getNativeEvent().getClientY() - offsetY) + "px");
+                windowStyle.setProperty("left", (event.getNativeEvent().getClientX() - offsetX) + "px");
+            }
+        }
+    }
+
+
 }
