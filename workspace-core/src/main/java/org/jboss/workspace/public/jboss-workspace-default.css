@@ -746,4 +746,35 @@ span {
 
     -moz-user-select: none;
     -khtml-user-select: none;
-    user-select: none;}
+    user-select: none;
+}
+
+.WSDropShadow-topLeftCorner {
+    width:17px;
+    height:17px;
+    background: url("images/ui/layout/dropshadow/eq-topleft.png") no-repeat;
+}
+
+.WSDropShadow-topLeft {
+    height:17px;
+    width:13px;
+    background: url("images/ui/layout/dropshadow/eq-topleft-inner.png")
+}
+
+.WSDropShadow-topMiddle {
+    height:17px;
+    width:100%;
+    background: url("images/ui/layout/dropshadow/eq-top.png");
+}
+
+.WSDropShadow-topRight {
+    width:13px;
+    height:17px;
+    background: url("images/ui/layout/dropshadow/eq-topright-inner.png");
+}
+
+.WSDropShadow-topRightCorner {
+       width:17px;
+    height:17px;
+    background: url("images/ui/layout/dropshadow/eq-topright.png") no-repeat; 
+}

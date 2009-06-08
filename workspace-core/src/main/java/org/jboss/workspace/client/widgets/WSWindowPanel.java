@@ -10,8 +10,10 @@ import static com.google.gwt.user.client.Window.getClientWidth;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.workspace.client.util.Effects;
 import org.jboss.workspace.client.util.LayoutUtil;
+import org.jboss.workspace.client.layout.WSDropShadowLayout;
 
 public class WSWindowPanel extends Composite {
+    private WSDropShadowLayout dropShadow;
     private DockPanel dockPanel = new DockPanel();
     private Image icon = new Image(GWT.getModuleBaseURL() + "/images/ui/icons/flag_blue.png");
     private Label label = new Label("Workspace Popup");
@@ -28,12 +30,17 @@ public class WSWindowPanel extends Composite {
     private static int zIndex = 1;
 
     public WSWindowPanel() {
-        dockPanel.getElement().getStyle().setProperty("position", "absolute");
+        dropShadow = new WSDropShadowLayout(dockPanel);
+
         dockPanel.setStyleName("WSWindowPanel");
+        dropShadow.getElement().getStyle().setProperty("position", "absolute");
+  //      outerDockPanel.add(dockPanel, DockPanel.CENTER);
 
         /**
          * Build the window title area
          */
+
+
         HorizontalPanel titleArea = new HorizontalPanel();
         titleArea.setStyleName("WSWindowPanel-titlearea");
         titleArea.setWidth("100%");
@@ -64,7 +71,7 @@ public class WSWindowPanel extends Composite {
         dockPanel.add(fPanel, DockPanel.NORTH);
         dockPanel.setCellVerticalAlignment(fPanel, HasVerticalAlignment.ALIGN_MIDDLE);
 
-        initWidget(dockPanel);
+        initWidget(dropShadow);
         setVisible(false);
         RootPanel.get().add(this);
 

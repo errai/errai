@@ -308,37 +308,6 @@ public class WSStackPanel extends ComplexPanel {
             Effects.fade(w.getElement(), 1, 2, 20, 100);    
         }
 
-//
-//
-//        if (visible) {
-//            Timer timer = new Timer() {
-//                float i = 0.0f;
-//                Style s = w.getElement().getStyle();
-//                boolean x = false;
-//
-//                public void run() {
-//                    i += 0.02f;
-//                    if (i < 1.0f) {
-//                        Effects.setOpacity(s, i);
-//
-//                        if (!x) {
-//                            UIObject.setVisible(tr, visible);
-//                            getWidget(index).setVisible(visible);
-//                            x=true;
-//                        }
-//                    }
-//                    else {
-//                        cancel();
-//                    }
-//                }
-//            };
-//            timer.scheduleRepeating(10);
-//        }
-//        else {
-//            UIObject.setVisible(tr, visible);
-//            getWidget(index).setVisible(visible);
-//        }
-
     }
 
     private void setStackVisible(int index, boolean visible) {
