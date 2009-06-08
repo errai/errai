@@ -4,5 +4,5 @@ import com.google.gwt.user.client.ui.Panel;
 
 
 public interface Layout {
-    public Panel createLayout();
+    public Panel createLayout(String id);
 }

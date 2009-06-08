@@ -55,7 +55,7 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
     private Map<String, WSTab> idTabLookup = new HashMap<String, WSTab>();
     public Map<Widget, WSTab> tabLookup = new LinkedHashMap<Widget, WSTab>();
 
-    public PickupDragController tabDragController = new PickupDragController(RootPanel.get(), false);
+    public PickupDragController tabDragController;
 
     public List<WorkspaceSizeChangeListener> workspaceSizeChangeListers = new ArrayList<WorkspaceSizeChangeListener>();
 
@@ -66,7 +66,7 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
     private int currSizeW;
     private int currSizeH;
 
-    public Panel createLayout() {
+    public Panel createLayout(final String id) {
         /**
          * Create main layout panel using a border layout.
          */
@@ -79,6 +79,7 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
         Widget area;
         mainLayoutPanel.add(createHeader(), DockPanel.NORTH);
 
+        tabDragController = new PickupDragController(RootPanel.get(), false);
         tabDragController.setBehaviorBoundaryPanelDrop(false);
         tabDragController.addDragHandler(new TabDragHandler(this));
 
@@ -94,17 +95,20 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
         currSizeW = Window.getClientWidth();
         currSizeH = Window.getClientHeight();
 
-        RootPanel.get().setPixelSize(currSizeW, currSizeH);
+        RootPanel.get(id).setPixelSize(currSizeW, currSizeH);
 
         addResizeHandler(new ResizeHandler() {
             public void onResize(ResizeEvent event) {
-                RootPanel.get().setPixelSize(event.getWidth(), event.getHeight());
+
+                RootPanel.get(id).setPixelSize(event.getWidth(), event.getHeight());
                 fireWorkspaceSizeChangeListeners(event.getWidth() - currSizeW, event.getHeight() - currSizeH);
 
                 currSizeW = event.getWidth();
                 currSizeH = event.getHeight();
             }
         });
+
+
 
         return mainLayoutPanel;
     }

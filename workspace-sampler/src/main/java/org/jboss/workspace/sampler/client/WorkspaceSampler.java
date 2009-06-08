@@ -20,7 +20,7 @@ import org.jboss.workspace.sampler.client.tabledemo.TableDemo;
 public class WorkspaceSampler implements EntryPoint {
     public void onModuleLoad() {
         Workspace ws = new Workspace();
-        final WorkspaceLayout layout = ws.init(null);
+        final WorkspaceLayout layout = ws.init("rootPanel");
         layout.setRpcSync(false);
 
         layout.addToolSet(new ToolSet() {

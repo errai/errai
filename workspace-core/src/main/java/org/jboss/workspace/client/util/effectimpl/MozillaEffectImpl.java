@@ -44,6 +44,5 @@ public class MozillaEffectImpl {
 
     public native static void setOpacity(Style s, int opacity) /*-{
         s.MozOpacity = opacity / 100;
-        s.KthmlOpacity = opacity / 100;
     }-*/;
 }

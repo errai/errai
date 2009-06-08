@@ -130,9 +130,9 @@ public class WSWindowPanel extends Composite {
             if (event.getTypeInt() == Event.ONMOUSEMOVE && drag) {
                 windowStyle.setProperty("top", (event.getNativeEvent().getClientY() - offsetY) + "px");
                 windowStyle.setProperty("left", (event.getNativeEvent().getClientX() - offsetX) + "px");
+
+                event.cancel();
             }
         }
     }
-
-
 }
