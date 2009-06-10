@@ -32,40 +32,10 @@ public class WSDropShadowLayout extends Composite {
         topRightCorner.setStyleName("WSDropShadow-topRightCorner");
         top.add(topRightCorner);
 
-        VerticalPanel left = new VerticalPanel();
-        dockPanel.add(left, DockPanel.WEST);
-
-        SimplePanel leftTop = new SimplePanel();
-        leftTop.setStyleName("WSDropShadow-leftTop");
-        left.add(leftTop);
-
-        SimplePanel leftMiddle = new SimplePanel();
-        leftMiddle.setStyleName("WSDropShadow-leftMiddle");
-        left.add(leftMiddle);
-
-        SimplePanel leftBottom = new SimplePanel();
-        leftBottom.setStyleName("WSDropShadow-leftBottom");
-        left.add(leftBottom);
-
-        dockPanel.add(wrappedWidget, DockPanel.CENTER);
-
-        VerticalPanel right = new VerticalPanel();
-        dockPanel.add(right, DockPanel.EAST);
-
-        SimplePanel rightTop = new SimplePanel();
-        rightTop.setStyleName("WSDropShadow-rightTop");
-        right.add(rightTop);
-
-        SimplePanel rightMiddle = new SimplePanel();
-        rightMiddle.setStyleName("WSDropShadow-rightMiddle");
-        right.add(rightMiddle);
-
-        SimplePanel rightBottom = new SimplePanel();
-        rightBottom.setStyleName("WSDropShadow-rightBottom");
-        right.add(rightBottom);
-
         HorizontalPanel bottom = new HorizontalPanel();
+        bottom.setWidth("100%");
         dockPanel.add(bottom, DockPanel.SOUTH);
+        dockPanel.setCellWidth(bottom, "100%");
 
         SimplePanel bottomLeftCorner = new SimplePanel();
         bottomLeftCorner.setStyleName("WSDropShadow-bottomLeftCorner");
@@ -78,6 +48,7 @@ public class WSDropShadowLayout extends Composite {
         SimplePanel bottomMiddle = new SimplePanel();
         bottomMiddle.setStyleName("WSDropShadow-bottomMiddle");
         bottom.add(bottomMiddle);
+        bottom.setCellWidth(bottomMiddle, "100%");
 
         SimplePanel bottomRight = new SimplePanel();
         bottomRight.setStyleName("WSDropShadow-bottomRight");
@@ -86,6 +57,47 @@ public class WSDropShadowLayout extends Composite {
         SimplePanel bottomRightCorner = new SimplePanel();
         bottomRightCorner.setStyleName("WSDropShadow-bottomRightCorner");
         bottom.add(bottomRightCorner);
+
+
+        VerticalPanel left = new VerticalPanel();
+        left.setHeight("100%");
+        dockPanel.add(left, DockPanel.WEST);
+        dockPanel.setCellHeight(left, "100%");
+
+        SimplePanel leftTop = new SimplePanel();
+        leftTop.setStyleName("WSDropShadow-leftTop");
+        left.add(leftTop);
+
+        SimplePanel leftMiddle = new SimplePanel();
+        leftMiddle.setHeight("100%");
+        leftMiddle.setStyleName("WSDropShadow-leftMiddle");
+        left.add(leftMiddle);
+        left.setCellHeight(leftMiddle, "100%");
+
+        SimplePanel leftBottom = new SimplePanel();
+        leftBottom.setStyleName("WSDropShadow-leftBottom");
+        left.add(leftBottom);
+
+        VerticalPanel right = new VerticalPanel();
+        right.setHeight("100%");
+        dockPanel.add(right, DockPanel.EAST);
+        dockPanel.setCellHeight(right, "100%");
+
+        SimplePanel rightTop = new SimplePanel();
+        rightTop.setStyleName("WSDropShadow-rightTop");
+        right.add(rightTop);
+
+        SimplePanel rightMiddle = new SimplePanel();
+        rightMiddle.setHeight("100%");
+        rightMiddle.setStyleName("WSDropShadow-rightMiddle");
+        right.add(rightMiddle);
+        right.setCellHeight(rightMiddle, "100%");
+
+        SimplePanel rightBottom = new SimplePanel();
+        rightBottom.setStyleName("WSDropShadow-rightBottom");
+        right.add(rightBottom);
+
+        dockPanel.add(wrappedWidget, DockPanel.CENTER);
 
         initWidget(dockPanel);
     }

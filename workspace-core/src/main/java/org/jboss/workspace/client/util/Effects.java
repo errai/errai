@@ -44,8 +44,8 @@ public class Effects {
 
     public native static void setOpacity(Style s, int opacity) /*-{
         s.opacity = opacity / 100;
-        s.MozOpacity = opacity / 100;
-        s.KthmlOpacity = opacity / 100;
+//        s.MozOpacity = opacity / 100;
+//        s.KthmlOpacity = opacity / 100;
         s.filter = "alpha(" + opacity + ")";
     }-*/;
 }

@@ -293,7 +293,7 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
                 return;
             }
             else {
-                WSModalDialog dialog = new WSModalDialog();
+                WSModalDialog dialog = new  WSModalDialog();
                 dialog.getOkButton().setText("Open New");
                 dialog.getCancelButton().setText("Goto");
 

@@ -4,16 +4,25 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.Command;
+import static com.google.gwt.user.client.DeferredCommand.addCommand;
 import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.Window;
 import static com.google.gwt.user.client.Window.getClientHeight;
 import static com.google.gwt.user.client.Window.getClientWidth;
 import com.google.gwt.user.client.ui.*;
+import org.jboss.workspace.client.layout.WSDropShadowLayout;
 import org.jboss.workspace.client.util.Effects;
 import org.jboss.workspace.client.util.LayoutUtil;
-import org.jboss.workspace.client.layout.WSDropShadowLayout;
 
+import static java.lang.Math.round;
+import java.util.LinkedList;
+import java.util.List;
+
+/**
+ * Workspace Window Panel implementation.  Provides basic popup window facilities.
+ */
 public class WSWindowPanel extends Composite {
-    private WSDropShadowLayout dropShadow;
     private DockPanel dockPanel = new DockPanel();
     private Image icon = new Image(GWT.getModuleBaseURL() + "/images/ui/icons/flag_blue.png");
     private Label label = new Label("Workspace Popup");
@@ -27,14 +36,17 @@ public class WSWindowPanel extends Composite {
     private MouseMover mouseMover = new MouseMover();
     private HandlerRegistration mouseMoverReg;
 
-    private static int zIndex = 1;
+    public static int zIndex = 1;
+
+    private List<Window.ClosingHandler> closingHandlers;
+
 
     public WSWindowPanel() {
-        dropShadow = new WSDropShadowLayout(dockPanel);
+        WSDropShadowLayout dropShadow = new WSDropShadowLayout(dockPanel);
 
         dockPanel.setStyleName("WSWindowPanel");
         dropShadow.getElement().getStyle().setProperty("position", "absolute");
-  //      outerDockPanel.add(dockPanel, DockPanel.CENTER);
+        //      outerDockPanel.add(dockPanel, DockPanel.CENTER);
 
         /**
          * Build the window title area
@@ -102,11 +114,19 @@ public class WSWindowPanel extends Composite {
         });
 
         LayoutUtil.disableTextSelection(label.getElement(), true);
+
+        setHeight("25px");
+    }
+
+    public WSWindowPanel(String title) {
+        this();
+        setTitle(title);
     }
 
     public void hide() {
         Effects.fade(getElement(), 1, 5, 100, 0);
         setVisible(false);
+        fireClosingHandlers();
     }
 
     public void show() {
@@ -120,16 +140,52 @@ public class WSWindowPanel extends Composite {
     public void add(Widget w) {
         dockPanel.add(w, DockPanel.CENTER);
         dockPanel.setSpacing(1);
+        dockPanel.setCellHeight(w, "100%");
+        dockPanel.setCellWidth(w, "100%");
+    }
+
+    @Deprecated
+    public void setWidget(Widget w) {
+        add(w);
     }
 
     public void center() {
-        Style s = getElement().getStyle();
+        final Style s = getElement().getStyle();
 
-        int top = (int) Math.round((((double) getClientHeight()) - ((double) getOffsetHeight())) / 2d);
-        int left = (int) Math.round((((double) getClientWidth()) - ((double) getOffsetWidth())) / 2d);
+        /**
+         * Defer the command to ensure calculations occur after all the DOM elements are attached.
+         */
+        addCommand(new Command() {
+            public void execute() {
+                int top = (int) round((((double) getClientHeight()) - ((double) getOffsetHeight())) / 2d);
+                int left = (int) round((((double) getClientWidth()) - ((double) getOffsetWidth())) / 2d);
 
-        s.setProperty("top", top + "px");
-        s.setProperty("left", left + "px");
+                s.setProperty("top", top + "px");
+                s.setProperty("left", left + "px");
+            }
+        });
+    }
+
+    public void setIcon(String url) {
+        icon.setUrl(url);
+    }
+
+    public void setTitle(String title) {
+        label.setText(title);
+    }
+
+    public void addClosingHandler(Window.ClosingHandler closingHandler) {
+        if (closingHandlers == null) closingHandlers = new LinkedList<Window.ClosingHandler>();
+        closingHandlers.add(closingHandler);
+    }
+
+    private void fireClosingHandlers() {
+        if (closingHandlers != null) {
+            WSClosingEvent event = new WSClosingEvent(this);
+            for (Window.ClosingHandler handler : closingHandlers) {
+                handler.onWindowClosing(event);
+            }
+        }
     }
 
     public class MouseMover implements Event.NativePreviewHandler {
@@ -140,6 +196,19 @@ public class WSWindowPanel extends Composite {
 
                 event.cancel();
             }
+        }
+    }
+
+    public class WSClosingEvent extends Window.ClosingEvent {
+        private WSWindowPanel source;
+
+        public WSClosingEvent(WSWindowPanel source) {
+            super();
+            this.source = source;
+        }
+
+        public WSWindowPanel getSource() {
+            return source;
         }
     }
 }

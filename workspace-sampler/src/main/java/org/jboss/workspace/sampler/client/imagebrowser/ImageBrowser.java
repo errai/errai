@@ -91,6 +91,7 @@ public class ImageBrowser implements Tool {
                     public void onClick(ClickEvent event) {
                         final WSWindowPanel panel = new WSWindowPanel();
 
+
                         final SimplePanel containerPanel = new SimplePanel();
                         final Image wImg = new Image();
 
@@ -144,6 +145,8 @@ public class ImageBrowser implements Tool {
                         DeferredCommand.addCommand(new Command() {
                             public void execute() {
                                 wImg.setUrl(i.getUrl());
+                                panel.setTitle("Viewing Image: " + (wImg.getUrl().substring(wImg.getUrl().lastIndexOf('/')+1))
+                                        + " (" + wImg.getWidth() + "x" + wImg.getHeight() + ")");
                             }
                         });
 

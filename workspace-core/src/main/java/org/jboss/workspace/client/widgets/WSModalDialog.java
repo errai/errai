@@ -2,7 +2,9 @@ package org.jboss.workspace.client.widgets;
 
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.WindowCloseListener;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style;
 import org.gwt.mosaic.ui.client.WindowPanel;
 import org.jboss.workspace.client.framework.AcceptsCallback;
 import org.jboss.workspace.client.listeners.ClickCallbackListener;
@@ -20,18 +22,31 @@ public class WSModalDialog implements AcceptsCallback {
     Button cancelButton;
     ClickCallbackListener cancelListener;
 
-    WindowPanel window;
+    SimplePanel drapePanel = new SimplePanel();
+    WSWindowPanel window;
 
     public WSModalDialog() {
         this("Alert!");
     }
 
     public WSModalDialog(String title) {
-        window = new WindowPanel(title);
+        Style drapeStyle = drapePanel.getElement().getStyle();
+
+        drapeStyle.setProperty("position", "absolute");
+        drapeStyle.setProperty("top", "0px");
+        drapeStyle.setProperty("left", "0px");
+
+        drapePanel.setWidth("100%");
+        drapePanel.setHeight("100%");
+
+        drapePanel.setStyleName("WSWindowPanel-drape");
+
+        window = new WSWindowPanel(title);
         window.setWidth("400px");
 
-        window.setAnimationEnabled(true);
-        window.setResizable(false);
+
+//        window.setAnimationEnabled(true);
+//        window.setResizable(false);
 
         dockPanel = new DockPanel();
 
@@ -60,7 +75,7 @@ public class WSModalDialog implements AcceptsCallback {
         dockPanel.setCellHorizontalAlignment(buttonPanel, DockPanel.ALIGN_RIGHT);
         dockPanel.setCellHeight(buttonPanel, "45px");
 
-        window.setWidget(dockPanel);
+        window.add(dockPanel);
     }
 
 
@@ -72,16 +87,12 @@ public class WSModalDialog implements AcceptsCallback {
     public void ask(String message, final AcceptsCallback callbackTo) {
         this.callbackTo = callbackTo;
         this.message.setText(message);
-        window.addWindowCloseListener(new WindowCloseListener() {
-            public String onWindowClosing() {
-                return null;
-            }
-
-            public void onWindowClosed() {
+        window.addClosingHandler(new Window.ClosingHandler() {
+            public void onWindowClosing(Window.ClosingEvent event) {
                 callbackTo.callback("WindowClosed");
+                RootPanel.get().remove(drapePanel);
             }
         });
-
     }
 
     public Button getOkButton() {
@@ -105,7 +116,12 @@ public class WSModalDialog implements AcceptsCallback {
     }
 
     public void showModal() {
-        window.showModal();
+        window.center();
+        window.show();
+
+     //   drapePanel.getElement().getStyle().setProperty("zIndex", String.valueOf(WSWindowPanel.zIndex - 1));
+
+        RootPanel.get().add(drapePanel);
     }
 
 }

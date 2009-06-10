@@ -25,7 +25,7 @@ public class WSTabSelectorDialog extends WSModalDialog {
     Button cancelButton;
     ClickCallbackListener cancelListener;
 
-    final WindowPanel window = new WindowPanel("Select Window");
+    final WSWindowPanel window = new WSWindowPanel("Select Window");
 
     String id;
 
@@ -81,15 +81,12 @@ public class WSTabSelectorDialog extends WSModalDialog {
         s.setProperty("verticalAlign", "top");
 
         window.add(hPanel);
-
-        window.setAnimationEnabled(true);
-        window.setResizable(false);
     }
 
 
     public void callback(String message) {
         callbackTo.callback(message);
-        window.close();
+        window.hide();
     }
 
     public void ask(String message, AcceptsCallback callbackTo) {
@@ -114,7 +111,8 @@ public class WSTabSelectorDialog extends WSModalDialog {
     }
 
     public void showModal() {
-        window.showModal();
+        window.show();
+        window.center();
     }
 
 }
