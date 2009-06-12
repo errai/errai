@@ -345,7 +345,7 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
 
     public void forceOpenTab(Tool tool, StatePacket packet, Image icon) {
         ScrollPanel flowpanel = new ScrollPanel();
-        Effects.setOpacity(flowpanel.getElement().getStyle(), 0);
+        Effects.setOpacity(flowpanel.getElement(), 0);
         flowpanel.setHeight("100%");
 
         Widget toolWidget = tool.getWidget(packet);
@@ -383,7 +383,7 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
 
         t.schedule(25);
 
-        Effects.fade(flowpanel.getElement(), 1, 5, 0, 100);
+        Effects.fade(flowpanel.getElement(), 5, 5, 0, 100);
     }
 
     public void closeTab(StatePacket packet) {

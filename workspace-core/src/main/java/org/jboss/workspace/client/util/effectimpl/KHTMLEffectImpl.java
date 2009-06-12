@@ -3,9 +3,10 @@ package org.jboss.workspace.client.util.effectimpl;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Timer;
+import org.jboss.workspace.client.util.Effect;
 
-public class KHTMLEffectImpl {
-        public static void fade(Element el, int durationMillis, final int stepping, final int start, final int end) {
+public class KHTMLEffectImpl implements Effect {
+    public void doFade(final Element el, int durationMillis, final int stepping, final int start, final int end) {
         final Style s = el.getStyle();
         Timer t = start < end ?
                 new Timer() {
@@ -14,10 +15,10 @@ public class KHTMLEffectImpl {
                     public void run() {
                         step += stepping;
                         if (step < end) {
-                            setOpacity(s, step);
+                            setOpacity(el, step);
                         }
                         else {
-                            setOpacity(s, end);
+                            setOpacity(el, end);
                             cancel();
                         }
                     }
@@ -29,10 +30,10 @@ public class KHTMLEffectImpl {
                     public void run() {
                         step -= stepping;
                         if (step < end) {
-                            setOpacity(s, step);
+                            setOpacity(el, step);
                         }
                         else {
-                            setOpacity(s, end);
+                            setOpacity(el, end);
                             cancel();
                         }
                     }
@@ -41,7 +42,11 @@ public class KHTMLEffectImpl {
         t.scheduleRepeating(durationMillis);
     }
 
-    public native static void setOpacity(Style s, int opacity) /*-{
+    public void setOpacity(Element el, int opacity) {
+         setOpacityNative(el.getStyle(), opacity);
+    }
+
+    public native static void setOpacityNative(Style s, int opacity) /*-{
         s.opacity = opacity / 100;
     }-*/;
 }

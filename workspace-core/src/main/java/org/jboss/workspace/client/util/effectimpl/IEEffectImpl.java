@@ -3,11 +3,11 @@ package org.jboss.workspace.client.util.effectimpl;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Timer;
+import org.jboss.workspace.client.util.Effect;
 
 
-public class IEEffectImpl {
-        public static void fade(Element el, int durationMillis, final int stepping, final int start, final int end) {
-        final Style s = el.getStyle();
+public class IEEffectImpl implements Effect {
+    public void doFade(final Element el, int durationMillis, final int stepping, final int start, final int end) {
         Timer t = start < end ?
                 new Timer() {
                     int step = start;
@@ -15,10 +15,10 @@ public class IEEffectImpl {
                     public void run() {
                         step += stepping;
                         if (step < end) {
-                            setOpacity(s, step);
+                            setOpacity(el, step);
                         }
                         else {
-                            setOpacity(s, end);
+                            setOpacity(el, end);
                             cancel();
                         }
                     }
@@ -30,10 +30,10 @@ public class IEEffectImpl {
                     public void run() {
                         step -= stepping;
                         if (step < end) {
-                            setOpacity(s, step);
+                            setOpacity(el, step);
                         }
                         else {
-                            setOpacity(s, end);
+                            setOpacity(el, end);
                             cancel();
                         }
                     }
@@ -42,7 +42,11 @@ public class IEEffectImpl {
         t.scheduleRepeating(durationMillis);
     }
 
-    public native static void setOpacity(Style s, int opacity) /*-{
-        s.filter = "alpha(" + opacity + ")";
+    public void setOpacity(Element el, int opacity) {
+       setOpacityNative(el.getStyle(), opacity);
+    }
+
+    public native static void setOpacityNative(Style s, int opacity) /*-{
+        s.filter="alpha(opacity='" + opacity + "')";
     }-*/;
 }

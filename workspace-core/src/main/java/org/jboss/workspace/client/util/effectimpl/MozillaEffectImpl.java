@@ -4,12 +4,11 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
+import org.jboss.workspace.client.util.Effect;
 
 
-public class MozillaEffectImpl {
-    public static void fade(Element el, int durationMillis, final int stepping, final int start, final int end) {
-        Window.alert("MOZ!");
-        final Style s = el.getStyle();
+public class MozillaEffectImpl implements Effect {
+    public void doFade(final Element el, int durationMillis, final int stepping, final int start, final int end) {
         Timer t = start < end ?
                 new Timer() {
                     int step = start;
@@ -17,10 +16,10 @@ public class MozillaEffectImpl {
                     public void run() {
                         step += stepping;
                         if (step < end) {
-                            setOpacity(s, step);
+                            setOpacity(el, step);
                         }
                         else {
-                            setOpacity(s, end);
+                            setOpacity(el, end);
                             cancel();
                         }
                     }
@@ -32,10 +31,10 @@ public class MozillaEffectImpl {
                     public void run() {
                         step -= stepping;
                         if (step < end) {
-                            setOpacity(s, step);
+                            setOpacity(el, step);
                         }
                         else {
-                            setOpacity(s, end);
+                            setOpacity(el, end);
                             cancel();
                         }
                     }
@@ -44,7 +43,11 @@ public class MozillaEffectImpl {
         t.scheduleRepeating(durationMillis);
     }
 
-    public native static void setOpacity(Style s, int opacity) /*-{
+    public void setOpacity(Element el, int opacity) {
+        setOpacityNative(el.getStyle(), opacity);
+    }
+
+    public native static void setOpacityNative(Style s, int opacity) /*-{
         s.MozOpacity = opacity / 100;
     }-*/;
 }

@@ -32,7 +32,6 @@ public class WSWindowPanel extends Composite {
 
     private boolean drag;
 
-    private Style windowStyle;
     private MouseMover mouseMover = new MouseMover();
     private HandlerRegistration mouseMoverReg;
 
@@ -40,8 +39,12 @@ public class WSWindowPanel extends Composite {
 
     private List<Window.ClosingHandler> closingHandlers;
 
+    private WSWindowPanel windowPanel;
+
 
     public WSWindowPanel() {
+        windowPanel = this;
+
         WSDropShadowLayout dropShadow = new WSDropShadowLayout(dockPanel);
 
         dockPanel.setStyleName("WSWindowPanel");
@@ -87,8 +90,8 @@ public class WSWindowPanel extends Composite {
         setVisible(false);
         RootPanel.get().add(this);
 
-        final WSWindowPanel windowPanel = this;
-        windowStyle = getElement().getStyle();
+
+
 
         fPanel.addMouseDownHandler(new MouseDownHandler() {
             public void onMouseDown(MouseDownEvent event) {
@@ -96,11 +99,11 @@ public class WSWindowPanel extends Composite {
                 offsetY = event.getClientY() - windowPanel.getAbsoluteTop();
                 drag = true;
 
-                windowStyle.setProperty("zIndex", zIndex++ + "");
+                windowPanel.getElement().getStyle().setProperty("zIndex", zIndex++ + "");
 
                 mouseMoverReg = Event.addNativePreviewHandler(mouseMover);
 
-                Effects.setOpacity(windowStyle, 50);
+                Effects.setOpacity(windowPanel.getElement(), 50);
             }
         });
 
@@ -109,7 +112,7 @@ public class WSWindowPanel extends Composite {
                 drag = false;
                 mouseMoverReg.removeHandler();
 
-                Effects.setOpacity(windowStyle, 100);
+                Effects.setOpacity(windowPanel.getElement(), 100);
             }
         });
 
@@ -130,11 +133,11 @@ public class WSWindowPanel extends Composite {
     }
 
     public void show() {
-        Effects.setOpacity(windowStyle, 0);
+        Effects.setOpacity(windowPanel.getElement(), 0);
         setVisible(true);
         Effects.fade(getElement(), 1, 5, 0, 100);
 
-        windowStyle.setProperty("zIndex", zIndex++ + "");
+        windowPanel.getElement().getStyle().setProperty("zIndex", zIndex++ + "");
     }
 
     public void add(Widget w) {
@@ -191,8 +194,10 @@ public class WSWindowPanel extends Composite {
     public class MouseMover implements Event.NativePreviewHandler {
         public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
             if (event.getTypeInt() == Event.ONMOUSEMOVE && drag) {
-                windowStyle.setProperty("top", (event.getNativeEvent().getClientY() - offsetY) + "px");
-                windowStyle.setProperty("left", (event.getNativeEvent().getClientX() - offsetX) + "px");
+                Style s = windowPanel.getElement().getStyle();
+
+                s.setProperty("top", (event.getNativeEvent().getClientY() - offsetY) + "px");
+                s.setProperty("left", (event.getNativeEvent().getClientX() - offsetX) + "px");
 
                 event.cancel();
             }
