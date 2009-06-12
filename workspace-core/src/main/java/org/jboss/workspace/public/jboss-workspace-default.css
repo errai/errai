@@ -745,8 +745,11 @@ span {
 }
 
 .WSWindowPanel-drape {
+    width:100%;
+    height:100%;
     background: black;
     opacity: 0.2;
+    filter:alpha(opacity=20);
 }
 
 .WSDropShadow-topLeftCorner {

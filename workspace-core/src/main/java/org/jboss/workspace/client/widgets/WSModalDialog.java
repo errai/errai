@@ -8,6 +8,7 @@ import com.google.gwt.dom.client.Style;
 import org.gwt.mosaic.ui.client.WindowPanel;
 import org.jboss.workspace.client.framework.AcceptsCallback;
 import org.jboss.workspace.client.listeners.ClickCallbackListener;
+import org.jboss.workspace.client.util.Effects;
 
 
 public class WSModalDialog implements AcceptsCallback {
@@ -40,6 +41,8 @@ public class WSModalDialog implements AcceptsCallback {
         drapePanel.setHeight("100%");
 
         drapePanel.setStyleName("WSWindowPanel-drape");
+
+        Effects.setOpacity(drapePanel.getElement(), 20);
 
         window = new WSWindowPanel(title);
         window.setWidth("400px");
