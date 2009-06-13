@@ -128,9 +128,8 @@ public class ImageBrowser implements Tool {
 
                                 containerPanel.setSize(width + "px", height + "px");
                                 wImg.setSize(width + "px", height + "px");
-                                panel.setSize(width + 5 + "px", height + 5 + "px");
-
                                 panel.center();
+
                             }
                         });
                         wImg.getElement().getStyle().setProperty("margin", "5px;");
@@ -147,6 +146,8 @@ public class ImageBrowser implements Tool {
                                 wImg.setUrl(i.getUrl());
                                 panel.setTitle("Viewing Image: " + (wImg.getUrl().substring(wImg.getUrl().lastIndexOf('/')+1))
                                         + " (" + wImg.getWidth() + "x" + wImg.getHeight() + ")");
+
+
                             }
                         });
 

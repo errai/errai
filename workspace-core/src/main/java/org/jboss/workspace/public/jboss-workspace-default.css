@@ -773,7 +773,7 @@ span {
 .WSDropShadow-topRight {
     width: 13px;
     height: 17px;
-    background: url("images/ui/layout/dropshadow/eq-topright-inner.png");
+    background: url("images/ui/layout/dropshadow/eq-topright-inner.png") transparent;
 }
 
 .WSDropShadow-topRightCorner {
@@ -815,7 +815,7 @@ span {
 .WSDropShadow-rightBottom {
     height: 11px;
     width: 17px;
-    background: url("images/ui/layout/dropshadow/eq-rightbottom.png") no-repeat;
+    background: url("images/ui/layout/dropshadow/eq-rightbottom.png") no-repeat transparent;
 }
 
 .WSDropShadow-bottomLeftCorner {

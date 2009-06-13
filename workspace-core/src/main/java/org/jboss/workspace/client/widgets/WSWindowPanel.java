@@ -49,13 +49,9 @@ public class WSWindowPanel extends Composite {
 
         dockPanel.setStyleName("WSWindowPanel");
         dropShadow.getElement().getStyle().setProperty("position", "absolute");
-        //      outerDockPanel.add(dockPanel, DockPanel.CENTER);
-
         /**
          * Build the window title area
          */
-
-
         HorizontalPanel titleArea = new HorizontalPanel();
         titleArea.setStyleName("WSWindowPanel-titlearea");
         titleArea.setWidth("100%");
@@ -90,9 +86,6 @@ public class WSWindowPanel extends Composite {
         setVisible(false);
         RootPanel.get().add(this);
 
-
-
-
         fPanel.addMouseDownHandler(new MouseDownHandler() {
             public void onMouseDown(MouseDownEvent event) {
                 offsetX = event.getClientX() - windowPanel.getAbsoluteLeft();
@@ -119,6 +112,9 @@ public class WSWindowPanel extends Composite {
         LayoutUtil.disableTextSelection(label.getElement(), true);
 
         setHeight("25px");
+        setWidth("25px");
+
+        Effects.setOpacity(dropShadow.getElement(), 50);
     }
 
     public WSWindowPanel(String title) {
@@ -135,7 +131,7 @@ public class WSWindowPanel extends Composite {
     public void show() {
         Effects.setOpacity(windowPanel.getElement(), 0);
         setVisible(true);
-        Effects.fade(getElement(), 1, 5, 0, 100);
+        Effects.fade(getElement(), 5, 10, 0, 100);
 
         windowPanel.getElement().getStyle().setProperty("zIndex", zIndex++ + "");
     }
@@ -143,8 +139,9 @@ public class WSWindowPanel extends Composite {
     public void add(Widget w) {
         dockPanel.add(w, DockPanel.CENTER);
         dockPanel.setSpacing(1);
-        dockPanel.setCellHeight(w, "100%");
-        dockPanel.setCellWidth(w, "100%");
+
+     //   dockPanel.setCellHeight(w, "100%");
+     //   dockPanel.setCellWidth(w, "100%");
     }
 
     @Deprecated
