@@ -4,7 +4,6 @@
     <!-- Inherit the core Web Toolkit stuff.                  -->
     <inherits name='com.google.gwt.user.User'/>
     <inherits name="com.google.gwt.user.UserAgent"/>
-    <inherits name='org.gwt.mosaic.Mosaic'/>
 
     <inherits name='com.allen_sauer.gwt.dnd.gwt-dnd'/>
     <!--<inherits name='org.gwt.mosaic.Mosaic'/>-->
@@ -12,7 +11,7 @@
     <!-- Configure the GuvnorNG Modules to include -->
     <!--<inherits name="org.mvel.guvnorui.MVELModule"/>-->
     <!--<inherits name="org.jboss.guvnor.security.GuvnorSecurity"/>-->
-    <inherits name="org.gwt.mosaic.actions.Actions"/>
+
     <inherits name="com.google.gwt.user.theme.chrome.Chrome"/>
 
     <!--<inherits name="org.gwt.mosaic.theme.standard.Standard"/>-->

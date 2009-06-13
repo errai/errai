@@ -4,7 +4,6 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.*;
-import org.gwt.mosaic.ui.client.WindowPanel;
 import org.jboss.workspace.client.framework.AcceptsCallback;
 import org.jboss.workspace.client.listeners.ClickCallbackListener;
 

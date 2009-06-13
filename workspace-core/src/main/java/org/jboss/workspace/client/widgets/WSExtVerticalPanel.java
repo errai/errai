@@ -3,8 +3,8 @@ package org.jboss.workspace.client.widgets;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import org.gwt.mosaic.core.client.DOM;
 import org.jboss.workspace.client.layout.WorkspaceLayout;
 
 public class WSExtVerticalPanel extends VerticalPanel {

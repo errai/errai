@@ -9,6 +9,12 @@ html, body {
     width: 100%;
 
     font-family: sans-serif;
+
+    outline: none;
+}
+
+div:focus {
+    outline:none;
 }
 
 h2 {

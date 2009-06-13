@@ -16,7 +16,7 @@ import static com.google.gwt.user.client.Window.addResizeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.*;
-import org.gwt.mosaic.ui.client.layout.BorderLayoutData;
+
 import org.jboss.workspace.client.ToolSet;
 import org.jboss.workspace.client.util.Effects;
 import org.jboss.workspace.client.framework.AcceptsCallback;
@@ -43,7 +43,6 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
 
     public final WSExtVerticalPanel leftPanel = new WSExtVerticalPanel(this);
     public final WSStackPanel navigation = new WSStackPanel();
-    public BorderLayoutData navigationLayout;
     public final Label navigationLabel = new Label("Navigate");
 
     public final WSTabPanel tabPanel = new WSTabPanel();
@@ -99,16 +98,15 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
 
         addResizeHandler(new ResizeHandler() {
             public void onResize(ResizeEvent event) {
-
                 RootPanel.get(id).setPixelSize(event.getWidth(), event.getHeight());
+                mainLayoutPanel.setPixelSize(event.getWidth(), event.getHeight());
+
                 fireWorkspaceSizeChangeListeners(event.getWidth() - currSizeW, event.getHeight() - currSizeH);
 
                 currSizeW = event.getWidth();
                 currSizeH = event.getHeight();
             }
         });
-
-
 
         return mainLayoutPanel;
     }

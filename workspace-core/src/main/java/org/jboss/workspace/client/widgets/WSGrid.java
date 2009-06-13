@@ -1,6 +1,7 @@
 package org.jboss.workspace.client.widgets;
 
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.DOM;
 import static com.google.gwt.user.client.DOM.setStyleAttribute;
@@ -64,7 +65,9 @@ public class WSGrid extends Composite {
     public WSGrid(boolean scrollable) {
         panel = new VerticalPanel();
         fPanel = new FocusPanel(panel);
+
         initWidget(fPanel);
+
         titleBar = new WSAbstractGrid(false, GridType.TITLEBAR);
 
         panel.add(titleBar);

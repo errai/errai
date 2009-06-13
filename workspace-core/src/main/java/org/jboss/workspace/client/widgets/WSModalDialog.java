@@ -1,11 +1,9 @@
 package org.jboss.workspace.client.widgets;
 
 import com.google.gwt.user.client.ui.*;
-import com.google.gwt.user.client.WindowCloseListener;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
-import org.gwt.mosaic.ui.client.WindowPanel;
 import org.jboss.workspace.client.framework.AcceptsCallback;
 import org.jboss.workspace.client.listeners.ClickCallbackListener;
 import org.jboss.workspace.client.util.Effects;
