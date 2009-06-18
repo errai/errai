@@ -15,16 +15,23 @@ import org.jboss.workspace.client.rpc.StatePacket;
  */
 public class Workspace implements EntryPoint {
     public static PickupDragController dragController;
-    private WorkspaceLayout workspaceLayout;
+    private static WorkspaceLayout workspaceLayout;
 
     /**
      * This is the entry point method.
      */
     public void onModuleLoad() {
+        init("rootPanel");
     }
                      
     public WorkspaceLayout init(String rootId) {
+        if (workspaceLayout != null) {
+            Window.alert("Workspace already initialized.");
+            return null;
+        }
+
         workspaceLayout = new WorkspaceLayout();
+        workspaceLayout.setRpcSync(false);
 
         enableScrolling(false);
 
@@ -50,11 +57,15 @@ public class Workspace implements EntryPoint {
         return workspaceLayout;
     }
 
-    public void addToolSet(ToolSet toolSet) {
+    public static void addToolSet(ToolSet toolSet) {
         workspaceLayout.addToolSet(toolSet);
     }
 
-    public void notifyState(StatePacket packet) {
+    public static void notifyState(StatePacket packet) {
         workspaceLayout.notifySessionState(packet);
+    }
+
+    public static WorkspaceLayout currentWorkspace() {
+        return workspaceLayout;
     }
 }

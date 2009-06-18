@@ -7,7 +7,7 @@ import com.google.gwt.user.client.ui.Widget;
 import org.jboss.workspace.client.ToolSet;
 import org.jboss.workspace.client.Workspace;
 import org.jboss.workspace.client.framework.Tool;
-import org.jboss.workspace.client.layout.WorkspaceLayout;
+
 import org.jboss.workspace.client.listeners.TabOpeningClickHandler;
 import org.jboss.workspace.client.widgets.WSTree;
 import org.jboss.workspace.client.widgets.WSTreeItem;
@@ -16,14 +16,11 @@ import org.jboss.workspace.sampler.client.minibrowser.MiniBrowserWidget;
 import org.jboss.workspace.sampler.client.servicecontrol.ServiceControlTool;
 import org.jboss.workspace.sampler.client.tabledemo.TableDemo;
 
-
 public class WorkspaceSampler implements EntryPoint {
     public void onModuleLoad() {
-        Workspace ws = new Workspace();
-        final WorkspaceLayout layout = ws.init("rootPanel");
-        layout.setRpcSync(false);
+        System.out.println("WTF?");
 
-        layout.addToolSet(new ToolSet() {
+        Workspace.addToolSet(new ToolSet() {
             public Tool[] getAllProvidedTools() {
                 return new Tool[]{new ServiceControlTool(), new TableDemo()};
             }
@@ -38,7 +35,7 @@ public class WorkspaceSampler implements EntryPoint {
         });
 
 
-        layout.addToolSet(new ToolSet() {
+        Workspace.addToolSet(new ToolSet() {
             public Tool[] getAllProvidedTools() {
                 return new Tool[0];
             }
@@ -60,7 +57,7 @@ public class WorkspaceSampler implements EntryPoint {
                 Image cameraIcon = new Image(GWT.getModuleBaseURL() + "/images/ui/icons/camera_go.png");
                 WSTreeItem imagesItem = new WSTreeItem(cameraIcon, "Images");
                 tItem.addItem(imagesItem);
-                tree.attachListener(imagesItem, new TabOpeningClickHandler(layout, new ImageBrowser()));
+                tree.attachListener(imagesItem, new TabOpeningClickHandler(Workspace.currentWorkspace(), new ImageBrowser()));
 
                 Image audioIcon = new Image(GWT.getModuleBaseURL() + "/images/ui/icons/control_play_blue.png");
                 tItem.addItem(new WSTreeItem(audioIcon, "Audio"));
@@ -72,7 +69,7 @@ public class WorkspaceSampler implements EntryPoint {
             }
         });
 
-        layout.pack();
+        Workspace.currentWorkspace().pack();
     }
 
 }

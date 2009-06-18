@@ -15,14 +15,4 @@
         <url-pattern>/org.jboss.guvnor.ui.GuvnorUI/guvnorUIstate</url-pattern>
     </servlet-mapping>
 
-    <servlet>
-        <servlet-name>mvel</servlet-name>
-        <servlet-class>org.mvel.guvnorui.server.MVELServiceImpl</servlet-class>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>mvel</servlet-name>
-        <url-pattern>/org.jboss.workspace.ui.GuvnorUI/mvel</url-pattern>
-    </servlet-mapping>
-
 </web-app>

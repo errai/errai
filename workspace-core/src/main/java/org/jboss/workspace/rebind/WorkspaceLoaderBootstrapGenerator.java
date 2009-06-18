@@ -14,7 +14,7 @@ import java.util.ResourceBundle;
 import java.util.Enumeration;
 import java.io.PrintWriter;
 
-public class GuvnorLoaderBootstrapGenerator extends Generator {
+public class WorkspaceLoaderBootstrapGenerator extends Generator {
     /**
      * Simple name of class to be generated
      */
@@ -84,7 +84,6 @@ public class GuvnorLoaderBootstrapGenerator extends Generator {
 
         // commit generated class
         context.commit(logger, printWriter);
-
     }
 
     private void generateBootstrapClass(TreeLogger logger, SourceWriter sourceWriter) {
@@ -94,10 +93,10 @@ public class GuvnorLoaderBootstrapGenerator extends Generator {
         ResourceBundle bundle;
 
         try {
-            bundle = ResourceBundle.getBundle("org.jboss.workspace.rebind.GuvnorModules");
+            bundle = ResourceBundle.getBundle("org.jboss.workspace.rebind.WorkspaceModules");
         }
         catch (Exception e) {
-            logger.log(TreeLogger.Type.ERROR, "can't find GuvnorModules.properties in classpath");
+            logger.log(TreeLogger.Type.ERROR, "can't find WorkspaceModules.properties in classpath");
             logger.log(TreeLogger.Type.ERROR, e.getMessage());
             throw new RuntimeException();
         }
