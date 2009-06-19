@@ -24,13 +24,4 @@
         <url-pattern>/jboss_workspace_sampler/serviceControl</url-pattern>
     </servlet-mapping>
 
-    <servlet>
-        <servlet-name>remoteLoggingService</servlet-name>
-        <servlet-class>com.google.gwt.gen2.logging.server.RemoteLoggingService</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>remoteLoggingService</servlet-name>
-        <url-pattern>/jboss_workspace_sampler/logging</url-pattern>
-    </servlet-mapping>
-
 </web-app>

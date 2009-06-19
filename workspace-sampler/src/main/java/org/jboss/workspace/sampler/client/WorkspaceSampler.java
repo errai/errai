@@ -18,13 +18,11 @@ import org.jboss.workspace.sampler.client.tabledemo.TableDemo;
 
 public class WorkspaceSampler implements EntryPoint {
     public void onModuleLoad() {
-        System.out.println("WTF?");
-
         Workspace.addToolSet(new ToolSet() {
             public Tool[] getAllProvidedTools() {
                 return new Tool[]{new ServiceControlTool(), new TableDemo()};
             }
-
+                                                                                                                              
             public String getToolSetName() {
                 return "Controls";
             }
