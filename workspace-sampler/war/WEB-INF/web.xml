@@ -19,6 +19,7 @@
         <servlet-name>serviceControlImpl</servlet-name>
         <servlet-class>org.jboss.workspace.sampler.server.servicecontrol.ServiceControlImpl</servlet-class>
     </servlet>
+
     <servlet-mapping>
         <servlet-name>serviceControlImpl</servlet-name>
         <url-pattern>/jboss_workspace_sampler/serviceControl</url-pattern>

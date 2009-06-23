@@ -43,18 +43,14 @@ public class WSModalDialog implements AcceptsCallback {
         Effects.setOpacity(drapePanel.getElement(), 20);
 
         window = new WSWindowPanel(title);
-        window.setWidth("400px");
-
-
-//        window.setAnimationEnabled(true);
-//        window.setResizable(false);
 
         dockPanel = new DockPanel();
+        dockPanel.setWidth("400px");
 
         dockPanel.add(new Image(GWT.getModuleBaseURL() + "/images/ui/icons/redflag.png"), DockPanel.WEST);
         dockPanel.add(message, DockPanel.CENTER);
 
-        message.getElement().getStyle().setProperty("padding", "5px");
+        message.getElement().getStyle().setProperty("padding", "0px");
 
         HorizontalPanel buttonPanel = new HorizontalPanel();
 

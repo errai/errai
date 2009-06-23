@@ -41,7 +41,6 @@ public class WSWindowPanel extends Composite {
 
     private WSWindowPanel windowPanel;
 
-
     public WSWindowPanel() {
         windowPanel = this;
 
@@ -138,10 +137,10 @@ public class WSWindowPanel extends Composite {
 
     public void add(Widget w) {
         dockPanel.add(w, DockPanel.CENTER);
-        dockPanel.setSpacing(1);
-
-     //   dockPanel.setCellHeight(w, "100%");
-     //   dockPanel.setCellWidth(w, "100%");
+        dockPanel.setSpacing(0);
+//
+//        dockPanel.setCellHeight(w, "100%");
+//        dockPanel.setCellWidth(w, "100%");
     }
 
     @Deprecated

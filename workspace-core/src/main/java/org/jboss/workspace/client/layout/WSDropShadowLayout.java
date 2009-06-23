@@ -105,6 +105,8 @@ public class WSDropShadowLayout extends Composite {
 
         }
         dockPanel.add(wrappedWidget, DockPanel.CENTER);
+        dockPanel.setCellWidth(wrappedWidget, "100%");
+        dockPanel.setCellHeight(wrappedWidget, "100%");
 
         initWidget(dockPanel);
     }
