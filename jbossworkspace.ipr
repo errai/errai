@@ -359,6 +359,11 @@
     <history />
     <find-history />
   </component>
+  <component name="copyright">
+    <Base>
+      <setting name="state" value="2" />
+    </Base>
+  </component>
   <component name="libraryTable">
     <library name="gwt1.6.4">
       <CLASSES>

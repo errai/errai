@@ -1,7 +1,6 @@
 package org.jboss.workspace.client.widgets;
 
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.DOM;
 import static com.google.gwt.user.client.DOM.setStyleAttribute;
@@ -10,10 +9,10 @@ import static com.google.gwt.user.client.Event.addNativePreviewHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.*;
 import static com.google.gwt.user.client.ui.RootPanel.getBodyElement;
+import org.jboss.workspace.client.listeners.CellChangeEvent;
 import org.jboss.workspace.client.widgets.format.WSCellFormatter;
 import org.jboss.workspace.client.widgets.format.WSCellSimpleTextCell;
 import org.jboss.workspace.client.widgets.format.WSCellTitle;
-import org.jboss.workspace.client.listeners.CellChangeEvent;
 
 import static java.lang.Double.parseDouble;
 import java.util.*;
@@ -481,8 +480,9 @@ public class WSGrid extends Composite {
 
     /**
      * Sets a column width (in pixels). Columns start from 0.
+     *
      * @param column - the column
-     * @param width - the width in pixels
+     * @param width  - the width in pixels
      */
     public void setColumnWidth(int column, int width) {
         colSizes.set(column, width);
@@ -497,8 +497,27 @@ public class WSGrid extends Composite {
 
             titleBar.tableIndex.get(0).get(column).setWidth(width + "px");
 
+            WSCell c;
             for (int cX = 0; cX < dataGrid.tableIndex.size(); cX++) {
-                dataGrid.tableIndex.get(cX).get(column).setWidth(width + "px");
+                c = dataGrid.tableIndex.get(cX).get(column);
+
+                /**
+                 * Check to see if this cell is merged with other cells.  If so, we need to accumulate
+                 * the proper column width.
+                 */
+                if (c.isColSpan()) {
+                    int spanSize = width + 2;
+                    for (int span = c.getColspan() - 1; span > 0; span--) {
+                        spanSize += colSizes.get(column + span) + 2;
+                    }
+
+
+                    c.setWidth((spanSize+2) + "px");
+                }
+                else {
+
+                    c.setWidth(width + "px");
+                }
             }
 
             titleBar.getScrollPanel().setWidth(currTableWidth - 20 + "px");
@@ -511,6 +530,7 @@ public class WSGrid extends Composite {
 
     /**
      * Returns an instance of the WSCell based on the row and col specified.
+     *
      * @param row - the row
      * @param col - the column
      * @return Instance of WSCell.
@@ -521,6 +541,7 @@ public class WSGrid extends Composite {
 
     /**
      * Highlights a vertical column.
+     *
      * @param col - the column
      */
     private void selectColumn(int col) {
@@ -535,6 +556,7 @@ public class WSGrid extends Composite {
 
     /**
      * Blurs a vertical column.
+     *
      * @param col - the column
      */
     private void blurColumn(int col) {
@@ -832,6 +854,9 @@ public class WSGrid extends Composite {
         private int row;
         private int col;
 
+        private int rowspan;
+        private int colspan;
+
         private WSAbstractGrid grid;
 
         public WSCell(WSAbstractGrid grid, WSCellFormatter cellFormat, int row, int column) {
@@ -1059,6 +1084,24 @@ public class WSGrid extends Composite {
             return cellFormat.getTextValue();
         }
 
+        public void mergeColumns(int cols) {
+            for (int i = 1; i < cols; i++) {
+                grid.table.removeCell(row, col + 1);
+            }
+
+            grid.table.getFlexCellFormatter().setColSpan(row, col, cols);
+
+            colspan = cols;
+        }
+
+        public boolean isColSpan() {
+            return colspan != 0;
+        }
+
+        public int getColspan() {
+            return colspan;
+        }
+
         @Override
         public void onBrowserEvent(Event event) {
             int leftG = getAbsoluteLeft() + 10;
@@ -1079,7 +1122,7 @@ public class WSGrid extends Composite {
                     break;
 
                 case Event.ONMOUSEMOVE:
-                    if (!_resizing) {
+                    if (!_resizing && grid.type == GridType.TITLEBAR) {
                         if (event.getClientX() < leftG) {
                             addStyleDependentName("resize-left");
                             _resizeArmed = true;
@@ -1142,7 +1185,7 @@ public class WSGrid extends Composite {
                         sortedColumns.put(col, !asc);
                         dataGrid.sort(col, asc);
                     }
-                    
+
                     break;
 
                 case Event.ONDBLCLICK:
@@ -1168,6 +1211,7 @@ public class WSGrid extends Composite {
 
     /**
      * Returns the offsite high of the title row
+     *
      * @return The offset height in pixels
      */
     public int getTitlebarOffsetHeight() {
@@ -1176,6 +1220,7 @@ public class WSGrid extends Composite {
 
     /**
      * Sets the height of the grid.
+     *
      * @param height CSS height string.
      */
     public void setHeight(String height) {
@@ -1184,6 +1229,7 @@ public class WSGrid extends Composite {
 
     /**
      * Sets the height of the grid in pixels
+     *
      * @param height The height in pixels
      */
     public void setPreciseHeight(int height) {
@@ -1194,6 +1240,7 @@ public class WSGrid extends Composite {
 
     /**
      * Set thes the width of the grid.
+     *
      * @param width The CSS width string.
      */
     public void setWidth(String width) {
@@ -1202,6 +1249,7 @@ public class WSGrid extends Composite {
 
     /**
      * Sets the width of the grid in pixels.
+     *
      * @param width The width in pixels.
      */
     public void setPreciseWidth(int width) {
@@ -1213,6 +1261,7 @@ public class WSGrid extends Composite {
     /**
      * Increase or decrease the width by a relative amount.  A positive value will increase the size of the grid,
      * while a negative value will shrink the size.
+     *
      * @param amount Size in pixels.
      */
     public void growWidth(int amount) {
@@ -1228,6 +1277,7 @@ public class WSGrid extends Composite {
 
     /**
      * If there is a sorted column, this will return an instance of the header cell for that sorted column.
+     *
      * @return An instance of WSCell.
      */
     public WSCell getSortedColumnHeader() {
@@ -1253,7 +1303,8 @@ public class WSGrid extends Composite {
 
     /**
      * Registers a {@link ChangeHandler} with the grid.
-     * @param handler
+     *
+     * @param handler -
      */
     public void addCellChangeHandler(ChangeHandler handler) {
         cellChangeHandlers.add(handler);
@@ -1261,7 +1312,8 @@ public class WSGrid extends Composite {
 
     /**
      * Removes a {@link ChangeHandler} from the grid.
-     * @param handler
+     *
+     * @param handler -
      */
     public void removeCellChangeHandler(ChangeHandler handler) {
         cellChangeHandlers.remove(handler);
@@ -1314,7 +1366,7 @@ public class WSGrid extends Composite {
             return (TITLEGRID & options) != 0;
         }
     }
-    
+
     public static void disableTextSelection(Element elem, boolean disable) {
         disableTextSelectInternal(elem, disable);
     }

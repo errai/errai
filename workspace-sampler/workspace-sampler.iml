@@ -81,5 +81,10 @@
     </orderEntry>
     <orderEntry type="library" name="GWT" level="application" />
   </component>
+  <component name="copyright">
+    <Base>
+      <setting name="state" value="2" />
+    </Base>
+  </component>
 </module>
 

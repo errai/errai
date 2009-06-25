@@ -57,6 +57,8 @@ public class TableDemo implements Tool {
         wsGrid.setCell(4, 2, new WSCellMultiSelector(userTypes, "Super User"));
         wsGrid.setCell(4, 3, new WSCellDateFormat(getShortDateFormat().parse("7/15/06")));
 
+        wsGrid.getCell(0, 0).mergeColumns(3);
+        
         packet.getActiveLayout().addWorkspaceSizeChangeListener(new WorkspaceSizeChangeListener() {
             public void onSizeChange(int deltaW, int actualW, int deltaH, int actualH) {
                 wsGrid.setPreciseHeight(actualH - packet.getActiveLayout().getAppPanelOffsetHeight() - 8);
