@@ -55,7 +55,7 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
     public Map<Widget, WSTab> tabLookup = new LinkedHashMap<Widget, WSTab>();
 
     public PickupDragController tabDragController;
-
+                                                                                                    
     public List<WorkspaceSizeChangeListener> workspaceSizeChangeListers = new ArrayList<WorkspaceSizeChangeListener>();
 
     private boolean rpcSync = true;

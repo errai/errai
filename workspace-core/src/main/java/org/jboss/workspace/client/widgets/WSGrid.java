@@ -86,7 +86,8 @@ public class WSGrid extends Composite {
 
         dataGrid.getScrollPanel().addScrollHandler(new ScrollHandler() {
             public void onScroll(ScrollEvent event) {
-                titleBar.getScrollPanel().setHorizontalScrollPosition(dataGrid.getScrollPanel().getHorizontalScrollPosition());
+                titleBar.getScrollPanel()
+                        .setHorizontalScrollPosition(dataGrid.getScrollPanel().getHorizontalScrollPosition());
             }
         });
 
@@ -267,6 +268,9 @@ public class WSGrid extends Composite {
                                         fillX++;
                                     }
                                 }
+
+
+
                                 dataGrid.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() + 1)
                                         .focus();
                             }
@@ -844,20 +848,20 @@ public class WSGrid extends Composite {
     private boolean _msie_compatibility = getUserAgent().contains("msie");
 
     public class WSCell extends Composite {
-        private FlowPanel panel;
+        protected FlowPanel panel;
 
-        private WSCellFormatter cellFormat;
+        protected WSCellFormatter cellFormat;
 
-        private boolean numeric;
-        private boolean edit;
+        protected boolean numeric;
+        protected boolean edit;
 
-        private int row;
-        private int col;
+        protected int row;
+        protected int col;
 
-        private int rowspan;
-        private int colspan;
+        protected int rowspan;
+        protected int colspan;
 
-        private WSAbstractGrid grid;
+        protected WSAbstractGrid grid;
 
         public WSCell(WSAbstractGrid grid, WSCellFormatter cellFormat, int row, int column) {
             this.grid = grid;
@@ -897,6 +901,9 @@ public class WSGrid extends Composite {
 
                 disableTextSelectInternal(panel.getElement(), true);
             }
+        }
+
+        public WSCell() {
         }
 
         /**
@@ -1085,8 +1092,34 @@ public class WSGrid extends Composite {
         }
 
         public void mergeColumns(int cols) {
+            final int _row = row;
+            
             for (int i = 1; i < cols; i++) {
                 grid.table.removeCell(row, col + 1);
+
+                final WSCell c = this;
+                final int _col = col + i;
+
+                grid.tableIndex.get(row).set(col + i, new WSGrid.WSCell() {
+                    private WSCell redirect = c;
+                    {
+                        this.col = _col;
+                        this.row = _row;
+                        initWidget(new HTML());
+                    }
+
+                    @Override
+                    public void blur() {
+                        redirect.blur();
+                    }
+
+                    @Override
+                    public void focus() {
+                        redirect.focus();
+                        selectionList.add(this);
+
+                    }
+                });
             }
 
             grid.table.getFlexCellFormatter().setColSpan(row, col, cols);
