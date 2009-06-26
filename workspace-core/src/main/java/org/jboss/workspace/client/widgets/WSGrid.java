@@ -36,7 +36,7 @@ public class WSGrid extends Composite {
     private int fillX;
     private int fillY;
 
-    private boolean currentFocusRowColSpan;
+    private boolean currentFocusColumn;
 
     private boolean _leftGrow = false;
     private boolean _resizeArmed = false;
@@ -164,7 +164,26 @@ public class WSGrid extends Composite {
          */
         fPanel.addKeyDownHandler(new KeyDownHandler() {
             public void onKeyDown(KeyDownEvent event) {
-                final WSCell currentFocus = selectionList.isEmpty() ? null : selectionList.lastElement();
+                //final WSCell currentFocus = selectionList.isEmpty() ? null : selectionList.lastElement();
+                final WSCell currentFocus;
+                if (selectionList.isEmpty()) {
+                    currentFocus = null;
+                }
+                else if (selectionList.lastElement().isColSpan()) {
+                 //   selectionList.remove(selectionList.lastElement());
+                    WSCell c = selectionList.lastElement();
+
+                    currentFocus = dataGrid.tableIndex.get(c.getRow())
+                            .get(c.getCol() + c.getColspan());
+
+                    blurAll();
+                    selectionList.remove(c);
+
+                    currentFocus.focus();
+                }
+                else {
+                    currentFocus = selectionList.lastElement();
+                }
 
                 if (currentFocus == null || currentFocus.edit) {
                     return;
@@ -237,7 +256,7 @@ public class WSGrid extends Composite {
                                 blurAll();
                             }
 
-                            if (currentFocusRowColSpan) {
+                            if (currentFocusColumn) {
                                 titleBar.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() + 1).focus();
                             }
                             else {
@@ -268,8 +287,6 @@ public class WSGrid extends Composite {
                                         fillX++;
                                     }
                                 }
-
-
 
                                 dataGrid.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() + 1)
                                         .focus();
@@ -324,7 +341,7 @@ public class WSGrid extends Composite {
                                 blurAll();
                             }
 
-                            if (currentFocusRowColSpan) {
+                            if (currentFocusColumn) {
                                 titleBar.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() - 1).focus();
                             }
                             else {
@@ -516,7 +533,7 @@ public class WSGrid extends Composite {
                     }
 
 
-                    c.setWidth((spanSize+2) + "px");
+                    c.setWidth((spanSize + 2) + "px");
                 }
                 else {
 
@@ -934,9 +951,9 @@ public class WSGrid extends Composite {
             if (edit) cellFormat.stopedit();
             removeStyleDependentName("selected");
 
-            if (currentFocusRowColSpan) {
+            if (currentFocusColumn) {
                 blurColumn(col);
-                currentFocusRowColSpan = false;
+                currentFocusColumn = false;
             }
             else {
                 selectionList.remove(this);
@@ -964,7 +981,7 @@ public class WSGrid extends Composite {
             selectionList.add(this);
 
             if (grid.type == GridType.TITLEBAR) {
-                currentFocusRowColSpan = true;
+                currentFocusColumn = true;
 
                 if (!isFocus) {
                     selectColumn(col);
@@ -1093,7 +1110,7 @@ public class WSGrid extends Composite {
 
         public void mergeColumns(int cols) {
             final int _row = row;
-            
+
             for (int i = 1; i < cols; i++) {
                 grid.table.removeCell(row, col + 1);
 
@@ -1102,7 +1119,9 @@ public class WSGrid extends Composite {
 
                 grid.tableIndex.get(row).set(col + i, new WSGrid.WSCell() {
                     private WSCell redirect = c;
+
                     {
+                        this.grid = c.grid;
                         this.col = _col;
                         this.row = _row;
                         initWidget(new HTML());
@@ -1116,8 +1135,8 @@ public class WSGrid extends Composite {
                     @Override
                     public void focus() {
                         redirect.focus();
+                        selectionList.remove(selectionList.size()-1);
                         selectionList.add(this);
-
                     }
                 });
             }
