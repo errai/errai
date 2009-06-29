@@ -3,7 +3,7 @@ html, body {
     background-color: #efefef;
 
     height: 100%;
-    margin: 0;
+    margin: 0;                                          
     overflow: hidden;
     padding: 0;
     width: 100%;
@@ -30,8 +30,7 @@ h3 {
 }
 
 .headerStyle {
-    background-image: url("images/titlegradient.png");
-    background-repeat: repeat-x;
+    background: url("images/titlegradient.png") repeat-x;
     padding: 0;
     margin: 0;
 }
@@ -173,7 +172,7 @@ span {
     height: 20px;
     font-size: 11px;
 
-    margin-bottom: 0px;
+    margin-bottom: 0;
 
 }
 
@@ -182,11 +181,6 @@ span {
     vertical-align: middle;
     color: gray;
 }
-
-/*.guvnor-NavButton {*/
-/*display: inline-block;*/
-/*vertical-align: middle;*/
-/*}*/
 
 .gwt-StackPanel {
 /*background: url( "images/bgleftgradient.png" );*/
@@ -233,9 +227,7 @@ span {
 }
 
 .gwt-StackPanel .gwt-StackPanelItem-selected {
-    background: #ffffff;
-    background-repeat: repeat-x;
-    background-color: #7f7f7f;
+    background: #7f7f7f repeat-x;
     color: white;
 }
 
@@ -412,11 +404,11 @@ span {
 }
 
 .mosaic-Caption-iconBoxLeft {
-    padding: 0px 0px 0px 2px;
+    padding: 0 0 0 2px;
 }
 
 .mosaic-Caption-iconBoxRight {
-    padding: 0px 2px 0px 0px;
+    padding: 0 2px 0 0;
 }
 
 .mosaic-Caption-text {
@@ -428,9 +420,8 @@ span {
 }
 
 .mosaic-CaptionLayoutPanel {
-    padding: 0px;
-    margin: 0px; /* debug */
-/*border: 1px dotted #00f;*/
+    padding: 0;
+    margin: 0;
 }
 
 .mosaic-CaptionLayoutPanel .Body {
@@ -459,9 +450,8 @@ span {
 }
 
 .mosaic-WindowPanel .mosaic-CaptionLayoutPanel {
-    padding: 0px;
-    margin: 0px; /* debug */
-/*border: 1px solid #00f;*/
+    padding: 0;
+    margin: 0;
 }
 
 .mosaic-WindowPanel .Body {
@@ -472,8 +462,8 @@ span {
 }
 
 .mosaic-WindowPanel .popupMiddleCenter {
-    padding: 0px;
-    margin: 0px;
+    padding: 0;
+    margin: 0;
 }
 
 .mosaic-WindowPanel .Resize-nw {
@@ -523,10 +513,7 @@ span {
 }
 
 .mosaic-InfoPanel {
-/*background-color: black;*/
-    background-image: url('images/traynotifybg.png');
-    background-position: top;
-    background-repeat: repeat-x;
+    background: url('images/traynotifybg.png') repeat-x top;
 
     color: white;
     font-size: 12px;
@@ -580,10 +567,10 @@ span {
 }
 
 .gwt-Tree .gwt-TreeItem-selected {
-    user-select: none; /*background-color: whitesmoke;*/
+    user-select: none;
     background-image: url('images/listhighlightbg.png');
     padding: 3px;
-    color: white; /*border: 1px dotted gray;*/
+    color: white;
 }
 
 .gwt-ScrollTable {
@@ -671,7 +658,7 @@ span {
 
 .WSCell-selected {
     background-color: #ddddff;
-    color: white;
+    color: black;
     border: 1px solid lightsteelblue;
 }
 
@@ -690,13 +677,10 @@ span {
 
 .WSCell-hcolselect {
     background-color: #aaaaff;
-    border: 1px solid #aaaaff; /*border-bottom-color: lightgray;*/
-/*border-right-color: lightsteelblue;*/
-/*border-left-color: lightsteelblue;*/
+    border: 1px solid #aaaaff;
 }
 
 .WSCell-editbox {
-/*background: transparent;*/
     border: 2px cornflowerblue solid;
     font-size: 11px;
     width: 100%;
