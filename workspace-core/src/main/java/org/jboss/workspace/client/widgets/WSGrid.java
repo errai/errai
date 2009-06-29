@@ -1148,8 +1148,13 @@ public class WSGrid extends Composite {
                     @Override
                     public void focus() {
                         redirect.focus();
-//                        selectionList.remove(selectionList.size()-1);
-//                        selectionList.add(this);
+                        selectionList.remove(selectionList.size()-1);
+                        selectionList.add(this);
+                    }
+
+                    @Override
+                    public int getColspan() {
+                        return c.colspan - (col - c.col);
                     }
                 });
             }
