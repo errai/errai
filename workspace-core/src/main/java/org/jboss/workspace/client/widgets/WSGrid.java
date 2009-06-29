@@ -17,9 +17,12 @@ import org.jboss.workspace.client.widgets.format.WSCellTitle;
 import static java.lang.Double.parseDouble;
 import java.util.*;
 
+/**
+ * A Grid/Table implementation for working with structured data.
+ */
 public class WSGrid extends Composite {
-    private FocusPanel fPanel;
-    private VerticalPanel panel;
+    private FocusPanel focusPanel;
+    private VerticalPanel innerPanel;
     private WSAbstractGrid titleBar;
     private WSAbstractGrid dataGrid;
 
@@ -62,20 +65,18 @@ public class WSGrid extends Composite {
     private int _startpos = 0;
 
     public WSGrid(boolean scrollable) {
-        panel = new VerticalPanel();
-        fPanel = new FocusPanel(panel);
-
-        initWidget(fPanel);
+        innerPanel = new VerticalPanel();
+        focusPanel = new FocusPanel(innerPanel);
+        initWidget(focusPanel);
 
         titleBar = new WSAbstractGrid(false, GridType.TITLEBAR);
-
-        panel.add(titleBar);
+        innerPanel.add(titleBar);
 
         titleBar.setStylePrimaryName("WSGrid-header");
         dataGrid = new WSAbstractGrid(scrollable, GridType.EDITABLE_GRID);
 
-        panel.add(dataGrid);
-        panel.setCellVerticalAlignment(dataGrid, HasVerticalAlignment.ALIGN_TOP);
+        innerPanel.add(dataGrid);
+        innerPanel.setCellVerticalAlignment(dataGrid, HasVerticalAlignment.ALIGN_TOP);
 
         dataGrid.setStylePrimaryName("WSGrid-datagrid");
 
@@ -94,7 +95,7 @@ public class WSGrid extends Composite {
         /**
          * This is the handler that is responsible for resizing columns.
          */
-        fPanel.addMouseDownHandler(new MouseDownHandler() {
+        focusPanel.addMouseDownHandler(new MouseDownHandler() {
             public void onMouseDown(MouseDownEvent event) {
                 if (!selectionList.isEmpty() && selectionList.lastElement().isEdit()) {
                     return;
@@ -118,7 +119,7 @@ public class WSGrid extends Composite {
         /**
          * This handler traces the mouse movement, drawing the vertical resizing indicator.
          */
-        fPanel.addMouseMoveHandler(new MouseMoveHandler() {
+        focusPanel.addMouseMoveHandler(new MouseMoveHandler() {
             public void onMouseMove(MouseMoveEvent event) {
                 if (_resizing) {
                     setStyleAttribute(resizeLine.getElement(), "left", (event.getClientX()) + "px");
@@ -130,7 +131,7 @@ public class WSGrid extends Composite {
          * This is the mouse release handler that resizes a column once the left mouse button is released
          * in a resizing operation.
          */
-        fPanel.addMouseUpHandler(new MouseUpHandler() {
+        focusPanel.addMouseUpHandler(new MouseUpHandler() {
             public void onMouseUp(MouseUpEvent event) {
                 if (_resizing) {
                     cancelResize();
@@ -161,41 +162,47 @@ public class WSGrid extends Composite {
         /**
          * This handler is responsible for all the keyboard input handlers for the grid.
          */
-        fPanel.addKeyDownHandler(new KeyDownHandler() {
+        focusPanel.addKeyDownHandler(new KeyDownHandler() {
             public void onKeyDown(KeyDownEvent event) {
                 //final WSCell currentFocus = selectionList.isEmpty() ? null : selectionList.lastElement();
                 final WSCell currentFocus;
-                int offsetX = 1;
+                int offsetX;
                 int offsetY = 1;
 
-
+                /**
+                 * Is there currently anything selected?
+                 */
                 if (selectionList.isEmpty()) {
-                    currentFocus = null;
-                }
-                else if (selectionList.lastElement().isColSpan()) {
-                    offsetX = selectionList.lastElement().getColspan();
-                    currentFocus = selectionList.lastElement();
-
-
-//                    WSCell c = selectionList.lastElement();
-//
-//                    currentFocus = dataGrid.tableIndex.get(c.getRow())
-//                            .get(c.getCol() + c.getColspan());
-//
-//                    blurAll();
-//                    selectionList.remove(c);
-//
-//                    currentFocus.focus();
+                    /**
+                     * No.
+                     */
+                    return;
                 }
                 else {
+                    /**
+                     * Yes.  Let's check to see if this cell spans columns.  If so, we will set the offsetX value
+                     * to the colspan value so navigation behaves.
+                     */
+                    offsetX = selectionList.lastElement().isColSpan() ? selectionList.lastElement().getColspan() : 1;
+
+                    /**
+                     * Set currentFocus to the last element in the selectionList.
+                     */
                     currentFocus = selectionList.lastElement();
                 }
 
-                if (currentFocus == null || currentFocus.edit) {
+                /**
+                 * If we're currently editing a cell, then we ignore these operations.
+                 */
+                if (currentFocus.edit) {
                     return;
                 }
 
                 switch (event.getNativeKeyCode()) {
+                    /**
+                     * If tab is pressed, we want to advance to the next cell.  If we are at the end of the line,
+                     * go to the first cell of the next line.  If shift is depressed, then perform the inverse.
+                     */
                     case KeyCodes.KEY_TAB:
                         blurAll();
                         if (event.getNativeEvent().getShiftKey()) {
@@ -215,6 +222,11 @@ public class WSGrid extends Composite {
                             }
                         }
                         break;
+
+                    /**
+                     * If the up key is pressed, we should advance to the cell directly above the currently selected
+                     * cell.  If we are at the top of the grid, then nothing should happen.
+                     */
                     case 63232:
                     case KeyCodes.KEY_UP:
                         if (currentFocus.getRow() > 0) {
@@ -255,6 +267,11 @@ public class WSGrid extends Composite {
                                     .focus();
                         }
                         break;
+
+                    /**
+                     * If the right key is pressed, we should advance to the cell directly to the right of the
+                     * currently selected cell.  If we are at the rightmost part of the grid, then nothing should happen.
+                     */
                     case 63235:
                     case KeyCodes.KEY_RIGHT:
                         if (currentFocus.getCol() < cols - offsetX) {
@@ -265,8 +282,6 @@ public class WSGrid extends Composite {
                             if (!event.getNativeEvent().getShiftKey()) {
                                 blurAll();
                             }
-
-
 
                             if (currentFocusColumn) {
                                 titleBar.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() + offsetX).focus();
@@ -306,6 +321,12 @@ public class WSGrid extends Composite {
 
                         }
                         break;
+
+                    /**
+                     * If either "Enter" or the down key is pressed we should advance to the cell directly below the
+                     * current cell.  If we are at the bottom of the grid, depending on the mode of the grid, either
+                     * nothing should happen, or a new line should be added.
+                     */
                     case 63233:
                     case KeyCodes.KEY_ENTER:
                     case KeyCodes.KEY_DOWN:
@@ -346,6 +367,11 @@ public class WSGrid extends Composite {
                             dataGrid.tableIndex.get(currentFocus.getRow() + offsetY).get(currentFocus.getCol()).focus();
                         }
                         break;
+
+                    /**
+                     * If the left key is pressed we should advance to the cell directly to the left of the currently
+                     * selected cell.  If we are at the leftmost part of the grid, nothing should happen.
+                     */
                     case 63234:
                     case KeyCodes.KEY_LEFT:
                         if (currentFocus.getCol() > 0) {
@@ -467,7 +493,7 @@ public class WSGrid extends Composite {
             }
         });
 
-        
+
     }
 
     public void setColumnHeader(int row, int column, String html) {
@@ -490,14 +516,18 @@ public class WSGrid extends Composite {
         dataGrid.getTableIndex().get(row).get(column).setValue(formatter);
     }
 
-    public void setCols(int cols) {
-        this.cols = cols;
-    }
-
+    /**
+     * Return the total number of columns in the grid.
+     *
+     * @return -
+     */
     public int getCols() {
         return cols;
     }
 
+    /**
+     * Blur all currently selected columns.
+     */
     public void blurAll() {
         Stack<WSCell> stk = new Stack<WSCell>();
         stk.addAll(selectionList);
@@ -953,7 +983,7 @@ public class WSGrid extends Composite {
         public void stopedit() {
             if (edit) {
                 edit = false;
-                fPanel.setFocus(true);
+                focusPanel.setFocus(true);
             }
         }
 
@@ -1148,7 +1178,7 @@ public class WSGrid extends Composite {
                     @Override
                     public void focus() {
                         redirect.focus();
-                        selectionList.remove(selectionList.size()-1);
+                        selectionList.remove(selectionList.size() - 1);
                         selectionList.add(this);
                     }
 
@@ -1294,7 +1324,7 @@ public class WSGrid extends Composite {
      * @param height CSS height string.
      */
     public void setHeight(String height) {
-        panel.setHeight(height);
+        innerPanel.setHeight(height);
     }
 
     /**
@@ -1314,7 +1344,7 @@ public class WSGrid extends Composite {
      * @param width The CSS width string.
      */
     public void setWidth(String width) {
-        panel.setWidth(width);
+        innerPanel.setWidth(width);
     }
 
     /**
@@ -1400,7 +1430,7 @@ public class WSGrid extends Composite {
 
         int titleHeight = titleBar.getOffsetHeight();
 
-        panel.setCellHeight(titleBar, titleHeight + "px");
+        innerPanel.setCellHeight(titleBar, titleHeight + "px");
 
         setHeight("450px");
         setWidth("100%");
