@@ -41,7 +41,7 @@ public class ServiceWidget extends Composite {
 
         Style dStyle = dPanel.getElement().getStyle();
         dStyle.setProperty("border", "1px solid #A1A1A1");
-        dStyle.setProperty("background", "#FFFFFF");
+        dStyle.setProperty("background", "white");
 
         p.add(hPanel);
 

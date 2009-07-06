@@ -3,7 +3,10 @@ package org.jboss.workspace.sampler.client.tabledemo;
 import static com.google.gwt.i18n.client.DateTimeFormat.getShortDateFormat;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ChangeEvent;
 import org.jboss.workspace.client.framework.Tool;
 import org.jboss.workspace.client.framework.WorkspaceSizeChangeListener;
 import org.jboss.workspace.client.rpc.StatePacket;
@@ -11,21 +14,21 @@ import org.jboss.workspace.client.widgets.WSGrid;
 import org.jboss.workspace.client.widgets.format.WSCellDateFormat;
 import org.jboss.workspace.client.widgets.format.WSCellMultiSelector;
 import org.jboss.workspace.client.widgets.format.WSCellSimpleTextCell;
+import org.jboss.workspace.client.listeners.CellChangeEvent;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 
-public class TableDemo implements Tool {
+public class GridDemo implements Tool {
     public Widget getWidget(final StatePacket packet) {
         final WSGrid wsGrid = new WSGrid();
         wsGrid.setHeight("400px");
-
+        
         Set<String> userTypes = new LinkedHashSet<String>();
         userTypes.add("Regular User");
         userTypes.add("Super User");
         userTypes.add("Mark Proctor");
-
 
         wsGrid.setColumnHeader(0, 0, "UserId");
         wsGrid.setColumnHeader(0, 1, "Name");
@@ -57,8 +60,10 @@ public class TableDemo implements Tool {
         wsGrid.setCell(4, 2, new WSCellMultiSelector(userTypes, "Super User"));
         wsGrid.setCell(4, 3, new WSCellDateFormat(getShortDateFormat().parse("7/15/06")));
 
-        wsGrid.getCell(0, 0).mergeColumns(3);
-        
+   //     wsGrid.getCell(0, 0).mergeColumns(2);
+
+        assert packet.getActiveLayout() != null;
+
         packet.getActiveLayout().addWorkspaceSizeChangeListener(new WorkspaceSizeChangeListener() {
             public void onSizeChange(int deltaW, int actualW, int deltaH, int actualH) {
                 wsGrid.setPreciseHeight(actualH - packet.getActiveLayout().getAppPanelOffsetHeight() - 8);
@@ -66,12 +71,11 @@ public class TableDemo implements Tool {
             }
         });
 
-//        wsGrid.addCellChangeHandler(new CellChangeHandler() {
-//            public void onCellChange(CellChangeEvent event) {
-//                Window.alert("Cell value changed! (Old value: " + event.getOldValue() + "; New value: " + event.getNewValue() + ")");
-//
-//            }
-//        });
+        wsGrid.addCellChangeHandler(new ChangeHandler() {
+            public void onChange(ChangeEvent changeEvent) {
+               // CellChangeEvent evt = (CellChangeEvent) changeEvent;
+            }
+        });
 
         wsGrid.setColumnWidth(0, 80);
 

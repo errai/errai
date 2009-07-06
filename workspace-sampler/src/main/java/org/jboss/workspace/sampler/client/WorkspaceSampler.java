@@ -14,13 +14,13 @@ import org.jboss.workspace.client.widgets.WSTreeItem;
 import org.jboss.workspace.sampler.client.imagebrowser.ImageBrowser;
 import org.jboss.workspace.sampler.client.minibrowser.MiniBrowserWidget;
 import org.jboss.workspace.sampler.client.servicecontrol.ServiceControlTool;
-import org.jboss.workspace.sampler.client.tabledemo.TableDemo;
+import org.jboss.workspace.sampler.client.tabledemo.GridDemo;
 
 public class WorkspaceSampler implements EntryPoint {
     public void onModuleLoad() {
         Workspace.addToolSet(new ToolSet() {
             public Tool[] getAllProvidedTools() {
-                return new Tool[]{new ServiceControlTool(), new TableDemo()};
+                return new Tool[]{new ServiceControlTool(), new GridDemo()};
             }
                                                                                                                               
             public String getToolSetName() {

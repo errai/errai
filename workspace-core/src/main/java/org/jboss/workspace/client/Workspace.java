@@ -31,7 +31,7 @@ public class Workspace implements EntryPoint {
         }
 
         workspaceLayout = new WorkspaceLayout();
-        workspaceLayout.setRpcSync(false);
+        workspaceLayout.setRpcSync(true);
 
         enableScrolling(false);
 

@@ -12,4 +12,6 @@ public interface ServiceControl extends RemoteService {
     public void stopService();
 
     public int getServiceStatus();
+
+    public String getName();
 }
