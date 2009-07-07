@@ -73,7 +73,7 @@ public class GridDemo implements Tool {
 
         wsGrid.addCellChangeHandler(new ChangeHandler() {
             public void onChange(ChangeEvent changeEvent) {
-               // CellChangeEvent evt = (CellChangeEvent) changeEvent;
+               packet.setModifiedFlag(true);
             }
         });
 
