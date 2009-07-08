@@ -16,15 +16,14 @@ import static com.google.gwt.user.client.Window.addResizeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.*;
-
 import org.jboss.workspace.client.ToolSet;
-import org.jboss.workspace.client.util.Effects;
 import org.jboss.workspace.client.framework.AcceptsCallback;
 import org.jboss.workspace.client.framework.Tool;
 import org.jboss.workspace.client.framework.WorkspaceSizeChangeListener;
 import org.jboss.workspace.client.rpc.LayoutStateService;
 import org.jboss.workspace.client.rpc.LayoutStateServiceAsync;
 import org.jboss.workspace.client.rpc.StatePacket;
+import org.jboss.workspace.client.util.Effects;
 import org.jboss.workspace.client.widgets.*;
 import org.jboss.workspace.client.widgets.dnd.TabDragHandler;
 
@@ -34,12 +33,12 @@ import java.util.*;
 /**
  * This is the main layout implementation for the Guvnor UI.
  */
-public class WorkspaceLayout implements org.jboss.workspace.client.framework.Layout {
+public class WorkspaceLayout extends Composite {
     /**
      * The main layout panel.
      */
     public final DockPanel mainLayoutPanel = new DockPanel();
-    public final HorizontalPanel header = new HorizontalPanel();
+    public final HorizontalPanel header = createHeader();
 
     public final WSExtVerticalPanel leftPanel = new WSExtVerticalPanel(this);
     public final WSStackPanel navigation = new WSStackPanel();
@@ -55,7 +54,7 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
     public Map<Widget, WSTab> tabLookup = new LinkedHashMap<Widget, WSTab>();
 
     public PickupDragController tabDragController;
-                                                                                                    
+
     public List<WorkspaceSizeChangeListener> workspaceSizeChangeListers = new ArrayList<WorkspaceSizeChangeListener>();
 
     private boolean rpcSync = true;
@@ -65,16 +64,13 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
     private int currSizeW;
     private int currSizeH;
 
-    public Panel createLayout(final String id) {
-        /**
-         * Create main layout panel using a border layout.
-         */
-   //     mainLayoutPanel.setHeight("100%");
-   //     mainLayoutPanel.setWidth("100%");
+    public WorkspaceLayout(String id) {
+        super();
 
-        /**
-         * Add the titlebar area
-         */
+        initWidget(createLayout(id));
+    }
+
+    private Panel createLayout(final String id) {
         Widget area;
         mainLayoutPanel.add(createHeader(), DockPanel.NORTH);
 
@@ -98,8 +94,6 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
 
         mainLayoutPanel.setPixelSize(currSizeW, currSizeH);
 
-        tabPanel.pack();        
-
         addResizeHandler(new ResizeHandler() {
             public void onResize(ResizeEvent event) {
                 RootPanel.get(id).setPixelSize(event.getWidth(), event.getHeight());
@@ -110,10 +104,30 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
                 currSizeW = event.getWidth();
                 currSizeH = event.getHeight();
 
-                tabPanel.pack();
+                /**
+                 * Need to handle height and width of the TabPanel here.
+                 */
 
+                LayoutHint.hintAll();
             }
         });
+
+
+        LayoutHint.attach(tabPanel, new LayoutHintProvider() {
+            public int getHeightHint() {
+                int hintHeight =  Window.getClientHeight() - tabPanel.getAbsoluteTop() - 20;
+                System.out.println("hintHeight:" + hintHeight);
+                return hintHeight;
+            }
+
+            public int getWidthHint() {
+                int hintWidth = Window.getClientWidth() - tabPanel.getAbsoluteLeft() - 10;
+                System.out.println("hintWidth:" + hintWidth);
+                return hintWidth;
+            }
+        });
+
+
 
         return mainLayoutPanel;
     }
@@ -123,7 +137,9 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
      *
      * @return -
      */
-    private Panel createHeader() {
+    private static HorizontalPanel createHeader() {
+        HorizontalPanel header = new HorizontalPanel();
+
         Image img = new Image(getModuleBaseURL() + "/images/workspacelogo.png");
         img.setHeight("45px");
         img.setWidth("193px");
@@ -219,7 +235,6 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
             }
         });
 
-
         topNavPanel.add(collapseButton);
         topNavPanel.setCellWidth(collapseButton, "21px");
         topNavPanel.setCellVerticalAlignment(collapseButton, HasVerticalAlignment.ALIGN_MIDDLE);
@@ -232,9 +247,6 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
         leftPanel.setCellHeight(navigation, "100%");
 
         navigation.setWidth("175px");
-    //    navigation.setHeight("100%");
-
-      //  leftPanel.setHeight("100%");
         leftPanel.setArmed(false);
 
         return leftPanel;
@@ -298,7 +310,7 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
                 return;
             }
             else {
-                WSModalDialog dialog = new  WSModalDialog();
+                WSModalDialog dialog = new WSModalDialog();
                 dialog.getOkButton().setText("Open New");
                 dialog.getCancelButton().setText("Goto");
 
@@ -440,7 +452,7 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
     }
 
     public void pullSessionState() {
-        if (!rpcSync) return;         
+        if (!rpcSync) return;
 
         LayoutStateServiceAsync guvSvc = (LayoutStateServiceAsync) create(LayoutStateService.class);
         ServiceDefTarget endpoint = (ServiceDefTarget) guvSvc;
@@ -598,5 +610,13 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
 
     public void pack() {
         fireWorkspaceSizeChangeListeners(Window.getClientWidth() - currSizeW, Window.getClientHeight() - currSizeH);
+
+        int tabPanelHeight = Window.getClientHeight() - tabPanel.getAbsoluteTop();
+        int tabPanelWidth = Window.getClientWidth() - tabPanel.getAbsoluteLeft();
+
+        tabPanel.setHeight(tabPanelHeight + "px");
+        tabPanel.setWidth((tabPanelWidth - 10) + "px");
+
+        LayoutHint.hintAll();        
     }
 }

@@ -3,6 +3,7 @@ package org.jboss.workspace.client.widgets;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.Window;
 
 public class WSTabPanel extends Composite {
     private DockPanel layoutPanel;
@@ -32,6 +33,7 @@ public class WSTabPanel extends Composite {
         });
 
         initWidget(layoutPanel);
+
     }
 
 
@@ -94,8 +96,15 @@ public class WSTabPanel extends Composite {
         return deckPanel;
     }
 
-    public void pack() {
-  
+    public void pack() {  
+    }
+
+    @Override
+    public void setPixelSize(int width, int height) {
+        super.setPixelSize(width, height);
+
+        int deckPanelHeight = height - tabBar.getOffsetHeight();
+        deckPanel.setHeight(deckPanelHeight + "px");
     }
 
     @Override

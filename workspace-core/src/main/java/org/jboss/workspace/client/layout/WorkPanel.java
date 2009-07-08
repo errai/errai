@@ -26,7 +26,6 @@ public class WorkPanel extends Composite implements HeightAware {
 
     public void add(Widget w) {
         mainPanel.add(w);
-
     }
 
     public void addWidgetTitle(Widget w) {
@@ -40,13 +39,5 @@ public class WorkPanel extends Composite implements HeightAware {
 
     public int getComponentHeight() {
         return mainPanel.getOffsetHeight() - title.getOffsetHeight();
-    }
-
-    @Override
-    protected void onAttach() {
-        super.onAttach();
-
-   //     Window.alert("HEIGHT:" + vPanel.getOffsetHeight());
-
     }
 }

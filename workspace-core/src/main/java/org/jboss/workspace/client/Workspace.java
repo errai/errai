@@ -30,14 +30,14 @@ public class Workspace implements EntryPoint {
             return null;
         }
 
-        workspaceLayout = new WorkspaceLayout();
+        workspaceLayout = new WorkspaceLayout(rootId);
         workspaceLayout.setRpcSync(true);
 
         enableScrolling(false);
 
 
         if (rootId != null) {
-            RootPanel.get(rootId).add(workspaceLayout.createLayout(rootId));
+            RootPanel.get(rootId).add(workspaceLayout);
         }
         else {
             Window.alert("No root ID specified!");

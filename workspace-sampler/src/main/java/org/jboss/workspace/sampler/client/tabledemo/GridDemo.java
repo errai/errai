@@ -27,7 +27,8 @@ public class GridDemo implements Tool {
         workPanel.setHeight("100%");
         
         final WSGrid wsGrid = new WSGrid();
-        wsGrid.setPreciseWidth(400);
+        wsGrid.setHeight("100%");
+
         wsGrid.setHeight("250px");
         
         Set<String> userTypes = new LinkedHashSet<String>();
