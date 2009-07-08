@@ -362,6 +362,7 @@ public class WorkspaceLayout extends Composite {
 
     public void forceOpenTab(Tool tool, StatePacket packet, Image icon) {
         FlowPanel flowpanel = new FlowPanel();
+        flowpanel.getElement().getStyle().setProperty("overflow", "scroll");
 
         Effects.setOpacity(flowpanel.getElement(), 0);
 
@@ -611,11 +612,11 @@ public class WorkspaceLayout extends Composite {
     public void pack() {
         fireWorkspaceSizeChangeListeners(Window.getClientWidth() - currSizeW, Window.getClientHeight() - currSizeH);
 
-        int tabPanelHeight = Window.getClientHeight() - tabPanel.getAbsoluteTop();
-        int tabPanelWidth = Window.getClientWidth() - tabPanel.getAbsoluteLeft();
-
-        tabPanel.setHeight(tabPanelHeight + "px");
-        tabPanel.setWidth((tabPanelWidth - 10) + "px");
+//        int tabPanelHeight = Window.getClientHeight() - tabPanel.getAbsoluteTop();
+//        int tabPanelWidth = Window.getClientWidth() - tabPanel.getAbsoluteLeft();
+//
+//        tabPanel.setHeight(tabPanelHeight + "px");
+//        tabPanel.setWidth((tabPanelWidth - 10) + "px");
 
         LayoutHint.hintAll();        
     }
