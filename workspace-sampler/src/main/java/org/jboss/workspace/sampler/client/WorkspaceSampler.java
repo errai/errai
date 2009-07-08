@@ -15,12 +15,13 @@ import org.jboss.workspace.sampler.client.imagebrowser.ImageBrowser;
 import org.jboss.workspace.sampler.client.minibrowser.MiniBrowserWidget;
 import org.jboss.workspace.sampler.client.servicecontrol.ServiceControlTool;
 import org.jboss.workspace.sampler.client.tabledemo.GridDemo;
+import org.jboss.workspace.sampler.client.dialogdemo.DialogDemo;
 
 public class WorkspaceSampler implements EntryPoint {
     public void onModuleLoad() {
         Workspace.addToolSet(new ToolSet() {
             public Tool[] getAllProvidedTools() {
-                return new Tool[]{new ServiceControlTool(), new GridDemo()};
+                return new Tool[]{new ServiceControlTool(), new GridDemo(), new DialogDemo()};
             }
                                                                                                                               
             public String getToolSetName() {
