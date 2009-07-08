@@ -128,19 +128,17 @@ public class WSWindowPanel extends Composite {
     }
 
     public void show() {
-        Effects.setOpacity(windowPanel.getElement(), 0);
+        Effects.setOpacity(getElement(), 0);
         setVisible(true);
         Effects.fade(getElement(), 5, 10, 0, 100);
 
-        windowPanel.getElement().getStyle().setProperty("zIndex", zIndex++ + "");
+        getElement().getStyle().setProperty("zIndex", zIndex++ + "");
     }
+
 
     public void add(Widget w) {
         dockPanel.add(w, DockPanel.CENTER);
         dockPanel.setSpacing(0);
-//
-//        dockPanel.setCellHeight(w, "100%");
-//        dockPanel.setCellWidth(w, "100%");
     }
 
     @Deprecated

@@ -12,7 +12,7 @@ public class Effects {
     public static void fade(Element el, int durationMillis, final int stepping, final int start, final int end) {
         effect.doFade(el, durationMillis, stepping, start, end);
     }
-    
+
     public static void setOpacity(Element el, int opacity) {
         effect.setOpacity(el, opacity);
     }

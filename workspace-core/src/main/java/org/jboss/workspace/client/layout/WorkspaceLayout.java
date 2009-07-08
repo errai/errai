@@ -69,8 +69,8 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
         /**
          * Create main layout panel using a border layout.
          */
-        mainLayoutPanel.setHeight("100%");
-        mainLayoutPanel.setWidth("100%");
+   //     mainLayoutPanel.setHeight("100%");
+   //     mainLayoutPanel.setWidth("100%");
 
         /**
          * Add the titlebar area
@@ -96,6 +96,10 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
 
         RootPanel.get(id).setPixelSize(currSizeW, currSizeH);
 
+        mainLayoutPanel.setPixelSize(currSizeW, currSizeH);
+
+        tabPanel.pack();        
+
         addResizeHandler(new ResizeHandler() {
             public void onResize(ResizeEvent event) {
                 RootPanel.get(id).setPixelSize(event.getWidth(), event.getHeight());
@@ -105,6 +109,9 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
 
                 currSizeW = event.getWidth();
                 currSizeH = event.getHeight();
+
+                tabPanel.pack();
+
             }
         });
 
@@ -225,9 +232,9 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
         leftPanel.setCellHeight(navigation, "100%");
 
         navigation.setWidth("175px");
-        navigation.setHeight("100%");
+    //    navigation.setHeight("100%");
 
-        leftPanel.setHeight("100%");
+      //  leftPanel.setHeight("100%");
         leftPanel.setArmed(false);
 
         return leftPanel;
@@ -342,9 +349,9 @@ public class WorkspaceLayout implements org.jboss.workspace.client.framework.Lay
     }
 
     public void forceOpenTab(Tool tool, StatePacket packet, Image icon) {
-        ScrollPanel flowpanel = new ScrollPanel();
+        FlowPanel flowpanel = new FlowPanel();
+
         Effects.setOpacity(flowpanel.getElement(), 0);
-        flowpanel.setHeight("100%");
 
         Widget toolWidget = tool.getWidget(packet);
 

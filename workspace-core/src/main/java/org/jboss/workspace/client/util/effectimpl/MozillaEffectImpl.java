@@ -30,7 +30,7 @@ public class MozillaEffectImpl implements Effect {
 
                     public void run() {
                         step -= stepping;
-                        if (step < end) {
+                        if (step > end) {
                             setOpacity(el, step);
                         }
                         else {

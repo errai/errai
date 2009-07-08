@@ -1,9 +1,9 @@
 package org.jboss.workspace.client.widgets;
 
-import com.google.gwt.user.client.ui.*;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.*;
 import org.jboss.workspace.client.framework.AcceptsCallback;
 import org.jboss.workspace.client.listeners.ClickCallbackListener;
 import org.jboss.workspace.client.util.Effects;
@@ -21,7 +21,7 @@ public class WSModalDialog implements AcceptsCallback {
     Button cancelButton;
     ClickCallbackListener cancelListener;
 
-    SimplePanel drapePanel = new SimplePanel();
+    SimplePanel drapePanel;
     WSWindowPanel window;
 
     public WSModalDialog() {
@@ -29,19 +29,6 @@ public class WSModalDialog implements AcceptsCallback {
     }
 
     public WSModalDialog(String title) {
-        Style drapeStyle = drapePanel.getElement().getStyle();
-
-        drapeStyle.setProperty("position", "absolute");
-        drapeStyle.setProperty("top", "0px");
-        drapeStyle.setProperty("left", "0px");
-
-        drapePanel.setWidth("100%");
-        drapePanel.setHeight("100%");
-
-        drapePanel.setStyleName("WSWindowPanel-drape");
-
-        Effects.setOpacity(drapePanel.getElement(), 20);
-
         window = new WSWindowPanel(title);
 
         dockPanel = new DockPanel();
@@ -112,13 +99,29 @@ public class WSModalDialog implements AcceptsCallback {
         this.window.setTitle(title);
     }
 
+    public static SimplePanel createDrape() {
+        SimplePanel drapePanel = new SimplePanel();
+
+        Style drapeStyle = drapePanel.getElement().getStyle();
+
+        drapeStyle.setProperty("position", "absolute");
+        drapeStyle.setProperty("top", "0px");
+        drapeStyle.setProperty("left", "0px");
+
+        drapePanel.setWidth("100%");
+        drapePanel.setHeight("100%");
+
+        drapePanel.setStyleName("WSWindowPanel-drape");
+
+        Effects.setOpacity(drapePanel.getElement(), 20);
+
+        return drapePanel;
+    }
+
     public void showModal() {
+        RootPanel.get().add(drapePanel = createDrape());
         window.center();
         window.show();
-
-     //   drapePanel.getElement().getStyle().setProperty("zIndex", String.valueOf(WSWindowPanel.zIndex - 1));
-
-        RootPanel.get().add(drapePanel);
     }
 
 }

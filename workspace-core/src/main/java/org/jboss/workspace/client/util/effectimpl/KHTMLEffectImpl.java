@@ -7,7 +7,7 @@ import org.jboss.workspace.client.util.Effect;
 
 public class KHTMLEffectImpl implements Effect {
     public void doFade(final Element el, int durationMillis, final int stepping, final int start, final int end) {
-        final Style s = el.getStyle();
+     //   final Style s = el.getStyle();
         Timer t = start < end ?
                 new Timer() {
                     int step = start;
@@ -29,7 +29,7 @@ public class KHTMLEffectImpl implements Effect {
 
                     public void run() {
                         step -= stepping;
-                        if (step < end) {
+                        if (step > end) {
                             setOpacity(el, step);
                         }
                         else {

@@ -15,6 +15,7 @@ import org.jboss.workspace.client.widgets.format.WSCellDateFormat;
 import org.jboss.workspace.client.widgets.format.WSCellMultiSelector;
 import org.jboss.workspace.client.widgets.format.WSCellSimpleTextCell;
 import org.jboss.workspace.client.listeners.CellChangeEvent;
+import org.jboss.workspace.client.layout.WorkPanel;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -22,8 +23,12 @@ import java.util.Set;
 
 public class GridDemo implements Tool {
     public Widget getWidget(final StatePacket packet) {
+        final WorkPanel workPanel = new WorkPanel();
+        workPanel.setHeight("100%");
+        
         final WSGrid wsGrid = new WSGrid();
-        wsGrid.setHeight("400px");
+        wsGrid.setPreciseWidth(400);
+        wsGrid.setHeight("250px");
         
         Set<String> userTypes = new LinkedHashSet<String>();
         userTypes.add("Regular User");
@@ -60,16 +65,7 @@ public class GridDemo implements Tool {
         wsGrid.setCell(4, 2, new WSCellMultiSelector(userTypes, "Super User"));
         wsGrid.setCell(4, 3, new WSCellDateFormat(getShortDateFormat().parse("7/15/06")));
 
-   //     wsGrid.getCell(0, 0).mergeColumns(2);
-
         assert packet.getActiveLayout() != null;
-
-        packet.getActiveLayout().addWorkspaceSizeChangeListener(new WorkspaceSizeChangeListener() {
-            public void onSizeChange(int deltaW, int actualW, int deltaH, int actualH) {
-                wsGrid.setPreciseHeight(actualH - packet.getActiveLayout().getAppPanelOffsetHeight() - 8);
-                wsGrid.setPreciseWidth(actualW - packet.getActiveLayout().getNavPanelOffsetWidth() - 8);
-            }
-        });
 
         wsGrid.addCellChangeHandler(new ChangeHandler() {
             public void onChange(ChangeEvent changeEvent) {
@@ -77,9 +73,12 @@ public class GridDemo implements Tool {
             }
         });
 
-        wsGrid.setColumnWidth(0, 80);
+   //     wsGrid.setColumnWidth(0, 80);
 
-        return wsGrid;
+        workPanel.setTitle("Grid Demo");
+        workPanel.add(wsGrid);
+
+        return workPanel;
     }
 
     public String getName() {

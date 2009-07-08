@@ -18,7 +18,8 @@ public class WSTabPanel extends Composite {
 
         tabBar = new TabBar();
         deckPanel = new DeckPanel();
-        deckPanel.setSize("100%", "100%");
+        deckPanel.setWidth("100%");
+
         deckPanel.addStyleName("gwt-TabPanelBottom");
 
         layoutPanel.add(tabBar, DockPanel.NORTH);
@@ -29,8 +30,6 @@ public class WSTabPanel extends Composite {
                 deckPanel.showWidget(integerSelectionEvent.getSelectedItem());
             }
         });
-
-
 
         initWidget(layoutPanel);
     }
@@ -44,6 +43,7 @@ public class WSTabPanel extends Composite {
         tabBar.addTab(tab);
         deckPanel.add(panel);
     }
+
 
     public void remove(Widget tab) {
         remove(deckPanel.getWidgetIndex(tab));
@@ -92,6 +92,10 @@ public class WSTabPanel extends Composite {
 
     public DeckPanel getDeckPanel() {
         return deckPanel;
+    }
+
+    public void pack() {
+  
     }
 
     @Override

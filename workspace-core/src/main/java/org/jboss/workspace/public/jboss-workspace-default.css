@@ -714,6 +714,7 @@ span {
 
 .WS-WorkPanel-area {
     background: url('images/bgfade.png') repeat-x;
+    height: 100%;
 }
 
 .WSWindowPanel {

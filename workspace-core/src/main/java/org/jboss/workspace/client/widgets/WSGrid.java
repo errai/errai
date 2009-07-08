@@ -2,11 +2,14 @@ package org.jboss.workspace.client.widgets;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.logical.shared.ResizeHandler;
+import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.user.client.DOM;
 import static com.google.gwt.user.client.DOM.setStyleAttribute;
 import com.google.gwt.user.client.Event;
 import static com.google.gwt.user.client.Event.addNativePreviewHandler;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import static com.google.gwt.user.client.ui.RootPanel.getBodyElement;
 import org.jboss.workspace.client.listeners.CellChangeEvent;
@@ -87,6 +90,7 @@ public class WSGrid extends Composite {
 
         dataGrid.getScrollPanel().addScrollHandler(new ScrollHandler() {
             public void onScroll(ScrollEvent event) {
+
                 titleBar.getScrollPanel()
                         .setHorizontalScrollPosition(dataGrid.getScrollPanel().getHorizontalScrollPosition());
             }
@@ -493,6 +497,30 @@ public class WSGrid extends Composite {
             }
         });
 
+        //setHeight("250px");
+//
+//        final WSGrid g = this;
+//        Window.addResizeHandler(new ResizeHandler() {
+//            public void onResize(ResizeEvent resizeEvent) {
+//                int width = resizeEvent.getWidth();
+//                int left = g.getAbsoluteLeft();
+//                int gWidth = g.getOffsetWidth();
+//
+//                if ((left + gWidth) > width) {
+//                    int offset = (left + gWidth) - width;
+//                    int newSize = gWidth - offset;
+//
+//                   g.setPreciseWidth(newSize);
+//                }
+//                else {
+//                    g.setWidth("100%");
+//                }
+//
+//
+//            }
+//        });
+
+
 
     }
 
@@ -584,8 +612,8 @@ public class WSGrid extends Composite {
                 }
             }
 
-            titleBar.getScrollPanel().setWidth(currTableWidth - 20 + "px");
-            dataGrid.getScrollPanel().setWidth(currTableWidth + "px");
+            //        titleBar.getScrollPanel().setWidth(currTableWidth - 20 + "px");
+            //        dataGrid.getScrollPanel().setWidth(currTableWidth + "px");
         }
         else {
             resizeOnAttach = true;
@@ -667,8 +695,10 @@ public class WSGrid extends Composite {
             if (!scrollable) {
                 setStyleAttribute(scrollPanel.getElement(), "overflowY", "hidden");
                 setStyleAttribute(scrollPanel.getElement(), "overflowX", "hidden");
-
                 scrollPanel.setHeight("18px");
+            }
+            else {
+                setStyleAttribute(scrollPanel.getElement(), "overflow", "scroll");
             }
 
             scrollPanel.add(table);
@@ -1429,19 +1459,27 @@ public class WSGrid extends Composite {
         super.onAttach();
 
         int titleHeight = titleBar.getOffsetHeight();
-
         innerPanel.setCellHeight(titleBar, titleHeight + "px");
-
-        setHeight("450px");
-        setWidth("100%");
-        dataGrid.setHeight("450px");
-        dataGrid.setHeight("450px");
 
         if (resizeOnAttach) {
             for (int i = 0; i < colSizes.size(); i++) {
                 setColumnWidth(i, colSizes.get(i));
             }
         }
+
+//        Widget w = this;
+//        while ((w = w.getParent()) != null) {
+//            if (w instanceof HeightAware) {
+//                int height = ((HeightAware) w).getComponentHeight();
+//
+//                System.out.println("found height!" + height);
+//
+//                setHeight(height + "px");
+//                dataGrid.setHeight(height + "px");
+//
+//                break;
+//            }
+//        }
     }
 
 
@@ -1469,6 +1507,10 @@ public class WSGrid extends Composite {
 
     public static void disableTextSelection(Element elem, boolean disable) {
         disableTextSelectInternal(elem, disable);
+    }
+
+    public Stack<WSCell> getSelectionList() {
+        return selectionList;
     }
 
     private native static void disableTextSelectInternal(Element e, boolean disable)/*-{

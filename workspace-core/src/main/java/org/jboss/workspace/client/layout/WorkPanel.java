@@ -1,15 +1,15 @@
 package org.jboss.workspace.client.layout;
 
 import com.google.gwt.user.client.ui.*;
+import org.jboss.workspace.client.widgets.HeightAware;
 
 
-public class WorkPanel extends Composite {
-    private SimplePanel title = new SimplePanel();
+public class WorkPanel extends Composite implements HeightAware {
+    VerticalPanel vPanel = new VerticalPanel();
+    private FlowPanel title = new FlowPanel();
     private FlowPanel mainPanel = new FlowPanel();
 
     public WorkPanel() {
-        VerticalPanel vPanel = new VerticalPanel();
-        vPanel.setHeight("100%");
         vPanel.setWidth("100%");
 
         vPanel.add(title);
@@ -25,10 +25,28 @@ public class WorkPanel extends Composite {
     }
 
     public void add(Widget w) {
-         mainPanel.add(w);
+        mainPanel.add(w);
+
     }
 
     public void addWidgetTitle(Widget w) {
         title.add(w);
+    }
+
+    @Override
+    public void setTitle(String s) {
+        title.add(new Label(s));
+    }
+
+    public int getComponentHeight() {
+        return mainPanel.getOffsetHeight() - title.getOffsetHeight();
+    }
+
+    @Override
+    protected void onAttach() {
+        super.onAttach();
+
+   //     Window.alert("HEIGHT:" + vPanel.getOffsetHeight());
+
     }
 }

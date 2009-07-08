@@ -30,7 +30,7 @@ public class IEEffectImpl implements Effect {
 
                     public void run() {
                         step -= stepping + 10;
-                        if (step < end) {
+                        if (step > end) {
                             setOpacity(el, step);
                         }
                         else {
