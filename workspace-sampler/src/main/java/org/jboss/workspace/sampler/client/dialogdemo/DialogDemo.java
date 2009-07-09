@@ -6,7 +6,6 @@ import org.jboss.workspace.client.rpc.StatePacket;
 import org.jboss.workspace.client.layout.WorkPanel;
 import org.jboss.workspace.client.widgets.WSModalDialog;
 import com.google.gwt.user.client.ui.*;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -35,7 +34,7 @@ public class DialogDemo implements Tool {
     private Button createButton() {
         Button button = new Button("Show Dialog");
         final WSModalDialog dialog = new WSModalDialog("Hello World!");
-        
+
         button.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 dialog.showModal();
@@ -47,7 +46,7 @@ public class DialogDemo implements Tool {
 
         dialog.ask("Would you like to continue?", new AcceptsCallback() {
             public void callback(String message) {
-                Window.alert(message);
+                // do nothing
             }
         });
 
