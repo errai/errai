@@ -1,21 +1,20 @@
 package org.jboss.workspace.sampler.client.tabledemo;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import static com.google.gwt.i18n.client.DateTimeFormat.getShortDateFormat;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.ChangeEvent;
 import org.jboss.workspace.client.framework.Tool;
-import org.jboss.workspace.client.framework.WorkspaceSizeChangeListener;
+import org.jboss.workspace.client.layout.LayoutHint;
+import org.jboss.workspace.client.layout.LayoutHintProvider;
+import org.jboss.workspace.client.layout.WorkPanel;
 import org.jboss.workspace.client.rpc.StatePacket;
 import org.jboss.workspace.client.widgets.WSGrid;
 import org.jboss.workspace.client.widgets.format.WSCellDateFormat;
 import org.jboss.workspace.client.widgets.format.WSCellMultiSelector;
 import org.jboss.workspace.client.widgets.format.WSCellSimpleTextCell;
-import org.jboss.workspace.client.listeners.CellChangeEvent;
-import org.jboss.workspace.client.layout.WorkPanel;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -25,12 +24,11 @@ public class GridDemo implements Tool {
     public Widget getWidget(final StatePacket packet) {
         final WorkPanel workPanel = new WorkPanel();
         workPanel.setHeight("100%");
-        
+
         final WSGrid wsGrid = new WSGrid();
         wsGrid.setHeight("100%");
+        wsGrid.setWidth("100%");
 
-        wsGrid.setHeight("250px");
-        
         Set<String> userTypes = new LinkedHashSet<String>();
         userTypes.add("Regular User");
         userTypes.add("Super User");
@@ -70,11 +68,20 @@ public class GridDemo implements Tool {
 
         wsGrid.addCellChangeHandler(new ChangeHandler() {
             public void onChange(ChangeEvent changeEvent) {
-               packet.setModifiedFlag(true);
+                packet.setModifiedFlag(true);
             }
         });
 
-   //     wsGrid.setColumnWidth(0, 80);
+        LayoutHint.attach(wsGrid, new LayoutHintProvider() {
+            public int getHeightHint() {
+                return workPanel.getPanelHeight();
+            }
+
+            public int getWidthHint() {
+                System.out.println("width:" + workPanel. getPanelWidth());
+                return workPanel.getPanelWidth();
+            }
+        });
 
         workPanel.setTitle("Grid Demo");
         workPanel.add(wsGrid);

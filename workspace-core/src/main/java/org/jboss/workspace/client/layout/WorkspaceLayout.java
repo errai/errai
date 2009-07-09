@@ -362,7 +362,7 @@ public class WorkspaceLayout extends Composite {
 
     public void forceOpenTab(Tool tool, StatePacket packet, Image icon) {
         FlowPanel flowpanel = new FlowPanel();
-        flowpanel.getElement().getStyle().setProperty("overflow", "scroll");
+       flowpanel.getElement().getStyle().setProperty("overflow", "hidden");
 
         Effects.setOpacity(flowpanel.getElement(), 0);
 

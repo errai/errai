@@ -20,25 +20,9 @@ public class WorkPanel extends Composite  {
         title.setStyleName("WS-WorkPanel-title");
         vPanel.setStyleName("WS-WorkPanel-area");
 
-
         initWidget(vPanel);
 
         getElement().getStyle().setProperty("overflow", "scroll");
-
-        final WorkPanel workPanel = this;
-        LayoutHint.attach(mainPanel, new LayoutHintProvider() {
-            public int getHeightHint() {
-                int height =  workPanel.getOffsetHeight() - title.getOffsetHeight();
-
-                return height;
-            }
-
-            public int getWidthHint() {
-                int width =  workPanel.getOffsetWidth();
-
-                return width;
-            }
-        });
     }
 
     @Override
@@ -52,6 +36,14 @@ public class WorkPanel extends Composite  {
 
     public void addWidgetTitle(Widget w) {
         title.add(w);
+    }
+
+    public int getPanelWidth() {
+        return getOffsetWidth();
+    }
+
+    public int getPanelHeight() {
+        return getOffsetHeight() - title.getOffsetHeight();
     }
 
     @Override

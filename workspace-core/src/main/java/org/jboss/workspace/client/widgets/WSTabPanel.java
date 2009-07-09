@@ -104,8 +104,11 @@ public class WSTabPanel extends Composite {
         super.setPixelSize(width, height);
 
         int deckPanelHeight = height - tabBar.getOffsetHeight();
-      //  deckPanel.setHeight(deckPanelHeight + "px");
         deckPanel.setPixelSize(width, deckPanelHeight);
+
+        for (int i = 0; i < deckPanel.getWidgetCount(); i++) {
+            deckPanel.getWidget(i).setPixelSize(width, deckPanelHeight);
+        }
 
     }
 

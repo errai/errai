@@ -2,14 +2,11 @@ package org.jboss.workspace.client.widgets;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.*;
-import com.google.gwt.event.logical.shared.ResizeHandler;
-import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.user.client.DOM;
 import static com.google.gwt.user.client.DOM.setStyleAttribute;
 import com.google.gwt.user.client.Event;
 import static com.google.gwt.user.client.Event.addNativePreviewHandler;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import static com.google.gwt.user.client.ui.RootPanel.getBodyElement;
 import org.jboss.workspace.client.listeners.CellChangeEvent;
@@ -519,7 +516,6 @@ public class WSGrid extends Composite {
 //
 //            }
 //        });
-
 
 
     }
@@ -1386,6 +1382,15 @@ public class WSGrid extends Composite {
         setWidth(width + "px");
         titleBar.getScrollPanel().setWidth(width - 20 + "px");
         dataGrid.getScrollPanel().setWidth(width + "px");
+    }
+
+
+    @Override
+    public void setPixelSize(int width, int height) {
+        super.setPixelSize(width, height);
+
+        setPreciseWidth(width);
+        setPreciseHeight(height);
     }
 
     /**
