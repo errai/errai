@@ -29,7 +29,7 @@ public class LayoutHint {
         LayoutHintProvider p;
         for (Widget w : MANGED_WIDGETS.keySet()) {
             p = findProvider(w);
-            if (p != null && w.isAttached()) {
+            if (p != null && w.isAttached() && p.getWidthHint() > 0 && p.getHeightHint() > 0) {
                 w.setPixelSize(p.getWidthHint(), p.getHeightHint());
             }
         }

@@ -611,13 +611,6 @@ public class WorkspaceLayout extends Composite {
 
     public void pack() {
         fireWorkspaceSizeChangeListeners(Window.getClientWidth() - currSizeW, Window.getClientHeight() - currSizeH);
-
-//        int tabPanelHeight = Window.getClientHeight() - tabPanel.getAbsoluteTop();
-//        int tabPanelWidth = Window.getClientWidth() - tabPanel.getAbsoluteLeft();
-//
-//        tabPanel.setHeight(tabPanelHeight + "px");
-//        tabPanel.setWidth((tabPanelWidth - 10) + "px");
-
         LayoutHint.hintAll();        
     }
 }

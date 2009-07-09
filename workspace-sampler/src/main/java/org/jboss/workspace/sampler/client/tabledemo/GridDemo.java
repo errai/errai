@@ -78,7 +78,7 @@ public class GridDemo implements Tool {
             }
 
             public int getWidthHint() {
-                System.out.println("width:" + workPanel. getPanelWidth());
+            //    System.out.println("width:" + workPanel.getPanelWidth());
                 return workPanel.getPanelWidth();
             }
         });
