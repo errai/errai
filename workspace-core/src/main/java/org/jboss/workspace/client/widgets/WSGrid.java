@@ -1387,8 +1387,7 @@ public class WSGrid extends Composite {
 
     @Override
     public void setPixelSize(int width, int height) {
-        super.setPixelSize(width, height);
-
+      //  System.out.println("WSGrid.setPixelSize(width:" + width + ":height:" + height + ")");
         setPreciseWidth(width);
         setPreciseHeight(height);
     }
@@ -1471,20 +1470,6 @@ public class WSGrid extends Composite {
                 setColumnWidth(i, colSizes.get(i));
             }
         }
-
-//        Widget w = this;
-//        while ((w = w.getParent()) != null) {
-//            if (w instanceof HeightAware) {
-//                int height = ((HeightAware) w).getComponentHeight();
-//
-//                System.out.println("found height!" + height);
-//
-//                setHeight(height + "px");
-//                dataGrid.setHeight(height + "px");
-//
-//                break;
-//            }
-//        }
     }
 
 

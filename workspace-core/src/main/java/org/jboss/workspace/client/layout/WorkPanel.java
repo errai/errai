@@ -8,6 +8,9 @@ public class WorkPanel extends Composite  {
     private FlowPanel title = new FlowPanel();
     private FlowPanel mainPanel = new FlowPanel();
 
+    private int h;
+    private int w;
+
     public WorkPanel() {
         vPanel.setWidth("100%");
 
@@ -26,8 +29,17 @@ public class WorkPanel extends Composite  {
     }
 
     @Override
-    public void setPixelSize(int i, int i1) {
-        super.setPixelSize(i, i1);
+    public void setPixelSize(int width, int height) {
+    //    System.out.println("WorkPanel.setPixelSize(width:" + width + ", height:" + height + ")");
+
+        h = (height - title.getOffsetHeight());
+        w = width;
+
+        vPanel.setCellHeight(mainPanel, h + "px");
+        vPanel.setCellWidth(mainPanel, width + "px");
+
+        vPanel.setPixelSize(width, height);
+        super.setPixelSize(width, height);
     }
 
     public void add(Widget w) {
@@ -39,11 +51,11 @@ public class WorkPanel extends Composite  {
     }
 
     public int getPanelWidth() {
-        return getOffsetWidth();
+        return w == 0 ? getOffsetWidth() : w;
     }
 
     public int getPanelHeight() {
-        return getOffsetHeight() - title.getOffsetHeight();
+        return h == 0 ? getOffsetHeight() - title.getOffsetHeight() : h;
     }
 
     @Override

@@ -115,18 +115,17 @@ public class WorkspaceLayout extends Composite {
 
         LayoutHint.attach(tabPanel, new LayoutHintProvider() {
             public int getHeightHint() {
-                int hintHeight =  Window.getClientHeight() - tabPanel.getAbsoluteTop() - 20;
-                System.out.println("hintHeight:" + hintHeight);
+                int hintHeight = Window.getClientHeight() - tabPanel.getAbsoluteTop() - 20;
+                //  System.out.println("hintHeight:" + hintHeight);
                 return hintHeight;
             }
 
             public int getWidthHint() {
                 int hintWidth = Window.getClientWidth() - tabPanel.getAbsoluteLeft() - 10;
-                System.out.println("hintWidth:" + hintWidth);
+                //  System.out.println("hintWidth:" + hintWidth);
                 return hintWidth;
             }
         });
-
 
 
         return mainLayoutPanel;
@@ -361,26 +360,26 @@ public class WorkspaceLayout extends Composite {
     }
 
     public void forceOpenTab(Tool tool, StatePacket packet, Image icon) {
-        FlowPanel flowpanel = new FlowPanel();
-       flowpanel.getElement().getStyle().setProperty("overflow", "hidden");
+        ExtSimplePanel panel = new ExtSimplePanel();
+        panel.getElement().getStyle().setProperty("overflow", "hidden");
 
-        Effects.setOpacity(flowpanel.getElement(), 0);
+        Effects.setOpacity(panel.getElement(), 0);
 
         Widget toolWidget = tool.getWidget(packet);
 
-        flowpanel.add(toolWidget);
+        panel.add(toolWidget);
 
         Image newIcon = new Image(icon != null ? icon.getUrl() : GWT.getModuleBaseURL()
                 + "/images/ui/icons/questioncube.png");
         newIcon.setSize("16px", "16px");
 
-        WSTab blt = new WSTab(this, flowpanel, newIcon, packet, tabPanel);
+        WSTab blt = new WSTab(this, panel, newIcon, packet, tabPanel);
 
-        tabPanel.add(flowpanel, blt);
-        tabPanel.selectTab(tabPanel.getWidgetIndex(flowpanel));
+        tabPanel.add(panel, blt);
+        tabPanel.selectTab(tabPanel.getWidgetIndex(panel));
 
-        tabLookup.put(flowpanel, blt);
-        tabIds.put(packet.getInstanceId(), flowpanel);
+        tabLookup.put(panel, blt);
+        tabIds.put(packet.getInstanceId(), panel);
         idTabLookup.put(packet.getInstanceId(), blt);
 
         tabDragController.makeDraggable(blt, newIcon);
@@ -401,7 +400,7 @@ public class WorkspaceLayout extends Composite {
 
         t.schedule(25);
 
-        Effects.fade(flowpanel.getElement(), 5, 5, 0, 100);
+        Effects.fade(panel.getElement(), 5, 5, 0, 100);
     }
 
     public void closeTab(StatePacket packet) {
@@ -611,6 +610,6 @@ public class WorkspaceLayout extends Composite {
 
     public void pack() {
         fireWorkspaceSizeChangeListeners(Window.getClientWidth() - currSizeW, Window.getClientHeight() - currSizeH);
-        LayoutHint.hintAll();        
+        LayoutHint.hintAll();
     }
 }
