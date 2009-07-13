@@ -13,9 +13,6 @@ import java.util.List;
 
 public class WSLaunchButton extends Composite {
     private static final String CSS_NAME = "WSLaunchButton";
-    private static final String CSS_NAME_DOWN = "WSLaunchButton-down";
-    private static final String CSS_NAME_HOVER = "WSLaunchButton-hover";
-    private static final String CSS_NAME_MOVE = "WSLaunchButton-move";
 
     private Image icon;
     private String name;
@@ -39,7 +36,7 @@ public class WSLaunchButton extends Composite {
 
 
     @Override
-    public void onBrowserEvent(Event event) {
+    public void onBrowserEvent(Event event) {                               
         if (!isAttached()) {
             return;
         }
