@@ -13,6 +13,7 @@ public class Effects {
         if (!GWT.isScript() && effect instanceof MozillaEffectImpl) {
             effect = new Effect() {
                 public void doFade(Element el, int durationMillis, int stepping, int start, int end) {
+                    setOpacity(el, end);
                 }
 
                 public void setOpacity(Element el, int opacity) {
