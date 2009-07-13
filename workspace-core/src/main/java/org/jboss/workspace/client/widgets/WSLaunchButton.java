@@ -40,18 +40,20 @@ public class WSLaunchButton extends Composite {
 
     @Override
     public void onBrowserEvent(Event event) {
-        if (!isAttached()) return;
+        if (!isAttached()) {
+            return;
+        }
 
         switch (event.getTypeInt()) {
+            case ONMOUSEMOVE:
+                break;
             case ONMOUSEOVER:
                 addStyleDependentName("hover");
-
-                Effects.fade(getElement(), 1, 2, 20, 100);
-
                 break;
+            case ONBLUR:
+            case ONLOSECAPTURE:
             case ONMOUSEOUT:
                 removeStyleDependentName("hover");
-
                 break;
             case ONMOUSEDOWN:
                 addStyleDependentName("down");
