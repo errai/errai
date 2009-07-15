@@ -25,4 +25,14 @@
         <url-pattern>/jboss_workspace_sampler/serviceControl</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>fileBrowserImpl</servlet-name>
+        <servlet-class>org.jboss.workspace.sampler.server.filebrowser.FileBrowserImpl</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>fileBrowserImpl</servlet-name>
+        <url-pattern>/jboss_workspace_sampler/fileBrowser</url-pattern>
+    </servlet-mapping>
+
 </web-app>
