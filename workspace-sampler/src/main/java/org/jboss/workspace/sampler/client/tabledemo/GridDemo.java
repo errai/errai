@@ -3,7 +3,10 @@ package org.jboss.workspace.sampler.client.tabledemo;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import static com.google.gwt.i18n.client.DateTimeFormat.getShortDateFormat;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 import org.jboss.workspace.client.framework.Tool;
@@ -29,6 +32,61 @@ public class GridDemo implements Tool {
         wsGrid.setHeight("100%");
         wsGrid.setWidth("100%");
 
+        populateTable(wsGrid);
+
+
+        assert packet.getActiveLayout() != null;
+
+        wsGrid.addCellChangeHandler(new ChangeHandler() {
+            public void onChange(ChangeEvent changeEvent) {
+                packet.setModifiedFlag(true);
+            }
+        });
+
+        LayoutHint.attach(wsGrid, new LayoutHintProvider() {
+            public int getHeightHint() {
+                return workPanel.getPanelHeight();
+            }
+
+            public int getWidthHint() {
+                return workPanel.getPanelWidth();
+            }
+        });
+
+        workPanel.setTitle("Grid Demo");
+        workPanel.add(wsGrid);
+
+
+        Button mergeCells = new Button("Merge Cells");
+        decorateUtilButton(mergeCells);
+        mergeCells.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent clickEvent) {
+                wsGrid.mergeSelected();
+            }
+        });
+
+        Button reset = new Button("Reset");
+        decorateUtilButton(reset);
+        reset.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent clickEvent) {
+                wsGrid.clear();
+                populateTable(wsGrid);
+            }
+        });
+
+        workPanel.addToTitlebar(mergeCells);
+        workPanel.addToTitlebar(reset);
+
+        return workPanel;
+    }
+
+    private void decorateUtilButton(Button button) {
+        button.setHeight("18px");
+        button.getElement().getStyle().setProperty("fontSize", "10px");
+        button.getElement().getStyle().setProperty("marginLeft", "5px");
+    }
+
+    private void populateTable(WSGrid wsGrid) {
         Set<String> userTypes = new LinkedHashSet<String>();
         userTypes.add("Regular User");
         userTypes.add("Super User");
@@ -64,28 +122,6 @@ public class GridDemo implements Tool {
         wsGrid.setCell(4, 2, new WSCellMultiSelector(userTypes, "Super User"));
         wsGrid.setCell(4, 3, new WSCellDateFormat(getShortDateFormat().parse("7/15/06")));
 
-        assert packet.getActiveLayout() != null;
-
-        wsGrid.addCellChangeHandler(new ChangeHandler() {
-            public void onChange(ChangeEvent changeEvent) {
-                packet.setModifiedFlag(true);
-            }
-        });
-
-        LayoutHint.attach(wsGrid, new LayoutHintProvider() {
-            public int getHeightHint() {
-                return workPanel.getPanelHeight();
-            }
-
-            public int getWidthHint() {
-                return workPanel.getPanelWidth();
-            }
-        });
-
-        workPanel.setTitle("Grid Demo");
-        workPanel.add(wsGrid);
-
-        return workPanel;
     }
 
     public String getName() {

@@ -108,7 +108,7 @@ public class WSWindowPanel extends Composite {
             }
         });
 
-        LayoutUtil.disableTextSelection(label.getElement(), true);
+        LayoutUtil.disableTextSelection(getElement(), true);
 
         setHeight("25px");
         setWidth("25px");

@@ -15,7 +15,7 @@ public class DialogDemo implements Tool {
     public Widget getWidget(StatePacket packet) {
         WorkPanel panel = new WorkPanel();
 
-        panel.addWidgetTitle(new HTML("Dialog Demo - click a button to show the modal dialog."));
+        panel.addToTitlebar(new HTML("Dialog Demo - click a button to show the modal dialog."));
 
         DockPanel dPanel = new DockPanel();
         dPanel.setWidth("100%");
