@@ -4,6 +4,8 @@ import com.google.gwt.user.client.rpc.RemoteService;
 
 public interface FileBrowser extends RemoteService {
 
+    public String getCurrentDir();
+
     public String getFiles(String path);
 
     public String getName();

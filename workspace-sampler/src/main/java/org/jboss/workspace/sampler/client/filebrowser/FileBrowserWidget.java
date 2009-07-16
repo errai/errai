@@ -9,9 +9,12 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.core.client.GWT;
 import org.jboss.workspace.client.layout.WorkPanel;
 
+import java.io.File;
+
 public class FileBrowserWidget extends Composite {
     TextArea fileList = new TextArea();
     String currentDir = ".";
+    Label currentDirectory = new Label();
 
     FileBrowserAsync svc = (FileBrowserAsync) GWT.create(FileBrowser.class);
     ServiceDefTarget svcTarget = (ServiceDefTarget) svc;    
@@ -23,6 +26,7 @@ public class FileBrowserWidget extends Composite {
 
         public void onSuccess(Object result) {
             setFileList((String) result);
+            setLabelText();
         }
     };
 
@@ -47,6 +51,8 @@ public class FileBrowserWidget extends Composite {
         VerticalPanel vpanel = new VerticalPanel();
         vpanel.setSize("90%", "200px");
 
+        vpanel.add(currentDirectory);
+
         p.add(hPanel);
 
         fileList.setSize("80%","150px");
@@ -58,6 +64,7 @@ public class FileBrowserWidget extends Composite {
         HorizontalPanel hp = new HorizontalPanel();
         hp.add(createPrevButton());
         hp.add(createCurrentButton());
+        setLabelText();
 
         vpanel.add(hp);
 
@@ -69,12 +76,27 @@ public class FileBrowserWidget extends Composite {
         initWidget(panel);
     }
 
+    private void setLabelText() {
+        AsyncCallback currentDirCallback = new AsyncCallback() {
+            public void onFailure(Throwable caught) {
+                Window.alert(caught.getMessage());
+            }
+
+            public void onSuccess(Object result) {
+                currentDirectory.setText("Path: " + (String) result);
+            }
+        };
+
+        svc.getCurrentDir(currentDirCallback);
+    }
+
     private Button createPrevButton() {
         final Button button = new Button("Show parent directory");
 
         button.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                svc.getFiles(currentDir+="/..", callback);
+                currentDir += "/..";
+                svc.getFiles(currentDir, callback);
             }
         });
 
@@ -87,7 +109,7 @@ public class FileBrowserWidget extends Composite {
         button.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 currentDir = ".";
-                svc.getFiles(".", callback);
+                svc.getFiles(currentDir, callback);
             }
         });
 

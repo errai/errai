@@ -7,4 +7,6 @@ public interface FileBrowserAsync {
     void getFiles(String path, AsyncCallback<String> async);
 
     void getName(AsyncCallback<String> async);
+
+    void getCurrentDir(AsyncCallback<String> async);
 }

@@ -7,12 +7,18 @@ import java.io.File;
 
 public class FileBrowserImpl extends RemoteServiceServlet implements FileBrowser {
 
+    String currentDir = System.getProperty("user.dir");
+
     public String getName() {
         return null;
     }
 
     public String getFiles(String path) {
         File dir = new File(path);
+        try {
+            currentDir = dir.getCanonicalPath();
+        } catch (Exception e) {
+        }
         String filelist = "";
         String[] children = dir.list();
         for (int i = 0; i < children.length; i++) {
@@ -20,5 +26,9 @@ public class FileBrowserImpl extends RemoteServiceServlet implements FileBrowser
         }
 
         return filelist;
+    }
+
+    public String getCurrentDir() {
+        return currentDir;
     }
 }
