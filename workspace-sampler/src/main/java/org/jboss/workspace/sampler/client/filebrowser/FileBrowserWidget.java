@@ -10,12 +10,12 @@ import com.google.gwt.core.client.GWT;
 import org.jboss.workspace.client.layout.WorkPanel;
 
 public class FileBrowserWidget extends Composite {
-    TextArea fileList = new TextArea();
+    ListBox fileList = new ListBox();
     String currentDir = ".";
     Label currentDirectory = new Label();
 
     FileBrowserAsync svc = (FileBrowserAsync) GWT.create(FileBrowser.class);
-    ServiceDefTarget svcTarget = (ServiceDefTarget) svc;    
+    ServiceDefTarget svcTarget = (ServiceDefTarget) svc;
 
     AsyncCallback callback = new AsyncCallback() {
         public void onFailure(Throwable caught) {
@@ -54,7 +54,6 @@ public class FileBrowserWidget extends Composite {
         p.add(hPanel);
 
         fileList.setSize("80%","150px");
-        fileList.setReadOnly(true);
         svcTarget.setServiceEntryPoint(GWT.getModuleBaseURL()+"fileBrowser");
         svc.getFiles(currentDir, callback);
         vpanel.add(fileList);
@@ -114,9 +113,15 @@ public class FileBrowserWidget extends Composite {
         return button;
     }
 
-    private void setFileList(String filelist) {
-        if (filelist.equals(""))
-            filelist = "Directory is empty";
-        fileList.setText(filelist);
+    private void setFileList(String files) {
+        fileList.clear();
+        if (files.equals(""))
+            fileList.insertItem("Directory is empty", 0);
+        else {
+            String[] fileArray = files.split("\n");
+            for (int i = 0; i < fileArray.length; i++)
+                fileList.insertItem(fileArray[i], i);
+        }
+        fileList.setVisibleItemCount(fileList.getItemCount() + 1);
     }
 }
