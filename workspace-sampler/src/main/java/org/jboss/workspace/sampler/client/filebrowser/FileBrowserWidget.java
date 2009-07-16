@@ -115,13 +115,9 @@ public class FileBrowserWidget extends Composite {
 
     private void setFileList(String files) {
         fileList.clear();
-        if (files.equals(""))
-            fileList.insertItem("Directory is empty", 0);
-        else {
-            String[] fileArray = files.split("\n");
-            for (int i = 0; i < fileArray.length; i++)
-                fileList.insertItem(fileArray[i], i);
-        }
+        String[] fileArray = files.split("\n");
+        for (int i = 0; i < fileArray.length; i++)
+            fileList.insertItem(fileArray[i], i);
         fileList.setVisibleItemCount(fileList.getItemCount() + 1);
     }
 }
