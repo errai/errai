@@ -7,6 +7,7 @@ import static com.google.gwt.user.client.DOM.setStyleAttribute;
 import com.google.gwt.user.client.Event;
 import static com.google.gwt.user.client.Event.addNativePreviewHandler;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import static com.google.gwt.user.client.ui.RootPanel.getBodyElement;
 import org.jboss.workspace.client.listeners.CellChangeEvent;
@@ -45,6 +46,7 @@ public class WSGrid extends Composite {
     private boolean _resizeArmed = false;
     private boolean _resizing = false;
     private boolean _rangeSelect = false;
+    private boolean _mergedCells = false;
 
     private boolean resizeOnAttach = false;
 
@@ -500,30 +502,6 @@ public class WSGrid extends Composite {
             }
         });
 
-        //setHeight("250px");
-//
-//        final WSGrid g = this;
-//        Window.addResizeHandler(new ResizeHandler() {
-//            public void onResize(ResizeEvent resizeEvent) {
-//                int width = resizeEvent.getWidth();
-//                int left = g.getAbsoluteLeft();
-//                int gWidth = g.getOffsetWidth();
-//
-//                if ((left + gWidth) > width) {
-//                    int offset = (left + gWidth) - width;
-//                    int newSize = gWidth - offset;
-//
-//                   g.setPreciseWidth(newSize);
-//                }
-//                else {
-//                    g.setWidth("100%");
-//                }
-//
-//
-//            }
-//        });
-
-
     }
 
     public void setColumnHeader(int row, int column, String html) {
@@ -817,6 +795,14 @@ public class WSGrid extends Composite {
         }
 
         public void sort(int col, boolean ascending) {
+            if (_mergedCells) {
+                WSModalDialog dialog = new WSModalDialog("Unable to sort");
+                dialog.getCancelButton().setVisible(false);
+                dialog.ask("The table cannot be sorted because it contains merged cells", null);
+                dialog.showModal();
+                return;
+            }
+
             boolean secondPass = isEmpty(valueAt(col, 0));
 
             _sort(col, ascending, 0, tableIndex.size() - 1);
@@ -1212,6 +1198,10 @@ public class WSGrid extends Composite {
         }
 
         public void mergeColumns(int cols) {
+            if (cols < 2) return;
+
+            _mergedCells = true;
+
             final int _row = row;
 
             for (int i = 1; i < cols; i++) {
@@ -1253,6 +1243,7 @@ public class WSGrid extends Composite {
             colspan = cols;
 
             updateColumnWidths();
+
         }
 
         public boolean isColSpan() {

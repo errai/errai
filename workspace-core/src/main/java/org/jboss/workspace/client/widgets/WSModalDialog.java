@@ -64,7 +64,7 @@ public class WSModalDialog implements AcceptsCallback {
 
 
     public void callback(String message) {
-        callbackTo.callback(message);
+        if (callbackTo != null) callbackTo.callback(message);
         window.hide();
     }
 
@@ -73,7 +73,7 @@ public class WSModalDialog implements AcceptsCallback {
         this.message.setText(message);
         window.addClosingHandler(new Window.ClosingHandler() {
             public void onWindowClosing(Window.ClosingEvent event) {
-                callbackTo.callback("WindowClosed");
+                if (callbackTo != null) callbackTo.callback("WindowClosed");
                 RootPanel.get().remove(drapePanel);
             }
         });
