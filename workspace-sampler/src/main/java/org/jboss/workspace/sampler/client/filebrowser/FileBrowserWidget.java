@@ -36,7 +36,7 @@ public class FileBrowserWidget extends Composite {
         SimplePanel titleArea = new SimplePanel();
         titleArea.setWidth("100%");
         titleArea.getElement().getStyle().setProperty("background", "#fff799");
-        titleArea.add(new Label("This console allows you to browse the files in the current directory."));
+        titleArea.add(new Label("This console allows you to browse the current and parent directories."));
 
         p.add(titleArea);
         panel.add(p);
@@ -74,7 +74,6 @@ public class FileBrowserWidget extends Composite {
 
         button.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                svcTarget.setServiceEntryPoint(GWT.getModuleBaseURL()+"fileBrowser");
                 svc.getFiles(currentDir+="/..", callback);
             }
         });
@@ -87,7 +86,6 @@ public class FileBrowserWidget extends Composite {
 
         button.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                svcTarget.setServiceEntryPoint(GWT.getModuleBaseURL()+"fileBrowser");
                 currentDir = ".";
                 svc.getFiles(".", callback);
             }
