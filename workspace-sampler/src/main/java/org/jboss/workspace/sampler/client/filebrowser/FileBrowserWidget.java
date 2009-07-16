@@ -9,8 +9,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.core.client.GWT;
 import org.jboss.workspace.client.layout.WorkPanel;
 
-import java.io.File;
-
 public class FileBrowserWidget extends Composite {
     TextArea fileList = new TextArea();
     String currentDir = ".";
