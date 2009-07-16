@@ -11,6 +11,20 @@ import org.jboss.workspace.client.layout.WorkPanel;
 
 public class FileBrowserWidget extends Composite {
     TextArea fileList = new TextArea();
+    String currentDir = ".";
+
+    FileBrowserAsync svc = (FileBrowserAsync) GWT.create(FileBrowser.class);
+    ServiceDefTarget svcTarget = (ServiceDefTarget) svc;    
+
+    AsyncCallback callback = new AsyncCallback() {
+        public void onFailure(Throwable caught) {
+            Window.alert(caught.getMessage());
+        }
+
+        public void onSuccess(Object result) {
+            setFileList((String) result);
+        }
+    };
 
     public FileBrowserWidget() {
         WorkPanel panel = new WorkPanel();
@@ -37,8 +51,15 @@ public class FileBrowserWidget extends Composite {
 
         fileList.setSize("80%","150px");
         fileList.setReadOnly(true);
+        svcTarget.setServiceEntryPoint(GWT.getModuleBaseURL()+"fileBrowser");
+        svc.getFiles(currentDir, callback);
         vpanel.add(fileList);
-        vpanel.add(createShowButton());
+
+        HorizontalPanel hp = new HorizontalPanel();
+        hp.add(createPrevButton());
+        hp.add(createCurrentButton());
+
+        vpanel.add(hp);
 
         hPanel.add(vpanel);
         hPanel.setCellHorizontalAlignment(vpanel, HasHorizontalAlignment.ALIGN_CENTER);
@@ -48,37 +69,36 @@ public class FileBrowserWidget extends Composite {
         initWidget(panel);
     }
 
-    private Button createShowButton() {
-        final Button button = new Button("Show files");
+    private Button createPrevButton() {
+        final Button button = new Button("Show parent directory");
 
         button.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                button.setEnabled(false);
-
-                FileBrowserAsync svc = (FileBrowserAsync) GWT.create(FileBrowser.class);
-                ServiceDefTarget svcTarget = (ServiceDefTarget) svc;
-                svcTarget.setServiceEntryPoint(GWT.getModuleBaseURL() + "fileBrowser");
-
-                AsyncCallback callback = new AsyncCallback() {
-                    public void onFailure(Throwable caught) {
-                        caught.printStackTrace();
-                        Window.alert(caught.getMessage());
-                    }
-
-                    public void onSuccess(Object result) {
-                        button.setEnabled(true);
-
-                        String filelist = (String) result;
-                        if (filelist.equals(""))
-                            filelist = "Directory is empty";
-                        fileList.setText(filelist);
-                    }
-                };
-
-                svc.getFiles(callback);
+                svcTarget.setServiceEntryPoint(GWT.getModuleBaseURL()+"fileBrowser");
+                svc.getFiles(currentDir+="/..", callback);
             }
         });
 
         return button;
+    }
+
+    private Button createCurrentButton() {
+        final Button button = new Button("Go back to current directory");
+
+        button.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                svcTarget.setServiceEntryPoint(GWT.getModuleBaseURL()+"fileBrowser");
+                currentDir = ".";
+                svc.getFiles(".", callback);
+            }
+        });
+
+        return button;
+    }
+
+    private void setFileList(String filelist) {
+        if (filelist.equals(""))
+            filelist = "Directory is empty";
+        fileList.setText(filelist);
     }
 }

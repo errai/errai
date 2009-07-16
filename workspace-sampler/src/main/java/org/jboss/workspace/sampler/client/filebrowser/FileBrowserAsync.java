@@ -4,7 +4,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface FileBrowserAsync {
     
-    void getFiles(AsyncCallback<String> async);
+    void getFiles(String path, AsyncCallback<String> async);
 
     void getName(AsyncCallback<String> async);
 }

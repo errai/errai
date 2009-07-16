@@ -11,8 +11,8 @@ public class FileBrowserImpl extends RemoteServiceServlet implements FileBrowser
         return null;
     }
 
-    public String getFiles() {
-        File dir = new File(".");
+    public String getFiles(String path) {
+        File dir = new File(path);
         String filelist = "";
         String[] children = dir.list();
         for (int i = 0; i < children.length; i++) {
