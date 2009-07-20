@@ -7,7 +7,6 @@ import static com.google.gwt.user.client.DOM.setStyleAttribute;
 import com.google.gwt.user.client.Event;
 import static com.google.gwt.user.client.Event.addNativePreviewHandler;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import static com.google.gwt.user.client.ui.RootPanel.getBodyElement;
 import org.jboss.workspace.client.listeners.CellChangeEvent;
@@ -22,6 +21,8 @@ import java.util.*;
  * A Grid/Table implementation for working with structured data.
  */
 public class WSGrid extends Composite {
+    private static final int CELL_HEIGHT_PX = 18;
+
     private FocusPanel focusPanel;
     private VerticalPanel innerPanel;
     private WSAbstractGrid titleBar;
@@ -588,6 +589,11 @@ public class WSGrid extends Composite {
 
                     c.setWidth(width + "px");
                 }
+
+//                if (c.isRowSpan()) {
+//                    int spanSize = height + 2;
+//
+//                }
             }
 
         }
@@ -655,6 +661,8 @@ public class WSGrid extends Composite {
         this.selectionList.clear();
         this.colSizes.clear();
         this.sortedColumns.clear();
+
+        this._mergedCells = false;
     }
 
     /**
@@ -964,8 +972,8 @@ public class WSGrid extends Composite {
         protected int row;
         protected int col;
 
-        protected int rowspan;
-        protected int colspan;
+        protected int rowspan = 1;
+        protected int colspan = 1;
 
         protected WSAbstractGrid grid;
 
@@ -1207,14 +1215,14 @@ public class WSGrid extends Composite {
             for (int i = 1; i < cols; i++) {
                 grid.table.removeCell(row, col + 1);
 
-                final WSCell c = this;
+                final WSCell cell = this;
                 final int _col = col + i;
 
                 grid.tableIndex.get(row).set(col + i, new WSGrid.WSCell() {
-                    private WSCell redirect = c;
+                    private WSCell redirect = cell;
 
                     {
-                        this.grid = c.grid;
+                        this.grid = cell.grid;
                         this.col = _col;
                         this.row = _row;
                         initWidget(new HTML());
@@ -1234,7 +1242,7 @@ public class WSGrid extends Composite {
 
                     @Override
                     public int getColspan() {
-                        return c.colspan - (col - c.col);
+                        return cell.colspan - (col - cell.col);
                     }
                 });
             }
@@ -1246,12 +1254,77 @@ public class WSGrid extends Composite {
 
         }
 
+        public void mergeRows(int rows) {
+            if (rows < 2) return;
+
+            _mergedCells = true;
+
+            final int _col = col;
+
+            FlexTable table = grid.table;
+            for (int i = 1; i < rows; i++) {
+                for (int c = _col; c < (_col + colspan); c++) {
+
+                    final WSCell cell = this;
+                    final int _row = row + i;
+
+                    table.removeCell(_row, c);
+
+                    grid.tableIndex.get(_row).set(c, new WSCell() {
+                        private WSCell redirect = cell;
+
+                        {
+                            this.grid = cell.grid;
+                            this.col = _col;
+                            this.row = _row;
+                            initWidget(new HTML());
+                        }
+
+                        @Override
+                        public void blur() {
+                            redirect.blur();
+                        }
+
+                        @Override
+                        public void focus() {
+                            redirect.focus();
+                            selectionList.remove(selectionList.size() - 1);
+                            selectionList.add(this);
+                        }
+
+                        @Override
+                        public int getColspan() {
+                            return cell.colspan - (col - cell.col);
+                        }
+
+                        @Override
+                        public int getRowspan() {
+                            return cell.rowspan - (row - cell.row);
+                        }
+                    });
+
+                    grid.table.getFlexCellFormatter().setRowSpan(row, col, rows);
+                    rowspan = rows;
+
+                    updateColumnWidths();
+                }
+            }
+        }
+
         public boolean isColSpan() {
-            return colspan != 0;
+            return colspan > 1;
         }
 
         public int getColspan() {
             return colspan;
+        }
+
+        public boolean isRowSpan() {
+            return rowspan > 1;
+        }
+
+        public int getRowspan() {
+            return rowspan;
         }
 
         @Override
@@ -1271,6 +1344,7 @@ public class WSGrid extends Composite {
                     break;
                 case Event.ONMOUSEOUT:
                     if (!_resizing) removeStyleDependentName("hover");
+                    if (grid.type == GridType.TITLEBAR) _resizeArmed = false;
                     break;
 
                 case Event.ONMOUSEMOVE:
@@ -1494,6 +1568,7 @@ public class WSGrid extends Composite {
         blurAll();
 
         start.mergeColumns(end.getCol() - start.getCol() + 1);
+        start.mergeRows(end.getRow() - start.getRow() + 1);
     }
 
     @Override

@@ -24,16 +24,16 @@ import java.util.Set;
 
 
 public class GridDemo implements Tool {
-    public Widget getWidget(final StatePacket packet) {
+
+   public Widget getWidget(final StatePacket packet) {
         final WorkPanel workPanel = new WorkPanel();
         workPanel.setHeight("100%");
 
         final WSGrid wsGrid = new WSGrid();
         wsGrid.setHeight("100%");
         wsGrid.setWidth("100%");
-
+                                            
         populateTable(wsGrid);
-
 
         assert packet.getActiveLayout() != null;
 

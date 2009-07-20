@@ -26,7 +26,7 @@ public class FileBrowserWidget extends Composite {
             setFileList((String) result);
             setLabelText();
         }
-    };
+    };            
 
     public FileBrowserWidget() {
         WorkPanel panel = new WorkPanel();
