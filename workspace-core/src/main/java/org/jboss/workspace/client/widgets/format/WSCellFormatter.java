@@ -36,6 +36,15 @@ public abstract class WSCellFormatter {
     public abstract boolean edit(WSGrid.WSCell element);
     public abstract void stopedit();
 
+    public void setHeight(String height) {
+        html.setHeight(height);
+    }
+
+    public void setWidth(String width) {
+        html.setWidth(width);
+    }
+
+
     /**
      * Notify any registered listeners that the value is about to change.
      * @param newValue

@@ -18,7 +18,7 @@
     <facet type="web" name="Web">
       <configuration>
         <descriptors>
-          <deploymentDescriptor name="web.xml" url="file://$MODULE_DIR$/war/WEB-INF/web.xml" optional="false" version="2.5" />
+          <deploymentDescriptor name="web.xml" url="file://$MODULE_DIR$/war/WEB-INF/web.xml" />
         </descriptors>
         <webroots>
           <root url="file://$MODULE_DIR$/war" relative="/" />
@@ -65,15 +65,6 @@
       <library>
         <CLASSES>
           <root url="jar://$MODULE_DIR$/../lib/gwt-dnd-2.5.6.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="file://$MODULE_DIR$/src/main/java" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

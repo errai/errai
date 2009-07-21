@@ -602,7 +602,7 @@ public class WSGrid extends Composite {
         }
     }
 
-    private void updateColumnWidths() {
+    private void updateColumnSizes() {
         int col = 0;
         for (Integer size : colSizes) {
             setColumnWidth(col++, size);
@@ -696,8 +696,6 @@ public class WSGrid extends Composite {
 
             if (!scrollable) {
                 setStyleAttribute(scrollPanel.getElement(), "overflow", "hidden");
-                //         setStyleAttribute(scrollPanel.getElement(), "overflowY", "hidden");
-                //         setStyleAttribute(scrollPanel.getElement(), "overflowX", "hidden");
                 scrollPanel.setHeight("18px");
             }
             else {
@@ -1062,7 +1060,7 @@ public class WSGrid extends Composite {
         }
 
         /**
-         * Focuses the curren cell.
+         * Focuses the current cell.
          */
         public void focus() {
             WSCell currentFocus = selectionList.isEmpty() ? null :
@@ -1250,7 +1248,7 @@ public class WSGrid extends Composite {
             grid.table.getFlexCellFormatter().setColSpan(row, col, cols);
             colspan = cols;
 
-            updateColumnWidths();
+            updateColumnSizes();
 
         }
 
@@ -1306,7 +1304,10 @@ public class WSGrid extends Composite {
                     grid.table.getFlexCellFormatter().setRowSpan(row, col, rows);
                     rowspan = rows;
 
-                    updateColumnWidths();
+                    setHeight((rows * CELL_HEIGHT_PX + rows - 1) + "px");
+
+
+                    updateColumnSizes();
                 }
             }
         }
@@ -1325,6 +1326,14 @@ public class WSGrid extends Composite {
 
         public int getRowspan() {
             return rowspan;
+        }
+
+        public void setHeight(String height) {
+            System.out.println("setting cell height: " + height);
+            super.setHeight(height);
+            panel.setHeight(height);
+            cellFormat.setHeight(height);
+            grid.table.getCellFormatter().setHeight(row, col, height);
         }
 
         @Override
