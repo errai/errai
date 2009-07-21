@@ -184,15 +184,16 @@ public class WSGrid extends Composite {
                 }
                 else {
                     /**
-                     * Yes.  Let's check to see if this cell spans columns.  If so, we will set the offsetX value
-                     * to the colspan value so navigation behaves.
-                     */
-                    offsetX = selectionList.lastElement().isColSpan() ? selectionList.lastElement().getColspan() : 1;
-
-                    /**
                      * Set currentFocus to the last element in the selectionList.
                      */
                     currentFocus = selectionList.lastElement();
+
+                    /**
+                     * Yes.  Let's check to see if this cell spans.  If so, we will set the offsetX value
+                     * to the colspan value so navigation behaves.
+                     */
+                    offsetX = currentFocus.isColSpan() ? currentFocus.getColspan() : 1;
+                    offsetY = currentFocus.isRowSpan() ? currentFocus.getRowspan() : 1;
                 }
 
                 /**
@@ -267,6 +268,9 @@ public class WSGrid extends Composite {
                                 }
                             }
 
+                            offsetY = (currentFocus.isRowSpan() ? currentFocus.getUpwardRowspan() : 1);
+
+
                             dataGrid.tableIndex.get(currentFocus.getRow() - offsetY).get(currentFocus.getCol())
                                     .focus();
                         }
@@ -318,6 +322,12 @@ public class WSGrid extends Composite {
                                         fillX++;
                                     }
                                 }
+
+//                                System.out.println("Curr Col   : " + currentFocus.getCol());
+//                                System.out.println("OffsetX    : " + offsetX);
+//                                System.out.println("Next X-Cell: " + (currentFocus.getCol() + offsetX));
+//                                System.out.println("Next Y-Cell: " + currentFocus.getRow());
+//                                System.out.println("------------------");
 
                                 dataGrid.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() + offsetX)
                                         .focus();
@@ -415,6 +425,14 @@ public class WSGrid extends Composite {
                                         fillX++;
                                     }
                                 }
+
+                                offsetX = (currentFocus.isColSpan() ? currentFocus.getLeftwareColspan() : 1);
+
+//                                System.out.println("Curr Focus   : (x:" + currentFocus.getCol() + "; y:" + currentFocus.getRow() + ")");
+//                                System.out.println("OffsetX    : " + offsetX);
+//                                System.out.println("Next X-Cell: " + (currentFocus.getCol() - offsetX));
+//                                System.out.println("Next Y-Cell: " + currentFocus.getRow());
+//                                System.out.println("------------------");
 
                                 dataGrid.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() - offsetX).focus();
                             }
@@ -586,14 +604,8 @@ public class WSGrid extends Composite {
                     c.setWidth((spanSize + 2) + "px");
                 }
                 else {
-
                     c.setWidth(width + "px");
                 }
-
-//                if (c.isRowSpan()) {
-//                    int spanSize = height + 2;
-//
-//                }
             }
 
         }
@@ -1209,8 +1221,6 @@ public class WSGrid extends Composite {
                 final int _col = col + i;
 
                 grid.tableIndex.get(row).set(col + i, new WSGrid.WSCell() {
-                    private WSCell redirect = cell;
-
                     {
                         this.grid = cell.grid;
                         this.col = _col;
@@ -1220,12 +1230,12 @@ public class WSGrid extends Composite {
 
                     @Override
                     public void blur() {
-                        redirect.blur();
+                        cell.blur();
                     }
 
                     @Override
                     public void focus() {
-                        redirect.focus();
+                        cell.focus();
                         selectionList.remove(selectionList.size() - 1);
                         selectionList.add(this);
                     }
@@ -1234,6 +1244,31 @@ public class WSGrid extends Composite {
                     public int getColspan() {
                         return cell.colspan - (col - cell.col);
                     }
+
+                    @Override
+                    public int getRowspan() {
+                        return cell.rowspan - (row - cell.row);
+                    }
+
+                    @Override
+                    public int getUpwardRowspan() {
+                        return row - cell.row + 1;
+                    }
+
+                    @Override
+                    public int getLeftwareColspan() {
+                        return col - cell.col + 1;
+                    }
+
+                    @Override
+                    public boolean isColSpan() {
+                        return cell.isColSpan();
+                    }
+
+                    @Override
+                    public boolean isRowSpan() {
+                        return cell.isRowSpan();
+                    }
                 });
             }
 
@@ -1241,7 +1276,6 @@ public class WSGrid extends Composite {
             colspan = cols;
 
             updateColumnSizes();
-
         }
 
         public void mergeRows(int rows) {
@@ -1258,11 +1292,9 @@ public class WSGrid extends Composite {
                     final WSCell cell = this;
                     final int _row = row + i;
 
-                    table.removeCell(_row, c);
+                    table.removeCell(_row, _col);
 
                     grid.tableIndex.get(_row).set(c, new WSCell() {
-                        private WSCell redirect = cell;
-
                         {
                             this.grid = cell.grid;
                             this.col = _col;
@@ -1272,12 +1304,12 @@ public class WSGrid extends Composite {
 
                         @Override
                         public void blur() {
-                            redirect.blur();
+                            cell.blur();
                         }
 
                         @Override
                         public void focus() {
-                            redirect.focus();
+                            cell.focus();
                             selectionList.remove(selectionList.size() - 1);
                             selectionList.add(this);
                         }
@@ -1291,13 +1323,32 @@ public class WSGrid extends Composite {
                         public int getRowspan() {
                             return cell.rowspan - (row - cell.row);
                         }
+
+                        @Override
+                        public int getUpwardRowspan() {
+                            return row - cell.row + 1;
+                        }
+
+                        @Override
+                        public int getLeftwareColspan() {
+                            return col - cell.col + 1;
+                        }
+
+                        @Override
+                        public boolean isColSpan() {
+                            return cell.isColSpan();
+                        }
+
+                        @Override
+                        public boolean isRowSpan() {
+                            return cell.isRowSpan();
+                        }
                     });
 
                     grid.table.getFlexCellFormatter().setRowSpan(row, col, rows);
                     rowspan = rows;
 
                     setHeight((rows * CELL_HEIGHT_PX + rows - 1) + "px");
-
 
                     updateColumnSizes();
                 }
@@ -1320,8 +1371,15 @@ public class WSGrid extends Composite {
             return rowspan;
         }
 
+        public int getLeftwareColspan() {
+            return colspan;
+        }
+
+        public int getUpwardRowspan() {
+            return rowspan;
+        }
+
         public void setHeight(String height) {
-            System.out.println("setting cell height: " + height);
             super.setHeight(height);
             panel.setHeight(height);
             cellFormat.setHeight(height);
@@ -1403,7 +1461,7 @@ public class WSGrid extends Composite {
                             dialog.ask("The table cannot be sorted because it contains merged cells", null);
                             dialog.showModal();
                             return;
-                        }                        
+                        }
 
                         boolean asc = getColumnSortOrder(col);
 
@@ -1496,7 +1554,6 @@ public class WSGrid extends Composite {
 
     @Override
     public void setPixelSize(int width, int height) {
-        //  System.out.println("WSGrid.setPixelSize(width:" + width + ":height:" + height + ")");
         setPreciseWidth(width);
         setPreciseHeight(height);
     }
