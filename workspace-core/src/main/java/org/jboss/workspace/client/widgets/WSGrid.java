@@ -801,14 +801,6 @@ public class WSGrid extends Composite {
         }
 
         public void sort(int col, boolean ascending) {
-            if (_mergedCells) {
-                WSModalDialog dialog = new WSModalDialog("Unable to sort");
-                dialog.getCancelButton().setVisible(false);
-                dialog.ask("The table cannot be sorted because it contains merged cells", null);
-                dialog.showModal();
-                return;
-            }
-
             boolean secondPass = isEmpty(valueAt(col, 0));
 
             _sort(col, ascending, 0, tableIndex.size() - 1);
@@ -1405,6 +1397,14 @@ public class WSGrid extends Composite {
 
                 case Event.ONCLICK:
                     if (grid.type == GridType.TITLEBAR) {
+                        if (_mergedCells) {
+                            WSModalDialog dialog = new WSModalDialog("Unable to sort");
+                            dialog.getCancelButton().setVisible(false);
+                            dialog.ask("The table cannot be sorted because it contains merged cells", null);
+                            dialog.showModal();
+                            return;
+                        }                        
+
                         boolean asc = getColumnSortOrder(col);
 
                         if (sortedColumnHeader != null) {
