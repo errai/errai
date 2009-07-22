@@ -8,7 +8,7 @@ import org.jboss.workspace.client.util.Effect;
 
 
 public class MozillaEffectImpl implements Effect {
-    public void doFade(final Element el, int durationMillis, final int stepping, final int start, final int end) {
+    public Timer doFade(final Element el, int durationMillis, final int stepping, final int start, final int end) {
         Timer t = start < end ?
                 new Timer() {
                     int step = start;
@@ -41,6 +41,8 @@ public class MozillaEffectImpl implements Effect {
                 };
 
         t.scheduleRepeating(durationMillis);
+
+        return t;
     }
 
     public void setOpacity(Element el, int opacity) {

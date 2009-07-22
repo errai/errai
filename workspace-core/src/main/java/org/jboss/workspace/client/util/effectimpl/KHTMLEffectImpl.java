@@ -6,7 +6,7 @@ import com.google.gwt.user.client.Timer;
 import org.jboss.workspace.client.util.Effect;
 
 public class KHTMLEffectImpl implements Effect {
-    public void doFade(final Element el, int durationMillis, final int stepping, final int start, final int end) {
+    public Timer doFade(final Element el, int durationMillis, final int stepping, final int start, final int end) {
      //   final Style s = el.getStyle();
         Timer t = start < end ?
                 new Timer() {
@@ -40,6 +40,8 @@ public class KHTMLEffectImpl implements Effect {
                 };
 
         t.scheduleRepeating(durationMillis);
+
+        return t;
     }
 
     public void setOpacity(Element el, int opacity) {

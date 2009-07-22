@@ -705,11 +705,12 @@ span {
     background: url('images/ui/layout/section-header.png') repeat-x;
     border-bottom: 1px #cccccc solid;
     vertical-align: middle;
+    width:100%;
+}
 
+.WS-WorkPanel-title-label {
     font-size: 11px;
-    font-weight: bold;
     color: #999999;
-
 }
 
 .WS-WorkPanel-area {

@@ -7,6 +7,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import static com.google.gwt.i18n.client.DateTimeFormat.getShortDateFormat;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 import org.jboss.workspace.client.framework.Tool;
@@ -25,14 +26,14 @@ import java.util.Set;
 
 public class GridDemo implements Tool {
 
-   public Widget getWidget(final StatePacket packet) {
+    public Widget getWidget(final StatePacket packet) {
         final WorkPanel workPanel = new WorkPanel();
         workPanel.setHeight("100%");
 
         final WSGrid wsGrid = new WSGrid();
         wsGrid.setHeight("100%");
         wsGrid.setWidth("100%");
-                                            
+
         populateTable(wsGrid);
 
         assert packet.getActiveLayout() != null;
@@ -74,8 +75,11 @@ public class GridDemo implements Tool {
             }
         });
 
-        workPanel.addToTitlebar(mergeCells);
-        workPanel.addToTitlebar(reset);
+        HorizontalPanel h = new HorizontalPanel();
+        h.add(mergeCells);
+        h.add(reset);
+
+        workPanel.addToTitlebar(h);
 
         return workPanel;
     }

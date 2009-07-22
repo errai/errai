@@ -4,7 +4,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.workspace.client.layout.WorkspaceLayout;
-import org.jboss.workspace.client.listeners.TabCloseListener;
+import org.jboss.workspace.client.listeners.TabCloseHandler;
 import org.jboss.workspace.client.rpc.StatePacket;
 import org.jboss.workspace.client.widgets.dnd.TabDropController;
 
@@ -23,10 +23,8 @@ public class WSTab extends Composite {
 
     final HorizontalPanel hPanel = new HorizontalPanel();
 
-    public WSTab(WorkspaceLayout bl, Widget widgetRef, Image tabIcon, StatePacket packet,
-                 WSTabPanel tabPanel) {
-        super();
-
+    //todo: this widget is still tied to the Workspace API -- bad!
+    public WSTab(WorkspaceLayout bl, Widget widgetRef, Image tabIcon, StatePacket packet, WSTabPanel tabPanel) {
         this.layout = bl;
         this.packet = packet;
         this.widgetRef = widgetRef;
@@ -43,7 +41,8 @@ public class WSTab extends Composite {
 
         Image closeButton = new Image(GWT.getModuleBaseURL() + "/images/close-icon.png");
         closeButton.addStyleName("workspace-tabCloseButton");
-        closeButton.addClickListener(new TabCloseListener(this, bl));
+
+        closeButton.addClickHandler(new TabCloseHandler(this, bl));
 
         hPanel.add(closeButton);
 
@@ -114,4 +113,8 @@ public class WSTab extends Composite {
     public void activate() {
         layout.tabPanel.selectTab(layout.tabPanel.getWidgetIndex(widgetRef));
     }
+
+    
+
+
 }

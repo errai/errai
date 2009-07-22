@@ -20,7 +20,7 @@ public class ServiceWidget extends Composite {
     private String status = "running";
 
     public ServiceWidget() {
-        panel.addToTitlebar(new HTML("Service Control"));
+        panel.setTitle("Service Control");
 
         VerticalPanel p = new VerticalPanel();
         p.setWidth("100%");

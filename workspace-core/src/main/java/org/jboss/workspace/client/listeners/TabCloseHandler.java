@@ -2,13 +2,15 @@ package org.jboss.workspace.client.listeners;
 
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
 import org.jboss.workspace.client.widgets.WSTab;
 import org.jboss.workspace.client.widgets.WSModalDialog;
 import org.jboss.workspace.client.layout.WorkspaceLayout;
 import org.jboss.workspace.client.framework.AcceptsCallback;
 
 
-public class TabCloseListener implements ClickListener, AcceptsCallback {
+public class TabCloseHandler implements ClickHandler, AcceptsCallback {
     /**
      * The reference to the tab.
      */
@@ -19,12 +21,12 @@ public class TabCloseListener implements ClickListener, AcceptsCallback {
      */
     private WorkspaceLayout guvWorkspace;
 
-    public TabCloseListener(WSTab tab, WorkspaceLayout guvWorkspace) {
+    public TabCloseHandler(WSTab tab, WorkspaceLayout guvWorkspace) {
         this.tab = tab;
         this.guvWorkspace = guvWorkspace;
     }
 
-    public void onClick(Widget sender) {
+    public void onClick(ClickEvent event) {
         /**
          * Check to see if the current tool has a modified flag.
          */

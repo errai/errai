@@ -2,9 +2,12 @@ package org.jboss.workspace.client.layout;
 
 import com.google.gwt.user.client.ui.*;
 
-public class WorkPanel extends Composite  {
+public class WorkPanel extends Composite {
     VerticalPanel vPanel = new VerticalPanel();
-    private HorizontalPanel title = new HorizontalPanel();
+
+    private Label titleLabel = new Label("New WorkPanel");
+    private SimplePanel title = new SimplePanel();
+    private HorizontalPanel titleInternal = new HorizontalPanel();
     private FlowPanel mainPanel = new FlowPanel();
 
     private int h;
@@ -19,8 +22,12 @@ public class WorkPanel extends Composite  {
         title.setHeight("25px");
         vPanel.setCellHeight(title, "25px");
 
+        titleLabel.setStyleName("WS-WorkPanel-title-label");
         title.setStyleName("WS-WorkPanel-title");
         vPanel.setStyleName("WS-WorkPanel-area");
+
+        titleInternal.add(titleLabel);
+        title.setWidget(titleInternal);
 
         initWidget(vPanel);
 
@@ -29,7 +36,7 @@ public class WorkPanel extends Composite  {
 
     @Override
     public void setPixelSize(int width, int height) {
-        h = (height - title.getOffsetHeight());
+        h = (height - titleInternal.getOffsetHeight());
         w = width;
 
         vPanel.setCellHeight(mainPanel, h + "px");
@@ -44,7 +51,8 @@ public class WorkPanel extends Composite  {
     }
 
     public void addToTitlebar(Widget w) {
-        title.add(w);
+        titleInternal.add(w);
+        titleInternal.setCellHorizontalAlignment(w, HasHorizontalAlignment.ALIGN_LEFT);
     }
 
     public int getPanelWidth() {
@@ -52,11 +60,11 @@ public class WorkPanel extends Composite  {
     }
 
     public int getPanelHeight() {
-        return h == 0 ? getOffsetHeight() - title.getOffsetHeight() : h;
+        return h == 0 ? getOffsetHeight() - titleInternal.getOffsetHeight() : h;
     }
 
     @Override
     public void setTitle(String s) {
-        title.add(new Label(s));
+        titleLabel.setText(s);
     }
 }

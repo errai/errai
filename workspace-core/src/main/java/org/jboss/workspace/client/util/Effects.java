@@ -2,6 +2,7 @@ package org.jboss.workspace.client.util;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.user.client.Timer;
 import org.jboss.workspace.client.util.effectimpl.MozillaEffectImpl;
 
 public class Effects {
@@ -12,8 +13,9 @@ public class Effects {
     static {
         if (!GWT.isScript() && effect instanceof MozillaEffectImpl) {
             effect = new Effect() {
-                public void doFade(Element el, int durationMillis, int stepping, int start, int end) {
+                public Timer doFade(Element el, int durationMillis, int stepping, int start, int end) {
                     setOpacity(el, end);
+                    return null;
                 }
 
                 public void setOpacity(Element el, int opacity) {

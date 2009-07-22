@@ -30,7 +30,7 @@ public class FileBrowserWidget extends Composite {
 
     public FileBrowserWidget() {
         WorkPanel panel = new WorkPanel();
-        panel.addToTitlebar(new HTML("File Browser"));
+        panel.setTitle("File Browser");
 
         VerticalPanel p = new VerticalPanel();
         p.setWidth("100%");

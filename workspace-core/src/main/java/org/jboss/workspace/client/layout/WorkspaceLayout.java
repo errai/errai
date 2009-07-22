@@ -4,8 +4,8 @@ import com.allen_sauer.gwt.dnd.client.PickupDragController;
 import com.google.gwt.core.client.GWT;
 import static com.google.gwt.core.client.GWT.create;
 import static com.google.gwt.core.client.GWT.getModuleBaseURL;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
@@ -369,11 +369,11 @@ public class WorkspaceLayout extends Composite {
 
         panel.add(toolWidget);
 
-        Image newIcon = new Image(icon != null ? icon.getUrl() : GWT.getModuleBaseURL()
+        final Image newIcon = new Image(icon != null ? icon.getUrl() : GWT.getModuleBaseURL()
                 + "/images/ui/icons/questioncube.png");
         newIcon.setSize("16px", "16px");
 
-        WSTab blt = new WSTab(this, panel, newIcon, packet, tabPanel);
+        final WSTab blt = new WSTab(this, panel, newIcon, packet, tabPanel);
 
         tabPanel.add(panel, blt);
         tabPanel.selectTab(tabPanel.getWidgetIndex(panel));
@@ -382,7 +382,21 @@ public class WorkspaceLayout extends Composite {
         tabIds.put(packet.getInstanceId(), panel);
         idTabLookup.put(packet.getInstanceId(), blt);
 
-        tabDragController.makeDraggable(blt, newIcon);
+        tabDragController.makeDraggable(blt, blt.getLabel());
+        tabDragController.makeDraggable(blt, blt.getIcon());
+
+        blt.getLabel().addMouseOverHandler(new MouseOverHandler() {
+            public void onMouseOver(MouseOverEvent event) {
+                blt.getLabel().getElement().getStyle().setProperty("cursor", "default");
+            }
+        });
+
+        blt.getLabel().addMouseDownHandler(new MouseDownHandler() {
+            public void onMouseDown(MouseDownEvent event) {
+                blt.activate();
+            }
+        });
+        
         tabDragController.setBehaviorDragProxy(true);
         tabDragController.registerDropController(blt.getTabDropController());
 
