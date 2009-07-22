@@ -268,11 +268,11 @@ public class WSGrid extends Composite {
                                 }
                             }
 
-                            offsetY = (currentFocus.isRowSpan() ? currentFocus.getUpwardRowspan() : 1);
+                           // offsetY = (currentFocus.isRowSpan() ? currentFocus.getUpwardRowspan() : 1);
 
-
-                            dataGrid.tableIndex.get(currentFocus.getRow() - offsetY).get(currentFocus.getCol())
-                                    .focus();
+                            dataGrid.tableIndex.get(currentFocus.getRow() -
+                                    (currentFocus.isRowSpan() ? currentFocus.getUpwardRowspan() : 1))
+                                    .get(currentFocus.getCol()).focus();
                         }
                         break;
 
@@ -323,11 +323,6 @@ public class WSGrid extends Composite {
                                     }
                                 }
 
-//                                System.out.println("Curr Col   : " + currentFocus.getCol());
-//                                System.out.println("OffsetX    : " + offsetX);
-//                                System.out.println("Next X-Cell: " + (currentFocus.getCol() + offsetX));
-//                                System.out.println("Next Y-Cell: " + currentFocus.getRow());
-//                                System.out.println("------------------");
 
                                 dataGrid.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() + offsetX)
                                         .focus();
@@ -426,15 +421,9 @@ public class WSGrid extends Composite {
                                     }
                                 }
 
-                                offsetX = (currentFocus.isColSpan() ? currentFocus.getLeftwareColspan() : 1);
 
-//                                System.out.println("Curr Focus   : (x:" + currentFocus.getCol() + "; y:" + currentFocus.getRow() + ")");
-//                                System.out.println("OffsetX    : " + offsetX);
-//                                System.out.println("Next X-Cell: " + (currentFocus.getCol() - offsetX));
-//                                System.out.println("Next Y-Cell: " + currentFocus.getRow());
-//                                System.out.println("------------------");
-
-                                dataGrid.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() - offsetX).focus();
+                                dataGrid.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol()
+                                        - (currentFocus.isColSpan() ? currentFocus.getLeftwareColspan() : 1)).focus();
                             }
                         }
                         break;
@@ -596,12 +585,12 @@ public class WSGrid extends Composite {
                  * the proper column width.
                  */
                 if (c.isColSpan()) {
-                    int spanSize = width + 2;
+                    int spanSize = width + 1;
                     for (int span = c.getColspan() - 1; span > 0; span--) {
                         spanSize += colSizes.get(column + span) + 2;
                     }
 
-                    c.setWidth((spanSize + 2) + "px");
+                    c.setWidth((spanSize + 1) + "px");
                 }
                 else {
                     c.setWidth(width + "px");
@@ -1348,7 +1337,7 @@ public class WSGrid extends Composite {
                     grid.table.getFlexCellFormatter().setRowSpan(row, col, rows);
                     rowspan = rows;
 
-                    setHeight((rows * CELL_HEIGHT_PX + rows - 1) + "px");
+                    setHeight((rows * CELL_HEIGHT_PX) + "px");
 
                     updateColumnSizes();
                 }
