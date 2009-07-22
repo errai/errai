@@ -1337,7 +1337,7 @@ public class WSGrid extends Composite {
                     grid.table.getFlexCellFormatter().setRowSpan(row, col, rows);
                     rowspan = rows;
 
-                    setHeight((rows * CELL_HEIGHT_PX) + "px");
+                    setHeight(((rows * CELL_HEIGHT_PX) + 1) + "px");
 
                     updateColumnSizes();
                 }
