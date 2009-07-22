@@ -21,7 +21,7 @@ public class FileBrowserTool  implements Tool {
     }
 
     public Image getIcon() {
-        return new Image(GWT.getModuleBaseURL() + "/images/ui/icons/server_go.png");
+        return new Image(GWT.getModuleBaseURL() + "/images/ui/icons/table_multiple.png");
     }
 
     public boolean multipleAllowed() {

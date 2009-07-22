@@ -62,7 +62,7 @@ public class DialogDemo implements Tool {
     }
 
     public Image getIcon() {
-        return new Image(GWT.getModuleBaseURL() + "/images/ui/icons/table_lightning.png");
+        return new Image(GWT.getModuleBaseURL() + "/images/ui/icons/application.png");
     }
 
     public boolean multipleAllowed() {
