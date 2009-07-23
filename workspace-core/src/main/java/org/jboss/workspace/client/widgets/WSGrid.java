@@ -215,7 +215,8 @@ public class WSGrid extends Composite {
                                 dataGrid.tableIndex.get(currentFocus.getRow() - offsetX).get(cols - offsetX).focus();
                             }
                             else {
-                                dataGrid.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() - offsetX).focus();
+                                dataGrid.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol()
+                                        - (currentFocus.isColSpan() ? currentFocus.getLeftwareColspan() : 1)).focus();
                             }
                         }
                         else {
@@ -1337,7 +1338,7 @@ public class WSGrid extends Composite {
                     grid.table.getFlexCellFormatter().setRowSpan(row, col, rows);
                     rowspan = rows;
 
-                    setHeight(((rows * CELL_HEIGHT_PX) + 1) + "px");
+                    setHeight(((rows * CELL_HEIGHT_PX)) + "px");
 
                     updateColumnSizes();
                 }
