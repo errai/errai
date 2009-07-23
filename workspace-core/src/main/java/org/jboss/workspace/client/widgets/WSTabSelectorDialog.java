@@ -45,7 +45,7 @@ public class WSTabSelectorDialog extends WSModalDialog {
                         }
                     });
 
-            if (tab.getPacket().isModifiedFlag()) {
+            if (tab.isModified()) {
                 b.getElement().getStyle().setProperty("color", "blue");
             }
 
@@ -80,6 +80,8 @@ public class WSTabSelectorDialog extends WSModalDialog {
         s.setProperty("verticalAlign", "top");
 
         window.add(hPanel);
+
+        System.out.println("Yo!");
     }
 
 

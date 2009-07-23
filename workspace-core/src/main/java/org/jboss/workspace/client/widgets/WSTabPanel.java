@@ -43,6 +43,7 @@ public class WSTabPanel extends Composite {
 
     public void add(Widget panel, WSTab tab) {
         tabBar.addTab(tab);
+        tab.setPanel(this);
         deckPanel.add(panel);
     }
 
@@ -103,13 +104,10 @@ public class WSTabPanel extends Composite {
     public void setPixelSize(int width, int height) {
         super.setPixelSize(width, height);
 
-    //    System.out.println("WSTabPanel.setPixelSize(width:" + width + ", height:" + height + ")");
-
         int deckPanelHeight = height - tabBar.getOffsetHeight();
         deckPanel.setPixelSize(width, deckPanelHeight);
 
         for (int i = 0; i < deckPanel.getWidgetCount(); i++) {
-       //     System.out.println("Deck:" + deckPanel.getWidget(i).getClass().getName());
             deckPanel.getWidget(i).setPixelSize(width, deckPanelHeight);
         }
 

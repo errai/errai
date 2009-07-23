@@ -14,7 +14,8 @@ public class ModifiedChangeListener implements ChangeListener {
     }
 
     public void onChange(Widget widget) {
-        packet.getActiveLayout().findTab(packet.getInstanceId()).setModified(true);
+        packet.getTabInstance().setModified(true);
+
         if (messageCallback != null) messageCallback.call();
     }
 

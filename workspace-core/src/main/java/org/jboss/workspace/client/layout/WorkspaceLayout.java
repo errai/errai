@@ -4,7 +4,6 @@ import com.allen_sauer.gwt.dnd.client.PickupDragController;
 import com.google.gwt.core.client.GWT;
 import static com.google.gwt.core.client.GWT.create;
 import static com.google.gwt.core.client.GWT.getModuleBaseURL;
-import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
@@ -48,10 +47,7 @@ public class WorkspaceLayout extends Composite {
 
     private Map<String, org.jboss.workspace.client.framework.Tool> availableTools = new HashMap<String, Tool>();
     private Map<String, Integer> activeTools = new HashMap<String, Integer>();
-
-    private Map<String, Widget> tabIds = new HashMap<String, Widget>();
-    private Map<String, WSTab> idTabLookup = new HashMap<String, WSTab>();
-    public Map<Widget, WSTab> tabLookup = new LinkedHashMap<Widget, WSTab>();
+    private Map<String, StatePacket> tabInstances = new HashMap<String, StatePacket>();
 
     public PickupDragController tabDragController;
 
@@ -289,23 +285,25 @@ public class WorkspaceLayout extends Composite {
         }
     }
 
+
     /**
      * Opens a new tab in the workspace.
      *
      * @param tool            The Tool to be rendered inside the tab.
-     * @param packet          The name of the tab.
      * @param icon            The image to use for th icon
      * @param multipleAllowed whether or not multiple instances should be allowed.
      */
-    public void openTab(final Tool tool, final StatePacket packet, final Image icon, boolean multipleAllowed) {
-        if (packet == null) {
-            Window.alert("Unable to Initialize Tool: Default StatePacket Missing.");
-            return;
-        }
+    public void openTab(Tool tool, Image icon, boolean multipleAllowed) {
+        this.openTab(tool, new StatePacket(this, tool), icon, multipleAllowed);
+    }
 
-        if (isToolActive(packet.getId())) {
+
+    private void openTab(final Tool tool, final StatePacket packet, final Image icon, boolean multipleAllowed) {
+
+        if (isToolActive(packet.getComponentTypeId())) {
             if (!multipleAllowed) {
-                selectTab(tabIds.get(packet.getInstanceId()));
+                System.out.println("Multiple Not Allowed!");
+                packet.getTabInstance().activate();
                 return;
             }
             else {
@@ -322,17 +320,17 @@ public class WorkspaceLayout extends Composite {
                             String newName;
                             int idx = 1;
 
-                            while (tabIds.containsKey(newId = (packet.getInstanceId() + "-" + idx))) idx++;
+                            while (tabInstances.containsKey(newId = (packet.getInstanceId() + "-" + idx))) idx++;
 
                             newName = packet.getName() + " (" + idx + ")";
 
                             packet.setInstanceId(newId);
                             packet.setName(newName);
 
-                            forceOpenTab(tool, packet, icon);
+                            _openTab(tool, packet, icon);
                         }
                         else if (!"WindowClosed".equals(message)) {
-                            Set<WSTab> s = layout.getActiveByType(packet.getId());
+                            Set<WSTab> s = layout.getActiveByType(packet.getComponentTypeId());
 
                             if (s.size() > 1) {
                                 WSTabSelectorDialog wsd = new WSTabSelectorDialog(s);
@@ -356,10 +354,10 @@ public class WorkspaceLayout extends Composite {
             }
         }
 
-        forceOpenTab(tool, packet, icon);
+        _openTab(tool, packet, icon);
     }
 
-    public void forceOpenTab(Tool tool, StatePacket packet, Image icon) {
+    private void _openTab(Tool tool, StatePacket packet, Image icon) {
         ExtSimplePanel panel = new ExtSimplePanel();
         panel.getElement().getStyle().setProperty("overflow", "hidden");
 
@@ -373,36 +371,34 @@ public class WorkspaceLayout extends Composite {
                 + "/images/ui/icons/questioncube.png");
         newIcon.setSize("16px", "16px");
 
-        final WSTab blt = new WSTab(this, panel, newIcon, packet, tabPanel);
-
-        tabPanel.add(panel, blt);
-        tabPanel.selectTab(tabPanel.getWidgetIndex(panel));
-
-        tabLookup.put(panel, blt);
-        tabIds.put(packet.getInstanceId(), panel);
-        idTabLookup.put(packet.getInstanceId(), blt);
-
-        tabDragController.makeDraggable(blt, blt.getLabel());
-        tabDragController.makeDraggable(blt, blt.getIcon());
-
-        blt.getLabel().addMouseOverHandler(new MouseOverHandler() {
-            public void onMouseOver(MouseOverEvent event) {
-                blt.getLabel().getElement().getStyle().setProperty("cursor", "default");
-            }
-        });
-
-        blt.getLabel().addMouseDownHandler(new MouseDownHandler() {
-            public void onMouseDown(MouseDownEvent event) {
-                blt.activate();
-            }
-        });
+        final WSTab newWSTab = new WSTab(packet.getName(), panel, newIcon);
+        packet.setTabInstance(newWSTab);
+        tabPanel.add(panel, newWSTab);
+        newWSTab.activate();
         
+        tabInstances.put(packet.getInstanceId(), packet);
+
+        tabDragController.makeDraggable(newWSTab, newWSTab.getLabel());
+        tabDragController.makeDraggable(newWSTab, newWSTab.getIcon());
+
+        newWSTab.getLabel().addMouseOverHandler(new MouseOverHandler() {
+            public void onMouseOver(MouseOverEvent event) {
+                newWSTab.getLabel().getElement().getStyle().setProperty("cursor", "default");
+            }
+        });
+
+        newWSTab.getLabel().addMouseDownHandler(new MouseDownHandler() {
+            public void onMouseDown(MouseDownEvent event) {
+                newWSTab.activate();
+            }
+        });
+
         tabDragController.setBehaviorDragProxy(true);
-        tabDragController.registerDropController(blt.getTabDropController());
+        tabDragController.registerDropController(newWSTab.getTabDropController());
 
-        blt.reset();
+        newWSTab.reset();
 
-        activateTool(packet.getId());
+        activateTool(packet.getComponentTypeId());
 
         notifySessionState(packet);
 
@@ -419,20 +415,11 @@ public class WorkspaceLayout extends Composite {
 
     public void closeTab(StatePacket packet) {
         deleteSessionState(packet);
-        closeTab(packet.getId(), packet.getInstanceId());
-    }
+        tabInstances.remove(packet.getInstanceId());
+        tabDragController.unregisterDropController(packet.getTabInstance().getTabDropController());
+        deactivateTool(packet.getComponentTypeId());
 
-    private void closeTab(String id, String instanceId) {
-        Widget w = tabIds.get(instanceId);
-        deactivateTool(id);
-        tabIds.remove(instanceId);
-        tabLookup.remove(w);
-        tabDragController.unregisterDropController(idTabLookup.get(instanceId).getTabDropController());
-        idTabLookup.remove(instanceId);
-
-        int idx = tabPanel.getWidgetIndex(w);
-
-        tabPanel.remove(w);
+        int idx = packet.getTabInstance().remove();
 
         if (idx > 0) idx--;
         else if (tabPanel.getWidgetCount() == 0) return;
@@ -440,30 +427,6 @@ public class WorkspaceLayout extends Composite {
         tabPanel.selectTab(idx);
     }
 
-    public void selectTab(String id) {
-        Widget w = tabIds.get(id);
-        selectTab(w);
-    }
-
-    public void selectTab(Widget widget) {
-        int idx = tabPanel.getWidgetIndex(widget);
-        tabPanel.selectTab(idx);
-        pack();
-    }
-
-    /**
-     * Based on the Widget reference, returns the WorkspaceTab class.
-     *
-     * @param panelRef -
-     * @return -
-     */
-    public WSTab findTab(Widget panelRef) {
-        return tabLookup.get(panelRef);
-    }
-
-    public WSTab findTab(String instanceID) {
-        return tabLookup.get(idTabLookup.get(instanceID).getWidgetRef());
-    }
 
     public void pullSessionState() {
         if (!rpcSync) return;
@@ -478,8 +441,8 @@ public class WorkspaceLayout extends Composite {
 
             public void onSuccess(StatePacket[] packets) {
                 for (StatePacket packet : packets) {
-                    Tool tool = availableTools.get(packet.getId());
-                    forceOpenTab(tool, packet, tool.getIcon());
+                    Tool tool = availableTools.get(packet.getComponentTypeId());
+                    _openTab(tool, packet, tool.getIcon());
                 }
 
             }
@@ -532,45 +495,47 @@ public class WorkspaceLayout extends Composite {
         guvSvc.deleteLayoutState(packet, callback);
     }
 
-    public void activateTool(String id) {
-        if (activeTools.containsKey(id)) {
-            int count = activeTools.get(id) + 1;
-            activeTools.put(id, count);
+    public void activateTool(String componentTypeId) {
+        if (activeTools.containsKey(componentTypeId)) {
+            int count = activeTools.get(componentTypeId) + 1;
+            activeTools.put(componentTypeId, count);
         }
         else {
-            activeTools.put(id, 1);
+            activeTools.put(componentTypeId, 1);
         }
     }
 
-    public boolean deactivateTool(String id) {
-        if (activeTools.containsKey(id)) {
-            int count = activeTools.get(id);
+    public boolean deactivateTool(String componentTypeId) {
+        if (activeTools.containsKey(componentTypeId)) {
+            int count = activeTools.get(componentTypeId);
             if (count == 1) {
-                activeTools.remove(id);
+                activeTools.remove(componentTypeId);
             }
             else {
-                activeTools.put(id, --count);
+                activeTools.put(componentTypeId, --count);
                 return true;
             }
         }
         else {
-            Window.alert("ERROR: unreferenced component: " + id);
+            Window.alert("ERROR: unreferenced component: " + componentTypeId);
         }
 
         return false;
     }
 
-    public boolean isToolActive(String id) {
-        return activeTools.containsKey(id);
+    public boolean isToolActive(String componentTypeId) {
+        return activeTools.containsKey(componentTypeId);
     }
 
-    public Set<WSTab> getActiveByType(String id) {
+    public Set<WSTab> getActiveByType(String componentTypeId) {
         HashSet<WSTab> set = new HashSet<WSTab>();
-        for (Map.Entry<Widget, WSTab> entry : this.tabLookup.entrySet()) {
-            if (id.equals(entry.getValue().getPacket().getId())) {
-                set.add(entry.getValue());
+
+        for (Map.Entry<String, StatePacket> entry : this.tabInstances.entrySet()) {
+            if (componentTypeId.equals(entry.getValue().getComponentTypeId())) {
+                set.add(entry.getValue().getTabInstance());
             }
         }
+       
         return set;
     }
 

@@ -26,22 +26,22 @@ public class LayoutStateServiceImpl extends RemoteServiceServlet implements Layo
     }
 
     public void saveLayoutState(StatePacket packet) {
-        if (packet == null || packet.getId() == null) {
+        if (packet == null || packet.getComponentTypeId() == null) {
             Window.alert("Packet or Packet ID is NULL");
         }
         else {
             Map<String, Map<String, StatePacket>> map = getLayoutPacketMap();
-            if (!map.containsKey(packet.getId())) {
-                map.put(packet.getId(), new LinkedHashMap<String, StatePacket>());
+            if (!map.containsKey(packet.getComponentTypeId())) {
+                map.put(packet.getComponentTypeId(), new LinkedHashMap<String, StatePacket>());
             }
-            map.get(packet.getId()).put(packet.getInstanceId(), packet);
+            map.get(packet.getComponentTypeId()).put(packet.getInstanceId(), packet);
         }
     }
 
     public void deleteLayoutState(StatePacket packet) {
         Map<String, Map<String, StatePacket>> map = getLayoutPacketMap();
-        if (map.containsKey(packet.getId())) {
-           map.get(packet.getId()).remove(packet.getInstanceId());
+        if (map.containsKey(packet.getComponentTypeId())) {
+           map.get(packet.getComponentTypeId()).remove(packet.getInstanceId());
         }
     }
     

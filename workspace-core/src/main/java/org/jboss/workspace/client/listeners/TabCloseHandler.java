@@ -8,6 +8,7 @@ import org.jboss.workspace.client.widgets.WSTab;
 import org.jboss.workspace.client.widgets.WSModalDialog;
 import org.jboss.workspace.client.layout.WorkspaceLayout;
 import org.jboss.workspace.client.framework.AcceptsCallback;
+import org.jboss.workspace.client.rpc.StatePacket;
 
 
 public class TabCloseHandler implements ClickHandler, AcceptsCallback {
@@ -15,22 +16,24 @@ public class TabCloseHandler implements ClickHandler, AcceptsCallback {
      * The reference to the tab.
      */
     private WSTab tab;
+    private StatePacket packet;
 
     /**
      * The reference to the root GuvnorLayout object.
      */
     private WorkspaceLayout guvWorkspace;
 
-    public TabCloseHandler(WSTab tab, WorkspaceLayout guvWorkspace) {
+    public TabCloseHandler(WSTab tab, WorkspaceLayout guvWorkspace, StatePacket packet) {
         this.tab = tab;
         this.guvWorkspace = guvWorkspace;
+        this.packet = packet;
     }
 
     public void onClick(ClickEvent event) {
         /**
          * Check to see if the current tool has a modified flag.
          */
-        if (tab.getPacket().isModifiedFlag()) {
+        if (tab.isModified()) {
 
             /**
              * Create a new warning Dialog
@@ -82,6 +85,6 @@ public class TabCloseHandler implements ClickHandler, AcceptsCallback {
      * Close the tab.
      */
     public void close() {
-        guvWorkspace.closeTab(tab.getPacket());
+        guvWorkspace.closeTab(packet);
     }
 }

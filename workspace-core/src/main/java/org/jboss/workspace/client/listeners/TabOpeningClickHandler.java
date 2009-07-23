@@ -40,7 +40,7 @@ public class TabOpeningClickHandler implements ClickHandler {
     }
 
     public void onClick(ClickEvent event) {
-        layout.openTab(tool, new StatePacket(layout, tool), icon, multipleAllowed);
+        layout.openTab(tool, icon, multipleAllowed);
     }
 
 

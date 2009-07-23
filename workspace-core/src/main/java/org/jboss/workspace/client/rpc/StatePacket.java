@@ -5,13 +5,14 @@ import com.google.gwt.user.client.ui.Widget;
 import org.jboss.workspace.client.framework.Tool;
 import static org.jboss.workspace.client.rpc.AdapterRegistry.getAdapter;
 import org.jboss.workspace.client.layout.WorkspaceLayout;
+import org.jboss.workspace.client.widgets.WSTab;
 
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
 public class StatePacket implements IsSerializable, Serializable {
-    private String id;
+    private String componentTypeId;
     private String instanceId;
     private String name;
 
@@ -24,28 +25,25 @@ public class StatePacket implements IsSerializable, Serializable {
 
     private transient Map<String, Integer> hash;
     private transient WorkspaceLayout layout;
+    private transient WSTab tabInstance;
 
 
     public StatePacket() {
     }
 
-    public StatePacket(WorkspaceLayout layout) {
-        this.layout = layout;
-    }
-
     public StatePacket(WorkspaceLayout layout, Tool tool) {
         this.layout = layout;
-        this.id = tool.getId();
-        this.instanceId = id;
+        this.componentTypeId = tool.getId();
+        this.instanceId = componentTypeId;
         this.name = tool.getName();
     }
 
-    public String getId() {
-        return id;
+    public String getComponentTypeId() {
+        return componentTypeId;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setComponentTypeId(String componentTypeId) {
+        this.componentTypeId = componentTypeId;
     }
 
     public String getInstanceId() {
@@ -66,6 +64,16 @@ public class StatePacket implements IsSerializable, Serializable {
 
     public void setModifiedFlag(boolean modifiedFlag) {
         this.modifiedFlag = modifiedFlag;
+        if (tabInstance != null) tabInstance.setModified(true);
+    }
+
+    public WSTab getTabInstance() {
+        return tabInstance;
+    }
+
+    public void setTabInstance(WSTab tabInstance) {
+        this.tabInstance = tabInstance;
+        tabInstance.setModified(modifiedFlag);
     }
 
     public String getName() {
@@ -153,7 +161,7 @@ public class StatePacket implements IsSerializable, Serializable {
 
     public String toString() {
         StringBuffer sbuf = new StringBuffer();
-        sbuf.append("Packet [compenentId:").append(id).append("][instance:").append(instanceId).append("]\n");
+        sbuf.append("Packet [compenentId:").append(componentTypeId).append("][instance:").append(instanceId).append("]\n");
         if (parameterNames != null) {
             for (int i = 0; i < parameterNames.length; i++) {
                 sbuf.append("{").append(parameterNames[i]).append("} = ").append(parameterValues[i]);
