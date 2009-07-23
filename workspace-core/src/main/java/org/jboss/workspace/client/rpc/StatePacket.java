@@ -159,6 +159,10 @@ public class StatePacket implements IsSerializable, Serializable {
         return layout;
     }
 
+    public void deactive() {
+        layout.closeTab(this);
+    }
+
     public String toString() {
         StringBuffer sbuf = new StringBuffer();
         sbuf.append("Packet [compenentId:").append(componentTypeId).append("][instance:").append(instanceId).append("]\n");

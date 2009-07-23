@@ -68,7 +68,7 @@ public class WSExtVerticalPanel extends VerticalPanel {
                 if (to == null || !DOM.isOrHasChild(this.getElement(), to)) {
                     getElement().setClassName("workspace-LeftNavArea");
                     t.cancel();
-                    workspaceLayout.closeNavPanel();
+                    workspaceLayout.collapseNavPanel();
                 }
                 break;
         }

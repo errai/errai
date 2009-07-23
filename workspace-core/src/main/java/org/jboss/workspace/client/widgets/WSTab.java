@@ -5,6 +5,8 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
 import org.jboss.workspace.client.widgets.dnd.TabDropController;
 
 import java.util.List;
@@ -45,6 +47,17 @@ public class WSTab extends Composite {
 
         closeButton = new Image(GWT.getModuleBaseURL() + "/images/close-icon.png");
         closeButton.addStyleName("workspace-tabCloseButton");
+        closeButton.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                notifyCloseHandlers();
+            }
+        });
+
+        addTabCloseHandler(new CloseHandler<WSTab>() {
+            public void onClose(CloseEvent closeEvent) {
+                remove();
+            }
+        });
 
         hPanel.add(closeButton);
 
@@ -110,8 +123,10 @@ public class WSTab extends Composite {
     public void setPanel(WSTabPanel panel) {
         this.panel = panel;
         this.tabDropController = new TabDropController(panel, this);
-//        closeButton.addClickHandler(new TabCloseHandler(this, bl));
+    }
 
+    public void clearTabCloseHandlers() {
+        tabCloseHandlers.clear();
     }
 
     public void addTabCloseHandler(CloseHandler<WSTab> closeHandler) {

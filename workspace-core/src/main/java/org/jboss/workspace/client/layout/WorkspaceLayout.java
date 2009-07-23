@@ -16,6 +16,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.workspace.client.ToolSet;
+import org.jboss.workspace.client.listeners.TabCloseHandler;
 import org.jboss.workspace.client.framework.AcceptsCallback;
 import org.jboss.workspace.client.framework.Tool;
 import org.jboss.workspace.client.framework.WorkspaceSizeChangeListener;
@@ -182,7 +183,7 @@ public class WorkspaceLayout extends Composite {
                                 setSize();
                                 navigation.setWidth(i + "px");
                                 leftPanel.setArmed(true);
-                                closeNavPanel();
+                                collapseNavPanel();
                             }
                         }
 
@@ -378,6 +379,9 @@ public class WorkspaceLayout extends Composite {
         
         tabInstances.put(packet.getInstanceId(), packet);
 
+        newWSTab.clearTabCloseHandlers();
+        newWSTab.addTabCloseHandler(new TabCloseHandler(packet));
+
         tabDragController.makeDraggable(newWSTab, newWSTab.getLabel());
         tabDragController.makeDraggable(newWSTab, newWSTab.getIcon());
 
@@ -549,7 +553,7 @@ public class WorkspaceLayout extends Composite {
         fireWorkspaceSizeChangeListeners(0, 0);
     }
 
-    public void closeNavPanel() {
+    public void collapseNavPanel() {
         navigation.setVisible(false);
         navigationLabel.setVisible(false);
         leftPanel.setWidth("12px");
