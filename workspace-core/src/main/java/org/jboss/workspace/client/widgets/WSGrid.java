@@ -423,6 +423,9 @@ public class WSGrid extends Composite {
                                 }
 
 
+                                System.out.println("CURRENT_CELL [row:" + currentFocus.getRow() + ";col:" + currentFocus.getCol() + "]");
+                                System.out.println("             [delta:" + (currentFocus.isColSpan() ? currentFocus.getLeftwareColspan() : 1) + "]");
+
                                 dataGrid.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol()
                                         - (currentFocus.isColSpan() ? currentFocus.getLeftwareColspan() : 1)).focus();
                             }
@@ -1362,11 +1365,11 @@ public class WSGrid extends Composite {
         }
 
         public int getLeftwareColspan() {
-            return colspan;
+            return 0;
         }
 
         public int getUpwardRowspan() {
-            return rowspan;
+            return 0;
         }
 
         public void setHeight(String height) {
