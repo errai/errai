@@ -269,8 +269,6 @@ public class WSGrid extends Composite {
                                 }
                             }
 
-                           // offsetY = (currentFocus.isRowSpan() ? currentFocus.getUpwardRowspan() : 1);
-
                             dataGrid.tableIndex.get(currentFocus.getRow() -
                                     (currentFocus.isRowSpan() ? currentFocus.getUpwardRowspan() : 1))
                                     .get(currentFocus.getCol()).focus();
@@ -421,10 +419,6 @@ public class WSGrid extends Composite {
                                         fillX++;
                                     }
                                 }
-
-
-                                System.out.println("CURRENT_CELL [row:" + currentFocus.getRow() + ";col:" + currentFocus.getCol() + "]");
-                                System.out.println("             [delta:" + (currentFocus.isColSpan() ? currentFocus.getLeftwareColspan() : 1) + "]");
 
                                 dataGrid.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol()
                                         - (currentFocus.isColSpan() ? currentFocus.getLeftwareColspan() : 1)).focus();
@@ -1276,16 +1270,18 @@ public class WSGrid extends Composite {
 
             _mergedCells = true;
 
-            final int _col = col;
+
 
             FlexTable table = grid.table;
             for (int i = 1; i < rows; i++) {
-                for (int c = _col; c < (_col + colspan); c++) {
+                for (int c = col; c < (col + colspan); c++) {
 
                     final WSCell cell = this;
                     final int _row = row + i;
 
-                    table.removeCell(_row, _col);
+                    table.removeCell(_row, col);
+
+                    final int _col = c;
 
                     grid.tableIndex.get(_row).set(c, new WSCell() {
                         {
@@ -1365,11 +1361,11 @@ public class WSGrid extends Composite {
         }
 
         public int getLeftwareColspan() {
-            return 0;
+            return 1;
         }
 
         public int getUpwardRowspan() {
-            return 0;
+            return 1;
         }
 
         public void setHeight(String height) {
