@@ -420,8 +420,15 @@ public class WSGrid extends Composite {
                                     }
                                 }
 
-                                dataGrid.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol()
-                                        - (currentFocus.isColSpan() ? currentFocus.getLeftwareColspan() : 1)).focus();
+                                int delta = currentFocus.getCol()
+                                        - (currentFocus.isColSpan() ? currentFocus.getLeftwareColspan() : 1);
+
+                                if (delta < 0) {
+                                    currentFocus.focus();
+                                }
+                                else {
+                                    dataGrid.tableIndex.get(currentFocus.getRow()).get(delta).focus();
+                                }
                             }
                         }
                         break;
@@ -1269,7 +1276,6 @@ public class WSGrid extends Composite {
             if (rows < 2) return;
 
             _mergedCells = true;
-
 
 
             FlexTable table = grid.table;

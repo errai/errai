@@ -51,6 +51,7 @@ public class WSLaunchButton extends Composite {
             case ONLOSECAPTURE:
             case ONMOUSEOUT:
                 removeStyleDependentName("hover");
+                removeStyleDependentName("down");
                 break;
             case ONMOUSEDOWN:
                 addStyleDependentName("down");

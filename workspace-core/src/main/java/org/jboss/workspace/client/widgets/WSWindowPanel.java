@@ -8,12 +8,14 @@ import com.google.gwt.user.client.Command;
 import static com.google.gwt.user.client.DeferredCommand.addCommand;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
+import static com.google.gwt.user.client.Event.addNativePreviewHandler;
 import static com.google.gwt.user.client.Window.getClientHeight;
 import static com.google.gwt.user.client.Window.getClientWidth;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.workspace.client.layout.WSDropShadowLayout;
 import org.jboss.workspace.client.util.Effects;
 import org.jboss.workspace.client.util.LayoutUtil;
+import static org.jboss.workspace.client.util.Effects.setOpacity;
 
 import static java.lang.Math.round;
 import java.util.LinkedList;
@@ -93,9 +95,9 @@ public class WSWindowPanel extends Composite {
 
                 windowPanel.getElement().getStyle().setProperty("zIndex", zIndex++ + "");
 
-                mouseMoverReg = Event.addNativePreviewHandler(mouseMover);
+                mouseMoverReg = addNativePreviewHandler(mouseMover);
 
-                Effects.setOpacity(windowPanel.getElement(), 50);
+                setOpacity(windowPanel.getElement(), 50);
             }
         });
 
@@ -104,16 +106,17 @@ public class WSWindowPanel extends Composite {
                 drag = false;
                 mouseMoverReg.removeHandler();
 
-                Effects.setOpacity(windowPanel.getElement(), 100);
+                setOpacity(windowPanel.getElement(), 100);
             }
         });
 
         LayoutUtil.disableTextSelection(getElement(), true);
+        LayoutUtil.disableTextSelection(windowPanel.getElement(), true);
 
         setHeight("25px");
         setWidth("25px");
 
-        Effects.setOpacity(dropShadow.getElement(), 50);
+        setOpacity(dropShadow.getElement(), 50);
     }
 
     public WSWindowPanel(String title) {
@@ -128,7 +131,7 @@ public class WSWindowPanel extends Composite {
     }
 
     public void show() {
-        Effects.setOpacity(getElement(), 0);
+        setOpacity(getElement(), 0);
         setVisible(true);
         Effects.fade(getElement(), 5, 10, 0, 100);
 
