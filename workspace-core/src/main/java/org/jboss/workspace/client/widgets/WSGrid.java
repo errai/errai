@@ -38,8 +38,11 @@ public class WSGrid extends Composite {
 
     private int startSelX;
     private int startSelY;
+    private boolean forwardDirX = true;
+
     private int fillX;
     private int fillY;
+    private boolean forwardDirY = true;
 
     private boolean currentFocusColumn;
 
@@ -252,6 +255,7 @@ public class WSGrid extends Composite {
 
                                 if (fill < 0) {
                                     fill *= -1;
+                                    forwardDirY = false;
                                 }
 
                                 int currCol = currentFocus.getCol() > startSelX ? startSelX : currentFocus.getCol();
@@ -305,6 +309,7 @@ public class WSGrid extends Composite {
 
                                     if (fill < 0) {
                                         fill *= -1;
+                                        forwardDirX = false;
                                     }
 
                                     int currRow = currentFocus.getRow() > startSelY ? startSelY : currentFocus.getRow();
@@ -355,6 +360,7 @@ public class WSGrid extends Composite {
 
                                 if (fill < 0) {
                                     fill *= -1;
+                                    forwardDirY = false;
                                 }
 
                                 int currCol = currentFocus.getCol() > startSelX ? startSelX : currentFocus.getCol();
@@ -403,6 +409,7 @@ public class WSGrid extends Composite {
 
                                     if (fill < 0) {
                                         fill *= -1;
+                                        forwardDirX = false;
                                     }
 
                                     int currRow = currentFocus.getRow() > startSelY ? startSelY : currentFocus.getRow();
@@ -561,6 +568,7 @@ public class WSGrid extends Composite {
         fillY = 0;
         startSelX = -1;
         startSelY = -1;
+        forwardDirX = forwardDirY = true;
     }
 
 
@@ -1071,7 +1079,7 @@ public class WSGrid extends Composite {
                 startSelY = row;
             }
 
-            selectionList.add(this);
+            if (!selectionList.contains(this)) selectionList.add(this);
 
             if (grid.type == GridType.TITLEBAR) {
                 currentFocusColumn = true;
@@ -1143,10 +1151,12 @@ public class WSGrid extends Composite {
             if (fillX < 0) {
                 startX = startSelX + fillX;
                 fillX *= -1;
+                forwardDirX = false;
             }
             if (fillY < 0) {
                 startY = startSelY + fillY;
                 fillY *= -1;
+                forwardDirY = false;
             }
 
             int endX = startX + fillX + 1;
@@ -1620,16 +1630,25 @@ public class WSGrid extends Composite {
     }
 
     public void mergeSelected() {
-        WSCell start = selectionList.firstElement();
-        if (start == null) return;
+        WSCell start;
 
-        WSCell end = selectionList.lastElement();
-        if (start == end) return;
+        int cellX = startSelX;
+        int cellY = startSelY;
+
+        if (!forwardDirX) {
+            cellX -= fillX;
+        }
+        if (!forwardDirY) {
+            cellY -= fillY;
+        }
+
+        start = dataGrid.cellAt(cellY, cellX);
+
+        start.mergeColumns(fillX + 1);
+        start.mergeRows(fillY + 1);
 
         blurAll();
 
-        start.mergeColumns(end.getCol() - start.getCol() + 1);
-        start.mergeRows(end.getRow() - start.getRow() + 1);
     }
 
     @Override
