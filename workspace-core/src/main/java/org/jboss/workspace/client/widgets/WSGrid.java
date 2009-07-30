@@ -7,6 +7,7 @@ import static com.google.gwt.user.client.DOM.setStyleAttribute;
 import com.google.gwt.user.client.Event;
 import static com.google.gwt.user.client.Event.addNativePreviewHandler;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import static com.google.gwt.user.client.ui.RootPanel.getBodyElement;
 import org.jboss.workspace.client.listeners.CellChangeEvent;
@@ -54,7 +55,7 @@ public class WSGrid extends Composite {
 
     private boolean resizeOnAttach = false;
 
-    private WSGrid wsGrid = this;
+    private WSGrid wsGrid = this;                                                                                              
     private PopupPanel resizeLine = new PopupPanel() {
         @Override
         public void onBrowserEvent(Event event) {
@@ -1531,9 +1532,9 @@ public class WSGrid extends Composite {
      * @param height The height in pixels
      */
     public void setPreciseHeight(int height) {
-        int offsetHeight = height - getTitlebarOffsetHeight();
+        int offsetHeight = height - getTitlebarOffsetHeight() - 10;
         setHeight(height + "px");
-        dataGrid.getScrollPanel().setHeight(offsetHeight + "px");
+        dataGrid.getScrollPanel().setHeight((offsetHeight)+ "px");
     }
 
     /**
