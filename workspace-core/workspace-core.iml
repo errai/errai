@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module relativePaths="true" type="JAVA_MODULE" version="4">
+  <component name="BuildJarSettings">
+    <containerInfo>
+      <containerElement type="module" name="workspace-core">
+        <attribute name="method" value="1" />
+        <attribute name="URI" value="/" />
+      </containerElement>
+    </containerInfo>
+    <setting name="jarUrl" value="file://$MODULE_DIR$/workspace-core.jar" />
+    <setting name="buildJar" value="true" />
+    <setting name="mainClass" value="" />
+  </component>
   <component name="FacetManager">
     <facet type="gwt" name="GWT">
       <configuration>

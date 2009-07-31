@@ -16,10 +16,10 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.workspace.client.ToolSet;
-import org.jboss.workspace.client.listeners.TabCloseHandler;
 import org.jboss.workspace.client.framework.AcceptsCallback;
 import org.jboss.workspace.client.framework.Tool;
 import org.jboss.workspace.client.framework.WorkspaceSizeChangeListener;
+import org.jboss.workspace.client.listeners.TabCloseHandler;
 import org.jboss.workspace.client.rpc.LayoutStateService;
 import org.jboss.workspace.client.rpc.LayoutStateServiceAsync;
 import org.jboss.workspace.client.rpc.StatePacket;
@@ -295,7 +295,12 @@ public class WorkspaceLayout extends Composite {
      * @param multipleAllowed whether or not multiple instances should be allowed.
      */
     public void openTab(Tool tool, Image icon, boolean multipleAllowed) {
-        this.openTab(tool, new StatePacket(this, tool), icon, multipleAllowed);
+        if (!multipleAllowed && tabInstances.containsKey(tool.getId())) {
+            this.openTab(tool, tabInstances.get(tool.getId()), icon, multipleAllowed);
+        }
+        else {
+            this.openTab(tool, new StatePacket(this, tool), icon, multipleAllowed);
+        }
     }
 
 
@@ -376,7 +381,7 @@ public class WorkspaceLayout extends Composite {
         packet.setTabInstance(newWSTab);
         tabPanel.add(panel, newWSTab);
         newWSTab.activate();
-        
+
         tabInstances.put(packet.getInstanceId(), packet);
 
         newWSTab.clearTabCloseHandlers();
@@ -539,7 +544,7 @@ public class WorkspaceLayout extends Composite {
                 set.add(entry.getValue().getTabInstance());
             }
         }
-       
+
         return set;
     }
 

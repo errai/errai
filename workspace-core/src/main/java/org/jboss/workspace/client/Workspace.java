@@ -24,7 +24,7 @@ public class Workspace implements EntryPoint {
         init("rootPanel");
     }
                      
-    public WorkspaceLayout init(String rootId) {
+    private WorkspaceLayout init(String rootId) {
         if (workspaceLayout != null) {
             Window.alert("Workspace already initialized.");
             return null;
