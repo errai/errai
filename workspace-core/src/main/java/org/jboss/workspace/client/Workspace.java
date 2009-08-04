@@ -17,6 +17,10 @@ public class Workspace implements EntryPoint {
     public static PickupDragController dragController;
     private static WorkspaceLayout workspaceLayout;
 
+
+    private Workspace() {
+    }
+
     /**
      * This is the entry point method.
      */
