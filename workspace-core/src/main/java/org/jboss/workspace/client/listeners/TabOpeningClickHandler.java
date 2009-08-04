@@ -1,13 +1,14 @@
 package org.jboss.workspace.client.listeners;
 
-import com.google.gwt.user.client.ui.ClickListener;
-import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.Image;
+import org.jboss.workspace.client.framework.CommandProcessor;
 import org.jboss.workspace.client.framework.Tool;
-import org.jboss.workspace.client.rpc.StatePacket;
 import org.jboss.workspace.client.layout.WorkspaceLayout;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class TabOpeningClickHandler implements ClickHandler {
     private WorkspaceLayout layout;
@@ -16,7 +17,7 @@ public class TabOpeningClickHandler implements ClickHandler {
     private Image icon;
     private boolean multipleAllowed;
 
-       public TabOpeningClickHandler(WorkspaceLayout layout, Tool tool) {
+    public TabOpeningClickHandler(WorkspaceLayout layout, Tool tool) {
         this.layout = layout;
         this.tabName = tool.getName();
         this.tool = tool;
@@ -31,7 +32,7 @@ public class TabOpeningClickHandler implements ClickHandler {
     }
 
     public TabOpeningClickHandler(WorkspaceLayout layout, String tabName, Tool tool, Image icon,
-                                   boolean multipleAllowed) {
+                                  boolean multipleAllowed) {
         this.layout = layout;
         this.tabName = tabName;
         this.tool = tool;
@@ -40,7 +41,12 @@ public class TabOpeningClickHandler implements ClickHandler {
     }
 
     public void onClick(ClickEvent event) {
-        layout.openTab(tool, icon, multipleAllowed);
+        Map msg = new HashMap();
+        msg.put(CommandProcessor.MessageParts.ComponentID.name(), tool.getId());
+        msg.put(CommandProcessor.MessageParts.IconURI.name(), tool.getIcon().getUrl());
+        msg.put(CommandProcessor.MessageParts.MultipleInstances.name(), tool.multipleAllowed());
+        
+        CommandProcessor.Command.OpenNewTab.send(msg);
     }
 
 

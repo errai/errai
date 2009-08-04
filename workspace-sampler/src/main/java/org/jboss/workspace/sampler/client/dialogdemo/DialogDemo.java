@@ -1,16 +1,18 @@
 package org.jboss.workspace.sampler.client.dialogdemo;
 
-import org.jboss.workspace.client.framework.Tool;
-import org.jboss.workspace.client.framework.AcceptsCallback;
-import org.jboss.workspace.client.framework.Federation;
-import org.jboss.workspace.client.rpc.StatePacket;
-import org.jboss.workspace.client.layout.WorkPanel;
-import org.jboss.workspace.client.widgets.WSModalDialog;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
+import org.jboss.workspace.client.framework.AcceptsCallback;
+import org.jboss.workspace.client.framework.Federation;
+import org.jboss.workspace.client.framework.Tool;
+import org.jboss.workspace.client.layout.WorkPanel;
+import org.jboss.workspace.client.rpc.StatePacket;
+import org.jboss.workspace.client.widgets.WSModalDialog;
+
+import java.util.Map;
 
 public class DialogDemo implements Tool {
 
@@ -30,8 +32,11 @@ public class DialogDemo implements Tool {
         dPanel.setCellHorizontalAlignment(b, HasHorizontalAlignment.ALIGN_CENTER);
 
         Federation.subscribe("mysubject", panel.getElement(), new AcceptsCallback() {
-            public void callback(Object message) {
-                 Window.alert("WhatTheHeck?:" + message);
+            public void callback(Object message, Object data) {
+                Map m = (Map) Federation.decodeMap(message);
+
+                Window.alert("I see you just opened a component (" + m.get("Component") + "): " + m.get("Opened"));
+
             }
         }, null);
 
@@ -52,7 +57,7 @@ public class DialogDemo implements Tool {
         dialog.getCancelButton().setText("No thanks!");
 
         dialog.ask("Would you like to continue?", new AcceptsCallback() {
-            public void callback(Object message) {
+            public void callback(Object message, Object data) {
             }
         });
 

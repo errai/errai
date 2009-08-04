@@ -16,6 +16,6 @@ public class ClickCallbackListener implements ClickHandler {
     }
 
     public void onClick(ClickEvent event) {
-        callback.callback(messageReturned);
+        callback.callback(messageReturned, null);
     }
 }

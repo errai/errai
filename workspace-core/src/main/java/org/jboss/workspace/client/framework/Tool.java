@@ -5,6 +5,7 @@ import com.google.gwt.user.client.ui.Widget;
 import org.jboss.workspace.client.rpc.StatePacket;
 
 public interface Tool {
+
     public Widget getWidget(StatePacket packet);
 
     public String getName();

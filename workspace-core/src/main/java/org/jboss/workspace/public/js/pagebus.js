@@ -139,7 +139,11 @@ if(!window["OpenAjax"]){
 										cb.call(sc, name, msg, d);
 								}
 							}
+
+                            
 							catch(err) {
+                                alert(err + "");
+
 								if(err.message == "PageBus.StackOverflow")
 									throw err;
 								h.publish("com.tibco.pagebus.error.callbackError", { name: escape(name), error: escape(err.message) });

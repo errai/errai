@@ -23,6 +23,8 @@ import org.jboss.workspace.client.widgets.format.WSCellSimpleTextCell;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
 
 
 public class GridDemo implements Tool {
@@ -82,7 +84,11 @@ public class GridDemo implements Tool {
 
         workPanel.addToTitlebar(h);
 
-        Federation.store("mysubject", "magpie");
+        Map<String, Object> message = new HashMap<String, Object>();
+        message.put("Component", "Grid");
+        message.put("Opened", true);
+        
+        Federation.store("mysubject", Federation.encodeMap(message));
 
         return workPanel;
     }

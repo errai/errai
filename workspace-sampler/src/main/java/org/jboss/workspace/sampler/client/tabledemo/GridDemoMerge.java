@@ -59,7 +59,7 @@ public class GridDemoMerge implements Tool {
             public void onClick(ClickEvent clickEvent) {
                 WSModalDialog modal = new WSModalDialog();
                 modal.ask("Are you sure", new AcceptsCallback() {
-                    public void callback(Object message) {
+                    public void callback(Object message, Object data) {
                        if ("OK".equals(message)) Window.alert("Response was OK");
                     }
                 });

@@ -16,9 +16,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.workspace.client.ToolSet;
-import org.jboss.workspace.client.framework.AcceptsCallback;
-import org.jboss.workspace.client.framework.Tool;
-import org.jboss.workspace.client.framework.WorkspaceSizeChangeListener;
+import org.jboss.workspace.client.framework.*;
 import org.jboss.workspace.client.listeners.TabCloseHandler;
 import org.jboss.workspace.client.rpc.LayoutStateService;
 import org.jboss.workspace.client.rpc.LayoutStateServiceAsync;
@@ -126,6 +124,42 @@ public class WorkspaceLayout extends Composite {
 
 
         return mainLayoutPanel;
+    }
+
+
+    @Override
+    protected void onAttach() {
+        super.onAttach();
+        
+        Federation.subscribe(CommandProcessor.Command.RegisterWorkspaceEnvironment.getSubject(),
+                null, new AcceptsCallback() {
+                    public void callback(Object message, Object data) {
+                        System.out.println("Received Message, Hooray!");
+
+                        Map commandMessage = Federation.decodeMap(message);
+                        System.out.println("decoding message ...");
+
+                        String commandType = (String) commandMessage.get(CommandProcessor.MessageParts.CommandType.name());
+                        System.out.println("command received: " + commandType);
+
+                        switch (CommandProcessor.Command.valueOf(commandType)) {
+                            case OpenNewTab:
+                                System.out.println("OpenNewTab!");
+                                Tool t = availableTools.get(commandMessage.get(CommandProcessor.MessageParts.ComponentID.name()));
+                                System.out.println("Tool Loaded: " +t);
+                                Image i = new Image((String) commandMessage.get(CommandProcessor.MessageParts.IconURI.name()));
+                                System.out.println("Image Loaded: " + i);
+                                Boolean multiple = (Boolean) commandMessage.get(CommandProcessor.MessageParts.MultipleInstances.name());
+                                System.out.println("Multi Loaded: " + multiple);
+
+                                openTab(t, i, multiple);
+                                break;
+                        }
+
+
+                    }
+                }, null);
+        
     }
 
     /**
@@ -294,7 +328,7 @@ public class WorkspaceLayout extends Composite {
      * @param icon            The image to use for th icon
      * @param multipleAllowed whether or not multiple instances should be allowed.
      */
-    public void openTab(Tool tool, Image icon, boolean multipleAllowed) {
+    private void openTab(Tool tool, Image icon, boolean multipleAllowed) {
         if (!multipleAllowed && tabInstances.containsKey(tool.getId())) {
             this.openTab(tool, tabInstances.get(tool.getId()), icon, multipleAllowed);
         }
@@ -320,7 +354,7 @@ public class WorkspaceLayout extends Composite {
                 final WorkspaceLayout layout = this;
 
                 AcceptsCallback openCallback = new AcceptsCallback() {
-                    public void callback(Object message) {
+                    public void callback(Object message, Object data) {
                         if (MESSAGE_OK.equals(message)) {
                             String newId;
                             String newName;
@@ -341,7 +375,7 @@ public class WorkspaceLayout extends Composite {
                             if (s.size() > 1) {
                                 WSTabSelectorDialog wsd = new WSTabSelectorDialog(s);
                                 wsd.ask("Select an open instance.", new AcceptsCallback() {
-                                    public void callback(Object message) {
+                                    public void callback(Object message, Object data) {
                                     }
                                 });
 

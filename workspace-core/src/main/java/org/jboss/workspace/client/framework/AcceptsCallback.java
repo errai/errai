@@ -7,5 +7,10 @@ public interface AcceptsCallback {
     public static final String MESSAGE_OK = "OK";
     public static final String MESSAGE_CANCEL = "CANCEL";
 
-    public void callback(Object message);
+    /**
+     * This is method called by the caller.
+     * @param message The message being returned
+     * @param data Any additional data (optional)
+     */
+    public void callback(Object message, Object data);
 }

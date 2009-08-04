@@ -32,7 +32,7 @@ public class MessageCallback {
     }
 
     public void call() {
-        callback.callback(message);
+        callback.callback(message, null);
         if (next != null) next.call();
     }
 
