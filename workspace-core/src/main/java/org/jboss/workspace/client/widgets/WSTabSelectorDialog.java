@@ -85,7 +85,7 @@ public class WSTabSelectorDialog extends WSModalDialog {
     }
 
 
-    public void callback(String message) {
+    public void callback(Object message) {
         callbackTo.callback(message);
         window.hide();
     }

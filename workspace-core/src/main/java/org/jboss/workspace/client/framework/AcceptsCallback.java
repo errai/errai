@@ -7,5 +7,5 @@ public interface AcceptsCallback {
     public static final String MESSAGE_OK = "OK";
     public static final String MESSAGE_CANCEL = "CANCEL";
 
-    public void callback(String message);
+    public void callback(Object message);
 }

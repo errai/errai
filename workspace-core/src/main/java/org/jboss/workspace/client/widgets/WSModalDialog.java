@@ -63,7 +63,7 @@ public class WSModalDialog implements AcceptsCallback {
     }
 
 
-    public void callback(String message) {
+    public void callback(Object message) {
         if (callbackTo != null) callbackTo.callback(message);
         window.hide();
     }

@@ -320,7 +320,7 @@ public class WorkspaceLayout extends Composite {
                 final WorkspaceLayout layout = this;
 
                 AcceptsCallback openCallback = new AcceptsCallback() {
-                    public void callback(String message) {
+                    public void callback(Object message) {
                         if (MESSAGE_OK.equals(message)) {
                             String newId;
                             String newName;
@@ -341,7 +341,7 @@ public class WorkspaceLayout extends Composite {
                             if (s.size() > 1) {
                                 WSTabSelectorDialog wsd = new WSTabSelectorDialog(s);
                                 wsd.ask("Select an open instance.", new AcceptsCallback() {
-                                    public void callback(String message) {
+                                    public void callback(Object message) {
                                     }
                                 });
 

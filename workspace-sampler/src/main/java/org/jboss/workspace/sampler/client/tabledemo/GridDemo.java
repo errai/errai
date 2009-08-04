@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 import org.jboss.workspace.client.framework.Tool;
+import org.jboss.workspace.client.framework.Federation;
 import org.jboss.workspace.client.layout.LayoutHint;
 import org.jboss.workspace.client.layout.LayoutHintProvider;
 import org.jboss.workspace.client.layout.WorkPanel;
@@ -80,6 +81,8 @@ public class GridDemo implements Tool {
         h.add(reset);
 
         workPanel.addToTitlebar(h);
+
+        Federation.store("mysubject", "magpie");
 
         return workPanel;
     }

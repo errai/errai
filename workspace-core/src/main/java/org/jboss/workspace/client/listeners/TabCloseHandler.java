@@ -57,7 +57,7 @@ public class TabCloseHandler implements CloseHandler, AcceptsCallback {
      *
      * @param message
      */
-    public void callback(String message) {
+    public void callback(Object message) {
         /**
          * If the user pressed okay, close the tab.
          */

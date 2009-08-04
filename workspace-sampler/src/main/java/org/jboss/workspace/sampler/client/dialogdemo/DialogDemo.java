@@ -2,10 +2,12 @@ package org.jboss.workspace.sampler.client.dialogdemo;
 
 import org.jboss.workspace.client.framework.Tool;
 import org.jboss.workspace.client.framework.AcceptsCallback;
+import org.jboss.workspace.client.framework.Federation;
 import org.jboss.workspace.client.rpc.StatePacket;
 import org.jboss.workspace.client.layout.WorkPanel;
 import org.jboss.workspace.client.widgets.WSModalDialog;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -27,6 +29,12 @@ public class DialogDemo implements Tool {
         dPanel.add(b, DockPanel.CENTER);
         dPanel.setCellHorizontalAlignment(b, HasHorizontalAlignment.ALIGN_CENTER);
 
+        Federation.subscribe("mysubject", panel.getElement(), new AcceptsCallback() {
+            public void callback(Object message) {
+                 Window.alert("WhatTheHeck?:" + message);
+            }
+        }, null);
+
         return panel;
     }
 
@@ -44,8 +52,7 @@ public class DialogDemo implements Tool {
         dialog.getCancelButton().setText("No thanks!");
 
         dialog.ask("Would you like to continue?", new AcceptsCallback() {
-            public void callback(String message) {
-                // do nothing
+            public void callback(Object message) {
             }
         });
 
