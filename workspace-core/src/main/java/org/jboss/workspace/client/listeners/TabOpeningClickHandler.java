@@ -41,10 +41,14 @@ public class TabOpeningClickHandler implements ClickHandler {
     }
 
     public void onClick(ClickEvent event) {
-        Map msg = new HashMap();
-        msg.put(CommandProcessor.MessageParts.ComponentID.name(), tool.getId());
-        msg.put(CommandProcessor.MessageParts.IconURI.name(), tool.getIcon().getUrl());
-        msg.put(CommandProcessor.MessageParts.MultipleInstances.name(), tool.multipleAllowed());
+
+        /**
+         * Build the message to send the command processor.
+         */
+        Map<String,Object> msg = new HashMap<String, Object>();
+        msg.put(CommandProcessor.MessageParts.ComponentID.name(),        tool.getId());
+        msg.put(CommandProcessor.MessageParts.IconURI.name(),            tool.getIcon().getUrl());
+        msg.put(CommandProcessor.MessageParts.MultipleInstances.name(),  tool.multipleAllowed());
         
         CommandProcessor.Command.OpenNewTab.send(msg);
     }
