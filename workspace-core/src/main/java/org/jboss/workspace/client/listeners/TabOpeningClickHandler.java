@@ -11,29 +11,25 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TabOpeningClickHandler implements ClickHandler {
-    private WorkspaceLayout layout;
     private String tabName;
     private Tool tool;
     private Image icon;
     private boolean multipleAllowed;
 
-    public TabOpeningClickHandler(WorkspaceLayout layout, Tool tool) {
-        this.layout = layout;
+    public TabOpeningClickHandler(Tool tool) {
         this.tabName = tool.getName();
         this.tool = tool;
         this.icon = tool.getIcon();
     }
 
-    public TabOpeningClickHandler(WorkspaceLayout layout, String tabName, Tool tool, Image icon) {
-        this.layout = layout;
+    public TabOpeningClickHandler(String tabName, Tool tool, Image icon) {
         this.tabName = tabName;
         this.tool = tool;
         this.icon = icon;
     }
 
-    public TabOpeningClickHandler(WorkspaceLayout layout, String tabName, Tool tool, Image icon,
+    public TabOpeningClickHandler(String tabName, Tool tool, Image icon,
                                   boolean multipleAllowed) {
-        this.layout = layout;
         this.tabName = tabName;
         this.tool = tool;
         this.icon = icon;

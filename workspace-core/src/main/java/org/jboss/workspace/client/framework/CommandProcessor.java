@@ -9,7 +9,11 @@ public class CommandProcessor {
 
         OpenNewTab,
         CloseTab,
-        RegisterWorkspaceEnvironment;
+        RegisterWorkspaceEnvironment,
+        RegisterToolSet,
+        GetWidget,
+        DisposeWidget,
+        PublishTool;
 
         public String getSubject() {
             return "org.jboss.workspace.WorkspaceLayout";
@@ -28,7 +32,8 @@ public class CommandProcessor {
     }
 
     public enum MessageParts {
-        CommandType, ComponentID, TabID, ComponentName, MultipleInstances, IconURI
+        CommandType, ComponentID, InstanceID, ComponentName, MultipleInstances, IconURI, ToolSetName, Subject,
+        DOMID
     }
 
     private static Map<String, String> createMessageMap(String commandType) {

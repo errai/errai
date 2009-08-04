@@ -3,6 +3,8 @@ package org.jboss.workspace.client.rpc;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.google.gwt.user.client.ui.Widget;
 import org.jboss.workspace.client.framework.Tool;
+import org.jboss.workspace.client.framework.Federation;
+import org.jboss.workspace.client.framework.CommandProcessor;
 import static org.jboss.workspace.client.rpc.AdapterRegistry.getAdapter;
 import org.jboss.workspace.client.layout.WorkspaceLayout;
 import org.jboss.workspace.client.widgets.WSTab;
@@ -24,18 +26,18 @@ public class StatePacket implements IsSerializable, Serializable {
     private int size = 0;
 
     private transient Map<String, Integer> hash;
-    private transient WorkspaceLayout layout;
+  //  private transient WorkspaceLayout layout;
     private transient WSTab tabInstance;
 
 
     public StatePacket() {
     }
 
-    public StatePacket(WorkspaceLayout layout, Tool tool) {
-        this.layout = layout;
-        this.componentTypeId = tool.getId();
+    public StatePacket(String componentId, String name) {
+   //     this.layout = layout;
+        this.componentTypeId = componentId;
         this.instanceId = componentTypeId;
-        this.name = tool.getName();
+        this.name = name;
     }
 
     public String getComponentTypeId() {
@@ -152,15 +154,15 @@ public class StatePacket implements IsSerializable, Serializable {
     }
 
     public void notifySessionState() {
-        layout.notifySessionState(this);
+     //   layout.notifySessionState(this);
     }
 
-    public WorkspaceLayout getActiveLayout() {
-        return layout;
-    }
+
 
     public void deactive() {
-        layout.closeTab(this);
+        Map msg = new HashMap();
+        msg.put(CommandProcessor.MessageParts.InstanceID.name(), instanceId);
+        CommandProcessor.Command.CloseTab.send(msg);
     }
 
     public String toString() {

@@ -13,11 +13,11 @@ import org.jboss.workspace.client.layout.WorkspaceLayout;
  * A simiple dock area to list and provide links to different features.
  */
 public class WSLauncherPanel extends Composite {
-    private WorkspaceLayout layout;
+ //  private WorkspaceLayout layout;
     private VerticalPanel vPanel;
 
-    public WSLauncherPanel(WorkspaceLayout layout) {
-        this.layout = layout;
+    public WSLauncherPanel() {
+   //     this.layout = layout;
         this.vPanel = new VerticalPanel();
         this.vPanel.setWidth("100%");
         initWidget(vPanel);
@@ -35,7 +35,7 @@ public class WSLauncherPanel extends Composite {
         newIcon.setSize("16px", "16px");
 
         WSLaunchButton button = new WSLaunchButton(newIcon, name);
-        button.addClickListener(new TabOpeningClickHandler(layout, name, tool, newIcon, tool.multipleAllowed()));
+        button.addClickListener(new TabOpeningClickHandler(name, tool, newIcon, tool.multipleAllowed()));
         vPanel.add(button);
 
     }

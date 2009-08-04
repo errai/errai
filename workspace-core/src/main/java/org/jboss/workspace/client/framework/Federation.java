@@ -1,11 +1,10 @@
 package org.jboss.workspace.client.framework;
 
-import com.google.gwt.user.client.Element;
 import com.google.gwt.json.client.*;
+import com.google.gwt.user.client.Element;
 
-import java.util.Map;
-import java.util.Set;
 import java.util.HashMap;
+import java.util.Map;
 
 
 public class Federation {
@@ -21,7 +20,7 @@ public class Federation {
          $wnd.PageBus.store(subject, value);
     }-*/;
 
-
+    
     public static Map<String, Object> decodeMap(Object value) {
         JSONValue a = JSONParser.parse(String.valueOf(value));
 
