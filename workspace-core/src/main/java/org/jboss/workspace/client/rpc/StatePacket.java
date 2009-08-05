@@ -2,11 +2,8 @@ package org.jboss.workspace.client.rpc;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.google.gwt.user.client.ui.Widget;
-import org.jboss.workspace.client.framework.Tool;
-import org.jboss.workspace.client.framework.Federation;
 import org.jboss.workspace.client.framework.CommandProcessor;
 import static org.jboss.workspace.client.rpc.AdapterRegistry.getAdapter;
-import org.jboss.workspace.client.layout.WorkspaceLayout;
 import org.jboss.workspace.client.widgets.WSTab;
 
 import java.io.Serializable;

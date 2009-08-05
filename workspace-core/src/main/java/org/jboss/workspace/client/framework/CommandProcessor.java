@@ -22,11 +22,11 @@ public class CommandProcessor {
         public void send(Map<String, Object> message) {
             message.put(MessageParts.CommandType.name(), this.name());
             String subject = getSubject();
-            String msg = Federation.encodeMap(message);
+            String msg = FederationUtil.encodeMap(message);
 
             System.out.println("About to send: [Subject:" + subject + ";Message:" + msg + "]");
 
-            Federation.store(subject, msg);
+            FederationUtil.store(subject, msg);
         }
 
     }

@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class Federation {
+public class FederationUtil {
     public native static void subscribe(String subject, Element scope, AcceptsCallback callback,
                                         Object subscriberData) /*-{
          $wnd.PageBus.subscribe(subject, scope,
@@ -20,11 +20,11 @@ public class Federation {
          $wnd.PageBus.store(subject, value);
     }-*/;
 
-    
+
     public static Map<String, Object> decodeMap(Object value) {
         JSONValue a = JSONParser.parse(String.valueOf(value));
 
-        Map<String,Object> m = new HashMap<String,Object>();
+        Map<String, Object> m = new HashMap<String, Object>();
 
         if (a instanceof JSONArray) {
             JSONArray eMap = (JSONArray) a;
@@ -32,9 +32,7 @@ public class Federation {
             JSONValue v;
 
             for (int i = 0; i < eMap.size(); i++) {
-                entry = (JSONArray) eMap.get(i);
-
-                if ((v = entry.get(1).isString()) != null) {
+                if ((v = (entry = (JSONArray) eMap.get(i)).get(1).isString()) != null) {
                     m.put(entry.get(0).isString().stringValue(), ((JSONString) v).stringValue());
                 }
                 else if ((v = entry.get(1).isNumber()) != null) {
@@ -44,7 +42,7 @@ public class Federation {
                     m.put(entry.get(0).isString().stringValue(), ((JSONBoolean) v).booleanValue());
                 }
             }
-              
+
         }
         else {
             throw new RuntimeException("bad encoding");
@@ -54,13 +52,13 @@ public class Federation {
     }
 
 
-    public static String encodeMap(Map<String,Object> map) {
+    public static String encodeMap(Map<String, Object> map) {
         JSONArray a = new JSONArray();
         Object v;
         JSONArray e;
 
         int i = 0;
-        for (Map.Entry<String,Object> entry :map.entrySet()) {
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
             e = new JSONArray();
             e.set(0, new JSONString(entry.getKey()));
 

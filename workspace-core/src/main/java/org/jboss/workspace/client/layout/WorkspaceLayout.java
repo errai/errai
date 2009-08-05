@@ -133,10 +133,10 @@ public class WorkspaceLayout extends Composite {
     protected void onAttach() {
         super.onAttach();
 
-        Federation.subscribe(CommandProcessor.Command.RegisterWorkspaceEnvironment.getSubject(),
+        FederationUtil.subscribe(CommandProcessor.Command.RegisterWorkspaceEnvironment.getSubject(),
                 null, new AcceptsCallback() {
                     public void callback(Object message, Object data) {
-                        Map commandMessage = Federation.decodeMap(message);
+                        Map commandMessage = FederationUtil.decodeMap(message);
 
                         String commandType = (String) commandMessage.get(CommandProcessor.MessageParts.CommandType.name());
                         System.out.println("command received: " + commandType);
@@ -358,9 +358,9 @@ public class WorkspaceLayout extends Composite {
 
         for (final Tool tool : toolSet.getAllProvidedTools()) {
             String subject = "org.jboss.workspace.toolregistration." + tool.getId();
-            Federation.subscribe(subject, null, new AcceptsCallback() {
+            FederationUtil.subscribe(subject, null, new AcceptsCallback() {
                 public void callback(Object message, Object data) {
-                    Map msg = Federation.decodeMap(message);
+                    Map msg = FederationUtil.decodeMap(message);
                     String commandType = (String) msg.get(CommandProcessor.MessageParts.CommandType.name());
 
                     switch (CommandProcessor.Command.valueOf(commandType)) {
@@ -484,7 +484,7 @@ public class WorkspaceLayout extends Composite {
 
         //  tabInstances.put(packet.getInstanceId(), packet);
 
-        Federation.subscribe("org.jboss.workspace.tabInstances." + packet.getInstanceId(), null,
+        FederationUtil.subscribe("org.jboss.workspace.tabInstances." + packet.getInstanceId(), null,
                 new AcceptsCallback() {
                     public void callback(Object message, Object data) {
 
