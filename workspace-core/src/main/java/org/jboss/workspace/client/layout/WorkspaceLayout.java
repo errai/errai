@@ -144,7 +144,7 @@ public class WorkspaceLayout extends Composite {
                         switch (CommandProcessor.Command.valueOf(commandType)) {
                             case OpenNewTab:
                                 String componentId = (String) commandMessage.get(CommandProcessor.MessageParts.ComponentID.name());
-                                String name = (String) commandMessage.get(CommandProcessor.MessageParts.ComponentName.name());
+                                String name = (String) commandMessage.get(CommandProcessor.MessageParts.Name.name());
                                 String subject = (String) commandMessage.get(CommandProcessor.MessageParts.Subject.name());
                                 Image i = new Image((String) commandMessage.get(CommandProcessor.MessageParts.IconURI.name()));
                                 Boolean multiple = (Boolean) commandMessage.get(CommandProcessor.MessageParts.MultipleInstances.name());
@@ -162,7 +162,7 @@ public class WorkspaceLayout extends Composite {
                                 break;
 
                             case RegisterToolSet:
-                                name = (String) commandMessage.get(CommandProcessor.MessageParts.ComponentName.name());
+                                name = (String) commandMessage.get(CommandProcessor.MessageParts.Name.name());
                                 String DOMID = (String) commandMessage.get(CommandProcessor.MessageParts.DOMID.name());
 
                                 Element e = getElementById(DOMID);
@@ -182,8 +182,6 @@ public class WorkspaceLayout extends Composite {
 
                     }
                 }, null);
-
-
     }
 
     /**
@@ -350,7 +348,7 @@ public class WorkspaceLayout extends Composite {
 
 
         Map<String, Object> msg = new HashMap<String, Object>();
-        msg.put(CommandProcessor.MessageParts.ComponentName.name(), toolSet.getToolSetName());
+        msg.put(CommandProcessor.MessageParts.Name.name(), toolSet.getToolSetName());
         msg.put(CommandProcessor.MessageParts.DOMID.name(), id);
 
         CommandProcessor.Command.RegisterToolSet.send(msg);
@@ -373,7 +371,7 @@ public class WorkspaceLayout extends Composite {
                             Map<String, Object> map = new HashMap<String, Object>();
                             map.put(CommandProcessor.MessageParts.DOMID.name(), elId);
                             map.put(CommandProcessor.MessageParts.ComponentID.name(), tool.getId());
-                            map.put(CommandProcessor.MessageParts.ComponentName.name(), tool.getName());
+                            map.put(CommandProcessor.MessageParts.Name.name(), tool.getName());
                             map.put(CommandProcessor.MessageParts.MultipleInstances.name(), tool.multipleAllowed());
                             map.put(CommandProcessor.MessageParts.IconURI.name(), tool.getIcon().getUrl());
 

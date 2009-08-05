@@ -6,7 +6,6 @@ import java.util.Map;
 public class CommandProcessor {
 
     public enum Command {
-
         OpenNewTab,
         CloseTab,
         RegisterWorkspaceEnvironment,
@@ -28,19 +27,9 @@ public class CommandProcessor {
 
             FederationUtil.store(subject, msg);
         }
-
     }
 
     public enum MessageParts {
-        CommandType, ComponentID, InstanceID, ComponentName, MultipleInstances, IconURI, ToolSetName, Subject,
-        DOMID
+        CommandType, ComponentID, InstanceID, Name, MultipleInstances, IconURI, Subject, DOMID
     }
-
-    private static Map<String, String> createMessageMap(String commandType) {
-        Map<String, String> m = new HashMap<String, String>();
-        m.put(MessageParts.CommandType.name(), commandType);
-        return m;
-    }
-
-
 }
