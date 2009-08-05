@@ -136,10 +136,7 @@ public class WorkspaceLayout extends Composite {
         Federation.subscribe(CommandProcessor.Command.RegisterWorkspaceEnvironment.getSubject(),
                 null, new AcceptsCallback() {
                     public void callback(Object message, Object data) {
-                        System.out.println("Received Message, Hooray!");
-
                         Map commandMessage = Federation.decodeMap(message);
-                        System.out.println("decoding message ...");
 
                         String commandType = (String) commandMessage.get(CommandProcessor.MessageParts.CommandType.name());
                         System.out.println("command received: " + commandType);
@@ -170,6 +167,8 @@ public class WorkspaceLayout extends Composite {
 
                                 Element e = getElementById(DOMID);
                                 WSElementWrapper w = new WSElementWrapper(e);
+
+                                System.out.println("Registering ToolSet: " + name);
 
                                 navigation.add(w, name);
                                 break;
@@ -329,6 +328,9 @@ public class WorkspaceLayout extends Composite {
 
         if (w != null) {
             w.getElement().setId(id);
+            w.setVisible(false);
+            RootPanel.get().add(w);
+
         }
         else {
             /**
@@ -342,7 +344,16 @@ public class WorkspaceLayout extends Composite {
             }
 
             launcherPanel.getElement().setId(id);
+            launcherPanel.setVisible(false);
+            RootPanel.get().add(launcherPanel);
         }
+
+
+        Map<String, Object> msg = new HashMap<String, Object>();
+        msg.put(CommandProcessor.MessageParts.ComponentName.name(), toolSet.getToolSetName());
+        msg.put(CommandProcessor.MessageParts.DOMID.name(), id);
+
+        CommandProcessor.Command.RegisterToolSet.send(msg);
 
 
         for (final Tool tool : toolSet.getAllProvidedTools()) {
@@ -359,7 +370,7 @@ public class WorkspaceLayout extends Composite {
                             String elId = "new_" + tool.getId() + System.currentTimeMillis();
                             w.getElement().setId(elId);
 
-                            Map map = new HashMap();
+                            Map<String, Object> map = new HashMap<String, Object>();
                             map.put(CommandProcessor.MessageParts.DOMID.name(), elId);
                             map.put(CommandProcessor.MessageParts.ComponentID.name(), tool.getId());
                             map.put(CommandProcessor.MessageParts.ComponentName.name(), tool.getName());
@@ -376,13 +387,11 @@ public class WorkspaceLayout extends Composite {
                 }
             }, null);
 
-            Map msg = new HashMap();
+            msg = new HashMap<String, Object>();
             msg.put(CommandProcessor.MessageParts.Subject.name(), subject);
             msg.put(CommandProcessor.MessageParts.ComponentID.name(), tool.getId());
             CommandProcessor.Command.PublishTool.send(msg);
         }
-
-
     }
 
 
@@ -459,7 +468,6 @@ public class WorkspaceLayout extends Composite {
         panel.getElement().getStyle().setProperty("overflow", "hidden");
 
         Effects.setOpacity(panel.getElement(), 0);
-
 
         //  Widget toolWidget = tool.getWidget(packet);
 
