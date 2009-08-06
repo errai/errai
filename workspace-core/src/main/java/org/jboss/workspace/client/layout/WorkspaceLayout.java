@@ -144,12 +144,13 @@ public class WorkspaceLayout extends Composite {
                         switch (CommandProcessor.Command.valueOf(commandType)) {
                             case OpenNewTab:
                                 String componentId = (String) commandMessage.get(CommandProcessor.MessageParts.ComponentID.name());
+                                String DOMID = (String) commandMessage.get(CommandProcessor.MessageParts.DOMID.name());
                                 String name = (String) commandMessage.get(CommandProcessor.MessageParts.Name.name());
                                 String subject = (String) commandMessage.get(CommandProcessor.MessageParts.Subject.name());
                                 Image i = new Image((String) commandMessage.get(CommandProcessor.MessageParts.IconURI.name()));
                                 Boolean multiple = (Boolean) commandMessage.get(CommandProcessor.MessageParts.MultipleInstances.name());
 
-                                openTab(subject, componentId, name, i, multiple);
+                                openTab(subject, componentId, name, i, multiple, DOMID);
                                 break;
 
                             case PublishTool:
@@ -163,7 +164,7 @@ public class WorkspaceLayout extends Composite {
 
                             case RegisterToolSet:
                                 name = (String) commandMessage.get(CommandProcessor.MessageParts.Name.name());
-                                String DOMID = (String) commandMessage.get(CommandProcessor.MessageParts.DOMID.name());
+                                DOMID = (String) commandMessage.get(CommandProcessor.MessageParts.DOMID.name());
 
                                 Element e = getElementById(DOMID);
                                 WSElementWrapper w = new WSElementWrapper(e);
@@ -177,6 +178,12 @@ public class WorkspaceLayout extends Composite {
                                 System.out.println("ClosingTab");
                                 String instanceId = (String) commandMessage.get(CommandProcessor.MessageParts.InstanceID.name());
                                 closeTab(instanceId);
+
+                            case Hello:
+                                name = (String) commandMessage.get(CommandProcessor.MessageParts.Name.name());
+                                Window.alert("Hello from: " + name);
+                                break;
+
                         }
 
 
@@ -348,8 +355,8 @@ public class WorkspaceLayout extends Composite {
 
 
         Map<String, Object> msg = new HashMap<String, Object>();
-        msg.put(CommandProcessor.MessageParts.Name.name(), toolSet.getToolSetName());
-        msg.put(CommandProcessor.MessageParts.DOMID.name(), id);
+        msg.put(CommandProcessor.MessageParts.Name.name(),      toolSet.getToolSetName());
+        msg.put(CommandProcessor.MessageParts.DOMID.name(),     id);
 
         CommandProcessor.Command.RegisterToolSet.send(msg);
 
@@ -391,17 +398,17 @@ public class WorkspaceLayout extends Composite {
     }
 
 
-    private void openTab(String subject, String componentId, String name, Image icon, boolean multipleAllowed) {
+    private void openTab(String subject, String componentId, String name, Image icon, boolean multipleAllowed, String DOMID) {
         if (!multipleAllowed && tabInstances.containsKey(componentId)) {
-            this.openTab(subject, componentId, name, new StatePacket(componentId, name), icon, multipleAllowed);
+            this.openTab(subject, DOMID, new StatePacket(componentId, name), icon, multipleAllowed);
         }
         else {
-            this.openTab(subject, componentId, name, new StatePacket(componentId, name), icon, multipleAllowed);
+            this.openTab(subject, DOMID, new StatePacket(componentId, name), icon, multipleAllowed);
         }
     }
 
 
-    private void openTab(final String subject, String componentId, String name, final StatePacket packet, final Image icon, boolean multipleAllowed) {
+    private void openTab(final String subject, final String DOMID, final StatePacket packet, final Image icon, boolean multipleAllowed) {
         if (isToolActive(packet.getComponentTypeId())) {
             if (!multipleAllowed) {
                 System.out.println("Multiple Not Allowed!");
@@ -429,7 +436,7 @@ public class WorkspaceLayout extends Composite {
                             packet.setInstanceId(newId);
                             packet.setName(newName);
 
-                            _openTab(subject, packet, icon);
+                            _openTab(subject, DOMID, packet, icon);
                         }
                         else if (!"WindowClosed".equals(message)) {
                             Set<WSTab> s = layout.getActiveByType(packet.getComponentTypeId());
@@ -456,14 +463,20 @@ public class WorkspaceLayout extends Composite {
             }
         }
 
-        _openTab(subject, packet, icon);
+        _openTab(subject, DOMID, packet, icon);
     }
 
-    private void _openTab(String subject, StatePacket packet, Image icon) {
+    private void _openTab(String subject, String DOMID, StatePacket packet, Image icon) {
         final ExtSimplePanel panel = new ExtSimplePanel();
         panel.getElement().getStyle().setProperty("overflow", "hidden");
 
         Effects.setOpacity(panel.getElement(), 0);
+
+        Element e = getElementById(DOMID);
+
+        WSElementWrapper toolWidget = new WSElementWrapper(e);
+        toolWidget.setVisible(true);
+        panel.add(toolWidget);
 
         //  Widget toolWidget = tool.getWidget(packet);
 
@@ -478,7 +491,7 @@ public class WorkspaceLayout extends Composite {
         tabPanel.add(panel, newWSTab);
         newWSTab.activate();
 
-        //  tabInstances.put(packet.getInstanceId(), packet);
+       //  tabInstances.put(packet.getInstanceId(), packet);
 
         FederationUtil.subscribe("org.jboss.workspace.tabInstances." + packet.getInstanceId(), null,
                 new AcceptsCallback() {

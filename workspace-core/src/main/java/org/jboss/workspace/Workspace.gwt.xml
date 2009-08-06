@@ -26,7 +26,7 @@
 
     <replace-with class="org.jboss.workspace.client.util.effectimpl.KHTMLEffectImpl">
         <when-type-is class="org.jboss.workspace.client.util.Effect"/>
-        <when-property-is name="user.agent" value="safari"/>
+        <when-property-is name="user.agent" value="safari"/>                                           
     </replace-with>
 
     <replace-with class="org.jboss.workspace.client.util.effectimpl.KHTMLEffectImpl">
@@ -48,5 +48,15 @@
         <when-type-is class="org.jboss.workspace.client.util.Effect"/>
         <when-property-is name="user.agent" value="ie6"/>
     </replace-with>
+
+    <replace-with class="org.jboss.workspace.client.util.effectimpl.IEEffectImpl">
+        <when-type-is class="org.jboss.workspace.client.util.Effect"/>
+        <when-property-is name="user.agent" value="ie8"/>
+    </replace-with>
+
+    <replace-with class="com.allen_sauer.gwt.dnd.client.util.impl.DOMUtilImplIE6">
+         <when-type-is class="com.allen_sauer.gwt.dnd.client.util.impl.DOMUtilImpl"/>
+         <when-property-is name="user.agent" value="ie8"/>
+     </replace-with>
 
 </module>

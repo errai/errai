@@ -26,8 +26,9 @@ public class Workspace implements EntryPoint {
      */
     public void onModuleLoad() {
         init("rootPanel");
+        _initAfterWSLoad();
     }
-                     
+
     private WorkspaceLayout init(String rootId) {
         if (workspaceLayout != null) {
             Window.alert("Workspace already initialized.");
@@ -72,4 +73,12 @@ public class Workspace implements EntryPoint {
     public static WorkspaceLayout currentWorkspace() {
         return workspaceLayout;
     }
+
+    private native static void _initAfterWSLoad() /*-{
+        try {
+        $wnd.initAfterWSLoad();
+        }
+        catch (e) {
+        }
+    }-*/;
 }

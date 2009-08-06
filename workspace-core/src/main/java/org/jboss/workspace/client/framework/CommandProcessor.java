@@ -12,7 +12,9 @@ public class CommandProcessor {
         RegisterToolSet,
         GetWidget,
         DisposeWidget,
-        PublishTool;
+        PublishTool,
+        Hello
+        ;
 
         public String getSubject() {
             return "org.jboss.workspace.WorkspaceLayout";
