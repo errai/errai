@@ -370,7 +370,7 @@ public class WorkspaceLayout extends Composite {
 
                     switch (CommandProcessor.Command.valueOf(commandType)) {
                         case GetWidget:
-                            Widget w = tool.getWidget(new StatePacket(tool.getId(), tool.getName()));
+                            Widget w = tool.getWidget();
                             String elId = "new_" + tool.getId() + System.currentTimeMillis();
                             w.getElement().setId(elId);
 
@@ -478,10 +478,6 @@ public class WorkspaceLayout extends Composite {
         toolWidget.setVisible(true);
         panel.add(toolWidget);
 
-        //  Widget toolWidget = tool.getWidget(packet);
-
-        //  panel.add(toolWidget);
-
         final Image newIcon = new Image(icon != null ? icon.getUrl() : GWT.getModuleBaseURL()
                 + "/images/ui/icons/questioncube.png");
         newIcon.setSize("16px", "16px");
@@ -490,8 +486,6 @@ public class WorkspaceLayout extends Composite {
         packet.setTabInstance(newWSTab);
         tabPanel.add(panel, newWSTab);
         newWSTab.activate();
-
-       //  tabInstances.put(packet.getInstanceId(), packet);
 
         FederationUtil.subscribe("org.jboss.workspace.tabInstances." + packet.getInstanceId(), null,
                 new AcceptsCallback() {

@@ -17,7 +17,7 @@ import org.jboss.workspace.client.widgets.WSModalDialog;
 
 
 public class GridDemoMerge implements Tool {
-    public Widget getWidget(final StatePacket packet) {
+    public Widget getWidget() {
         final WorkPanel workPanel = new WorkPanel();
         workPanel.setHeight("100%");
         workPanel.setTitle("Grid Demo Merge");

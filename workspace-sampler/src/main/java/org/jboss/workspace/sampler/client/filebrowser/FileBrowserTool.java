@@ -8,7 +8,7 @@ import com.google.gwt.core.client.GWT;
 
 
 public class FileBrowserTool  implements Tool {
-    public Widget getWidget(StatePacket packet) {
+    public Widget getWidget() {
         return new FileBrowserWidget();
     }
 

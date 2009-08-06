@@ -16,7 +16,7 @@ import java.util.Map;
 
 public class DialogDemo implements Tool {
 
-    public Widget getWidget(StatePacket packet) {
+    public Widget getWidget() {
         WorkPanel panel = new WorkPanel();
         panel.setTitle("Dialog Demo");
 

@@ -50,7 +50,7 @@ public class TabOpeningClickHandler implements ClickHandler {
         msg.put(CommandProcessor.MessageParts.MultipleInstances.name(),  tool.multipleAllowed());
         msg.put(CommandProcessor.MessageParts.Name.name(),               tool.getName());
 
-        Widget w = tool.getWidget(new StatePacket(tool.getId(), tool.getName()));
+        Widget w = tool.getWidget();
 
         String DOMID = tool.getId() + "_" + System.currentTimeMillis();
         w.getElement().setId(DOMID);

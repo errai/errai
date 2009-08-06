@@ -29,7 +29,7 @@ import java.util.HashMap;
 
 public class GridDemo implements Tool {
 
-    public Widget getWidget(final StatePacket packet) {
+    public Widget getWidget() {
         final WorkPanel workPanel = new WorkPanel();
         workPanel.setHeight("100%");
 
@@ -39,11 +39,11 @@ public class GridDemo implements Tool {
 
         populateTable(wsGrid);
 
-        wsGrid.addCellChangeHandler(new ChangeHandler() {
-            public void onChange(ChangeEvent changeEvent) {
-                packet.setModifiedFlag(true);
-            }
-        });
+//        wsGrid.addCellChangeHandler(new ChangeHandler() {
+//            public void onChange(ChangeEvent changeEvent) {
+//                packet.setModifiedFlag(true);
+//            }
+//        });
 
         LayoutHint.attach(wsGrid, new LayoutHintProvider() {
             public int getHeightHint() {

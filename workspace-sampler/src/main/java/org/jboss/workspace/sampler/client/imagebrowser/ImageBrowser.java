@@ -16,7 +16,7 @@ import org.jboss.workspace.client.widgets.WSWindowPanel;
 
 
 public class ImageBrowser implements Tool {
-    public Widget getWidget(StatePacket packet) {
+    public Widget getWidget() {
         return new Composite() {
             DockPanel dockPanel = new DockPanel();
 

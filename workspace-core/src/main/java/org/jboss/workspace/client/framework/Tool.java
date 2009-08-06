@@ -6,7 +6,7 @@ import org.jboss.workspace.client.rpc.StatePacket;
 
 public interface Tool {
 
-    public Widget getWidget(StatePacket packet);
+    public Widget getWidget();
 
     public String getName();
 

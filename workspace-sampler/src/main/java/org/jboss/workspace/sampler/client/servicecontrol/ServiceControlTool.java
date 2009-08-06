@@ -7,7 +7,7 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.core.client.GWT;
 
 public class ServiceControlTool implements Tool {
-    public Widget getWidget(StatePacket packet) {
+    public Widget getWidget() {
         return new ServiceWidget();
     }
 
