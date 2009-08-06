@@ -6,8 +6,8 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.Window;
 import org.jboss.workspace.client.framework.AcceptsCallback;
-import org.jboss.workspace.client.framework.Federation;
 import org.jboss.workspace.client.framework.Tool;
+import org.jboss.workspace.client.framework.FederationUtil;
 import org.jboss.workspace.client.layout.WorkPanel;
 import org.jboss.workspace.client.rpc.StatePacket;
 import org.jboss.workspace.client.widgets.WSModalDialog;
@@ -31,9 +31,9 @@ public class DialogDemo implements Tool {
         dPanel.add(b, DockPanel.CENTER);
         dPanel.setCellHorizontalAlignment(b, HasHorizontalAlignment.ALIGN_CENTER);
 
-        Federation.subscribe("mysubject", panel.getElement(), new AcceptsCallback() {
+        FederationUtil.subscribe("mysubject", panel.getElement(), new AcceptsCallback() {
             public void callback(Object message, Object data) {
-                Map m = (Map) Federation.decodeMap(message);
+                Map m = (Map) FederationUtil.decodeMap(message);
 
                 Window.alert("I see you just opened a component (" + m.get("Component") + "): " + m.get("Opened"));
 

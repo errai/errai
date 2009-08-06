@@ -57,7 +57,7 @@ public class WorkspaceSampler implements EntryPoint {
                 Image cameraIcon = new Image(GWT.getModuleBaseURL() + "/images/ui/icons/camera_go.png");
                 WSTreeItem imagesItem = new WSTreeItem(cameraIcon, "Images");
                 tItem.addItem(imagesItem);
-                tree.attachListener(imagesItem, new TabOpeningClickHandler(Workspace.currentWorkspace(), new ImageBrowser()));
+                tree.attachListener(imagesItem, new TabOpeningClickHandler(new ImageBrowser()));
 
                 Image audioIcon = new Image(GWT.getModuleBaseURL() + "/images/ui/icons/control_play_blue.png");
                 tItem.addItem(new WSTreeItem(audioIcon, "Audio"));

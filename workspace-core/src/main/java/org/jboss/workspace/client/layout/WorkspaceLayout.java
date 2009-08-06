@@ -363,7 +363,6 @@ public class WorkspaceLayout extends Composite {
 
                     switch (CommandProcessor.Command.valueOf(commandType)) {
                         case GetWidget:
-
                             Widget w = tool.getWidget(new StatePacket(tool.getId(), tool.getName()));
                             String elId = "new_" + tool.getId() + System.currentTimeMillis();
                             w.getElement().setId(elId);
@@ -376,7 +375,6 @@ public class WorkspaceLayout extends Composite {
                             map.put(CommandProcessor.MessageParts.IconURI.name(), tool.getIcon().getUrl());
 
                             CommandProcessor.Command.OpenNewTab.send(map);
-
                             break;
                         case DisposeWidget:
                             break;

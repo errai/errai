@@ -11,7 +11,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 import org.jboss.workspace.client.framework.Tool;
-import org.jboss.workspace.client.framework.Federation;
+import org.jboss.workspace.client.framework.FederationUtil;
 import org.jboss.workspace.client.layout.LayoutHint;
 import org.jboss.workspace.client.layout.LayoutHintProvider;
 import org.jboss.workspace.client.layout.WorkPanel;
@@ -38,8 +38,6 @@ public class GridDemo implements Tool {
         wsGrid.setWidth("100%");
 
         populateTable(wsGrid);
-
-        assert packet.getActiveLayout() != null;
 
         wsGrid.addCellChangeHandler(new ChangeHandler() {
             public void onChange(ChangeEvent changeEvent) {
@@ -88,7 +86,7 @@ public class GridDemo implements Tool {
         message.put("Component", "Grid");
         message.put("Opened", true);
         
-        Federation.store("mysubject", Federation.encodeMap(message));
+        FederationUtil.store("mysubject", FederationUtil.encodeMap(message));
 
         return workPanel;
     }
