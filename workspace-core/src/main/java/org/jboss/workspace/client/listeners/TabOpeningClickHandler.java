@@ -3,9 +3,12 @@ package org.jboss.workspace.client.listeners;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.RootPanel;
 import org.jboss.workspace.client.framework.CommandProcessor;
 import org.jboss.workspace.client.framework.Tool;
 import org.jboss.workspace.client.layout.WorkspaceLayout;
+import org.jboss.workspace.client.rpc.StatePacket;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,7 +48,17 @@ public class TabOpeningClickHandler implements ClickHandler {
         msg.put(CommandProcessor.MessageParts.ComponentID.name(),        tool.getId());
         msg.put(CommandProcessor.MessageParts.IconURI.name(),            tool.getIcon().getUrl());
         msg.put(CommandProcessor.MessageParts.MultipleInstances.name(),  tool.multipleAllowed());
-        
+        msg.put(CommandProcessor.MessageParts.Name.name(),               tool.getName());
+
+        Widget w = tool.getWidget(new StatePacket(tool.getId(), tool.getName()));
+
+        String DOMID = tool.getId() + "_" + System.currentTimeMillis();
+        w.getElement().setId(DOMID);
+        w.setVisible(false);
+        RootPanel.get().add(w);
+
+        msg.put(CommandProcessor.MessageParts.DOMID.name(),             DOMID);
+           
         CommandProcessor.Command.OpenNewTab.send(msg);
     }
 
