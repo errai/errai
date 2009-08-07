@@ -31,6 +31,7 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
             if (remoteSubscriptions.containsKey(subject)) {
                 for (Map.Entry<Object, Queue<Message>> entry : messageQueues.entrySet()) {
                     if (remoteSubscriptions.get(subject).contains(entry.getKey())) {
+                        System.out.println("*** Topic '" + subject + "' is a client end-point. Pushing!");
                         messageQueues.get(entry.getKey()).add(new Message() {
                             public String getSubject() {
                                 return subject;

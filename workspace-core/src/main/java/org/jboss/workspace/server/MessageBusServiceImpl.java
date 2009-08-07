@@ -22,10 +22,15 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
             @Override
             public void run() {
                 try {
+                    /**
+                     * Wait 10 seconds.
+                     */
                     sleep(1000 * 10);
 
                     System.out.println("transmitting test message...");
-                    bus.store("org.jboss.workspace.WorkspaceLayout", "[[\"CommandType\", \"Hello\"], [\"Name\", \"Mr. Server\"]]");
+
+                    bus.store("org.jboss.workspace.WorkspaceLayout", 
+                            "[[\"CommandType\", \"Hello\"], [\"Name\", \"Mr. Server\"]]");
                 }
                 catch (InterruptedException e) {
 
