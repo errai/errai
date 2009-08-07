@@ -17,18 +17,33 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
     public class SimpleMessageBus implements MessageBus {
         private final Map<String, List<AcceptsCallback>> subscriptions = new HashMap<String, List<AcceptsCallback>>();
         private final Map<String, List<Object>> remoteSubscriptions = new HashMap<String, List<Object>>();
+
         private final Map<Object, Queue<Message>> messageQueues = new HashMap<Object, Queue<Message>>();
         private final Map<Object, Thread> activeWaitingThreads = new HashMap<Object, Thread>();
 
-        public void store(String subject, String message) {
+        public void store(final String subject, final String message) {
             if (subscriptions.containsKey(subject)) {
                 for (AcceptsCallback c : subscriptions.get(subject)) {
                     c.callback(message, null);
                 }
             }
+
             if (remoteSubscriptions.containsKey(subject)) {
-                for (Thread t : activeWaitingThreads.values()) {
-                    t.interrupt();
+                for (Map.Entry<Object, Queue<Message>> entry : messageQueues.entrySet()) {
+                    if (remoteSubscriptions.get(subject).contains(entry.getKey())) {
+                        messageQueues.get(entry.getKey()).add(new Message() {
+                            public String getSubject() {
+                                return subject;
+                            }
+
+                            public String getMessage() {
+                                return message;
+                            }
+                        });
+
+                        Thread t = activeWaitingThreads.get(entry.getKey());
+                        if (t != null) t.interrupt();
+                    }
                 }
             }
 
@@ -41,16 +56,16 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
 
             if (q.isEmpty()) {
                 try {
+                    System.out.println("Thread waiting...");
                     activeWaitingThreads.put(sessionContext, Thread.currentThread());
-                    Thread.sleep((1000 * 60) * 45);
+                    Thread.sleep(1000 * 45);
                 }
                 catch (InterruptedException e) {
-                    return q.poll();
                 }
                 finally {
                     activeWaitingThreads.remove(sessionContext);
                 }
-                return null;
+                return q.poll();
 
             }
             else {
@@ -60,7 +75,8 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
 
 
         private Queue<Message> getQueue(Object sessionContext) {
-            if (!messageQueues.containsKey(sessionContext)) messageQueues.put(sessionContext, new LinkedList<Message>());
+            if (!messageQueues.containsKey(sessionContext))
+                messageQueues.put(sessionContext, new LinkedList<Message>());
             return messageQueues.get(sessionContext);
         }
 
@@ -72,6 +88,8 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
         public void remoteSubscribe(Object sessionContext, String subject) {
             if (!remoteSubscriptions.containsKey(subject)) remoteSubscriptions.put(subject, new ArrayList<Object>());
             remoteSubscriptions.get(subject).add(sessionContext);
+
+            System.out.println("RemoteRegistration:" + subject);
         }
 
         public Set<String> getSubjects() {

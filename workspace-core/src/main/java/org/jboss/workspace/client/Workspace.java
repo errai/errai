@@ -14,11 +14,12 @@ import org.jboss.workspace.client.framework.AcceptsCallback;
 import org.jboss.workspace.client.framework.FederationUtil;
 import org.jboss.workspace.client.framework.ModuleLoaderBootstrap;
 import org.jboss.workspace.client.layout.WorkspaceLayout;
+import org.jboss.workspace.client.rpc.MessageBusService;
 import org.jboss.workspace.client.rpc.MessageBusServiceAsync;
 import org.jboss.workspace.client.rpc.StatePacket;
-import org.jboss.workspace.client.rpc.MessageBusService;
 
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
@@ -27,6 +28,7 @@ public class Workspace implements EntryPoint {
     public static PickupDragController dragController;
     private static WorkspaceLayout workspaceLayout;
 
+    private static List<ToolSet> toBeLoaded = new ArrayList<ToolSet>();
 
     private Workspace() {
     }
@@ -36,14 +38,38 @@ public class Workspace implements EntryPoint {
      */
     public void onModuleLoad() {
         init("rootPanel");
+    }
+
+    private void init(String rootId) {
+        if (workspaceLayout != null) {
+            Window.alert("Workspace already initialized.");
+            return;
+        }
+
+        establishHTTPSession(rootId);
+
         _initAfterWSLoad();
     }
 
-    private WorkspaceLayout init(String rootId) {
-        if (workspaceLayout != null) {
-            Window.alert("Workspace already initialized.");
-            return null;
-        }
+    private void initWorkspace(String rootId) {
+        FederationUtil.addOnSubscribeHook(new AcceptsCallback() {
+            public void callback(Object message, Object data) {
+
+                AsyncCallback remoteSubscribe = new AsyncCallback() {
+                    public void onFailure(Throwable throwable) {
+                    }
+
+                    public void onSuccess(Object o) {
+                    }
+                };
+
+                final MessageBusServiceAsync messageBus = (MessageBusServiceAsync) create(MessageBusService.class);
+                final ServiceDefTarget endpoint = (ServiceDefTarget) messageBus;
+                endpoint.setServiceEntryPoint(getModuleBaseURL() + "jbwMsgBus");
+                messageBus.remoteSubscribe((String) message, remoteSubscribe);
+            }
+        });
+
 
         workspaceLayout = new WorkspaceLayout(rootId);
         workspaceLayout.setRpcSync(true);
@@ -56,7 +82,7 @@ public class Workspace implements EntryPoint {
         }
         else {
             Window.alert("No root ID specified!");
-            return null;
+            return;
         }
 
         dragController = new PickupDragController(RootPanel.get(), true);
@@ -64,21 +90,77 @@ public class Workspace implements EntryPoint {
         ModuleLoaderBootstrap mlb = create(ModuleLoaderBootstrap.class);
         mlb.initAll(workspaceLayout);
 
+
+        initializeMessagingBus();
+
         /**
          * Get any session state information from the server.
          */
         workspaceLayout.pullSessionState();
-
-        initializeMessagingBus();
-
-        return workspaceLayout;
     }
 
-    private void initializeMessagingBus() {
-
+    private void establishHTTPSession(final String rootId) {
         final MessageBusServiceAsync messageBus = (MessageBusServiceAsync) create(MessageBusService.class);
         final ServiceDefTarget endpoint = (ServiceDefTarget) messageBus;
         endpoint.setServiceEntryPoint(getModuleBaseURL() + "jbwMsgBus");
+
+        AsyncCallback store = new AsyncCallback() {
+            public void onFailure(Throwable throwable) {
+                Window.alert("NO CARRIER.");
+            }
+
+            public void onSuccess(Object o) {
+                initWorkspace(rootId);
+            }
+        };
+
+        messageBus.store("HelloRemote", "ImHere", store);
+    }
+
+    private void initializeMessagingBus() {
+        final MessageBusServiceAsync messageBus = (MessageBusServiceAsync) create(MessageBusService.class);
+        final ServiceDefTarget endpoint = (ServiceDefTarget) messageBus;
+        endpoint.setServiceEntryPoint(getModuleBaseURL() + "jbwMsgBus");
+
+
+        final Timer incoming = new Timer() {
+            boolean block = false;
+
+            @Override
+            public void run() {
+                System.out.println("Client:Polling...");
+
+                if (block) return;
+
+                AsyncCallback nextMessage = new AsyncCallback<String[]>() {
+                    public void onFailure(Throwable throwable) {
+                        block = false;
+                    }
+
+                    public void onSuccess(String[] o) {
+                        System.out.println("Client received message");
+                        FederationUtil.store(o[0], o[1]);
+                        block = false;
+                    }
+                };
+
+                block = true;
+                messageBus.nextMessage(nextMessage);
+            }
+
+
+        };
+
+        System.out.println("About to start poll...");
+        incoming.schedule(1);
+
+        final Timer outerTimer = new Timer() {
+            @Override
+            public void run() {
+                incoming.scheduleRepeating((60 * 45) * 1000);
+            }
+        };
+
 
         AsyncCallback<String[]> getSubjects = new AsyncCallback<String[]>() {
             public void onFailure(Throwable throwable) {
@@ -86,6 +168,11 @@ public class Workspace implements EntryPoint {
             }
 
             public void onSuccess(String[] o) {
+
+                for (ToolSet ts : toBeLoaded) {
+                    WorkspaceLayout.addToolSet(ts);
+                }
+
                 for (final String subject : o) {
                     FederationUtil.subscribe(subject, null, new AcceptsCallback() {
                         public void callback(Object message, Object data) {
@@ -101,56 +188,25 @@ public class Workspace implements EntryPoint {
                         }
                     }, null);
                 }
+
+                outerTimer.schedule(10);
             }
         };
 
         messageBus.getSubjects(getSubjects);
 
-        FederationUtil.addOnSubscribeHook(new AcceptsCallback() {
-            public void callback(Object message, Object data) {
-                AsyncCallback remoteSubscribe = new AsyncCallback() {
-                    public void onFailure(Throwable throwable) {
-                    }
 
-                    public void onSuccess(Object o) {
-                    }
-                };
-                messageBus.remoteSubscribe((String) message, remoteSubscribe);
-            }
-        });
+        System.out.println("Started...");
+
 
         /**
          * Setup the push-polling system that will route server messages to the local client bus.
          */
-        final Timer incoming = new Timer() {
-            boolean block = false;
-
-            @Override
-            public void run() {
-                if (block) return;
-
-                AsyncCallback nextMessage = new AsyncCallback<String[]>() {
-                    public void onFailure(Throwable throwable) {
-                        block = false;
-                    }
-
-                    public void onSuccess(String[] o) {
-                        FederationUtil.store(o[0], o[1]);
-                        block = false;
-                    }
-                };
-
-                block = true;
-                messageBus.nextMessage(nextMessage);
-            }
-        };
-
-        incoming.scheduleRepeating((60 * 45) * 1000);
 
     }
 
     public static void addToolSet(ToolSet toolSet) {
-        workspaceLayout.addToolSet(toolSet);
+        toBeLoaded.add(toolSet);
     }
 
     public static void notifyState(StatePacket packet) {
