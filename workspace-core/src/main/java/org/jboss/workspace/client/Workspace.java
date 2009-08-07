@@ -16,6 +16,7 @@ import org.jboss.workspace.client.framework.ModuleLoaderBootstrap;
 import org.jboss.workspace.client.layout.WorkspaceLayout;
 import org.jboss.workspace.client.rpc.MessageBusServiceAsync;
 import org.jboss.workspace.client.rpc.StatePacket;
+import org.jboss.workspace.client.rpc.MessageBusService;
 
 import java.util.Set;
 
@@ -75,16 +76,16 @@ public class Workspace implements EntryPoint {
 
     private void initializeMessagingBus() {
 
-        final MessageBusServiceAsync messageBus = (MessageBusServiceAsync) create(MessageBusServiceAsync.class);
+        final MessageBusServiceAsync messageBus = (MessageBusServiceAsync) create(MessageBusService.class);
         final ServiceDefTarget endpoint = (ServiceDefTarget) messageBus;
         endpoint.setServiceEntryPoint(getModuleBaseURL() + "jbwMsgBus");
 
-        AsyncCallback<Set<String>> getSubjects = new AsyncCallback<Set<String>>() {
+        AsyncCallback<String[]> getSubjects = new AsyncCallback<String[]>() {
             public void onFailure(Throwable throwable) {
                 Window.alert("Workspace is angry! >:( Can't establish link with message bus on server");
             }
 
-            public void onSuccess(Set<String> o) {
+            public void onSuccess(String[] o) {
                 for (final String subject : o) {
                     FederationUtil.subscribe(subject, null, new AcceptsCallback() {
                         public void callback(Object message, Object data) {
@@ -104,7 +105,6 @@ public class Workspace implements EntryPoint {
         };
 
         messageBus.getSubjects(getSubjects);
-
 
         FederationUtil.addOnSubscribeHook(new AcceptsCallback() {
             public void callback(Object message, Object data) {

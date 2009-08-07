@@ -36,7 +36,7 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
         bus.remoteSubscribe(getThreadLocalRequest().getSession(true), subject);
     }
 
-    public Set<String> getSubjects() {
-        return bus.getSubjects();
+    public String[] getSubjects() {
+        return bus.getSubjects().toArray(new String[bus.getSubjects().size()]);
     }
 }
