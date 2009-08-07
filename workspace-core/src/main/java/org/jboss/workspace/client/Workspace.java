@@ -16,7 +16,6 @@ import org.jboss.workspace.client.framework.ModuleLoaderBootstrap;
 import org.jboss.workspace.client.layout.WorkspaceLayout;
 import org.jboss.workspace.client.rpc.MessageBusService;
 import org.jboss.workspace.client.rpc.MessageBusServiceAsync;
-import org.jboss.workspace.client.rpc.StatePacket;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +45,7 @@ public class Workspace implements EntryPoint {
             return;
         }
 
-        establishHTTPSession(rootId);
+        beginStartup(rootId);
 
         _initAfterWSLoad();
     }
@@ -72,7 +71,6 @@ public class Workspace implements EntryPoint {
 
 
         workspaceLayout = new WorkspaceLayout(rootId);
-        workspaceLayout.setRpcSync(true);
 
         enableScrolling(false);
 
@@ -90,16 +88,10 @@ public class Workspace implements EntryPoint {
         ModuleLoaderBootstrap mlb = create(ModuleLoaderBootstrap.class);
         mlb.initAll(workspaceLayout);
 
-
         initializeMessagingBus();
-
-        /**
-         * Get any session state information from the server.
-         */
-        workspaceLayout.pullSessionState();
     }
 
-    private void establishHTTPSession(final String rootId) {
+    private void beginStartup(final String rootId) {
         final MessageBusServiceAsync messageBus = (MessageBusServiceAsync) create(MessageBusService.class);
         final ServiceDefTarget endpoint = (ServiceDefTarget) messageBus;
         endpoint.setServiceEntryPoint(getModuleBaseURL() + "jbwMsgBus");
@@ -128,8 +120,6 @@ public class Workspace implements EntryPoint {
 
             @Override
             public void run() {
-                System.out.println("Client:Polling...");
-
                 if (block) return;
 
                 AsyncCallback nextMessage = new AsyncCallback<String[]>() {
@@ -138,7 +128,7 @@ public class Workspace implements EntryPoint {
                     }
 
                     public void onSuccess(String[] o) {
-                        System.out.println("Client received message");
+                        //        System.out.println("Client received message");
                         FederationUtil.store(o[0], o[1]);
                         block = false;
                     }
@@ -151,7 +141,6 @@ public class Workspace implements EntryPoint {
 
         };
 
-        System.out.println("About to start poll...");
         incoming.schedule(1);
 
         final Timer outerTimer = new Timer() {
@@ -195,26 +184,10 @@ public class Workspace implements EntryPoint {
 
         messageBus.getSubjects(getSubjects);
 
-
-        System.out.println("Started...");
-
-
-        /**
-         * Setup the push-polling system that will route server messages to the local client bus.
-         */
-
     }
 
     public static void addToolSet(ToolSet toolSet) {
         toBeLoaded.add(toolSet);
-    }
-
-    public static void notifyState(StatePacket packet) {
-        workspaceLayout.notifySessionState(packet);
-    }
-
-    public static WorkspaceLayout currentWorkspace() {
-        return workspaceLayout;
     }
 
     private native static void _initAfterWSLoad() /*-{

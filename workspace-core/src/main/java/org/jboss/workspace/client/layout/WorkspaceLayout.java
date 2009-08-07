@@ -54,9 +54,7 @@ public class WorkspaceLayout extends Composite {
 
     public List<WorkspaceSizeChangeListener> workspaceSizeChangeListers = new ArrayList<WorkspaceSizeChangeListener>();
 
-    private boolean rpcSync = true;
-
-    public int tabs = 0;
+//    public int tabs = 0;
 
     private int currSizeW;
     private int currSizeH;
@@ -139,7 +137,6 @@ public class WorkspaceLayout extends Composite {
                         Map commandMessage = FederationUtil.decodeMap(message);
 
                         String commandType = (String) commandMessage.get(CommandProcessor.MessageParts.CommandType.name());
-               //         System.out.println("command received: " + commandType);
 
                         switch (CommandProcessor.Command.valueOf(commandType)) {
                             case OpenNewTab:
@@ -158,8 +155,6 @@ public class WorkspaceLayout extends Composite {
                                 subject = (String) commandMessage.get(CommandProcessor.MessageParts.Subject.name());
 
                                 availableTools.put(componentId, subject);
-
-                 //               System.out.println("Tool Published: " + componentId + "; subject:" + subject);
                                 break;
 
                             case RegisterToolSet:
@@ -169,13 +164,10 @@ public class WorkspaceLayout extends Composite {
                                 Element e = getElementById(DOMID);
                                 WSElementWrapper w = new WSElementWrapper(e);
 
-                 //               System.out.println("Registering ToolSet: " + name);
-
                                 navigation.add(w, name);
                                 break;
 
                             case CloseTab:
-                 //               System.out.println("ClosingTab");
                                 String instanceId = (String) commandMessage.get(CommandProcessor.MessageParts.InstanceID.name());
                                 closeTab(instanceId);
 
@@ -521,8 +513,6 @@ public class WorkspaceLayout extends Composite {
 
         activateTool(packet.getComponentTypeId());
 
-        notifySessionState(packet);
-
         Timer t = new Timer() {
             public void run() {
                 pack();
@@ -553,73 +543,6 @@ public class WorkspaceLayout extends Composite {
         tabPanel.selectTab(idx);
     }
 
-
-    public void pullSessionState() {
-        if (!rpcSync) return;
-
-        LayoutStateServiceAsync guvSvc = (LayoutStateServiceAsync) create(LayoutStateService.class);
-        ServiceDefTarget endpoint = (ServiceDefTarget) guvSvc;
-        endpoint.setServiceEntryPoint(getModuleBaseURL() + "workspaceUIstate");
-
-        AsyncCallback<StatePacket[]> callback = new AsyncCallback<StatePacket[]>() {
-            public void onFailure(Throwable throwable) {
-            }
-
-            public void onSuccess(StatePacket[] packets) {
-                for (StatePacket packet : packets) {
-                    //Tool tool = availableTools.get(packet.getComponentTypeId());
-                    //_openTab(tool, packet, tool.getIcon());
-                }
-
-            }
-        };
-
-        guvSvc.getAllLayoutPackets(callback);
-
-        Timer t = new Timer() {
-            public void run() {
-                pack();
-            }
-        };
-
-        t.schedule(25);
-    }
-
-    public void notifySessionState(StatePacket packet) {
-        if (!rpcSync) return;
-//
-//        LayoutStateServiceAsync guvSvc = (LayoutStateServiceAsync) create(LayoutStateService.class);
-//        ServiceDefTarget endpoint = (ServiceDefTarget) guvSvc;
-//        endpoint.setServiceEntryPoint(getModuleBaseURL() + "workspaceUIstate");
-//
-//        AsyncCallback callback = new AsyncCallback() {
-//            public void onFailure(Throwable throwable) {
-//            }
-//
-//            public void onSuccess(Object o) {
-//            }
-//        };
-//
-//        guvSvc.saveLayoutState(packet, callback);
-    }
-
-//    public void deleteSessionState(StatePacket packet) {
-//        if (!rpcSync) return;
-//
-//        LayoutStateServiceAsync guvSvc = (LayoutStateServiceAsync) create(LayoutStateService.class);
-//        ServiceDefTarget endpoint = (ServiceDefTarget) guvSvc;
-//        endpoint.setServiceEntryPoint(getModuleBaseURL() + "workspaceUIstate");
-//
-//        AsyncCallback callback = new AsyncCallback() {
-//            public void onFailure(Throwable throwable) {
-//            }
-//
-//            public void onSuccess(Object o) {
-//            }
-//        };
-//
-//        guvSvc.deleteLayoutState(packet, callback);
-//    }
 
     public void activateTool(String componentTypeId) {
         if (activeTools.containsKey(componentTypeId)) {
@@ -704,14 +627,6 @@ public class WorkspaceLayout extends Composite {
 
     public int getNavPanelOffsetWidth() {
         return navigation.getOffsetWidth();
-    }
-
-    public boolean isRpcSync() {
-        return rpcSync;
-    }
-
-    public void setRpcSync(boolean rpcSync) {
-        this.rpcSync = rpcSync;
     }
 
     public void pack() {
