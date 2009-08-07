@@ -17,7 +17,7 @@
     <entry-point class='org.jboss.workspace.client.Workspace'/>
     <stylesheet src="jboss-workspace-default.css"/>
 
-    <servlet path="/workspaceUIstate" class="org.jboss.workspace.server.LayoutStateServiceImpl"/>
+    <servlet path="/wsMsgBus" class="org.jboss.workspace.server.MessageBusServiceImpl"/>
 
     <replace-with class="org.jboss.workspace.client.util.effectimpl.KHTMLEffectImpl">
         <when-type-is class="org.jboss.workspace.client.util.Effect"/>

@@ -3,12 +3,21 @@ package org.jboss.workspace.client;
 import com.allen_sauer.gwt.dnd.client.PickupDragController;
 import com.google.gwt.core.client.EntryPoint;
 import static com.google.gwt.core.client.GWT.create;
+import static com.google.gwt.core.client.GWT.getModuleBaseURL;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import static com.google.gwt.user.client.Window.enableScrolling;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.RootPanel;
+import org.jboss.workspace.client.framework.AcceptsCallback;
+import org.jboss.workspace.client.framework.FederationUtil;
 import org.jboss.workspace.client.framework.ModuleLoaderBootstrap;
 import org.jboss.workspace.client.layout.WorkspaceLayout;
+import org.jboss.workspace.client.rpc.MessageBusServiceAsync;
 import org.jboss.workspace.client.rpc.StatePacket;
+
+import java.util.Set;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
@@ -59,7 +68,85 @@ public class Workspace implements EntryPoint {
          */
         workspaceLayout.pullSessionState();
 
+        initializeMessagingBus();
+
         return workspaceLayout;
+    }
+
+    private void initializeMessagingBus() {
+
+        final MessageBusServiceAsync messageBus = (MessageBusServiceAsync) create(MessageBusServiceAsync.class);
+        final ServiceDefTarget endpoint = (ServiceDefTarget) messageBus;
+        endpoint.setServiceEntryPoint(getModuleBaseURL() + "jbwMsgBus");
+
+        AsyncCallback<Set<String>> getSubjects = new AsyncCallback<Set<String>>() {
+            public void onFailure(Throwable throwable) {
+                Window.alert("Workspace is angry! >:( Can't establish link with message bus on server");
+            }
+
+            public void onSuccess(Set<String> o) {
+                for (final String subject : o) {
+                    FederationUtil.subscribe(subject, null, new AcceptsCallback() {
+                        public void callback(Object message, Object data) {
+                            AsyncCallback cb = new AsyncCallback() {
+                                public void onFailure(Throwable throwable) {
+                                }
+
+                                public void onSuccess(Object o) {
+                                }
+                            };
+
+                            messageBus.store(subject, (String) message, cb);
+                        }
+                    }, null);
+                }
+            }
+        };
+
+        messageBus.getSubjects(getSubjects);
+
+
+        FederationUtil.addOnSubscribeHook(new AcceptsCallback() {
+            public void callback(Object message, Object data) {
+                AsyncCallback remoteSubscribe = new AsyncCallback() {
+                    public void onFailure(Throwable throwable) {
+                    }
+
+                    public void onSuccess(Object o) {
+                    }
+                };
+                messageBus.remoteSubscribe((String) message, remoteSubscribe);
+            }
+        });
+
+        /**
+         * Setup the push-polling system that will route server messages to the local client bus.
+         */
+        final Timer incoming = new Timer() {
+            boolean block = false;
+
+            @Override
+            public void run() {
+                if (block) return;
+
+                AsyncCallback nextMessage = new AsyncCallback<String[]>() {
+                    public void onFailure(Throwable throwable) {
+                        block = false;
+                    }
+
+                    public void onSuccess(String[] o) {
+                        FederationUtil.store(o[0], o[1]);
+                        block = false;
+                    }
+                };
+
+                block = true;
+                messageBus.nextMessage(nextMessage);
+            }
+        };
+
+        incoming.scheduleRepeating((60 * 45) * 1000);
+
     }
 
     public static void addToolSet(ToolSet toolSet) {

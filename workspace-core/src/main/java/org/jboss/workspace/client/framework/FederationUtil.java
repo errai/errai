@@ -5,10 +5,24 @@ import com.google.gwt.user.client.Element;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 
 
 public class FederationUtil {
-    public native static void subscribe(String subject, Element scope, AcceptsCallback callback,
+    private static List<AcceptsCallback> onSubscribeHooks = new ArrayList<AcceptsCallback>();
+
+    public static void subscribe(String subject, Element scope, AcceptsCallback callback,
+                                        Object subscriberData) {
+
+        for (AcceptsCallback c : onSubscribeHooks) {
+            c.callback(subject, subscriberData);
+        }
+
+        _subscribe(subject, scope, callback, subscriberData);
+    }
+
+    private native static void _subscribe(String subject, Element scope, AcceptsCallback callback,
                                         Object subscriberData) /*-{
          $wnd.PageBus.subscribe(subject, scope,
              function(subject, message, subscriberData) {
@@ -20,6 +34,10 @@ public class FederationUtil {
          $wnd.PageBus.store(subject, value);
     }-*/;
 
+
+    public static void addOnSubscribeHook(AcceptsCallback callback) {
+        onSubscribeHooks.add(callback);
+    }
 
     public static Map<String, Object> decodeMap(Object value) {
         JSONValue a = JSONParser.parse(String.valueOf(value));

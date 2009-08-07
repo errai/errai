@@ -603,23 +603,23 @@ public class WorkspaceLayout extends Composite {
         guvSvc.saveLayoutState(packet, callback);
     }
 
-    public void deleteSessionState(StatePacket packet) {
-        if (!rpcSync) return;
-
-        LayoutStateServiceAsync guvSvc = (LayoutStateServiceAsync) create(LayoutStateService.class);
-        ServiceDefTarget endpoint = (ServiceDefTarget) guvSvc;
-        endpoint.setServiceEntryPoint(getModuleBaseURL() + "workspaceUIstate");
-
-        AsyncCallback callback = new AsyncCallback() {
-            public void onFailure(Throwable throwable) {
-            }
-
-            public void onSuccess(Object o) {
-            }
-        };
-
-        guvSvc.deleteLayoutState(packet, callback);
-    }
+//    public void deleteSessionState(StatePacket packet) {
+//        if (!rpcSync) return;
+//
+//        LayoutStateServiceAsync guvSvc = (LayoutStateServiceAsync) create(LayoutStateService.class);
+//        ServiceDefTarget endpoint = (ServiceDefTarget) guvSvc;
+//        endpoint.setServiceEntryPoint(getModuleBaseURL() + "workspaceUIstate");
+//
+//        AsyncCallback callback = new AsyncCallback() {
+//            public void onFailure(Throwable throwable) {
+//            }
+//
+//            public void onSuccess(Object o) {
+//            }
+//        };
+//
+//        guvSvc.deleteLayoutState(packet, callback);
+//    }
 
     public void activateTool(String componentTypeId) {
         if (activeTools.containsKey(componentTypeId)) {
