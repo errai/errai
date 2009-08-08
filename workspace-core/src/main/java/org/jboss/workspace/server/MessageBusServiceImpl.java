@@ -1,22 +1,18 @@
 package org.jboss.workspace.server;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-import com.google.gwt.json.client.JSONParser;
 import org.jboss.workspace.client.framework.AcceptsCallback;
 import org.jboss.workspace.client.rpc.MessageBusService;
 import org.jboss.workspace.server.bus.Message;
 import org.jboss.workspace.server.bus.MessageBus;
 import org.jboss.workspace.server.bus.SimpleMessageBusProvider;
-import org.mvbus.Configuration;
-import org.mvbus.MVBus;
-import org.mvbus.encode.engines.json.JsonDecodingEngine;
+import org.jboss.workspace.server.json.JSONUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.util.List;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 public class MessageBusServiceImpl extends RemoteServiceServlet implements MessageBusService {
     private MessageBus bus;
@@ -33,7 +29,7 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
                     /**
                      * Wait 10 seconds.
                      */
-                    while (true) {
+                 //   while (true) {
                         sleep(1000 * 5);
 
                         System.out.println("transmitting test message...");
@@ -43,8 +39,8 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
                         message.put("Name", "Mr. Server");
 
                         bus.store("org.jboss.workspace.WorkspaceLayout", message);
-                       
-                    }
+
+               //     }
                 }
                 catch (InterruptedException e) {
 
@@ -56,9 +52,13 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
 
         bus.subscribe("ServerEchoService", new AcceptsCallback() {
             public void callback(Object message, Object data) {
-               
 
+                if (message == null) return;
+                Map map = JSONUtil.decodeToMap(String.valueOf(message));
 
+                if (map.containsKey("EchoBackData")) {
+                    System.out.println("EchoBack: " + map.get("EchoBackData"));
+                }
             }
         });
     }
@@ -80,7 +80,7 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
     }
 
     public void remoteSubscribe(String subject) {
-
+        if (bus.getSubjects().contains(subject)) return;
         bus.remoteSubscribe(getId(), subject);
     }
 

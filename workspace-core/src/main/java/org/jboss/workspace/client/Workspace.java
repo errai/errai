@@ -11,14 +11,16 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.RootPanel;
 import org.jboss.workspace.client.framework.AcceptsCallback;
-import org.jboss.workspace.client.rpc.MessageBusClient;
 import org.jboss.workspace.client.framework.ModuleLoaderBootstrap;
 import org.jboss.workspace.client.layout.WorkspaceLayout;
+import org.jboss.workspace.client.rpc.MessageBusClient;
 import org.jboss.workspace.client.rpc.MessageBusService;
 import org.jboss.workspace.client.rpc.MessageBusServiceAsync;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
@@ -48,6 +50,8 @@ public class Workspace implements EntryPoint {
         beginStartup(rootId);
 
         _initAfterWSLoad();
+
+
     }
 
     private void initWorkspace(String rootId) {
@@ -106,7 +110,8 @@ public class Workspace implements EntryPoint {
             }
         };
 
-        messageBus.store("ServerEchoService", "[[\"bar\", \"foo\"], [\"FOO\", \"BAR\"]]", store);
+
+        messageBus.store("ServerEchoService", null, store);
     }
 
     private void createPushListener() {
@@ -157,6 +162,11 @@ public class Workspace implements EntryPoint {
             public void run() {
                 incoming.run();
                 incoming.scheduleRepeating((60 * 45) * 1000);
+
+
+                Map msg = new HashMap();
+                msg.put("EchoBackData", "This is a test of the echoback service!");
+                MessageBusClient.store("ServerEchoService", msg);
             }
         };
 
@@ -173,6 +183,7 @@ public class Workspace implements EntryPoint {
                 }
 
                 for (final String subject : o) {
+                    System.out.println("Subscribing to remote subject '" + subject + "'");
                     MessageBusClient.subscribe(subject, null, new AcceptsCallback() {
                         public void callback(Object message, Object data) {
                             AsyncCallback cb = new AsyncCallback() {
@@ -183,6 +194,7 @@ public class Workspace implements EntryPoint {
                                 }
                             };
 
+                            System.out.println("Transmitting message to server: " + subject + ";message=" + message);
                             messageBus.store(subject, (String) message, cb);
                         }
                     }, null);

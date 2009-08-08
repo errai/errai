@@ -35,6 +35,11 @@ public class MessageBusClient {
          $wnd.PageBus.store(subject, value);
     }-*/;
 
+    public static void store(String subject, Map message) {
+        System.out.println("sending message: " + subject);
+        store(subject, encodeMap(message));
+    }
+
 
     public static void addOnSubscribeHook(AcceptsCallback callback) {
         onSubscribeHooks.add(callback);
