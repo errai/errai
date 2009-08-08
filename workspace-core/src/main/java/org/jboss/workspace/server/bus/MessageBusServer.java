@@ -45,11 +45,9 @@ public class MessageBusServer {
 
         int i = 0;
         for (Map.Entry<String, Object> entry : map.entrySet()) {
-
             buf.append("\"").append(entry.getKey()).append("\"").append(":");
 
-            v = entry.getValue();
-            if (v == null) {
+            if ((v = entry.getValue()) == null) {
                 buf.append("null");
             }
             else if (v instanceof String) {

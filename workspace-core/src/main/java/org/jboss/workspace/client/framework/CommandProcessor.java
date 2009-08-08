@@ -14,8 +14,7 @@ public class CommandProcessor {
         GetWidget,
         DisposeWidget,
         PublishTool,
-        Hello
-        ;
+        Hello;
 
         public String getSubject() {
             return "org.jboss.workspace.WorkspaceLayout";
@@ -26,7 +25,7 @@ public class CommandProcessor {
             String subject = getSubject();
             String msg = MessageBusClient.encodeMap(message);
 
-            System.out.println("About to send: [Subject:" + subject + ";Message:" + msg + "]");
+       //     System.out.println("About to send: [Subject:" + subject + ";Message:" + msg + "]");
 
             MessageBusClient.store(subject, msg);
         }

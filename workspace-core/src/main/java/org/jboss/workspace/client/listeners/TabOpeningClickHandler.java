@@ -7,8 +7,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.RootPanel;
 import org.jboss.workspace.client.framework.CommandProcessor;
 import org.jboss.workspace.client.framework.Tool;
-import org.jboss.workspace.client.layout.WorkspaceLayout;
-import org.jboss.workspace.client.rpc.StatePacket;
 
 import java.util.HashMap;
 import java.util.Map;

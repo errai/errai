@@ -15,9 +15,11 @@ import com.google.gwt.user.client.Window;
 import static com.google.gwt.user.client.Window.addResizeHandler;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.workspace.client.ToolSet;
-import org.jboss.workspace.client.framework.*;
+import org.jboss.workspace.client.framework.AcceptsCallback;
+import org.jboss.workspace.client.framework.CommandProcessor;
+import org.jboss.workspace.client.framework.Tool;
+import org.jboss.workspace.client.framework.WorkspaceSizeChangeListener;
 import org.jboss.workspace.client.listeners.TabCloseHandler;
-import org.jboss.workspace.client.rpc.StatePacket;
 import org.jboss.workspace.client.rpc.MessageBusClient;
 import org.jboss.workspace.client.util.Effects;
 import org.jboss.workspace.client.widgets.*;
@@ -34,7 +36,7 @@ public class WorkspaceLayout extends Composite {
      * The main layout panel.
      */
     public final DockPanel mainLayoutPanel = new DockPanel();
-    public final HorizontalPanel header = createHeader();
+  //  public final HorizontalPanel header = createHeader();
 
     public final WSExtVerticalPanel leftPanel = new WSExtVerticalPanel(this);
     public final WSStackPanel navigation = new WSStackPanel();
@@ -42,6 +44,7 @@ public class WorkspaceLayout extends Composite {
 
     public final WSTabPanel tabPanel = new WSTabPanel();
 
+    @SuppressWarnings({"MismatchedQueryAndUpdateOfCollection"})
     private Map<String, String> availableTools = new HashMap<String, String>();
     private Map<String, Integer> activeTools = new HashMap<String, Integer>();
     private Map<String, String> tabInstances = new HashMap<String, String>();
@@ -82,7 +85,6 @@ public class WorkspaceLayout extends Composite {
         currSizeH = Window.getClientHeight();
 
         RootPanel.get(id).setPixelSize(currSizeW, currSizeH);
-
         mainLayoutPanel.setPixelSize(currSizeW, currSizeH);
 
         addResizeHandler(new ResizeHandler() {
@@ -106,15 +108,11 @@ public class WorkspaceLayout extends Composite {
 
         LayoutHint.attach(tabPanel, new LayoutHintProvider() {
             public int getHeightHint() {
-                int hintHeight = Window.getClientHeight() - tabPanel.getAbsoluteTop() - 20;
-                //  System.out.println("hintHeight:" + hintHeight);
-                return hintHeight;
+                return Window.getClientHeight() - tabPanel.getAbsoluteTop() - 20;
             }
 
             public int getWidthHint() {
-                int hintWidth = Window.getClientWidth() - tabPanel.getAbsoluteLeft() - 10;
-                //  System.out.println("hintWidth:" + hintWidth);
-                return hintWidth;
+                return Window.getClientWidth() - tabPanel.getAbsoluteLeft() - 10;
             }
         });
 
@@ -166,6 +164,7 @@ public class WorkspaceLayout extends Composite {
                             case CloseTab:
                                 String instanceId = (String) commandMessage.get(CommandProcessor.MessageParts.InstanceID.name());
                                 closeTab(instanceId);
+                                break;
 
                             case Hello:
                                 name = (String) commandMessage.get(CommandProcessor.MessageParts.Name.name());
@@ -315,7 +314,6 @@ public class WorkspaceLayout extends Composite {
      * @param toolSet -
      */
     public static void addToolSet(ToolSet toolSet) {
-
         Widget w = toolSet.getWidget();
         String id = "ToolSet_" + toolSet.getToolSetName().replace(" ", "_");
 
@@ -323,13 +321,11 @@ public class WorkspaceLayout extends Composite {
             w.getElement().setId(id);
             w.setVisible(false);
             RootPanel.get().add(w);
-
         }
         else {
             /**
              * Create a default launcher panel.
              */
-
             WSLauncherPanel launcherPanel = new WSLauncherPanel();
 
             for (Tool t : toolSet.getAllProvidedTools()) {
@@ -347,7 +343,6 @@ public class WorkspaceLayout extends Composite {
         msg.put(CommandProcessor.MessageParts.DOMID.name(),     id);
 
         CommandProcessor.Command.RegisterToolSet.send(msg);
-
 
         for (final Tool tool : toolSet.getAllProvidedTools()) {
             String subject = "org.jboss.workspace.toolregistration." + tool.getId();
@@ -388,19 +383,20 @@ public class WorkspaceLayout extends Composite {
 
     private void openTab(String subject, String componentId, String name, Image icon, boolean multipleAllowed, String DOMID) {
         if (!multipleAllowed && tabInstances.containsKey(componentId)) {
-            this.openTab(subject, DOMID, new StatePacket(componentId, name), icon, multipleAllowed);
+            this.openTab(subject, DOMID, componentId, name, icon, multipleAllowed);
         }
         else {
-            this.openTab(subject, DOMID, new StatePacket(componentId, name), icon, multipleAllowed);
+            this.openTab(subject, DOMID, componentId, name, icon, multipleAllowed);
         }
     }
 
 
-    private void openTab(final String subject, final String DOMID, final StatePacket packet, final Image icon, boolean multipleAllowed) {
-        if (isToolActive(packet.getComponentTypeId())) {
+    private void openTab(final String subject, final String DOMID, final String componentId,  final String name,
+                         final Image icon, boolean multipleAllowed) {
+        if (isToolActive(componentId)) {
             if (!multipleAllowed) {
                 System.out.println("Multiple Not Allowed!");
-                packet.getTabInstance().activate();
+               // packet.getTabInstance().activate();
                 return;
             }
             else {
@@ -417,17 +413,14 @@ public class WorkspaceLayout extends Composite {
                             String newName;
                             int idx = 1;
 
-                            while (tabInstances.containsKey(newId = (packet.getInstanceId() + "-" + idx))) idx++;
+                            while (tabInstances.containsKey(newId = (componentId + "-" + idx))) idx++;
 
-                            newName = packet.getName() + " (" + idx + ")";
+                            newName = name+ " (" + idx + ")";
 
-                            packet.setInstanceId(newId);
-                            packet.setName(newName);
-
-                            _openTab(subject, DOMID, packet, icon);
+                            _openTab(subject, DOMID, componentId, newName, newId, icon);
                         }
                         else if (!"WindowClosed".equals(message)) {
-                            Set<WSTab> s = layout.getActiveByType(packet.getComponentTypeId());
+                            Set<WSTab> s = layout.getActiveByType(componentId);
 
                             if (s.size() > 1) {
                                 WSTabSelectorDialog wsd = new WSTabSelectorDialog(s);
@@ -445,16 +438,16 @@ public class WorkspaceLayout extends Composite {
                     }
                 };
 
-                dialog.ask("A panel is already open for '" + packet.getName() + "'. What do you want to do?", openCallback);
+                dialog.ask("A panel is already open for '" + name + "'. What do you want to do?", openCallback);
                 dialog.showModal();
                 return;
             }
         }
 
-        _openTab(subject, DOMID, packet, icon);
+        _openTab(subject, DOMID, componentId, name, componentId ,icon);
     }
 
-    private void _openTab(String subject, String DOMID, StatePacket packet, Image icon) {
+    private void _openTab(String subject, String DOMID, String componentId, String name, String instanceId, Image icon) {
         final ExtSimplePanel panel = new ExtSimplePanel();
         panel.getElement().getStyle().setProperty("overflow", "hidden");
 
@@ -470,12 +463,11 @@ public class WorkspaceLayout extends Composite {
                 + "/images/ui/icons/questioncube.png");
         newIcon.setSize("16px", "16px");
 
-        final WSTab newWSTab = new WSTab(packet.getName(), panel, newIcon);
-        packet.setTabInstance(newWSTab);
+        final WSTab newWSTab = new WSTab(name, panel, newIcon);
         tabPanel.add(panel, newWSTab);
         newWSTab.activate();
 
-        MessageBusClient.subscribe("org.jboss.workspace.tabInstances." + packet.getInstanceId(), null,
+        MessageBusClient.subscribe("org.jboss.workspace.tabInstances." + instanceId, null,
                 new AcceptsCallback() {
                     public void callback(Object message, Object data) {
 
@@ -485,7 +477,7 @@ public class WorkspaceLayout extends Composite {
 
 
         newWSTab.clearTabCloseHandlers();
-        newWSTab.addTabCloseHandler(new TabCloseHandler(packet));
+        newWSTab.addTabCloseHandler(new TabCloseHandler(instanceId));
 
         tabDragController.makeDraggable(newWSTab, newWSTab.getLabel());
         tabDragController.makeDraggable(newWSTab, newWSTab.getIcon());
@@ -507,7 +499,7 @@ public class WorkspaceLayout extends Composite {
 
         newWSTab.reset();
 
-        activateTool(packet.getComponentTypeId());
+        activateTool(componentId);
 
         Timer t = new Timer() {
             public void run() {
@@ -520,23 +512,19 @@ public class WorkspaceLayout extends Composite {
         Effects.fade(panel.getElement(), 5, 5, 0, 100);
     }
 
-    private void closeTab(String instanceId) {
-        tabInstances.remove(instanceId);
 
-    }
-
-    public void closeTab(StatePacket packet) {
+    public void closeTab(String instanceId) {
         //    deleteSessionState(packet);
-        tabInstances.remove(packet.getInstanceId());
-        tabDragController.unregisterDropController(packet.getTabInstance().getTabDropController());
-        deactivateTool(packet.getComponentTypeId());
+        tabInstances.remove(instanceId);
+  //      tabDragController.unregisterDropController(packet.getTabInstance().getTabDropController());
+    //    deactivateTool(packet.getComponentTypeId());
 
-        int idx = packet.getTabInstance().remove();
+//        int idx = packet.getTabInstance().remove();
 
-        if (idx > 0) idx--;
-        else if (tabPanel.getWidgetCount() == 0) return;
-
-        tabPanel.selectTab(idx);
+//        if (idx > 0) idx--;
+//        else if (tabPanel.getWidgetCount() == 0) return;
+//
+//        tabPanel.selectTab(idx);
     }
 
 

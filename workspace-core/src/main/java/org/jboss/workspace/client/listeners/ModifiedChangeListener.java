@@ -2,19 +2,15 @@ package org.jboss.workspace.client.listeners;
 
 import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.Widget;
-import org.jboss.workspace.client.rpc.StatePacket;
 import org.jboss.workspace.client.framework.MessageCallback;
 
 public class ModifiedChangeListener implements ChangeListener {
-    private StatePacket packet;
+ //   private StatePacket packet;
     private MessageCallback messageCallback;
 
-    public ModifiedChangeListener(StatePacket packet) {
-        this.packet = packet;
-    }
 
     public void onChange(Widget widget) {
-        packet.getTabInstance().setModified(true);
+   //     packet.getTabInstance().setModified(true);
 
         if (messageCallback != null) messageCallback.call();
     }
