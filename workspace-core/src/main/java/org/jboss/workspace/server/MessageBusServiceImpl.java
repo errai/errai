@@ -15,6 +15,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 public class MessageBusServiceImpl extends RemoteServiceServlet implements MessageBusService {
     private MessageBus bus;
@@ -36,8 +38,12 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
 
                         System.out.println("transmitting test message...");
 
-                        bus.store("org.jboss.workspace.WorkspaceLayout",
-                                "[[\"CommandType\", \"Hello\"], [\"Name\", \"Mr. Server\"]]");
+                        Map message = new HashMap();
+                        message.put("CommandType", "Hello");
+                        message.put("Name", "Mr. Server");
+
+                        bus.store("org.jboss.workspace.WorkspaceLayout", message);
+                       
                     }
                 }
                 catch (InterruptedException e) {
