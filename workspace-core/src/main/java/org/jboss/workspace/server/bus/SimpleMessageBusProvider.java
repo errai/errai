@@ -1,7 +1,6 @@
 package org.jboss.workspace.server.bus;
 
 import org.jboss.workspace.client.framework.AcceptsCallback;
-import org.jboss.workspace.server.json.JSONUtil;
 
 import java.util.*;
 
@@ -22,7 +21,7 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
         private final Map<Object, Queue<Message>> messageQueues = new HashMap<Object, Queue<Message>>();
         private final Map<Object, Thread> activeWaitingThreads = new HashMap<Object, Thread>();
 
-        public void store(final String subject, final Map message) {
+        public void store(final String subject, final Map<String, Object> message) {
             store(subject, MessageBusServer.encodeMap(message));
         }
 
@@ -66,6 +65,7 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
                     Thread.sleep(1000 * 45);
                 }
                 catch (InterruptedException e) {
+                    // passthru
                 }
                 finally {
                     activeWaitingThreads.remove(sessionContext);
