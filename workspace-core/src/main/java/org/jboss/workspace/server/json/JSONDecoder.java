@@ -1,7 +1,5 @@
 package org.jboss.workspace.server.json;
 
-import org.mvel2.CompileException;
-
 import static java.lang.Character.isDigit;
 import static java.lang.Double.parseDouble;
 import java.util.ArrayList;
@@ -189,13 +187,13 @@ public class JSONDecoder {
 
         switch (type) {
             case '[':
-                throw new CompileException("unbalanced braces [ ... ]", chars, start);
+                throw new RuntimeException("unbalanced braces [ ... ]");
             case '{':
-                throw new CompileException("unbalanced braces { ... }", chars, start);
+                throw new RuntimeException("unbalanced braces { ... }");
             case '(':
-                throw new CompileException("unbalanced braces ( ... )", chars, start);
+                throw new RuntimeException("unbalanced braces ( ... )");
             default:
-                throw new CompileException("unterminated string literal", chars, start);
+                throw new RuntimeException("unterminated string literal");
         }
     }
 
@@ -205,7 +203,7 @@ public class JSONDecoder {
         }
 
         if (cursor >= length || expr[cursor] != type) {
-            throw new CompileException("unterminated literal", expr, cursor);
+            throw new RuntimeException("unterminated literal");
         }
 
         return cursor;
