@@ -25,12 +25,14 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
                     /**
                      * Wait 10 seconds.
                      */
-                    sleep(1000 * 10);
+                    while (true) {
+                        sleep(1000 * 5);
 
-                    System.out.println("transmitting test message...");
+                        System.out.println("transmitting test message...");
 
-                    bus.store("org.jboss.workspace.WorkspaceLayout", 
-                            "[[\"CommandType\", \"Hello\"], [\"Name\", \"Mr. Server\"]]");
+                        bus.store("org.jboss.workspace.WorkspaceLayout",
+                                "[[\"CommandType\", \"Hello\"], [\"Name\", \"Mr. Server\"]]");
+                    }
                 }
                 catch (InterruptedException e) {
 

@@ -109,6 +109,10 @@ public class Workspace implements EntryPoint {
         messageBus.store("HelloRemote", "ImHere", store);
     }
 
+    private void createPushListener() {
+
+    }
+
     private void initializeMessagingBus() {
         final MessageBusServiceAsync messageBus = (MessageBusServiceAsync) create(MessageBusService.class);
         final ServiceDefTarget endpoint = (ServiceDefTarget) messageBus;
@@ -120,32 +124,38 @@ public class Workspace implements EntryPoint {
 
             @Override
             public void run() {
-                if (block) return;
+                if (block) {
+                    System.out.println("listener is blocking");
+                    return;
+                }
+                else {
+                    System.out.println("listener is listening");
+                }
 
                 AsyncCallback nextMessage = new AsyncCallback<String[]>() {
                     public void onFailure(Throwable throwable) {
                         block = false;
+                        schedule(1);
                     }
 
                     public void onSuccess(String[] o) {
-                        //        System.out.println("Client received message");
                         FederationUtil.store(o[0], o[1]);
                         block = false;
+                        schedule(1);
+
                     }
                 };
 
                 block = true;
                 messageBus.nextMessage(nextMessage);
+                block = false;
             }
-
-
         };
-
-        incoming.schedule(1);
 
         final Timer outerTimer = new Timer() {
             @Override
             public void run() {
+                incoming.run();
                 incoming.scheduleRepeating((60 * 45) * 1000);
             }
         };

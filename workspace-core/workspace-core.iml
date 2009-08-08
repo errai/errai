@@ -20,7 +20,6 @@
         <setting name="gwtScriptOutputStyle" value="DETAILED" />
         <setting name="gwtSdkUrl" value="file://$MODULE_DIR$/../../gwt-1.7.0" />
         <setting name="runGwtCompilerOnMake" value="true" />
-        <setting name="webFacet" value="Web" />
         <packaging>
           <module name="org.jboss.workspace.Workspace" path="/org.jboss.workspace.Workspace" />
         </packaging>
