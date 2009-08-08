@@ -5,8 +5,8 @@ import org.jboss.workspace.client.framework.AcceptsCallback;
 import org.jboss.workspace.client.rpc.MessageBusService;
 import org.jboss.workspace.server.bus.Message;
 import org.jboss.workspace.server.bus.MessageBus;
-import org.jboss.workspace.server.bus.SimpleMessageBusProvider;
 import org.jboss.workspace.server.bus.MessageBusServer;
+import org.jboss.workspace.server.bus.SimpleMessageBusProvider;
 import org.jboss.workspace.server.json.JSONUtil;
 
 import javax.servlet.ServletException;
@@ -26,22 +26,20 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
         Thread t = new Thread() {
             @Override
             public void run() {
+                //noinspection EmptyCatchBlock
                 try {
                     /**
                      * Wait 10 seconds.
                      */
-                        sleep(1000 * 5);
+                    sleep(1000 * 5);
 
-                        System.out.println("transmitting test message...");
+                    Map<String, Object> message = new HashMap<String, Object>();
+                    message.put("CommandType", "Hello");
+                    message.put("Name", "Mr. Server");
 
-                        Map<String, Object> message = new HashMap<String, Object>();
-                        message.put("CommandType", "Hello");
-                        message.put("Name", "Mr. Server");
-
-                        MessageBusServer.store("org.jboss.workspace.WorkspaceLayout", message);
-                 }
+                    MessageBusServer.store("org.jboss.workspace.WorkspaceLayout", message);
+                }
                 catch (InterruptedException e) {
-
                 }
             }
         };

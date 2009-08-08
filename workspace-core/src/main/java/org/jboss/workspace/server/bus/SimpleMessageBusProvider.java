@@ -1,6 +1,7 @@
 package org.jboss.workspace.server.bus;
 
 import org.jboss.workspace.client.framework.AcceptsCallback;
+import static org.jboss.workspace.server.bus.MessageBusServer.encodeMap;
 
 import java.util.*;
 
@@ -22,7 +23,7 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
         private final Map<Object, Thread> activeWaitingThreads = new HashMap<Object, Thread>();
 
         public void store(final String subject, final Map<String, Object> message) {
-            store(subject, MessageBusServer.encodeMap(message));
+            store(subject, encodeMap(message));
         }
 
         public void store(final String subject, final Object message) {
@@ -35,7 +36,6 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
             if (remoteSubscriptions.containsKey(subject)) {
                 for (Map.Entry<Object, Queue<Message>> entry : messageQueues.entrySet()) {
                     if (remoteSubscriptions.get(subject).contains(entry.getKey())) {
-                        System.out.println("*** Topic '" + subject + "' is a client end-point. Pushing!");
                         messageQueues.get(entry.getKey()).add(new Message() {
                             public String getSubject() {
                                 return subject;
@@ -56,8 +56,6 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
 
         public Message nextMessage(Object sessionContext) {
             Queue<Message> q = getQueue(sessionContext);
-
-            assert !activeWaitingThreads.containsKey(Thread.currentThread());
 
             if (q.isEmpty()) {
                 try {
@@ -82,6 +80,7 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
         private Queue<Message> getQueue(Object sessionContext) {
             if (!messageQueues.containsKey(sessionContext))
                 messageQueues.put(sessionContext, new LinkedList<Message>());
+
             return messageQueues.get(sessionContext);
         }
 

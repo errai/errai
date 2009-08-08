@@ -1,6 +1,7 @@
 package org.jboss.workspace.server.json;
 
 import static java.lang.Character.isDigit;
+import static java.lang.Character.isLetter;
 import static java.lang.Double.parseDouble;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,17 +17,12 @@ public class JSONDecoder {
     private Object lhs;
     private Object rhs;
 
-    public static void main(String[] args) {
-        JSONDecoder decode = new JSONDecoder("{ 'alga' : true , 'babien':  2 }");
-        Object o = decode.parse();
-
-        System.out.println(o);
-
-
-    }
-
     public JSONDecoder(String json) {
         this.length = (this.json = json.toCharArray()).length;
+    }
+
+    public JSONDecoder(char[] json) {
+        this.length = (this.json = json).length;
     }
 
     public Object parse() {
@@ -40,36 +36,24 @@ public class JSONDecoder {
                 case '[':
                     cursor++;
                     addValue(_parse(new ArrayList()));
-
                     break;
+
                 case '{':
                     cursor++;
                     addValue(_parse(new HashMap()));
-
                     break;
 
                 case ']':
                 case '}':
                 case ',':
                     cursor++;
-                    if (lhs != null) {
-                        if (collection instanceof Map) {
-                            ((Map) collection).put(lhs, rhs);
-                        }
-                        else {
-                            ((Collection) collection).add(lhs);
-                        }
-                    }
-
-                    lhs = rhs = null;
+                    record(collection);
                     break;
-
 
                 case '"':
                 case '\'':
                     int end = balancedCapture(json, cursor, json[cursor]);
                     addValue(new String(json, cursor + 1, end - cursor - 1));
-
                     cursor = end + 1;
                     break;
 
@@ -82,28 +66,18 @@ public class JSONDecoder {
 
                         break;
                     }
-                    else if (Character.isLetter(json[cursor])) {
+                    else if (isLetter(json[cursor])) {
                         int start = cursor++;
-                        while (cursor < length && Character.isLetter(json[cursor])) cursor++;
+                        while ((cursor < length) && isLetter(json[cursor])) cursor++;
 
                         addValue("true".equals(new String(json, start, cursor - start)) ? Boolean.TRUE : Boolean.FALSE);
 
                     }
                     cursor++;
-
             }
         }
 
-        if (lhs != null) {
-            if (collection instanceof Map) {
-                ((Map) collection).put(lhs, rhs);
-            }
-            else {
-                ((Collection) collection).add(lhs);
-            }
-        }
-
-        lhs = rhs = null;
+        record(collection);
 
         return collection;
     }
@@ -117,13 +91,28 @@ public class JSONDecoder {
         }
     }
 
+    private void record(Object collection) {
+        if (lhs != null) {
+            if (collection instanceof Map) {
+                //noinspection unchecked
+                ((Map) collection).put(lhs, rhs);
+            }
+            else {
+                //noinspection unchecked
+                ((Collection) collection).add(lhs);
+            }
+        }
+
+        lhs = rhs = null;
+    }
+
     /**
      * Balanced capture algorithm (taken from MVEL)
      *
-     * @param chars
-     * @param start
-     * @param type
-     * @return
+     * @param chars -
+     * @param start -
+     * @param type  -
+     * @return -
      */
     public static int balancedCapture(char[] chars, int start, char type) {
         int depth = 1;
