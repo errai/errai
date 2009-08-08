@@ -1,14 +1,20 @@
 package org.jboss.workspace.server;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import com.google.gwt.json.client.JSONParser;
+import org.jboss.workspace.client.framework.AcceptsCallback;
 import org.jboss.workspace.client.rpc.MessageBusService;
 import org.jboss.workspace.server.bus.Message;
 import org.jboss.workspace.server.bus.MessageBus;
 import org.jboss.workspace.server.bus.SimpleMessageBusProvider;
+import org.mvbus.Configuration;
+import org.mvbus.MVBus;
+import org.mvbus.encode.engines.json.JsonDecodingEngine;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.List;
 
 public class MessageBusServiceImpl extends RemoteServiceServlet implements MessageBusService {
     private MessageBus bus;
@@ -41,6 +47,14 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
         };
 
         t.start();
+
+        bus.subscribe("ServerEchoService", new AcceptsCallback() {
+            public void callback(Object message, Object data) {
+               
+
+
+            }
+        });
     }
 
     public void store(String subject, String message) {

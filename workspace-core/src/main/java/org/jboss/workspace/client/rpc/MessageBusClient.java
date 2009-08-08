@@ -1,4 +1,4 @@
-package org.jboss.workspace.client.framework;
+package org.jboss.workspace.client.rpc;
 
 import com.google.gwt.json.client.*;
 import com.google.gwt.user.client.Element;
@@ -8,12 +8,13 @@ import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
 
+import org.jboss.workspace.client.framework.AcceptsCallback;
 
-public class FederationUtil {
+
+public class MessageBusClient {
     private static List<AcceptsCallback> onSubscribeHooks = new ArrayList<AcceptsCallback>();
 
-    public static void subscribe(String subject, Element scope, AcceptsCallback callback,
-                                        Object subscriberData) {
+    public static void subscribe(String subject, Element scope, AcceptsCallback callback, Object subscriberData) {
 
         for (AcceptsCallback c : onSubscribeHooks) {
             c.callback(subject, subscriberData);

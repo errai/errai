@@ -1,8 +1,6 @@
 package org.jboss.workspace.sampler.client.tabledemo;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import static com.google.gwt.i18n.client.DateTimeFormat.getShortDateFormat;
@@ -11,11 +9,10 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 import org.jboss.workspace.client.framework.Tool;
-import org.jboss.workspace.client.framework.FederationUtil;
+import org.jboss.workspace.client.rpc.MessageBusClient;
 import org.jboss.workspace.client.layout.LayoutHint;
 import org.jboss.workspace.client.layout.LayoutHintProvider;
 import org.jboss.workspace.client.layout.WorkPanel;
-import org.jboss.workspace.client.rpc.StatePacket;
 import org.jboss.workspace.client.widgets.WSGrid;
 import org.jboss.workspace.client.widgets.format.WSCellDateFormat;
 import org.jboss.workspace.client.widgets.format.WSCellMultiSelector;
@@ -86,7 +83,7 @@ public class GridDemo implements Tool {
         message.put("Component", "Grid");
         message.put("Opened", true);
         
-        FederationUtil.store("mysubject", FederationUtil.encodeMap(message));
+        MessageBusClient.store("mysubject", MessageBusClient.encodeMap(message));
 
         return workPanel;
     }

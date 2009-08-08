@@ -71,6 +71,8 @@
       </library>
     </orderEntry>
     <orderEntry type="library" name="GWT" level="application" />
+    <orderEntry type="module" module-name="mvbus" />
+    <orderEntry type="module" module-name="mvel" />
   </component>
   <component name="copyright">
     <Base>

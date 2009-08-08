@@ -2,7 +2,6 @@ package org.jboss.workspace.client.layout;
 
 import com.allen_sauer.gwt.dnd.client.PickupDragController;
 import com.google.gwt.core.client.GWT;
-import static com.google.gwt.core.client.GWT.create;
 import static com.google.gwt.core.client.GWT.getModuleBaseURL;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.ResizeEvent;
@@ -14,15 +13,12 @@ import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import static com.google.gwt.user.client.Window.addResizeHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.workspace.client.ToolSet;
 import org.jboss.workspace.client.framework.*;
 import org.jboss.workspace.client.listeners.TabCloseHandler;
-import org.jboss.workspace.client.rpc.LayoutStateService;
-import org.jboss.workspace.client.rpc.LayoutStateServiceAsync;
 import org.jboss.workspace.client.rpc.StatePacket;
+import org.jboss.workspace.client.rpc.MessageBusClient;
 import org.jboss.workspace.client.util.Effects;
 import org.jboss.workspace.client.widgets.*;
 import org.jboss.workspace.client.widgets.dnd.TabDragHandler;
@@ -131,10 +127,10 @@ public class WorkspaceLayout extends Composite {
     protected void onAttach() {
         super.onAttach();
 
-        FederationUtil.subscribe(CommandProcessor.Command.RegisterWorkspaceEnvironment.getSubject(),
+        MessageBusClient.subscribe(CommandProcessor.Command.RegisterWorkspaceEnvironment.getSubject(),
                 null, new AcceptsCallback() {
                     public void callback(Object message, Object data) {
-                        Map commandMessage = FederationUtil.decodeMap(message);
+                        Map commandMessage = MessageBusClient.decodeMap(message);
 
                         String commandType = (String) commandMessage.get(CommandProcessor.MessageParts.CommandType.name());
 
@@ -355,9 +351,9 @@ public class WorkspaceLayout extends Composite {
 
         for (final Tool tool : toolSet.getAllProvidedTools()) {
             String subject = "org.jboss.workspace.toolregistration." + tool.getId();
-            FederationUtil.subscribe(subject, null, new AcceptsCallback() {
+            MessageBusClient.subscribe(subject, null, new AcceptsCallback() {
                 public void callback(Object message, Object data) {
-                    Map msg = FederationUtil.decodeMap(message);
+                    Map msg = MessageBusClient.decodeMap(message);
                     String commandType = (String) msg.get(CommandProcessor.MessageParts.CommandType.name());
 
                     switch (CommandProcessor.Command.valueOf(commandType)) {
@@ -479,7 +475,7 @@ public class WorkspaceLayout extends Composite {
         tabPanel.add(panel, newWSTab);
         newWSTab.activate();
 
-        FederationUtil.subscribe("org.jboss.workspace.tabInstances." + packet.getInstanceId(), null,
+        MessageBusClient.subscribe("org.jboss.workspace.tabInstances." + packet.getInstanceId(), null,
                 new AcceptsCallback() {
                     public void callback(Object message, Object data) {
 

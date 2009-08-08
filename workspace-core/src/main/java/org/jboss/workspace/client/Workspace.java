@@ -11,7 +11,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.RootPanel;
 import org.jboss.workspace.client.framework.AcceptsCallback;
-import org.jboss.workspace.client.framework.FederationUtil;
+import org.jboss.workspace.client.rpc.MessageBusClient;
 import org.jboss.workspace.client.framework.ModuleLoaderBootstrap;
 import org.jboss.workspace.client.layout.WorkspaceLayout;
 import org.jboss.workspace.client.rpc.MessageBusService;
@@ -51,7 +51,7 @@ public class Workspace implements EntryPoint {
     }
 
     private void initWorkspace(String rootId) {
-        FederationUtil.addOnSubscribeHook(new AcceptsCallback() {
+        MessageBusClient.addOnSubscribeHook(new AcceptsCallback() {
             public void callback(Object message, Object data) {
 
                 AsyncCallback remoteSubscribe = new AsyncCallback() {
@@ -106,7 +106,7 @@ public class Workspace implements EntryPoint {
             }
         };
 
-        messageBus.store("HelloRemote", "ImHere", store);
+        messageBus.store("ServerEchoService", "[[\"bar\", \"foo\"], [\"FOO\", \"BAR\"]]", store);
     }
 
     private void createPushListener() {
@@ -139,7 +139,7 @@ public class Workspace implements EntryPoint {
                     }
 
                     public void onSuccess(String[] o) {
-                        FederationUtil.store(o[0], o[1]);
+                        MessageBusClient.store(o[0], o[1]);
                         block = false;
                         schedule(1);
 
@@ -173,7 +173,7 @@ public class Workspace implements EntryPoint {
                 }
 
                 for (final String subject : o) {
-                    FederationUtil.subscribe(subject, null, new AcceptsCallback() {
+                    MessageBusClient.subscribe(subject, null, new AcceptsCallback() {
                         public void callback(Object message, Object data) {
                             AsyncCallback cb = new AsyncCallback() {
                                 public void onFailure(Throwable throwable) {

@@ -1,6 +1,7 @@
 package org.jboss.workspace.client.framework;
 
-import java.util.HashMap;
+import org.jboss.workspace.client.rpc.MessageBusClient;
+
 import java.util.Map;
 
 public class CommandProcessor {
@@ -23,11 +24,11 @@ public class CommandProcessor {
         public void send(Map<String, Object> message) {
             message.put(MessageParts.CommandType.name(), this.name());
             String subject = getSubject();
-            String msg = FederationUtil.encodeMap(message);
+            String msg = MessageBusClient.encodeMap(message);
 
             System.out.println("About to send: [Subject:" + subject + ";Message:" + msg + "]");
 
-            FederationUtil.store(subject, msg);
+            MessageBusClient.store(subject, msg);
         }
     }
 
