@@ -164,7 +164,7 @@ public class Workspace implements EntryPoint {
                 incoming.scheduleRepeating((60 * 45) * 1000);
 
 
-                Map msg = new HashMap();
+                Map<String, Object> msg = new HashMap<String, Object>();
                 msg.put("EchoBackData", "This is a test of the echoback service!");
                 MessageBusClient.store("ServerEchoService", msg);
             }

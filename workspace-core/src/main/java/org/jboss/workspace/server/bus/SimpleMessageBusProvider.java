@@ -26,7 +26,7 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
             store(subject, MessageBusServer.encodeMap(message));
         }
 
-        public void store(final String subject, final String message) {
+        public void store(final String subject, final Object message) {
             if (subscriptions.containsKey(subject)) {
                 for (AcceptsCallback c : subscriptions.get(subject)) {
                     c.callback(message, null);
@@ -42,7 +42,7 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
                                 return subject;
                             }
 
-                            public String getMessage() {
+                            public Object getMessage() {
                                 return message;
                             }
                         });
@@ -62,7 +62,6 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
 
             if (q.isEmpty()) {
                 try {
-                    System.out.println("Thread waiting...");
                     activeWaitingThreads.put(sessionContext, Thread.currentThread());
                     Thread.sleep(1000 * 45);
                 }
@@ -94,8 +93,6 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
         public void remoteSubscribe(Object sessionContext, String subject) {
             if (!remoteSubscriptions.containsKey(subject)) remoteSubscriptions.put(subject, new ArrayList<Object>());
             remoteSubscriptions.get(subject).add(sessionContext);
-
-            System.out.println("RemoteRegistration:" + subject);
         }
 
         public Set<String> getSubjects() {

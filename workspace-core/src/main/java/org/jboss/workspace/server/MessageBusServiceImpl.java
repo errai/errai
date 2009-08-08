@@ -6,6 +6,7 @@ import org.jboss.workspace.client.rpc.MessageBusService;
 import org.jboss.workspace.server.bus.Message;
 import org.jboss.workspace.server.bus.MessageBus;
 import org.jboss.workspace.server.bus.SimpleMessageBusProvider;
+import org.jboss.workspace.server.bus.MessageBusServer;
 import org.jboss.workspace.server.json.JSONUtil;
 
 import javax.servlet.ServletException;
@@ -29,19 +30,16 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
                     /**
                      * Wait 10 seconds.
                      */
-                 //   while (true) {
                         sleep(1000 * 5);
 
                         System.out.println("transmitting test message...");
 
-                        Map message = new HashMap();
+                        Map<String, Object> message = new HashMap<String, Object>();
                         message.put("CommandType", "Hello");
                         message.put("Name", "Mr. Server");
 
-                        bus.store("org.jboss.workspace.WorkspaceLayout", message);
-
-               //     }
-                }
+                        MessageBusServer.store("org.jboss.workspace.WorkspaceLayout", message);
+                 }
                 catch (InterruptedException e) {
 
                 }
@@ -68,11 +66,9 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
     }
 
     public String[] nextMessage() {
-        System.out.println("Polling...");
         Message m = bus.nextMessage(getId());
         if (m != null) {
-            System.out.println("pushing message [subject:" + m.getSubject() + ";msg=" + m.getMessage() + "]");
-            return new String[]{m.getSubject(), m.getMessage()};
+            return new String[]{m.getSubject(), String.valueOf(m.getMessage())};
         }
         else {
             return null;

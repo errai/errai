@@ -17,19 +17,16 @@ public class MessageBusServer {
             c.callback(subject, subscriberData);
         }
 
-        _subscribe(subject, scope, callback, subscriberData);
+        //      _subscribe(subject, scope, callback, subscriberData);
     }
 
-    private native static void _subscribe(String subject, Element scope, AcceptsCallback callback,
-                                          Object subscriberData) /*-{
-           $wnd.PageBus.subscribe(subject, scope,
-               function(subject, message, subscriberData) {
-                  callback.@org.jboss.workspace.client.framework.AcceptsCallback::callback(Ljava/lang/Object;Ljava/lang/Object;)(message, subscriberData)
-               }, null);
-      }-*/;
+
+    public static void store(String subject, Map<String, Object> value) {
+        new SimpleMessageBusProvider().getBus().store(subject, encodeMap(value));
+    }
 
     public static void store(String subject, Object value) {
-        //    new SimpleMessageBusProvider().getBus().store(subject, value);
+        new SimpleMessageBusProvider().getBus().store(subject, value);
     }
 
 
