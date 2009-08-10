@@ -23,29 +23,6 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
         // just use the simple bus for now.  more integration options to come...
         bus = new SimpleMessageBusProvider().getBus();
 
-        Thread t = new Thread() {
-            @Override
-            public void run() {
-                //noinspection EmptyCatchBlock
-                try {
-                    /**
-                     * Wait 10 seconds.
-                     */
-                    sleep(1000 * 5);
-
-                    Map<String, Object> message = new HashMap<String, Object>();
-                    message.put("CommandType", "Hello");
-                    message.put("Name", "Mr. Server");
-
-                    MessageBusServer.store("org.jboss.workspace.WorkspaceLayout", message);
-                }
-                catch (InterruptedException e) {
-                }
-            }
-        };
-
-        t.start();
-
         bus.subscribe("ServerEchoService", new AcceptsCallback() {
             public void callback(Object message, Object data) {
 

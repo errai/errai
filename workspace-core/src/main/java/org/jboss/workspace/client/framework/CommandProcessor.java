@@ -25,8 +25,6 @@ public class CommandProcessor {
             String subject = getSubject();
             String msg = MessageBusClient.encodeMap(message);
 
-       //     System.out.println("About to send: [Subject:" + subject + ";Message:" + msg + "]");
-
             MessageBusClient.store(subject, msg);
         }
     }

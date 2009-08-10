@@ -50,6 +50,10 @@ public class TabOpeningClickHandler implements ClickHandler {
 
         Widget w = tool.getWidget();
 
+        /**
+         * Generate a unique DOM ID for the actual Widget Element.  This is used to reference and pull in the actual
+         * widget into the Workspace UI.
+         */
         String DOMID = tool.getId() + "_" + System.currentTimeMillis();
         w.getElement().setId(DOMID);
         w.setVisible(false);

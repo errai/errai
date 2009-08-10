@@ -50,11 +50,19 @@ public class Workspace implements EntryPoint {
         beginStartup(rootId);
 
         _initAfterWSLoad();
-
-
     }
 
+    /**
+     * Initialize the actual Workspace UI.
+     * @param rootId
+     */
     private void initWorkspace(String rootId) {
+
+        /**
+         * Register a subscriber hook, with the MessageBusClient to send remoteSubcribe requests to the bus
+         * on the server.  This is necessary for the server to be aware of any and all services that are available
+         * in the client.
+         */
         MessageBusClient.addOnSubscribeHook(new AcceptsCallback() {
             public void callback(Object message, Object data) {
 
@@ -74,10 +82,12 @@ public class Workspace implements EntryPoint {
         });
 
 
+        /**
+         * Instantiate layout.
+         */
         workspaceLayout = new WorkspaceLayout(rootId);
 
         enableScrolling(false);
-
 
         if (rootId != null) {
             RootPanel.get(rootId).add(workspaceLayout);
@@ -87,11 +97,20 @@ public class Workspace implements EntryPoint {
             return;
         }
 
+        /**
+         * Create the main drag and drop controller for the UI.
+         */
         dragController = new PickupDragController(RootPanel.get(), true);
 
+        /*
+         * Process any modules that were compiled in at compile time here.
+         */
         ModuleLoaderBootstrap mlb = create(ModuleLoaderBootstrap.class);
         mlb.initAll(workspaceLayout);
 
+        /**
+         * Bring up the message bus.
+         */
         initializeMessagingBus();
     }
 
@@ -102,7 +121,7 @@ public class Workspace implements EntryPoint {
 
         AsyncCallback store = new AsyncCallback() {
             public void onFailure(Throwable throwable) {
-                Window.alert("NO CARRIER.");
+                Window.alert("NO CARRIER");
             }
 
             public void onSuccess(Object o) {
@@ -111,18 +130,19 @@ public class Workspace implements EntryPoint {
         };
 
 
+        /**
+         * Send initial message to the ServerEchoService, to establish an HTTP session. Otherwise, concurrent
+         * requests will result in multiple sessions being creatd.  Which is bad.  Avoid this at all costs.
+         * Please.
+         */
         messageBus.store("ServerEchoService", null, store);
     }
 
-    private void createPushListener() {
-
-    }
 
     private void initializeMessagingBus() {
         final MessageBusServiceAsync messageBus = (MessageBusServiceAsync) create(MessageBusService.class);
         final ServiceDefTarget endpoint = (ServiceDefTarget) messageBus;
         endpoint.setServiceEntryPoint(getModuleBaseURL() + "jbwMsgBus");
-
 
         final Timer incoming = new Timer() {
             boolean block = false;
@@ -130,11 +150,11 @@ public class Workspace implements EntryPoint {
             @Override
             public void run() {
                 if (block) {
-                    System.out.println("listener is blocking");
+           //         System.out.println("listener is blocking");
                     return;
                 }
                 else {
-                    System.out.println("listener is listening");
+           //         System.out.println("listener is listening");
                 }
 
                 AsyncCallback nextMessage = new AsyncCallback<String[]>() {
@@ -147,7 +167,6 @@ public class Workspace implements EntryPoint {
                         MessageBusClient.store(o[0], o[1]);
                         block = false;
                         schedule(1);
-
                     }
                 };
 
@@ -162,11 +181,6 @@ public class Workspace implements EntryPoint {
             public void run() {
                 incoming.run();
                 incoming.scheduleRepeating((60 * 45) * 1000);
-
-
-                Map<String, Object> msg = new HashMap<String, Object>();
-                msg.put("EchoBackData", "This is a test of the echoback service!");
-                MessageBusClient.store("ServerEchoService", msg);
             }
         };
 
@@ -183,7 +197,7 @@ public class Workspace implements EntryPoint {
                 }
 
                 for (final String subject : o) {
-                    System.out.println("Subscribing to remote subject '" + subject + "'");
+            //        System.out.println("Subscribing to remote subject '" + subject + "'");
                     MessageBusClient.subscribe(subject, null, new AcceptsCallback() {
                         public void callback(Object message, Object data) {
                             AsyncCallback cb = new AsyncCallback() {
@@ -194,7 +208,7 @@ public class Workspace implements EntryPoint {
                                 }
                             };
 
-                            System.out.println("Transmitting message to server: " + subject + ";message=" + message);
+         //                   System.out.println("Transmitting message to server: " + subject + ";message=" + message);
                             messageBus.store(subject, (String) message, cb);
                         }
                     }, null);
