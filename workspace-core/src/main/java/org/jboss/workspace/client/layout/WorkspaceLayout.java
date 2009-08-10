@@ -170,7 +170,6 @@ public class WorkspaceLayout extends Composite {
                                 name = (String) commandMessage.get(CommandProcessor.MessageParts.Name.name());
                                 Window.alert("Hello from: " + name);
                                 break;
-
                         }
 
 
@@ -477,8 +476,9 @@ public class WorkspaceLayout extends Composite {
 
                         switch (CommandProcessor.Command.valueOf(commandType)) {
                             case CloseTab:
-                                int idx = newWSTab.remove();
+                                tabDragController.unregisterDropController(newWSTab.getTabDropController());
 
+                                int idx = newWSTab.remove();
                                 if (idx > 0) idx--;
                                 else if (tabPanel.getWidgetCount() == 0) return;
 
@@ -488,6 +488,7 @@ public class WorkspaceLayout extends Composite {
 
                             case ActivateTool:
                                 newWSTab.activate();
+                                break;
                         }
 
                     }
@@ -617,18 +618,6 @@ public class WorkspaceLayout extends Composite {
         }
 
     }
-
-//    public void addWorkspaceSizeChangeListener(WorkspaceSizeChangeListener wscl) {
-//        workspaceSizeChangeListers.add(wscl);
-//    }
-//
-//    public int getAppPanelOffsetHeight() {
-//        return tabPanel.getDeckPanel().getAbsoluteTop();
-//    }
-//
-//    public int getNavPanelOffsetWidth() {
-//        return navigation.getOffsetWidth();
-//    }
 
     public void pack() {
         fireWorkspaceSizeChangeListeners(Window.getClientWidth() - currSizeW, Window.getClientHeight() - currSizeH);

@@ -4,12 +4,13 @@ import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import org.jboss.workspace.client.framework.AcceptsCallback;
 import org.jboss.workspace.client.framework.CommandProcessor;
+import org.jboss.workspace.client.widgets.WSTab;
 
 import java.util.Map;
 import java.util.HashMap;
 
 
-public class TabCloseHandler implements CloseHandler, AcceptsCallback {
+public class TabCloseHandler implements CloseHandler<WSTab>, AcceptsCallback {
     /**
      * The reference to the tab.
      */
