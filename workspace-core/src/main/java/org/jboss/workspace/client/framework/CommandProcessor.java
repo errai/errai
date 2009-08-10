@@ -14,6 +14,7 @@ public class CommandProcessor {
         GetWidget,
         DisposeWidget,
         PublishTool,
+        ActivateTool,
         Hello;
 
         public String getSubject() {

@@ -140,7 +140,7 @@ public class WorkspaceLayout extends Composite {
                                 Image i = new Image((String) commandMessage.get(CommandProcessor.MessageParts.IconURI.name()));
                                 Boolean multiple = (Boolean) commandMessage.get(CommandProcessor.MessageParts.MultipleInstances.name());
 
-                                openTab(subject, componentId, name, i, multiple, DOMID);
+                                openTab(componentId, name, i, multiple, DOMID);
                                 break;
 
                             case PublishTool:
@@ -161,6 +161,7 @@ public class WorkspaceLayout extends Composite {
                                 break;
 
                             case CloseTab:
+                                System.out.println("close tab");
                                 String instanceId = (String) commandMessage.get(CommandProcessor.MessageParts.InstanceID.name());
                                 closeTab(instanceId);
                                 break;
@@ -338,8 +339,8 @@ public class WorkspaceLayout extends Composite {
 
 
         Map<String, Object> msg = new HashMap<String, Object>();
-        msg.put(CommandProcessor.MessageParts.Name.name(),      toolSet.getToolSetName());
-        msg.put(CommandProcessor.MessageParts.DOMID.name(),     id);
+        msg.put(CommandProcessor.MessageParts.Name.name(), toolSet.getToolSetName());
+        msg.put(CommandProcessor.MessageParts.DOMID.name(), id);
 
         CommandProcessor.Command.RegisterToolSet.send(msg);
 
@@ -380,22 +381,24 @@ public class WorkspaceLayout extends Composite {
     }
 
 
-    private void openTab(String subject, String componentId, String name, Image icon, boolean multipleAllowed, String DOMID) {
+    private void openTab(String componentId, String name, Image icon, boolean multipleAllowed, String DOMID) {
         if (!multipleAllowed && tabInstances.containsKey(componentId)) {
-            this.openTab(subject, DOMID, componentId, name, icon, multipleAllowed);
+            this.openTab(DOMID, componentId, name, icon, multipleAllowed);
         }
         else {
-            this.openTab(subject, DOMID, componentId, name, icon, multipleAllowed);
+            this.openTab(DOMID, componentId, name, icon, multipleAllowed);
         }
     }
 
 
-    private void openTab(final String subject, final String DOMID, final String componentId,  final String name,
+    private void openTab(final String DOMID, final String componentId, final String name,
                          final Image icon, boolean multipleAllowed) {
         if (isToolActive(componentId)) {
             if (!multipleAllowed) {
-                System.out.println("Multiple Not Allowed!");
-               // packet.getTabInstance().activate();
+                Map<String, Object> msg = new HashMap<String, Object>();
+                msg.put(CommandProcessor.MessageParts.CommandType.name(), CommandProcessor.Command.ActivateTool.name());
+                MessageBusClient.store(getInstanceSubject(componentId), msg);
+
                 return;
             }
             else {
@@ -414,9 +417,9 @@ public class WorkspaceLayout extends Composite {
 
                             while (tabInstances.containsKey(newId = (componentId + "-" + idx))) idx++;
 
-                            newName = name+ " (" + idx + ")";
+                            newName = name + " (" + idx + ")";
 
-                            _openTab(subject, DOMID, componentId, newName, newId, icon);
+                            _openTab(DOMID, componentId, newName, newId, icon);
                         }
                         else if (!"WindowClosed".equals(message)) {
                             Set<WSTab> s = layout.getActiveByType(componentId);
@@ -443,18 +446,16 @@ public class WorkspaceLayout extends Composite {
             }
         }
 
-        _openTab(subject, DOMID, componentId, name, componentId ,icon);
+        _openTab(DOMID, componentId, name, componentId, icon);
     }
 
-    private void _openTab(String subject, String DOMID, String componentId, String name, String instanceId, Image icon) {
+    private void _openTab(String DOMID, final String componentId, String name, String instanceId, Image icon) {
         final ExtSimplePanel panel = new ExtSimplePanel();
         panel.getElement().getStyle().setProperty("overflow", "hidden");
 
         Effects.setOpacity(panel.getElement(), 0);
 
-        Element e = getElementById(DOMID);
-
-        WSElementWrapper toolWidget = new WSElementWrapper(e);
+        WSElementWrapper toolWidget = new WSElementWrapper(getElementById(DOMID));
         toolWidget.setVisible(true);
         panel.add(toolWidget);
 
@@ -466,9 +467,28 @@ public class WorkspaceLayout extends Composite {
         tabPanel.add(panel, newWSTab);
         newWSTab.activate();
 
-        MessageBusClient.subscribe("org.jboss.workspace.tabInstances." + instanceId, null,
+        String subject = getInstanceSubject(instanceId);
+
+        MessageBusClient.subscribe(subject, null,
                 new AcceptsCallback() {
                     public void callback(Object message, Object data) {
+                        Map<String, Object> msgParts = MessageBusClient.decodeMap(message);
+                        String commandType = (String) msgParts.get(CommandProcessor.MessageParts.CommandType.name());
+
+                        switch (CommandProcessor.Command.valueOf(commandType)) {
+                            case CloseTab:
+                                int idx = newWSTab.remove();
+
+                                if (idx > 0) idx--;
+                                else if (tabPanel.getWidgetCount() == 0) return;
+
+                                tabPanel.selectTab(idx);
+                                deactivateTool(componentId);
+                                break;
+
+                            case ActivateTool:
+                                newWSTab.activate();
+                        }
 
                     }
                 },
@@ -511,19 +531,17 @@ public class WorkspaceLayout extends Composite {
         Effects.fade(panel.getElement(), 5, 5, 0, 100);
     }
 
+    public static String getInstanceSubject(String instanceId) {
+        return "org.jboss.workspace.tabInstances." + instanceId;
+    }
+
 
     public void closeTab(String instanceId) {
-        //    deleteSessionState(packet);
-        tabInstances.remove(instanceId);
-  //      tabDragController.unregisterDropController(packet.getTabInstance().getTabDropController());
-    //    deactivateTool(packet.getComponentTypeId());
+        Map<String, Object> delegateMsg = new HashMap<String, Object>();
+        delegateMsg.put(CommandProcessor.MessageParts.CommandType.name(), CommandProcessor.Command.CloseTab.name());
+        delegateMsg.put(CommandProcessor.MessageParts.InstanceID.name(), instanceId);
 
-//        int idx = packet.getTabInstance().remove();
-
-//        if (idx > 0) idx--;
-//        else if (tabPanel.getWidgetCount() == 0) return;
-//
-//        tabPanel.selectTab(idx);
+        MessageBusClient.store(getInstanceSubject(instanceId), delegateMsg);
     }
 
 
