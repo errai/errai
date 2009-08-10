@@ -36,7 +36,6 @@ public class WorkspaceLayout extends Composite {
      * The main layout panel.
      */
     public final DockPanel mainLayoutPanel = new DockPanel();
-  //  public final HorizontalPanel header = createHeader();
 
     public final WSExtVerticalPanel leftPanel = new WSExtVerticalPanel(this);
     public final WSStackPanel navigation = new WSStackPanel();
@@ -601,17 +600,17 @@ public class WorkspaceLayout extends Composite {
 
     }
 
-    public void addWorkspaceSizeChangeListener(WorkspaceSizeChangeListener wscl) {
-        workspaceSizeChangeListers.add(wscl);
-    }
-
-    public int getAppPanelOffsetHeight() {
-        return tabPanel.getDeckPanel().getAbsoluteTop();
-    }
-
-    public int getNavPanelOffsetWidth() {
-        return navigation.getOffsetWidth();
-    }
+//    public void addWorkspaceSizeChangeListener(WorkspaceSizeChangeListener wscl) {
+//        workspaceSizeChangeListers.add(wscl);
+//    }
+//
+//    public int getAppPanelOffsetHeight() {
+//        return tabPanel.getDeckPanel().getAbsoluteTop();
+//    }
+//
+//    public int getNavPanelOffsetWidth() {
+//        return navigation.getOffsetWidth();
+//    }
 
     public void pack() {
         fireWorkspaceSizeChangeListeners(Window.getClientWidth() - currSizeW, Window.getClientHeight() - currSizeH);
