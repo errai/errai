@@ -52,8 +52,6 @@ public class WorkspaceLayout extends Composite {
 
     public List<WorkspaceSizeChangeListener> workspaceSizeChangeListers = new ArrayList<WorkspaceSizeChangeListener>();
 
-//    public int tabs = 0;
-
     private int currSizeW;
     private int currSizeH;
 
@@ -123,9 +121,8 @@ public class WorkspaceLayout extends Composite {
     @Override
     protected void onAttach() {
         super.onAttach();
-
         MessageBusClient.subscribe(CommandProcessor.Command.RegisterWorkspaceEnvironment.getSubject(),
-                null, new AcceptsCallback() {
+                new AcceptsCallback() {
                     public void callback(Object message, Object data) {
                         Map commandMessage = MessageBusClient.decodeMap(message);
 
@@ -136,7 +133,7 @@ public class WorkspaceLayout extends Composite {
                                 String componentId = (String) commandMessage.get(CommandProcessor.MessageParts.ComponentID.name());
                                 String DOMID = (String) commandMessage.get(CommandProcessor.MessageParts.DOMID.name());
                                 String name = (String) commandMessage.get(CommandProcessor.MessageParts.Name.name());
-                                String subject = (String) commandMessage.get(CommandProcessor.MessageParts.Subject.name());
+                                String subject;
                                 Image i = new Image((String) commandMessage.get(CommandProcessor.MessageParts.IconURI.name()));
                                 Boolean multiple = (Boolean) commandMessage.get(CommandProcessor.MessageParts.MultipleInstances.name());
 
@@ -164,6 +161,13 @@ public class WorkspaceLayout extends Composite {
                                 System.out.println("close tab");
                                 String instanceId = (String) commandMessage.get(CommandProcessor.MessageParts.InstanceID.name());
                                 closeTab(instanceId);
+                                break;
+
+                            case GetActiveWidgets:
+                                componentId = (String) commandMessage.get(CommandProcessor.MessageParts.ComponentID.name());
+                                subject = (String) commandMessage.get(CommandProcessor.MessageParts.Subject.name());
+
+                                Set<String> active = getActiveByType(componentId);
                                 break;
 
                             case Hello:
@@ -345,7 +349,7 @@ public class WorkspaceLayout extends Composite {
 
         for (final Tool tool : toolSet.getAllProvidedTools()) {
             String subject = "org.jboss.workspace.toolregistration." + tool.getId();
-            MessageBusClient.subscribe(subject, null, new AcceptsCallback() {
+            MessageBusClient.subscribe(subject, new AcceptsCallback() {
                 public void callback(Object message, Object data) {
                     Map msg = MessageBusClient.decodeMap(message);
                     String commandType = (String) msg.get(CommandProcessor.MessageParts.CommandType.name());
@@ -379,7 +383,6 @@ public class WorkspaceLayout extends Composite {
         }
     }
 
-
     private void openTab(String componentId, String name, Image icon, boolean multipleAllowed, String DOMID) {
         if (!multipleAllowed && tabInstances.containsKey(componentId)) {
             this.openTab(DOMID, componentId, name, icon, multipleAllowed);
@@ -388,7 +391,6 @@ public class WorkspaceLayout extends Composite {
             this.openTab(DOMID, componentId, name, icon, multipleAllowed);
         }
     }
-
 
     private void openTab(final String DOMID, final String componentId, final String name,
                          final Image icon, boolean multipleAllowed) {
@@ -421,10 +423,10 @@ public class WorkspaceLayout extends Composite {
                             _openTab(DOMID, componentId, newName, newId, icon);
                         }
                         else if (!"WindowClosed".equals(message)) {
-                            Set<WSTab> s = layout.getActiveByType(componentId);
+                            Set<String> s = layout.getActiveByType(componentId);
 
                             if (s.size() > 1) {
-                                WSTabSelectorDialog wsd = new WSTabSelectorDialog(s);
+                                WSTabSelectorDialog wsd = new WSTabSelectorDialog(componentId);
                                 wsd.ask("Select an open instance.", new AcceptsCallback() {
                                     public void callback(Object message, Object data) {
                                     }
@@ -433,7 +435,7 @@ public class WorkspaceLayout extends Composite {
                                 wsd.showModal();
                             }
                             else {
-                                s.iterator().next().activate();
+                          //      s.iterator().next().activate();
                             }
                         }
                     }
@@ -466,9 +468,7 @@ public class WorkspaceLayout extends Composite {
         tabPanel.add(panel, newWSTab);
         newWSTab.activate();
 
-        String subject = getInstanceSubject(instanceId);
-
-        MessageBusClient.subscribe(subject, null,
+        MessageBusClient.subscribe(getInstanceSubject(instanceId),
                 new AcceptsCallback() {
                     public void callback(Object message, Object data) {
                         Map<String, Object> msgParts = MessageBusClient.decodeMap(message);
@@ -521,6 +521,13 @@ public class WorkspaceLayout extends Composite {
 
         activateTool(componentId);
 
+        Map<String, Object> tabProperties = new HashMap<String, Object>();
+        tabProperties.put(CommandProcessor.MessageParts.Name.name(), name);
+        tabProperties.put(CommandProcessor.MessageParts.IconURI.name(), newIcon.getUrl());
+
+        tabInstances.put(instanceId, MessageBusClient.encodeMap(tabProperties));
+
+
         Timer t = new Timer() {
             public void run() {
                 pack();
@@ -536,7 +543,6 @@ public class WorkspaceLayout extends Composite {
         return "org.jboss.workspace.tabInstances." + instanceId;
     }
 
-
     public void closeTab(String instanceId) {
         Map<String, Object> delegateMsg = new HashMap<String, Object>();
         delegateMsg.put(CommandProcessor.MessageParts.CommandType.name(), CommandProcessor.Command.CloseTab.name());
@@ -544,7 +550,6 @@ public class WorkspaceLayout extends Composite {
 
         MessageBusClient.store(getInstanceSubject(instanceId), delegateMsg);
     }
-
 
     public void activateTool(String componentTypeId) {
         if (activeTools.containsKey(componentTypeId)) {
@@ -578,17 +583,16 @@ public class WorkspaceLayout extends Composite {
         return activeTools.containsKey(componentTypeId);
     }
 
-    public Set<WSTab> getActiveByType(String componentTypeId) {
-//        HashSet<WSTab> set = new HashSet<WSTab>();
-//
-//        for (Map.Entry<String, StatePacket> entry : this.tabInstances.entrySet()) {
-//            if (componentTypeId.equals(entry.getValue().getComponentTypeId())) {
-//                set.add(entry.getValue().getTabInstance());
-//            }
-//        }
-//
-//        return set;
-        return null;
+    public Set<String> getActiveByType(String componentTypeId) {
+        HashSet<String> set = new HashSet<String>();
+
+        for (Map.Entry<String, String> entry : this.tabInstances.entrySet()) {
+            if (componentTypeId.equals(entry.getValue())) {
+                set.add(entry.getValue());
+            }
+        }
+
+        return set;
     }
 
     public void openNavPanel() {
@@ -616,7 +620,6 @@ public class WorkspaceLayout extends Composite {
         for (WorkspaceSizeChangeListener wscl : workspaceSizeChangeListers) {
             wscl.onSizeChange(deltaW, w, deltaH, h);
         }
-
     }
 
     public void pack() {

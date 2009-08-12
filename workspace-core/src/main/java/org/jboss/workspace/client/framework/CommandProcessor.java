@@ -15,6 +15,7 @@ public class CommandProcessor {
         DisposeWidget,
         PublishTool,
         ActivateTool,
+        GetActiveWidgets,
         Hello;
 
         public String getSubject() {
@@ -31,6 +32,7 @@ public class CommandProcessor {
     }
 
     public enum MessageParts {
-        CommandType, ComponentID, InstanceID, Name, MultipleInstances, IconURI, Subject, DOMID
+        CommandType, ComponentID, InstanceID, Name, MultipleInstances, IconURI, Subject, DOMID, RespondWithCommand,
+        NestedData
     }
 }

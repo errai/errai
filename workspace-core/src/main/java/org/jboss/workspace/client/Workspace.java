@@ -198,7 +198,7 @@ public class Workspace implements EntryPoint {
 
                 for (final String subject : o) {
             //        System.out.println("Subscribing to remote subject '" + subject + "'");
-                    MessageBusClient.subscribe(subject, null, new AcceptsCallback() {
+                    MessageBusClient.subscribe(subject, new AcceptsCallback() {
                         public void callback(Object message, Object data) {
                             AsyncCallback cb = new AsyncCallback() {
                                 public void onFailure(Throwable throwable) {

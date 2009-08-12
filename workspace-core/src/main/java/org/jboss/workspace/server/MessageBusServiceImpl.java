@@ -34,6 +34,29 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
                 }
             }
         });
+
+        Thread t = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(1000 * 5);
+
+                    Map<String, Object> msg = new HashMap<String, Object>();
+                    msg.put("CommandType", "Hello");
+                    msg.put("Name", "Mr. Server");
+
+                    bus.store("org.jboss.workspace.WorkspaceLayout", msg);
+
+                }
+                catch (InterruptedException e) {
+                }
+                
+            }
+        };
+
+        t.start();
+
+
     }
 
     public void store(String subject, String message) {

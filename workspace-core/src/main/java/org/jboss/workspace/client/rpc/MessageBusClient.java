@@ -14,18 +14,18 @@ import org.jboss.workspace.client.framework.AcceptsCallback;
 public class MessageBusClient {
     private static List<AcceptsCallback> onSubscribeHooks = new ArrayList<AcceptsCallback>();
 
-    public static void subscribe(String subject, Element scope, AcceptsCallback callback, Object subscriberData) {
+    public static void subscribe(String subject, AcceptsCallback callback, Object subscriberData) {
 
         for (AcceptsCallback c : onSubscribeHooks) {
             c.callback(subject, subscriberData);
         }
 
-        _subscribe(subject, scope, callback, subscriberData);
+        _subscribe(subject, callback, subscriberData);
     }
 
-    private native static void _subscribe(String subject, Element scope, AcceptsCallback callback,
+    private native static void _subscribe(String subject, AcceptsCallback callback,
                                         Object subscriberData) /*-{
-         $wnd.PageBus.subscribe(subject, scope,
+         $wnd.PageBus.subscribe(subject, null,
              function(subject, message, subscriberData) {
                 callback.@org.jboss.workspace.client.framework.AcceptsCallback::callback(Ljava/lang/Object;Ljava/lang/Object;)(message, subscriberData)
              }, null);

@@ -20,12 +20,10 @@ public class TabCloseHandler implements CloseHandler<WSTab>, AcceptsCallback {
         this.instanceId = instanceId;
     }
 
-
     public void onClose(CloseEvent closeEvent) {
         Map<String, Object> msg = new HashMap<String, Object>();
         msg.put(CommandProcessor.MessageParts.InstanceID.name(), instanceId);
         CommandProcessor.Command.CloseTab.send(msg);
-
 
         /**
          * Check to see if the current tool has a modified flag.

@@ -119,7 +119,6 @@ public class WSTab extends Composite {
         return idx;
     }
 
-
     public void setPanel(WSTabPanel panel) {
         this.panel = panel;
         this.tabDropController = new TabDropController(panel, this);
