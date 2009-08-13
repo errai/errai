@@ -5,7 +5,6 @@ import org.jboss.workspace.client.framework.AcceptsCallback;
 import org.jboss.workspace.client.rpc.MessageBusService;
 import org.jboss.workspace.server.bus.Message;
 import org.jboss.workspace.server.bus.MessageBus;
-import org.jboss.workspace.server.bus.MessageBusServer;
 import org.jboss.workspace.server.bus.SimpleMessageBusProvider;
 import org.jboss.workspace.server.json.JSONUtil;
 
