@@ -1,11 +1,9 @@
 package org.jboss.workspace.server.bus;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.jboss.workspace.client.framework.AcceptsCallback;
 
-import java.util.List;
-import java.util.Set;
 import java.util.Map;
+import java.util.Set;
 
 public interface MessageBus {
     public void store(String subject, Object message);
