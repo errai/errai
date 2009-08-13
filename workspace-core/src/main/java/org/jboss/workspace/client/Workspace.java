@@ -18,9 +18,7 @@ import org.jboss.workspace.client.rpc.MessageBusService;
 import org.jboss.workspace.client.rpc.MessageBusServiceAsync;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
@@ -54,10 +52,9 @@ public class Workspace implements EntryPoint {
 
     /**
      * Initialize the actual Workspace UI.
-     * @param rootId
+     * @param rootId -
      */
     private void initWorkspace(String rootId) {
-
         /**
          * Register a subscriber hook, with the MessageBusClient to send remoteSubcribe requests to the bus
          * on the server.  This is necessary for the server to be aware of any and all services that are available
@@ -66,11 +63,11 @@ public class Workspace implements EntryPoint {
         MessageBusClient.addOnSubscribeHook(new AcceptsCallback() {
             public void callback(Object message, Object data) {
 
-                AsyncCallback remoteSubscribe = new AsyncCallback() {
+                AsyncCallback<Void> remoteSubscribe = new AsyncCallback<Void>() {
                     public void onFailure(Throwable throwable) {
                     }
 
-                    public void onSuccess(Object o) {
+                    public void onSuccess(Void o) {
                     }
                 };
 
@@ -80,7 +77,6 @@ public class Workspace implements EntryPoint {
                 messageBus.remoteSubscribe((String) message, remoteSubscribe);
             }
         });
-
 
         /**
          * Instantiate layout.
@@ -119,16 +115,15 @@ public class Workspace implements EntryPoint {
         final ServiceDefTarget endpoint = (ServiceDefTarget) messageBus;
         endpoint.setServiceEntryPoint(getModuleBaseURL() + "jbwMsgBus");
 
-        AsyncCallback store = new AsyncCallback() {
+        AsyncCallback<Void> store = new AsyncCallback<Void>() {
             public void onFailure(Throwable throwable) {
                 Window.alert("NO CARRIER");
             }
 
-            public void onSuccess(Object o) {
+            public void onSuccess(Void o) {
                 initWorkspace(rootId);
             }
         };
-
 
         /**
          * Send initial message to the ServerEchoService, to establish an HTTP session. Otherwise, concurrent
@@ -150,14 +145,10 @@ public class Workspace implements EntryPoint {
             @Override
             public void run() {
                 if (block) {
-           //         System.out.println("listener is blocking");
                     return;
                 }
-                else {
-           //         System.out.println("listener is listening");
-                }
 
-                AsyncCallback nextMessage = new AsyncCallback<String[]>() {
+                AsyncCallback<String[]> nextMessage = new AsyncCallback<String[]>() {
                     public void onFailure(Throwable throwable) {
                         block = false;
                         schedule(1);
@@ -184,31 +175,27 @@ public class Workspace implements EntryPoint {
             }
         };
 
-
         AsyncCallback<String[]> getSubjects = new AsyncCallback<String[]>() {
             public void onFailure(Throwable throwable) {
                 Window.alert("Workspace is angry! >:( Can't establish link with message bus on server");
             }
 
             public void onSuccess(String[] o) {
-
                 for (ToolSet ts : toBeLoaded) {
                     WorkspaceLayout.addToolSet(ts);
                 }
 
                 for (final String subject : o) {
-            //        System.out.println("Subscribing to remote subject '" + subject + "'");
                     MessageBusClient.subscribe(subject, new AcceptsCallback() {
                         public void callback(Object message, Object data) {
-                            AsyncCallback cb = new AsyncCallback() {
+                            AsyncCallback<Void> cb = new AsyncCallback<Void>() {
                                 public void onFailure(Throwable throwable) {
                                 }
 
-                                public void onSuccess(Object o) {
+                                public void onSuccess(Void o) {
                                 }
                             };
 
-         //                   System.out.println("Transmitting message to server: " + subject + ";message=" + message);
                             messageBus.store(subject, (String) message, cb);
                         }
                     }, null);
@@ -219,7 +206,6 @@ public class Workspace implements EntryPoint {
         };
 
         messageBus.getSubjects(getSubjects);
-
     }
 
     public static void addToolSet(ToolSet toolSet) {

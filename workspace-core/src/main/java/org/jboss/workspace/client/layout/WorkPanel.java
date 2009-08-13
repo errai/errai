@@ -36,7 +36,6 @@ public class WorkPanel extends Composite {
 
     @Override
     public void setPixelSize(int width, int height) {
-        System.out.println("WorkPanel.setPixelSize(width: " + width + ",height:" + height + ")");
         h = (height - titleInternal.getOffsetHeight());
         w = width;
 

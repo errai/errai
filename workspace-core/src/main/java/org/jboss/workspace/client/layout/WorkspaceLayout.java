@@ -158,7 +158,6 @@ public class WorkspaceLayout extends Composite {
                                 break;
 
                             case CloseTab:
-                                System.out.println("close tab");
                                 String instanceId = (String) commandMessage.get(CommandProcessor.MessageParts.InstanceID.name());
                                 closeTab(instanceId);
                                 break;

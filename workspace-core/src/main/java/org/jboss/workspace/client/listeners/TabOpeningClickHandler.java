@@ -17,33 +17,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TabOpeningClickHandler implements ClickHandler {
-    private String tabName;
     private Tool tool;
-    private Image icon;
-    private boolean multipleAllowed;
 
     public TabOpeningClickHandler(Tool tool) {
-        this.tabName = tool.getName();
         this.tool = tool;
-        this.icon = tool.getIcon();
-    }
-
-    public TabOpeningClickHandler(String tabName, Tool tool, Image icon) {
-        this.tabName = tabName;
-        this.tool = tool;
-        this.icon = icon;
-    }
-
-    public TabOpeningClickHandler(String tabName, Tool tool, Image icon,
-                                  boolean multipleAllowed) {
-        this.tabName = tabName;
-        this.tool = tool;
-        this.icon = icon;
-        this.multipleAllowed = multipleAllowed;
     }
 
     public void onClick(ClickEvent event) {
-
         /**
          * Build the message to send the command processor.
          */
@@ -67,6 +47,7 @@ public class TabOpeningClickHandler implements ClickHandler {
         msg.put(CommandProcessor.MessageParts.DOMID.name(), DOMID);
 
         String sizeHintsSubject = "org.jboss.workspace.sizehints." + DOMID;
+
         MessageBusClient.subscribe(sizeHintsSubject,
                 new AcceptsCallback() {
                     public void callback(Object message, Object data) {
@@ -89,40 +70,7 @@ public class TabOpeningClickHandler implements ClickHandler {
             }
         });
 
-
         CommandProcessor.Command.OpenNewTab.send(msg);
     }
 
-
-    public String getTabName() {
-        return tabName;
-    }
-
-    public void setTabName(String tabName) {
-        this.tabName = tabName;
-    }
-
-    public Tool getTool() {
-        return tool;
-    }
-
-    public void setTool(Tool tool) {
-        this.tool = tool;
-    }
-
-    public Image getIcon() {
-        return icon;
-    }
-
-    public void setIcon(Image icon) {
-        this.icon = icon;
-    }
-
-    public boolean isMultipleAllowed() {
-        return multipleAllowed;
-    }
-
-    public void setMultipleAllowed(boolean multipleAllowed) {
-        this.multipleAllowed = multipleAllowed;
-    }
 }

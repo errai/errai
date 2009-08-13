@@ -33,6 +33,8 @@ public class WSGrid extends Composite {
 
     private Stack<WSCell> selectionList = new Stack<WSCell>();
     private ArrayList<Integer> colSizes = new ArrayList<Integer>();
+    private ArrayList<Integer> rowSizes = new ArrayList<Integer>();
+
     private Map<Integer, Boolean> sortedColumns = new HashMap<Integer, Boolean>();
 
     private WSCell sortedColumnHeader;
