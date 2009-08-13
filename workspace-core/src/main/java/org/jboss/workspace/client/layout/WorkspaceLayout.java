@@ -124,7 +124,7 @@ public class WorkspaceLayout extends Composite {
         MessageBusClient.subscribe(CommandProcessor.Command.RegisterWorkspaceEnvironment.getSubject(),
                 new AcceptsCallback() {
                     public void callback(Object message, Object data) {
-                        Map commandMessage = MessageBusClient.decodeMap(message);
+                        final Map commandMessage = MessageBusClient.decodeMap(message);
 
                         String commandType = (String) commandMessage.get(CommandProcessor.MessageParts.CommandType.name());
 
@@ -133,11 +133,11 @@ public class WorkspaceLayout extends Composite {
                                 String componentId = (String) commandMessage.get(CommandProcessor.MessageParts.ComponentID.name());
                                 String DOMID = (String) commandMessage.get(CommandProcessor.MessageParts.DOMID.name());
                                 String name = (String) commandMessage.get(CommandProcessor.MessageParts.Name.name());
-                                String subject;
+                                String subject = (String) commandMessage.get(CommandProcessor.MessageParts.SizeHintsSubject.name());
                                 Image i = new Image((String) commandMessage.get(CommandProcessor.MessageParts.IconURI.name()));
                                 Boolean multiple = (Boolean) commandMessage.get(CommandProcessor.MessageParts.MultipleInstances.name());
 
-                                openTab(componentId, name, i, multiple, DOMID);
+                                openTab(componentId, name, i, multiple, DOMID, subject);
                                 break;
 
                             case PublishTool:
@@ -348,52 +348,23 @@ public class WorkspaceLayout extends Composite {
         CommandProcessor.Command.RegisterToolSet.send(msg);
 
         for (final Tool tool : toolSet.getAllProvidedTools()) {
-            String subject = "org.jboss.workspace.toolregistration." + tool.getId();
-            MessageBusClient.subscribe(subject, new AcceptsCallback() {
-                public void callback(Object message, Object data) {
-                    Map msg = MessageBusClient.decodeMap(message);
-                    String commandType = (String) msg.get(CommandProcessor.MessageParts.CommandType.name());
-
-                    switch (CommandProcessor.Command.valueOf(commandType)) {
-                        case GetWidget:
-                            Widget w = tool.getWidget();
-                            String elId = "new_" + tool.getId() + System.currentTimeMillis();
-                            w.getElement().setId(elId);
-
-                            Map<String, Object> map = new HashMap<String, Object>();
-                            map.put(CommandProcessor.MessageParts.DOMID.name(), elId);
-                            map.put(CommandProcessor.MessageParts.ComponentID.name(), tool.getId());
-                            map.put(CommandProcessor.MessageParts.Name.name(), tool.getName());
-                            map.put(CommandProcessor.MessageParts.MultipleInstances.name(), tool.multipleAllowed());
-                            map.put(CommandProcessor.MessageParts.IconURI.name(), tool.getIcon().getUrl());
-
-                            CommandProcessor.Command.OpenNewTab.send(map);
-                            break;
-                        case DisposeWidget:
-                            break;
-                    }
-
-                }
-            }, null);
-
             msg = new HashMap<String, Object>();
-            msg.put(CommandProcessor.MessageParts.Subject.name(), subject);
             msg.put(CommandProcessor.MessageParts.ComponentID.name(), tool.getId());
             CommandProcessor.Command.PublishTool.send(msg);
         }
     }
 
-    private void openTab(String componentId, String name, Image icon, boolean multipleAllowed, String DOMID) {
+    private void openTab(String componentId, String name, Image icon, boolean multipleAllowed, String DOMID, String layoutHints) {
         if (!multipleAllowed && tabInstances.containsKey(componentId)) {
-            this.openTab(DOMID, componentId, name, icon, multipleAllowed);
+            this.openTab(DOMID, componentId, name, icon, multipleAllowed, layoutHints);
         }
         else {
-            this.openTab(DOMID, componentId, name, icon, multipleAllowed);
+            this.openTab(DOMID, componentId, name, icon, multipleAllowed, layoutHints);
         }
     }
 
     private void openTab(final String DOMID, final String componentId, final String name,
-                         final Image icon, boolean multipleAllowed) {
+                         final Image icon, boolean multipleAllowed, final String layoutHints) {
         if (isToolActive(componentId)) {
             if (!multipleAllowed) {
                 Map<String, Object> msg = new HashMap<String, Object>();
@@ -420,7 +391,7 @@ public class WorkspaceLayout extends Composite {
 
                             newName = name + " (" + idx + ")";
 
-                            _openTab(DOMID, componentId, newName, newId, icon);
+                            _openTab(DOMID, componentId, newName, newId, icon, layoutHints);
                         }
                         else if (!"WindowClosed".equals(message)) {
                             Set<String> s = layout.getActiveByType(componentId);
@@ -447,10 +418,10 @@ public class WorkspaceLayout extends Composite {
             }
         }
 
-        _openTab(DOMID, componentId, name, componentId, icon);
+        _openTab(DOMID, componentId, name, componentId, icon, layoutHints);
     }
 
-    private void _openTab(String DOMID, final String componentId, String name, String instanceId, Image icon) {
+    private void _openTab(String DOMID, final String componentId, String name, String instanceId, Image icon, String layoutHints) {
         final ExtSimplePanel panel = new ExtSimplePanel();
         panel.getElement().getStyle().setProperty("overflow", "hidden");
 
@@ -458,7 +429,7 @@ public class WorkspaceLayout extends Composite {
 
         WSElementWrapper toolWidget = new WSElementWrapper(getElementById(DOMID));
         toolWidget.setVisible(true);
-        panel.add(toolWidget);
+        panel.setWidget(toolWidget);
 
         final Image newIcon = new Image(icon != null ? icon.getUrl() : GWT.getModuleBaseURL()
                 + "/images/ui/icons/questioncube.png");
@@ -489,6 +460,7 @@ public class WorkspaceLayout extends Composite {
                             case ActivateTool:
                                 newWSTab.activate();
                                 break;
+
                         }
 
                     }

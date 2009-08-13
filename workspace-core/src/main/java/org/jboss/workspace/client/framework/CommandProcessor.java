@@ -16,6 +16,7 @@ public class CommandProcessor {
         PublishTool,
         ActivateTool,
         GetActiveWidgets,
+        SizeHints,
         Hello;
 
         public String getSubject() {
@@ -24,15 +25,12 @@ public class CommandProcessor {
 
         public void send(Map<String, Object> message) {
             message.put(MessageParts.CommandType.name(), this.name());
-            String subject = getSubject();
-            String msg = MessageBusClient.encodeMap(message);
-
-            MessageBusClient.store(subject, msg);
+            MessageBusClient.store(getSubject(), message);
         }
     }
 
     public enum MessageParts {
         CommandType, ComponentID, InstanceID, Name, MultipleInstances, IconURI, Subject, DOMID, RespondWithCommand,
-        NestedData
+        NestedData, Width, Height, SizeHintsSubject
     }
 }

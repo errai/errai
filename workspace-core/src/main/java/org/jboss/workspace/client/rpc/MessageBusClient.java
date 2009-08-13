@@ -36,7 +36,6 @@ public class MessageBusClient {
     }-*/;
 
     public static void store(String subject, Map message) {
-        System.out.println("sending message: " + subject);
         store(subject, encodeMap(message));
     }
 
