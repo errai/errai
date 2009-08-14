@@ -78,6 +78,7 @@ public class WSCellDateFormat extends WSCellFormatter {
         return valueOf(date.getTime());
     }
 
+
     public boolean edit(WSGrid.WSCell element) {
         wsCellReference = element;
         editCellReference = this;

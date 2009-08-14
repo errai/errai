@@ -31,11 +31,11 @@ public class WSCellWidgetCell extends WSCellFormatter {
     }
 
     public void setHeight(String height) {
-        // do nothing
+        widget.setHeight(height);
     }
 
     public void setWidth(String width) {
-        // do nothing
+        widget.setWidth(width);
     }
 
 }

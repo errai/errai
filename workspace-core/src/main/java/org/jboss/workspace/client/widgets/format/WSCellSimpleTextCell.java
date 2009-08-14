@@ -42,10 +42,13 @@ public class WSCellSimpleTextCell extends WSCellFormatter {
 
     public WSCellSimpleTextCell(String value) {
         this.html = new HTML(value);
+        this.html.setStyleName("WSCell-inner");
     }
 
     public WSCellSimpleTextCell(String value, boolean readonly) {
         this.html = new HTML(value);
+        this.html.setStyleName("WSCell-inner");
+        
         this.readonly = readonly;
     }
 

@@ -635,14 +635,20 @@ span {
     border-bottom-color: #efefef;
     border-left-color: #efefef;
 
-    vertical-align: top;
+    vertical-align: middle;
 
     overflow: hidden;
+}
+
+
+.WSCell-inner {
+    vertical-align: middle;
 }
 
 .WSCell-panel {
     overflow: auto;
     height: 12pt;
+    vertical-align: middle;
 }
 
 .WSCell-innerpanel {
@@ -650,6 +656,8 @@ span {
      * This is needed to fix a Firefox rendering bug.
      */
     overflow: auto;
+    vertical-align: middle;
+    
 }
 
 .WSCell-hover {

@@ -50,6 +50,14 @@ public class WSCellTitle extends WSCellFormatter {
         return hPanel;
     }
 
+    @Override
+    public void setHeight(String height) {
+    }
+
+    @Override
+    public void setWidth(String width) {
+    }
+
     public boolean edit(WSGrid.WSCell element) {
         return false;
     }

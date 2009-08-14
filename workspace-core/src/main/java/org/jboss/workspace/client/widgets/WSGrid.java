@@ -33,7 +33,6 @@ public class WSGrid extends Composite {
 
     private Stack<WSCell> selectionList = new Stack<WSCell>();
     private ArrayList<Integer> colSizes = new ArrayList<Integer>();
-    private ArrayList<Integer> rowSizes = new ArrayList<Integer>();
 
     private Map<Integer, Boolean> sortedColumns = new HashMap<Integer, Boolean>();
 
@@ -574,6 +573,9 @@ public class WSGrid extends Composite {
         forwardDirX = forwardDirY = true;
     }
 
+    public void setRowHeight(int row, int height) {
+        dataGrid.setRowHeight(row, height);
+    }
 
     /**
      * Sets a column width (in pixels). Columns start from 0.
@@ -651,6 +653,7 @@ public class WSGrid extends Composite {
             row.get(col).addStyleDependentName("colselect");
         }
     }
+
 
     /**
      * Blurs a vertical column.
@@ -813,6 +816,16 @@ public class WSGrid extends Composite {
             return tableIndex;
         }
 
+        public void setRowHeight(int row, int height) {
+            if (row > tableIndex.size()) return;
+
+            ArrayList<WSCell> rowData = tableIndex.get(row);
+            String ht = height + "px";
+            for (int i = 0; i < cols; i++) {
+                rowData.get(i).setHeight(ht);
+            }
+        }
+
         public WSCell getCell(int row, int col) {
             return tableIndex.get(row).get(col);
         }
@@ -969,7 +982,7 @@ public class WSGrid extends Composite {
     private boolean _msie_compatibility = getUserAgent().contains("msie");
 
     public class WSCell extends Composite {
-        protected FlowPanel panel;
+        protected SimplePanel panel;
 
         protected WSCellFormatter cellFormat;
 
@@ -986,7 +999,7 @@ public class WSGrid extends Composite {
 
         public WSCell(WSAbstractGrid grid, WSCellFormatter cellFormat, int row, int column) {
             this.grid = grid;
-            panel = new FlowPanel();
+            panel = new SimplePanel();
             panel.setStyleName("WSCell-panel");
 
             if (grid.tableIndex.size() - 1 < row) {
@@ -1006,7 +1019,7 @@ public class WSGrid extends Composite {
             this.cellFormat = cellFormat;
 
             panel.add(cellFormat.getWidget(wsGrid));
-
+  
             this.row = row;
             this.col = column;
 
@@ -1203,10 +1216,14 @@ public class WSGrid extends Composite {
             if (_msie_compatibility && (formatter.getTextValue() == null || formatter.getTextValue().length() == 0)) {
                 formatter.setValue("&nbsp;");
             }
+
             this.cellFormat = formatter;
             panel.clear();
-            panel.add(formatter.getWidget(wsGrid));
 
+            Widget w = formatter.getWidget(wsGrid);
+
+            panel.add(w);
+            
             numeric = isNumeric(formatter.getTextValue());
         }
 
