@@ -7,7 +7,6 @@ import static com.google.gwt.user.client.DOM.setStyleAttribute;
 import com.google.gwt.user.client.Event;
 import static com.google.gwt.user.client.Event.addNativePreviewHandler;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import static com.google.gwt.user.client.ui.RootPanel.getBodyElement;
 import org.jboss.workspace.client.listeners.CellChangeEvent;
@@ -56,7 +55,7 @@ public class WSGrid extends Composite {
 
     private boolean resizeOnAttach = false;
 
-    private WSGrid wsGrid = this;                                                                                              
+    private WSGrid wsGrid = this;
     private PopupPanel resizeLine = new PopupPanel() {
         @Override
         public void onBrowserEvent(Event event) {
@@ -1019,7 +1018,7 @@ public class WSGrid extends Composite {
             this.cellFormat = cellFormat;
 
             panel.add(cellFormat.getWidget(wsGrid));
-  
+
             this.row = row;
             this.col = column;
 
@@ -1123,18 +1122,47 @@ public class WSGrid extends Composite {
                 int leftVisible = rightVisible - grid.getScrollPanel().getOffsetWidth() + 2;
 
                 if (bottomCell >= bottomVisible) {
-                    if (scrollPos % cellHeight != 0) {
-                        scrollPos += (scrollPos % cellHeight);
-                    }
+                    final int startPos = scrollPos;
+                    scrollPos += (bottomCell - bottomVisible) + 18;
+                    final int endPos = scrollPos;
 
-                    int offsetDifference = bottomCell - bottomVisible + 18;
-                    grid.getScrollPanel().setScrollPosition(scrollPos + offsetDifference);
+                    Timer smoothScroll = new Timer() {
+                        int i = startPos;
+
+                        @Override
+                        public void run() {
+                            if ((i += 5) >= endPos) {
+                                i = endPos;
+                                cancel();
+                            }
+
+                            grid.scrollPanel.setScrollPosition(i);
+                        }
+                    };
+                    smoothScroll.scheduleRepeating(1);
+
                 }
                 else if (bottomCell - cellHeight <= (topVisible)) {
-                    if (scrollPos % cellHeight != 0) {
-                        scrollPos -= (scrollPos % cellHeight);
-                    }
-                    grid.getScrollPanel().setScrollPosition(scrollPos - getOffsetHeight());
+                    final int startPos = scrollPos;
+                    scrollPos -= getOffsetHeight();
+                    final int endPos = scrollPos;
+
+                    Timer smoothScroll = new Timer() {
+                        int i = startPos;
+
+                        @Override
+                        public void run() {
+                            if ((i -= 5) <= endPos) {
+                                i = endPos;
+                                cancel();
+                            }
+
+                            grid.scrollPanel.setScrollPosition(i);
+                        }
+                    };
+                    smoothScroll.scheduleRepeating(1);
+
+                //    grid.getScrollPanel().setScrollPosition(scrollPos - getOffsetHeight());
                 }
                 else if (rightCell >= (rightVisible)) {
                     if (scrollPosH % cellWidth != 0) {
@@ -1224,7 +1252,7 @@ public class WSGrid extends Composite {
             Widget w = formatter.getWidget(wsGrid);
 
             panel.add(w);
-            
+
             numeric = isNumeric(formatter.getTextValue());
         }
 
@@ -1554,7 +1582,7 @@ public class WSGrid extends Composite {
     public void setPreciseHeight(int height) {
         int offsetHeight = height - getTitlebarOffsetHeight() - 10;
         setHeight(height + "px");
-        dataGrid.getScrollPanel().setHeight((offsetHeight)+ "px");
+        dataGrid.getScrollPanel().setHeight((offsetHeight) + "px");
     }
 
     /**
