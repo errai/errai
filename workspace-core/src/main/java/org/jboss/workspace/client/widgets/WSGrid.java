@@ -1116,18 +1116,19 @@ public class WSGrid extends Composite {
                 int rightCell = DOM.getAbsoluteLeft(getElement()) + cellWidth
                         - DOM.getAbsoluteLeft(grid.getScrollPanel().getElement()) + scrollPosH;
 
-                int bottomVisible = grid.getScrollPanel().getOffsetHeight() + scrollPos - 1;
+                int bottomVisible = grid.getScrollPanel().getOffsetHeight() + scrollPos - 19;
                 int topVisible = bottomVisible - grid.getScrollPanel().getOffsetHeight() + 2;
 
-                int rightVisible = grid.getScrollPanel().getOffsetWidth() + scrollPosH - 1;
+                int rightVisible = grid.getScrollPanel().getOffsetWidth() + scrollPosH - 19;
                 int leftVisible = rightVisible - grid.getScrollPanel().getOffsetWidth() + 2;
 
-                if (bottomCell >= (bottomVisible - cellHeight)) {
+                if (bottomCell >= bottomVisible) {
                     if (scrollPos % cellHeight != 0) {
                         scrollPos += (scrollPos % cellHeight);
                     }
 
-                    grid.getScrollPanel().setScrollPosition(scrollPos + getOffsetHeight());
+                    int offsetDifference = bottomCell - bottomVisible + 18;
+                    grid.getScrollPanel().setScrollPosition(scrollPos + offsetDifference);
                 }
                 else if (bottomCell - cellHeight <= (topVisible)) {
                     if (scrollPos % cellHeight != 0) {
