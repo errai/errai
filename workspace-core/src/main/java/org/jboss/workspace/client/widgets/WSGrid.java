@@ -1126,14 +1126,22 @@ public class WSGrid extends Composite {
                     scrollPos += (bottomCell - bottomVisible) + 18;
                     final int endPos = scrollPos;
 
+                    final int threshold = endPos - ((endPos - startPos) / 3);
+
                     Timer smoothScroll = new Timer() {
                         int i = startPos;
+                        int vel = 5;
+                        boolean x = true;
 
                         @Override
                         public void run() {
-                            if ((i += 5) >= endPos) {
+                            if ((i += vel) >= endPos) {
                                 i = endPos;
                                 cancel();
+                            }
+                            if (i > threshold) {
+                                if (x && vel > 1) vel--;
+                                x = !x;
                             }
 
                             grid.scrollPanel.setScrollPosition(i);
@@ -1146,15 +1154,23 @@ public class WSGrid extends Composite {
                     final int startPos = scrollPos;
                     scrollPos -= getOffsetHeight();
                     final int endPos = scrollPos;
+                    final int threshold = endPos + ((startPos - endPos) / 3);
 
                     Timer smoothScroll = new Timer() {
                         int i = startPos;
+                        int vel = 5;
+                        boolean x = true;
+
 
                         @Override
                         public void run() {
-                            if ((i -= 5) <= endPos) {
+                            if ((i -= vel) <= endPos) {
                                 i = endPos;
                                 cancel();
+                            }
+                            if (i < threshold) {
+                                if (x && vel > 1) vel--;
+                                x = !x;
                             }
 
                             grid.scrollPanel.setScrollPosition(i);
@@ -1162,7 +1178,7 @@ public class WSGrid extends Composite {
                     };
                     smoothScroll.scheduleRepeating(1);
 
-                //    grid.getScrollPanel().setScrollPosition(scrollPos - getOffsetHeight());
+                    //    grid.getScrollPanel().setScrollPosition(scrollPos - getOffsetHeight());
                 }
                 else if (rightCell >= (rightVisible)) {
                     if (scrollPosH % cellWidth != 0) {
