@@ -3,7 +3,7 @@ html, body {
     background-color: #efefef;
 
     height: 100%;
-    margin: 0;                                          
+    margin: 0;
     overflow: hidden;
     padding: 0;
     width: 100%;
@@ -14,7 +14,7 @@ html, body {
 }
 
 div:focus {
-    outline:none;
+    outline: none;
 }
 
 h2 {
@@ -584,8 +584,8 @@ span {
 }
 
 .gwt-ScrollTable .headerWrapper,
-    .mosaic-ColumnWidget .headerWrapper,
-    .mosaic-ScrollTreeTable .headerWrapper {
+.mosaic-ColumnWidget .headerWrapper,
+.mosaic-ScrollTreeTable .headerWrapper {
     background-image: url('images/titlegradient.png');
 }
 
@@ -640,7 +640,6 @@ span {
     overflow: hidden;
 }
 
-
 .WSCell-inner {
     vertical-align: middle;
 }
@@ -657,7 +656,7 @@ span {
      */
     overflow: auto;
     vertical-align: middle;
-    
+
 }
 
 .WSCell-hover {
@@ -679,13 +678,34 @@ span {
     border: 1px solid #ddddff;
 
     border-bottom-color: lightgray;
-    border-right-color: lightsteelblue;
+    border-right-color: ;
     border-left-color: lightsteelblue;
 }
 
 .WSCell-hcolselect {
     background-color: #aaaaff;
     border: 1px solid #aaaaff;
+}
+
+.WSCell-rowselect-left {
+    border-top: 1px solid lightsteelblue;
+    border-bottom: 1px solid lightsteelblue;
+    border-left: 1px solid lightsteelblue;
+    background-color: #ddddff;    
+}
+
+.WSCell-rowselect-right {
+    border-top: 1px solid lightsteelblue;
+    border-bottom: 1px solid lightsteelblue;
+    border-right: 1px solid lightsteelblue;
+    background-color: #ddddff;
+
+}
+
+.WSCell-rowselect {
+    border-top: 1px solid lightsteelblue;
+    border-bottom: 1px solid lightsteelblue;
+    background-color: #ddddff;
 }
 
 .WSCell-editbox {
@@ -713,7 +733,7 @@ span {
     background: url('images/ui/layout/section-header.png') repeat-x;
     border-bottom: 1px #cccccc solid;
     vertical-align: middle;
-    width:100%;
+    width: 100%;
 }
 
 .WS-WorkPanel-title-label {
@@ -745,11 +765,11 @@ span {
 }
 
 .WSWindowPanel-drape {
-    width:100%;
-    height:100%;
+    width: 100%;
+    height: 100%;
     background: black;
     opacity: 0.2;
-    filter:alpha(opacity=20);
+    filter: alpha(opacity = 20);
 }
 
 .WSDropShadow-topLeftCorner {

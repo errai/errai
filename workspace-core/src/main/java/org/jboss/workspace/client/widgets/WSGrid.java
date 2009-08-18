@@ -1069,6 +1069,22 @@ public class WSGrid extends Composite {
             if (edit) cellFormat.stopedit();
             removeStyleDependentName("selected");
 
+            if (rowSelectionOnly) {
+                for (int i = 0; i < cols; i++) {
+                    WSCell c = grid.getCell(row, i);
+
+                    if (i == 0) {
+                        c.removeStyleDependentName("rowselect-left");
+                    }
+                    else if (i + 1 == cols) {
+                        c.removeStyleDependentName("rowselect-right");
+                    }
+                    else {
+                        c.removeStyleDependentName("rowselect");
+                    }
+                }
+            }
+
             if (currentFocusColumn) {
                 blurColumn(col);
                 currentFocusColumn = false;
@@ -1199,14 +1215,38 @@ public class WSGrid extends Composite {
             }
 
             if (rowSelectionOnly) {
-                 for (int i = 0; i < cols; i++) {
-                     if (!selectionList.contains(grid.getCell(row, i))) {
-                         grid.getCell(row, i).focus();
-                     }
-                 }
+                for (int i = 0; i < cols; i++) {
+                    WSCell c = grid.getCell(row, i);
+
+                    if (!selectionList.contains(c)) {
+
+                        if (i == 0) {
+                            c.addStyleDependentName("rowselect-left");
+                        }
+                        else if (i + 1 == cols) {
+                            c.addStyleDependentName("rowselect-right");
+                        }
+                        else {
+                            c.addStyleDependentName("rowselect");
+                        }
+                    }
+                }
+
+                if (col == 0) {
+                    addStyleDependentName("rowselect-left");
+                }
+                else if (col + 1 == cols) {
+                    addStyleDependentName("rowselect-right");
+                }
+                else {
+                    addStyleDependentName("rowselect");
+                }
             }
 
-            addStyleDependentName("selected");
+            else {
+
+                addStyleDependentName("selected");
+            }
         }
 
         /**
@@ -1474,7 +1514,7 @@ public class WSGrid extends Composite {
             switch (event.getTypeInt()) {
                 case Event.ONMOUSEOVER:
                     if (!_resizing) {
-                        addStyleDependentName("hover");
+                //        addStyleDependentName("hover");
                         if (_rangeSelect) {
                             focusRange();
                         }
@@ -1482,7 +1522,7 @@ public class WSGrid extends Composite {
 
                     break;
                 case Event.ONMOUSEOUT:
-                    if (!_resizing) removeStyleDependentName("hover");
+              //      if (!_resizing) removeStyleDependentName("hover");
                     if (grid.type == GridType.TITLEBAR) _resizeArmed = false;
                     break;
 
