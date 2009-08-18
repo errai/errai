@@ -1214,7 +1214,7 @@ public class WSGrid extends Composite {
                 }
             }
 
-            if (rowSelectionOnly) {
+            if (grid.type != GridType.TITLEBAR && rowSelectionOnly) {
                 for (int i = 0; i < cols; i++) {
                     WSCell c = grid.getCell(row, i);
 
