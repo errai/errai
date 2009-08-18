@@ -75,11 +75,15 @@ public class WSGrid extends Composite {
 
     public WSGrid(boolean scrollable) {
         innerPanel = new VerticalPanel();
+        innerPanel.setSpacing(0);
+
         focusPanel = new FocusPanel(innerPanel);
         initWidget(focusPanel);
 
         titleBar = new WSAbstractGrid(false, GridType.TITLEBAR);
         innerPanel.add(titleBar);
+        innerPanel.setCellVerticalAlignment(titleBar, HasVerticalAlignment.ALIGN_BOTTOM);
+
 
         titleBar.setStylePrimaryName("WSGrid-header");
         dataGrid = new WSAbstractGrid(scrollable, GridType.EDITABLE_GRID);
@@ -717,7 +721,8 @@ public class WSGrid extends Composite {
 
             if (!scrollable) {
                 setStyleAttribute(scrollPanel.getElement(), "overflow", "hidden");
-                scrollPanel.setHeight("18px");
+                scrollPanel.setHeight("20px");
+                table.setHeight("20px");
             }
             else {
                 setStyleAttribute(scrollPanel.getElement(), "overflow", "scroll");
@@ -727,6 +732,8 @@ public class WSGrid extends Composite {
 
             tableIndex = new ArrayList<ArrayList<WSCell>>();
             tableIndex.add(new ArrayList<WSCell>());
+
+            setHeight("20px");
         }
 
         public void clear() {
@@ -1637,7 +1644,7 @@ public class WSGrid extends Composite {
      * @param height CSS height string.
      */
     public void setHeight(String height) {
-        innerPanel.setHeight(height);
+        focusPanel.setHeight(height);
     }
 
     /**
@@ -1657,7 +1664,7 @@ public class WSGrid extends Composite {
      * @param width The CSS width string.
      */
     public void setWidth(String width) {
-        innerPanel.setWidth(width);
+        focusPanel.setWidth(width);
     }
 
     /**
