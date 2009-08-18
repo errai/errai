@@ -55,6 +55,8 @@ public class WSGrid extends Composite {
 
     private boolean resizeOnAttach = false;
 
+    private boolean rowSelectionOnly = false;
+
     private WSGrid wsGrid = this;
     private PopupPanel resizeLine = new PopupPanel() {
         @Override
@@ -1196,6 +1198,14 @@ public class WSGrid extends Composite {
                 }
             }
 
+            if (rowSelectionOnly) {
+                 for (int i = 0; i < cols; i++) {
+                     if (!selectionList.contains(grid.getCell(row, i))) {
+                         grid.getCell(row, i).focus();
+                     }
+                 }
+            }
+
             addStyleDependentName("selected");
         }
 
@@ -1759,6 +1769,14 @@ public class WSGrid extends Composite {
 
     public Stack<WSCell> getSelectionList() {
         return selectionList;
+    }
+
+    public boolean isRowSelectionOnly() {
+        return rowSelectionOnly;
+    }
+
+    public void setRowSelectionOnly(boolean rowSelectionOnly) {
+        this.rowSelectionOnly = rowSelectionOnly;
     }
 
     private native static void disableTextSelectInternal(Element e, boolean disable)/*-{
