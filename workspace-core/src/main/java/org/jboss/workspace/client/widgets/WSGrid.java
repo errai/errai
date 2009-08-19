@@ -531,6 +531,10 @@ public class WSGrid extends Composite {
 
     }
 
+    public void removeRow(int row) {
+        dataGrid.removeRow(row);
+    }
+    
     public void setColumnHeader(int row, int column, String html) {
         cols = titleBar.ensureRowsAndCols(row + 1, column + 1);
         WSCell wsc = titleBar.getTableIndex().get(row).get(column);
@@ -760,6 +764,11 @@ public class WSGrid extends Composite {
             for (int i = 0; i < cols; i++) {
                 addCell(table.getRowCount() - 1, "");
             }
+        }
+
+        public void removeRow(int row) {
+            table.removeRow(row);
+            tableIndex.remove(row);
         }
 
         public int ensureRowsAndCols(int rows, int cols) {
@@ -1745,7 +1754,6 @@ public class WSGrid extends Composite {
     public void removeCellChangeHandler(ChangeHandler handler) {
         cellChangeHandlers.remove(handler);
     }
-
 
     private void fireAllCellChangeHandlers(WSCell cell, String newValue) {
         for (ChangeHandler c : cellChangeHandlers) c.onChange(new CellChangeEvent(cell, newValue));
