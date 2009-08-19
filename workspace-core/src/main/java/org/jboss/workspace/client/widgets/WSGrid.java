@@ -769,6 +769,15 @@ public class WSGrid extends Composite {
         public void removeRow(int row) {
             table.removeRow(row);
             tableIndex.remove(row);
+
+            int size = tableIndex.size();
+
+            for (int i = row; i < size; i++) {
+                ArrayList<WSCell> currRow = tableIndex.get(i);
+                int numCols = currRow.size();
+                for (int j = 0; j < numCols; j++)
+                    ((WSCell) currRow.get(j)).row--;
+            }
         }
 
         public int ensureRowsAndCols(int rows, int cols) {
