@@ -770,6 +770,8 @@ public class WSGrid extends Composite {
             table.removeRow(row);
             tableIndex.remove(row);
 
+
+            // Need to update the rows for all the cells following the deleted row.
             int size = tableIndex.size();
             for (int i = row; i < size; i++) {
                 ArrayList<WSCell> currRow = tableIndex.get(i);
