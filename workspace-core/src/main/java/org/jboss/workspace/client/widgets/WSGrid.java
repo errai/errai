@@ -771,7 +771,6 @@ public class WSGrid extends Composite {
             tableIndex.remove(row);
 
             int size = tableIndex.size();
-
             for (int i = row; i < size; i++) {
                 ArrayList<WSCell> currRow = tableIndex.get(i);
                 int numCols = currRow.size();
