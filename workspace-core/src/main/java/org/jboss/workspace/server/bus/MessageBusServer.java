@@ -69,6 +69,4 @@ public class MessageBusServer {
 
         return buf.append("}").toString();
     }
-
-
 }
