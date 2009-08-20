@@ -459,7 +459,6 @@ public class WorkspaceLayout extends Composite {
                             case ActivateTool:
                                 newWSTab.activate();
                                 break;
-
                         }
 
                     }

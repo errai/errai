@@ -7,6 +7,7 @@ import static com.google.gwt.user.client.DOM.setStyleAttribute;
 import com.google.gwt.user.client.Event;
 import static com.google.gwt.user.client.Event.addNativePreviewHandler;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import static com.google.gwt.user.client.ui.RootPanel.getBodyElement;
 import org.jboss.workspace.client.listeners.CellChangeEvent;
@@ -178,7 +179,6 @@ public class WSGrid extends Composite {
          */
         focusPanel.addKeyDownHandler(new KeyDownHandler() {
             public void onKeyDown(KeyDownEvent event) {
-                //final WSCell currentFocus = selectionList.isEmpty() ? null : selectionList.lastElement();
                 final WSCell currentFocus;
                 int offsetX;
                 int offsetY = 1;
@@ -212,6 +212,8 @@ public class WSGrid extends Composite {
                 if (currentFocus.edit) {
                     return;
                 }
+
+                event.preventDefault();
 
                 switch (event.getNativeKeyCode()) {
                     /**
@@ -492,43 +494,6 @@ public class WSGrid extends Composite {
                 _rangeSelect = false;
             }
         });
-
-        /**
-         * This handler is to prevent certain default browser behaviors when interacting with the grid using
-         * keyboard operations.
-         */
-        addNativePreviewHandler(new Event.NativePreviewHandler() {
-            public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
-                final WSCell currentFocus = selectionList.isEmpty() ? null :
-                        selectionList.lastElement();
-
-                if (currentFocus != null && currentFocus.isEdit()) {
-                    return;
-                }
-
-                switch (event.getTypeInt()) {
-                    case Event.ONKEYDOWN:
-                        switch (event.getNativeEvent().getKeyCode()) {
-                            case KeyCodes.KEY_TAB:
-                                if (currentFocus != null && currentFocus.isEdit()) {
-                                    currentFocus.cellFormat.stopedit();
-                                }
-                            case 63232:
-                            case KeyCodes.KEY_UP:
-                            case 63235:
-                            case KeyCodes.KEY_RIGHT:
-                            case 63233:
-                            case KeyCodes.KEY_ENTER:
-                            case KeyCodes.KEY_DOWN:
-                            case 63234:
-                            case KeyCodes.KEY_LEFT:
-                            case 63272:
-                                event.getNativeEvent().preventDefault();
-                        }
-                }
-            }
-        });
-
     }
 
     public void removeRow(int row) {
@@ -1170,13 +1135,13 @@ public class WSGrid extends Composite {
                     scrollPos += (bottomCell - bottomVisible) + 18;
                     final int endPos = scrollPos;
 
-                    final int speedPremium = ((endPos - startPos) / 100);
-                    final int threshold = endPos - 50 - (speedPremium * 10);
-                    final double decelRate = ((double) (endPos - startPos)) / (250 + (speedPremium * 100));
+                    final int multiplier = ((endPos - startPos) / 100);
+                    final int threshold = endPos - 50 - (multiplier * 10);
+                    final double decelRate = ((double) (endPos - startPos)) / (250 + (multiplier * 100));
 
                     Timer smoothScroll = new Timer() {
                         int i = startPos;
-                        double vel = 5.0 + speedPremium;
+                        double vel = 5.0 + multiplier;
                         int absoluteVel = (int) Math.round(vel);
                         double decel = decelRate;
 
@@ -1205,13 +1170,13 @@ public class WSGrid extends Composite {
                     scrollPos -= getOffsetHeight();
                     final int endPos = scrollPos;
 
-                    final int speedPremium = ((endPos - startPos) / 100);
-                    final double decelRate = ((double)(startPos - endPos)) / (250 + (speedPremium * 100));
-                    final int threshold = endPos + 50 + (speedPremium * 10);
+                    final int multiplier = ((endPos - startPos) / 100);
+                    final double decelRate = ((double)(startPos - endPos)) / (250 + (multiplier * 100));
+                    final int threshold = endPos + 50 + (multiplier * 10);
 
                     Timer smoothScroll = new Timer() {
                         int i = startPos;
-                        double vel = 5.0 + speedPremium;
+                        double vel = 5.0 + multiplier;
                         int absoluteVel = (int) Math.round(vel);
                         double decel = decelRate;
 
@@ -1234,8 +1199,6 @@ public class WSGrid extends Composite {
                         }
                     };
                     smoothScroll.scheduleRepeating(1);
-
-                    //    grid.getScrollPanel().setScrollPosition(scrollPos - getOffsetHeight());
                 }
                 else if (rightCell >= (rightVisible)) {
                     if (scrollPosH % cellWidth != 0) {
