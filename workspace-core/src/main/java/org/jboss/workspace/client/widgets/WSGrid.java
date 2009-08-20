@@ -534,7 +534,7 @@ public class WSGrid extends Composite {
     public void removeRow(int row) {
         dataGrid.removeRow(row);
     }
-    
+
     public void setColumnHeader(int row, int column, String html) {
         cols = titleBar.ensureRowsAndCols(row + 1, column + 1);
         WSCell wsc = titleBar.getTableIndex().get(row).get(column);
@@ -1170,22 +1170,28 @@ public class WSGrid extends Composite {
                     scrollPos += (bottomCell - bottomVisible) + 18;
                     final int endPos = scrollPos;
 
-                    final int threshold = endPos - ((endPos - startPos) / 3);
+                    final int speedPremium = ((endPos - startPos) / 100);
+                    final int threshold = endPos - 50 - (speedPremium * 10);
+                    final double decelRate = ((double) (endPos - startPos)) / (250 + (speedPremium * 100));
 
                     Timer smoothScroll = new Timer() {
                         int i = startPos;
-                        int vel = 5;
-                        boolean x = true;
+                        double vel = 5.0 + speedPremium;
+                        int absoluteVel = (int) Math.round(vel);
+                        double decel = decelRate;
 
                         @Override
                         public void run() {
-                            if ((i += vel) >= endPos) {
+                            if ((i += absoluteVel) >= endPos) {
                                 i = endPos;
                                 cancel();
                             }
                             if (i > threshold) {
-                                if (x && vel > 1) vel--;
-                                x = !x;
+                                if (vel > 1) {
+                                    vel -= decelRate;
+                                    absoluteVel = (int) Math.round(vel);
+                                    if (absoluteVel < 1) absoluteVel = 1;
+                                }
                             }
 
                             grid.scrollPanel.setScrollPosition(i);
@@ -1198,23 +1204,30 @@ public class WSGrid extends Composite {
                     final int startPos = scrollPos;
                     scrollPos -= getOffsetHeight();
                     final int endPos = scrollPos;
-                    final int threshold = endPos + ((startPos - endPos) / 3);
+
+                    final int speedPremium = ((endPos - startPos) / 100);
+                    final double decelRate = ((double)(startPos - endPos)) / (250 + (speedPremium * 100));
+                    final int threshold = endPos + 50 + (speedPremium * 10);
 
                     Timer smoothScroll = new Timer() {
                         int i = startPos;
-                        int vel = 5;
-                        boolean x = true;
-
+                        double vel = 5.0 + speedPremium;
+                        int absoluteVel = (int) Math.round(vel);
+                        double decel = decelRate;
 
                         @Override
                         public void run() {
-                            if ((i -= vel) <= endPos) {
+                            if ((i -= absoluteVel) <= endPos) {
                                 i = endPos;
                                 cancel();
                             }
                             if (i < threshold) {
-                                if (x && vel > 1) vel--;
-                                x = !x;
+                                if (vel > 1) {
+                                    vel -= decelRate;
+                                    absoluteVel = (int) Math.round(vel);
+                                    if (absoluteVel < 1) absoluteVel = 1;                                    
+                                }
+                                //  x = !x;
                             }
 
                             grid.scrollPanel.setScrollPosition(i);
@@ -1540,7 +1553,7 @@ public class WSGrid extends Composite {
             switch (event.getTypeInt()) {
                 case Event.ONMOUSEOVER:
                     if (!_resizing) {
-                //        addStyleDependentName("hover");
+                        //        addStyleDependentName("hover");
                         if (_rangeSelect) {
                             focusRange();
                         }
@@ -1548,7 +1561,7 @@ public class WSGrid extends Composite {
 
                     break;
                 case Event.ONMOUSEOUT:
-              //      if (!_resizing) removeStyleDependentName("hover");
+                    //      if (!_resizing) removeStyleDependentName("hover");
                     if (grid.type == GridType.TITLEBAR) _resizeArmed = false;
                     break;
 
