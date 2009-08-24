@@ -823,7 +823,7 @@ public class WSGrid extends Composite {
         }
 
         public void sort(int col, boolean ascending) {
-            boolean secondPass = isEmpty(valueAt(col, 0));
+            boolean secondPass = isEmpty(valueAt(0, col));
 
             _sort(col, ascending, 0, tableIndex.size() - 1);
             if (secondPass) {
@@ -954,6 +954,12 @@ public class WSGrid extends Composite {
         }
 
         public String valueAt(int row, int col) {
+//            ArrayList<WSCell> rowArr = tableIndex.get(row);
+//            WSCell cell = rowArr.get(col);
+//
+//            return cell.cellFormat.getTextValue();
+
+
             return tableIndex.get(row).get(col).cellFormat.getTextValue();
         }
 
