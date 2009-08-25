@@ -336,7 +336,6 @@ public class WSGrid extends Composite {
                                     }
                                 }
 
-
                                 dataGrid.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() + offsetX)
                                         .focus();
                             }
@@ -954,12 +953,6 @@ public class WSGrid extends Composite {
         }
 
         public String valueAt(int row, int col) {
-//            ArrayList<WSCell> rowArr = tableIndex.get(row);
-//            WSCell cell = rowArr.get(col);
-//
-//            return cell.cellFormat.getTextValue();
-
-
             return tableIndex.get(row).get(col).cellFormat.getTextValue();
         }
 
