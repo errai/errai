@@ -42,7 +42,7 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
 
                     Map<String, Object> msg = new HashMap<String, Object>();
                     msg.put("CommandType", "Hello");
-                    msg.put("Name", "Mr. Server");
+                    msg.put("Name", "Jay Balunas");
 
                     bus.store("org.jboss.workspace.WorkspaceLayout", msg);
 
