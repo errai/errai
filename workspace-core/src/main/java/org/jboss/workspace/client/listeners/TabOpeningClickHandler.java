@@ -3,15 +3,15 @@ package org.jboss.workspace.client.listeners;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.jboss.workspace.client.framework.AcceptsCallback;
-import org.jboss.workspace.client.framework.CommandProcessor;
 import org.jboss.workspace.client.framework.Tool;
 import org.jboss.workspace.client.layout.LayoutHint;
 import org.jboss.workspace.client.layout.LayoutHintProvider;
 import org.jboss.workspace.client.rpc.MessageBusClient;
+import org.jboss.workspace.client.rpc.protocols.LayoutCommands;
+import org.jboss.workspace.client.rpc.protocols.LayoutParts;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,10 +28,10 @@ public class TabOpeningClickHandler implements ClickHandler {
          * Build the message to send the command processor.
          */
         Map<String, Object> msg = new HashMap<String, Object>();
-        msg.put(CommandProcessor.MessageParts.ComponentID.name(), tool.getId());
-        msg.put(CommandProcessor.MessageParts.IconURI.name(), tool.getIcon().getUrl());
-        msg.put(CommandProcessor.MessageParts.MultipleInstances.name(), tool.multipleAllowed());
-        msg.put(CommandProcessor.MessageParts.Name.name(), tool.getName());
+        msg.put(LayoutParts.ComponentID.name(), tool.getId());
+        msg.put(LayoutParts.IconURI.name(), tool.getIcon().getUrl());
+        msg.put(LayoutParts.MultipleInstances.name(), tool.multipleAllowed());
+        msg.put(LayoutParts.Name.name(), tool.getName());
 
         final Widget w = tool.getWidget();
 
@@ -44,7 +44,7 @@ public class TabOpeningClickHandler implements ClickHandler {
         w.setVisible(false);
         RootPanel.get().add(w);
 
-        msg.put(CommandProcessor.MessageParts.DOMID.name(), DOMID);
+        msg.put(LayoutParts.DOMID.name(), DOMID);
 
         String sizeHintsSubject = "org.jboss.workspace.sizehints." + DOMID;
 
@@ -53,8 +53,8 @@ public class TabOpeningClickHandler implements ClickHandler {
                     public void callback(Object message, Object data) {
                         Map<String, Object> msg = MessageBusClient.decodeMap(message);
 
-                        Double width = (Double) msg.get(CommandProcessor.MessageParts.Width.name());
-                        Double height = (Double) msg.get(CommandProcessor.MessageParts.Height.name());
+                        Double width = (Double) msg.get(LayoutParts.Width.name());
+                        Double height = (Double) msg.get(LayoutParts.Height.name());
 
                         w.setPixelSize(width.intValue(), height.intValue());
                     }
@@ -70,7 +70,7 @@ public class TabOpeningClickHandler implements ClickHandler {
             }
         });
 
-        CommandProcessor.Command.OpenNewTab.send(msg);
+        LayoutCommands.OpenNewTab.send(msg);
     }
 
 }

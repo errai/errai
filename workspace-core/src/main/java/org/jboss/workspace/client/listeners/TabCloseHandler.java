@@ -3,8 +3,9 @@ package org.jboss.workspace.client.listeners;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import org.jboss.workspace.client.framework.AcceptsCallback;
-import org.jboss.workspace.client.framework.CommandProcessor;
 import org.jboss.workspace.client.widgets.WSTab;
+import org.jboss.workspace.client.rpc.protocols.LayoutCommands;
+import org.jboss.workspace.client.rpc.protocols.LayoutParts;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -22,8 +23,8 @@ public class TabCloseHandler implements CloseHandler<WSTab>, AcceptsCallback {
 
     public void onClose(CloseEvent closeEvent) {
         Map<String, Object> msg = new HashMap<String, Object>();
-        msg.put(CommandProcessor.MessageParts.InstanceID.name(), instanceId);
-        CommandProcessor.Command.CloseTab.send(msg);
+        msg.put(LayoutParts.InstanceID.name(), instanceId);
+        LayoutCommands.CloseTab.send(msg);
 
         /**
          * Check to see if the current tool has a modified flag.

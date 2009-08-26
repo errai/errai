@@ -16,11 +16,12 @@ import static com.google.gwt.user.client.Window.addResizeHandler;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.workspace.client.ToolSet;
 import org.jboss.workspace.client.framework.AcceptsCallback;
-import org.jboss.workspace.client.framework.CommandProcessor;
 import org.jboss.workspace.client.framework.Tool;
 import org.jboss.workspace.client.framework.WorkspaceSizeChangeListener;
 import org.jboss.workspace.client.listeners.TabCloseHandler;
 import org.jboss.workspace.client.rpc.MessageBusClient;
+import org.jboss.workspace.client.rpc.protocols.LayoutCommands;
+import org.jboss.workspace.client.rpc.protocols.LayoutParts;
 import org.jboss.workspace.client.util.Effects;
 import org.jboss.workspace.client.widgets.*;
 import org.jboss.workspace.client.widgets.dnd.TabDragHandler;
@@ -121,35 +122,35 @@ public class WorkspaceLayout extends Composite {
     @Override
     protected void onAttach() {
         super.onAttach();
-        MessageBusClient.subscribe(CommandProcessor.Command.RegisterWorkspaceEnvironment.getSubject(),
+        MessageBusClient.subscribe(LayoutCommands.RegisterWorkspaceEnvironment.getSubject(),
                 new AcceptsCallback() {
                     public void callback(Object message, Object data) {
                         final Map commandMessage = MessageBusClient.decodeMap(message);
 
-                        String commandType = (String) commandMessage.get(CommandProcessor.MessageParts.CommandType.name());
+                        String commandType = (String) commandMessage.get(LayoutParts.CommandType.name());
 
-                        switch (CommandProcessor.Command.valueOf(commandType)) {
+                        switch (LayoutCommands.valueOf(commandType)) {
                             case OpenNewTab:
-                                String componentId = (String) commandMessage.get(CommandProcessor.MessageParts.ComponentID.name());
-                                String DOMID = (String) commandMessage.get(CommandProcessor.MessageParts.DOMID.name());
-                                String name = (String) commandMessage.get(CommandProcessor.MessageParts.Name.name());
-                                String subject = (String) commandMessage.get(CommandProcessor.MessageParts.SizeHintsSubject.name());
-                                Image i = new Image((String) commandMessage.get(CommandProcessor.MessageParts.IconURI.name()));
-                                Boolean multiple = (Boolean) commandMessage.get(CommandProcessor.MessageParts.MultipleInstances.name());
+                                String componentId = (String) commandMessage.get(LayoutParts.ComponentID.name());
+                                String DOMID = (String) commandMessage.get(LayoutParts.DOMID.name());
+                                String name = (String) commandMessage.get(LayoutParts.Name.name());
+                                String subject = (String) commandMessage.get(LayoutParts.SizeHintsSubject.name());
+                                Image i = new Image((String) commandMessage.get(LayoutParts.IconURI.name()));
+                                Boolean multiple = (Boolean) commandMessage.get(LayoutParts.MultipleInstances.name());
 
                                 openTab(componentId, name, i, multiple, DOMID, subject);
                                 break;
 
                             case PublishTool:
-                                componentId = (String) commandMessage.get(CommandProcessor.MessageParts.ComponentID.name());
-                                subject = (String) commandMessage.get(CommandProcessor.MessageParts.Subject.name());
+                                componentId = (String) commandMessage.get(LayoutParts.ComponentID.name());
+                                subject = (String) commandMessage.get(LayoutParts.Subject.name());
 
                                 availableTools.put(componentId, subject);
                                 break;
 
                             case RegisterToolSet:
-                                name = (String) commandMessage.get(CommandProcessor.MessageParts.Name.name());
-                                DOMID = (String) commandMessage.get(CommandProcessor.MessageParts.DOMID.name());
+                                name = (String) commandMessage.get(LayoutParts.Name.name());
+                                DOMID = (String) commandMessage.get(LayoutParts.DOMID.name());
 
                                 Element e = getElementById(DOMID);
                                 WSElementWrapper w = new WSElementWrapper(e);
@@ -158,19 +159,19 @@ public class WorkspaceLayout extends Composite {
                                 break;
 
                             case CloseTab:
-                                String instanceId = (String) commandMessage.get(CommandProcessor.MessageParts.InstanceID.name());
+                                String instanceId = (String) commandMessage.get(LayoutParts.InstanceID.name());
                                 closeTab(instanceId);
                                 break;
 
                             case GetActiveWidgets:
-                                componentId = (String) commandMessage.get(CommandProcessor.MessageParts.ComponentID.name());
-                                subject = (String) commandMessage.get(CommandProcessor.MessageParts.Subject.name());
+                                componentId = (String) commandMessage.get(LayoutParts.ComponentID.name());
+                                subject = (String) commandMessage.get(LayoutParts.Subject.name());
 
                                 Set<String> active = getActiveByType(componentId);
                                 break;
 
                             case Hello:
-                                name = (String) commandMessage.get(CommandProcessor.MessageParts.Name.name());
+                                name = (String) commandMessage.get(LayoutParts.Name.name());
                                 Window.alert("Hello from: " + name);
                                 break;
                         }
@@ -341,15 +342,15 @@ public class WorkspaceLayout extends Composite {
 
 
         Map<String, Object> msg = new HashMap<String, Object>();
-        msg.put(CommandProcessor.MessageParts.Name.name(), toolSet.getToolSetName());
-        msg.put(CommandProcessor.MessageParts.DOMID.name(), id);
+        msg.put(LayoutParts.Name.name(), toolSet.getToolSetName());
+        msg.put(LayoutParts.DOMID.name(), id);
 
-        CommandProcessor.Command.RegisterToolSet.send(msg);
+        LayoutCommands.RegisterToolSet.send(msg);
 
         for (final Tool tool : toolSet.getAllProvidedTools()) {
             msg = new HashMap<String, Object>();
-            msg.put(CommandProcessor.MessageParts.ComponentID.name(), tool.getId());
-            CommandProcessor.Command.PublishTool.send(msg);
+            msg.put(LayoutParts.ComponentID.name(), tool.getId());
+            LayoutCommands.PublishTool.send(msg);
         }
     }
 
@@ -367,7 +368,7 @@ public class WorkspaceLayout extends Composite {
         if (isToolActive(componentId)) {
             if (!multipleAllowed) {
                 Map<String, Object> msg = new HashMap<String, Object>();
-                msg.put(CommandProcessor.MessageParts.CommandType.name(), CommandProcessor.Command.ActivateTool.name());
+                msg.put(LayoutParts.CommandType.name(), LayoutCommands.ActivateTool.name());
                 MessageBusClient.store(getInstanceSubject(componentId), msg);
 
                 return;
@@ -442,9 +443,9 @@ public class WorkspaceLayout extends Composite {
                 new AcceptsCallback() {
                     public void callback(Object message, Object data) {
                         Map<String, Object> msgParts = MessageBusClient.decodeMap(message);
-                        String commandType = (String) msgParts.get(CommandProcessor.MessageParts.CommandType.name());
+                        String commandType = (String) msgParts.get(LayoutParts.CommandType.name());
 
-                        switch (CommandProcessor.Command.valueOf(commandType)) {
+                        switch (LayoutCommands.valueOf(commandType)) {
                             case CloseTab:
                                 tabDragController.unregisterDropController(newWSTab.getTabDropController());
 
@@ -492,8 +493,8 @@ public class WorkspaceLayout extends Composite {
         activateTool(componentId);
 
         Map<String, Object> tabProperties = new HashMap<String, Object>();
-        tabProperties.put(CommandProcessor.MessageParts.Name.name(), name);
-        tabProperties.put(CommandProcessor.MessageParts.IconURI.name(), newIcon.getUrl());
+        tabProperties.put(LayoutParts.Name.name(), name);
+        tabProperties.put(LayoutParts.IconURI.name(), newIcon.getUrl());
 
         tabInstances.put(instanceId, MessageBusClient.encodeMap(tabProperties));
 
@@ -515,8 +516,8 @@ public class WorkspaceLayout extends Composite {
 
     public void closeTab(String instanceId) {
         Map<String, Object> delegateMsg = new HashMap<String, Object>();
-        delegateMsg.put(CommandProcessor.MessageParts.CommandType.name(), CommandProcessor.Command.CloseTab.name());
-        delegateMsg.put(CommandProcessor.MessageParts.InstanceID.name(), instanceId);
+        delegateMsg.put(LayoutParts.CommandType.name(), LayoutCommands.CloseTab.name());
+        delegateMsg.put(LayoutParts.InstanceID.name(), instanceId);
 
         MessageBusClient.store(getInstanceSubject(instanceId), delegateMsg);
     }

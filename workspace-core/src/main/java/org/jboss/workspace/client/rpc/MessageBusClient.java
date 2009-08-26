@@ -1,14 +1,14 @@
 package org.jboss.workspace.client.rpc;
 
-import com.google.gwt.json.client.*;
-import com.google.gwt.user.client.Element;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
-import java.util.ArrayList;
-
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONValue;
 import org.jboss.workspace.client.framework.AcceptsCallback;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 public class MessageBusClient {
@@ -23,8 +23,17 @@ public class MessageBusClient {
         _subscribe(subject, callback, subscriberData);
     }
 
+    public static void subscribe(String subject, AcceptsCallback callback) {
+
+        for (AcceptsCallback c : onSubscribeHooks) {
+            c.callback(subject, null);
+        }
+
+        _subscribe(subject, callback, null);
+    }
+
     private native static void _subscribe(String subject, AcceptsCallback callback,
-                                        Object subscriberData) /*-{
+                                          Object subscriberData) /*-{
          $wnd.PageBus.subscribe(subject, null,
              function(subject, message, subscriberData) {
                 callback.@org.jboss.workspace.client.framework.AcceptsCallback::callback(Ljava/lang/Object;Ljava/lang/Object;)(message, subscriberData)
@@ -39,6 +48,9 @@ public class MessageBusClient {
         store(subject, encodeMap(message));
     }
 
+    public static void store(String subject, CommandMessage message) {
+        store(subject, message.getParts());
+    }
 
     public static void addOnSubscribeHook(AcceptsCallback callback) {
         onSubscribeHooks.add(callback);
@@ -77,10 +89,14 @@ public class MessageBusClient {
     }
 
 
+    public static CommandMessage decodeCommandMessage(Object value) {
+        return new CommandMessage(decodeMap(value));
+    }
+
     public static String encodeMap(Map<String, Object> map) {
         StringBuffer buf = new StringBuffer("{");
         Object v;
-  
+
         int i = 0;
         for (Map.Entry<String, Object> entry : map.entrySet()) {
 

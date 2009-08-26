@@ -5,10 +5,11 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.workspace.client.framework.AcceptsCallback;
-import org.jboss.workspace.client.framework.CommandProcessor;
 import org.jboss.workspace.client.layout.WorkspaceLayout;
 import org.jboss.workspace.client.listeners.ClickCallbackListener;
 import org.jboss.workspace.client.rpc.MessageBusClient;
+import org.jboss.workspace.client.rpc.protocols.LayoutCommands;
+import org.jboss.workspace.client.rpc.protocols.LayoutParts;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -43,17 +44,17 @@ public class WSTabSelectorDialog extends WSModalDialog {
             public void callback(Object message, Object data) {
                 Map<String, Object> msg = MessageBusClient.decodeMap(message);
 
-                Map<String, Object> nestedData = MessageBusClient.decodeMap(msg.get(CommandProcessor.MessageParts.NestedData.name()));
+                Map<String, Object> nestedData = MessageBusClient.decodeMap(msg.get(LayoutParts.NestedData.name()));
                 for (final Map.Entry<String, Object> entry : nestedData.entrySet()) {
                     Map<String, Object> instanceProperties = MessageBusClient.decodeMap(entry.getValue());
 
-                    Button b = new Button("<span><img src='" + instanceProperties.get(CommandProcessor.MessageParts.IconURI.name())
-                            + "' align='left'/>" + instanceProperties.get(CommandProcessor.MessageParts.Name.name()) + "</span>"
+                    Button b = new Button("<span><img src='" + instanceProperties.get(LayoutParts.IconURI.name())
+                            + "' align='left'/>" + instanceProperties.get(LayoutParts.Name.name()) + "</span>"
                             , new ClickHandler() {
 
                                 public void onClick(ClickEvent event) {
                                     Map<String, Object> msg = new HashMap<String, Object>();
-                                    msg.put(CommandProcessor.MessageParts.CommandType.name(), CommandProcessor.Command.ActivateTool.name());
+                                    msg.put(LayoutParts.CommandType.name(), LayoutCommands.ActivateTool.name());
                                     MessageBusClient.store(WorkspaceLayout.getInstanceSubject(entry.getKey()), msg);
 
                                     window.hide();

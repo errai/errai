@@ -2,6 +2,7 @@ package org.jboss.workspace.server.bus;
 
 import com.google.gwt.user.client.Element;
 import org.jboss.workspace.client.framework.AcceptsCallback;
+import org.jboss.workspace.client.rpc.CommandMessage;
 import org.jboss.workspace.server.json.JSONUtil;
 
 import java.util.ArrayList;
@@ -33,6 +34,12 @@ public class MessageBusServer {
     public static void addOnSubscribeHook(AcceptsCallback callback) {
         onSubscribeHooks.add(callback);
     }
+
+
+    public static CommandMessage decodeToCommandMessage(Object in) {
+        return new CommandMessage(decodeMap(in));
+    }
+
 
     public static Map<String, Object> decodeMap(Object value) {
         return JSONUtil.decodeToMap(String.valueOf(value));

@@ -24,6 +24,7 @@ public class JAASAdapter implements AuthorizationAdapter {
             };
 
             LoginContext loginContext = new LoginContext(name, callbackHandler);
+            
             loginContext.login();
         }
         catch (LoginException e) {

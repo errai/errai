@@ -26,6 +26,7 @@ import java.util.List;
 public class Workspace implements EntryPoint {
     public static PickupDragController dragController;
     private static WorkspaceLayout workspaceLayout;
+    
 
     private static List<ToolSet> toBeLoaded = new ArrayList<ToolSet>();
 

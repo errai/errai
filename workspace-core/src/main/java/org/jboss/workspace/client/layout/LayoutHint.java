@@ -1,8 +1,8 @@
 package org.jboss.workspace.client.layout;
 
 import com.google.gwt.user.client.ui.Widget;
-import org.jboss.workspace.client.framework.CommandProcessor;
 import org.jboss.workspace.client.rpc.MessageBusClient;
+import org.jboss.workspace.client.rpc.protocols.LayoutParts;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -45,8 +45,8 @@ public class LayoutHint {
             p = findProvider(s);
             if (p != null && p.getWidthHint() > 0 && p.getHeightHint() > 0) {
                 Map<String, Object> msg = new HashMap<String, Object>();
-                msg.put(CommandProcessor.MessageParts.Width.name(), p.getWidthHint());
-                msg.put(CommandProcessor.MessageParts.Height.name(), p.getHeightHint());
+                msg.put(LayoutParts.Width.name(), p.getWidthHint());
+                msg.put(LayoutParts.Height.name(), p.getHeightHint());
 
                 MessageBusClient.store(s, msg);
 
