@@ -8,10 +8,12 @@ import java.util.Set;
 public class BasicAuthenticationContext implements AuthenticationContext {
     private Set<Role> roles;
     private String name;
+    private boolean valid;
 
     public BasicAuthenticationContext(Set<Role> roles, String name) {
         this.roles = roles;
         this.name = name;
+        valid = true;
     }
 
     public Set<Role> getRoles() {
@@ -27,6 +29,10 @@ public class BasicAuthenticationContext implements AuthenticationContext {
     }
 
     public void logout() {
+        valid = false;
+    }
 
+    public boolean isValid() {
+        return valid;
     }
 }

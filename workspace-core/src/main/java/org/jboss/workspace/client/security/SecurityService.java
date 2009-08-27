@@ -9,22 +9,25 @@ import static org.jboss.workspace.client.rpc.protocols.SecurityParts.CommandType
 import static org.jboss.workspace.client.rpc.protocols.SecurityParts.CredentialsRequired;
 import org.jboss.workspace.client.security.impl.NameCredential;
 import org.jboss.workspace.client.security.impl.PasswordCredential;
+import org.jboss.workspace.client.security.impl.BasicAuthenticationContext;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
-public class SecurityManager {
-    public static void doAuthentication(final String name, final AuthenticationHandler handler) {
+public class SecurityService {
+    private AuthenticationContext authenticationContext;
 
+    public void doAuthentication(final String name, final AuthenticationHandler handler) {
         final String responseSubject = "org.jboss.workspace.authentication." + name;
         MessageBusClient.subscribe(responseSubject, new AcceptsCallback() {
             public void callback(Object message, Object data) {
-                Map<String, Object> msgParts = MessageBusClient.decodeMap(message);
-                String commandType = (String) msgParts.get(CommandType.name());
+                CommandMessage msg = MessageBusClient.decodeCommandMessage(message);
 
-                switch (SecurityCommands.valueOf(commandType)) {
+                switch (SecurityCommands.valueOf(msg.getCommandType())) {
                     case WhatCredentials:
-                        String credentialsRequired = (String) msgParts.get(CredentialsRequired.name());
+                        String credentialsRequired = msg.get(String.class, CredentialsRequired);
                         String[] credentialNames = credentialsRequired.split(",");
                         Credential[] credentials = new Credential[credentialNames.length];
 
@@ -55,7 +58,6 @@ public class SecurityManager {
                                 case Password:
                                     challenge.set(CredentialTypes.Password, credentials[i].getValue());
                                     break;
-
                             }
                         }
 
@@ -63,7 +65,24 @@ public class SecurityManager {
                         break;
 
                     case SecurityResponse:
-                        System.out.println("GOT RESPONSE");
+                        String name = msg.get(String.class, SecurityParts.Name);
+                        String rolesString =  msg.get(String.class, SecurityParts.Roles);
+
+                        if (authenticationContext != null && authenticationContext.isValid()) return;
+
+                        String[] roles =  rolesString.split(",");
+
+                        Set<Role> roleSet = new HashSet<Role>();
+                        for (final String role : roles) {
+                            roleSet.add(new Role() {
+                                public String getRoleName() {
+                                    return role;
+                                }
+                            });
+                        }
+
+                        authenticationContext = new BasicAuthenticationContext(roleSet, name);
+
                         break;
                         
                 }

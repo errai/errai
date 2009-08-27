@@ -16,6 +16,7 @@ import org.jboss.workspace.client.layout.WorkspaceLayout;
 import org.jboss.workspace.client.rpc.MessageBusClient;
 import org.jboss.workspace.client.rpc.MessageBusService;
 import org.jboss.workspace.client.rpc.MessageBusServiceAsync;
+import org.jboss.workspace.client.security.SecurityService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,8 +27,8 @@ import java.util.List;
 public class Workspace implements EntryPoint {
     public static PickupDragController dragController;
     private static WorkspaceLayout workspaceLayout;
+    private static SecurityService securityService;
     
-
     private static List<ToolSet> toBeLoaded = new ArrayList<ToolSet>();
 
     private Workspace() {
