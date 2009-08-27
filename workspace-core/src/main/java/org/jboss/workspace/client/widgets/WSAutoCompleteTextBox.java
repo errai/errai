@@ -75,7 +75,7 @@ public class WSAutoCompleteTextBox extends TextBox
     /**
      * Not used at all
      */
-    public void onKeyPress(Widget arg0, char arg1, int arg2) {
+    public void onKeyPress(Widget arg0, char argc, int arg1) {
     }
 
     /**
