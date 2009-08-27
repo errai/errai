@@ -32,13 +32,29 @@ public class CommandMessage {
     }
 
     public CommandMessage set(Enum part, Object value) {
-        parts.put(part.name(), value);
+        return set(part.name(), value);
+    }
+
+    public CommandMessage set(String part, Object value) {
+        parts.put(part, value);
         encoded = null;
         return this;
     }
 
     public <T> T get(Class<T> type, Enum part) {
         return (T) parts.get(part.name());
+    }
+
+    public <T> T get(Class<T> type, String part) {
+        return (T) parts.get(part);
+    }
+
+    public boolean hasPart(Enum part) {
+        return hasPart(part.name());
+    }
+
+    public boolean hasPart(String part) {
+        return parts.containsKey(part);
     }
 
     public Map<String, Object> getParts() {

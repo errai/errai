@@ -2,6 +2,7 @@ package org.jboss.workspace.server;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import org.jboss.workspace.client.framework.AcceptsCallback;
+import org.jboss.workspace.client.framework.MessageCallback;
 import org.jboss.workspace.client.rpc.MessageBusService;
 import org.jboss.workspace.client.rpc.CommandMessage;
 import org.jboss.workspace.client.rpc.protocols.SecurityCommands;
@@ -38,10 +39,8 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
         loadConfig();
 
         //todo: this all needs to be refactored at some point.
-        bus.subscribe(AUTHORIZATION_SVC_SUBJECT, new AcceptsCallback() {
-            public void callback(Object message, Object data) {
-                CommandMessage c = decodeToCommandMessage(message);
-
+        bus.subscribe(AUTHORIZATION_SVC_SUBJECT, new MessageCallback() {
+            public void callback(CommandMessage c) {
                 switch (SecurityCommands.valueOf(c.getCommandType())) {
                     case WhatCredentials:
                          //todo: we only support login/password for now
@@ -55,14 +54,14 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
             }
         });
 
-        bus.subscribe("ServerEchoService", new AcceptsCallback() {
-            public void callback(Object message, Object data) {
+        bus.subscribe("ServerEchoService", new MessageCallback() {
+            public void callback(CommandMessage c) {
 
-                if (message == null) return;
-                Map map = JSONUtil.decodeToMap(String.valueOf(message));
-
-                if (map.containsKey("EchoBackData")) {
-                    System.out.println("EchoBack: " + map.get("EchoBackData"));
+                if (c.hasPart("EchoBackData")) {
+                    System.out.println("EchoBack: " + c.get(String.class, "EchoBackData"));
+                }
+                else {
+                    System.out.println("Echo!");
                 }
             }
         });

@@ -1,6 +1,7 @@
 package org.jboss.workspace.server.bus;
 
 import org.jboss.workspace.client.framework.AcceptsCallback;
+import org.jboss.workspace.client.framework.MessageCallback;
 
 import java.util.Map;
 import java.util.Set;
@@ -11,7 +12,7 @@ public interface MessageBus {
 
     public Message nextMessage(Object sessionContext);
 
-    public void subscribe(String subject, AcceptsCallback receiver);
+    public void subscribe(String subject, MessageCallback receiver);
     public void remoteSubscribe(Object sessionContext, String subject);
 
     public Set<String> getSubjects();

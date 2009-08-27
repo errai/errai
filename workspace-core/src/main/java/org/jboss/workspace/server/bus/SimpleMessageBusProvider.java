@@ -1,7 +1,10 @@
 package org.jboss.workspace.server.bus;
 
 import org.jboss.workspace.client.framework.AcceptsCallback;
+import org.jboss.workspace.client.framework.MessageCallback;
+import org.jboss.workspace.client.rpc.CommandMessage;
 import static org.jboss.workspace.server.bus.MessageBusServer.encodeMap;
+import org.jboss.workspace.server.json.JSONUtil;
 
 import java.util.*;
 
@@ -16,7 +19,7 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
     }
 
     public class SimpleMessageBus implements MessageBus {
-        private final Map<String, List<AcceptsCallback>> subscriptions = new HashMap<String, List<AcceptsCallback>>();
+        private final Map<String, List<MessageCallback>> subscriptions = new HashMap<String, List<MessageCallback>>();
         private final Map<String, List<Object>> remoteSubscriptions = new HashMap<String, List<Object>>();
 
         private final Map<Object, Queue<Message>> messageQueues = new HashMap<Object, Queue<Message>>();
@@ -27,9 +30,12 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
         }
 
         public void store(final String subject, final Object message) {
+            String jsonMessage = message != null ? String.valueOf(message) : null;
+            CommandMessage msg = new CommandMessage(message != null ? JSONUtil.decodeToMap(jsonMessage) : new HashMap<String,Object>(), jsonMessage);
+
             if (subscriptions.containsKey(subject)) {
-                for (AcceptsCallback c : subscriptions.get(subject)) {
-                    c.callback(message, null);
+                for (MessageCallback c : subscriptions.get(subject)) {
+                    c.callback(msg);
                 }
             }
 
@@ -84,8 +90,8 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
             return messageQueues.get(sessionContext);
         }
 
-        public void subscribe(String subject, AcceptsCallback receiver) {
-            if (!subscriptions.containsKey(subject)) subscriptions.put(subject, new ArrayList<AcceptsCallback>());
+        public void subscribe(String subject, MessageCallback receiver) {
+            if (!subscriptions.containsKey(subject)) subscriptions.put(subject, new ArrayList<MessageCallback>());
             subscriptions.get(subject).add(receiver);
         }
 
