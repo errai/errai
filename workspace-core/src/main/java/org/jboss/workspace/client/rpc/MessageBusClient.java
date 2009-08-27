@@ -4,6 +4,7 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
 import org.jboss.workspace.client.framework.AcceptsCallback;
+import org.jboss.workspace.client.framework.MessageCallback;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,7 +15,7 @@ import java.util.Map;
 public class MessageBusClient {
     private static List<AcceptsCallback> onSubscribeHooks = new ArrayList<AcceptsCallback>();
 
-    public static void subscribe(String subject, AcceptsCallback callback, Object subscriberData) {
+    public static void subscribe(String subject, MessageCallback callback, Object subscriberData) {
 
         for (AcceptsCallback c : onSubscribeHooks) {
             c.callback(subject, subscriberData);
@@ -23,7 +24,7 @@ public class MessageBusClient {
         _subscribe(subject, callback, subscriberData);
     }
 
-    public static void subscribe(String subject, AcceptsCallback callback) {
+    public static void subscribe(String subject, MessageCallback callback) {
 
         for (AcceptsCallback c : onSubscribeHooks) {
             c.callback(subject, null);
@@ -32,12 +33,16 @@ public class MessageBusClient {
         _subscribe(subject, callback, null);
     }
 
-    private native static void _subscribe(String subject, AcceptsCallback callback,
+    private native static void _subscribe(String subject, MessageCallback callback,
                                           Object subscriberData) /*-{
+
          $wnd.PageBus.subscribe(subject, null,
-             function(subject, message, subscriberData) {
-                callback.@org.jboss.workspace.client.framework.AcceptsCallback::callback(Ljava/lang/Object;Ljava/lang/Object;)(message, subscriberData)
-             }, null);
+                 function (subject, message, subcriberData) {
+                    callback.@org.jboss.workspace.client.framework.MessageCallback::callback(Lorg/jboss/workspace/client/rpc/CommandMessage;)(@org.jboss.workspace.client.rpc.MessageBusClient::decodeCommandMessage(Ljava/lang/Object;)(message))
+                 },
+                 null);
+
+  
     }-*/;
 
     public native static void store(String subject, Object value) /*-{
@@ -90,7 +95,7 @@ public class MessageBusClient {
 
 
     public static CommandMessage decodeCommandMessage(Object value) {
-        return new CommandMessage(decodeMap(value));
+        return new CommandMessage(decodeMap(value), String.valueOf(value));
     }
 
     public static String encodeMap(Map<String, Object> map) {

@@ -1,6 +1,7 @@
 package org.jboss.workspace.client.security;
 
 import org.jboss.workspace.client.framework.AcceptsCallback;
+import org.jboss.workspace.client.framework.MessageCallback;
 import org.jboss.workspace.client.rpc.MessageBusClient;
 import org.jboss.workspace.client.rpc.CommandMessage;
 import org.jboss.workspace.client.rpc.protocols.SecurityCommands;
@@ -21,10 +22,8 @@ public class SecurityService {
 
     public void doAuthentication(final String name, final AuthenticationHandler handler) {
         final String responseSubject = "org.jboss.workspace.authentication." + name;
-        MessageBusClient.subscribe(responseSubject, new AcceptsCallback() {
-            public void callback(Object message, Object data) {
-                CommandMessage msg = MessageBusClient.decodeCommandMessage(message);
-
+        MessageBusClient.subscribe(responseSubject, new MessageCallback() {
+            public void callback(CommandMessage msg) {
                 switch (SecurityCommands.valueOf(msg.getCommandType())) {
                     case WhatCredentials:
                         String credentialsRequired = msg.get(String.class, CredentialsRequired);

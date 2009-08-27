@@ -12,10 +12,13 @@ import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.RootPanel;
 import org.jboss.workspace.client.framework.AcceptsCallback;
 import org.jboss.workspace.client.framework.ModuleLoaderBootstrap;
+import org.jboss.workspace.client.framework.WSComponent;
+import org.jboss.workspace.client.framework.MessageCallback;
 import org.jboss.workspace.client.layout.WorkspaceLayout;
 import org.jboss.workspace.client.rpc.MessageBusClient;
 import org.jboss.workspace.client.rpc.MessageBusService;
 import org.jboss.workspace.client.rpc.MessageBusServiceAsync;
+import org.jboss.workspace.client.rpc.CommandMessage;
 import org.jboss.workspace.client.security.SecurityService;
 
 import java.util.ArrayList;
@@ -27,7 +30,8 @@ import java.util.List;
 public class Workspace implements EntryPoint {
     public static PickupDragController dragController;
     private static WorkspaceLayout workspaceLayout;
-    private static SecurityService securityService;
+    private static SecurityService securityService = new SecurityService();
+    private static WSComponent loginComponent;
     
     private static List<ToolSet> toBeLoaded = new ArrayList<ToolSet>();
 
@@ -188,8 +192,8 @@ public class Workspace implements EntryPoint {
                 }
 
                 for (final String subject : o) {
-                    MessageBusClient.subscribe(subject, new AcceptsCallback() {
-                        public void callback(Object message, Object data) {
+                    MessageBusClient.subscribe(subject, new MessageCallback() {
+                        public void callback(CommandMessage message) {
                             AsyncCallback<Void> cb = new AsyncCallback<Void>() {
                                 public void onFailure(Throwable throwable) {
                                 }
@@ -198,7 +202,14 @@ public class Workspace implements EntryPoint {
                                 }
                             };
 
-                            messageBus.store(subject, (String) message, cb);
+                            if (message.hasCachedEncoding()) {
+                                messageBus.store(subject, message.getEncoded(), cb);
+                            }
+                            else {
+                                messageBus.store(subject, MessageBusClient.encodeMap(message.getParts()), cb);
+                            }
+
+                      //     messageBus.store(subject, message);
                         }
                     }, null);
                 }
@@ -208,6 +219,18 @@ public class Workspace implements EntryPoint {
         };
 
         messageBus.getSubjects(getSubjects);
+    }
+
+    public static SecurityService getSecurityService() {
+        return securityService;
+    }
+
+    public static WSComponent getLoginComponent() {
+        return loginComponent;
+    }
+
+    public static void setLoginComponent(WSComponent loginComponent) {
+        Workspace.loginComponent = loginComponent;
     }
 
     public static void addToolSet(ToolSet toolSet) {

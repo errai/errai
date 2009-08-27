@@ -7,9 +7,16 @@ import java.util.Map;
 
 public class CommandMessage {
     private Map<String, Object> parts = new HashMap<String, Object>();
+    private String encoded;
+
 
     public CommandMessage(Map<String, Object> parts) {
         this.parts = parts;
+    }
+
+    public CommandMessage(Map<String, Object> parts, String encoded) {
+        this.parts = parts;
+        this.encoded = encoded;
     }
 
     public CommandMessage(String commandType) {
@@ -26,6 +33,7 @@ public class CommandMessage {
 
     public CommandMessage set(Enum part, Object value) {
         parts.put(part.name(), value);
+        encoded = null;
         return this;
     }
 
@@ -36,4 +44,14 @@ public class CommandMessage {
     public Map<String, Object> getParts() {
         return parts;
     }
+
+    public boolean hasCachedEncoding() {
+        return encoded != null;
+    }
+
+    public String getEncoded() {
+        return encoded;
+    }
+
+
 }

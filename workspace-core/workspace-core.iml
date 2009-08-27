@@ -18,7 +18,7 @@
         <setting name="compilerMaxHeapSize" value="728" />
         <setting name="compilerOutputPath" value="" />
         <setting name="gwtScriptOutputStyle" value="DETAILED" />
-        <setting name="gwtSdkUrl" value="file://$MODULE_DIR$/../../../gwt-1.7.0" />
+        <setting name="gwtSdkUrl" value="file://$MODULE_DIR$/../../gwt-1.7.0" />
         <setting name="runGwtCompilerOnMake" value="true" />
         <packaging>
           <module name="org.jboss.workspace.Workspace" path="/org.jboss.workspace.Workspace" />

@@ -5,9 +5,11 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.workspace.client.framework.AcceptsCallback;
+import org.jboss.workspace.client.framework.MessageCallback;
 import org.jboss.workspace.client.layout.WorkspaceLayout;
 import org.jboss.workspace.client.listeners.ClickCallbackListener;
 import org.jboss.workspace.client.rpc.MessageBusClient;
+import org.jboss.workspace.client.rpc.CommandMessage;
 import org.jboss.workspace.client.rpc.protocols.LayoutCommands;
 import org.jboss.workspace.client.rpc.protocols.LayoutParts;
 
@@ -40,11 +42,10 @@ public class WSTabSelectorDialog extends WSModalDialog {
         hPanel.add(vPanel);
         vPanel.add(message);
 
-        MessageBusClient.subscribe(this.getClass().getName(), new AcceptsCallback() {
-            public void callback(Object message, Object data) {
-                Map<String, Object> msg = MessageBusClient.decodeMap(message);
+        MessageBusClient.subscribe(this.getClass().getName(), new MessageCallback() {
+            public void callback(CommandMessage msg) {
 
-                Map<String, Object> nestedData = MessageBusClient.decodeMap(msg.get(LayoutParts.NestedData.name()));
+                Map<String, Object> nestedData = MessageBusClient.decodeMap(msg.get(String.class, LayoutParts.NestedData));
                 for (final Map.Entry<String, Object> entry : nestedData.entrySet()) {
                     Map<String, Object> instanceProperties = MessageBusClient.decodeMap(entry.getValue());
 

@@ -97,5 +97,9 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
         public Set<String> getSubjects() {
             return subscriptions.keySet();
         }
+
+        public void addGlobalListener(MessageListener listener) {
+
+        }
     }
 }

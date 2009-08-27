@@ -15,4 +15,6 @@ public interface MessageBus {
     public void remoteSubscribe(Object sessionContext, String subject);
 
     public Set<String> getSubjects();
+
+    public void addGlobalListener(MessageListener listener);
 }

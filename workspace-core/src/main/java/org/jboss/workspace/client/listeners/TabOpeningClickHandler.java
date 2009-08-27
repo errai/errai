@@ -7,9 +7,11 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.jboss.workspace.client.framework.AcceptsCallback;
 import org.jboss.workspace.client.framework.Tool;
+import org.jboss.workspace.client.framework.MessageCallback;
 import org.jboss.workspace.client.layout.LayoutHint;
 import org.jboss.workspace.client.layout.LayoutHintProvider;
 import org.jboss.workspace.client.rpc.MessageBusClient;
+import org.jboss.workspace.client.rpc.CommandMessage;
 import org.jboss.workspace.client.rpc.protocols.LayoutCommands;
 import org.jboss.workspace.client.rpc.protocols.LayoutParts;
 
@@ -49,12 +51,12 @@ public class TabOpeningClickHandler implements ClickHandler {
         String sizeHintsSubject = "org.jboss.workspace.sizehints." + DOMID;
 
         MessageBusClient.subscribe(sizeHintsSubject,
-                new AcceptsCallback() {
-                    public void callback(Object message, Object data) {
-                        Map<String, Object> msg = MessageBusClient.decodeMap(message);
+                new MessageCallback() {
+                    public void callback(CommandMessage message) {
+                      ///  Map<String, Object> msg = MessageBusClient.decodeMap(message);
 
-                        Double width = (Double) msg.get(LayoutParts.Width.name());
-                        Double height = (Double) msg.get(LayoutParts.Height.name());
+                        Double width = message.get(Double.class, LayoutParts.Width);
+                        Double height = message.get(Double.class, LayoutParts.Height);
 
                         w.setPixelSize(width.intValue(), height.intValue());
                     }
