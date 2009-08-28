@@ -75,7 +75,7 @@ public class WSAutoCompleteTextBox extends TextBox
     /**
      * Not used at all
      */
-    public void onKeyPress(Widget arg0, char argc, int arg1) {
+    public void onKeyPress(Widget arg0, char arg1, int arg2) {
     }
 
     /**
@@ -130,7 +130,7 @@ public class WSAutoCompleteTextBox extends TextBox
             choices.clear();
 
             for (int i = 0; i < matches.length; i++) {
-                choices.addItem((String) matches[i]);
+                choices.addItem(matches[i]);
             }
 
             // if there is only one match and it is what is in the
@@ -145,12 +145,15 @@ public class WSAutoCompleteTextBox extends TextBox
                     RootPanel.get().add(choicesPopup);
                     popupAdded = true;
                 }
-                choicesPopup.show();
                 visible = true;
                 choicesPopup.setPopupPosition(this.getAbsoluteLeft(),
                         this.getAbsoluteTop() + this.getOffsetHeight());
-                // choicesPopup.setWidth(this.getOffsetWidth() + "px");
                 choices.setWidth(this.getOffsetWidth() + "px");
+                choicesPopup.show();
+                choicesPopup.getElement().getStyle().setProperty("position", "absolute");
+                choicesPopup.getElement().getStyle().setProperty("left", Integer.toString(this.getAbsoluteLeft()));
+                choicesPopup.getElement().getStyle().setProperty("top",
+                        Integer.toString(this.getAbsoluteTop() + this.getOffsetHeight()));
             }
 
         } else {
