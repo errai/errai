@@ -42,6 +42,7 @@ public class WSWindowPanel extends Composite {
     private List<Window.ClosingHandler> closingHandlers;
 
     private WSWindowPanel windowPanel;
+    private SimplePanel drapePanel;
 
     public WSWindowPanel() {
         windowPanel = this;
@@ -128,6 +129,11 @@ public class WSWindowPanel extends Composite {
         Effects.fade(getElement(), 1, 5, 100, 0);
         setVisible(false);
         fireClosingHandlers();
+
+        if (drapePanel != null) {
+            RootPanel.get().remove(drapePanel);
+            drapePanel = null;
+        }
     }
 
     public void show() {
@@ -137,6 +143,15 @@ public class WSWindowPanel extends Composite {
 
         getElement().getStyle().setProperty("zIndex", zIndex++ + "");
     }
+
+    public void showModal() {
+        RootPanel.get().add(drapePanel = createDrape());
+
+        setVisible(true);
+        Effects.fade(getElement(), 5, 10, 0, 100);
+        getElement().getStyle().setProperty("zIndex", zIndex++ + "");
+    }
+
 
 
     public void add(Widget w) {
@@ -213,4 +228,24 @@ public class WSWindowPanel extends Composite {
             return source;
         }
     }
+
+    public static SimplePanel createDrape() {
+        SimplePanel drapePanel = new SimplePanel();
+
+        Style drapeStyle = drapePanel.getElement().getStyle();
+
+        drapeStyle.setProperty("position", "absolute");
+        drapeStyle.setProperty("top", "0px");
+        drapeStyle.setProperty("left", "0px");
+
+        drapePanel.setWidth("100%");
+        drapePanel.setHeight("100%");
+
+        drapePanel.setStyleName("WSWindowPanel-drape");
+
+        Effects.setOpacity(drapePanel.getElement(), 20);
+
+        return drapePanel;
+    }
+
 }

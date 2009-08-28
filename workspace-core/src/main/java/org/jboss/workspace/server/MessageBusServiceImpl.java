@@ -6,10 +6,7 @@ import org.jboss.workspace.client.rpc.CommandMessage;
 import org.jboss.workspace.client.rpc.MessageBusService;
 import org.jboss.workspace.client.rpc.protocols.SecurityCommands;
 import org.jboss.workspace.client.rpc.protocols.SecurityParts;
-import org.jboss.workspace.server.bus.Message;
-import org.jboss.workspace.server.bus.MessageBus;
-import org.jboss.workspace.server.bus.MessageBusServer;
-import org.jboss.workspace.server.bus.SimpleMessageBusProvider;
+import org.jboss.workspace.server.bus.*;
 import org.jboss.workspace.server.json.JSONUtil;
 import org.jboss.workspace.server.security.auth.AuthorizationAdapter;
 import org.jboss.workspace.server.security.auth.JAASAdapter;
@@ -18,7 +15,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import static java.lang.Thread.currentThread;
-import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
@@ -36,9 +32,26 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
         bus = new SimpleMessageBusProvider().getBus();
 
         loadConfig();
-
         final AuthorizationAdapter authAdapter = authorizationAdapter;
 
+        bus.addGlobalListener(new MessageListener() {
+            public boolean handleMessage(CommandMessage message) {
+                if (authAdapter != null && !authAdapter.isAuthenticated(message)) {
+                    CommandMessage securityChallenge = new CommandMessage(SecurityCommands.SecurityChallenge)
+                            .set(SecurityParts.CredentialsRequired, "Name,Password")
+                            .set(SecurityParts.ReplyTo, AUTHORIZATION_SVC_SUBJECT)
+                            .set(SecurityParts.SessionData, message.get(HttpSession.class, SecurityParts.SessionData));
+
+                    MessageBusServer.store("LoginClient", securityChallenge, false);
+
+                    return false;
+                }
+                return true;
+
+            }
+        });
+
+        
         //todo: this all needs to be refactored at some point.
         bus.subscribe(AUTHORIZATION_SVC_SUBJECT, new MessageCallback() {
             public void callback(CommandMessage c) {
@@ -57,17 +70,6 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
 
         bus.subscribe("TestService", new MessageCallback() {
             public void callback(CommandMessage message) {
-                if (!authAdapter.isAuthenticated(message)) {
-                    CommandMessage securityChallenge = new CommandMessage(SecurityCommands.SecurityChallenge)
-                            .set(SecurityParts.CredentialsRequired, "Name,Password")
-                            .set(SecurityParts.ReplyTo, AUTHORIZATION_SVC_SUBJECT)
-                            .set(SecurityParts.SessionData, message.get(HttpSession.class, SecurityParts.SessionData));
-
-                    MessageBusServer.store("LoginClient", securityChallenge);
-
-                    return;
-                }
-
                 System.out.println("yay authentication land!");
             }
         });

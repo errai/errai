@@ -43,6 +43,11 @@ public class CommandMessage {
         return this;
     }
 
+    public void remove(String part) {
+        parts.remove(part);
+        encoded = null;
+    }
+
     public <T> T get(Class<T> type, Enum part) {
         return (T) parts.get(part.name());
     }

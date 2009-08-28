@@ -229,8 +229,9 @@ public class
                 switch (SecurityCommands.valueOf(message.getCommandType())) {
                     case SecurityChallenge:
                         WSWindowPanel panel = new WSWindowPanel();
+                        panel.setTitle("Security Challenge");
                         panel.add(loginComponent.getWidget());
-                        panel.show();
+                        panel.showModal();
                         panel.center();
                         break;
 

@@ -5,7 +5,6 @@ import org.jboss.workspace.client.rpc.CommandMessage;
 import org.jboss.workspace.client.rpc.protocols.SecurityParts;
 import org.jboss.workspace.server.MessageBusServiceImpl;
 import static org.jboss.workspace.server.bus.MessageBusServer.encodeMap;
-import org.jboss.workspace.server.json.JSONUtil;
 
 import javax.servlet.http.HttpSession;
 import java.util.*;
@@ -21,13 +20,21 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
     }
 
     public class SimpleMessageBus implements MessageBus {
+        private final List<MessageListener> listeners = new ArrayList<MessageListener>();
+
         private final Map<String, List<MessageCallback>> subscriptions = new HashMap<String, List<MessageCallback>>();
         private final Map<String, List<Object>> remoteSubscriptions = new HashMap<String, List<Object>>();
 
         private final Map<Object, Queue<Message>> messageQueues = new HashMap<Object, Queue<Message>>();
         private final Map<Object, Thread> activeWaitingThreads = new HashMap<Object, Thread>();
 
-        public void storeGlobal(final String subject, final CommandMessage message) {
+        public void storeGlobal(String subject, CommandMessage message) {
+            storeGlobal(subject, message, true);
+        }
+
+        public void storeGlobal(final String subject, final CommandMessage message, boolean fireListeners) {
+            if (fireListeners && !fireAllListeners(message)) return;
+
             final String jsonMessage = encodeMap(message.getParts());
 
             if (subscriptions.containsKey(subject)) {
@@ -54,11 +61,11 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
                     }
                 }
             }
-
         }
 
 
         private void store(final String sessionId, final String subject, final Object message) {
+
             if (messageQueues.containsKey(sessionId)) {
                 messageQueues.get(sessionId).add(new Message() {
                     public String getSubject() {
@@ -76,16 +83,26 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
         }
 
         public void store(String sessionid, String subject, CommandMessage message) {
+            store(sessionid, subject, message, true);
+        }
+
+        public void store(String sessionid, String subject, CommandMessage message, boolean fireListeners) {
+            if (fireListeners && !fireAllListeners(message)) return;
+
             store(sessionid, subject, encodeMap(message.getParts()));
         }
 
         public void store(String subject, CommandMessage message) {
+            store(subject, message, true);
+        }
+
+        public void store(String subject, CommandMessage message, boolean fireListeners) {
             if (!message.hasPart(SecurityParts.SessionData)) {
                 throw new RuntimeException("cannot automatically route message.  no session contained in message");
             }
 
             store((String) message.get(HttpSession.class, SecurityParts.SessionData)
-                    .getAttribute(MessageBusServiceImpl.WS_SESSION_ID), subject, message);
+                    .getAttribute(MessageBusServiceImpl.WS_SESSION_ID), subject, message, fireListeners);
         }
 
         public Message nextMessage(Object sessionContext) {
@@ -132,8 +149,20 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
             return subscriptions.keySet();
         }
 
-        public void addGlobalListener(MessageListener listener) {
+        private boolean fireAllListeners(CommandMessage message) {
+            boolean allowContinue = true;
 
+            for (MessageListener listener : listeners) {
+                if (!listener.handleMessage(message)) {
+                    allowContinue = false;
+                }
+            }
+
+            return allowContinue;
+        }
+
+        public void addGlobalListener(MessageListener listener) {
+            listeners.add(listener);
         }
     }
 }

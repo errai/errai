@@ -35,6 +35,15 @@ public class MessageBusServer {
         }
     }
 
+    public static void store(String subject, CommandMessage message, boolean fireListeners) {
+        try {
+            new SimpleMessageBusProvider().getBus().store(subject, message, fireListeners);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 //    public static void store(String subject, Object value) {
 //        new SimpleMessageBusProvider().getBus().store(subject, value);
 //    }
