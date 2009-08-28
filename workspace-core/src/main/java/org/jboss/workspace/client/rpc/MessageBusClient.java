@@ -49,7 +49,7 @@ public class MessageBusClient {
          $wnd.PageBus.store(subject, value);
     }-*/;
 
-    public static void store(String subject, Map message) {
+    public static void store(String subject, Map<String, Object> message) {
         store(subject, encodeMap(message));
     }
 
@@ -99,6 +99,8 @@ public class MessageBusClient {
     }
 
     public static String encodeMap(Map<String, Object> map) {
+        if (map.size() == 0) return "{}";
+
         StringBuffer buf = new StringBuffer("{");
         Object v;
 

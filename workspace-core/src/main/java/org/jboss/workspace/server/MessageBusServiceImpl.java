@@ -18,7 +18,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import static java.lang.Thread.currentThread;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -60,10 +59,11 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
             public void callback(CommandMessage message) {
                 if (!authAdapter.isAuthenticated(message)) {
                     CommandMessage securityChallenge = new CommandMessage(SecurityCommands.SecurityChallenge)
-                        .set(SecurityParts.CredentialsRequired, "Name,Password")
-                        .set(SecurityParts.ReplyTo, AUTHORIZATION_SVC_SUBJECT);
+                            .set(SecurityParts.CredentialsRequired, "Name,Password")
+                            .set(SecurityParts.ReplyTo, AUTHORIZATION_SVC_SUBJECT)
+                            .set(SecurityParts.SessionData, message.get(HttpSession.class, SecurityParts.SessionData));
 
-                    MessageBusServer.store(message.get(String.class, SecurityParts.ReplyTo), securityChallenge);
+                    MessageBusServer.store("LoginClient", securityChallenge);
 
                     return;
                 }
@@ -92,9 +92,8 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
                 try {
                     Thread.sleep(1000 * 5);
 
-                    Map<String, Object> msg = new HashMap<String, Object>();
-                    msg.put("CommandType", "Hello");
-                    msg.put("Name", "Jay Balunas");
+                    CommandMessage msg = new CommandMessage("Hello");
+                    msg.set("Name", "Jay Balunas");
 
                     bus.storeGlobal("org.jboss.workspace.WorkspaceLayout", msg);
 
@@ -131,10 +130,14 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
     }
 
     public void store(String subject, String message) {
-        Map<String, Object> translatedMessage = message != null ? JSONUtil.decodeToMap(message) : null;
-        if (translatedMessage != null) {
-            translatedMessage.put(SecurityParts.SessionData.name(), getSession());
+        System.out.println("MessageRecvFromClient <<" + subject + ":" + message + ">>");
+
+        CommandMessage translatedMessage = new CommandMessage();
+        if (message != null) {
+            translatedMessage.setParts(JSONUtil.decodeToMap(message));
+            translatedMessage.set(SecurityParts.SessionData, getSession());
         }
+
         bus.storeGlobal(subject, translatedMessage);
     }
 

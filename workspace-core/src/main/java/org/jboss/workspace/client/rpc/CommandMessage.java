@@ -9,6 +9,8 @@ public class CommandMessage {
     private Map<String, Object> parts = new HashMap<String, Object>();
     private String encoded;
 
+    public CommandMessage() {
+    }
 
     public CommandMessage(Map<String, Object> parts) {
         this.parts = parts;
@@ -59,6 +61,10 @@ public class CommandMessage {
 
     public Map<String, Object> getParts() {
         return parts;
+    }
+
+    public void setParts(Map<String, Object> parts) {
+        this.parts = parts;
     }
 
     public boolean hasCachedEncoding() {

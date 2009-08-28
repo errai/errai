@@ -28,16 +28,11 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
         private final Map<Object, Thread> activeWaitingThreads = new HashMap<Object, Thread>();
 
         public void storeGlobal(final String subject, final CommandMessage message) {
-            storeGlobal(subject, encodeMap(message.getParts()));
-        }
-
-        public void storeGlobal(final String subject, final Object message) {
-            String jsonMessage = message != null ? String.valueOf(message) : null;
-            CommandMessage msg = new CommandMessage(message != null ? JSONUtil.decodeToMap(jsonMessage) : new HashMap<String, Object>(), jsonMessage);
+            final String jsonMessage = encodeMap(message.getParts());
 
             if (subscriptions.containsKey(subject)) {
                 for (MessageCallback c : subscriptions.get(subject)) {
-                    c.callback(msg);
+                    c.callback(message);
                 }
             }
 
@@ -50,7 +45,7 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
                             }
 
                             public Object getMessage() {
-                                return message;
+                                return jsonMessage;
                             }
                         });
 
@@ -59,9 +54,11 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
                     }
                 }
             }
+
         }
 
-        public void store(final String sessionId, final String subject, final Object message) {
+
+        private void store(final String sessionId, final String subject, final Object message) {
             if (messageQueues.containsKey(sessionId)) {
                 messageQueues.get(sessionId).add(new Message() {
                     public String getSubject() {
@@ -84,7 +81,7 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
 
         public void store(String subject, CommandMessage message) {
             if (!message.hasPart(SecurityParts.SessionData)) {
-                throw new RuntimeException("cannot automatically re-route message.  no session contained in messge");
+                throw new RuntimeException("cannot automatically route message.  no session contained in message");
             }
 
             store((String) message.get(HttpSession.class, SecurityParts.SessionData)

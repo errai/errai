@@ -19,7 +19,9 @@ import org.jboss.workspace.client.rpc.MessageBusClient;
 import org.jboss.workspace.client.rpc.MessageBusService;
 import org.jboss.workspace.client.rpc.MessageBusServiceAsync;
 import org.jboss.workspace.client.rpc.CommandMessage;
+import org.jboss.workspace.client.rpc.protocols.SecurityCommands;
 import org.jboss.workspace.client.security.SecurityService;
+import org.jboss.workspace.client.widgets.WSWindowPanel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +29,8 @@ import java.util.List;
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
  */
-public class Workspace implements EntryPoint {
+public class
+        Workspace implements EntryPoint {
     public static PickupDragController dragController;
     private static WorkspaceLayout workspaceLayout;
     private static SecurityService securityService = new SecurityService();
@@ -161,6 +164,7 @@ public class Workspace implements EntryPoint {
                     }
 
                     public void onSuccess(String[] o) {
+                        System.out.println("MessageFromServer <<" + o[0] + ":" + o[1] + ">>");
                         MessageBusClient.store(o[0], o[1]);
                         block = false;
                         schedule(1);
@@ -219,6 +223,24 @@ public class Workspace implements EntryPoint {
         };
 
         messageBus.getSubjects(getSubjects);
+
+        MessageBusClient.subscribe("LoginClient", new MessageCallback() {
+            public void callback(CommandMessage message) {
+                switch (SecurityCommands.valueOf(message.getCommandType())) {
+                    case SecurityChallenge:
+                        WSWindowPanel panel = new WSWindowPanel();
+                        panel.add(loginComponent.getWidget());
+                        panel.show();
+                        panel.center();
+                        break;
+
+                    default:
+                        // I don't know this command. :(
+
+                }
+            }
+        });
+
     }
 
     public static SecurityService getSecurityService() {

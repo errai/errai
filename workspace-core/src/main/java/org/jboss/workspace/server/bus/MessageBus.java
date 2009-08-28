@@ -8,10 +8,10 @@ import java.util.Map;
 import java.util.Set;
 
 public interface MessageBus {
-    public void storeGlobal(String subject, Object message);
+   // public void storeGlobal(String subject, Object message);
     public void storeGlobal(String subject, CommandMessage message);
 
-    public void store(String sessionId, String subject, Object message);
+  //  public void store(String sessionId, String subject, Object message);
     public void store(String sessionid, String subject, CommandMessage message);
     public void store(String subject, CommandMessage message);
 

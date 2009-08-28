@@ -5,6 +5,7 @@ import org.jboss.workspace.client.framework.AcceptsCallback;
 import org.jboss.workspace.client.rpc.CommandMessage;
 import org.jboss.workspace.server.json.JSONUtil;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -24,9 +25,14 @@ public class MessageBusServer {
     public static void storeGlobal(String subject, CommandMessage message) {
         new SimpleMessageBusProvider().getBus().storeGlobal(subject, message);
     }
-    
+
     public static void store(String subject, CommandMessage message) {
-        new SimpleMessageBusProvider().getBus().store(subject, message);
+        try {
+            new SimpleMessageBusProvider().getBus().store(subject, message);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 //    public static void store(String subject, Object value) {
@@ -54,29 +60,51 @@ public class MessageBusServer {
         Object v;
 
         int i = 0;
+        boolean first = true;
         for (Map.Entry<String, Object> entry : map.entrySet()) {
-            buf.append("\"").append(entry.getKey()).append("\"").append(":");
-
             if ((v = entry.getValue()) == null) {
-                buf.append("null");
+                if (!first) {
+                    buf.append(", ");
+                }
+                buf.append("\"").append(entry.getKey()).append("\"").append(":").append("null");
+                first = false;
+
             }
             else if (v instanceof String) {
-                buf.append("\"").append(v).append("\"");
+                if (!first) {
+                    buf.append(", ");
+                }
+                buf.append("\"").append(entry.getKey()).append("\"").append(":").append("\"").append(v).append("\"");
+                first = false;
+
             }
             else if (v instanceof Number) {
-                buf.append(v);
+                if (!first) {
+                    buf.append(", ");
+                }
+                buf.append("\"").append(entry.getKey()).append("\"").append(":").append(v);
+                first = false;
+
             }
             else if (v instanceof Boolean) {
-                buf.append(v);
+                if (!first) {
+                    buf.append(", ");
+                }
+                buf.append("\"").append(entry.getKey()).append("\"").append(":").append(v);
+                first = false;
+
             }
-            else {
+            else if (!(v instanceof Serializable)) {
                 throw new RuntimeException("cannot encode element type: " + v);
             }
-
-            if (++i < map.size()) buf.append(", ");
+            i++;
         }
+        buf.append("}");
+
+        System.out.println("ENCODED:" + buf.toString());
+        return buf.toString();
 
 
-        return buf.append("}").toString();
+        //  return buf.append("}").toString();
     }
 }
