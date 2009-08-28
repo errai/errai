@@ -1,17 +1,15 @@
 package org.jboss.workspace.server;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-import org.jboss.workspace.client.framework.AcceptsCallback;
 import org.jboss.workspace.client.framework.MessageCallback;
-import org.jboss.workspace.client.rpc.MessageBusService;
 import org.jboss.workspace.client.rpc.CommandMessage;
+import org.jboss.workspace.client.rpc.MessageBusService;
 import org.jboss.workspace.client.rpc.protocols.SecurityCommands;
 import org.jboss.workspace.client.rpc.protocols.SecurityParts;
 import org.jboss.workspace.server.bus.Message;
 import org.jboss.workspace.server.bus.MessageBus;
-import org.jboss.workspace.server.bus.SimpleMessageBusProvider;
 import org.jboss.workspace.server.bus.MessageBusServer;
-import static org.jboss.workspace.server.bus.MessageBusServer.decodeToCommandMessage;
+import org.jboss.workspace.server.bus.SimpleMessageBusProvider;
 import org.jboss.workspace.server.json.JSONUtil;
 import org.jboss.workspace.server.security.auth.AuthorizationAdapter;
 import org.jboss.workspace.server.security.auth.JAASAdapter;
@@ -38,18 +36,27 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
 
         loadConfig();
 
+
+        final AuthorizationAdapter authAdapter = authorizationAdapter;
+
         //todo: this all needs to be refactored at some point.
         bus.subscribe(AUTHORIZATION_SVC_SUBJECT, new MessageCallback() {
             public void callback(CommandMessage c) {
                 switch (SecurityCommands.valueOf(c.getCommandType())) {
                     case WhatCredentials:
-                         //todo: we only support login/password for now
+                        //todo: we only support login/password for now
                         CommandMessage reply = new CommandMessage(SecurityCommands.WhatCredentials)
                                 .set(SecurityParts.CredentialsRequired, "Name,Password")
                                 .set(SecurityParts.ReplyTo, AUTHORIZATION_SVC_SUBJECT);
 
-                         MessageBusServer.store(c.get(String.class, SecurityParts.ReplyTo), reply);
+                        MessageBusServer.store(c.get(String.class, SecurityParts.ReplyTo), reply);
                 }
+
+            }
+        });
+
+        bus.subscribe("TestService", new MessageCallback() {
+            public void callback(CommandMessage message) {
 
             }
         });
@@ -65,7 +72,6 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
                 }
             }
         });
-
 
 
         Thread t = new Thread() {
@@ -113,7 +119,9 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
     }
 
     public void store(String subject, String message) {
-        bus.store(subject, message);
+        Map<String, Object> translatedMessage = JSONUtil.decodeToMap(message);
+        translatedMessage.put(SecurityParts.SessionData.name(), getSession());
+        bus.store(subject, translatedMessage);
     }
 
     public String[] nextMessage() {
@@ -131,7 +139,7 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
         bus.remoteSubscribe(getId(), subject);
     }
 
-    private String getId() {
+    private HttpSession getSession() {
         HttpServletRequest request = getThreadLocalRequest();
         HttpSession session = request.getSession();
 
@@ -139,7 +147,11 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
             session.setAttribute("WSSessionID", session.getId());
         }
 
-        return (String) session.getAttribute("WSSessionID");
+        return session;
+    }
+
+    private String getId() {
+        return (String) getSession().getAttribute("WSSessionID");
     }
 
     public String[] getSubjects() {
