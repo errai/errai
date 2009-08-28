@@ -27,6 +27,8 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
     private MessageBus bus;
     private AuthorizationAdapter authorizationAdapter;
 
+
+    public static final String WS_SESSION_ID = "WSSessionID";
     public static final String AUTHORIZATION_SVC_SUBJECT = "AuthorizationService";
 
     @Override
@@ -35,7 +37,6 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
         bus = new SimpleMessageBusProvider().getBus();
 
         loadConfig();
-
 
         final AuthorizationAdapter authAdapter = authorizationAdapter;
 
@@ -57,12 +58,23 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
 
         bus.subscribe("TestService", new MessageCallback() {
             public void callback(CommandMessage message) {
+                if (!authAdapter.isAuthenticated(message)) {
+                    CommandMessage securityChallenge = new CommandMessage(SecurityCommands.SecurityChallenge)
+                        .set(SecurityParts.CredentialsRequired, "Name,Password")
+                        .set(SecurityParts.ReplyTo, AUTHORIZATION_SVC_SUBJECT);
 
+                    MessageBusServer.store(message.get(String.class, SecurityParts.ReplyTo), securityChallenge);
+
+                    return;
+                }
+
+                System.out.println("yay authentication land!");
             }
         });
 
         bus.subscribe("ServerEchoService", new MessageCallback() {
             public void callback(CommandMessage c) {
+
 
                 if (c.hasPart("EchoBackData")) {
                     System.out.println("EchoBack: " + c.get(String.class, "EchoBackData"));
@@ -84,7 +96,7 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
                     msg.put("CommandType", "Hello");
                     msg.put("Name", "Jay Balunas");
 
-                    bus.store("org.jboss.workspace.WorkspaceLayout", msg);
+                    bus.storeGlobal("org.jboss.workspace.WorkspaceLayout", msg);
 
                 }
                 catch (InterruptedException e) {
@@ -119,9 +131,11 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
     }
 
     public void store(String subject, String message) {
-        Map<String, Object> translatedMessage = JSONUtil.decodeToMap(message);
-        translatedMessage.put(SecurityParts.SessionData.name(), getSession());
-        bus.store(subject, translatedMessage);
+        Map<String, Object> translatedMessage = message != null ? JSONUtil.decodeToMap(message) : null;
+        if (translatedMessage != null) {
+            translatedMessage.put(SecurityParts.SessionData.name(), getSession());
+        }
+        bus.storeGlobal(subject, translatedMessage);
     }
 
     public String[] nextMessage() {
@@ -143,15 +157,15 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
         HttpServletRequest request = getThreadLocalRequest();
         HttpSession session = request.getSession();
 
-        if (session.getAttribute("WSSessionID") == null) {
-            session.setAttribute("WSSessionID", session.getId());
+        if (session.getAttribute(WS_SESSION_ID) == null) {
+            session.setAttribute(WS_SESSION_ID, session.getId());
         }
 
         return session;
     }
 
     private String getId() {
-        return (String) getSession().getAttribute("WSSessionID");
+        return (String) getSession().getAttribute(WS_SESSION_ID);
     }
 
     public String[] getSubjects() {

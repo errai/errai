@@ -1,11 +1,13 @@
 package org.jboss.workspace.server.bus;
 
-import org.jboss.workspace.client.framework.AcceptsCallback;
 import org.jboss.workspace.client.framework.MessageCallback;
 import org.jboss.workspace.client.rpc.CommandMessage;
+import org.jboss.workspace.client.rpc.protocols.SecurityParts;
+import org.jboss.workspace.server.MessageBusServiceImpl;
 import static org.jboss.workspace.server.bus.MessageBusServer.encodeMap;
 import org.jboss.workspace.server.json.JSONUtil;
 
+import javax.servlet.http.HttpSession;
 import java.util.*;
 
 public class SimpleMessageBusProvider implements MessageBusProvider {
@@ -25,13 +27,13 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
         private final Map<Object, Queue<Message>> messageQueues = new HashMap<Object, Queue<Message>>();
         private final Map<Object, Thread> activeWaitingThreads = new HashMap<Object, Thread>();
 
-        public void store(final String subject, final Map<String, Object> message) {
-            store(subject, encodeMap(message));
+        public void storeGlobal(final String subject, final CommandMessage message) {
+            storeGlobal(subject, encodeMap(message.getParts()));
         }
 
-        public void store(final String subject, final Object message) {
+        public void storeGlobal(final String subject, final Object message) {
             String jsonMessage = message != null ? String.valueOf(message) : null;
-            CommandMessage msg = new CommandMessage(message != null ? JSONUtil.decodeToMap(jsonMessage) : new HashMap<String,Object>(), jsonMessage);
+            CommandMessage msg = new CommandMessage(message != null ? JSONUtil.decodeToMap(jsonMessage) : new HashMap<String, Object>(), jsonMessage);
 
             if (subscriptions.containsKey(subject)) {
                 for (MessageCallback c : subscriptions.get(subject)) {
@@ -57,7 +59,36 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
                     }
                 }
             }
+        }
 
+        public void store(final String sessionId, final String subject, final Object message) {
+            if (messageQueues.containsKey(sessionId)) {
+                messageQueues.get(sessionId).add(new Message() {
+                    public String getSubject() {
+                        return subject;
+                    }
+
+                    public Object getMessage() {
+                        return message;
+                    }
+                });
+
+                Thread t = activeWaitingThreads.get(sessionId);
+                if (t != null) t.interrupt();
+            }
+        }
+
+        public void store(String sessionid, String subject, CommandMessage message) {
+            store(sessionid, subject, encodeMap(message.getParts()));
+        }
+
+        public void store(String subject, CommandMessage message) {
+            if (!message.hasPart(SecurityParts.SessionData)) {
+                throw new RuntimeException("cannot automatically re-route message.  no session contained in messge");
+            }
+
+            store((String) message.get(HttpSession.class, SecurityParts.SessionData)
+                    .getAttribute(MessageBusServiceImpl.WS_SESSION_ID), subject, message);
         }
 
         public Message nextMessage(Object sessionContext) {

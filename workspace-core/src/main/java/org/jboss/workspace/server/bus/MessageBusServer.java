@@ -21,14 +21,17 @@ public class MessageBusServer {
         //      _subscribe(subject, scope, callback, subscriberData);
     }
 
-
-    public static void store(String subject, Map<String, Object> value) {
-        new SimpleMessageBusProvider().getBus().store(subject, encodeMap(value));
+    public static void storeGlobal(String subject, CommandMessage message) {
+        new SimpleMessageBusProvider().getBus().storeGlobal(subject, message);
+    }
+    
+    public static void store(String subject, CommandMessage message) {
+        new SimpleMessageBusProvider().getBus().store(subject, message);
     }
 
-    public static void store(String subject, Object value) {
-        new SimpleMessageBusProvider().getBus().store(subject, value);
-    }
+//    public static void store(String subject, Object value) {
+//        new SimpleMessageBusProvider().getBus().store(subject, value);
+//    }
 
 
     public static void addOnSubscribeHook(AcceptsCallback callback) {

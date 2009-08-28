@@ -209,7 +209,7 @@ public class Workspace implements EntryPoint {
                                 messageBus.store(subject, MessageBusClient.encodeMap(message.getParts()), cb);
                             }
 
-                      //     messageBus.store(subject, message);
+                      //     messageBus.storeGlobal(subject, message);
                         }
                     }, null);
                 }

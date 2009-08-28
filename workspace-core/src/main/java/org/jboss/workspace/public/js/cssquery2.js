@@ -413,7 +413,7 @@ AttributeSelector.replace = function($match, $attribute, $namespace, $compare, $
         var $key = this.PREFIX + $match;
         if (!attributeSelectors[$key]) {
                 $attribute = this.create($attribute, $compare || "", $value || "");
-                // store the selector
+                // storeGlobal the selector
                 attributeSelectors[$key] = $attribute;
                 attributeSelectors.push($attribute);
         }
