@@ -22,15 +22,34 @@ public class CommandMessage {
     }
 
     public CommandMessage(String commandType) {
-        parts.put(MessageParts.CommandType.name(), commandType);
+        setCommandType(commandType);
     }
 
     public CommandMessage(Enum commandType) {
-        parts.put(MessageParts.CommandType.name(), commandType.name());
+        setCommandType(commandType.name());
     }
+
+    public CommandMessage(String subject, String commandType) {
+        setSubject(subject).setCommandType(commandType);
+    }
+
 
     public String getCommandType() {
         return String.valueOf(parts.get(MessageParts.CommandType.name()));
+    }
+
+    public String getSubject() {
+        return String.valueOf(parts.get(MessageParts.Subject.name()));
+    }
+
+    public CommandMessage setSubject(String subject) {
+        parts.put(MessageParts.Subject.name(), subject);
+        return this;
+    }
+
+    public CommandMessage setCommandType(String type) {
+        parts.put(MessageParts.CommandType.name(), type);
+        return this;
     }
 
     public CommandMessage set(Enum part, Object value) {

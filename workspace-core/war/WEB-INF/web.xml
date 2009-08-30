@@ -9,8 +9,16 @@
         <servlet-name>org.jboss.workspace.Workspace MessageBusService</servlet-name>
         <servlet-class>org.jboss.workspace.server.MessageBusServiceImpl</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>org.jboss.workspace.Workspace MessageBusService</servlet-name>
+        <servlet-class>org.jboss.workspace.server.MessageBusServiceImpl</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>org.jboss.workspace.Workspace MessageBusService</servlet-name>
-        <url-pattern>/org.jboss.workspace.Workspace/MessageBusService</url-pattern>
+        <url-pattern>/org.jboss.workspace.Workspace/jbwMsgBus</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>org.jboss.workspace.Workspace MessageBusService</servlet-name>
+        <url-pattern>/org.jboss.workspace.Workspace/jbwMsgBus</url-pattern>
     </servlet-mapping>
 </web-app>

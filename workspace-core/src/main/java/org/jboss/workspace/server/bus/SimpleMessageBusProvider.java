@@ -98,11 +98,16 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
 
         public void store(String subject, CommandMessage message, boolean fireListeners) {
             if (!message.hasPart(SecurityParts.SessionData)) {
-                throw new RuntimeException("cannot automatically route message.  no session contained in message");
+                throw new RuntimeException("cannot automatically route message. no session contained in message.");
             }
 
-            store((String) message.get(HttpSession.class, SecurityParts.SessionData)
-                    .getAttribute(MessageBusServiceImpl.WS_SESSION_ID), subject, message, fireListeners);
+            HttpSession session = message.get(HttpSession.class, SecurityParts.SessionData);
+
+            if (session == null) {
+                throw new RuntimeException("cannot automatically route message. no session contained in message.");
+            }
+
+            store((String) session.getAttribute(MessageBusServiceImpl.WS_SESSION_ID), subject, message, fireListeners);
         }
 
         public Message nextMessage(Object sessionContext) {

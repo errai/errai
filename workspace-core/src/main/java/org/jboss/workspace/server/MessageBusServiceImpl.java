@@ -6,10 +6,10 @@ import org.jboss.workspace.client.rpc.CommandMessage;
 import org.jboss.workspace.client.rpc.MessageBusService;
 import org.jboss.workspace.client.rpc.protocols.SecurityCommands;
 import org.jboss.workspace.client.rpc.protocols.SecurityParts;
+import org.jboss.workspace.client.security.CredentialTypes;
 import org.jboss.workspace.server.bus.*;
 import org.jboss.workspace.server.json.JSONUtil;
-import org.jboss.workspace.server.security.auth.AuthorizationAdapter;
-import org.jboss.workspace.server.security.auth.JAASAdapter;
+import org.jboss.workspace.server.security.auth.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -22,7 +22,6 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
     private MessageBus bus;
     private AuthorizationAdapter authorizationAdapter;
 
-
     public static final String WS_SESSION_ID = "WSSessionID";
     public static final String AUTHORIZATION_SVC_SUBJECT = "AuthorizationService";
 
@@ -32,26 +31,9 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
         bus = new SimpleMessageBusProvider().getBus();
 
         loadConfig();
-        final AuthorizationAdapter authAdapter = authorizationAdapter;
 
-        bus.addGlobalListener(new MessageListener() {
-            public boolean handleMessage(CommandMessage message) {
-                if (authAdapter != null && !authAdapter.isAuthenticated(message)) {
-                    CommandMessage securityChallenge = new CommandMessage(SecurityCommands.SecurityChallenge)
-                            .set(SecurityParts.CredentialsRequired, "Name,Password")
-                            .set(SecurityParts.ReplyTo, AUTHORIZATION_SVC_SUBJECT)
-                            .set(SecurityParts.SessionData, message.get(HttpSession.class, SecurityParts.SessionData));
+        bus.addGlobalListener(new BasicAuthorizationListener(authorizationAdapter));
 
-                    MessageBusServer.store("LoginClient", securityChallenge, false);
-
-                    return false;
-                }
-                return true;
-
-            }
-        });
-
-        
         //todo: this all needs to be refactored at some point.
         bus.subscribe(AUTHORIZATION_SVC_SUBJECT, new MessageCallback() {
             public void callback(CommandMessage c) {
@@ -70,9 +52,11 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
 
         bus.subscribe("TestService", new MessageCallback() {
             public void callback(CommandMessage message) {
-                System.out.println("yay authentication land!");
+                System.out.println("yay!");
             }
         });
+
+        ((JAASAdapter) authorizationAdapter).addSecurityRule("TestService", new RoleAuthDescriptor(new String[] { CredentialTypes.Authenticated.name() }));
 
         bus.subscribe("ServerEchoService", new MessageCallback() {
             public void callback(CommandMessage c) {
@@ -97,7 +81,7 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
                     CommandMessage msg = new CommandMessage("Hello");
                     msg.set("Name", "Jay Balunas");
 
-                    bus.storeGlobal("org.jboss.workspace.WorkspaceLayout", msg);
+                    bus.storeGlobal("org.jboss.workspace.WorkspaceLayout", msg, false);
 
                 }
                 catch (InterruptedException e) {
@@ -134,11 +118,13 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
     public void store(String subject, String message) {
         System.out.println("MessageRecvFromClient <<" + subject + ":" + message + ">>");
 
-        CommandMessage translatedMessage = new CommandMessage();
+        CommandMessage translatedMessage = new CommandMessage().setSubject(subject);
         if (message != null) {
             translatedMessage.setParts(JSONUtil.decodeToMap(message));
-            translatedMessage.set(SecurityParts.SessionData, getSession());
         }
+        translatedMessage.set(SecurityParts.SessionData, getSession());
+
+        if (authorizationAdapter != null) authorizationAdapter.process(translatedMessage);
 
         bus.storeGlobal(subject, translatedMessage);
     }
