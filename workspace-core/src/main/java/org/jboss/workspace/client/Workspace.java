@@ -163,7 +163,6 @@ public class
                 switch (SecurityCommands.valueOf(message.getCommandType())) {
                     case SecurityChallenge:
                        showLoginPanel();
-
                         break;
 
                     case FailedAuth:
@@ -179,6 +178,7 @@ public class
                         break;
 
                     case SuccessfulAuth:
+                        loginWindowPanel.removeClosingHandler(loginWindowClosingHandler);
                         loginWindowPanel.hide();
                         final WSWindowPanel welcome = new WSWindowPanel();
                         welcome.setWidth("250px");
