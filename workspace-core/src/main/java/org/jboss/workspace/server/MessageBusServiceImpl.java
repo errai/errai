@@ -42,9 +42,16 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
                         //todo: we only support login/password for now
                         CommandMessage reply = new CommandMessage(SecurityCommands.WhatCredentials)
                                 .set(SecurityParts.CredentialsRequired, "Name,Password")
-                                .set(SecurityParts.ReplyTo, AUTHORIZATION_SVC_SUBJECT);
+                                .set(SecurityParts.ReplyTo, AUTHORIZATION_SVC_SUBJECT)
+                                .set(SecurityParts.SessionData, c.get(HttpSession.class, SecurityParts.SessionData));
 
                         MessageBusServer.store(c.get(String.class, SecurityParts.ReplyTo), reply);
+                        break;
+
+                    case AuthRequest:
+                        authorizationAdapter.challenge(c);
+                        break;
+
                 }
 
             }
@@ -56,12 +63,11 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
             }
         });
 
-        ((JAASAdapter) authorizationAdapter).addSecurityRule("TestService", new RoleAuthDescriptor(new String[] { CredentialTypes.Authenticated.name() }));
+        ((JAASAdapter) authorizationAdapter).addSecurityRule("TestService",
+                new RoleAuthDescriptor(new String[] { CredentialTypes.Authenticated.name() }));
 
         bus.subscribe("ServerEchoService", new MessageCallback() {
             public void callback(CommandMessage c) {
-
-
                 if (c.hasPart("EchoBackData")) {
                     System.out.println("EchoBack: " + c.get(String.class, "EchoBackData"));
                 }
@@ -82,7 +88,6 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
                     msg.set("Name", "Jay Balunas");
 
                     bus.storeGlobal("org.jboss.workspace.WorkspaceLayout", msg, false);
-
                 }
                 catch (InterruptedException e) {
                 }

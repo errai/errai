@@ -56,7 +56,8 @@ public class SecurityService {
                             }
                         }
 
-                        MessageBusClient.store("AuthenticationService", challenge);
+                        System.out.println("reply");
+                        MessageBusClient.store("AuthorizationService", challenge);
                         break;
 
                     case SecurityResponse:
@@ -84,6 +85,11 @@ public class SecurityService {
             }
         });
 
+
+        CommandMessage message = new CommandMessage(SecurityCommands.WhatCredentials);
+        message.set(SecurityParts.ReplyTo, responseSubject);
+        System.out.println("Send Auth Request..,");
+        MessageBusClient.store("AuthorizationService", message);
     }
 
 }

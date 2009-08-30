@@ -12,10 +12,20 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
 
 public class JAASAdapter implements AuthorizationAdapter {
     private static final String AUTH_TOKEN = "WSAuthToken";
     private HashMap<String, AuthDescriptor> securityRules = new HashMap<String, AuthDescriptor>();
+
+    public JAASAdapter() {
+        URL url = Thread.currentThread().getContextClassLoader().getResource("login.config");
+
+        if (url == null) throw new RuntimeException("cannot find login.config file");
+
+        System.setProperty("java.security.auth.login.config", url.toString());
+    }
 
     public void challenge(final CommandMessage message) {
         try {
@@ -36,15 +46,21 @@ public class JAASAdapter implements AuthorizationAdapter {
                 }
             };
 
-            LoginContext loginContext = new LoginContext(name, callbackHandler);
+            LoginContext loginContext = new LoginContext("Login", callbackHandler);
 
             loginContext.login();
 
             HttpSession session = message.get(HttpSession.class, SecurityParts.SessionData);
             session.setAttribute(AUTH_TOKEN, "AUTH");
+
+            System.out.println("*** Authentication Successful ***");
         }
         catch (LoginException e) {
+            System.out.println("*** Authentication FAILED ***");
             throw new AuthenticationFailedException(e.getMessage(), e);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
