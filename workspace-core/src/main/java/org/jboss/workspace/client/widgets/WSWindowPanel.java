@@ -194,6 +194,10 @@ public class WSWindowPanel extends Composite {
         closingHandlers.add(closingHandler);
     }
 
+    public void removeClosingHandler(Window.ClosingHandler closingHandler) {
+        if (closingHandlers != null) closingHandlers.remove(closingHandler);
+    }
+
     private void fireClosingHandlers() {
         if (closingHandlers != null) {
             WSClosingEvent event = new WSClosingEvent(this);

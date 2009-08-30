@@ -39,7 +39,18 @@ public class
     private static WorkspaceLayout workspaceLayout;
     private static SecurityService securityService = new SecurityService();
     private static WSComponent loginComponent;
+
     private static WSWindowPanel loginWindowPanel;
+    private static Window.ClosingHandler loginWindowClosingHandler;
+
+    static {
+        loginWindowClosingHandler = new Window.ClosingHandler() {
+            public void onWindowClosing(Window.ClosingEvent event) {
+                CommandMessage msg = new CommandMessage();
+                MessageBusClient.store("ServerEchoService", msg);
+            }
+        };
+    }
 
     private static List<ToolSet> toBeLoaded = new ArrayList<ToolSet>();
 
@@ -151,20 +162,17 @@ public class
 
                 switch (SecurityCommands.valueOf(message.getCommandType())) {
                     case SecurityChallenge:
-                        newWindowPanel();
+                       showLoginPanel();
 
-                        loginWindowPanel.setTitle("Security Challenge");
-                        loginWindowPanel.add(loginComponent.getWidget());
-                        loginWindowPanel.showModal();
-                        loginWindowPanel.center();
                         break;
 
                     case FailedAuth:
+                        loginWindowPanel.removeClosingHandler(loginWindowClosingHandler);
+                        loginWindowPanel.hide();
                         WSModalDialog failed = new WSModalDialog();
                         failed.ask("Authentication Failure. Please Try Again", new AcceptsCallback() {
                             public void callback(Object message, Object data) {
-                                loginWindowPanel.hide();
-                                loginWindowPanel.showModal();
+                               if ("WindowClosed".equals(message)) showLoginPanel();
                             }
                         });
                         failed.showModal();
@@ -173,7 +181,9 @@ public class
                     case SuccessfulAuth:
                         loginWindowPanel.hide();
                         final WSWindowPanel welcome = new WSWindowPanel();
+                        welcome.setWidth("250px");
                         VerticalPanel vp = new VerticalPanel();
+                        vp.setWidth("100%");
 
                         Label label = new Label("Welcome " + message.get(String.class, SecurityParts.Name)
                                 + ", you are now logged in");
@@ -333,13 +343,22 @@ public class
     }
 
     private static void newWindowPanel() {
+        if (loginWindowPanel != null) {
+            loginWindowPanel.removeClosingHandler(loginWindowClosingHandler);
+            loginWindowPanel.hide();
+        }
+
         loginWindowPanel = new WSWindowPanel();
-        loginWindowPanel.addClosingHandler(new Window.ClosingHandler() {
-            public void onWindowClosing(Window.ClosingEvent event) {
-                CommandMessage msg = new CommandMessage();
-                MessageBusClient.store("ServerEchoService", msg);
-            }
-        });
+        loginWindowPanel.addClosingHandler(loginWindowClosingHandler);
+    }
+
+    public static void showLoginPanel() {
+        newWindowPanel();
+        loginWindowPanel.setTitle("Security Challenge");
+        loginWindowPanel.add(loginComponent.getWidget());
+        loginWindowPanel.showModal();
+        loginWindowPanel.center();
+
     }
 
     private native static void _initAfterWSLoad() /*-{
