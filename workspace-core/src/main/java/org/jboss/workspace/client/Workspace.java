@@ -248,7 +248,6 @@ public class
                     }
 
                     public void onSuccess(String[] o) {
-                        System.out.println("MessageFromServer <<" + o[0] + ":" + o[1] + ">>");
                         MessageBusClient.store(o[0], o[1]);
                         block = false;
                         schedule(1);

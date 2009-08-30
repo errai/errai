@@ -103,8 +103,6 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
     }
 
     public void store(String subject, String message) {
-        System.out.println("MessageRecvFromClient <<" + subject + ":" + message + ">>");
-
         CommandMessage translatedMessage = new CommandMessage();
         if (message != null) {
             translatedMessage.setParts(JSONUtil.decodeToMap(message));

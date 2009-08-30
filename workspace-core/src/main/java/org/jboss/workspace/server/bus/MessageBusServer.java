@@ -109,8 +109,6 @@ public class MessageBusServer {
             i++;
         }
         buf.append("}");
-
-        System.out.println("ENCODED:" + buf.toString());
         return buf.toString();
 
 

@@ -143,7 +143,7 @@ public class WSTabSelectorDialog extends WSModalDialog {
 
         window.add(hPanel);
 
-        System.out.println("Yo!");
+      
     }
 
 

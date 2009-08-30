@@ -92,7 +92,6 @@ public class SecurityService {
 
         CommandMessage message = new CommandMessage(SecurityCommands.WhatCredentials);
         message.set(SecurityParts.ReplyTo, SUBJECT);
-        System.out.println("Send Auth Request..,");
         MessageBusClient.store("AuthorizationService", message);
     }
 
