@@ -162,7 +162,7 @@ public class
 
                 switch (SecurityCommands.valueOf(message.getCommandType())) {
                     case SecurityChallenge:
-                       showLoginPanel();
+                        showLoginPanel();
                         break;
 
                     case FailedAuth:
@@ -171,7 +171,7 @@ public class
                         WSModalDialog failed = new WSModalDialog();
                         failed.ask("Authentication Failure. Please Try Again", new AcceptsCallback() {
                             public void callback(Object message, Object data) {
-                               if ("WindowClosed".equals(message)) showLoginPanel();
+                                if ("WindowClosed".equals(message)) showLoginPanel();
                             }
                         });
                         failed.showModal();
@@ -195,6 +195,8 @@ public class
                         vp.setCellHeight(label, "50px");
 
                         Button okButton = new Button("OK");
+                        okButton.getElement().getStyle().setProperty("padding", "20px");
+
                         vp.add(okButton);
                         vp.setCellHorizontalAlignment(okButton, HasAlignment.ALIGN_CENTER);
 
@@ -282,25 +284,7 @@ public class
                 for (final String subject : o) {
                     MessageBusClient.subscribe(subject, new MessageCallback() {
                         public void callback(CommandMessage message) {
-                            try {
-                                AsyncCallback<Void> cb = new AsyncCallback<Void>() {
-                                    public void onFailure(Throwable throwable) {
-                                    }
-
-                                    public void onSuccess(Void o) {
-                                    }
-                                };
-
-//                                if (message.hasCachedEncoding()) {
-//                                    messageBus.store(subject, message.getEncoded(), cb);
-//                                }
-//                                else {
-                                messageBus.store(subject, MessageBusClient.encodeMap(message.getParts()), cb);
-//                                }
-                            }
-                            catch (Exception e) {
-                                e.printStackTrace();
-                            }
+                            MessageBusClient.enqueueForRemoteTransmit(subject, message);
                         }
                     }, null);
                 }

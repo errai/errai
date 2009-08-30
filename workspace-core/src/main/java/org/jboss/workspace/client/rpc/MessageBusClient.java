@@ -1,19 +1,30 @@
 package org.jboss.workspace.client.rpc;
 
+import static com.google.gwt.core.client.GWT.create;
+import static com.google.gwt.core.client.GWT.getModuleBaseURL;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.rpc.ServiceDefTarget;
+import com.google.gwt.user.client.Timer;
 import org.jboss.workspace.client.framework.AcceptsCallback;
 import org.jboss.workspace.client.framework.MessageCallback;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 public class MessageBusClient {
     private static List<AcceptsCallback> onSubscribeHooks = new ArrayList<AcceptsCallback>();
+    private static final MessageBusServiceAsync messageBus = (MessageBusServiceAsync) create(MessageBusService.class);
+    private static final ServiceDefTarget endpoint = (ServiceDefTarget) messageBus;
+
+    private static final Queue<String[]> outgoingQueue = new LinkedList<String[]>();
+    private static boolean transmitting = false;
+
+    static {
+        endpoint.setServiceEntryPoint(getModuleBaseURL() + "jbwMsgBus");
+    }
 
     public static void subscribe(String subject, MessageCallback callback, Object subscriberData) {
 
@@ -56,6 +67,50 @@ public class MessageBusClient {
     public static void store(String subject, CommandMessage message) {
         try {
             store(subject, message.getParts());
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void enqueueForRemoteTransmit(String subject, CommandMessage message) {
+        outgoingQueue.add(new String[]{subject, encodeMap(message.getParts())});
+        sendAll();
+    }
+
+    private static void sendAll() {
+        if (transmitting) {
+            Timer retry = new Timer() {
+                @Override
+                public void run() {
+                    if (!transmitting) {
+                        cancel();
+                        sendAll();
+                    }
+                }
+            };
+            retry.scheduleRepeating(50);
+        }
+
+        transmitting = true;
+        while (!outgoingQueue.isEmpty()) {
+            String[] msg = outgoingQueue.poll();
+            transmitRemote(msg[0], msg[1]);
+        }
+        transmitting = false;
+    }
+
+    private static void transmitRemote(String subject, String message) {
+        try {
+            AsyncCallback<Void> cb = new AsyncCallback<Void>() {
+                public void onFailure(Throwable throwable) {
+                }
+
+                public void onSuccess(Void o) {
+                }
+            };
+
+            messageBus.store(subject, message, cb);
         }
         catch (Exception e) {
             e.printStackTrace();
