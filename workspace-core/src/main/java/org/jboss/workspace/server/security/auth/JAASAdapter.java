@@ -51,7 +51,7 @@ public class JAASAdapter implements AuthorizationAdapter {
             loginContext.login();
 
             HttpSession session = message.get(HttpSession.class, SecurityParts.SessionData);
-            session.setAttribute(AUTH_TOKEN, "AUTH");
+            session.setAttribute(AUTH_TOKEN, AUTH_TOKEN);
 
             System.out.println("*** Authentication Successful ***");
         }
