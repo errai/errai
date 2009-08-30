@@ -54,7 +54,12 @@ public class MessageBusClient {
     }
 
     public static void store(String subject, CommandMessage message) {
-        store(subject, message.getParts());
+        try {
+            store(subject, message.getParts());
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static void addOnSubscribeHook(AcceptsCallback callback) {

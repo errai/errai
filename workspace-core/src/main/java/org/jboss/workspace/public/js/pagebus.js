@@ -143,11 +143,10 @@ if (!window["OpenAjax"]) {
                             catch(err) {
                                 alert(err + "");
 
-                                if (err != null) {
-                                    if (err.message == "PageBus.StackOverflow")
-                                        throw err;
-                                    h.publish("com.tibco.pagebus.error.callbackError", { name: escape(name), error: escape(err.message) });
-                                }
+                                if (err.message == "PageBus.StackOverflow")
+                                    throw err;
+                                h.publish("com.tibco.pagebus.error.callbackError", { name: escape(name), error: escape(err.message) });
+
                             }
                         }
                     }

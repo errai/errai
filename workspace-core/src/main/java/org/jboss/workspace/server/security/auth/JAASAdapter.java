@@ -1,19 +1,20 @@
 package org.jboss.workspace.server.security.auth;
 
 import org.jboss.workspace.client.rpc.CommandMessage;
+import org.jboss.workspace.client.rpc.protocols.SecurityCommands;
 import org.jboss.workspace.client.rpc.protocols.SecurityParts;
 import org.jboss.workspace.client.security.CredentialTypes;
+import org.jboss.workspace.server.bus.MessageBusServer;
 
 import javax.security.auth.callback.*;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.HashSet;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 public class JAASAdapter implements AuthorizationAdapter {
     private static final String AUTH_TOKEN = "WSAuthToken";
@@ -28,10 +29,9 @@ public class JAASAdapter implements AuthorizationAdapter {
     }
 
     public void challenge(final CommandMessage message) {
+        final String name = message.get(String.class, SecurityParts.Name);
+        final String password = message.get(String.class, SecurityParts.Password);
         try {
-            final String name = message.get(String.class, SecurityParts.Name);
-            final String password = message.get(String.class, SecurityParts.Password);
-
             CallbackHandler callbackHandler = new CallbackHandler() {
                 public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
                     for (Callback cb : callbacks) {
@@ -53,9 +53,19 @@ public class JAASAdapter implements AuthorizationAdapter {
             HttpSession session = message.get(HttpSession.class, SecurityParts.SessionData);
             session.setAttribute(AUTH_TOKEN, AUTH_TOKEN);
 
-            System.out.println("*** Authentication Successful ***");
+            CommandMessage successfulMsg = new CommandMessage(SecurityCommands.SuccessfulAuth);
+            successfulMsg.set(SecurityParts.Name, name);
+            successfulMsg.set(SecurityParts.SessionData, session);
+
+            MessageBusServer.store("LoginClient", successfulMsg);
         }
         catch (LoginException e) {
+            CommandMessage failMessage = new CommandMessage(SecurityCommands.FailedAuth);
+            failMessage.set(SecurityParts.Name, name);
+            failMessage.set(SecurityParts.SessionData, message.get(HttpSession.class, SecurityParts.SessionData));
+
+            MessageBusServer.store("LoginClient", failMessage);
+
             System.out.println("*** Authentication FAILED ***");
             throw new AuthenticationFailedException(e.getMessage(), e);
         }
@@ -71,7 +81,7 @@ public class JAASAdapter implements AuthorizationAdapter {
 
     public boolean requiresAuthorization(CommandMessage message) {
         String subject = message.getSubject();
-        AuthDescriptor descriptor = securityRules.get(subject);     
+        AuthDescriptor descriptor = securityRules.get(subject);
         return descriptor != null && !descriptor.isAuthorized(message);
     }
 

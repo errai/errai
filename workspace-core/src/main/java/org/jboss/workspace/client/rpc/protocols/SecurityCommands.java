@@ -1,5 +1,5 @@
 package org.jboss.workspace.client.rpc.protocols;
 
 public enum SecurityCommands {
-     WhatCredentials, AuthRequest, SecurityResponse, SecurityChallenge
+     WhatCredentials, AuthRequest, SecurityResponse, SecurityChallenge, FailedAuth, SuccessfulAuth
 }

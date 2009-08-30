@@ -52,6 +52,7 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
                         authorizationAdapter.challenge(c);
                         break;
 
+
                 }
 
             }
@@ -63,8 +64,9 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
             }
         });
 
-        ((JAASAdapter) authorizationAdapter).addSecurityRule("TestService",
-                new RoleAuthDescriptor(new String[] { CredentialTypes.Authenticated.name() }));
+        RoleAuthDescriptor authRequired = new RoleAuthDescriptor(new String[] { CredentialTypes.Authenticated.name() });
+        ((JAASAdapter) authorizationAdapter).addSecurityRule("TestService", authRequired);
+        ((JAASAdapter) authorizationAdapter).addSecurityRule("ServerEchoService", authRequired);
 
         bus.subscribe("ServerEchoService", new MessageCallback() {
             public void callback(CommandMessage c) {
