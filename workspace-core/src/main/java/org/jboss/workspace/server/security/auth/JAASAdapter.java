@@ -60,6 +60,8 @@ public class JAASAdapter implements AuthorizationAdapter {
             MessageBusServer.store("LoginClient", successfulMsg);
         }
         catch (LoginException e) {
+            e.printStackTrace();
+
             CommandMessage failMessage = new CommandMessage(SecurityCommands.FailedAuth);
             failMessage.set(SecurityParts.Name, name);
             failMessage.set(SecurityParts.SessionData, message.get(HttpSession.class, SecurityParts.SessionData));

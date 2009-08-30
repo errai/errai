@@ -15,10 +15,14 @@ import java.util.Set;
 
 public class SecurityService {
     private AuthenticationContext authenticationContext;
-    
-    public void doAuthentication(final String name, final AuthenticationHandler handler) {
-        final String responseSubject = "org.jboss.workspace.authentication." + name;
-        MessageBusClient.subscribe(responseSubject, new MessageCallback() {
+    public static final String SUBJECT = "ClientAuthenticationService";
+
+    public SecurityService() {
+    }
+
+    public void doAuthentication(final AuthenticationHandler handler) {
+        MessageBusClient.unsubscribeAll(SUBJECT);
+        MessageBusClient.subscribe(SUBJECT, new MessageCallback() {
             public void callback(CommandMessage msg) {
                 switch (SecurityCommands.valueOf(msg.getCommandType())) {
                     case WhatCredentials:
@@ -43,7 +47,7 @@ public class SecurityService {
                         handler.doLogin(credentials);
 
                         CommandMessage challenge = new CommandMessage(SecurityCommands.AuthRequest.name());
-                        challenge.set(SecurityParts.ReplyTo, responseSubject);
+                        challenge.set(SecurityParts.ReplyTo, SUBJECT);
 
                         for (int i = 0; i < credentialNames.length; i++) {
                             switch (CredentialTypes.valueOf(credentialNames[i])) {
@@ -56,8 +60,8 @@ public class SecurityService {
                             }
                         }
 
-                        System.out.println("reply");
                         MessageBusClient.store("AuthorizationService", challenge);
+
                         break;
 
                     case SecurityResponse:
@@ -80,14 +84,14 @@ public class SecurityService {
                         authenticationContext = new BasicAuthenticationContext(roleSet, name);
 
                         break;
-                        
+
                 }
             }
         });
 
 
         CommandMessage message = new CommandMessage(SecurityCommands.WhatCredentials);
-        message.set(SecurityParts.ReplyTo, responseSubject);
+        message.set(SecurityParts.ReplyTo, SUBJECT);
         System.out.println("Send Auth Request..,");
         MessageBusClient.store("AuthorizationService", message);
     }

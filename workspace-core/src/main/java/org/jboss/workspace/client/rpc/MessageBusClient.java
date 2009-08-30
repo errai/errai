@@ -5,9 +5,9 @@ import static com.google.gwt.core.client.GWT.getModuleBaseURL;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
-import com.google.gwt.user.client.Timer;
 import org.jboss.workspace.client.framework.AcceptsCallback;
 import org.jboss.workspace.client.framework.MessageCallback;
 
@@ -18,6 +18,7 @@ public class MessageBusClient {
     private static List<AcceptsCallback> onSubscribeHooks = new ArrayList<AcceptsCallback>();
     private static final MessageBusServiceAsync messageBus = (MessageBusServiceAsync) create(MessageBusService.class);
     private static final ServiceDefTarget endpoint = (ServiceDefTarget) messageBus;
+    private static final Map<String, List<Object>> subscriptions = new HashMap<String, List<Object>>();
 
     private static final Queue<String[]> outgoingQueue = new LinkedList<String[]>();
     private static boolean transmitting = false;
@@ -26,13 +27,21 @@ public class MessageBusClient {
         endpoint.setServiceEntryPoint(getModuleBaseURL() + "jbwMsgBus");
     }
 
+    public static void unsubscribeAll(String subject) {
+        if (subscriptions.containsKey(subject)) {
+            for (Object o : subscriptions.get(subject)) {
+                _unsubscribe(o);
+            }
+        }
+    }
+
     public static void subscribe(String subject, MessageCallback callback, Object subscriberData) {
 
         for (AcceptsCallback c : onSubscribeHooks) {
             c.callback(subject, subscriberData);
         }
 
-        _subscribe(subject, callback, subscriberData);
+        addSubscription(subject, _subscribe(subject, callback, subscriberData));
     }
 
     public static void subscribe(String subject, MessageCallback callback) {
@@ -41,13 +50,24 @@ public class MessageBusClient {
             c.callback(subject, null);
         }
 
-        _subscribe(subject, callback, null);
+        addSubscription(subject, _subscribe(subject, callback, null));
     }
 
-    private native static void _subscribe(String subject, MessageCallback callback,
-                                          Object subscriberData) /*-{
+    private static void addSubscription(String subject, Object reference) {
+        if (!subscriptions.containsKey(subject)) subscriptions.put(subject, new ArrayList<Object>());
+        subscriptions.get(subject).add(reference);
+    }
 
-         $wnd.PageBus.subscribe(subject, null,
+
+    private native static void _unsubscribe(Object subject) /*-{
+        $wnd.PageBus.unsubscribe(subject);
+    }-*/;
+
+
+    private native static Object _subscribe(String subject, MessageCallback callback,
+                                            Object subscriberData) /*-{
+
+         return $wnd.PageBus.subscribe(subject, null,
                  function (subject, message, subcriberData) {
                     callback.@org.jboss.workspace.client.framework.MessageCallback::callback(Lorg/jboss/workspace/client/rpc/CommandMessage;)(@org.jboss.workspace.client.rpc.MessageBusClient::decodeCommandMessage(Ljava/lang/Object;)(message))
                  },

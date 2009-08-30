@@ -158,16 +158,14 @@ public class
          */
         MessageBusClient.subscribe("LoginClient", new MessageCallback() {
             public void callback(CommandMessage message) {
-                System.out.println("LoginClient...");
-
                 switch (SecurityCommands.valueOf(message.getCommandType())) {
                     case SecurityChallenge:
                         showLoginPanel();
                         break;
 
                     case FailedAuth:
-                        loginWindowPanel.removeClosingHandler(loginWindowClosingHandler);
-                        loginWindowPanel.hide();
+                        closeLoginPanel();
+                        
                         WSModalDialog failed = new WSModalDialog();
                         failed.ask("Authentication Failure. Please Try Again", new AcceptsCallback() {
                             public void callback(Object message, Object data) {
@@ -178,8 +176,8 @@ public class
                         break;
 
                     case SuccessfulAuth:
-                        loginWindowPanel.removeClosingHandler(loginWindowClosingHandler);
-                        loginWindowPanel.hide();
+                        closeLoginPanel();
+
                         final WSWindowPanel welcome = new WSWindowPanel();
                         welcome.setWidth("250px");
                         VerticalPanel vp = new VerticalPanel();
@@ -195,7 +193,7 @@ public class
                         vp.setCellHeight(label, "50px");
 
                         Button okButton = new Button("OK");
-                        okButton.getElement().getStyle().setProperty("padding", "20px");
+                        okButton.getElement().getStyle().setProperty("margin", "20px");
 
                         vp.add(okButton);
                         vp.setCellHorizontalAlignment(okButton, HasAlignment.ALIGN_CENTER);
@@ -326,11 +324,17 @@ public class
         toBeLoaded.add(toolSet);
     }
 
-    private static void newWindowPanel() {
+    private static void closeLoginPanel() {
         if (loginWindowPanel != null) {
             loginWindowPanel.removeClosingHandler(loginWindowClosingHandler);
             loginWindowPanel.hide();
+            RootPanel.get().remove(loginWindowPanel);
+            loginWindowPanel = null;
         }
+    }
+
+    private static void newWindowPanel() {
+        closeLoginPanel();
 
         loginWindowPanel = new WSWindowPanel();
         loginWindowPanel.addClosingHandler(loginWindowClosingHandler);
