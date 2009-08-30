@@ -1,25 +1,21 @@
 package org.jboss.workspace.client.security;
 
-import org.jboss.workspace.client.framework.AcceptsCallback;
 import org.jboss.workspace.client.framework.MessageCallback;
-import org.jboss.workspace.client.rpc.MessageBusClient;
 import org.jboss.workspace.client.rpc.CommandMessage;
+import org.jboss.workspace.client.rpc.MessageBusClient;
 import org.jboss.workspace.client.rpc.protocols.SecurityCommands;
 import org.jboss.workspace.client.rpc.protocols.SecurityParts;
-import static org.jboss.workspace.client.rpc.protocols.SecurityParts.CommandType;
 import static org.jboss.workspace.client.rpc.protocols.SecurityParts.CredentialsRequired;
+import org.jboss.workspace.client.security.impl.BasicAuthenticationContext;
 import org.jboss.workspace.client.security.impl.NameCredential;
 import org.jboss.workspace.client.security.impl.PasswordCredential;
-import org.jboss.workspace.client.security.impl.BasicAuthenticationContext;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.HashSet;
 import java.util.Set;
 
 public class SecurityService {
     private AuthenticationContext authenticationContext;
-
+    
     public void doAuthentication(final String name, final AuthenticationHandler handler) {
         final String responseSubject = "org.jboss.workspace.authentication." + name;
         MessageBusClient.subscribe(responseSubject, new MessageCallback() {
@@ -87,10 +83,6 @@ public class SecurityService {
                 }
             }
         });
-
-
-
-
 
     }
 
