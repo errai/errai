@@ -207,6 +207,8 @@ public class
                         welcome.add(vp);
                         welcome.show();
                         welcome.center();
+
+                        okButton.setFocus(true);
                         break;
 
 
