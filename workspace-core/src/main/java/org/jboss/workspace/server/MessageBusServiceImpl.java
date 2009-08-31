@@ -35,7 +35,6 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
         // just use the simple bus for now.  more integration options to come...
         bus = new SimpleMessageBusProvider().getBus();
 
-
         // initialize the configuration.
         loadConfig();
 
@@ -63,10 +62,8 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
                         authorizationAdapter.challenge(c);
                         break;
                 }
-
             }
         });
-
 
         /**
          * A temporary test service to bounce remote messages of.
@@ -83,7 +80,6 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
         RoleAuthDescriptor authRequired = new RoleAuthDescriptor(new String[] { CredentialTypes.Authenticated.name() });
         ((JAASAdapter) authorizationAdapter).addSecurityRule("TestService", authRequired);
         ((JAASAdapter) authorizationAdapter).addSecurityRule("ServerEchoService", authRequired);
-
 
         /**
          * The standard ServerEchoService.
