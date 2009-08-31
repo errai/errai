@@ -3,14 +3,20 @@ package org.jboss.workspace.server;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import org.jboss.workspace.client.framework.MessageCallback;
 import org.jboss.workspace.client.rpc.CommandMessage;
-import org.jboss.workspace.client.rpc.MessageBusService;
 import org.jboss.workspace.client.rpc.ConversationMessage;
+import org.jboss.workspace.client.rpc.MessageBusService;
 import org.jboss.workspace.client.rpc.protocols.SecurityCommands;
 import org.jboss.workspace.client.rpc.protocols.SecurityParts;
 import org.jboss.workspace.client.security.CredentialTypes;
-import org.jboss.workspace.server.bus.*;
+import org.jboss.workspace.server.bus.Message;
+import org.jboss.workspace.server.bus.MessageBus;
+import org.jboss.workspace.server.bus.MessageBusServer;
+import org.jboss.workspace.server.bus.SimpleMessageBusProvider;
 import org.jboss.workspace.server.json.JSONUtil;
-import org.jboss.workspace.server.security.auth.*;
+import org.jboss.workspace.server.security.auth.AuthorizationAdapter;
+import org.jboss.workspace.server.security.auth.BasicAuthorizationListener;
+import org.jboss.workspace.server.security.auth.JAASAdapter;
+import org.jboss.workspace.server.security.auth.RoleAuthDescriptor;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -18,6 +24,8 @@ import javax.servlet.http.HttpSession;
 import static java.lang.Thread.currentThread;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.Date;
+import java.text.SimpleDateFormat;
 
 /**
  * The main gateway of the Workspace application to the server.  All communication between the client and the
@@ -51,8 +59,8 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
                         //todo: we only support login/password for now
                         MessageBusServer.store(c.get(String.class, SecurityParts.ReplyTo),
                                 ConversationMessage.create(SecurityCommands.WhatCredentials, c)
-                                .set(SecurityParts.CredentialsRequired, "Name,Password")
-                                .set(SecurityParts.ReplyTo, AUTHORIZATION_SVC_SUBJECT));
+                                        .set(SecurityParts.CredentialsRequired, "Name,Password")
+                                        .set(SecurityParts.ReplyTo, AUTHORIZATION_SVC_SUBJECT));
                         break;
 
                     case AuthRequest:
@@ -77,7 +85,7 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
         /**
          * Some temporary security rules to test the login system.
          */
-        RoleAuthDescriptor authRequired = new RoleAuthDescriptor(new String[] { CredentialTypes.Authenticated.name() });
+        RoleAuthDescriptor authRequired = new RoleAuthDescriptor(new String[]{CredentialTypes.Authenticated.name()});
         ((JAASAdapter) authorizationAdapter).addSecurityRule("TestService", authRequired);
         ((JAASAdapter) authorizationAdapter).addSecurityRule("ServerEchoService", authRequired);
 
@@ -94,6 +102,9 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
                 }
             }
         });
+
+
+
     }
 
     private void loadConfig() {
@@ -112,6 +123,44 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
         catch (MissingResourceException e) {
             useDefaults();
         }
+
+        try {
+            ResourceBundle bundle = ResourceBundle.getBundle("workspace");
+            String modulesToLoad = bundle.getString("workspace.server_modules");
+
+            String[] moduleFQCN = modulesToLoad.split(",");
+            Class<Module>[] moduleClass = new Class[moduleFQCN.length];
+
+            try {
+                for (int i = 0; i < moduleFQCN.length; i++) {
+                    try {
+                        moduleClass[i] = (Class<Module>) Class.forName(moduleFQCN[i]);
+                    }
+                    catch (Exception e) {
+                        throw new RuntimeException("unable to load module: " + moduleClass[i], e);
+                    }
+                }
+            }
+            catch (RuntimeException e) {
+                throw e;
+            }
+            catch (Exception e) {
+                throw new RuntimeException("error", e);
+            }
+
+            try {
+                for (Class<Module> clazz : moduleClass) {
+                    clazz.newInstance().init();
+                }
+            }
+            catch (Exception e) {
+                throw new RuntimeException("error loading module: " + e.getMessage(), e);
+            }
+
+        }
+        catch (Exception e) {
+            throw new RuntimeException("unable to load config" ,e);
+        }
     }
 
     private void useDefaults() {
@@ -120,10 +169,13 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
 
     /**
      * Store a new message onto the bus.
+     *
      * @param subject
      * @param message
      */
     public void store(String subject, String message) {
+        System.out.println("RecvMsgFromClient (Subject:" + subject + ";Message=" + message + ")");
+
         CommandMessage translatedMessage = new CommandMessage();
 
         /**
@@ -155,6 +207,7 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
 
     /**
      * Retrieve the next waiting message from the bus.
+     *
      * @return
      */
     public String[] nextMessage() {
@@ -169,6 +222,7 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
 
     /**
      * Indicate to the server bus that the remote subject exists for routing purposes.
+     *
      * @param subject
      */
     public void remoteSubscribe(String subject) {
@@ -189,6 +243,7 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
 
     /**
      * The the unique session identifier.
+     *
      * @return
      */
     private String getId() {
@@ -197,6 +252,7 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
 
     /**
      * Return a list of all available subjects in the server bus.
+     *
      * @return
      */
     public String[] getSubjects() {

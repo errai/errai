@@ -34,8 +34,7 @@ import java.util.List;
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
  */
-public class
-        Workspace implements EntryPoint {
+public class Workspace implements EntryPoint {
     public static PickupDragController dragController;
     private static WorkspaceLayout workspaceLayout;
     private static SecurityService securityService = new SecurityService();
@@ -254,6 +253,9 @@ public class
 
                     public void onSuccess(String[] o) {
                         if (o == null) return;
+
+                        System.out.println("RecvMsgFromServer (Subject:" + o[0] + ";Message=" + o[1] +")");
+
                         MessageBusClient.store(o[0], o[1]);
                         block = false;
                         schedule(1);
