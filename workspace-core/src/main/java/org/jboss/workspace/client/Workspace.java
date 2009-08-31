@@ -304,13 +304,13 @@ public class
         final Timer finalEchoTimer = new Timer() {
             @Override
             public void run() {
+                Window.alert("final echo");
                 CommandMessage msg = new CommandMessage();
                 MessageBusClient.store("ServerEchoService", msg);
             }
         };
 
-        finalEchoTimer.schedule(500);
-
+        finalEchoTimer.schedule(750);
     }
 
     public static SecurityService getSecurityService() {
