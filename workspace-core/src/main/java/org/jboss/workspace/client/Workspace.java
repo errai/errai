@@ -23,6 +23,7 @@ import org.jboss.workspace.client.rpc.MessageBusService;
 import org.jboss.workspace.client.rpc.MessageBusServiceAsync;
 import org.jboss.workspace.client.rpc.protocols.SecurityCommands;
 import org.jboss.workspace.client.rpc.protocols.SecurityParts;
+import org.jboss.workspace.client.rpc.protocols.MessageParts;
 import org.jboss.workspace.client.security.SecurityService;
 import org.jboss.workspace.client.widgets.WSModalDialog;
 import org.jboss.workspace.client.widgets.WSWindowPanel;
@@ -184,8 +185,10 @@ public class
                         vp.setWidth("100%");
 
                         Label label = new Label("Welcome " + message.get(String.class, SecurityParts.Name)
-                                + ", you are now logged in");
-
+                                + ", you are now logged in -- "
+                                + (message.hasPart(MessageParts.MessageText) ?
+                                message.get(String.class, MessageParts.MessageText) : ""));
+                        
                         label.getElement().getStyle().setProperty("margin", "20px");
 
                         vp.add(label);

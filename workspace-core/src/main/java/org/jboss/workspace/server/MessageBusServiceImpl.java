@@ -19,6 +19,10 @@ import static java.lang.Thread.currentThread;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+/**
+ * The main gateway of the Workspace application to the server.  All communication between the client and the
+ * server passes through this class.
+ */
 public class MessageBusServiceImpl extends RemoteServiceServlet implements MessageBusService {
     private MessageBus bus;
     private AuthorizationAdapter authorizationAdapter;
@@ -31,6 +35,8 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
         // just use the simple bus for now.  more integration options to come...
         bus = new SimpleMessageBusProvider().getBus();
 
+
+        // initialize the configuration.
         loadConfig();
 
         bus.addGlobalListener(new BasicAuthorizationListener(authorizationAdapter));
@@ -40,6 +46,9 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
             public void callback(CommandMessage c) {
                 switch (SecurityCommands.valueOf(c.getCommandType())) {
                     case WhatCredentials:
+                        /**
+                         * Respond with what credentials the authentication system requires.
+                         */
                         //todo: we only support login/password for now
                         MessageBusServer.store(c.get(String.class, SecurityParts.ReplyTo),
                                 ConversationMessage.create(SecurityCommands.WhatCredentials, c)
@@ -48,6 +57,9 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
                         break;
 
                     case AuthRequest:
+                        /**
+                         * Send a challenge.
+                         */
                         authorizationAdapter.challenge(c);
                         break;
                 }
@@ -55,16 +67,27 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
             }
         });
 
+
+        /**
+         * A temporary test service to bounce remote messages of.
+         */
         bus.subscribe("TestService", new MessageCallback() {
             public void callback(CommandMessage message) {
                 System.out.println("yay!");
             }
         });
 
+        /**
+         * Some temporary security rules to test the login system.
+         */
         RoleAuthDescriptor authRequired = new RoleAuthDescriptor(new String[] { CredentialTypes.Authenticated.name() });
         ((JAASAdapter) authorizationAdapter).addSecurityRule("TestService", authRequired);
         ((JAASAdapter) authorizationAdapter).addSecurityRule("ServerEchoService", authRequired);
 
+
+        /**
+         * The standard ServerEchoService.
+         */
         bus.subscribe("ServerEchoService", new MessageCallback() {
             public void callback(CommandMessage c) {
                 if (c.hasPart("EchoBackData")) {
@@ -99,6 +122,11 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
         authorizationAdapter = new JAASAdapter();
     }
 
+    /**
+     * Store a new message onto the bus.
+     * @param subject
+     * @param message
+     */
     public void store(String subject, String message) {
         CommandMessage translatedMessage = new CommandMessage();
         if (message != null) {
@@ -111,6 +139,10 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
         bus.storeGlobal(subject, translatedMessage);
     }
 
+    /**
+     * Retrieve the next waiting message from the bus.
+     * @return
+     */
     public String[] nextMessage() {
         Message m = bus.nextMessage(getId());
         if (m != null) {
@@ -121,6 +153,10 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
         }
     }
 
+    /**
+     * Indicate to the server bus that the remote subject exists for routing purposes.
+     * @param subject
+     */
     public void remoteSubscribe(String subject) {
         if (bus.getSubjects().contains(subject)) return;
         bus.remoteSubscribe(getId(), subject);
@@ -137,10 +173,18 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
         return session;
     }
 
+    /**
+     * The the unique session identifier.
+     * @return
+     */
     private String getId() {
         return (String) getSession().getAttribute(WS_SESSION_ID);
     }
 
+    /**
+     * Return a list of all available subjects in the server bus.
+     * @return
+     */
     public String[] getSubjects() {
         return bus.getSubjects().toArray(new String[bus.getSubjects().size()]);
     }
