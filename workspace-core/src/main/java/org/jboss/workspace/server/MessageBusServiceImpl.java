@@ -4,6 +4,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import org.jboss.workspace.client.framework.MessageCallback;
 import org.jboss.workspace.client.rpc.CommandMessage;
 import org.jboss.workspace.client.rpc.MessageBusService;
+import org.jboss.workspace.client.rpc.ConversationMessage;
 import org.jboss.workspace.client.rpc.protocols.SecurityCommands;
 import org.jboss.workspace.client.rpc.protocols.SecurityParts;
 import org.jboss.workspace.client.security.CredentialTypes;
@@ -40,12 +41,10 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
                 switch (SecurityCommands.valueOf(c.getCommandType())) {
                     case WhatCredentials:
                         //todo: we only support login/password for now
-                        CommandMessage reply = new CommandMessage(SecurityCommands.WhatCredentials)
+                        MessageBusServer.store(c.get(String.class, SecurityParts.ReplyTo),
+                                ConversationMessage.create(SecurityCommands.WhatCredentials, c)
                                 .set(SecurityParts.CredentialsRequired, "Name,Password")
-                                .set(SecurityParts.ReplyTo, AUTHORIZATION_SVC_SUBJECT)
-                                .set(SecurityParts.SessionData, c.get(HttpSession.class, SecurityParts.SessionData));
-
-                        MessageBusServer.store(c.get(String.class, SecurityParts.ReplyTo), reply);
+                                .set(SecurityParts.ReplyTo, AUTHORIZATION_SVC_SUBJECT));
                         break;
 
                     case AuthRequest:

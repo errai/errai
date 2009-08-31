@@ -19,12 +19,12 @@ public class BasicAuthorizationListener implements MessageListener {
 
     public boolean handleMessage(CommandMessage message) {
         if (adapter.requiresAuthorization(message)) {
-            CommandMessage securityChallenge = new CommandMessage(SecurityCommands.SecurityChallenge)
-                    .set(SecurityParts.CredentialsRequired, "Name,Password")
-                    .set(SecurityParts.ReplyTo, MessageBusServiceImpl.AUTHORIZATION_SVC_SUBJECT)
-                    .set(SecurityParts.SessionData, message.get(HttpSession.class, SecurityParts.SessionData));
-
-            MessageBusServer.store("LoginClient", securityChallenge, false);
+            MessageBusServer.store("LoginClient",
+                    CommandMessage.create(SecurityCommands.SecurityChallenge)
+                            .set(SecurityParts.CredentialsRequired, "Name,Password")
+                            .set(SecurityParts.ReplyTo, MessageBusServiceImpl.AUTHORIZATION_SVC_SUBJECT)
+                            .set(SecurityParts.SessionData, message.get(HttpSession.class, SecurityParts.SessionData))
+                    , false);
 
             return false;
         }

@@ -6,8 +6,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CommandMessage {
-    private Map<String, Object> parts = new HashMap<String, Object>();
-    private String encoded;
+    protected Map<String, Object> parts = new HashMap<String, Object>();
+    protected String encoded;
+
+    public static CommandMessage create(String commandType) {
+        return new CommandMessage(commandType);
+    }
+
+    public static CommandMessage create(Enum commandType) {
+        return new CommandMessage(commandType);
+    }
 
     public CommandMessage() {
     }
