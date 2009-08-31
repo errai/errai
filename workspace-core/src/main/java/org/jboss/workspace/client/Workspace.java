@@ -304,7 +304,6 @@ public class
         final Timer finalEchoTimer = new Timer() {
             @Override
             public void run() {
-                Window.alert("final echo");
                 CommandMessage msg = new CommandMessage();
                 MessageBusClient.store("ServerEchoService", msg);
             }
