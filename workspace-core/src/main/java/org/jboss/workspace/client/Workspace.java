@@ -248,6 +248,7 @@ public class
                     }
 
                     public void onSuccess(String[] o) {
+                        if (o == null) return;
                         MessageBusClient.store(o[0], o[1]);
                         block = false;
                         schedule(1);
