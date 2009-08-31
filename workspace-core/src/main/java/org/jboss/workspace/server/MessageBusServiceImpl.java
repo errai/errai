@@ -51,8 +51,6 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
                     case AuthRequest:
                         authorizationAdapter.challenge(c);
                         break;
-
-
                 }
 
             }
