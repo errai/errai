@@ -125,13 +125,31 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
      */
     public void store(String subject, String message) {
         CommandMessage translatedMessage = new CommandMessage();
+
+        /**
+         * Assuming we didn't receive a null payload (which is possible, as you can send subject-based signalling),
+         * we will decode the payload back into workable form.
+         */
         if (message != null) {
             translatedMessage.setParts(JSONUtil.decodeToMap(message));
         }
+
+        /**
+         * Add the current HTTPSession to the payload for access and use by services on the server.
+         */
         translatedMessage.set(SecurityParts.SessionData, getSession()).setSubject(subject);
 
-        if (authorizationAdapter != null) authorizationAdapter.process(translatedMessage);
 
+        /**
+         * If an authorization adapter is configured, we now allow it to pre-process the request.
+         */
+        if (authorizationAdapter != null) {
+            authorizationAdapter.process(translatedMessage);
+        }
+
+        /**
+         * Pass the message off to the messaging bus for handling.
+         */
         bus.storeGlobal(subject, translatedMessage);
     }
 
