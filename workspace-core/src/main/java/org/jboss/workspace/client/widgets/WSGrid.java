@@ -495,6 +495,10 @@ public class WSGrid extends Composite {
         });
     }
 
+    public int getRowCount() {
+        return dataGrid.getRowCount();
+    }
+
     public void removeRow(int row) {
         dataGrid.removeRow(row);
     }
@@ -721,6 +725,10 @@ public class WSGrid extends Composite {
             int currentColSize = table.getCellCount(row);
             table.addCell(row);
             table.setWidget(row, currentColSize, new WSCell(this, new WSCellSimpleTextCell(w), row, currentColSize));
+        }
+
+        public int getRowCount() {
+            return table.getRowCount();
         }
 
         public void addRow() {
