@@ -11,18 +11,26 @@ public abstract class WSCellFormatter {
     protected static WSGrid.WSCell wsCellReference;
     protected HTML html;
     protected boolean readonly = false;
+    protected boolean cancel = false;
+
+    public void cancelEdit() {
+        cancel = true;
+    }
 
     public void setValue(String value) {
         if (readonly) return;
 
         notifyCellUpdate(value);
 
-        if (value == null || value.length() == 0) {
-            html.setHTML("&nbsp;");
-            return;
-        }
+        if (!cancel) {
+            if (value == null || value.length() == 0) {
+                html.setHTML("&nbsp;");
+                return;
+            }
 
-        html.setHTML(value);
+            html.setHTML(value);
+        } else
+            cancel = false;
     }
 
     public String getTextValue() {
@@ -32,8 +40,9 @@ public abstract class WSCellFormatter {
     public Widget getWidget(WSGrid grid) {
         return html;
     }
-    
+
     public abstract boolean edit(WSGrid.WSCell element);
+
     public abstract void stopedit();
 
     public void setHeight(String height) {
@@ -47,6 +56,7 @@ public abstract class WSCellFormatter {
 
     /**
      * Notify any registered listeners that the value is about to change.
+     *
      * @param newValue
      */
     public void notifyCellUpdate(String newValue) {

@@ -1063,6 +1063,10 @@ public class WSGrid extends Composite {
             }
         }
 
+        public void cancelEdit() {
+            cellFormat.cancelEdit();
+        }
+
         /**
          * Blurs the current cell.
          */
