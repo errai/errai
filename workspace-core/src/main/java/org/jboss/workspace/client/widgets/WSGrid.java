@@ -69,12 +69,12 @@ public class WSGrid extends Composite {
     private List<ChangeHandler> cellChangeHandlers = new LinkedList<ChangeHandler>();
 
     public WSGrid() {
-        this(true);
+        this(true, true);
     }
 
     private int _startpos = 0;
 
-    public WSGrid(boolean scrollable) {
+    public WSGrid(boolean scrollable, boolean editable) {
         innerPanel = new VerticalPanel();
         innerPanel.setSpacing(0);
 
@@ -87,7 +87,10 @@ public class WSGrid extends Composite {
 
 
         titleBar.setStylePrimaryName("WSGrid-header");
-        dataGrid = new WSAbstractGrid(scrollable, GridType.EDITABLE_GRID);
+        if (editable)
+            dataGrid = new WSAbstractGrid(scrollable, GridType.EDITABLE_GRID);
+        else
+            dataGrid = new WSAbstractGrid(scrollable, GridType.NONEDITABLE_GRID);
 
         innerPanel.add(dataGrid);
         innerPanel.setCellVerticalAlignment(dataGrid, HasVerticalAlignment.ALIGN_TOP);
@@ -1788,11 +1791,12 @@ public class WSGrid extends Composite {
         }
     }
 
-
+    private static final int NONEDITABLE = 0;
     private static final int EDITABLE = 1;
     private static final int TITLEGRID = 1 << 1;
 
     public enum GridType {
+        NONEDITABLE_GRID(NONEDITABLE),
         EDITABLE_GRID(EDITABLE),
         TITLEBAR(TITLEGRID);
 
