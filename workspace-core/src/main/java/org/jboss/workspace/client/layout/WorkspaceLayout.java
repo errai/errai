@@ -105,7 +105,6 @@ public class WorkspaceLayout extends Composite {
             }
         });
 
-
         LayoutHint.attach(tabPanel, new LayoutHintProvider() {
             public int getHeightHint() {
                 return Window.getClientHeight() - tabPanel.getAbsoluteTop() - 20;
@@ -116,10 +115,8 @@ public class WorkspaceLayout extends Composite {
             }
         });
 
-
         return mainLayoutPanel;
     }
-
 
     @Override
     protected void onAttach() {

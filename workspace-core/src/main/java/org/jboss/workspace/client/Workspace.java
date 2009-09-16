@@ -72,7 +72,6 @@ public class Workspace implements EntryPoint {
 
         beginStartup(rootId);
 
-
         _initAfterWSLoad();
     }
 
@@ -152,7 +151,6 @@ public class Workspace implements EntryPoint {
             }
         };
 
-
         /**
          * Register the login client.
          */
@@ -213,14 +211,11 @@ public class Workspace implements EntryPoint {
                         okButton.setFocus(true);
                         break;
 
-
                     default:
                         // I don't know this command. :(
-
                 }
             }
         });
-
 
         /**
          * Send initial message to the ServerEchoService, to establish an HTTP session. Otherwise, concurrent
@@ -229,7 +224,6 @@ public class Workspace implements EntryPoint {
          */
         messageBus.store("ServerEchoService", "{}", store);
     }
-
 
     private void initializeMessagingBus() {
         final MessageBusServiceAsync messageBus = (MessageBusServiceAsync) create(MessageBusService.class);
@@ -302,7 +296,6 @@ public class Workspace implements EntryPoint {
 
         messageBus.getSubjects(getSubjects);
 
-
         final Timer finalEchoTimer = new Timer() {
             @Override
             public void run() {
@@ -352,7 +345,6 @@ public class Workspace implements EntryPoint {
         loginWindowPanel.add(loginComponent.getWidget());
         loginWindowPanel.showModal();
         loginWindowPanel.center();
-
     }
 
     private native static void _initAfterWSLoad() /*-{

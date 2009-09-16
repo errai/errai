@@ -7,10 +7,7 @@ import org.jboss.workspace.client.util.Effect;
 
 
 public class IEEffectImpl implements Effect {
-
-
     public Timer doFade(final Element el, int durationMillis, final int stepping, final int start, final int end) {
-
         Timer t = start < end ?
                 new Timer() {
                     int step = start;
@@ -54,8 +51,4 @@ public class IEEffectImpl implements Effect {
     public native static void setOpacityNative(Style s, int opacity) /*-{
      s.filter="progid:DXImageTransform.Microsoft.Alpha(opacity='" + opacity + "')";
     }-*/;
-
-    public void kill() {
-
-    }
 }

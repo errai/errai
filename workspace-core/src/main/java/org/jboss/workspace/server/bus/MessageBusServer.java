@@ -13,15 +13,6 @@ import java.util.Map;
 public class MessageBusServer {
     private static List<AcceptsCallback> onSubscribeHooks = new ArrayList<AcceptsCallback>();
 
-    public static void subscribe(String subject, Element scope, AcceptsCallback callback, Object subscriberData) {
-
-        for (AcceptsCallback c : onSubscribeHooks) {
-            c.callback(subject, subscriberData);
-        }
-
-        //      _subscribe(subject, scope, callback, subscriberData);
-    }
-
     public static void storeGlobal(String subject, CommandMessage message) {
         new SimpleMessageBusProvider().getBus().storeGlobal(subject, message);
     }
@@ -44,11 +35,6 @@ public class MessageBusServer {
         }
     }
 
-//    public static void store(String subject, Object value) {
-//        new SimpleMessageBusProvider().getBus().store(subject, value);
-//    }
-
-
     public static void addOnSubscribeHook(AcceptsCallback callback) {
         onSubscribeHooks.add(callback);
     }
@@ -58,11 +44,9 @@ public class MessageBusServer {
         return new CommandMessage(decodeMap(in));
     }
 
-
     public static Map<String, Object> decodeMap(Object value) {
         return JSONUtil.decodeToMap(String.valueOf(value));
     }
-
 
     public static String encodeMap(Map<String, Object> map) {
         StringBuffer buf = new StringBuffer("{");
@@ -110,8 +94,5 @@ public class MessageBusServer {
         }
         buf.append("}");
         return buf.toString();
-
-
-        //  return buf.append("}").toString();
     }
 }
