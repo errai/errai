@@ -129,16 +129,15 @@ public class WorkspaceLayout extends Composite {
                                 String componentId =  message.get(String.class, LayoutParts.ComponentID);
                                 String DOMID =  message.get(String.class, LayoutParts.DOMID);
                                 String name =  message.get(String.class, LayoutParts.Name);
-                                String subject = message.get(String.class, LayoutParts.SizeHintsSubject);
                                 Image i = new Image(message.get(String.class, LayoutParts.IconURI));
                                 Boolean multiple = message.get(Boolean.class, LayoutParts.MultipleInstances);
 
-                                openTab(componentId, name, i, multiple, DOMID, subject);
+                                openTab(componentId, name, i, multiple, DOMID);
                                 break;
 
                             case PublishTool:
                                 componentId = message.get(String.class, LayoutParts.ComponentID);
-                                subject = message.get(String.class, LayoutParts.Subject);
+                                String subject = message.get(String.class, LayoutParts.Subject);
 
                                 availableTools.put(componentId, subject);
                                 break;
@@ -160,8 +159,6 @@ public class WorkspaceLayout extends Composite {
 
                             case GetActiveWidgets:
                                 componentId =  message.get(String.class, LayoutParts.ComponentID);
-                              //  subject =  message.get(String.class, LayoutParts.Subject);
-
                                 Set<String> active = getActiveByType(componentId);
                                 break;
 
@@ -335,7 +332,6 @@ public class WorkspaceLayout extends Composite {
             RootPanel.get().add(launcherPanel);
         }
 
-
         Map<String, Object> msg = new HashMap<String, Object>();
         msg.put(LayoutParts.Name.name(), toolSet.getToolSetName());
         msg.put(LayoutParts.DOMID.name(), id);
@@ -349,17 +345,17 @@ public class WorkspaceLayout extends Composite {
         }
     }
 
-    private void openTab(String componentId, String name, Image icon, boolean multipleAllowed, String DOMID, String layoutHints) {
+    private void openTab(String componentId, String name, Image icon, boolean multipleAllowed, String DOMID) {
         if (!multipleAllowed && tabInstances.containsKey(componentId)) {
-            this.openTab(DOMID, componentId, name, icon, multipleAllowed, layoutHints);
+            this.openTab(DOMID, componentId, name, icon, multipleAllowed);
         }
         else {
-            this.openTab(DOMID, componentId, name, icon, multipleAllowed, layoutHints);
+            this.openTab(DOMID, componentId, name, icon, multipleAllowed);
         }
     }
 
     private void openTab(final String DOMID, final String componentId, final String name,
-                         final Image icon, boolean multipleAllowed, final String layoutHints) {
+                         final Image icon, boolean multipleAllowed) {
         if (isToolActive(componentId)) {
             if (!multipleAllowed) {
                 Map<String, Object> msg = new HashMap<String, Object>();
@@ -386,7 +382,7 @@ public class WorkspaceLayout extends Composite {
 
                             newName = name + " (" + idx + ")";
 
-                            _openTab(DOMID, componentId, newName, newId, icon, layoutHints);
+                            _openTab(DOMID, componentId, newName, newId, icon);
                         }
                         else if (!"WindowClosed".equals(message)) {
                             Set<String> s = layout.getActiveByType(componentId);
@@ -413,10 +409,10 @@ public class WorkspaceLayout extends Composite {
             }
         }
 
-        _openTab(DOMID, componentId, name, componentId, icon, layoutHints);
+        _openTab(DOMID, componentId, name, componentId, icon);
     }
 
-    private void _openTab(String DOMID, final String componentId, String name, String instanceId, Image icon, String layoutHints) {
+    private void _openTab(String DOMID, final String componentId, String name, String instanceId, Image icon) {
         final ExtSimplePanel panel = new ExtSimplePanel();
         panel.getElement().getStyle().setProperty("overflow", "hidden");
 
@@ -437,9 +433,6 @@ public class WorkspaceLayout extends Composite {
         MessageBusClient.subscribe(getInstanceSubject(instanceId),
                 new MessageCallback() {
                     public void callback(CommandMessage message) {
-                     //   Map<String, Object> msgParts = MessageBusClient.decodeMap(message);
-                   //     String commandType = (String) msgParts.get(LayoutParts.CommandType.name());
-
                         switch (LayoutCommands.valueOf(message.getCommandType())) {
                             case CloseTab:
                                 tabDragController.unregisterDropController(newWSTab.getTabDropController());
@@ -456,11 +449,9 @@ public class WorkspaceLayout extends Composite {
                                 newWSTab.activate();
                                 break;
                         }
-
                     }
                 },
                 panel.getElement());
-
 
         newWSTab.clearTabCloseHandlers();
         newWSTab.addTabCloseHandler(new TabCloseHandler(instanceId));
