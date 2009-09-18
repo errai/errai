@@ -21,9 +21,9 @@ import org.jboss.workspace.client.rpc.CommandMessage;
 import org.jboss.workspace.client.rpc.MessageBusClient;
 import org.jboss.workspace.client.rpc.MessageBusService;
 import org.jboss.workspace.client.rpc.MessageBusServiceAsync;
+import org.jboss.workspace.client.rpc.protocols.MessageParts;
 import org.jboss.workspace.client.rpc.protocols.SecurityCommands;
 import org.jboss.workspace.client.rpc.protocols.SecurityParts;
-import org.jboss.workspace.client.rpc.protocols.MessageParts;
 import org.jboss.workspace.client.security.SecurityService;
 import org.jboss.workspace.client.widgets.WSModalDialog;
 import org.jboss.workspace.client.widgets.WSWindowPanel;
@@ -72,20 +72,6 @@ public class Workspace implements EntryPoint {
 
         beginStartup(rootId);
 
-        _initAfterWSLoad();
-    }
-
-    /**
-     * Initialize the actual Workspace UI.
-     *
-     * @param rootId -
-     */
-    private void initWorkspace(String rootId) {
-        /**
-         * Register a subscriber hook, with the MessageBusClient to send remoteSubcribe requests to the bus
-         * on the server.  This is necessary for the server to be aware of any and all services that are available
-         * in the client.
-         */
         MessageBusClient.addOnSubscribeHook(new AcceptsCallback() {
             public void callback(Object message, Object data) {
 
@@ -116,14 +102,28 @@ public class Workspace implements EntryPoint {
                     }
                 };
 
-                System.out.println("Preparing to send remote unsubscribe...");
-
                 final MessageBusServiceAsync messageBus = (MessageBusServiceAsync) create(MessageBusService.class);
                 final ServiceDefTarget endpoint = (ServiceDefTarget) messageBus;
                 endpoint.setServiceEntryPoint(getModuleBaseURL() + "jbwMsgBus");
                 messageBus.remoteUnsubscribe((String) message, remoteSubscribe);
             }
         });
+
+        _initAfterWSLoad();
+    }
+
+    /**
+     * Initialize the actual Workspace UI.
+     *
+     * @param rootId -
+     */
+    private void initWorkspace(String rootId) {
+        /**
+         * Register a subscriber hook, with the MessageBusClient to send remoteSubcribe requests to the bus
+         * on the server.  This is necessary for the server to be aware of any and all services that are available
+         * in the client.
+         */
+
 
         /**
          * Instantiate layout.
@@ -184,7 +184,7 @@ public class Workspace implements EntryPoint {
 
                     case FailedAuth:
                         closeLoginPanel();
-                        
+
                         WSModalDialog failed = new WSModalDialog();
                         failed.ask("Authentication Failure. Please Try Again", new AcceptsCallback() {
                             public void callback(Object message, Object data) {
@@ -206,7 +206,7 @@ public class Workspace implements EntryPoint {
                                 + ", you are now logged in -- "
                                 + (message.hasPart(MessageParts.MessageText) ?
                                 message.get(String.class, MessageParts.MessageText) : ""));
-                        
+
                         label.getElement().getStyle().setProperty("margin", "20px");
 
                         vp.add(label);
@@ -269,7 +269,7 @@ public class Workspace implements EntryPoint {
                     public void onSuccess(String[] o) {
                         if (o == null) return;
 
-                        System.out.println("RecvMsgFromServer (Subject:" + o[0] + ";Message=" + o[1] +")");
+                        System.out.println("RecvMsgFromServer (Subject:" + o[0] + ";Message=" + o[1] + ")");
 
                         MessageBusClient.store(o[0], o[1]);
                         block = false;
@@ -310,18 +310,31 @@ public class Workspace implements EntryPoint {
                 }
 
                 outerTimer.schedule(10);
-
-
             }
         };
 
         messageBus.getSubjects(getSubjects);
 
+
+        AsyncCallback cb = new AsyncCallback() {
+            public void onFailure(Throwable caught) {
+            }
+
+            public void onSuccess(Object result) {
+            }
+        };
+
+        for (String s : MessageBusClient.getAllLocalSubscriptions()) {
+            messageBus.remoteSubscribe(s, cb);
+        }
+
+
         final Timer finalEchoTimer = new Timer() {
             @Override
             public void run() {
-                CommandMessage msg = new CommandMessage();
-                MessageBusClient.store("ServerEchoService", msg);
+
+
+                MessageBusClient.store("ServerEchoService", new CommandMessage());
             }
         };
 

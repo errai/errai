@@ -183,6 +183,10 @@ public class MessageBusClient {
         onUnsubscribeHooks.add(callback);
     }
 
+    public static Set<String> getAllLocalSubscriptions() {
+        return subscriptions.keySet();
+    }
+
     public static Map<String, Object> decodeMap(Object value) {
         JSONValue a = JSONParser.parse(String.valueOf(value));
 
