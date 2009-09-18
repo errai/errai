@@ -104,6 +104,27 @@ public class Workspace implements EntryPoint {
             }
         });
 
+        MessageBusClient.addOnUnsubscribeHook(new AcceptsCallback() {
+            public void callback(Object message, Object data) {
+
+                AsyncCallback<Void> remoteSubscribe = new AsyncCallback<Void>() {
+                    public void onFailure(Throwable throwable) {
+                        System.out.println("Failed to unsubscribe.  This is like, not good and stuff.");
+                    }
+
+                    public void onSuccess(Void o) {
+                    }
+                };
+
+                System.out.println("Preparing to send remote unsubscribe...");
+
+                final MessageBusServiceAsync messageBus = (MessageBusServiceAsync) create(MessageBusService.class);
+                final ServiceDefTarget endpoint = (ServiceDefTarget) messageBus;
+                endpoint.setServiceEntryPoint(getModuleBaseURL() + "jbwMsgBus");
+                messageBus.remoteUnsubscribe((String) message, remoteSubscribe);
+            }
+        });
+
         /**
          * Instantiate layout.
          */

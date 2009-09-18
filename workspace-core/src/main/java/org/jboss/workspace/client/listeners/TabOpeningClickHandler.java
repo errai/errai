@@ -35,6 +35,8 @@ public class TabOpeningClickHandler implements ClickHandler {
         msg.put(LayoutParts.MultipleInstances.name(), tool.multipleAllowed());
         msg.put(LayoutParts.Name.name(), tool.getName());
 
+        MessageBusClient.beginCapture();
+
         final Widget w = tool.getWidget();
 
         /**

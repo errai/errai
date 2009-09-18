@@ -230,6 +230,10 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
         bus.remoteSubscribe(getId(), subject);
     }
 
+    public void remoteUnsubscribe(String subject) {
+        bus.remoteUnsubscribe(getId(), subject);
+    }
+
     private HttpSession getSession() {
         HttpServletRequest request = getThreadLocalRequest();
         HttpSession session = request.getSession();

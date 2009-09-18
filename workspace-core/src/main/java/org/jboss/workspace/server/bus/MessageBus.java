@@ -22,7 +22,9 @@ public interface MessageBus {
     public Message nextMessage(Object sessionContext);
 
     public void subscribe(String subject, MessageCallback receiver);
+
     public void remoteSubscribe(Object sessionContext, String subject);
+    public void remoteUnsubscribe(Object sessionContext, String subject);
 
     public Set<String> getSubjects();
 

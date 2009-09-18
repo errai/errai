@@ -430,6 +430,8 @@ public class WorkspaceLayout extends Composite {
         tabPanel.add(panel, newWSTab);
         newWSTab.activate();
 
+        final Map<String, Set<Object>> toUnregister = MessageBusClient.getAllRegisteredThisSession();
+
         MessageBusClient.subscribe(getInstanceSubject(instanceId),
                 new MessageCallback() {
                     public void callback(CommandMessage message) {
@@ -437,12 +439,15 @@ public class WorkspaceLayout extends Composite {
                             case CloseTab:
                                 tabDragController.unregisterDropController(newWSTab.getTabDropController());
 
+                                MessageBusClient.unregisterAll(toUnregister);
+                                deactivateTool(componentId);
+
                                 int idx = newWSTab.remove();
                                 if (idx > 0) idx--;
                                 else if (tabPanel.getWidgetCount() == 0) return;
 
                                 tabPanel.selectTab(idx);
-                                deactivateTool(componentId);
+
                                 break;
 
                             case ActivateTool:

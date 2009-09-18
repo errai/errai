@@ -22,8 +22,10 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
     public class SimpleMessageBus implements MessageBus {
         private final List<MessageListener> listeners = new ArrayList<MessageListener>();
 
+
         private final Map<String, List<MessageCallback>> subscriptions = new HashMap<String, List<MessageCallback>>();
         private final Map<String, List<Object>> remoteSubscriptions = new HashMap<String, List<Object>>();
+
 
         private final Map<Object, Queue<Message>> messageQueues = new HashMap<Object, Queue<Message>>();
         private final Map<Object, Thread> activeWaitingThreads = new HashMap<Object, Thread>();
@@ -33,6 +35,10 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
         }
 
         public void storeGlobal(final String subject, final CommandMessage message, boolean fireListeners) {
+            if (!subscriptions.containsKey(subject) && !remoteSubscriptions.containsKey(subject))  {
+                throw new NoSubscribersToDeliverTo("for: " + subject);
+            }
+
             if (fireListeners && !fireAllListeners(message)) return;
 
             final String jsonMessage = encodeMap(message.getParts());
@@ -65,8 +71,7 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
 
 
         private void store(final String sessionId, final String subject, final Object message) {
-
-            if (messageQueues.containsKey(sessionId)) {
+            if (messageQueues.containsKey(sessionId) && isAnyoneListening(sessionId, subject)) {
                 messageQueues.get(sessionId).add(new Message() {
                     public String getSubject() {
                         return subject;
@@ -79,6 +84,9 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
 
                 Thread t = activeWaitingThreads.get(sessionId);
                 if (t != null) t.interrupt();
+            }
+            else {
+                throw new NoSubscribersToDeliverTo("for: " + subject);
             }
         }
 
@@ -110,6 +118,7 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
             store((String) session.getAttribute(MessageBusServiceImpl.WS_SESSION_ID), subject, message, fireListeners);
         }
 
+
         public Message nextMessage(Object sessionContext) {
             Queue<Message> q = getQueue(sessionContext);
 
@@ -133,6 +142,7 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
         }
 
 
+
         private Queue<Message> getQueue(Object sessionContext) {
             if (!messageQueues.containsKey(sessionContext))
                 messageQueues.put(sessionContext, new LinkedList<Message>());
@@ -148,6 +158,20 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
         public void remoteSubscribe(Object sessionContext, String subject) {
             if (!remoteSubscriptions.containsKey(subject)) remoteSubscriptions.put(subject, new ArrayList<Object>());
             remoteSubscriptions.get(subject).add(sessionContext);
+        }
+
+        public void remoteUnsubscribe(Object sessionContext, String subject) {
+            if (!remoteSubscriptions.containsKey(subject)) return;
+
+            List<Object> sessionsToSubject = remoteSubscriptions.get(subject);
+            sessionsToSubject.remove(sessionContext);
+
+            if (sessionsToSubject.isEmpty()) remoteSubscriptions.remove(subject);
+        }
+
+        private boolean isAnyoneListening(Object sessionContext, String subject) {
+            return subscriptions.containsKey(subject) ||
+                    (remoteSubscriptions.containsKey(subject) && remoteSubscriptions.get(subject).contains(sessionContext));
         }
 
         public Set<String> getSubjects() {

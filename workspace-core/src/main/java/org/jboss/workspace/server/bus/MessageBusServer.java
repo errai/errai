@@ -21,6 +21,9 @@ public class MessageBusServer {
         try {
             new SimpleMessageBusProvider().getBus().store(subject, message);
         }
+        catch (NoSubscribersToDeliverTo e) {
+            throw e;
+        }
         catch (Exception e) {
             e.printStackTrace();
         }

@@ -16,6 +16,8 @@ import java.util.*;
 
 public class MessageBusClient {
     private static List<AcceptsCallback> onSubscribeHooks = new ArrayList<AcceptsCallback>();
+    private static List<AcceptsCallback> onUnsubscribeHooks = new ArrayList<AcceptsCallback>();
+
     private static final MessageBusServiceAsync messageBus = (MessageBusServiceAsync) create(MessageBusService.class);
     private static final ServiceDefTarget endpoint = (ServiceDefTarget) messageBus;
     private static final Map<String, List<Object>> subscriptions = new HashMap<String, List<Object>>();
@@ -23,20 +25,31 @@ public class MessageBusClient {
     private static final Queue<String[]> outgoingQueue = new LinkedList<String[]>();
     private static boolean transmitting = false;
 
+    private static Map<String, Set<Object>> registeredInThisSession = new HashMap<String, Set<Object>>();
+
     static {
         endpoint.setServiceEntryPoint(getModuleBaseURL() + "jbwMsgBus");
+    }
+
+    public static void beginCapture() {
+        registeredInThisSession = new HashMap<String, Set<Object>>();
     }
 
     public static void unsubscribeAll(String subject) {
         if (subscriptions.containsKey(subject)) {
             for (Object o : subscriptions.get(subject)) {
+
                 _unsubscribe(o);
             }
+
+            for (AcceptsCallback c : onUnsubscribeHooks) {
+                c.callback(subject, null);
+            }
+
         }
     }
 
     public static void subscribe(String subject, MessageCallback callback, Object subscriberData) {
-
         for (AcceptsCallback c : onSubscribeHooks) {
             c.callback(subject, subscriberData);
         }
@@ -54,26 +67,50 @@ public class MessageBusClient {
     }
 
     private static void addSubscription(String subject, Object reference) {
-        if (!subscriptions.containsKey(subject)) subscriptions.put(subject, new ArrayList<Object>());
+        if (!subscriptions.containsKey(subject)) {
+            subscriptions.put(subject, new ArrayList<Object>());
+        }
+
+        if (!registeredInThisSession.containsKey(subject)) {
+            registeredInThisSession.put(subject, new HashSet<Object>());
+        }
+
         subscriptions.get(subject).add(reference);
+        registeredInThisSession.get(subject).add(reference);
     }
 
+    public static Map<String, Set<Object>> getAllRegisteredThisSession() {
+       return registeredInThisSession;
+    }
 
-    private native static void _unsubscribe(Object subject) /*-{
-        $wnd.PageBus.unsubscribe(subject);
+    public static void unregisterAll(Map<String, Set<Object>> all) {
+        for (Map.Entry<String, Set<Object>> entry : all.entrySet()) {
+            for (Object o : entry.getValue()) {
+                subscriptions.get(entry.getKey()).remove(o);
+                _unsubscribe(o);
+            }
+
+            if (subscriptions.get(entry.getKey()).isEmpty()) {
+                for (AcceptsCallback c : onUnsubscribeHooks) {
+                    c.callback(entry.getKey(), null);
+                }
+            }
+        }
+
+    }
+
+    private native static void _unsubscribe(Object registrationHandle) /*-{
+        $wnd.PageBus.unsubscribe(registrationHandle);
     }-*/;
 
 
     private native static Object _subscribe(String subject, MessageCallback callback,
                                             Object subscriberData) /*-{
-
          return $wnd.PageBus.subscribe(subject, null,
                  function (subject, message, subcriberData) {
                     callback.@org.jboss.workspace.client.framework.MessageCallback::callback(Lorg/jboss/workspace/client/rpc/CommandMessage;)(@org.jboss.workspace.client.rpc.MessageBusClient::decodeCommandMessage(Ljava/lang/Object;)(message))
                  },
                  null);
-
-  
     }-*/;
 
     public native static void store(String subject, Object value) /*-{
@@ -103,7 +140,7 @@ public class MessageBusClient {
             Timer retry = new Timer() {
                 @Override
                 public void run() {
-                    if (!transmitting) {
+                    if (!MessageBusClient.transmitting) {
                         cancel();
                         sendAll();
                     }
@@ -119,6 +156,7 @@ public class MessageBusClient {
         }
         transmitting = false;
     }
+
 
     private static void transmitRemote(String subject, String message) {
         try {
@@ -139,6 +177,10 @@ public class MessageBusClient {
 
     public static void addOnSubscribeHook(AcceptsCallback callback) {
         onSubscribeHooks.add(callback);
+    }
+
+    public static void addOnUnsubscribeHook(AcceptsCallback callback) {
+        onUnsubscribeHooks.add(callback);
     }
 
     public static Map<String, Object> decodeMap(Object value) {

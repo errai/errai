@@ -13,4 +13,6 @@ public interface MessageBusServiceAsync {
     void remoteSubscribe(String subject, AsyncCallback<Void> async);
 
     void getSubjects(AsyncCallback<String[]> async);
+
+    void remoteUnsubscribe(String subject, AsyncCallback<Void> async);
 }
