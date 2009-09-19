@@ -91,6 +91,9 @@ public class Workspace implements EntryPoint {
 
 
         _initAfterWSLoad();
+
+        MessageBusClient.store("ServerEchoService", new CommandMessage());
+
     }
 
     /**
