@@ -1,7 +1,7 @@
 package org.jboss.workspace.client.rpc;
 
-import org.jboss.workspace.client.rpc.protocols.SecurityParts;
 import org.jboss.workspace.client.rpc.protocols.MessageParts;
+import org.jboss.workspace.client.rpc.protocols.SecurityParts;
 
 public class ConversationMessage extends CommandMessage {
     public static ConversationMessage create(String commandType, CommandMessage inReplyTo) {
@@ -12,19 +12,30 @@ public class ConversationMessage extends CommandMessage {
         return new ConversationMessage(commandType, inReplyTo);
     }
 
-    public ConversationMessage(Enum commandType, CommandMessage inReplyTo) {
-        if (!inReplyTo.hasPart(SecurityParts.SessionData)) {
-            System.out.println("ERROR");
-            throw new RuntimeException("cannot have a conversation. there is no session data.");
+    public static ConversationMessage create(CommandMessage inReplyTo) {
+        return new ConversationMessage(inReplyTo);
+    }
+
+    public ConversationMessage(CommandMessage inReplyTo) {
+        if (inReplyTo.hasPart(SecurityParts.SessionData)) {
+            set(SecurityParts.SessionData, inReplyTo.get(Object.class, SecurityParts.SessionData));
         }
-        set(SecurityParts.SessionData, inReplyTo.get(Object.class, SecurityParts.SessionData));
+        else if (inReplyTo.hasPart(MessageParts.ReplyTo)) {
+            set(MessageParts.ToSubject, inReplyTo.get(String.class, MessageParts.ReplyTo));
+        }
+        else {
+            throw new RuntimeException("cannot have a conversation. there is no session data or ReplyTo field");
+        }
+    }
+
+
+    public ConversationMessage(Enum commandType, CommandMessage inReplyTo) {
+        this(inReplyTo);
         setCommandType(commandType.name());
     }
 
     public ConversationMessage(String commandType, CommandMessage inReplyTo) {
-        if (!inReplyTo.hasPart(SecurityParts.SessionData)) {
-            throw new RuntimeException("cannot have a conversation. there is no session data.");
-        }
+        this(inReplyTo);
         set(SecurityParts.SessionData, inReplyTo.get(Object.class, SecurityParts.SessionData));
         setCommandType(commandType);
     }

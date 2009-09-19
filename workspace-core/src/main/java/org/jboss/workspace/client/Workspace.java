@@ -21,6 +21,7 @@ import org.jboss.workspace.client.rpc.CommandMessage;
 import org.jboss.workspace.client.rpc.MessageBusClient;
 import org.jboss.workspace.client.rpc.MessageBusService;
 import org.jboss.workspace.client.rpc.MessageBusServiceAsync;
+import org.jboss.workspace.client.rpc.protocols.BusCommands;
 import org.jboss.workspace.client.rpc.protocols.MessageParts;
 import org.jboss.workspace.client.rpc.protocols.SecurityCommands;
 import org.jboss.workspace.client.rpc.protocols.SecurityParts;
@@ -70,44 +71,24 @@ public class Workspace implements EntryPoint {
             return;
         }
 
-        beginStartup(rootId);
-
         MessageBusClient.addOnSubscribeHook(new AcceptsCallback() {
             public void callback(Object message, Object data) {
+                MessageBusClient.store("ServerBus", CommandMessage.create(BusCommands.RemoteSubscribe)
+                        .set(MessageParts.ToSubject, message));
 
-                AsyncCallback<Void> remoteSubscribe = new AsyncCallback<Void>() {
-                    public void onFailure(Throwable throwable) {
-                    }
-
-                    public void onSuccess(Void o) {
-                    }
-                };
-
-                final MessageBusServiceAsync messageBus = (MessageBusServiceAsync) create(MessageBusService.class);
-                final ServiceDefTarget endpoint = (ServiceDefTarget) messageBus;
-                endpoint.setServiceEntryPoint(getModuleBaseURL() + "jbwMsgBus");
-                messageBus.remoteSubscribe((String) message, remoteSubscribe);
             }
         });
 
         MessageBusClient.addOnUnsubscribeHook(new AcceptsCallback() {
             public void callback(Object message, Object data) {
+                MessageBusClient.store("ServerBus", CommandMessage.create(BusCommands.RemoteUnsubscribe)
+                        .set(MessageParts.ToSubject, message));
 
-                AsyncCallback<Void> remoteSubscribe = new AsyncCallback<Void>() {
-                    public void onFailure(Throwable throwable) {
-                        System.out.println("Failed to unsubscribe.  This is like, not good and stuff.");
-                    }
-
-                    public void onSuccess(Void o) {
-                    }
-                };
-
-                final MessageBusServiceAsync messageBus = (MessageBusServiceAsync) create(MessageBusService.class);
-                final ServiceDefTarget endpoint = (ServiceDefTarget) messageBus;
-                endpoint.setServiceEntryPoint(getModuleBaseURL() + "jbwMsgBus");
-                messageBus.remoteUnsubscribe((String) message, remoteSubscribe);
             }
         });
+
+        beginStartup(rootId);
+
 
         _initAfterWSLoad();
     }
@@ -175,68 +156,7 @@ public class Workspace implements EntryPoint {
         /**
          * Register the login client.
          */
-        MessageBusClient.subscribe("LoginClient", new MessageCallback() {
-            public void callback(CommandMessage message) {
-                switch (SecurityCommands.valueOf(message.getCommandType())) {
-                    case SecurityChallenge:
-                        showLoginPanel();
-                        break;
 
-                    case FailedAuth:
-                        closeLoginPanel();
-
-                        WSModalDialog failed = new WSModalDialog();
-                        failed.ask("Authentication Failure. Please Try Again", new AcceptsCallback() {
-                            public void callback(Object message, Object data) {
-                                if ("WindowClosed".equals(message)) showLoginPanel();
-                            }
-                        });
-                        failed.showModal();
-                        break;
-
-                    case SuccessfulAuth:
-                        closeLoginPanel();
-
-                        final WSWindowPanel welcome = new WSWindowPanel();
-                        welcome.setWidth("250px");
-                        VerticalPanel vp = new VerticalPanel();
-                        vp.setWidth("100%");
-
-                        Label label = new Label("Welcome " + message.get(String.class, SecurityParts.Name)
-                                + ", you are now logged in -- "
-                                + (message.hasPart(MessageParts.MessageText) ?
-                                message.get(String.class, MessageParts.MessageText) : ""));
-
-                        label.getElement().getStyle().setProperty("margin", "20px");
-
-                        vp.add(label);
-                        vp.setCellVerticalAlignment(label, HasAlignment.ALIGN_MIDDLE);
-                        vp.setCellHeight(label, "50px");
-
-                        Button okButton = new Button("OK");
-                        okButton.getElement().getStyle().setProperty("margin", "20px");
-
-                        vp.add(okButton);
-                        vp.setCellHorizontalAlignment(okButton, HasAlignment.ALIGN_CENTER);
-
-                        okButton.addClickHandler(new ClickHandler() {
-                            public void onClick(ClickEvent event) {
-                                welcome.hide();
-                            }
-                        });
-
-                        welcome.add(vp);
-                        welcome.show();
-                        welcome.center();
-
-                        okButton.setFocus(true);
-                        break;
-
-                    default:
-                        // I don't know this command. :(
-                }
-            }
-        });
 
         /**
          * Send initial message to the ServerEchoService, to establish an HTTP session. Otherwise, concurrent
@@ -269,7 +189,7 @@ public class Workspace implements EntryPoint {
                     public void onSuccess(String[] o) {
                         if (o == null) return;
 
-                        System.out.println("RecvMsgFromServer (Subject:" + o[0] + ";Message=" + o[1] + ")");
+                        //    System.out.println("RecvMsgFromServer (Subject:" + o[0] + ";Message=" + o[1] + ")");
 
                         MessageBusClient.store(o[0], o[1]);
                         block = false;
@@ -310,6 +230,77 @@ public class Workspace implements EntryPoint {
                 }
 
                 outerTimer.schedule(10);
+
+                for (String s : MessageBusClient.getAllLocalSubscriptions()) {
+                    MessageBusClient.store("ServerBus",
+                            CommandMessage.create(BusCommands.RemoteSubscribe)
+                                    .set(MessageParts.Subject, s));
+                }
+
+
+                MessageBusClient.subscribe("LoginClient", new MessageCallback() {
+                    public void callback(CommandMessage message) {
+                        switch (SecurityCommands.valueOf(message.getCommandType())) {
+                            case SecurityChallenge:
+                                showLoginPanel();
+                                break;
+
+                            case FailedAuth:
+                                closeLoginPanel();
+
+                                WSModalDialog failed = new WSModalDialog();
+                                failed.ask("Authentication Failure. Please Try Again", new AcceptsCallback() {
+                                    public void callback(Object message, Object data) {
+                                        if ("WindowClosed".equals(message)) showLoginPanel();
+                                    }
+                                });
+                                failed.showModal();
+                                break;
+
+                            case SuccessfulAuth:
+                                closeLoginPanel();
+
+                                final WSWindowPanel welcome = new WSWindowPanel();
+                                welcome.setWidth("250px");
+                                VerticalPanel vp = new VerticalPanel();
+                                vp.setWidth("100%");
+
+                                Label label = new Label("Welcome " + message.get(String.class, SecurityParts.Name)
+                                        + ", you are now logged in -- "
+                                        + (message.hasPart(MessageParts.MessageText) ?
+                                        message.get(String.class, MessageParts.MessageText) : ""));
+
+                                label.getElement().getStyle().setProperty("margin", "20px");
+
+                                vp.add(label);
+                                vp.setCellVerticalAlignment(label, HasAlignment.ALIGN_MIDDLE);
+                                vp.setCellHeight(label, "50px");
+
+                                Button okButton = new Button("OK");
+                                okButton.getElement().getStyle().setProperty("margin", "20px");
+
+                                vp.add(okButton);
+                                vp.setCellHorizontalAlignment(okButton, HasAlignment.ALIGN_CENTER);
+
+                                okButton.addClickHandler(new ClickHandler() {
+                                    public void onClick(ClickEvent event) {
+                                        welcome.hide();
+                                    }
+                                });
+
+                                welcome.add(vp);
+                                welcome.show();
+                                welcome.center();
+
+                                okButton.setFocus(true);
+                                break;
+
+                            default:
+                                // I don't know this command. :(
+                        }
+                    }
+                });
+
             }
         };
 
@@ -324,16 +315,10 @@ public class Workspace implements EntryPoint {
             }
         };
 
-        for (String s : MessageBusClient.getAllLocalSubscriptions()) {
-            messageBus.remoteSubscribe(s, cb);
-        }
-
 
         final Timer finalEchoTimer = new Timer() {
             @Override
             public void run() {
-
-
                 MessageBusClient.store("ServerEchoService", new CommandMessage());
             }
         };

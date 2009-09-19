@@ -1,7 +1,10 @@
 package org.jboss.workspace.client.layout;
 
 import com.google.gwt.user.client.ui.Widget;
+import org.jboss.workspace.client.framework.MessageCallback;
+import org.jboss.workspace.client.rpc.CommandMessage;
 import org.jboss.workspace.client.rpc.MessageBusClient;
+import static org.jboss.workspace.client.rpc.MessageBusClient.subscribe;
 import org.jboss.workspace.client.rpc.protocols.LayoutParts;
 
 import java.util.HashMap;
@@ -12,23 +15,20 @@ public class LayoutHint {
     private static LinkedHashMap<Widget, LayoutHintProvider> MANAGED_WIDGETS = new LinkedHashMap<Widget, LayoutHintProvider>();
     private static LinkedHashMap<String, LayoutHintProvider> MANAGED_SUBJECTS = new LinkedHashMap<String, LayoutHintProvider>();
 
-    public static void attach(Widget w, LayoutHintProvider p) {
+    public static void attach(final Widget w, LayoutHintProvider p) {
+        String subject = "org.jboss.errai.sizeHints:" + w.getElement().getId() + ":" + System.currentTimeMillis();
+
+        subscribe(subject,
+                new MessageCallback() {
+                    public void callback(CommandMessage message) {
+                        w.setPixelSize(message.get(Double.class, LayoutParts.Width).intValue(),
+                                message.get(Double.class, LayoutParts.Height).intValue());
+                    }
+                }, null);
+
+
         MANAGED_WIDGETS.put(w, p);
-    }
-
-    public static void attach(String subject, LayoutHintProvider p) {
         MANAGED_SUBJECTS.put(subject, p);
-    }
-
-
-    public static int findHeightHint(Widget instance) {
-        LayoutHintProvider p = findProvider(instance);
-        return p == null ? 0 : p.getHeightHint();
-    }
-
-    public static int findWidthHint(Widget instance) {
-        LayoutHintProvider p = findProvider(instance);
-        return p == null ? 0 : p.getWidthHint();
     }
 
     public static LayoutHintProvider findProvider(Widget instance) {
@@ -42,14 +42,10 @@ public class LayoutHint {
     public static void hintAll() {
         LayoutHintProvider p;
         for (String s : MANAGED_SUBJECTS.keySet()) {
-            p = findProvider(s);
-            if (p != null && p.getWidthHint() > 0 && p.getHeightHint() > 0) {
-                Map<String, Object> msg = new HashMap<String, Object>();
-                msg.put(LayoutParts.Width.name(), p.getWidthHint());
-                msg.put(LayoutParts.Height.name(), p.getHeightHint());
-
-                MessageBusClient.store(s, msg);
-
+            if ((p = findProvider(s)) != null && p.getWidthHint() > 0 && p.getHeightHint() > 0) {
+                MessageBusClient.store(s, CommandMessage.create()
+                        .set(LayoutParts.Width, p.getWidthHint())
+                        .set(LayoutParts.Height, p.getHeightHint()));
             }
         }
 
@@ -59,7 +55,5 @@ public class LayoutHint {
                 w.setPixelSize(p.getWidthHint(), p.getHeightHint());
             }
         }
-
-
     }
 }

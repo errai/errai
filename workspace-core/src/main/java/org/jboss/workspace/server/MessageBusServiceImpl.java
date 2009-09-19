@@ -7,6 +7,8 @@ import org.jboss.workspace.client.rpc.ConversationMessage;
 import org.jboss.workspace.client.rpc.MessageBusService;
 import org.jboss.workspace.client.rpc.protocols.SecurityCommands;
 import org.jboss.workspace.client.rpc.protocols.SecurityParts;
+import org.jboss.workspace.client.rpc.protocols.BusCommands;
+import org.jboss.workspace.client.rpc.protocols.MessageParts;
 import org.jboss.workspace.client.security.CredentialTypes;
 import org.jboss.workspace.server.bus.Message;
 import org.jboss.workspace.server.bus.MessageBus;
@@ -103,8 +105,21 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
             }
         });
 
+        bus.subscribe("ServerBus", new MessageCallback() {
+            public void callback(CommandMessage message) {
+                switch (BusCommands.valueOf(message.getCommandType())) {
+                    case RemoteSubscribe:
+                        bus.remoteSubscribe(message.get(HttpSession.class, SecurityParts.SessionData).getAttribute(WS_SESSION_ID),
+                                message.get(String.class, MessageParts.ToSubject));
+                        break;
 
-
+                    case RemoteUnsubscribe:
+                        bus.remoteUnsubscribe(message.get(HttpSession.class, SecurityParts.SessionData).getAttribute(WS_SESSION_ID),
+                                message.get(String.class, MessageParts.ToSubject));
+                        break;
+                }
+            }
+        });
     }
 
     private void loadConfig() {
@@ -220,19 +235,14 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
         }
     }
 
-    /**
-     * Indicate to the server bus that the remote subject exists for routing purposes.
-     *
-     * @param subject
-     */
-    public void remoteSubscribe(String subject) {
-        if (bus.getSubjects().contains(subject)) return;
-        bus.remoteSubscribe(getId(), subject);
-    }
-
-    public void remoteUnsubscribe(String subject) {
-        bus.remoteUnsubscribe(getId(), subject);
-    }
+//    public void remoteSubscribe(String subject) {
+//        if (bus.getSubjects().contains(subject)) return;
+//        bus.remoteSubscribe(getId(), subject);
+//    }
+//
+//    public void remoteUnsubscribe(String subject) {
+//        bus.remoteUnsubscribe(getId(), subject);
+//    }
 
     private HttpSession getSession() {
         HttpServletRequest request = getThreadLocalRequest();

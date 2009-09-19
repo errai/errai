@@ -10,6 +10,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import org.jboss.workspace.client.framework.AcceptsCallback;
 import org.jboss.workspace.client.framework.MessageCallback;
+import org.jboss.workspace.client.rpc.protocols.MessageParts;
 
 import java.util.*;
 
@@ -37,15 +38,14 @@ public class MessageBusClient {
 
     public static void unsubscribeAll(String subject) {
         if (subscriptions.containsKey(subject)) {
+            System.out.println("Unsubscribe:" + subject);
             for (Object o : subscriptions.get(subject)) {
-
                 _unsubscribe(o);
             }
 
             for (AcceptsCallback c : onUnsubscribeHooks) {
                 c.callback(subject, null);
             }
-
         }
     }
 
@@ -58,7 +58,6 @@ public class MessageBusClient {
     }
 
     public static void subscribe(String subject, MessageCallback callback) {
-
         for (AcceptsCallback c : onSubscribeHooks) {
             c.callback(subject, null);
         }
@@ -66,7 +65,43 @@ public class MessageBusClient {
         addSubscription(subject, _subscribe(subject, callback, null));
     }
 
+    public static void subscribeOnce(String subject, MessageCallback callback, Object subscriberData) {
+        if (subscriptions.containsKey(subject)) return;
+        subscribe(subject,callback, subscriberData);
+    }
+
+    public static void subscribeOnce(String subject, MessageCallback callback) {
+        if (subscriptions.containsKey(subject)) return;
+        subscribe(subject, callback);
+    }
+
+    /**
+     * Have a single two-way conversation
+     *
+     * @param subject
+     * @param message
+     * @param callback
+     */
+    public static void conversationWith(String subject, CommandMessage message, MessageCallback callback) {
+        final String tempSubject = callback.hashCode() + ":temp";
+
+        message.set(MessageParts.ReplyTo, tempSubject);
+
+        subscribe(tempSubject, callback);
+        subscribe(tempSubject, new MessageCallback() {
+            public void callback(CommandMessage message) {
+                System.out.println("unsubscribing temp subject");
+                unsubscribeAll(tempSubject);
+            }
+        });
+
+        System.out.println("Sending Message To: " + subject);
+        store(subject, message);
+    }
+
     private static void addSubscription(String subject, Object reference) {
+        System.out.println("Add Subscription:" + subject + ":" + reference);
+
         if (!subscriptions.containsKey(subject)) {
             subscriptions.put(subject, new ArrayList<Object>());
         }
@@ -80,12 +115,14 @@ public class MessageBusClient {
     }
 
     public static Map<String, Set<Object>> getAllRegisteredThisSession() {
-       return registeredInThisSession;
+        return registeredInThisSession;
     }
 
     public static void unregisterAll(Map<String, Set<Object>> all) {
         for (Map.Entry<String, Set<Object>> entry : all.entrySet()) {
             for (Object o : entry.getValue()) {
+                System.out.println("Unregistering: " + o + "...");
+
                 subscriptions.get(entry.getKey()).remove(o);
                 _unsubscribe(o);
             }
@@ -102,7 +139,6 @@ public class MessageBusClient {
     private native static void _unsubscribe(Object registrationHandle) /*-{
         $wnd.PageBus.unsubscribe(registrationHandle);
     }-*/;
-
 
     private native static Object _subscribe(String subject, MessageCallback callback,
                                             Object subscriberData) /*-{
@@ -130,6 +166,15 @@ public class MessageBusClient {
         }
     }
 
+    public static void store(CommandMessage message) {
+        if (message.hasPart(MessageParts.ToSubject)) {
+            store(message.get(String.class, MessageParts.ToSubject), message);
+        }
+        else {
+            throw new RuntimeException("Cannot send message using this method if the message does not contain a ToSubject field.");
+        }
+    }
+
     public static void enqueueForRemoteTransmit(String subject, CommandMessage message) {
         outgoingQueue.add(new String[]{subject, encodeMap(message.getParts())});
         sendAll();
@@ -152,6 +197,7 @@ public class MessageBusClient {
         transmitting = true;
         while (!outgoingQueue.isEmpty()) {
             String[] msg = outgoingQueue.poll();
+            System.out.println("Transmitting:" + msg);
             transmitRemote(msg[0], msg[1]);
         }
         transmitting = false;

@@ -17,6 +17,10 @@ public class CommandMessage {
         return new CommandMessage(commandType);
     }
 
+    public static CommandMessage create() {
+        return new CommandMessage();
+    }
+
     public CommandMessage() {
     }
 

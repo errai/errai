@@ -21,9 +21,11 @@ public class SecurityService {
     }
 
     public void doAuthentication(final AuthenticationHandler handler) {
-        MessageBusClient.unsubscribeAll(SUBJECT);
+      //  MessageBusClient.unsubscribeAll(SUBJECT);
         MessageBusClient.subscribe(SUBJECT, new MessageCallback() {
             public void callback(CommandMessage msg) {
+                MessageBusClient.unsubscribeAll(SUBJECT);
+
                 switch (SecurityCommands.valueOf(msg.getCommandType())) {
                     case WhatCredentials:
                         String credentialsRequired = msg.get(String.class, CredentialsRequired);

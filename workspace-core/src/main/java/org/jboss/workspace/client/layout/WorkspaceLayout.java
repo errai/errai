@@ -16,12 +16,12 @@ import static com.google.gwt.user.client.Window.addResizeHandler;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.workspace.client.ToolSet;
 import org.jboss.workspace.client.framework.AcceptsCallback;
+import org.jboss.workspace.client.framework.MessageCallback;
 import org.jboss.workspace.client.framework.Tool;
 import org.jboss.workspace.client.framework.WorkspaceSizeChangeListener;
-import org.jboss.workspace.client.framework.MessageCallback;
 import org.jboss.workspace.client.listeners.TabCloseHandler;
-import org.jboss.workspace.client.rpc.MessageBusClient;
 import org.jboss.workspace.client.rpc.CommandMessage;
+import org.jboss.workspace.client.rpc.MessageBusClient;
 import org.jboss.workspace.client.rpc.protocols.LayoutCommands;
 import org.jboss.workspace.client.rpc.protocols.LayoutParts;
 import org.jboss.workspace.client.util.Effects;
@@ -126,13 +126,14 @@ public class WorkspaceLayout extends Composite {
                     public void callback(CommandMessage message) {
                         switch (LayoutCommands.valueOf(message.getCommandType())) {
                             case OpenNewTab:
-                                String componentId =  message.get(String.class, LayoutParts.ComponentID);
-                                String DOMID =  message.get(String.class, LayoutParts.DOMID);
-                                String name =  message.get(String.class, LayoutParts.Name);
+                                String componentId = message.get(String.class, LayoutParts.ComponentID);
+                                String DOMID = message.get(String.class, LayoutParts.DOMID);
+                                String initSubject = message.get(String.class, LayoutParts.InitSubject);
+                                String name = message.get(String.class, LayoutParts.Name);
                                 Image i = new Image(message.get(String.class, LayoutParts.IconURI));
                                 Boolean multiple = message.get(Boolean.class, LayoutParts.MultipleInstances);
 
-                                openTab(componentId, name, i, multiple, DOMID);
+                                openTab(componentId, name, i, multiple, DOMID, initSubject);
                                 break;
 
                             case PublishTool:
@@ -153,17 +154,17 @@ public class WorkspaceLayout extends Composite {
                                 break;
 
                             case CloseTab:
-                                String instanceId =  message.get(String.class, LayoutParts.InstanceID);
+                                String instanceId = message.get(String.class, LayoutParts.InstanceID);
                                 closeTab(instanceId);
                                 break;
 
                             case GetActiveWidgets:
-                                componentId =  message.get(String.class, LayoutParts.ComponentID);
+                                componentId = message.get(String.class, LayoutParts.ComponentID);
                                 Set<String> active = getActiveByType(componentId);
                                 break;
 
                             case Hello:
-                                name =  message.get(String.class, LayoutParts.Name);
+                                name = message.get(String.class, LayoutParts.Name);
                                 Window.alert("Hello from: " + name);
                                 break;
                         }
@@ -345,22 +346,20 @@ public class WorkspaceLayout extends Composite {
         }
     }
 
-    private void openTab(String componentId, String name, Image icon, boolean multipleAllowed, String DOMID) {
+    private void openTab(String componentId, String name, Image icon, boolean multipleAllowed, String DOMID, String initSubject) {
         if (!multipleAllowed && tabInstances.containsKey(componentId)) {
-            this.openTab(DOMID, componentId, name, icon, multipleAllowed);
+            this.openTab(DOMID, initSubject, componentId, name, icon, multipleAllowed);
         }
         else {
-            this.openTab(DOMID, componentId, name, icon, multipleAllowed);
+            this.openTab(DOMID, initSubject, componentId, name, icon, multipleAllowed);
         }
     }
 
-    private void openTab(final String DOMID, final String componentId, final String name,
+    private void openTab(final String DOMID, final String initSubject, final String componentId, final String name,
                          final Image icon, boolean multipleAllowed) {
         if (isToolActive(componentId)) {
             if (!multipleAllowed) {
-                Map<String, Object> msg = new HashMap<String, Object>();
-                msg.put(LayoutParts.CommandType.name(), LayoutCommands.ActivateTool.name());
-                MessageBusClient.store(getInstanceSubject(componentId), msg);
+                MessageBusClient.store(getInstanceSubject(componentId), CommandMessage.create(LayoutCommands.ActivateTool));
 
                 return;
             }
@@ -382,7 +381,7 @@ public class WorkspaceLayout extends Composite {
 
                             newName = name + " (" + idx + ")";
 
-                            _openTab(DOMID, componentId, newName, newId, icon);
+                            _openTab(DOMID, initSubject, componentId, newName, newId, icon);
                         }
                         else if (!"WindowClosed".equals(message)) {
                             Set<String> s = layout.getActiveByType(componentId);
@@ -397,7 +396,7 @@ public class WorkspaceLayout extends Composite {
                                 wsd.showModal();
                             }
                             else {
-                          //      s.iterator().next().activate();
+                                //      s.iterator().next().activate();
                             }
                         }
                     }
@@ -409,96 +408,104 @@ public class WorkspaceLayout extends Composite {
             }
         }
 
-        _openTab(DOMID, componentId, name, componentId, icon);
+        _openTab(DOMID, initSubject, componentId, name, componentId, icon);
     }
 
-    private void _openTab(String DOMID, final String componentId, String name, String instanceId, Image icon) {
-        final ExtSimplePanel panel = new ExtSimplePanel();
-        panel.getElement().getStyle().setProperty("overflow", "hidden");
-
-        Effects.setOpacity(panel.getElement(), 0);
-
-        WSElementWrapper toolWidget = new WSElementWrapper(getElementById(DOMID));
-        toolWidget.setVisible(true);
-        panel.setWidget(toolWidget);
-
-        final Image newIcon = new Image(icon != null ? icon.getUrl() : GWT.getModuleBaseURL()
-                + "/images/ui/icons/questioncube.png");
-        newIcon.setSize("16px", "16px");
-
-        final WSTab newWSTab = new WSTab(name, panel, newIcon);
-        tabPanel.add(panel, newWSTab);
-        newWSTab.activate();
-
-        final Map<String, Set<Object>> toUnregister = MessageBusClient.getAllRegisteredThisSession();
-
-        MessageBusClient.subscribe(getInstanceSubject(instanceId),
+    private void _openTab(final String DOMID, final String initSubject, final String componentId, final String name, final String instanceId, final Image icon) {
+        MessageBusClient.conversationWith(initSubject,
+                CommandMessage.create().set(LayoutParts.DOMID, DOMID),
                 new MessageCallback() {
                     public void callback(CommandMessage message) {
-                        switch (LayoutCommands.valueOf(message.getCommandType())) {
-                            case CloseTab:
-                                tabDragController.unregisterDropController(newWSTab.getTabDropController());
+                        System.out.println("RECV INIT!");
 
-                                MessageBusClient.unregisterAll(toUnregister);
-                                deactivateTool(componentId);
 
-                                int idx = newWSTab.remove();
-                                if (idx > 0) idx--;
-                                else if (tabPanel.getWidgetCount() == 0) return;
+                        final ExtSimplePanel panel = new ExtSimplePanel();
+                        panel.getElement().getStyle().setProperty("overflow", "hidden");
 
-                                tabPanel.selectTab(idx);
+                        Effects.setOpacity(panel.getElement(), 0);
 
-                                break;
+                        WSElementWrapper toolWidget = new WSElementWrapper(getElementById(DOMID));
+                        toolWidget.setVisible(true);
+                        panel.setWidget(toolWidget);
 
-                            case ActivateTool:
+                        final Image newIcon = new Image(icon != null ? icon.getUrl() : GWT.getModuleBaseURL()
+                                + "/images/ui/icons/questioncube.png");
+                        newIcon.setSize("16px", "16px");
+
+                        final WSTab newWSTab = new WSTab(name, panel, newIcon);
+                        tabPanel.add(panel, newWSTab);
+                        newWSTab.activate();
+
+                        final Map<String, Set<Object>> toUnregister = MessageBusClient.getAllRegisteredThisSession();
+
+                        MessageBusClient.subscribe(getInstanceSubject(instanceId),
+                                new MessageCallback() {
+                                    public void callback(CommandMessage message) {
+                                        switch (LayoutCommands.valueOf(message.getCommandType())) {
+                                            case CloseTab:
+                                                tabDragController.unregisterDropController(newWSTab.getTabDropController());
+                                                MessageBusClient.unregisterAll(toUnregister);
+                                                deactivateTool(componentId);
+
+                                                int idx = newWSTab.remove();
+                                                if (idx > 0) idx--;
+                                                else if (tabPanel.getWidgetCount() == 0) return;
+
+                                                tabPanel.selectTab(idx);
+
+                                                break;
+
+                                            case ActivateTool:
+                                                newWSTab.activate();
+                                                break;
+                                        }
+                                    }
+                                },
+                                panel.getElement());
+
+                        newWSTab.clearTabCloseHandlers();
+                        newWSTab.addTabCloseHandler(new TabCloseHandler(instanceId));
+
+                        tabDragController.makeDraggable(newWSTab, newWSTab.getLabel());
+                        tabDragController.makeDraggable(newWSTab, newWSTab.getIcon());
+
+                        newWSTab.getLabel().addMouseOverHandler(new MouseOverHandler() {
+                            public void onMouseOver(MouseOverEvent event) {
+                                newWSTab.getLabel().getElement().getStyle().setProperty("cursor", "default");
+                            }
+                        });
+
+                        newWSTab.getLabel().addMouseDownHandler(new MouseDownHandler() {
+                            public void onMouseDown(MouseDownEvent event) {
                                 newWSTab.activate();
-                                break;
-                        }
+                            }
+                        });
+
+                        tabDragController.setBehaviorDragProxy(true);
+                        tabDragController.registerDropController(newWSTab.getTabDropController());
+
+                        newWSTab.reset();
+
+                        activateTool(componentId);
+
+                        Map<String, Object> tabProperties = new HashMap<String, Object>();
+                        tabProperties.put(LayoutParts.Name.name(), name);
+                        tabProperties.put(LayoutParts.IconURI.name(), newIcon.getUrl());
+
+                        tabInstances.put(instanceId, MessageBusClient.encodeMap(tabProperties));
+
+
+                        Timer t = new Timer() {
+                            public void run() {
+                                pack();
+                            }
+                        };
+
+                        t.schedule(25);
+
+                        Effects.fade(panel.getElement(), 5, 5, 0, 100);
                     }
-                },
-                panel.getElement());
-
-        newWSTab.clearTabCloseHandlers();
-        newWSTab.addTabCloseHandler(new TabCloseHandler(instanceId));
-
-        tabDragController.makeDraggable(newWSTab, newWSTab.getLabel());
-        tabDragController.makeDraggable(newWSTab, newWSTab.getIcon());
-
-        newWSTab.getLabel().addMouseOverHandler(new MouseOverHandler() {
-            public void onMouseOver(MouseOverEvent event) {
-                newWSTab.getLabel().getElement().getStyle().setProperty("cursor", "default");
-            }
-        });
-
-        newWSTab.getLabel().addMouseDownHandler(new MouseDownHandler() {
-            public void onMouseDown(MouseDownEvent event) {
-                newWSTab.activate();
-            }
-        });
-
-        tabDragController.setBehaviorDragProxy(true);
-        tabDragController.registerDropController(newWSTab.getTabDropController());
-
-        newWSTab.reset();
-
-        activateTool(componentId);
-
-        Map<String, Object> tabProperties = new HashMap<String, Object>();
-        tabProperties.put(LayoutParts.Name.name(), name);
-        tabProperties.put(LayoutParts.IconURI.name(), newIcon.getUrl());
-
-        tabInstances.put(instanceId, MessageBusClient.encodeMap(tabProperties));
-
-
-        Timer t = new Timer() {
-            public void run() {
-                pack();
-            }
-        };
-
-        t.schedule(25);
-
-        Effects.fade(panel.getElement(), 5, 5, 0, 100);
+                });
     }
 
     public static String getInstanceSubject(String instanceId) {

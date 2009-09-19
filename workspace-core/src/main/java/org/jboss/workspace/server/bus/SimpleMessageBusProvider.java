@@ -7,6 +7,8 @@ import org.jboss.workspace.server.MessageBusServiceImpl;
 import static org.jboss.workspace.server.bus.MessageBusServer.encodeMap;
 
 import javax.servlet.http.HttpSession;
+import static java.lang.Thread.currentThread;
+import static java.lang.Thread.sleep;
 import java.util.*;
 
 public class SimpleMessageBusProvider implements MessageBusProvider {
@@ -22,7 +24,6 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
     public class SimpleMessageBus implements MessageBus {
         private final List<MessageListener> listeners = new ArrayList<MessageListener>();
 
-
         private final Map<String, List<MessageCallback>> subscriptions = new HashMap<String, List<MessageCallback>>();
         private final Map<String, List<Object>> remoteSubscriptions = new HashMap<String, List<Object>>();
 
@@ -35,7 +36,7 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
         }
 
         public void storeGlobal(final String subject, final CommandMessage message, boolean fireListeners) {
-            if (!subscriptions.containsKey(subject) && !remoteSubscriptions.containsKey(subject))  {
+            if (!subscriptions.containsKey(subject) && !remoteSubscriptions.containsKey(subject)) {
                 throw new NoSubscribersToDeliverTo("for: " + subject);
             }
 
@@ -68,7 +69,6 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
                 }
             }
         }
-
 
         private void store(final String sessionId, final String subject, final Object message) {
             if (messageQueues.containsKey(sessionId) && isAnyoneListening(sessionId, subject)) {
@@ -118,30 +118,30 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
             store((String) session.getAttribute(MessageBusServiceImpl.WS_SESSION_ID), subject, message, fireListeners);
         }
 
-
         public Message nextMessage(Object sessionContext) {
             Queue<Message> q = getQueue(sessionContext);
 
             if (q.isEmpty()) {
-                try {
-                    activeWaitingThreads.put(sessionContext, Thread.currentThread());
-                    Thread.sleep(1000 * 45);
-                }
-                catch (InterruptedException e) {
-                    // passthru
-                }
-                finally {
-                    activeWaitingThreads.remove(sessionContext);
-                }
+                holdThread(sessionContext);
                 return q.poll();
-
             }
             else {
                 return q.poll();
             }
         }
 
-
+        private void holdThread(Object sessionContext) {
+            try {
+                activeWaitingThreads.put(sessionContext, currentThread());
+                sleep(1000 * 45);
+            }
+            catch (InterruptedException e) {
+                // passthru
+            }
+            finally {
+                activeWaitingThreads.remove(sessionContext);
+            }
+        }
 
         private Queue<Message> getQueue(Object sessionContext) {
             if (!messageQueues.containsKey(sessionContext))
@@ -151,12 +151,19 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
         }
 
         public void subscribe(String subject, MessageCallback receiver) {
-            if (!subscriptions.containsKey(subject)) subscriptions.put(subject, new ArrayList<MessageCallback>());
+            if (!subscriptions.containsKey(subject)) {
+                subscriptions.put(subject, new ArrayList<MessageCallback>());
+            }
             subscriptions.get(subject).add(receiver);
         }
 
         public void remoteSubscribe(Object sessionContext, String subject) {
-            if (!remoteSubscriptions.containsKey(subject)) remoteSubscriptions.put(subject, new ArrayList<Object>());
+            System.out.println("RemoteSubscriptionRequest:" + subject);
+            if (subscriptions.containsKey(subject)) return;
+
+            if (!remoteSubscriptions.containsKey(subject)) {
+                remoteSubscriptions.put(subject, new ArrayList<Object>());
+            }
             remoteSubscriptions.get(subject).add(sessionContext);
         }
 
@@ -166,7 +173,9 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
             List<Object> sessionsToSubject = remoteSubscriptions.get(subject);
             sessionsToSubject.remove(sessionContext);
 
-            if (sessionsToSubject.isEmpty()) remoteSubscriptions.remove(subject);
+            if (sessionsToSubject.isEmpty()) {
+                remoteSubscriptions.remove(subject);
+            }
         }
 
         private boolean isAnyoneListening(Object sessionContext, String subject) {
