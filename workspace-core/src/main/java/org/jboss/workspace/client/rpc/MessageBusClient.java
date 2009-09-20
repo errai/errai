@@ -38,7 +38,6 @@ public class MessageBusClient {
 
     public static void unsubscribeAll(String subject) {
         if (subscriptions.containsKey(subject)) {
-            System.out.println("Unsubscribe:" + subject);
             for (Object o : subscriptions.get(subject)) {
                 _unsubscribe(o);
             }
@@ -117,8 +116,6 @@ public class MessageBusClient {
     public static void unregisterAll(Map<String, Set<Object>> all) {
         for (Map.Entry<String, Set<Object>> entry : all.entrySet()) {
             for (Object o : entry.getValue()) {
-                System.out.println("Unregistering: " + o + "...");
-
                 subscriptions.get(entry.getKey()).remove(o);
                 _unsubscribe(o);
             }

@@ -416,9 +416,6 @@ public class WorkspaceLayout extends Composite {
                 CommandMessage.create().set(LayoutParts.DOMID, DOMID),
                 new MessageCallback() {
                     public void callback(CommandMessage message) {
-                        System.out.println("RECV INIT!");
-
-
                         final ExtSimplePanel panel = new ExtSimplePanel();
                         panel.getElement().getStyle().setProperty("overflow", "hidden");
 
