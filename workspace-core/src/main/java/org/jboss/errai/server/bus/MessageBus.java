@@ -27,4 +27,6 @@ public interface MessageBus {
     public Set<String> getSubjects();
 
     public void addGlobalListener(MessageListener listener);
+    public void addSubscribeListener(SubscribeListener listener);
+    public void addUnsubscribeListener(UnsubscribeListener listener);
 }

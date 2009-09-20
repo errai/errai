@@ -27,9 +27,11 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
         private final Map<String, List<MessageCallback>> subscriptions = new HashMap<String, List<MessageCallback>>();
         private final Map<String, List<Object>> remoteSubscriptions = new HashMap<String, List<Object>>();
 
-
         private final Map<Object, Queue<Message>> messageQueues = new HashMap<Object, Queue<Message>>();
         private final Map<Object, Thread> activeWaitingThreads = new HashMap<Object, Thread>();
+
+        private final List<SubscribeListener> subscribeListeners = new LinkedList<SubscribeListener>();
+        private final List<UnsubscribeListener> unsubscribeListeners = new LinkedList<UnsubscribeListener>();
 
         public SimpleMessageBus() {
             Thread thread = new Thread() {
@@ -85,7 +87,7 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
                 throw new NoSubscribersToDeliverTo("for: " + subject);
             }
 
-            if (fireListeners && !fireAllListeners(message)) return;
+            if (fireListeners && !fireGlobalMessageListeners(message)) return;
 
             final String jsonMessage = encodeMap(message.getParts());
 
@@ -140,7 +142,7 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
         }
 
         public void store(String sessionid, String subject, CommandMessage message, boolean fireListeners) {
-            if (fireListeners && !fireAllListeners(message)) return;
+            if (fireListeners && !fireGlobalMessageListeners(message)) return;
 
             store(sessionid, subject, encodeMap(message.getParts()));
         }
@@ -199,12 +201,17 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
             if (!subscriptions.containsKey(subject)) {
                 subscriptions.put(subject, new ArrayList<MessageCallback>());
             }
+
+            fireSubscribeListeners(new SubscriptionEvent(false, null, subject));
+
             subscriptions.get(subject).add(receiver);
         }
 
         public void remoteSubscribe(Object sessionContext, String subject) {
             //  System.out.println("RemoteSubscriptionRequest:" + subject);
             if (subscriptions.containsKey(subject) || subject == null) return;
+
+            fireSubscribeListeners(new SubscriptionEvent(true, sessionContext, subject));
 
             if (!remoteSubscriptions.containsKey(subject)) {
                 remoteSubscriptions.put(subject, new ArrayList<Object>());
@@ -214,6 +221,8 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
 
         public void remoteUnsubscribe(Object sessionContext, String subject) {
             if (!remoteSubscriptions.containsKey(subject)) return;
+
+            fireUnsubscribeListeners(new SubscriptionEvent(true, sessionContext, subject));
 
             List<Object> sessionsToSubject = remoteSubscriptions.get(subject);
             sessionsToSubject.remove(sessionContext);
@@ -232,7 +241,7 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
             return subscriptions.keySet();
         }
 
-        private boolean fireAllListeners(CommandMessage message) {
+        private boolean fireGlobalMessageListeners(CommandMessage message) {
             boolean allowContinue = true;
 
             for (MessageListener listener : listeners) {
@@ -244,8 +253,28 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
             return allowContinue;
         }
 
+        private void fireSubscribeListeners(SubscriptionEvent event) {
+            for (SubscribeListener listener : subscribeListeners) {
+                listener.onSubscribe(event);
+            }
+        }
+
+        private void fireUnsubscribeListeners(SubscriptionEvent event) {
+            for (UnsubscribeListener listener : unsubscribeListeners) {
+                listener.onUnsubscribe(event);
+            }
+        }
+
         public void addGlobalListener(MessageListener listener) {
             listeners.add(listener);
+        }
+
+        public void addSubscribeListener(SubscribeListener listener) {
+            subscribeListeners.add(listener);
+        }
+
+        public void addUnsubscribeListener(UnsubscribeListener listener) {
+            unsubscribeListeners.add(listener);
         }
     }
 }
