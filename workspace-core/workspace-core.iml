@@ -22,6 +22,7 @@
         <setting name="runGwtCompilerOnMake" value="true" />
         <setting name="webFacet" value="Web" />
         <packaging>
+          <module name="org.jboss.errai.Workspace" path="/org.jboss.errai.Workspace" />
           <module name="org.jboss.workspace.Workspace" path="/org.jboss.workspace.Workspace" />
         </packaging>
       </configuration>

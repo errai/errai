@@ -137,7 +137,7 @@ public class MessageBusClient {
                                             Object subscriberData) /*-{
          return $wnd.PageBus.subscribe(subject, null,
                  function (subject, message, subcriberData) {
-                    callback.@org.jboss.errai.client.framework.MessageCallback::callback(Lorg/jboss/workspace/client/rpc/CommandMessage;)(@org.jboss.errai.client.rpc.MessageBusClient::decodeCommandMessage(Ljava/lang/Object;)(message))
+                    callback.@org.jboss.errai.client.framework.MessageCallback::callback(Lorg/jboss/errai/client/rpc/CommandMessage;)(@org.jboss.errai.client.rpc.MessageBusClient::decodeCommandMessage(Ljava/lang/Object;)(message))
                  },
                  null);
     }-*/;
