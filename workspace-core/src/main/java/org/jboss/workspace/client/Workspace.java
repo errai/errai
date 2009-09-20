@@ -21,6 +21,7 @@ import org.jboss.workspace.client.rpc.CommandMessage;
 import org.jboss.workspace.client.rpc.MessageBusClient;
 import org.jboss.workspace.client.rpc.MessageBusService;
 import org.jboss.workspace.client.rpc.MessageBusServiceAsync;
+import static org.jboss.workspace.client.rpc.MessageBusClient.enqueueForRemoteTransmit;
 import org.jboss.workspace.client.rpc.protocols.BusCommands;
 import org.jboss.workspace.client.rpc.protocols.MessageParts;
 import org.jboss.workspace.client.rpc.protocols.SecurityCommands;
@@ -88,7 +89,6 @@ public class Workspace implements EntryPoint {
         });
 
         beginStartup(rootId);
-
 
         _initAfterWSLoad();
 
@@ -186,13 +186,17 @@ public class Workspace implements EntryPoint {
                 AsyncCallback<String[]> nextMessage = new AsyncCallback<String[]>() {
                     public void onFailure(Throwable throwable) {
                         block = false;
+                        System.out.println("FAILURE: " + throwable);
                         schedule(1);
                     }
 
                     public void onSuccess(String[] o) {
-                        if (o == null) return;
+                        if (o == null) {
+                      //      System.out.println("no payload");
+                            return;
+                        }
 
-                        //    System.out.println("RecvMsgFromServer (Subject:" + o[0] + ";Message=" + o[1] + ")");
+                    //    System.out.println("RecvMsgFromServer (Subject:" + o[0] + ";Message=" + o[1] + ")");
 
                         MessageBusClient.store(o[0], o[1]);
                         block = false;
@@ -227,7 +231,7 @@ public class Workspace implements EntryPoint {
                 for (final String subject : o) {
                     MessageBusClient.subscribe(subject, new MessageCallback() {
                         public void callback(CommandMessage message) {
-                            MessageBusClient.enqueueForRemoteTransmit(subject, message);
+                            enqueueForRemoteTransmit(subject, message);
                         }
                     }, null);
                 }

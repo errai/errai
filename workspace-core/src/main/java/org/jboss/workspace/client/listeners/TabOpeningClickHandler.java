@@ -30,7 +30,7 @@ public class TabOpeningClickHandler implements ClickHandler {
                 try {
                     final Widget w = tool.getWidget();
                     w.getElement().setId(message.get(String.class, LayoutParts.DOMID));
-                    w.setVisible(false);
+                   // w.setVisible(false);
                     RootPanel.get().add(w);
 
                     LayoutHint.attach(w, new LayoutHintProvider() {

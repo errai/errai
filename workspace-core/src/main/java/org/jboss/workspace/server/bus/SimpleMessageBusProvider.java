@@ -158,8 +158,8 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
         }
 
         public void remoteSubscribe(Object sessionContext, String subject) {
-            System.out.println("RemoteSubscriptionRequest:" + subject);
-            if (subscriptions.containsKey(subject)) return;
+          //  System.out.println("RemoteSubscriptionRequest:" + subject);
+            if (subscriptions.containsKey(subject) || subject == null) return;
 
             if (!remoteSubscriptions.containsKey(subject)) {
                 remoteSubscriptions.put(subject, new ArrayList<Object>());

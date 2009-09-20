@@ -67,7 +67,7 @@ public class MessageBusClient {
 
     public static void subscribeOnce(String subject, MessageCallback callback, Object subscriberData) {
         if (subscriptions.containsKey(subject)) return;
-        subscribe(subject,callback, subscriberData);
+        subscribe(subject, callback, subscriberData);
     }
 
     public static void subscribeOnce(String subject, MessageCallback callback) {
@@ -90,18 +90,14 @@ public class MessageBusClient {
         subscribe(tempSubject, callback);
         subscribe(tempSubject, new MessageCallback() {
             public void callback(CommandMessage message) {
-                System.out.println("unsubscribing temp subject");
                 unsubscribeAll(tempSubject);
             }
         });
 
-        System.out.println("Sending Message To: " + subject);
         store(subject, message);
     }
 
     private static void addSubscription(String subject, Object reference) {
-        System.out.println("Add Subscription:" + subject + ":" + reference);
-
         if (!subscriptions.containsKey(subject)) {
             subscriptions.put(subject, new ArrayList<Object>());
         }
@@ -180,43 +176,65 @@ public class MessageBusClient {
         sendAll();
     }
 
+
+    private static Timer sendTimer;
+
     private static void sendAll() {
         if (transmitting) {
-            Timer retry = new Timer() {
-                @Override
-                public void run() {
-                    if (!MessageBusClient.transmitting) {
-                        cancel();
+            if (sendTimer == null) {
+                sendTimer = new Timer() {
+                    int timeout = 0;
+                    @Override
+                    public void run() {
+                        if (outgoingQueue.isEmpty()) {
+                            cancel();
+                        }
                         sendAll();
+
+                        /**
+                         * If this fails 4 times (which is the equivalent of 200ms) then we stop blocking
+                         * progress and allow more messages to flow.
+                         */
+                        if (++timeout > 4) {
+                            transmitting = false;
+                        }
                     }
-                }
-            };
-            retry.scheduleRepeating(50);
+                };
+                sendTimer.scheduleRepeating(50);
+            }
+
+            return;
+        }
+        else {
+            sendTimer = null;
         }
 
-        transmitting = true;
-        while (!outgoingQueue.isEmpty()) {
-            String[] msg = outgoingQueue.poll();
-            System.out.println("Transmitting:" + msg);
-            transmitRemote(msg[0], msg[1]);
-        }
-        transmitting = false;
+        String[] msg = outgoingQueue.poll();
+
+        if (msg == null) return;
+       
+        transmitRemote(msg[0], msg[1]);
     }
 
 
     private static void transmitRemote(String subject, String message) {
         try {
-            AsyncCallback<Void> cb = new AsyncCallback<Void>() {
+            transmitting = true;
+            messageBus.store(subject, message, new AsyncCallback<Void>() {
                 public void onFailure(Throwable throwable) {
+                    MessageBusClient.transmitting = false;
+                    sendAll();
                 }
 
                 public void onSuccess(Void o) {
+                    MessageBusClient.transmitting = false;
+                    sendAll();
                 }
-            };
+            });
 
-            messageBus.store(subject, message, cb);
         }
         catch (Exception e) {
+            transmitting = false;
             e.printStackTrace();
         }
     }

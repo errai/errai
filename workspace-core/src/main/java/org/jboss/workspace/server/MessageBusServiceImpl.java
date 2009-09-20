@@ -189,7 +189,7 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
      * @param message
      */
     public void store(String subject, String message) {
-        System.out.println("RecvMsgFromClient (Subject:" + subject + ";Message=" + message + ")");
+        //System.out.println("RecvMsgFromClient (Subject:" + subject + ";Message=" + message + ")");
 
         CommandMessage translatedMessage = new CommandMessage();
 
