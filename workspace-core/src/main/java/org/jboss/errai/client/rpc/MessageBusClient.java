@@ -202,15 +202,13 @@ public class MessageBusClient {
 
             return;
         }
-        else {
+        else if (sendTimer != null) {
+            sendTimer.cancel();
             sendTimer = null;
         }
 
         String[] msg = outgoingQueue.poll();
-
-        if (msg == null) return;
-       
-        transmitRemote(msg[0], msg[1]);
+        if (msg != null) transmitRemote(msg[0], msg[1]);
     }
 
 

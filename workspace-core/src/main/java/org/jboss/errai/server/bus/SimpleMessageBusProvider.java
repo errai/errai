@@ -31,6 +31,51 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
         private final Map<Object, Queue<Message>> messageQueues = new HashMap<Object, Queue<Message>>();
         private final Map<Object, Thread> activeWaitingThreads = new HashMap<Object, Thread>();
 
+        public SimpleMessageBus() {
+            Thread thread = new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        while (true) {
+                            Thread.sleep(5000);
+
+                            System.err.println();
+                            System.err.println("[ MessageBus Status   ");
+                            System.err.println("[ -----------------");
+                            System.err.println("[ Remote Endpoints: " + remoteSubscriptions.size());
+                            for (String endPointName : remoteSubscriptions.keySet()) {
+                                System.err.println("[  __________________________");
+                                System.err.println("[  Endpoint         : " + endPointName);
+                                System.err.println("[  ClientsSubscribed: " + remoteSubscriptions.get(endPointName).size());
+                            }
+
+                            System.err.println("[");
+                            System.err.println("[ Queues");
+                            for (Object queue : messageQueues.keySet()) {
+                                System.err.println("[  __________________________");
+                                System.err.println("[  Queue: " + queue);
+                                for (Message message : messageQueues.get(queue)) {
+                                    System.err.println("[     -> @" + message.getSubject() + " = " + message.getMessage());
+                                }
+                            }
+
+                            System.err.println();
+                        }
+
+                    }
+                    catch (Exception e) {
+                        e.printStackTrace();
+                        System.out.println("Exit");
+                        return;
+                    }
+
+                }
+            };
+
+            thread.setPriority(Thread.MIN_PRIORITY);
+            thread.start();
+        }
+
         public void storeGlobal(String subject, CommandMessage message) {
             storeGlobal(subject, message, true);
         }
@@ -158,7 +203,7 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
         }
 
         public void remoteSubscribe(Object sessionContext, String subject) {
-          //  System.out.println("RemoteSubscriptionRequest:" + subject);
+            //  System.out.println("RemoteSubscriptionRequest:" + subject);
             if (subscriptions.containsKey(subject) || subject == null) return;
 
             if (!remoteSubscriptions.containsKey(subject)) {

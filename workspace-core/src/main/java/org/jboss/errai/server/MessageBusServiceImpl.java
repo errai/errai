@@ -5,10 +5,10 @@ import org.jboss.errai.client.framework.MessageCallback;
 import org.jboss.errai.client.rpc.CommandMessage;
 import org.jboss.errai.client.rpc.ConversationMessage;
 import org.jboss.errai.client.rpc.MessageBusService;
-import org.jboss.errai.client.rpc.protocols.SecurityCommands;
-import org.jboss.errai.client.rpc.protocols.SecurityParts;
 import org.jboss.errai.client.rpc.protocols.BusCommands;
 import org.jboss.errai.client.rpc.protocols.MessageParts;
+import org.jboss.errai.client.rpc.protocols.SecurityCommands;
+import org.jboss.errai.client.rpc.protocols.SecurityParts;
 import org.jboss.errai.client.security.CredentialTypes;
 import org.jboss.errai.server.bus.Message;
 import org.jboss.errai.server.bus.MessageBus;
@@ -172,8 +172,10 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
 
         }
         catch (Exception e) {
-            throw new RuntimeException("unable to load config" ,e);
+            throw new RuntimeException("unable to load config", e);
         }
+
+  
     }
 
     private void useDefaults() {
