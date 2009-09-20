@@ -6,19 +6,19 @@
            version="2.5">
 
     <servlet>
-        <servlet-name>org.jboss.workspace.Workspace MessageBusService</servlet-name>
-        <servlet-class>org.jboss.workspace.server.MessageBusServiceImpl</servlet-class>
+        <servlet-name>org.jboss.errai.Workspace MessageBusService</servlet-name>
+        <servlet-class>org.jboss.errai.server.MessageBusServiceImpl</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>org.jboss.workspace.Workspace MessageBusService</servlet-name>
-        <servlet-class>org.jboss.workspace.server.MessageBusServiceImpl</servlet-class>
+        <servlet-name>org.jboss.errai.Workspace MessageBusService</servlet-name>
+        <servlet-class>org.jboss.errai.server.MessageBusServiceImpl</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>org.jboss.workspace.Workspace MessageBusService</servlet-name>
-        <url-pattern>/org.jboss.workspace.Workspace/jbwMsgBus</url-pattern>
+        <servlet-name>org.jboss.errai.Workspace MessageBusService</servlet-name>
+        <url-pattern>/org.jboss.errai.Workspace/jbwMsgBus</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>org.jboss.workspace.Workspace MessageBusService</servlet-name>
-        <url-pattern>/org.jboss.workspace.Workspace/jbwMsgBus</url-pattern>
+        <servlet-name>org.jboss.errai.Workspace MessageBusService</servlet-name>
+        <url-pattern>/org.jboss.errai.Workspace/jbwMsgBus</url-pattern>
     </servlet-mapping>
 </web-app>
