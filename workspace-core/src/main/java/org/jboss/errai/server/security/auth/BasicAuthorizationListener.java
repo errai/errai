@@ -6,6 +6,7 @@ import org.jboss.errai.client.rpc.protocols.SecurityParts;
 import org.jboss.errai.server.MessageBusServiceImpl;
 import org.jboss.errai.server.bus.MessageBusServer;
 import org.jboss.errai.server.bus.MessageListener;
+import org.jboss.errai.server.bus.NoSubscribersToDeliverTo;
 
 import javax.servlet.http.HttpSession;
 
@@ -19,14 +20,20 @@ public class BasicAuthorizationListener implements MessageListener {
 
     public boolean handleMessage(CommandMessage message) {
         if (adapter.requiresAuthorization(message)) {
-            MessageBusServer.store("LoginClient",
-                    CommandMessage.create(SecurityCommands.SecurityChallenge)
-                            .set(SecurityParts.CredentialsRequired, "Name,Password")
-                            .set(SecurityParts.ReplyTo, MessageBusServiceImpl.AUTHORIZATION_SVC_SUBJECT)
-                            .set(SecurityParts.SessionData, message.get(HttpSession.class, SecurityParts.SessionData))
-                    , false);
 
-            return false;
+            try {
+                MessageBusServer.store("LoginClient",
+                        CommandMessage.create(SecurityCommands.SecurityChallenge)
+                                .set(SecurityParts.CredentialsRequired, "Name,Password")
+                                .set(SecurityParts.ReplyTo, MessageBusServiceImpl.AUTHORIZATION_SVC_SUBJECT)
+                                .set(SecurityParts.SessionData, message.get(HttpSession.class, SecurityParts.SessionData))
+                        , false);
+
+                return false;
+            }
+            catch (NoSubscribersToDeliverTo e) {
+                System.out.println("**NO LOGINCLIENT*");
+            }
         }
         return true;
 

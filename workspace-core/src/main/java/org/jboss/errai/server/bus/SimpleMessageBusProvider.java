@@ -46,18 +46,26 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
                             System.err.println("[ -----------------");
                             System.err.println("[ Remote Endpoints: " + remoteSubscriptions.size());
                             for (String endPointName : remoteSubscriptions.keySet()) {
-                                System.err.println("[  __________________________");
-                                System.err.println("[  Endpoint         : " + endPointName);
-                                System.err.println("[  ClientsSubscribed: " + remoteSubscriptions.get(endPointName).size());
+                                System.err.println("[   __________________________");
+                                System.err.println("[   Endpoint         : " + endPointName);
+                                System.err.println("[   ClientsSubscribed: " + remoteSubscriptions.get(endPointName).size());
                             }
 
                             System.err.println("[");
                             System.err.println("[ Queues");
                             for (Object queue : messageQueues.keySet()) {
-                                System.err.println("[  __________________________");
-                                System.err.println("[  Queue: " + queue);
-                                for (Message message : messageQueues.get(queue)) {
-                                    System.err.println("[     -> @" + message.getSubject() + " = " + message.getMessage());
+                                System.err.println("[   __________________________");
+
+                                Queue<Message> q = messageQueues.get(queue);
+
+                                System.err.println("[   Queue: " + queue + " (size:" + q.size() + ")");
+                                try {
+                                    for (Message message : q) {
+                                        System.err.println("[     -> @" + message.getSubject() + " = " + message.getMessage());
+                                    }
+                                }
+                                catch (ConcurrentModificationException e) {
+                                    System.out.println("[     -> BLOCKED!");
                                 }
                             }
 
@@ -228,6 +236,17 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
 
             if (sessionsToSubject.isEmpty()) {
                 remoteSubscriptions.remove(subject);
+            }
+
+            /**
+             * Any messages still in the queue for this subject, will now never be delivered.  So we must purge them,
+             * like the unwanted and forsaken messages they are.
+             */
+            Iterator<Message> iter = messageQueues.get(sessionContext).iterator();
+            while (iter.hasNext()) {
+                if (subject.equals(iter.next().getSubject())) {
+                    iter.remove();
+                }
             }
         }
 

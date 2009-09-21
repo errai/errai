@@ -32,6 +32,9 @@ public class MessageBusServer {
         try {
             new SimpleMessageBusProvider().getBus().store(subject, message, fireListeners);
         }
+        catch (NoSubscribersToDeliverTo e) {
+            throw e;
+        }
         catch (Exception e) {
             e.printStackTrace();
         }
