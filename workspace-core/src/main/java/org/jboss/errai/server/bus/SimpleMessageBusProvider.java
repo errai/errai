@@ -7,9 +7,10 @@ import org.jboss.errai.server.MessageBusServiceImpl;
 import static org.jboss.errai.server.bus.MessageBusServer.encodeMap;
 
 import javax.servlet.http.HttpSession;
-import static java.lang.Thread.currentThread;
-import static java.lang.Thread.sleep;
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 public class SimpleMessageBusProvider implements MessageBusProvider {
     private static MessageBus bus;
@@ -21,14 +22,25 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
         return bus;
     }
 
+    private static final Message heartBeat = new Message() {
+        public String getSubject() {
+            return "HeartBeat";
+        }
+
+        public Object getMessage() {
+            return null;
+        }
+    };
+
+
     public class SimpleMessageBus implements MessageBus {
         private final List<MessageListener> listeners = new ArrayList<MessageListener>();
 
         private final Map<String, List<MessageCallback>> subscriptions = new HashMap<String, List<MessageCallback>>();
         private final Map<String, List<Object>> remoteSubscriptions = new HashMap<String, List<Object>>();
 
-        private final Map<Object, Queue<Message>> messageQueues = new HashMap<Object, Queue<Message>>();
-        private final Map<Object, Thread> activeWaitingThreads = new HashMap<Object, Thread>();
+        private final Map<Object, BlockingQueue<Message>> messageQueues = new HashMap<Object, BlockingQueue<Message>>();
+        //   private final Map<Object, Thread> activeWaitingThreads = new HashMap<Object, Thread>();
 
         private final List<SubscribeListener> subscribeListeners = new LinkedList<SubscribeListener>();
         private final List<UnsubscribeListener> unsubscribeListeners = new LinkedList<UnsubscribeListener>();
@@ -105,9 +117,9 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
             }
 
             if (remoteSubscriptions.containsKey(subject)) {
-                for (Map.Entry<Object, Queue<Message>> entry : messageQueues.entrySet()) {
+                for (Map.Entry<Object, BlockingQueue<Message>> entry : messageQueues.entrySet()) {
                     if (remoteSubscriptions.get(subject).contains(entry.getKey())) {
-                        messageQueues.get(entry.getKey()).add(new Message() {
+                        messageQueues.get(entry.getKey()).offer(new Message() {
                             public String getSubject() {
                                 return subject;
                             }
@@ -116,9 +128,6 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
                                 return jsonMessage;
                             }
                         });
-
-                        Thread t = activeWaitingThreads.get(entry.getKey());
-                        if (t != null) t.interrupt();
                     }
                 }
             }
@@ -126,7 +135,7 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
 
         private void store(final String sessionId, final String subject, final Object message) {
             if (messageQueues.containsKey(sessionId) && isAnyoneListening(sessionId, subject)) {
-                messageQueues.get(sessionId).add(new Message() {
+                messageQueues.get(sessionId).offer(new Message() {
                     public String getSubject() {
                         return subject;
                     }
@@ -135,9 +144,6 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
                         return message;
                     }
                 });
-
-                Thread t = activeWaitingThreads.get(sessionId);
-                if (t != null) t.interrupt();
             }
             else {
                 throw new NoSubscribersToDeliverTo("for: " + subject);
@@ -172,34 +178,23 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
             store((String) session.getAttribute(MessageBusServiceImpl.WS_SESSION_ID), subject, message, fireListeners);
         }
 
+
         public Message nextMessage(Object sessionContext) {
-            Queue<Message> q = getQueue(sessionContext);
-
-            if (q.isEmpty()) {
-                holdThread(sessionContext);
-                return q.poll();
-            }
-            else {
-                return q.poll();
-            }
-        }
-
-        private void holdThread(Object sessionContext) {
             try {
-                activeWaitingThreads.put(sessionContext, currentThread());
-                sleep(1000 * 45);
+                /**
+                 * Long-poll for 45 seconds.
+                 */
+                Message m = getQueue(sessionContext).poll(45, TimeUnit.SECONDS);
+                return m == null ? heartBeat : m;
             }
             catch (InterruptedException e) {
-                // passthru
-            }
-            finally {
-                activeWaitingThreads.remove(sessionContext);
+                return heartBeat;
             }
         }
 
-        private Queue<Message> getQueue(Object sessionContext) {
+        private BlockingQueue<Message> getQueue(Object sessionContext) {
             if (!messageQueues.containsKey(sessionContext))
-                messageQueues.put(sessionContext, new LinkedList<Message>());
+                messageQueues.put(sessionContext, new ArrayBlockingQueue<Message>(25));
 
             return messageQueues.get(sessionContext);
         }

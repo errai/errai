@@ -195,11 +195,12 @@ public class Workspace implements EntryPoint {
 
                     public void onSuccess(String[] o) {
                         if (o == null) {
-                      //      System.out.println("no payload");
                             return;
                         }
 
-                    //    System.out.println("RecvMsgFromServer (Subject:" + o[0] + ";Message=" + o[1] + ")");
+                        if ("HeartBeat".equals(o[0])) {
+                            System.out.println("** Heartbeat **");
+                        }
 
                         MessageBusClient.store(o[0], o[1]);
                         block = false;
