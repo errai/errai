@@ -70,7 +70,6 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
                         System.out.println("Exit");
                         return;
                     }
-
                 }
             };
 
@@ -254,12 +253,32 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
         }
 
         private void fireSubscribeListeners(SubscriptionEvent event) {
-            for (SubscribeListener listener : subscribeListeners) {
-                listener.onSubscribe(event);
+            Iterator<SubscribeListener> iter = subscribeListeners.iterator();
+
+            event.setDisposeListener(false);
+
+            while (iter.hasNext()) {
+                iter.next().onSubscribe(event);
+                if (event.isDisposeListener()) {
+                    iter.remove();
+                    event.setDisposeListener(false);
+                }
             }
         }
 
         private void fireUnsubscribeListeners(SubscriptionEvent event) {
+            Iterator<UnsubscribeListener> iter = unsubscribeListeners.iterator();
+
+            event.setDisposeListener(false);
+
+            while (iter.hasNext()) {
+                iter.next().onUnsubscribe(event);
+                if (event.isDisposeListener()) {
+                    iter.remove();
+                    event.setDisposeListener(false);
+                }
+            }
+
             for (UnsubscribeListener listener : unsubscribeListeners) {
                 listener.onUnsubscribe(event);
             }

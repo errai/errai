@@ -41,6 +41,13 @@ public class MessageBusServer {
         onSubscribeHooks.add(callback);
     }
 
+    public static void addSubscribeListener(SubscribeListener listener) {
+        new SimpleMessageBusProvider().getBus().addSubscribeListener(listener);
+    }
+
+    public static void addUnsubscribeListener(UnsubscribeListener listener) {
+        new SimpleMessageBusProvider().getBus().addUnsubscribeListener(listener);
+    }
 
     public static CommandMessage decodeToCommandMessage(Object in) {
         return new CommandMessage(decodeMap(in));
