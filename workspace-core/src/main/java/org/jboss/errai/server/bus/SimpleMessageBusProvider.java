@@ -268,7 +268,6 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
                 return;
             }
 
-
             Set<Object> sessionsToSubject = remoteSubscriptions.get(subject);
 
             sessionsToSubject.remove(sessionContext);
