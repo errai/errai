@@ -42,7 +42,7 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
         private final List<MessageListener> listeners = new ArrayList<MessageListener>();
 
         private final Map<String, List<MessageCallback>> subscriptions = new HashMap<String, List<MessageCallback>>();
-        private final Map<String, List<Object>> remoteSubscriptions = new HashMap<String, List<Object>>();
+        private final Map<String, Set<Object>> remoteSubscriptions = new HashMap<String, Set<Object>>();
 
         private final Map<Object, BlockingQueue<Message>> messageQueues = new HashMap<Object, BlockingQueue<Message>>();
         //   private final Map<Object, Thread> activeWaitingThreads = new HashMap<Object, Thread>();
@@ -242,13 +242,12 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
         }
 
         public void remoteSubscribe(Object sessionContext, String subject) {
-            //  System.out.println("RemoteSubscriptionRequest:" + subject);
             if (subscriptions.containsKey(subject) || subject == null) return;
 
             fireSubscribeListeners(new SubscriptionEvent(true, sessionContext, subject));
 
             if (!remoteSubscriptions.containsKey(subject)) {
-                remoteSubscriptions.put(subject, new ArrayList<Object>());
+                remoteSubscriptions.put(subject, new HashSet<Object>());
             }
             remoteSubscriptions.get(subject).add(sessionContext);
         }
@@ -270,7 +269,7 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
             }
 
 
-            List<Object> sessionsToSubject = remoteSubscriptions.get(subject);
+            Set<Object> sessionsToSubject = remoteSubscriptions.get(subject);
 
             sessionsToSubject.remove(sessionContext);
 
