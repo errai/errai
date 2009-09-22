@@ -7,10 +7,15 @@ import org.jboss.errai.server.MessageBusServiceImpl;
 import static org.jboss.errai.server.bus.MessageBusServer.encodeMap;
 
 import javax.servlet.http.HttpSession;
+import javax.swing.*;
+import java.awt.*;
 import java.util.*;
+import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
+
 
 public class SimpleMessageBusProvider implements MessageBusProvider {
     private static MessageBus bus;
@@ -50,45 +55,70 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
                 @Override
                 public void run() {
                     try {
-                        while (true) {
-                            Thread.sleep(5000);
+                        JFrame frame = new JFrame() {
+                            {
+                                setTitle("Errai Bus Monitor");
+                                setResizable(true);
+                            }
+                        };
 
-                            System.err.println();
-                            System.err.println("[ MessageBus Status   ");
-                            System.err.println("[ -----------------");
-                            System.err.println("[ Remote Endpoints: " + remoteSubscriptions.size());
-                            for (String endPointName : remoteSubscriptions.keySet()) {
-                                System.err.println("[   __________________________");
-                                System.err.println("[   Endpoint         : " + endPointName);
-                                System.err.println("[   ClientsSubscribed: " + remoteSubscriptions.get(endPointName).size());
+                        final JTextArea area = new JTextArea();
+                        area.setDisabledTextColor(Color.BLACK);
+                        area.setEnabled(false);
+                        area.setFont(area.getFont().deriveFont(9f));
+
+                        frame.getContentPane().add(area);
+
+                        frame.pack();
+                        frame.setVisible(true);
+                        frame.setSize(400, 600);
+
+                        StringBuilder builder;
+
+                        //noinspection InfiniteLoopStatement
+                        while (true) {
+                            Thread.sleep(100);
+
+                            builder = new StringBuilder().append("LOCAL ENDPOINTS :")
+                                    .append(subscriptions.size()).append("\n");
+
+                            for (String endPointName : subscriptions.keySet()) {
+                                builder.append(" [").append(subscriptions.get(endPointName).size()).append("] ")
+                                        .append(endPointName).append("\n");
                             }
 
-                            System.err.println("[");
-                            System.err.println("[ Queues");
+                            builder.append("REMOTE ENDPOINTS: ")
+                                    .append(remoteSubscriptions.size()).append("\n");
+                            for (String endPointName : remoteSubscriptions.keySet()) {
+                                builder.append(" [").append(remoteSubscriptions.get(endPointName).size()).append("] ")
+                                        .append(endPointName).append("\n");
+
+                            }
+
+                            builder.append("\nQUEUES\n");
+
                             for (Object queue : messageQueues.keySet()) {
-                                System.err.println("[   __________________________");
+                                builder.append("   __________________________").append("\n");
 
                                 Queue<Message> q = messageQueues.get(queue);
 
-                                System.err.println("[   Queue: " + queue + " (size:" + q.size() + ")");
-                                try {
-                                    for (Message message : q) {
-                                        System.err.println("[     -> @" + message.getSubject() + " = " + message.getMessage());
-                                    }
+                                builder.append("   Queue: ").append(queue).append(" (size:").append(q.size()).append(")").append(q.size() == 25 ? " ** QUEUE FULL (BLOCKING) **" : "").append("\n");
+                                for (Message message : q) {
+                                    builder.append("     -> @").append(message.getSubject()).append(" = ").append(message.getMessage()).append("\n");
                                 }
-                                catch (ConcurrentModificationException e) {
-                                    System.out.println("[     -> BLOCKED!");
-                                }
+
                             }
 
-                            System.err.println();
+                            area.setText(builder.append("\n").toString());
                         }
-
+                    }
+                    catch (InterruptedException e) {
+                    }
+                    catch (ConcurrentModificationException e) {
+                        run();
                     }
                     catch (Exception e) {
                         e.printStackTrace();
-                        System.out.println("Exit");
-                        return;
                     }
                 }
             };
@@ -155,7 +185,10 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
         }
 
         public void store(String sessionid, String subject, CommandMessage message, boolean fireListeners) {
-            if (fireListeners && !fireGlobalMessageListeners(message)) return;
+            if (fireListeners && !fireGlobalMessageListeners(message)) {
+                System.out.println("ListenerBlockedDelivery (@" + subject + ")");
+                return;
+            }
 
             store(sessionid, subject, encodeMap(message.getParts()));
         }
@@ -222,11 +255,24 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
         }
 
         public void remoteUnsubscribe(Object sessionContext, String subject) {
-            if (!remoteSubscriptions.containsKey(subject)) return;
 
-            fireUnsubscribeListeners(new SubscriptionEvent(true, sessionContext, subject));
+            if (!remoteSubscriptions.containsKey(subject)) {
+                System.out.println("CannotUnsubscribe (NO KNOWN SUBJECT: " + subject + ")");
+                return;
+            }
+
+            try {
+                fireUnsubscribeListeners(new SubscriptionEvent(true, sessionContext, subject));
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("Exception running listeners");
+                return;
+            }
+
 
             List<Object> sessionsToSubject = remoteSubscriptions.get(subject);
+
             sessionsToSubject.remove(sessionContext);
 
             if (sessionsToSubject.isEmpty()) {
@@ -291,10 +337,6 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
                     iter.remove();
                     event.setDisposeListener(false);
                 }
-            }
-
-            for (UnsubscribeListener listener : unsubscribeListeners) {
-                listener.onUnsubscribe(event);
             }
         }
 

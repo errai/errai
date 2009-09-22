@@ -11,6 +11,7 @@ import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import org.jboss.errai.client.framework.AcceptsCallback;
 import org.jboss.errai.client.framework.MessageCallback;
 import org.jboss.errai.client.rpc.protocols.MessageParts;
+import org.jboss.errai.client.widgets.WSModalDialog;
 
 import java.util.*;
 
@@ -74,6 +75,8 @@ public class MessageBusClient {
         subscribe(subject, callback);
     }
 
+    private static int conversationCounter = 0;
+
     /**
      * Have a single two-way conversation
      *
@@ -81,19 +84,37 @@ public class MessageBusClient {
      * @param message
      * @param callback
      */
-    public static void conversationWith(String subject, CommandMessage message, MessageCallback callback) {
-        final String tempSubject = callback.hashCode() + ":temp";
+    public static void conversationWith(final String subject, CommandMessage message, MessageCallback callback) {
+        final String tempSubject = conversationCounter++ + ":temp";
+
+        final Timer t = new Timer() {
+            @Override
+            public void run() {
+                WSModalDialog error = new WSModalDialog();
+                error.ask("Service '" + subject + "' did not property respond", new AcceptsCallback() {
+                    public void callback(Object message, Object data) {
+                        unsubscribeAll(tempSubject);
+                    }
+                });
+
+                error.showModal();
+            }
+        };
 
         message.set(MessageParts.ReplyTo, tempSubject);
 
         subscribe(tempSubject, callback);
         subscribe(tempSubject, new MessageCallback() {
             public void callback(CommandMessage message) {
+                t.cancel();
                 unsubscribeAll(tempSubject);
             }
         });
 
+
         store(subject, message);
+
+        t.schedule(500);
     }
 
     private static void addSubscription(String subject, Object reference) {
@@ -181,6 +202,7 @@ public class MessageBusClient {
             if (sendTimer == null) {
                 sendTimer = new Timer() {
                     int timeout = 0;
+
                     @Override
                     public void run() {
                         if (outgoingQueue.isEmpty()) {

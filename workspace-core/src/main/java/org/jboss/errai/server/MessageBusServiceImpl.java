@@ -185,11 +185,13 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
     /**
      * Store a new message onto the bus.
      *
-     * @param subject
-     * @param message
+     * @param subject -
+     * @param message -
      */
     public void store(String subject, String message) {
         //System.out.println("RecvMsgFromClient (Subject:" + subject + ";Message=" + message + ")");
+
+        System.out.println("INCOMING_MSG (@" + subject + "):" + message);
 
         CommandMessage translatedMessage = new CommandMessage();
 
@@ -234,15 +236,6 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
             return null;
         }
     }
-
-//    public void remoteSubscribe(String subject) {
-//        if (bus.getSubjects().contains(subject)) return;
-//        bus.remoteSubscribe(getId(), subject);
-//    }
-//
-//    public void remoteUnsubscribe(String subject) {
-//        bus.remoteUnsubscribe(getId(), subject);
-//    }
 
     private HttpSession getSession() {
         HttpServletRequest request = getThreadLocalRequest();
