@@ -10,10 +10,10 @@ import org.jboss.errai.client.rpc.protocols.MessageParts;
 import org.jboss.errai.client.rpc.protocols.SecurityCommands;
 import org.jboss.errai.client.rpc.protocols.SecurityParts;
 import org.jboss.errai.client.security.CredentialTypes;
+import org.jboss.errai.server.bus.DefaultMessageBusProvider;
 import org.jboss.errai.server.bus.Message;
 import org.jboss.errai.server.bus.MessageBus;
 import org.jboss.errai.server.bus.MessageBusServer;
-import org.jboss.errai.server.bus.SimpleMessageBusProvider;
 import org.jboss.errai.server.json.JSONUtil;
 import org.jboss.errai.server.security.auth.AuthorizationAdapter;
 import org.jboss.errai.server.security.auth.BasicAuthorizationListener;
@@ -41,7 +41,7 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
     @Override
     public void init() throws ServletException {
         // just use the simple bus for now.  more integration options to come...
-        bus = new SimpleMessageBusProvider().getBus();
+        bus = new DefaultMessageBusProvider().getBus();
 
         // initialize the configuration.
         loadConfig();

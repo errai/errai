@@ -13,12 +13,12 @@ public class MessageBusServer {
     private static List<AcceptsCallback> onSubscribeHooks = new ArrayList<AcceptsCallback>();
 
     public static void storeGlobal(String subject, CommandMessage message) {
-        new SimpleMessageBusProvider().getBus().storeGlobal(subject, message);
+        new DefaultMessageBusProvider().getBus().storeGlobal(subject, message);
     }
 
     public static void store(String subject, CommandMessage message) {
         try {
-            new SimpleMessageBusProvider().getBus().store(subject, message);
+            new DefaultMessageBusProvider().getBus().store(subject, message);
         }
         catch (NoSubscribersToDeliverTo e) {
             throw e;
@@ -30,7 +30,7 @@ public class MessageBusServer {
 
     public static void store(String subject, CommandMessage message, boolean fireListeners) {
         try {
-            new SimpleMessageBusProvider().getBus().store(subject, message, fireListeners);
+            new DefaultMessageBusProvider().getBus().store(subject, message, fireListeners);
         }
         catch (NoSubscribersToDeliverTo e) {
             throw e;
@@ -45,11 +45,11 @@ public class MessageBusServer {
     }
 
     public static void addSubscribeListener(SubscribeListener listener) {
-        new SimpleMessageBusProvider().getBus().addSubscribeListener(listener);
+        new DefaultMessageBusProvider().getBus().addSubscribeListener(listener);
     }
 
     public static void addUnsubscribeListener(UnsubscribeListener listener) {
-        new SimpleMessageBusProvider().getBus().addUnsubscribeListener(listener);
+        new DefaultMessageBusProvider().getBus().addUnsubscribeListener(listener);
     }
 
     public static CommandMessage decodeToCommandMessage(Object in) {
