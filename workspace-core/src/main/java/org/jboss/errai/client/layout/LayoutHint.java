@@ -13,8 +13,10 @@ public class LayoutHint {
     private static LinkedHashMap<Widget, LayoutHintProvider> MANAGED_WIDGETS = new LinkedHashMap<Widget, LayoutHintProvider>();
     private static LinkedHashMap<String, LayoutHintProvider> MANAGED_SUBJECTS = new LinkedHashMap<String, LayoutHintProvider>();
 
+    private static int counter = 0;
+
     public static void attach(final Widget w, LayoutHintProvider p) {
-        String subject = "org.jboss.errai.sizeHints:" + w.getElement().getId() + ":" + System.currentTimeMillis();
+        String subject = "org.jboss.errai.sizeHints:" + counter++;
 
         subscribe(subject,
                 new MessageCallback() {

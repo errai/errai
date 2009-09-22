@@ -33,9 +33,6 @@ public class MessageBusClient {
         endpoint.setServiceEntryPoint(getModuleBaseURL() + "jbwMsgBus");
     }
 
-    public static void beginCapture() {
-        registeredInThisSession = new HashMap<String, Set<Object>>();
-    }
 
     public static void unsubscribeAll(String subject) {
         if (subscriptions.containsKey(subject)) {
@@ -122,16 +119,25 @@ public class MessageBusClient {
             subscriptions.put(subject, new ArrayList<Object>());
         }
 
-        if (!registeredInThisSession.containsKey(subject)) {
+        if (registeredInThisSession != null && !registeredInThisSession.containsKey(subject)) {
             registeredInThisSession.put(subject, new HashSet<Object>());
         }
 
         subscriptions.get(subject).add(reference);
-        registeredInThisSession.get(subject).add(reference);
+        if (registeredInThisSession != null) registeredInThisSession.get(subject).add(reference);
     }
 
-    public static Map<String, Set<Object>> getAllRegisteredThisSession() {
+    public static Map<String, Set<Object>> getCapturedRegistrations() {
         return registeredInThisSession;
+    }
+
+    public static void beginCapture() {
+        registeredInThisSession = new HashMap<String, Set<Object>>();
+    }
+
+
+    public static void endCapture() {
+        registeredInThisSession = null;
     }
 
     public static void unregisterAll(Map<String, Set<Object>> all) {

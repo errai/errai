@@ -433,32 +433,6 @@ public class WorkspaceLayout extends Composite {
                         tabPanel.add(panel, newWSTab);
                         newWSTab.activate();
 
-                        final Map<String, Set<Object>> toUnregister = MessageBusClient.getAllRegisteredThisSession();
-
-                        MessageBusClient.subscribe(getInstanceSubject(instanceId),
-                                new MessageCallback() {
-                                    public void callback(CommandMessage message) {
-                                        switch (LayoutCommands.valueOf(message.getCommandType())) {
-                                            case CloseTab:
-                                                tabDragController.unregisterDropController(newWSTab.getTabDropController());
-                                                MessageBusClient.unregisterAll(toUnregister);
-                                                deactivateTool(componentId);
-
-                                                int idx = newWSTab.remove();
-                                                if (idx > 0) idx--;
-                                                else if (tabPanel.getWidgetCount() == 0) return;
-
-                                                tabPanel.selectTab(idx);
-
-                                                break;
-
-                                            case ActivateTool:
-                                                newWSTab.activate();
-                                                break;
-                                        }
-                                    }
-                                },
-                                panel.getElement());
 
                         newWSTab.clearTabCloseHandlers();
                         newWSTab.addTabCloseHandler(new TabCloseHandler(instanceId));
@@ -491,6 +465,34 @@ public class WorkspaceLayout extends Composite {
 
                         tabInstances.put(instanceId, MessageBusClient.encodeMap(tabProperties));
 
+                        MessageBusClient.subscribe(getInstanceSubject(instanceId),
+                                new MessageCallback() {
+                                    private Map<String, Set<Object>> toUnregister = MessageBusClient.getCapturedRegistrations();
+
+                                    public void callback(CommandMessage message) {
+                                        switch (LayoutCommands.valueOf(message.getCommandType())) {
+                                            case CloseTab:
+                                                tabDragController.unregisterDropController(newWSTab.getTabDropController());
+                                                MessageBusClient.unregisterAll(toUnregister);
+                                                deactivateTool(componentId);
+
+                                                int idx = newWSTab.remove();
+                                                if (idx > 0) idx--;
+                                                else if (tabPanel.getWidgetCount() == 0) return;
+
+                                                tabPanel.selectTab(idx);
+
+                                                break;
+
+                                            case ActivateTool:
+                                                newWSTab.activate();
+                                                break;
+                                        }
+                                    }
+                                },
+                                panel.getElement());
+
+                        MessageBusClient.endCapture();
 
                         Timer t = new Timer() {
                             public void run() {

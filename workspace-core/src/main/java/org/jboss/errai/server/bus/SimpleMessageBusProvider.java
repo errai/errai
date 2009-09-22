@@ -99,7 +99,6 @@ public class SimpleMessageBusProvider implements MessageBusProvider {
 
                             for (Object queue : messageQueues.keySet()) {
                                 builder.append("   __________________________").append("\n");
-
                                 Queue<Message> q = messageQueues.get(queue);
 
                                 builder.append("   Queue: ").append(queue).append(" (size:").append(q.size()).append(")").append(q.size() == 25 ? " ** QUEUE FULL (BLOCKING) **" : "").append("\n");
