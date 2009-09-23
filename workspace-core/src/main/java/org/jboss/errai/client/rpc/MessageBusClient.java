@@ -125,6 +125,10 @@ public class MessageBusClient {
         if (registeredInThisSession != null) registeredInThisSession.get(subject).add(reference);
     }
 
+    public static boolean isSubscribed(String subject) {
+        return subscriptions.containsKey(subject);
+    }
+
     public static Map<String, Set<Object>> getCapturedRegistrations() {
         return registeredInThisSession;
     }

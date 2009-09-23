@@ -2,6 +2,7 @@ package org.jboss.errai.client;
 
 import com.allen_sauer.gwt.dnd.client.PickupDragController;
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
 import static com.google.gwt.core.client.GWT.create;
 import static com.google.gwt.core.client.GWT.getModuleBaseURL;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -148,6 +149,7 @@ public class Workspace implements EntryPoint {
 
         AsyncCallback<Void> store = new AsyncCallback<Void>() {
             public void onFailure(Throwable throwable) {
+                throwable.printStackTrace();
                 Window.alert("NO CARRIER");
             }
 
@@ -199,6 +201,9 @@ public class Workspace implements EntryPoint {
                             System.out.println("** Heartbeat **");
                         }
 
+                        GWT.log("ClientRecievedMessage [Subject:'" + o[0] + "';SubcribedTo:"
+                                + MessageBusClient.isSubscribed(o[0]) + ";Data:" + o[1] + "] ", null);
+
                         MessageBusClient.store(o[0], o[1]);
                         block = false;
                         schedule(1);
@@ -243,9 +248,6 @@ public class Workspace implements EntryPoint {
                                     .set(MessageParts.Subject, s));
                 }
 
-                for (ToolSet ts : toBeLoaded) {
-                    WorkspaceLayout.addToolSet(ts);
-                }
 
                 MessageBusClient.subscribe("LoginClient", new MessageCallback() {
                     public void callback(CommandMessage message) {
@@ -309,6 +311,10 @@ public class Workspace implements EntryPoint {
                         }
                     }
                 });
+
+                for (ToolSet ts : toBeLoaded) {
+                    WorkspaceLayout.addToolSet(ts);
+                }
 
             }
         };

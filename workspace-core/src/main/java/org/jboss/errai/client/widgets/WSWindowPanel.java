@@ -27,7 +27,7 @@ import java.util.List;
 public class WSWindowPanel extends Composite {
     private DockPanel dockPanel = new DockPanel();
     private Image icon = new Image(GWT.getModuleBaseURL() + "/images/ui/icons/flag_blue.png");
-    private Label label = new Label("Workspace Popup");
+    private Label label = new Label("Popup");
 
     private int offsetX;
     private int offsetY;
@@ -82,7 +82,8 @@ public class WSWindowPanel extends Composite {
         fPanel.add(titleArea);
 
         dockPanel.add(fPanel, DockPanel.NORTH);
-        dockPanel.setCellVerticalAlignment(fPanel, HasVerticalAlignment.ALIGN_MIDDLE);
+        dockPanel.setCellVerticalAlignment(fPanel, HasVerticalAlignment.ALIGN_TOP);
+        dockPanel.setCellHeight(fPanel, "25px");
 
         initWidget(dropShadow);
         setVisible(false);
