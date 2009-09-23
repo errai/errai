@@ -33,7 +33,6 @@ public class MessageBusClient {
         endpoint.setServiceEntryPoint(getModuleBaseURL() + "jbwMsgBus");
     }
 
-
     public static void unsubscribeAll(String subject) {
         if (subscriptions.containsKey(subject)) {
             for (Object o : subscriptions.get(subject)) {
@@ -108,7 +107,6 @@ public class MessageBusClient {
             }
         });
 
-
         store(subject, message);
 
         t.schedule(500);
@@ -135,7 +133,6 @@ public class MessageBusClient {
         registeredInThisSession = new HashMap<String, Set<Object>>();
     }
 
-
     public static void endCapture() {
         registeredInThisSession = null;
     }
@@ -153,7 +150,6 @@ public class MessageBusClient {
                 }
             }
         }
-
     }
 
     private native static void _unsubscribe(Object registrationHandle) /*-{
@@ -200,7 +196,6 @@ public class MessageBusClient {
         sendAll();
     }
 
-
     private static Timer sendTimer;
 
     private static void sendAll() {
@@ -238,7 +233,6 @@ public class MessageBusClient {
         String[] msg = outgoingQueue.poll();
         if (msg != null) transmitRemote(msg[0], msg[1]);
     }
-
 
     private static void transmitRemote(String subject, String message) {
         try {
@@ -305,7 +299,6 @@ public class MessageBusClient {
 
         return m;
     }
-
 
     public static CommandMessage decodeCommandMessage(Object value) {
         return new CommandMessage(decodeMap(value), String.valueOf(value));

@@ -55,6 +55,17 @@ public class ConversationMessage extends CommandMessage {
         return set(part.name(), value);
     }
 
+    /**
+     * Copy the same value from the specified message into this message.
+     * @param part
+     * @param message
+     * @return
+     */
+    public ConversationMessage copy(Enum part, CommandMessage message) {
+        set(part, message.get(Object.class, part));
+        return this;
+    }
+
     public ConversationMessage set(String part, Object value) {
         parts.put(part, value);
         encoded = null;

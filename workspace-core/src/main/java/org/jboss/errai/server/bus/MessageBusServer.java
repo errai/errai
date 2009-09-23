@@ -2,8 +2,12 @@ package org.jboss.errai.server.bus;
 
 import org.jboss.errai.client.framework.AcceptsCallback;
 import org.jboss.errai.client.rpc.CommandMessage;
+import org.jboss.errai.client.rpc.protocols.MessageParts;
+import org.jboss.errai.client.rpc.protocols.SecurityParts;
+import org.jboss.errai.server.MessageBusServiceImpl;
 import org.jboss.errai.server.json.JSONUtil;
 
+import javax.servlet.http.HttpSession;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +18,18 @@ public class MessageBusServer {
 
     public static void storeGlobal(String subject, CommandMessage message) {
         new DefaultMessageBusProvider().getBus().storeGlobal(subject, message);
+    }
+
+    public static void store(String sessionId, String subject, CommandMessage message) {
+        try {
+            new DefaultMessageBusProvider().getBus().store(sessionId, subject, message);
+        }
+        catch (NoSubscribersToDeliverTo e) {
+            throw e;
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static void store(String subject, CommandMessage message) {
@@ -28,6 +44,7 @@ public class MessageBusServer {
         }
     }
 
+
     public static void store(String subject, CommandMessage message, boolean fireListeners) {
         try {
             new DefaultMessageBusProvider().getBus().store(subject, message, fireListeners);
@@ -37,6 +54,15 @@ public class MessageBusServer {
         }
         catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    public static void store(CommandMessage message) {
+        if (message.hasPart(MessageParts.ToSubject)) {
+            store(message.get(String.class, MessageParts.ToSubject), message);
+        }
+        else {
+            throw new RuntimeException("Cannot send message using this method if the message does not contain a ToSubject field.");
         }
     }
 
@@ -106,5 +132,9 @@ public class MessageBusServer {
         }
         buf.append("}");
         return buf.toString();
+    }
+
+    public static String getSessionId(CommandMessage message) {
+        return (String) message.get(HttpSession.class, SecurityParts.SessionData).getAttribute(MessageBusServiceImpl.WS_SESSION_ID);
     }
 }

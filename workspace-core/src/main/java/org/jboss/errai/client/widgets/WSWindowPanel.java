@@ -159,6 +159,24 @@ public class WSWindowPanel extends Composite {
         dockPanel.setSpacing(0);
     }
 
+    @Override
+    public void setHeight(String height) {
+        super.setHeight(height);
+        dockPanel.setHeight(height);
+    }
+
+    @Override
+    public void setWidth(String width) {
+        super.setWidth(width);
+        dockPanel.setWidth(width);
+    }
+
+    @Override
+    public void setSize(String width, String height) {
+        setHeight(height);
+        setWidth(width);
+    }
+
     @Deprecated
     public void setWidget(Widget w) {
         add(w);

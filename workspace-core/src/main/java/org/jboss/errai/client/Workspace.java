@@ -19,9 +19,9 @@ import org.jboss.errai.client.framework.WSComponent;
 import org.jboss.errai.client.layout.WorkspaceLayout;
 import org.jboss.errai.client.rpc.CommandMessage;
 import org.jboss.errai.client.rpc.MessageBusClient;
+import static org.jboss.errai.client.rpc.MessageBusClient.enqueueForRemoteTransmit;
 import org.jboss.errai.client.rpc.MessageBusService;
 import org.jboss.errai.client.rpc.MessageBusServiceAsync;
-import static org.jboss.errai.client.rpc.MessageBusClient.enqueueForRemoteTransmit;
 import org.jboss.errai.client.rpc.protocols.BusCommands;
 import org.jboss.errai.client.rpc.protocols.MessageParts;
 import org.jboss.errai.client.rpc.protocols.SecurityCommands;
@@ -225,9 +225,7 @@ public class Workspace implements EntryPoint {
             }
 
             public void onSuccess(String[] o) {
-                for (ToolSet ts : toBeLoaded) {
-                    WorkspaceLayout.addToolSet(ts);
-                }
+
 
                 for (final String subject : o) {
                     MessageBusClient.subscribe(subject, new MessageCallback() {
@@ -245,6 +243,9 @@ public class Workspace implements EntryPoint {
                                     .set(MessageParts.Subject, s));
                 }
 
+                for (ToolSet ts : toBeLoaded) {
+                    WorkspaceLayout.addToolSet(ts);
+                }
 
                 MessageBusClient.subscribe("LoginClient", new MessageCallback() {
                     public void callback(CommandMessage message) {
@@ -313,7 +314,6 @@ public class Workspace implements EntryPoint {
         };
 
         messageBus.getSubjects(getSubjects);
-
 
         AsyncCallback cb = new AsyncCallback() {
             public void onFailure(Throwable caught) {

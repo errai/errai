@@ -1,6 +1,7 @@
 package org.jboss.errai.client.rpc;
 
 import org.jboss.errai.client.rpc.protocols.MessageParts;
+import org.jboss.errai.client.rpc.protocols.SecurityParts;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -53,7 +54,7 @@ public class CommandMessage {
     public String getSubject() {
         return String.valueOf(parts.get(MessageParts.Subject.name()));
     }
-
+    
     public CommandMessage setSubject(String subject) {
         parts.put(MessageParts.Subject.name(), subject);
         return this;
@@ -73,6 +74,19 @@ public class CommandMessage {
         encoded = null;
         return this;
     }
+
+    /**
+     * Copy the same value from the specified message into this message.
+     *
+     * @param part
+     * @param message
+     * @return
+     */
+    public CommandMessage copy(Enum part, CommandMessage message) {
+        set(part, message.get(Object.class, part));
+        return this;
+    }
+
 
     public void remove(String part) {
         parts.remove(part);
