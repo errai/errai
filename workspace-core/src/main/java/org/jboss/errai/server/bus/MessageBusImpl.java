@@ -146,15 +146,20 @@ public class MessageBusImpl implements MessageBus {
 
     private void store(final String sessionId, final String subject, final Object message) {
         if (messageQueues.containsKey(sessionId) && isAnyoneListening(sessionId, subject)) {
-            messageQueues.get(sessionId).offer(new Message() {
-                public String getSubject() {
-                    return subject;
-                }
+            try {
+                messageQueues.get(sessionId).offer(new Message() {
+                    public String getSubject() {
+                        return subject;
+                    }
 
-                public Object getMessage() {
-                    return message;
-                }
-            });
+                    public Object getMessage() {
+                        return message;
+                    }
+                }, 60, TimeUnit.SECONDS);
+            }
+            catch (InterruptedException e) {
+                //todo: create a delivery failure notice.
+            }
         }
         else {
             throw new NoSubscribersToDeliverTo("for: " + subject);
