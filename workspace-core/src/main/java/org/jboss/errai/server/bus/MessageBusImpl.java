@@ -23,7 +23,6 @@ public class MessageBusImpl implements MessageBus {
     private final Map<String, Set<Object>> remoteSubscriptions = new HashMap<String, Set<Object>>();
 
     private final Map<Object, BlockingQueue<Message>> messageQueues = new HashMap<Object, BlockingQueue<Message>>();
-    //   private final Map<Object, Thread> activeWaitingThreads = new HashMap<Object, Thread>();
 
     private final List<SubscribeListener> subscribeListeners = new LinkedList<SubscribeListener>();
     private final List<UnsubscribeListener> unsubscribeListeners = new LinkedList<UnsubscribeListener>();
