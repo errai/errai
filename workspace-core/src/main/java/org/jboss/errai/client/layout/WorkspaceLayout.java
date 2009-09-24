@@ -409,8 +409,8 @@ public class WorkspaceLayout extends Composite {
     }
 
     private void _openTab(final String DOMID, final String initSubject, final String componentId, final String name, final String instanceId, final Image icon) {
-        MessageBusClient.conversationWith(initSubject,
-                CommandMessage.create().set(LayoutParts.DOMID, DOMID),
+        MessageBusClient.conversationWith(
+                CommandMessage.create().set(LayoutParts.DOMID, DOMID).setSubject(initSubject),
                 new MessageCallback() {
                     public void callback(CommandMessage message) {
                         final ExtSimplePanel panel = new ExtSimplePanel();

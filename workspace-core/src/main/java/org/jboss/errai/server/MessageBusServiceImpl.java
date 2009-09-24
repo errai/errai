@@ -113,12 +113,12 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
                 switch (BusCommands.valueOf(message.getCommandType())) {
                     case RemoteSubscribe:
                         bus.remoteSubscribe(message.get(HttpSession.class, SecurityParts.SessionData).getAttribute(WS_SESSION_ID),
-                                message.get(String.class, MessageParts.ToSubject));
+                                message.get(String.class, MessageParts.Subject));
                         break;
 
                     case RemoteUnsubscribe:
                         bus.remoteUnsubscribe(message.get(HttpSession.class, SecurityParts.SessionData).getAttribute(WS_SESSION_ID),
-                                message.get(String.class, MessageParts.ToSubject));
+                                message.get(String.class, MessageParts.Subject));
                         break;
                 }
             }
@@ -235,7 +235,7 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
 
     private String getCandidateFQCN(String rootFile, String fileName) {
         return fileName.replaceAll("(/|\\\\)", ".")
-                .substring(rootFile.length()+1, fileName.lastIndexOf('.'));
+                .substring(rootFile.length() + 1, fileName.lastIndexOf('.'));
     }
 
 
@@ -280,7 +280,13 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
         /**
          * Pass the message off to the messaging bus for handling.
          */
-        bus.storeGlobal(subject, translatedMessage);
+        try {
+            bus.storeGlobal(subject, translatedMessage);
+        }
+        catch (Throwable t) {
+            System.err.println("Message was not delivered.");
+            t.printStackTrace();
+        }
     }
 
     /**

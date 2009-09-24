@@ -20,10 +20,11 @@ public class ConversationMessage extends CommandMessage {
         if (inReplyTo.hasPart(SecurityParts.SessionData)) {
             set(SecurityParts.SessionData, inReplyTo.get(Object.class, SecurityParts.SessionData));
         }
-        else if (inReplyTo.hasPart(MessageParts.ReplyTo)) {
+        if (inReplyTo.hasPart(MessageParts.ReplyTo)) {
             set(MessageParts.ToSubject, inReplyTo.get(String.class, MessageParts.ReplyTo));
         }
-        else {
+
+        if (!inReplyTo.hasPart(SecurityParts.SessionData) && !inReplyTo.hasPart(MessageParts.ReplyTo)) {
             throw new RuntimeException("cannot have a conversation. there is no session data or ReplyTo field");
         }
     }

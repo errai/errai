@@ -46,17 +46,16 @@ public class CommandMessage {
         setSubject(subject).setCommandType(commandType);
     }
 
-
     public String getCommandType() {
-        return String.valueOf(parts.get(MessageParts.CommandType.name()));
+        return (String) parts.get(MessageParts.CommandType.name());
     }
 
     public String getSubject() {
-        return String.valueOf(parts.get(MessageParts.Subject.name()));
+        return String.valueOf(parts.get(MessageParts.ToSubject.name()));
     }
     
     public CommandMessage setSubject(String subject) {
-        parts.put(MessageParts.Subject.name(), subject);
+        parts.put(MessageParts.ToSubject.name(), subject);
         return this;
     }
 

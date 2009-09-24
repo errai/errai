@@ -75,7 +75,7 @@ public class Workspace implements EntryPoint {
         MessageBusClient.addOnSubscribeHook(new AcceptsCallback() {
             public void callback(Object message, Object data) {
                 MessageBusClient.store("ServerBus", CommandMessage.create(BusCommands.RemoteSubscribe)
-                        .set(MessageParts.ToSubject, message));
+                        .set(MessageParts.Subject, message));
 
             }
         });
@@ -83,7 +83,7 @@ public class Workspace implements EntryPoint {
         MessageBusClient.addOnUnsubscribeHook(new AcceptsCallback() {
             public void callback(Object message, Object data) {
                 MessageBusClient.store("ServerBus", CommandMessage.create(BusCommands.RemoteUnsubscribe)
-                        .set(MessageParts.ToSubject, message));
+                        .set(MessageParts.Subject, message));
 
             }
         });
@@ -229,8 +229,6 @@ public class Workspace implements EntryPoint {
             }
 
             public void onSuccess(String[] o) {
-
-
                 for (final String subject : o) {
                     MessageBusClient.subscribe(subject, new MessageCallback() {
                         public void callback(CommandMessage message) {

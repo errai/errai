@@ -76,18 +76,17 @@ public class MessageBusClient {
     /**
      * Have a single two-way conversation
      *
-     * @param subject
      * @param message
      * @param callback
      */
-    public static void conversationWith(final String subject, CommandMessage message, MessageCallback callback) {
+    public static void conversationWith(final CommandMessage message, MessageCallback callback) {
         final String tempSubject = conversationCounter++ + ":temp";
 
         final Timer t = new Timer() {
             @Override
             public void run() {
                 WSModalDialog error = new WSModalDialog();
-                error.ask("Service '" + subject + "' did not property respond", new AcceptsCallback() {
+                error.ask("Service '" + message.getSubject() + "' did not property respond", new AcceptsCallback() {
                     public void callback(Object message, Object data) {
                         unsubscribeAll(tempSubject);
                     }
@@ -107,7 +106,7 @@ public class MessageBusClient {
             }
         });
 
-        store(subject, message);
+        store(message);
 
         t.schedule(500);
     }
@@ -243,6 +242,8 @@ public class MessageBusClient {
             transmitting = true;
             messageBus.store(subject, message, new AsyncCallback<Void>() {
                 public void onFailure(Throwable throwable) {
+                    throwable.printStackTrace();
+
                     MessageBusClient.transmitting = false;
                     sendAll();
                 }
