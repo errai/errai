@@ -28,10 +28,7 @@ import org.jboss.errai.client.security.SecurityService;
 import org.jboss.errai.client.widgets.WSModalDialog;
 import org.jboss.errai.client.widgets.WSWindowPanel;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
@@ -56,6 +53,8 @@ public class Workspace implements EntryPoint {
 
     private static List<ToolSet> toBeLoaded = new ArrayList<ToolSet>();
     private static Map<String, List<Tool>> toBeLoadedGroups = new HashMap<String, List<Tool>>();
+    private static List<String> preferredGroupOrdering = new ArrayList<String>();
+
 
     private Workspace() {
     }
@@ -312,11 +311,53 @@ public class Workspace implements EntryPoint {
                     }
                 });
 
+                Set<String> loaded = new HashSet<String>();
+                if (!preferredGroupOrdering.isEmpty()) {
+                    for (final String group : preferredGroupOrdering) {
+                        if (loaded.contains(group)) continue;
+
+                        for (ToolSet ts : toBeLoaded) {
+                            if (ts.getToolSetName().equals(group)) {
+                                loaded.add(group);
+                                WorkspaceLayout.addToolSet(ts);
+                            }
+                        }
+
+                        if (loaded.contains(group)) continue;
+
+                        if (toBeLoadedGroups.containsKey(group)) {
+                            loaded.add(group);
+
+                            ToolSet ts = new ToolSet() {
+                                public Tool[] getAllProvidedTools() {
+                                    Tool[] toolArray = new Tool[toBeLoadedGroups.get(group).size()];
+                                    toBeLoadedGroups.get(group).toArray(toolArray);
+                                    return toolArray;
+                                }
+
+                                public String getToolSetName() {
+                                    return group;
+                                }
+
+                                public Widget getWidget() {
+                                    return null;
+                                }
+                            };
+
+                            WorkspaceLayout.addToolSet(ts);
+                        }
+                    }
+                }
+
+
                 for (ToolSet ts : toBeLoaded) {
+                    if (loaded.contains(ts.getToolSetName())) continue;
                     WorkspaceLayout.addToolSet(ts);
                 }
 
                 for (final String group : toBeLoadedGroups.keySet()) {
+                    if (loaded.contains(group)) continue;
+                    
                     ToolSet ts = new ToolSet() {
                         public Tool[] getAllProvidedTools() {
                             Tool[] toolArray = new Tool[toBeLoadedGroups.get(group).size()];
@@ -378,12 +419,16 @@ public class Workspace implements EntryPoint {
 
     private static int toolCounter = 0;
 
-    public static void addTool(String group, String name,  String icon, boolean multipleAllowed, int priority, WSComponent component) {
+    public static void addTool(String group, String name, String icon, boolean multipleAllowed, int priority, WSComponent component) {
         if (!toBeLoadedGroups.containsKey(group)) toBeLoadedGroups.put(group, new ArrayList<Tool>());
 
         final String toolId = name.replaceAll(" ", "_") + "." + toolCounter++;
 
         toBeLoadedGroups.get(group).add(new ToolImpl(name, toolId, multipleAllowed, new Image(GWT.getModuleBaseURL() + icon), component));
+    }
+
+    public static void setPreferredGroupOrdering(String[] groups) {
+        preferredGroupOrdering.addAll(Arrays.asList(groups));
     }
 
     private static void closeLoginPanel() {

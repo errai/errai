@@ -9,6 +9,7 @@ import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
+import org.jboss.errai.client.framework.annotations.GroupOrder;
 import org.jboss.errai.client.framework.annotations.LoadTool;
 import org.jboss.errai.client.framework.annotations.LoadToolSet;
 import org.jboss.errai.client.framework.annotations.LoginComponent;
@@ -161,7 +162,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
                         writer.println("org.jboss.errai.client.Workspace.addToolSet(new " + clazz.getName() + "());");
                         logger.log(TreeLogger.Type.INFO, "Adding Errai Toolset: " + clazz.getName());
                     }
-                    else if (clazz.isAnnotationPresent(LoadTool.class)){
+                    else if (clazz.isAnnotationPresent(LoadTool.class)) {
                         LoadTool loadTool = (LoadTool) clazz.getAnnotation(LoadTool.class);
 
                         writer.println("org.jboss.errai.client.Workspace.addTool(\"" + loadTool.group() + "\"," +
@@ -169,7 +170,28 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
                                 + ", " + loadTool.priority() + ", new " + clazz.getName() + "());");
                     }
                     else if (clazz.isAnnotationPresent(LoginComponent.class)) {
-                       writer.println("org.jboss.errai.client.Workspace.setLoginComponent(new " + clazz.getName() + "());");
+                        writer.println("org.jboss.errai.client.Workspace.setLoginComponent(new " + clazz.getName() + "());");
+                    }
+                    else if (clazz.isAnnotationPresent(GroupOrder.class)) {
+                        GroupOrder groupOrder = (GroupOrder) clazz.getAnnotation(GroupOrder.class);
+
+                        if ("".equals(groupOrder.value().trim())) continue;
+
+                        String[] order = groupOrder.value().split(",");
+
+                        writer.print("org.jboss.errai.client.Workspace.setPreferredGroupOrdering(new String[] {");
+
+                        for (int i = 0; i < order.length; i++) {
+                            writer.print("\"");
+                            writer.print(order[i].trim());
+                            writer.print("\"");
+
+                            if (i+1<order.length) {
+                                writer.print(",");
+                            }
+                        }
+
+                        writer.println("});");
                     }
                 }
                 catch (NoClassDefFoundError e) {
