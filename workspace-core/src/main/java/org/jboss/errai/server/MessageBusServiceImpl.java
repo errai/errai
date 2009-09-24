@@ -10,6 +10,7 @@ import org.jboss.errai.client.rpc.protocols.MessageParts;
 import org.jboss.errai.client.rpc.protocols.SecurityCommands;
 import org.jboss.errai.client.rpc.protocols.SecurityParts;
 import org.jboss.errai.client.security.CredentialTypes;
+import org.jboss.errai.server.annotations.LoadModule;
 import org.jboss.errai.server.bus.DefaultMessageBusProvider;
 import org.jboss.errai.server.bus.Message;
 import org.jboss.errai.server.bus.MessageBus;
@@ -23,7 +24,11 @@ import org.jboss.errai.server.security.auth.RoleAuthDescriptor;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.io.File;
+import java.io.IOException;
 import static java.lang.Thread.currentThread;
+import java.net.URL;
+import java.util.Enumeration;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
@@ -146,6 +151,7 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
 
             try {
                 for (int i = 0; i < moduleFQCN.length; i++) {
+                    if (moduleClass[i] == null) continue;
                     try {
                         moduleClass[i] = (Class<Module>) Class.forName(moduleFQCN[i]);
                     }
@@ -163,6 +169,7 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
 
             try {
                 for (Class<Module> clazz : moduleClass) {
+                    if (clazz == null) continue;
                     clazz.newInstance().init();
                 }
             }
@@ -170,13 +177,67 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
                 throw new RuntimeException("error loading module: " + e.getMessage(), e);
             }
 
+
+            try {
+                Enumeration<URL> targets = currentThread().getContextClassLoader().getResources("ErraiApp.properties");
+
+                while (targets.hasMoreElements()) {
+                    findLoadableModules(targets.nextElement());
+                }
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+            }
+
         }
         catch (Exception e) {
             throw new RuntimeException("unable to load config", e);
         }
-
-  
     }
+
+    private void findLoadableModules(URL url) {
+        File root = new File(url.getFile()).getParentFile();
+        _findLoadableModules(root, root);
+    }
+
+    private void _findLoadableModules(File root, File start) {
+        for (File file : start.listFiles()) {
+            if (file.isDirectory()) _findLoadableModules(root, file);
+            if (file.getName().endsWith(".class")) {
+                try {
+                    String FQCN = getCandidateFQCN(root.getAbsolutePath(), file.getAbsolutePath());
+                    Class clazz = Class.forName(FQCN);
+                    if (clazz.isAnnotationPresent(LoadModule.class)) {
+                        ((Module) clazz.newInstance()).init();
+                    }
+                }
+                catch (NoClassDefFoundError e) {
+                    // do nothing.
+                }
+                catch (ExceptionInInitializerError e) {
+                    // do nothing.
+                }
+                catch (UnsupportedOperationException e) {
+                    // do nothing.
+                }
+                catch (ClassNotFoundException e) {
+                    // do nothing.
+                }
+                catch (IllegalAccessException e) {
+                    throw new RuntimeException("Failed to load module", e);
+                }
+                catch (InstantiationException e) {
+                    throw new RuntimeException("Failed to load module", e);
+                }
+            }
+        }
+    }
+
+    private String getCandidateFQCN(String rootFile, String fileName) {
+        return fileName.replaceAll("(/|\\\\)", ".")
+                .substring(rootFile.length()+1, fileName.lastIndexOf('.'));
+    }
+
 
     private void useDefaults() {
         authorizationAdapter = new JAASAdapter();

@@ -1,18 +1,23 @@
 package org.jboss.errai.rebind;
 
 
-import com.google.gwt.user.rebind.SourceWriter;
-import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.core.ext.Generator;
-import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
+import com.google.gwt.user.rebind.SourceWriter;
+import org.jboss.errai.client.framework.annotations.LoadToolSet;
 
-import java.util.ResourceBundle;
-import java.util.Enumeration;
+import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
+import static java.lang.Thread.currentThread;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.ResourceBundle;
 
 public class WorkspaceLoaderBootstrapGenerator extends Generator {
     /**
@@ -119,9 +124,61 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
             sourceWriter.println("new " + bundle.getString(key) + "().initModule(errai);");
         }
 
+        try {
+            Enumeration<URL> targets = currentThread().getContextClassLoader().getResources("ErraiApp.properties");
+
+            while (targets.hasMoreElements()) {
+                findLoadableModules(logger, sourceWriter, targets.nextElement());
+            }
+        }
+        catch (IOException e) {
+            logger.log(TreeLogger.Type.INFO, "no module loading roots found");
+        }
+
+
         // end constructor source generation
         sourceWriter.outdent();
         sourceWriter.println("}");
+    }
+
+
+    private void findLoadableModules(TreeLogger logger, SourceWriter writer, URL url) {
+        File root = new File(url.getFile()).getParentFile();
+        _findLoadableModules(logger, writer, root, root);
+    }
+
+    private void _findLoadableModules(TreeLogger logger, SourceWriter writer, File root, File start) {
+        for (File file : start.listFiles()) {
+            if (file.isDirectory()) _findLoadableModules(logger, writer, root, file);
+            if (file.getName().endsWith(".class")) {
+                try {
+                    String FQCN = getCandidateFQCN(root.getAbsolutePath(), file.getAbsolutePath());
+                    Class clazz = Class.forName(FQCN);
+
+                    if (clazz.isAnnotationPresent(LoadToolSet.class)) {
+                        writer.println("org.jboss.errai.client.Workspace.addToolSet(new " + clazz.getName() + "());");
+                        logger.log(TreeLogger.Type.INFO, "Adding Errai Toolset: " + clazz.getName());
+                    }
+                }
+                catch (NoClassDefFoundError e) {
+                    // do nothing.
+                }
+                catch (ExceptionInInitializerError e) {
+                    // do nothing.
+                }
+                catch (UnsupportedOperationException e) {
+                    // do nothing.
+                }
+                catch (ClassNotFoundException e) {
+                    // do nothing.
+                }
+            }
+        }
+    }
+
+    private String getCandidateFQCN(String rootFile, String fileName) {
+        return fileName.replaceAll("(/|\\\\)", ".")
+                .substring(rootFile.length() + 1, fileName.lastIndexOf('.'));
     }
 
 }
