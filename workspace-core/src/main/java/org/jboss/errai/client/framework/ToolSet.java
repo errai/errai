@@ -1,4 +1,4 @@
-package org.jboss.errai.client;
+package org.jboss.errai.client.framework;
 
 import org.jboss.errai.client.framework.WidgetProvider;
 import org.jboss.errai.client.framework.Tool;
