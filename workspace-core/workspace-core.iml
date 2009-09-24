@@ -18,7 +18,7 @@
         <setting name="compilerMaxHeapSize" value="728" />
         <setting name="compilerOutputPath" value="" />
         <setting name="gwtScriptOutputStyle" value="DETAILED" />
-        <setting name="gwtSdkUrl" value="file://$MODULE_DIR$/../../gwt-2.0-SNAPSHOT" />
+        <setting name="gwtSdkUrl" value="file://$MODULE_DIR$/../../gwt-versions/gwt-mac-2.0-SNAPSHOT" />
         <setting name="runGwtCompilerOnMake" value="true" />
         <setting name="webFacet" value="Web" />
         <packaging>
@@ -95,7 +95,7 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="GWT2" level="application" />
+    <orderEntry type="library" name="GWT" level="application" />
   </component>
   <component name="copyright">
     <Base>
