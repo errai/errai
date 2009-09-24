@@ -9,7 +9,9 @@ import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
+import org.jboss.errai.client.framework.annotations.LoadTool;
 import org.jboss.errai.client.framework.annotations.LoadToolSet;
+import org.jboss.errai.client.framework.annotations.LoginComponent;
 
 import java.io.File;
 import java.io.IOException;
@@ -158,6 +160,16 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
                     if (clazz.isAnnotationPresent(LoadToolSet.class)) {
                         writer.println("org.jboss.errai.client.Workspace.addToolSet(new " + clazz.getName() + "());");
                         logger.log(TreeLogger.Type.INFO, "Adding Errai Toolset: " + clazz.getName());
+                    }
+                    else if (clazz.isAnnotationPresent(LoadTool.class)){
+                        LoadTool loadTool = (LoadTool) clazz.getAnnotation(LoadTool.class);
+
+                        writer.println("org.jboss.errai.client.Workspace.addTool(\"" + loadTool.group() + "\"," +
+                                " \"" + loadTool.name() + "\", \"" + loadTool.icon() + "\", " + loadTool.multipleAllowed()
+                                + ", " + loadTool.priority() + ", new " + clazz.getName() + "());");
+                    }
+                    else if (clazz.isAnnotationPresent(LoginComponent.class)) {
+                       writer.println("org.jboss.errai.client.Workspace.setLoginComponent(new " + clazz.getName() + "());");
                     }
                 }
                 catch (NoClassDefFoundError e) {
