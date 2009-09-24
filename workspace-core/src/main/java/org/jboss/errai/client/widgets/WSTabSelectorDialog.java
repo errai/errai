@@ -5,16 +5,14 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.client.framework.AcceptsCallback;
-import org.jboss.errai.client.framework.MessageCallback;
-import org.jboss.errai.client.layout.WorkspaceLayout;
 import org.jboss.errai.client.listeners.ClickCallbackListener;
-import org.jboss.errai.client.rpc.MessageBusClient;
 import org.jboss.errai.client.rpc.CommandMessage;
+import org.jboss.errai.client.rpc.MessageBusClient;
 import org.jboss.errai.client.rpc.protocols.LayoutCommands;
 import org.jboss.errai.client.rpc.protocols.LayoutParts;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 
 public class WSTabSelectorDialog extends WSModalDialog {
@@ -35,74 +33,38 @@ public class WSTabSelectorDialog extends WSModalDialog {
 
     String id;
 
-    public WSTabSelectorDialog(String componentTypeId) {
+    public WSTabSelectorDialog(Set<String> components) {
         hPanel = new HorizontalPanel();
         hPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
         vPanel = new VerticalPanel();
         hPanel.add(vPanel);
         vPanel.add(message);
 
-        MessageBusClient.subscribe(this.getClass().getName(), new MessageCallback() {
-            public void callback(CommandMessage msg) {
+        for (String s : components) {
 
-                Map<String, Object> nestedData = MessageBusClient.decodeMap(msg.get(String.class, LayoutParts.NestedData));
-                for (final Map.Entry<String, Object> entry : nestedData.entrySet()) {
-                    Map<String, Object> instanceProperties = MessageBusClient.decodeMap(entry.getValue());
+            final Map<String, Object> instanceProperties = MessageBusClient.decodeMap(s);
 
-                    Button b = new Button("<span><img src='" + instanceProperties.get(LayoutParts.IconURI.name())
-                            + "' align='left'/>" + instanceProperties.get(LayoutParts.Name.name()) + "</span>"
-                            , new ClickHandler() {
+            Button b = new Button("<span><img src='" + instanceProperties.get(LayoutParts.IconURI.name())
+                    + "' align='left'/>" + instanceProperties.get(LayoutParts.Name.name()) + "</span>"
+                    , new ClickHandler() {
 
-                                public void onClick(ClickEvent event) {
-                                    Map<String, Object> msg = new HashMap<String, Object>();
-                                    msg.put(LayoutParts.CommandType.name(), LayoutCommands.ActivateTool.name());
-                                    MessageBusClient.store(WorkspaceLayout.getInstanceSubject(entry.getKey()), msg);
-
-                                    window.hide();
-                                }
-                            });
-
-                    b.getElement().getStyle().setProperty("background", "transparent");
-                    b.getElement().getStyle().setProperty("textAlign", "left");
-                    b.setWidth("100%");
-
-                    vPanel.add(b);
-                }
+                        public void onClick(ClickEvent event) {
+                            MessageBusClient.store((String) instanceProperties.get(LayoutParts.Subject.name()),
+                                    CommandMessage.create(LayoutCommands.ActivateTool));
 
 
-            }
-        }, null);
+                            window.hide();
+                        }
+                    });
+
+            b.getElement().getStyle().setProperty("background", "transparent");
+            b.getElement().getStyle().setProperty("textAlign", "left");
+            b.setWidth("100%");
+
+            vPanel.add(b);
+        }
 
 
-//
-//        Map<String, Object> msg = new HashMap<String, Object>();
-//        msg.put(CommandProcessor.MessageParts.Subject)
-//
-
-
-//        for (final String tab : tabs) {
-//            Button b = new Button("<span><img src='" + tab.getIcon().getUrl() + "' align='left'/>" + tab.getLabel() + "</span>"
-//                    , new ClickHandler() {
-//
-//                        public void onClick(ClickEvent event) {
-//                            Map<String, Object> msg = new HashMap<String, Object>();
-//
-//
-//
-//                            window.hide();
-//                        }
-//                    });
-
-//            if (tab.isModified()) {
-//                b.getElement().getStyle().setProperty("color", "blue");
-//            }
-
-//            b.getElement().getStyle().setProperty("background", "transparent");
-//            b.getElement().getStyle().setProperty("textAlign", "left");
-//            b.setWidth("100%");
-//
-//            vPanel.add(b);
-//        }
 
         HorizontalPanel innerContainer = new HorizontalPanel();
         vPanel.add(innerContainer);
@@ -143,7 +105,7 @@ public class WSTabSelectorDialog extends WSModalDialog {
 
         window.add(hPanel);
 
-      
+
     }
 
 

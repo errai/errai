@@ -2,9 +2,9 @@ package org.jboss.errai.client.listeners;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.Window;
 import org.jboss.errai.client.framework.MessageCallback;
 import org.jboss.errai.client.framework.Tool;
 import org.jboss.errai.client.layout.LayoutHint;
@@ -27,10 +27,11 @@ public class TabOpeningClickHandler implements ClickHandler {
 
         MessageBusClient.subscribeOnce(initSubject, new MessageCallback() {
             public void callback(CommandMessage message) {
+
                 try {
                     final Widget w = tool.getWidget();
                     w.getElement().setId(message.get(String.class, LayoutParts.DOMID));
-                   // w.setVisible(false);
+
                     RootPanel.get().add(w);
 
                     LayoutHint.attach(w, new LayoutHintProvider() {
@@ -48,6 +49,7 @@ public class TabOpeningClickHandler implements ClickHandler {
                 catch (Exception e) {
                     e.printStackTrace();
                 }
+
             }
         });
 
@@ -59,12 +61,12 @@ public class TabOpeningClickHandler implements ClickHandler {
         MessageBusClient.beginCapture();
 
         MessageBusClient.store("org.jboss.errai.WorkspaceLayout", CommandMessage.create(LayoutCommands.OpenNewTab)
-                        .set(LayoutParts.ComponentID, tool.getId())
-                        .set(LayoutParts.IconURI, tool.getIcon().getUrl())
-                        .set(LayoutParts.MultipleInstances, tool.multipleAllowed())
-                        .set(LayoutParts.Name, tool.getName())
-                        .set(LayoutParts.DOMID, tool.getId() + "_" + System.currentTimeMillis())
-                        .set(LayoutParts.InitSubject, initSubject));
+                .set(LayoutParts.ComponentID, tool.getId())
+                .set(LayoutParts.IconURI, tool.getIcon().getUrl())
+                .set(LayoutParts.MultipleInstances, tool.multipleAllowed())
+                .set(LayoutParts.Name, tool.getName())
+                .set(LayoutParts.DOMID, tool.getId() + "_" + System.currentTimeMillis())
+                .set(LayoutParts.InitSubject, initSubject));
     }
 
 }

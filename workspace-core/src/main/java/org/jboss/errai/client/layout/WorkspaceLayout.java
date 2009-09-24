@@ -159,11 +159,6 @@ public class WorkspaceLayout extends Composite {
                                 componentId = message.get(String.class, LayoutParts.ComponentID);
                                 Set<String> active = getActiveByType(componentId);
                                 break;
-
-                            case Hello:
-                                name = message.get(String.class, LayoutParts.Name);
-                                Window.alert("Hello from: " + name);
-                                break;
                         }
 
 
@@ -384,7 +379,7 @@ public class WorkspaceLayout extends Composite {
                             Set<String> s = layout.getActiveByType(componentId);
 
                             if (s.size() > 1) {
-                                WSTabSelectorDialog wsd = new WSTabSelectorDialog(componentId);
+                                WSTabSelectorDialog wsd = new WSTabSelectorDialog(s);
                                 wsd.ask("Select an open instance.", new AcceptsCallback() {
                                     public void callback(Object message, Object data) {
                                     }
@@ -393,7 +388,7 @@ public class WorkspaceLayout extends Composite {
                                 wsd.showModal();
                             }
                             else {
-                                //      s.iterator().next().activate();
+                                MessageBusClient.store(getInstanceSubject(componentId), CommandMessage.create(LayoutCommands.ActivateTool));
                             }
                         }
                     }
@@ -410,7 +405,8 @@ public class WorkspaceLayout extends Composite {
 
     private void _openTab(final String DOMID, final String initSubject, final String componentId, final String name, final String instanceId, final Image icon) {
         MessageBusClient.conversationWith(
-                CommandMessage.create().set(LayoutParts.DOMID, DOMID).setSubject(initSubject),
+                CommandMessage.create().set(LayoutParts.DOMID, DOMID)
+                        .setSubject(initSubject),
                 new MessageCallback() {
                     public void callback(CommandMessage message) {
                         final ExtSimplePanel panel = new ExtSimplePanel();
@@ -459,6 +455,8 @@ public class WorkspaceLayout extends Composite {
                         Map<String, Object> tabProperties = new HashMap<String, Object>();
                         tabProperties.put(LayoutParts.Name.name(), name);
                         tabProperties.put(LayoutParts.IconURI.name(), newIcon.getUrl());
+                        tabProperties.put(LayoutParts.ComponentID.name(), componentId);
+                        tabProperties.put(LayoutParts.Subject.name(), getInstanceSubject(instanceId));
 
                         tabInstances.put(instanceId, MessageBusClient.encodeMap(tabProperties));
 
@@ -552,7 +550,7 @@ public class WorkspaceLayout extends Composite {
         HashSet<String> set = new HashSet<String>();
 
         for (Map.Entry<String, String> entry : this.tabInstances.entrySet()) {
-            if (componentTypeId.equals(entry.getValue())) {
+            if (componentTypeId.equals(MessageBusClient.decodeMap(entry.getValue()).get("ComponentID"))) {
                 set.add(entry.getValue());
             }
         }

@@ -15,7 +15,8 @@ public enum LayoutCommands {
     ActivateTool,
     GetActiveWidgets,
     SizeHints,
-    Hello;
+    Initialize,
+    GetInstances;
 
     public String getSubject() {
         return "org.jboss.errai.WorkspaceLayout";

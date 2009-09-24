@@ -79,36 +79,21 @@ public class MessageBusClient {
      * @param message
      * @param callback
      */
-    public static void conversationWith(final CommandMessage message, MessageCallback callback) {
+    public static void conversationWith(final CommandMessage message, final MessageCallback callback) {
         final String tempSubject = conversationCounter++ + ":temp";
-
-        final Timer t = new Timer() {
-            @Override
-            public void run() {
-                WSModalDialog error = new WSModalDialog();
-                error.ask("Service '" + message.getSubject() + "' did not property respond", new AcceptsCallback() {
-                    public void callback(Object message, Object data) {
-                        unsubscribeAll(tempSubject);
-                    }
-                });
-
-                error.showModal();
-            }
-        };
 
         message.set(MessageParts.ReplyTo, tempSubject);
 
-        subscribe(tempSubject, callback);
         subscribe(tempSubject, new MessageCallback() {
             public void callback(CommandMessage message) {
-                t.cancel();
                 unsubscribeAll(tempSubject);
+                callback.callback(message);
             }
         });
 
-        store(message);
+        subscribe(tempSubject, callback);
 
-        t.schedule(500);
+        store(message);
     }
 
     private static void addSubscription(String subject, Object reference) {
