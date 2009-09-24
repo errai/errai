@@ -357,7 +357,7 @@ public class Workspace implements EntryPoint {
 
                 for (final String group : toBeLoadedGroups.keySet()) {
                     if (loaded.contains(group)) continue;
-                    
+
                     ToolSet ts = new ToolSet() {
                         public Tool[] getAllProvidedTools() {
                             Tool[] toolArray = new Tool[toBeLoadedGroups.get(group).size()];
