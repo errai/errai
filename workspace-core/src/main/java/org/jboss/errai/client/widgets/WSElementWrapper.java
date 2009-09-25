@@ -1,7 +1,7 @@
 package org.jboss.errai.client.widgets;
 
-import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.ui.Widget;
 
 
 public class WSElementWrapper extends Widget {

@@ -1,7 +1,7 @@
 package org.jboss.errai.client.rpc.adapters;
 
-import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.PasswordTextBox;
+import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.client.rpc.Attachable;
 
 public class PasswordBoxAttach implements Attachable {

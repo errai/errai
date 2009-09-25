@@ -1,9 +1,9 @@
 package org.jboss.errai.client.widgets;
 
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import org.jboss.errai.client.layout.WorkspaceLayout;
 

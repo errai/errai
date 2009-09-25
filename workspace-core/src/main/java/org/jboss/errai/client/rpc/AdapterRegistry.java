@@ -1,15 +1,14 @@
 package org.jboss.errai.client.rpc;
 
+import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.PasswordTextBox;
-
-import java.util.Map;
-import java.util.HashMap;
-
+import org.jboss.errai.client.rpc.adapters.PasswordBoxAttach;
 import org.jboss.errai.client.rpc.adapters.TextAreaAttach;
 import org.jboss.errai.client.rpc.adapters.TextBoxAttach;
-import org.jboss.errai.client.rpc.adapters.PasswordBoxAttach;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class AdapterRegistry {
     public static final Map<Class, Attachable> adapters = new HashMap<Class, Attachable>();

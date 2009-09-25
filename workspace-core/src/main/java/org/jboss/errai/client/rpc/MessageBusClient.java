@@ -11,7 +11,6 @@ import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import org.jboss.errai.client.framework.AcceptsCallback;
 import org.jboss.errai.client.framework.MessageCallback;
 import org.jboss.errai.client.rpc.protocols.MessageParts;
-import org.jboss.errai.client.widgets.WSModalDialog;
 
 import java.util.*;
 

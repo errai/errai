@@ -1,7 +1,7 @@
 package org.jboss.errai.client.rpc.adapters;
 
-import org.jboss.errai.client.rpc.Attachable;
 import com.google.gwt.user.client.ui.Widget;
+import org.jboss.errai.client.rpc.Attachable;
 
 public class TextBoxAttach implements Attachable {
     public void attach(final String id, final Widget widget, final String instanceId) {

@@ -1,8 +1,8 @@
 package org.jboss.errai.client.widgets.dnd;
 
-import com.allen_sauer.gwt.dnd.client.drop.AbstractDropController;
 import com.allen_sauer.gwt.dnd.client.DragContext;
 import com.allen_sauer.gwt.dnd.client.VetoDragException;
+import com.allen_sauer.gwt.dnd.client.drop.AbstractDropController;
 import com.google.gwt.user.client.ui.Widget;
 
 /**

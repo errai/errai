@@ -1,10 +1,11 @@
 package org.jboss.errai.client.widgets;
 
-import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.ui.UIObject;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.ComplexPanel;
-
-import com.google.gwt.user.client.*;
+import com.google.gwt.user.client.ui.UIObject;
+import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.client.util.Effects;
 
 

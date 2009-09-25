@@ -12,21 +12,6 @@
     <setting name="mainClass" value="" />
   </component>
   <component name="FacetManager">
-    <facet type="gwt" name="GWT">
-      <configuration>
-        <setting name="additionalCompilerParameters" value="" />
-        <setting name="compilerMaxHeapSize" value="728" />
-        <setting name="compilerOutputPath" value="" />
-        <setting name="gwtScriptOutputStyle" value="DETAILED" />
-        <setting name="gwtSdkUrl" value="file://$MODULE_DIR$/../../gwt-versions/gwt-mac-2.0-SNAPSHOT" />
-        <setting name="runGwtCompilerOnMake" value="true" />
-        <setting name="webFacet" value="Web" />
-        <packaging>
-          <module name="org.jboss.errai.Workspace" path="/org.jboss.errai.Workspace" />
-          <module name="org.jboss.workspace.Workspace" path="/org.jboss.workspace.Workspace" />
-        </packaging>
-      </configuration>
-    </facet>
     <facet type="web" name="Web">
       <configuration>
         <descriptors>
@@ -50,6 +35,20 @@
         </packaging>
       </configuration>
     </facet>
+    <facet type="gwt" name="GWT">
+      <configuration>
+        <setting name="additionalCompilerParameters" value="" />
+        <setting name="compilerMaxHeapSize" value="512" />
+        <setting name="compilerOutputPath" value="" />
+        <setting name="gwtScriptOutputStyle" value="DETAILED" />
+        <setting name="gwtSdkUrl" value="file://$MODULE_DIR$/../../gwt-2.0-SNAPSHOT" />
+        <setting name="runGwtCompilerOnMake" value="true" />
+        <setting name="webFacet" value="Web" />
+        <packaging>
+          <module name="org.jboss.errai.Workspace" path="/org.jboss.errai.Workspace" />
+        </packaging>
+      </configuration>
+    </facet>
   </component>
   <component name="NewModuleRootManager" inherit-compiler-output="true">
     <exclude-output />
@@ -59,6 +58,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="GWT2" level="application" />
     <orderEntry type="module-library">
       <library>
         <CLASSES>
@@ -95,7 +95,6 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="GWT2" level="application" />
   </component>
   <component name="copyright">
     <Base>

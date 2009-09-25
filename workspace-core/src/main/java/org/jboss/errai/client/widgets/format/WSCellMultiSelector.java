@@ -3,7 +3,9 @@ package org.jboss.errai.client.widgets.format;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.RootPanel;
 import org.jboss.errai.client.widgets.WSGrid;
 
 import java.util.LinkedHashSet;

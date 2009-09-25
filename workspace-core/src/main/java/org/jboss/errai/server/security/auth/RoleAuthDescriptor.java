@@ -3,8 +3,8 @@ package org.jboss.errai.server.security.auth;
 import org.jboss.errai.client.rpc.CommandMessage;
 import org.jboss.errai.client.rpc.protocols.SecurityParts;
 
-import java.util.Set;
 import java.util.HashSet;
+import java.util.Set;
 
 public class RoleAuthDescriptor implements AuthDescriptor {
     private Set<Role> roles;

@@ -7,15 +7,15 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Command;
 import static com.google.gwt.user.client.DeferredCommand.addCommand;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.Window;
 import static com.google.gwt.user.client.Event.addNativePreviewHandler;
+import com.google.gwt.user.client.Window;
 import static com.google.gwt.user.client.Window.getClientHeight;
 import static com.google.gwt.user.client.Window.getClientWidth;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.client.layout.WSDropShadowLayout;
 import org.jboss.errai.client.util.Effects;
-import org.jboss.errai.client.util.LayoutUtil;
 import static org.jboss.errai.client.util.Effects.setOpacity;
+import org.jboss.errai.client.util.LayoutUtil;
 
 import static java.lang.Math.round;
 import java.util.LinkedList;

@@ -1,7 +1,7 @@
 package org.jboss.errai.client.widgets.format;
 
-import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.client.widgets.WSGrid;
 
 //todo: this totally needs to be refactored... the formatter currently holds the value...

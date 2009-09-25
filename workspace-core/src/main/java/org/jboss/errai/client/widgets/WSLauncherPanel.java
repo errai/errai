@@ -1,9 +1,9 @@
 package org.jboss.errai.client.widgets;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.core.client.GWT;
 import org.jboss.errai.client.framework.Tool;
 import org.jboss.errai.client.listeners.TabOpeningClickHandler;
 
