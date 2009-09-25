@@ -69,7 +69,6 @@ public class ConversationMessage extends CommandMessage {
 
     public ConversationMessage set(String part, Object value) {
         parts.put(part, value);
-        encoded = null;
         return this;
     }
 }

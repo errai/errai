@@ -12,7 +12,7 @@ import org.jboss.errai.client.rpc.adapters.TextBoxAttach;
 import org.jboss.errai.client.rpc.adapters.PasswordBoxAttach;
 
 public class AdapterRegistry {
-    public static final Map<Class, Attachable> adapters = new HashMap();
+    public static final Map<Class, Attachable> adapters = new HashMap<Class, Attachable>();
     static {
         adapters.put(TextArea.class, new TextAreaAttach());
         adapters.put(TextBox.class, new TextBoxAttach());

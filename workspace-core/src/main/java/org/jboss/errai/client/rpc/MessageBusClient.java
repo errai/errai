@@ -291,7 +291,7 @@ public class MessageBusClient {
     }
 
     public static CommandMessage decodeCommandMessage(Object value) {
-        return new CommandMessage(decodeMap(value), String.valueOf(value));
+        return new CommandMessage(decodeMap(value));
     }
 
     public static String encodeMap(Map<String, Object> map) {

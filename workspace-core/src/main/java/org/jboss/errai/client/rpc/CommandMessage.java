@@ -1,14 +1,12 @@
 package org.jboss.errai.client.rpc;
 
 import org.jboss.errai.client.rpc.protocols.MessageParts;
-import org.jboss.errai.client.rpc.protocols.SecurityParts;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class CommandMessage {
     protected Map<String, Object> parts = new HashMap<String, Object>();
-    protected String encoded;
 
     public static CommandMessage create(String commandType) {
         return new CommandMessage(commandType);
@@ -27,11 +25,6 @@ public class CommandMessage {
 
     public CommandMessage(Map<String, Object> parts) {
         this.parts = parts;
-    }
-
-    public CommandMessage(Map<String, Object> parts, String encoded) {
-        this.parts = parts;
-        this.encoded = encoded;
     }
 
     public CommandMessage(String commandType) {
@@ -70,33 +63,34 @@ public class CommandMessage {
 
     public CommandMessage set(String part, Object value) {
         parts.put(part, value);
-        encoded = null;
         return this;
     }
 
     /**
      * Copy the same value from the specified message into this message.
      *
-     * @param part
-     * @param message
-     * @return
+     * @param part -
+     * @param message -
+     * @return -
      */
     public CommandMessage copy(Enum part, CommandMessage message) {
         set(part, message.get(Object.class, part));
         return this;
     }
 
-
     public void remove(String part) {
         parts.remove(part);
-        encoded = null;
     }
 
+    @SuppressWarnings({"UnusedDeclaration"})
     public <T> T get(Class<T> type, Enum part) {
+        //noinspection unchecked
         return (T) parts.get(part.name());
     }
 
+    @SuppressWarnings({"UnusedDeclaration"})
     public <T> T get(Class<T> type, String part) {
+        //noinspection unchecked
         return (T) parts.get(part);
     }
 
@@ -115,14 +109,4 @@ public class CommandMessage {
     public void setParts(Map<String, Object> parts) {
         this.parts = parts;
     }
-
-    public boolean hasCachedEncoding() {
-        return encoded != null;
-    }
-
-    public String getEncoded() {
-        return encoded;
-    }
-
-
 }

@@ -55,7 +55,6 @@ public class Workspace implements EntryPoint {
     private static Map<String, List<Tool>> toBeLoadedGroups = new HashMap<String, List<Tool>>();
     private static List<String> preferredGroupOrdering = new ArrayList<String>();
 
-
     private Workspace() {
     }
 
