@@ -70,6 +70,7 @@ public class MessageBusClient {
         subscribe(subject, callback);
     }
 
+
     private static int conversationCounter = 0;
 
     /**

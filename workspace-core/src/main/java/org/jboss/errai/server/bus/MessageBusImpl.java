@@ -54,7 +54,7 @@ public class MessageBusImpl implements MessageBus {
 
                     //noinspection InfiniteLoopStatement
                     while (true) {
-                        Thread.sleep(100);
+                        Thread.sleep(200);
 
                         builder = new StringBuilder().append("LOCAL ENDPOINTS :")
                                 .append(subscriptions.size()).append("\n");

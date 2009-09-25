@@ -25,34 +25,35 @@ public class TabOpeningClickHandler implements ClickHandler {
     public void onClick(ClickEvent event) {
         String initSubject = tool.getId() + ":init";
 
-        MessageBusClient.subscribeOnce(initSubject, new MessageCallback() {
-            public void callback(CommandMessage message) {
+        if (!MessageBusClient.isSubscribed(initSubject)) {
+            MessageBusClient.subscribe(initSubject, new MessageCallback() {
+                public void callback(CommandMessage message) {
 
-                try {
-                    final Widget w = tool.getWidget();
-                    w.getElement().setId(message.get(String.class, LayoutParts.DOMID));
+                    try {
+                        final Widget w = tool.getWidget();
+                        w.getElement().setId(message.get(String.class, LayoutParts.DOMID));
 
-                    RootPanel.get().add(w);
+                        RootPanel.get().add(w);
 
-                    LayoutHint.attach(w, new LayoutHintProvider() {
-                        public int getHeightHint() {
-                            return Window.getClientHeight() - w.getAbsoluteTop() - 20;
-                        }
+                        LayoutHint.attach(w, new LayoutHintProvider() {
+                            public int getHeightHint() {
+                                return Window.getClientHeight() - w.getAbsoluteTop() - 20;
+                            }
 
-                        public int getWidthHint() {
-                            return Window.getClientWidth() - w.getAbsoluteLeft() - 5;
-                        }
-                    });
+                            public int getWidthHint() {
+                                return Window.getClientWidth() - w.getAbsoluteLeft() - 5;
+                            }
+                        });
 
-                    MessageBusClient.store(ConversationMessage.create(message));
+                        MessageBusClient.store(ConversationMessage.create(message));
+                    }
+                    catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
                 }
-                catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-            }
-        });
-
+            });
+        }
 
         /**
          * Being capturing all message registration activity. This is necessary if you want to use the automatic
