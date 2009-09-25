@@ -187,7 +187,17 @@ public class Workspace implements EntryPoint {
                 AsyncCallback<String[]> nextMessage = new AsyncCallback<String[]>() {
                     public void onFailure(Throwable throwable) {
                         block = false;
-                        System.out.println("FAILURE: " + throwable);
+
+                        final WSModalDialog commmunicationFailure = new WSModalDialog();
+                        commmunicationFailure.ask("There was an error communicating with the server: " + throwable.getMessage(),
+                                new AcceptsCallback() {
+                                    public void callback(Object message, Object data) {
+                                    }
+                                }
+                                );
+
+                        commmunicationFailure.showModal();
+
                         schedule(1);
                     }
 
@@ -250,6 +260,9 @@ public class Workspace implements EntryPoint {
                     public void callback(CommandMessage message) {
                         switch (SecurityCommands.valueOf(message.getCommandType())) {
                             case SecurityChallenge:
+
+                                workspaceLayout.getUserInfoPanel().clear();
+
                                 showLoginPanel();
                                 break;
 
@@ -269,7 +282,10 @@ public class Workspace implements EntryPoint {
                                 closeLoginPanel();
 
                                 HorizontalPanel userInfo = new HorizontalPanel();
-                                userInfo.add(new Label(message.get(String.class, SecurityParts.Name)));
+                                Label userName = new Label(message.get(String.class, SecurityParts.Name));
+                                userName.getElement().getStyle().setProperty("fontWeight", "bold");
+                                
+                                userInfo.add(userName);
                                 Button logout = new Button("Logout");
                                 logout.setStyleName("logoutButton");
                                 userInfo.add(logout);
