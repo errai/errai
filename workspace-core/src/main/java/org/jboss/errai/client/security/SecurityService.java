@@ -21,7 +21,7 @@ public class SecurityService {
     }
 
     public void doAuthentication(final AuthenticationHandler handler) {
-      //  MessageBusClient.unsubscribeAll(SUBJECT);
+      
         MessageBusClient.subscribe(SUBJECT, new MessageCallback() {
             public void callback(CommandMessage msg) {
                 MessageBusClient.unsubscribeAll(SUBJECT);

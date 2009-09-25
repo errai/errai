@@ -873,3 +873,10 @@ span {
     width: 17px;
     background: url("images/ui/layout/dropshadow/eq-bottomright.png") no-repeat;
 }
+
+.logoutButton {
+    background: transparent;
+    border: 0;
+    font-size: 9px;
+    text-decoration: underline;
+}

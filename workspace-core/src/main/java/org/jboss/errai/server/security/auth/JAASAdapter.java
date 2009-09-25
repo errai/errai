@@ -152,9 +152,22 @@ public class JAASAdapter implements AuthorizationAdapter {
         securityRules.put(subject, descriptor);
     }
 
+    public boolean endSession(CommandMessage message) {
+        boolean sessionEnded = isAuthenticated(message);
+        if (sessionEnded) {
+            getAuthDescriptor(message).remove(new SimpleRole(CredentialTypes.Authenticated.name()));
+            message.get(HttpSession.class, SecurityParts.SessionData).removeAttribute(AUTH_TOKEN);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
     public void process(CommandMessage message) {
         if (isAuthenticated(message)) {
             getAuthDescriptor(message).add(new SimpleRole(CredentialTypes.Authenticated.name()));
+
         }
     }
 

@@ -74,6 +74,12 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
                          */
                         authorizationAdapter.challenge(c);
                         break;
+
+                    case EndSession:
+                        authorizationAdapter.endSession(c);
+                        MessageBusServer.store(ConversationMessage.create(c).setSubject("LoginClient")
+                                .setCommandType(SecurityCommands.SecurityChallenge));
+                        break;
                 }
             }
         });

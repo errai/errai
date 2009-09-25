@@ -170,6 +170,10 @@ public class MessageBusClient {
         }
     }
 
+    public static void store(String subject, Enum commandType) {
+        store(subject, CommandMessage.create(commandType));
+    }
+
     public static void store(CommandMessage message) {
         if (message.hasPart(MessageParts.ToSubject)) {
             store(message.get(String.class, MessageParts.ToSubject), message);

@@ -25,6 +25,7 @@ import org.jboss.errai.client.rpc.protocols.MessageParts;
 import org.jboss.errai.client.rpc.protocols.SecurityCommands;
 import org.jboss.errai.client.rpc.protocols.SecurityParts;
 import org.jboss.errai.client.security.SecurityService;
+import org.jboss.errai.client.widgets.WSLoginPanel;
 import org.jboss.errai.client.widgets.WSModalDialog;
 import org.jboss.errai.client.widgets.WSWindowPanel;
 
@@ -37,7 +38,7 @@ public class Workspace implements EntryPoint {
     public static PickupDragController dragController;
     private static WorkspaceLayout workspaceLayout;
     private static SecurityService securityService = new SecurityService();
-    private static WSComponent loginComponent;
+    private static WSComponent loginComponent = new WSLoginPanel();
 
     private static WSWindowPanel loginWindowPanel;
     private static Window.ClosingHandler loginWindowClosingHandler;
@@ -266,6 +267,20 @@ public class Workspace implements EntryPoint {
 
                             case SuccessfulAuth:
                                 closeLoginPanel();
+
+                                HorizontalPanel userInfo = new HorizontalPanel();
+                                userInfo.add(new Label(message.get(String.class, SecurityParts.Name)));
+                                Button logout = new Button("Logout");
+                                logout.setStyleName("logoutButton");
+                                userInfo.add(logout);
+                                logout.addClickHandler(new ClickHandler() {
+                                    public void onClick(ClickEvent event) {
+                                        MessageBusClient.store("AuthorizationService", SecurityCommands.EndSession);
+                                    }
+                                });
+
+
+                                workspaceLayout.getUserInfoPanel().add(userInfo);
 
                                 final WSWindowPanel welcome = new WSWindowPanel();
                                 welcome.setWidth("250px");

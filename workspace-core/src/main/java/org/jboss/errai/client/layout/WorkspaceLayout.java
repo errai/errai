@@ -39,6 +39,7 @@ public class WorkspaceLayout extends Composite {
     public final WSExtVerticalPanel leftPanel = new WSExtVerticalPanel(this);
     public final WSStackPanel navigation = new WSStackPanel();
     public final Label navigationLabel = new Label("Navigate");
+    public final SimplePanel userInfoPanel = new SimplePanel();
 
     public final WSTabPanel tabPanel = new WSTabPanel();
 
@@ -170,7 +171,7 @@ public class WorkspaceLayout extends Composite {
      *
      * @return -
      */
-    private static HorizontalPanel createHeader() {
+    private HorizontalPanel createHeader() {
         HorizontalPanel header = new HorizontalPanel();
 
         Image img = new Image(getModuleBaseURL() + "/images/workspacelogo.png");
@@ -178,10 +179,14 @@ public class WorkspaceLayout extends Composite {
         img.setWidth("193px");
 
         header.add(img);
+        header.setCellHorizontalAlignment(img, HasHorizontalAlignment.ALIGN_LEFT);
 
         header.setHeight("45px");
         header.setWidth("100%");
         header.setStyleName("headerStyle");
+
+        header.add(userInfoPanel);
+        header.setCellHorizontalAlignment(userInfoPanel, HasHorizontalAlignment.ALIGN_RIGHT);
 
         return header;
     }
@@ -573,6 +578,10 @@ public class WorkspaceLayout extends Composite {
         leftPanel.setWidth("12px");
 
         fireWorkspaceSizeChangeListeners(0, 0);
+    }
+
+    public Panel getUserInfoPanel() {
+        return userInfoPanel;
     }
 
     private void fireWorkspaceSizeChangeListeners(int deltaW, int deltaH) {

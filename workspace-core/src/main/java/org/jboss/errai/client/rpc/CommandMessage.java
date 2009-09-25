@@ -46,9 +46,14 @@ public class CommandMessage {
     public String getSubject() {
         return String.valueOf(parts.get(MessageParts.ToSubject.name()));
     }
-    
+
     public CommandMessage setSubject(String subject) {
         parts.put(MessageParts.ToSubject.name(), subject);
+        return this;
+    }
+
+    public CommandMessage setCommandType(Enum type) {
+        parts.put(MessageParts.CommandType.name(), type.name());
         return this;
     }
 
@@ -69,7 +74,7 @@ public class CommandMessage {
     /**
      * Copy the same value from the specified message into this message.
      *
-     * @param part -
+     * @param part    -
      * @param message -
      * @return -
      */
