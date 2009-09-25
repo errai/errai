@@ -177,10 +177,13 @@ public class Workspace implements EntryPoint {
         final ServiceDefTarget endpoint = (ServiceDefTarget) messageBus;
         endpoint.setServiceEntryPoint(getModuleBaseURL() + "jbwMsgBus");
 
-        final HTML heartBeat = new HTML("*Heartbeat*");
-        Style s = heartBeat.getElement().getStyle();
+        final SimplePanel heartBeat = new SimplePanel();
+        final HTML hBtext = new HTML("*Heartbeat*");
+        hBtext.getElement().getStyle().setProperty("color", "red");
 
-        s.setProperty("color", "red");
+        heartBeat.add(hBtext);
+
+        Style s = heartBeat.getElement().getStyle();
         s.setProperty("position", "absolute");
         s.setProperty("left", "300");
         s.setProperty("top", "10");
@@ -225,14 +228,14 @@ public class Workspace implements EntryPoint {
                             System.out.println("** Heartbeat **");
 
                             heartBeat.setVisible(true);
-                            Effects.fade(heartBeat.getElement(), 50, 1, 10, 100);
+                            Effects.fade(heartBeat.getElement(), 25, 2, 10, 100);
                             Timer fadeout = new Timer() {
                                 @Override
                                 public void run() {
-                                    Effects.fade(heartBeat.getElement(), 50, 1, 100, 0);
+                                    Effects.fade(heartBeat.getElement(), 25, 2, 100, 0);
                                 }
                             };
-                            fadeout.schedule(1500);
+                            fadeout.schedule(2000);
 
 
                         }
