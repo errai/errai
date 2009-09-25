@@ -5,6 +5,7 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import static com.google.gwt.core.client.GWT.create;
 import static com.google.gwt.core.client.GWT.getModuleBaseURL;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
@@ -25,6 +26,7 @@ import org.jboss.errai.client.rpc.protocols.MessageParts;
 import org.jboss.errai.client.rpc.protocols.SecurityCommands;
 import org.jboss.errai.client.rpc.protocols.SecurityParts;
 import org.jboss.errai.client.security.SecurityService;
+import org.jboss.errai.client.util.Effects;
 import org.jboss.errai.client.widgets.WSLoginPanel;
 import org.jboss.errai.client.widgets.WSModalDialog;
 import org.jboss.errai.client.widgets.WSWindowPanel;
@@ -175,6 +177,19 @@ public class Workspace implements EntryPoint {
         final ServiceDefTarget endpoint = (ServiceDefTarget) messageBus;
         endpoint.setServiceEntryPoint(getModuleBaseURL() + "jbwMsgBus");
 
+        final HTML heartBeat = new HTML("*Heartbeat*");
+        Style s = heartBeat.getElement().getStyle();
+
+        s.setProperty("color", "red");
+        s.setProperty("position", "absolute");
+        s.setProperty("left", "300");
+        s.setProperty("top", "10");
+
+        heartBeat.setVisible(false);
+
+        RootPanel.get().add(heartBeat);
+
+
         final Timer incoming = new Timer() {
             boolean block = false;
 
@@ -208,6 +223,18 @@ public class Workspace implements EntryPoint {
 
                         if ("HeartBeat".equals(o[0])) {
                             System.out.println("** Heartbeat **");
+
+                            heartBeat.setVisible(true);
+                            Effects.fade(heartBeat.getElement(), 50, 1, 10, 100);
+                            Timer fadeout = new Timer() {
+                                @Override
+                                public void run() {
+                                    Effects.fade(heartBeat.getElement(), 50, 1, 100, 0);
+                                }
+                            };
+                            fadeout.schedule(1500);
+
+
                         }
 
                         GWT.log("ClientRecievedMessage [Subject:'" + o[0] + "';SubcribedTo:"
