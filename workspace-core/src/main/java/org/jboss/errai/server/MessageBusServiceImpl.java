@@ -61,7 +61,7 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
                          * Respond with what credentials the authentication system requires.
                          */
                         //todo: we only support login/password for now
-                        MessageBusServer.store(c.get(String.class, SecurityParts.ReplyTo),
+                        MessageBusServer.send(c.get(String.class, SecurityParts.ReplyTo),
                                 ConversationMessage.create(SecurityCommands.WhatCredentials, c)
                                         .set(SecurityParts.CredentialsRequired, "Name,Password")
                                         .set(SecurityParts.ReplyTo, AUTHORIZATION_SVC_SUBJECT));
@@ -76,7 +76,7 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
 
                     case EndSession:
                         authorizationAdapter.endSession(c);
-                        MessageBusServer.store(ConversationMessage.create(c).setSubject("LoginClient")
+                        MessageBusServer.send(ConversationMessage.create(c).setSubject("LoginClient")
                                 .setCommandType(SecurityCommands.SecurityChallenge));
                         break;
                 }
@@ -105,7 +105,7 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
         bus.subscribe("ServerEchoService", new MessageCallback() {
             public void callback(CommandMessage c) {
                 if (c.hasPart(MessageParts.ReplyTo)) {
-                    MessageBusServer.store(ConversationMessage.create(c));
+                    MessageBusServer.send(ConversationMessage.create(c));
                 }
             }
         });
@@ -269,7 +269,7 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
          * Pass the message off to the messaging bus for handling.
          */
         try {
-            bus.storeGlobal(subject, translatedMessage);
+            bus.sendGlobal(subject, translatedMessage);
         }
         catch (Throwable t) {
             System.err.println("Message was not delivered.");

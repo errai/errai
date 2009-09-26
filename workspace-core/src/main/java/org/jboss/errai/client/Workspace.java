@@ -25,7 +25,7 @@ import java.util.*;
  * Entry point classes define <code>onModuleLoad()</code>.
  */
 public class Workspace implements EntryPoint {
-    public static ClientBusServer bus = new ClientBusServer();
+    public static ClientBus bus = new ClientBus();
 
     public static PickupDragController dragController;
     private static WorkspaceLayout workspaceLayout;
@@ -39,7 +39,7 @@ public class Workspace implements EntryPoint {
         loginWindowClosingHandler = new Window.ClosingHandler() {
             public void onWindowClosing(Window.ClosingEvent event) {
                 CommandMessage msg = new CommandMessage();
-                MessageBusClient.store("ServerEchoService", msg);
+                MessageBusClient.send("ServerEchoService", msg);
             }
         };
     }
@@ -64,22 +64,33 @@ public class Workspace implements EntryPoint {
             return;
         }
 
+
+        /**
+         * Configure the local client message bus to send RemoteSubscribe signals to the remote bus when
+         * new subscriptions are creately locally.
+         */
         MessageBusClient.addOnSubscribeHook(new AcceptsCallback() {
             public void callback(Object message, Object data) {
-                MessageBusClient.store("ServerBus", CommandMessage.create(BusCommands.RemoteSubscribe)
+                MessageBusClient.send("ServerBus", CommandMessage.create(BusCommands.RemoteSubscribe)
                         .set(MessageParts.Subject, message));
 
             }
         });
 
+        /**
+         * ... also send RemoteUnsubscribe signals.
+         */
         MessageBusClient.addOnUnsubscribeHook(new AcceptsCallback() {
             public void callback(Object message, Object data) {
-                MessageBusClient.store("ServerBus", CommandMessage.create(BusCommands.RemoteUnsubscribe)
+                MessageBusClient.send("ServerBus", CommandMessage.create(BusCommands.RemoteUnsubscribe)
                         .set(MessageParts.Subject, message));
 
             }
         });
 
+        /**
+         *  Declare the standard LoginClient here.
+         */
         MessageBusClient.subscribe("LoginClient", new MessageCallback() {
             public void callback(CommandMessage message) {
                 try {
@@ -117,7 +128,7 @@ public class Workspace implements EntryPoint {
                         userInfo.add(logout);
                         logout.addClickHandler(new ClickHandler() {
                             public void onClick(ClickEvent event) {
-                                MessageBusClient.store("AuthorizationService", SecurityCommands.EndSession);
+                                MessageBusClient.send("AuthorizationService", SecurityCommands.EndSession);
                             }
                         });
 
@@ -168,12 +179,18 @@ public class Workspace implements EntryPoint {
             }
         });
 
+        /**
+         * Initialize the workspace UI.
+         */
         initWorkspace(rootId);        
 
         try {
+            /**
+             * Specifiy a callback interface to execute the _initAfterWSLoad() tasks when we know the bus
+             * is fully up and running.
+             */
             bus.init(new AcceptsCallback() {
                 public void callback(Object message, Object data) {
-                    System.out.println("Callback...");
                     _initAfterWSLoad();
                 }
             });
@@ -189,13 +206,6 @@ public class Workspace implements EntryPoint {
      * @param rootId -
      */
     private void initWorkspace(String rootId) {
-        /**
-         * Register a subscriber hook, with the MessageBusClient to send remoteSubcribe requests to the bus
-         * on the server.  This is necessary for the server to be aware of any and all services that are available
-         * in the client.
-         */
-
-
         /**
          * Instantiate layout.
          */
@@ -221,10 +231,6 @@ public class Workspace implements EntryPoint {
          */
         ModuleLoaderBootstrap mlb = create(ModuleLoaderBootstrap.class);
         mlb.initAll(workspaceLayout);
-
-        /**
-         * Bring up the message bus.
-         */
 
         Set<String> loaded = new HashSet<String>();
         if (!preferredGroupOrdering.isEmpty()) {
@@ -264,7 +270,6 @@ public class Workspace implements EntryPoint {
             }
         }
 
-
         for (ToolSet ts : toBeLoaded) {
             if (loaded.contains(ts.getToolSetName())) continue;
             WorkspaceLayout.addToolSet(ts);
@@ -291,10 +296,7 @@ public class Workspace implements EntryPoint {
 
             WorkspaceLayout.addToolSet(ts);
         }
-
-
     }
-
 
     public static SecurityService getSecurityService() {
         return securityService;
@@ -349,6 +351,7 @@ public class Workspace implements EntryPoint {
         loginWindowPanel.showModal();
         loginWindowPanel.center();
     }
+
 
     private native static void _initAfterWSLoad() /*-{
         try {

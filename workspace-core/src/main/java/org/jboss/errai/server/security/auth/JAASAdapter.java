@@ -115,14 +115,14 @@ public class JAASAdapter implements AuthorizationAdapter {
             /**
              * Transmit the message back to the client.
              */
-            MessageBusServer.store("LoginClient", successfulMsg);
+            MessageBusServer.send("LoginClient", successfulMsg);
         }
         catch (LoginException e) {
             /**
              * The login failed. How upsetting. Life must go on, and we must inform the client of the
              * unfortunate news.
              */
-            MessageBusServer.store("LoginClient", ConversationMessage.create(SecurityCommands.FailedAuth, message)
+            MessageBusServer.send("LoginClient", ConversationMessage.create(SecurityCommands.FailedAuth, message)
                     .set(SecurityParts.Name, name));
 
             throw new AuthenticationFailedException(e.getMessage(), e);

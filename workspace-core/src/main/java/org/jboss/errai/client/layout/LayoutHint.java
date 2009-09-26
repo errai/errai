@@ -43,7 +43,7 @@ public class LayoutHint {
         LayoutHintProvider p;
         for (String s : MANAGED_SUBJECTS.keySet()) {
             if ((p = findProvider(s)) != null && p.getWidthHint() > 0 && p.getHeightHint() > 0) {
-                MessageBusClient.store(s, CommandMessage.create()
+                MessageBusClient.send(s, CommandMessage.create()
                         .set(LayoutParts.Width, p.getWidthHint())
                         .set(LayoutParts.Height, p.getHeightHint()));
             }

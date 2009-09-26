@@ -22,7 +22,7 @@ import org.jboss.errai.client.widgets.WSModalDialog;
 
 import java.util.*;
 
-public class ClientBusServer {
+public class ClientBus {
     private List<AcceptsCallback> onSubscribeHooks = new ArrayList<AcceptsCallback>();
     private List<AcceptsCallback> onUnsubscribeHooks = new ArrayList<AcceptsCallback>();
 
@@ -36,7 +36,7 @@ public class ClientBusServer {
     private Map<String, Set<Object>> registeredInThisSession = new HashMap<String, Set<Object>>();
 
 
-    public ClientBusServer() {
+    public ClientBus() {
         endpoint.setServiceEntryPoint(getModuleBaseURL() + "jbwMsgBus");
     }
 
@@ -52,7 +52,6 @@ public class ClientBusServer {
     public Set<String> getAllLocalSubscriptions() {
         return subscriptions.keySet();
     }
-
 
     public void unsubscribeAll(String subject) {
         if (subscriptions.containsKey(subject)) {
@@ -115,31 +114,31 @@ public class ClientBusServer {
 
         subscribe(tempSubject, callback);
 
-        store(message);
+        send(message);
     }
 
 
-    public void store(String subject, Map<String, Object> message) {
+    public void send(String subject, Map<String, Object> message) {
         store(subject, JSONUtilCli.encodeMap(message));
     }
 
-    public void store(String subject, CommandMessage message) {
+    public void send(String subject, CommandMessage message) {
         try {
-            store(subject, message.getParts());
+            send(subject, message.getParts());
         }
         catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void store(String subject, Enum commandType) {
-        store(subject, CommandMessage.create(commandType));
+    public void send(String subject, Enum commandType) {
+        send(subject, CommandMessage.create(commandType));
     }
 
 
-    public void store(CommandMessage message) {
+    public void send(CommandMessage message) {
         if (message.hasPart(MessageParts.ToSubject)) {
-            store(message.get(String.class, MessageParts.ToSubject), message);
+            send(message.get(String.class, MessageParts.ToSubject), message);
         }
         else {
             throw new RuntimeException("Cannot send message using this method if the message does not contain a ToSubject field.");
@@ -396,7 +395,7 @@ public class ClientBusServer {
                 outerTimer.schedule(10);
 
                 for (String s : MessageBusClient.getAllLocalSubscriptions()) {
-                    MessageBusClient.store("ServerBus",
+                    MessageBusClient.send("ServerBus",
                             CommandMessage.create(BusCommands.RemoteSubscribe)
                                     .set(MessageParts.Subject, s));
                 }

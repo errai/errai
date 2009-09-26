@@ -353,7 +353,7 @@ public class WorkspaceLayout extends Composite {
                          final Image icon, boolean multipleAllowed) {
         if (isToolActive(componentId)) {
             if (!multipleAllowed) {
-                MessageBusClient.store(getInstanceSubject(componentId), CommandMessage.create(LayoutCommands.ActivateTool));
+                MessageBusClient.send(getInstanceSubject(componentId), CommandMessage.create(LayoutCommands.ActivateTool));
 
                 return;
             }
@@ -390,7 +390,7 @@ public class WorkspaceLayout extends Composite {
                                 wsd.showModal();
                             }
                             else {
-                                MessageBusClient.store(getInstanceSubject(componentId), CommandMessage.create(LayoutCommands.ActivateTool));
+                                MessageBusClient.send(getInstanceSubject(componentId), CommandMessage.create(LayoutCommands.ActivateTool));
                             }
                         }
                     }
@@ -513,7 +513,7 @@ public class WorkspaceLayout extends Composite {
         delegateMsg.put(LayoutParts.CommandType.name(), LayoutCommands.CloseTab.name());
         delegateMsg.put(LayoutParts.InstanceID.name(), instanceId);
 
-        MessageBusClient.store(getInstanceSubject(instanceId), delegateMsg);
+        MessageBusClient.send(getInstanceSubject(instanceId), delegateMsg);
     }
 
     public void activateTool(String componentTypeId) {

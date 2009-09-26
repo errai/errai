@@ -24,6 +24,6 @@ public enum LayoutCommands {
 
     public void send(Map<String, Object> message) {
         message.put(LayoutParts.CommandType.name(), this.name());
-        MessageBusClient.store(getSubject(), message);
+        MessageBusClient.send(getSubject(), message);
     }
 }

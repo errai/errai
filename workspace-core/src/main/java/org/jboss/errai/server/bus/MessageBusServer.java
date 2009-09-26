@@ -4,7 +4,6 @@ import org.jboss.errai.client.framework.AcceptsCallback;
 import org.jboss.errai.client.rpc.CommandMessage;
 import org.jboss.errai.client.rpc.protocols.MessageParts;
 import org.jboss.errai.client.rpc.protocols.SecurityParts;
-import org.jboss.errai.server.MessageBusServiceImpl;
 import org.jboss.errai.server.json.JSONUtil;
 
 import javax.servlet.http.HttpSession;
@@ -16,13 +15,13 @@ import java.util.Map;
 public class MessageBusServer {
     private static List<AcceptsCallback> onSubscribeHooks = new ArrayList<AcceptsCallback>();
 
-    public static void storeGlobal(String subject, CommandMessage message) {
-        new DefaultMessageBusProvider().getBus().storeGlobal(subject, message);
+    public static void sendGlobal(String subject, CommandMessage message) {
+        new DefaultMessageBusProvider().getBus().sendGlobal(subject, message);
     }
 
-    public static void store(String sessionId, String subject, CommandMessage message) {
+    public static void send(String sessionId, String subject, CommandMessage message) {
         try {
-            new DefaultMessageBusProvider().getBus().store(sessionId, subject, message);
+            new DefaultMessageBusProvider().getBus().send(sessionId, subject, message);
         }
         catch (NoSubscribersToDeliverTo e) {
             throw e;
@@ -32,9 +31,9 @@ public class MessageBusServer {
         }
     }
 
-    public static void store(String subject, CommandMessage message) {
+    public static void send(String subject, CommandMessage message) {
         try {
-            new DefaultMessageBusProvider().getBus().store(subject, message);
+            new DefaultMessageBusProvider().getBus().send(subject, message);
         }
         catch (NoSubscribersToDeliverTo e) {
             throw e;
@@ -44,10 +43,9 @@ public class MessageBusServer {
         }
     }
 
-
-    public static void store(String subject, CommandMessage message, boolean fireListeners) {
+    public static void send(String subject, CommandMessage message, boolean fireListeners) {
         try {
-            new DefaultMessageBusProvider().getBus().store(subject, message, fireListeners);
+            new DefaultMessageBusProvider().getBus().send(subject, message, fireListeners);
         }
         catch (NoSubscribersToDeliverTo e) {
             throw e;
@@ -57,9 +55,9 @@ public class MessageBusServer {
         }
     }
 
-    public static void store(CommandMessage message) {
+    public static void send(CommandMessage message) {
         if (message.hasPart(MessageParts.ToSubject)) {
-            store(message.get(String.class, MessageParts.ToSubject), message);
+            send(message.get(String.class, MessageParts.ToSubject), message);
         }
         else {
             throw new RuntimeException("Cannot send message using this method if the message does not contain a ToSubject field.");

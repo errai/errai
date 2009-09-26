@@ -50,7 +50,7 @@ public class WSTabSelectorDialog extends WSModalDialog {
                     , new ClickHandler() {
 
                         public void onClick(ClickEvent event) {
-                            MessageBusClient.store((String) instanceProperties.get(LayoutParts.Subject.name()),
+                            MessageBusClient.send((String) instanceProperties.get(LayoutParts.Subject.name()),
                                     CommandMessage.create(LayoutCommands.ActivateTool));
 
 
@@ -65,35 +65,23 @@ public class WSTabSelectorDialog extends WSModalDialog {
             vPanel.add(b);
         }
 
-
-
         HorizontalPanel innerContainer = new HorizontalPanel();
         vPanel.add(innerContainer);
         innerContainer.setWidth("100%");
         innerContainer.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
 
-        buttonPanel = new
+        buttonPanel = new HorizontalPanel();
 
-                HorizontalPanel();
+        okButton = new Button("OK");
 
-        okButton = new
-
-                Button("OK");
-
-        okListener = new
-
-                ClickCallbackListener(this, AcceptsCallback.MESSAGE_OK);
+        okListener = new ClickCallbackListener(this, AcceptsCallback.MESSAGE_OK);
 
         okButton.addClickHandler(okListener);
         buttonPanel.add(okButton);
 
-        cancelButton = new
+        cancelButton = new Button("Cancel");
 
-                Button("Cancel");
-
-        cancelListener = new
-
-                ClickCallbackListener(this, AcceptsCallback.MESSAGE_CANCEL);
+        cancelListener = new ClickCallbackListener(this, AcceptsCallback.MESSAGE_CANCEL);
 
         cancelButton.addClickHandler(cancelListener);
         buttonPanel.add(cancelButton);

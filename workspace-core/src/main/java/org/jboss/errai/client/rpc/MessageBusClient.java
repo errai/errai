@@ -2,20 +2,20 @@ package org.jboss.errai.client.rpc;
 
 import org.jboss.errai.client.framework.AcceptsCallback;
 import org.jboss.errai.client.framework.MessageCallback;
-import org.jboss.errai.client.rpc.protocols.ClientBusServer;
+import org.jboss.errai.client.rpc.protocols.ClientBus;
 
 import java.util.Map;
 import java.util.Set;
 
 
 public class MessageBusClient {
-    private static ClientBusServer bus;
+    private static ClientBus bus;
 
-    public static ClientBusServer getBus() {
+    public static ClientBus getBus() {
         return bus;
     }
 
-    public static void setBus(ClientBusServer bus) {
+    public static void setBus(ClientBus bus) {
         MessageBusClient.bus = bus;
     }
 
@@ -63,20 +63,20 @@ public class MessageBusClient {
         bus.unregisterAll(all);
     }
 
-    public static void store(String subject, Map<String, Object> message) {
-        bus.store(subject, message);
+    public static void send(String subject, Map<String, Object> message) {
+        bus.send(subject, message);
     }
 
-    public static void store(String subject, CommandMessage message) {
-        bus.store(subject, message);
+    public static void send(String subject, CommandMessage message) {
+        bus.send(subject, message);
     }
 
-    public static void store(String subject, Enum commandType) {
-        bus.store(subject, commandType);
+    public static void send(String subject, Enum commandType) {
+        bus.send(subject, commandType);
     }
 
-    public static void store(CommandMessage message) {
-        bus.store(message);
+    public static void send(CommandMessage message) {
+        bus.send(message);
     }
 
     public static void addOnSubscribeHook(AcceptsCallback callback) {

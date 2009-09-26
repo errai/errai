@@ -22,7 +22,7 @@ public class BasicAuthorizationListener implements MessageListener {
         if (adapter.requiresAuthorization(message)) {
 
             try {
-                MessageBusServer.store("LoginClient",
+                MessageBusServer.send("LoginClient",
                         CommandMessage.create(SecurityCommands.SecurityChallenge)
                                 .set(SecurityParts.CredentialsRequired, "Name,Password")
                                 .set(SecurityParts.ReplyTo, MessageBusServiceImpl.AUTHORIZATION_SVC_SUBJECT)

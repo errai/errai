@@ -21,7 +21,7 @@ public class TabCloseHandler implements CloseHandler<WSTab>, AcceptsCallback {
     }
 
     public void onClose(CloseEvent closeEvent) {
-        MessageBusClient.store("org.jboss.errai.WorkspaceLayout",
+        MessageBusClient.send("org.jboss.errai.WorkspaceLayout",
                 CommandMessage.create(LayoutCommands.CloseTab)
                 .set(LayoutParts.InstanceID, instanceId));
     }

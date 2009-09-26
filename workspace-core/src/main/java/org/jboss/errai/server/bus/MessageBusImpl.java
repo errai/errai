@@ -131,11 +131,11 @@ public class MessageBusImpl implements MessageBus {
         });
     }
 
-    public void storeGlobal(String subject, CommandMessage message) {
-        storeGlobal(subject, message, true);
+    public void sendGlobal(String subject, CommandMessage message) {
+        sendGlobal(subject, message, true);
     }
 
-    public void storeGlobal(final String subject, final CommandMessage message, boolean fireListeners) {
+    public void sendGlobal(final String subject, final CommandMessage message, boolean fireListeners) {
         if (!subscriptions.containsKey(subject) && !remoteSubscriptions.containsKey(subject)) {
             throw new NoSubscribersToDeliverTo("for: " + subject);
         }
@@ -189,11 +189,11 @@ public class MessageBusImpl implements MessageBus {
         }
     }
 
-    public void store(String sessionid, String subject, CommandMessage message) {
-        store(sessionid, subject, message, true);
+    public void send(String sessionid, String subject, CommandMessage message) {
+        send(sessionid, subject, message, true);
     }
 
-    public void store(String sessionid, String subject, CommandMessage message, boolean fireListeners) {
+    public void send(String sessionid, String subject, CommandMessage message, boolean fireListeners) {
         if (fireListeners && !fireGlobalMessageListeners(message)) {
             System.out.println("ListenerBlockedDelivery (@" + subject + ")");
             return;
@@ -202,11 +202,11 @@ public class MessageBusImpl implements MessageBus {
         store(sessionid, subject, MessageBusServer.encodeMap(message.getParts()));
     }
 
-    public void store(String subject, CommandMessage message) {
-        store(subject, message, true);
+    public void send(String subject, CommandMessage message) {
+        send(subject, message, true);
     }
 
-    public void store(String subject, CommandMessage message, boolean fireListeners) {
+    public void send(String subject, CommandMessage message, boolean fireListeners) {
         if (!message.hasPart(SecurityParts.SessionData)) {
             throw new RuntimeException("cannot automatically route message. no session contained in message.");
         }
@@ -217,7 +217,7 @@ public class MessageBusImpl implements MessageBus {
             throw new RuntimeException("cannot automatically route message. no session contained in message.");
         }
 
-        store((String) session.getAttribute(WS_SESSION_ID), subject, message, fireListeners);
+        send((String) session.getAttribute(WS_SESSION_ID), subject, message, fireListeners);
     }
 
 

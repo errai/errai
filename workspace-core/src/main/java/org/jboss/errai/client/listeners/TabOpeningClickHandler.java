@@ -45,7 +45,7 @@ public class TabOpeningClickHandler implements ClickHandler {
                             }
                         });
 
-                        MessageBusClient.store(ConversationMessage.create(message));
+                        MessageBusClient.send(ConversationMessage.create(message));
                     }
                     catch (Exception e) {
                         e.printStackTrace();
@@ -61,7 +61,7 @@ public class TabOpeningClickHandler implements ClickHandler {
          */
         MessageBusClient.beginCapture();
 
-        MessageBusClient.store("org.jboss.errai.WorkspaceLayout", CommandMessage.create(LayoutCommands.OpenNewTab)
+        MessageBusClient.send("org.jboss.errai.WorkspaceLayout", CommandMessage.create(LayoutCommands.OpenNewTab)
                 .set(LayoutParts.ComponentID, tool.getId())
                 .set(LayoutParts.IconURI, tool.getIcon().getUrl())
                 .set(LayoutParts.MultipleInstances, tool.multipleAllowed())

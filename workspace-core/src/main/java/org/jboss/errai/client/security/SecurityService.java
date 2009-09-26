@@ -62,7 +62,7 @@ public class SecurityService {
                             }
                         }
 
-                        MessageBusClient.store("AuthorizationService", challenge);
+                        MessageBusClient.send("AuthorizationService", challenge);
 
                         break;
 
@@ -94,7 +94,7 @@ public class SecurityService {
 
         CommandMessage message = new CommandMessage(SecurityCommands.WhatCredentials);
         message.set(SecurityParts.ReplyTo, SUBJECT);
-        MessageBusClient.store("AuthorizationService", message);
+        MessageBusClient.send("AuthorizationService", message);
     }
 
 }

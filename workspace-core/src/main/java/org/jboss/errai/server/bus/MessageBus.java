@@ -8,14 +8,14 @@ import java.util.Set;
 public interface MessageBus {
     public static final String WS_SESSION_ID = "WSSessionID";
 
-    public void storeGlobal(String subject, CommandMessage message);
-    public void storeGlobal(String subject, CommandMessage message, boolean fireListeners);
+    public void sendGlobal(String subject, CommandMessage message);
+    public void sendGlobal(String subject, CommandMessage message, boolean fireListeners);
 
-    public void store(String sessionid, String subject, CommandMessage message);
-    public void store(String sessionid, String subject, CommandMessage message, boolean fireListeners);
+    public void send(String sessionid, String subject, CommandMessage message);
+    public void send(String sessionid, String subject, CommandMessage message, boolean fireListeners);
 
-    public void store(String subject, CommandMessage message);
-    public void store(String subject, CommandMessage message, boolean fireListeners);
+    public void send(String subject, CommandMessage message);
+    public void send(String subject, CommandMessage message, boolean fireListeners);
 
     public Message nextMessage(Object sessionContext);
 
