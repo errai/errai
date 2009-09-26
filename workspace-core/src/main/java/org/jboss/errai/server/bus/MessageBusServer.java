@@ -135,6 +135,6 @@ public class MessageBusServer {
     }
 
     public static String getSessionId(CommandMessage message) {
-        return (String) message.get(HttpSession.class, SecurityParts.SessionData).getAttribute(MessageBusServiceImpl.WS_SESSION_ID);
+        return (String) message.get(HttpSession.class, SecurityParts.SessionData).getAttribute(MessageBus.WS_SESSION_ID);
     }
 }

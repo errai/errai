@@ -6,6 +6,8 @@ import org.jboss.errai.client.rpc.CommandMessage;
 import java.util.Set;
 
 public interface MessageBus {
+    public static final String WS_SESSION_ID = "WSSessionID";
+
     public void storeGlobal(String subject, CommandMessage message);
     public void storeGlobal(String subject, CommandMessage message, boolean fireListeners);
 

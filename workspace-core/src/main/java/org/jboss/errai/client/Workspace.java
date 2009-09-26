@@ -95,7 +95,6 @@ public class Workspace implements EntryPoint {
         _initAfterWSLoad();
 
         MessageBusClient.store("ServerEchoService", new CommandMessage());
-
     }
 
     /**
@@ -159,17 +158,13 @@ public class Workspace implements EntryPoint {
             }
         };
 
-        /**
-         * Register the login client.
-         */
-
 
         /**
-         * Send initial message to the ServerEchoService, to establish an HTTP session. Otherwise, concurrent
+         * Send initial message to connect to the queue, to establish an HTTP session. Otherwise, concurrent
          * requests will result in multiple sessions being creatd.  Which is bad.  Avoid this at all costs.
          * Please.
          */
-        messageBus.store("ServerEchoService", "{}", store);
+        messageBus.store("ServerBus", "{\"CommandType\":\"ConnectToQueue\"}", store);
     }
 
     private void initializeMessagingBus() {
@@ -192,7 +187,6 @@ public class Workspace implements EntryPoint {
 
         RootPanel.get().add(heartBeat);
 
-
         final Timer incoming = new Timer() {
             boolean block = false;
 
@@ -207,7 +201,8 @@ public class Workspace implements EntryPoint {
                         block = false;
 
                         final WSModalDialog commmunicationFailure = new WSModalDialog();
-                        commmunicationFailure.ask("There was an error communicating with the server: " + throwable.getMessage(),
+                        commmunicationFailure.ask("There was an error communicating with the server: "
+                                + throwable.getMessage(),
                                 new AcceptsCallback() {
                                     public void callback(Object message, Object data) {
                                     }
@@ -236,8 +231,6 @@ public class Workspace implements EntryPoint {
                                 }
                             };
                             fadeout.schedule(2000);
-
-
                         }
 
                         GWT.log("ClientRecievedMessage [Subject:'" + o[0] + "';SubcribedTo:"
@@ -324,7 +317,6 @@ public class Workspace implements EntryPoint {
                                         MessageBusClient.store("AuthorizationService", SecurityCommands.EndSession);
                                     }
                                 });
-
 
                                 workspaceLayout.getUserInfoPanel().add(userInfo);
 

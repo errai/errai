@@ -11,10 +11,7 @@ import org.jboss.errai.client.rpc.protocols.SecurityCommands;
 import org.jboss.errai.client.rpc.protocols.SecurityParts;
 import org.jboss.errai.client.security.CredentialTypes;
 import org.jboss.errai.server.annotations.LoadModule;
-import org.jboss.errai.server.bus.DefaultMessageBusProvider;
-import org.jboss.errai.server.bus.Message;
-import org.jboss.errai.server.bus.MessageBus;
-import org.jboss.errai.server.bus.MessageBusServer;
+import org.jboss.errai.server.bus.*;
 import org.jboss.errai.server.json.JSONUtil;
 import org.jboss.errai.server.security.auth.AuthorizationAdapter;
 import org.jboss.errai.server.security.auth.BasicAuthorizationListener;
@@ -40,7 +37,7 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
     private MessageBus bus;
     private AuthorizationAdapter authorizationAdapter;
 
-    public static final String WS_SESSION_ID = "WSSessionID";
+
     public static final String AUTHORIZATION_SVC_SUBJECT = "AuthorizationService";
 
     @Override
@@ -114,21 +111,7 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
             }
         });
 
-        bus.subscribe("ServerBus", new MessageCallback() {
-            public void callback(CommandMessage message) {
-                switch (BusCommands.valueOf(message.getCommandType())) {
-                    case RemoteSubscribe:
-                        bus.remoteSubscribe(message.get(HttpSession.class, SecurityParts.SessionData).getAttribute(WS_SESSION_ID),
-                                message.get(String.class, MessageParts.Subject));
-                        break;
 
-                    case RemoteUnsubscribe:
-                        bus.remoteUnsubscribe(message.get(HttpSession.class, SecurityParts.SessionData).getAttribute(WS_SESSION_ID),
-                                message.get(String.class, MessageParts.Subject));
-                        break;
-                }
-            }
-        });
     }
 
     private void loadConfig() {
@@ -314,8 +297,8 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
         HttpServletRequest request = getThreadLocalRequest();
         HttpSession session = request.getSession();
 
-        if (session.getAttribute(WS_SESSION_ID) == null) {
-            session.setAttribute(WS_SESSION_ID, session.getId());
+        if (session.getAttribute(MessageBus.WS_SESSION_ID) == null) {
+            session.setAttribute(MessageBus.WS_SESSION_ID, session.getId());
         }
 
         return session;
@@ -327,7 +310,7 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
      * @return
      */
     private String getId() {
-        return (String) getSession().getAttribute(WS_SESSION_ID);
+        return (String) getSession().getAttribute(MessageBus.WS_SESSION_ID);
     }
 
     /**

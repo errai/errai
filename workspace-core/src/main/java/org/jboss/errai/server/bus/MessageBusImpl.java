@@ -3,8 +3,9 @@ package org.jboss.errai.server.bus;
 import com.google.gwt.core.client.GWT;
 import org.jboss.errai.client.framework.MessageCallback;
 import org.jboss.errai.client.rpc.CommandMessage;
+import org.jboss.errai.client.rpc.protocols.BusCommands;
+import org.jboss.errai.client.rpc.protocols.MessageParts;
 import org.jboss.errai.client.rpc.protocols.SecurityParts;
-import org.jboss.errai.server.MessageBusServiceImpl;
 
 import javax.servlet.http.HttpSession;
 import javax.swing.*;
@@ -26,6 +27,7 @@ public class MessageBusImpl implements MessageBus {
 
     private final List<SubscribeListener> subscribeListeners = new LinkedList<SubscribeListener>();
     private final List<UnsubscribeListener> unsubscribeListeners = new LinkedList<UnsubscribeListener>();
+
 
     public MessageBusImpl() {
         Thread thread = new Thread() {
@@ -106,6 +108,27 @@ public class MessageBusImpl implements MessageBus {
             thread.setPriority(Thread.MIN_PRIORITY);
             thread.start();
         }
+
+        subscribe("ServerBus", new MessageCallback() {
+            public void callback(CommandMessage message) {
+                switch (BusCommands.valueOf(message.getCommandType())) {
+                    case RemoteSubscribe:
+                        remoteSubscribe(message.get(HttpSession.class, SecurityParts.SessionData).getAttribute(WS_SESSION_ID),
+                                message.get(String.class, MessageParts.Subject));
+                        break;
+
+                    case RemoteUnsubscribe:
+                        remoteUnsubscribe(message.get(HttpSession.class, SecurityParts.SessionData).getAttribute(WS_SESSION_ID),
+                                message.get(String.class, MessageParts.Subject));
+                        break;
+
+                    case ConnectToQueue:
+                        if (!messageQueues.containsKey(message.get(HttpSession.class, SecurityParts.SessionData)))
+                            messageQueues.put(message.get(HttpSession.class, SecurityParts.SessionData).getAttribute(WS_SESSION_ID),
+                                    new ArrayBlockingQueue<Message>(25));
+                }
+            }
+        });
     }
 
     public void storeGlobal(String subject, CommandMessage message) {
@@ -194,7 +217,7 @@ public class MessageBusImpl implements MessageBus {
             throw new RuntimeException("cannot automatically route message. no session contained in message.");
         }
 
-        store((String) session.getAttribute(MessageBusServiceImpl.WS_SESSION_ID), subject, message, fireListeners);
+        store((String) session.getAttribute(WS_SESSION_ID), subject, message, fireListeners);
     }
 
 
@@ -212,8 +235,8 @@ public class MessageBusImpl implements MessageBus {
     }
 
     private BlockingQueue<Message> getQueue(Object sessionContext) {
-        if (!messageQueues.containsKey(sessionContext))
-            messageQueues.put(sessionContext, new ArrayBlockingQueue<Message>(25));
+//        if (!messageQueues.containsKey(sessionContext))
+//            messageQueues.put(sessionContext, new ArrayBlockingQueue<Message>(25));
 
         return messageQueues.get(sessionContext);
     }
