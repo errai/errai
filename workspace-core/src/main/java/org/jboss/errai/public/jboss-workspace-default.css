@@ -61,11 +61,13 @@ span {
 .workspace-LeftNavArea {
     background-color: #efefef;
     border-right: 1px solid #d0d0d0;
+    height:100%;
 }
 
 .workspace-LeftNavArea-MouseOver {
     background-color: #dedede;
     border-right: 1px solid gray;
+    height:100%;
 }
 
 .workspace-RightAppPanel {
@@ -684,7 +686,7 @@ span {
     border: 1px solid #ddddff;
 
     border-bottom-color: lightgray;
-    border-right-color: ;
+    border-right-color: lightsteelblue;
     border-left-color: lightsteelblue;
 }
 

@@ -140,22 +140,6 @@ public class MessageBusClient {
         }
     }
 
-    private native static void _unsubscribe(Object registrationHandle) /*-{
-        $wnd.PageBus.unsubscribe(registrationHandle);
-    }-*/;
-
-    private native static Object _subscribe(String subject, MessageCallback callback,
-                                            Object subscriberData) /*-{
-         return $wnd.PageBus.subscribe(subject, null,
-                 function (subject, message, subcriberData) {
-                    callback.@org.jboss.errai.client.framework.MessageCallback::callback(Lorg/jboss/errai/client/rpc/CommandMessage;)(@org.jboss.errai.client.rpc.MessageBusClient::decodeCommandMessage(Ljava/lang/Object;)(message))
-                 },
-                 null);
-    }-*/;
-
-    public native static void store(String subject, Object value) /*-{
-         $wnd.PageBus.store(subject, value);
-    }-*/;
 
     public static void store(String subject, Map<String, Object> message) {
         store(subject, encodeMap(message));
@@ -332,6 +316,24 @@ public class MessageBusClient {
 
         return buf.append("}").toString();
     }
+
+
+    private native static void _unsubscribe(Object registrationHandle) /*-{
+         $wnd.PageBus.unsubscribe(registrationHandle);
+     }-*/;
+
+    private native static Object _subscribe(String subject, MessageCallback callback,
+                                            Object subscriberData) /*-{
+          return $wnd.PageBus.subscribe(subject, null,
+                  function (subject, message, subcriberData) {
+                     callback.@org.jboss.errai.client.framework.MessageCallback::callback(Lorg/jboss/errai/client/rpc/CommandMessage;)(@org.jboss.errai.client.rpc.MessageBusClient::decodeCommandMessage(Ljava/lang/Object;)(message))
+                  },
+                  null);
+     }-*/;
+
+    public native static void store(String subject, Object value) /*-{
+          $wnd.PageBus.store(subject, value);
+     }-*/;
 
 }
 

@@ -154,11 +154,6 @@ public class WorkspaceLayout extends Composite {
                                 String instanceId = message.get(String.class, LayoutParts.InstanceID);
                                 closeTab(instanceId);
                                 break;
-
-                            case GetActiveWidgets:
-                                componentId = message.get(String.class, LayoutParts.ComponentID);
-                                Set<String> active = getActiveByType(componentId);
-                                break;
                         }
 
 
@@ -231,6 +226,7 @@ public class WorkspaceLayout extends Composite {
 
                         private void setSize() {
                             leftPanel.setWidth(i + "px");
+                            leftPanel.setHeight("100%");
                         }
                     };
 
@@ -262,6 +258,7 @@ public class WorkspaceLayout extends Composite {
 
                         private void setSize() {
                             leftPanel.setWidth(i + "px");
+                            leftPanel.setHeight("0");
                         }
                     };
 

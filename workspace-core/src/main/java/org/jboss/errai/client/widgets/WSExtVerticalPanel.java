@@ -56,7 +56,7 @@ public class WSExtVerticalPanel extends VerticalPanel {
                 }
 
                 if (event.getClientY() > range) {
-                    getElement().setClassName("errai-LeftNavArea-MouseOver");
+                    setStyleName("workspace-LeftNavArea-MouseOver");
                     t.schedule(200);
                 }
 
@@ -66,7 +66,7 @@ public class WSExtVerticalPanel extends VerticalPanel {
             case Event.ONMOUSEOUT:
                 Element to = DOM.eventGetToElement(event);
                 if (to == null || !DOM.isOrHasChild(this.getElement(), to)) {
-                    getElement().setClassName("errai-LeftNavArea");
+                    setStyleName("workspace-LeftNavArea");
                     t.cancel();
                     workspaceLayout.collapseNavPanel();
                 }

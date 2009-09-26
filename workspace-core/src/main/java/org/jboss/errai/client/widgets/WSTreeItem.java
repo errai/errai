@@ -21,6 +21,8 @@ public class WSTreeItem extends TreeItem {
     }
 
 
+    
+
     @Override
     public WSTreeItem addItem(String itemText) {
         WSTreeItem treeItem = new WSTreeItem(new HTML(itemText));
