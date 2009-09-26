@@ -5,13 +5,15 @@ import org.jboss.errai.client.framework.MessageCallback;
 import org.jboss.errai.client.rpc.CommandMessage;
 import org.jboss.errai.client.rpc.ConversationMessage;
 import org.jboss.errai.client.rpc.MessageBusService;
-import org.jboss.errai.client.rpc.protocols.BusCommands;
 import org.jboss.errai.client.rpc.protocols.MessageParts;
 import org.jboss.errai.client.rpc.protocols.SecurityCommands;
 import org.jboss.errai.client.rpc.protocols.SecurityParts;
 import org.jboss.errai.client.security.CredentialTypes;
 import org.jboss.errai.server.annotations.LoadModule;
-import org.jboss.errai.server.bus.*;
+import org.jboss.errai.server.bus.DefaultMessageBusProvider;
+import org.jboss.errai.server.bus.Message;
+import org.jboss.errai.server.bus.MessageBus;
+import org.jboss.errai.server.bus.MessageBusServer;
 import org.jboss.errai.server.json.JSONUtil;
 import org.jboss.errai.server.security.auth.AuthorizationAdapter;
 import org.jboss.errai.server.security.auth.BasicAuthorizationListener;
@@ -102,11 +104,8 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
          */
         bus.subscribe("ServerEchoService", new MessageCallback() {
             public void callback(CommandMessage c) {
-                if (c.hasPart("EchoBackData")) {
-                    System.out.println("EchoBack: " + c.get(String.class, "EchoBackData"));
-                }
-                else {
-                    System.out.println("Echo!");
+                if (c.hasPart(MessageParts.ReplyTo)) {
+                    MessageBusServer.store(ConversationMessage.create(c));
                 }
             }
         });

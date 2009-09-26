@@ -18,6 +18,7 @@ import org.jboss.errai.client.framework.*;
 import org.jboss.errai.client.listeners.TabCloseHandler;
 import org.jboss.errai.client.rpc.CommandMessage;
 import org.jboss.errai.client.rpc.MessageBusClient;
+import org.jboss.errai.client.rpc.json.JSONUtilCli;
 import org.jboss.errai.client.rpc.protocols.LayoutCommands;
 import org.jboss.errai.client.rpc.protocols.LayoutParts;
 import org.jboss.errai.client.util.Effects;
@@ -459,7 +460,7 @@ public class WorkspaceLayout extends Composite {
                         tabProperties.put(LayoutParts.ComponentID.name(), componentId);
                         tabProperties.put(LayoutParts.Subject.name(), getInstanceSubject(instanceId));
 
-                        tabInstances.put(instanceId, MessageBusClient.encodeMap(tabProperties));
+                        tabInstances.put(instanceId, JSONUtilCli.encodeMap(tabProperties));
 
                         MessageBusClient.subscribe(getInstanceSubject(instanceId),
                                 new MessageCallback() {
@@ -551,7 +552,7 @@ public class WorkspaceLayout extends Composite {
         HashSet<String> set = new HashSet<String>();
 
         for (Map.Entry<String, String> entry : this.tabInstances.entrySet()) {
-            if (componentTypeId.equals(MessageBusClient.decodeMap(entry.getValue()).get("ComponentID"))) {
+            if (componentTypeId.equals(JSONUtilCli.decodeMap(entry.getValue()).get("ComponentID"))) {
                 set.add(entry.getValue());
             }
         }

@@ -8,6 +8,7 @@ import org.jboss.errai.client.framework.AcceptsCallback;
 import org.jboss.errai.client.listeners.ClickCallbackListener;
 import org.jboss.errai.client.rpc.CommandMessage;
 import org.jboss.errai.client.rpc.MessageBusClient;
+import org.jboss.errai.client.rpc.json.JSONUtilCli;
 import org.jboss.errai.client.rpc.protocols.LayoutCommands;
 import org.jboss.errai.client.rpc.protocols.LayoutParts;
 
@@ -42,7 +43,7 @@ public class WSTabSelectorDialog extends WSModalDialog {
 
         for (String s : components) {
 
-            final Map<String, Object> instanceProperties = MessageBusClient.decodeMap(s);
+            final Map<String, Object> instanceProperties = JSONUtilCli.decodeMap(s);
 
             Button b = new Button("<span><img src='" + instanceProperties.get(LayoutParts.IconURI.name())
                     + "' align='left'/>" + instanceProperties.get(LayoutParts.Name.name()) + "</span>"
