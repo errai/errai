@@ -167,6 +167,10 @@ public class WSAutoCompleteTextBox extends TextBox
         complete();
     }
 
+    public void onChange() {
+        complete();
+    }
+
     // add selected item to textbox
     protected void complete() {
         if (choices.getItemCount() > 0) {
