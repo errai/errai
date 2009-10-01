@@ -1,183 +1,141 @@
-/*
-Auto-Completion Textbox for GWT
-Copyright (C) 2006 Oliver Albers http://gwt.components.googlepages.com/
-
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
-
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-*/
 package org.jboss.errai.client.widgets;
 
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.ui.*;
 
+import java.util.ArrayList;
 
-public class WSAutoCompleteTextBox extends TextBox
-        implements KeyboardListener, ChangeListener {
 
-    protected PopupPanel choicesPopup = new PopupPanel(true);
-    protected ListBox choices = new ListBox();
-    protected CompletionItems items = new SimpleAutoCompletionItems(new String[]{});
-    protected boolean popupAdded = false;
-    protected boolean visible = false;
+public class WSAutoCompleteTextBox extends TextBox implements ClickHandler, ChangeHandler, KeyUpHandler {
+
+    private ListBox list = new ListBox();
+    private PopupPanel popup = new PopupPanel(true);
+    private String[] items = new String[]{};
 
     /**
-     * Default Constructor
+     * Constructor. Sets up listeners and adds the list to the popup, and the popup to the main root panel.
      */
     public WSAutoCompleteTextBox() {
         super();
-        this.addKeyboardListener(this);
-        choices.addChangeListener(this);
-        choicesPopup.add(choices);
+        addClickHandler(this);
+        addKeyUpHandler(this);
+        addChangeHandler(this);
+        popup.add(list);
+        RootPanel.get().add(popup);
     }
 
     /**
-     * Sets an "algorithm" returning completion items
-     * You can define your own way how the textbox retrieves autocompletion items
-     * by implementing the CompletionItems interface and setting the according object
+     * Overrides onClick in ClickHandler. Completes selection.
      *
-     * @param items CompletionItem implementation
+     * @param event the {@link ClickEvent} that was fired
      */
-    public void setCompletionItems(CompletionItems items) {
+    public void onClick(ClickEvent event) {
+        select();
+    }
+
+    /**
+     * Overrides onChange in ChangeHandler. Completes the selection.
+     *
+     * @param event the {@link ChangeEvent} that was fired
+     */
+    public void onChange(ChangeEvent event) {
+        select();
+    }
+
+    /**
+     * Overrides onKeyUp in KeyUpHandler. Takes care of selection and showing popup box.
+     * - If Enter is clicked, and the popup is showing: selection is made.
+     * - Up/Down arrow keys are used to traverse through popup list.
+     * - ESC key closes the popup list.
+     * - Any other key prompts popup to show with appropriate items in the list.
+     *
+     * @param event the {@link KeyUpEvent} that was fired
+     */
+    public void onKeyUp(KeyUpEvent event) {
+        if (event.isDownArrow()) {
+            int selectedIndex = list.getSelectedIndex() + 1;
+            if (selectedIndex > list.getItemCount())
+                selectedIndex = 0;
+
+            list.setSelectedIndex(selectedIndex);
+
+        } else if (event.isUpArrow()) {
+            int selectedIndex = list.getSelectedIndex() - 1;
+            if (selectedIndex < 0)
+                selectedIndex = list.getItemCount();
+
+            list.setSelectedIndex(selectedIndex);
+
+        } else if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+            if (popup.isShowing())
+                select();
+
+        } else if (event.getNativeKeyCode() == KeyCodes.KEY_ESCAPE) {
+            cancel();
+
+        } else {
+            cancel();
+            String text = getText();
+            if (text.length() > 0) {
+                String[] matches = getMatchingItems(text);
+                if (matches.length > 0 && !(matches.length == 1 && matches[0].equals(text))) {
+
+                    for (int i = 0; i < matches.length; i++)
+                        list.addItem(matches[i]);
+                    list.setSelectedIndex(0);
+                    list.setVisibleItemCount(matches.length + 1);
+                    list.setWidth(getOffsetWidth() + "px");
+
+                    popup.setPopupPosition(getAbsoluteLeft(), getAbsoluteTop() + getOffsetHeight());
+                    popup.show();
+                    popup.getElement().getStyle().setProperty("position", "absolute");
+                    popup.getElement().getStyle().setProperty("left", Integer.toString(getAbsoluteLeft()));
+                    popup.getElement().getStyle().setProperty("top", Integer.toString(getAbsoluteTop()
+                            + getOffsetHeight()));
+
+                }
+            }
+        }
+    }
+
+    /**
+     * Sets the applicable options.
+     *
+     * @param items the array of available options for the drop down list
+     */
+    public void setItems(String[] items) {
         this.items = items;
     }
 
     /**
-     * Returns the used CompletionItems object
+     * Returns an array of items that start with the specified string.
      *
-     * @return CompletionItems implementation
+     * @param match the string to search for in the list of items
+     * @return the string array of matching items; can be empty
      */
-    public CompletionItems getCompletionItems() {
-        return this.items;
+    private String[] getMatchingItems(String match) {
+        ArrayList matches = new ArrayList();
+        for (int i = 0; i < items.length; i++)
+            if (items[i].toLowerCase().startsWith(match.toLowerCase()))
+                matches.add(items[i]);
+
+        return (String[]) matches.toArray(new String[matches.size()]);
     }
 
     /**
-     * Not used at all
+     * Completes the selection and cancels the popup.
      */
-    public void onKeyDown(Widget arg0, char arg1, int arg2) {
+    private void select() {
+        if (list.getItemCount() > 0)
+            setText(list.getItemText(list.getSelectedIndex()));
+        cancel();
     }
 
     /**
-     * Not used at all
+     * Cancels the popup.
      */
-    public void onKeyPress(Widget arg0, char arg1, int arg2) {
-    }
-
-    /**
-     * A key was released, start autocompletion
-     */
-    public void onKeyUp(Widget arg0, char arg1, int arg2) {
-        if (arg1 == KEY_DOWN) {
-            int selectedIndex = choices.getSelectedIndex();
-            selectedIndex++;
-            if (selectedIndex > choices.getItemCount()) {
-                selectedIndex = 0;
-            }
-            choices.setSelectedIndex(selectedIndex);
-
-            return;
-        }
-
-        if (arg1 == KEY_UP) {
-            int selectedIndex = choices.getSelectedIndex();
-            selectedIndex--;
-            if (selectedIndex < 0) {
-                selectedIndex = choices.getItemCount();
-            }
-            choices.setSelectedIndex(selectedIndex);
-
-            return;
-        }
-
-        if (arg1 == KEY_ENTER) {
-            if (visible) {
-                complete();
-            }
-
-            return;
-        }
-
-        if (arg1 == KEY_ESCAPE) {
-            choices.clear();
-            choicesPopup.hide();
-            visible = false;
-
-            return;
-        }
-
-        String text = this.getText();
-        String[] matches = new String[]{};
-        if (text.length() > 0) {
-            matches = items.getCompletionItems(text);
-        }
-
-        if (matches.length > 0) {
-            choices.clear();
-
-            for (int i = 0; i < matches.length; i++) {
-                choices.addItem(matches[i]);
-            }
-
-            // if there is only one match and it is what is in the
-            // text field anyways there is no need to show autocompletion
-            if (matches.length == 1 && matches[0].compareTo(text) == 0) {
-                choicesPopup.hide();
-            } else {
-                choices.setSelectedIndex(0);
-                choices.setVisibleItemCount(matches.length + 1);
-
-                if (!popupAdded) {
-                    RootPanel.get().add(choicesPopup);
-                    popupAdded = true;
-                }
-                visible = true;
-                choicesPopup.setPopupPosition(this.getAbsoluteLeft(),
-                        this.getAbsoluteTop() + this.getOffsetHeight());
-                choices.setWidth(this.getOffsetWidth() + "px");
-                choicesPopup.show();
-                choicesPopup.getElement().getStyle().setProperty("position", "absolute");
-                choicesPopup.getElement().getStyle().setProperty("left", Integer.toString(this.getAbsoluteLeft()));
-                choicesPopup.getElement().getStyle().setProperty("top",
-                        Integer.toString(this.getAbsoluteTop() + this.getOffsetHeight()));
-            }
-
-        } else {
-            visible = false;
-            choicesPopup.hide();
-        }
-    }
-
-    /**
-     * A mouseclick in the list of items
-     */
-    public void onChange(Widget arg0) {
-        complete();
-    }
-
-    public void onClick(Widget arg0) {
-        complete();
-    }
-
-    public void onChange() {
-        complete();
-    }
-
-    // add selected item to textbox
-    protected void complete() {
-        if (choices.getItemCount() > 0) {
-            this.setText(choices.getItemText(choices.getSelectedIndex()));
-        }
-
-        choices.clear();
-        choicesPopup.hide();
+    private void cancel() {
+        list.clear();
+        popup.hide();
     }
 }
