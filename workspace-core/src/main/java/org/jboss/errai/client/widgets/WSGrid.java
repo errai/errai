@@ -102,7 +102,6 @@ public class WSGrid extends Composite {
 
         dataGrid.getScrollPanel().addScrollHandler(new ScrollHandler() {
             public void onScroll(ScrollEvent event) {
-
                 titleBar.getScrollPanel()
                         .setHorizontalScrollPosition(dataGrid.getScrollPanel().getHorizontalScrollPosition());
             }
@@ -1183,7 +1182,7 @@ public class WSGrid extends Composite {
                     final int endPos = scrollPos;
 
                     final int multiplier = ((endPos - startPos) / 100);
-                    final double decelRate = ((double)(startPos - endPos)) / (250 + (multiplier * 100));
+                    final double decelRate = ((double) (startPos - endPos)) / (250 + (multiplier * 100));
                     final int threshold = endPos + 50 + (multiplier * 10);
 
                     Timer smoothScroll = new Timer() {
@@ -1202,7 +1201,7 @@ public class WSGrid extends Composite {
                                 if (vel > 1) {
                                     vel -= decelRate;
                                     absoluteVel = (int) Math.round(vel);
-                                    if (absoluteVel < 1) absoluteVel = 1;                                    
+                                    if (absoluteVel < 1) absoluteVel = 1;
                                 }
                                 //  x = !x;
                             }

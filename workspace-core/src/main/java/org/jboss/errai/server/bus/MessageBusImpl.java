@@ -28,7 +28,6 @@ public class MessageBusImpl implements MessageBus {
     private final List<SubscribeListener> subscribeListeners = new LinkedList<SubscribeListener>();
     private final List<UnsubscribeListener> unsubscribeListeners = new LinkedList<UnsubscribeListener>();
 
-
     public MessageBusImpl() {
         Thread thread = new Thread() {
             @Override
@@ -91,6 +90,7 @@ public class MessageBusImpl implements MessageBus {
                     }
                 }
                 catch (InterruptedException e) {
+                    // do nothing.
                 }
                 catch (ConcurrentModificationException e) {
                     run();

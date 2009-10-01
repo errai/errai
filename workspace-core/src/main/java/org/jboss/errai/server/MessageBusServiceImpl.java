@@ -39,7 +39,6 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
     private MessageBus bus;
     private AuthorizationAdapter authorizationAdapter;
 
-
     public static final String AUTHORIZATION_SVC_SUBJECT = "AuthorizationService";
 
     @Override
@@ -109,8 +108,6 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
                 }
             }
         });
-
-
     }
 
     private void loadConfig() {
@@ -135,12 +132,13 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
             String modulesToLoad = bundle.getString("workspace.server_modules");
 
             String[] moduleFQCN = modulesToLoad.split(",");
-            Class<Module>[] moduleClass = new Class[moduleFQCN.length];
+            @SuppressWarnings({"unchecked"}) Class<Module>[] moduleClass = new Class[moduleFQCN.length];
 
             try {
                 for (int i = 0; i < moduleFQCN.length; i++) {
                     if (moduleClass[i] == null) continue;
                     try {
+                        //noinspection unchecked
                         moduleClass[i] = (Class<Module>) Class.forName(moduleFQCN[i]);
                     }
                     catch (Exception e) {
@@ -164,7 +162,6 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
             catch (Exception e) {
                 throw new RuntimeException("error loading module: " + e.getMessage(), e);
             }
-
 
             try {
                 Enumeration<URL> targets = currentThread().getContextClassLoader().getResources("ErraiApp.properties");
@@ -238,8 +235,6 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
      * @param message -
      */
     public void store(String subject, String message) {
-        //System.out.println("RecvMsgFromClient (Subject:" + subject + ";Message=" + message + ")");
-
         System.out.println("INCOMING_MSG (@" + subject + "):" + message);
 
         CommandMessage translatedMessage = new CommandMessage();
@@ -280,7 +275,7 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
     /**
      * Retrieve the next waiting message from the bus.
      *
-     * @return
+     * @return -
      */
     public String[] nextMessage() {
         Message m = bus.nextMessage(getId());
@@ -306,7 +301,7 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
     /**
      * The the unique session identifier.
      *
-     * @return
+     * @return -
      */
     private String getId() {
         return (String) getSession().getAttribute(MessageBus.WS_SESSION_ID);
@@ -315,7 +310,7 @@ public class MessageBusServiceImpl extends RemoteServiceServlet implements Messa
     /**
      * Return a list of all available subjects in the server bus.
      *
-     * @return
+     * @return -
      */
     public String[] getSubjects() {
         return bus.getSubjects().toArray(new String[bus.getSubjects().size()]);

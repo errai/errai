@@ -38,8 +38,7 @@ public class Workspace implements EntryPoint {
     static {
         loginWindowClosingHandler = new Window.ClosingHandler() {
             public void onWindowClosing(Window.ClosingEvent event) {
-                CommandMessage msg = new CommandMessage();
-                MessageBusClient.send("ServerEchoService", msg);
+                MessageBusClient.send("ServerEchoService", new CommandMessage());
             }
         };
     }
@@ -67,7 +66,7 @@ public class Workspace implements EntryPoint {
 
         /**
          * Configure the local client message bus to send RemoteSubscribe signals to the remote bus when
-         * new subscriptions are creately locally.
+         * new subscriptions are created locally.
          */
         MessageBusClient.addOnSubscribeHook(new AcceptsCallback() {
             public void callback(Object message, Object data) {

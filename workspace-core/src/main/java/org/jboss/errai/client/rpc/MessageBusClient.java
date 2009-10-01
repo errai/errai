@@ -7,7 +7,6 @@ import org.jboss.errai.client.rpc.protocols.ClientBus;
 import java.util.Map;
 import java.util.Set;
 
-
 public class MessageBusClient {
     private static ClientBus bus;
 

@@ -420,8 +420,8 @@ public class WorkspaceLayout extends Composite {
                         toolWidget.setVisible(true);
                         panel.setWidget(toolWidget);
 
-                        final Image newIcon = new Image(icon != null ? icon.getUrl() : GWT.getModuleBaseURL()
-                                + "/images/ui/icons/questioncube.png");
+                        final Image newIcon = new Image(icon != null || "".equals(icon) ? icon.getUrl() : GWT.getModuleBaseURL()
+                                + "/images/ui/icons/application.png");
                         newIcon.setSize("16px", "16px");
 
                         final WSTab newWSTab = new WSTab(name, panel, newIcon);
