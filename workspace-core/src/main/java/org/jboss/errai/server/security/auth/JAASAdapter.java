@@ -99,7 +99,7 @@ public class JAASAdapter implements AuthorizationAdapter {
 
             try {
                 ResourceBundle bundle = ResourceBundle.getBundle("errai");
-                String motdText = bundle.getString("workspace.login_motd");
+                String motdText = bundle.getString("errai.login_motd");
 
                 /**
                  * If the MOTD is configured, then add it to the message.

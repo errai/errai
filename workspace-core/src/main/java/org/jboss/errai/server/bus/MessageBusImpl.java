@@ -3,6 +3,7 @@ package org.jboss.errai.server.bus;
 import com.google.gwt.core.client.GWT;
 import org.jboss.errai.client.framework.MessageCallback;
 import org.jboss.errai.client.rpc.CommandMessage;
+import org.jboss.errai.client.rpc.ConversationMessage;
 import org.jboss.errai.client.rpc.protocols.BusCommands;
 import org.jboss.errai.client.rpc.protocols.MessageParts;
 import org.jboss.errai.client.rpc.protocols.SecurityParts;
@@ -123,12 +124,30 @@ public class MessageBusImpl implements MessageBus {
                         break;
 
                     case ConnectToQueue:
+                        Object sessionContext = message.get(HttpSession.class, SecurityParts.SessionData).getAttribute(WS_SESSION_ID);
+
                         if (!messageQueues.containsKey(message.get(HttpSession.class, SecurityParts.SessionData)))
-                            messageQueues.put(message.get(HttpSession.class, SecurityParts.SessionData).getAttribute(WS_SESSION_ID),
+                            messageQueues.put(sessionContext,
                                     new ArrayBlockingQueue<Message>(25));
+
+                        remoteSubscribe(sessionContext, "ClientBus");
+
+                        for (String service : subscriptions.keySet()) {
+                            send(ConversationMessage.create(BusCommands.RemoteSubscribe, message)
+                                    .set(MessageParts.Subject, service).setSubject("ClientBus"), false);
+                        }
+
+                        send(ConversationMessage.create(BusCommands.FinishStateSync, message).setSubject("ClientBus"), false);
+
+                        break;
+
                 }
             }
         });
+    }
+
+    public void sendGlobal(CommandMessage message) {
+        sendGlobal(message.getSubject(), message);
     }
 
     public void sendGlobal(String subject, CommandMessage message) {
@@ -206,6 +225,10 @@ public class MessageBusImpl implements MessageBus {
         send(subject, message, true);
     }
 
+    public void send(CommandMessage message, boolean fireListeners) {
+        send(message.getSubject(), message, fireListeners);
+    }
+
     public void send(String subject, CommandMessage message, boolean fireListeners) {
         if (!message.hasPart(SecurityParts.SessionData)) {
             throw new RuntimeException("cannot automatically route message. no session contained in message.");
@@ -235,9 +258,6 @@ public class MessageBusImpl implements MessageBus {
     }
 
     private BlockingQueue<Message> getQueue(Object sessionContext) {
-//        if (!messageQueues.containsKey(sessionContext))
-//            messageQueues.put(sessionContext, new ArrayBlockingQueue<Message>(25));
-
         return messageQueues.get(sessionContext);
     }
 
@@ -263,7 +283,6 @@ public class MessageBusImpl implements MessageBus {
     }
 
     public void remoteUnsubscribe(Object sessionContext, String subject) {
-
         if (!remoteSubscriptions.containsKey(subject)) {
             System.out.println("CannotUnsubscribe (NO KNOWN SUBJECT: " + subject + ")");
             return;

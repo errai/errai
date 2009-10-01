@@ -7,6 +7,8 @@ import org.jboss.errai.server.MessageBusServiceImpl;
 import org.jboss.errai.server.bus.MessageBusServer;
 import org.jboss.errai.server.bus.MessageListener;
 import org.jboss.errai.server.bus.NoSubscribersToDeliverTo;
+import org.jboss.errai.server.service.ErraiService;
+import org.jboss.errai.server.service.ErraiServiceImpl;
 
 import javax.servlet.http.HttpSession;
 
@@ -25,7 +27,7 @@ public class BasicAuthorizationListener implements MessageListener {
                 MessageBusServer.send("LoginClient",
                         CommandMessage.create(SecurityCommands.SecurityChallenge)
                                 .set(SecurityParts.CredentialsRequired, "Name,Password")
-                                .set(SecurityParts.ReplyTo, MessageBusServiceImpl.AUTHORIZATION_SVC_SUBJECT)
+                                .set(SecurityParts.ReplyTo, ErraiService.AUTHORIZATION_SVC_SUBJECT)
                                 .set(SecurityParts.SessionData, message.get(HttpSession.class, SecurityParts.SessionData))
                         , false);
 

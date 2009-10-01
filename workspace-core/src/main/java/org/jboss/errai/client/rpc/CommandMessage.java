@@ -111,7 +111,8 @@ public class CommandMessage {
         return parts;
     }
 
-    public void setParts(Map<String, Object> parts) {
+    public CommandMessage setParts(Map<String, Object> parts) {
         this.parts = parts;
+        return this;
     }
 }

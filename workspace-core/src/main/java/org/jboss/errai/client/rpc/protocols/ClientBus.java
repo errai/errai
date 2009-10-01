@@ -1,12 +1,8 @@
 package org.jboss.errai.client.rpc.protocols;
 
 import com.google.gwt.core.client.GWT;
-import static com.google.gwt.core.client.GWT.create;
-import static com.google.gwt.core.client.GWT.getModuleBaseURL;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.rpc.ServiceDefTarget;
+import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -14,8 +10,6 @@ import org.jboss.errai.client.framework.AcceptsCallback;
 import org.jboss.errai.client.framework.MessageCallback;
 import org.jboss.errai.client.rpc.CommandMessage;
 import org.jboss.errai.client.rpc.MessageBusClient;
-import org.jboss.errai.client.rpc.MessageBusService;
-import org.jboss.errai.client.rpc.MessageBusServiceAsync;
 import org.jboss.errai.client.rpc.json.JSONUtilCli;
 import org.jboss.errai.client.util.Effects;
 import org.jboss.errai.client.widgets.WSModalDialog;
@@ -23,21 +17,35 @@ import org.jboss.errai.client.widgets.WSModalDialog;
 import java.util.*;
 
 public class ClientBus {
+    private static final String SERVICE_ENTRY_POINT = "erraiBus";
+
     private List<AcceptsCallback> onSubscribeHooks = new ArrayList<AcceptsCallback>();
     private List<AcceptsCallback> onUnsubscribeHooks = new ArrayList<AcceptsCallback>();
 
-    private final MessageBusServiceAsync messageBus = (MessageBusServiceAsync) create(MessageBusService.class);
-    private final ServiceDefTarget endpoint = (ServiceDefTarget) messageBus;
+
+    private final RequestBuilder sendBuilder;
+    private final RequestBuilder recvBuilder;
+
+
     private final Map<String, List<Object>> subscriptions = new HashMap<String, List<Object>>();
 
-    private final Queue<String[]> outgoingQueue = new LinkedList<String[]>();
+    private final Queue<String> outgoingQueue = new LinkedList<String>();
     private boolean transmitting = false;
 
     private Map<String, Set<Object>> registeredInThisSession = new HashMap<String, Set<Object>>();
 
 
     public ClientBus() {
-        endpoint.setServiceEntryPoint(getModuleBaseURL() + "jbwMsgBus");
+        // endpoint.setServiceEntryPoint(getModuleBaseURL() + SERVICE_ENTRY_POINT);
+        sendBuilder = new RequestBuilder(
+                RequestBuilder.POST,
+                URL.encode(SERVICE_ENTRY_POINT)
+        );
+
+        recvBuilder = new RequestBuilder(
+                RequestBuilder.GET,
+                URL.encode(SERVICE_ENTRY_POINT)
+        );
     }
 
 
@@ -119,6 +127,7 @@ public class ClientBus {
 
 
     public void send(String subject, Map<String, Object> message) {
+        message.put("ToSubject", subject);
         store(subject, JSONUtilCli.encodeMap(message));
     }
 
@@ -145,8 +154,8 @@ public class ClientBus {
         }
     }
 
-    public void enqueueForRemoteTransmit(String subject, CommandMessage message) {
-        outgoingQueue.add(new String[]{subject, JSONUtilCli.encodeMap(message.getParts())});
+    public void enqueueForRemoteTransmit(CommandMessage message) {
+        outgoingQueue.add(JSONUtilCli.encodeMap(message.getParts()));
         sendAll();
     }
 
@@ -230,26 +239,29 @@ public class ClientBus {
             sendTimer = null;
         }
 
-        String[] msg = outgoingQueue.poll();
-        if (msg != null) transmitRemote(msg[0], msg[1]);
+        transmitRemote(outgoingQueue.poll());
     }
 
-    private void transmitRemote(String subject, String message) {
+    private void transmitRemote(String message) {
+        if (message == null) return;
+
         try {
             transmitting = true;
-            messageBus.store(subject, message, new AsyncCallback<Void>() {
-                public void onFailure(Throwable throwable) {
-                    throwable.printStackTrace();
 
+            sendBuilder.sendRequest(message, new RequestCallback() {
+                public void onResponseReceived(Request request, Response response) {
                     transmitting = false;
                     sendAll();
                 }
 
-                public void onSuccess(Void o) {
+                public void onError(Request request, Throwable exception) {
+                    exception.printStackTrace();
+
                     transmitting = false;
                     sendAll();
                 }
             });
+
 
         }
         catch (Exception e) {
@@ -259,41 +271,74 @@ public class ClientBus {
     }
 
 
-
     public void init() {
         init(null);
     }
 
     public void init(final AcceptsCallback callback) {
-        final MessageBusServiceAsync messageBus = (MessageBusServiceAsync) create(MessageBusService.class);
-        final ServiceDefTarget endpoint = (ServiceDefTarget) messageBus;
-        endpoint.setServiceEntryPoint(getModuleBaseURL() + "jbwMsgBus");
 
-        AsyncCallback<Void> store = new AsyncCallback<Void>() {
-            public void onFailure(Throwable throwable) {
-                System.out.println("FAILED TO CONNECT");
+        subscribe("ClientBus", new MessageCallback() {
+            public void callback(CommandMessage message) {
+                switch (BusCommands.valueOf(message.getCommandType())) {
+                    case RemoteSubscribe:
+                        subscribe(message.get(String.class, MessageParts.Subject), new MessageCallback() {
+                            public void callback(CommandMessage message) {
+                                enqueueForRemoteTransmit(message);
+                            }
+                        });
+                        break;
 
+                    case RemoteUnsubscribe:
+                        unsubscribeAll(message.get(String.class, MessageParts.Subject));
+                        break;
+
+                    case FinishStateSync:
+                        for (String s : MessageBusClient.getAllLocalSubscriptions()) {
+                            MessageBusClient.send("ServerBus",
+                                    CommandMessage.create(BusCommands.RemoteSubscribe)
+                                            .set(MessageParts.Subject, s));
+                        }
+
+
+                        MessageBusClient.conversationWith(CommandMessage.create().setSubject("ServerEchoService"),
+                                new MessageCallback() {
+                                    public void callback(CommandMessage message) {
+                                        GWT.log("Finishing initializing of Client Bus...", null);
+                                        if (callback != null) callback.callback(null, null);
+                                    }
+                                });
+                        break;
+
+                }
             }
+        });
 
-            public void onSuccess(Void o) {
-                initializeMessagingBus(callback);
-            }
-        };
+        String initialMessage = "{\"CommandType\":\"ConnectToQueue\", \"ToSubject\":\"ServerBus\"}";
 
         /**
          * Send initial message to connect to the queue, to establish an HTTP session. Otherwise, concurrent
          * requests will result in multiple sessions being creatd.  Which is bad.  Avoid this at all costs.
          * Please.
          */
-        messageBus.store("ServerBus", "{\"CommandType\":\"ConnectToQueue\"}", store);
+        try {
+            sendBuilder.sendRequest(initialMessage, new RequestCallback() {
+                public void onResponseReceived(Request request, Response response) {
+                    initializeMessagingBus(callback);
+                }
+
+                public void onError(Request request, Throwable exception) {
+                    exception.printStackTrace();
+                }
+            });
+        }
+        catch (RequestException e) {
+            //todo: handle this.
+
+        }
     }
 
 
     private void initializeMessagingBus(final AcceptsCallback initCallback) {
-        final MessageBusServiceAsync messageBus = (MessageBusServiceAsync) create(MessageBusService.class);
-        final ServiceDefTarget endpoint = (ServiceDefTarget) messageBus;
-        endpoint.setServiceEntryPoint(getModuleBaseURL() + "jbwMsgBus");
-
         final SimplePanel heartBeat = new SimplePanel();
         final HTML hBtext = new HTML("*Heartbeat*");
         hBtext.getElement().getStyle().setProperty("color", "red");
@@ -318,8 +363,8 @@ public class ClientBus {
                     return;
                 }
 
-                AsyncCallback<String[]> nextMessage = new AsyncCallback<String[]>() {
-                    public void onFailure(Throwable throwable) {
+                RequestCallback nextMessage = new RequestCallback() {
+                    public void onError(Request request, Throwable throwable) {
                         block = false;
 
                         final WSModalDialog commmunicationFailure = new WSModalDialog();
@@ -336,12 +381,11 @@ public class ClientBus {
                         schedule(1);
                     }
 
-                    public void onSuccess(String[] o) {
-                        if (o == null) {
-                            return;
-                        }
+                    public void onResponseReceived(Request request, Response response) {
 
-                        if ("HeartBeat".equals(o[0])) {
+                        System.out.println("recieved message: " + response.getText());
+
+                        if ("HeartBeat".equals(response.getText())) {
                             System.out.println("** Heartbeat **");
 
                             heartBeat.setVisible(true);
@@ -355,17 +399,21 @@ public class ClientBus {
                             fadeout.schedule(2000);
                         }
 
-                        GWT.log("ClientRecievedMessage [Subject:'" + o[0] + "';SubcribedTo:"
-                                + MessageBusClient.isSubscribed(o[0]) + ";Data:" + o[1] + "] ", null);
+                        String toSubject = response.getHeader("ToSubject");
 
-                        store(o[0], o[1]);
+                        store(toSubject, response.getText());
                         block = false;
                         schedule(1);
                     }
                 };
 
                 block = true;
-                messageBus.nextMessage(nextMessage);
+                try {
+                    recvBuilder.sendRequest(null, nextMessage);
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
                 block = false;
             }
         };
@@ -375,42 +423,13 @@ public class ClientBus {
             public void run() {
                 incoming.run();
                 incoming.scheduleRepeating((60 * 45) * 1000);
+
+
             }
         };
 
-        AsyncCallback<String[]> getSubjects = new AsyncCallback<String[]>() {
-            public void onFailure(Throwable throwable) {
-                Window.alert("Workspace is angry! >:( Can't establish link with message bus on server");
-            }
 
-            public void onSuccess(String[] o) {
-                for (final String subject : o) {
-                    MessageBusClient.subscribe(subject, new MessageCallback() {
-                        public void callback(CommandMessage message) {
-                            enqueueForRemoteTransmit(subject, message);
-                        }
-                    }, null);
-                }
-
-                outerTimer.schedule(10);
-
-                for (String s : MessageBusClient.getAllLocalSubscriptions()) {
-                    MessageBusClient.send("ServerBus",
-                            CommandMessage.create(BusCommands.RemoteSubscribe)
-                                    .set(MessageParts.Subject, s));
-                }
-
-                MessageBusClient.conversationWith(CommandMessage.create().setSubject("ServerEchoService"),
-                        new MessageCallback() {
-                            public void callback(CommandMessage message) {
-                                GWT.log("Finishing initializing of Client Bus...", null);
-                                if (initCallback != null) initCallback.callback(null, null);
-                            }
-                        });
-                }
-        };
-
-        messageBus.getSubjects(getSubjects);
+        outerTimer.schedule(10);
     }
 
 

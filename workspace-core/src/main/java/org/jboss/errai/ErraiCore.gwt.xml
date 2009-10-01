@@ -18,9 +18,6 @@
     <entry-point class='org.jboss.errai.client.Workspace'/>
     <stylesheet src="jboss-workspace-default.css"/>
 
-
-    <servlet path="/jbwMsgBus" class="org.jboss.errai.server.MessageBusServiceImpl"/>
-
     <replace-with class="org.jboss.errai.client.util.effectimpl.KHTMLEffectImpl">
         <when-type-is class="org.jboss.errai.client.util.Effect"/>
         <when-property-is name="user.agent" value="opera"/>
