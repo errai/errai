@@ -158,8 +158,6 @@ public class ErraiServiceImpl implements ErraiService {
                     findLoadableModules(targets.nextElement(), loaded);
                 }
             }
-
-
             catch (IOException e) {
                 e.printStackTrace();
             }
@@ -220,7 +218,6 @@ public class ErraiServiceImpl implements ErraiService {
                 catch (UnsatisfiedLinkError e) {
                     // do nothing.
                 }
-
             }
         }
     }

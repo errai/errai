@@ -23,6 +23,8 @@ import java.util.concurrent.TimeUnit;
 
 @Singleton
 public class MessageBusImpl implements MessageBus {
+    private final static int QUEUE_SIZE = 50;
+
     private final List<MessageListener> listeners = new ArrayList<MessageListener>();
 
     private final Map<String, List<MessageCallback>> subscriptions = new HashMap<String, List<MessageCallback>>();
@@ -84,7 +86,7 @@ public class MessageBusImpl implements MessageBus {
                             builder.append("   __________________________").append("\n");
                             Queue<Message> q = messageQueues.get(queue);
 
-                            builder.append("   Queue: ").append(queue).append(" (size:").append(q.size()).append(")").append(q.size() == 25 ? " ** QUEUE FULL (BLOCKING) **" : "").append("\n");
+                            builder.append("   Queue: ").append(queue).append(" (size:").append(q.size()).append(")").append(q.size() == QUEUE_SIZE ? " ** QUEUE FULL (BLOCKING) **" : "").append("\n");
                             for (Message message : q) {
                                 builder.append("     -> @").append(message.getSubject()).append(" = ").append(message.getMessage()).append("\n");
                             }
@@ -132,7 +134,7 @@ public class MessageBusImpl implements MessageBus {
 
                         if (!messageQueues.containsKey(message.get(HttpSession.class, SecurityParts.SessionData)))
                             messageQueues.put(sessionContext,
-                                    new ArrayBlockingQueue<Message>(25));
+                                    new ArrayBlockingQueue<Message>(QUEUE_SIZE));
 
                         remoteSubscribe(sessionContext, "ClientBus");
 
@@ -346,10 +348,6 @@ public class MessageBusImpl implements MessageBus {
     private boolean isAnyoneListening(Object sessionContext, String subject) {
         return subscriptions.containsKey(subject) ||
                 (remoteSubscriptions.containsKey(subject) && remoteSubscriptions.get(subject).contains(sessionContext));
-    }
-
-    public Set<String> getSubjects() {
-        return subscriptions.keySet();
     }
 
     private boolean fireGlobalMessageListeners(CommandMessage message) {
