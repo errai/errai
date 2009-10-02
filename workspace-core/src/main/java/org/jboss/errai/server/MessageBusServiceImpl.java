@@ -14,6 +14,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Reader;
@@ -40,9 +41,7 @@ public class MessageBusServiceImpl extends HttpServlet {
         httpServletResponse.setHeader("ToSubject", m.getSubject());
         OutputStream stream = httpServletResponse.getOutputStream();
 
-        byte[] messagePayload = String.valueOf(m.getMessage()).getBytes();
-
-        for (byte b : messagePayload) {
+        for (byte b : ((String) m.getMessage()).getBytes()) {
             stream.write(b);
         }
 
@@ -53,6 +52,7 @@ public class MessageBusServiceImpl extends HttpServlet {
     protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException {
         Reader reader = httpServletRequest.getReader();
         StringBuilder sb = new StringBuilder(httpServletRequest.getContentLength());
+        HttpSession session = httpServletRequest.getSession();
 
         CharBuffer buffer = CharBuffer.allocate(10);
 
@@ -65,17 +65,13 @@ public class MessageBusServiceImpl extends HttpServlet {
             buffer.rewind();
         }
 
-        if (httpServletRequest.getSession().getAttribute(MessageBus.WS_SESSION_ID) == null) {
-            httpServletRequest.getSession().setAttribute(MessageBus.WS_SESSION_ID, httpServletRequest.getSession().getId());
+        if (session.getAttribute(MessageBus.WS_SESSION_ID) == null) {
+           session.setAttribute(MessageBus.WS_SESSION_ID, httpServletRequest.getSession().getId());
         }
 
-        CommandMessage translatedMessage = new CommandMessage()
+        service.store(new CommandMessage()
                 .setParts(decodeToMap(sb.toString()))
-                .set(SecurityParts.SessionData, httpServletRequest.getSession());
-
-        System.out.println("INCOMING:" + sb.toString());
-
-        service.store(translatedMessage);
+                .set(SecurityParts.SessionData, httpServletRequest.getSession()));
     }
 
 
