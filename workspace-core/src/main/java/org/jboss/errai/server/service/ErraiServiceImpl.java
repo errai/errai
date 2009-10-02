@@ -75,15 +75,6 @@ public class ErraiServiceImpl implements ErraiService {
         });
 
         /**
-         * A temporary test service to bounce remote messages of.
-         */
-        bus.subscribe("TestService", new MessageCallback() {
-            public void callback(CommandMessage message) {
-                System.out.println("yay!");
-            }
-        });
-
-        /**
          * Some temporary security rules to test the login system.
          */
         RoleAuthDescriptor authRequired = new RoleAuthDescriptor(new String[]{CredentialTypes.Authenticated.name()});
@@ -95,14 +86,11 @@ public class ErraiServiceImpl implements ErraiService {
          */
         bus.subscribe("ServerEchoService", new MessageCallback() {
             public void callback(CommandMessage c) {
-                if (c.hasPart(MessageParts.ReplyTo)) {
-                    bus.send(ConversationMessage.create(c));
-                }
+                bus.send(ConversationMessage.create(c));
             }
         });
 
         loadConfig();
-
     }
 
     public void store(CommandMessage message) {
@@ -170,8 +158,6 @@ public class ErraiServiceImpl implements ErraiService {
                 while (targets.hasMoreElements()) {
                     findLoadableModules(targets.nextElement(), loaded);
                 }
-
-                System.out.println("loaded...");
             }
 
 
@@ -206,7 +192,7 @@ public class ErraiServiceImpl implements ErraiService {
 
                     Class<?> loadClass = Class.forName(FQCN);
 
-                    if (loadClass.isAssignableFrom(Module.class)) {
+                    if (Module.class.isAssignableFrom(loadClass)) {
                         final Class<? extends Module> clazz = loadClass.asSubclass(Module.class);
 
                         if (clazz.isAnnotationPresent(LoadModule.class)) {

@@ -70,8 +70,12 @@ public class Workspace implements EntryPoint {
          */
         MessageBusClient.addOnSubscribeHook(new AcceptsCallback() {
             public void callback(Object message, Object data) {
+                String subject = (String) message;
+
+                if (subject.startsWith("local:")) return;
+
                 MessageBusClient.send("ServerBus", CommandMessage.create(BusCommands.RemoteSubscribe)
-                        .set(MessageParts.Subject, message));
+                        .set(MessageParts.Subject, subject));
 
             }
         });

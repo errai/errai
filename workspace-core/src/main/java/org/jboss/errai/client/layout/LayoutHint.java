@@ -16,7 +16,7 @@ public class LayoutHint {
     private static int counter = 0;
 
     public static void attach(final Widget w, LayoutHintProvider p) {
-        String subject = "org.jboss.errai.sizeHints:" + counter++;
+        String subject = "local:org.jboss.errai.sizeHints:" + counter++;
 
         subscribe(subject,
                 new MessageCallback() {

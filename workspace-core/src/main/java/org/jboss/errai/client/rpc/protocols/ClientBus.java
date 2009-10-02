@@ -36,7 +36,6 @@ public class ClientBus {
 
 
     public ClientBus() {
-        // endpoint.setServiceEntryPoint(getModuleBaseURL() + SERVICE_ENTRY_POINT);
         sendBuilder = new RequestBuilder(
                 RequestBuilder.POST,
                 URL.encode(SERVICE_ENTRY_POINT)
@@ -109,7 +108,7 @@ public class ClientBus {
      * @param callback
      */
     public void conversationWith(final CommandMessage message, final MessageCallback callback) {
-        final String tempSubject = conversationCounter++ + ":temp";
+        final String tempSubject = "temp:PsuedoConversation:" + (++conversationCounter);
 
         message.set(MessageParts.ReplyTo, tempSubject);
 
@@ -294,13 +293,15 @@ public class ClientBus {
 
                     case FinishStateSync:
                         for (String s : MessageBusClient.getAllLocalSubscriptions()) {
+                            if (s.startsWith("local:")) continue;
+
                             MessageBusClient.send("ServerBus",
                                     CommandMessage.create(BusCommands.RemoteSubscribe)
                                             .set(MessageParts.Subject, s));
                         }
 
 
-                        MessageBusClient.conversationWith(CommandMessage.create().setSubject("ServerEchoService"),
+                        conversationWith(CommandMessage.create().setSubject("ServerEchoService"),
                                 new MessageCallback() {
                                     public void callback(CommandMessage message) {
                                         GWT.log("Finishing initializing of Client Bus...", null);
@@ -382,9 +383,6 @@ public class ClientBus {
                     }
 
                     public void onResponseReceived(Request request, Response response) {
-
-                        System.out.println("recieved message: " + response.getText());
-
                         if ("HeartBeat".equals(response.getText())) {
                             System.out.println("** Heartbeat **");
 

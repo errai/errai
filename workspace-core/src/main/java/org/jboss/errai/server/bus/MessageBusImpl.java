@@ -7,7 +7,9 @@ import org.jboss.errai.client.rpc.CommandMessage;
 import org.jboss.errai.client.rpc.ConversationMessage;
 import org.jboss.errai.client.rpc.protocols.BusCommands;
 import org.jboss.errai.client.rpc.protocols.MessageParts;
+import org.jboss.errai.client.rpc.protocols.SecurityCommands;
 import org.jboss.errai.client.rpc.protocols.SecurityParts;
+import static org.jboss.errai.server.bus.MessageBusServer.encodeMap;
 
 import javax.servlet.http.HttpSession;
 import javax.swing.*;
@@ -135,6 +137,10 @@ public class MessageBusImpl implements MessageBus {
                         remoteSubscribe(sessionContext, "ClientBus");
 
                         for (String service : subscriptions.keySet()) {
+                            if (service.startsWith("local:")) {
+                                continue;
+                            }
+
                             send(ConversationMessage.create(BusCommands.RemoteSubscribe, message)
                                     .set(MessageParts.Subject, service).setSubject("ClientBus"), false);
                         }
@@ -160,9 +166,21 @@ public class MessageBusImpl implements MessageBus {
             throw new NoSubscribersToDeliverTo("for: " + subject);
         }
 
-        if (fireListeners && !fireGlobalMessageListeners(message)) return;
+        if (fireListeners && !fireGlobalMessageListeners(message)) {
+            if (message.hasPart(MessageParts.ReplyTo) && message.hasPart(SecurityParts.SessionData)) {
+                /**
+                 * Inform the sender that we did not deliver the message.
+                 */
 
-        final String jsonMessage = MessageBusServer.encodeMap(message.getParts());
+                store((String) message.get(HttpSession.class, SecurityParts.SessionData).getAttribute(WS_SESSION_ID),
+                        message.get(String.class, MessageParts.ReplyTo),
+                        encodeMap(CommandMessage.create(SecurityCommands.MessageNotDelivered).getParts()));
+            }
+
+            return;
+        }
+
+        final String jsonMessage = encodeMap(message.getParts());
 
         if (subscriptions.containsKey(subject)) {
             for (MessageCallback c : subscriptions.get(subject)) {
@@ -219,11 +237,15 @@ public class MessageBusImpl implements MessageBus {
 
     public void send(String sessionid, String subject, CommandMessage message, boolean fireListeners) {
         if (fireListeners && !fireGlobalMessageListeners(message)) {
-            System.out.println("ListenerBlockedDelivery (@" + subject + ")");
+            if (message.hasPart(MessageParts.ReplyTo)) {
+                store(sessionid, message.get(String.class, MessageParts.ReplyTo),
+                        encodeMap(CommandMessage.create(SecurityCommands.MessageNotDelivered).getParts()));
+            }
+
             return;
         }
 
-        store(sessionid, subject, MessageBusServer.encodeMap(message.getParts()));
+        store(sessionid, subject, encodeMap(message.getParts()));
     }
 
     public void send(String subject, CommandMessage message) {
@@ -289,7 +311,6 @@ public class MessageBusImpl implements MessageBus {
 
     public void remoteUnsubscribe(Object sessionContext, String subject) {
         if (!remoteSubscriptions.containsKey(subject)) {
-            System.out.println("CannotUnsubscribe (NO KNOWN SUBJECT: " + subject + ")");
             return;
         }
 
