@@ -204,16 +204,20 @@ public class ErraiServiceImpl implements ErraiService {
                         loaded.add(FQCN);
                     }
 
+                    Class<?> loadClass = Class.forName(FQCN);
 
-                    final Class<? extends Module> clazz = (Class<? extends Module>) Class.forName(FQCN);
-                    if (clazz.isAnnotationPresent(LoadModule.class)) {
-                        Guice.createInjector(new AbstractModule() {
-                            @Override
-                            protected void configure() {
-                                bind(Module.class).to(clazz);
-                                bind(MessageBus.class).toInstance(bus);
-                            }
-                        }).getInstance(Module.class).init();
+                    if (loadClass.isAssignableFrom(Module.class)) {
+                        final Class<? extends Module> clazz = loadClass.asSubclass(Module.class);
+
+                        if (clazz.isAnnotationPresent(LoadModule.class)) {
+                            Guice.createInjector(new AbstractModule() {
+                                @Override
+                                protected void configure() {
+                                    bind(Module.class).to(clazz);
+                                    bind(MessageBus.class).toInstance(bus);
+                                }
+                            }).getInstance(Module.class).init();
+                        }
                     }
                 }
                 catch (NoClassDefFoundError e) {
@@ -229,14 +233,9 @@ public class ErraiServiceImpl implements ErraiService {
                     // do nothing.
                 }
                 catch (UnsatisfiedLinkError e) {
-
+                    // do nothing.
                 }
-//                catch (IllegalAccessException e) {
-//                    throw new RuntimeException("Failed to load module", e);
-//                }
-//                catch (InstantiationException e) {
-//                    throw new RuntimeException("Failed to load module", e);
-//                }
+
             }
         }
     }
@@ -245,7 +244,6 @@ public class ErraiServiceImpl implements ErraiService {
         return fileName.replaceAll("(/|\\\\)", ".")
                 .substring(rootFile.length() + 1, fileName.lastIndexOf('.'));
     }
-
 
 
     public MessageBus getBus() {
