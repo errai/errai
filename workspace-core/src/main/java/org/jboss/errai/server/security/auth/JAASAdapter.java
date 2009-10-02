@@ -1,11 +1,13 @@
 package org.jboss.errai.server.security.auth;
 
+import com.google.inject.Inject;
 import org.jboss.errai.client.rpc.CommandMessage;
 import org.jboss.errai.client.rpc.ConversationMessage;
 import org.jboss.errai.client.rpc.protocols.MessageParts;
 import org.jboss.errai.client.rpc.protocols.SecurityCommands;
 import org.jboss.errai.client.rpc.protocols.SecurityParts;
 import org.jboss.errai.client.security.CredentialTypes;
+import org.jboss.errai.server.bus.MessageBus;
 import org.jboss.errai.server.bus.MessageBusServer;
 
 import javax.security.auth.callback.*;
@@ -36,7 +38,10 @@ public class JAASAdapter implements AuthorizationAdapter {
      */
     private HashMap<String, AuthDescriptor> securityRules = new HashMap<String, AuthDescriptor>();
 
-    public JAASAdapter() {
+    private MessageBus bus;
+
+    @Inject
+    public JAASAdapter(MessageBus bus) {
         /**
          * Try and find the default login.config file.
          */
@@ -48,6 +53,8 @@ public class JAASAdapter implements AuthorizationAdapter {
          * is for demonstration purposes only.  This will need to be removed at a later point.
          */
         System.setProperty("java.security.auth.login.config", url.toString());
+
+        this.bus = bus;
     }
 
     /**
@@ -115,14 +122,14 @@ public class JAASAdapter implements AuthorizationAdapter {
             /**
              * Transmit the message back to the client.
              */
-            MessageBusServer.send("LoginClient", successfulMsg);
+            bus.send("LoginClient", successfulMsg);
         }
         catch (LoginException e) {
             /**
              * The login failed. How upsetting. Life must go on, and we must inform the client of the
              * unfortunate news.
              */
-            MessageBusServer.send("LoginClient", ConversationMessage.create(SecurityCommands.FailedAuth, message)
+            bus.send("LoginClient", ConversationMessage.create(SecurityCommands.FailedAuth, message)
                     .set(SecurityParts.Name, name));
 
             throw new AuthenticationFailedException(e.getMessage(), e);

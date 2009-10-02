@@ -1,5 +1,6 @@
 package org.jboss.errai.server;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.jboss.errai.client.rpc.CommandMessage;
 import org.jboss.errai.client.rpc.protocols.SecurityParts;
@@ -26,11 +27,10 @@ import java.nio.CharBuffer;
 public class MessageBusServiceImpl extends HttpServlet {
     private ErraiService service;
 
-    @Override
-    public void init() throws ServletException {
-        service = new ErraiServiceImpl();
+    @Inject
+    public MessageBusServiceImpl(ErraiService service) {
+        this.service = service;
     }
-
 
     @Override
     protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException {

@@ -1,6 +1,7 @@
 package org.jboss.errai.server.bus;
 
 import com.google.gwt.core.client.GWT;
+import com.google.inject.Singleton;
 import org.jboss.errai.client.framework.MessageCallback;
 import org.jboss.errai.client.rpc.CommandMessage;
 import org.jboss.errai.client.rpc.ConversationMessage;
@@ -18,6 +19,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+@Singleton
 public class MessageBusImpl implements MessageBus {
     private final List<MessageListener> listeners = new ArrayList<MessageListener>();
 
@@ -140,7 +142,6 @@ public class MessageBusImpl implements MessageBus {
                         send(ConversationMessage.create(BusCommands.FinishStateSync, message).setSubject("ClientBus"), false);
 
                         break;
-
                 }
             }
         });
@@ -206,6 +207,10 @@ public class MessageBusImpl implements MessageBus {
         else {
             throw new NoSubscribersToDeliverTo("for: " + subject);
         }
+    }
+
+    public void send(CommandMessage message) {
+        sendGlobal(message);
     }
 
     public void send(String sessionid, String subject, CommandMessage message) {

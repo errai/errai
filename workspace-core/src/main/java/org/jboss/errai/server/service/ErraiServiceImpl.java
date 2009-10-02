@@ -1,5 +1,8 @@
 package org.jboss.errai.server.service;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Inject;
 import org.jboss.errai.client.framework.MessageCallback;
 import org.jboss.errai.client.rpc.CommandMessage;
 import org.jboss.errai.client.rpc.ConversationMessage;
@@ -9,9 +12,7 @@ import org.jboss.errai.client.rpc.protocols.SecurityParts;
 import org.jboss.errai.client.security.CredentialTypes;
 import org.jboss.errai.server.Module;
 import org.jboss.errai.server.annotations.LoadModule;
-import org.jboss.errai.server.bus.DefaultMessageBusProvider;
 import org.jboss.errai.server.bus.MessageBus;
-import org.jboss.errai.server.bus.MessageBusServer;
 import org.jboss.errai.server.security.auth.AuthorizationAdapter;
 import org.jboss.errai.server.security.auth.BasicAuthorizationListener;
 import org.jboss.errai.server.security.auth.JAASAdapter;
@@ -22,23 +23,25 @@ import java.io.IOException;
 import static java.lang.Thread.currentThread;
 import java.net.URL;
 import java.util.Enumeration;
-import java.util.MissingResourceException;
+import java.util.HashSet;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 public class ErraiServiceImpl implements ErraiService {
-
     private MessageBus bus;
     private AuthorizationAdapter authorizationAdapter;
 
+    @Inject
+    public ErraiServiceImpl(MessageBus bus, AuthorizationAdapter authorizationAdapter) {
+        this.bus = bus;
+        this.authorizationAdapter = authorizationAdapter;
 
-    public ErraiServiceImpl() {
+        init();
+    }
+
+    private void init() {
         // just use the simple bus for now.  more integration options to come...
-        bus = new DefaultMessageBusProvider().getBus();
-
-        // initialize the configuration.
-        loadConfig();
-
-        bus.addGlobalListener(new BasicAuthorizationListener(authorizationAdapter));
+        bus.addGlobalListener(new BasicAuthorizationListener(authorizationAdapter, bus));
 
         //todo: this all needs to be refactored at some point.
         bus.subscribe(AUTHORIZATION_SVC_SUBJECT, new MessageCallback() {
@@ -49,7 +52,7 @@ public class ErraiServiceImpl implements ErraiService {
                          * Respond with what credentials the authentication system requires.
                          */
                         //todo: we only support login/password for now
-                        MessageBusServer.send(c.get(String.class, SecurityParts.ReplyTo),
+                        bus.send(c.get(String.class, SecurityParts.ReplyTo),
                                 ConversationMessage.create(SecurityCommands.WhatCredentials, c)
                                         .set(SecurityParts.CredentialsRequired, "Name,Password")
                                         .set(SecurityParts.ReplyTo, AUTHORIZATION_SVC_SUBJECT));
@@ -64,7 +67,7 @@ public class ErraiServiceImpl implements ErraiService {
 
                     case EndSession:
                         authorizationAdapter.endSession(c);
-                        MessageBusServer.send(ConversationMessage.create(c).setSubject("LoginClient")
+                        bus.send(ConversationMessage.create(c).setSubject("LoginClient")
                                 .setCommandType(SecurityCommands.SecurityChallenge));
                         break;
                 }
@@ -93,12 +96,13 @@ public class ErraiServiceImpl implements ErraiService {
         bus.subscribe("ServerEchoService", new MessageCallback() {
             public void callback(CommandMessage c) {
                 if (c.hasPart(MessageParts.ReplyTo)) {
-                    MessageBusServer.send(ConversationMessage.create(c));
+                    bus.send(ConversationMessage.create(c));
                 }
             }
         });
 
         loadConfig();
+
     }
 
     public void store(CommandMessage message) {
@@ -122,21 +126,6 @@ public class ErraiServiceImpl implements ErraiService {
     }
 
     private void loadConfig() {
-        try {
-            ResourceBundle bundle = ResourceBundle.getBundle("errai");
-            String authenticationAdapterClass = bundle.getString("errai.authentication_adapter");
-
-            try {
-                Class clazz = Class.forName(authenticationAdapterClass, false, currentThread().getContextClassLoader());
-                authorizationAdapter = (AuthorizationAdapter) clazz.newInstance();
-            }
-            catch (Exception e) {
-                throw new RuntimeException("could not instantiate authentication adapter:" + authenticationAdapterClass, e);
-            }
-        }
-        catch (MissingResourceException e) {
-            useDefaults();
-        }
 
         try {
             ResourceBundle bundle = ResourceBundle.getBundle("errai");
@@ -176,11 +165,16 @@ public class ErraiServiceImpl implements ErraiService {
 
             try {
                 Enumeration<URL> targets = currentThread().getContextClassLoader().getResources("ErraiApp.properties");
+                Set<String> loaded = new HashSet<String>();
 
                 while (targets.hasMoreElements()) {
-                    findLoadableModules(targets.nextElement());
+                    findLoadableModules(targets.nextElement(), loaded);
                 }
+
+                System.out.println("loaded...");
             }
+
+
             catch (IOException e) {
                 e.printStackTrace();
             }
@@ -191,20 +185,35 @@ public class ErraiServiceImpl implements ErraiService {
         }
     }
 
-    private void findLoadableModules(URL url) {
+    private void findLoadableModules(URL url, Set<String> loaded) {
         File root = new File(url.getFile()).getParentFile();
-        _findLoadableModules(root, root);
+        _findLoadableModules(root, root, loaded);
     }
 
-    private void _findLoadableModules(File root, File start) {
+    private void _findLoadableModules(File root, File start, Set<String> loaded) {
         for (File file : start.listFiles()) {
-            if (file.isDirectory()) _findLoadableModules(root, file);
+            if (file.isDirectory()) _findLoadableModules(root, file, loaded);
             if (file.getName().endsWith(".class")) {
                 try {
                     String FQCN = getCandidateFQCN(root.getAbsolutePath(), file.getAbsolutePath());
-                    Class clazz = Class.forName(FQCN);
+
+                    if (loaded.contains(FQCN)) {
+                        return;
+                    }
+                    else {
+                        loaded.add(FQCN);
+                    }
+
+
+                    final Class<? extends Module> clazz = (Class<? extends Module>) Class.forName(FQCN);
                     if (clazz.isAnnotationPresent(LoadModule.class)) {
-                        ((Module) clazz.newInstance()).init();
+                        Guice.createInjector(new AbstractModule() {
+                            @Override
+                            protected void configure() {
+                                bind(Module.class).to(clazz);
+                                bind(MessageBus.class).toInstance(bus);
+                            }
+                        }).getInstance(Module.class).init();
                     }
                 }
                 catch (NoClassDefFoundError e) {
@@ -222,12 +231,12 @@ public class ErraiServiceImpl implements ErraiService {
                 catch (UnsatisfiedLinkError e) {
 
                 }
-                catch (IllegalAccessException e) {
-                    throw new RuntimeException("Failed to load module", e);
-                }
-                catch (InstantiationException e) {
-                    throw new RuntimeException("Failed to load module", e);
-                }
+//                catch (IllegalAccessException e) {
+//                    throw new RuntimeException("Failed to load module", e);
+//                }
+//                catch (InstantiationException e) {
+//                    throw new RuntimeException("Failed to load module", e);
+//                }
             }
         }
     }
@@ -238,9 +247,6 @@ public class ErraiServiceImpl implements ErraiService {
     }
 
 
-    private void useDefaults() {
-        authorizationAdapter = new JAASAdapter();
-    }
 
     public MessageBus getBus() {
         return bus;
