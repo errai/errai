@@ -11,6 +11,8 @@ import org.jboss.errai.server.service.ErraiService;
 import org.jboss.errai.server.service.ErraiServiceImpl;
 
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -39,6 +41,7 @@ public class MessageBusServiceImpl extends HttpServlet {
                 httpServletRequest.getSession().getAttribute(MessageBus.WS_SESSION_ID));
 
         httpServletResponse.setHeader("ToSubject", m.getSubject());
+        httpServletResponse.setHeader("Cache-Control", "no-cache");
         OutputStream stream = httpServletResponse.getOutputStream();
 
         for (byte b : ((String) m.getMessage()).getBytes()) {
@@ -72,7 +75,7 @@ public class MessageBusServiceImpl extends HttpServlet {
         service.store(new CommandMessage()
                 .setParts(decodeToMap(sb.toString()))
                 .set(SecurityParts.SessionData, httpServletRequest.getSession()));
-    }
+      }
 
 
 }

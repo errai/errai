@@ -364,50 +364,51 @@ public class ClientBus {
                     return;
                 }
 
-                RequestCallback nextMessage = new RequestCallback() {
-                    public void onError(Request request, Throwable throwable) {
-                        block = false;
-
-                        final WSModalDialog commmunicationFailure = new WSModalDialog();
-                        commmunicationFailure.ask("There was an error communicating with the server: "
-                                + throwable.getMessage(),
-                                new AcceptsCallback() {
-                                    public void callback(Object message, Object data) {
-                                    }
-                                }
-                        );
-
-                        commmunicationFailure.showModal();
-
-                        schedule(1);
-                    }
-
-                    public void onResponseReceived(Request request, Response response) {
-                        if ("HeartBeat".equals(response.getText())) {
-                            System.out.println("** Heartbeat **");
-
-                            heartBeat.setVisible(true);
-                            Effects.fade(heartBeat.getElement(), 25, 2, 10, 100);
-                            com.google.gwt.user.client.Timer fadeout = new com.google.gwt.user.client.Timer() {
-                                @Override
-                                public void run() {
-                                    Effects.fade(heartBeat.getElement(), 25, 2, 100, 0);
-                                }
-                            };
-                            fadeout.schedule(2000);
-                        }
-
-                        String toSubject = response.getHeader("ToSubject");
-
-                        store(toSubject, response.getText());
-                        block = false;
-                        schedule(1);
-                    }
-                };
-
                 block = true;
                 try {
-                    recvBuilder.sendRequest(null, nextMessage);
+                    recvBuilder.sendRequest(null,
+                            new RequestCallback() {
+                                public void onError(Request request, Throwable throwable) {
+                                    block = false;
+
+                                    final WSModalDialog commmunicationFailure = new WSModalDialog();
+                                    commmunicationFailure.ask("There was an error communicating with the server: "
+                                            + throwable.getMessage(),
+                                            new AcceptsCallback() {
+                                                public void callback(Object message, Object data) {
+                                                }
+                                            }
+                                    );
+
+                                    commmunicationFailure.showModal();
+
+                                    schedule(1);
+                                }
+
+                                public void onResponseReceived(Request request, Response response) {
+                                    if ("HeartBeat".equals(response.getText())) {
+                                        System.out.println("** Heartbeat **");
+
+                                        heartBeat.setVisible(true);
+                                        Effects.fade(heartBeat.getElement(), 25, 2, 10, 100);
+                                        com.google.gwt.user.client.Timer fadeout = new com.google.gwt.user.client.Timer() {
+                                            @Override
+                                            public void run() {
+                                                Effects.fade(heartBeat.getElement(), 25, 2, 100, 0);
+                                            }
+                                        };
+                                        fadeout.schedule(2000);
+                                    }
+
+                                    String toSubject = response.getHeader("ToSubject");
+                                    store(toSubject, response.getText());
+
+                                    block = false;
+                                    schedule(1);
+                                }
+                            }
+
+                    );
                 }
                 catch (Exception e) {
                     e.printStackTrace();
@@ -421,8 +422,6 @@ public class ClientBus {
             public void run() {
                 incoming.run();
                 incoming.scheduleRepeating((60 * 45) * 1000);
-
-
             }
         };
 
