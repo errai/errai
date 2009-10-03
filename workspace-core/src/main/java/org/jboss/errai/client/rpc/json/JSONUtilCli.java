@@ -16,6 +16,8 @@ public class JSONUtilCli {
 
     public static ArrayList<Message> decodePayload(Object value) {
         try {
+            if (value == null) return null;
+
             ArrayList<Message> list = new ArrayList<Message>();
             JSONValue a = JSONParser.parse(String.valueOf(value));
 

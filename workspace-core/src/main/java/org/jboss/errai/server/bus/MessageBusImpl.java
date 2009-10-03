@@ -15,13 +15,9 @@ import static org.jboss.errai.server.bus.MessageBusServer.encodeMap;
 import javax.servlet.http.HttpSession;
 import javax.swing.*;
 import java.awt.*;
-import static java.lang.System.currentTimeMillis;
 import java.util.*;
 import java.util.List;
 import java.util.Queue;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 @Singleton
 public class MessageBusImpl implements MessageBus {
@@ -32,10 +28,12 @@ public class MessageBusImpl implements MessageBus {
     private final Map<String, List<MessageCallback>> subscriptions = new HashMap<String, List<MessageCallback>>();
     private final Map<String, Set<Object>> remoteSubscriptions = new HashMap<String, Set<Object>>();
 
-    private final Map<Object, BlockingQueue<Message>> messageQueues = new HashMap<Object, BlockingQueue<Message>>();
+    private final Map<Object, MessageQueue> messageQueues = new HashMap<Object, MessageQueue>();
 
     private final List<SubscribeListener> subscribeListeners = new LinkedList<SubscribeListener>();
     private final List<UnsubscribeListener> unsubscribeListeners = new LinkedList<UnsubscribeListener>();
+
+    private final HouseKeeper houseKeeper = new HouseKeeper(this);
 
     public MessageBusImpl() {
         Thread thread = new Thread() {
@@ -86,7 +84,7 @@ public class MessageBusImpl implements MessageBus {
 
                         for (Object queue : messageQueues.keySet()) {
                             builder.append("   __________________________").append("\n");
-                            Queue<Message> q = messageQueues.get(queue);
+                            Queue<Message> q = messageQueues.get(queue).getQueue();
 
                             builder.append("   Queue: ").append(queue).append(" (size:").append(q.size()).append(")").append(q.size() == QUEUE_SIZE ? " ** QUEUE FULL (BLOCKING) **" : "").append("\n");
                             for (Message message : q) {
@@ -136,7 +134,7 @@ public class MessageBusImpl implements MessageBus {
 
                         if (!messageQueues.containsKey(message.get(HttpSession.class, SecurityParts.SessionData)))
                             messageQueues.put(sessionContext,
-                                    new ArrayBlockingQueue<Message>(QUEUE_SIZE));
+                                    new MessageQueue(QUEUE_SIZE));
 
                         remoteSubscribe(sessionContext, "ClientBus");
 
@@ -155,6 +153,8 @@ public class MessageBusImpl implements MessageBus {
                 }
             }
         });
+
+        houseKeeper.start();
     }
 
     public void sendGlobal(CommandMessage message) {
@@ -193,7 +193,7 @@ public class MessageBusImpl implements MessageBus {
         }
 
         if (remoteSubscriptions.containsKey(subject)) {
-            for (Map.Entry<Object, BlockingQueue<Message>> entry : messageQueues.entrySet()) {
+            for (Map.Entry<Object, MessageQueue> entry : messageQueues.entrySet()) {
                 if (remoteSubscriptions.get(subject).contains(entry.getKey())) {
                     messageQueues.get(entry.getKey()).offer(new Message() {
                         public String getSubject() {
@@ -211,20 +211,15 @@ public class MessageBusImpl implements MessageBus {
 
     private void store(final String sessionId, final String subject, final Object message) {
         if (messageQueues.containsKey(sessionId) && isAnyoneListening(sessionId, subject)) {
-            try {
-                messageQueues.get(sessionId).offer(new Message() {
-                    public String getSubject() {
-                        return subject;
-                    }
+            messageQueues.get(sessionId).offer(new Message() {
+                public String getSubject() {
+                    return subject;
+                }
 
-                    public Object getMessage() {
-                        return message;
-                    }
-                }, 60, TimeUnit.SECONDS);
-            }
-            catch (InterruptedException e) {
-                //todo: create a delivery failure notice.
-            }
+                public Object getMessage() {
+                    return message;
+                }
+            });
         }
         else {
             throw new NoSubscribersToDeliverTo("for: " + subject);
@@ -276,29 +271,7 @@ public class MessageBusImpl implements MessageBus {
 
 
     public Payload nextMessage(Object sessionContext) {
-        try {
-            /**
-             * Long-poll for 45 seconds.
-             */
-
-            BlockingQueue<Message> queue = messageQueues.get(sessionContext);
-
-            Message m = queue.poll(45, TimeUnit.SECONDS);
-            long startWindow = currentTimeMillis();
-            int payLoadSize = 0;
-
-            Payload p = new Payload(m == null ? heartBeat : m);
-            
-            while (!queue.isEmpty() && payLoadSize < 10 && (currentTimeMillis() - startWindow) < 25) {
-                p.addMessage(queue.poll());
-                payLoadSize++;
-            }
-
-            return p;
-        }
-        catch (InterruptedException e) {
-            return new Payload(heartBeat);
-        }
+        return messageQueues.get(sessionContext).poll();
     }
 
     public void subscribe(String subject, MessageCallback receiver) {
@@ -348,7 +321,7 @@ public class MessageBusImpl implements MessageBus {
          * Any messages still in the queue for this subject, will now never be delivered.  So we must purge them,
          * like the unwanted and forsaken messages they are.
          */
-        Iterator<Message> iter = messageQueues.get(sessionContext).iterator();
+        Iterator<Message> iter = messageQueues.get(sessionContext).getQueue().iterator();
         while (iter.hasNext()) {
             if (subject.equals(iter.next().getSubject())) {
                 iter.remove();
@@ -413,15 +386,52 @@ public class MessageBusImpl implements MessageBus {
         unsubscribeListeners.add(listener);
     }
 
+    private static class HouseKeeper extends Thread {
+        private boolean running = true;
+        private MessageBusImpl bus;
 
-    private static final Message heartBeat = new Message() {
-        public String getSubject() {
-            return "HeartBeat";
+        public HouseKeeper(MessageBusImpl bus) {
+            super();
+            this.bus = bus;
+            setPriority(Thread.MIN_PRIORITY);
         }
 
-        public Object getMessage() {
-            return null;
+        @Override
+        public void run() {
+            try {
+                while (running) {
+                    Thread.sleep(1000 * 10);
+                    houseKeep();
+                }
+            }
+            catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
-    };
+
+        private void houseKeep() {
+            boolean houseKeepingPerformed = false;
+
+            while (!houseKeepingPerformed) {
+                try {
+
+                    Iterator<Object> iter = bus.messageQueues.keySet().iterator();
+
+                    while (iter.hasNext()) {
+                        if (bus.messageQueues.get(iter.next()).isStale()) {
+                            iter.remove();
+                        }
+                    }
+
+                    houseKeepingPerformed = true;
+                }
+                catch (ConcurrentModificationException cme) {
+                    // fall-through and try again.
+                }
+            }
+        }
+
+    }
+
 
 }

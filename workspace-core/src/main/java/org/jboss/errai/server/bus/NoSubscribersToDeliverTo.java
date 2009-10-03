@@ -1,6 +1,6 @@
 package org.jboss.errai.server.bus;
 
-public class NoSubscribersToDeliverTo extends RuntimeException {
+public class NoSubscribersToDeliverTo extends MessageDeliveryFailure {
     public NoSubscribersToDeliverTo() {
         super();
     }
