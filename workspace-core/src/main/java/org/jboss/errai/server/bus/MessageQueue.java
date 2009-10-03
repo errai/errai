@@ -84,6 +84,10 @@ public class MessageQueue {
         return !pollActive && (currentTimeMillis() - lastTransmission) > TIMEOUT;
     }
 
+    public boolean isActive() {
+        return pollActive;
+    }
+
     private static final Message heartBeat = new Message() {
         public String getSubject() {
             return "HeartBeat";

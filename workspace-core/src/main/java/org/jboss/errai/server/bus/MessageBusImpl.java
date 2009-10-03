@@ -83,10 +83,14 @@ public class MessageBusImpl implements MessageBus {
                         builder.append("\nQUEUES\n");
 
                         for (Object queue : messageQueues.keySet()) {
-                            builder.append("   __________________________").append("\n");
-                            Queue<Message> q = messageQueues.get(queue).getQueue();
+                            MessageQueue mq = messageQueues.get(queue);
 
-                            builder.append("   Queue: ").append(queue).append(" (size:").append(q.size()).append(")").append(q.size() == QUEUE_SIZE ? " ** QUEUE FULL (BLOCKING) **" : "").append("\n");
+                            builder.append("   __________________________").append("\n");
+                            Queue<Message> q = mq.getQueue();
+
+                            builder.append("   Queue: ").append(queue).append(" (size:").append(q.size()).append("; active:")
+                                    .append(mq.isActive()).append("; stale:").append(mq.isStale()).append(")")
+                                    .append(q.size() == QUEUE_SIZE ? " ** QUEUE FULL (BLOCKING) **" : "").append("\n");
                             for (Message message : q) {
                                 builder.append("     -> @").append(message.getSubject()).append(" = ").append(message.getMessage()).append("\n");
                             }
@@ -411,15 +415,17 @@ public class MessageBusImpl implements MessageBus {
 
         private void houseKeep() {
             boolean houseKeepingPerformed = false;
+            List<Object> endSessions = new LinkedList<Object>();
 
             while (!houseKeepingPerformed) {
                 try {
 
                     Iterator<Object> iter = bus.messageQueues.keySet().iterator();
+                    Object ref;
 
                     while (iter.hasNext()) {
-                        if (bus.messageQueues.get(iter.next()).isStale()) {
-                            iter.remove();
+                        if (bus.messageQueues.get(ref = iter.next()).isStale()) {
+                            endSessions.add(ref);
                         }
                     }
 
@@ -428,6 +434,14 @@ public class MessageBusImpl implements MessageBus {
                 catch (ConcurrentModificationException cme) {
                     // fall-through and try again.
                 }
+            }
+
+            for (Object ref : endSessions) {
+                for (String subject : new HashSet<String>(bus.remoteSubscriptions.keySet())) {
+                    bus.remoteUnsubscribe(ref, subject);
+                }
+
+                bus.messageQueues.remove(ref);
             }
         }
 
