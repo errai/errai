@@ -9,10 +9,12 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import org.jboss.errai.client.framework.AcceptsCallback;
 import org.jboss.errai.client.framework.MessageCallback;
 import org.jboss.errai.client.rpc.CommandMessage;
+import org.jboss.errai.client.rpc.Message;
 import org.jboss.errai.client.rpc.MessageBusClient;
 import org.jboss.errai.client.rpc.json.JSONUtilCli;
 import org.jboss.errai.client.util.Effects;
 import org.jboss.errai.client.widgets.WSModalDialog;
+
 
 import java.util.*;
 
@@ -400,8 +402,9 @@ public class ClientBus {
                                         fadeout.schedule(2000);
                                     }
 
-                                    String toSubject = response.getHeader("ToSubject");
-                                    store(toSubject, response.getText());
+                                    for (Message m : JSONUtilCli.decodePayload(response.getText())) {
+                                        store(m.getSubject(), m.getMessage());
+                                    }
 
                                     block = false;
                                     schedule(1);

@@ -19,7 +19,7 @@ public interface MessageBus {
     public void send(String subject, CommandMessage message);
     public void send(String subject, CommandMessage message, boolean fireListeners);
 
-    public Message nextMessage(Object sessionContext);
+    public Payload nextMessage(Object sessionContext);
 
     public void subscribe(String subject, MessageCallback receiver);
 

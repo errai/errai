@@ -1,15 +1,49 @@
 package org.jboss.errai.client.rpc.json;
 
+import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.client.rpc.CommandMessage;
+import org.jboss.errai.client.rpc.Message;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 
 public class JSONUtilCli {
+
+    public static ArrayList<Message> decodePayload(Object value) {
+        ArrayList<Message> list = new ArrayList<Message>();
+        JSONValue a = JSONParser.parse(String.valueOf(value));
+
+        if (a instanceof JSONArray) {
+            JSONArray arr = (JSONArray) a;
+
+            for (int i = 0; i < arr.size(); i++) {
+                a = arr.get(i);
+
+                if (a instanceof JSONObject) {
+                    final JSONObject eMap = (JSONObject) a;
+                    final String subject = eMap.keySet().iterator().next();
+
+                    list.add(new Message() {
+                        public String getSubject() {
+                            return subject;
+                        }
+
+                        public Object getMessage() {
+                            return eMap.get(subject);
+                        }
+                    });
+                }
+
+            }
+        }
+        return list;
+    }
+
     public static Map<String, Object> decodeMap(Object value) {
         JSONValue a = JSONParser.parse(String.valueOf(value));
 

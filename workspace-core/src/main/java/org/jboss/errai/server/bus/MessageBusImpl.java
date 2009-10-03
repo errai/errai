@@ -5,6 +5,7 @@ import com.google.inject.Singleton;
 import org.jboss.errai.client.framework.MessageCallback;
 import org.jboss.errai.client.rpc.CommandMessage;
 import org.jboss.errai.client.rpc.ConversationMessage;
+import org.jboss.errai.client.rpc.Message;
 import org.jboss.errai.client.rpc.protocols.BusCommands;
 import org.jboss.errai.client.rpc.protocols.MessageParts;
 import org.jboss.errai.client.rpc.protocols.SecurityCommands;
@@ -273,16 +274,26 @@ public class MessageBusImpl implements MessageBus {
     }
 
 
-    public Message nextMessage(Object sessionContext) {
+    public Payload nextMessage(Object sessionContext) {
         try {
             /**
              * Long-poll for 45 seconds.
              */
-            Message m = getQueue(sessionContext).poll(45, TimeUnit.SECONDS);
-            return m == null ? heartBeat : m;
+
+            BlockingQueue<Message> queue = messageQueues.get(sessionContext);
+
+            Message m = queue.poll(45, TimeUnit.SECONDS);
+
+            Payload p = new Payload(m == null ? heartBeat : m);
+            
+            while (!queue.isEmpty()) {
+                p.addMessage(queue.poll());
+            }
+
+            return p;
         }
         catch (InterruptedException e) {
-            return heartBeat;
+            return new Payload(heartBeat);
         }
     }
 
