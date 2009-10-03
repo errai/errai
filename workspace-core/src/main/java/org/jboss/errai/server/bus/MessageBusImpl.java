@@ -15,6 +15,7 @@ import static org.jboss.errai.server.bus.MessageBusServer.encodeMap;
 import javax.servlet.http.HttpSession;
 import javax.swing.*;
 import java.awt.*;
+import static java.lang.System.currentTimeMillis;
 import java.util.*;
 import java.util.List;
 import java.util.Queue;
@@ -283,11 +284,14 @@ public class MessageBusImpl implements MessageBus {
             BlockingQueue<Message> queue = messageQueues.get(sessionContext);
 
             Message m = queue.poll(45, TimeUnit.SECONDS);
+            long startWindow = currentTimeMillis();
+            int payLoadSize = 0;
 
             Payload p = new Payload(m == null ? heartBeat : m);
             
-            while (!queue.isEmpty()) {
+            while (!queue.isEmpty() && payLoadSize < 10 && (currentTimeMillis() - startWindow) < 25) {
                 p.addMessage(queue.poll());
+                payLoadSize++;
             }
 
             return p;
@@ -295,10 +299,6 @@ public class MessageBusImpl implements MessageBus {
         catch (InterruptedException e) {
             return new Payload(heartBeat);
         }
-    }
-
-    private BlockingQueue<Message> getQueue(Object sessionContext) {
-        return messageQueues.get(sessionContext);
     }
 
     public void subscribe(String subject, MessageCallback receiver) {

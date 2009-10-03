@@ -15,33 +15,40 @@ import java.util.Map;
 public class JSONUtilCli {
 
     public static ArrayList<Message> decodePayload(Object value) {
-        ArrayList<Message> list = new ArrayList<Message>();
-        JSONValue a = JSONParser.parse(String.valueOf(value));
+        try {
+            ArrayList<Message> list = new ArrayList<Message>();
+            JSONValue a = JSONParser.parse(String.valueOf(value));
 
-        if (a instanceof JSONArray) {
-            JSONArray arr = (JSONArray) a;
+            if (a instanceof JSONArray) {
+                JSONArray arr = (JSONArray) a;
 
-            for (int i = 0; i < arr.size(); i++) {
-                a = arr.get(i);
+                for (int i = 0; i < arr.size(); i++) {
+                    a = arr.get(i);
 
-                if (a instanceof JSONObject) {
-                    final JSONObject eMap = (JSONObject) a;
-                    final String subject = eMap.keySet().iterator().next();
+                    if (a instanceof JSONObject) {
+                        final JSONObject eMap = (JSONObject) a;
+                        final String subject = eMap.keySet().iterator().next();
 
-                    list.add(new Message() {
-                        public String getSubject() {
-                            return subject;
-                        }
+                        list.add(new Message() {
+                            public String getSubject() {
+                                return subject;
+                            }
 
-                        public Object getMessage() {
-                            return eMap.get(subject);
-                        }
-                    });
+                            public Object getMessage() {
+                                return eMap.get(subject);
+                            }
+                        });
+                    }
+
                 }
-
             }
+            return list;
         }
-        return list;
+        catch (Exception e) {
+            System.out.println("Payload: " + value);
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public static Map<String, Object> decodeMap(Object value) {

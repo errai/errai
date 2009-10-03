@@ -60,8 +60,16 @@ public class MessageBusServiceImpl extends HttpServlet {
             stream.write('"');
             stream.write(':');
 
-            for (byte b : ((String) m.getMessage()).getBytes()) {
-                stream.write(b);
+            if (m.getMessage() == null) {
+                stream.write('n');
+                stream.write('u');
+                stream.write('l');
+                stream.write('l');
+            }
+            else {
+                for (byte b : ((String) m.getMessage()).getBytes()) {
+                    stream.write(b);
+                }
             }
             stream.write('}');
 
