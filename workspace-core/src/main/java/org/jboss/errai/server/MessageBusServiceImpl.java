@@ -36,7 +36,9 @@ public class MessageBusServiceImpl extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
+            throws ServletException, IOException {
+
         Payload p = service.getBus().nextMessage(
                 httpServletRequest.getSession().getAttribute(MessageBus.WS_SESSION_ID));
 
@@ -83,7 +85,9 @@ public class MessageBusServiceImpl extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
+            throws ServletException, IOException {
+
         Reader reader = httpServletRequest.getReader();
         StringBuilder sb = new StringBuilder(httpServletRequest.getContentLength());
         HttpSession session = httpServletRequest.getSession();
@@ -107,6 +111,4 @@ public class MessageBusServiceImpl extends HttpServlet {
                 .setParts(decodeToMap(sb.toString()))
                 .set(SecurityParts.SessionData, httpServletRequest.getSession()));
     }
-
-
 }
