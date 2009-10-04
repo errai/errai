@@ -4,6 +4,7 @@ import com.allen_sauer.gwt.dnd.client.PickupDragController;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import static com.google.gwt.core.client.GWT.create;
+import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
@@ -25,7 +26,7 @@ import java.util.*;
  * Entry point classes define <code>onModuleLoad()</code>.
  */
 public class Workspace implements EntryPoint {
-    public static ClientBus bus = new ClientBus();
+    public static ClientBus bus;
 
     public static PickupDragController dragController;
     private static WorkspaceLayout workspaceLayout;
@@ -48,7 +49,14 @@ public class Workspace implements EntryPoint {
     private static List<String> preferredGroupOrdering = new ArrayList<String>();
 
     private Workspace() {
-        MessageBusClient.setBus(bus);
+        GWT.runAsync(new RunAsyncCallback() {
+            public void onFailure(Throwable reason) {
+            }
+
+            public void onSuccess() {
+                MessageBusClient.setBus(bus = new ClientBus());
+            }
+        });
     }
 
     /**
@@ -185,6 +193,8 @@ public class Workspace implements EntryPoint {
         /**
          * Initialize the workspace UI.
          */
+
+
         initWorkspace(rootId);        
 
         try {
@@ -323,6 +333,9 @@ public class Workspace implements EntryPoint {
         if (!toBeLoadedGroups.containsKey(group)) toBeLoadedGroups.put(group, new ArrayList<Tool>());
 
         final String toolId = name.replaceAll(" ", "_") + "." + toolCounter++;
+        if (icon == null || "".equals(icon)) {
+            icon = "/images/ui/icons/application.png";
+        }
 
         toBeLoadedGroups.get(group).add(new ToolImpl(name, toolId, multipleAllowed, new Image(GWT.getModuleBaseURL() + icon), component));
     }
@@ -358,7 +371,6 @@ public class Workspace implements EntryPoint {
 
     private native static void _initAfterWSLoad() /*-{
         try {
-            if ($wnd.Scriptaculous != null) $wnd.Scriptaculous.load();
             $wnd.initAfterWSLoad();
         }
         catch (e) {
