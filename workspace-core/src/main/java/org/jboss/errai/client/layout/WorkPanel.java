@@ -6,7 +6,6 @@ public class WorkPanel extends Composite {
     VerticalPanel vPanel = new VerticalPanel();
 
     private Label titleLabel = new Label("New WorkPanel");
-    private SimplePanel title = new SimplePanel();
     private HorizontalPanel titleInternal = new HorizontalPanel();
     private FlowPanel mainPanel = new FlowPanel();
 
@@ -16,6 +15,7 @@ public class WorkPanel extends Composite {
     public WorkPanel() {
         vPanel.setWidth("100%");
 
+        SimplePanel title = new SimplePanel();
         vPanel.add(title);
         vPanel.add(mainPanel);
 
