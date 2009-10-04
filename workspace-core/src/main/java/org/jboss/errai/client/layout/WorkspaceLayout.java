@@ -499,7 +499,7 @@ public class WorkspaceLayout extends Composite {
 
                         t.schedule(25);
 
-                        Effects.fade(panel.getElement(), 5, 5, 0, 100);
+                        Effects.fade(panel.getElement(), 1, 0, 100);
                     }
                 });
     }

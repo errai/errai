@@ -11,22 +11,22 @@ public class Effects {
      */
     private static Effect effect = GWT.create(Effect.class);
     static {
-        if (!GWT.isScript() && effect instanceof MozillaEffectImpl) {
-            effect = new Effect() {
-                public Timer doFade(Element el, int durationMillis, int stepping, int start, int end) {
-                    setOpacity(el, end);
-                    return null;
-                }
-
-                public void setOpacity(Element el, int opacity) {
-                    MozillaEffectImpl.setOpacityNative(el.getStyle(), opacity);
-                }
-            };
-        }
+//        if (!GWT.isScript() && effect instanceof MozillaEffectImpl) {
+//            effect = new Effect() {
+//                public Timer doFade(Element el, double duration, int start, int end) {
+//                    setOpacity(el, end);
+//                    return null;
+//                }
+//
+//                public void setOpacity(Element el, int opacity) {
+//                    MozillaEffectImpl.setOpacityNative(el.getStyle(), opacity);
+//                }
+//            };
+//        }
     }
 
-    public static void fade(Element el, int durationMillis, final int stepping, final int start, final int end) {
-        effect.doFade(el, durationMillis, stepping, start, end);
+    public static void fade(Element el, final double duration, final int start, final int end) {
+        effect.doFade(el, duration, start, end);
     }
 
     public static void setOpacity(Element el, int opacity) {

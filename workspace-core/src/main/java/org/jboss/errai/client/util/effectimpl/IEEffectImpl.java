@@ -7,13 +7,13 @@ import org.jboss.errai.client.util.Effect;
 
 
 public class IEEffectImpl implements Effect {
-    public Timer doFade(final Element el, int durationMillis, final int stepping, final int start, final int end) {
+    public Timer doFade(final Element el, double duration ,final int start, final int end) {
         Timer t = start < end ?
                 new Timer() {
                     int step = start;
 
                     public void run() {
-                        step += stepping + 10;
+                        step +=  5;
                         if (step < end) {
                             setOpacity(el, step);
                         }
@@ -28,7 +28,7 @@ public class IEEffectImpl implements Effect {
                     int step = end;
 
                     public void run() {
-                        step -= stepping + 10;
+                        step -=  5;
                         if (step > end) {
                             setOpacity(el, step);
                         }
@@ -39,16 +39,12 @@ public class IEEffectImpl implements Effect {
                     }
                 };
 
-        t.scheduleRepeating(durationMillis);
+        t.scheduleRepeating(1);
 
         return t;
     }
 
     public void setOpacity(Element el, int opacity) {
-        setOpacityNative(el.getStyle(), opacity);
+        el.getStyle().setProperty("filter", "progid:DXImageTransform.Microsoft.Alpha(opacity='" + opacity + "')");        
     }
-
-    public native static void setOpacityNative(Style s, int opacity) /*-{
-     s.filter="progid:DXImageTransform.Microsoft.Alpha(opacity='" + opacity + "')";
-    }-*/;
 }

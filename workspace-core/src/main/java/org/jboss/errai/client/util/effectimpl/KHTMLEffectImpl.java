@@ -1,24 +1,23 @@
 package org.jboss.errai.client.util.effectimpl;
 
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Timer;
 import org.jboss.errai.client.util.Effect;
 
 public class KHTMLEffectImpl implements Effect {
-    public Timer doFade(final Element el, int durationMillis, final int stepping, final int start, final int end) {
-     //   final Style s = el.getStyle();
+    public Timer doFade(final Element el, double duration, final int start, final int end) {
+        //   final Style s = el.getStyle();
         Timer t = start < end ?
                 new Timer() {
                     int step = start;
 
                     public void run() {
-                        step += stepping;
+                        step += 5;
                         if (step < end) {
-                            setOpacity(el, step);
+                            _setOpacity(el, step);
                         }
                         else {
-                            setOpacity(el, end);
+                            _setOpacity(el, end);
                             cancel();
                         }
                     }
@@ -28,27 +27,28 @@ public class KHTMLEffectImpl implements Effect {
                     int step = end;
 
                     public void run() {
-                        step -= stepping;
+                        step -= 5;
                         if (step > end) {
-                            setOpacity(el, step);
+                            _setOpacity(el, step);
                         }
                         else {
-                            setOpacity(el, end);
+                            _setOpacity(el, end);
                             cancel();
                         }
                     }
                 };
 
-        t.scheduleRepeating(durationMillis);
+        t.scheduleRepeating(1);
 
         return t;
     }
 
     public void setOpacity(Element el, int opacity) {
-         setOpacityNative(el.getStyle(), opacity);
+        _setOpacity(el, opacity);
     }
 
-    public native static void setOpacityNative(Style s, int opacity) /*-{
-        s.opacity = opacity / 100;
-    }-*/;
+    public static void _setOpacity(Element el, float opacity) {
+        el.getStyle().setProperty("opacity", String.valueOf(opacity / 100));
+    }
+
 }

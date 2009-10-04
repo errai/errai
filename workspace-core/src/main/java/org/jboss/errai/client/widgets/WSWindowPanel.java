@@ -127,7 +127,7 @@ public class WSWindowPanel extends Composite {
     }
 
     public void hide() {
-        Effects.fade(getElement(), 1, 5, 100, 0);
+        Effects.fade(getElement(), 1, 100, 0);
         setVisible(false);
         fireClosingHandlers();
 
@@ -140,17 +140,19 @@ public class WSWindowPanel extends Composite {
     public void show() {
         setOpacity(getElement(), 0);
         setVisible(true);
-        Effects.fade(getElement(), 5, 10, 0, 100);
-
+        
         getElement().getStyle().setProperty("zIndex", zIndex++ + "");
+        Effects.fade(getElement(), 0.5, 0, 100);
     }
 
     public void showModal() {
         RootPanel.get().add(drapePanel = createDrape());
 
         setVisible(true);
-        Effects.fade(getElement(), 5, 10, 0, 100);
+
         getElement().getStyle().setProperty("zIndex", zIndex++ + "");
+        Effects.fade(getElement(), 0.5, 0, 100);
+
     }
 
 

@@ -358,7 +358,8 @@ public class Workspace implements EntryPoint {
 
     private native static void _initAfterWSLoad() /*-{
         try {
-        $wnd.initAfterWSLoad();
+            if ($wnd.Scriptaculous != null) $wnd.Scriptaculous.load();
+            $wnd.initAfterWSLoad();
         }
         catch (e) {
         }

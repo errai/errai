@@ -389,20 +389,7 @@ public class ClientBus {
                                 }
 
                                 public void onResponseReceived(Request request, Response response) {
-                                    if ("HeartBeat".equals(response.getText())) {
-                                        System.out.println("** Heartbeat **");
-
-                                        heartBeat.setVisible(true);
-                                        Effects.fade(heartBeat.getElement(), 25, 2, 10, 100);
-                                        com.google.gwt.user.client.Timer fadeout = new com.google.gwt.user.client.Timer() {
-                                            @Override
-                                            public void run() {
-                                                Effects.fade(heartBeat.getElement(), 25, 2, 100, 0);
-                                            }
-                                        };
-                                        fadeout.schedule(2000);
-                                    }
-
+                             
                                     for (Message m : decodePayload(response.getText())) {
                                         store(m.getSubject(), m.getMessage());
                                     }
