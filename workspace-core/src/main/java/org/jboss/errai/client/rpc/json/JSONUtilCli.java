@@ -16,7 +16,7 @@ public class JSONUtilCli {
 
     public static ArrayList<Message> decodePayload(Object value) {
         try {
-            if (value == null) return null;
+            if (value == null || !"".equals(value)) return null;
 
             ArrayList<Message> list = new ArrayList<Message>();
             JSONValue a = JSONParser.parse(String.valueOf(value));
@@ -47,7 +47,7 @@ public class JSONUtilCli {
             return list;
         }
         catch (Exception e) {
-            System.out.println("Payload: " + value);
+
             e.printStackTrace();
             return null;
         }

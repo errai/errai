@@ -13,8 +13,8 @@ public class MessageQueue {
     private static final long DEFAULT_TRANSMISSION_WINDOW = 25;
 
     private long transmissionWindow = 25;
-    private long lastTransmission = System.currentTimeMillis();
-    private long lastEnqueue = System.currentTimeMillis();
+    private long lastTransmission = currentTimeMillis();
+    private long lastEnqueue = currentTimeMillis();
 
     private boolean pollActive = false;
 
@@ -30,6 +30,7 @@ public class MessageQueue {
             pollActive = true;
             Message m = queue.poll(45, TimeUnit.SECONDS);
             pollActive = false;
+
             long startWindow = currentTimeMillis();
             int payLoadSize = 0;
 
@@ -58,13 +59,13 @@ public class MessageQueue {
     public boolean offer(final Message message) {
         boolean b = false;
         try {
-            b = queue.offer(message, 25, TimeUnit.MILLISECONDS);
+            b = queue.offer(message, 100, TimeUnit.MILLISECONDS);
 
             if (!b) {
                 throw new QueueOverloadedException("cannot deliver message.");
             }
 
-            lastEnqueue = System.currentTimeMillis();
+            lastEnqueue = currentTimeMillis();
             return b;
         }
         catch (InterruptedException e) {
