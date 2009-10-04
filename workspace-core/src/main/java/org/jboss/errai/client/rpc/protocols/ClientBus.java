@@ -12,6 +12,7 @@ import org.jboss.errai.client.rpc.CommandMessage;
 import org.jboss.errai.client.rpc.Message;
 import org.jboss.errai.client.rpc.MessageBusClient;
 import org.jboss.errai.client.rpc.json.JSONUtilCli;
+import static org.jboss.errai.client.rpc.json.JSONUtilCli.decodePayload;
 import org.jboss.errai.client.util.Effects;
 import org.jboss.errai.client.widgets.WSModalDialog;
 
@@ -402,7 +403,7 @@ public class ClientBus {
                                         fadeout.schedule(2000);
                                     }
 
-                                    for (Message m : JSONUtilCli.decodePayload(response.getText())) {
+                                    for (Message m : decodePayload(response.getText())) {
                                         store(m.getSubject(), m.getMessage());
                                     }
 

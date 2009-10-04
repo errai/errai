@@ -16,10 +16,12 @@ public class JSONUtilCli {
 
     public static ArrayList<Message> decodePayload(Object value) {
         try {
-            if (value == null || !"".equals(value)) return null;
+            String str = String.valueOf(value);
+            if (value == null || str.trim().length() == 0) return new ArrayList<Message>(0);
 
             ArrayList<Message> list = new ArrayList<Message>();
-            JSONValue a = JSONParser.parse(String.valueOf(value));
+
+            JSONValue a = JSONParser.parse(str);
 
             if (a instanceof JSONArray) {
                 JSONArray arr = (JSONArray) a;
@@ -47,9 +49,8 @@ public class JSONUtilCli {
             return list;
         }
         catch (Exception e) {
-
             e.printStackTrace();
-            return null;
+            return new ArrayList<Message>(0);
         }
     }
 
