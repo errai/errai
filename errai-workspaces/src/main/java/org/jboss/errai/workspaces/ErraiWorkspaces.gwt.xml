@@ -2,6 +2,7 @@
         "http://google-web-toolkit.googlecode.com/svn/releases/1.6/distro-source/core/src/gwt-module.dtd">
 <module>
     <inherits name="org.jboss.errai.bus.ErraiBus"/>
+    <inherits name="org.jboss.errai.widgets.ErraiWidgets" />
 
     <inherits name='com.allen_sauer.gwt.dnd.gwt-dnd'/>
     <inherits name="com.google.gwt.user.theme.chrome.Chrome"/>
