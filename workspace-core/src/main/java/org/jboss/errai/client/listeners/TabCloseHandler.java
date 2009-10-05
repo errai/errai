@@ -5,8 +5,8 @@ import com.google.gwt.event.logical.shared.CloseHandler;
 import org.jboss.errai.client.framework.AcceptsCallback;
 import org.jboss.errai.client.bus.CommandMessage;
 import org.jboss.errai.client.bus.MessageBusClient;
-import org.jboss.errai.client.bus.protocols.LayoutCommands;
-import org.jboss.errai.client.bus.protocols.LayoutParts;
+import org.jboss.errai.bus.client.protocols.LayoutCommands;
+import org.jboss.errai.bus.client.protocols.LayoutParts;
 import org.jboss.errai.client.widgets.WSTab;
 
 

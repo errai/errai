@@ -1,7 +1,7 @@
 package org.jboss.errai.server.security.auth;
 
 import org.jboss.errai.client.bus.CommandMessage;
-import org.jboss.errai.client.bus.protocols.SecurityParts;
+import org.jboss.errai.bus.client.protocols.SecurityParts;
 
 import java.util.HashSet;
 import java.util.Set;

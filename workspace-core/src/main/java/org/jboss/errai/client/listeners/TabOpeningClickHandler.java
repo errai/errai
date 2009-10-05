@@ -12,8 +12,8 @@ import org.jboss.errai.client.layout.LayoutHint;
 import org.jboss.errai.client.layout.LayoutHintProvider;
 import org.jboss.errai.client.bus.CommandMessage;
 import org.jboss.errai.client.bus.ConversationMessage;
-import org.jboss.errai.client.bus.protocols.LayoutCommands;
-import org.jboss.errai.client.bus.protocols.LayoutParts;
+import org.jboss.errai.bus.client.protocols.LayoutCommands;
+import org.jboss.errai.bus.client.protocols.LayoutParts;
 
 public class TabOpeningClickHandler implements ClickHandler {
     private Tool tool;

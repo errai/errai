@@ -14,7 +14,6 @@ import org.jboss.errai.client.bus.CommandMessage;
 import org.jboss.errai.client.bus.MessageBusClient;
 import org.jboss.errai.client.framework.*;
 import org.jboss.errai.client.layout.WorkspaceLayout;
-import org.jboss.errai.client.bus.protocols.*;
 import org.jboss.errai.client.security.SecurityService;
 import org.jboss.errai.client.widgets.WSLoginPanel;
 import org.jboss.errai.client.widgets.WSModalDialog;

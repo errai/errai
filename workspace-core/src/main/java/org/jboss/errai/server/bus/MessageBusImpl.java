@@ -6,10 +6,10 @@ import org.jboss.errai.client.bus.CommandMessage;
 import org.jboss.errai.client.bus.ConversationMessage;
 import org.jboss.errai.client.bus.Message;
 import org.jboss.errai.client.framework.MessageCallback;
-import org.jboss.errai.client.bus.protocols.BusCommands;
-import org.jboss.errai.client.bus.protocols.MessageParts;
-import org.jboss.errai.client.bus.protocols.SecurityCommands;
-import org.jboss.errai.client.bus.protocols.SecurityParts;
+import org.jboss.errai.bus.client.protocols.BusCommands;
+import org.jboss.errai.bus.client.protocols.MessageParts;
+import org.jboss.errai.bus.client.protocols.SecurityCommands;
+import org.jboss.errai.bus.client.protocols.SecurityParts;
 import static org.jboss.errai.server.bus.MessageBusServer.encodeMap;
 
 import javax.servlet.http.HttpSession;
