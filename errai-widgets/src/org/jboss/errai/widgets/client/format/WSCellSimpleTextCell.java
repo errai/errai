@@ -9,7 +9,6 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import org.jboss.errai.widgets.client.WSGrid;
 
-
 public class WSCellSimpleTextCell extends WSCellFormatter {
     private static TextBox textBox;
     private static WSCellSimpleTextCell editCellReference;
