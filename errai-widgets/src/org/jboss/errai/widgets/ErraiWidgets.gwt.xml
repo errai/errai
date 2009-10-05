@@ -6,4 +6,6 @@
     <inherits name="org.jboss.errai.common.ErraiCommon"/>
 
     <entry-point class='org.jboss.errai.widgets.client.ErraiWidgets'/>
+
+    <stylesheet src="errai-default.css"/>
 </module>

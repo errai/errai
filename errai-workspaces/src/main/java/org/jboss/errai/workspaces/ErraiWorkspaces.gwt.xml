@@ -14,7 +14,7 @@
 
     <!-- Specify the app entry point class.                   -->
     <entry-point class='org.jboss.errai.workspaces.client.Workspace'/>
-    <stylesheet src="jboss-workspace-default.css"/>
+    <stylesheet src="errai-default.css"/>
 
     <replace-with class="org.jboss.errai.widgets.client.effects.effectimpl.KHTMLEffectImpl">
         <when-type-is class="org.jboss.errai.widgets.client.effects.Effect"/>

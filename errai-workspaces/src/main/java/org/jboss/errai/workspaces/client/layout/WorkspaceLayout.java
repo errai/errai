@@ -17,6 +17,7 @@ import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.MessageBusClient;
 import org.jboss.errai.bus.client.MessageCallback;
+import org.jboss.errai.common.client.framework.AcceptsCallback;
 import org.jboss.errai.widgets.client.*;
 import org.jboss.errai.widgets.client.effects.Effects;
 import org.jboss.errai.workspaces.client.framework.*;
