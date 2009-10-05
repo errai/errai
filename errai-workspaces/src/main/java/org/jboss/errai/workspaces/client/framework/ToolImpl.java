@@ -2,6 +2,7 @@ package org.jboss.errai.workspaces.client.framework;
 
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
+import org.jboss.errai.common.client.framework.WSComponent;
 
 public class ToolImpl implements Tool {
     private String name;

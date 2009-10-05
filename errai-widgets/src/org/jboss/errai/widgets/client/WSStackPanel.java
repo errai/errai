@@ -6,7 +6,7 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.ComplexPanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
-import org.jboss.errai.workspaces.client.util.Effects;
+import org.jboss.errai.widgets.client.effects.Effects;
 
 
 public class WSStackPanel extends ComplexPanel {

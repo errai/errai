@@ -12,10 +12,9 @@ import com.google.gwt.user.client.Window;
 import static com.google.gwt.user.client.Window.getClientHeight;
 import static com.google.gwt.user.client.Window.getClientWidth;
 import com.google.gwt.user.client.ui.*;
-import org.jboss.errai.workspaces.client.layout.WSDropShadowLayout;
-import org.jboss.errai.workspaces.client.util.Effects;
-import static org.jboss.errai.workspaces.client.util.Effects.setOpacity;
-import org.jboss.errai.workspaces.client.util.LayoutUtil;
+import org.jboss.errai.widgets.client.effects.Effects;
+import org.jboss.errai.widgets.client.layout.WSDropShadowLayout;
+import org.jboss.errai.widgets.client.util.LayoutUtil;
 
 import static java.lang.Math.round;
 import java.util.LinkedList;
@@ -99,7 +98,7 @@ public class WSWindowPanel extends Composite {
 
                 mouseMoverReg = addNativePreviewHandler(mouseMover);
 
-                setOpacity(windowPanel.getElement(), 50);
+                Effects.setOpacity(windowPanel.getElement(), 50);
             }
         });
 
@@ -108,7 +107,7 @@ public class WSWindowPanel extends Composite {
                 drag = false;
                 mouseMoverReg.removeHandler();
 
-                setOpacity(windowPanel.getElement(), 100);
+                Effects.setOpacity(windowPanel.getElement(), 100);
             }
         });
 
@@ -118,7 +117,7 @@ public class WSWindowPanel extends Composite {
         setHeight("25px");
         setWidth("25px");
 
-        setOpacity(dropShadow.getElement(), 50);
+        Effects.setOpacity(dropShadow.getElement(), 50);
     }
 
     public WSWindowPanel(String title) {
@@ -138,7 +137,7 @@ public class WSWindowPanel extends Composite {
     }
 
     public void show() {
-        setOpacity(getElement(), 0);
+        Effects.setOpacity(getElement(), 0);
         setVisible(true);
         
         getElement().getStyle().setProperty("zIndex", zIndex++ + "");

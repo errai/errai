@@ -15,12 +15,14 @@ import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
+import org.jboss.errai.common.client.framework.AcceptsCallback;
+import org.jboss.errai.common.client.framework.WSComponent;
 import org.jboss.errai.widgets.client.WSModalDialog;
 import org.jboss.errai.widgets.client.WSWindowPanel;
 import org.jboss.errai.workspaces.client.framework.*;
 import org.jboss.errai.workspaces.client.layout.WorkspaceLayout;
 import org.jboss.errai.bus.client.security.SecurityService;
-import org.jboss.errai.widgets.client.WSLoginPanel;
+import org.jboss.errai.workspaces.client.widgets.WSLoginPanel;
 
 import java.util.*;
 

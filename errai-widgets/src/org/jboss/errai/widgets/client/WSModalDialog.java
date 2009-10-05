@@ -4,9 +4,9 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
-import org.jboss.errai.workspaces.client.framework.AcceptsCallback;
-import org.jboss.errai.workspaces.client.listeners.ClickCallbackListener;
-import org.jboss.errai.workspaces.client.util.Effects;
+import org.jboss.errai.common.client.framework.AcceptsCallback;
+import org.jboss.errai.widgets.client.effects.Effects;
+import org.jboss.errai.widgets.client.listeners.ClickCallbackListener;
 
 
 public class WSModalDialog implements AcceptsCallback {

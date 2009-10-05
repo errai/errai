@@ -16,38 +16,38 @@
     <entry-point class='org.jboss.errai.workspaces.client.Workspace'/>
     <stylesheet src="jboss-workspace-default.css"/>
 
-    <replace-with class="org.jboss.errai.workspaces.client.util.effectimpl.KHTMLEffectImpl">
-        <when-type-is class="org.jboss.errai.workspaces.client.util.Effect"/>
+    <replace-with class="org.jboss.errai.widgets.client.effects.effectimpl.KHTMLEffectImpl">
+        <when-type-is class="org.jboss.errai.widgets.client.effects.Effect"/>
         <when-property-is name="user.agent" value="opera"/>
     </replace-with>
 
-    <replace-with class="org.jboss.errai.workspaces.client.util.effectimpl.KHTMLEffectImpl">
-        <when-type-is class="org.jboss.errai.workspaces.client.util.Effect"/>
+    <replace-with class="org.jboss.errai.widgets.client.effects.effectimpl.KHTMLEffectImpl">
+        <when-type-is class="org.jboss.errai.widgets.client.effects.Effect"/>
         <when-property-is name="user.agent" value="safari"/>
     </replace-with>
 
-    <replace-with class="org.jboss.errai.workspaces.client.util.effectimpl.KHTMLEffectImpl">
-        <when-type-is class="org.jboss.errai.workspaces.client.util.Effect"/>
+    <replace-with class="org.jboss.errai.widgets.client.effects.effectimpl.KHTMLEffectImpl">
+        <when-type-is class="org.jboss.errai.widgets.client.effects.Effect"/>
         <when-property-is name="user.agent" value="webkit"/>
     </replace-with>
 
-    <replace-with class="org.jboss.errai.workspaces.client.util.effectimpl.MozillaEffectImpl">
-        <when-type-is class="org.jboss.errai.workspaces.client.util.Effect"/>
+    <replace-with class="org.jboss.errai.widgets.client.effects.effectimpl.MozillaEffectImpl">
+        <when-type-is class="org.jboss.errai.widgets.client.effects.Effect"/>
         <when-property-is name="user.agent" value="gecko"/>
     </replace-with>
 
-    <replace-with class="org.jboss.errai.workspaces.client.util.effectimpl.MozillaEffectImpl">
-        <when-type-is class="org.jboss.errai.workspaces.client.util.Effect"/>
+    <replace-with class="org.jboss.errai.widgets.client.effects.effectimpl.MozillaEffectImpl">
+        <when-type-is class="org.jboss.errai.widgets.client.effects.Effect"/>
         <when-property-is name="user.agent" value="gecko1_8"/>
     </replace-with>
 
-    <replace-with class="org.jboss.errai.workspaces.client.util.effectimpl.IEEffectImpl">
-        <when-type-is class="org.jboss.errai.workspaces.client.util.Effect"/>
+    <replace-with class="org.jboss.errai.widgets.client.effects.effectimpl.IEEffectImpl">
+        <when-type-is class="org.jboss.errai.widgets.client.effects.Effect"/>
         <when-property-is name="user.agent" value="ie6"/>
     </replace-with>
 
-    <replace-with class="org.jboss.errai.workspaces.client.util.effectimpl.IEEffectImpl">
-        <when-type-is class="org.jboss.errai.workspaces.client.util.Effect"/>
+    <replace-with class="org.jboss.errai.widgets.client.effects.effectimpl.IEEffectImpl">
+        <when-type-is class="org.jboss.errai.widgets.client.effects.Effect"/>
         <when-property-is name="user.agent" value="ie8"/>
     </replace-with>
 

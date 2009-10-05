@@ -8,10 +8,10 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.*;
 import static com.google.gwt.user.client.ui.RootPanel.getBodyElement;
-import org.jboss.errai.workspaces.client.listeners.CellChangeEvent;
 import org.jboss.errai.widgets.client.format.WSCellFormatter;
 import org.jboss.errai.widgets.client.format.WSCellSimpleTextCell;
 import org.jboss.errai.widgets.client.format.WSCellTitle;
+import org.jboss.errai.widgets.client.listeners.CellChangeEvent;
 
 import static java.lang.Double.parseDouble;
 import java.util.*;

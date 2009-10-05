@@ -18,13 +18,14 @@ import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.MessageBusClient;
 import org.jboss.errai.bus.client.MessageCallback;
 import org.jboss.errai.widgets.client.*;
+import org.jboss.errai.widgets.client.effects.Effects;
 import org.jboss.errai.workspaces.client.framework.*;
 import org.jboss.errai.workspaces.client.listeners.TabCloseHandler;
 import org.jboss.errai.bus.client.json.JSONUtilCli;
 import org.jboss.errai.bus.client.protocols.LayoutCommands;
 import org.jboss.errai.bus.client.protocols.LayoutParts;
-import org.jboss.errai.workspaces.client.util.Effects;
-import org.jboss.errai.widgets.client.dnd.TabDragHandler;
+import org.jboss.errai.workspaces.client.widgets.*;
+import org.jboss.errai.workspaces.client.widgets.dnd.TabDragHandler;
 
 import java.util.*;
 
