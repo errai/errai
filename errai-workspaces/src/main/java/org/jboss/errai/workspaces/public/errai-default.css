@@ -77,12 +77,12 @@ span {
 }
 
 .workspace-NavHeader {
-    background-image: url("images/ui/layout/navbartitle.png'");
+    background-image: url("images/ui/layout/navbartitle.png");
     border-top: 1px solid #d5d5d5;
 }
 
 .workspace-DialogBox {
-    background-image: url("images/ui/layout/dialogbg.png'");
+    background-image: url("images/ui/layout/dialogbg.png");
     background-position: center;
     background-repeat: repeat-x;
 
@@ -515,7 +515,7 @@ span {
 }
 
 .mosaic-InfoPanel {
-    background: url("'../../images/traynotifybg.png'") repeat-x top;
+    background: url("images/traynotifybg.png") repeat-x top;
 
     color: white;
     font-size: 12px;
@@ -570,7 +570,7 @@ span {
 
 .gwt-Tree .gwt-TreeItem-selected {
     user-select: none;
-    background-image: url("'../../images/listhighlightbg.png'");
+    background-image: url("images/listhighlightbg.png");
     padding: 3px;
     color: white;
 }
@@ -581,14 +581,14 @@ span {
 }
 
 .gwt-ScrollTable .headerTable tr {
-    background-image: url("'../../images/titlegradient.png'");
+    background-image: url("images/titlegradient.png");
 
 }
 
 .gwt-ScrollTable .headerWrapper,
 .mosaic-ColumnWidget .headerWrapper,
 .mosaic-ScrollTreeTable .headerWrapper {
-    background-image: url("'../../images/titlegradient.png'");
+    background-image: url("images/titlegradient.png");
 }
 
 .WSGrid-header {
@@ -738,7 +738,7 @@ span {
 }
 
 .WS-WorkPanel-title {
-    background: url("'../../images/ui/layout/section-header.png'") repeat-x;
+    background: url("images/ui/layout/section-header.png") repeat-x;
     border-bottom: 1px #cccccc solid;
     vertical-align: middle;
     width: 100%;
@@ -750,7 +750,7 @@ span {
 }
 
 .WS-WorkPanel-area {
-    background: url("'../../images/bgfade.png'") repeat-x;
+    background: url("images/bgfade.png") repeat-x;
     height: 100%;
 }
 
@@ -760,7 +760,7 @@ span {
 }
 
 .WSWindowPanel-titlearea {
-    background: url("'../../images/ui/layout/section-header.png'") repeat-x;
+    background: url("images/ui/layout/section-header.png") repeat-x;
     vertical-align: middle;
     font-size: 10px;
     font-weight: bold;
