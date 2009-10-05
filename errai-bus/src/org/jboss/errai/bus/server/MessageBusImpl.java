@@ -2,10 +2,10 @@ package org.jboss.errai.bus.server;
 
 import com.google.gwt.core.client.GWT;
 import com.google.inject.Singleton;
-import org.jboss.errai.workspaces.client.bus.CommandMessage;
-import org.jboss.errai.workspaces.client.bus.ConversationMessage;
-import org.jboss.errai.workspaces.client.bus.Message;
-import org.jboss.errai.workspaces.client.framework.MessageCallback;
+import org.jboss.errai.bus.client.CommandMessage;
+import org.jboss.errai.bus.client.ConversationMessage;
+import org.jboss.errai.bus.client.Message;
+import org.jboss.errai.bus.client.MessageCallback;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;

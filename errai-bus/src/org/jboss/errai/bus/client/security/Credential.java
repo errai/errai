@@ -1,4 +1,4 @@
-package org.jboss.errai.workspaces.client.security;
+package org.jboss.errai.bus.client.security;
 
 public interface Credential {
     public Object getValue();

@@ -1,4 +1,4 @@
-package org.jboss.errai.workspaces.client.security;
+package org.jboss.errai.bus.client.security;
 
 public interface AuthenticationHandler {
     public void doLogin(Credential[] credentials);

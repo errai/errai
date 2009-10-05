@@ -1,6 +1,7 @@
 package org.jboss.errai.bus.server;
 
-import org.jboss.errai.workspaces.client.bus.Message;
+
+import org.jboss.errai.bus.client.Message;
 
 import java.util.LinkedList;
 import java.util.List;

@@ -1,7 +1,8 @@
 package org.jboss.errai.bus.server;
 
-import org.jboss.errai.workspaces.client.bus.CommandMessage;
-import org.jboss.errai.workspaces.client.framework.MessageCallback;
+import org.jboss.errai.bus.client.CommandMessage;
+import org.jboss.errai.bus.client.MessageCallback;
+
 
 public interface MessageBus {
     public static final String WS_SESSION_ID = "WSSessionID";

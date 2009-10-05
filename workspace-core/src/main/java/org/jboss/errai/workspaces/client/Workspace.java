@@ -10,12 +10,14 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import static com.google.gwt.user.client.Window.enableScrolling;
 import com.google.gwt.user.client.ui.*;
-import org.jboss.errai.bus.client.MessageCallback;
-import org.jboss.errai.workspaces.client.bus.CommandMessage;
-import org.jboss.errai.workspaces.client.bus.MessageBusClient;
+import org.jboss.errai.bus.client.*;
+import org.jboss.errai.bus.client.protocols.BusCommands;
+import org.jboss.errai.bus.client.protocols.MessageParts;
+import org.jboss.errai.bus.client.protocols.SecurityCommands;
+import org.jboss.errai.bus.client.protocols.SecurityParts;
 import org.jboss.errai.workspaces.client.framework.*;
 import org.jboss.errai.workspaces.client.layout.WorkspaceLayout;
-import org.jboss.errai.workspaces.client.security.SecurityService;
+import org.jboss.errai.bus.client.security.SecurityService;
 import org.jboss.errai.workspaces.client.widgets.WSLoginPanel;
 import org.jboss.errai.workspaces.client.widgets.WSModalDialog;
 import org.jboss.errai.workspaces.client.widgets.WSWindowPanel;
@@ -76,25 +78,22 @@ public class Workspace implements EntryPoint {
          * Configure the local client message bus to send RemoteSubscribe signals to the remote bus when
          * new subscriptions are created locally.
          */
-        MessageBusClient.addOnSubscribeHook(new AcceptsCallback() {
-            public void callback(Object message, Object data) {
-                String subject = (String) message;
-
+        MessageBusClient.addOnSubscribeHook(new HookCallback() {
+            public void callback(String subject) {
                 if (subject.startsWith("local:")) return;
 
                 MessageBusClient.send("ServerBus", CommandMessage.create(BusCommands.RemoteSubscribe)
                         .set(MessageParts.Subject, subject));
-
             }
         });
 
         /**
          * ... also send RemoteUnsubscribe signals.
          */
-        MessageBusClient.addOnUnsubscribeHook(new AcceptsCallback() {
-            public void callback(Object message, Object data) {
+        MessageBusClient.addOnUnsubscribeHook(new HookCallback() {
+            public void callback(String subject) {
                 MessageBusClient.send("ServerBus", CommandMessage.create(BusCommands.RemoteUnsubscribe)
-                        .set(MessageParts.Subject, message));
+                        .set(MessageParts.Subject, subject));
 
             }
         });
@@ -202,8 +201,8 @@ public class Workspace implements EntryPoint {
              * Specifiy a callback interface to execute the _initAfterWSLoad() tasks when we know the bus
              * is fully up and running.
              */
-            bus.init(new AcceptsCallback() {
-                public void callback(Object message, Object data) {
+            bus.init(new HookCallback() {
+                public void callback(String subject) {
                     _initAfterWSLoad();
                 }
             });

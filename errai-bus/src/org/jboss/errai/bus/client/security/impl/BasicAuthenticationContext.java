@@ -1,7 +1,7 @@
-package org.jboss.errai.workspaces.client.security.impl;
+package org.jboss.errai.bus.client.security.impl;
 
-import org.jboss.errai.workspaces.client.security.AuthenticationContext;
-import org.jboss.errai.workspaces.client.security.Role;
+import org.jboss.errai.bus.client.security.AuthenticationContext;
+import org.jboss.errai.bus.client.security.Role;
 
 import java.util.Set;
 

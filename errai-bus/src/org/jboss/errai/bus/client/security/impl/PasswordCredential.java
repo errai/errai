@@ -1,6 +1,6 @@
-package org.jboss.errai.workspaces.client.security.impl;
+package org.jboss.errai.bus.client.security.impl;
 
-import org.jboss.errai.workspaces.client.security.Credential;
+import org.jboss.errai.bus.client.security.Credential;
 
 public class PasswordCredential implements Credential {
     public String password;
