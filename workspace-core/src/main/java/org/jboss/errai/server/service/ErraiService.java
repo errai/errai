@@ -1,6 +1,6 @@
 package org.jboss.errai.server.service;
 
-import org.jboss.errai.client.rpc.CommandMessage;
+import org.jboss.errai.client.bus.CommandMessage;
 import org.jboss.errai.server.bus.MessageBus;
 
 public interface ErraiService {

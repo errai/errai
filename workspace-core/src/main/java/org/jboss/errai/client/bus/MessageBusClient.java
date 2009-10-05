@@ -1,8 +1,8 @@
-package org.jboss.errai.client.rpc;
+package org.jboss.errai.client.bus;
 
 import org.jboss.errai.client.framework.AcceptsCallback;
 import org.jboss.errai.client.framework.MessageCallback;
-import org.jboss.errai.client.rpc.protocols.ClientBus;
+import org.jboss.errai.client.bus.protocols.ClientBus;
 
 import java.util.Map;
 import java.util.Set;

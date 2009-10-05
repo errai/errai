@@ -2,9 +2,9 @@ package org.jboss.errai.server;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.jboss.errai.client.rpc.CommandMessage;
-import org.jboss.errai.client.rpc.Message;
-import org.jboss.errai.client.rpc.protocols.SecurityParts;
+import org.jboss.errai.client.bus.CommandMessage;
+import org.jboss.errai.client.bus.Message;
+import org.jboss.errai.client.bus.protocols.SecurityParts;
 import org.jboss.errai.server.bus.MessageBus;
 import org.jboss.errai.server.bus.Payload;
 import static org.jboss.errai.server.json.JSONUtil.decodeToMap;

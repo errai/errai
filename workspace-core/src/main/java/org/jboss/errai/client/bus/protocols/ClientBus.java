@@ -1,4 +1,4 @@
-package org.jboss.errai.client.rpc.protocols;
+package org.jboss.errai.client.bus.protocols;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
@@ -6,14 +6,13 @@ import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import org.jboss.errai.client.bus.Message;
+import org.jboss.errai.client.bus.MessageBusClient;
 import org.jboss.errai.client.framework.AcceptsCallback;
 import org.jboss.errai.client.framework.MessageCallback;
-import org.jboss.errai.client.rpc.CommandMessage;
-import org.jboss.errai.client.rpc.Message;
-import org.jboss.errai.client.rpc.MessageBusClient;
-import org.jboss.errai.client.rpc.json.JSONUtilCli;
-import static org.jboss.errai.client.rpc.json.JSONUtilCli.decodePayload;
-import org.jboss.errai.client.util.Effects;
+import org.jboss.errai.client.bus.CommandMessage;
+import org.jboss.errai.client.bus.json.JSONUtilCli;
+import static org.jboss.errai.client.bus.json.JSONUtilCli.decodePayload;
 import org.jboss.errai.client.widgets.WSModalDialog;
 
 
@@ -429,7 +428,7 @@ public class ClientBus {
                                             Object subscriberData) /*-{
           return $wnd.PageBus.subscribe(subject, null,
                   function (subject, message, subcriberData) {
-                     callback.@org.jboss.errai.client.framework.MessageCallback::callback(Lorg/jboss/errai/client/rpc/CommandMessage;)(@org.jboss.errai.client.rpc.json.JSONUtilCli::decodeCommandMessage(Ljava/lang/Object;)(message))
+                     callback.@org.jboss.errai.client.framework.MessageCallback::callback(Lorg/jboss/errai/client/rpc/CommandMessage;)(@org.jboss.errai.client.bus.json.JSONUtilCli::decodeCommandMessage(Ljava/lang/Object;)(message))
                   },
                   null);
      }-*/;

@@ -1,7 +1,7 @@
 package org.jboss.errai.server.bus;
 
-import org.jboss.errai.client.rpc.CommandMessage;
-import org.jboss.errai.client.rpc.protocols.SecurityParts;
+import org.jboss.errai.client.bus.CommandMessage;
+import org.jboss.errai.client.bus.protocols.SecurityParts;
 import org.jboss.errai.server.json.JSONUtil;
 
 import javax.servlet.http.HttpSession;

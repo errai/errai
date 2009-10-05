@@ -1,6 +1,6 @@
 package org.jboss.errai.server.security.auth;
 
-import org.jboss.errai.client.rpc.CommandMessage;
+import org.jboss.errai.client.bus.CommandMessage;
 
 public interface AuthorizationAdapter {
     public void challenge(CommandMessage message);

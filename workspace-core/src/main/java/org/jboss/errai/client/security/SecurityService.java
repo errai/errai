@@ -1,11 +1,11 @@
 package org.jboss.errai.client.security;
 
+import org.jboss.errai.client.bus.CommandMessage;
+import org.jboss.errai.client.bus.MessageBusClient;
 import org.jboss.errai.client.framework.MessageCallback;
-import org.jboss.errai.client.rpc.CommandMessage;
-import org.jboss.errai.client.rpc.MessageBusClient;
-import org.jboss.errai.client.rpc.protocols.SecurityCommands;
-import org.jboss.errai.client.rpc.protocols.SecurityParts;
-import static org.jboss.errai.client.rpc.protocols.SecurityParts.CredentialsRequired;
+import org.jboss.errai.client.bus.protocols.SecurityCommands;
+import org.jboss.errai.client.bus.protocols.SecurityParts;
+import static org.jboss.errai.client.bus.protocols.SecurityParts.CredentialsRequired;
 import org.jboss.errai.client.security.impl.BasicAuthenticationContext;
 import org.jboss.errai.client.security.impl.NameCredential;
 import org.jboss.errai.client.security.impl.PasswordCredential;

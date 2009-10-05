@@ -1,11 +1,11 @@
 package org.jboss.errai.client.layout;
 
 import com.google.gwt.user.client.ui.Widget;
+import org.jboss.errai.client.bus.CommandMessage;
+import org.jboss.errai.client.bus.MessageBusClient;
 import org.jboss.errai.client.framework.MessageCallback;
-import org.jboss.errai.client.rpc.CommandMessage;
-import org.jboss.errai.client.rpc.MessageBusClient;
-import static org.jboss.errai.client.rpc.MessageBusClient.subscribe;
-import org.jboss.errai.client.rpc.protocols.LayoutParts;
+import static org.jboss.errai.client.bus.MessageBusClient.subscribe;
+import org.jboss.errai.client.bus.protocols.LayoutParts;
 
 import java.util.LinkedHashMap;
 

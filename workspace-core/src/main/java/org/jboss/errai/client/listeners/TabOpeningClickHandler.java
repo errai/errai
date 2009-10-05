@@ -5,15 +5,15 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
+import org.jboss.errai.client.bus.MessageBusClient;
 import org.jboss.errai.client.framework.MessageCallback;
 import org.jboss.errai.client.framework.Tool;
 import org.jboss.errai.client.layout.LayoutHint;
 import org.jboss.errai.client.layout.LayoutHintProvider;
-import org.jboss.errai.client.rpc.CommandMessage;
-import org.jboss.errai.client.rpc.ConversationMessage;
-import org.jboss.errai.client.rpc.MessageBusClient;
-import org.jboss.errai.client.rpc.protocols.LayoutCommands;
-import org.jboss.errai.client.rpc.protocols.LayoutParts;
+import org.jboss.errai.client.bus.CommandMessage;
+import org.jboss.errai.client.bus.ConversationMessage;
+import org.jboss.errai.client.bus.protocols.LayoutCommands;
+import org.jboss.errai.client.bus.protocols.LayoutParts;
 
 public class TabOpeningClickHandler implements ClickHandler {
     private Tool tool;

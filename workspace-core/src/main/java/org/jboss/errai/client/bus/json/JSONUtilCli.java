@@ -1,11 +1,11 @@
-package org.jboss.errai.client.rpc.json;
+package org.jboss.errai.client.bus.json;
 
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
-import org.jboss.errai.client.rpc.CommandMessage;
-import org.jboss.errai.client.rpc.Message;
+import org.jboss.errai.client.bus.Message;
+import org.jboss.errai.client.bus.CommandMessage;
 
 import java.util.ArrayList;
 import java.util.HashMap;

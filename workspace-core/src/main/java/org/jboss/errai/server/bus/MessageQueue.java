@@ -1,6 +1,6 @@
 package org.jboss.errai.server.bus;
 
-import org.jboss.errai.client.rpc.Message;
+import org.jboss.errai.client.bus.Message;
 
 import static java.lang.System.currentTimeMillis;
 import java.util.concurrent.BlockingQueue;

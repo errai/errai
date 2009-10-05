@@ -1,6 +1,6 @@
-package org.jboss.errai.client.rpc;
+package org.jboss.errai.client.bus;
 
-import org.jboss.errai.client.rpc.protocols.MessageParts;
+import org.jboss.errai.client.bus.protocols.MessageParts;
 
 import java.util.HashMap;
 import java.util.Map;

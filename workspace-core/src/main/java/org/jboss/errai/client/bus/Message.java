@@ -1,4 +1,4 @@
-package org.jboss.errai.client.rpc;
+package org.jboss.errai.client.bus;
 
 public interface Message {
     public String getSubject();

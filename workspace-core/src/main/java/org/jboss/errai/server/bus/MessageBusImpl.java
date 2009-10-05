@@ -2,14 +2,14 @@ package org.jboss.errai.server.bus;
 
 import com.google.gwt.core.client.GWT;
 import com.google.inject.Singleton;
+import org.jboss.errai.client.bus.CommandMessage;
+import org.jboss.errai.client.bus.ConversationMessage;
+import org.jboss.errai.client.bus.Message;
 import org.jboss.errai.client.framework.MessageCallback;
-import org.jboss.errai.client.rpc.CommandMessage;
-import org.jboss.errai.client.rpc.ConversationMessage;
-import org.jboss.errai.client.rpc.Message;
-import org.jboss.errai.client.rpc.protocols.BusCommands;
-import org.jboss.errai.client.rpc.protocols.MessageParts;
-import org.jboss.errai.client.rpc.protocols.SecurityCommands;
-import org.jboss.errai.client.rpc.protocols.SecurityParts;
+import org.jboss.errai.client.bus.protocols.BusCommands;
+import org.jboss.errai.client.bus.protocols.MessageParts;
+import org.jboss.errai.client.bus.protocols.SecurityCommands;
+import org.jboss.errai.client.bus.protocols.SecurityParts;
 import static org.jboss.errai.server.bus.MessageBusServer.encodeMap;
 
 import javax.servlet.http.HttpSession;

@@ -1,7 +1,7 @@
-package org.jboss.errai.client.rpc;
+package org.jboss.errai.client.bus;
 
-import org.jboss.errai.client.rpc.protocols.MessageParts;
-import org.jboss.errai.client.rpc.protocols.SecurityParts;
+import org.jboss.errai.client.bus.protocols.MessageParts;
+import org.jboss.errai.client.bus.protocols.SecurityParts;
 
 public class ConversationMessage extends CommandMessage {
     public static ConversationMessage create(String commandType, CommandMessage inReplyTo) {

@@ -3,10 +3,10 @@ package org.jboss.errai.client.listeners;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import org.jboss.errai.client.framework.AcceptsCallback;
-import org.jboss.errai.client.rpc.CommandMessage;
-import org.jboss.errai.client.rpc.MessageBusClient;
-import org.jboss.errai.client.rpc.protocols.LayoutCommands;
-import org.jboss.errai.client.rpc.protocols.LayoutParts;
+import org.jboss.errai.client.bus.CommandMessage;
+import org.jboss.errai.client.bus.MessageBusClient;
+import org.jboss.errai.client.bus.protocols.LayoutCommands;
+import org.jboss.errai.client.bus.protocols.LayoutParts;
 import org.jboss.errai.client.widgets.WSTab;
 
 
