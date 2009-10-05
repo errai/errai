@@ -7,7 +7,7 @@ import org.jboss.errai.bus.client.MessageBusClient;
 import org.jboss.errai.bus.client.protocols.LayoutCommands;
 import org.jboss.errai.bus.client.protocols.LayoutParts;
 import org.jboss.errai.workspaces.client.framework.AcceptsCallback;
-import org.jboss.errai.workspaces.client.widgets.WSTab;
+import org.jboss.errai.widgets.client.WSTab;
 
 
 public class TabCloseHandler implements CloseHandler<WSTab>, AcceptsCallback {
