@@ -1,0 +1,63 @@
+<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 1.6//EN"
+        "http://google-web-toolkit.googlecode.com/svn/releases/1.6/distro-source/core/src/gwt-module.dtd">
+<module>
+    <script src="js/pagebus.js"/>
+
+    <!-- Only generate code for supported browsers -->
+    <!-- Inherit the core Web Toolkit stuff.                  -->
+
+    <inherits name="org.jboss.errai.bus.ErraiBus"/>
+
+    <inherits name='com.allen_sauer.gwt.dnd.gwt-dnd'/>
+    <inherits name="com.google.gwt.user.theme.chrome.Chrome"/>
+
+    <generate-with class="org.jboss.errai.workspaces.rebind.WorkspaceLoaderBootstrapGenerator">
+        <when-type-assignable
+                class="org.jboss.errai.workspaces.client.framework.ModuleLoaderBootstrap"/>
+    </generate-with>
+
+    <!-- Specify the app entry point class.                   -->
+    <entry-point class='org.jboss.errai.workspaces.client.Workspace'/>
+    <stylesheet src="jboss-workspace-default.css"/>
+
+    <replace-with class="org.jboss.errai.workspaces.client.util.effectimpl.KHTMLEffectImpl">
+        <when-type-is class="org.jboss.errai.workspaces.client.util.Effect"/>
+        <when-property-is name="user.agent" value="opera"/>
+    </replace-with>
+
+    <replace-with class="org.jboss.errai.workspaces.client.util.effectimpl.KHTMLEffectImpl">
+        <when-type-is class="org.jboss.errai.workspaces.client.util.Effect"/>
+        <when-property-is name="user.agent" value="safari"/>
+    </replace-with>
+
+    <replace-with class="org.jboss.errai.workspaces.client.util.effectimpl.KHTMLEffectImpl">
+        <when-type-is class="org.jboss.errai.workspaces.client.util.Effect"/>
+        <when-property-is name="user.agent" value="webkit"/>
+    </replace-with>
+
+    <replace-with class="org.jboss.errai.workspaces.client.util.effectimpl.MozillaEffectImpl">
+        <when-type-is class="org.jboss.errai.workspaces.client.util.Effect"/>
+        <when-property-is name="user.agent" value="gecko"/>
+    </replace-with>
+
+    <replace-with class="org.jboss.errai.workspaces.client.util.effectimpl.MozillaEffectImpl">
+        <when-type-is class="org.jboss.errai.workspaces.client.util.Effect"/>
+        <when-property-is name="user.agent" value="gecko1_8"/>
+    </replace-with>
+
+    <replace-with class="org.jboss.errai.workspaces.client.util.effectimpl.IEEffectImpl">
+        <when-type-is class="org.jboss.errai.workspaces.client.util.Effect"/>
+        <when-property-is name="user.agent" value="ie6"/>
+    </replace-with>
+
+    <replace-with class="org.jboss.errai.workspaces.client.util.effectimpl.IEEffectImpl">
+        <when-type-is class="org.jboss.errai.workspaces.client.util.Effect"/>
+        <when-property-is name="user.agent" value="ie8"/>
+    </replace-with>
+
+    <replace-with class="com.allen_sauer.gwt.dnd.client.util.impl.DOMUtilImplIE6">
+        <when-type-is class="com.allen_sauer.gwt.dnd.client.util.impl.DOMUtilImpl"/>
+        <when-property-is name="user.agent" value="ie8"/>
+    </replace-with>
+
+</module>
