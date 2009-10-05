@@ -10,7 +10,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import static com.google.gwt.user.client.Window.enableScrolling;
 import com.google.gwt.user.client.ui.*;
-import org.jboss.errai.workspaces.bus.client.MessageCallback;
+import org.jboss.errai.bus.client.MessageCallback;
 import org.jboss.errai.workspaces.client.bus.CommandMessage;
 import org.jboss.errai.workspaces.client.bus.MessageBusClient;
 import org.jboss.errai.workspaces.client.framework.*;

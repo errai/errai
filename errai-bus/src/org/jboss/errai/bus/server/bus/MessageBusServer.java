@@ -1,8 +1,8 @@
-package org.jboss.errai.workspaces.server.bus;
+package org.jboss.errai.bus.server.bus;
 
 import org.jboss.errai.workspaces.client.bus.CommandMessage;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
-import org.jboss.errai.workspaces.server.json.JSONUtil;
+import org.jboss.errai.bus.server.json.JSONUtil;
 
 import javax.servlet.http.HttpSession;
 import java.io.Serializable;

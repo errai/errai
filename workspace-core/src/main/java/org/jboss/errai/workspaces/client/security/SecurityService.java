@@ -2,10 +2,10 @@ package org.jboss.errai.workspaces.client.security;
 
 import org.jboss.errai.workspaces.client.bus.CommandMessage;
 import org.jboss.errai.workspaces.client.bus.MessageBusClient;
-import org.jboss.errai.workspaces.bus.client.MessageCallback;
-import org.jboss.errai.workspaces.bus.client.protocols.SecurityCommands;
-import org.jboss.errai.workspaces.bus.client.protocols.SecurityParts;
-import static org.jboss.errai.workspaces.bus.client.protocols.SecurityParts.CredentialsRequired;
+import org.jboss.errai.bus.client.MessageCallback;
+import org.jboss.errai.bus.client.protocols.SecurityCommands;
+import org.jboss.errai.bus.client.protocols.SecurityParts;
+import static org.jboss.errai.bus.client.protocols.SecurityParts.CredentialsRequired;
 import org.jboss.errai.workspaces.client.security.impl.BasicAuthenticationContext;
 import org.jboss.errai.workspaces.client.security.impl.NameCredential;
 import org.jboss.errai.workspaces.client.security.impl.PasswordCredential;

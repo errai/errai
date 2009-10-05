@@ -1,4 +1,4 @@
-package org.jboss.errai.workspaces.server.security.auth;
+package org.jboss.errai.bus.server.security.auth;
 
 import com.google.inject.Inject;
 import org.jboss.errai.workspaces.client.bus.CommandMessage;
@@ -7,7 +7,7 @@ import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
 import org.jboss.errai.workspaces.client.security.CredentialTypes;
-import org.jboss.errai.workspaces.server.bus.MessageBus;
+import org.jboss.errai.bus.server.bus.MessageBus;
 
 import javax.security.auth.callback.*;
 import javax.security.auth.login.LoginContext;

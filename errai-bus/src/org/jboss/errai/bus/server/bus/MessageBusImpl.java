@@ -1,4 +1,4 @@
-package org.jboss.errai.workspaces.server.bus;
+package org.jboss.errai.bus.server.bus;
 
 import com.google.gwt.core.client.GWT;
 import com.google.inject.Singleton;
@@ -10,7 +10,7 @@ import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
-import static org.jboss.errai.workspaces.server.bus.MessageBusServer.encodeMap;
+import static org.jboss.errai.bus.server.bus.MessageBusServer.encodeMap;
 
 import javax.servlet.http.HttpSession;
 import javax.swing.*;

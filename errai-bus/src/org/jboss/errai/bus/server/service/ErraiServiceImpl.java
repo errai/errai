@@ -1,4 +1,4 @@
-package org.jboss.errai.workspaces.server.service;
+package org.jboss.errai.bus.server.service;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -10,12 +10,12 @@ import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
 import org.jboss.errai.workspaces.client.security.CredentialTypes;
 import org.jboss.errai.workspaces.server.Module;
-import org.jboss.errai.workspaces.server.annotations.LoadModule;
-import org.jboss.errai.workspaces.server.bus.MessageBus;
-import org.jboss.errai.workspaces.server.security.auth.AuthorizationAdapter;
-import org.jboss.errai.workspaces.server.security.auth.BasicAuthorizationListener;
-import org.jboss.errai.workspaces.server.security.auth.JAASAdapter;
-import org.jboss.errai.workspaces.server.security.auth.RoleAuthDescriptor;
+import org.jboss.errai.bus.server.annotations.LoadModule;
+import org.jboss.errai.bus.server.bus.MessageBus;
+import org.jboss.errai.bus.server.security.auth.AuthorizationAdapter;
+import org.jboss.errai.bus.server.security.auth.BasicAuthorizationListener;
+import org.jboss.errai.bus.server.security.auth.JAASAdapter;
+import org.jboss.errai.bus.server.security.auth.RoleAuthDescriptor;
 
 import java.io.File;
 import java.io.IOException;

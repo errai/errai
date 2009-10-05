@@ -1,12 +1,12 @@
-package org.jboss.errai.workspaces.server.security.auth;
+package org.jboss.errai.bus.server.security.auth;
 
 import org.jboss.errai.workspaces.client.bus.CommandMessage;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
-import org.jboss.errai.workspaces.server.bus.MessageBus;
-import org.jboss.errai.workspaces.server.bus.MessageListener;
-import org.jboss.errai.workspaces.server.bus.NoSubscribersToDeliverTo;
-import org.jboss.errai.workspaces.server.service.ErraiService;
+import org.jboss.errai.bus.server.bus.MessageBus;
+import org.jboss.errai.bus.server.bus.MessageListener;
+import org.jboss.errai.bus.server.bus.NoSubscribersToDeliverTo;
+import org.jboss.errai.bus.server.service.ErraiService;
 
 import javax.servlet.http.HttpSession;
 

@@ -3,9 +3,9 @@ package org.jboss.errai.workspaces.client.layout;
 import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.workspaces.client.bus.CommandMessage;
 import org.jboss.errai.workspaces.client.bus.MessageBusClient;
-import org.jboss.errai.workspaces.bus.client.MessageCallback;
+import org.jboss.errai.bus.client.MessageCallback;
 import static org.jboss.errai.workspaces.client.bus.MessageBusClient.subscribe;
-import org.jboss.errai.workspaces.bus.client.protocols.LayoutParts;
+import org.jboss.errai.bus.client.protocols.LayoutParts;
 
 import java.util.LinkedHashMap;
 

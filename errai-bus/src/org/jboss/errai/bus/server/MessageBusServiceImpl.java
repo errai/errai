@@ -1,14 +1,14 @@
-package org.jboss.errai.workspaces.server;
+package org.jboss.errai.bus.server;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.jboss.errai.workspaces.client.bus.CommandMessage;
 import org.jboss.errai.workspaces.client.bus.Message;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
-import org.jboss.errai.workspaces.server.bus.MessageBus;
-import org.jboss.errai.workspaces.server.bus.Payload;
-import static org.jboss.errai.workspaces.server.json.JSONUtil.decodeToMap;
-import org.jboss.errai.workspaces.server.service.ErraiService;
+import org.jboss.errai.bus.server.bus.MessageBus;
+import org.jboss.errai.bus.server.bus.Payload;
+import static org.jboss.errai.bus.server.json.JSONUtil.decodeToMap;
+import org.jboss.errai.bus.server.service.ErraiService;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;

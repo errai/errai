@@ -1,4 +1,4 @@
-package org.jboss.errai.workspaces.server.security.auth;
+package org.jboss.errai.bus.server.security.auth;
 
 import org.jboss.errai.workspaces.client.bus.CommandMessage;
 import org.jboss.errai.bus.client.protocols.SecurityParts;

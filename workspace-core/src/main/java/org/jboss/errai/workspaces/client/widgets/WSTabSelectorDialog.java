@@ -8,9 +8,9 @@ import org.jboss.errai.workspaces.client.bus.MessageBusClient;
 import org.jboss.errai.workspaces.client.framework.AcceptsCallback;
 import org.jboss.errai.workspaces.client.listeners.ClickCallbackListener;
 import org.jboss.errai.workspaces.client.bus.CommandMessage;
-import org.jboss.errai.workspaces.bus.client.json.JSONUtilCli;
-import org.jboss.errai.workspaces.bus.client.protocols.LayoutCommands;
-import org.jboss.errai.workspaces.bus.client.protocols.LayoutParts;
+import org.jboss.errai.bus.client.json.JSONUtilCli;
+import org.jboss.errai.bus.client.protocols.LayoutCommands;
+import org.jboss.errai.bus.client.protocols.LayoutParts;
 
 import java.util.Map;
 import java.util.Set;
