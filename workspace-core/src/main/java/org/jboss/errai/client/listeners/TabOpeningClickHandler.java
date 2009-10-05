@@ -6,7 +6,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.client.bus.MessageBusClient;
-import org.jboss.errai.client.framework.MessageCallback;
+import org.jboss.errai.bus.client.MessageCallback;
 import org.jboss.errai.client.framework.Tool;
 import org.jboss.errai.client.layout.LayoutHint;
 import org.jboss.errai.client.layout.LayoutHintProvider;

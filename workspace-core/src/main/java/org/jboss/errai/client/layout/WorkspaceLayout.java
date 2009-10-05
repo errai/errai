@@ -14,6 +14,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import static com.google.gwt.user.client.Window.addResizeHandler;
 import com.google.gwt.user.client.ui.*;
+import org.jboss.errai.bus.client.MessageCallback;
 import org.jboss.errai.client.bus.MessageBusClient;
 import org.jboss.errai.client.framework.*;
 import org.jboss.errai.client.listeners.TabCloseHandler;

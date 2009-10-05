@@ -2,7 +2,7 @@ package org.jboss.errai.client.security;
 
 import org.jboss.errai.client.bus.CommandMessage;
 import org.jboss.errai.client.bus.MessageBusClient;
-import org.jboss.errai.client.framework.MessageCallback;
+import org.jboss.errai.bus.client.MessageCallback;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
 import static org.jboss.errai.bus.client.protocols.SecurityParts.CredentialsRequired;
