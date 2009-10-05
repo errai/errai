@@ -7,7 +7,7 @@ import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
 import org.jboss.errai.workspaces.client.security.CredentialTypes;
-import org.jboss.errai.bus.server.bus.MessageBus;
+import org.jboss.errai.bus.server.MessageBus;
 
 import javax.security.auth.callback.*;
 import javax.security.auth.login.LoginContext;

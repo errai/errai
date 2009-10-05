@@ -1,4 +1,4 @@
-package org.jboss.errai.bus.server.bus;
+package org.jboss.errai.bus.server;
 
 public class NoSubscribersToDeliverTo extends MessageDeliveryFailure {
     public NoSubscribersToDeliverTo() {

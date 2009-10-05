@@ -1,4 +1,4 @@
-package org.jboss.errai.bus.server.bus;
+package org.jboss.errai.bus.server;
 
 import com.google.gwt.core.client.GWT;
 import com.google.inject.Singleton;
@@ -10,7 +10,6 @@ import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
-import static org.jboss.errai.bus.server.bus.MessageBusServer.encodeMap;
 
 import javax.servlet.http.HttpSession;
 import javax.swing.*;
@@ -182,13 +181,13 @@ public class MessageBusImpl implements MessageBus {
 
                 store((String) message.get(HttpSession.class, SecurityParts.SessionData).getAttribute(WS_SESSION_ID),
                         message.get(String.class, MessageParts.ReplyTo),
-                        encodeMap(CommandMessage.create(SecurityCommands.MessageNotDelivered).getParts()));
+                        MessageBusServer.encodeMap(CommandMessage.create(SecurityCommands.MessageNotDelivered).getParts()));
             }
 
             return;
         }
 
-        final String jsonMessage = encodeMap(message.getParts());
+        final String jsonMessage = MessageBusServer.encodeMap(message.getParts());
 
         if (subscriptions.containsKey(subject)) {
             for (MessageCallback c : subscriptions.get(subject)) {
@@ -242,13 +241,13 @@ public class MessageBusImpl implements MessageBus {
         if (fireListeners && !fireGlobalMessageListeners(message)) {
             if (message.hasPart(MessageParts.ReplyTo)) {
                 store(sessionid, message.get(String.class, MessageParts.ReplyTo),
-                        encodeMap(CommandMessage.create(SecurityCommands.MessageNotDelivered).getParts()));
+                        MessageBusServer.encodeMap(CommandMessage.create(SecurityCommands.MessageNotDelivered).getParts()));
             }
 
             return;
         }
 
-        store(sessionid, subject, encodeMap(message.getParts()));
+        store(sessionid, subject, MessageBusServer.encodeMap(message.getParts()));
     }
 
     public void send(String subject, CommandMessage message) {

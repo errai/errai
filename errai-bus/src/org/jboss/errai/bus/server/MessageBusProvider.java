@@ -1,4 +1,4 @@
-package org.jboss.errai.bus.server.bus;
+package org.jboss.errai.bus.server;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;

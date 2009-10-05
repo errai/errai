@@ -1,4 +1,4 @@
-package org.jboss.errai.bus.server.bus;
+package org.jboss.errai.bus.server;
 
 public class MessageDeliveryFailure extends RuntimeException {
     public MessageDeliveryFailure() {
