@@ -1,8 +1,8 @@
 package org.jboss.errai.bus.server.security.auth;
 
 import com.google.inject.Inject;
-import org.jboss.errai.workspaces.client.bus.CommandMessage;
-import org.jboss.errai.workspaces.client.bus.ConversationMessage;
+import org.jboss.errai.bus.client.CommandMessage;
+import org.jboss.errai.bus.client.ConversationMessage;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;

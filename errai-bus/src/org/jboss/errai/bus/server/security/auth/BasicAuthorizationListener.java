@@ -1,7 +1,7 @@
 package org.jboss.errai.bus.server.security.auth;
 
+import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.server.MessageBus;
-import org.jboss.errai.workspaces.client.bus.CommandMessage;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
 import org.jboss.errai.bus.server.MessageListener;

@@ -1,10 +1,9 @@
 package org.jboss.errai.workspaces.client.layout;
 
 import com.google.gwt.user.client.ui.Widget;
-import org.jboss.errai.workspaces.client.bus.CommandMessage;
-import org.jboss.errai.workspaces.client.bus.MessageBusClient;
+import org.jboss.errai.bus.client.CommandMessage;
+import org.jboss.errai.bus.client.MessageBusClient;
 import org.jboss.errai.bus.client.MessageCallback;
-import static org.jboss.errai.workspaces.client.bus.MessageBusClient.subscribe;
 import org.jboss.errai.bus.client.protocols.LayoutParts;
 
 import java.util.LinkedHashMap;
@@ -18,7 +17,7 @@ public class LayoutHint {
     public static void attach(final Widget w, LayoutHintProvider p) {
         String subject = "local:org.jboss.errai.sizeHints:" + counter++;
 
-        subscribe(subject,
+        MessageBusClient.subscribe(subject,
                 new MessageCallback() {
                     public void callback(CommandMessage message) {
                         w.setPixelSize(message.get(Double.class, LayoutParts.Width).intValue(),
