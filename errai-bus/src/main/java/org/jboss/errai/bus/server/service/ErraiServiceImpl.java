@@ -9,14 +9,11 @@ import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.client.MessageCallback;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
-import org.jboss.errai.bus.client.security.CredentialTypes;
 import org.jboss.errai.bus.server.Module;
 import org.jboss.errai.bus.server.ServerMessageBus;
 import org.jboss.errai.bus.server.annotations.LoadModule;
 import org.jboss.errai.bus.server.security.auth.AuthorizationAdapter;
 import org.jboss.errai.bus.server.security.auth.BasicAuthorizationListener;
-import org.jboss.errai.bus.server.security.auth.JAASAdapter;
-import org.jboss.errai.bus.server.security.auth.RoleAuthDescriptor;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,7 +21,6 @@ import static java.lang.Thread.currentThread;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.ResourceBundle;
 import java.util.Set;
 
 public class ErraiServiceImpl implements ErraiService {
@@ -94,6 +90,7 @@ public class ErraiServiceImpl implements ErraiService {
     }
 
     public void store(CommandMessage message) {
+
         /**
          * If an authorization adapter is configured, we now allow it to pre-process the request.
          */
@@ -116,41 +113,6 @@ public class ErraiServiceImpl implements ErraiService {
     private void loadConfig() {
 
         try {
-      //      ResourceBundle bundle = ResourceBundle.getBundle("errai");
-//            String modulesToLoad = bundle.getString("workspace.server_modules");
-//
-//            String[] moduleFQCN = modulesToLoad.split(",");
-//            @SuppressWarnings({"unchecked"}) Class<Module>[] moduleClass = new Class[moduleFQCN.length];
-//
-//            try {
-//                for (int i = 0; i < moduleFQCN.length; i++) {
-//                    if (moduleClass[i] == null) continue;
-//                    try {
-//                        //noinspection unchecked
-//                        moduleClass[i] = (Class<Module>) Class.forName(moduleFQCN[i]);
-//                    }
-//                    catch (Exception e) {
-//                        throw new RuntimeException("unable to load module: " + moduleClass[i], e);
-//                    }
-//                }
-//            }
-//            catch (RuntimeException e) {
-//                throw e;
-//            }
-//            catch (Exception e) {
-//                throw new RuntimeException("error", e);
-//            }
-
-//            try {
-//                for (Class<Module> clazz : moduleClass) {
-//                    if (clazz == null) continue;
-//                    clazz.newInstance().init();
-//                }
-//            }
-//            catch (Exception e) {
-//                throw new RuntimeException("error loading module: " + e.getMessage(), e);
-//            }
-
             try {
                 Enumeration<URL> targets = currentThread().getContextClassLoader().getResources("ErraiApp.properties");
                 Set<String> loaded = new HashSet<String>();

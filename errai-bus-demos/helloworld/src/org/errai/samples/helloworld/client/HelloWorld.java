@@ -19,7 +19,7 @@ public class HelloWorld implements EntryPoint {
                 CommandMessage.create()
                         .toSubject("HelloWorld")
                         .sendNowWith(bus);
-            }
+           }
         });
 
         RootPanel.get().add(clickMe);

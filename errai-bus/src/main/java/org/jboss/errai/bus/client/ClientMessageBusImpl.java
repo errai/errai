@@ -51,7 +51,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 _unsubscribe(o);
             }
 
-           fireAllUnSubcribeListener(subject);
+            fireAllUnSubcribeListener(subject);
         }
     }
 
@@ -111,8 +111,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             }
         });
 
-        subscribe(tempSubject, callback);
-
         send(message);
     }
 
@@ -143,7 +141,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     public void send(CommandMessage message) {
         if (message.hasPart(MessageParts.ToSubject)) {
             send(message.get(String.class, MessageParts.ToSubject), message);
-        } else {
+        }
+        else {
             throw new RuntimeException("Cannot send message using this method if the message does not contain a ToSubject field.");
         }
     }
@@ -225,7 +224,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             }
 
             return;
-        } else if (sendTimer != null) {
+        }
+        else if (sendTimer != null) {
             sendTimer.cancel();
             sendTimer = null;
         }
@@ -292,7 +292,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                                             .set(MessageParts.Subject, s));
                         }
 
-
                         conversationWith(CommandMessage.create().toSubject("ServerEchoService"),
                                 new MessageCallback() {
                                     public void callback(CommandMessage message) {
@@ -305,6 +304,31 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 }
             }
         });
+
+
+        final MessageBus self = this;
+        addSubscribeListener(new SubscribeListener() {
+            public void onSubscribe(SubscriptionEvent event) {
+                CommandMessage.create(BusCommands.RemoteSubscribe)
+                        .toSubject("ServerBus")
+                        .set(MessageParts.Subject, event.getSubject())
+                        .sendNowWith(self);
+            }
+        });
+
+        /**
+         * ... also send RemoteUnsubscribe signals.
+         */
+
+        addUnsubscribeListener(new UnsubscribeListener() {
+            public void onUnsubscribe(SubscriptionEvent event) {
+                CommandMessage.create(BusCommands.RemoteUnsubscribe)
+                        .toSubject("ServerBus")
+                        .set(MessageParts.Subject, event.getSubject())
+                        .sendNowWith(self);
+            }
+        });
+
 
         String initialMessage = "{\"CommandType\":\"ConnectToQueue\", \"ToSubject\":\"ServerBus\"}";
 
