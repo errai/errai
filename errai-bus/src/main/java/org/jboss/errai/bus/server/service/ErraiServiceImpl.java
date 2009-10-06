@@ -77,9 +77,9 @@ public class ErraiServiceImpl implements ErraiService {
         /**
          * Some temporary security rules to test the login system.
          */
-        RoleAuthDescriptor authRequired = new RoleAuthDescriptor(new String[]{CredentialTypes.Authenticated.name()});
-        ((JAASAdapter) authorizationAdapter).addSecurityRule("TestService", authRequired);
-        ((JAASAdapter) authorizationAdapter).addSecurityRule("ServerEchoService", authRequired);
+//        RoleAuthDescriptor authRequired = new RoleAuthDescriptor(new String[]{CredentialTypes.Authenticated.name()});
+//        ((JAASAdapter) authorizationAdapter).addSecurityRule("TestService", authRequired);
+//        ((JAASAdapter) authorizationAdapter).addSecurityRule("ServerEchoService", authRequired);
 
         /**
          * The standard ServerEchoService.
@@ -116,7 +116,7 @@ public class ErraiServiceImpl implements ErraiService {
     private void loadConfig() {
 
         try {
-            ResourceBundle bundle = ResourceBundle.getBundle("errai");
+      //      ResourceBundle bundle = ResourceBundle.getBundle("errai");
 //            String modulesToLoad = bundle.getString("workspace.server_modules");
 //
 //            String[] moduleFQCN = modulesToLoad.split(",");

@@ -111,10 +111,10 @@ public class MessageBusImpl implements ServerMessageBus {
         /**
          * If we're in development mode, start the monitor.
          */
-        if (!GWT.isClient()) {
-            thread.setPriority(Thread.MIN_PRIORITY);
-            thread.start();
-        }
+//        if (!GWT.isClient()) {
+//            thread.setPriority(Thread.MIN_PRIORITY);
+//            thread.start();
+//        }
 
         subscribe("ServerBus", new MessageCallback() {
             public void callback(CommandMessage message) {
