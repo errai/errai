@@ -1,4 +1,4 @@
-package org.jboss.errai.bus.server;
+package org.jboss.errai.bus.client;
 
 public class SubscriptionEvent {
     private boolean disposeListener = false;

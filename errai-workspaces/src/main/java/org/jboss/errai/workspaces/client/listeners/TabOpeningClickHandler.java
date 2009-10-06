@@ -5,10 +5,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
-import org.jboss.errai.bus.client.CommandMessage;
-import org.jboss.errai.bus.client.ConversationMessage;
-import org.jboss.errai.bus.client.MessageBusClient;
-import org.jboss.errai.bus.client.MessageCallback;
+import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.client.protocols.LayoutCommands;
 import org.jboss.errai.bus.client.protocols.LayoutParts;
 import org.jboss.errai.workspaces.client.framework.Tool;
@@ -25,8 +22,10 @@ public class TabOpeningClickHandler implements ClickHandler {
     public void onClick(ClickEvent event) {
         String initSubject = tool.getId() + ":init";
 
-        if (!MessageBusClient.isSubscribed(initSubject)) {
-            MessageBusClient.subscribe(initSubject, new MessageCallback() {
+        final MessageBus bus = ErraiClient.getBus();
+
+        if (!bus.isSubscribed(initSubject)) {
+            bus.subscribe(initSubject, new MessageCallback() {
                 public void callback(CommandMessage message) {
 
                     try {
@@ -45,7 +44,7 @@ public class TabOpeningClickHandler implements ClickHandler {
                             }
                         });
 
-                        MessageBusClient.send(ConversationMessage.create(message));
+                        ConversationMessage.create(message).sendNowWith(bus);
                     }
                     catch (Exception e) {
                         e.printStackTrace();
@@ -59,15 +58,17 @@ public class TabOpeningClickHandler implements ClickHandler {
          * Being capturing all message registration activity. This is necessary if you want to use the automatic
          * clean-up features and close the messaging channels when the tool instance closes.
          */
-        MessageBusClient.beginCapture();
+        ((ClientBusImpl)bus).beginCapture();
 
-        MessageBusClient.send("org.jboss.errai.WorkspaceLayout", CommandMessage.create(LayoutCommands.OpenNewTab)
+        CommandMessage.create(LayoutCommands.OpenNewTab)
+                .toSubject("org.jboss.errai.WorkspaceLayout")
                 .set(LayoutParts.ComponentID, tool.getId())
                 .set(LayoutParts.IconURI, tool.getIcon().getUrl())
                 .set(LayoutParts.MultipleInstances, tool.multipleAllowed())
                 .set(LayoutParts.Name, tool.getName())
                 .set(LayoutParts.DOMID, tool.getId() + "_" + System.currentTimeMillis())
-                .set(LayoutParts.InitSubject, initSubject));
+                .set(LayoutParts.InitSubject, initSubject)
+                .sendNowWith(bus);
     }
 
 }

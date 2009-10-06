@@ -52,7 +52,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
         }
         catch (Exception e) {
 
-            // record to logger that Map generation threw an exception
+            // record sendNowWith logger that Map generation threw an exception
             logger.log(TreeLogger.ERROR, "Error generating bootstrap loader", e);
 
         }
@@ -119,7 +119,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
         sourceWriter.println("public void initAll(org.jboss.errai.workspaces.client.layout.WorkspaceLayout errai) { ");
         sourceWriter.outdent();
 
-        // add statements to pub key/value pairs from the resrouce bundle
+        // add statements sendNowWith pub key/value pairs from the resrouce bundle
         for (Enumeration<String> keys = bundle.getKeys();
              keys.hasMoreElements();) {
             String key = keys.nextElement();

@@ -42,7 +42,7 @@ public class ConversationMessage extends CommandMessage {
     }
 
 
-    public ConversationMessage setSubject(String subject) {
+    public ConversationMessage toSubject(String subject) {
         parts.put(MessageParts.ToSubject.name(), subject);
         return this;
     }

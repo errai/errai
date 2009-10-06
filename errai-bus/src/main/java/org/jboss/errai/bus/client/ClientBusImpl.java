@@ -13,16 +13,15 @@ import org.jboss.errai.bus.client.protocols.MessageParts;
 
 import java.util.*;
 
-public class ClientBus {
+public class ClientBusImpl implements MessageBus {
     private static final String SERVICE_ENTRY_POINT = "erraiBus";
 
-    private List<HookCallback> onSubscribeHooks = new ArrayList<HookCallback>();
-    private List<HookCallback> onUnsubscribeHooks = new ArrayList<HookCallback>();
+    private List<SubscribeListener> onSubscribeHooks = new ArrayList<SubscribeListener>();
+    private List<UnsubscribeListener> onUnsubscribeHooks = new ArrayList<UnsubscribeListener>();
 
 
     private final RequestBuilder sendBuilder;
     private final RequestBuilder recvBuilder;
-
 
     private final Map<String, List<Object>> subscriptions = new HashMap<String, List<Object>>();
 
@@ -32,7 +31,7 @@ public class ClientBus {
     private Map<String, Set<Object>> registeredInThisSession = new HashMap<String, Set<Object>>();
 
 
-    public ClientBus() {
+    public ClientBusImpl() {
         sendBuilder = new RequestBuilder(
                 RequestBuilder.POST,
                 URL.encode(SERVICE_ENTRY_POINT)
@@ -42,16 +41,10 @@ public class ClientBus {
                 RequestBuilder.GET,
                 URL.encode(SERVICE_ENTRY_POINT)
         );
+
+        init();
     }
 
-
-    public void addOnSubscribeHook(HookCallback callback) {
-        onSubscribeHooks.add(callback);
-    }
-
-    public void addOnUnsubscribeHook(HookCallback callback) {
-        onUnsubscribeHooks.add(callback);
-    }
 
     public Set<String> getAllLocalSubscriptions() {
         return subscriptions.keySet();
@@ -63,26 +56,44 @@ public class ClientBus {
                 _unsubscribe(o);
             }
 
-            for (HookCallback c : onUnsubscribeHooks) {
-                c.callback(subject);
-            }
+           fireAllUnSubcribeListener(subject);
         }
     }
 
     public void subscribe(String subject, MessageCallback callback, Object subscriberData) {
-        for (HookCallback c : onSubscribeHooks) {
-            c.callback(subject);
-        }
-
+        fireAllSubcribeListener(subject);
         addSubscription(subject, _subscribe(subject, callback, subscriberData));
     }
 
     public void subscribe(String subject, MessageCallback callback) {
-        for (HookCallback c : onSubscribeHooks) {
-            c.callback(subject);
-        }
-
+        fireAllSubcribeListener(subject);
         addSubscription(subject, _subscribe(subject, callback, null));
+    }
+
+    private void fireAllSubcribeListener(String subject) {
+        Iterator<SubscribeListener> iter = onSubscribeHooks.iterator();
+        SubscriptionEvent evt = new SubscriptionEvent(false, "InBrowser", subject);
+
+        while (iter.hasNext()) {
+            iter.next().onSubscribe(evt);
+            if (evt.isDisposeListener()) {
+                iter.remove();
+                evt.setDisposeListener(false);
+            }
+        }
+    }
+
+    private void fireAllUnSubcribeListener(String subject) {
+        Iterator<UnsubscribeListener> iter = onUnsubscribeHooks.iterator();
+        SubscriptionEvent evt = new SubscriptionEvent(false, "InBrowser", subject);
+
+        while (iter.hasNext()) {
+            iter.next().onUnsubscribe(evt);
+            if (evt.isDisposeListener()) {
+                iter.remove();
+                evt.setDisposeListener(false);
+            }
+        }
     }
 
     public void subscribeOnce(String subject, MessageCallback callback, Object subscriberData) {
@@ -122,6 +133,10 @@ public class ClientBus {
     }
 
 
+    public void sendGlobal(CommandMessage message) {
+        send(message);
+    }
+
     public void send(String subject, Map<String, Object> message) {
         message.put("ToSubject", subject);
         store(subject, JSONUtilCli.encodeMap(message));
@@ -144,8 +159,7 @@ public class ClientBus {
     public void send(CommandMessage message) {
         if (message.hasPart(MessageParts.ToSubject)) {
             send(message.get(String.class, MessageParts.ToSubject), message);
-        }
-        else {
+        } else {
             throw new RuntimeException("Cannot send message using this method if the message does not contain a ToSubject field.");
         }
     }
@@ -193,9 +207,7 @@ public class ClientBus {
             }
 
             if (subscriptions.get(entry.getKey()).isEmpty()) {
-                for (HookCallback c : onUnsubscribeHooks) {
-                    c.callback(entry.getKey());
-                }
+                fireAllUnSubcribeListener(entry.getKey());
             }
         }
     }
@@ -229,8 +241,7 @@ public class ClientBus {
             }
 
             return;
-        }
-        else if (sendTimer != null) {
+        } else if (sendTimer != null) {
             sendTimer.cancel();
             sendTimer = null;
         }
@@ -289,16 +300,16 @@ public class ClientBus {
                         break;
 
                     case FinishStateSync:
-                        for (String s : MessageBusClient.getAllLocalSubscriptions()) {
+                        for (String s : subscriptions.keySet()) {
                             if (s.startsWith("local:")) continue;
 
-                            MessageBusClient.send("ServerBus",
+                            send("ServerBus",
                                     CommandMessage.create(BusCommands.RemoteSubscribe)
                                             .set(MessageParts.Subject, s));
                         }
 
 
-                        conversationWith(CommandMessage.create().setSubject("ServerEchoService"),
+                        conversationWith(CommandMessage.create().toSubject("ServerEchoService"),
                                 new MessageCallback() {
                                     public void callback(CommandMessage message) {
                                         GWT.log("Finishing initializing of Client Bus...", null);
@@ -373,7 +384,7 @@ public class ClientBus {
                                 }
 
                                 public void onResponseReceived(Request request, Response response) {
-                             
+
                                     for (Message m : decodePayload(response.getText())) {
                                         store(m.getSubject(), m.getMessage());
                                     }
@@ -404,6 +415,30 @@ public class ClientBus {
         outerTimer.schedule(10);
     }
 
+
+    public Payload nextMessage(Object sessionContext) {
+        return null;
+    }
+
+
+    public void addGlobalListener(MessageListener listener) {
+    }
+
+    public void send(CommandMessage message, boolean fireListeners) {
+        send(message);
+    }
+
+    public void send(String subject, CommandMessage message, boolean fireListener) {
+        send(subject, message);
+    }
+
+    public void addSubscribeListener(SubscribeListener listener) {
+        this.onSubscribeHooks.add(listener);
+    }
+
+    public void addUnsubscribeListener(UnsubscribeListener listener) {
+        this.onUnsubscribeHooks.add(listener);
+    }
 
     private native static void _unsubscribe(Object registrationHandle) /*-{
          $wnd.PageBus.unsubscribe(registrationHandle);

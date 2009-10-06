@@ -30,7 +30,6 @@ import java.util.*;
  * Entry point classes define <code>onModuleLoad()</code>.
  */
 public class Workspace implements EntryPoint {
-    public static ClientBus bus;
 
     public static PickupDragController dragController;
     private static WorkspaceLayout workspaceLayout;
@@ -43,7 +42,7 @@ public class Workspace implements EntryPoint {
     static {
         loginWindowClosingHandler = new Window.ClosingHandler() {
             public void onWindowClosing(Window.ClosingEvent event) {
-                MessageBusClient.send("ServerEchoService", new CommandMessage());
+                ErraiClient.getBus().send("ServerEchoService", new CommandMessage());
             }
         };
     }
@@ -53,14 +52,6 @@ public class Workspace implements EntryPoint {
     private static List<String> preferredGroupOrdering = new ArrayList<String>();
 
     private Workspace() {
-        GWT.runAsync(new RunAsyncCallback() {
-            public void onFailure(Throwable reason) {
-            }
-
-            public void onSuccess() {
-                MessageBusClient.setBus(bus = new ClientBus());
-            }
-        });
     }
 
     /**
@@ -75,115 +66,121 @@ public class Workspace implements EntryPoint {
             return;
         }
 
+        final MessageBus bus = ErraiClient.getBus();
 
         /**
          * Configure the local client message bus to send RemoteSubscribe signals to the remote bus when
          * new subscriptions are created locally.
          */
-        MessageBusClient.addOnSubscribeHook(new HookCallback() {
-            public void callback(String subject) {
-                if (subject.startsWith("local:")) return;
-
-                MessageBusClient.send("ServerBus", CommandMessage.create(BusCommands.RemoteSubscribe)
-                        .set(MessageParts.Subject, subject));
+        bus.addSubscribeListener(new SubscribeListener() {
+            public void onSubscribe(SubscriptionEvent event) {
+                CommandMessage.create(BusCommands.RemoteSubscribe)
+                        .toSubject("ServerBus")
+                        .set(MessageParts.Subject, event.getSubject())
+                        .sendNowWith(bus);
             }
         });
 
         /**
          * ... also send RemoteUnsubscribe signals.
          */
-        MessageBusClient.addOnUnsubscribeHook(new HookCallback() {
-            public void callback(String subject) {
-                MessageBusClient.send("ServerBus", CommandMessage.create(BusCommands.RemoteUnsubscribe)
-                        .set(MessageParts.Subject, subject));
 
+        bus.addUnsubscribeListener(new UnsubscribeListener() {
+            public void onUnsubscribe(SubscriptionEvent event) {
+                CommandMessage.create(BusCommands.RemoteUnsubscribe)
+                        .toSubject("ServerBus")
+                        .set(MessageParts.Subject, event.getSubject())
+                        .sendNowWith(bus);
             }
         });
+
 
         /**
          *  Declare the standard LoginClient here.
          */
-        MessageBusClient.subscribe("LoginClient", new MessageCallback() {
+        bus.subscribe("LoginClient", new MessageCallback() {
             public void callback(CommandMessage message) {
                 try {
 
-                switch (SecurityCommands.valueOf(message.getCommandType())) {
-                    case SecurityChallenge:
+                    switch (SecurityCommands.valueOf(message.getCommandType())) {
+                        case SecurityChallenge:
 
-                        workspaceLayout.getUserInfoPanel().clear();
+                            workspaceLayout.getUserInfoPanel().clear();
 
-                        showLoginPanel();
-                        break;
+                            showLoginPanel();
+                            break;
 
-                    case FailedAuth:
-                        closeLoginPanel();
+                        case FailedAuth:
+                            closeLoginPanel();
 
-                        WSModalDialog failed = new WSModalDialog();
-                        failed.ask("Authentication Failure. Please Try Again", new AcceptsCallback() {
-                            public void callback(Object message, Object data) {
-                                if ("WindowClosed".equals(message)) showLoginPanel();
-                            }
-                        });
-                        failed.showModal();
-                        break;
+                            WSModalDialog failed = new WSModalDialog();
+                            failed.ask("Authentication Failure. Please Try Again", new AcceptsCallback() {
+                                public void callback(Object message, Object data) {
+                                    if ("WindowClosed".equals(message)) showLoginPanel();
+                                }
+                            });
+                            failed.showModal();
+                            break;
 
-                    case SuccessfulAuth:
-                        closeLoginPanel();
+                        case SuccessfulAuth:
+                            closeLoginPanel();
 
-                        HorizontalPanel userInfo = new HorizontalPanel();
-                        Label userName = new Label(message.get(String.class, SecurityParts.Name));
-                        userName.getElement().getStyle().setProperty("fontWeight", "bold");
+                            HorizontalPanel userInfo = new HorizontalPanel();
+                            Label userName = new Label(message.get(String.class, SecurityParts.Name));
+                            userName.getElement().getStyle().setProperty("fontWeight", "bold");
 
-                        userInfo.add(userName);
-                        Button logout = new Button("Logout");
-                        logout.setStyleName("logoutButton");
-                        userInfo.add(logout);
-                        logout.addClickHandler(new ClickHandler() {
-                            public void onClick(ClickEvent event) {
-                                MessageBusClient.send("AuthorizationService", SecurityCommands.EndSession);
-                            }
-                        });
+                            userInfo.add(userName);
+                            Button logout = new Button("Logout");
+                            logout.setStyleName("logoutButton");
+                            userInfo.add(logout);
+                            logout.addClickHandler(new ClickHandler() {
+                                public void onClick(ClickEvent event) {
+                                    CommandMessage.create(SecurityCommands.EndSession)
+                                            .toSubject("AuthorizationService")
+                                            .sendNowWith(bus);
+                                }
+                            });
 
-                        workspaceLayout.getUserInfoPanel().add(userInfo);
+                            workspaceLayout.getUserInfoPanel().add(userInfo);
 
-                        final WSWindowPanel welcome = new WSWindowPanel();
-                        welcome.setWidth("250px");
-                        VerticalPanel vp = new VerticalPanel();
-                        vp.setWidth("100%");
+                            final WSWindowPanel welcome = new WSWindowPanel();
+                            welcome.setWidth("250px");
+                            VerticalPanel vp = new VerticalPanel();
+                            vp.setWidth("100%");
 
-                        Label label = new Label("Welcome " + message.get(String.class, SecurityParts.Name)
-                                + ", you are now logged in -- "
-                                + (message.hasPart(MessageParts.MessageText) ?
-                                message.get(String.class, MessageParts.MessageText) : ""));
+                            Label label = new Label("Welcome " + message.get(String.class, SecurityParts.Name)
+                                    + ", you are now logged in -- "
+                                    + (message.hasPart(MessageParts.MessageText) ?
+                                    message.get(String.class, MessageParts.MessageText) : ""));
 
-                        label.getElement().getStyle().setProperty("margin", "20px");
+                            label.getElement().getStyle().setProperty("margin", "20px");
 
-                        vp.add(label);
-                        vp.setCellVerticalAlignment(label, HasAlignment.ALIGN_MIDDLE);
-                        vp.setCellHeight(label, "50px");
+                            vp.add(label);
+                            vp.setCellVerticalAlignment(label, HasAlignment.ALIGN_MIDDLE);
+                            vp.setCellHeight(label, "50px");
 
-                        Button okButton = new Button("OK");
-                        okButton.getElement().getStyle().setProperty("margin", "20px");
+                            Button okButton = new Button("OK");
+                            okButton.getElement().getStyle().setProperty("margin", "20px");
 
-                        vp.add(okButton);
-                        vp.setCellHorizontalAlignment(okButton, HasAlignment.ALIGN_CENTER);
+                            vp.add(okButton);
+                            vp.setCellHorizontalAlignment(okButton, HasAlignment.ALIGN_CENTER);
 
-                        okButton.addClickHandler(new ClickHandler() {
-                            public void onClick(ClickEvent event) {
-                                welcome.hide();
-                            }
-                        });
+                            okButton.addClickHandler(new ClickHandler() {
+                                public void onClick(ClickEvent event) {
+                                    welcome.hide();
+                                }
+                            });
 
-                        welcome.add(vp);
-                        welcome.show();
-                        welcome.center();
+                            welcome.add(vp);
+                            welcome.show();
+                            welcome.center();
 
-                        okButton.setFocus(true);
-                        break;
+                            okButton.setFocus(true);
+                            break;
 
-                    default:
-                        // I don't know this command. :(
-                }
+                        default:
+                            // I don't know this command. :(
+                    }
                 }
                 catch (Exception e) {
                     e.printStackTrace();
@@ -196,18 +193,18 @@ public class Workspace implements EntryPoint {
          */
 
 
-        initWorkspace(rootId);        
+        initWorkspace(rootId);
 
         try {
             /**
              * Specifiy a callback interface to execute the _initAfterWSLoad() tasks when we know the bus
              * is fully up and running.
              */
-            bus.init(new HookCallback() {
-                public void callback(String subject) {
-                    _initAfterWSLoad();
-                }
-            });
+//            bus.init(new HookCallback() {
+//                public void callback(String subject) {
+//                    _initAfterWSLoad();
+//                }
+//            });
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -229,8 +226,7 @@ public class Workspace implements EntryPoint {
 
         if (rootId != null) {
             RootPanel.get(rootId).add(workspaceLayout);
-        }
-        else {
+        } else {
             Window.alert("No root ID specified!");
             return;
         }

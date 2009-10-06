@@ -31,7 +31,7 @@ public class WSTab extends Composite {
 
     List<CloseHandler<WSTab>> tabCloseHandlers = new ArrayList<CloseHandler<WSTab>>();
 
-    //todo: this widget is still tied to the Workspace API -- bad!
+    //todo: this widget is still tied sendNowWith the Workspace API -- bad!
     public WSTab(String name, Widget widgetRef, Image tabIcon) {
         this.widgetRef = widgetRef;
         this.icon = tabIcon;

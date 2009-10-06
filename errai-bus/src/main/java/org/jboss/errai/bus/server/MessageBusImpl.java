@@ -2,10 +2,7 @@ package org.jboss.errai.bus.server;
 
 import com.google.gwt.core.client.GWT;
 import com.google.inject.Singleton;
-import org.jboss.errai.bus.client.CommandMessage;
-import org.jboss.errai.bus.client.ConversationMessage;
-import org.jboss.errai.bus.client.Message;
-import org.jboss.errai.bus.client.MessageCallback;
+import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
@@ -147,10 +144,10 @@ public class MessageBusImpl implements MessageBus {
                             }
 
                             send(ConversationMessage.create(BusCommands.RemoteSubscribe, message)
-                                    .set(MessageParts.Subject, service).setSubject("ClientBus"), false);
+                                    .set(MessageParts.Subject, service).toSubject("ClientBus"), false);
                         }
 
-                        send(ConversationMessage.create(BusCommands.FinishStateSync, message).setSubject("ClientBus"), false);
+                        send(ConversationMessage.create(BusCommands.FinishStateSync, message).toSubject("ClientBus"), false);
 
                         break;
                 }
@@ -223,14 +220,17 @@ public class MessageBusImpl implements MessageBus {
                     return message;
                 }
             });
-        }
-        else {
+        } else {
             throw new NoSubscribersToDeliverTo("for: " + subject);
         }
     }
 
     public void send(CommandMessage message) {
-        sendGlobal(message);
+        if (message.hasPart(MessageParts.SessionID)) {
+            send(message.get(String.class, MessageParts.SessionID), message.getSubject(), message);
+        } else {
+            sendGlobal(message);
+        }
     }
 
     public void send(String sessionid, String subject, CommandMessage message) {
@@ -269,7 +269,8 @@ public class MessageBusImpl implements MessageBus {
             throw new RuntimeException("cannot automatically route message. no session contained in message.");
         }
 
-        send((String) session.getAttribute(WS_SESSION_ID), subject, message, fireListeners);
+        send(message.hasPart(MessageParts.SessionID) ? message.get(String.class, MessageParts.SessionID) :
+                (String) session.getAttribute(WS_SESSION_ID), subject, message, fireListeners);
     }
 
 
@@ -330,6 +331,18 @@ public class MessageBusImpl implements MessageBus {
                 iter.remove();
             }
         }
+    }
+
+    public void unsubscribeAll(String subject) {
+        throw new RuntimeException("unsubscribeAll not yet implemented.");
+    }
+
+    public void conversationWith(CommandMessage message, MessageCallback callback) {
+        throw new RuntimeException("conversationWith not yet implemented.");
+    }
+
+    public boolean isSubscribed(String subject) {
+        return subscriptions.containsKey(subject);
     }
 
     private boolean isAnyoneListening(Object sessionContext, String subject) {

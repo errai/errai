@@ -36,7 +36,7 @@ public class CommandMessage {
     }
 
     public CommandMessage(String subject, String commandType) {
-        setSubject(subject).setCommandType(commandType);
+        toSubject(subject).setCommandType(commandType);
     }
 
     public String getCommandType() {
@@ -47,7 +47,7 @@ public class CommandMessage {
         return String.valueOf(parts.get(MessageParts.ToSubject.name()));
     }
 
-    public CommandMessage setSubject(String subject) {
+    public CommandMessage toSubject(String subject) {
         parts.put(MessageParts.ToSubject.name(), subject);
         return this;
     }
@@ -115,4 +115,9 @@ public class CommandMessage {
         this.parts = parts;
         return this;
     }
+
+    public void sendNowWith(MessageBus viaThis) {
+        viaThis.send(this);
+    }
+
 }

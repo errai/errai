@@ -1,7 +1,7 @@
 <!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 1.6//EN"
         "http://google-web-toolkit.googlecode.com/svn/releases/1.6/distro-source/core/src/gwt-module.dtd">
 <module>
-    <script src="js/pagebus.js"/>    
+    <script src="js/pagebus.js"/>
 
     <inherits name='com.google.gwt.user.User'/>
     <inherits name='com.google.gwt.user.User'/>
@@ -10,4 +10,8 @@
     <inherits name="com.google.gwt.json.JSON"/>
 
     <entry-point class='org.jboss.errai.bus.client.ErraiBus'/>
+
+    <replace-with class="org.jboss.errai.bus.client.ClientBusImpl">
+        <when-type-is class="org.jboss.errai.bus.client.MessageBus"/>
+    </replace-with>
 </module>

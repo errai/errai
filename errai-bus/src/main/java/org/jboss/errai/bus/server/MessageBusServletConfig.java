@@ -4,6 +4,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.servlet.ServletModule;
+import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.server.security.auth.AuthorizationAdapter;
 import org.jboss.errai.bus.server.security.auth.JAASAdapter;
 import org.jboss.errai.bus.server.service.ErraiService;

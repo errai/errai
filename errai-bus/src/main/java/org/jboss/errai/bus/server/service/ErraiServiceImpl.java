@@ -5,11 +5,11 @@ import com.google.inject.Guice;
 import com.google.inject.Inject;
 import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.ConversationMessage;
+import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.client.MessageCallback;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
 import org.jboss.errai.bus.client.security.CredentialTypes;
-import org.jboss.errai.bus.server.MessageBus;
 import org.jboss.errai.bus.server.Module;
 import org.jboss.errai.bus.server.annotations.LoadModule;
 import org.jboss.errai.bus.server.security.auth.AuthorizationAdapter;
@@ -39,10 +39,10 @@ public class ErraiServiceImpl implements ErraiService {
     }
 
     private void init() {
-        // just use the simple bus for now.  more integration options to come...
+        // just use the simple bus for now.  more integration options sendNowWith come...
         bus.addGlobalListener(new BasicAuthorizationListener(authorizationAdapter, bus));
 
-        //todo: this all needs to be refactored at some point.
+        //todo: this all needs sendNowWith be refactored at some point.
         bus.subscribe(AUTHORIZATION_SVC_SUBJECT, new MessageCallback() {
             public void callback(CommandMessage c) {
                 switch (SecurityCommands.valueOf(c.getCommandType())) {
@@ -66,7 +66,7 @@ public class ErraiServiceImpl implements ErraiService {
 
                     case EndSession:
                         authorizationAdapter.endSession(c);
-                        bus.send(ConversationMessage.create(c).setSubject("LoginClient")
+                        bus.send(ConversationMessage.create(c).toSubject("LoginClient")
                                 .setCommandType(SecurityCommands.SecurityChallenge));
                         break;
                 }

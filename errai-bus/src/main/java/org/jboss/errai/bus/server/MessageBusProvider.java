@@ -3,6 +3,7 @@ package org.jboss.errai.bus.server;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import org.jboss.errai.bus.client.MessageBus;
 
 
 @Singleton

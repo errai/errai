@@ -14,9 +14,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import static com.google.gwt.user.client.Window.addResizeHandler;
 import com.google.gwt.user.client.ui.*;
-import org.jboss.errai.bus.client.CommandMessage;
-import org.jboss.errai.bus.client.MessageBusClient;
-import org.jboss.errai.bus.client.MessageCallback;
+import org.jboss.errai.bus.client.*;
 import org.jboss.errai.common.client.framework.AcceptsCallback;
 import org.jboss.errai.widgets.client.*;
 import org.jboss.errai.widgets.client.effects.Effects;
@@ -122,7 +120,7 @@ public class WorkspaceLayout extends Composite {
     @Override
     protected void onAttach() {
         super.onAttach();
-        MessageBusClient.subscribe(LayoutCommands.RegisterWorkspaceEnvironment.getSubject(),
+        ErraiClient.getBus().subscribe(LayoutCommands.RegisterWorkspaceEnvironment.getSubject(),
                 new MessageCallback() {
                     public void callback(CommandMessage message) {
                         switch (LayoutCommands.valueOf(message.getCommandType())) {
@@ -162,7 +160,7 @@ public class WorkspaceLayout extends Composite {
 
 
                     }
-                }, null);
+                });
     }
 
     /**
@@ -330,16 +328,20 @@ public class WorkspaceLayout extends Composite {
             RootPanel.get().add(launcherPanel);
         }
 
-        Map<String, Object> msg = new HashMap<String, Object>();
-        msg.put(LayoutParts.Name.name(), toolSet.getToolSetName());
-        msg.put(LayoutParts.DOMID.name(), id);
+         MessageBus bus = ErraiClient.getBus();
 
-        LayoutCommands.RegisterToolSet.send(msg);
+        CommandMessage.create(LayoutCommands.RegisterToolSet)
+                .toSubject("org.jboss.errai.WorkspaceLayout")
+                .set(LayoutParts.Name, toolSet.getToolSetName())
+                .set(LayoutParts.DOMID, id)
+                .sendNowWith(bus);
+
 
         for (final Tool tool : toolSet.getAllProvidedTools()) {
-            msg = new HashMap<String, Object>();
-            msg.put(LayoutParts.ComponentID.name(), tool.getId());
-            LayoutCommands.PublishTool.send(msg);
+            CommandMessage.create(LayoutCommands.PublishTool)
+                    .toSubject("org.jboss.errai.WorkspaceLayout")
+                    .set(LayoutParts.ComponentID, tool.getId())
+                    .sendNowWith(bus);
         }
     }
 
@@ -356,7 +358,9 @@ public class WorkspaceLayout extends Composite {
                          final Image icon, boolean multipleAllowed) {
         if (isToolActive(componentId)) {
             if (!multipleAllowed) {
-                MessageBusClient.send(getInstanceSubject(componentId), CommandMessage.create(LayoutCommands.ActivateTool));
+                CommandMessage.create(LayoutCommands.ActivateTool)
+                        .toSubject(getInstanceSubject(componentId))
+                        .sendNowWith(ErraiClient.getBus());
 
                 return;
             }
@@ -393,7 +397,9 @@ public class WorkspaceLayout extends Composite {
                                 wsd.showModal();
                             }
                             else {
-                                MessageBusClient.send(getInstanceSubject(componentId), CommandMessage.create(LayoutCommands.ActivateTool));
+                                CommandMessage.create(LayoutCommands.ActivateTool)
+                                        .toSubject(getInstanceSubject(componentId))
+                                        .sendNowWith(ErraiClient.getBus());
                             }
                         }
                     }
@@ -409,9 +415,11 @@ public class WorkspaceLayout extends Composite {
     }
 
     private void _openTab(final String DOMID, final String initSubject, final String componentId, final String name, final String instanceId, final Image icon) {
-        MessageBusClient.conversationWith(
+        final MessageBus bus = ErraiClient.getBus();
+
+        bus.conversationWith(
                 CommandMessage.create().set(LayoutParts.DOMID, DOMID)
-                        .setSubject(initSubject),
+                        .toSubject(initSubject),
                 new MessageCallback() {
                     public void callback(CommandMessage message) {
                         final ExtSimplePanel panel = new ExtSimplePanel();
@@ -465,15 +473,17 @@ public class WorkspaceLayout extends Composite {
 
                         tabInstances.put(instanceId, JSONUtilCli.encodeMap(tabProperties));
 
-                        MessageBusClient.subscribe(getInstanceSubject(instanceId),
+                        bus.subscribe(getInstanceSubject(instanceId),
                                 new MessageCallback() {
-                                    private Map<String, Set<Object>> toUnregister = MessageBusClient.getCapturedRegistrations();
+                                    private Map<String, Set<Object>> toUnregister = ((ClientBusImpl)bus).getCapturedRegistrations();
 
                                     public void callback(CommandMessage message) {
                                         switch (LayoutCommands.valueOf(message.getCommandType())) {
                                             case CloseTab:
                                                 tabDragController.unregisterDropController(newWSTab.getTabDropController());
-                                                MessageBusClient.unregisterAll(toUnregister);
+
+                                                ((ClientBusImpl)bus).unregisterAll(toUnregister);
+
                                                 deactivateTool(componentId);
 
                                                 int idx = newWSTab.remove();
@@ -489,10 +499,9 @@ public class WorkspaceLayout extends Composite {
                                                 break;
                                         }
                                     }
-                                },
-                                panel.getElement());
+                                });
 
-                        MessageBusClient.endCapture();
+                        ((ClientBusImpl)bus).endCapture();
 
                         Timer t = new Timer() {
                             public void run() {
@@ -512,11 +521,10 @@ public class WorkspaceLayout extends Composite {
     }
 
     public void closeTab(String instanceId) {
-        Map<String, Object> delegateMsg = new HashMap<String, Object>();
-        delegateMsg.put(LayoutParts.CommandType.name(), LayoutCommands.CloseTab.name());
-        delegateMsg.put(LayoutParts.InstanceID.name(), instanceId);
-
-        MessageBusClient.send(getInstanceSubject(instanceId), delegateMsg);
+        CommandMessage.create(LayoutCommands.CloseTab)
+                .toSubject(getInstanceSubject(instanceId))
+                .set(LayoutParts.InstanceID, instanceId)
+                .sendNowWith(ErraiClient.getBus());
     }
 
     public void activateTool(String componentTypeId) {

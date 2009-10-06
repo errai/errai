@@ -3,7 +3,7 @@ package org.jboss.errai.workspaces.client.listeners;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import org.jboss.errai.bus.client.CommandMessage;
-import org.jboss.errai.bus.client.MessageBusClient;
+import org.jboss.errai.bus.client.ErraiClient;
 import org.jboss.errai.bus.client.protocols.LayoutCommands;
 import org.jboss.errai.bus.client.protocols.LayoutParts;
 import org.jboss.errai.common.client.framework.AcceptsCallback;
@@ -21,9 +21,10 @@ public class TabCloseHandler implements CloseHandler<WSTab>, AcceptsCallback {
     }
 
     public void onClose(CloseEvent closeEvent) {
-        MessageBusClient.send("org.jboss.errai.WorkspaceLayout",
-                CommandMessage.create(LayoutCommands.CloseTab)
-                .set(LayoutParts.InstanceID, instanceId));
+        CommandMessage.create(LayoutCommands.CloseTab)
+                .toSubject("org.jboss.errai.WorkspaceLayout")
+                .set(LayoutParts.InstanceID, instanceId)
+                .sendNowWith(ErraiClient.getBus());
     }
 
 

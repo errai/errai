@@ -1,6 +1,7 @@
 package org.jboss.errai.bus.server;
 
 import org.jboss.errai.bus.client.CommandMessage;
+import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
 import org.jboss.errai.bus.server.json.JSONUtil;
 
