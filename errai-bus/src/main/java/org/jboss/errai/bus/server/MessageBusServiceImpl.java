@@ -5,6 +5,7 @@ import com.google.inject.Singleton;
 import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.Payload;
+import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
 import org.jboss.errai.bus.client.MessageBus;
 import static org.jboss.errai.bus.server.json.JSONUtil.decodeToMap;
@@ -21,6 +22,7 @@ import java.io.Reader;
 import java.nio.CharBuffer;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The main gateway of the Workspace application to the server.  All communication between the client and the
@@ -105,6 +107,13 @@ public class MessageBusServiceImpl extends HttpServlet {
 
         if (session.getAttribute(MessageBus.WS_SESSION_ID) == null) {
             session.setAttribute(MessageBus.WS_SESSION_ID, httpServletRequest.getSession().getId());
+        }
+
+        Map<String, Object> parts = decodeToMap(sb.toString());
+        if (parts.containsKey(MessageParts.SessionID.name())) {
+            // If the client is trying to send a session ID into the server bus, it might be trying to
+            // do something evil.  So we check for, and remove it if this is the case.
+            parts.remove(MessageParts.SessionID.name());
         }
 
         service.store(new CommandMessage()
