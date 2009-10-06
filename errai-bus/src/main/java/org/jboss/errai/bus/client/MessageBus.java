@@ -21,8 +21,6 @@ public interface MessageBus {
 
     public void conversationWith(CommandMessage message, MessageCallback callback);
 
-    public Payload nextMessage(Object sessionContext);
-
     public void subscribe(String subject, MessageCallback receiver);
     public void unsubscribeAll(String subject);
 

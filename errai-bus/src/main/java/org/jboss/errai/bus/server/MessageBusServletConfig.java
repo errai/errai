@@ -24,6 +24,8 @@ public class MessageBusServletConfig extends GuiceServletContextListener {
                 serve(appContext).with(MessageBusServiceImpl.class);
 
                 bind(MessageBus.class).to(MessageBusImpl.class);
+                bind(ServerMessageBus.class).to(MessageBusImpl.class);
+                
                 bind(ErraiService.class).to(ErraiServiceImpl.class);
                 bind(AuthorizationAdapter.class).to(JAASAdapter.class);     
             }

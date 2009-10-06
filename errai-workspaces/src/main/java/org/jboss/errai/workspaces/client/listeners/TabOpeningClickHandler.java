@@ -58,7 +58,7 @@ public class TabOpeningClickHandler implements ClickHandler {
          * Being capturing all message registration activity. This is necessary if you want to use the automatic
          * clean-up features and close the messaging channels when the tool instance closes.
          */
-        ((ClientBusImpl)bus).beginCapture();
+        ((ClientMessageBus)bus).beginCapture();
 
         CommandMessage.create(LayoutCommands.OpenNewTab)
                 .toSubject("org.jboss.errai.WorkspaceLayout")

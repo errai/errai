@@ -475,14 +475,14 @@ public class WorkspaceLayout extends Composite {
 
                         bus.subscribe(getInstanceSubject(instanceId),
                                 new MessageCallback() {
-                                    private Map<String, Set<Object>> toUnregister = ((ClientBusImpl)bus).getCapturedRegistrations();
+                                    private Map<String, Set<Object>> toUnregister = ((ClientMessageBus)bus).getCapturedRegistrations();
 
                                     public void callback(CommandMessage message) {
                                         switch (LayoutCommands.valueOf(message.getCommandType())) {
                                             case CloseTab:
                                                 tabDragController.unregisterDropController(newWSTab.getTabDropController());
 
-                                                ((ClientBusImpl)bus).unregisterAll(toUnregister);
+                                                ((ClientMessageBus)bus).unregisterAll(toUnregister);
 
                                                 deactivateTool(componentId);
 
@@ -501,7 +501,7 @@ public class WorkspaceLayout extends Composite {
                                     }
                                 });
 
-                        ((ClientBusImpl)bus).endCapture();
+                        ((ClientMessageBus)bus).endCapture();
 
                         Timer t = new Timer() {
                             public void run() {

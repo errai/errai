@@ -13,7 +13,7 @@ import org.jboss.errai.bus.client.protocols.MessageParts;
 
 import java.util.*;
 
-public class ClientBusImpl implements MessageBus {
+public class ClientMessageBusImpl implements ClientMessageBus {
     private static final String SERVICE_ENTRY_POINT = "erraiBus";
 
     private List<SubscribeListener> onSubscribeHooks = new ArrayList<SubscribeListener>();
@@ -31,7 +31,7 @@ public class ClientBusImpl implements MessageBus {
     private Map<String, Set<Object>> registeredInThisSession = new HashMap<String, Set<Object>>();
 
 
-    public ClientBusImpl() {
+    public ClientMessageBusImpl() {
         sendBuilder = new RequestBuilder(
                 RequestBuilder.POST,
                 URL.encode(SERVICE_ENTRY_POINT)
@@ -43,11 +43,6 @@ public class ClientBusImpl implements MessageBus {
         );
 
         init();
-    }
-
-
-    public Set<String> getAllLocalSubscriptions() {
-        return subscriptions.keySet();
     }
 
     public void unsubscribeAll(String subject) {
@@ -95,17 +90,6 @@ public class ClientBusImpl implements MessageBus {
             }
         }
     }
-
-    public void subscribeOnce(String subject, MessageCallback callback, Object subscriberData) {
-        if (subscriptions.containsKey(subject)) return;
-        subscribe(subject, callback, subscriberData);
-    }
-
-    public void subscribeOnce(String subject, MessageCallback callback) {
-        if (subscriptions.containsKey(subject)) return;
-        subscribe(subject, callback);
-    }
-
 
     private static int conversationCounter = 0;
 
@@ -413,11 +397,6 @@ public class ClientBusImpl implements MessageBus {
 
 
         outerTimer.schedule(10);
-    }
-
-
-    public Payload nextMessage(Object sessionContext) {
-        return null;
     }
 
 

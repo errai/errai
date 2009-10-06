@@ -11,6 +11,7 @@ import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
 import org.jboss.errai.bus.client.security.CredentialTypes;
 import org.jboss.errai.bus.server.Module;
+import org.jboss.errai.bus.server.ServerMessageBus;
 import org.jboss.errai.bus.server.annotations.LoadModule;
 import org.jboss.errai.bus.server.security.auth.AuthorizationAdapter;
 import org.jboss.errai.bus.server.security.auth.BasicAuthorizationListener;
@@ -27,11 +28,11 @@ import java.util.ResourceBundle;
 import java.util.Set;
 
 public class ErraiServiceImpl implements ErraiService {
-    private MessageBus bus;
+    private ServerMessageBus bus;
     private AuthorizationAdapter authorizationAdapter;
 
     @Inject
-    public ErraiServiceImpl(MessageBus bus, AuthorizationAdapter authorizationAdapter) {
+    public ErraiServiceImpl(ServerMessageBus bus, AuthorizationAdapter authorizationAdapter) {
         this.bus = bus;
         this.authorizationAdapter = authorizationAdapter;
 
@@ -228,7 +229,7 @@ public class ErraiServiceImpl implements ErraiService {
     }
 
 
-    public MessageBus getBus() {
+    public ServerMessageBus getBus() {
         return bus;
     }
 }

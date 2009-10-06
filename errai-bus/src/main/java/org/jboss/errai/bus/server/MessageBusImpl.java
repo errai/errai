@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Queue;
 
 @Singleton
-public class MessageBusImpl implements MessageBus {
+public class MessageBusImpl implements ServerMessageBus {
     private final static int QUEUE_SIZE = 200;
 
     private final List<MessageListener> listeners = new ArrayList<MessageListener>();
