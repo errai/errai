@@ -49,6 +49,8 @@ public class JSONUtilCli {
             return list;
         }
         catch (Exception e) {
+            System.err.println("Failed to decode payload:\n" + value);
+
             e.printStackTrace();
             return new ArrayList<Message>(0);
         }

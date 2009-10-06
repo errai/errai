@@ -117,39 +117,39 @@ public class ErraiServiceImpl implements ErraiService {
 
         try {
             ResourceBundle bundle = ResourceBundle.getBundle("errai");
-            String modulesToLoad = bundle.getString("workspace.server_modules");
+//            String modulesToLoad = bundle.getString("workspace.server_modules");
+//
+//            String[] moduleFQCN = modulesToLoad.split(",");
+//            @SuppressWarnings({"unchecked"}) Class<Module>[] moduleClass = new Class[moduleFQCN.length];
+//
+//            try {
+//                for (int i = 0; i < moduleFQCN.length; i++) {
+//                    if (moduleClass[i] == null) continue;
+//                    try {
+//                        //noinspection unchecked
+//                        moduleClass[i] = (Class<Module>) Class.forName(moduleFQCN[i]);
+//                    }
+//                    catch (Exception e) {
+//                        throw new RuntimeException("unable to load module: " + moduleClass[i], e);
+//                    }
+//                }
+//            }
+//            catch (RuntimeException e) {
+//                throw e;
+//            }
+//            catch (Exception e) {
+//                throw new RuntimeException("error", e);
+//            }
 
-            String[] moduleFQCN = modulesToLoad.split(",");
-            @SuppressWarnings({"unchecked"}) Class<Module>[] moduleClass = new Class[moduleFQCN.length];
-
-            try {
-                for (int i = 0; i < moduleFQCN.length; i++) {
-                    if (moduleClass[i] == null) continue;
-                    try {
-                        //noinspection unchecked
-                        moduleClass[i] = (Class<Module>) Class.forName(moduleFQCN[i]);
-                    }
-                    catch (Exception e) {
-                        throw new RuntimeException("unable to load module: " + moduleClass[i], e);
-                    }
-                }
-            }
-            catch (RuntimeException e) {
-                throw e;
-            }
-            catch (Exception e) {
-                throw new RuntimeException("error", e);
-            }
-
-            try {
-                for (Class<Module> clazz : moduleClass) {
-                    if (clazz == null) continue;
-                    clazz.newInstance().init();
-                }
-            }
-            catch (Exception e) {
-                throw new RuntimeException("error loading module: " + e.getMessage(), e);
-            }
+//            try {
+//                for (Class<Module> clazz : moduleClass) {
+//                    if (clazz == null) continue;
+//                    clazz.newInstance().init();
+//                }
+//            }
+//            catch (Exception e) {
+//                throw new RuntimeException("error loading module: " + e.getMessage(), e);
+//            }
 
             try {
                 Enumeration<URL> targets = currentThread().getContextClassLoader().getResources("ErraiApp.properties");
