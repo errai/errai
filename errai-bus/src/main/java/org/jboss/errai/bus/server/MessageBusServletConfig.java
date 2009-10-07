@@ -53,8 +53,6 @@ public class MessageBusServletConfig extends GuiceServletContextListener {
                 if (!authAdapterSpecified) {
                     bind(AuthenticationAdapter.class).to(DefaultAdapter.class);
                 }
-
-
             }
         });
     }
