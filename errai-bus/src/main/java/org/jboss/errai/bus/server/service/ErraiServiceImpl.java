@@ -24,6 +24,7 @@ import static java.lang.Thread.currentThread;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.ResourceBundle;
 import java.util.Set;
 
 public class ErraiServiceImpl implements ErraiService {
@@ -114,10 +115,29 @@ public class ErraiServiceImpl implements ErraiService {
             catch (IOException e) {
                 e.printStackTrace();
             }
-
         }
         catch (Exception e) {
             throw new RuntimeException("unable to load config", e);
+        }
+
+        try {
+            ResourceBundle erraiServiceConfig = ResourceBundle.getBundle("ErraiService");
+
+            Enumeration<String> keys = erraiServiceConfig.getKeys();
+            String key;
+            while (keys.hasMoreElements()) {
+                key = keys.nextElement();
+
+                if ("errai.require_authentication_for_all".equals(key)) {
+                    if("true".equals(erraiServiceConfig.getString(key))) {
+                        bus.addRule("ServerEchoService", new RolesRequiredRule(new HashSet<Object>(), bus));
+                    }
+                }
+
+            }
+        }
+        catch (Exception e) {
+            throw new RuntimeException("error reading from configuration", e);
         }
     }
 

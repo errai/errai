@@ -111,10 +111,10 @@ public class MessageBusImpl implements ServerMessageBus {
         /**
          * If we're in development mode, start the monitor.
          */
-//        if (!GWT.isClient()) {
-//            thread.setPriority(Thread.MIN_PRIORITY);
-//            thread.start();
-//        }
+        if (!GWT.isClient()) {
+            thread.setPriority(Thread.MIN_PRIORITY);
+            thread.start();
+        }
 
         subscribe("ServerBus", new MessageCallback() {
             public void callback(CommandMessage message) {
@@ -220,7 +220,8 @@ public class MessageBusImpl implements ServerMessageBus {
                     return message;
                 }
             });
-        } else {
+        }
+        else {
             throw new NoSubscribersToDeliverTo("for: " + subject);
         }
     }
@@ -228,7 +229,8 @@ public class MessageBusImpl implements ServerMessageBus {
     public void send(CommandMessage message) {
         if (message.hasPart(MessageParts.SessionID)) {
             send(message.get(String.class, MessageParts.SessionID), message.getSubject(), message);
-        } else {
+        }
+        else {
             sendGlobal(message);
         }
     }
@@ -276,6 +278,23 @@ public class MessageBusImpl implements ServerMessageBus {
 
     public Payload nextMessage(Object sessionContext) {
         return messageQueues.get(sessionContext).poll();
+    }
+
+    public void addRule(String subject, BooleanRoutingRule rule) {
+        Iterator<MessageCallback> iter = subscriptions.get(subject).iterator();
+
+        List<MessageCallback> newCallbacks = new LinkedList<MessageCallback>();
+
+        while (iter.hasNext()) {
+            final MessageCallback mc = iter.next();
+            iter.remove();
+            newCallbacks.add(new RuleDelegateMessageCallback(mc, rule));
+        }
+
+        List<MessageCallback> slist = subscriptions.get(subject);
+        for (MessageCallback mc : newCallbacks) {
+            slist.add(mc);
+        }
     }
 
     public void subscribe(String subject, MessageCallback receiver) {
