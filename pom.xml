@@ -26,9 +26,9 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <gwtHome>${gwt.home}</gwtHome>
+        <gwt.home>${env.GWT_HOME}</gwt.home>        
         <gwt.version>2.0-SNAPSHOT</gwt.version>
-        <gwt.maven>1.2-SNAPSHOT</gwt.maven>
+        <gwt.maven>1.2.jboss</gwt.maven>
         <guice.version>2.0</guice.version>
     </properties>
 
