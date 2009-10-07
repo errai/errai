@@ -8,6 +8,7 @@ import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
 import org.jboss.errai.bus.client.security.CredentialTypes;
 import org.jboss.errai.bus.client.MessageBus;
+import org.jboss.errai.bus.server.service.ErraiService;
 
 import javax.security.auth.callback.*;
 import javax.security.auth.login.LoginContext;
@@ -15,7 +16,6 @@ import javax.security.auth.login.LoginException;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -24,18 +24,11 @@ import java.util.Set;
  * A simple JAAS adapter to provide JAAS-based authentication.  This implementation currently defaults to a
  * property-file based authentication system and is still primarily for prototyping purposes.
  */
-public class JAASAdapter implements AuthorizationAdapter {
+public class JAASAdapter implements AuthenticationAdapter {
     /**
      * A simple token to add to a session to indicate successful authorization.
      */
-    private static final String AUTH_TOKEN = "WSAuthToken";
 
-    /**
-     * A Map to hold a list of message subjects and their AuthDescriptors.  This isn't using JAAS-ey based
-     * authorization at this point, but rather a Workspace-centric abstraction API.  But that can be fixed
-     * later.
-     */
-    private HashMap<String, AuthDescriptor> securityRules = new HashMap<String, AuthDescriptor>();
 
     private MessageBus bus;
 
@@ -89,12 +82,13 @@ public class JAASAdapter implements AuthorizationAdapter {
              */
             loginContext.login();
 
-
+            AuthSubject authSubject = new AuthSubject(name, name, (Set) loginContext.getSubject().getPrincipals());
+            
             /**
              * If we got this far, then the authentication succeeded. So grab access to the HTTPSession and
              * add the authorization token.
              */
-            addAuthenticationToken(message);
+            addAuthenticationToken(message,authSubject);
 
             /**
              * Prepare to send a message back to the client, informing it that a successful login has
@@ -138,31 +132,23 @@ public class JAASAdapter implements AuthorizationAdapter {
         }
     }
 
-    private void addAuthenticationToken(CommandMessage message) {
+    private void addAuthenticationToken(CommandMessage message, AuthSubject loginSubject) {
+
+
         HttpSession session = message.get(HttpSession.class, SecurityParts.SessionData);
-        session.setAttribute(AUTH_TOKEN, AUTH_TOKEN);
+        session.setAttribute(ErraiService.SESSION_AUTH_DATA, loginSubject);
     }
 
     public boolean isAuthenticated(CommandMessage message) {
         HttpSession session = message.get(HttpSession.class, SecurityParts.SessionData);
-        return session != null && AUTH_TOKEN.equals(session.getAttribute(AUTH_TOKEN));
-    }
-
-    public boolean requiresAuthorization(CommandMessage message) {
-        String subject = message.getSubject();
-        AuthDescriptor descriptor = securityRules.get(subject);
-        return descriptor != null && !descriptor.isAuthorized(message);
-    }
-
-    public void addSecurityRule(String subject, AuthDescriptor descriptor) {
-        securityRules.put(subject, descriptor);
+        return session != null && session.getAttribute(ErraiService.SESSION_AUTH_DATA) != null;
     }
 
     public boolean endSession(CommandMessage message) {
         boolean sessionEnded = isAuthenticated(message);
         if (sessionEnded) {
             getAuthDescriptor(message).remove(new SimpleRole(CredentialTypes.Authenticated.name()));
-            message.get(HttpSession.class, SecurityParts.SessionData).removeAttribute(AUTH_TOKEN);
+            message.get(HttpSession.class, SecurityParts.SessionData).removeAttribute(ErraiService.SESSION_AUTH_DATA);
             return true;
         }
         else {
@@ -172,7 +158,7 @@ public class JAASAdapter implements AuthorizationAdapter {
 
     public void process(CommandMessage message) {
         if (isAuthenticated(message)) {
-            getAuthDescriptor(message).add(new SimpleRole(CredentialTypes.Authenticated.name()));
+         //   getAuthDescriptor(message).add(new SimpleRole(CredentialTypes.Authenticated.name()));
 
         }
     }

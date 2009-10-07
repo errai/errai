@@ -12,8 +12,11 @@ import org.jboss.errai.bus.client.protocols.SecurityParts;
 import org.jboss.errai.bus.server.Module;
 import org.jboss.errai.bus.server.ServerMessageBus;
 import org.jboss.errai.bus.server.annotations.LoadModule;
-import org.jboss.errai.bus.server.security.auth.AuthorizationAdapter;
-import org.jboss.errai.bus.server.security.auth.BasicAuthorizationListener;
+import org.jboss.errai.bus.server.annotations.Service;
+import org.jboss.errai.bus.server.annotations.security.RequireAuthentication;
+import org.jboss.errai.bus.server.annotations.security.RequireRoles;
+import org.jboss.errai.bus.server.security.auth.AuthenticationAdapter;
+import org.jboss.errai.bus.server.security.auth.rules.RolesRequiredRule;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,19 +28,20 @@ import java.util.Set;
 
 public class ErraiServiceImpl implements ErraiService {
     private ServerMessageBus bus;
-    private AuthorizationAdapter authorizationAdapter;
+    private AuthenticationAdapter authenticationAdapter;
+
 
     @Inject
-    public ErraiServiceImpl(ServerMessageBus bus, AuthorizationAdapter authorizationAdapter) {
+    public ErraiServiceImpl(ServerMessageBus bus, AuthenticationAdapter authenticationAdapter) {
         this.bus = bus;
-        this.authorizationAdapter = authorizationAdapter;
+        this.authenticationAdapter = authenticationAdapter;
 
         init();
     }
 
     private void init() {
         // just use the simple bus for now.  more integration options sendNowWith come...
-        bus.addGlobalListener(new BasicAuthorizationListener(authorizationAdapter, bus));
+        //bus.addGlobalListener(new BasicAuthorizationListener(authorizationAdapter, bus));
 
         //todo: this all needs sendNowWith be refactored at some point.
         bus.subscribe(AUTHORIZATION_SVC_SUBJECT, new MessageCallback() {
@@ -58,11 +62,11 @@ public class ErraiServiceImpl implements ErraiService {
                         /**
                          * Send a challenge.
                          */
-                        authorizationAdapter.challenge(c);
+                        authenticationAdapter.challenge(c);
                         break;
 
                     case EndSession:
-                        authorizationAdapter.endSession(c);
+                        authenticationAdapter.endSession(c);
                         bus.send(ConversationMessage.create(c).toSubject("LoginClient")
                                 .setCommandType(SecurityCommands.SecurityChallenge));
                         break;
@@ -70,12 +74,6 @@ public class ErraiServiceImpl implements ErraiService {
             }
         });
 
-        /**
-         * Some temporary security rules to test the login system.
-         */
-//        RoleAuthDescriptor authRequired = new RoleAuthDescriptor(new String[]{CredentialTypes.Authenticated.name()});
-//        ((JAASAdapter) authorizationAdapter).addSecurityRule("TestService", authRequired);
-//        ((JAASAdapter) authorizationAdapter).addSecurityRule("ServerEchoService", authRequired);
 
         /**
          * The standard ServerEchoService.
@@ -90,14 +88,6 @@ public class ErraiServiceImpl implements ErraiService {
     }
 
     public void store(CommandMessage message) {
-
-        /**
-         * If an authorization adapter is configured, we now allow it to pre-process the request.
-         */
-        if (authorizationAdapter != null) {
-            authorizationAdapter.process(message);
-        }
-
         /**
          * Pass the message off to the messaging bus for handling.
          */
@@ -164,6 +154,35 @@ public class ErraiServiceImpl implements ErraiService {
                                 }
                             }).getInstance(Module.class).init();
                         }
+
+                    }
+                    else if (MessageCallback.class.isAssignableFrom(loadClass)) {
+                        final Class<? extends MessageCallback> clazz = loadClass.asSubclass(MessageCallback.class);
+                        if (clazz.isAnnotationPresent(Service.class)) {
+                            MessageCallback svc = Guice.createInjector(new AbstractModule() {
+                                @Override
+                                protected void configure() {
+                                    bind(MessageCallback.class).to(clazz);
+                                    bind(MessageBus.class).toInstance(bus);
+                                }
+                            }).getInstance(MessageCallback.class);
+
+                            String svcName = clazz.getAnnotation(Service.class).value();
+
+                            bus.subscribe(svcName, svc);
+
+                            RolesRequiredRule rule = null;
+                            if (clazz.isAnnotationPresent(RequireRoles.class)) {
+                                rule = new RolesRequiredRule(clazz.getAnnotation(RequireRoles.class).value(), bus);
+                            }
+                            else if (clazz.isAnnotationPresent(RequireAuthentication.class)) {
+                                rule = new RolesRequiredRule(new HashSet<Object>(), bus);
+                            }
+                            if (rule != null) {
+                                bus.addRule(svcName, rule);
+                            }
+                        }
+
                     }
                 }
                 catch (NoClassDefFoundError e) {

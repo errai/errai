@@ -7,21 +7,26 @@ import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
+import java.security.Principal;
 import java.util.Map;
 import java.util.ResourceBundle;
 
 public class PropertyFileLoginModule implements LoginModule {
     private String login;
     private String password;
+    private Subject subject;
 
     public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState, Map<String, ?> options) {
         NameCallback name = new NameCallback("Login");
         PasswordCallback password = new PasswordCallback("Password", false);
+        this.subject = subject;
 
         try {
             callbackHandler.handle(new Callback[]{name, password});
             this.login = name.getName();
             this.password = new String(password.getPassword());
+
+            loadRoles();
 
         }
         catch (Exception e) {
@@ -33,6 +38,21 @@ public class PropertyFileLoginModule implements LoginModule {
         ResourceBundle bundle = ResourceBundle.getBundle("users");
         String password = bundle.getString(login);
         return password != null && this.password.equals(password);
+    }
+
+    public void loadRoles() {
+        ResourceBundle bundle = ResourceBundle.getBundle("roles");
+        String[] roles = bundle.getString(login).split(",");
+
+        for (final String role : roles) {
+            subject.getPrincipals().add(new Principal() {
+                public String getName() {
+                    return role.trim();
+                }
+            });
+        }
+
+
     }
 
     public boolean commit() throws LoginException {

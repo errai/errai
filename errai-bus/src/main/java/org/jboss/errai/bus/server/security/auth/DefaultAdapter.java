@@ -4,7 +4,7 @@ import com.google.gwt.core.client.GWT;
 import org.jboss.errai.bus.client.CommandMessage;
 
 
-public class DefaultAdapter implements AuthorizationAdapter {
+public class DefaultAdapter implements AuthenticationAdapter {
     public DefaultAdapter() {
         GWT.log("Warning: DefaultAdapter being used. This provides no security.", null);
     }

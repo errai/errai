@@ -152,7 +152,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         sendAll();
     }
 
-
     private void addSubscription(String subject, Object reference) {
         if (!subscriptions.containsKey(subject)) {
             subscriptions.put(subject, new ArrayList<Object>());
@@ -194,7 +193,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             }
         }
     }
-
 
     private com.google.gwt.user.client.Timer sendTimer;
 
@@ -300,7 +298,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                                     }
                                 });
                         break;
-
                 }
             }
         });
@@ -350,10 +347,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         }
         catch (RequestException e) {
             //todo: handle this.
-
         }
     }
-
 
     private void initializeMessagingBus(final HookCallback initCallback) {
         final SimplePanel heartBeat = new SimplePanel();
@@ -401,7 +396,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                                     schedule(1);
                                 }
                             }
-
                     );
                 }
                 catch (Exception e) {
@@ -418,7 +412,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 incoming.scheduleRepeating((60 * 45) * 1000);
             }
         };
-
 
         outerTimer.schedule(10);
     }
