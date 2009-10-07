@@ -116,8 +116,6 @@ public class MessageBusServiceImpl extends HttpServlet {
             parts.remove(MessageParts.SessionID.name());
         }
 
-        System.out.println("RcvMsgPacket: " + sb.toString());
-
         service.store(new CommandMessage()
                 .setParts(decodeToMap(sb.toString()))
                 .set(SecurityParts.SessionData, httpServletRequest.getSession()));
