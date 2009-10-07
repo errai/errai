@@ -46,8 +46,15 @@ public class PropertyFileLoginModule implements LoginModule {
 
         for (final String role : roles) {
             subject.getPrincipals().add(new Principal() {
+                private String name = role.trim();
+
                 public String getName() {
-                    return role.trim();
+                    return name;
+                }
+
+                @Override
+                public boolean equals(Object obj) {
+                    return name.equals(obj);
                 }
             });
         }

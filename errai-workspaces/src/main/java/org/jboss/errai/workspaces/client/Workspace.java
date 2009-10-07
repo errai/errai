@@ -81,6 +81,20 @@ public class Workspace implements EntryPoint {
         /**
          *  Declare the standard LoginClient here.
          */
+        bus.subscribe("ClientErrorService", new MessageCallback() {
+            public void callback(CommandMessage message) {
+                String errorMessage = message.get(String.class, MessageParts.ErrorMessage);
+
+                WSModalDialog errorDialog = new WSModalDialog();
+                errorDialog.ask(errorMessage, new AcceptsCallback() {
+                    public void callback(Object message, Object data) {
+                    }
+                });
+                errorDialog.showModal(); 
+            }
+        });
+
+
         bus.subscribe("LoginClient", new MessageCallback() {
             public void callback(CommandMessage message) {
                 try {
@@ -183,11 +197,6 @@ public class Workspace implements EntryPoint {
              * Specifiy a callback interface to execute the _initAfterWSLoad() tasks when we know the bus
              * is fully up and running.
              */
-//            bus.init(new HookCallback() {
-//                public void callback(String subject) {
-//                    _initAfterWSLoad();
-//                }
-//            });
         }
         catch (Exception e) {
             e.printStackTrace();

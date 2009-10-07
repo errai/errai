@@ -2,7 +2,9 @@ package org.jboss.errai.bus.server.security.auth.rules;
 
 import org.jboss.errai.bus.client.BooleanRoutingRule;
 import org.jboss.errai.bus.client.CommandMessage;
+import org.jboss.errai.bus.client.ConversationMessage;
 import org.jboss.errai.bus.client.MessageBus;
+import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
 import org.jboss.errai.bus.server.security.auth.AuthSubject;
@@ -10,6 +12,7 @@ import org.jboss.errai.bus.server.service.ErraiService;
 
 import javax.servlet.http.HttpSession;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 public class RolesRequiredRule implements BooleanRoutingRule {
@@ -48,9 +51,33 @@ public class RolesRequiredRule implements BooleanRoutingRule {
                 return false;
             }
 
-            Set<Object> sessionRoles = subject.getRoles();
+            if (!subject.getRoles().containsAll(requiredRoles)) {
+                ConversationMessage.create()
+                        .toSubject("ClientErrorService")
+                        .set(MessageParts.ErrorMessage, "Access denied to service: "
+                                + message.get(String.class, MessageParts.ToSubject) +
+                                " (Required Roles: [" + getRequiredRolesString() + "])")
+                        .sendNowWith(bus);
+                return false;
 
-            return sessionRoles.containsAll(requiredRoles);
+            }
+            else {
+                return true;
+            }
+
+
         }
+    }
+
+    private String getRequiredRolesString() {
+        StringBuilder builder = new StringBuilder();
+        Iterator<Object> iter = requiredRoles.iterator();
+
+        while (iter.hasNext()) {
+            builder.append(String.valueOf(iter.next()));
+            if (iter.hasNext()) builder.append(", ");
+        }
+
+        return builder.toString();
     }
 }
