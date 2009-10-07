@@ -26,7 +26,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <gwtHome>${env.GWT_HOME}</gwtHome>
+        <gwtHome>${gwt.home}</gwtHome>
         <gwt.version>2.0-SNAPSHOT</gwt.version>
         <gwt.maven>1.2-SNAPSHOT</gwt.maven>
         <guice.version>2.0</guice.version>
@@ -55,9 +55,18 @@
     </dependencyManagement>
 
     <build>
+
+        <!--
+            include module descriptors from src/main/java
+            in order not to break the Intellij GWT plugin
+        -->
+        <resources>
+            <resource>
+                <directory>src/main/java</directory>
+            </resource>
+        </resources>
+
         <plugins>
-
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-install-plugin</artifactId>

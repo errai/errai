@@ -26,14 +26,14 @@
             <artifactId>gwt-user</artifactId>
             <version>2.0-SNAPSHOT</version>
             <scope>system</scope>
-            <systemPath>${env.GWT_HOME}/gwt-user.jar</systemPath>
+            <systemPath>${gwt.home}/gwt-user.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.google.gwt</groupId>
             <artifactId>gwt-dev</artifactId>
-            <version>2.0-SNAPSHOT</version>
+            <version>${gwt.version}</version>
             <scope>system</scope>
-            <systemPath>${env.GWT_HOME}/gwt-dev-${platform}.jar</systemPath>
+            <systemPath>${gwt.home}/gwt-dev-${platform}.jar</systemPath>
             <classifier>${platform}</classifier>
         </dependency>
         <dependency>
