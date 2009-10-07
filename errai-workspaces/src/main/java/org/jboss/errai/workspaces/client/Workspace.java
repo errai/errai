@@ -51,6 +51,16 @@ public class Workspace implements EntryPoint {
     private static List<String> preferredGroupOrdering = new ArrayList<String>();
     private static Set<String> sessionRoles = new HashSet<String>();
 
+    private final Runnable negotiate = new Runnable() {
+            public void run() {
+                CommandMessage.create()
+                        .toSubject("ClientNegotiationService")
+                        .set(MessageParts.ReplyTo, "ClientConfiguratorService")
+                        .sendNowWith(ErraiClient.getBus());
+            }
+        };
+
+
     private Workspace() {
     }
 
@@ -99,8 +109,10 @@ public class Workspace implements EntryPoint {
 
                     switch (SecurityCommands.valueOf(message.getCommandType())) {
                         case SecurityChallenge:
-                            deferredMessage = new CommandMessage();
-                            deferredMessage.setParts(JSONUtilCli.decodeMap(message.get(String.class, SecurityParts.RejectedMessage)));
+                            if (message.hasPart(SecurityParts.RejectedMessage)) {
+                                deferredMessage = new CommandMessage();
+                                deferredMessage.setParts(JSONUtilCli.decodeMap(message.get(String.class, SecurityParts.RejectedMessage)));
+                            }
 
                             workspaceLayout.getUserInfoPanel().clear();
 
@@ -157,7 +169,22 @@ public class Workspace implements EntryPoint {
 
                             okButton.setFocus(true);
 
-                            bus.send(deferredMessage);
+
+                            if (deferredMessage != null) {
+                                /**
+                                 * Send the message that was originally rejected, and prompted the
+                                 * authentication requirement.
+                                 */
+                                bus.send(deferredMessage);
+                                deferredMessage = null;
+                            }
+                            else {
+                                /**
+                                 * Send the standard negotiation because no message was intercepted
+                                 * to resend
+                                 */
+                                negotiate.run();
+                            }
 
                             break;
 
@@ -194,7 +221,7 @@ public class Workspace implements EntryPoint {
      *
      * @param rootId -
      */
-    private void initWorkspace(String rootId) {
+    private void initWorkspace(final String rootId) {
         /**
          * Instantiate layout.
          */
@@ -202,10 +229,7 @@ public class Workspace implements EntryPoint {
 
         enableScrolling(false);
 
-        if (rootId != null) {
-            RootPanel.get(rootId).add(workspaceLayout);
-        }
-        else {
+        if (rootId == null) {
             Window.alert("No root ID specified!");
             return;
         }
@@ -218,14 +242,13 @@ public class Workspace implements EntryPoint {
 
         final ClientMessageBus bus = (ClientMessageBus) ErraiClient.getBus();
 
-        bus.addPostInitTask(new Runnable() {
-            public void run() {
-                CommandMessage.create()
-                        .toSubject("ClientNegotiationService")
-                        .set(MessageParts.ReplyTo, "ClientConfiguratorService")
-                        .sendNowWith(bus);
-            }
-        });
+
+        if (bus.isInitialized()) {
+            negotiate.run();
+        }
+        else {
+            bus.addPostInitTask(negotiate);
+        }
 
         /**
          * This service is used for setting up and restoring the session.
@@ -254,12 +277,22 @@ public class Workspace implements EntryPoint {
                                     CommandMessage.create(SecurityCommands.EndSession)
                                             .toSubject("AuthorizationService")
                                             .sendNowWith(bus);
+
+
+                                    bus.unsubscribeAll("org.jboss.errai.WorkspaceLayout");
+                                    sessionRoles.clear();
+
+                                    RootPanel.get(rootId).remove(workspaceLayout);
+                                    workspaceLayout = new WorkspaceLayout(rootId);
+
+
                                 }
                             });
 
                             workspaceLayout.getUserInfoPanel().add(userInfo);
                         }
 
+                        RootPanel.get(rootId).add(workspaceLayout);
                         renderToolPallete();
                     }
                 });
@@ -345,7 +378,7 @@ public class Workspace implements EntryPoint {
                 for (ToolSet ts : toBeLoaded) {
                     if (ts.getToolSetName().equals(group)) {
                         loaded.add(group);
-                        WorkspaceLayout.addToolSet(ts);
+                        workspaceLayout.addToolSet(ts);
                     }
                 }
 
@@ -379,7 +412,7 @@ public class Workspace implements EntryPoint {
                             }
                         };
 
-                        WorkspaceLayout.addToolSet(ts);
+                        workspaceLayout.addToolSet(ts);
                     }
                 }
             }
@@ -387,7 +420,7 @@ public class Workspace implements EntryPoint {
 
         for (ToolSet ts : toBeLoaded) {
             if (loaded.contains(ts.getToolSetName())) continue;
-            WorkspaceLayout.addToolSet(ts);
+            workspaceLayout.addToolSet(ts);
         }
 
         for (final String group : toBeLoadedGroups.keySet()) {
@@ -419,12 +452,14 @@ public class Workspace implements EntryPoint {
                     }
                 };
 
-                WorkspaceLayout.addToolSet(ts);
+                workspaceLayout.addToolSet(ts);
             }
         }
 
-        toBeLoadedGroups.clear();
         toBeLoaded.clear();
+        toBeLoadedGroups.clear();
+        preferredGroupOrdering.clear();
+        toolCounter = 0;
     }
 
 

@@ -11,4 +11,5 @@ public interface ClientMessageBus extends MessageBus {
     public void endCapture();
 
     public void addPostInitTask(Runnable run);
+    public boolean isInitialized();
 }

@@ -31,6 +31,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     private List<Runnable> postInitTasks = new ArrayList<Runnable>();
 
+    private boolean initialized = false;
+
 
     public ClientMessageBusImpl() {
         sendBuilder = new RequestBuilder(
@@ -266,6 +268,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
 
     public void init(final HookCallback callback) {
+        final MessageBus self = this;
 
         subscribe("ClientBus", new MessageCallback() {
             public void callback(CommandMessage message) {
@@ -286,22 +289,23 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                         for (String s : subscriptions.keySet()) {
                             if (s.startsWith("local:")) continue;
 
-                            send("ServerBus",
-                                    CommandMessage.create(BusCommands.RemoteSubscribe)
-                                            .set(MessageParts.Subject, s));
+                            CommandMessage.create(BusCommands.RemoteSubscribe)
+                                    .toSubject("ServerBus")
+                                    .set(MessageParts.Subject, s)
+                                    .sendNowWith(self);
                         }
 
                         for (Runnable run : postInitTasks) {
                             run.run();
                         }
 
+                        initialized = true;
+
                         break;
                 }
             }
         });
 
-
-        final MessageBus self = this;
         addSubscribeListener(new SubscribeListener() {
             public void onSubscribe(SubscriptionEvent event) {
                 CommandMessage.create(BusCommands.RemoteSubscribe)
@@ -346,6 +350,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         catch (RequestException e) {
             //todo: handle this.
         }
+    }
+
+    public boolean isInitialized() {
+        return initialized;
     }
 
     private void initializeMessagingBus(final HookCallback initCallback) {

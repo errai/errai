@@ -117,4 +117,10 @@ public class WSTabPanel extends Composite {
         super.onAttach();
         layoutPanel.setCellHeight(tabBar, tabBar.getOffsetHeight() + "px");
     }
+
+    public void clear() {
+        for (int i = 0; i < getWidgetCount(); i++) {
+            remove(i);
+        }
+    }
 }

@@ -15,14 +15,18 @@ import com.google.gwt.user.client.Window;
 import static com.google.gwt.user.client.Window.addResizeHandler;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.bus.client.*;
-import org.jboss.errai.common.client.framework.AcceptsCallback;
-import org.jboss.errai.widgets.client.*;
-import org.jboss.errai.widgets.client.effects.Effects;
-import org.jboss.errai.workspaces.client.framework.*;
-import org.jboss.errai.workspaces.client.listeners.TabCloseHandler;
 import org.jboss.errai.bus.client.json.JSONUtilCli;
 import org.jboss.errai.bus.client.protocols.LayoutCommands;
 import org.jboss.errai.bus.client.protocols.LayoutParts;
+import org.jboss.errai.common.client.framework.AcceptsCallback;
+import org.jboss.errai.widgets.client.WSElementWrapper;
+import org.jboss.errai.widgets.client.WSModalDialog;
+import org.jboss.errai.widgets.client.WSStackPanel;
+import org.jboss.errai.widgets.client.effects.Effects;
+import org.jboss.errai.workspaces.client.framework.Tool;
+import org.jboss.errai.workspaces.client.framework.ToolSet;
+import org.jboss.errai.workspaces.client.framework.WorkspaceSizeChangeListener;
+import org.jboss.errai.workspaces.client.listeners.TabCloseHandler;
 import org.jboss.errai.workspaces.client.widgets.*;
 import org.jboss.errai.workspaces.client.widgets.dnd.TabDragHandler;
 
@@ -156,9 +160,8 @@ public class WorkspaceLayout extends Composite {
                                 String instanceId = message.get(String.class, LayoutParts.InstanceID);
                                 closeTab(instanceId);
                                 break;
+
                         }
-
-
                     }
                 });
     }
@@ -304,7 +307,7 @@ public class WorkspaceLayout extends Composite {
      *
      * @param toolSet -
      */
-    public static void addToolSet(ToolSet toolSet) {
+    public void addToolSet(ToolSet toolSet) {
         Widget w = toolSet.getWidget();
         String id = "ToolSet_" + toolSet.getToolSetName().replace(" ", "_");
 
@@ -328,7 +331,7 @@ public class WorkspaceLayout extends Composite {
             RootPanel.get().add(launcherPanel);
         }
 
-         MessageBus bus = ErraiClient.getBus();
+        MessageBus bus = ErraiClient.getBus();
 
         CommandMessage.create(LayoutCommands.RegisterToolSet)
                 .toSubject("org.jboss.errai.WorkspaceLayout")
@@ -475,14 +478,14 @@ public class WorkspaceLayout extends Composite {
 
                         bus.subscribe(getInstanceSubject(instanceId),
                                 new MessageCallback() {
-                                    private Map<String, Set<Object>> toUnregister = ((ClientMessageBus)bus).getCapturedRegistrations();
+                                    private Map<String, Set<Object>> toUnregister = ((ClientMessageBus) bus).getCapturedRegistrations();
 
                                     public void callback(CommandMessage message) {
                                         switch (LayoutCommands.valueOf(message.getCommandType())) {
                                             case CloseTab:
                                                 tabDragController.unregisterDropController(newWSTab.getTabDropController());
 
-                                                ((ClientMessageBus)bus).unregisterAll(toUnregister);
+                                                ((ClientMessageBus) bus).unregisterAll(toUnregister);
 
                                                 deactivateTool(componentId);
 
@@ -501,7 +504,7 @@ public class WorkspaceLayout extends Composite {
                                     }
                                 });
 
-                        ((ClientMessageBus)bus).endCapture();
+                        ((ClientMessageBus) bus).endCapture();
 
                         Timer t = new Timer() {
                             public void run() {

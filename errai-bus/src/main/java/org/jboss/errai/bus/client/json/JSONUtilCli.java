@@ -81,8 +81,8 @@ public class JSONUtilCli {
                 }
             }
         }
-        else {
-            throw new RuntimeException("bad encoding");
+        else if (a != null) {
+            throw new RuntimeException("bad encoding: " + a);
         }
 
         return m;
