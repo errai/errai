@@ -56,6 +56,11 @@ public class PropertyFileLoginModule implements LoginModule {
                 public boolean equals(Object obj) {
                     return name.equals(obj);
                 }
+
+                @Override
+                public String toString() {
+                    return name;
+                }
             });
         }
 

@@ -94,7 +94,9 @@ public class JAASAdapter implements AuthenticationAdapter {
              * Prepare to send a message back to the client, informing it that a successful login has
              * been performed.
              */
-            ConversationMessage successfulMsg = ConversationMessage.create(SecurityCommands.SuccessfulAuth, message)
+            ConversationMessage successfulMsg = ConversationMessage.
+                    create(SecurityCommands.SuccessfulAuth, message)
+                    .set(SecurityParts.Roles, authSubject.toRolesString())
                     .set(SecurityParts.Name, name);
 
             try {

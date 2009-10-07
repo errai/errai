@@ -9,4 +9,6 @@ public interface ClientMessageBus extends MessageBus {
     
     public void beginCapture();
     public void endCapture();
+
+    public void addPostInitTask(Runnable run);
 }

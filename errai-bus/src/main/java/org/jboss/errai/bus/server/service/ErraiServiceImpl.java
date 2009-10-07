@@ -7,6 +7,7 @@ import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.ConversationMessage;
 import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.client.MessageCallback;
+import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
 import org.jboss.errai.bus.server.Module;
@@ -15,9 +16,11 @@ import org.jboss.errai.bus.server.annotations.LoadModule;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.annotations.security.RequireAuthentication;
 import org.jboss.errai.bus.server.annotations.security.RequireRoles;
+import org.jboss.errai.bus.server.security.auth.AuthSubject;
 import org.jboss.errai.bus.server.security.auth.AuthenticationAdapter;
 import org.jboss.errai.bus.server.security.auth.rules.RolesRequiredRule;
 
+import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
 import static java.lang.Thread.currentThread;
@@ -85,6 +88,22 @@ public class ErraiServiceImpl implements ErraiService {
             }
         });
 
+        bus.subscribe("ClientNegotiationService", new MessageCallback() {
+            public void callback(CommandMessage message) {
+                AuthSubject subject = (AuthSubject)
+                        message.get(HttpSession.class, SecurityParts.SessionData).getAttribute(ErraiService.SESSION_AUTH_DATA);
+
+                ConversationMessage reply = ConversationMessage.create(message);
+
+                if (subject != null) {
+                    reply.set(SecurityParts.Roles, subject.toRolesString());
+                    reply.set(SecurityParts.Name, subject.getUsername());
+                }
+
+                reply.sendNowWith(bus);
+            }
+        });
+
         loadConfig();
     }
 
@@ -130,7 +149,7 @@ public class ErraiServiceImpl implements ErraiService {
 
                 if ("errai.require_authentication_for_all".equals(key)) {
                     if("true".equals(erraiServiceConfig.getString(key))) {
-                        bus.addRule("ServerEchoService", new RolesRequiredRule(new HashSet<Object>(), bus));
+                        bus.addRule("ClientNegotiationService", new RolesRequiredRule(new HashSet<Object>(), bus));
                     }
                 }
 

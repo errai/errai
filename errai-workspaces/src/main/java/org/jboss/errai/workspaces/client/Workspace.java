@@ -9,10 +9,8 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import static com.google.gwt.user.client.Window.enableScrolling;
 import com.google.gwt.user.client.ui.*;
-import org.jboss.errai.bus.client.CommandMessage;
-import org.jboss.errai.bus.client.ErraiClient;
-import org.jboss.errai.bus.client.MessageBus;
-import org.jboss.errai.bus.client.MessageCallback;
+import org.jboss.errai.bus.client.*;
+import org.jboss.errai.bus.client.json.JSONUtilCli;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
@@ -21,10 +19,7 @@ import org.jboss.errai.common.client.framework.AcceptsCallback;
 import org.jboss.errai.common.client.framework.WSComponent;
 import org.jboss.errai.widgets.client.WSModalDialog;
 import org.jboss.errai.widgets.client.WSWindowPanel;
-import org.jboss.errai.workspaces.client.framework.ModuleLoaderBootstrap;
-import org.jboss.errai.workspaces.client.framework.Tool;
-import org.jboss.errai.workspaces.client.framework.ToolImpl;
-import org.jboss.errai.workspaces.client.framework.ToolSet;
+import org.jboss.errai.workspaces.client.framework.*;
 import org.jboss.errai.workspaces.client.layout.WorkspaceLayout;
 import org.jboss.errai.workspaces.client.widgets.WSLoginPanel;
 
@@ -52,8 +47,9 @@ public class Workspace implements EntryPoint {
     }
 
     private static List<ToolSet> toBeLoaded = new ArrayList<ToolSet>();
-    private static Map<String, List<Tool>> toBeLoadedGroups = new HashMap<String, List<Tool>>();
+    private static Map<String, List<ToolProvider>> toBeLoadedGroups = new HashMap<String, List<ToolProvider>>();
     private static List<String> preferredGroupOrdering = new ArrayList<String>();
+    private static Set<String> sessionRoles = new HashSet<String>();
 
     private Workspace() {
     }
@@ -90,17 +86,21 @@ public class Workspace implements EntryPoint {
                     public void callback(Object message, Object data) {
                     }
                 });
-                errorDialog.showModal(); 
+                errorDialog.showModal();
             }
         });
 
 
         bus.subscribe("LoginClient", new MessageCallback() {
+            private CommandMessage deferredMessage;
+
             public void callback(CommandMessage message) {
                 try {
 
                     switch (SecurityCommands.valueOf(message.getCommandType())) {
                         case SecurityChallenge:
+                            deferredMessage = new CommandMessage();
+                            deferredMessage.setParts(JSONUtilCli.decodeMap(message.get(String.class, SecurityParts.RejectedMessage)));
 
                             workspaceLayout.getUserInfoPanel().clear();
 
@@ -122,23 +122,6 @@ public class Workspace implements EntryPoint {
                         case SuccessfulAuth:
                             closeLoginPanel();
 
-                            HorizontalPanel userInfo = new HorizontalPanel();
-                            Label userName = new Label(message.get(String.class, SecurityParts.Name));
-                            userName.getElement().getStyle().setProperty("fontWeight", "bold");
-
-                            userInfo.add(userName);
-                            Button logout = new Button("Logout");
-                            logout.setStyleName("logoutButton");
-                            userInfo.add(logout);
-                            logout.addClickHandler(new ClickHandler() {
-                                public void onClick(ClickEvent event) {
-                                    CommandMessage.create(SecurityCommands.EndSession)
-                                            .toSubject("AuthorizationService")
-                                            .sendNowWith(bus);
-                                }
-                            });
-
-                            workspaceLayout.getUserInfoPanel().add(userInfo);
 
                             final WSWindowPanel welcome = new WSWindowPanel();
                             welcome.setWidth("250px");
@@ -173,6 +156,9 @@ public class Workspace implements EntryPoint {
                             welcome.center();
 
                             okButton.setFocus(true);
+
+                            bus.send(deferredMessage);
+
                             break;
 
                         default:
@@ -218,7 +204,8 @@ public class Workspace implements EntryPoint {
 
         if (rootId != null) {
             RootPanel.get(rootId).add(workspaceLayout);
-        } else {
+        }
+        else {
             Window.alert("No root ID specified!");
             return;
         }
@@ -228,76 +215,56 @@ public class Workspace implements EntryPoint {
          */
         dragController = new PickupDragController(RootPanel.get(), true);
 
-        /*
-         * Process any modules that were compiled in at compile time here.
-         */
-        ModuleLoaderBootstrap mlb = create(ModuleLoaderBootstrap.class);
-        mlb.initAll(workspaceLayout);
 
-        Set<String> loaded = new HashSet<String>();
-        if (!preferredGroupOrdering.isEmpty()) {
-            for (final String group : preferredGroupOrdering) {
-                if (loaded.contains(group)) continue;
+        final ClientMessageBus bus = (ClientMessageBus) ErraiClient.getBus();
 
-                for (ToolSet ts : toBeLoaded) {
-                    if (ts.getToolSetName().equals(group)) {
-                        loaded.add(group);
-                        WorkspaceLayout.addToolSet(ts);
-                    }
-                }
-
-                if (loaded.contains(group)) continue;
-
-                if (toBeLoadedGroups.containsKey(group)) {
-                    loaded.add(group);
-
-                    ToolSet ts = new ToolSet() {
-                        public Tool[] getAllProvidedTools() {
-                            Tool[] toolArray = new Tool[toBeLoadedGroups.get(group).size()];
-                            toBeLoadedGroups.get(group).toArray(toolArray);
-                            return toolArray;
-                        }
-
-                        public String getToolSetName() {
-                            return group;
-                        }
-
-                        public Widget getWidget() {
-                            return null;
-                        }
-                    };
-
-                    WorkspaceLayout.addToolSet(ts);
-                }
+        bus.addPostInitTask(new Runnable() {
+            public void run() {
+                CommandMessage.create()
+                        .toSubject("ClientNegotiationService")
+                        .set(MessageParts.ReplyTo, "ClientConfiguratorService")
+                        .sendNowWith(bus);
             }
-        }
+        });
 
-        for (ToolSet ts : toBeLoaded) {
-            if (loaded.contains(ts.getToolSetName())) continue;
-            WorkspaceLayout.addToolSet(ts);
-        }
+        /**
+         * This service is used for setting up and restoring the session.
+         */
+        bus.subscribe("ClientConfiguratorService",
+                new MessageCallback() {
+                    public void callback(CommandMessage message) {
+                        if (message.hasPart(SecurityParts.Roles)) {
+                            String[] roleStrs = message.get(String.class, SecurityParts.Roles).split(",");
+                            for (String s : roleStrs) {
+                                sessionRoles.add(s.trim());
+                            }
+                        }
 
-        for (final String group : toBeLoadedGroups.keySet()) {
-            if (loaded.contains(group)) continue;
+                        if (message.hasPart(SecurityParts.Name)) {
+                            HorizontalPanel userInfo = new HorizontalPanel();
+                            Label userName = new Label(message.get(String.class, SecurityParts.Name));
+                            userName.getElement().getStyle().setProperty("fontWeight", "bold");
 
-            ToolSet ts = new ToolSet() {
-                public Tool[] getAllProvidedTools() {
-                    Tool[] toolArray = new Tool[toBeLoadedGroups.get(group).size()];
-                    toBeLoadedGroups.get(group).toArray(toolArray);
-                    return toolArray;
-                }
+                            userInfo.add(userName);
+                            Button logout = new Button("Logout");
+                            logout.setStyleName("logoutButton");
+                            userInfo.add(logout);
+                            logout.addClickHandler(new ClickHandler() {
+                                public void onClick(ClickEvent event) {
+                                    CommandMessage.create(SecurityCommands.EndSession)
+                                            .toSubject("AuthorizationService")
+                                            .sendNowWith(bus);
+                                }
+                            });
 
-                public String getToolSetName() {
-                    return group;
-                }
+                            workspaceLayout.getUserInfoPanel().add(userInfo);
+                        }
 
-                public Widget getWidget() {
-                    return null;
-                }
-            };
+                        renderToolPallete();
+                    }
+                });
 
-            WorkspaceLayout.addToolSet(ts);
-        }
+
     }
 
     public static SecurityService getSecurityService() {
@@ -319,15 +286,147 @@ public class Workspace implements EntryPoint {
     private static int toolCounter = 0;
 
     public static void addTool(String group, String name, String icon, boolean multipleAllowed, int priority, WSComponent component) {
-        if (!toBeLoadedGroups.containsKey(group)) toBeLoadedGroups.put(group, new ArrayList<Tool>());
+        if (!toBeLoadedGroups.containsKey(group)) toBeLoadedGroups.put(group, new ArrayList<ToolProvider>());
 
         final String toolId = name.replaceAll(" ", "_") + "." + toolCounter++;
         if (icon == null || "".equals(icon)) {
             icon = "/images/ui/icons/application.png";
         }
 
-        toBeLoadedGroups.get(group).add(new ToolImpl(name, toolId, multipleAllowed, new Image(GWT.getModuleBaseURL() + icon), component));
+        final Tool toolImpl = new ToolImpl(name, toolId, multipleAllowed, new Image(GWT.getModuleBaseURL() + icon), component);
+        ToolProvider provider = new ToolProvider() {
+            public Tool getTool() {
+                return toolImpl;
+            }
+        };
+
+        toBeLoadedGroups.get(group).add(provider);
     }
+
+    public static void addTool(String group, String name, String icon, boolean multipleAllowed, int prioerty, WSComponent component, final String[] renderIfRoles) {
+        if (!toBeLoadedGroups.containsKey(group)) toBeLoadedGroups.put(group, new ArrayList<ToolProvider>());
+
+        final String toolId = name.replaceAll(" ", "_") + "." + toolCounter++;
+        if (icon == null || "".equals(icon)) {
+            icon = "/images/ui/icons/application.png";
+        }
+
+        final Set<String> roles = new HashSet<String>();
+
+        for (String role : renderIfRoles) {
+            roles.add(role.trim());
+        }
+
+
+        final Tool toolImpl = new ToolImpl(name, toolId, multipleAllowed, new Image(GWT.getModuleBaseURL() + icon), component);
+        ToolProvider provider = new ToolProvider() {
+            public Tool getTool() {
+                if (sessionRoles.containsAll(roles)) {
+                    return toolImpl;
+                }
+                else {
+                    return null;
+                }
+            }
+        };
+
+        toBeLoadedGroups.get(group).add(provider);
+    }
+
+    public void renderToolPallete() {
+        ModuleLoaderBootstrap mlb = create(ModuleLoaderBootstrap.class);
+        mlb.initAll(workspaceLayout);
+
+        Set<String> loaded = new HashSet<String>();
+        if (!preferredGroupOrdering.isEmpty()) {
+            for (final String group : preferredGroupOrdering) {
+                if (loaded.contains(group)) continue;
+
+                for (ToolSet ts : toBeLoaded) {
+                    if (ts.getToolSetName().equals(group)) {
+                        loaded.add(group);
+                        WorkspaceLayout.addToolSet(ts);
+                    }
+                }
+
+                if (loaded.contains(group)) continue;
+
+                if (toBeLoadedGroups.containsKey(group)) {
+                    loaded.add(group);
+
+                    final List<Tool> toBeRendered = new ArrayList<Tool>();
+                    for (ToolProvider provider : toBeLoadedGroups.get(group)) {
+                        Tool t = provider.getTool();
+                        if (t != null) {
+                            toBeRendered.add(t);
+                        }
+                    }
+
+                    if (!toBeRendered.isEmpty()) {
+                        ToolSet ts = new ToolSet() {
+                            public Tool[] getAllProvidedTools() {
+                                Tool[] toolArray = new Tool[toBeRendered.size()];
+                                toBeRendered.toArray(toolArray);
+                                return toolArray;
+                            }
+
+                            public String getToolSetName() {
+                                return group;
+                            }
+
+                            public Widget getWidget() {
+                                return null;
+                            }
+                        };
+
+                        WorkspaceLayout.addToolSet(ts);
+                    }
+                }
+            }
+        }
+
+        for (ToolSet ts : toBeLoaded) {
+            if (loaded.contains(ts.getToolSetName())) continue;
+            WorkspaceLayout.addToolSet(ts);
+        }
+
+        for (final String group : toBeLoadedGroups.keySet()) {
+            if (loaded.contains(group)) continue;
+
+            final List<Tool> toBeRendered = new ArrayList<Tool>();
+            for (ToolProvider provider : toBeLoadedGroups.get(group)) {
+                Tool t = provider.getTool();
+                if (t != null) {
+                    toBeRendered.add(t);
+                }
+            }
+
+            if (!toBeRendered.isEmpty()) {
+
+                ToolSet ts = new ToolSet() {
+                    public Tool[] getAllProvidedTools() {
+                        Tool[] toolArray = new Tool[toBeRendered.size()];
+                        toBeRendered.toArray(toolArray);
+                        return toolArray;
+                    }
+
+                    public String getToolSetName() {
+                        return group;
+                    }
+
+                    public Widget getWidget() {
+                        return null;
+                    }
+                };
+
+                WorkspaceLayout.addToolSet(ts);
+            }
+        }
+
+        toBeLoadedGroups.clear();
+        toBeLoaded.clear();
+    }
+
 
     public static void setPreferredGroupOrdering(String[] groups) {
         preferredGroupOrdering.addAll(Arrays.asList(groups));

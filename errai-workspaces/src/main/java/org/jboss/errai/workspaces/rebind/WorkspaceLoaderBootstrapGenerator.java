@@ -9,6 +9,7 @@ import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
+import org.jboss.errai.bus.server.annotations.security.RequireRoles;
 import org.jboss.errai.workspaces.client.framework.annotations.GroupOrder;
 import org.jboss.errai.workspaces.client.framework.annotations.LoadTool;
 import org.jboss.errai.workspaces.client.framework.annotations.LoadToolSet;
@@ -165,9 +166,27 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
                     else if (clazz.isAnnotationPresent(LoadTool.class)) {
                         LoadTool loadTool = (LoadTool) clazz.getAnnotation(LoadTool.class);
 
-                        writer.println("org.jboss.errai.workspaces.client.Workspace.addTool(\"" + loadTool.group() + "\"," +
-                                " \"" + loadTool.name() + "\", \"" + loadTool.icon() + "\", " + loadTool.multipleAllowed()
-                                + ", " + loadTool.priority() + ", new " + clazz.getName() + "());");
+                        if (clazz.isAnnotationPresent(RequireRoles.class)) {
+                            RequireRoles requireRoles = (RequireRoles) clazz.getAnnotation(RequireRoles.class);
+
+                            StringBuilder rolesBuilder = new StringBuilder("new String[] {");
+                            String[] roles = requireRoles.value();
+
+                            for (int i = 0; i < roles.length; i++) {
+                                rolesBuilder.append("\"").append(roles[i].trim()).append("\"");
+                                if ((i + 1) < roles.length) rolesBuilder.append(", ");
+                            }
+                            rolesBuilder.append("}");
+
+                            writer.println("org.jboss.errai.workspaces.client.Workspace.addTool(\"" + loadTool.group() + "\"," +
+                                    " \"" + loadTool.name() + "\", \"" + loadTool.icon() + "\", " + loadTool.multipleAllowed()
+                                    + ", " + loadTool.priority() + ", new " + clazz.getName() + "(), " + rolesBuilder.toString() + ");");
+                        }
+                        else {
+                            writer.println("org.jboss.errai.workspaces.client.Workspace.addTool(\"" + loadTool.group() + "\"," +
+                                    " \"" + loadTool.name() + "\", \"" + loadTool.icon() + "\", " + loadTool.multipleAllowed()
+                                    + ", " + loadTool.priority() + ", new " + clazz.getName() + "());");
+                        }
                     }
                     else if (clazz.isAnnotationPresent(LoginComponent.class)) {
                         writer.println("org.jboss.errai.workspaces.client.Workspace.setLoginComponent(new " + clazz.getName() + "());");
@@ -186,7 +205,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
                             writer.print(order[i].trim());
                             writer.print("\"");
 
-                            if (i+1<order.length) {
+                            if (i + 1 < order.length) {
                                 writer.print(",");
                             }
                         }

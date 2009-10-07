@@ -10,7 +10,9 @@ import java.io.Serializable;
 import java.util.Map;
 
 public class MessageBusServer {
-
+    public static void main(String[] args) {
+        System.out.println("\"".replaceAll("\"", "\\\\\""));
+    }
 
     public static CommandMessage decodeToCommandMessage(Object in) {
         return new CommandMessage(decodeMap(in));
@@ -39,7 +41,7 @@ public class MessageBusServer {
                 if (!first) {
                     buf.append(", ");
                 }
-                buf.append("\"").append(entry.getKey()).append("\"").append(":").append("\"").append(v).append("\"");
+                buf.append("\"").append(entry.getKey()).append("\"").append(":").append("\"").append(((String) v).replaceAll("\"", "\\\\\"")).append("\"");
                 first = false;
 
             }

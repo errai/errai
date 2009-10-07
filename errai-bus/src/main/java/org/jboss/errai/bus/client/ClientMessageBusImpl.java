@@ -1,6 +1,5 @@
 package org.jboss.errai.bus.client;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.ui.HTML;
@@ -29,6 +28,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     private boolean transmitting = false;
 
     private Map<String, Set<Object>> registeredInThisSession = new HashMap<String, Set<Object>>();
+
+    private List<Runnable> postInitTasks = new ArrayList<Runnable>();
 
 
     public ClientMessageBusImpl() {
@@ -290,13 +291,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                                             .set(MessageParts.Subject, s));
                         }
 
-                        conversationWith(CommandMessage.create().toSubject("ServerEchoService"),
-                                new MessageCallback() {
-                                    public void callback(CommandMessage message) {
-                                        GWT.log("Finishing initializing of Client Bus...", null);
-                                        if (callback != null) callback.callback(null);
-                                    }
-                                });
+                        for (Runnable run : postInitTasks) {
+                            run.run();
+                        }
+
                         break;
                 }
             }
@@ -416,6 +414,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         outerTimer.schedule(10);
     }
 
+
+    public void addPostInitTask(Runnable run) {
+        postInitTasks.add(run);
+    }
 
     public void addGlobalListener(MessageListener listener) {
     }

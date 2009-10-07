@@ -7,6 +7,8 @@ import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
+import org.jboss.errai.bus.server.MessageBusServer;
+import org.jboss.errai.bus.server.json.JSONUtil;
 import org.jboss.errai.bus.server.security.auth.AuthSubject;
 import org.jboss.errai.bus.server.service.ErraiService;
 
@@ -47,6 +49,7 @@ public class RolesRequiredRule implements BooleanRoutingRule {
                         .set(SecurityParts.CredentialsRequired, "Name,Password")
                         .set(SecurityParts.ReplyTo, ErraiService.AUTHORIZATION_SVC_SUBJECT)
                         .set(SecurityParts.SessionData, message.get(HttpSession.class, SecurityParts.SessionData))
+                        .set(SecurityParts.RejectedMessage, MessageBusServer.encodeMap(message.getParts()))
                         , false);
                 return false;
             }
