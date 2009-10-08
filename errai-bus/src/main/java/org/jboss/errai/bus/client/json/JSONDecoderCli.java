@@ -42,18 +42,8 @@ public class JSONDecoderCli {
     private Map<String, Object> decodeObject(JSONObject eMap) {
         Map<String, Object> m = new HashMap<String, Object>();
 
-        for (String key : eMap.keySet()) {
-            JSONValue v = eMap.get(key);
-
-            if (v.isString() != null) {
-                m.put(key, v.isString().stringValue());
-            } else if (v.isNumber() != null) {
-                m.put(key, v.isNumber().doubleValue());
-            } else if (v.isBoolean() != null) {
-                m.put(key, v.isBoolean().booleanValue());
-            } else if (v.isNull() != null) {
-                m.put(key, null);
-            }
+        for (String key : eMap.keySet()) {            
+            m.put(key, _decode(eMap.get(key)));
         }
 
         return m;

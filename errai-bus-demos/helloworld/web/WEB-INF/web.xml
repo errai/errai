@@ -6,18 +6,16 @@
            version="2.5">
 
     <filter>
-          <filter-name>guiceFilter</filter-name>
-          <filter-class>com.google.inject.servlet.GuiceFilter</filter-class>
-      </filter>
+        <filter-name>guiceFilter</filter-name>
+        <filter-class>com.google.inject.servlet.GuiceFilter</filter-class>
+    </filter>
 
-      <filter-mapping>
-          <filter-name>guiceFilter</filter-name>
-          <url-pattern>/*</url-pattern>
-      </filter-mapping>
+    <filter-mapping>
+        <filter-name>guiceFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
 
-      <listener>
-          <listener-class>org.jboss.errai.bus.server.MessageBusServletConfig</listener-class>
-      </listener>
-
-
+    <listener>
+        <listener-class>org.jboss.errai.bus.server.MessageBusServletConfig</listener-class>
+    </listener>
 </web-app>

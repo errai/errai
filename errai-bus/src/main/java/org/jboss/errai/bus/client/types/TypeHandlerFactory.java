@@ -40,10 +40,11 @@ public class TypeHandlerFactory {
     }
 
     public static Object convert(Class from, Class to, Object value) {
+        if (value.getClass() == to) return value;
         Map<Class, TypeHandler> toHandlers = getHandler(from);
-        if (toHandlers == null) throw new RuntimeException("Can't convert from: " + from.getName());
+        if (toHandlers == null) return value;
         TypeHandler handler = toHandlers.get(to);
-        if (handler == null) throw new RuntimeException("Can't convert to: " + to.getName());
+        if (handler == null) return value;
         return handler.getConverted(value);
     }
 }
