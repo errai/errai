@@ -26,8 +26,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <gwt.home>${env.GWT_HOME}</gwt.home>        
-        <gwt.version>2.0-SNAPSHOT</gwt.version>
+        <gwt.version>2.0.0-6320</gwt.version>
         <gwt.maven>1.2.jboss</gwt.maven>
         <guice.version>2.0</guice.version>
     </properties>
@@ -41,6 +40,34 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>com.google.gwt</groupId>
+                <artifactId>gwt-servlet</artifactId>
+                <version>${gwt.version}</version>
+                <scope>compile</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.gwt</groupId>
+                <artifactId>gwt-user</artifactId>
+                <version>${gwt.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.gwt</groupId>
+                <artifactId>gwt-dev-${platform}</artifactId>
+                <version>${gwt.version}</version>                
+                <scope>provided</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.gwt</groupId>
+                <artifactId>gwt-dev-oophm</artifactId>
+                <version>${gwt.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
             <dependency>
                 <groupId>com.google.code.guice</groupId>
                 <artifactId>guice</artifactId>
