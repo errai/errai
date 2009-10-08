@@ -95,38 +95,7 @@ public class JSONUtilCli {
     }
 
     public static String encodeMap(Map<String, Object> map) {
-        if (map.size() == 0) return "{}";
-
-        StringBuffer buf = new StringBuffer("{");
-        Object v;
-
-        int i = 0;
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
-
-            buf.append("\"").append(entry.getKey()).append("\"").append(":");
-
-            v = entry.getValue();
-            if (v == null) {
-                buf.append("null");
-            }
-            else if (v instanceof String) {
-                buf.append("\"").append(v).append("\"");
-            }
-            else if (v instanceof Number) {
-                buf.append(v);
-            }
-            else if (v instanceof Boolean) {
-                buf.append(v);
-            }
-            else {
-                throw new RuntimeException("cannot encode element type: " + v);
-            }
-
-            if (++i < map.size()) buf.append(", ");
-        }
-
-
-        return buf.append("}").toString();
+        return new JSONEncoderCli().encode(map);
     }
 
 }
