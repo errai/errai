@@ -15,8 +15,8 @@ import java.util.Map;
 public class JSONUtilCli {
 
     public static ArrayList<Message> decodePayload(Object value) {
-
         String str = String.valueOf(value);
+
         if (value == null || str.trim().length() == 0) return new ArrayList<Message>(0);
 
         ArrayList<Message> list = new ArrayList<Message>();
@@ -38,6 +38,7 @@ public class JSONUtilCli {
                         }
 
                         public Object getMessage() {
+
                             return eMap.get(subject);
                         }
                     });

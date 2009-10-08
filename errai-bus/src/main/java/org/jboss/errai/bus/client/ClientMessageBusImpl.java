@@ -57,14 +57,22 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         }
     }
 
-    public void subscribe(String subject, MessageCallback callback, Object subscriberData) {
-        fireAllSubcribeListener(subject);
-        addSubscription(subject, _subscribe(subject, callback, subscriberData));
-    }
 
-    public void subscribe(String subject, MessageCallback callback) {
+    public void subscribe(final String subject, final MessageCallback callback) {
         fireAllSubcribeListener(subject);
-        addSubscription(subject, _subscribe(subject, callback, null));
+
+        MessageCallback dispatcher = new MessageCallback() {
+            public void callback(CommandMessage message) {
+                try {
+                    callback.callback(message);
+                }
+                catch (Exception e) {
+                    showError("Receiver '" + subject + "' threw an exception", decodeCommandMessage(message), e);
+                }
+            }
+        };
+
+        addSubscription(subject, _subscribe(subject, dispatcher, null));
     }
 
     private void fireAllSubcribeListener(String subject) {
@@ -399,22 +407,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                                         schedule(1);
                                     }
                                     catch (Exception e) {
-                                        DialogBox errorDialog = new DialogBox();
-
-                                        VerticalPanel panel = new VerticalPanel();
-                                        panel.add(new HTML("<strong>CLIENT-SERVER CONNECTION ENDED DUE TO CRITICAL EXCEPTION:</strong>"));
-
-                                        ScrollPanel scrollPanel = new ScrollPanel();
-                                        scrollPanel.add(new HTML(response.getText()));
-                                        scrollPanel.setAlwaysShowScrollBars(true);
-                                        scrollPanel.setHeight("500px");
-
-                                        panel.add(scrollPanel);
-
-                                        errorDialog.add(panel);
-
-                                        errorDialog.center();
-                                        errorDialog.show();
+                                        showError("Errai MessageBus Disconnected Due to Fatal Error", response.getText(), e);
                                     }
                                 }
                             }
@@ -475,9 +468,59 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                   null);
      }-*/;
 
-    public native static void store(String subject, Object value) /*-{
+    public static void store(String subject, Object value) {
+        try {
+            _store(subject, value);
+        }
+        catch (Exception e) {
+            showError("Receiver for '" + subject + "' threw an exception", "Unknown", e);
+        }
+    }
+
+    public native static void _store(String subject, Object value) /*-{
           $wnd.PageBus.store(subject, value);
      }-*/;
 
+
+    private static final String decodeCommandMessage(CommandMessage msg) {
+        StringBuffer decode = new StringBuffer(
+                "<table><thead style='font-weight:bold;'><tr><td>Field</td><td>Value</td></tr></thead><tbody>");
+
+        for (Map.Entry<String, Object> entry : msg.getParts().entrySet()) {
+            decode.append("<tr><td>").append(entry.getKey()).append("</td><td>").append(entry.getValue()).append("</td></tr>");
+        }
+        decode.append("</tbody></table>");
+
+        return decode.toString();
+
+    }
+
+    private static final void showError(String message, String additionalDetails, Throwable e) {
+        DialogBox errorDialog = new DialogBox();
+
+        StringBuffer buildTrace = new StringBuffer("<tt>");
+        buildTrace.append(e.getClass().getName()).append(": ").append(e.getMessage()).append("<br/>");
+        for (StackTraceElement ste : e.getStackTrace()) {
+            buildTrace.append(ste.toString()).append("<br/>");
+        }
+
+
+        VerticalPanel panel = new VerticalPanel();
+        panel.getElement().getStyle().setProperty("border", "1px");
+
+        panel.add(new HTML("<strong>" + message + "</strong>"));
+
+        ScrollPanel scrollPanel = new ScrollPanel();
+        scrollPanel.add(new HTML(buildTrace.toString() + "<br/><strong>Additional Details:</strong>" + additionalDetails + "</tt>"));
+        scrollPanel.setAlwaysShowScrollBars(true);
+        scrollPanel.setHeight("500px");
+
+        panel.add(scrollPanel);
+
+        errorDialog.add(panel);
+
+        errorDialog.center();
+        errorDialog.show();
+    }
 
 }

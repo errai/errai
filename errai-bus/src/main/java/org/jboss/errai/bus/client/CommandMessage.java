@@ -97,16 +97,8 @@ public class CommandMessage {
     @SuppressWarnings({"UnusedDeclaration"})
     public <T> T get(Class<T> type, Enum part) {
         //noinspection unchecked
-        Object value = parts.get(part.name());
-        try {
-            return (T) value;
-        }
-        catch (ClassCastException e) {
-            // try converstion.  Unfortunately since the GWT Client Emulation library
-            // does not implement Class.isAssignableFrom(), doing this via a CCE is currently
-            // the most efficient way to implement this.
-            return (T) TypeHandlerFactory.convert(value.getClass(), type, value);
-        }
+        Object value = parts.get(part.toString());
+        return value == null ? null : (T) TypeHandlerFactory.convert(value.getClass(), type, value);
 
 
     }
@@ -115,16 +107,7 @@ public class CommandMessage {
     public <T> T get(Class<T> type, String part) {
         //noinspection unchecked
         Object value = parts.get(part);
-        try {
-            return (T) value;
-        }
-        catch (ClassCastException e) {
-            // try converstion.  Unfortunately since the GWT Client Emulation library
-            // does not implement Class.isAssignableFrom(), doing this via a CCE is currently
-            // the most efficient way to implement this.
-            return (T) TypeHandlerFactory.convert(value.getClass(), type, value);
-        }
-
+        return value == null ? null : (T) TypeHandlerFactory.convert(value.getClass(), type, value);
     }
 
     public boolean hasPart(Enum part) {
