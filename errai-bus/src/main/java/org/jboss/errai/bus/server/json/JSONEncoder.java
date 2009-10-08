@@ -1,7 +1,6 @@
 package org.jboss.errai.bus.server.json;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -15,8 +14,11 @@ public class JSONEncoder {
     public String _encode(Object v) {
         if (v == null) {
             return "null";
-        } else if (v instanceof String || v instanceof Number || v instanceof Boolean) {
-            return "\"" + v + "\"";
+        } else if (v instanceof String) {
+            return "\"" + ((String) v).replaceAll("\"", "\\\\\"") + "\"";
+        }
+        if (v instanceof Number || v instanceof Boolean) {
+            return String.valueOf(v);
         } else if (v instanceof Collection) {
             return encodeCollection((Collection) v);
         } else if (v instanceof Map) {
