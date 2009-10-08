@@ -1,6 +1,7 @@
 package org.jboss.errai.bus.client;
 
 import org.jboss.errai.bus.client.protocols.MessageParts;
+import org.jboss.errai.bus.client.types.TypeHandlerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -96,13 +97,23 @@ public class CommandMessage {
     @SuppressWarnings({"UnusedDeclaration"})
     public <T> T get(Class<T> type, Enum part) {
         //noinspection unchecked
-        return (T) parts.get(part.name());
+        Object value = parts.get(part.name());
+        if (value == null || type == value.getClass()) {
+            return (T) value;
+        } else {
+            return (T) TypeHandlerFactory.convert(part.getClass(), type, value);
+        }
     }
 
     @SuppressWarnings({"UnusedDeclaration"})
     public <T> T get(Class<T> type, String part) {
         //noinspection unchecked
-        return (T) parts.get(part);
+        Object value = parts.get(part);
+        if (value == null || type == value.getClass()) {
+            return (T) value;
+        } else {
+            return (T) TypeHandlerFactory.convert(part.getClass(), type, value);
+        }
     }
 
     public boolean hasPart(Enum part) {
