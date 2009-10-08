@@ -498,7 +498,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     private static void showError(String message, String additionalDetails, Throwable e) {
         DialogBox errorDialog = new DialogBox();
 
-
         StringBuffer buildTrace = new StringBuffer("<tt>");
         buildTrace.append(e.getClass().getName()).append(": ").append(e.getMessage()).append("<br/>");
         for (StackTraceElement ste : e.getStackTrace()) {

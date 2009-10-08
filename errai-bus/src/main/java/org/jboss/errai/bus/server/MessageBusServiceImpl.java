@@ -48,6 +48,7 @@ public class MessageBusServiceImpl extends HttpServlet {
 
         httpServletResponse.setHeader("Cache-Control", "no-cache");
         httpServletResponse.addHeader("Payload-Size", String.valueOf(messages.size()));
+        httpServletResponse.setContentType("application/json");
         OutputStream stream = httpServletResponse.getOutputStream();
 
         Iterator<Message> iter = messages.iterator();
@@ -119,5 +120,22 @@ public class MessageBusServiceImpl extends HttpServlet {
         service.store(new CommandMessage()
                 .setParts(decodeToMap(sb.toString()))
                 .set(SecurityParts.SessionData, httpServletRequest.getSession()));
+
+        OutputStream stream = httpServletResponse.getOutputStream();
+
+        stream.write('<');
+        stream.write('n');
+        stream.write('u');
+        stream.write('l');
+        stream.write('l');
+        stream.write('>');
+        stream.write('<');
+        stream.write('/');
+        stream.write('n');
+        stream.write('u');
+        stream.write('l');
+        stream.write('l');
+        stream.write('>');
+        stream.close();
     }
 }
