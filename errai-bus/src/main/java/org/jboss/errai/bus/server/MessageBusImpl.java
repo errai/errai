@@ -178,13 +178,13 @@ public class MessageBusImpl implements ServerMessageBus {
 
                 store((String) message.get(HttpSession.class, SecurityParts.SessionData).getAttribute(WS_SESSION_ID),
                         message.get(String.class, MessageParts.ReplyTo),
-                        MessageBusServer.encodeMap(CommandMessage.create(SecurityCommands.MessageNotDelivered).getParts()));
+                        MessageBusServer.encodeJSON(CommandMessage.create(SecurityCommands.MessageNotDelivered).getParts()));
             }
 
             return;
         }
 
-        final String jsonMessage = MessageBusServer.encodeMap(message.getParts());
+        final String jsonMessage = MessageBusServer.encodeJSON(message.getParts());
 
         if (subscriptions.containsKey(subject)) {
             for (MessageCallback c : subscriptions.get(subject)) {
@@ -243,13 +243,13 @@ public class MessageBusImpl implements ServerMessageBus {
         if (fireListeners && !fireGlobalMessageListeners(message)) {
             if (message.hasPart(MessageParts.ReplyTo)) {
                 store(sessionid, message.get(String.class, MessageParts.ReplyTo),
-                        MessageBusServer.encodeMap(CommandMessage.create(SecurityCommands.MessageNotDelivered).getParts()));
+                        MessageBusServer.encodeJSON(CommandMessage.create(SecurityCommands.MessageNotDelivered).getParts()));
             }
 
             return;
         }
 
-        store(sessionid, subject, MessageBusServer.encodeMap(message.getParts()));
+        store(sessionid, subject, MessageBusServer.encodeJSON(message.getParts()));
     }
 
     public void send(String subject, CommandMessage message) {

@@ -49,7 +49,7 @@ public class RolesRequiredRule implements BooleanRoutingRule {
                         .set(SecurityParts.CredentialsRequired, "Name,Password")
                         .set(SecurityParts.ReplyTo, ErraiService.AUTHORIZATION_SVC_SUBJECT)
                         .set(SecurityParts.SessionData, message.get(HttpSession.class, SecurityParts.SessionData))
-                        .set(SecurityParts.RejectedMessage, MessageBusServer.encodeMap(message.getParts()))
+                        .set(SecurityParts.RejectedMessage, MessageBusServer.encodeJSON(message.getParts()))
                         , false);
                 return false;
             }

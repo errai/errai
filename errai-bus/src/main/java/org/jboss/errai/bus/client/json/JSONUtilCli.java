@@ -21,6 +21,8 @@ public class JSONUtilCli {
 
             ArrayList<Message> list = new ArrayList<Message>();
 
+            System.out.println("decoding:" + str);
+
             JSONValue a = JSONParser.parse(str);
 
             if (a instanceof JSONArray) {
