@@ -252,10 +252,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 }
 
                 public void onError(Request request, Throwable exception) {
-                    exception.printStackTrace();
+                    showError("Failed to communicate with remote bus", "", exception);
 
                     transmitting = false;
-                    sendAll();
+                   // sendAll();
                 }
             });
 
