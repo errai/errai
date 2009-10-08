@@ -7,6 +7,7 @@ import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
+import org.jboss.errai.bus.server.service.ErraiService;
 
 import javax.servlet.http.HttpSession;
 import javax.swing.*;
@@ -226,8 +227,8 @@ public class MessageBusImpl implements ServerMessageBus {
     }
 
     public void send(CommandMessage message) {
-        if (message.hasPart(MessageParts.SessionID)) {
-            send(message.get(String.class, MessageParts.SessionID), message.getSubject(), message);
+        if (message.hasPart(SecurityParts.SessionData)) {
+            send((String) message.get(HttpSession.class, SecurityParts.SessionData).getAttribute(WS_SESSION_ID), message.getSubject(), message);
         } else {
             sendGlobal(message);
         }
