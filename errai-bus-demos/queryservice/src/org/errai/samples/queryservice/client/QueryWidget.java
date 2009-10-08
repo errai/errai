@@ -30,9 +30,6 @@ public class QueryWidget extends Composite {
     TextBox queryBox;
 
     @UiField
-    Button sendQuery;
-
-    @UiField
     HTML results;
 
     private MessageBus bus = ErraiClient.getBus();
@@ -45,19 +42,20 @@ public class QueryWidget extends Composite {
 
         MessageCallback responseHandler = new MessageCallback() {
             public void callback(CommandMessage message) {
-                if (!message.hasPart("QueryResponse")) {
-                    results.setText("No results.");
 
-                } else {
-                    String[] resultsString = message.get(String[].class, "QueryResponse");
-                    StringBuffer buf = new StringBuffer("<ul>");
+                String[] resultsString = message.get(String[].class, "QueryResponse");
 
-                    for (String result : resultsString) {
-                        buf.append("<li>").append(result).append("</li>");
-                    }
-
-                    results.setHTML(buf.append("</ul>").toString());
+                if (resultsString == null) {
+                    resultsString = new String[] { "No results." };
                 }
+
+                StringBuffer buf = new StringBuffer("<ul>");
+
+                for (String result : resultsString) {
+                    buf.append("<li>").append(result).append("</li>");
+                }
+
+                results.setHTML(buf.append("</ul>").toString());
             }
         };
 
