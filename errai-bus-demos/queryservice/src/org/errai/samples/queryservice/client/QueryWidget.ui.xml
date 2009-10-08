@@ -1,0 +1,11 @@
+<gwt:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+        xmlns:gwt='urn:import:com.google.gwt.user.client.ui'>
+        <gwt:VerticalPanel>
+                <gwt:HorizontalPanel>
+                        <gwt:Label text="Query" />
+                        <gwt:TextBox ui:field="queryBox" />
+                        <gwt:Button ui:field="sendQuery" text="Submit" />
+                </gwt:HorizontalPanel>
+                <gwt:HTML ui:field="results" />
+        </gwt:VerticalPanel>
+</gwt:UiBinder> 
