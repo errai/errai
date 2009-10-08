@@ -14,9 +14,12 @@ public class JSONEncoderCli {
     public String _encode(Object v) {
         if (v == null) {
             return "null";
-        } else if (v instanceof String || v instanceof Number || v instanceof Boolean) {
+        } else if (v instanceof String) {
             return "\"" + v + "\"";
-        } else if (v instanceof Collection) {
+        } else if (v instanceof Number || v instanceof Boolean) {
+            return String.valueOf(v);
+        }
+        else if (v instanceof Collection) {
             return encodeCollection((Collection) v);
         } else if (v instanceof Map) {
             return encodeMap((Map) v);

@@ -20,9 +20,6 @@ public class JSONUtilCli {
             if (value == null || str.trim().length() == 0) return new ArrayList<Message>(0);
 
             ArrayList<Message> list = new ArrayList<Message>();
-
-            System.out.println("decoding:" + str);
-
             JSONValue a = JSONParser.parse(str);
 
             if (a instanceof JSONArray) {
