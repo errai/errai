@@ -43,11 +43,11 @@ public class JSONEncoderCli {
                 }
                 mapBuild.append(_encode(entry.getKey()))
                         .append(":").append(val);
+
+                first = false;
             } else {
                 defer = false;
             }
-
-            first = false;
         }
 
         return mapBuild.append("}").toString();
