@@ -59,35 +59,7 @@ public class JSONUtilCli {
     }
 
     public static Map<String, Object> decodeMap(Object value) {
-        JSONValue a = JSONParser.parse(String.valueOf(value));
-
-        Map<String, Object> m = new HashMap<String, Object>();
-
-        if (a instanceof JSONObject) {
-            JSONObject eMap = (JSONObject) a;
-
-            for (String key : eMap.keySet()) {
-                JSONValue v = eMap.get(key);
-
-                if (v.isString() != null) {
-                    m.put(key, v.isString().stringValue());
-                }
-                else if (v.isNumber() != null) {
-                    m.put(key, v.isNumber().doubleValue());
-                }
-                else if (v.isBoolean() != null) {
-                    m.put(key, v.isBoolean().booleanValue());
-                }
-                else if (v.isNull() != null) {
-                    m.put(key, null);
-                }
-            }
-        }
-        else if (a != null) {
-            throw new RuntimeException("bad encoding: " + a);
-        }
-
-        return m;
+        return (Map<String, Object>) new JSONDecoderCli().decode(value);
     }
 
     public static CommandMessage decodeCommandMessage(Object value) {
