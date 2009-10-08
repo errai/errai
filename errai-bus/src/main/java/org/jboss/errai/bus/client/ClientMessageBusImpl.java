@@ -482,7 +482,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      }-*/;
 
 
-    private static final String decodeCommandMessage(CommandMessage msg) {
+    private static String decodeCommandMessage(CommandMessage msg) {
         StringBuffer decode = new StringBuffer(
                 "<table><thead style='font-weight:bold;'><tr><td>Field</td><td>Value</td></tr></thead><tbody>");
 
@@ -495,8 +495,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     }
 
-    private static final void showError(String message, String additionalDetails, Throwable e) {
+    private static void showError(String message, String additionalDetails, Throwable e) {
         DialogBox errorDialog = new DialogBox();
+
 
         StringBuffer buildTrace = new StringBuffer("<tt>");
         buildTrace.append(e.getClass().getName()).append(": ").append(e.getMessage()).append("<br/>");
@@ -504,16 +505,20 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             buildTrace.append(ste.toString()).append("<br/>");
         }
 
-
         VerticalPanel panel = new VerticalPanel();
         panel.getElement().getStyle().setProperty("border", "1px");
+        panel.getElement().getStyle().setProperty("borderStyle", "solid");
+        panel.getElement().getStyle().setProperty("borderColor", "black");
+        panel.getElement().getStyle().setProperty("backgroundColor", "lightgrey");
 
-        panel.add(new HTML("<strong>" + message + "</strong>"));
+
+        panel.add(new HTML("<strong style='background:red;color:white;'>" + message + "</strong>"));
 
         ScrollPanel scrollPanel = new ScrollPanel();
         scrollPanel.add(new HTML(buildTrace.toString() + "<br/><strong>Additional Details:</strong>" + additionalDetails + "</tt>"));
         scrollPanel.setAlwaysShowScrollBars(true);
         scrollPanel.setHeight("500px");
+
 
         panel.add(scrollPanel);
 
