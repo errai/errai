@@ -2,9 +2,8 @@ package org.jboss.errai.bus.client;
 
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.http.client.*;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.bus.client.json.JSONUtilCli;
 import static org.jboss.errai.bus.client.json.JSONUtilCli.decodePayload;
 import org.jboss.errai.bus.client.protocols.BusCommands;
@@ -144,8 +143,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     public void send(CommandMessage message) {
         if (message.hasPart(MessageParts.ToSubject)) {
             send(message.get(String.class, MessageParts.ToSubject), message);
-        }
-        else {
+        } else {
             throw new RuntimeException("Cannot send message using this method if the message does not contain a ToSubject field.");
         }
     }
@@ -225,8 +223,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             }
 
             return;
-        }
-        else if (sendTimer != null) {
+        } else if (sendTimer != null) {
             sendTimer.cancel();
             sendTimer = null;
         }
@@ -393,13 +390,32 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                                 }
 
                                 public void onResponseReceived(Request request, Response response) {
+                                    try {
+                                        for (Message m : decodePayload(response.getText())) {
+                                            store(m.getSubject(), m.getMessage());
+                                        }
 
-                                    for (Message m : decodePayload(response.getText())) {
-                                        store(m.getSubject(), m.getMessage());
+                                        block = false;
+                                        schedule(1);
                                     }
+                                    catch (Exception e) {
+                                        DialogBox errorDialog = new DialogBox();
 
-                                    block = false;
-                                    schedule(1);
+                                        VerticalPanel panel = new VerticalPanel();
+                                        panel.add(new HTML("<strong>CLIENT-SERVER CONNECTION ENDED DUE TO CRITICAL EXCEPTION:</strong>"));
+
+                                        ScrollPanel scrollPanel = new ScrollPanel();
+                                        scrollPanel.add(new HTML(response.getText()));
+                                        scrollPanel.setAlwaysShowScrollBars(true);
+                                        scrollPanel.setHeight("500px");
+
+                                        panel.add(scrollPanel);
+
+                                        errorDialog.add(panel);
+
+                                        errorDialog.center();
+                                        errorDialog.show();
+                                    }
                                 }
                             }
                     );

@@ -15,44 +15,37 @@ import java.util.Map;
 public class JSONUtilCli {
 
     public static ArrayList<Message> decodePayload(Object value) {
-        try {
-            String str = String.valueOf(value);
-            if (value == null || str.trim().length() == 0) return new ArrayList<Message>(0);
 
-            ArrayList<Message> list = new ArrayList<Message>();
-            JSONValue a = JSONParser.parse(str);
+        String str = String.valueOf(value);
+        if (value == null || str.trim().length() == 0) return new ArrayList<Message>(0);
 
-            if (a instanceof JSONArray) {
-                JSONArray arr = (JSONArray) a;
+        ArrayList<Message> list = new ArrayList<Message>();
+        JSONValue a = JSONParser.parse(str);
 
-                for (int i = 0; i < arr.size(); i++) {
-                    a = arr.get(i);
+        if (a instanceof JSONArray) {
+            JSONArray arr = (JSONArray) a;
 
-                    if (a instanceof JSONObject) {
-                        final JSONObject eMap = (JSONObject) a;
-                        final String subject = eMap.keySet().iterator().next();
+            for (int i = 0; i < arr.size(); i++) {
+                a = arr.get(i);
 
-                        list.add(new Message() {
-                            public String getSubject() {
-                                return subject;
-                            }
+                if (a instanceof JSONObject) {
+                    final JSONObject eMap = (JSONObject) a;
+                    final String subject = eMap.keySet().iterator().next();
 
-                            public Object getMessage() {
-                                return eMap.get(subject);
-                            }
-                        });
-                    }
+                    list.add(new Message() {
+                        public String getSubject() {
+                            return subject;
+                        }
 
+                        public Object getMessage() {
+                            return eMap.get(subject);
+                        }
+                    });
                 }
-            }
-            return list;
-        }
-        catch (Exception e) {
-            System.err.println("Failed to decode payload:\n" + value);
 
-            e.printStackTrace();
-            return new ArrayList<Message>(0);
+            }
         }
+        return list;
     }
 
     public static Map<String, Object> decodeMap(Object value) {
