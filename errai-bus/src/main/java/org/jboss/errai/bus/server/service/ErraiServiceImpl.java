@@ -208,6 +208,10 @@ public class ErraiServiceImpl implements ErraiService {
 
                             String svcName = clazz.getAnnotation(Service.class).value();
 
+                            if ("".equals(svcName)) {
+                                svcName = clazz.getSimpleName();
+                            }
+
                             bus.subscribe(svcName, svc);
 
                             RolesRequiredRule rule = null;
@@ -221,7 +225,6 @@ public class ErraiServiceImpl implements ErraiService {
                                 bus.addRule(svcName, rule);
                             }
                         }
-
                     }
                 }
                 catch (NoClassDefFoundError e) {

@@ -83,6 +83,12 @@ public class CommandMessage {
         return this;
     }
 
+    public CommandMessage copy(String part, CommandMessage message) {
+        set(part, message.get(Object.class, part));
+        return this;
+    }
+
+
     public void remove(String part) {
         parts.remove(part);
     }
