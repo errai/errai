@@ -2,7 +2,7 @@ package org.jboss.errai.workspaces.client.layout;
 
 import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.bus.client.CommandMessage;
-import org.jboss.errai.bus.client.ErraiClient;
+import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.MessageCallback;
 import org.jboss.errai.bus.client.protocols.LayoutParts;
 
@@ -17,7 +17,7 @@ public class LayoutHint {
     public static void attach(final Widget w, LayoutHintProvider p) {
         String subject = "local:org.jboss.errai.sizeHints:" + counter++;
 
-        ErraiClient.getBus().subscribe(subject,
+        ErraiBus.get().subscribe(subject,
                 new MessageCallback() {
                     public void callback(CommandMessage message) {
                         w.setPixelSize(message.get(Double.class, LayoutParts.Width).intValue(),
@@ -46,7 +46,7 @@ public class LayoutHint {
                         .toSubject(s)
                         .set(LayoutParts.Width, p.getWidthHint())
                         .set(LayoutParts.Height, p.getHeightHint())
-                        .sendNowWith(ErraiClient.getBus());
+                        .sendNowWith(ErraiBus.get());
             }
         }
 

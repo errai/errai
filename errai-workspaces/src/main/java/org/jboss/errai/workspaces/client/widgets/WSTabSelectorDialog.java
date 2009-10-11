@@ -5,7 +5,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.bus.client.CommandMessage;
-import org.jboss.errai.bus.client.ErraiClient;
+import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.common.client.framework.AcceptsCallback;
 import org.jboss.errai.widgets.client.WSModalDialog;
 import org.jboss.errai.widgets.client.WSWindowPanel;
@@ -54,7 +54,7 @@ public class WSTabSelectorDialog extends WSModalDialog {
                         public void onClick(ClickEvent event) {
                             CommandMessage.create(LayoutCommands.ActivateTool)
                                     .toSubject((String) instanceProperties.get(LayoutParts.Subject.name()))
-                                    .sendNowWith(ErraiClient.getBus());
+                                    .sendNowWith(ErraiBus.get());
 
                             window.hide();
                         }
@@ -95,10 +95,7 @@ public class WSTabSelectorDialog extends WSModalDialog {
         s.setProperty("verticalAlign", "top");
 
         window.add(hPanel);
-
-
     }
-
 
     public void callback(Object message, Object data) {
         callbackTo.callback(message, data

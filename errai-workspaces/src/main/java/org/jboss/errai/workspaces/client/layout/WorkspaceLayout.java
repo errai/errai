@@ -124,7 +124,7 @@ public class WorkspaceLayout extends Composite {
     @Override
     protected void onAttach() {
         super.onAttach();
-        ErraiClient.getBus().subscribe(LayoutCommands.RegisterWorkspaceEnvironment.getSubject(),
+        ErraiBus.get().subscribe(LayoutCommands.RegisterWorkspaceEnvironment.getSubject(),
                 new MessageCallback() {
                     public void callback(CommandMessage message) {
                         switch (LayoutCommands.valueOf(message.getCommandType())) {
@@ -331,7 +331,7 @@ public class WorkspaceLayout extends Composite {
             RootPanel.get().add(launcherPanel);
         }
 
-        MessageBus bus = ErraiClient.getBus();
+        MessageBus bus = ErraiBus.get();
 
         CommandMessage.create(LayoutCommands.RegisterToolSet)
                 .toSubject("org.jboss.errai.WorkspaceLayout")
@@ -363,7 +363,7 @@ public class WorkspaceLayout extends Composite {
             if (!multipleAllowed) {
                 CommandMessage.create(LayoutCommands.ActivateTool)
                         .toSubject(getInstanceSubject(componentId))
-                        .sendNowWith(ErraiClient.getBus());
+                        .sendNowWith(ErraiBus.get());
 
                 return;
             }
@@ -402,7 +402,7 @@ public class WorkspaceLayout extends Composite {
                             else {
                                 CommandMessage.create(LayoutCommands.ActivateTool)
                                         .toSubject(getInstanceSubject(componentId))
-                                        .sendNowWith(ErraiClient.getBus());
+                                        .sendNowWith(ErraiBus.get());
                             }
                         }
                     }
@@ -418,7 +418,7 @@ public class WorkspaceLayout extends Composite {
     }
 
     private void _openTab(final String DOMID, final String initSubject, final String componentId, final String name, final String instanceId, final Image icon) {
-        final MessageBus bus = ErraiClient.getBus();
+        final MessageBus bus = ErraiBus.get();
 
         bus.conversationWith(
                 CommandMessage.create().set(LayoutParts.DOMID, DOMID)
@@ -527,7 +527,7 @@ public class WorkspaceLayout extends Composite {
         CommandMessage.create(LayoutCommands.CloseTab)
                 .toSubject(getInstanceSubject(instanceId))
                 .set(LayoutParts.InstanceID, instanceId)
-                .sendNowWith(ErraiClient.getBus());
+                .sendNowWith(ErraiBus.get());
     }
 
     public void activateTool(String componentTypeId) {

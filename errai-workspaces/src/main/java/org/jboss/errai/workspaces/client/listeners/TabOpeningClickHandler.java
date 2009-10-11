@@ -22,7 +22,7 @@ public class TabOpeningClickHandler implements ClickHandler {
     public void onClick(ClickEvent event) {
         String initSubject = tool.getId() + ":init";
 
-        final MessageBus bus = ErraiClient.getBus();
+        final MessageBus bus = ErraiBus.get();
 
         if (!bus.isSubscribed(initSubject)) {
             bus.subscribe(initSubject, new MessageCallback() {

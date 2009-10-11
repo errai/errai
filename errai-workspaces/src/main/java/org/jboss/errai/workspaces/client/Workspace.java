@@ -41,7 +41,7 @@ public class Workspace implements EntryPoint {
     static {
         loginWindowClosingHandler = new Window.ClosingHandler() {
             public void onWindowClosing(Window.ClosingEvent event) {
-                ErraiClient.getBus().send("ServerEchoService", new CommandMessage());
+                ErraiBus.get().send("ServerEchoService", new CommandMessage());
             }
         };
     }
@@ -56,7 +56,7 @@ public class Workspace implements EntryPoint {
                 CommandMessage.create()
                         .toSubject("ClientNegotiationService")
                         .set(MessageParts.ReplyTo, "ClientConfiguratorService")
-                        .sendNowWith(ErraiClient.getBus());
+                        .sendNowWith(ErraiBus.get());
             }
         };
 
@@ -76,7 +76,7 @@ public class Workspace implements EntryPoint {
             return;
         }
 
-        final MessageBus bus = ErraiClient.getBus();
+        final MessageBus bus = ErraiBus.get();
 
         /**
          * Configure the local client message bus to send RemoteSubscribe signals to the remote bus when
@@ -240,7 +240,7 @@ public class Workspace implements EntryPoint {
         dragController = new PickupDragController(RootPanel.get(), true);
 
 
-        final ClientMessageBus bus = (ClientMessageBus) ErraiClient.getBus();
+        final ClientMessageBus bus = (ClientMessageBus) ErraiBus.get();
 
 
         if (bus.isInitialized()) {
@@ -289,6 +289,7 @@ public class Workspace implements EntryPoint {
                                 }
                             });
 
+                            workspaceLayout.getUserInfoPanel().clear();
                             workspaceLayout.getUserInfoPanel().add(userInfo);
                         }
 

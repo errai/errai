@@ -1,7 +1,7 @@
 package org.jboss.errai.bus.client.security;
 
 import org.jboss.errai.bus.client.CommandMessage;
-import org.jboss.errai.bus.client.ErraiClient;
+import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.MessageCallback;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
@@ -22,9 +22,9 @@ public class SecurityService {
 
     public void doAuthentication(final AuthenticationHandler handler) {
       
-        ErraiClient.getBus().subscribe(SUBJECT, new MessageCallback() {
+        ErraiBus.get().subscribe(SUBJECT, new MessageCallback() {
             public void callback(CommandMessage msg) {
-                ErraiClient.getBus().unsubscribeAll(SUBJECT);
+                ErraiBus.get().unsubscribeAll(SUBJECT);
 
                 switch (SecurityCommands.valueOf(msg.getCommandType())) {
                     case WhatCredentials:
@@ -62,7 +62,7 @@ public class SecurityService {
                             }
                         }
 
-                        ErraiClient.getBus().send("AuthorizationService", challenge);
+                        ErraiBus.get().send("AuthorizationService", challenge);
 
                         break;
 
@@ -94,7 +94,7 @@ public class SecurityService {
 
         CommandMessage message = new CommandMessage(SecurityCommands.WhatCredentials);
         message.set(SecurityParts.ReplyTo, SUBJECT);
-        ErraiClient.getBus().send("AuthorizationService", message);
+        ErraiBus.get().send("AuthorizationService", message);
     }
 
 }
