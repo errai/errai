@@ -18,22 +18,37 @@ public class QueryService implements MessageCallback {
     @Inject
     public QueryService(MessageBus bus) {
         this.bus = bus;
+
+        // setup the default values.
         setupMap();
-    }
-
-    public void callback(CommandMessage message) {
-        String queryString = message.get(String.class, "QueryString");
-
-        ConversationMessage.create(message)
-                .set("QueryResponse", dataMap.get(queryString))
-                .sendNowWith(bus);
     }
 
     private void setupMap() {
         dataMap = new HashMap<String, String[]>();
-        dataMap.put("Beer", new String[]{"Heineken", "Budweiser", "Hoogaarden"});
-        dataMap.put("Fruit", new String[]{"Apples", "Oranges", "Grapes"});
-        dataMap.put("Animals", new String[]{"Monkeys", "Giraffes", "Lions"});
+        dataMap.put("beer", new String[]{"Heineken", "Budweiser", "Hoogaarden"});
+        dataMap.put("fruit", new String[]{"Apples", "Oranges", "Grapes"});
+        dataMap.put("animals", new String[]{"Monkeys", "Giraffes", "Lions"});
+    }
+
+    public void callback(CommandMessage message) {
+        /**
+         * Extract the "QueryString" field from the incoming message
+         */
+        String queryString = message.get(String.class, "QueryString");
+
+        /**
+         * Query our dataMap to get any relevant results.
+         */
+        String[] results = dataMap.get(queryString.toLowerCase());
+
+        /**
+         * Create a ConversationMessage to establish a conversation with the calling
+         * client.  We add our results array to the "QueryResponse" field and send
+         * a message back.
+         */
+        ConversationMessage.create(message)
+                .set("QueryResponse", results)
+                .sendNowWith(bus);
     }
 }
 

@@ -6,13 +6,56 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.uibinder.client.UiTemplate;
-import com.google.gwt.user.client.ui.*;
-import org.jboss.errai.bus.client.CommandMessage;
-import org.jboss.errai.bus.client.ErraiClient;
-import org.jboss.errai.bus.client.MessageBus;
-import org.jboss.errai.bus.client.MessageCallback;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.TextBox;
+import org.jboss.errai.bus.client.*;
 
 public class QueryWidget extends Composite {
+    @UiHandler("sendQuery")
+    void doSubmit(ClickEvent event) {
+        /**
+         * Define a message to be sent.
+         */
+        CommandMessage msg = CommandMessage.create()
+                .toSubject("QueryService")
+                .set("QueryString", queryBox.getText());
+     
+        /**
+         * Define a MessageCallback to handle the response.
+         */
+        MessageCallback responseHandler = new MessageCallback() {
+            public void callback(CommandMessage message) {
+                /**
+                 * Extract the results String[] from the incoming message.
+                 */
+                String[] resultsString = message.get(String[].class, "QueryResponse");
+
+                /**
+                 * If there's no results, display a message.
+                 */
+                if (resultsString == null) {
+                    resultsString = new String[]{"No results."};
+                }
+
+                /**
+                 * Build an HTML unordered list based on the results.
+                 */
+                StringBuffer buf = new StringBuffer("<ul>");
+                for (String result : resultsString) {
+                    buf.append("<li>").append(result).append("</li>");
+                }
+                results.setHTML(buf.append("</ul>").toString());
+            }
+        };
+
+        /**
+         * Initiate the conversation.
+         */
+        bus.conversationWith(msg, responseHandler);
+    }
+
     /**
      * Do boilerplate for UIBinder
      */
@@ -32,36 +75,7 @@ public class QueryWidget extends Composite {
     @UiField
     HTML results;
 
-    private MessageBus bus = ErraiClient.getBus();
-
-    @UiHandler("sendQuery")
-    void doSubmit(ClickEvent event) {
-        CommandMessage msg = CommandMessage.create()
-                .toSubject("QueryService")
-                .set("QueryString", queryBox.getText());
-
-        MessageCallback responseHandler = new MessageCallback() {
-            public void callback(CommandMessage message) {
-
-                String[] resultsString = message.get(String[].class, "QueryResponse");
-
-                if (resultsString == null) {
-                    resultsString = new String[] { "No results." };
-                }
-
-                StringBuffer buf = new StringBuffer("<ul>");
-
-                for (String result : resultsString) {
-                    buf.append("<li>").append(result).append("</li>");
-                }
-
-                results.setHTML(buf.append("</ul>").toString());
-            }
-        };
-
-        bus.conversationWith(msg, responseHandler);
-    }
-
+    private MessageBus bus = ErraiBus.get();
 }
 
 
