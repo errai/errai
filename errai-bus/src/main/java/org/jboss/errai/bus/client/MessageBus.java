@@ -1,13 +1,5 @@
 package org.jboss.errai.bus.client;
 
-import org.jboss.errai.bus.client.CommandMessage;
-import org.jboss.errai.bus.client.MessageCallback;
-import org.jboss.errai.bus.client.MessageListener;
-import org.jboss.errai.bus.client.Payload;
-import org.jboss.errai.bus.client.SubscribeListener;
-import org.jboss.errai.bus.client.UnsubscribeListener;
-
-
 public interface MessageBus {
     public static final String WS_SESSION_ID = "WSSessionID";
 

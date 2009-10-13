@@ -7,7 +7,6 @@ import org.jboss.errai.bus.server.json.JSONEncoder;
 import org.jboss.errai.bus.server.json.JSONUtil;
 
 import javax.servlet.http.HttpSession;
-import java.io.Serializable;
 import java.util.Map;
 
 public class MessageBusServer {

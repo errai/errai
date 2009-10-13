@@ -2,12 +2,12 @@ package org.jboss.errai.workspaces.client.widgets;
 
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.ui.*;
-import org.jboss.errai.common.client.framework.WSComponent;
-import org.jboss.errai.workspaces.client.Workspace;
 import org.jboss.errai.bus.client.security.AuthenticationHandler;
 import org.jboss.errai.bus.client.security.Credential;
 import org.jboss.errai.bus.client.security.impl.NameCredential;
 import org.jboss.errai.bus.client.security.impl.PasswordCredential;
+import org.jboss.errai.common.client.framework.WSComponent;
+import org.jboss.errai.workspaces.client.Workspace;
 
 public class WSLoginPanel implements WSComponent {
     public Widget getWidget() {

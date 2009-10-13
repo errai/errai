@@ -4,9 +4,9 @@ import com.allen_sauer.gwt.dnd.client.DragEndEvent;
 import com.allen_sauer.gwt.dnd.client.DragHandler;
 import com.allen_sauer.gwt.dnd.client.DragStartEvent;
 import com.allen_sauer.gwt.dnd.client.VetoDragException;
+import org.jboss.errai.workspaces.client.layout.WorkspaceLayout;
 import org.jboss.errai.workspaces.client.widgets.WSTab;
 import org.jboss.errai.workspaces.client.widgets.WSTabPanel;
-import org.jboss.errai.workspaces.client.layout.WorkspaceLayout;
 
 public class TabDragHandler implements DragHandler {
     private WorkspaceLayout layout;

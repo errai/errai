@@ -4,10 +4,10 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.Message;
+import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.client.Payload;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
-import org.jboss.errai.bus.client.MessageBus;
 import static org.jboss.errai.bus.server.json.JSONUtil.decodeToMap;
 import org.jboss.errai.bus.server.service.ErraiService;
 

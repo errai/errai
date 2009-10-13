@@ -1,7 +1,6 @@
 package org.jboss.errai.bus.server;
 
 import org.jboss.errai.bus.client.BooleanRoutingRule;
-import org.jboss.errai.bus.client.RuleDelegateMessageCallback;
 import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.client.Payload;
 

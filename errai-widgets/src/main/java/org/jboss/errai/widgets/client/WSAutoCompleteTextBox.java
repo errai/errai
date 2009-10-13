@@ -1,7 +1,10 @@
 package org.jboss.errai.widgets.client;
 
 import com.google.gwt.event.dom.client.*;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.TextBox;
 
 import java.util.ArrayList;
 

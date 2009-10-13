@@ -7,7 +7,6 @@ import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
-import org.jboss.errai.bus.server.service.ErraiService;
 
 import javax.servlet.http.HttpSession;
 import javax.swing.*;

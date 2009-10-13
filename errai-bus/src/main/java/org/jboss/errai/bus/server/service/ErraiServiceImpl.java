@@ -7,7 +7,6 @@ import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.ConversationMessage;
 import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.client.MessageCallback;
-import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
 import org.jboss.errai.bus.server.Module;

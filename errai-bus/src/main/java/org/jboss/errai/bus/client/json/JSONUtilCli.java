@@ -8,7 +8,6 @@ import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.Message;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
 

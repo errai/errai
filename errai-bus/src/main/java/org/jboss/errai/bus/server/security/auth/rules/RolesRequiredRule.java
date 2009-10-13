@@ -8,7 +8,6 @@ import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
 import org.jboss.errai.bus.server.MessageBusServer;
-import org.jboss.errai.bus.server.json.JSONUtil;
 import org.jboss.errai.bus.server.security.auth.AuthSubject;
 import org.jboss.errai.bus.server.service.ErraiService;
 

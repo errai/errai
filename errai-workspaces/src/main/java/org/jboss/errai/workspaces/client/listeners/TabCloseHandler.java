@@ -35,6 +35,4 @@ public class TabCloseHandler implements CloseHandler<WSTab>, AcceptsCallback {
      */
     public void callback(Object message, Object data) {
     }
-
-
 }
