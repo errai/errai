@@ -10,13 +10,12 @@ import java.util.List;
 
 /**
  * The ShoutboxService matches offers (provider) with demands (client)
- * and handles an offers liefecycle.
+ * and handles the offer life-cycle and client notifications.
  */
 public class ShoutboxService
 {
-  public static final String CTRL_CHANNEL = "errai.shoutbox.control";
-  public static final String NOTIFICATION_CHANNEL = "errai.shoutbox.notification"; 
-
+  public static final String INBOX = "errai.shoutbox.inbox";
+  
   private final MessageBus bus = ErraiBus.get();
 
   private List<Offer> offers = new ArrayList<Offer>();
@@ -25,7 +24,7 @@ public class ShoutboxService
   {
 
     // listen for control messages
-    bus.subscribe(CTRL_CHANNEL,
+    bus.subscribe(INBOX,
         new MessageCallback()
         {
           public void callback(CommandMessage message)
@@ -82,7 +81,7 @@ public class ShoutboxService
    */
   private void handleSubmitOffer(CommandMessage message)
   {
-    String subjectMatter = message.get(String.class, ShoutboxCmdParts.SUBJECT_MATTER);
+    String subjectMatter = message.get(String.class, ShoutboxCmdParts.SUBJECT);
     Offer offer = containsOffer(subjectMatter);
 
     if(null==offer)
@@ -102,7 +101,7 @@ public class ShoutboxService
    */
   private void handleRetractOffer(CommandMessage message)
   {
-    String subjectMatter = message.get(String.class, ShoutboxCmdParts.SUBJECT_MATTER);
+    String subjectMatter = message.get(String.class, ShoutboxCmdParts.SUBJECT);
     Offer offer = containsOffer(subjectMatter);
 
     if(offer!=null)
@@ -116,7 +115,7 @@ public class ShoutboxService
    */
   private void handleEngageOffer(CommandMessage message)
   {
-    String subjectMatter = message.get(String.class, ShoutboxCmdParts.SUBJECT_MATTER);
+    String subjectMatter = message.get(String.class, ShoutboxCmdParts.SUBJECT);
     String client = message.get(String.class, ShoutboxCmdParts.CLIENT);
 
     Offer offer = containsOffer(subjectMatter);
@@ -137,7 +136,7 @@ public class ShoutboxService
    */
   private void handleRetireOffer(CommandMessage message)
   {
-    String subjectMatter = message.get(String.class, ShoutboxCmdParts.SUBJECT_MATTER);
+    String subjectMatter = message.get(String.class, ShoutboxCmdParts.SUBJECT);
     String client = message.get(String.class, ShoutboxCmdParts.CLIENT);
 
     Offer offer = containsOffer(subjectMatter);

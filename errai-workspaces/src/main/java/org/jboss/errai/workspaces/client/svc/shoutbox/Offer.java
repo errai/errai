@@ -162,8 +162,8 @@ class Offer
     {
       // inform client
       CommandMessage.create(ShoutboxCmd.RETRACT_OFFER)
-          .toSubject(ShoutboxService.NOTIFICATION_CHANNEL)
-          .set(ShoutboxCmdParts.SUBJECT_MATTER, subject)
+          .toSubject(subject)
+          .set(ShoutboxCmdParts.SUBJECT, subject)
           .set(ShoutboxCmdParts.PROVIDER, provider)
           .sendNowWith(bus);
 
@@ -199,8 +199,8 @@ class Offer
   private void notifyPendingClients()
   {
     CommandMessage.create(ShoutboxCmd.SUBMIT_OFFER)
-        .toSubject(ShoutboxService.NOTIFICATION_CHANNEL)
-        .set(ShoutboxCmdParts.SUBJECT_MATTER, subject)
+        .toSubject(subject)
+        .set(ShoutboxCmdParts.SUBJECT, subject)
         .set(ShoutboxCmdParts.PROVIDER, provider)
         .sendNowWith(bus);
 

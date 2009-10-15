@@ -27,5 +27,5 @@ package org.jboss.errai.workspaces.client.svc.shoutbox;
  */
 public enum ShoutboxCmdParts
 {
-  PROVIDER, CLIENT, SUBJECT_MATTER
+  PROVIDER, CLIENT, SUBJECT
 }

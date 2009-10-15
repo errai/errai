@@ -27,9 +27,9 @@ import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.client.MessageCallback;
 
 /**
- * Interface to to the shoutbox service.
- * The usage is different for providers <i>offering</i>
- * and clients <i>demanding</i> a subject through through the shoutbox.
+ * Interface to to the shoutbox service.<br>
+ * Usage is different for providers <i>offering</i>
+ * and clients <i>demanding</i> a subject through the shoutbox service.
  *
  * <p/>
  * Provider's do <i>submit</i> or <i>retract</i> offers:
@@ -78,8 +78,8 @@ public class Shoutbox
   public void submitOffer(String provider, String subjectMatter)
   {
     CommandMessage.create(ShoutboxCmd.SUBMIT_OFFER)
-        .toSubject(ShoutboxService.CTRL_CHANNEL)
-        .set(ShoutboxCmdParts.SUBJECT_MATTER, subjectMatter)
+        .toSubject(ShoutboxService.INBOX)
+        .set(ShoutboxCmdParts.SUBJECT, subjectMatter)
         .set(ShoutboxCmdParts.PROVIDER, provider)
         .sendNowWith(bus);
   }
@@ -87,18 +87,18 @@ public class Shoutbox
   public void retractOffer(String provider, String subjectMatter)
   {
     CommandMessage.create(ShoutboxCmd.RETRACT_OFFER)
-        .toSubject(ShoutboxService.CTRL_CHANNEL)
-        .set(ShoutboxCmdParts.SUBJECT_MATTER, subjectMatter)
+        .toSubject(ShoutboxService.INBOX)
+        .set(ShoutboxCmdParts.SUBJECT, subjectMatter)
         .set(ShoutboxCmdParts.PROVIDER, provider)
         .sendNowWith(bus);
   }
 
-  public void engageOffer(String client, String subjectMatter,  ShoutboxCallback callback)
+  public void engageOffer(String client, String subject,  ShoutboxCallback callback)
   {
     this.delegate = callback;
 
     // shout box example
-    bus.subscribe(ShoutboxService.NOTIFICATION_CHANNEL,
+    bus.subscribe(subject,
         new MessageCallback()
         {
           public void callback(CommandMessage message)
@@ -118,8 +118,8 @@ public class Shoutbox
 
     // engage an offer right away
     CommandMessage.create(ShoutboxCmd.ENGAGE_OFFER)
-        .toSubject(ShoutboxService.CTRL_CHANNEL)
-        .set(ShoutboxCmdParts.SUBJECT_MATTER, subjectMatter)
+        .toSubject(ShoutboxService.INBOX)
+        .set(ShoutboxCmdParts.SUBJECT, subject)
         .set(ShoutboxCmdParts.CLIENT, client)
         .sendNowWith(bus);
   }
@@ -127,8 +127,8 @@ public class Shoutbox
   public void retireOffer(String client, String subjectMatter)
   {
      CommandMessage.create(ShoutboxCmd.RETIRE_OFFER)
-        .toSubject(ShoutboxService.CTRL_CHANNEL)
-        .set(ShoutboxCmdParts.SUBJECT_MATTER, subjectMatter)
+        .toSubject(ShoutboxService.INBOX)
+        .set(ShoutboxCmdParts.SUBJECT, subjectMatter)
         .set(ShoutboxCmdParts.CLIENT, client)
         .sendNowWith(bus);
   }
