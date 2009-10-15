@@ -20,11 +20,18 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.jboss.errai.workspaces.client.framework;
+package org.jboss.errai.workspaces.client.svc.shoutbox;
 
-import com.google.gwt.user.client.ui.Panel;
+/**
+ * Client callback for notifications when a provider submits
+ * or retracts an offer.
+ *  
+ * @author Heiko Braun <hbraun@redhat.com>
+ */
+public interface ShoutboxCallback
+{
 
+  void offerSubmitted(String providerId);
 
-public interface Layout {
-    public Panel createLayout(String id);
+  void offerRetracted(String providerId);
 }

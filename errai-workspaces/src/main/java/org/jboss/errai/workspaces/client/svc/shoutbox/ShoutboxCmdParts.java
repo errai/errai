@@ -20,11 +20,12 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.jboss.errai.workspaces.client.framework;
+package org.jboss.errai.workspaces.client.svc.shoutbox;
 
-import com.google.gwt.user.client.ui.Panel;
-
-
-public interface Layout {
-    public Panel createLayout(String id);
+/**
+ * @author Heiko Braun <hbraun@redhat.com>
+ */
+public enum ShoutboxCmdParts
+{
+  PROVIDER, CLIENT, SUBJECT_MATTER
 }

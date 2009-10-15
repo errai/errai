@@ -20,11 +20,20 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.jboss.errai.workspaces.client.framework;
+package org.jboss.errai.workspaces.client.icons;
 
-import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.AbstractImagePrototype;
+import com.google.gwt.user.client.ui.ImageBundle;
 
-
-public interface Layout {
-    public Panel createLayout(String id);
+/**
+ * Icons that ship as part of the workspace framework.
+ * See {@link com.google.gwt.user.client.ui.ImageBundle} for further explanations.
+ * 
+ * @author Heiko Braun <hbraun@redhat.com>
+ */
+public interface ErraiImageBundle extends ImageBundle
+{
+  @Resource("message_icon.png")  
+  public AbstractImagePrototype messageIcon();
+    
 }
