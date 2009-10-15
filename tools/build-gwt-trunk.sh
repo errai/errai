@@ -24,7 +24,7 @@ mvn deploy:deploy-file -DgroupId=com.google.gwt -DartifactId=gwt-dev -Dversion=$
 mkdir temp 
 tar -zxf build/dist/gwt-$PLATFORM-$GWT_VERSION.tar.gz -C temp 
 cd temp/gwt-$PLATFORM-$GWT_VERSION 
-zip -0 gwt-$PLATFORM-$GWT_VERSION.zip lib*.jnilib 
+zip -0 -R gwt-$PLATFORM-$GWT_VERSION.zip * 
 cd ../.. 
 
 mvn deploy:deploy-file -DgroupId=com.google.gwt -DartifactId=gwt-dev -Dversion=$GWT_VERSION -Dclassifier=$PLATFORM-libs -Dpackaging=zip -Durl=$LOCAL_REPO -DgeneratePom=true -Dfile=temp/gwt-$PLATFORM-$GWT_VERSION/gwt-mac-$GWT_VERSION.zip 
