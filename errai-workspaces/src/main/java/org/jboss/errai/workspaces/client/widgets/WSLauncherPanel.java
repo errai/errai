@@ -1,39 +1,88 @@
 package org.jboss.errai.workspaces.client.widgets;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import org.jboss.errai.widgets.client.WSLaunchButton;
-import org.jboss.errai.workspaces.client.framework.Tool;
-import org.jboss.errai.workspaces.client.listeners.TabOpeningClickHandler;
+import org.jboss.errai.common.client.ErraiCommon;
+import org.jboss.errai.workspaces.client.layout.WorkspaceLayout;
 
+public class WSLauncherPanel extends VerticalPanel {
 
-/**
- * A simiple dock area to list and provide links to different features.
- */
-public class WSLauncherPanel extends Composite {
-    private VerticalPanel vPanel;
+    private boolean armed;
+    private WorkspaceLayout workspaceLayout;
 
-    public WSLauncherPanel() {
-        this.vPanel = new VerticalPanel();
-        this.vPanel.setWidth("100%");
-        initWidget(vPanel);
+    Timer t = new Timer() {
+        public void run() {
+            if (armed) workspaceLayout.openNavPanel();
+        }
+    };
+
+    int range = -1;
+    
+    public WSLauncherPanel(WorkspaceLayout layout) {
+        super();
+
+        sinkEvents(Event.MOUSEEVENTS);
+
+        this.workspaceLayout = layout;
+
+        ErraiCommon.disableTextSelection(getElement(), true);
     }
 
-    public void addLink(String name, Tool tool) {
-        Image newIcon;
-        if (tool.getIcon() != null) {
-            newIcon = new Image(tool.getIcon().getUrl());
-        }
-        else {
-            newIcon = new Image(GWT.getModuleBaseURL() + "/images/ui/icons/questioncube.png");
-        }
-        
-        newIcon.setSize("16px", "16px");
+    @Override
+    public void onBrowserEvent(Event event) {
+        if (!armed) return;
 
-        WSLaunchButton button = new WSLaunchButton(newIcon, name);
-        button.addClickListener(new TabOpeningClickHandler(tool));
-        vPanel.add(button);
+        switch (event.getTypeInt()) {
+            case Event.ONMOUSEOVER:
+                break;
+            case Event.ONMOUSEUP:
+                if (range == -1) {
+                    range = getAbsoluteTop() + 20;
+                }
+
+                if (event.getClientY() > range) {
+                    t.cancel();
+                    workspaceLayout.openNavPanel();
+                }
+                break;
+
+            case Event.ONCLICK:
+                break;
+
+            case Event.ONMOUSEMOVE:
+
+                if (range == -1) {
+                    range = getAbsoluteTop() + 20;
+                }
+
+                if (event.getClientY() > range) {
+                    setStyleName("workspace-LeftNavArea-MouseOver");
+                    t.schedule(200);
+                }
+
+                break;
+
+
+            case Event.ONMOUSEOUT:
+                Element to = DOM.eventGetToElement(event);
+                if (to == null || !DOM.isOrHasChild(this.getElement(), to)) {
+                    setStyleName("workspace-LeftNavArea");
+                    t.cancel();
+                    workspaceLayout.collapseNavPanel();
+                }
+                break;
+        }
+    }
+
+
+    public boolean isArmed() {
+        return armed;
+    }
+
+    public void setArmed(boolean armed) {
+        this.armed = armed;
     }
 }

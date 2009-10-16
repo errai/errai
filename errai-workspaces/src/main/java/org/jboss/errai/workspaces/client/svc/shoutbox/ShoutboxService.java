@@ -12,6 +12,8 @@ import java.util.List;
  * The ShoutboxService matches offers (provider) with demands (client)
  * and handles the offer life-cycle and client notifications.
  */
+
+
 public class ShoutboxService
 {
   public static final String INBOX = "errai.shoutbox.inbox";

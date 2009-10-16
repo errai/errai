@@ -42,7 +42,7 @@ public class WorkspaceLayout extends Composite {
      */
     public final DockPanel mainLayoutPanel = new DockPanel();
 
-    public final WSExtVerticalPanel leftPanel = new WSExtVerticalPanel(this);
+    public final WSLauncherPanel leftPanel = new WSLauncherPanel(this);
     public final WSStackPanel navigation = new WSStackPanel();
     public final Label navigationLabel = new Label("Navigate");
     public final SimplePanel userInfoPanel = new SimplePanel();
@@ -320,15 +320,15 @@ public class WorkspaceLayout extends Composite {
             /**
              * Create a default launcher panel.
              */
-            WSLauncherPanel launcherPanel = new WSLauncherPanel();
+            WSToolSetLauncher toolSetLauncher = new WSToolSetLauncher();
 
             for (Tool t : toolSet.getAllProvidedTools()) {
-                launcherPanel.addLink(t.getName(), t);
+                toolSetLauncher.addLink(t.getName(), t);
             }
 
-            launcherPanel.getElement().setId(id);
-            launcherPanel.setVisible(false);
-            RootPanel.get().add(launcherPanel);
+            toolSetLauncher.getElement().setId(id);
+            toolSetLauncher.setVisible(false);
+            RootPanel.get().add(toolSetLauncher);
         }
 
         MessageBus bus = ErraiBus.get();
