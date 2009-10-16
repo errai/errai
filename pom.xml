@@ -36,6 +36,7 @@
         <module>errai-workspaces</module>
         <module>errai-widgets</module>
         <module>errai-bus</module>
+        <module>errai-bus-demos</module>
     </modules>
 
     <dependencyManagement>
