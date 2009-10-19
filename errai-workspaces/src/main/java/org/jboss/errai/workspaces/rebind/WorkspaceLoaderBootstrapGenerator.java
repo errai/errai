@@ -10,6 +10,7 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
 import org.jboss.errai.bus.server.annotations.security.RequireRoles;
+import org.jboss.errai.bus.server.util.ConfigUtil;
 import org.jboss.errai.workspaces.client.framework.annotations.GroupOrder;
 import org.jboss.errai.workspaces.client.framework.annotations.LoadTool;
 import org.jboss.errai.workspaces.client.framework.annotations.LoadToolSet;
@@ -21,6 +22,7 @@ import java.io.PrintWriter;
 import static java.lang.Thread.currentThread;
 import java.net.URL;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class WorkspaceLoaderBootstrapGenerator extends Generator {
@@ -128,27 +130,21 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
             sourceWriter.println("new " + bundle.getString(key) + "().initModule(errai);");
         }
 
-        try {
-            Enumeration<URL> targets = currentThread().getContextClassLoader().getResources("ErraiApp.properties");
-
-            while (targets.hasMoreElements()) {
-                findLoadableModules(logger, sourceWriter, targets.nextElement());
-            }
-        }
-        catch (IOException e) {
-            logger.log(TreeLogger.Type.INFO, "no module loading roots found");
-        }
-
-
+        findLoadableModules(logger, sourceWriter);
+        
         // end constructor source generation
         sourceWriter.outdent();
         sourceWriter.println("}");
     }
 
 
-    private void findLoadableModules(TreeLogger logger, SourceWriter writer, URL url) {
-        File root = new File(url.getFile()).getParentFile();
-        _findLoadableModules(logger, writer, root, root);
+    private void findLoadableModules(TreeLogger logger, SourceWriter writer) {
+        List<File> targets = ConfigUtil.findAllConfigTargets();
+
+        for (File root : targets) {
+            _findLoadableModules(logger, writer, root, root);
+        }
+
     }
 
     private void _findLoadableModules(TreeLogger logger, SourceWriter writer, File root, File start) {
