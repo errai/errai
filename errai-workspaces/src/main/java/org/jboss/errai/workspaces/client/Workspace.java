@@ -123,7 +123,7 @@ public class Workspace implements EntryPoint {
                             closeLoginPanel();
 
                             WSModalDialog failed = new WSModalDialog();
-                            failed.ask("Authentication Failure. Please Try Again", new AcceptsCallback() {
+                            failed.ask("Authentication Failure. Please Try Again.", new AcceptsCallback() {
                                 public void callback(Object message, Object data) {
                                     if ("WindowClosed".equals(message)) showLoginPanel();
                                 }

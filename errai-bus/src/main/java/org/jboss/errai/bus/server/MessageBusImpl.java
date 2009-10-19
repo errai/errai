@@ -228,6 +228,8 @@ public class MessageBusImpl implements ServerMessageBus {
     public void send(CommandMessage message) {
         if (message.hasPart(SecurityParts.SessionData)) {
             send((String) message.get(HttpSession.class, SecurityParts.SessionData).getAttribute(WS_SESSION_ID), message.getSubject(), message);
+        } else if (message.hasPart(MessageParts.SessionID)) {
+            send(message.get(String.class, MessageParts.SessionID), message.getSubject(), message);
         } else {
             sendGlobal(message);
         }
