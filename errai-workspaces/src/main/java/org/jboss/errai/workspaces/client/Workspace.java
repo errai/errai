@@ -52,13 +52,13 @@ public class Workspace implements EntryPoint {
     private static Set<String> sessionRoles = new HashSet<String>();
 
     private final Runnable negotiate = new Runnable() {
-            public void run() {
-                CommandMessage.create()
-                        .toSubject("ClientNegotiationService")
-                        .set(MessageParts.ReplyTo, "ClientConfiguratorService")
-                        .sendNowWith(ErraiBus.get());
-            }
-        };
+        public void run() {
+            CommandMessage.create()
+                    .toSubject("ClientNegotiationService")
+                    .set(MessageParts.ReplyTo, "ClientConfiguratorService")
+                    .sendNowWith(ErraiBus.get());
+        }
+    };
 
 
     private Workspace() {
@@ -177,8 +177,7 @@ public class Workspace implements EntryPoint {
                                  */
                                 bus.send(deferredMessage);
                                 deferredMessage = null;
-                            }
-                            else {
+                            } else {
                                 /**
                                  * Send the standard negotiation because no message was intercepted
                                  * to resend
@@ -201,7 +200,6 @@ public class Workspace implements EntryPoint {
         /**
          * Initialize the workspace UI.
          */
-
 
         initWorkspace(rootId);
 
@@ -245,8 +243,7 @@ public class Workspace implements EntryPoint {
 
         if (bus.isInitialized()) {
             negotiate.run();
-        }
-        else {
+        } else {
             bus.addPostInitTask(negotiate);
         }
 
@@ -357,8 +354,7 @@ public class Workspace implements EntryPoint {
             public Tool getTool() {
                 if (sessionRoles.containsAll(roles)) {
                     return toolImpl;
-                }
-                else {
+                } else {
                     return null;
                 }
             }

@@ -8,6 +8,8 @@ import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.server.security.auth.AuthenticationAdapter;
 import org.jboss.errai.bus.server.security.auth.DefaultAdapter;
 import org.jboss.errai.bus.server.service.ErraiService;
+import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
+import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
 import org.jboss.errai.bus.server.service.ErraiServiceImpl;
 
 import java.util.Enumeration;
@@ -33,7 +35,8 @@ public class MessageBusServletConfig extends GuiceServletContextListener {
                         serve(appContext).with(MessageBusServiceImpl.class);
                     } else if ("errai.authentication_adapter".equals(key)) {
                         try {
-                            Class<? extends AuthenticationAdapter> authAdapterClass = Class.forName(bundle.getString(key)).asSubclass(AuthenticationAdapter.class);
+                            Class<? extends AuthenticationAdapter> authAdapterClass = Class.forName(bundle.getString(key))
+                                    .asSubclass(AuthenticationAdapter.class);
                             bind(AuthenticationAdapter.class).to(authAdapterClass);
                             authAdapterSpecified = true;
 
@@ -49,6 +52,7 @@ public class MessageBusServletConfig extends GuiceServletContextListener {
                 bind(MessageBus.class).to(MessageBusImpl.class);
                 bind(ServerMessageBus.class).to(MessageBusImpl.class);
                 bind(ErraiService.class).to(ErraiServiceImpl.class);
+                bind(ErraiServiceConfigurator.class).to(ErraiServiceConfiguratorImpl.class);
 
                 if (!authAdapterSpecified) {
                     bind(AuthenticationAdapter.class).to(DefaultAdapter.class);
