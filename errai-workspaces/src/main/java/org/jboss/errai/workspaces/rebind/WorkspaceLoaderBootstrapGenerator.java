@@ -17,10 +17,7 @@ import org.jboss.errai.workspaces.client.framework.annotations.LoadToolSet;
 import org.jboss.errai.workspaces.client.framework.annotations.LoginComponent;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintWriter;
-import static java.lang.Thread.currentThread;
-import java.net.URL;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -153,17 +150,17 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
             if (file.getName().endsWith(".class")) {
                 try {
                     String FQCN = getCandidateFQCN(root.getAbsolutePath(), file.getAbsolutePath());
-                    Class clazz = Class.forName(FQCN);
+                    Class<?> clazz = Class.forName(FQCN);
 
                     if (clazz.isAnnotationPresent(LoadToolSet.class)) {
                         writer.println("org.jboss.errai.workspaces.client.Workspace.addToolSet(new " + clazz.getName() + "());");
                         logger.log(TreeLogger.Type.INFO, "Adding Errai Toolset: " + clazz.getName());
                     }
                     else if (clazz.isAnnotationPresent(LoadTool.class)) {
-                        LoadTool loadTool = (LoadTool) clazz.getAnnotation(LoadTool.class);
+                        LoadTool loadTool = clazz.getAnnotation(LoadTool.class);
 
                         if (clazz.isAnnotationPresent(RequireRoles.class)) {
-                            RequireRoles requireRoles = (RequireRoles) clazz.getAnnotation(RequireRoles.class);
+                            RequireRoles requireRoles = clazz.getAnnotation(RequireRoles.class);
 
                             StringBuilder rolesBuilder = new StringBuilder("new String[] {");
                             String[] roles = requireRoles.value();
@@ -188,7 +185,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
                         writer.println("org.jboss.errai.workspaces.client.Workspace.setLoginComponent(new " + clazz.getName() + "());");
                     }
                     else if (clazz.isAnnotationPresent(GroupOrder.class)) {
-                        GroupOrder groupOrder = (GroupOrder) clazz.getAnnotation(GroupOrder.class);
+                        GroupOrder groupOrder = clazz.getAnnotation(GroupOrder.class);
 
                         if ("".equals(groupOrder.value().trim())) continue;
 
