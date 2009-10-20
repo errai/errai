@@ -17,6 +17,6 @@
 
     <generate-with class="org.jboss.errai.bus.rebind.ExtensionProxyGenerator">
         <when-type-assignable
-                class="org.jboss.errai.bus.rebind.ExtensionGenerator"/>
+                class="org.jboss.errai.bus.client.ext.ExtensionsLoader"/>
     </generate-with>
 </module>

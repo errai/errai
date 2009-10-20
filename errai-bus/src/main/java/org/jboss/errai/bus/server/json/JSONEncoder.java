@@ -1,6 +1,6 @@
 package org.jboss.errai.bus.server.json;
 
-import com.sun.tools.javac.tree.Tree;
+import org.jboss.errai.bus.client.protocols.SecurityParts;
 import org.mvel2.MVEL;
 
 import java.io.Serializable;
@@ -10,8 +10,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
-public class JSONEncoder {    
-    boolean defer = false;
+public class JSONEncoder {
+  //  boolean defer = false;
 
     public String encode(Object v) {
         return _encode(v);
@@ -34,7 +34,7 @@ public class JSONEncoder {
         } else if (v instanceof Serializable) {
             return encodeObject((Serializable) v);
         } else {
-            defer = true;
+      //      defer = true;
             return null;
         }
     }
@@ -58,9 +58,9 @@ public class JSONEncoder {
 
             build.append(k).append(":").append(_encode(v));
 
-            if (defer) {
-                throw new RuntimeException("cannot transmit type:" + v.getClass().getName());
-            }
+//            if (defer) {
+//                throw new RuntimeException("cannot transmit type:" + v.getClass().getName());
+//            }
 
             if (i + 1 < fields.length) build.append(",");
         }
@@ -73,18 +73,20 @@ public class JSONEncoder {
         boolean first = true;
 
         for (Map.Entry<Object, Object> entry : map.entrySet()) {
-            String val = _encode(entry.getValue());
-            if (!defer) {
-                if (!first) {
-                    mapBuild.append(",");
-                }
-                mapBuild.append(_encode(entry.getKey()))
-                        .append(":").append(val);
+            if (SecurityParts.SessionData.toString().equals(entry.getKey())) continue;
 
-                first = false;
-            } else {
-                defer = false;
+            String val = _encode(entry.getValue());
+//            if (!defer) {
+            if (!first) {
+                mapBuild.append(",");
             }
+            mapBuild.append(_encode(entry.getKey()))
+                    .append(":").append(val);
+
+            first = false;
+//            } else {
+//                defer = false;
+//            }
 
         }
 

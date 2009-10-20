@@ -174,11 +174,7 @@ public class ExtensionProxyGenerator extends Generator {
     }
 
     private static boolean isAnnotated(Class clazz, Class<? extends Annotation> annotation, Class ofType) {
-        if (ofType.isAssignableFrom(clazz)) {
-            return clazz.isAnnotationPresent(annotation);
-        } else {
-            throw new RuntimeException("Unknown type annotated with: " + annotation.getName());
-        }
+        return ofType.isAssignableFrom(clazz) && clazz.isAnnotationPresent(annotation);
     }
 
     private void findAllTargets() {
