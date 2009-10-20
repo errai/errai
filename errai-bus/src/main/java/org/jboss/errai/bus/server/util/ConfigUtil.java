@@ -1,11 +1,26 @@
 package org.jboss.errai.bus.server.util;
 
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.user.rebind.SourceWriter;
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import org.jboss.errai.bus.client.MessageBus;
+import org.jboss.errai.bus.client.MessageCallback;
+import org.jboss.errai.bus.server.ErraiModule;
+import org.jboss.errai.bus.server.Module;
+import org.jboss.errai.bus.server.annotations.ExtensionConfigurator;
+import org.jboss.errai.bus.server.annotations.LoadModule;
+import org.jboss.errai.bus.server.annotations.Service;
+import org.jboss.errai.bus.server.annotations.security.RequireAuthentication;
+import org.jboss.errai.bus.server.annotations.security.RequireRoles;
+import org.jboss.errai.bus.server.ext.ErraiConfigExtension;
+import org.jboss.errai.bus.server.security.auth.rules.RolesRequiredRule;
+import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
+
 import java.io.File;
 import static java.lang.Thread.currentThread;
 import java.net.URL;
-import java.util.Enumeration;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class ConfigUtil {
     public static final String ERRAI_CONFIG_STUB_NAME = "ErraiApp.properties";
@@ -24,4 +39,74 @@ public class ConfigUtil {
             throw new RuntimeException("Could not generate extension proxies", e);
         }
     }
+
+    public static void visitAll(File root, final ConfigVisitor visitor) {
+       _findLoadableModules(root, root, new HashSet<String>(), new VisitDelegate() {
+           public void visit(Class clazz) {
+               visitor.visit(clazz);
+           }
+       });
+    }
+
+    public static void visitAllTargets(List<File> targets, ConfigVisitor visitor) {
+        for (File file : targets) {
+            visitAll(file, visitor);
+        }
+    }
+
+    public static void visitAll(File root, final TreeLogger logger, final SourceWriter writer, final RebindVisitor visitor) {
+       _findLoadableModules(root, root, new HashSet<String>(), new VisitDelegate() {
+           public void visit(Class clazz) {
+               visitor.visit(clazz, logger, writer);
+           }
+       });
+    }
+
+    public static void visitAllTargets(List<File> targets,  final TreeLogger logger, final SourceWriter writer, RebindVisitor visitor) {
+        for (File file : targets) {
+            visitAll(file, logger, writer, visitor);
+        }
+    }
+
+    private static void _findLoadableModules(File root, File start, Set<String> loadedTargets, VisitDelegate visitor) {
+        for (File file : start.listFiles()) {
+            if (file.isDirectory()) _findLoadableModules(root, file, loadedTargets, visitor);
+            if (file.getName().endsWith(".class")) {
+                try {
+                    String FQCN = getCandidateFQCN(root.getAbsolutePath(), file.getAbsolutePath());
+
+                    if (loadedTargets.contains(FQCN)) {
+                        return;
+                    } else {
+                        loadedTargets.add(FQCN);
+                    }
+
+                    Class<?> loadClass = Class.forName(FQCN);
+
+                    visitor.visit(loadClass);
+                }
+                catch (NoClassDefFoundError e) {
+                    // do nothing.
+                }
+                catch (ExceptionInInitializerError e) {
+                    // do nothing.
+                }
+                catch (UnsupportedOperationException e) {
+                    // do nothing.
+                }
+                catch (ClassNotFoundException e) {
+                    // do nothing.
+                }
+                catch (UnsatisfiedLinkError e) {
+                    // do nothing.
+                }
+            }
+        }
+    }
+
+    private static String getCandidateFQCN(String rootFile, String fileName) {
+        return fileName.replaceAll("(/|\\\\)", ".")
+                .substring(rootFile.length() + 1, fileName.lastIndexOf('.'));
+    }
+
 }

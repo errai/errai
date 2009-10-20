@@ -114,7 +114,7 @@ public class ExtensionProxyGenerator extends Generator {
         sourceWriter.outdent();
 
         for (ExtensionGenerator generator : generators) {
-            generator.generate(logger, sourceWriter);
+            generator.generate(logger, sourceWriter, targets);
         }
 
         // end constructor source generation
