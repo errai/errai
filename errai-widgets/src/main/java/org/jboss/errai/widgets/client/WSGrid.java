@@ -1566,7 +1566,6 @@ public class WSGrid extends Composite {
                     if (edit) {
                         return;
                     }
-
                     _rangeSelect = true;
 
                     if (event.getShiftKey()) {
@@ -1778,7 +1777,6 @@ public class WSGrid extends Composite {
         start.mergeRows(fillY + 1);
 
         blurAll();
-
     }
 
     @Override

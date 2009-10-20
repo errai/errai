@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Queue;
 
 @Singleton
-public class MessageBusImpl implements ServerMessageBus {
+public class ServerMessageBusImpl implements ServerMessageBus {
     private final static int QUEUE_SIZE = 200;
 
     private final List<MessageListener> listeners = new ArrayList<MessageListener>();
@@ -31,7 +31,7 @@ public class MessageBusImpl implements ServerMessageBus {
 
     private final HouseKeeper houseKeeper = new HouseKeeper(this);
 
-    public MessageBusImpl() {
+    public ServerMessageBusImpl() {
         Thread thread = new Thread() {
             @Override
             public void run() {
@@ -178,13 +178,13 @@ public class MessageBusImpl implements ServerMessageBus {
 
                 store((String) message.get(HttpSession.class, SecurityParts.SessionData).getAttribute(WS_SESSION_ID),
                         message.get(String.class, MessageParts.ReplyTo),
-                        MessageBusServer.encodeJSON(CommandMessage.create(SecurityCommands.MessageNotDelivered).getParts()));
+                        ServerBusUtils.encodeJSON(CommandMessage.create(SecurityCommands.MessageNotDelivered).getParts()));
             }
 
             return;
         }
 
-        final String jsonMessage = MessageBusServer.encodeJSON(message.getParts());
+        final String jsonMessage = ServerBusUtils.encodeJSON(message.getParts());
 
         if (subscriptions.containsKey(subject)) {
             for (MessageCallback c : subscriptions.get(subject)) {
@@ -243,13 +243,13 @@ public class MessageBusImpl implements ServerMessageBus {
         if (fireListeners && !fireGlobalMessageListeners(message)) {
             if (message.hasPart(MessageParts.ReplyTo)) {
                 store(sessionid, message.get(String.class, MessageParts.ReplyTo),
-                        MessageBusServer.encodeJSON(CommandMessage.create(SecurityCommands.MessageNotDelivered).getParts()));
+                        ServerBusUtils.encodeJSON(CommandMessage.create(SecurityCommands.MessageNotDelivered).getParts()));
             }
 
             return;
         }
 
-        store(sessionid, subject, MessageBusServer.encodeJSON(message.getParts()));
+        store(sessionid, subject, ServerBusUtils.encodeJSON(message.getParts()));
     }
 
     public void send(String subject, CommandMessage message) {
@@ -423,9 +423,9 @@ public class MessageBusImpl implements ServerMessageBus {
 
     private static class HouseKeeper extends Thread {
         private boolean running = true;
-        private MessageBusImpl bus;
+        private ServerMessageBusImpl bus;
 
-        public HouseKeeper(MessageBusImpl bus) {
+        public HouseKeeper(ServerMessageBusImpl bus) {
             super();
             this.bus = bus;
             setPriority(Thread.MIN_PRIORITY);

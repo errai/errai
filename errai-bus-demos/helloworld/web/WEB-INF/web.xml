@@ -16,6 +16,6 @@
     </filter-mapping>
 
     <listener>
-        <listener-class>org.jboss.errai.bus.server.MessageBusServletConfig</listener-class>
+        <listener-class>org.jboss.errai.bus.server.ErraiServletConfig</listener-class>
     </listener>
 </web-app>

@@ -15,7 +15,7 @@ import org.jboss.errai.bus.server.service.ErraiServiceImpl;
 import java.util.Enumeration;
 import java.util.ResourceBundle;
 
-public class MessageBusServletConfig extends GuiceServletContextListener {
+public class ErraiServletConfig extends GuiceServletContextListener {
     @Override
     protected Injector getInjector() {
         return Guice.createInjector(new ServletModule() {
@@ -32,7 +32,7 @@ public class MessageBusServletConfig extends GuiceServletContextListener {
 
                     if ("errai.application_context".equals(key)) {
                         String appContext = bundle.getString("errai.application_context") + "erraiBus";
-                        serve(appContext).with(MessageBusServiceImpl.class);
+                        serve(appContext).with(ErraiServletImpl.class);
                     } else if ("errai.authentication_adapter".equals(key)) {
                         try {
                             Class<? extends AuthenticationAdapter> authAdapterClass = Class.forName(bundle.getString(key))
@@ -49,8 +49,8 @@ public class MessageBusServletConfig extends GuiceServletContextListener {
                     }
                 }
 
-                bind(MessageBus.class).to(MessageBusImpl.class);
-                bind(ServerMessageBus.class).to(MessageBusImpl.class);
+                bind(MessageBus.class).to(ServerMessageBusImpl.class);
+                bind(ServerMessageBus.class).to(ServerMessageBusImpl.class);
                 bind(ErraiService.class).to(ErraiServiceImpl.class);
                 bind(ErraiServiceConfigurator.class).to(ErraiServiceConfiguratorImpl.class);
 

@@ -29,11 +29,11 @@ import java.util.Map;
  * server passes through this class.
  */
 @Singleton
-public class MessageBusServiceImpl extends HttpServlet {
+public class ErraiServletImpl extends HttpServlet {
     private ErraiService service;
 
     @Inject
-    public MessageBusServiceImpl(ErraiService service) {
+    public ErraiServletImpl(ErraiService service) {
         this.service = service;
     }
 

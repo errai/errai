@@ -9,7 +9,7 @@ import org.jboss.errai.bus.server.json.JSONUtil;
 import javax.servlet.http.HttpSession;
 import java.util.Map;
 
-public class MessageBusServer {
+public class ServerBusUtils {
     public static void main(String[] args) {
         System.out.println("\"".replaceAll("\"", "\\\\\""));
     }
