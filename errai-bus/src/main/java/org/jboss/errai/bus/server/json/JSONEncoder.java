@@ -44,7 +44,7 @@ public class JSONEncoder {
 
         Class cls = o.getClass();
 
-        StringBuilder build = new StringBuilder("{EncodedType:'" + cls.getName() + "',");
+        StringBuilder build = new StringBuilder("{__EncodedType:'" + cls.getName() + "',");
         Field[] fields = cls.getDeclaredFields();
 
         for (int i = 0; i < fields.length; i++) {

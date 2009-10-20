@@ -1,9 +1,13 @@
 package org.jboss.errai.bus.client.json;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
+import org.jboss.errai.bus.client.types.Demarshaller;
+import org.jboss.errai.bus.client.types.TypeDemarshallers;
+import org.jboss.errai.bus.client.types.TypeHandlerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,9 +18,7 @@ import java.util.Map;
 public class JSONDecoderCli {
 
     public Object decode(Object value) {
-        JSONValue v = JSONParser.parse(String.valueOf(value));
-
-        return _decode(v);
+        return _decode(JSONParser.parse(String.valueOf(value)));
     }
 
     private Object _decode(JSONValue v) {
@@ -32,18 +34,27 @@ public class JSONDecoderCli {
             return decodeObject(v.isObject());
         } else if (v instanceof JSONArray) {
             return decodeList(v.isArray());
-        }
-        else {
+        } else {
             throw new RuntimeException("unknown encoding");
         }
 
     }
 
-    private Map<String, Object> decodeObject(JSONObject eMap) {
+    private Object decodeObject(JSONObject eMap) {
         Map<String, Object> m = new HashMap<String, Object>();
 
         for (String key : eMap.keySet()) {
-            
+            if ("__EncodedType".equals(key)) {
+                String className = eMap.get(key).isString().stringValue();
+
+                if (TypeDemarshallers.hasDemarshaller(className)) {
+                    return TypeDemarshallers.getDemarshaller(className).demarshall(eMap);
+                }
+                else {
+                    throw new RuntimeException("no available demarshaller: " + className);
+                }
+
+            }
 
             m.put(key, _decode(eMap.get(key)));
         }
