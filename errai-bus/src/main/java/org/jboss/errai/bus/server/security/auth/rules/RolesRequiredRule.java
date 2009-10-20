@@ -7,7 +7,7 @@ import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
-import org.jboss.errai.bus.server.ServerBusUtils;
+import org.jboss.errai.bus.server.util.ServerBusUtils;
 import org.jboss.errai.bus.server.security.auth.AuthSubject;
 import org.jboss.errai.bus.server.service.ErraiService;
 

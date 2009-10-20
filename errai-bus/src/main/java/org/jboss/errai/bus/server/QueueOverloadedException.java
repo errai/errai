@@ -1,6 +1,8 @@
 package org.jboss.errai.bus.server;
 
 public class QueueOverloadedException extends MessageDeliveryFailure {
+    private static final long serialVersionUID = 6014530858847384745L;
+
     public QueueOverloadedException() {
     }
 

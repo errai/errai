@@ -1,8 +1,10 @@
 package org.jboss.errai.bus.client;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.ui.*;
+import org.jboss.errai.bus.client.ext.ExtensionsLoader;
 import org.jboss.errai.bus.client.json.JSONUtilCli;
 import static org.jboss.errai.bus.client.json.JSONUtilCli.decodePayload;
 import org.jboss.errai.bus.client.protocols.BusCommands;
@@ -419,11 +421,16 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             }
         };
 
+        final MessageBus bus = this;
+
         final com.google.gwt.user.client.Timer outerTimer = new com.google.gwt.user.client.Timer() {
             @Override
             public void run() {
                 incoming.run();
                 incoming.scheduleRepeating((60 * 45) * 1000);
+
+                ExtensionsLoader loader = GWT.create(ExtensionsLoader.class);
+                loader.initExtensions(bus);
             }
         };
 

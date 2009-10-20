@@ -1,4 +1,4 @@
-package org.jboss.errai.bus.server;
+package org.jboss.errai.bus.server.util;
 
 import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.MessageBus;

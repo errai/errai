@@ -41,10 +41,8 @@ public class ErraiServletImpl extends HttpServlet {
     protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
             throws ServletException, IOException {
 
-        Payload p = service.getBus().nextMessage(
-                httpServletRequest.getSession().getAttribute(MessageBus.WS_SESSION_ID));
-
-        List<Message> messages = p.getMessages();
+        List<Message> messages = service.getBus().nextMessage(
+                httpServletRequest.getSession().getAttribute(MessageBus.WS_SESSION_ID)).getMessages();
 
         httpServletResponse.setHeader("Cache-Control", "no-cache");
         httpServletResponse.addHeader("Payload-Size", String.valueOf(messages.size()));

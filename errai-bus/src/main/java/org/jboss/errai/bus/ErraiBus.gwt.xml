@@ -14,4 +14,9 @@
     <replace-with class="org.jboss.errai.bus.client.ClientMessageBusImpl">
         <when-type-is class="org.jboss.errai.bus.client.MessageBus"/>
     </replace-with>
+
+    <generate-with class="org.jboss.errai.bus.rebind.ExtensionProxyGenerator">
+        <when-type-assignable
+                class="org.jboss.errai.bus.rebind.ExtensionGenerator"/>
+    </generate-with>
 </module>

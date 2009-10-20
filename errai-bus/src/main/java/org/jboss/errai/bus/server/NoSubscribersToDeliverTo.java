@@ -1,6 +1,8 @@
 package org.jboss.errai.bus.server;
 
 public class NoSubscribersToDeliverTo extends MessageDeliveryFailure {
+    private static final long serialVersionUID = -5385972750788483158L;
+
     public NoSubscribersToDeliverTo() {
         super();
     }
