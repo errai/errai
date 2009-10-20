@@ -1,10 +1,16 @@
 package org.jboss.errai.bus.server.json;
 
+import com.sun.tools.javac.tree.Tree;
+import org.mvel2.MVEL;
+
+import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
-public class JSONEncoder {
+public class JSONEncoder {    
     boolean defer = false;
 
     public String encode(Object v) {
@@ -25,12 +31,42 @@ public class JSONEncoder {
             return encodeMap((Map) v);
         } else if (v instanceof Object[]) {
             return encodeArray((Object[]) v);
+        } else if (v instanceof Serializable) {
+            return encodeObject((Serializable) v);
         } else {
             defer = true;
             return null;
         }
     }
 
+    public String encodeObject(Serializable o) {
+        if (o == null) return "null";
+
+        Class cls = o.getClass();
+
+        StringBuilder build = new StringBuilder("{EncodedType:'" + cls.getName() + "',");
+        Field[] fields = cls.getDeclaredFields();
+
+        for (int i = 0; i < fields.length; i++) {
+            if ((fields[i].getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
+                    || fields[i].isSynthetic()) {
+                continue;
+            }
+
+            String k = fields[i].getName();
+            Object v = MVEL.getProperty(k, o);
+
+            build.append(k).append(":").append(_encode(v));
+
+            if (defer) {
+                throw new RuntimeException("cannot transmit type:" + v.getClass().getName());
+            }
+
+            if (i + 1 < fields.length) build.append(",");
+        }
+
+        return build.append("}").toString();
+    }
 
     public String encodeMap(Map<Object, Object> map) {
         StringBuilder mapBuild = new StringBuilder("{");

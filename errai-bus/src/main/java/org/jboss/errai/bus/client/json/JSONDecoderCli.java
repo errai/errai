@@ -42,7 +42,9 @@ public class JSONDecoderCli {
     private Map<String, Object> decodeObject(JSONObject eMap) {
         Map<String, Object> m = new HashMap<String, Object>();
 
-        for (String key : eMap.keySet()) {            
+        for (String key : eMap.keySet()) {
+            
+
             m.put(key, _decode(eMap.get(key)));
         }
 

@@ -47,4 +47,11 @@ public class TypeHandlerFactory {
         if (handler == null) return value;
         return handler.getConverted(value);
     }
+
+    public static void addHandler(Class from, Class to, TypeHandler handler) {
+         if (!handlers.containsKey(from)) {
+             handlers.put(from, new HashMap<Class, TypeHandler>());
+         }
+        handlers.get(from).put(to, handler);
+    }
 }

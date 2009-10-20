@@ -189,103 +189,11 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
         });
 
         
-        // end constructor source generation
         sourceWriter.outdent();
         sourceWriter.println("}");
     }
 
 
-//    private void findLoadableModules(TreeLogger logger, SourceWriter writer) {
-//        List<File> targets = ConfigUtil.findAllConfigTargets();
-//
-//        for (File root : targets) {
-//            _findLoadableModules(logger, writer, root, root);
-//        }
-//
-//    }
-//
-//    private void _findLoadableModules(TreeLogger logger, SourceWriter writer, File root, File start) {
-//        for (File file : start.listFiles()) {
-//            if (file.isDirectory()) _findLoadableModules(logger, writer, root, file);
-//            if (file.getName().endsWith(".class")) {
-//                try {
-//                    String FQCN = getCandidateFQCN(root.getAbsolutePath(), file.getAbsolutePath());
-//                    Class<?> clazz = Class.forName(FQCN);
-//
-//                    if (clazz.isAnnotationPresent(LoadToolSet.class)) {
-//                        writer.println("org.jboss.errai.workspaces.client.Workspace.addToolSet(new " + clazz.getName() + "());");
-//                        logger.log(TreeLogger.Type.INFO, "Adding Errai Toolset: " + clazz.getName());
-//                    }
-//                    else if (clazz.isAnnotationPresent(LoadTool.class)) {
-//                        LoadTool loadTool = clazz.getAnnotation(LoadTool.class);
-//
-//                        if (clazz.isAnnotationPresent(RequireRoles.class)) {
-//                            RequireRoles requireRoles = clazz.getAnnotation(RequireRoles.class);
-//
-//                            StringBuilder rolesBuilder = new StringBuilder("new String[] {");
-//                            String[] roles = requireRoles.value();
-//
-//                            for (int i = 0; i < roles.length; i++) {
-//                                rolesBuilder.append("\"").append(roles[i].trim()).append("\"");
-//                                if ((i + 1) < roles.length) rolesBuilder.append(", ");
-//                            }
-//                            rolesBuilder.append("}");
-//
-//                            writer.println("org.jboss.errai.workspaces.client.Workspace.addTool(\"" + loadTool.group() + "\"," +
-//                                    " \"" + loadTool.name() + "\", \"" + loadTool.icon() + "\", " + loadTool.multipleAllowed()
-//                                    + ", " + loadTool.priority() + ", new " + clazz.getName() + "(), " + rolesBuilder.toString() + ");");
-//                        }
-//                        else {
-//                            writer.println("org.jboss.errai.workspaces.client.Workspace.addTool(\"" + loadTool.group() + "\"," +
-//                                    " \"" + loadTool.name() + "\", \"" + loadTool.icon() + "\", " + loadTool.multipleAllowed()
-//                                    + ", " + loadTool.priority() + ", new " + clazz.getName() + "());");
-//                        }
-//                    }
-//                    else if (clazz.isAnnotationPresent(LoginComponent.class)) {
-//                        writer.println("org.jboss.errai.workspaces.client.Workspace.setLoginComponent(new " + clazz.getName() + "());");
-//                    }
-//                    else if (clazz.isAnnotationPresent(GroupOrder.class)) {
-//                        GroupOrder groupOrder = clazz.getAnnotation(GroupOrder.class);
-//
-//                        if ("".equals(groupOrder.value().trim())) continue;
-//
-//                        String[] order = groupOrder.value().split(",");
-//
-//                        writer.print("org.jboss.errai.workspaces.client.Workspace.setPreferredGroupOrdering(new String[] {");
-//
-//                        for (int i = 0; i < order.length; i++) {
-//                            writer.print("\"");
-//                            writer.print(order[i].trim());
-//                            writer.print("\"");
-//
-//                            if (i + 1 < order.length) {
-//                                writer.print(",");
-//                            }
-//                        }
-//
-//                        writer.println("});");
-//                    }
-//                }
-//                catch (NoClassDefFoundError e) {
-//                    // do nothing.
-//                }
-//                catch (ExceptionInInitializerError e) {
-//                    // do nothing.
-//                }
-//                catch (UnsupportedOperationException e) {
-//                    // do nothing.
-//                }
-//                catch (ClassNotFoundException e) {
-//                    // do nothing.
-//                }
-//            }
-//        }
-//    }
-//
-//    private String getCandidateFQCN(String rootFile, String fileName) {
-//        return fileName.replaceAll("(/|\\\\)", ".")
-//                .substring(rootFile.length() + 1, fileName.lastIndexOf('.'));
-//    }
 
 }
 

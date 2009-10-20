@@ -25,7 +25,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
     private ServerMessageBus bus;
     private ErraiModule module;
     private List<File> configRootTargets;
-    private Set<String> loadedTargets;
+    private Map<String, String> properties;
 
     private ErraiServiceConfigurator configInst = this;
 
@@ -36,12 +36,12 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
     }
 
     public void configure() {
-        loadedTargets = new HashSet<String>();
+        properties = new HashMap<String, String>();
         configRootTargets = ConfigUtil.findAllConfigTargets();
 
         ConfigUtil.visitAllTargets(configRootTargets,
                 new ConfigVisitor() {
-                    public void visit(Class<?> loadClass) {
+                    public void visit(final Class<?> loadClass) {
                         if (Module.class.isAssignableFrom(loadClass)) {
                             final Class<? extends Module> clazz = loadClass.asSubclass(Module.class);
 
@@ -90,6 +90,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                                 ErraiConfigExtension configExt = Guice.createInjector(new AbstractModule() {
                                     @Override
                                     protected void configure() {
+                                        bind(ErraiConfigExtension.class).to(loadClass.asSubclass(ErraiConfigExtension.class));
                                         bind(MessageBus.class).toInstance(bus);
                                         bind(ErraiModule.class).toInstance(module);
                                         bind(ErraiServiceConfigurator.class).toInstance(configInst);
@@ -106,26 +107,33 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
 
         try {
             ResourceBundle erraiServiceConfig = ResourceBundle.getBundle("ErraiService");
-
             Enumeration<String> keys = erraiServiceConfig.getKeys();
             String key;
             while (keys.hasMoreElements()) {
                 key = keys.nextElement();
-
-                if ("errai.require_authentication_for_all".equals(key)) {
-                    if ("true".equals(erraiServiceConfig.getString(key))) {
-                        bus.addRule("ClientNegotiationService", new RolesRequiredRule(new HashSet<Object>(), bus));
-                    }
-                }
-
+                properties.put(key, erraiServiceConfig.getString(key));
             }
         }
         catch (Exception e) {
             throw new RuntimeException("error reading from configuration", e);
         }
+
+        String requireAuthenticationForAll = "errai.require_authentication_for_all";
+
+        if (hasProperty(requireAuthenticationForAll) && "true".equals(getProperty(requireAuthenticationForAll))) {
+            bus.addRule("ClientNegotiationService", new RolesRequiredRule(new HashSet<Object>(), bus));
+        }
     }
 
     public List<File> getConfigurationRoots() {
         return this.configRootTargets;
+    }
+
+    public boolean hasProperty(String key) {
+        return properties.containsKey(key);
+    }
+
+    public String getProperty(String key) {
+        return properties.get(key);
     }
 }
