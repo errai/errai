@@ -1,6 +1,5 @@
 package org.jboss.errai.bus.rebind;
 
-import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.user.rebind.SourceWriter;
 

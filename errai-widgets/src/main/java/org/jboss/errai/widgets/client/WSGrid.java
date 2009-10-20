@@ -19,6 +19,7 @@ import java.util.*;
 /**
  * A Grid/Table implementation for working with structured data.
  */
+@SuppressWarnings({"UnusedDeclaration", "ConstantConditions"})
 public class WSGrid extends Composite {
     private static final int CELL_HEIGHT_PX = 18;
 
@@ -154,6 +155,8 @@ public class WSGrid extends Composite {
                     WSCell currentFocus = selectionList.isEmpty() ? null :
                             selectionList.lastElement();
 
+                    if (currentFocus == null) return;
+
                     int selCol = (_leftGrow ? currentFocus.col - 1 : currentFocus.col);
                     if (selCol == -1) return;
 
@@ -181,7 +184,7 @@ public class WSGrid extends Composite {
             public void onKeyDown(KeyDownEvent event) {
                 final WSCell currentFocus;
                 int offsetX;
-                int offsetY = 1;
+                int offsetY;
 
                 /**
                  * Is there currently anything selected?
