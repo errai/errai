@@ -1,0 +1,20 @@
+@comment{
+
+     # This class is used to generate the demarshaller code used by the ErraiBus
+     # serialization engine.
+
+}
+org.jboss.errai.bus.client.types.TypeDemarshallers.addDemarshaller(
+    @{className},
+    new org.jboss.errai.bus.client.types.Demarshaller<@{className}>() {
+        public @{className} demarshall(JSONObject o) {
+            ${className} n = new @{className}();
+
+            @foreach{fieldName : fields}
+            n.@{org.mvel2.util.ReflectionUtil.getSetter(fieldName)}(org.jboss.errai.bus.client.types.JSONTypeHelper.convert(o.get("@{fieldName}"), ${targetTypes.get(fieldName).getName()}.class);
+            @end{}
+
+            return n;
+        }
+    }
+);

@@ -5,7 +5,7 @@ import com.google.inject.Provider;
 import org.hibernate.ejb.Ejb3Configuration;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.server.ErraiModule;
-import org.jboss.errai.bus.server.annotations.ExtensionConfigurator;
+import org.jboss.errai.bus.server.annotations.ExtensionComponent;
 import org.jboss.errai.bus.server.ext.ErraiConfigExtension;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.bus.server.util.ConfigUtil;
@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * This is a prototype implementation of the persistence service.
  */
-@ExtensionConfigurator
+@ExtensionComponent
 public class ErraiPersistenceConfigurator implements ErraiConfigExtension {
     private ErraiBus bus;
     private ErraiModule module;

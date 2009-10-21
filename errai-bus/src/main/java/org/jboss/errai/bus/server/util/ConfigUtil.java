@@ -2,23 +2,10 @@ package org.jboss.errai.bus.server.util;
 
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.user.rebind.SourceWriter;
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import org.jboss.errai.bus.client.MessageBus;
-import org.jboss.errai.bus.client.MessageCallback;
-import org.jboss.errai.bus.server.ErraiModule;
-import org.jboss.errai.bus.server.Module;
-import org.jboss.errai.bus.server.annotations.ExtensionConfigurator;
-import org.jboss.errai.bus.server.annotations.LoadModule;
-import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.bus.server.annotations.security.RequireAuthentication;
-import org.jboss.errai.bus.server.annotations.security.RequireRoles;
-import org.jboss.errai.bus.server.ext.ErraiConfigExtension;
-import org.jboss.errai.bus.server.security.auth.rules.RolesRequiredRule;
-import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 
 import java.io.File;
 import static java.lang.Thread.currentThread;
+import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.util.*;
 
@@ -108,5 +95,10 @@ public class ConfigUtil {
         return fileName.replaceAll("(/|\\\\)", ".")
                 .substring(rootFile.length() + 1, fileName.lastIndexOf('.'));
     }
+
+    public static boolean isAnnotated(Class clazz, Class<? extends Annotation> annotation, Class ofType) {
+        return ofType.isAssignableFrom(clazz) && clazz.isAnnotationPresent(annotation);
+    }
+
 
 }

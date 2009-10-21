@@ -8,7 +8,7 @@ import org.jboss.errai.bus.client.MessageCallback;
 import org.jboss.errai.bus.server.ErraiModule;
 import org.jboss.errai.bus.server.Module;
 import org.jboss.errai.bus.server.ServerMessageBus;
-import org.jboss.errai.bus.server.annotations.ExtensionConfigurator;
+import org.jboss.errai.bus.server.annotations.ExtensionComponent;
 import org.jboss.errai.bus.server.annotations.LoadModule;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.annotations.security.RequireAuthentication;
@@ -85,7 +85,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                                 }
                             }
                         } else if (ErraiConfigExtension.class.isAssignableFrom(loadClass)) {
-                            if (loadClass.isAnnotationPresent(ExtensionConfigurator.class)) {
+                            if (loadClass.isAnnotationPresent(ExtensionComponent.class)) {
 
                                 ErraiConfigExtension configExt = Guice.createInjector(new AbstractModule() {
                                     @Override

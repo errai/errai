@@ -39,13 +39,13 @@ public class TypeHandlerFactory {
         return toHandlers;
     }
 
-    public static Object convert(Class from, Class to, Object value) {
-        if (value.getClass() == to) return value;
+    public static <T> T convert(Class from, Class<? extends T> to, Object value) {
+        if (value.getClass() == to) return  (T)value;
         Map<Class, TypeHandler> toHandlers = getHandler(from);
-        if (toHandlers == null) return value;
+        if (toHandlers == null) return (T) value;
         TypeHandler handler = toHandlers.get(to);
-        if (handler == null) return value;
-        return handler.getConverted(value);
+        if (handler == null) return (T) value;
+        return (T) handler.getConverted(value);
     }
 
     public static void addHandler(Class from, Class to, TypeHandler handler) {

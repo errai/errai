@@ -11,7 +11,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class JSONEncoder {
-  //  boolean defer = false;
 
     public String encode(Object v) {
         return _encode(v);
@@ -34,7 +33,6 @@ public class JSONEncoder {
         } else if (v instanceof Serializable) {
             return encodeObject((Serializable) v);
         } else {
-      //      defer = true;
             return null;
         }
     }
@@ -47,16 +45,15 @@ public class JSONEncoder {
         StringBuilder build = new StringBuilder("{__EncodedType:'" + cls.getName() + "',");
         Field[] fields = cls.getDeclaredFields();
 
+        String k;
         for (int i = 0; i < fields.length; i++) {
             if ((fields[i].getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
                     || fields[i].isSynthetic()) {
                 continue;
             }
 
-            String k = fields[i].getName();
-            Object v = MVEL.getProperty(k, o);
 
-            build.append(k).append(":").append(_encode(v));
+            build.append(k = fields[i].getName()).append(":").append(_encode(MVEL.getProperty(k, o)));
 
             if (i + 1 < fields.length) build.append(",");
         }
