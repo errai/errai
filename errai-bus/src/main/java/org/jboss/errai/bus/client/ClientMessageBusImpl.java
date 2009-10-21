@@ -394,7 +394,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                                 public void onError(Request request, Throwable throwable) {
                                     block = false;
 
-
                                     schedule(1);
                                 }
 

@@ -58,10 +58,6 @@ public class JSONEncoder {
 
             build.append(k).append(":").append(_encode(v));
 
-//            if (defer) {
-//                throw new RuntimeException("cannot transmit type:" + v.getClass().getName());
-//            }
-
             if (i + 1 < fields.length) build.append(",");
         }
 
@@ -76,7 +72,6 @@ public class JSONEncoder {
             if (SecurityParts.SessionData.toString().equals(entry.getKey())) continue;
 
             String val = _encode(entry.getValue());
-//            if (!defer) {
             if (!first) {
                 mapBuild.append(",");
             }
@@ -84,10 +79,6 @@ public class JSONEncoder {
                     .append(":").append(val);
 
             first = false;
-//            } else {
-//                defer = false;
-//            }
-
         }
 
         return mapBuild.append("}").toString();
