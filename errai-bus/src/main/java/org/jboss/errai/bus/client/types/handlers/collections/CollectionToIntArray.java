@@ -11,7 +11,7 @@ public class CollectionToIntArray implements TypeHandler<Collection, Integer[]> 
 
         int i = 0;
         for (Object o : in) {
-           newArray[i++] = ((Double)o).intValue();
+           newArray[i++] = ((Number)o).intValue();
         }
 
         return newArray;

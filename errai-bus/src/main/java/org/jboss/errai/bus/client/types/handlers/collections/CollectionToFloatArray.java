@@ -4,14 +4,14 @@ import org.jboss.errai.bus.client.types.TypeHandler;
 
 import java.util.Collection;
 
-public class CollectionToLongArray implements TypeHandler<Collection, Long[]> {
-    public Long[] getConverted(Collection in) {
+public class CollectionToFloatArray implements TypeHandler<Collection, Float[]> {
+    public Float[] getConverted(Collection in) {
         if (in == null) return null;
-        Long[] newArray = new Long[in.size()];
+        Float[] newArray = new Float[in.size()];
 
         int i = 0;
         for (Object o : in) {
-           newArray[i++] = ((Number)o).longValue();
+           newArray[i++] = ((Number)o).floatValue();
         }
 
         return newArray;

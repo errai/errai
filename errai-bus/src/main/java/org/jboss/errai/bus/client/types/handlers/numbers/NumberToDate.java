@@ -4,7 +4,7 @@ import org.jboss.errai.bus.client.types.TypeHandler;
 
 import java.util.Date;
 
-public class NumbertToDate implements TypeHandler<Number, Date> {
+public class NumberToDate implements TypeHandler<Number, Date> {
     public Date getConverted(Number in) {
         return new Date(in.longValue());
     }

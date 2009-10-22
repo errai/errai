@@ -23,6 +23,12 @@ public class TypeHandlerFactory {
         collectionHandlers.put(Boolean[].class, new CollectionToBooleanArray());
         collectionHandlers.put(Double[].class, new CollectionToDoubleArray());
 
+        collectionHandlers.put(int[].class, new CollectionToIntArray());
+        collectionHandlers.put(long[].class, new CollectionToLongArray());
+        collectionHandlers.put(boolean[].class, new CollectionToBooleanArray());
+        collectionHandlers.put(double[].class, new CollectionToDoubleArray());
+
+
         handlers.put(Collection.class, collectionHandlers);
 
         Map<Class, TypeHandler> numberHandlers = new HashMap<Class, TypeHandler>();
@@ -31,11 +37,11 @@ public class TypeHandlerFactory {
         numberHandlers.put(Short.class, new NumberToShort());
         numberHandlers.put(Float.class, new NumberToFloat());
         numberHandlers.put(Double.class, new NumberToFloat());
-        numberHandlers.put(java.util.Date.class, new NumbertToDate());
+        numberHandlers.put(java.util.Date.class, new NumberToDate());
         numberHandlers.put(java.sql.Date.class, new NumberToSQLDate());
 
         handlers.put(Number.class, numberHandlers);
-
+        
         /**
          * We can specifically discriminate on ArrayList pretty exclusively for now, because we
          * know the JSONDecoder always uses it for lists/arrays.
