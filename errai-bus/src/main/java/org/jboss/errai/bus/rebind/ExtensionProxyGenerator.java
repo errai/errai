@@ -1,5 +1,6 @@
 package org.jboss.errai.bus.rebind;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
@@ -43,7 +44,7 @@ public class ExtensionProxyGenerator extends Generator {
             packageName = classType.getPackage().getName();
             className = classType.getSimpleSourceName() + "Impl";
 
-            System.out.println("Generating: " + packageName + "." + className);
+            logger.log(TreeLogger.INFO, "Generating Extensions Bootstrapper...");
 
             // Generate class source code
             generateClass(logger, context);

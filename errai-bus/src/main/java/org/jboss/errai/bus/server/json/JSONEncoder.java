@@ -58,19 +58,15 @@ public class JSONEncoder {
                     || field.isSynthetic()) {
                 continue;
             } else if (!first) {
-                build.append(",");
+                build.append(',');
             }
 
-            build.append(k = field.getName()).append(":").append(_encode(MVEL.getProperty(k, o)));
+            build.append(k = field.getName()).append(':').append(_encode(MVEL.getProperty(k, o)));
             first = false;
         }
 
-        build.append("}");
 
-
-        System.out.println(">>" + build.toString());
-
-        return build.toString();
+        return build.append('}').toString();
     }
 
     public String encodeMap(Map<Object, Object> map) {
