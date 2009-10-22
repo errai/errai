@@ -99,8 +99,6 @@ public class CommandMessage {
         //noinspection unchecked
         Object value = parts.get(part.toString());
         return value == null ? null : (T) TypeHandlerFactory.convert(value.getClass(), type, value);
-
-
     }
 
     @SuppressWarnings({"UnusedDeclaration"})

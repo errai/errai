@@ -1,5 +1,6 @@
 package org.jboss.errai.bus.server;
 
+import com.google.gwt.core.client.GWT;
 import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.Payload;
 
@@ -9,7 +10,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 public class MessageQueue {
-    private static final long TIMEOUT = (1000 * 10);
+    private static final long TIMEOUT = Boolean.getBoolean("org.jboss.errai.debugmode") ? (1000 * 60 * 60) : (1000 * 30);
     private static final int MAXIMUM_PAYLOAD_SIZE = 10;
     private static final long DEFAULT_TRANSMISSION_WINDOW = 25;
 

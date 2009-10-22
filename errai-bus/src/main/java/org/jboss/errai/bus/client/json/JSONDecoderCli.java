@@ -51,9 +51,10 @@ public class JSONDecoderCli {
                     return TypeDemarshallers.getDemarshaller(className).demarshall(eMap);
                 }
                 else {
+                    GWT.log("Could not demartial class. There is no available demarshaller. " +
+                            "Ensure you have exposed the class with @ExposeEntity.", null);
                     throw new RuntimeException("no available demarshaller: " + className);
                 }
-
             }
 
             m.put(key, _decode(eMap.get(key)));

@@ -1,5 +1,6 @@
 package org.jboss.errai.bus.server.util;
 
+import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.user.rebind.SourceWriter;
 
@@ -41,17 +42,17 @@ public class ConfigUtil {
         }
     }
 
-    public static void visitAll(File root, final TreeLogger logger, final SourceWriter writer, final RebindVisitor visitor) {
+    public static void visitAll(File root, final GeneratorContext context, final TreeLogger logger, final SourceWriter writer, final RebindVisitor visitor) {
        _findLoadableModules(root, root, new HashSet<String>(), new VisitDelegate() {
            public void visit(Class clazz) {
-               visitor.visit(clazz, logger, writer);
+               visitor.visit(clazz, context, logger, writer);
            }
        });
     }
 
-    public static void visitAllTargets(List<File> targets,  final TreeLogger logger, final SourceWriter writer, RebindVisitor visitor) {
+    public static void visitAllTargets(List<File> targets, final GeneratorContext context, final TreeLogger logger, final SourceWriter writer, RebindVisitor visitor) {
         for (File file : targets) {
-            visitAll(file, logger, writer, visitor);
+            visitAll(file, context, logger, writer, visitor);
         }
     }
 

@@ -30,10 +30,11 @@ public class ExtensionProxyGenerator extends Generator {
      */
     private String packageName = null;
 
+    private TypeOracle typeOracle;
 
     @Override
     public String generate(TreeLogger logger, GeneratorContext context, String typeName) throws UnableToCompleteException {
-        TypeOracle typeOracle = context.getTypeOracle();
+        typeOracle = context.getTypeOracle();
 
         try {
             // get classType and save instance variables
@@ -42,6 +43,8 @@ public class ExtensionProxyGenerator extends Generator {
             packageName = classType.getPackage().getName();
             className = classType.getSimpleSourceName() + "Impl";
 
+            System.out.println("Generating: " + packageName + "." + className);
+
             // Generate class source code
             generateClass(logger, context);
 
@@ -49,7 +52,7 @@ public class ExtensionProxyGenerator extends Generator {
         catch (Exception e) {
 
             // record sendNowWith logger that Map generation threw an exception
-            logger.log(TreeLogger.ERROR, "Error generating bootstrap loader", e);
+            logger.log(TreeLogger.ERROR, "Error generating extensions", e);
 
         }
 
@@ -81,7 +84,7 @@ public class ExtensionProxyGenerator extends Generator {
         SourceWriter sourceWriter = composer.createSourceWriter(context, printWriter);
 
         // generator constructor source code
-        generateBootstrapClass(logger, sourceWriter);
+        generateExtensions(context, logger, sourceWriter);
         // close generated class
         sourceWriter.outdent();
         sourceWriter.println("}");
@@ -90,7 +93,7 @@ public class ExtensionProxyGenerator extends Generator {
         context.commit(logger, printWriter);
     }
 
-    private void generateBootstrapClass(TreeLogger logger, SourceWriter sourceWriter) {
+    private void generateExtensions(GeneratorContext context, TreeLogger logger, SourceWriter sourceWriter) {
         // start constructor source generation
         sourceWriter.println("public " + className + "() { ");
         sourceWriter.indent();
@@ -103,15 +106,15 @@ public class ExtensionProxyGenerator extends Generator {
 
         final List<File> targets = ConfigUtil.findAllConfigTargets();
 
-        new SerializationExtensionGenerator().generate(logger, sourceWriter, targets);
+        new SerializationExtensionGenerator().generate(context, logger, sourceWriter, targets);
 
-        ConfigUtil.visitAllTargets(targets, logger, sourceWriter,
+        ConfigUtil.visitAllTargets(targets, context, logger, sourceWriter,
                 new RebindVisitor() {
-                    public void visit(Class<?> visit, TreeLogger logger, SourceWriter writer) {
+                    public void visit(Class<?> visit, GeneratorContext context, TreeLogger logger, SourceWriter writer) {
                         if (ConfigUtil.isAnnotated(visit, ExtensionComponent.class, ExtensionGenerator.class)) {
                             try {
                                 ExtensionGenerator generator = visit.asSubclass(ExtensionGenerator.class).newInstance();
-                                generator.generate(logger, writer, targets);
+                                generator.generate(context, logger, writer, targets);
                             }
                             catch (Exception e) {
                                 throw new RuntimeException("Could not load extension generator: " + visit.getName(), e);

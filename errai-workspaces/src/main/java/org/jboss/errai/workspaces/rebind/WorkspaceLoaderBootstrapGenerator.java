@@ -86,7 +86,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
         SourceWriter sourceWriter = composer.createSourceWriter(context, printWriter);
 
         // generator constructor source code
-        generateBootstrapClass(logger, sourceWriter);
+        generateBootstrapClass(context, logger, sourceWriter);
         // close generated class
         sourceWriter.outdent();
         sourceWriter.println("}");
@@ -95,7 +95,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
         context.commit(logger, printWriter);
     }
 
-    private void generateBootstrapClass(TreeLogger logger, SourceWriter sourceWriter) {
+    private void generateBootstrapClass(GeneratorContext context, TreeLogger logger, SourceWriter sourceWriter) {
 
         // init resource bundle
 
@@ -130,8 +130,8 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
  
         List<File> targets = ConfigUtil.findAllConfigTargets();
 
-        ConfigUtil.visitAllTargets(targets, logger, sourceWriter, new RebindVisitor() {
-            public void visit(Class<?> clazz, TreeLogger logger, SourceWriter writer) {
+        ConfigUtil.visitAllTargets(targets, context, logger, sourceWriter, new RebindVisitor() {
+            public void visit(Class<?> clazz, GeneratorContext context, TreeLogger logger, SourceWriter writer) {
                 if (clazz.isAnnotationPresent(LoadToolSet.class)) {
                         writer.println("org.jboss.errai.workspaces.client.Workspace.addToolSet(new " + clazz.getName() + "());");
                         logger.log(TreeLogger.Type.INFO, "Adding Errai Toolset: " + clazz.getName());

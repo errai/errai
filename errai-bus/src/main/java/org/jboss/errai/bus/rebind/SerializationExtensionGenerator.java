@@ -1,6 +1,8 @@
 package org.jboss.errai.bus.rebind;
 
+import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.user.rebind.SourceWriter;
 import org.jboss.errai.bus.server.annotations.ExposeEntity;
 import org.jboss.errai.bus.server.annotations.ExtensionComponent;
@@ -26,10 +28,10 @@ public class SerializationExtensionGenerator implements ExtensionGenerator {
         demarshallerGenerator = TemplateCompiler.compileTemplate(istream, null);
     }
 
-    public void generate(TreeLogger logger, SourceWriter writer, List<File> roots) {
-        ConfigUtil.visitAllTargets(roots, logger, writer,
+    public void generate(GeneratorContext context, TreeLogger logger, SourceWriter writer, List<File> roots) {
+        ConfigUtil.visitAllTargets(roots, context, logger, writer,
                 new RebindVisitor() {
-                    public void visit(Class<?> visit, TreeLogger logger, SourceWriter writer) {
+                    public void visit(Class<?> visit, GeneratorContext context, TreeLogger logger, SourceWriter writer) {
                         if (visit.isAnnotationPresent(ExposeEntity.class)) {
 
                             Map<String, Class> types = new HashMap<String, Class>();
