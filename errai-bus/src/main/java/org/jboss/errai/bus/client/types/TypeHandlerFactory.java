@@ -1,6 +1,7 @@
 package org.jboss.errai.bus.client.types;
 
-import org.jboss.errai.bus.client.types.handlers.*;
+import org.jboss.errai.bus.client.types.handlers.collections.*;
+import org.jboss.errai.bus.client.types.handlers.numbers.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,11 +25,28 @@ public class TypeHandlerFactory {
 
         handlers.put(Collection.class, collectionHandlers);
 
+        Map<Class, TypeHandler> numberHandlers = new HashMap<Class, TypeHandler>();
+        numberHandlers.put(Integer.class, new NumberToInt());
+        numberHandlers.put(Long.class, new NumberToLong());
+        numberHandlers.put(Short.class, new NumberToShort());
+        numberHandlers.put(Float.class, new NumberToFloat());
+        numberHandlers.put(Double.class, new NumberToFloat());
+        numberHandlers.put(java.util.Date.class, new NumbertToDate());
+        numberHandlers.put(java.sql.Date.class, new NumberToSQLDate());
+
+        handlers.put(Number.class, numberHandlers);
+
         /**
          * We can specifically discriminate on ArrayList pretty exclusively for now, because we
          * know the JSONDecoder always uses it for lists/arrays.
          */
         inheritanceMap.put(ArrayList.class, Collection.class);
+        inheritanceMap.put(Integer.class, Number.class);
+        inheritanceMap.put(Long.class, Number.class);
+        inheritanceMap.put(Short.class, Number.class);
+        inheritanceMap.put(Float.class, Number.class);
+        inheritanceMap.put(Double.class, Number.class);
+
     }
 
     public static Map<Class, TypeHandler> getHandler(Class from) {

@@ -1,4 +1,4 @@
-package org.jboss.errai.bus.client.types.handlers;
+package org.jboss.errai.bus.client.types.handlers.collections;
 
 import org.jboss.errai.bus.client.types.TypeHandler;
 

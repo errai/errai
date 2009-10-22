@@ -14,7 +14,7 @@ public class JSONTypeHelper {
             return TypeHandlerFactory.convert(String.class, to, ((JSONString)v).stringValue());
         }
         else if ((v = value.isNumber()) != null) {
-            return TypeHandlerFactory.convert(Double.class, to, ((JSONNumber)v).doubleValue());
+            return TypeHandlerFactory.convert(Number.class, to, ((JSONNumber)v).doubleValue());
         }
         else if ((v = value.isBoolean()) != null) {
             return TypeHandlerFactory.convert(Boolean.class, to, ((JSONBoolean)v).booleanValue());

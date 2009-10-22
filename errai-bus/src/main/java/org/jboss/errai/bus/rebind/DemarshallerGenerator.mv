@@ -9,7 +9,8 @@ org.jboss.errai.bus.client.types.TypeDemarshallers.addDemarshaller(
     new org.jboss.errai.bus.client.types.Demarshaller<@{className}>() {
         public @{className} demarshall(com.google.gwt.json.client.JSONObject o) {
             ${className} n = new @{className}();
-            @foreach{fieldName : fields}n.@{org.mvel2.util.ReflectionUtil.getSetter(fieldName)}(org.jboss.errai.bus.client.types.JSONTypeHelper.convert(o.get("@{fieldName}"), ${targetTypes.get(fieldName).getName()}.class));@end{}
+            @foreach{fieldName : fields}n.@{org.mvel2.util.ReflectionUtil.getSetter(fieldName)}(org.jboss.errai.bus.client.types.JSONTypeHelper.convert(o.get("@{fieldName}"), ${targetTypes.get(fieldName).getName()}.class));
+            @end{}
             return n;
         }
     }

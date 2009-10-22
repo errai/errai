@@ -1,12 +1,14 @@
 package org.jboss.errai.bus.server.json;
 
 import org.jboss.errai.bus.client.protocols.SecurityParts;
+import org.jboss.errai.bus.client.types.TypeHandler;
 import org.mvel2.MVEL;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -42,23 +44,33 @@ public class JSONEncoder {
 
         Class cls = o.getClass();
 
+        if (tHandlers.containsKey(cls)) {
+            return _encode(convert(o));
+        }
+        
         StringBuilder build = new StringBuilder("{__EncodedType:'" + cls.getName() + "',");
         Field[] fields = cls.getDeclaredFields();
 
         String k;
-        for (int i = 0; i < fields.length; i++) {
-            if ((fields[i].getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
-                    || fields[i].isSynthetic()) {
+        boolean first = true;
+        for (Field field : fields) {
+            if ((field.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
+                    || field.isSynthetic()) {
                 continue;
+            } else if (!first) {
+                build.append(",");
             }
 
-
-            build.append(k = fields[i].getName()).append(":").append(_encode(MVEL.getProperty(k, o)));
-
-            if (i + 1 < fields.length) build.append(",");
+            build.append(k = field.getName()).append(":").append(_encode(MVEL.getProperty(k, o)));
+            first = false;
         }
 
-        return build.append("}").toString();
+        build.append("}");
+
+
+        System.out.println(">>" + build.toString());
+
+        return build.toString();
     }
 
     public String encodeMap(Map<Object, Object> map) {
@@ -98,6 +110,28 @@ public class JSONEncoder {
             if ((i + 1) < array.length) buildCol.append(",");
         }
         return buildCol.append("]").toString();
+    }
+
+    private static final Map<Class, TypeHandler> tHandlers = new HashMap<Class, TypeHandler>();
+
+    static {
+        tHandlers.put(java.sql.Date.class, new TypeHandler<java.sql.Date, Long>() {
+            public Long getConverted(java.sql.Date in) {
+                return in.getTime();
+            }
+        });
+        tHandlers.put(java.util.Date.class, new TypeHandler<java.util.Date, Long>() {
+            public Long getConverted(java.util.Date in) {
+                return in.getTime();
+            }
+        });
+    }
+
+    private static Object convert(Object in) {
+        if (in == null || !tHandlers.containsKey(in.getClass())) return in;
+        else {
+            return tHandlers.get(in.getClass()).getConverted(in);
+        }
     }
 
 
