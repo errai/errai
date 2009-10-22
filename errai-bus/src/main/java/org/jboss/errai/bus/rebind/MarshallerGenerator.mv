@@ -1,0 +1,31 @@
+@comment{
+
+     # This class is used to generate the marshaller code used by the ErraiBus
+     # serialization engine.
+
+}
+
+@declare{'extractor'}@{fieldName}:").append(jsonEncoder.encode(o.@{getter}())).append("@end{}
+
+org.jboss.errai.bus.client.types.TypeMarshallers.addMarshaller(
+    @{className}.class,
+    new org.jboss.errai.bus.client.types.Marshaller<@{className}>() {
+        public String marshall(@{className} o) {
+            try {
+                StringBuilder json = new StringBuilder("{__EncodedType:\"@{className}\",");
+                org.jboss.errai.bus.client.json.JSONEncoderCli jsonEncoder = new org.jboss.errai.bus.client.json.JSONEncoderCli();
+
+                json.append("@foreach{fieldName : fields}@includeNamed{"extractor";fieldName=fieldName;targetType=targetTypes.get(fieldName);getter=org.mvel2.util.ReflectionUtil.getGetter(fieldName)}@end{","}}");
+
+                System.out.println("EncodedJSON:" + json.toString());
+
+                return "\"" + json.toString().replaceAll("\"", "'") + "\"";
+            }
+            catch (Exception e) {
+                System.out.println("marshalling error");
+                e.printStackTrace();
+                return null;
+            }
+        }
+    }
+);

@@ -68,7 +68,9 @@ public class TypeHandlerFactory {
         Map<Class, TypeHandler> toHandlers = getHandler(from);
         if (toHandlers == null) return (T) value;
         TypeHandler handler = toHandlers.get(to);
-        if (handler == null) return (T) value;
+        if (handler == null) {
+            return (T) value;
+        }
         return (T) handler.getConverted(value);
     }
 

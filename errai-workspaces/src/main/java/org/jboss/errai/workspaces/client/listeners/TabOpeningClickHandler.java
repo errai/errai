@@ -53,6 +53,7 @@ public class TabOpeningClickHandler implements ClickHandler {
                 }
             });
         }
+        try {
 
         /**
          * Being capturing all message registration activity. This is necessary if you want to use the automatic
@@ -69,6 +70,10 @@ public class TabOpeningClickHandler implements ClickHandler {
                 .set(LayoutParts.DOMID, tool.getId() + "_" + System.currentTimeMillis())
                 .set(LayoutParts.InitSubject, initSubject)
                 .sendNowWith(bus);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }

@@ -4,11 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TypeDemarshallers {
-    private static final Map<String, Class> classMap = new HashMap<String, Class>();
+    private static final Map<String, Demarshaller> classMap = new HashMap<String, Demarshaller>();
     private static final Map<Class, Demarshaller> demarshallers = new HashMap<Class, Demarshaller>();
 
     public static void addDemarshaller(Class type, Demarshaller d) {
-        classMap.put(type.getName(), type);
+        classMap.put(type.getName(), d);
         demarshallers.put(type,d);
     }
 
@@ -17,7 +17,7 @@ public class TypeDemarshallers {
     }
 
     public static Demarshaller getDemarshaller(String type) {
-        return demarshallers.get(classMap.get(type));
+        return classMap.get(type);
     }
 
     public static boolean hasDemarshaller(Class type) {

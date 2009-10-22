@@ -4,7 +4,12 @@ import java.util.Map;
 
 public class JSONUtil {
     public static Map<String, Object> decodeToMap(String in) {
-        return (Map<String, Object>) new JSONDecoder(in).parse();
+        Map m = (Map<String, Object>) new JSONDecoder(in).parse();
+
+        if (m.containsKey("__MarshalledTypes")) {
+            System.out.println("WOOO!");
+        }
+
+        return m;
     }
-   
 }

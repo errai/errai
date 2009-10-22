@@ -56,4 +56,15 @@ public class JSONTypeHelper {
         return null;
     }
 
+    public static String encodeHelper(Object v) {
+        if (v instanceof String) {
+            return "\\\"" + v + "\\\"";
+        }
+        else if (v instanceof Character) {
+            return "'" + v + "'";
+        }
+        else {
+            return String.valueOf(v);
+        }
+    }
 }

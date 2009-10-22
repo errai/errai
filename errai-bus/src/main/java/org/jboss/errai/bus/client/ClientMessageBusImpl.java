@@ -478,7 +478,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             _store(subject, value);
         }
         catch (Exception e) {
-            showError("Receiver for '" + subject + "' threw an exception", "Unknown", e);
+            showError("Error sending data to client bus for '" + subject + "'", "Value:" + value, e);
         }
     }
 

@@ -127,40 +127,45 @@ public class WorkspaceLayout extends Composite {
         ErraiBus.get().subscribe(LayoutCommands.RegisterWorkspaceEnvironment.getSubject(),
                 new MessageCallback() {
                     public void callback(CommandMessage message) {
-                        switch (LayoutCommands.valueOf(message.getCommandType())) {
-                            case OpenNewTab:
-                                String componentId = message.get(String.class, LayoutParts.ComponentID);
-                                String DOMID = message.get(String.class, LayoutParts.DOMID);
-                                String initSubject = message.get(String.class, LayoutParts.InitSubject);
-                                String name = message.get(String.class, LayoutParts.Name);
-                                Image i = new Image(message.get(String.class, LayoutParts.IconURI));
-                                Boolean multiple = message.get(Boolean.class, LayoutParts.MultipleInstances);
+                        try {
+                            switch (LayoutCommands.valueOf(message.getCommandType())) {
+                                case OpenNewTab:
+                                    String componentId = message.get(String.class, LayoutParts.ComponentID);
+                                    String DOMID = message.get(String.class, LayoutParts.DOMID);
+                                    String initSubject = message.get(String.class, LayoutParts.InitSubject);
+                                    String name = message.get(String.class, LayoutParts.Name);
+                                    Image i = new Image(message.get(String.class, LayoutParts.IconURI));
+                                    Boolean multiple = message.get(Boolean.class, LayoutParts.MultipleInstances);
 
-                                openTab(componentId, name, i, multiple, DOMID, initSubject);
-                                break;
+                                    openTab(componentId, name, i, multiple, DOMID, initSubject);
+                                    break;
 
-                            case PublishTool:
-                                componentId = message.get(String.class, LayoutParts.ComponentID);
-                                String subject = message.get(String.class, LayoutParts.Subject);
+                                case PublishTool:
+                                    componentId = message.get(String.class, LayoutParts.ComponentID);
+                                    String subject = message.get(String.class, LayoutParts.Subject);
 
-                                availableTools.put(componentId, subject);
-                                break;
+                                    availableTools.put(componentId, subject);
+                                    break;
 
-                            case RegisterToolSet:
-                                name = message.get(String.class, LayoutParts.Name);
-                                DOMID = message.get(String.class, LayoutParts.DOMID);
+                                case RegisterToolSet:
+                                    name = message.get(String.class, LayoutParts.Name);
+                                    DOMID = message.get(String.class, LayoutParts.DOMID);
 
-                                Element e = getElementById(DOMID);
-                                WSElementWrapper w = new WSElementWrapper(e);
+                                    Element e = getElementById(DOMID);
+                                    WSElementWrapper w = new WSElementWrapper(e);
 
-                                navigation.add(w, name);
-                                break;
+                                    navigation.add(w, name);
+                                    break;
 
-                            case CloseTab:
-                                String instanceId = message.get(String.class, LayoutParts.InstanceID);
-                                closeTab(instanceId);
-                                break;
+                                case CloseTab:
+                                    String instanceId = message.get(String.class, LayoutParts.InstanceID);
+                                    closeTab(instanceId);
+                                    break;
 
+                            }
+                        }
+                        catch (Exception e) {
+                            e.printStackTrace();
                         }
                     }
                 });
@@ -241,8 +246,7 @@ public class WorkspaceLayout extends Composite {
                     navigationLabel.setVisible(false);
 
                     collapseButton.setUrl(GWT.getModuleBaseURL() + "/images/collapseright.png");
-                }
-                else {
+                } else {
                     leftPanel.setArmed(false);
                     Timer timer = new Timer() {
                         int i = 12;
@@ -315,8 +319,7 @@ public class WorkspaceLayout extends Composite {
             w.getElement().setId(id);
             w.setVisible(false);
             RootPanel.get().add(w);
-        }
-        else {
+        } else {
             /**
              * Create a default launcher panel.
              */
@@ -351,8 +354,7 @@ public class WorkspaceLayout extends Composite {
     private void openTab(String componentId, String name, Image icon, boolean multipleAllowed, String DOMID, String initSubject) {
         if (!multipleAllowed && tabInstances.containsKey(componentId)) {
             this.openTab(DOMID, initSubject, componentId, name, icon, multipleAllowed);
-        }
-        else {
+        } else {
             this.openTab(DOMID, initSubject, componentId, name, icon, multipleAllowed);
         }
     }
@@ -366,8 +368,7 @@ public class WorkspaceLayout extends Composite {
                         .sendNowWith(ErraiBus.get());
 
                 return;
-            }
-            else {
+            } else {
                 WSModalDialog dialog = new WSModalDialog();
                 dialog.getOkButton().setText("Open New");
                 dialog.getCancelButton().setText("Goto");
@@ -386,8 +387,7 @@ public class WorkspaceLayout extends Composite {
                             newName = name + " (" + idx + ")";
 
                             _openTab(DOMID, initSubject, componentId, newName, newId, icon);
-                        }
-                        else if (!"WindowClosed".equals(message)) {
+                        } else if (!"WindowClosed".equals(message)) {
                             Set<String> s = layout.getActiveByType(componentId);
 
                             if (s.size() > 1) {
@@ -398,8 +398,7 @@ public class WorkspaceLayout extends Composite {
                                 });
 
                                 wsd.showModal();
-                            }
-                            else {
+                            } else {
                                 CommandMessage.create(LayoutCommands.ActivateTool)
                                         .toSubject(getInstanceSubject(componentId))
                                         .sendNowWith(ErraiBus.get());
@@ -534,8 +533,7 @@ public class WorkspaceLayout extends Composite {
         if (activeTools.containsKey(componentTypeId)) {
             int count = activeTools.get(componentTypeId) + 1;
             activeTools.put(componentTypeId, count);
-        }
-        else {
+        } else {
             activeTools.put(componentTypeId, 1);
         }
     }
@@ -545,13 +543,11 @@ public class WorkspaceLayout extends Composite {
             int count = activeTools.get(componentTypeId);
             if (count == 1) {
                 activeTools.remove(componentTypeId);
-            }
-            else {
+            } else {
                 activeTools.put(componentTypeId, --count);
                 return true;
             }
-        }
-        else {
+        } else {
             Window.alert("ERROR: unreferenced component: " + componentTypeId);
         }
 

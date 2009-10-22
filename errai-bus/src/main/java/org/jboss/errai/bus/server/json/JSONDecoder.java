@@ -26,7 +26,13 @@ public class JSONDecoder {
     }
 
     public Object parse() {
-        return ((ArrayList) _parse(new ArrayList(1))).get(0);
+        try {
+            return ((ArrayList) _parse(new ArrayList(1))).get(0);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
     }
 
     private Object _parse(Object collection) {
@@ -65,8 +71,7 @@ public class JSONDecoder {
                         addValue(parseDouble(new String(json, start, cursor - start)));
 
                         break;
-                    }
-                    else if (isLetter(json[cursor])) {
+                    } else if (isLetter(json[cursor])) {
                         int start = cursor++;
                         while ((cursor < length) && isLetter(json[cursor])) cursor++;
 
@@ -85,8 +90,7 @@ public class JSONDecoder {
     private void addValue(Object val) {
         if (lhs == null) {
             lhs = val;
-        }
-        else {
+        } else {
             rhs = val;
         }
     }
@@ -96,8 +100,7 @@ public class JSONDecoder {
             if (collection instanceof Map) {
                 //noinspection unchecked
                 ((Map) collection).put(lhs, rhs);
-            }
-            else {
+            } else {
                 //noinspection unchecked
                 ((Collection) collection).add(lhs);
             }
@@ -135,16 +138,14 @@ public class JSONDecoder {
                     return start;
                 }
             }
-        }
-        else {
+        } else {
             for (start++; start < chars.length; start++) {
                 if (start < chars.length && chars[start] == '/') {
                     if (start + 1 == chars.length) return start;
                     if (chars[start + 1] == '/') {
                         start++;
                         while (start < chars.length && chars[start] != '\n') start++;
-                    }
-                    else if (chars[start + 1] == '*') {
+                    } else if (chars[start + 1] == '*') {
                         start += 2;
                         while (start < chars.length) {
                             switch (chars[start]) {
@@ -164,11 +165,9 @@ public class JSONDecoder {
                 if (start == chars.length) return start;
                 if (chars[start] == '\'' || chars[start] == '"') {
                     start = captureStringLiteral(chars[start], chars, start, chars.length);
-                }
-                else if (chars[start] == type) {
+                } else if (chars[start] == type) {
                     depth++;
-                }
-                else if (chars[start] == term && --depth == 0) {
+                } else if (chars[start] == term && --depth == 0) {
                     return start;
                 }
             }

@@ -22,10 +22,14 @@ import java.util.Map;
 
 public class SerializationExtensionGenerator implements ExtensionGenerator {
     private CompiledTemplate demarshallerGenerator;
+    private CompiledTemplate marshallerGenerator;
 
     public SerializationExtensionGenerator() {
         InputStream istream = this.getClass().getResourceAsStream("DemarshallerGenerator.mv");
         demarshallerGenerator = TemplateCompiler.compileTemplate(istream, null);
+
+        istream = this.getClass().getResourceAsStream("MarshallerGenerator.mv");
+        marshallerGenerator = TemplateCompiler.compileTemplate(istream, null);
     }
 
     public void generate(GeneratorContext context, TreeLogger logger, SourceWriter writer, List<File> roots) {
@@ -48,12 +52,16 @@ public class SerializationExtensionGenerator implements ExtensionGenerator {
                             templateVars.put("fields", types.keySet());
                             templateVars.put("targetTypes", types);
 
+                            String s;
                             writer.print((String) TemplateRuntime.execute(demarshallerGenerator, templateVars));
+                            writer.print(s = (String) TemplateRuntime.execute(marshallerGenerator, templateVars));
 
-                            logger.log(TreeLogger.Type.INFO, "Generated demarshaller for: " + visit.getName());
+                            System.out.println(s);
+
+                            logger.log(TreeLogger.Type.INFO, "Generated mashaller/demarshaller for: " + visit.getName());
                         }
                     }
                 }
-                );
+        );
     }
 }
