@@ -76,8 +76,6 @@ public class JSONEncoderCli {
                 first = false;
             }
             mapBuild.append("\"");
-
-            System.out.println("##" + mapBuild.toString() + "}");
         }
 
         return mapBuild.append("}").toString();

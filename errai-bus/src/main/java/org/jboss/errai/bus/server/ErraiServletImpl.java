@@ -108,15 +108,6 @@ public class ErraiServletImpl extends HttpServlet {
             session.setAttribute(MessageBus.WS_SESSION_ID, httpServletRequest.getSession().getId());
         }
 
-        System.out.println("MessageReceived:" + sb.toString());
-
-//        Map<String, Object> parts = decodeToMap(sb.toString());
-//        if (parts.containsKey(MessageParts.SessionID.name())) {
-//            // If the client is trying to send a session ID into the server bus, it might be trying to
-//            // do something evil.  So we check for, and remove it if this is the case.
-//            parts.remove(MessageParts.SessionID.name());
-//        }
-
         service.store(MessageUtil.createCommandMessage(httpServletRequest.getSession(), sb.toString()));
 
         OutputStream stream = httpServletResponse.getOutputStream();
