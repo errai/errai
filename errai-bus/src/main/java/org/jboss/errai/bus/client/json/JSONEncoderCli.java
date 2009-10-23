@@ -22,8 +22,7 @@ public class JSONEncoderCli {
             return "\"" + v + "\"";
         } else if (v instanceof Number || v instanceof Boolean) {
             return String.valueOf(v);
-        }
-        else if (v instanceof Collection) {
+        } else if (v instanceof Collection) {
             return encodeCollection((Collection) v);
         } else if (v instanceof Map) {
             return encodeMap((Map) v);
@@ -32,8 +31,7 @@ public class JSONEncoderCli {
         } else if (v instanceof Serializable) {
             if (TypeMarshallers.hasMarshaller(v.getClass().getName())) {
                 return TypeMarshallers.getMarshaller(marshall = v.getClass().getName()).marshall(v);
-            }
-            else {
+            } else {
                 throw new RuntimeException("Unable to marshal: no available marshaller: " + v.getClass().getName());
             }
         } else {
@@ -69,8 +67,13 @@ public class JSONEncoderCli {
 
         if (marshalledTypes != null) {
             mapBuild.append(",__MarshalledTypes:\"");
+            first = true;
             for (Map.Entry<String, String> m : marshalledTypes.entrySet()) {
+                if (!first) {
+                    mapBuild.append(',');
+                }
                 mapBuild.append(m.getKey()).append("|").append(m.getValue());
+                first = false;
             }
             mapBuild.append("\"");
 

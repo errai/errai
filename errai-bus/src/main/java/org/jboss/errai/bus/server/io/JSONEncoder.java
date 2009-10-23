@@ -1,4 +1,4 @@
-package org.jboss.errai.bus.server.json;
+package org.jboss.errai.bus.server.io;
 
 import org.jboss.errai.bus.client.protocols.SecurityParts;
 import org.jboss.errai.bus.client.types.TypeHandler;

@@ -5,10 +5,10 @@ import com.google.inject.Singleton;
 import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.MessageBus;
-import org.jboss.errai.bus.client.Payload;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
-import static org.jboss.errai.bus.server.json.JSONUtil.decodeToMap;
+import org.jboss.errai.bus.server.io.MessageUtil;
+import static org.jboss.errai.bus.server.io.MessageUtil.decodeToMap;
 import org.jboss.errai.bus.server.service.ErraiService;
 
 import javax.servlet.ServletException;
@@ -46,7 +46,7 @@ public class ErraiServletImpl extends HttpServlet {
 
         httpServletResponse.setHeader("Cache-Control", "no-cache");
         httpServletResponse.addHeader("Payload-Size", String.valueOf(messages.size()));
-        httpServletResponse.setContentType("application/json");
+        httpServletResponse.setContentType("application/io");
         OutputStream stream = httpServletResponse.getOutputStream();
 
         Iterator<Message> iter = messages.iterator();
@@ -110,16 +110,14 @@ public class ErraiServletImpl extends HttpServlet {
 
         System.out.println("MessageReceived:" + sb.toString());
 
-        Map<String, Object> parts = decodeToMap(sb.toString());
-        if (parts.containsKey(MessageParts.SessionID.name())) {
-            // If the client is trying to send a session ID into the server bus, it might be trying to
-            // do something evil.  So we check for, and remove it if this is the case.
-            parts.remove(MessageParts.SessionID.name());
-        }
+//        Map<String, Object> parts = decodeToMap(sb.toString());
+//        if (parts.containsKey(MessageParts.SessionID.name())) {
+//            // If the client is trying to send a session ID into the server bus, it might be trying to
+//            // do something evil.  So we check for, and remove it if this is the case.
+//            parts.remove(MessageParts.SessionID.name());
+//        }
 
-        service.store(new CommandMessage()
-                .setParts(decodeToMap(sb.toString()))
-                .set(SecurityParts.SessionData, httpServletRequest.getSession()));
+        service.store(MessageUtil.createCommandMessage(httpServletRequest.getSession(), sb.toString()));
 
         OutputStream stream = httpServletResponse.getOutputStream();
 

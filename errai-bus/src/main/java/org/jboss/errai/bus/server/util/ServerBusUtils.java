@@ -3,8 +3,8 @@ package org.jboss.errai.bus.server.util;
 import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
-import org.jboss.errai.bus.server.json.JSONEncoder;
-import org.jboss.errai.bus.server.json.JSONUtil;
+import org.jboss.errai.bus.server.io.JSONEncoder;
+import org.jboss.errai.bus.server.io.MessageUtil;
 
 import javax.servlet.http.HttpSession;
 import java.util.Map;
@@ -19,7 +19,7 @@ public class ServerBusUtils {
     }
 
     public static Map<String, Object> decodeMap(Object value) {
-        return JSONUtil.decodeToMap(String.valueOf(value));
+        return MessageUtil.decodeToMap(String.valueOf(value));
     }
 
     public static String encodeJSON(Object value) {

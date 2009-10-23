@@ -1,4 +1,4 @@
-package org.jboss.errai.bus.server.json;
+package org.jboss.errai.bus.server.io;
 
 import static java.lang.Character.isDigit;
 import static java.lang.Character.isLetter;
@@ -71,12 +71,21 @@ public class JSONDecoder {
                         addValue(parseDouble(new String(json, start, cursor - start)));
 
                         break;
-                    } else if (isLetter(json[cursor])) {
+                    } else if (Character.isJavaIdentifierPart(json[cursor])) {
                         int start = cursor++;
-                        while ((cursor < length) && isLetter(json[cursor])) cursor++;
+                        while ((cursor < length) && Character.isJavaIdentifierPart(json[cursor])) cursor++;
 
-                        addValue("true".equals(new String(json, start, cursor - start)) ? Boolean.TRUE : Boolean.FALSE);
-
+                        String s = new String(json, start, cursor - start);
+                        if ("true".equals(s) || "false".equals(s)) {
+                            addValue("true".equals(s) ? Boolean.TRUE : Boolean.FALSE);
+                        }
+                        else if ("null".equals(s)) {
+                            addValue(null);
+                        }
+                        else {
+                            addValue(s);
+                        }
+                        continue;
                     }
                     cursor++;
             }
@@ -197,5 +206,10 @@ public class JSONDecoder {
         return cursor;
     }
 
+    public static void main(String[] args) {
+        Object o = new JSONDecoder("{__EncodedType:\"org.jboss.errai.demo.thestore.client.modules.domain.User\",password:null,age:10,userId:null,date:1256255282295,fullname:\"Heiko Braun\",name:\"HeikoB\"}").parse();
+        System.out.println("" + o);
+
+    }
 
 }
