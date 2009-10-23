@@ -221,15 +221,15 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                         sendAll();
 
                         /**
-                         * If this fails 4 times (which is the equivalent of 200ms) then we stop blocking
+                         * If this fails 20 times then we stop blocking
                          * progress and allow more messages to flow.
                          */
-                        if (++timeout > 4) {
+                        if (++timeout > 20) {
                             transmitting = false;
                         }
                     }
                 };
-                sendTimer.scheduleRepeating(50);
+                sendTimer.scheduleRepeating(75);
             }
 
             return;
