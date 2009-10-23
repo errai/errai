@@ -29,6 +29,7 @@
         <gwt.version>2.0.0-6320</gwt.version>
         <gwt.maven>1.2.jboss</gwt.maven>
         <guice.version>2.0</guice.version>
+        <mvel.version>2.0.12</mvel.version>
     </properties>
 
     <modules>
@@ -58,7 +59,7 @@
             <dependency>
                 <groupId>com.google.gwt</groupId>
                 <artifactId>gwt-dev-${platform}</artifactId>
-                <version>${gwt.version}</version>                
+                <version>${gwt.version}</version>
                 <scope>provided</scope>
             </dependency>
 
@@ -78,6 +79,16 @@
                 <groupId>com.google.code.guice</groupId>
                 <artifactId>guice-servlet</artifactId>
                 <version>${guice.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mvel</groupId>
+                <artifactId>mvel2</artifactId>
+                <version>${mvel.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.persistence</groupId>
+                <artifactId>persistence-api</artifactId>
+                <version>1.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

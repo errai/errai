@@ -16,7 +16,7 @@
 
 
     <dependencies>
-         <dependency>
+        <dependency>
             <groupId>org.jboss.errai</groupId>
             <artifactId>errai-common</artifactId>
             <version>${version}</version>
@@ -24,6 +24,11 @@
         <dependency>
             <groupId>com.google.gwt</groupId>
             <artifactId>gwt-user</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-dev-${platform}</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -35,9 +40,18 @@
             <groupId>com.google.code.guice</groupId>
             <artifactId>guice</artifactId>
         </dependency>
-          <dependency>
+        <dependency>
             <groupId>com.google.code.guice</groupId>
             <artifactId>guice-servlet</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mvel</groupId>
+            <artifactId>mvel2</artifactId>           
+        </dependency>
+        <dependency>
+            <groupId>javax.persistence</groupId>
+            <artifactId>persistence-api</artifactId>            
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
