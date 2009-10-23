@@ -17,8 +17,6 @@ org.jboss.errai.bus.client.types.TypeMarshallers.addMarshaller(
 
                 json.append("@foreach{fieldName : fields}@includeNamed{"extractor";fieldName=fieldName;targetType=targetTypes.get(fieldName);getter=org.mvel2.util.ReflectionUtil.getGetter(fieldName)}@end{","}}");
 
-                System.out.println("EncodedJSON:" + json.toString());
-
                 return "\"" + json.toString().replaceAll("\"", "'") + "\"";
             }
             catch (Exception e) {

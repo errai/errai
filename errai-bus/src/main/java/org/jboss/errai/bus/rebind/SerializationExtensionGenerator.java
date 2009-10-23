@@ -52,11 +52,9 @@ public class SerializationExtensionGenerator implements ExtensionGenerator {
                             templateVars.put("fields", types.keySet());
                             templateVars.put("targetTypes", types);
 
-                            String s;
-                            writer.print((String) TemplateRuntime.execute(demarshallerGenerator, templateVars));
-                            writer.print(s = (String) TemplateRuntime.execute(marshallerGenerator, templateVars));
 
-                            System.out.println(s);
+                            writer.print((String) TemplateRuntime.execute(demarshallerGenerator, templateVars));
+                            writer.print((String) TemplateRuntime.execute(marshallerGenerator, templateVars));
 
                             logger.log(TreeLogger.Type.INFO, "Generated mashaller/demarshaller for: " + visit.getName());
                         }

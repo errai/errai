@@ -11,22 +11,29 @@ public class MessageUtil {
         return (Map<String, Object>) new JSONDecoder(in).parse();
     }
 
-    public static CommandMessage createCommandMessage(Object session, String json) {
-        Map<String, Object> parts = decodeToMap(json);
-        if (parts.containsKey(MessageParts.SessionID.name())) {
-            // If the client is trying to send a session ID into the server bus, it might be trying to
-            // do something evil.  So we check for, and remove it if this is the case.
-            parts.remove(MessageParts.SessionID.name());
+    public static CommandMessage[] createCommandMessage(Object session, String json) {
+        if (json.length() == 0) return new CommandMessage[0];
+        String[] pkg = json.split("\\|\\|");
+        CommandMessage[] c = new CommandMessage[pkg.length];
+
+        for (int i = 0; i < pkg.length; i++) {
+            Map<String, Object> parts = decodeToMap(pkg[i]);
+            if (parts.containsKey(MessageParts.SessionID.name())) {
+                // If the client is trying to send a session ID into the server bus, it might be trying to
+                // do something evil.  So we check for, and remove it if this is the case.
+                parts.remove(MessageParts.SessionID.name());
+            }
+            parts.put(SecurityParts.SessionData.name(), session);
+
+            CommandMessage msg = CommandMessage.create().setParts(parts);
+
+            if (parts.containsKey("__MarshalledTypes")) {
+                TypeDemarshallHelper.demarshallAll((String) parts.get("__MarshalledTypes"), msg);
+            }
+
+            c[i] = msg;
         }
-        parts.put(SecurityParts.SessionData.name(), session);
 
-        CommandMessage msg = CommandMessage.create().setParts(parts);
-
-        if (parts.containsKey("__MarshalledTypes")) {
-            TypeDemarshallHelper.demarshallAll((String) parts.get("__MarshalledTypes"), msg);
-        }
-
-        return msg;
-
+        return c;
     }
 }

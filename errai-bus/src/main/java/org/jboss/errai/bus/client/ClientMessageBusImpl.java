@@ -1,6 +1,7 @@
 package org.jboss.errai.bus.client;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.ui.*;
@@ -237,7 +238,15 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             sendTimer = null;
         }
 
-        transmitRemote(outgoingQueue.poll());
+        int transmissionSize = outgoingQueue.size();
+
+        StringBuffer outgoing = new StringBuffer();
+        for (int i = 0; i < transmissionSize; i++) {
+            outgoing.append(outgoingQueue.poll());
+            if ((i+1) < transmissionSize) outgoing.append("||");
+        }
+        
+        if (transmissionSize != 0) transmitRemote(outgoing.toString());
     }
 
     private void transmitRemote(String message) {
@@ -256,7 +265,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                     showError("Failed to communicate with remote bus", "", exception);
 
                     transmitting = false;
-                   // sendAll();
+                    // sendAll();
                 }
             });
 
