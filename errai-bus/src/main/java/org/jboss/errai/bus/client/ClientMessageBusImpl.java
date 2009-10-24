@@ -1,7 +1,6 @@
 package org.jboss.errai.bus.client;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.ui.*;
@@ -30,7 +29,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     private Map<String, Set<Object>> registeredInThisSession = new HashMap<String, Set<Object>>();
 
-    private List<Runnable> postInitTasks = new ArrayList<Runnable>();
+    private ArrayList<Runnable> postInitTasks = new ArrayList<Runnable>();
 
     private boolean initialized = false;
 
@@ -108,8 +107,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     /**
      * Have a single two-way conversation
      *
-     * @param message
-     * @param callback
+     * @param message  -
+     * @param callback -
      */
     public void conversationWith(final CommandMessage message, final MessageCallback callback) {
         final String tempSubject = "temp:PsuedoConversation:" + (++conversationCounter);
@@ -131,11 +130,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         send(message);
     }
 
-    public void send(String subject, Map<String, Object> message) {
-        message.put("ToSubject", subject);
-        store(subject, JSONUtilCli.encodeMap(message));
-    }
-
     public void send(String subject, CommandMessage message) {
         try {
             send(subject, message.getParts());
@@ -144,6 +138,20 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             e.printStackTrace();
         }
     }
+
+    public void send(final String subject, final Map<String, Object> message) {
+        message.put("ToSubject", subject);
+        if (!initialized) {
+            postInitTasks.add(new Runnable() {
+                public void run() {
+                    store(subject, JSONUtilCli.encodeMap(message));
+                }
+            });
+        } else {
+            store(subject, JSONUtilCli.encodeMap(message));
+        }
+    }
+
 
     public void send(String subject, Enum commandType) {
         send(subject, CommandMessage.create(commandType));
@@ -154,7 +162,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         if (message.hasPart(MessageParts.ToSubject)) {
             send(message.get(String.class, MessageParts.ToSubject), message);
         } else {
-            throw new RuntimeException("Cannot send message using this method if the message does not contain a ToSubject field.");
+            throw new RuntimeException("Cannot send message using this method" +
+                    " if the message does not contain a ToSubject field.");
         }
     }
 
@@ -208,6 +217,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     private com.google.gwt.user.client.Timer sendTimer;
 
     private void sendAll() {
+        if (!initialized) {
+            return;
+        }
         if (transmitting) {
             if (sendTimer == null) {
                 sendTimer = new com.google.gwt.user.client.Timer() {
@@ -243,9 +255,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         StringBuffer outgoing = new StringBuffer();
         for (int i = 0; i < transmissionSize; i++) {
             outgoing.append(outgoingQueue.poll());
-            if ((i+1) < transmissionSize) outgoing.append("||");
+            if ((i + 1) < transmissionSize) outgoing.append("||");
         }
-        
+
         if (transmissionSize != 0) transmitRemote(outgoing.toString());
     }
 
@@ -310,9 +322,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                                     .sendNowWith(self);
                         }
 
-                        for (Runnable run : postInitTasks) {
-                            run.run();
+                        // Don't use an iterator here -- potential for concurrent
+                        // modifications!
+                        for (int i = 0; i < postInitTasks.size(); i++) {
+                            postInitTasks.get(i).run();
                         }
+
 
                         initialized = true;
 
@@ -323,6 +338,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
         addSubscribeListener(new SubscribeListener() {
             public void onSubscribe(SubscriptionEvent event) {
+                if (event.getSubject().startsWith("local:")) {
+                    return;
+                }
                 CommandMessage.create(BusCommands.RemoteSubscribe)
                         .toSubject("ServerBus")
                         .set(MessageParts.Subject, event.getSubject())
@@ -371,6 +389,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         return initialized;
     }
 
+    @SuppressWarnings({"UnusedDeclaration"})
     private void initializeMessagingBus(final HookCallback initCallback) {
         final SimplePanel heartBeat = new SimplePanel();
         final HTML hBtext = new HTML("*Heartbeat*");

@@ -108,6 +108,8 @@ public class ErraiServletImpl extends HttpServlet {
             session.setAttribute(MessageBus.WS_SESSION_ID, httpServletRequest.getSession().getId());
         }
 
+        System.out.println("RECV:" + sb.toString());
+
         for (CommandMessage msg : MessageUtil.createCommandMessage(httpServletRequest.getSession(), sb.toString())) {
             service.store(msg);
         }
