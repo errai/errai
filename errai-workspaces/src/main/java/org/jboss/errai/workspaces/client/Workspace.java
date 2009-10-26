@@ -4,6 +4,7 @@ import com.allen_sauer.gwt.dnd.client.PickupDragController;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import static com.google.gwt.core.client.GWT.create;
+import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
@@ -68,7 +69,15 @@ public class Workspace implements EntryPoint {
      * This is the entry point method.
      */
     public void onModuleLoad() {
-        init("rootPanel");
+        GWT.runAsync(new RunAsyncCallback() {
+
+            public void onFailure(Throwable reason) {
+            }
+
+            public void onSuccess() {
+                init("rootPanel");
+            }
+        });        
     }
 
     private void init(final String rootId) {
@@ -316,7 +325,8 @@ public class Workspace implements EntryPoint {
 
     private static int toolCounter = 0;
 
-    public static void addTool(String group, String name, String icon, boolean multipleAllowed, int priority, WSComponent component) {
+    public static void addTool(String group, String name, String icon,
+                               boolean multipleAllowed, int priority, WSComponent component) {
         if (!toBeLoadedGroups.containsKey(group)) toBeLoadedGroups.put(group, new ArrayList<ToolProvider>());
 
         final String toolId = name.replaceAll(" ", "_") + "." + toolCounter++;
@@ -334,7 +344,8 @@ public class Workspace implements EntryPoint {
         toBeLoadedGroups.get(group).add(provider);
     }
 
-    public static void addTool(String group, String name, String icon, boolean multipleAllowed, int prioerty, WSComponent component, final String[] renderIfRoles) {
+    public static void addTool(String group, String name, String icon,
+                               boolean multipleAllowed, int priority, WSComponent component, final String[] renderIfRoles) {
         if (!toBeLoadedGroups.containsKey(group)) toBeLoadedGroups.put(group, new ArrayList<ToolProvider>());
 
         final String toolId = name.replaceAll(" ", "_") + "." + toolCounter++;
@@ -349,7 +360,8 @@ public class Workspace implements EntryPoint {
         }
 
 
-        final Tool toolImpl = new ToolImpl(name, toolId, multipleAllowed, new Image(GWT.getModuleBaseURL() + icon), component);
+        final Tool toolImpl = new ToolImpl(name, toolId, multipleAllowed,
+                new Image(GWT.getModuleBaseURL() + icon), component);
         ToolProvider provider = new ToolProvider() {
             public Tool getTool() {
                 if (sessionRoles.containsAll(roles)) {

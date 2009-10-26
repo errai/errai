@@ -2,7 +2,9 @@ package org.jboss.errai.workspaces.client.layout;
 
 import com.google.gwt.user.client.ui.*;
 
-public class WorkPanel extends Composite {
+import java.util.Iterator;
+
+public class WorkPanel extends Panel {
     VerticalPanel vPanel = new VerticalPanel();
 
     private Label titleLabel = new Label("New WorkPanel");
@@ -13,6 +15,8 @@ public class WorkPanel extends Composite {
     private int w;
 
     public WorkPanel() {
+        setElement(vPanel.getElement());
+
         vPanel.setWidth("100%");
 
         SimplePanel title = new SimplePanel();
@@ -28,8 +32,6 @@ public class WorkPanel extends Composite {
 
         titleInternal.add(titleLabel);
         title.setWidget(titleInternal);
-
-        initWidget(vPanel);
 
         getElement().getStyle().setProperty("overflow", "scroll");
     }
@@ -48,6 +50,15 @@ public class WorkPanel extends Composite {
 
     public void add(Widget w) {
         mainPanel.add(w);
+    }
+
+    public Iterator<Widget> iterator() {
+        return mainPanel.iterator();
+    }
+
+    @Override
+    public boolean remove(Widget child) {
+        return mainPanel.remove(child);
     }
 
     public void addToTitlebar(Widget w) {
