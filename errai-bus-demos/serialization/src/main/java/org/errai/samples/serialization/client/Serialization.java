@@ -1,7 +1,9 @@
 package org.errai.samples.serialization.client;
 
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.RootPanel;
 import org.errai.samples.serialization.client.model.Record;
 import org.jboss.errai.bus.client.*;
 
@@ -12,6 +14,7 @@ public class Serialization implements EntryPoint {
 
     public void onModuleLoad() {
         final FlexTable table = new FlexTable();
+
 
         bus.conversationWith(ConversationMessage.create()
                 .toSubject("ObjectService"),
@@ -28,6 +31,15 @@ public class Serialization implements EntryPoint {
                             table.setWidget(row, 4, new HTML(String.valueOf(r.getStuff())));
                             row++;
                         }
+
+                        try {
+                            CommandMessage.create().toSubject("ObjectService")
+                                    .set("Recs", records).sendNowWith(bus);
+                        }
+                        catch (Throwable e) {
+                            e.printStackTrace();
+                        }
+
                     }
                 }
         );

@@ -22,12 +22,21 @@ public class ObjectService implements MessageCallback {
     }
 
     public void callback(CommandMessage message) {
-        System.out.println("beep");
 
         List<Record> records = new ArrayList<Record>();
-        records.add(new Record(1, "Mike", -40.23f, getDate(2004, 5, 2) , new String[] { "iPhone3G16", "MacBookPro15"}));
-        records.add(new Record(2, "Lillian", 30.10f, getDate(2005,1, 10), new String[] { "iPhone3G8", "MacBookPro15"}));
-        records.add(new Record(3, "Heiko", 50.50f, getDate(2006, 5, 20), new String[] { "iPhone3GS32", "MacBookPro13"}));
+        records.add(new Record(1, "Mike", -40.23f, getDate(2004, 5, 2), new String[]{"iPhone3G16", "MacBookPro15"}));
+        records.add(new Record(2, "Lillian", 30.10f, getDate(2005, 1, 10), new String[]{"iPhone3G8", "MacBookPro15"}));
+        records.add(new Record(3, "Heiko", 50.50f, getDate(2006, 5, 20), new String[]{"iPhone3GS32", "MacBookPro13"}));
+
+        if (message.hasPart("Recs")) {
+            List<Record> recs = message.get(List.class, "Recs");
+
+            for (Record r : recs) {
+                System.out.println(">" +r);
+            }
+
+            return;
+        }
 
         ConversationMessage.create(message)
                 .set("Records", records)

@@ -46,8 +46,6 @@ public class JSONDecoderCli {
         for (String key : eMap.keySet()) {
             if ("__EncodedType".equals(key)) {
                 String className = eMap.get(key).isString().stringValue();
-
-                System.out.println("about to bind for:" + className + ":" + key);
                 if (TypeDemarshallers.hasDemarshaller(className)) {
                     return TypeDemarshallers.getDemarshaller(className).demarshall(eMap);
                 }

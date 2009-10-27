@@ -86,7 +86,7 @@ public class JSONEncoderCli {
         Iterator iter = col.iterator();
         while (iter.hasNext()) {
             buildCol.append(_encode(iter.next()));
-            if (iter.hasNext()) buildCol.append(buildCol.append(","));
+            if (iter.hasNext()) buildCol.append(',');
         }
         return buildCol.append("]").toString();
     }

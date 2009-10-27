@@ -36,6 +36,8 @@ public class TypeDemarshallHelper {
             for (String t : object.split(",")) {
                 String[] pair = t.split("\\|");
 
+                System.out.println("Decoding:" + pair[0] + " : " + command.get(String.class, pair[0]));
+
                 @SuppressWarnings({"unchecked"})
                 Map<String, Object> obj = (Map<String, Object>) new JSONDecoder(command.get(String.class, pair[0])).parse();
                 Object newInstance = Class.forName(pair[1]).newInstance();
