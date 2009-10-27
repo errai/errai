@@ -110,7 +110,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      * @param callback -
      */
     public void conversationWith(final CommandMessage message, final MessageCallback callback) {
-        final String tempSubject = "temp:PsuedoConversation:" + (++conversationCounter);
+        final String tempSubject = "temp:Conversation:" + (++conversationCounter);
 
         message.set(MessageParts.ReplyTo, tempSubject);
 
@@ -539,14 +539,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         panel.getElement().getStyle().setProperty("borderColor", "black");
         panel.getElement().getStyle().setProperty("backgroundColor", "lightgrey");
 
-
         panel.add(new HTML("<strong style='background:red;color:white;'>" + message + "</strong>"));
 
         ScrollPanel scrollPanel = new ScrollPanel();
         scrollPanel.add(new HTML(buildTrace.toString() + "<br/><strong>Additional Details:</strong>" + additionalDetails + "</tt>"));
         scrollPanel.setAlwaysShowScrollBars(true);
         scrollPanel.setHeight("500px");
-
 
         panel.add(scrollPanel);
 
