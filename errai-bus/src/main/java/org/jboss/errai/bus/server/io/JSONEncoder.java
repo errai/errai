@@ -13,7 +13,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class JSONEncoder {
-
     public String encode(Object v) {
         return _encode(v);
     }
@@ -29,6 +28,7 @@ public class JSONEncoder {
         } else if (v instanceof Collection) {
             return encodeCollection((Collection) v);
         } else if (v instanceof Map) {
+            //noinspection unchecked
             return encodeMap((Map) v);
         } else if (v instanceof Object[]) {
             return encodeArray((Object[]) v);
@@ -77,15 +77,15 @@ public class JSONEncoder {
 
             String val = _encode(entry.getValue());
             if (!first) {
-                mapBuild.append(",");
+                mapBuild.append(',');
             }
             mapBuild.append(_encode(entry.getKey()))
-                    .append(":").append(val);
+                    .append(':').append(val);
 
             first = false;
         }
 
-        return mapBuild.append("}").toString();
+        return mapBuild.append('}').toString();
     }
 
     private String encodeCollection(Collection col) {
@@ -95,16 +95,16 @@ public class JSONEncoder {
             buildCol.append(_encode(iter.next()));
             if (iter.hasNext()) buildCol.append(',');
         }
-        return buildCol.append("]").toString();
+        return buildCol.append(']').toString();
     }
 
     private String encodeArray(Object[] array) {
         StringBuilder buildCol = new StringBuilder("[");
         for (int i = 0; i < array.length; i++) {
             buildCol.append(_encode(array[i]));
-            if ((i + 1) < array.length) buildCol.append(",");
+            if ((i + 1) < array.length) buildCol.append(',');
         }
-        return buildCol.append("]").toString();
+        return buildCol.append(']').toString();
     }
 
     private static final Map<Class, TypeHandler> tHandlers = new HashMap<Class, TypeHandler>();
@@ -125,6 +125,7 @@ public class JSONEncoder {
     private static Object convert(Object in) {
         if (in == null || !tHandlers.containsKey(in.getClass())) return in;
         else {
+            //noinspection unchecked
             return tHandlers.get(in.getClass()).getConverted(in);
         }
     }

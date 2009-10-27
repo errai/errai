@@ -23,11 +23,7 @@ public class ServerBusUtils {
     }
 
     public static String encodeJSON(Object value) {
-        String outgoing = new JSONEncoder().encode(value);
-
-        System.out.println("OUT:" + outgoing);
-
-        return outgoing;
+        return new JSONEncoder().encode(value);
     }
 
     public static String getSessionId(CommandMessage message) {

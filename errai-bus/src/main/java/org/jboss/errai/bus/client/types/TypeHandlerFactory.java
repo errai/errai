@@ -3,10 +3,7 @@ package org.jboss.errai.bus.client.types;
 import org.jboss.errai.bus.client.types.handlers.collections.*;
 import org.jboss.errai.bus.client.types.handlers.numbers.*;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class TypeHandlerFactory {
     private static Map<Class, Map<Class, TypeHandler>> handlers =
@@ -28,6 +25,8 @@ public class TypeHandlerFactory {
         collectionHandlers.put(boolean[].class, new CollectionToBooleanArray());
         collectionHandlers.put(double[].class, new CollectionToDoubleArray());
 
+        collectionHandlers.put(Set.class, new CollectionToSet());
+        collectionHandlers.put(List.class, new CollectionToList());
 
         handlers.put(Collection.class, collectionHandlers);
 
@@ -37,15 +36,12 @@ public class TypeHandlerFactory {
         numberHandlers.put(Short.class, new NumberToShort());
         numberHandlers.put(Float.class, new NumberToFloat());
         numberHandlers.put(Double.class, new NumberToFloat());
+        numberHandlers.put(Byte.class, new NumberToByte());
         numberHandlers.put(java.util.Date.class, new NumberToDate());
         numberHandlers.put(java.sql.Date.class, new NumberToSQLDate());
 
         handlers.put(Number.class, numberHandlers);
-        
-        /**
-         * We can specifically discriminate on ArrayList pretty exclusively for now, because we
-         * know the JSONDecoder always uses it for lists/arrays.
-         */
+
         inheritanceMap.put(ArrayList.class, Collection.class);
         inheritanceMap.put(Integer.class, Number.class);
         inheritanceMap.put(Long.class, Number.class);
@@ -53,6 +49,13 @@ public class TypeHandlerFactory {
         inheritanceMap.put(Float.class, Number.class);
         inheritanceMap.put(Double.class, Number.class);
 
+        inheritanceMap.put(ArrayList.class, List.class);
+        inheritanceMap.put(LinkedList.class, List.class);
+        inheritanceMap.put(AbstractList.class, List.class);
+        inheritanceMap.put(Stack.class, List.class);
+
+        inheritanceMap.put(HashSet.class, Set.class);
+        inheritanceMap.put(AbstractSet.class, Set.class);
     }
 
     public static Map<Class, TypeHandler> getHandler(Class from) {

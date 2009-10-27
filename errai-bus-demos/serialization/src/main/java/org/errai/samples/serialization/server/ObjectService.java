@@ -25,9 +25,9 @@ public class ObjectService implements MessageCallback {
         System.out.println("beep");
 
         List<Record> records = new ArrayList<Record>();
-        records.add(new Record(1, "Mike", -40.23f, getDate(2004, 5, 2)));
-        records.add(new Record(2, "Lillian", 30.10f, getDate(2005,1, 10)));
-        records.add(new Record(3, "Heiko", 50.50f, getDate(2006, 5, 20)));
+        records.add(new Record(1, "Mike", -40.23f, getDate(2004, 5, 2) , new String[] { "iPhone3G16", "MacBookPro15"}));
+        records.add(new Record(2, "Lillian", 30.10f, getDate(2005,1, 10), new String[] { "iPhone3G8", "MacBookPro15"}));
+        records.add(new Record(3, "Heiko", 50.50f, getDate(2006, 5, 20), new String[] { "iPhone3GS32", "MacBookPro13"}));
 
         ConversationMessage.create(message)
                 .set("Records", records)
@@ -38,22 +38,5 @@ public class ObjectService implements MessageCallback {
         Calendar c = Calendar.getInstance();
         c.set(year, month, day);
         return new Date(c.getTimeInMillis());
-    }
-
-
-    public static void main(String[] args) {
-        Map<String, Object> m = new HashMap<String, Object>();
-
-        List<Record> records = new ArrayList<Record>();
-        records.add(new Record(1, "Mike", -40.23f, getDate(2004, 5, 2)));
-        records.add(new Record(2, "Lillian", 30.10f, getDate(2005,1, 10)));
-        records.add(new Record(3, "Heiko", 50.50f, getDate(2006, 5, 20)));
-
-        m.put("Records", records);
-
-        String s = (String) new JSONEncoder().encode(m);
-
-        System.out.println(":" + s);
-
     }
 }

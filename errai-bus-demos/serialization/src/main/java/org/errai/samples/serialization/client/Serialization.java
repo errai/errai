@@ -25,6 +25,7 @@ public class Serialization implements EntryPoint {
                             table.setWidget(row, 1, new HTML(r.getName()));
                             table.setWidget(row, 2, new HTML(String.valueOf(r.getBalance())));
                             table.setWidget(row, 3, new HTML(r.getAccountOpened().toString()));
+                            table.setWidget(row, 4, new HTML(String.valueOf(r.getStuff())));
                             row++;
                         }
                     }

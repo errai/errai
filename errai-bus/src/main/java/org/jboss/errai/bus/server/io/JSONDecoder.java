@@ -1,6 +1,7 @@
 package org.jboss.errai.bus.server.io;
 
 import static java.lang.Character.isDigit;
+import static java.lang.Character.isJavaIdentifierPart;
 import static java.lang.Character.isLetter;
 import static java.lang.Double.parseDouble;
 import java.util.ArrayList;
@@ -71,9 +72,9 @@ public class JSONDecoder {
                         addValue(parseDouble(new String(json, start, cursor - start)));
 
                         break;
-                    } else if (Character.isJavaIdentifierPart(json[cursor])) {
+                    } else if (isJavaIdentifierPart(json[cursor])) {
                         int start = cursor++;
-                        while ((cursor < length) && Character.isJavaIdentifierPart(json[cursor])) cursor++;
+                        while ((cursor < length) && isJavaIdentifierPart(json[cursor])) cursor++;
 
                         String s = new String(json, start, cursor - start);
                         if ("true".equals(s) || "false".equals(s)) {
