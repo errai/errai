@@ -3,17 +3,22 @@ package org.jboss.errai.widgets.client;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.DOM;
+
 import static com.google.gwt.user.client.DOM.setStyleAttribute;
+
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.*;
+
 import static com.google.gwt.user.client.ui.RootPanel.getBodyElement;
+
 import org.jboss.errai.widgets.client.format.WSCellFormatter;
 import org.jboss.errai.widgets.client.format.WSCellSimpleTextCell;
 import org.jboss.errai.widgets.client.format.WSCellTitle;
 import org.jboss.errai.widgets.client.listeners.CellChangeEvent;
 
 import static java.lang.Double.parseDouble;
+
 import java.util.*;
 
 /**
@@ -194,8 +199,7 @@ public class WSGrid extends Composite {
                      * No.
                      */
                     return;
-                }
-                else {
+                } else {
                     /**
                      * Set currentFocus to the last element in the selectionList.
                      */
@@ -228,17 +232,14 @@ public class WSGrid extends Composite {
                         if (event.getNativeEvent().getShiftKey()) {
                             if (currentFocus.getCol() == 0 && currentFocus.getRow() > 0) {
                                 dataGrid.tableIndex.get(currentFocus.getRow() - offsetX).get(cols - offsetX).focus();
-                            }
-                            else {
+                            } else {
                                 dataGrid.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol()
                                         - (currentFocus.isColSpan() ? currentFocus.getLeftwareColspan() : 1)).focus();
                             }
-                        }
-                        else {
+                        } else {
                             if (currentFocus.getCol() == cols - offsetX && currentFocus.getRow() < dataGrid.tableIndex.size()) {
                                 dataGrid.tableIndex.get(currentFocus.getRow() + offsetX).get(0).focus();
-                            }
-                            else {
+                            } else {
                                 dataGrid.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() + offsetX).focus();
                             }
                         }
@@ -260,8 +261,7 @@ public class WSGrid extends Composite {
 
                                 if (fillX == 0) {
                                     fill = fillX = startSelX - currentFocus.getCol();
-                                }
-                                else {
+                                } else {
                                     fill = fillX;
                                 }
 
@@ -276,8 +276,7 @@ public class WSGrid extends Composite {
                                         dataGrid.tableIndex.get(currentFocus.getRow()).get(currCol).blur();
                                     }
                                     fillY--;
-                                }
-                                else {
+                                } else {
                                     for (int fillend = currCol + fill + offsetY; currCol < fillend; currCol++) {
                                         dataGrid.tableIndex.get(currentFocus.getRow() - offsetY).get(currCol).focus();
                                     }
@@ -308,14 +307,12 @@ public class WSGrid extends Composite {
 
                             if (currentFocusColumn) {
                                 titleBar.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() + offsetX).focus();
-                            }
-                            else {
+                            } else {
                                 if (startSelY != -1) {
                                     int fill;
                                     if (fillY == 0) {
                                         fill = fillY = currentFocus.getRow() - startSelY;
-                                    }
-                                    else {
+                                    } else {
                                         fill = fillY;
                                     }
 
@@ -330,8 +327,7 @@ public class WSGrid extends Composite {
                                             dataGrid.tableIndex.get(currRow).get(currentFocus.getCol()).blur();
                                         }
                                         fillX--;
-                                    }
-                                    else {
+                                    } else {
                                         for (int fillend = currRow + fill + offsetX; currRow < fillend; currRow++) {
                                             dataGrid.tableIndex.get(currRow).get(currentFocus.getCol() + offsetX).focus();
                                         }
@@ -364,8 +360,7 @@ public class WSGrid extends Composite {
 
                                 if (fillX == 0) {
                                     fill = fillX = currentFocus.getCol() - startSelX;
-                                }
-                                else {
+                                } else {
                                     fill = fillX;
                                 }
 
@@ -380,8 +375,7 @@ public class WSGrid extends Composite {
                                         dataGrid.tableIndex.get(currentFocus.getRow()).get(currCol).blur();
                                     }
                                     fillY--;
-                                }
-                                else {
+                                } else {
                                     for (int fillend = currCol + fill + offsetY; currCol < fillend; currCol++) {
                                         dataGrid.tableIndex.get(currentFocus.getRow() + offsetY).get(currCol).focus();
                                     }
@@ -406,15 +400,13 @@ public class WSGrid extends Composite {
 
                             if (currentFocusColumn) {
                                 titleBar.tableIndex.get(currentFocus.getRow()).get(currentFocus.getCol() - offsetX).focus();
-                            }
-                            else {
+                            } else {
                                 if (startSelY != -1) {
                                     int fill;
 
                                     if (fillY == 0) {
                                         fill = fillY = startSelY - currentFocus.getRow();
-                                    }
-                                    else {
+                                    } else {
                                         fill = fillY;
                                     }
 
@@ -429,8 +421,7 @@ public class WSGrid extends Composite {
                                             dataGrid.tableIndex.get(currRow).get(currentFocus.getCol()).blur();
                                         }
                                         fillX--;
-                                    }
-                                    else {
+                                    } else {
                                         for (int fillend = currRow + fill + offsetX; currRow < fillend; currRow++) {
                                             dataGrid.tableIndex.get(currRow).get(currentFocus.getCol() - offsetX).focus();
                                         }
@@ -443,8 +434,7 @@ public class WSGrid extends Composite {
 
                                 if (delta < 0) {
                                     currentFocus.focus();
-                                }
-                                else {
+                                } else {
                                     dataGrid.tableIndex.get(currentFocus.getRow()).get(delta).focus();
                                 }
                             }
@@ -463,8 +453,7 @@ public class WSGrid extends Composite {
                             for (WSCell c : selectionList) {
                                 c.setValue("");
                             }
-                        }
-                        else {
+                        } else {
                             /**
                              * Wipe the whole column.
                              */
@@ -496,6 +485,17 @@ public class WSGrid extends Composite {
                 _rangeSelect = false;
             }
         });
+    }
+
+    public void setScrollable(boolean scrollable) {
+        dataGrid.setScrollable(scrollable);
+    }
+
+    public void setEditable(boolean editable) {
+        if (editable)
+            dataGrid.setType(GridType.EDITABLE_GRID);
+        else
+            dataGrid.setType(GridType.NONEDITABLE_GRID);
     }
 
     public int getRowCount() {
@@ -589,14 +589,12 @@ public class WSGrid extends Composite {
                     }
 
                     c.setWidth((spanSize + 1) + "px");
-                }
-                else {
+                } else {
                     c.setWidth(width + "px");
                 }
             }
 
-        }
-        else {
+        } else {
             resizeOnAttach = true;
         }
     }
@@ -693,14 +691,7 @@ public class WSGrid extends Composite {
             initWidget(scrollPanel);
             scrollPanel.setAlwaysShowScrollBars(scrollable);
 
-            if (!scrollable) {
-                setStyleAttribute(scrollPanel.getElement(), "overflow", "hidden");
-                scrollPanel.setHeight("20px");
-                table.setHeight("20px");
-            }
-            else {
-                setStyleAttribute(scrollPanel.getElement(), "overflow", "scroll");
-            }
+            setScrollable(scrollable);
 
             scrollPanel.add(table);
 
@@ -708,6 +699,20 @@ public class WSGrid extends Composite {
             tableIndex.add(new ArrayList<WSCell>());
 
             setHeight("20px");
+        }
+
+        public void setType(GridType type) {
+            this.type = type;
+        }
+
+        public void setScrollable(boolean scrollable) {
+            if (!scrollable) {
+                setStyleAttribute(scrollPanel.getElement(), "overflow", "hidden");
+                scrollPanel.setHeight("20px");
+                table.setHeight("20px");
+            } else {
+                setStyleAttribute(scrollPanel.getElement(), "overflow", "scroll");
+            }
         }
 
         public void clear() {
@@ -869,8 +874,7 @@ public class WSGrid extends Composite {
 
                     if (i < j) _sort_swap(i, j);
                 }
-            }
-            else {
+            } else {
                 while (i < j) {
                     i++;
                     while (_sort_gt(cellAt(i, col), pvtStr)) {
@@ -892,8 +896,7 @@ public class WSGrid extends Composite {
 
             if (l.numeric && r.numeric) {
                 return parseDouble(l.getValue()) > parseDouble(r.getValue());
-            }
-            else {
+            } else {
                 String ll = l.getValue();
                 String rr = r.getValue();
 
@@ -906,8 +909,7 @@ public class WSGrid extends Composite {
                 for (int i = 0; i < ll.length() && i < rr.length(); i++) {
                     if (ll.charAt(i) > rr.charAt(i)) {
                         return true;
-                    }
-                    else if (ll.charAt(i) < rr.charAt(i)) {
+                    } else if (ll.charAt(i) < rr.charAt(i)) {
                         return false;
                     }
                 }
@@ -921,8 +923,7 @@ public class WSGrid extends Composite {
 
             if (l.numeric && r.numeric) {
                 return parseDouble(l.getValue()) < parseDouble(r.getValue());
-            }
-            else {
+            } else {
                 String ll = l.getValue();
                 String rr = r.getValue();
 
@@ -935,8 +936,7 @@ public class WSGrid extends Composite {
                 for (int i = 0; i < ll.length() && i < rr.length(); i++) {
                     if (ll.charAt(i) < rr.charAt(i)) {
                         return true;
-                    }
-                    else if (ll.charAt(i) > rr.charAt(i)) {
+                    } else if (ll.charAt(i) > rr.charAt(i)) {
                         return false;
                     }
                 }
@@ -1012,8 +1012,7 @@ public class WSGrid extends Composite {
 
             if (cols.size() == 0 || cols.size() - 1 < column) {
                 cols.add(this);
-            }
-            else {
+            } else {
                 cols.set(column, this);
             }
 
@@ -1079,11 +1078,9 @@ public class WSGrid extends Composite {
 
                     if (i == 0) {
                         c.removeStyleDependentName("rowselect-left");
-                    }
-                    else if (i + 1 == cols) {
+                    } else if (i + 1 == cols) {
                         c.removeStyleDependentName("rowselect-right");
-                    }
-                    else {
+                    } else {
                         c.removeStyleDependentName("rowselect");
                     }
                 }
@@ -1092,8 +1089,7 @@ public class WSGrid extends Composite {
             if (currentFocusColumn) {
                 blurColumn(col);
                 currentFocusColumn = false;
-            }
-            else {
+            } else {
                 selectionList.remove(this);
             }
         }
@@ -1124,8 +1120,7 @@ public class WSGrid extends Composite {
                 if (!isFocus) {
                     selectColumn(col);
                 }
-            }
-            else {
+            } else {
                 int scrollPos = grid.getScrollPanel().getScrollPosition();
                 int scrollPosH = grid.getScrollPanel().getHorizontalScrollPosition();
 
@@ -1177,8 +1172,7 @@ public class WSGrid extends Composite {
                     };
                     smoothScroll.scheduleRepeating(1);
 
-                }
-                else if (bottomCell - cellHeight <= (topVisible)) {
+                } else if (bottomCell - cellHeight <= (topVisible)) {
                     final int startPos = scrollPos;
                     scrollPos -= getOffsetHeight();
                     final int endPos = scrollPos;
@@ -1212,15 +1206,13 @@ public class WSGrid extends Composite {
                         }
                     };
                     smoothScroll.scheduleRepeating(1);
-                }
-                else if (rightCell >= (rightVisible)) {
+                } else if (rightCell >= (rightVisible)) {
                     if (scrollPosH % cellWidth != 0) {
                         scrollPosH += (scrollPosH % cellWidth);
                     }
 
                     grid.getScrollPanel().setHorizontalScrollPosition(scrollPosH + getOffsetWidth());
-                }
-                else if (rightCell - cellWidth <= (leftVisible)) {
+                } else if (rightCell - cellWidth <= (leftVisible)) {
                     if (scrollPosH % cellWidth != 0) {
                         scrollPosH -= (scrollPosH % cellWidth);
                     }
@@ -1237,11 +1229,9 @@ public class WSGrid extends Composite {
 
                         if (i == 0) {
                             c.addStyleDependentName("rowselect-left");
-                        }
-                        else if (i + 1 == cols) {
+                        } else if (i + 1 == cols) {
                             c.addStyleDependentName("rowselect-right");
-                        }
-                        else {
+                        } else {
                             c.addStyleDependentName("rowselect");
                         }
                     }
@@ -1249,16 +1239,12 @@ public class WSGrid extends Composite {
 
                 if (col == 0) {
                     addStyleDependentName("rowselect-left");
-                }
-                else if (col + 1 == cols) {
+                } else if (col + 1 == cols) {
                     addStyleDependentName("rowselect-right");
-                }
-                else {
+                } else {
                     addStyleDependentName("rowselect");
                 }
-            }
-
-            else {
+            } else {
 
                 addStyleDependentName("selected");
             }
@@ -1312,8 +1298,7 @@ public class WSGrid extends Composite {
 
             if (_msie_compatibility && html.length() == 0) {
                 cellFormat.setValue("&nbsp;");
-            }
-            else {
+            } else {
                 cellFormat.setValue(html);
                 panel.clear();
                 panel.add(cellFormat.getWidget(wsGrid));
@@ -1546,13 +1531,11 @@ public class WSGrid extends Composite {
                             addStyleDependentName("resize-left");
                             _resizeArmed = true;
                             _leftGrow = true;
-                        }
-                        else if (event.getClientX() > rightG) {
+                        } else if (event.getClientX() > rightG) {
                             addStyleDependentName("resize-right");
                             _resizeArmed = true;
                             _leftGrow = false;
-                        }
-                        else {
+                        } else {
                             removeStyleDependentName("resize-left");
                             removeStyleDependentName("resize-right");
                             _resizeArmed = false;
@@ -1569,8 +1552,7 @@ public class WSGrid extends Composite {
                     if (event.getShiftKey()) {
                         focusRange();
                         break;
-                    }
-                    else if (!event.getMetaKey() && !event.getCtrlKey()
+                    } else if (!event.getMetaKey() && !event.getCtrlKey()
                             && !selectionList.isEmpty() && selectionList.lastElement() != this) {
                         blurAll();
                     }
@@ -1602,8 +1584,7 @@ public class WSGrid extends Composite {
                             WSCell old = sortedColumnHeader;
                             sortedColumnHeader = this;
                             old.cellFormat.getWidget(wsGrid);
-                        }
-                        else {
+                        } else {
                             sortedColumnHeader = this;
                         }
                         cellFormat.getWidget(wsGrid);
@@ -1727,8 +1708,7 @@ public class WSGrid extends Composite {
     public boolean getColumnSortOrder(int col) {
         if (sortedColumns.containsKey(col)) {
             return sortedColumns.get(col);
-        }
-        else {
+        } else {
             sortedColumns.put(col, true);
             return true;
         }
