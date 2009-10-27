@@ -10,7 +10,6 @@ public class ErraiBus implements EntryPoint {
         return bus;
     }
 
-
     public void onModuleLoad() {
     }
 }

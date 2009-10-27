@@ -18,7 +18,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     private List<SubscribeListener> onSubscribeHooks = new ArrayList<SubscribeListener>();
     private List<UnsubscribeListener> onUnsubscribeHooks = new ArrayList<UnsubscribeListener>();
 
-
     private final RequestBuilder sendBuilder;
     private final RequestBuilder recvBuilder;
 
@@ -33,17 +32,18 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     private boolean initialized = false;
 
-
     public ClientMessageBusImpl() {
         sendBuilder = new RequestBuilder(
                 RequestBuilder.POST,
                 URL.encode(SERVICE_ENTRY_POINT)
         );
+        sendBuilder.setHeader("Connection", "Keep-Alive");
 
         recvBuilder = new RequestBuilder(
                 RequestBuilder.GET,
                 URL.encode(SERVICE_ENTRY_POINT)
         );
+        recvBuilder.setHeader("Connection", "Keep-Alive");
 
         init();
     }
@@ -57,7 +57,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             fireAllUnSubcribeListener(subject);
         }
     }
-
 
     public void subscribe(final String subject, final MessageCallback callback) {
         fireAllSubcribeListener(subject);
@@ -125,7 +124,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         send(message);
     }
 
-
     public void sendGlobal(CommandMessage message) {
         send(message);
     }
@@ -152,11 +150,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         }
     }
 
-
     public void send(String subject, Enum commandType) {
         send(subject, CommandMessage.create(commandType));
     }
-
 
     public void send(CommandMessage message) {
         if (message.hasPart(MessageParts.ToSubject)) {
@@ -255,7 +251,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         StringBuffer outgoing = new StringBuffer();
         for (int i = 0; i < transmissionSize; i++) {
             outgoing.append(outgoingQueue.poll());
-            if ((i + 1) < transmissionSize) outgoing.append("||");
+
+            if ((i + 1) < transmissionSize) {
+                outgoing.append("||");
+            }
         }
 
         if (transmissionSize != 0) transmitRemote(outgoing.toString());
@@ -324,10 +323,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
                         // Don't use an iterator here -- potential for concurrent
                         // modifications!
+                        //noinspection ForLoopReplaceableByForEach
                         for (int i = 0; i < postInitTasks.size(); i++) {
                             postInitTasks.get(i).run();
                         }
-
 
                         initialized = true;
 
@@ -464,7 +463,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         outerTimer.schedule(10);
     }
 
-
     public void addPostInitTask(Runnable run) {
         postInitTasks.add(run);
     }
@@ -514,7 +512,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           $wnd.PageBus.store(subject, value);
      }-*/;
 
-
     private static String decodeCommandMessage(CommandMessage msg) {
         StringBuffer decode = new StringBuffer(
                 "<table><thead style='font-weight:bold;'><tr><td>Field</td><td>Value</td></tr></thead><tbody>");
@@ -525,7 +522,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         decode.append("</tbody></table>");
 
         return decode.toString();
-
     }
 
     private static void showError(String message, String additionalDetails, Throwable e) {
@@ -559,5 +555,4 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         errorDialog.center();
         errorDialog.show();
     }
-
 }

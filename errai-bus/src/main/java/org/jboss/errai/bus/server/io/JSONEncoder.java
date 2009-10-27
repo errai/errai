@@ -65,7 +65,6 @@ public class JSONEncoder {
             first = false;
         }
 
-
         return build.append('}').toString();
     }
 
@@ -129,6 +128,4 @@ public class JSONEncoder {
             return tHandlers.get(in.getClass()).getConverted(in);
         }
     }
-
-
 }

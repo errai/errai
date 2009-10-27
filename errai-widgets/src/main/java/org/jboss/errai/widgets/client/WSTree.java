@@ -48,7 +48,6 @@ public class WSTree extends Composite {
             }
         });
 
-
         tree.addMouseOutHandler(new MouseOutHandler() {
             public void onMouseOut(MouseOutEvent event) {
                 lastItem = null;
@@ -125,7 +124,6 @@ public class WSTree extends Composite {
         tree.addItem(item);
     }
 
-
     public void attachListener(WSTreeItem item, ClickHandler handler) {
         if (handler != null)
             clickListeners.put(item, handler);
@@ -134,5 +132,4 @@ public class WSTree extends Composite {
     public static native String getUserAgent() /*-{
         return navigator.userAgent.toLowerCase();
     }-*/;
-
 }

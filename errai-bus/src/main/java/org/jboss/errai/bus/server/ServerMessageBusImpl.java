@@ -149,7 +149,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                         }
 
                         send(ConversationMessage.create(BusCommands.FinishStateSync, message).toSubject("ClientBus"), false);
-
                         break;
                 }
             }
@@ -476,8 +475,5 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 bus.messageQueues.remove(ref);
             }
         }
-
     }
-
-
 }

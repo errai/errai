@@ -2,7 +2,6 @@ package org.jboss.errai.widgets.client;
 
 import com.google.gwt.user.client.ui.*;
 
-
 public class WSTreeItem extends TreeItem {
     private Image icon;
     private String label;
@@ -19,9 +18,6 @@ public class WSTreeItem extends TreeItem {
 
         setHTML(createHTML());
     }
-
-
-    
 
     @Override
     public WSTreeItem addItem(String itemText) {

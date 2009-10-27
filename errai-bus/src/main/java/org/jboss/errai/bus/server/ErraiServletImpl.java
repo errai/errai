@@ -8,6 +8,7 @@ import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
 import org.jboss.errai.bus.server.io.MessageUtil;
+import static org.jboss.errai.bus.server.io.MessageUtil.createCommandMessage;
 import static org.jboss.errai.bus.server.io.MessageUtil.decodeToMap;
 import org.jboss.errai.bus.server.service.ErraiService;
 
@@ -92,7 +93,6 @@ public class ErraiServletImpl extends HttpServlet {
         Reader reader = httpServletRequest.getReader();
         StringBuilder sb = new StringBuilder(httpServletRequest.getContentLength());
         HttpSession session = httpServletRequest.getSession();
-
         CharBuffer buffer = CharBuffer.allocate(10);
 
         int read;
@@ -108,9 +108,7 @@ public class ErraiServletImpl extends HttpServlet {
             session.setAttribute(MessageBus.WS_SESSION_ID, httpServletRequest.getSession().getId());
         }
 
-        System.out.println("RECV:" + sb.toString());
-
-        for (CommandMessage msg : MessageUtil.createCommandMessage(httpServletRequest.getSession(), sb.toString())) {
+        for (CommandMessage msg : createCommandMessage(httpServletRequest.getSession(), sb.toString())) {
             service.store(msg);
         }
 

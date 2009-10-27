@@ -634,7 +634,6 @@ public class WSGrid extends Composite {
         }
     }
 
-
     /**
      * Blurs a vertical column.
      *
@@ -1417,7 +1416,6 @@ public class WSGrid extends Composite {
             if (rows < 2) return;
 
             _mergedCells = true;
-
 
             FlexTable table = grid.table;
             for (int i = 1; i < rows; i++) {

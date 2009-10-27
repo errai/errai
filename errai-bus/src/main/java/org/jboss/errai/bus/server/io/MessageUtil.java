@@ -8,6 +8,7 @@ import java.util.Map;
 
 public class MessageUtil {
     public static Map<String, Object> decodeToMap(String in) {
+        //noinspection unchecked
         return (Map<String, Object>) new JSONDecoder(in).parse();
     }
 

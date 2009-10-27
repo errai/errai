@@ -1,6 +1,5 @@
 package org.jboss.errai.bus.client;
 
-
 import java.util.LinkedList;
 import java.util.List;
 
