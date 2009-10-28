@@ -50,6 +50,7 @@ public class JSONDecoder {
                     break;
 
                 case '{':
+      
                     cursor++;
                     ctx.addValue(_parse(new Context(), new HashMap()));
                     break;
@@ -250,7 +251,7 @@ public class JSONDecoder {
     }
 
     public static void main(String[] args) {
-        System.out.println(new JSONDecoder("{__EncodedType:'org.errai.samples.serialization.client.model.Record',accountOpened:1086209032685,balance:-40.23,recordId:1,stuff:['iPhone3G16','MacBookPro15', 'Crap'],name:'Mike'}").parse());
+        System.out.println(new JSONDecoder("{__EncodedType:'org.jboss.errai.demo.thestore.client.modules.domain.User',password:null,age:10,userId:null,date:1256764689014,fullname:'Heiko Braun',name:'HeikoB'}").parse());
 
 
     }

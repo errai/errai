@@ -51,11 +51,12 @@ public class TypeDemarshallHelper {
 
     public static Object _demarshallAll(Object o) throws Exception {
         if (o instanceof String) {
-            if ((o = new JSONDecoder((String) o).parse()) instanceof String ) {
+            Object v;
+            if ((v = new JSONDecoder((String) o).parse()) instanceof String ) {
                 return o;
             }
             else {
-                return _demarshallAll(o);
+                return _demarshallAll(v);
             }
 
         } else if (o instanceof Collection) {
