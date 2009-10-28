@@ -72,7 +72,7 @@ public class JSONEncoderCli {
                 if (!first) {
                     mapBuild.append(',');
                 }
-                mapBuild.append(m.getKey()).append("|").append(m.getValue());
+                mapBuild.append(m.getKey());
                 first = false;
             }
             mapBuild.append("\"");

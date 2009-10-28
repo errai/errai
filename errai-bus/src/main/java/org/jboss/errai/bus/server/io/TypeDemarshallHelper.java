@@ -5,6 +5,10 @@ import org.mvel2.ConversionHandler;
 import org.mvel2.DataConversion;
 import org.mvel2.MVEL;
 
+import javax.swing.text.html.HTMLDocument;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 
 public class TypeDemarshallHelper {
@@ -29,30 +33,51 @@ public class TypeDemarshallHelper {
             }
         });
 
+        
+
     }
 
     public static void demarshallAll(String object, CommandMessage command) {
         try {
             for (String t : object.split(",")) {
-                String[] pair = t.split("\\|");
-
-                System.out.println("Decoding:" + pair[0] + " : " + command.get(String.class, pair[0]));
-
-                @SuppressWarnings({"unchecked"})
-                Map<String, Object> obj = (Map<String, Object>) new JSONDecoder(command.get(String.class, pair[0])).parse();
-                Object newInstance = Class.forName(pair[1]).newInstance();
-
-                for (Map.Entry<String, Object> entry : obj.entrySet()) {
-                    if ("__EncodedType".equals(entry.getKey())) continue;
-
-                    MVEL.setProperty(newInstance, entry.getKey(), entry.getValue());
-                }
-                command.set(pair[0], newInstance);
+                command.set(t, _demarshallAll(command.get(Object.class, t)));
             }
         }
         catch (Exception e) {
             throw new RuntimeException("could not demarshall types", e);
         }
+    }
+
+
+    public static Object _demarshallAll(Object o) throws Exception {
+        if (o instanceof String) {
+            if ((o = new JSONDecoder((String) o).parse()) instanceof String ) {
+                return o;
+            }
+            else {
+                return _demarshallAll(o);
+            }
+
+        } else if (o instanceof Collection) {
+            ArrayList newList = new ArrayList(((Collection)o).size());
+            for (Object o2 : ((Collection) o)) {
+                newList.add(_demarshallAll(o2));
+            }
+            return newList;
+        } else if (o instanceof Map) {
+            Map<?, ?> oMap = (Map) o;
+            if (oMap.containsKey("__EncodedType")) {
+                Object newInstance =  Class.forName((String) oMap.get("__EncodedType")).newInstance();
+
+                for (Map.Entry<?, ?> entry : oMap.entrySet()) {
+                    if ("__EncodedType".equals(entry.getKey())) continue;
+                    MVEL.setProperty(newInstance, (String) entry.getKey(), _demarshallAll(entry.getValue()));
+                }
+
+                return newInstance;
+            }
+        }
+        return o;
     }
 
     public static void main(String[] args) {

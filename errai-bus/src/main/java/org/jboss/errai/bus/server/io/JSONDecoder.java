@@ -1,13 +1,13 @@
 package org.jboss.errai.bus.server.io;
 
-import static java.lang.Character.isDigit;
-import static java.lang.Character.isJavaIdentifierPart;
-import static java.lang.Character.isLetter;
-import static java.lang.Double.parseDouble;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
+import static java.lang.Character.isDigit;
+import static java.lang.Character.isJavaIdentifierPart;
+import static java.lang.Double.parseDouble;
 
 
 public class JSONDecoder {
@@ -15,8 +15,6 @@ public class JSONDecoder {
     private int length;
     private int cursor;
 
-    private Object lhs;
-    private Object rhs;
 
     public JSONDecoder(String json) {
         this.length = (this.json = json.toCharArray()).length;
@@ -26,9 +24,15 @@ public class JSONDecoder {
         this.length = (this.json = json).length;
     }
 
+    public JSONDecoder(char[] json, int length, int cursor) {
+        this.json = json;
+        this.length = length;
+        this.cursor = cursor;
+    }
+
     public Object parse() {
         try {
-            return ((ArrayList) _parse(new ArrayList(1))).get(0);
+            return _parse(new Context(), null);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -36,31 +40,38 @@ public class JSONDecoder {
         }
     }
 
-    private Object _parse(Object collection) {
+    private Object _parse(Context ctx, Object collection) {
 
         while (cursor < length) {
             switch (json[cursor]) {
                 case '[':
                     cursor++;
-                    addValue(_parse(new ArrayList()));
+                    ctx.addValue(_parse(new Context(), new ArrayList()));
                     break;
 
                 case '{':
                     cursor++;
-                    addValue(_parse(new HashMap()));
+                    ctx.addValue(_parse(new Context(), new HashMap()));
                     break;
 
                 case ']':
                 case '}':
+                    ctx.exit();
+                    if (!ctx.isNest()) {
+                        cursor++;
+                        return ctx.record(collection);
+                    }
                 case ',':
+
                     cursor++;
-                    record(collection);
+                    ctx.record(collection);
+
                     break;
 
                 case '"':
                 case '\'':
                     int end = balancedCapture(json, cursor, json[cursor]);
-                    addValue(new String(json, cursor + 1, end - cursor - 1));
+                    ctx.addValue(new String(json, cursor + 1, end - cursor - 1));
                     cursor = end + 1;
                     break;
 
@@ -69,7 +80,7 @@ public class JSONDecoder {
                         int start = cursor++;
                         while (cursor < length && (isDigit(json[cursor]) || json[cursor] == '.')) cursor++;
 
-                        addValue(parseDouble(new String(json, start, cursor - start)));
+                        ctx.addValue(parseDouble(new String(json, start, cursor - start)));
 
                         break;
                     } else if (isJavaIdentifierPart(json[cursor])) {
@@ -78,13 +89,11 @@ public class JSONDecoder {
 
                         String s = new String(json, start, cursor - start);
                         if ("true".equals(s) || "false".equals(s)) {
-                            addValue("true".equals(s) ? Boolean.TRUE : Boolean.FALSE);
-                        }
-                        else if ("null".equals(s)) {
-                            addValue(null);
-                        }
-                        else {
-                            addValue(s);
+                            ctx.addValue("true".equals(s) ? Boolean.TRUE : Boolean.FALSE);
+                        } else if ("null".equals(s)) {
+                            ctx.addValue(null);
+                        } else {
+                            ctx.addValue(s);
                         }
                         continue;
                     }
@@ -92,31 +101,7 @@ public class JSONDecoder {
             }
         }
 
-        record(collection);
-
-        return collection;
-    }
-
-    private void addValue(Object val) {
-        if (lhs == null) {
-            lhs = val;
-        } else {
-            rhs = val;
-        }
-    }
-
-    private void record(Object collection) {
-        if (lhs != null) {
-            if (collection instanceof Map) {
-                //noinspection unchecked
-                ((Map) collection).put(lhs, rhs);
-            } else {
-                //noinspection unchecked
-                ((Collection) collection).add(lhs);
-            }
-        }
-
-        lhs = rhs = null;
+        return ctx.record(collection);
     }
 
     /**
@@ -207,9 +192,66 @@ public class JSONDecoder {
         return cursor;
     }
 
+
+    private class Context {
+        Object lhs;
+        Object rhs;
+        private int nest;
+
+        private Context() {
+        }
+
+        private Context(int nest) {
+            this.nest = nest;
+        }
+
+        private void addValue(Object val) {
+            if (lhs == null) {
+                lhs = val;
+            } else {
+                rhs = val;
+            }
+        }
+
+        private Object record(Object collection) {
+            try {
+                if (lhs != null) {
+                    if (collection instanceof Map) {
+                        //noinspection unchecked
+                        ((Map) collection).put(lhs, rhs);
+                    } else {
+                        if (collection == null) return lhs;
+                        //noinspection unchecked
+                        ((Collection) collection).add(lhs);
+                    }
+                }
+                return collection;
+            }
+            catch (ClassCastException e) {
+                e.printStackTrace();
+                return null;
+            }
+            finally {
+                lhs = rhs = null;
+            }
+        }
+
+        public void nest() {
+            nest++;
+        }
+
+        public void exit() {
+            nest--;
+        }
+
+        public boolean isNest() {
+            return nest >= 0;
+        }
+    }
+
     public static void main(String[] args) {
-        Object o = new JSONDecoder("{__EncodedType:\"org.jboss.errai.demo.thestore.client.modules.domain.User\",password:null,age:10,userId:null,date:1256255282295,fullname:\"Heiko Braun\",name:\"HeikoB\"}").parse();
-        System.out.println("" + o);
+        System.out.println(new JSONDecoder("{__EncodedType:'org.errai.samples.serialization.client.model.Record',accountOpened:1086209032685,balance:-40.23,recordId:1,stuff:['iPhone3G16','MacBookPro15', 'Crap'],name:'Mike'}").parse());
+
 
     }
 
