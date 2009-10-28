@@ -42,7 +42,7 @@ public class TypeHandlerFactory {
 
         handlers.put(Number.class, numberHandlers);
 
-        inheritanceMap.put(ArrayList.class, Collection.class);
+
         inheritanceMap.put(Integer.class, Number.class);
         inheritanceMap.put(Long.class, Number.class);
         inheritanceMap.put(Short.class, Number.class);
@@ -56,12 +56,15 @@ public class TypeHandlerFactory {
 
         inheritanceMap.put(HashSet.class, Set.class);
         inheritanceMap.put(AbstractSet.class, Set.class);
+
+        inheritanceMap.put(Set.class, Collection.class);
+        inheritanceMap.put(List.class, Collection.class);
     }
 
     public static Map<Class, TypeHandler> getHandler(Class from) {
         Map<Class, TypeHandler> toHandlers = handlers.get(from);
-        if (toHandlers == null) {
-            toHandlers = handlers.get(inheritanceMap.get(from));
+        if (toHandlers == null && inheritanceMap.containsKey(from)) {
+            toHandlers = getHandler(inheritanceMap.get(from));
         }
         return toHandlers;
     }
