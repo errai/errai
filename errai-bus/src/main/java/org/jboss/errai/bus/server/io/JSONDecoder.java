@@ -9,12 +9,10 @@ import static java.lang.Character.isDigit;
 import static java.lang.Character.isJavaIdentifierPart;
 import static java.lang.Double.parseDouble;
 
-
 public class JSONDecoder {
     private char[] json;
     private int length;
     private int cursor;
-
 
     public JSONDecoder(String json) {
         this.length = (this.json = json.toCharArray()).length;
@@ -41,7 +39,6 @@ public class JSONDecoder {
     }
 
     private Object _parse(Context ctx, Object collection) {
-
         while (cursor < length) {
             switch (json[cursor]) {
                 case '[':
@@ -50,7 +47,6 @@ public class JSONDecoder {
                     break;
 
                 case '{':
-      
                     cursor++;
                     ctx.addValue(_parse(new Context(), new HashMap()));
                     break;
@@ -193,7 +189,6 @@ public class JSONDecoder {
         return cursor;
     }
 
-
     private class Context {
         Object lhs;
         Object rhs;
@@ -249,11 +244,4 @@ public class JSONDecoder {
             return nest >= 0;
         }
     }
-
-    public static void main(String[] args) {
-        System.out.println(new JSONDecoder("{'__MarshalledTypes':'Recs','ToSubject':'ObjectService','Recs':['{__EncodedType:\\\"org.errai.samples.serialization.client.model.Record\\\",accountOpened:1086202302320,balance:-40.23,recordId:1,stuff:[\\\"{__EncodedType:\\\\\\\"org.errai.samples.serialization.client.model.Item\\\\\\\",itemName:'MacBookPro15',quantity:2}\\\",\\\"{__EncodedType:\\\\\\\"org.errai.samples.serialization.client.model.Item\\\\\\\",itemName:'iPhone3G',quantity:2}\\\"],name:'Mike'}','{__EncodedType:\\\"org.errai.samples.serialization.client.model.Record\\\",accountOpened:1108061502320,balance:30.1,recordId:2,stuff:[\\\"{__EncodedType:\\\\\\\"org.errai.samples.serialization.client.model.Item\\\\\\\",itemName:'MacBookPro15',quantity:1}\\\",\\\"{__EncodedType:\\\\\\\"org.errai.samples.serialization.client.model.Item\\\\\\\",itemName:'iPhone3G',quantity:1}\\\"],name:'Lillian'}','{__EncodedType:\\\"org.errai.samples.serialization.client.model.Record\\\",accountOpened:1150829502320,balance:50.5,recordId:3,stuff:[\\\"{__EncodedType:\\\\\\\"org.errai.samples.serialization.client.model.Item\\\\\\\",itemName:'iPhone3Gs',quantity:1}\\\",\\\"{__EncodedType:\\\\\\\"org.errai.samples.serialization.client.model.Item\\\\\\\",itemName:'MacBookPro13',quantity:2}\\\"],name:'Heiko'}']}").parse());
-
-
-    }
-
 }

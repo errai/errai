@@ -11,9 +11,11 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
+import static org.mvel2.DataConversion.addConversionHandler;
+
 public class TypeDemarshallHelper {
     static {
-        DataConversion.addConversionHandler(java.sql.Date.class, new ConversionHandler() {
+        addConversionHandler(java.sql.Date.class, new ConversionHandler() {
             public Object convertFrom(Object o) {
                 return new java.sql.Date(((Number) o).longValue());
             }
@@ -23,7 +25,7 @@ public class TypeDemarshallHelper {
             }
         });
 
-        DataConversion.addConversionHandler(java.util.Date.class, new ConversionHandler() {
+        addConversionHandler(java.util.Date.class, new ConversionHandler() {
             public Object convertFrom(Object o) {
                 return new java.util.Date(((Number) o).longValue());
             }
@@ -32,8 +34,6 @@ public class TypeDemarshallHelper {
                 return Number.class.isAssignableFrom(aClass);
             }
         });
-
-
     }
 
     public static void demarshallAll(String object, CommandMessage command) {
@@ -46,7 +46,6 @@ public class TypeDemarshallHelper {
             throw new RuntimeException("could not demarshall types for message parts:" + object, e);
         }
     }
-
 
     public static Object _demarshallAll(Object o) throws Exception {
         try {
@@ -78,5 +77,4 @@ public class TypeDemarshallHelper {
             throw new RuntimeException("error demarshalling encoded object:\n" + o, e);
         }
     }
-
 }
