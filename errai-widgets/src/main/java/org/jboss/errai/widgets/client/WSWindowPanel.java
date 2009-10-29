@@ -17,6 +17,8 @@ import org.jboss.errai.widgets.client.layout.WSDropShadowLayout;
 import org.jboss.errai.widgets.client.util.LayoutUtil;
 
 import static java.lang.Math.round;
+
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -84,7 +86,9 @@ public class WSWindowPanel extends Composite {
         dockPanel.setCellVerticalAlignment(fPanel, HasVerticalAlignment.ALIGN_TOP);
         dockPanel.setCellHeight(fPanel, "25px");
 
-        initWidget(dropShadow);
+       initWidget(dropShadow);
+      //  setElement(dropShadow.getElement());
+
         setVisible(false);
         RootPanel.get().add(this);
 
@@ -183,6 +187,16 @@ public class WSWindowPanel extends Composite {
     public void setWidget(Widget w) {
         add(w);
     }
+
+
+    public Iterator<Widget> iterator() {
+        return dockPanel.iterator();
+    }
+
+//    @Override
+//    public boolean remove(Widget child) {
+//        return dockPanel.remove(child);
+//    }
 
     public void center() {
         final Style s = getElement().getStyle();

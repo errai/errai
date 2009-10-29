@@ -12,6 +12,9 @@ public class TypeHandlerFactory {
     private static Map<Class, Class> inheritanceMap = new HashMap<Class, Class>();
 
     static {
+        /**
+         * Declare all the default coercion handlers.
+         */
         Map<Class, TypeHandler> collectionHandlers = new HashMap<Class, TypeHandler>();
         collectionHandlers.put(Object[].class, new CollectionToObjArray());
         collectionHandlers.put(String[].class, new CollectionToStringArray());
@@ -42,7 +45,9 @@ public class TypeHandlerFactory {
 
         handlers.put(Number.class, numberHandlers);
 
-
+        /**
+         * Build an inheretence Map.
+         */
         inheritanceMap.put(Integer.class, Number.class);
         inheritanceMap.put(Long.class, Number.class);
         inheritanceMap.put(Short.class, Number.class);
@@ -70,7 +75,7 @@ public class TypeHandlerFactory {
     }
 
     public static <T> T convert(Class from, Class<? extends T> to, Object value) {
-        if (value.getClass() == to) return  (T)value;
+        if (value.getClass() == to) return (T)value;
         Map<Class, TypeHandler> toHandlers = getHandler(from);
         if (toHandlers == null) return (T) value;
         TypeHandler handler = toHandlers.get(to);
