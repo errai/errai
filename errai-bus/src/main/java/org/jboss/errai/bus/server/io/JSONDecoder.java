@@ -72,7 +72,7 @@ public class JSONDecoder {
                 case '"':
                 case '\'':
                     int end = balancedCapture(json, cursor, json[cursor]);
-                    ctx.addValue(new String(json, cursor + 1, end - cursor - 1));
+                    ctx.addValue(new String(json, cursor + 1, end - cursor - 1).replaceAll("\\\\\\\\", "\\\\").replaceAll("\\\\\"", "\""));
                     cursor = end + 1;
                     break;
 
@@ -251,7 +251,7 @@ public class JSONDecoder {
     }
 
     public static void main(String[] args) {
-        System.out.println(new JSONDecoder("{__EncodedType:'org.jboss.errai.demo.thestore.client.modules.domain.User',password:null,age:10,userId:null,date:1256764689014,fullname:'Heiko Braun',name:'HeikoB'}").parse());
+        System.out.println(new JSONDecoder("{'__MarshalledTypes':'Recs','ToSubject':'ObjectService','Recs':['{__EncodedType:\\\"org.errai.samples.serialization.client.model.Record\\\",accountOpened:1086202302320,balance:-40.23,recordId:1,stuff:[\\\"{__EncodedType:\\\\\\\"org.errai.samples.serialization.client.model.Item\\\\\\\",itemName:'MacBookPro15',quantity:2}\\\",\\\"{__EncodedType:\\\\\\\"org.errai.samples.serialization.client.model.Item\\\\\\\",itemName:'iPhone3G',quantity:2}\\\"],name:'Mike'}','{__EncodedType:\\\"org.errai.samples.serialization.client.model.Record\\\",accountOpened:1108061502320,balance:30.1,recordId:2,stuff:[\\\"{__EncodedType:\\\\\\\"org.errai.samples.serialization.client.model.Item\\\\\\\",itemName:'MacBookPro15',quantity:1}\\\",\\\"{__EncodedType:\\\\\\\"org.errai.samples.serialization.client.model.Item\\\\\\\",itemName:'iPhone3G',quantity:1}\\\"],name:'Lillian'}','{__EncodedType:\\\"org.errai.samples.serialization.client.model.Record\\\",accountOpened:1150829502320,balance:50.5,recordId:3,stuff:[\\\"{__EncodedType:\\\\\\\"org.errai.samples.serialization.client.model.Item\\\\\\\",itemName:'iPhone3Gs',quantity:1}\\\",\\\"{__EncodedType:\\\\\\\"org.errai.samples.serialization.client.model.Item\\\\\\\",itemName:'MacBookPro13',quantity:2}\\\"],name:'Heiko'}']}").parse());
 
 
     }

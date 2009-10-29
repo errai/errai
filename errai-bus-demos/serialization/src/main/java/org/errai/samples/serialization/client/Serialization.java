@@ -15,7 +15,6 @@ public class Serialization implements EntryPoint {
     public void onModuleLoad() {
         final FlexTable table = new FlexTable();
 
-
         bus.conversationWith(ConversationMessage.create()
                 .toSubject("ObjectService"),
                 new MessageCallback() {

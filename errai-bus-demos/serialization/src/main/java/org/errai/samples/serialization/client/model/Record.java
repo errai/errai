@@ -14,18 +14,18 @@ public class Record implements Serializable {
     private String name;
     private float balance;
     private Date accountOpened;
-    private Set<String> stuff;
+    private Set<Item> stuff;
 
     public Record() {
     }
 
-    public Record(int recordId, String name, float balance, Date accountOpened, String[] stuff) {
+    public Record(int recordId, String name, float balance, Date accountOpened, Item[] stuff) {
         this.recordId = recordId;
         this.name = name;
         this.balance = balance;
         this.accountOpened = accountOpened;
 
-        this.stuff = new HashSet<String>();
+        this.stuff = new HashSet<Item>();
         this.stuff.addAll(Arrays.asList(stuff));
     }
 
@@ -61,11 +61,22 @@ public class Record implements Serializable {
         this.accountOpened = accountOpened;
     }
 
-    public Set<String> getStuff() {
+    public Set<Item> getStuff() {
         return stuff;
     }
 
-    public void setStuff(Set<String> stuff) {
+    public void setStuff(Set<Item> stuff) {
         this.stuff = stuff;
+    }
+
+    @Override
+    public String toString() {
+        return "Record{" +
+                "recordId=" + recordId +
+                ", name='" + name + '\'' +
+                ", balance=" + balance +
+                ", accountOpened=" + accountOpened +
+                ", stuff=" + stuff +
+                '}';
     }
 }

@@ -4,6 +4,7 @@ import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.user.rebind.SourceWriter;
+import org.jboss.errai.bus.client.types.Marshaller;
 import org.jboss.errai.bus.server.annotations.ExposeEntity;
 import org.jboss.errai.bus.server.annotations.ExtensionComponent;
 import org.jboss.errai.bus.server.util.ConfigUtil;
@@ -52,8 +53,20 @@ public class SerializationExtensionGenerator implements ExtensionGenerator {
                             templateVars.put("fields", types.keySet());
                             templateVars.put("targetTypes", types);
 
-                            writer.print((String) TemplateRuntime.execute(demarshallerGenerator, templateVars));
-                            writer.print((String) TemplateRuntime.execute(marshallerGenerator, templateVars));
+                            String d;
+
+                            writer.print(d = (String) TemplateRuntime.execute(demarshallerGenerator, templateVars));
+
+                            logger.log(TreeLogger.Type.INFO, d);
+
+                      //      System.out.println("demarshall:" + d);
+
+                            writer.print(d = (String) TemplateRuntime.execute(marshallerGenerator, templateVars));
+
+                            logger.log(TreeLogger.Type.INFO, d);
+
+                         //   System.out.println("marshall:" + d);
+
 
                             logger.log(TreeLogger.Type.INFO, "Generated mashaller/demarshaller for: " + visit.getName());
                         }
@@ -61,4 +74,6 @@ public class SerializationExtensionGenerator implements ExtensionGenerator {
                 }
         );
     }
+
+ 
 }

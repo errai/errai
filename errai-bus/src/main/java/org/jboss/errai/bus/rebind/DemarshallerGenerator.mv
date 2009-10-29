@@ -25,7 +25,6 @@
         n.@{org.mvel2.util.ReflectionUtil.getSetter(fieldName)}(org.jboss.errai.bus.client.types.JSONTypeHelper.convert(o.get("@{fieldName}"), ${targetType.getName()}.class));
     @end{}
 @end{}
-    
 
 org.jboss.errai.bus.client.types.TypeDemarshallers.addDemarshaller(
     @{className}.class,

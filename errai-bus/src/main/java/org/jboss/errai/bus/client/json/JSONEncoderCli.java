@@ -19,7 +19,8 @@ public class JSONEncoderCli {
         if (v == null) {
             return "null";
         } else if (v instanceof String) {
-            return "\"" + v + "\"";
+            return "\"" + ((String) v).replaceAll("\\\\\"", "\\\\\\\\\"").replaceAll("\"", "\\\\\"") + "\"" +
+                    "";
         } else if (v instanceof Number || v instanceof Boolean) {
             return String.valueOf(v);
         } else if (v instanceof Collection) {

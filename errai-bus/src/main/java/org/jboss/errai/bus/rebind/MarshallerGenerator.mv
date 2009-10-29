@@ -17,7 +17,7 @@ org.jboss.errai.bus.client.types.TypeMarshallers.addMarshaller(
 
                 json.append("@foreach{fieldName : fields}@includeNamed{"extractor";fieldName=fieldName;targetType=targetTypes.get(fieldName);getter=org.mvel2.util.ReflectionUtil.getGetter(fieldName)}@end{","}}");
 
-                return "\"" + json.toString().replaceAll("\"", "'") + "\"";
+                return json.toString();
             }
             catch (Exception e) {
                 System.out.println("marshalling error");

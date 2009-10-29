@@ -38,7 +38,7 @@ public class JSONTypeHelper {
                  if ("__EncodedType".equals(key)) {
                      String className = eMap.get(key).isString().stringValue();
 
-                     if (TypeDemarshallers.hasDemarshaller(to)) {
+                     if (TypeDemarshallers.hasDemarshaller(className)) {
                          return (T) TypeDemarshallers.getDemarshaller(className).demarshall(eMap);
                      }
                      else {
