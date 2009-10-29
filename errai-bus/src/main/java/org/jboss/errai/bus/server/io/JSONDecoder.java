@@ -72,7 +72,7 @@ public class JSONDecoder {
                 case '"':
                 case '\'':
                     int end = balancedCapture(json, cursor, json[cursor]);
-                    ctx.addValue(new String(json, cursor + 1, end - cursor - 1).replaceAll("\\\\\\\\", "\\\\").replaceAll("\\\\\"", "\""));
+                    ctx.addValue(new String(json, cursor + 1, end - cursor - 1));
                     cursor = end + 1;
                     break;
 
