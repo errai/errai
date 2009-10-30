@@ -1,9 +1,11 @@
 package org.jboss.errai.bus.server.io;
 
+import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
 import org.jboss.errai.bus.client.types.TypeHandler;
 import org.mvel2.MVEL;
 
+import javax.servlet.http.HttpSession;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -73,8 +75,6 @@ public class JSONEncoder {
         boolean first = true;
 
         for (Map.Entry<Object, Object> entry : map.entrySet()) {
-            if (SecurityParts.SessionData.toString().equals(entry.getKey())) continue;
-
             String val = _encode(entry.getValue());
             if (!first) {
                 mapBuild.append(',');
@@ -129,4 +129,6 @@ public class JSONEncoder {
             return tHandlers.get(in.getClass()).getConverted(in);
         }
     }
+
+  
 }

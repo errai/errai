@@ -24,9 +24,10 @@ public class MessageUtil {
                 // do something evil.  So we check for, and remove it if this is the case.
                 parts.remove(MessageParts.SessionID.name());
             }
-            parts.put(SecurityParts.SessionData.name(), session);
+            //   parts.put(SecurityParts.SessionData.name(), session);
 
             CommandMessage msg = CommandMessage.create().setParts(parts);
+            msg.setResource("Session", session);
 
             if (parts.containsKey("__MarshalledTypes")) {
                 TypeDemarshallHelper.demarshallAll((String) parts.get("__MarshalledTypes"), msg);

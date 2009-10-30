@@ -135,14 +135,12 @@ public class JAASAdapter implements AuthenticationAdapter {
     }
 
     private void addAuthenticationToken(CommandMessage message, AuthSubject loginSubject) {
-
-
-        HttpSession session = message.get(HttpSession.class, SecurityParts.SessionData);
+        HttpSession session = (HttpSession) message.getResource("Session");
         session.setAttribute(ErraiService.SESSION_AUTH_DATA, loginSubject);
     }
 
     public boolean isAuthenticated(CommandMessage message) {
-        HttpSession session = message.get(HttpSession.class, SecurityParts.SessionData);
+        HttpSession session = (HttpSession) message.getResource("Session");
         return session != null && session.getAttribute(ErraiService.SESSION_AUTH_DATA) != null;
     }
 
@@ -150,13 +148,22 @@ public class JAASAdapter implements AuthenticationAdapter {
         boolean sessionEnded = isAuthenticated(message);
         if (sessionEnded) {
             getAuthDescriptor(message).remove(new SimpleRole(CredentialTypes.Authenticated.name()));
-            message.get(HttpSession.class, SecurityParts.SessionData).removeAttribute(ErraiService.SESSION_AUTH_DATA);
+            ((HttpSession)message.getResource("Session")).removeAttribute(ErraiService.SESSION_AUTH_DATA);
             return true;
         }
         else {
             return false;
         }
     }
+
+    private Set getAuthDescriptor(CommandMessage message) {
+         Set credentials = message.get(Set.class, SecurityParts.Credentials);
+         if (credentials == null) {
+             message.set(SecurityParts.Credentials, credentials = new HashSet());
+         }
+         return credentials;
+     }
+
 
     public void process(CommandMessage message) {
         if (isAuthenticated(message)) {
@@ -165,13 +172,6 @@ public class JAASAdapter implements AuthenticationAdapter {
         }
     }
 
-    private Set getAuthDescriptor(CommandMessage message) {
-        Set credentials = message.get(Set.class, SecurityParts.Credentials);
-        if (credentials == null) {
-            message.set(SecurityParts.Credentials, credentials = new HashSet());
-        }
-        return credentials;
-    }
 
 
 }

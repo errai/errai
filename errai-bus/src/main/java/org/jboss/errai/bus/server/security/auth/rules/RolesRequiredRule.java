@@ -34,9 +34,9 @@ public class RolesRequiredRule implements BooleanRoutingRule {
     }
 
     public boolean decision(CommandMessage message) {
-        if (!message.hasPart(SecurityParts.SessionData)) return false;
+        if (!message.hasResource("Session")) return false;
         else {
-            AuthSubject subject = (AuthSubject) message.get(HttpSession.class, SecurityParts.SessionData)
+            AuthSubject subject = (AuthSubject) getSession(message)
                     .getAttribute(ErraiService.SESSION_AUTH_DATA);
 
             if (subject == null) {
@@ -47,7 +47,7 @@ public class RolesRequiredRule implements BooleanRoutingRule {
                         .toSubject("LoginClient")
                         .set(SecurityParts.CredentialsRequired, "Name,Password")
                         .set(SecurityParts.ReplyTo, ErraiService.AUTHORIZATION_SVC_SUBJECT)
-                        .set(SecurityParts.SessionData, message.get(HttpSession.class, SecurityParts.SessionData))
+                        .copyResource("Session", message)
                         .set(SecurityParts.RejectedMessage, ServerBusUtils.encodeJSON(message.getParts()))
                         , false);
                 return false;
@@ -62,8 +62,7 @@ public class RolesRequiredRule implements BooleanRoutingRule {
                         .sendNowWith(bus);
                 return false;
 
-            }
-            else {
+            } else {
                 return true;
             }
 
@@ -81,5 +80,9 @@ public class RolesRequiredRule implements BooleanRoutingRule {
         }
 
         return builder.toString();
+    }
+
+    private static HttpSession getSession(CommandMessage message) {
+        return ((HttpSession) message.getResource("Session"));
     }
 }

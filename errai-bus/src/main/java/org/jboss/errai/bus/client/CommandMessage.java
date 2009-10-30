@@ -8,6 +8,7 @@ import java.util.Map;
 
 public class CommandMessage {
     protected Map<String, Object> parts = new HashMap<String, Object>();
+    protected Map<String, Object> resources;
 
     public static CommandMessage create(String commandType) {
         return new CommandMessage(commandType);
@@ -124,6 +125,29 @@ public class CommandMessage {
         this.parts = parts;
         return this;
     }
+
+    public CommandMessage setResource(String key, Object res) {
+        if (this.resources == null) this.resources = new HashMap<String, Object>();
+        this.resources.put(key, res);
+        return this;
+    }
+
+    public Object getResource(String key) {
+        return this.resources == null ? null : this.resources.get(key);
+    }
+
+    public CommandMessage copyResource(String key, CommandMessage copyFrom) {
+        if (!copyFrom.hasResource(key)) {
+            throw new RuntimeException("Cannot copy resource '" + key + "': no such resource.");
+        }
+        setResource(key, copyFrom.getResource(key));
+        return this;
+    }
+
+    public boolean hasResource(String key) {
+        return this.resources != null && this.resources.containsKey(key);
+    }
+
 
     public void sendNowWith(MessageBus viaThis) {
         viaThis.send(this);

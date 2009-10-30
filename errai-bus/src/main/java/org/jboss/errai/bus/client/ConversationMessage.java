@@ -17,15 +17,15 @@ public class ConversationMessage extends CommandMessage {
     }
 
     public ConversationMessage(CommandMessage inReplyTo) {
-        if (inReplyTo.hasPart(SecurityParts.SessionData)) {
-            set(SecurityParts.SessionData, inReplyTo.get(Object.class, SecurityParts.SessionData));
+        if (inReplyTo.hasResource("Session")) {
+            setResource("Session", inReplyTo.getResource("Session"));
         }
         if (inReplyTo.hasPart(MessageParts.ReplyTo)) {
             set(MessageParts.ToSubject, inReplyTo.get(String.class, MessageParts.ReplyTo));
         }
 
-        if (!inReplyTo.hasPart(SecurityParts.SessionData) && !inReplyTo.hasPart(MessageParts.ReplyTo)) {
-            throw new RuntimeException("cannot have a conversation. there is no session data or ReplyTo field");
+        if (!inReplyTo.hasResource("Session") && !inReplyTo.hasPart(MessageParts.ReplyTo)) {
+            throw new RuntimeException("cannot have a conversation. there is no session data or ReplyTo field. Are you sure you referenced an incoming message?");
         }
     }
 
@@ -37,7 +37,6 @@ public class ConversationMessage extends CommandMessage {
 
     public ConversationMessage(String commandType, CommandMessage inReplyTo) {
         this(inReplyTo);
-        set(SecurityParts.SessionData, inReplyTo.get(Object.class, SecurityParts.SessionData));
         setCommandType(commandType);
     }
 

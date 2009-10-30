@@ -75,7 +75,7 @@ public class ErraiServiceImpl implements ErraiService {
         bus.subscribe("ClientNegotiationService", new MessageCallback() {
             public void callback(CommandMessage message) {
                 AuthSubject subject = (AuthSubject)
-                        message.get(HttpSession.class, SecurityParts.SessionData).getAttribute(ErraiService.SESSION_AUTH_DATA);
+                        ((HttpSession) message.getResource("Session")).getAttribute(ErraiService.SESSION_AUTH_DATA);
 
                 ConversationMessage reply = ConversationMessage.create(message);
 

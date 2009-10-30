@@ -51,28 +51,13 @@ public class ErraiModule extends ServletModule {
         }
 
         bind(MessageBus.class).to(ServerMessageBusImpl.class);
-        bind(ServerMessageBus.class).to(ServerMessageBusImpl.class);
+        bind(ServerMessageBus.class).to(ServerMessageBusImpl.class); 
         bind(ErraiService.class).to(ErraiServiceImpl.class);
         bind(ErraiServiceConfigurator.class).to(ErraiServiceConfiguratorImpl.class);
-        bind(ErraiModule.class).toInstance(this);
-       
+
         if (!authAdapterSpecified) {
             bind(AuthenticationAdapter.class).to(DefaultAdapter.class);
         }
     }
 
-    @Override
-    public <T> LinkedBindingBuilder<T> bind(Key<T> key) {
-        return super.bind(key);
-    }
-
-    @Override
-    public <T> AnnotatedBindingBuilder<T> bind(TypeLiteral<T> typeLiteral) {
-        return super.bind(typeLiteral);
-    }
-
-    @Override
-    public <T> AnnotatedBindingBuilder<T> bind(Class<T> clazz) {
-        return super.bind(clazz);
-    }
 }

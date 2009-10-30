@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class ServerBusUtils {
     public static void main(String[] args) {
-        System.out.println("\"".replaceAll("\"", "\\\\\""));
+        System.out.println("\"".replaceAll("\"", "\\\\\""));                                                       
     }
 
     public static CommandMessage decodeToCommandMessage(Object in) {
@@ -27,6 +27,6 @@ public class ServerBusUtils {
     }
 
     public static String getSessionId(CommandMessage message) {
-        return (String) message.get(HttpSession.class, SecurityParts.SessionData).getAttribute(MessageBus.WS_SESSION_ID);
+        return (String) ((HttpSession) message.getResource("Session")).getAttribute(MessageBus.WS_SESSION_ID);
     }
 }

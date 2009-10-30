@@ -121,19 +121,19 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             public void callback(CommandMessage message) {
                 switch (BusCommands.valueOf(message.getCommandType())) {
                     case RemoteSubscribe:
-                        remoteSubscribe(message.get(HttpSession.class, SecurityParts.SessionData).getAttribute(WS_SESSION_ID),
+                        remoteSubscribe(getSession(message).getAttribute(WS_SESSION_ID),
                                 message.get(String.class, MessageParts.Subject));
                         break;
 
                     case RemoteUnsubscribe:
-                        remoteUnsubscribe(message.get(HttpSession.class, SecurityParts.SessionData).getAttribute(WS_SESSION_ID),
+                        remoteUnsubscribe(getSession(message).getAttribute(WS_SESSION_ID),
                                 message.get(String.class, MessageParts.Subject));
                         break;
 
                     case ConnectToQueue:
-                        Object sessionContext = message.get(HttpSession.class, SecurityParts.SessionData).getAttribute(WS_SESSION_ID);
+                        Object sessionContext = getSession(message).getAttribute(WS_SESSION_ID);
 
-                        if (!messageQueues.containsKey(message.get(HttpSession.class, SecurityParts.SessionData)))
+                        if (!messageQueues.containsKey(getSession(message)))
                             messageQueues.put(sessionContext,
                                     new MessageQueue(QUEUE_SIZE));
 
@@ -171,12 +171,12 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
 
         if (fireListeners && !fireGlobalMessageListeners(message)) {
-            if (message.hasPart(MessageParts.ReplyTo) && message.hasPart(SecurityParts.SessionData)) {
+            if (message.hasPart(MessageParts.ReplyTo) && message.hasResource("Session")) {
                 /**
                  * Inform the sender that we did not deliver the message.
                  */
 
-                store((String) message.get(HttpSession.class, SecurityParts.SessionData).getAttribute(WS_SESSION_ID),
+                store((String) getSession(message).getAttribute(WS_SESSION_ID),
                         message.get(String.class, MessageParts.ReplyTo),
                         ServerBusUtils.encodeJSON(CommandMessage.create(SecurityCommands.MessageNotDelivered).getParts()));
             }
@@ -226,8 +226,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
 
     public void send(CommandMessage message) {
-        if (message.hasPart(SecurityParts.SessionData)) {
-            send((String) message.get(HttpSession.class, SecurityParts.SessionData).getAttribute(WS_SESSION_ID), message.getSubject(), message);
+        if (message.hasResource("Session")) {
+            send((String) getSession(message).getAttribute(WS_SESSION_ID), message.getSubject(), message);
         } else if (message.hasPart(MessageParts.SessionID)) {
             send(message.get(String.class, MessageParts.SessionID), message.getSubject(), message);
         } else {
@@ -261,11 +261,11 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
 
     public void send(String subject, CommandMessage message, boolean fireListeners) {
-        if (!message.hasPart(SecurityParts.SessionData)) {
+        if (!message.hasResource("Session")) {
             throw new RuntimeException("cannot automatically route message. no session contained in message.");
         }
 
-        HttpSession session = message.get(HttpSession.class, SecurityParts.SessionData);
+        HttpSession session = getSession(message);
 
         if (session == null) {
             throw new RuntimeException("cannot automatically route message. no session contained in message.");
@@ -419,6 +419,10 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     public void addUnsubscribeListener(UnsubscribeListener listener) {
         unsubscribeListeners.add(listener);
+    }
+
+    private static HttpSession getSession(CommandMessage message) {
+        return ((HttpSession) message.getResource("Session"));
     }
 
     private static class HouseKeeper extends Thread {

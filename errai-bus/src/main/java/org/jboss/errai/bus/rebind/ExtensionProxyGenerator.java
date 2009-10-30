@@ -108,7 +108,7 @@ public class ExtensionProxyGenerator extends Generator {
         final List<File> targets = ConfigUtil.findAllConfigTargets();
 
         new SerializationExtensionGenerator().generate(context, logger, sourceWriter, targets);
-
+        
         ConfigUtil.visitAllTargets(targets, context, logger, sourceWriter,
                 new RebindVisitor() {
                     public void visit(Class<?> visit, GeneratorContext context, TreeLogger logger, SourceWriter writer) {

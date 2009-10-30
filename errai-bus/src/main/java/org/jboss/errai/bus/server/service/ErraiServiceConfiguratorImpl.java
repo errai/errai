@@ -3,9 +3,9 @@ package org.jboss.errai.bus.server.service;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.client.MessageCallback;
-import org.jboss.errai.bus.server.ErraiModule;
 import org.jboss.errai.bus.server.Module;
 import org.jboss.errai.bus.server.ServerMessageBus;
 import org.jboss.errai.bus.server.annotations.ExtensionComponent;
@@ -23,16 +23,14 @@ import java.util.*;
 
 public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
     private ServerMessageBus bus;
-    private ErraiModule module;
     private List<File> configRootTargets;
     private Map<String, String> properties;
 
     private ErraiServiceConfigurator configInst = this;
 
     @Inject
-    public ErraiServiceConfiguratorImpl(ServerMessageBus bus, ErraiModule module) {
+    public ErraiServiceConfiguratorImpl(ServerMessageBus bus) {
         this.bus = bus;
-        this.module = module;
     }
 
     public void configure() {
@@ -51,6 +49,36 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
         catch (Exception e) {
             throw new RuntimeException("error reading from configuration", e);
         }
+
+        final Map<Class, Provider> bindings = new HashMap<Class, Provider>();
+
+
+        ConfigUtil.visitAllTargets(configRootTargets, new ConfigVisitor() {
+            public void visit(Class<?> loadClass) {
+                if (ErraiConfigExtension.class.isAssignableFrom(loadClass)) {
+                            if (loadClass.isAnnotationPresent(ExtensionComponent.class)) {
+                                final Class<? extends ErraiConfigExtension> clazz =
+                                        loadClass.asSubclass(ErraiConfigExtension.class);
+
+                                try {
+                                    Guice.createInjector(new AbstractModule() {
+                                        @Override
+                                        protected void configure() {
+                                            bind(ErraiConfigExtension.class).to(clazz);
+                                            bind(ErraiServiceConfigurator.class).toInstance(configInst);
+                                        }
+                                    }).getInstance(ErraiConfigExtension.class).configure(bindings);
+                                }
+                                catch (Throwable e) {
+                                    e.printStackTrace();
+                                    throw new RuntimeException("could not initialize extension: " + loadClass.getName(), e);
+                                }
+                            }
+                        }
+            }
+        });
+
+
 
         ConfigUtil.visitAllTargets(configRootTargets,
                 new ConfigVisitor() {
@@ -76,6 +104,10 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                                     protected void configure() {
                                         bind(MessageCallback.class).to(clazz);
                                         bind(MessageBus.class).toInstance(bus);
+
+                                        for (Map.Entry<Class, Provider> entry : bindings.entrySet()) {
+                                          bind(entry.getKey()).toProvider(entry.getValue());  
+                                        }
                                     }
                                 }).getInstance(MessageCallback.class);
 
@@ -97,27 +129,6 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                                     bus.addRule(svcName, rule);
                                 }
                             }
-                        } else if (ErraiConfigExtension.class.isAssignableFrom(loadClass)) {
-                            if (loadClass.isAnnotationPresent(ExtensionComponent.class)) {
-                                final Class<? extends ErraiConfigExtension> clazz =
-                                        loadClass.asSubclass(ErraiConfigExtension.class);
-
-                                try {
-                                    Guice.createInjector(new AbstractModule() {
-                                        @Override
-                                        protected void configure() {
-                                            bind(ErraiConfigExtension.class).to(clazz);
-                                            // bind(MessageBus.class).toInstance(bus);
-                                            bind(ErraiModule.class).toInstance(module);
-                                            bind(ErraiServiceConfigurator.class).toInstance(configInst);
-                                        }
-                                    }).getInstance(ErraiConfigExtension.class).configure();
-                                }
-                                catch (Throwable e) {
-                                    e.printStackTrace();
-                                    throw new RuntimeException("could not initialize extension: " + loadClass.getName(), e);
-                                }
-                            }
                         }
                     }
                 }
@@ -130,6 +141,8 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
             bus.addRule("ClientNegotiationService", new RolesRequiredRule(new HashSet<Object>(), bus));
         }
     }
+
+
 
     public List<File> getConfigurationRoots() {
         return this.configRootTargets;
