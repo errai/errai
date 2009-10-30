@@ -1,14 +1,15 @@
 package org.jboss.errai.bus.server.security.auth;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
 
 public class AuthSubject {
     protected String username;
     protected String fullname;
-    protected Set<Object> roles;
+    protected Collection<Object> roles;
 
-    public AuthSubject(String username, String fullname, Set<Object> roles) {
+    public AuthSubject(String username, String fullname, Collection<Object> roles) {
         this.username = username;
         this.fullname = fullname;
         this.roles = roles;
@@ -22,7 +23,7 @@ public class AuthSubject {
         return fullname;
     }
 
-    public Set<Object> getRoles() {
+    public Collection<Object> getRoles() {
         return roles;
     }
 

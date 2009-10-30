@@ -1,9 +1,6 @@
 package org.jboss.errai.bus.server.service;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
+import com.google.inject.*;
 import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.client.MessageCallback;
 import org.jboss.errai.bus.server.Module;
@@ -59,26 +56,40 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
         // services.
         extensionBindings = new HashMap<Class, Provider>();
         resourceProviders = new HashMap<String, Provider>();
+        final List<Runnable> deferred = new LinkedList<Runnable>();
 
         if (properties.containsKey("errai.authentication_adapter")) {
             try {
                 final Class<? extends AuthenticationAdapter> authAdapterClass = Class.forName(properties.get("errai.authentication_adapter"))
                         .asSubclass(AuthenticationAdapter.class);
 
-                final AuthenticationAdapter authAdapterInst = Guice.createInjector(new AbstractModule() {
-                    @Override
-                    protected void configure() {
-                        bind(AuthenticationAdapter.class).to(authAdapterClass);
-                        bind(ErraiServiceConfigurator.class).toInstance(configInst);
-                        bind(MessageBus.class).toInstance(bus);                        
+                final Runnable create = new Runnable() {
+                    public void run() {
+                        final AuthenticationAdapter authAdapterInst = Guice.createInjector(new AbstractModule() {
+                            @Override
+                            protected void configure() {
+                                bind(AuthenticationAdapter.class).to(authAdapterClass);
+                                bind(ErraiServiceConfigurator.class).toInstance(configInst);
+                                bind(MessageBus.class).toInstance(bus);
+                            }
+                        }).getInstance(AuthenticationAdapter.class);
+                        
+                        extensionBindings.put(AuthenticationAdapter.class, new Provider() {
+                            public Object get() {
+                                return authAdapterInst;
+                            }
+                        });
                     }
-                }).getInstance(AuthenticationAdapter.class);
+                };
 
-                extensionBindings.put(AuthenticationAdapter.class, new Provider() {
-                    public Object get() {
-                        return authAdapterInst;
-                    }
-                });
+                try {
+                    create.run();
+                }
+                catch (CreationException e) {
+                    deferred.add(create);
+                }
+
+
             }
             catch (Exception e) {
                 throw new RuntimeException("cannot configure authentication adapter", e);
@@ -98,18 +109,32 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
 
                     try {
 
-                        /**
-                         * Configure the Guice Injector so the extension can draw in configuration
-                         * dependencies.
-                         */
-                        Guice.createInjector(new AbstractModule() {
-                            @Override
-                            protected void configure() {
-                                bind(ErraiConfigExtension.class).to(clazz);
-                                bind(ErraiServiceConfigurator.class).toInstance(configInst);
-                                bind(MessageBus.class).toInstance(bus);
+                        final Runnable create = new Runnable() {
+                            public void run() {
+                                Guice.createInjector(new AbstractModule() {
+                                    @Override
+                                    protected void configure() {
+                                        bind(ErraiConfigExtension.class).to(clazz);
+                                        bind(ErraiServiceConfigurator.class).toInstance(configInst);
+                                        bind(MessageBus.class).toInstance(bus);
+
+                                        // Add any extension bindings.
+                                        for (Map.Entry<Class, Provider> entry : extensionBindings.entrySet()) {
+                                            bind(entry.getKey()).toProvider(entry.getValue());
+                                        }
+                                    }
+                                }).getInstance(ErraiConfigExtension.class)
+                                        .configure(extensionBindings, resourceProviders);
                             }
-                        }).getInstance(ErraiConfigExtension.class).configure(extensionBindings, resourceProviders);
+                        };
+
+                        try {
+                            create.run();
+                        }
+                        catch (CreationException e) {
+                            deferred.add(create);
+                        }
+
                     }
                     catch (Throwable e) {
                         e.printStackTrace();
@@ -182,6 +207,14 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
         if (hasProperty(requireAuthenticationForAll) && "true".equals(getProperty(requireAuthenticationForAll))) {
             bus.addRule("ClientNegotiationService", new RolesRequiredRule(new HashSet<Object>(), bus));
         }
+
+        for (Runnable r : deferred) {
+            r.run();
+        }
+    }
+
+    public static interface Creator {
+        public void create(Inject injector);
     }
 
     public Map<String, Provider> getResourceProviders() {
