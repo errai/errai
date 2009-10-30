@@ -39,6 +39,19 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
         properties = new HashMap<String, String>();
         configRootTargets = ConfigUtil.findAllConfigTargets();
 
+        try {
+            ResourceBundle erraiServiceConfig = ResourceBundle.getBundle("ErraiService");
+            Enumeration<String> keys = erraiServiceConfig.getKeys();
+            String key;
+            while (keys.hasMoreElements()) {
+                key = keys.nextElement();
+                properties.put(key, erraiServiceConfig.getString(key));
+            }
+        }
+        catch (Exception e) {
+            throw new RuntimeException("error reading from configuration", e);
+        }
+
         ConfigUtil.visitAllTargets(configRootTargets,
                 new ConfigVisitor() {
                     public void visit(final Class<?> loadClass) {
@@ -86,37 +99,30 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                             }
                         } else if (ErraiConfigExtension.class.isAssignableFrom(loadClass)) {
                             if (loadClass.isAnnotationPresent(ExtensionComponent.class)) {
+                                final Class<? extends ErraiConfigExtension> clazz =
+                                        loadClass.asSubclass(ErraiConfigExtension.class);
 
-                                ErraiConfigExtension configExt = Guice.createInjector(new AbstractModule() {
-                                    @Override
-                                    protected void configure() {
-                                        bind(ErraiConfigExtension.class).to(loadClass.asSubclass(ErraiConfigExtension.class));
-                                        bind(MessageBus.class).toInstance(bus);
-                                        bind(ErraiModule.class).toInstance(module);
-                                        bind(ErraiServiceConfigurator.class).toInstance(configInst);
-                                    }
-                                }).getInstance(ErraiConfigExtension.class);
-
-                                configExt.configure();
+                                try {
+                                    Guice.createInjector(new AbstractModule() {
+                                        @Override
+                                        protected void configure() {
+                                            bind(ErraiConfigExtension.class).to(clazz);
+                                            // bind(MessageBus.class).toInstance(bus);
+                                            bind(ErraiModule.class).toInstance(module);
+                                            bind(ErraiServiceConfigurator.class).toInstance(configInst);
+                                        }
+                                    }).getInstance(ErraiConfigExtension.class).configure();
+                                }
+                                catch (Throwable e) {
+                                    e.printStackTrace();
+                                    throw new RuntimeException("could not initialize extension: " + loadClass.getName(), e);
+                                }
                             }
                         }
                     }
                 }
         );
 
-
-        try {
-            ResourceBundle erraiServiceConfig = ResourceBundle.getBundle("ErraiService");
-            Enumeration<String> keys = erraiServiceConfig.getKeys();
-            String key;
-            while (keys.hasMoreElements()) {
-                key = keys.nextElement();
-                properties.put(key, erraiServiceConfig.getString(key));
-            }
-        }
-        catch (Exception e) {
-            throw new RuntimeException("error reading from configuration", e);
-        }
 
         String requireAuthenticationForAll = "errai.require_authentication_for_all";
 

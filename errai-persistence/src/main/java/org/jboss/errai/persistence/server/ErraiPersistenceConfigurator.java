@@ -23,21 +23,26 @@ import java.util.List;
  */
 @ExtensionComponent
 public class ErraiPersistenceConfigurator implements ErraiConfigExtension {
-    private ErraiBus bus;
+  //  private ErraiBus bus;
     private ErraiModule module;
     private ErraiServiceConfigurator config;
 
     @Inject
-    public ErraiPersistenceConfigurator(ErraiBus bus, ErraiModule module, ErraiServiceConfigurator config) {
-        this.bus = bus;
+    public ErraiPersistenceConfigurator(ErraiModule module, ErraiServiceConfigurator config) {
+     //   this.bus = bus;
         this.module = module;
         this.config = config;
     }
 
     public void configure() {
         final Ejb3Configuration ejbconf = new Ejb3Configuration();
+
         ejbconf.setProperty("hibernate.connection.datasource", "java:/" + config.getProperty("errai.prototyping.persistence.datasource"));
-        ejbconf.setProperty("hibernate.dialect", config.getProperty("errai.prototyping.persistence.dialect"));
+
+
+        String v = config.getProperty("errai.prototyping.persistence.dialect");
+
+        ejbconf.setProperty("hibernate.dialect", v);
         ejbconf.setProperty("hibernate.show_sql", "false");
         ejbconf.setProperty("hibernate.hbm2ddl.auto", "update");
 
@@ -58,6 +63,9 @@ public class ErraiPersistenceConfigurator implements ErraiConfigExtension {
             }
         });
 
-        
+
+        System.out.println("started errai-persistence yay!");
     }
+
+
 }
