@@ -188,7 +188,18 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
         if (subscriptions.containsKey(subject)) {
             for (MessageCallback c : subscriptions.get(subject)) {
-                c.callback(message);
+                try {
+                    c.callback(message);
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+
+                    ConversationMessage.create(message)
+                            .toSubject("ClientErrorService")
+                            .set(MessageParts.ErrorMessage, "Service '" + c.getClass().getName()
+                                    + "' threw an exception:" + e.getMessage() + " (see server log for stacktrace)")
+                            .sendNowWith(this);
+                }
             }
         }
 
