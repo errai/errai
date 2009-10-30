@@ -112,7 +112,7 @@ public class ExtensionProxyGenerator extends Generator {
         ConfigUtil.visitAllTargets(targets, context, logger, sourceWriter,
                 new RebindVisitor() {
                     public void visit(Class<?> visit, GeneratorContext context, TreeLogger logger, SourceWriter writer) {
-                        System.out.println("Searching:" + visit);
+                      //  System.out.println("Searching:" + visit);
 
                         if (ConfigUtil.isAnnotated(visit, ExtensionComponent.class, ExtensionGenerator.class)) {
                             try {
