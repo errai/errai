@@ -5,9 +5,6 @@ import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.MessageBus;
 
 public class ErraiPersistence implements EntryPoint {
-    
-
     public void onModuleLoad() {
-
     }
 }

@@ -148,6 +148,13 @@ public class CommandMessage {
         return this.resources != null && this.resources.containsKey(key);
     }
 
+    public void addResources(Map<String, ?> resources) {
+        if (this.resources == null) this.resources = new HashMap<String, Object>(resources);
+        else {
+            this.resources.putAll(resources);
+        }
+    }
+
 
     public void sendNowWith(MessageBus viaThis) {
         viaThis.send(this);

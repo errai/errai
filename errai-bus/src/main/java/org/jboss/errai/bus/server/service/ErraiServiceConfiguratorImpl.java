@@ -14,6 +14,7 @@ import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.annotations.security.RequireAuthentication;
 import org.jboss.errai.bus.server.annotations.security.RequireRoles;
 import org.jboss.errai.bus.server.ext.ErraiConfigExtension;
+import org.jboss.errai.bus.server.security.auth.AuthenticationAdapter;
 import org.jboss.errai.bus.server.security.auth.rules.RolesRequiredRule;
 import org.jboss.errai.bus.server.util.ConfigUtil;
 import org.jboss.errai.bus.server.util.ConfigVisitor;
@@ -25,6 +26,9 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
     private ServerMessageBus bus;
     private List<File> configRootTargets;
     private Map<String, String> properties;
+
+    private Map<Class, Provider> extensionBindings;
+    private Map<String, Provider> resourceProviders;
 
     private ErraiServiceConfigurator configInst = this;
 
@@ -50,35 +54,70 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
             throw new RuntimeException("error reading from configuration", e);
         }
 
-        final Map<Class, Provider> bindings = new HashMap<Class, Provider>();
+
+        // Create a Map to collect any extensions bindings to be bound to
+        // services.
+        extensionBindings = new HashMap<Class, Provider>();
+        resourceProviders = new HashMap<String, Provider>();
+
+        if (properties.containsKey("errai.authentication_adapter")) {
+            try {
+                final Class<? extends AuthenticationAdapter> authAdapterClass = Class.forName(properties.get("errai.authentication_adapter"))
+                        .asSubclass(AuthenticationAdapter.class);
+
+                final AuthenticationAdapter authAdapterInst = Guice.createInjector(new AbstractModule() {
+                    @Override
+                    protected void configure() {
+                        bind(AuthenticationAdapter.class).to(authAdapterClass);
+                        bind(ErraiServiceConfigurator.class).toInstance(configInst);
+                        bind(MessageBus.class).toInstance(bus);                        
+                    }
+                }).getInstance(AuthenticationAdapter.class);
+
+                extensionBindings.put(AuthenticationAdapter.class, new Provider() {
+                    public Object get() {
+                        return authAdapterInst;
+                    }
+                });
+            }
+            catch (Exception e) {
+                throw new RuntimeException("cannot configure authentication adapter", e);
+            }
+        }
 
 
+        // Search for Errai extensions.
         ConfigUtil.visitAllTargets(configRootTargets, new ConfigVisitor() {
             public void visit(Class<?> loadClass) {
-                if (ErraiConfigExtension.class.isAssignableFrom(loadClass)) {
-                            if (loadClass.isAnnotationPresent(ExtensionComponent.class)) {
-                                final Class<? extends ErraiConfigExtension> clazz =
-                                        loadClass.asSubclass(ErraiConfigExtension.class);
+                if (ErraiConfigExtension.class.isAssignableFrom(loadClass)
+                        && loadClass.isAnnotationPresent(ExtensionComponent.class)) {
 
-                                try {
-                                    Guice.createInjector(new AbstractModule() {
-                                        @Override
-                                        protected void configure() {
-                                            bind(ErraiConfigExtension.class).to(clazz);
-                                            bind(ErraiServiceConfigurator.class).toInstance(configInst);
-                                        }
-                                    }).getInstance(ErraiConfigExtension.class).configure(bindings);
-                                }
-                                catch (Throwable e) {
-                                    e.printStackTrace();
-                                    throw new RuntimeException("could not initialize extension: " + loadClass.getName(), e);
-                                }
+                    // We have an annotated ErraiConfigExtension.  So let's configure it.
+                    final Class<? extends ErraiConfigExtension> clazz =
+                            loadClass.asSubclass(ErraiConfigExtension.class);
+
+                    try {
+
+                        /**
+                         * Configure the Guice Injector so the extension can draw in configuration
+                         * dependencies.
+                         */
+                        Guice.createInjector(new AbstractModule() {
+                            @Override
+                            protected void configure() {
+                                bind(ErraiConfigExtension.class).to(clazz);
+                                bind(ErraiServiceConfigurator.class).toInstance(configInst);
+                                bind(MessageBus.class).toInstance(bus);
                             }
-                        }
+                        }).getInstance(ErraiConfigExtension.class).configure(extensionBindings, resourceProviders);
+                    }
+                    catch (Throwable e) {
+                        e.printStackTrace();
+                        throw new RuntimeException("could not initialize extension: " + loadClass.getName(), e);
+                    }
+                }
             }
         });
-
-
 
         ConfigUtil.visitAllTargets(configRootTargets,
                 new ConfigVisitor() {
@@ -105,18 +144,22 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                                         bind(MessageCallback.class).to(clazz);
                                         bind(MessageBus.class).toInstance(bus);
 
-                                        for (Map.Entry<Class, Provider> entry : bindings.entrySet()) {
-                                          bind(entry.getKey()).toProvider(entry.getValue());  
+                                        // Add any extension bindings.
+                                        for (Map.Entry<Class, Provider> entry : extensionBindings.entrySet()) {
+                                            bind(entry.getKey()).toProvider(entry.getValue());
                                         }
                                     }
                                 }).getInstance(MessageCallback.class);
 
                                 String svcName = clazz.getAnnotation(Service.class).value();
 
+                                // If no name is specified, just use the class name as the service
+                                // by default.
                                 if ("".equals(svcName)) {
                                     svcName = clazz.getSimpleName();
                                 }
 
+                                // Subscribe the service to the bus.
                                 bus.subscribe(svcName, svc);
 
                                 RolesRequiredRule rule = null;
@@ -134,7 +177,6 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                 }
         );
 
-
         String requireAuthenticationForAll = "errai.require_authentication_for_all";
 
         if (hasProperty(requireAuthenticationForAll) && "true".equals(getProperty(requireAuthenticationForAll))) {
@@ -142,7 +184,9 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
         }
     }
 
-
+    public Map<String, Provider> getResourceProviders() {
+        return this.resourceProviders;
+    }
 
     public List<File> getConfigurationRoots() {
         return this.configRootTargets;
@@ -154,5 +198,9 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
 
     public String getProperty(String key) {
         return properties.get(key);
+    }
+
+    public <T> T getResource(Class<? extends T> resourceClass) {
+        return (T) extensionBindings.get(resourceClass).get();
     }
 }

@@ -14,14 +14,12 @@ import javax.servlet.http.HttpSession;
 
 public class ErraiServiceImpl implements ErraiService {
     private ServerMessageBus bus;
-    private AuthenticationAdapter authenticationAdapter;
     private ErraiServiceConfigurator configurator;
 
     @Inject
-    public ErraiServiceImpl(ServerMessageBus bus, AuthenticationAdapter authenticationAdapter,
+    public ErraiServiceImpl(ServerMessageBus bus,
                             ErraiServiceConfigurator configurator) {
         this.bus = bus;
-        this.authenticationAdapter = authenticationAdapter;
         this.configurator = configurator;
 
         init();
@@ -50,11 +48,14 @@ public class ErraiServiceImpl implements ErraiService {
                         /**
                          * Send a challenge.
                          */
-                        authenticationAdapter.challenge(c);
+
+                        configurator.getResource(AuthenticationAdapter.class)
+                                .challenge(c);
                         break;
 
                     case EndSession:
-                        authenticationAdapter.endSession(c);
+                        configurator.getResource(AuthenticationAdapter.class)
+                                .challenge(c);
                         bus.send(ConversationMessage.create(c).toSubject("LoginClient")
                                 .setCommandType(SecurityCommands.SecurityChallenge));
                         break;
@@ -92,6 +93,9 @@ public class ErraiServiceImpl implements ErraiService {
     }
 
     public void store(CommandMessage message) {
+
+        message.addResources(configurator.getResourceProviders());
+
         /**
          * Pass the message off to the messaging bus for handling.
          */

@@ -15,6 +15,7 @@ import org.jboss.errai.bus.server.ext.ErraiConfigExtension;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.bus.server.util.ConfigUtil;
 import org.jboss.errai.bus.server.util.ConfigVisitor;
+import org.jboss.errai.persistence.server.security.annotations.AuthUserEntity;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
@@ -29,18 +30,14 @@ import java.util.Map;
  */
 @ExtensionComponent
 public class ErraiPersistenceConfigurator implements ErraiConfigExtension {
-  //  private ErraiBus bus;
-    private ErraiModule module;
     private ErraiServiceConfigurator config;
 
     @Inject
-    public ErraiPersistenceConfigurator(ErraiModule module, ErraiServiceConfigurator config) {
-     //   this.bus = bus;
-        this.module = module;
+    public ErraiPersistenceConfigurator(ErraiServiceConfigurator config) {
         this.config = config;
     }
 
-    public void configure(Map<Class, Provider> bindings) {
+    public void configure(Map<Class, Provider> bindings, Map<String, Provider> resourceProviders) {
         final AnnotationConfiguration cfg = new AnnotationConfiguration();
         cfg.setProperty("hibernate.connection.driver_class", config.getProperty("errai.prototyping.persistence.connection.driver_class"));
         cfg.setProperty("hibernate.connection.url", config.getProperty("errai.prototyping.persistence.connection.url"));
@@ -66,11 +63,14 @@ public class ErraiPersistenceConfigurator implements ErraiConfigExtension {
 
         final SessionFactory sessionFactory = cfg.buildSessionFactory();
 
-        bindings.put(Session.class, new Provider<Session>() {
+        Provider<Session> sessionProvider = new Provider<Session>() {
             public Session get() {
                 return sessionFactory.openSession();
             }
-        });
+        };
+
+        bindings.put(Session.class, sessionProvider);
+        resourceProviders.put("SessionProvider",  sessionProvider);
     }
 
 

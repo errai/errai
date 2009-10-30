@@ -1,5 +1,7 @@
 package org.jboss.errai.persistence.server.security;
 
+import com.google.inject.Provider;
+import org.hibernate.Session;
 import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
 import org.jboss.errai.bus.client.security.CredentialTypes;
@@ -14,10 +16,10 @@ import java.util.Set;
 
 public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
     public void challenge(CommandMessage message) {
-
+        Session session = (Session) ((Provider) message.getResource("SessionProvider")).get();
     }
 
-   private void addAuthenticationToken(CommandMessage message, AuthSubject loginSubject) {
+    private void addAuthenticationToken(CommandMessage message, AuthSubject loginSubject) {
         HttpSession session = (HttpSession) message.getResource("Session");
         session.setAttribute(ErraiService.SESSION_AUTH_DATA, loginSubject);
     }
@@ -31,20 +33,20 @@ public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
         boolean sessionEnded = isAuthenticated(message);
         if (sessionEnded) {
             getAuthDescriptor(message).remove(new SimpleRole(CredentialTypes.Authenticated.name()));
-            ((HttpSession)message.getResource("Session")).removeAttribute(ErraiService.SESSION_AUTH_DATA);
+            ((HttpSession) message.getResource("Session")).removeAttribute(ErraiService.SESSION_AUTH_DATA);
             return true;
-        }
-        else {
+        } else {
             return false;
         }
     }
+
     private Set getAuthDescriptor(CommandMessage message) {
-         Set credentials = message.get(Set.class, SecurityParts.Credentials);
-         if (credentials == null) {
-             message.set(SecurityParts.Credentials, credentials = new HashSet());
-         }
-         return credentials;
-     }
+        Set credentials = message.get(Set.class, SecurityParts.Credentials);
+        if (credentials == null) {
+            message.set(SecurityParts.Credentials, credentials = new HashSet());
+        }
+        return credentials;
+    }
 
     public void process(CommandMessage message) {
 

@@ -12,12 +12,6 @@ import java.util.List;
 @ExtensionComponent
 public class ErraiPersistenceExtension implements ExtensionGenerator {
     public void generate(GeneratorContext gcontext, TreeLogger logger, SourceWriter writer, List<File> targets) {
-//        ConfigUtil.visitAllTargets(targets, logger, writer, new RebindVisitor() {
-//            public void visit(Class<?> visit, TreeLogger logger, SourceWriter writer) {
-//                if (visit.isAnnotationPresent(ExposeEntity.class)) {
-//
-//                }
-//            }
-//        } );
+
     }
 }
