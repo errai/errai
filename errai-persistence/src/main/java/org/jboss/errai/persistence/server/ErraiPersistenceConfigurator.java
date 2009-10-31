@@ -68,8 +68,15 @@ public class ErraiPersistenceConfigurator implements ErraiConfigExtension {
                 return sessionFactory.openSession();
             }
         };
+        Provider<SessionFactory> sessionFactoryProvider = new Provider() {
+            public Object get() {
+                return sessionFactory;
+            }
+        };
 
         bindings.put(Session.class, sessionProvider);
+        bindings.put(SessionFactory.class, sessionFactoryProvider);
+
         resourceProviders.put("SessionProvider",  sessionProvider);
     }
 
