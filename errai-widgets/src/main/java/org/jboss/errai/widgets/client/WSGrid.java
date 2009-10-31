@@ -960,12 +960,6 @@ public class WSGrid extends Composite {
 
                 c1.setOriginalRow(j);
                 c2.setOriginalRow(i);
-
-             //   t = cellFmtAt(i, z);
-
-
-//                setValueAt(i, z, cellFmtAt(j, z));
-//                setValueAt(j, z, t);
             }
         }
 
