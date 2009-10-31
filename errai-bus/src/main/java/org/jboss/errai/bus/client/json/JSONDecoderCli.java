@@ -16,7 +16,6 @@ import java.util.Map;
 
 
 public class JSONDecoderCli {
-
     public Object decode(Object value) {
         return _decode(JSONParser.parse(String.valueOf(value)));
     }
@@ -37,12 +36,10 @@ public class JSONDecoderCli {
         } else {
             throw new RuntimeException("unknown encoding");
         }
-
     }
 
     private Object decodeObject(JSONObject eMap) {
         Map<String, Object> m = new HashMap<String, Object>();
-
         for (String key : eMap.keySet()) {
             if ("__EncodedType".equals(key)) {
                 String className = eMap.get(key).isString().stringValue();
@@ -58,7 +55,6 @@ public class JSONDecoderCli {
 
             m.put(key, _decode(eMap.get(key)));
         }
-
         return m;
     }
 
