@@ -8,7 +8,7 @@ import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.widgets.client.WSGrid;
 
 
-public class WSCellTitle extends WSCellFormatter {
+public class WSCellTitle extends WSCellFormatter<String> {
     HorizontalPanel hPanel = new HorizontalPanel();
     HTML label = new HTML();
     Image img = new Image();
@@ -31,6 +31,11 @@ public class WSCellTitle extends WSCellFormatter {
 
     public void setValue(String value) {
         label.setHTML(value);
+    }
+
+    @Override
+    public String getValue() {
+        return label.getText();
     }
 
     public String getTextValue() {

@@ -47,6 +47,9 @@ public class ErraiPersistenceConfigurator implements ErraiConfigExtension {
 
         cfg.setProperty("hibernate.dialect", config.getProperty("errai.prototyping.persistence.dialect"));
         cfg.setProperty("hibernate.current_session_context_class", "thread");
+        cfg.setProperty("hibernate.cache.use_second_level_cache", "false");
+        cfg.setProperty("hibernate.cache.provider_class", "org.hibernate.cache.NoCacheProvider");
+        
 
         cfg.setProperty("hibernate.show_sql", "true");
         cfg.setProperty("hibernate.hbm2ddl.auto", "update");

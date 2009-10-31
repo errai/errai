@@ -9,7 +9,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import org.jboss.errai.widgets.client.WSGrid;
 
-public class WSCellSimpleTextCell extends WSCellFormatter {
+public class WSCellSimpleTextCell extends WSCellFormatter<String> {
     private static TextBox textBox;
     private static WSCellSimpleTextCell editCellReference;
 
@@ -80,4 +80,8 @@ public class WSCellSimpleTextCell extends WSCellFormatter {
         wsCellReference.stopedit();
     }
 
+    @Override
+    public String getValue() {
+        return html.getText();
+    }
 }

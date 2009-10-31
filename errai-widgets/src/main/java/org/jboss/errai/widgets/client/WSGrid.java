@@ -1,5 +1,5 @@
 package org.jboss.errai.widgets.client;
-                                                                                               
+
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.DOM;
@@ -71,6 +71,7 @@ public class WSGrid extends Composite {
     };
 
     private List<ChangeHandler> cellChangeHandlers = new LinkedList<ChangeHandler>();
+    private List<ChangeHandler> afterCellChangeHandlers = new LinkedList<ChangeHandler>();
 
     public WSGrid() {
         this(true, true);
@@ -947,10 +948,24 @@ public class WSGrid extends Composite {
 
         private void _sort_swap(int i, int j) {
             WSCellFormatter t;
+            WSCell c1;
+            WSCell c2;
             for (int z = 0; z < cols; z++) {
-                t = cellFmtAt(i, z);
-                setValueAt(i, z, cellFmtAt(j, z));
-                setValueAt(j, z, t);
+                c1 = cellAt(i, z);
+                c2 = cellAt(j, z);
+                t = c1.getCellFormat();
+
+                c1.setValue(c2.getCellFormat());
+                c2.setValue(t);
+
+                c1.setOriginalRow(j);
+                c2.setOriginalRow(i);
+
+             //   t = cellFmtAt(i, z);
+
+
+//                setValueAt(i, z, cellFmtAt(j, z));
+//                setValueAt(j, z, t);
             }
         }
 
@@ -990,6 +1005,7 @@ public class WSGrid extends Composite {
         protected boolean numeric;
         protected boolean edit;
 
+        protected int originalRow;
         protected int row;
         protected int col;
 
@@ -1020,7 +1036,7 @@ public class WSGrid extends Composite {
 
             panel.add(cellFormat.getWidget(wsGrid));
 
-            this.row = row;
+            this.row = this.originalRow = row;
             this.col = column;
 
             initWidget(panel);
@@ -1094,8 +1110,12 @@ public class WSGrid extends Composite {
             }
         }
 
-        public void notifyCellUpdate(String newValue) {
+        public void notifyCellUpdate(Object newValue) {
             fireAllCellChangeHandlers(this, newValue);
+        }
+
+        public void notifyCellAfterUpdate() {
+            fireAllAfterCellChangeHandlers(this);
         }
 
         /**
@@ -1281,6 +1301,14 @@ public class WSGrid extends Composite {
             }
         }
 
+        public int getOriginalRow() {
+            return originalRow;
+        }
+
+        public void setOriginalRow(int originalRow) {
+            this.originalRow = originalRow;
+        }
+
         public int getRow() {
             return row;
         }
@@ -1324,6 +1352,10 @@ public class WSGrid extends Composite {
 
         public String getValue() {
             return cellFormat.getTextValue();
+        }
+
+        public WSCellFormatter getCellFormat() {
+            return cellFormat;
         }
 
         public void mergeColumns(int cols) {
@@ -1723,6 +1755,10 @@ public class WSGrid extends Composite {
         cellChangeHandlers.add(handler);
     }
 
+    public void addAfterCellChangeHandler(ChangeHandler handler) {
+        afterCellChangeHandlers.add(handler);
+    }
+
     /**
      * Removes a {@link ChangeHandler} from the grid.
      *
@@ -1732,9 +1768,20 @@ public class WSGrid extends Composite {
         cellChangeHandlers.remove(handler);
     }
 
-    private void fireAllCellChangeHandlers(WSCell cell, String newValue) {
+    public void removeAfterCellChangeHandler(ChangeHandler handler) {
+        cellChangeHandlers.remove(handler);
+    }
+
+    private void fireAllCellChangeHandlers(WSCell cell, Object newValue) {
         for (ChangeHandler c : cellChangeHandlers) c.onChange(new CellChangeEvent(cell, newValue));
     }
+
+    private void fireAllAfterCellChangeHandlers(WSCell cell) {
+        for (ChangeHandler c : afterCellChangeHandlers) c.onChange(new CellChangeEvent(cell, cell.getCellFormat().getValue()));
+
+    }
+
+
 
     public void mergeSelected() {
         WSCell start;

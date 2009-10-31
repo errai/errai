@@ -14,7 +14,7 @@ import static java.lang.String.valueOf;
 import java.util.Date;
 
 
-public class WSCellDateFormat extends WSCellFormatter {
+public class WSCellDateFormat extends WSCellFormatter<Date> {
     private Date date;
     private String formatPattern = "MMM dd, yyyy";
 
@@ -29,7 +29,8 @@ public class WSCellDateFormat extends WSCellFormatter {
 
         datePicker.addValueChangeHandler(new ValueChangeHandler() {
             public void onValueChange(ValueChangeEvent valueChangeEvent) {
-                wsCellReference.setValue(valueOf(((Date) valueChangeEvent.getValue()).getTime()));
+                ((WSCellDateFormat)wsCellReference.getCellFormat()).setValue((Date) valueChangeEvent.getValue());
+              //  wsCellReference.setValue(valueOf(((Date) valueChangeEvent.getValue()).getTime()));
                 datePicker.setVisible(false);
                 editCellReference.stopedit();
             }
@@ -66,9 +67,15 @@ public class WSCellDateFormat extends WSCellFormatter {
     }
 
     public void setValue(Date date) {
-        notifyCellUpdate(valueOf(date.getTime()));
+        notifyCellUpdate(date);
         this.date = date;
         html.setHTML(DateTimeFormat.getFormat(formatPattern).format(date));
+        notifyCellAfterUpdate();
+    }
+
+    @Override
+    public Date getValue() {
+        return date;
     }
 
     @Override

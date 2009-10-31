@@ -5,7 +5,7 @@ import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.widgets.client.WSGrid;
 
 //todo: this totally needs to be refactored... the formatter currently holds the value...
-public abstract class WSCellFormatter {
+public abstract class WSCellFormatter<T> {
     protected static WSGrid.WSCell wsCellReference;
     protected HTML html;
     protected boolean readonly = false;
@@ -15,25 +15,35 @@ public abstract class WSCellFormatter {
         cancel = true;
     }
 
-    public void setValue(String value) {
-        if (readonly) return;
+    public void setValue(T value) {
+        try {
+            if (readonly) return;
 
-        notifyCellUpdate(value);
+            String str = String.valueOf(value);
 
-        if (!cancel) {
-            if (value == null || value.length() == 0) {
-                html.setHTML("&nbsp;");
-                return;
-            }
+            notifyCellUpdate(str);
 
-            html.setHTML(value);
-        } else
-            cancel = false;
+            if (!cancel) {
+                if (value == null || str.length() == 0) {
+                    html.setHTML("&nbsp;");
+                    return;
+                }
+
+                html.setHTML(str);
+            } else
+                cancel = false;
+
+        }
+        finally {
+            notifyCellAfterUpdate();
+        }
     }
 
     public String getTextValue() {
         return html.getHTML().equals("&nbsp;") ? "" : html.getHTML();
     }
+
+    public abstract T getValue();
 
     public Widget getWidget(WSGrid grid) {
         return html;
@@ -57,9 +67,13 @@ public abstract class WSCellFormatter {
      *
      * @param newValue
      */
-    public void notifyCellUpdate(String newValue) {
+    public void notifyCellUpdate(Object newValue) {
         if (wsCellReference == null) return;
-
         wsCellReference.notifyCellUpdate(newValue);
+    }
+
+    public void notifyCellAfterUpdate() {
+        if (wsCellReference == null) return;
+        wsCellReference.notifyCellAfterUpdate();
     }
 }

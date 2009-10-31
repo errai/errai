@@ -11,7 +11,7 @@ import org.jboss.errai.widgets.client.WSGrid;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-public class WSCellMultiSelector extends WSCellFormatter {
+public class WSCellMultiSelector extends WSCellFormatter<String> {
     private Set<String> values;
     //  private HTML selection;
     private boolean updateble = true;
@@ -58,6 +58,11 @@ public class WSCellMultiSelector extends WSCellFormatter {
             super.setValue(value);
             values.add(value);
         }
+    }
+
+    @Override
+    public String getValue() {
+       return html.getText();
     }
 
     public boolean edit(WSGrid.WSCell element) {

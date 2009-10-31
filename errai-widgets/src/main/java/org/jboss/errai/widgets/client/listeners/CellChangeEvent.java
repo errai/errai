@@ -2,12 +2,13 @@ package org.jboss.errai.widgets.client.listeners;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import org.jboss.errai.widgets.client.WSGrid;
+import org.jboss.errai.widgets.client.format.WSCellFormatter;
 
 public class CellChangeEvent extends ChangeEvent {
     private WSGrid.WSCell cell;
-    private String newValue;
+    private Object newValue;
 
-    public CellChangeEvent(WSGrid.WSCell cell, String newValue) {
+    public CellChangeEvent(WSGrid.WSCell cell, Object newValue) {
         this.cell = cell;
         this.newValue = newValue;
     }
@@ -16,11 +17,11 @@ public class CellChangeEvent extends ChangeEvent {
         return cell;
     }
 
-    public String getNewValue() {
+    public Object getNewValue() {
         return newValue;
     }
 
-    public String getOldValue() {
-        return cell.getValue();
+    public Object getOldValue() {
+        return cell.getCellFormat().getValue();
     }
 }

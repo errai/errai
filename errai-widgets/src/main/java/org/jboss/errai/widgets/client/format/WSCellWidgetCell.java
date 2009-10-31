@@ -4,7 +4,7 @@ import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.widgets.client.WSGrid;
 
 
-public class WSCellWidgetCell extends WSCellFormatter {
+public class WSCellWidgetCell extends WSCellFormatter<Widget> {
 
     Widget widget = null;
 
@@ -38,4 +38,8 @@ public class WSCellWidgetCell extends WSCellFormatter {
         widget.setWidth(width);
     }
 
+    @Override
+    public Widget getValue() {
+        return widget;
+    }
 }
