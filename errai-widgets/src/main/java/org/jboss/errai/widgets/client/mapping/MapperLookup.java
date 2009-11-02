@@ -1,6 +1,5 @@
 package org.jboss.errai.widgets.client.mapping;
 
-import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.widgets.client.WSGrid;
 
 import java.util.HashMap;

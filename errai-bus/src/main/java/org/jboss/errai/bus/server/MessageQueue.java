@@ -5,6 +5,7 @@ import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.Payload;
 
 import static java.lang.System.currentTimeMillis;
+
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -26,11 +27,11 @@ public class MessageQueue {
         this.queue = new LinkedBlockingQueue<Message>(queueSize);
     }
 
-    public Payload poll() {
+    public Payload poll(boolean wait) {
         try {
 
             pollActive = true;
-            Message m = queue.poll(45, TimeUnit.SECONDS);
+            Message m = wait ? queue.poll(45, TimeUnit.SECONDS) : queue.poll();
             pollActive = false;
 
             long startWindow = currentTimeMillis();
@@ -38,17 +39,18 @@ public class MessageQueue {
 
             Payload p = new Payload(m == null ? heartBeat : m);
 
-            while (!queue.isEmpty() && payLoadSize < MAXIMUM_PAYLOAD_SIZE
-                    && (currentTimeMillis() - startWindow) < transmissionWindow) {
-                p.addMessage(queue.poll());
-                payLoadSize++;
-            }
+            if (wait) {
+                while (!queue.isEmpty() && payLoadSize < MAXIMUM_PAYLOAD_SIZE
+                        && (currentTimeMillis() - startWindow) < transmissionWindow) {
+                    p.addMessage(queue.poll());
+                    payLoadSize++;
+                }
 
-            if ((lastTransmission = currentTimeMillis()) - lastEnqueue > transmissionWindow) {
-                transmissionWindow = (lastTransmission - lastEnqueue);
-            }
-            else {
-                transmissionWindow = DEFAULT_TRANSMISSION_WINDOW;
+                if ((lastTransmission = currentTimeMillis()) - lastEnqueue > transmissionWindow) {
+                    transmissionWindow = (lastTransmission - lastEnqueue);
+                } else {
+                    transmissionWindow = DEFAULT_TRANSMISSION_WINDOW;
+                }
             }
 
             return p;

@@ -6,7 +6,9 @@ import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.bus.client.ext.ExtensionsLoader;
 import org.jboss.errai.bus.client.json.JSONUtilCli;
+
 import static org.jboss.errai.bus.client.json.JSONUtilCli.decodePayload;
+
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 
@@ -269,6 +271,15 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             sendBuilder.sendRequest(message, new RequestCallback() {
                 public void onResponseReceived(Request request, Response response) {
                     transmitting = false;
+
+                    /**
+                     * If the server bus returned us some client-destined messages
+                     * in response to our send, handle them now.
+                     */
+                    for (Message m : decodePayload(response.getText())) {
+                        store(m.getSubject(), m.getMessage());
+                    }
+
                     sendAll();
                 }
 

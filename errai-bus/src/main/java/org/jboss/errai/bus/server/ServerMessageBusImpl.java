@@ -287,8 +287,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
 
 
-    public Payload nextMessage(Object sessionContext) {
-        return messageQueues.get(sessionContext).poll();
+    public Payload nextMessage(Object sessionContext, boolean wait) {
+        return messageQueues.get(sessionContext).poll(wait);
     }
 
     public void addRule(String subject, BooleanRoutingRule rule) {

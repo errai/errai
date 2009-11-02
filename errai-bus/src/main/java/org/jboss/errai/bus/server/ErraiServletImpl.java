@@ -41,9 +41,43 @@ public class ErraiServletImpl extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
             throws ServletException, IOException {
+          pollForMessages(httpServletRequest, httpServletResponse, true);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
+            throws ServletException, IOException {
+
+        Reader reader = httpServletRequest.getReader();
+        StringBuilder sb = new StringBuilder(httpServletRequest.getContentLength());
+        HttpSession session = httpServletRequest.getSession();
+        CharBuffer buffer = CharBuffer.allocate(10);
+
+        int read;
+        while ((read = reader.read(buffer)) > 0) {
+            buffer.rewind();
+            for (; read > 0; read--) {
+                sb.append(buffer.get());
+            }
+            buffer.rewind();
+        }
+
+        if (session.getAttribute(MessageBus.WS_SESSION_ID) == null) {
+            session.setAttribute(MessageBus.WS_SESSION_ID, httpServletRequest.getSession().getId());
+        }
+
+        for (CommandMessage msg : createCommandMessage(httpServletRequest.getSession(), sb.toString())) {
+            service.store(msg);
+        }
+
+        pollForMessages(httpServletRequest, httpServletResponse, false);
+    }
+
+    private void pollForMessages(HttpServletRequest httpServletRequest, 
+                                 HttpServletResponse httpServletResponse, boolean wait) throws IOException {
 
         List<Message> messages = service.getBus().nextMessage(
-                httpServletRequest.getSession().getAttribute(MessageBus.WS_SESSION_ID)).getMessages();
+                httpServletRequest.getSession().getAttribute(MessageBus.WS_SESSION_ID), wait).getMessages();
 
         httpServletResponse.setHeader("Cache-Control", "no-cache");
         httpServletResponse.addHeader("Payload-Size", String.valueOf(messages.size()));
@@ -86,47 +120,5 @@ public class ErraiServletImpl extends HttpServlet {
         stream.close();
     }
 
-    @Override
-    protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
-            throws ServletException, IOException {
 
-        Reader reader = httpServletRequest.getReader();
-        StringBuilder sb = new StringBuilder(httpServletRequest.getContentLength());
-        HttpSession session = httpServletRequest.getSession();
-        CharBuffer buffer = CharBuffer.allocate(10);
-
-        int read;
-        while ((read = reader.read(buffer)) > 0) {
-            buffer.rewind();
-            for (; read > 0; read--) {
-                sb.append(buffer.get());
-            }
-            buffer.rewind();
-        }
-
-        if (session.getAttribute(MessageBus.WS_SESSION_ID) == null) {
-            session.setAttribute(MessageBus.WS_SESSION_ID, httpServletRequest.getSession().getId());
-        }
-
-        for (CommandMessage msg : createCommandMessage(httpServletRequest.getSession(), sb.toString())) {
-            service.store(msg);
-        }
-
-        OutputStream stream = httpServletResponse.getOutputStream();
-
-        stream.write('<');
-        stream.write('n');
-        stream.write('u');
-        stream.write('l');
-        stream.write('l');
-        stream.write('>');
-        stream.write('<');
-        stream.write('/');
-        stream.write('n');
-        stream.write('u');
-        stream.write('l');
-        stream.write('l');
-        stream.write('>');
-        stream.close();
-    }
 }
