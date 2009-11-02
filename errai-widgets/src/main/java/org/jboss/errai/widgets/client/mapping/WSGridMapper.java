@@ -11,7 +11,7 @@ import java.util.List;
 public class WSGridMapper<V extends List<X>, X> extends WidgetMapper<WSGrid, WSCellFormatter, V> {
     private WSGrid grid;
     private List<X> list;
-    private String[] defaultTitleValues;
+
 
     public WSGridMapper(WSGrid grid) {
         this.grid = grid;
@@ -19,7 +19,7 @@ public class WSGridMapper<V extends List<X>, X> extends WidgetMapper<WSGrid, WSC
             public void onChange(ChangeEvent event) {
                 CellChangeEvent evt = (CellChangeEvent) event;
 
-                if (list != null)  {
+                if (list != null) {
                     X v = list.get(evt.getCell().getOriginalRow());
                     fields[evt.getCell().getCol()].setFieldValue(evt.getCell().getCellFormat(), v);
                     fireAreChangeHandlers(v);
@@ -32,27 +32,27 @@ public class WSGridMapper<V extends List<X>, X> extends WidgetMapper<WSGrid, WSC
         public void mapRow(int row, FieldMapper<WSGrid, WSCellFormatter, X>[] fields, WSGrid w, X value) {
             int col = 0;
             for (FieldMapper<WSGrid, WSCellFormatter, X> f : fields) {
-                 grid.setCell(row, col++, f.getFieldValue(w, value));
+                grid.setCell(row, col++, f.getFieldValue(w, value));
             }
         }
     };
 
-    public String[] getDefaultTitleValues() {
-        return defaultTitleValues;
-    }
-
-    public void setDefaultTitleValues(String[] defaultTitleValues) {
-        this.defaultTitleValues = defaultTitleValues;
-    }
 
     @Override
     public void map(V list) {
         this.list = list;
 
-        if (defaultTitleValues != null && grid.getCols() == 0) {
+        if (grid.getCols() == 0) {
             int i = 0;
-            for (String s : defaultTitleValues) {
-                grid.setColumnHeader(0, i++, s);
+            if (defaultTitleValues != null) {
+                if (defaultTitleValues.length != fields.length) {
+                    throw new RuntimeException("Different number of defaultTitle fields ("
+                            + defaultTitleValues.length + ") from actual fields (" + fields.length + ")");
+                }
+
+                for (String s : defaultTitleValues) {
+                    grid.setColumnHeader(0, i++, s);
+                }
             }
         }
 

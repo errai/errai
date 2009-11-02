@@ -168,8 +168,15 @@ public class WidgetMappingsGenerator extends Generator {
 
                     if (currField.isAnnotationPresent(EntityFields.class)) {
                         EntityFields ef = currField.getAnnotation(EntityFields.class);
-                        for (String fieldName : ef.values()) {
-                            fieldsToMap.add(targetClass.getField(fieldName));
+                        for (String fieldName : ef.value()) {
+                            JField fld = jEntityTarget.getField(fieldName);
+                            if (fld == null) {
+                                RuntimeException e = new RuntimeException( "no such field in entity class '" + jEntityTarget.getName() + "': " + fieldName);
+                                logger.log(TreeLogger.Type.ERROR, e.getMessage(), e);
+                                throw e;
+                            }
+
+                            fieldsToMap.add(jEntityTarget.getField(fieldName));
                         }
                     } else {
                         for (JField fld : jEntityTarget.getFields()) {
@@ -189,16 +196,9 @@ public class WidgetMappingsGenerator extends Generator {
                     vars.put("fieldsToMap", fieldsToMap);
 
                     String s = (String) TemplateRuntime.execute(mappingsGen, vars);
-
-                 //   System.out.println(s);
-
                     sourceWriter.print(s);
 
-                 //   System.out.println();
-
                     s = "widget." + currField.getName() + " = " + varName + ";";
-
-               //     System.out.println(s);
 
                     sourceWriter.println(s);
                 }

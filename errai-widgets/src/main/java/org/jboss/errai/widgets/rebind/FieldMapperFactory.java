@@ -41,8 +41,19 @@ public class FieldMapperFactory {
                 StringBuilder builder = new StringBuilder(variable + ".setDefaultTitleValues(new String[] {");
 
                 Iterator<JField> iter = fields.iterator();
+                JField fld;
+                String fieldName;
                 while (iter.hasNext()) {
-                    builder.append("\"").append(iter.next().getName()).append("\"");
+                    fld = iter.next();
+
+                    if (fld.isAnnotationPresent(FriendlyName.class)) {
+                        fieldName = fld.getAnnotation(FriendlyName.class).value();
+                    }
+                    else {
+                        fieldName = fld.getName();
+                    }
+
+                    builder.append("\"").append(fieldName).append("\"");
                     if (iter.hasNext()) builder.append(", ");
                 }
                 return builder.append("});").toString();
