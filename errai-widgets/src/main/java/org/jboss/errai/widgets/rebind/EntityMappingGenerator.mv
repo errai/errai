@@ -1,0 +1,13 @@
+@code{
+  mapperClass = org.jboss.errai.widgets.client.mapping.MapperLookup.lookup(targetWidget);
+  fieldMapper = org.jboss.errai.widgets.rebind.FieldMapperFactory.getFieldMapper(targetWidget);
+}
+
+@{mapperClass.getName()}<@{targetType}> @{variableName} = new @{mapperClass.getName()}<@{targetType}>(widget.@{targetFieldName});
+
+@{fieldMapper.init(typeOracle, targetWidget, targetType, variableName, fieldsToMap)}
+
+@{variableName}.setFields(new org.jboss.errai.widgets.client.mapping.FieldMapper[] {@foreach{targetField : fieldsToMap}
+      @{fieldMapper.generateFieldMapperGenerator(typeOracle, targetWidget, targetType, targetField.getName())}
+  @end{','}
+});

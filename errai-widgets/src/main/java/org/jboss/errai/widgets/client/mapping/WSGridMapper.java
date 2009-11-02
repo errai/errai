@@ -11,6 +11,7 @@ import java.util.List;
 public class WSGridMapper<V> extends WidgetMapper<WSGrid, WSCellFormatter, V> {
     private WSGrid grid;
     private List<V> list;
+    private String[] defaultTitleValues;
 
     public WSGridMapper(WSGrid grid) {
         this.grid = grid;
@@ -36,9 +37,24 @@ public class WSGridMapper<V> extends WidgetMapper<WSGrid, WSCellFormatter, V> {
         }
     };
 
+    public String[] getDefaultTitleValues() {
+        return defaultTitleValues;
+    }
+
+    public void setDefaultTitleValues(String[] defaultTitleValues) {
+        this.defaultTitleValues = defaultTitleValues;
+    }
+
     @Override
     public void map(List<V> list) {
         this.list = list;
+
+        if (defaultTitleValues != null && grid.getCols() == 0) {
+            int i = 0;
+            for (String s : defaultTitleValues) {
+                grid.setColumnHeader(0, i++, s);
+            }
+        }
 
         int row = 0;
         for (V o : list) {
