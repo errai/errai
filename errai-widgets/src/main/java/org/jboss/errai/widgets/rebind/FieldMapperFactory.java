@@ -1,12 +1,9 @@
 package org.jboss.errai.widgets.rebind;
 
-import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.JField;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
-import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.widgets.client.WSGrid;
 import org.mvel2.integration.impl.MapVariableResolverFactory;
-import org.mvel2.templates.TemplateCompiler;
 import org.mvel2.templates.TemplateRuntime;
 
 import java.io.InputStream;

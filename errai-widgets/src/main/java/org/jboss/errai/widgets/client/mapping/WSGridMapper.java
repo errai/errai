@@ -8,9 +8,9 @@ import org.jboss.errai.widgets.client.listeners.CellChangeEvent;
 
 import java.util.List;
 
-public class WSGridMapper<V> extends WidgetMapper<WSGrid, WSCellFormatter, V> {
+public class WSGridMapper<V extends List<X>, X> extends WidgetMapper<WSGrid, WSCellFormatter, V> {
     private WSGrid grid;
-    private List<V> list;
+    private List<X> list;
     private String[] defaultTitleValues;
 
     public WSGridMapper(WSGrid grid) {
@@ -20,7 +20,7 @@ public class WSGridMapper<V> extends WidgetMapper<WSGrid, WSCellFormatter, V> {
                 CellChangeEvent evt = (CellChangeEvent) event;
 
                 if (list != null)  {
-                    V v = list.get(evt.getCell().getOriginalRow());
+                    X v = list.get(evt.getCell().getOriginalRow());
                     fields[evt.getCell().getCol()].setFieldValue(evt.getCell().getCellFormat(), v);
                     fireAreChangeHandlers(v);
                 }
@@ -28,10 +28,10 @@ public class WSGridMapper<V> extends WidgetMapper<WSGrid, WSCellFormatter, V> {
         });
     }
 
-    private ColumnMapper<WSGrid, WSCellFormatter, V> mapper = new ColumnMapper<WSGrid, WSCellFormatter, V>() {
-        public void mapRow(int row, FieldMapper<WSGrid, WSCellFormatter, V>[] fields, WSGrid w, V value) {
+    private ColumnMapper<WSGrid, WSCellFormatter, X> mapper = new ColumnMapper<WSGrid, WSCellFormatter, X>() {
+        public void mapRow(int row, FieldMapper<WSGrid, WSCellFormatter, X>[] fields, WSGrid w, X value) {
             int col = 0;
-            for (FieldMapper<WSGrid, WSCellFormatter, V> f : fields) {
+            for (FieldMapper<WSGrid, WSCellFormatter, X> f : fields) {
                  grid.setCell(row, col++, f.getFieldValue(w, value));
             }
         }
@@ -46,7 +46,7 @@ public class WSGridMapper<V> extends WidgetMapper<WSGrid, WSCellFormatter, V> {
     }
 
     @Override
-    public void map(List<V> list) {
+    public void map(V list) {
         this.list = list;
 
         if (defaultTitleValues != null && grid.getCols() == 0) {
@@ -57,7 +57,7 @@ public class WSGridMapper<V> extends WidgetMapper<WSGrid, WSCellFormatter, V> {
         }
 
         int row = 0;
-        for (V o : list) {
+        for (X o : list) {
             mapper.mapRow(row++, fields, grid, o);
         }
     }

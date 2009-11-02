@@ -24,8 +24,6 @@ import java.util.List;
 import java.util.Map;
 
 public class WidgetMappingsGenerator extends Generator {
-
-
     /**
      * Simple name of class to be generated
      */
@@ -142,24 +140,34 @@ public class WidgetMappingsGenerator extends Generator {
         sourceWriter.outdent();
 
         try {
-            Map<String, String> mapperFields = new HashMap<String, String>();
+            JClassType widgetMapper = typeOracle.getType(WidgetMapper.class.getName());
 
-            int i = 1;
-            for (JField f : targetClass.getFields()) {
-                if (f.isAnnotationPresent(EntityMapped.class)) {
-                    EntityMapped m = f.getAnnotation(EntityMapped.class);
+            for (JField currField : targetClass.getFields()) {
+                if (currField.isAnnotationPresent(MapperField.class) && widgetMapper.isAssignableFrom(currField.getType().isClassOrInterface())) {
+                    MapperField mf = currField.getAnnotation(MapperField.class);
 
-                    Class entityTarget = m.value();
-                    JClassType jEntityTarget = typeOracle.getType(entityTarget.getName());
+                    JField widgetField = targetClass.getField(mf.value());
+                    String varName = widgetField.getName() + "Mapper";
 
-                    String varName = f.getName() + "Mapper";
-                    mapperFields.put(f.getName(), varName);
+                    JClassType binderField = currField.getType().isClassOrInterface();
+                    JParameterizedType pType = binderField.isParameterized();
+
+                    if (pType == null) {
+                        RuntimeException e = new RuntimeException("Field '" + currField.getName() + "' must be parameterized");
+                        logger.log(TreeLogger.Type.ERROR, e.getMessage(), e);
+                        throw e;
+                    }
+
+                    // The last type arg shall always be our domain object type per this spec.
+                    JClassType jEntityTarget = pType.getTypeArgs()[pType.getTypeArgs().length - 1];
+
+                    String strTypeParms = generateTypeParmString(pType);
+
 
                     List<JField> fieldsToMap = new LinkedList<JField>();
 
-                    if (f.isAnnotationPresent(EntityFields.class)) {
-                        EntityFields ef = f.getAnnotation(EntityFields.class);
-
+                    if (currField.isAnnotationPresent(EntityFields.class)) {
+                        EntityFields ef = currField.getAnnotation(EntityFields.class);
                         for (String fieldName : ef.values()) {
                             fieldsToMap.add(targetClass.getField(fieldName));
                         }
@@ -174,10 +182,10 @@ public class WidgetMappingsGenerator extends Generator {
                     Map<String, Object> vars = new HashMap<String, Object>();
                     vars.put("typeOracle", typeOracle);
                     vars.put("variableName", varName);
-                    vars.put("targetWidget", f.getType().isClassOrInterface().getPackage().getName()
-                            + "." + f.getType().isClassOrInterface().getName());
-                    vars.put("targetType", entityTarget.getName());
-                    vars.put("targetFieldName", f.getName());
+                    vars.put("strTypeParms", strTypeParms);
+                    vars.put("targetWidget", widgetField.getType().getQualifiedSourceName());
+                    vars.put("targetType",  jEntityTarget.getQualifiedSourceName());
+                    vars.put("targetFieldName", widgetField.getName());
                     vars.put("fieldsToMap", fieldsToMap);
 
                     String s = (String) TemplateRuntime.execute(mappingsGen, vars);
@@ -185,31 +193,20 @@ public class WidgetMappingsGenerator extends Generator {
                     System.out.println(s);
 
                     sourceWriter.print(s);
-                }
-            }
-
-            JClassType widgetMapper = typeOracle.getType(WidgetMapper.class.getName());
-
-            for (JField f : targetClass.getFields()) {
-                if (f.isAnnotationPresent(MapperField.class) && widgetMapper.isAssignableFrom(f.getType().isClassOrInterface())) {
-                    MapperField mf = f.getAnnotation(MapperField.class);
-
-                    String varName = mapperFields.get(mf.value());
-
-                    if (varName == null) {
-                        logger.log(TreeLogger.Type.ERROR, "mapper field '" + mf.value() + "' does not exist");
-                        throw new RuntimeException("mapper field '" + mf.value() + "' does not exist");
-                    }
 
                     System.out.println();
 
-                    String s = "widget." + f.getName() + " = " + varName + ";";
+                    s = "widget." + currField.getName() + " = " + varName + ";";
 
                     System.out.println(s);
 
                     sourceWriter.println(s);
                 }
             }
+
+
+
+
 
         }
         catch (Exception e) {
@@ -220,6 +217,21 @@ public class WidgetMappingsGenerator extends Generator {
         // end constructor source generation
         sourceWriter.outdent();
         sourceWriter.println("}");
+    }
+
+    private String generateTypeParmString(JParameterizedType t) {
+        StringBuilder builder = new StringBuilder("<");
+        JClassType[] typeArgs = t.getTypeArgs();
+        for (int i = 0, typeArgsLength = typeArgs.length; i < typeArgsLength; i++) {
+            JClassType c = typeArgs[i];
+            builder.append(c.getQualifiedSourceName());
+
+            JParameterizedType pt = c.isParameterized();
+            if (pt != null) builder.append(generateTypeParmString(pt));
+
+            if ((i+1) < typeArgsLength) builder.append(",");
+        }
+        return builder.append(">").toString();
     }
 
 }

@@ -3,7 +3,7 @@
   fieldMapper = org.jboss.errai.widgets.rebind.FieldMapperFactory.getFieldMapper(targetWidget);
 }
 
-@{mapperClass.getName()}<@{targetType}> @{variableName} = new @{mapperClass.getName()}<@{targetType}>(widget.@{targetFieldName});
+@{mapperClass.getName()}@{strTypeParms} @{variableName} = new @{mapperClass.getName()}@{strTypeParms}(widget.@{targetFieldName});
 
 @{fieldMapper.init(typeOracle, targetWidget, targetType, variableName, fieldsToMap)}
 
