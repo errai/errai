@@ -190,15 +190,15 @@ public class WidgetMappingsGenerator extends Generator {
 
                     String s = (String) TemplateRuntime.execute(mappingsGen, vars);
 
-                    System.out.println(s);
+                 //   System.out.println(s);
 
                     sourceWriter.print(s);
 
-                    System.out.println();
+                 //   System.out.println();
 
                     s = "widget." + currField.getName() + " = " + varName + ";";
 
-                    System.out.println(s);
+               //     System.out.println(s);
 
                     sourceWriter.println(s);
                 }
