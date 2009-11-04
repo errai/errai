@@ -276,8 +276,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                      * If the server bus returned us some client-destined messages
                      * in response to our send, handle them now.
                      */
-                    for (Message m : decodePayload(response.getText())) {
-                        store(m.getSubject(), m.getMessage());
+                    try {
+                        procIncomingPayload(response);
+                    }
+                    catch (Exception e) {
+                        showError("Problem decoding incoming message:", "None", e);
                     }
 
                     sendAll();
@@ -382,7 +385,14 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         try {
             sendBuilder.sendRequest(initialMessage, new RequestCallback() {
                 public void onResponseReceived(Request request, Response response) {
+                    try {
+                        procIncomingPayload(response);
+                    }
+                    catch (Exception e) {
+                        return;
+                    }
                     initializeMessagingBus(callback);
+
                 }
 
                 public void onError(Request request, Throwable exception) {
@@ -422,6 +432,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             @Override
             public void run() {
                 if (block) {
+                    scheduleRepeating(25);
                     return;
                 }
 
@@ -432,16 +443,15 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                                 public void onError(Request request, Throwable throwable) {
                                     block = false;
 
+                                    showError("Communication Error", "None", throwable);
                                     schedule(1);
                                 }
 
                                 public void onResponseReceived(Request request, Response response) {
+                                    block = false;
+                                    
                                     try {
-                                        for (Message m : decodePayload(response.getText())) {
-                                            store(m.getSubject(), m.getMessage());
-                                        }
-
-                                        block = false;
+                                        procIncomingPayload(response);
                                         schedule(1);
                                     }
                                     catch (Exception e) {
@@ -463,8 +473,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         final com.google.gwt.user.client.Timer outerTimer = new com.google.gwt.user.client.Timer() {
             @Override
             public void run() {
-                incoming.run();
-                incoming.scheduleRepeating((60 * 45) * 1000);
+                incoming.scheduleRepeating(1000);
+                //  incoming.scheduleRepeating((60 * 45) * 1000);
 
                 ExtensionsLoader loader = GWT.create(ExtensionsLoader.class);
                 loader.initExtensions(bus);
@@ -563,5 +573,17 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
         errorDialog.center();
         errorDialog.show();
+    }
+
+    private static void procIncomingPayload(Response response) throws Exception {
+        try {
+            for (Message m : decodePayload(response.getText())) {
+                store(m.getSubject(), m.getMessage());
+            }
+        }
+        catch (Exception t) {
+            showError("Error Receiving Message", response.getText(), t);
+            throw t;
+        }
     }
 }

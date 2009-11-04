@@ -155,9 +155,12 @@ public class CommandMessage {
         }
     }
 
-
     public void sendNowWith(MessageBus viaThis) {
         viaThis.send(this);
     }
 
+    @Override
+    public String toString() {
+        return "CommandMessage(toSubject=" + getSubject() + ";CommandType=" + getCommandType() + ")";
+    }
 }

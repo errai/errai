@@ -19,7 +19,7 @@ public class MessageQueue {
     private long lastTransmission = currentTimeMillis();
     private long lastEnqueue = currentTimeMillis();
 
-    private boolean pollActive = false;
+    private volatile boolean pollActive = false;
 
     private BlockingQueue<Message> queue;
 
@@ -29,11 +29,19 @@ public class MessageQueue {
 
     public Payload poll(boolean wait) {
         try {
-
-            pollActive = true;
-            Message m = wait ? queue.poll(45, TimeUnit.SECONDS) : queue.poll();
-            pollActive = false;
-
+            Message m;
+            if (wait) {
+                if (pollActive) {
+                    throw new RuntimeException("concurrent polling not allowed!");
+                }
+                pollActive = true;
+                m = queue.poll(45, TimeUnit.SECONDS);
+                pollActive = false;
+            }
+            else {
+                m = queue.poll();  
+            }
+            
             long startWindow = currentTimeMillis();
             int payLoadSize = 0;
 

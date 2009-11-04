@@ -3,10 +3,7 @@ package org.errai.samples.serialization.client.model;
 import org.jboss.errai.bus.server.annotations.ExposeEntity;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @ExposeEntity
 public class Record implements Serializable {
@@ -15,11 +12,12 @@ public class Record implements Serializable {
     private float balance;
     private Date accountOpened;
     private Set<Item> stuff;
+    private Map<String, String> properties;
 
     public Record() {
     }
 
-    public Record(int recordId, String name, float balance, Date accountOpened, Item[] stuff) {
+    public Record(int recordId, String name, float balance, Date accountOpened, Item[] stuff, String[][] properties) {
         this.recordId = recordId;
         this.name = name;
         this.balance = balance;
@@ -27,6 +25,11 @@ public class Record implements Serializable {
 
         this.stuff = new HashSet<Item>();
         this.stuff.addAll(Arrays.asList(stuff));
+
+        this.properties = new HashMap<String, String>();
+        for (String[] s : properties) {
+            this.properties.put(s[0], s[1]);
+        }
     }
 
     public int getRecordId() {
@@ -67,6 +70,14 @@ public class Record implements Serializable {
 
     public void setStuff(Set<Item> stuff) {
         this.stuff = stuff;
+    }
+
+    public Map<String, String> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Map<String, String> properties) {
+        this.properties = properties;
     }
 
     @Override

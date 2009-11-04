@@ -5,11 +5,6 @@ import com.google.inject.Singleton;
 import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.MessageBus;
-import org.jboss.errai.bus.client.protocols.MessageParts;
-import org.jboss.errai.bus.client.protocols.SecurityParts;
-import org.jboss.errai.bus.server.io.MessageUtil;
-import static org.jboss.errai.bus.server.io.MessageUtil.createCommandMessage;
-import static org.jboss.errai.bus.server.io.MessageUtil.decodeToMap;
 import org.jboss.errai.bus.server.service.ErraiService;
 
 import javax.servlet.ServletException;
@@ -23,7 +18,8 @@ import java.io.Reader;
 import java.nio.CharBuffer;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+
+import static org.jboss.errai.bus.server.io.MessageUtil.createCommandMessage;
 
 /**
  * The main gateway of the Workspace application to the server.  All communication between the client and the
