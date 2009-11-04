@@ -6,7 +6,6 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.RootPanel;
 import org.errai.samples.serialization.client.model.Record;
 import org.jboss.errai.bus.client.*;
-import org.jboss.errai.bus.client.protocols.MessageParts;
 
 import java.util.List;
 
@@ -14,21 +13,36 @@ public class Serialization implements EntryPoint {
     private MessageBus bus = ErraiBus.get();
 
     public void onModuleLoad() {
-        final HTML html = new HTML();
+        final FlexTable table = new FlexTable();
 
+        bus.conversationWith(ConversationMessage.create()
+                .toSubject("ObjectService"),
+                new MessageCallback() {
+                    public void callback(CommandMessage message) {
+                        List<Record> records = message.get(List.class, "Records");
 
-        bus.subscribe("MrClient", new MessageCallback() {
-            public void callback(CommandMessage message) {
-                html.setHTML(message.get(String.class, "Message"));
-            }
-        });
+                        int row = 0;
+                        for (Record r : records) {
+                            table.setWidget(row, 0, new HTML(String.valueOf(r.getRecordId())));
+                            table.setWidget(row, 1, new HTML(r.getName()));
+                            table.setWidget(row, 2, new HTML(String.valueOf(r.getBalance())));
+                            table.setWidget(row, 3, new HTML(r.getAccountOpened().toString()));
+                            table.setWidget(row, 4, new HTML(String.valueOf(r.getStuff())));
+                            row++;
+                        }
 
+                        try {
+                            CommandMessage.create().toSubject("ObjectService")
+                                    .set("Recs", records).sendNowWith(bus);
+                        }
+                        catch (Throwable e) {
+                            e.printStackTrace();
+                        }
 
-        ConversationMessage.create()
-                .toSubject("ObjectService")
-                .set(MessageParts.ReplyTo, "MrClient")
-                .sendNowWith(bus);
+                    }
+                }
+        );
 
-        RootPanel.get().add(html);
+        RootPanel.get().add(table);
     }
 }
