@@ -293,8 +293,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                     // sendAll();
                 }
             });
-
-
         }
         catch (Exception e) {
             transmitting = false;
@@ -375,7 +373,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         });
 
 
-        String initialMessage = "{\"CommandType\":\"ConnectToQueue\", \"ToSubject\":\"ServerBus\"}";
+        String initialMessage = "{\"CommandType\":\"ConnectToQueue\",\"ToSubject\":\"ServerBus\"}";
 
         /**
          * Send initial message to connect to the queue, to establish an HTTP session. Otherwise, concurrent
