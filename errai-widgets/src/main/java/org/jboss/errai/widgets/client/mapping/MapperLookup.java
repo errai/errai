@@ -1,6 +1,7 @@
 package org.jboss.errai.widgets.client.mapping;
 
 import org.jboss.errai.widgets.client.WSGrid;
+import org.jboss.errai.widgets.client.mapping.impl.WSGridMapper;
 
 import java.util.HashMap;
 import java.util.Map;

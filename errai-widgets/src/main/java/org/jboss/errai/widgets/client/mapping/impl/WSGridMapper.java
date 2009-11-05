@@ -1,10 +1,13 @@
-package org.jboss.errai.widgets.client.mapping;
+package org.jboss.errai.widgets.client.mapping.impl;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import org.jboss.errai.widgets.client.WSGrid;
 import org.jboss.errai.widgets.client.format.WSCellFormatter;
 import org.jboss.errai.widgets.client.listeners.CellChangeEvent;
+import org.jboss.errai.widgets.client.mapping.ColumnMapper;
+import org.jboss.errai.widgets.client.mapping.FieldMapper;
+import org.jboss.errai.widgets.client.mapping.WidgetMapper;
 
 import java.util.List;
 

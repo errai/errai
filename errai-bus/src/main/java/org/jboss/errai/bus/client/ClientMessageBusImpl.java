@@ -35,17 +35,15 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     private boolean initialized = false;
 
     public ClientMessageBusImpl() {
-        sendBuilder = new RequestBuilder(
+        (sendBuilder = new RequestBuilder(
                 RequestBuilder.POST,
                 URL.encode(SERVICE_ENTRY_POINT)
-        );
-        sendBuilder.setHeader("Connection", "Keep-Alive");
+        )).setHeader("Connection", "Keep-Alive");
 
-        recvBuilder = new RequestBuilder(
+        (recvBuilder = new RequestBuilder(
                 RequestBuilder.GET,
                 URL.encode(SERVICE_ENTRY_POINT)
-        );
-        recvBuilder.setHeader("Connection", "Keep-Alive");
+        )).setHeader("Connection", "Keep-Alive");
 
         init();
     }
@@ -288,9 +286,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
                 public void onError(Request request, Throwable exception) {
                     showError("Failed to communicate with remote bus", "", exception);
-
                     transmitting = false;
-                    // sendAll();
                 }
             });
         }
