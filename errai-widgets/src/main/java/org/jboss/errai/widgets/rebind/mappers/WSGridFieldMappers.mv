@@ -1,7 +1,4 @@
 @code{
-    System.out.println("targetType:" + targetType);
-    System.out.println("fieldName:" + fieldName);
-
     jtype = typeOracle.getType(targetType).getField(fieldName).getType().isClassOrInterface();
     getter = org.mvel2.util.ReflectionUtil.getGetter(fieldName);
 

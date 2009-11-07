@@ -11,7 +11,6 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
 import org.jboss.errai.widgets.client.mapping.ErraiWidgetBinding;
-import org.jboss.errai.widgets.client.mapping.WidgetMapper;
 import org.mvel2.templates.CompiledTemplate;
 import org.mvel2.templates.TemplateCompiler;
 import org.mvel2.templates.TemplateRuntime;
@@ -41,6 +40,7 @@ public class WidgetMappingsGenerator extends Generator {
     private TypeOracle typeOracle;
 
     private CompiledTemplate mappingsGen;
+
 
     @Override
     public String generate(TreeLogger logger, GeneratorContext context, String typeName) throws UnableToCompleteException {
@@ -140,11 +140,13 @@ public class WidgetMappingsGenerator extends Generator {
         sourceWriter.outdent();
 
         try {
-            JClassType widgetMapper = typeOracle.getType(WidgetMapper.class.getName());
+            JClassType widgetMapper = typeOracle.getType(org.jboss.errai.widgets.client.mapping.WidgetMapper.class.getName());
+
+            Map<String, List<JField>> toBeMapped = new HashMap<String, List<JField>>();
 
             for (JField currField : targetClass.getFields()) {
-                if (currField.isAnnotationPresent(MapperField.class) && widgetMapper.isAssignableFrom(currField.getType().isClassOrInterface())) {
-                    MapperField mf = currField.getAnnotation(MapperField.class);
+                if (currField.isAnnotationPresent(WidgetMapper.class) && widgetMapper.isAssignableFrom(currField.getType().isClassOrInterface())) {
+                    WidgetMapper mf = currField.getAnnotation(WidgetMapper.class);
 
                     JField widgetField = targetClass.getField(mf.value());
                     String varName = widgetField.getName() + "Mapper";
@@ -166,12 +168,16 @@ public class WidgetMappingsGenerator extends Generator {
 
                     List<JField> fieldsToMap = new LinkedList<JField>();
 
+                    /**
+                     * If an EntityFields annotatio is present, then we discriminate on those fields.  Otherwise
+                     * we capture all fields by default.
+                     */
                     if (currField.isAnnotationPresent(EntityFields.class)) {
                         EntityFields ef = currField.getAnnotation(EntityFields.class);
                         for (String fieldName : ef.value()) {
                             JField fld = jEntityTarget.getField(fieldName);
                             if (fld == null) {
-                                RuntimeException e = new RuntimeException( "no such field in entity class '" + jEntityTarget.getName() + "': " + fieldName);
+                                RuntimeException e = new RuntimeException("no such field in entity class '" + jEntityTarget.getName() + "': " + fieldName);
                                 logger.log(TreeLogger.Type.ERROR, e.getMessage(), e);
                                 throw e;
                             }
@@ -191,7 +197,7 @@ public class WidgetMappingsGenerator extends Generator {
                     vars.put("variableName", varName);
                     vars.put("strTypeParms", strTypeParms);
                     vars.put("targetWidget", widgetField.getType().getQualifiedSourceName());
-                    vars.put("targetType",  jEntityTarget.getQualifiedSourceName());
+                    vars.put("targetType", jEntityTarget.getQualifiedSourceName());
                     vars.put("targetFieldName", widgetField.getName());
                     vars.put("fieldsToMap", fieldsToMap);
 
@@ -201,13 +207,29 @@ public class WidgetMappingsGenerator extends Generator {
                     s = "widget." + currField.getName() + " = " + varName + ";";
 
                     sourceWriter.println(s);
+                } else if (currField.isAnnotationPresent(EntityMapped.class)) {
+                    EntityMapped entityMappedA = currField.getAnnotation(EntityMapped.class);
+
+                    JClassType entityType = currField.getType().isClassOrInterface();
+                    String entityFieldName = currField.getName();
+                    String toEntityField;
+
+                    for (JField fld : targetClass.getFields()) {
+                        if (fld.isAnnotationPresent(MapField.class)) {
+                            MapField mapFieldA = fld.getAnnotation(MapField.class);
+                            toEntityField = "".equals(mapFieldA.value()) ? entityFieldName : mapFieldA.value();
+
+                            if (!toBeMapped.containsKey(toEntityField)) {
+                                List<JField> fieldsToMap;
+                                toBeMapped.put(toEntityField, fieldsToMap = new LinkedList<JField>());
+                                fieldsToMap.add(fld);
+                            } else {
+                                toBeMapped.get(toEntityField).add(fld);
+                            }
+                        }
+                    }
                 }
             }
-
-
-
-
-
         }
         catch (Exception e) {
             logger.log(TreeLogger.Type.ERROR, "failed to map field (does not exist)", e);
@@ -229,7 +251,7 @@ public class WidgetMappingsGenerator extends Generator {
             JParameterizedType pt = c.isParameterized();
             if (pt != null) builder.append(generateTypeParmString(pt));
 
-            if ((i+1) < typeArgsLength) builder.append(",");
+            if ((i + 1) < typeArgsLength) builder.append(",");
         }
         return builder.append(">").toString();
     }
