@@ -22,18 +22,39 @@
 
 package org.jboss.errai.workspaces.client.icons;
 
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.ImageBundle;
 
 /**
  * Icons that ship as part of the workspace framework.
  * See {@link com.google.gwt.user.client.ui.ImageBundle} for further explanations.
- * 
+ *
  * @author Heiko Braun <hbraun@redhat.com>
  */
-public interface ErraiImageBundle extends ImageBundle
-{
-  @Resource("message_icon.png")  
-  public AbstractImagePrototype messageIcon();
-    
+public interface ErraiImageBundle extends ClientBundle {
+    @Source("message_icon.png")
+    public ImageResource messageIcon();
+
+    @Source("workspacelogo.png")
+    public ImageResource workspaceLogo();
+
+    @Source("collapseleft.png")
+    public ImageResource collapseLeft();
+
+    @Source("application.png")
+    public ImageResource application();
+
+    @Source("collapseright.png")
+    public ImageResource collapseRight();
+
+    @Source("close-icon.png")
+    public ImageResource closeIcon();
+
+    @Source("questioncube.png")
+    public ImageResource questionCube();
+
+    @Source("user.png")
+    public ImageResource user();
 }

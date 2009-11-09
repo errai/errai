@@ -7,6 +7,7 @@ import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.*;
+import org.jboss.errai.workspaces.client.icons.ErraiImageBundle;
 import org.jboss.errai.workspaces.client.widgets.dnd.TabDropController;
 
 import java.util.ArrayList;
@@ -31,6 +32,8 @@ public class WSTab extends Composite {
 
     List<CloseHandler<WSTab>> tabCloseHandlers = new ArrayList<CloseHandler<WSTab>>();
 
+    ErraiImageBundle erraiImageBundle = GWT.create(ErraiImageBundle.class);
+
     //todo: this widget is still tied sendNowWith the Workspace API -- bad!
     public WSTab(String name, Widget widgetRef, Image tabIcon) {
         this.widgetRef = widgetRef;
@@ -45,7 +48,7 @@ public class WSTab extends Composite {
 
         hPanel.add(label);
 
-        closeButton = new Image(GWT.getModuleBaseURL() + "/images/close-icon.png");
+        closeButton = new Image(erraiImageBundle.closeIcon());
         closeButton.addStyleName("workspace-tabCloseButton");
         closeButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {

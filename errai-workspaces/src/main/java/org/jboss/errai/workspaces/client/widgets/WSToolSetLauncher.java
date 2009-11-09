@@ -6,6 +6,7 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import org.jboss.errai.widgets.client.WSLaunchButton;
 import org.jboss.errai.workspaces.client.framework.Tool;
+import org.jboss.errai.workspaces.client.icons.ErraiImageBundle;
 import org.jboss.errai.workspaces.client.listeners.TabOpeningClickHandler;
 
 
@@ -14,6 +15,8 @@ import org.jboss.errai.workspaces.client.listeners.TabOpeningClickHandler;
  */
 public class WSToolSetLauncher extends Composite {
     private VerticalPanel vPanel;
+
+    ErraiImageBundle erraiImageBundle = GWT.create(ErraiImageBundle.class);
 
     public WSToolSetLauncher() {
         this.vPanel = new VerticalPanel();
@@ -27,7 +30,7 @@ public class WSToolSetLauncher extends Composite {
             newIcon = new Image(tool.getIcon().getUrl());
         }
         else {
-            newIcon = new Image(GWT.getModuleBaseURL() + "/images/ui/icons/questioncube.png");
+            newIcon = new Image(erraiImageBundle.questionCube());
         }
         
         newIcon.setSize("16px", "16px");

@@ -6,6 +6,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.common.client.framework.AcceptsCallback;
 import org.jboss.errai.widgets.client.effects.Effects;
+import org.jboss.errai.widgets.client.icons.ErraiWidgetsImageBundle;
 import org.jboss.errai.widgets.client.listeners.ClickCallbackListener;
 
 
@@ -24,6 +25,8 @@ public class WSModalDialog implements AcceptsCallback {
     SimplePanel drapePanel;
     WSWindowPanel window;
 
+    ErraiWidgetsImageBundle imageBundle = GWT.create(ErraiWidgetsImageBundle.class);
+
     public WSModalDialog() {
         this("Alert!");
     }
@@ -34,7 +37,7 @@ public class WSModalDialog implements AcceptsCallback {
         dockPanel = new DockPanel();
         dockPanel.setWidth("400px");
 
-        dockPanel.add(new Image(GWT.getModuleBaseURL() + "/images/ui/icons/redflag.png"), DockPanel.WEST);
+        dockPanel.add(new Image(imageBundle.redFlag()), DockPanel.WEST);
         dockPanel.add(message, DockPanel.CENTER);
 
         message.getElement().getStyle().setProperty("padding", "0px");

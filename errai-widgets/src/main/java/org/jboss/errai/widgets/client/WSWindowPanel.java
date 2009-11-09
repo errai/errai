@@ -13,6 +13,7 @@ import static com.google.gwt.user.client.Window.getClientHeight;
 import static com.google.gwt.user.client.Window.getClientWidth;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.widgets.client.effects.Effects;
+import org.jboss.errai.widgets.client.icons.ErraiWidgetsImageBundle;
 import org.jboss.errai.widgets.client.layout.WSDropShadowLayout;
 import org.jboss.errai.widgets.client.util.LayoutUtil;
 
@@ -26,8 +27,9 @@ import java.util.List;
  * Workspace Window Panel implementation.  Provides basic popup window facilities.
  */
 public class WSWindowPanel extends Composite {
+    ErraiWidgetsImageBundle imageBundle = GWT.create(ErraiWidgetsImageBundle.class);
     private DockPanel dockPanel = new DockPanel();
-    private Image icon = new Image(GWT.getModuleBaseURL() + "/images/ui/icons/flag_blue.png");
+    private Image icon = new Image(imageBundle.blueFlag());
     private Label label = new Label("Popup");
 
     private int offsetX;
@@ -68,7 +70,7 @@ public class WSWindowPanel extends Composite {
         titleArea.setCellVerticalAlignment(label, HasVerticalAlignment.ALIGN_MIDDLE);
 
         Button closeButton = new Button();
-        closeButton.setHTML("<img src='" + GWT.getModuleBaseURL() + "/images/ui/icons/cancel.png' />");
+        closeButton.setHTML("<img src='" + imageBundle.cancel().getURL() +"' />");
 
         closeButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {

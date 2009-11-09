@@ -6,6 +6,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.widgets.client.WSGrid;
+import org.jboss.errai.widgets.client.icons.ErraiWidgetsImageBundle;
 
 
 public class WSCellTitle extends WSCellFormatter<String> {
@@ -14,6 +15,8 @@ public class WSCellTitle extends WSCellFormatter<String> {
     Image img = new Image();
 
     WSGrid.WSCell cell;
+
+    ErraiWidgetsImageBundle imageBundle = GWT.create(ErraiWidgetsImageBundle.class);
 
     public WSCellTitle(WSGrid.WSCell cell, String title) {
         this.cell = cell;
@@ -44,8 +47,12 @@ public class WSCellTitle extends WSCellFormatter<String> {
 
     public Widget getWidget(WSGrid wsGrid) {
         if (wsGrid.getSortedColumnHeader() == cell) {
-            img.setUrl(GWT.getModuleBaseURL()
-                    + "images/ui/icons/sort-" + (wsGrid.getColumnSortOrder(cell.getCol()) ? "down" : "up") + ".png");
+
+            if (wsGrid.getColumnSortOrder(cell.getCol()))
+                img.setUrl(imageBundle.sortDown().getURL());
+            else
+                img.setUrl(imageBundle.sortUp().getURL());
+
             img.setVisible(true);
         }
         else {

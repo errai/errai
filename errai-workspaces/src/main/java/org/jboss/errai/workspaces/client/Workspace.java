@@ -21,6 +21,7 @@ import org.jboss.errai.common.client.framework.WSComponent;
 import org.jboss.errai.widgets.client.WSModalDialog;
 import org.jboss.errai.widgets.client.WSWindowPanel;
 import org.jboss.errai.workspaces.client.framework.*;
+import org.jboss.errai.workspaces.client.icons.ErraiImageBundle;
 import org.jboss.errai.workspaces.client.layout.WorkspaceLayout;
 import org.jboss.errai.workspaces.client.widgets.WSLoginPanel;
 
@@ -38,6 +39,8 @@ public class Workspace implements EntryPoint {
 
     private static WSWindowPanel loginWindowPanel;
     private static Window.ClosingHandler loginWindowClosingHandler;
+
+    private static ErraiImageBundle erraiImageBundle = GWT.create(ErraiImageBundle.class);
 
     static {
         loginWindowClosingHandler = new Window.ClosingHandler() {
@@ -330,11 +333,15 @@ public class Workspace implements EntryPoint {
         if (!toBeLoadedGroups.containsKey(group)) toBeLoadedGroups.put(group, new ArrayList<ToolProvider>());
 
         final String toolId = name.replaceAll(" ", "_") + "." + toolCounter++;
-        if (icon == null || "".equals(icon)) {
-            icon = "/images/ui/icons/application.png";
-        }
 
-        final Tool toolImpl = new ToolImpl(name, toolId, multipleAllowed, new Image(GWT.getModuleBaseURL() + icon), component);
+        Image img;
+        if (icon == null || "".equals(icon)) {
+            img = new Image(erraiImageBundle.application());
+        }
+        else
+            img = new Image(GWT.getModuleBaseURL() + icon);
+
+        final Tool toolImpl = new ToolImpl(name, toolId, multipleAllowed, img, component);
         ToolProvider provider = new ToolProvider() {
             public Tool getTool() {
                 return toolImpl;
@@ -349,9 +356,12 @@ public class Workspace implements EntryPoint {
         if (!toBeLoadedGroups.containsKey(group)) toBeLoadedGroups.put(group, new ArrayList<ToolProvider>());
 
         final String toolId = name.replaceAll(" ", "_") + "." + toolCounter++;
+        Image img;
         if (icon == null || "".equals(icon)) {
-            icon = "/images/ui/icons/application.png";
+            img = new Image(erraiImageBundle.application());
         }
+        else
+            img = new Image(GWT.getModuleBaseURL() + icon);
 
         final Set<String> roles = new HashSet<String>();
 
@@ -361,7 +371,7 @@ public class Workspace implements EntryPoint {
 
 
         final Tool toolImpl = new ToolImpl(name, toolId, multipleAllowed,
-                new Image(GWT.getModuleBaseURL() + icon), component);
+                img, component);
         ToolProvider provider = new ToolProvider() {
             public Tool getTool() {
                 if (sessionRoles.containsAll(roles)) {

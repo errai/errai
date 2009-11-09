@@ -2,13 +2,14 @@ package org.jboss.errai.workspaces.client.layout;
 
 import com.allen_sauer.gwt.dnd.client.PickupDragController;
 import com.google.gwt.core.client.GWT;
-import static com.google.gwt.core.client.GWT.getModuleBaseURL;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import static com.google.gwt.user.client.DOM.getElementById;
+
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
@@ -26,6 +27,7 @@ import org.jboss.errai.widgets.client.effects.Effects;
 import org.jboss.errai.workspaces.client.framework.Tool;
 import org.jboss.errai.workspaces.client.framework.ToolSet;
 import org.jboss.errai.workspaces.client.framework.WorkspaceSizeChangeListener;
+import org.jboss.errai.workspaces.client.icons.ErraiImageBundle;
 import org.jboss.errai.workspaces.client.listeners.TabCloseHandler;
 import org.jboss.errai.workspaces.client.widgets.*;
 import org.jboss.errai.workspaces.client.widgets.dnd.TabDragHandler;
@@ -60,6 +62,8 @@ public class WorkspaceLayout extends Composite {
 
     private int currSizeW;
     private int currSizeH;
+
+    ErraiImageBundle erraiImageBundle = GWT.create(ErraiImageBundle.class);
 
     public WorkspaceLayout(String id) {
         super();
@@ -179,7 +183,7 @@ public class WorkspaceLayout extends Composite {
     private HorizontalPanel createHeader() {
         HorizontalPanel header = new HorizontalPanel();
 
-        Image img = new Image(getModuleBaseURL() + "/images/workspacelogo.png");
+        Image img = new Image(erraiImageBundle.workspaceLogo());
         img.setHeight("45px");
         img.setWidth("193px");
 
@@ -207,7 +211,9 @@ public class WorkspaceLayout extends Composite {
         navigationLabel.setStyleName("workspace-NavHeaderText");
         topNavPanel.add(navigationLabel);
 
-        final Image collapseButton = new Image(GWT.getModuleBaseURL() + "/images/collapseleft.png");
+        final ImageResource collapseLeft = erraiImageBundle.collapseLeft();
+        final ImageResource collapseRight = erraiImageBundle.collapseRight();
+        final Image collapseButton = new Image(collapseLeft);
         collapseButton.setStyleName("workspace-NavCollapseButton");
 
         collapseButton.addClickHandler(new ClickHandler() {
@@ -245,7 +251,7 @@ public class WorkspaceLayout extends Composite {
                     navigation.setVisible(false);
                     navigationLabel.setVisible(false);
 
-                    collapseButton.setUrl(GWT.getModuleBaseURL() + "/images/collapseright.png");
+                    collapseButton.setUrl(collapseRight.getURL());
                 } else {
                     leftPanel.setArmed(false);
                     Timer timer = new Timer() {
@@ -272,7 +278,7 @@ public class WorkspaceLayout extends Composite {
                     };
 
                     if (navigation.getOffsetWidth() == 0) timer.scheduleRepeating(20);
-                    collapseButton.setUrl(GWT.getModuleBaseURL() + "/images/collapseleft.png");
+                    collapseButton.setUrl(collapseLeft.getURL());
                 }
 
                 collapse = !collapse;
@@ -433,8 +439,10 @@ public class WorkspaceLayout extends Composite {
                         toolWidget.setVisible(true);
                         panel.setWidget(toolWidget);
 
-                        final Image newIcon = new Image(icon != null || "".equals(icon) ? icon.getUrl() : GWT.getModuleBaseURL()
-                                + "/images/ui/icons/application.png");
+                        Image app = new Image(erraiImageBundle.application());
+
+                        final Image newIcon = new Image(icon != null || "".equals(icon) ? icon.getUrl() :
+                                app.getUrl());
                         newIcon.setSize("16px", "16px");
 
                         final WSTab newWSTab = new WSTab(name, panel, newIcon);
