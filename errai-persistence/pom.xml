@@ -1,9 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <name>Errai::Widgets</name>
+    <name>Errai::Persistence</name>
     <groupId>org.jboss.errai</groupId>
-    <artifactId>errai-widgets</artifactId>
+    <artifactId>errai-persistence</artifactId>
     <packaging>jar</packaging>
 
     <!-- Parent -->
@@ -19,6 +19,11 @@
         <dependency>
             <groupId>org.jboss.errai</groupId>
             <artifactId>errai-common</artifactId>
+            <version>${version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.errai</groupId>
+            <artifactId>errai-bus</artifactId>
             <version>${version}</version>
         </dependency>
         <dependency>
@@ -45,8 +50,14 @@
             <artifactId>guice-servlet</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.mvel</groupId>
-            <artifactId>mvel2</artifactId>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-entitymanager</artifactId>
+            <version>3.3.1.ga</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>3.3.1.GA</version>
         </dependency>
     </dependencies>
 
