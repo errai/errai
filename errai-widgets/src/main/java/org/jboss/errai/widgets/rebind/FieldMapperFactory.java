@@ -1,16 +1,9 @@
 package org.jboss.errai.widgets.rebind;
 
-import com.google.gwt.core.ext.typeinfo.JField;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import org.jboss.errai.widgets.client.WSGrid;
 import org.jboss.errai.widgets.rebind.mappers.WSGridFMGenerator;
-import org.mvel2.integration.impl.MapVariableResolverFactory;
-import org.mvel2.templates.TemplateRuntime;
 
-import java.io.InputStream;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 public class FieldMapperFactory {

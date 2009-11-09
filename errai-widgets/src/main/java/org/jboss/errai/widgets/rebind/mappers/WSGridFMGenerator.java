@@ -32,9 +32,7 @@ public class WSGridFMGenerator implements FieldMapperGenerator {
         JField fld;
         String fieldName;
         while (iter.hasNext()) {
-            fld = iter.next();
-
-            if (fld.isAnnotationPresent(FriendlyName.class)) {
+            if ((fld = iter.next()).isAnnotationPresent(FriendlyName.class)) {
                 fieldName = fld.getAnnotation(FriendlyName.class).value();
             } else {
                 fieldName = fld.getName();

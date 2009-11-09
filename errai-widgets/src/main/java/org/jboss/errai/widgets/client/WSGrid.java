@@ -1775,8 +1775,6 @@ public class WSGrid extends Composite {
 
     }
 
-
-
     public void mergeSelected() {
         WSCell start;
 
