@@ -5,13 +5,17 @@ import com.google.gwt.user.client.ui.Widget;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class WidgetMapper<T extends Widget, F, V> {
+public abstract class WidgetMapper<T extends Widget, V> {
     protected List<MapperChangeHandler<?>> changeHandlers;
     protected FieldMapper[] fields;
     protected T widget;
     protected String[] defaultTitleValues;
 
-    public abstract void map(V obj);
+    public void map(V entity) {
+        for (FieldMapper<T, T, V> m : fields) {
+            m.getFieldValue(widget, entity);
+        }
+    }
 
     public void setFields(FieldMapper[] fields) {
         this.fields = fields;
@@ -23,7 +27,7 @@ public abstract class WidgetMapper<T extends Widget, F, V> {
 
     public void setDefaultTitleValues(String[] defaultTitleValues) {
         this.defaultTitleValues = defaultTitleValues;
-    }    
+    }
 
     public void addMapperChangeHandler(MapperChangeHandler<?> handler) {
         if (changeHandlers == null) changeHandlers = new ArrayList<MapperChangeHandler<?>>();

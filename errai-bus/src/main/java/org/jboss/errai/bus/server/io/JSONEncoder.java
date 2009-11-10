@@ -128,7 +128,5 @@ public class JSONEncoder {
             //noinspection unchecked
             return tHandlers.get(in.getClass()).getConverted(in);
         }
-    }
-
-  
+    }  
 }

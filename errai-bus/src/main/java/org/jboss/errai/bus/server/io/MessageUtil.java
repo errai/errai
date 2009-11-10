@@ -19,12 +19,7 @@ public class MessageUtil {
 
         for (int i = 0; i < pkg.length; i++) {
             Map<String, Object> parts = decodeToMap(pkg[i]);
-            if (parts.containsKey(MessageParts.SessionID.name())) {
-                // If the client is trying to send a session ID into the server bus, it might be trying to
-                // do something evil.  So we check for, and remove it if this is the case.
-                parts.remove(MessageParts.SessionID.name());
-            }
-            //   parts.put(SecurityParts.SessionData.name(), session);
+            parts.remove(MessageParts.SessionID.name());
 
             CommandMessage msg = CommandMessage.create().setParts(parts);
             msg.setResource("Session", session);

@@ -1,12 +1,12 @@
 package org.jboss.errai.widgets.rebind;
 
 import org.jboss.errai.widgets.client.WSGrid;
-import org.jboss.errai.widgets.rebind.mappers.WSGridFMGenerator;
+import org.jboss.errai.widgets.rebind.collectionmappers.WSGridFMGenerator;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class FieldMapperFactory {
+public class FieldMapperGeneratorFactory {
     private static final Map<String, FieldMapperGenerator> FIELD_MAPPERS =
             new HashMap<String, FieldMapperGenerator>();
 

@@ -1,0 +1,26 @@
+@code{
+  mapperClass = org.jboss.errai.widgets.client.mapping.MapperLookup.lookupCollectionMapper(targetWidget);
+  fieldMapper = org.jboss.errai.widgets.rebind.FieldMapperGeneratorFactory.getFieldMapper(targetWidget);
+}
+
+@declare{'widgetMapping'}
+    @code{
+       def typeOf(t) {
+           t is String ? typeOracle.getType(t) : t;
+       }
+
+       def instanceOf(instType, ofTypeStr) {
+            typeOf(ofTypeStr).isAssignableFrom(typeOf(instType));
+       }
+
+
+    }
+@end{}
+
+@{entityVarName}.addChangeHandler(new com.google.gwt.event.dom.client.ChangeHandler() {
+    public void onChange(com.google.gwt.event.dom.client.ChangeEvent event) {
+       @foreach{widgetField:widgetFields}
+            widget.@{widgetField.getName()}
+       @end{}
+    }
+});

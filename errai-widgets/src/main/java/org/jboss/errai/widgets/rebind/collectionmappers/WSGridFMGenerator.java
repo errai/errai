@@ -1,4 +1,4 @@
-package org.jboss.errai.widgets.rebind.mappers;
+package org.jboss.errai.widgets.rebind.collectionmappers;
 
 import com.google.gwt.core.ext.typeinfo.JField;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
@@ -41,6 +41,7 @@ public class WSGridFMGenerator implements FieldMapperGenerator {
             builder.append("\"").append(fieldName).append("\"");
             if (iter.hasNext()) builder.append(", ");
         }
+        
         return builder.append("});").toString();
     }
 }

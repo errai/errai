@@ -10,6 +10,7 @@ import com.google.gwt.core.ext.typeinfo.JParameterizedType;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
+import org.jboss.errai.widgets.client.mapping.CollectionWidgetMapper;
 import org.jboss.errai.widgets.client.mapping.ErraiWidgetBinding;
 import org.mvel2.templates.CompiledTemplate;
 import org.mvel2.templates.TemplateCompiler;
@@ -40,15 +41,19 @@ public class WidgetMappingsGenerator extends Generator {
     private TypeOracle typeOracle;
 
     private CompiledTemplate mappingsGen;
-
+    private CompiledTemplate entityMappingGen;
 
     @Override
     public String generate(TreeLogger logger, GeneratorContext context, String typeName) throws UnableToCompleteException {
         typeOracle = context.getTypeOracle();
         this.typeName = typeName;
 
-        InputStream istream = this.getClass().getResourceAsStream("EntityMappingGenerator.mv");
+        InputStream istream = this.getClass().getResourceAsStream("CollectionMappingGenerator.mv");
         mappingsGen = TemplateCompiler.compileTemplate(istream, null);
+
+        istream = this.getClass().getResourceAsStream("WidgetMappings.mv");
+        entityMappingGen = TemplateCompiler.compileTemplate(istream, null);
+
 
         try {
             // get classType and save instance variables
@@ -136,11 +141,11 @@ public class WidgetMappingsGenerator extends Generator {
         sourceWriter.println("public " + className + "() { ");
         sourceWriter.println("}");
 
-        sourceWriter.println("public void mapAll(" + strTargetType + " widget) { ");
+        sourceWriter.println("public void mapAll(final " + strTargetType + " widget) { ");
         sourceWriter.outdent();
 
         try {
-            JClassType widgetMapper = typeOracle.getType(org.jboss.errai.widgets.client.mapping.WidgetMapper.class.getName());
+            JClassType widgetMapper = typeOracle.getType(CollectionWidgetMapper.class.getName());
 
             Map<String, List<JField>> toBeMapped = new HashMap<String, List<JField>>();
 
@@ -164,7 +169,6 @@ public class WidgetMappingsGenerator extends Generator {
                     JClassType jEntityTarget = pType.getTypeArgs()[pType.getTypeArgs().length - 1];
 
                     String strTypeParms = generateTypeParmString(pType);
-
 
                     List<JField> fieldsToMap = new LinkedList<JField>();
 
@@ -220,15 +224,23 @@ public class WidgetMappingsGenerator extends Generator {
                             toEntityField = "".equals(mapFieldA.value()) ? entityFieldName : mapFieldA.value();
 
                             if (!toBeMapped.containsKey(toEntityField)) {
-                                List<JField> fieldsToMap;
-                                toBeMapped.put(toEntityField, fieldsToMap = new LinkedList<JField>());
-                                fieldsToMap.add(fld);
-                            } else {
-                                toBeMapped.get(toEntityField).add(fld);
+                                toBeMapped.put(toEntityField, new LinkedList<JField>());
                             }
+
+                            toBeMapped.get(toEntityField).add(fld);
                         }
                     }
                 }
+            }
+
+            for (Map.Entry<String, List<JField>> entry : toBeMapped.entrySet()) {
+                Map<String, Object> vars = new HashMap<String, Object>();
+                vars.put("typeOracle", typeOracle);
+                vars.put("entityVarName", entry.getKey());
+                vars.put("widgetFields", entry.getValue());
+
+                String s = (String) TemplateRuntime.execute(entityMappingGen, vars);
+                sourceWriter.print(s);
             }
         }
         catch (Exception e) {

@@ -1,6 +1,6 @@
 @code{
-  mapperClass = org.jboss.errai.widgets.client.mapping.MapperLookup.lookup(targetWidget);
-  fieldMapper = org.jboss.errai.widgets.rebind.FieldMapperFactory.getFieldMapper(targetWidget);
+  mapperClass = org.jboss.errai.widgets.client.mapping.MapperLookup.lookupCollectionMapper(targetWidget);
+  fieldMapper = org.jboss.errai.widgets.rebind.FieldMapperGeneratorFactory.getFieldMapper(targetWidget);
 }
 
 @{mapperClass.getName()}@{strTypeParms} @{variableName} = new @{mapperClass.getName()}@{strTypeParms}(widget.@{targetFieldName});
