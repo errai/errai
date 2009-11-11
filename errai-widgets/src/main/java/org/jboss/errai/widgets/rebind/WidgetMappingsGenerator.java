@@ -23,6 +23,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import static org.jboss.errai.widgets.rebind.FieldMapperGeneratorFactory.getFieldMapper;
+
 public class WidgetMappingsGenerator extends Generator {
     /**
      * Simple name of class to be generated
@@ -147,7 +149,6 @@ public class WidgetMappingsGenerator extends Generator {
         try {
             JClassType widgetMapper = typeOracle.getType(CollectionWidgetMapper.class.getName());
 
-            Map<String, List<JField>> toBeMapped = new HashMap<String, List<JField>>();
 
             for (JField currField : targetClass.getFields()) {
                 if (currField.isAnnotationPresent(WidgetMapper.class) && widgetMapper.isAssignableFrom(currField.getType().isClassOrInterface())) {
@@ -215,8 +216,12 @@ public class WidgetMappingsGenerator extends Generator {
                     EntityMapped entityMappedA = currField.getAnnotation(EntityMapped.class);
 
                     JClassType entityType = currField.getType().isClassOrInterface();
+                    String varName = currField.getName() + "Mapper";
+
                     String entityFieldName = currField.getName();
                     String toEntityField;
+
+                    Map<String, List<JField>> toBeMapped = new HashMap<String, List<JField>>();
 
                     for (JField fld : targetClass.getFields()) {
                         if (fld.isAnnotationPresent(MapField.class)) {
@@ -230,18 +235,51 @@ public class WidgetMappingsGenerator extends Generator {
                             toBeMapped.get(toEntityField).add(fld);
                         }
                     }
+
+                    for (Map.Entry<String, List<JField>> entry : toBeMapped.entrySet()) {
+                        List<String> generatedInitializations = new LinkedList<String>();
+                        List<String> generatedBindings = new LinkedList<String>();
+
+                        for (JField fld : entry.getValue()) {
+                           JClassType classType = fld.getType().isClassOrInterface();
+
+                           String fieldName = fld.getAnnotation(MapField.class).value();
+                           if ("".equals(fieldName)) {
+                               fieldName = fld.getName();
+                           }
+
+                           FieldMapperGenerator g =
+                                   getFieldMapper(classType.getQualifiedSourceName());
+
+                            if (g == null) {
+                                throw new RuntimeException("Cannot generate mapper for widget: " + classType.getName());
+                            }
+
+                            generatedInitializations.add(g.init(typeOracle, entityFieldName,
+                                    entityType.getQualifiedSourceName(), null, null));
+                            generatedBindings.add(g.generateFieldMapperGenerator(typeOracle,
+                                    entityFieldName, entityType.getQualifiedSourceName(), fieldName));
+                        }
+
+
+                        Map<String, Object> vars = new HashMap<String, Object>();
+                        vars.put("typeOracle", typeOracle);
+                        vars.put("variableName", varName);      
+                        vars.put("initializers", generatedInitializations);
+                        vars.put("targetFieldName", entityFieldName);
+                        vars.put("bindings", generatedBindings);
+
+
+                        String s = (String) TemplateRuntime.execute(entityMappingGen, vars);
+                        System.out.println("GENER8:" + s);
+                        sourceWriter.print(s);
+                    }
+
+
                 }
             }
 
-            for (Map.Entry<String, List<JField>> entry : toBeMapped.entrySet()) {
-                Map<String, Object> vars = new HashMap<String, Object>();
-                vars.put("typeOracle", typeOracle);
-                vars.put("entityVarName", entry.getKey());
-                vars.put("widgetFields", entry.getValue());
 
-                String s = (String) TemplateRuntime.execute(entityMappingGen, vars);
-                sourceWriter.print(s);
-            }
         }
         catch (Exception e) {
             logger.log(TreeLogger.Type.ERROR, "failed to map field (does not exist)", e);

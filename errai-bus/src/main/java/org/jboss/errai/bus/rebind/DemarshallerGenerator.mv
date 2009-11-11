@@ -9,26 +9,26 @@
     @if{targetType.isPrimitive()}
         @code{targetType = org.mvel2.util.ParseTools.boxPrimitive(targetType);}
         @if{Integer.isAssignableFrom(targetType)}
-          n.@{setter}(org.jboss.errai.bus.client.types.JSONTypeHelper.convert(o.get("@{fieldName}"), Integer.class).intValue());
+          n.@{setter}(org.jboss.errai.common.client.types.JSONTypeHelper.convert(o.get("@{fieldName}"), Integer.class).intValue());
         @else{Long.isAssignableFrom(targetType)}
-          n.@{setter}(org.jboss.errai.bus.client.types.JSONTypeHelper.convert(o.get("@{fieldName}"), Long.class).longValue());
+          n.@{setter}(org.jboss.errai.common.client.types.JSONTypeHelper.convert(o.get("@{fieldName}"), Long.class).longValue());
         @else{Short.isAssignableFrom(targetType)}
-          n.@{setter}(org.jboss.errai.bus.client.types.JSONTypeHelper.convert(o.get("@{fieldName}"), Short.class).shortValue());
+          n.@{setter}(org.jboss.errai.common.client.types.JSONTypeHelper.convert(o.get("@{fieldName}"), Short.class).shortValue());
         @else{Float.isAssignableFrom(targetType)}
-          n.@{setter}(org.jboss.errai.bus.client.types.JSONTypeHelper.convert(o.get("@{fieldName}"), Float.class).floatValue());
+          n.@{setter}(org.jboss.errai.common.client.types.JSONTypeHelper.convert(o.get("@{fieldName}"), Float.class).floatValue());
         @else{Double.isAssignableFrom(targetType)}
-          n.@{setter}(org.jboss.errai.bus.client.types.JSONTypeHelper.convert(o.get("@{fieldName}"), Double.class).doubleValue());
+          n.@{setter}(org.jboss.errai.common.client.types.JSONTypeHelper.convert(o.get("@{fieldName}"), Double.class).doubleValue());
         @else{Boolean.isAssignableFrom(targetType)}
-          n.@{setter}(org.jboss.errai.bus.client.types.JSONTypeHelper.convert(o.get("@{fieldName}"), Boolean.class).booleanValue());
+          n.@{setter}(org.jboss.errai.common.client.types.JSONTypeHelper.convert(o.get("@{fieldName}"), Boolean.class).booleanValue());
         @end{}
     @else{}
-        n.@{org.mvel2.util.ReflectionUtil.getSetter(fieldName)}(org.jboss.errai.bus.client.types.JSONTypeHelper.convert(o.get("@{fieldName}"), ${targetType.getName()}.class));
+        n.@{org.mvel2.util.ReflectionUtil.getSetter(fieldName)}(org.jboss.errai.common.client.types.JSONTypeHelper.convert(o.get("@{fieldName}"), ${targetType.getName()}.class));
     @end{}
 @end{}
 
-org.jboss.errai.bus.client.types.TypeDemarshallers.addDemarshaller(
+org.jboss.errai.common.client.types.TypeDemarshallers.addDemarshaller(
     @{className}.class,
-    new org.jboss.errai.bus.client.types.Demarshaller<@{className}>() {
+    new org.jboss.errai.common.client.types.Demarshaller<@{className}>() {
         public @{className} demarshall(com.google.gwt.json.client.JSONObject o) {
             try {
             ${className} n = new @{className}();

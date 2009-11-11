@@ -1,11 +1,8 @@
 package org.jboss.errai.bus.server.io;
 
-import org.jboss.errai.bus.client.CommandMessage;
-import org.jboss.errai.bus.client.protocols.SecurityParts;
-import org.jboss.errai.bus.client.types.TypeHandler;
+import org.jboss.errai.common.client.types.TypeHandler;
 import org.mvel2.MVEL;
 
-import javax.servlet.http.HttpSession;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;

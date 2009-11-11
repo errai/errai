@@ -1,7 +1,9 @@
 package org.jboss.errai.widgets.rebind;
 
+import com.google.gwt.user.client.ui.TextBox;
 import org.jboss.errai.widgets.client.WSGrid;
 import org.jboss.errai.widgets.rebind.collectionmappers.WSGridFMGenerator;
+import org.jboss.errai.widgets.rebind.widgetmappers.TextBoxFMGenerator;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,5 +22,7 @@ public class FieldMapperGeneratorFactory {
 
     static {
         FIELD_MAPPERS.put(WSGrid.class.getName(), new WSGridFMGenerator());
+
+        FIELD_MAPPERS.put(TextBox.class.getName(), new TextBoxFMGenerator());
     }
 }

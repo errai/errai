@@ -7,9 +7,7 @@ import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.ConversationMessage;
 import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.client.MessageCallback;
-import org.jboss.errai.bus.client.types.Marshaller;
 import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.bus.server.io.JSONEncoder;
 
 import java.sql.Date;
 import java.util.*;

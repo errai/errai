@@ -1,5 +1,4 @@
 @code{
-  mapperClass = org.jboss.errai.widgets.client.mapping.MapperLookup.lookupCollectionMapper(targetWidget);
   fieldMapper = org.jboss.errai.widgets.rebind.FieldMapperGeneratorFactory.getFieldMapper(targetWidget);
 }
 
@@ -12,15 +11,16 @@
        def instanceOf(instType, ofTypeStr) {
             typeOf(ofTypeStr).isAssignableFrom(typeOf(instType));
        }
-
-
     }
 @end{}
 
-@{entityVarName}.addChangeHandler(new com.google.gwt.event.dom.client.ChangeHandler() {
-    public void onChange(com.google.gwt.event.dom.client.ChangeEvent event) {
-       @foreach{widgetField:widgetFields}
-            widget.@{widgetField.getName()}
-       @end{}
-    }
+org.jboss.errai.widgets.client.mapping.WidgetMapper @{variableName} = new org.jboss.errai.widgets.client.mapping.WidgetMapper();
+
+@foreach{init : initializers}
+    @{init}
+@end{}
+
+@{variableName}.setFields(new org.jboss.errai.widgets.client.mapping.FieldMapper[] {@foreach{binding : bindings}
+       @{binding}
+  @end{','}
 });

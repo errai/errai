@@ -3,6 +3,8 @@
 <module>
     <script src="js/pagebus.js"/>
 
+    <inherits name="org.jboss.errai.common.ErraiCommon" />
+
     <inherits name='com.google.gwt.user.User'/>
     <inherits name='com.google.gwt.user.User'/>
     <inherits name="com.google.gwt.user.UserAgent"/>

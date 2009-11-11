@@ -1,7 +1,7 @@
 package org.jboss.errai.bus.client;
 
 import org.jboss.errai.bus.client.protocols.MessageParts;
-import org.jboss.errai.bus.client.types.TypeHandlerFactory;
+import org.jboss.errai.common.client.types.TypeHandlerFactory;
 
 import java.util.HashMap;
 import java.util.Map;

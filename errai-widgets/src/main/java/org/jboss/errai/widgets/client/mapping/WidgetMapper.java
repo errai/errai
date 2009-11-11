@@ -5,7 +5,7 @@ import com.google.gwt.user.client.ui.Widget;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class WidgetMapper<T extends Widget, V> {
+public class WidgetMapper<T extends Widget, V> {
     protected List<MapperChangeHandler<?>> changeHandlers;
     protected FieldMapper[] fields;
     protected T widget;

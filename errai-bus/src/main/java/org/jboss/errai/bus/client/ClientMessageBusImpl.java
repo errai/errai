@@ -6,13 +6,12 @@ import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.bus.client.ext.ExtensionsLoader;
 import org.jboss.errai.bus.client.json.JSONUtilCli;
-
-import static org.jboss.errai.bus.client.json.JSONUtilCli.decodePayload;
-
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 
 import java.util.*;
+
+import static org.jboss.errai.bus.client.json.JSONUtilCli.decodePayload;
 
 public class ClientMessageBusImpl implements ClientMessageBus {
     private static final String SERVICE_ENTRY_POINT = "erraiBus";

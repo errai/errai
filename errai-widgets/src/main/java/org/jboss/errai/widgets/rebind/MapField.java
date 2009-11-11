@@ -9,5 +9,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface MapField {
     String value() default "";
-    String entity() default "";
+    String field() default "";
 }

@@ -2,11 +2,8 @@ package org.jboss.errai.bus.rebind;
 
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.user.rebind.SourceWriter;
-import org.jboss.errai.bus.client.types.Marshaller;
 import org.jboss.errai.bus.server.annotations.ExposeEntity;
-import org.jboss.errai.bus.server.annotations.ExtensionComponent;
 import org.jboss.errai.bus.server.util.ConfigUtil;
 import org.jboss.errai.bus.server.util.RebindVisitor;
 import org.mvel2.templates.CompiledTemplate;
