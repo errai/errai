@@ -2,6 +2,7 @@ package org.jboss.errai.widgets.rebind.widgetmappers;
 
 import com.google.gwt.core.ext.typeinfo.JField;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 import org.jboss.errai.widgets.rebind.FieldMapperGenerator;
 import org.mvel2.integration.impl.MapVariableResolverFactory;
@@ -12,7 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class TextBoxFMGenerator implements FieldMapperGenerator {
+public class PasswordTextBoxFMGenerator implements FieldMapperGenerator {
     public String generateFieldMapperGenerator(TypeOracle oracle, String targetWidget, String targetType, String targetFieldType, String fieldName) {
         InputStream istream = this.getClass().getResourceAsStream("TextBoxFMGenerator.mv");
         Map<String, Object> vars = new HashMap<String, Object>();

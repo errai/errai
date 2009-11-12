@@ -18,10 +18,7 @@ import org.mvel2.templates.TemplateRuntime;
 
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.jboss.errai.widgets.rebind.FieldMapperGeneratorFactory.getFieldMapper;
 
@@ -239,6 +236,7 @@ public class WidgetMappingsGenerator extends Generator {
                     for (Map.Entry<String, List<JField>> entry : toBeMapped.entrySet()) {
                         List<String> generatedInitializations = new LinkedList<String>();
                         List<String> generatedBindings = new LinkedList<String>();
+                        ArrayList<String[]> fieldIndexPositions = new ArrayList<String[]>();
 
                         for (JField fld : entry.getValue()) {
                            JClassType classType = fld.getType().isClassOrInterface();
@@ -247,6 +245,14 @@ public class WidgetMappingsGenerator extends Generator {
                            if ("".equals(fieldName)) {
                                fieldName = fld.getName();
                            }
+
+                           JField targetField = entityType.getField(fieldName);
+                           if (targetField == null) {
+                               throw new RuntimeException("The field '" + fieldName + "' does not correspond with a field in the class: "
+                                       + entityType.getQualifiedSourceName());
+                           }
+
+                           JClassType targetFieldType = targetField.getType().isClassOrInterface();
 
                            FieldMapperGenerator g =
                                    getFieldMapper(classType.getQualifiedSourceName());
@@ -257,8 +263,19 @@ public class WidgetMappingsGenerator extends Generator {
 
                             generatedInitializations.add(g.init(typeOracle, entityFieldName,
                                     entityType.getQualifiedSourceName(), null, null));
-                            generatedBindings.add(g.generateFieldMapperGenerator(typeOracle,
-                                    entityFieldName, entityType.getQualifiedSourceName(), fieldName));
+                            generatedBindings.add(
+                                    g.generateFieldMapperGenerator(typeOracle,
+                                    classType.getQualifiedSourceName(),
+                                    entityType.getQualifiedSourceName(),
+                                    targetFieldType.getQualifiedSourceName(),
+                                            fieldName));
+
+                            fieldIndexPositions.add(new String[] { fieldName,
+                                    g.generateValueExtractorStatement(typeOracle,
+                                            classType.getQualifiedSourceName(),
+                                            entityType.getQualifiedSourceName(),
+                                            targetFieldType.getQualifiedSourceName(),
+                                            fieldName) });
                         }
 
 
@@ -268,6 +285,8 @@ public class WidgetMappingsGenerator extends Generator {
                         vars.put("initializers", generatedInitializations);
                         vars.put("targetFieldName", entityFieldName);
                         vars.put("bindings", generatedBindings);
+                        vars.put("fieldIndexPositions", fieldIndexPositions);
+                        vars.put("entityFieldName", entityFieldName);
 
 
                         String s = (String) TemplateRuntime.execute(entityMappingGen, vars);

@@ -19,8 +19,11 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.util.List;
 
-public class ExtensionProxyGenerator extends Generator {
+import static org.jboss.errai.bus.server.util.ConfigUtil.findAllConfigTargets;
+import static org.jboss.errai.bus.server.util.ConfigUtil.isAnnotated;
+import static org.jboss.errai.bus.server.util.ConfigUtil.visitAllTargets;
 
+public class ExtensionProxyGenerator extends Generator {
     /**
      * Simple name of class to be generated
      */
@@ -105,16 +108,16 @@ public class ExtensionProxyGenerator extends Generator {
         sourceWriter.println("public void initExtensions(" + MessageBus.class.getName() + " bus) { ");
         sourceWriter.outdent();
 
-        final List<File> targets = ConfigUtil.findAllConfigTargets();
+        final List<File> targets = findAllConfigTargets();
 
         new SerializationExtensionGenerator().generate(context, logger, sourceWriter, targets);
         
-        ConfigUtil.visitAllTargets(targets, context, logger, sourceWriter,
+        visitAllTargets(targets, context, logger, sourceWriter,
                 new RebindVisitor() {
                     public void visit(Class<?> visit, GeneratorContext context, TreeLogger logger, SourceWriter writer) {
                       //  System.out.println("Searching:" + visit);
 
-                        if (ConfigUtil.isAnnotated(visit, ExtensionComponent.class, ExtensionGenerator.class)) {
+                        if (isAnnotated(visit, ExtensionComponent.class, ExtensionGenerator.class)) {
                             try {
                                 ExtensionGenerator generator = visit.asSubclass(ExtensionGenerator.class).newInstance();
                                 generator.generate(context, logger, writer, targets);

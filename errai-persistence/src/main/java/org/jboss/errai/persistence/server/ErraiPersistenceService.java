@@ -25,14 +25,10 @@ public class ErraiPersistenceService implements MessageCallback {
                     Class<?> clazz = Class.forName(type);
                     Object v = emFactory.createEntityManager().find(clazz, id);
 
-                    
-
                 }
                 catch (ClassNotFoundException e) {
                     // handle this error at some point.
                 }
-
-
         }
     }
 }

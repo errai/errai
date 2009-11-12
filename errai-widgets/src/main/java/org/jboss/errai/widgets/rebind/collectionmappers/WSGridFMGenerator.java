@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 public class WSGridFMGenerator implements FieldMapperGenerator {
-    public String generateFieldMapperGenerator(TypeOracle typeOracle, String targetWidget, String targetType, String fieldName) {
+    public String generateFieldMapperGenerator(TypeOracle typeOracle, String targetWidget, String targetType, String targetFieldType, String fieldName) {
         InputStream istream = this.getClass().getResourceAsStream("WSGridFieldMappers.mv");
         Map<String, Object> vars = new HashMap<String, Object>();
         vars.put("typeOracle", typeOracle);
@@ -23,6 +23,10 @@ public class WSGridFMGenerator implements FieldMapperGenerator {
         vars.put("fieldName", fieldName);
 
         return (String) TemplateRuntime.eval(istream, null, new MapVariableResolverFactory(vars), null);
+    }
+
+    public String generateValueExtractorStatement(TypeOracle oracle, String targetWidget, String targetType, String targetFieldType, String fieldName) {
+        return "";
     }
 
     public String init(TypeOracle oracle, String targetWidget, String targetType, String variable, List<JField> fields) {

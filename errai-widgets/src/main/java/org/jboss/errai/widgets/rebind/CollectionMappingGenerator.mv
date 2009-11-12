@@ -8,6 +8,6 @@
 @{fieldMapper.init(typeOracle, targetWidget, targetType, variableName, fieldsToMap)}
 
 @{variableName}.setFields(new org.jboss.errai.widgets.client.mapping.FieldMapper[] {@foreach{targetField : fieldsToMap}
-      @{fieldMapper.generateFieldMapperGenerator(typeOracle, targetWidget, targetType, targetField.getName())}
+      @{fieldMapper.generateFieldMapperGenerator(typeOracle, targetWidget, targetType, null, targetField.getName())}
   @end{','}
 });

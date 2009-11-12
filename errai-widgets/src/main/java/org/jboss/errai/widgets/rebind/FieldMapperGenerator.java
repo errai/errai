@@ -12,6 +12,14 @@ public interface FieldMapperGenerator {
             TypeOracle oracle,
             String targetWidget,
             String targetType,
+            String targetFieldType,
+            String fieldName);
+
+    public String generateValueExtractorStatement(
+            TypeOracle oracle,
+            String targetWidget,
+            String targetType,
+            String targetFieldType,
             String fieldName);
 
     public String init(

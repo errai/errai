@@ -4,10 +4,12 @@
 }
 new org.jboss.errai.widgets.client.mapping.FieldMapper<@{targetWidget}, @{fieldType}, @{targetType}>() {
     public @{fieldType} getFieldValue(@{targetWidget} w, @{targetType} value) {
-        w.setText(String.valueOf(value.@{getter}));
+        @{fieldType} val = String.valueOf(value.@{getter}());
+        w.setText(val);
+        return val;
     }
 
-    public void setFieldValue(@{targetWidget} widget, @{targetType} value) {
-        value.@{setter}(org.jboss.errai.bus.client.types.TypeHandlerFactory.convert(String.class, @{fieldType}.class, value));
+    public void setFieldValue(@{fieldType} fieldValue, @{targetType} value) {
+        value.@{setter}(org.jboss.errai.common.client.types.TypeHandlerFactory.convert(String.class, @{fieldType}.class, fieldValue));
     }
 }
