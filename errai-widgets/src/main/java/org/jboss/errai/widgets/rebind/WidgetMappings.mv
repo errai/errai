@@ -11,14 +11,12 @@ final org.jboss.errai.widgets.client.mapping.FieldMapper[] fieldMappers = new or
 };
 
 @{variableName}.setFields(fieldMappers);
-
-@code{count = 0;}
-@foreach{fld : fieldIndexPositions}
+@code{count = 0;}@foreach{fld : fieldIndexPositions}
+    if (widget.@{fld[0]} == null) {
+        throw new RuntimeException("Target field '@{fld[0]}' is null. If you are using UIBinder, you must apply UIBindings *before* you map your widgets");
+    }
     widget.@{fld[0]}.addChangeHandler(new com.google.gwt.event.dom.client.ChangeHandler() {
         public void onChange(com.google.gwt.event.dom.client.ChangeEvent event) {
             fieldMappers[@{count}].setFieldValue(widget.@{fld[0]}.@{fld[1]}, widget.@{entityFieldName});
         }
-    });
-
-@code{count++;}
-@end{}
+    });@code{count++;}@end{}
