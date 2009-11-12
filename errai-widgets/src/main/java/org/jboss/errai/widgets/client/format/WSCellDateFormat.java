@@ -69,7 +69,7 @@ public class WSCellDateFormat extends WSCellFormatter<Date> {
     public void setValue(Date date) {
         notifyCellUpdate(date);
         this.date = date;
-        html.setHTML(DateTimeFormat.getFormat(formatPattern).format(date));
+        if (date != null) html.setHTML(DateTimeFormat.getFormat(formatPattern).format(date));
         notifyCellAfterUpdate();
     }
 
@@ -80,7 +80,7 @@ public class WSCellDateFormat extends WSCellFormatter<Date> {
 
     @Override
     public String getTextValue() {
-        return valueOf(date.getTime());
+        return date == null ? null : valueOf(date.getTime());
     }
 
 

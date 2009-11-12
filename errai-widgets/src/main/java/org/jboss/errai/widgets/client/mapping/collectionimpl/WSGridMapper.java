@@ -42,6 +42,8 @@ public class WSGridMapper<V extends List<X>, X> extends CollectionWidgetMapper<W
 
     @Override
     public void map(V list) {
+        grid.clear();
+        
         this.list = list;
 
         if (grid.getCols() == 0) {
