@@ -4,12 +4,10 @@ org.jboss.errai.widgets.client.mapping.WidgetMapper @{variableName} = new org.jb
 @foreach{init : initializers}
     @{init}
 @end{}
-
 final org.jboss.errai.widgets.client.mapping.FieldMapper[] fieldMappers = new org.jboss.errai.widgets.client.mapping.FieldMapper[] {@foreach{binding : bindings}
        @{binding}
   @end{','}
 };
-
 @{variableName}.setFields(fieldMappers);
 @code{count = 0;}@foreach{fld : fieldIndexPositions}
     if (widget.@{fld[0]} == null) {

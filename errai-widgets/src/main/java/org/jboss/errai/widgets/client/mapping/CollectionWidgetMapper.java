@@ -8,4 +8,5 @@ import java.util.List;
 public abstract class CollectionWidgetMapper<T extends Widget, F, V> extends WidgetMapper<T, V> {
     @Override
     public abstract void map(V entity);
+  
 }

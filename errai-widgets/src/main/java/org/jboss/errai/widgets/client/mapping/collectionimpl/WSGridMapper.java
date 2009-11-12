@@ -39,7 +39,6 @@ public class WSGridMapper<V extends List<X>, X> extends CollectionWidgetMapper<W
         }
     };
 
-
     @Override
     public void map(V list) {
         grid.clear();
@@ -64,5 +63,10 @@ public class WSGridMapper<V extends List<X>, X> extends CollectionWidgetMapper<W
         for (X o : list) {
             mapper.mapRow(row++, fields, grid, o);
         }
+    }
+
+    public X getSelected() {
+        int currSelRow = grid.getSelectionList().iterator().next().getOriginalRow();
+        return list.get(currSelRow);
     }
 }
