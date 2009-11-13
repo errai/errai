@@ -67,11 +67,21 @@ public class WorkPanel extends Panel {
     }
 
     public int getPanelWidth() {
-        return w == 0 ? getOffsetWidth() : w;
+        return w == 0 ? super.getOffsetWidth() : w;
     }
 
     public int getPanelHeight() {
-        return h == 0 ? getOffsetHeight() - titleInternal.getOffsetHeight() : h;
+        return h == 0 ? super.getOffsetHeight() - titleInternal.getOffsetHeight() : h;
+    }
+
+    @Override
+    public int getOffsetWidth() {
+        return getPanelWidth();
+    }
+
+    @Override
+    public int getOffsetHeight() {
+        return getPanelHeight();
     }
 
     @Override
