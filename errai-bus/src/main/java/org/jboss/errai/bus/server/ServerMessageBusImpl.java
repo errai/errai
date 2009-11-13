@@ -6,7 +6,6 @@ import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
-import org.jboss.errai.bus.client.protocols.SecurityParts;
 import org.jboss.errai.bus.server.util.ServerBusUtils;
 
 import javax.servlet.http.HttpSession;
@@ -194,11 +193,13 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 catch (Exception e) {
                     e.printStackTrace();
 
-                    ConversationMessage.create(message)
-                            .toSubject("ClientErrorService")
-                            .set(MessageParts.ErrorMessage, "Service '" + c.getClass().getName()
-                                    + "' threw an exception:" + e.getMessage() + " (see server log for stacktrace)")
-                            .sendNowWith(this);
+                    if (message.hasResource("Session")) {
+                        ConversationMessage.create(message)
+                                .toSubject("ClientErrorService")
+                                .set(MessageParts.ErrorMessage, "Service '" + c.getClass().getName()
+                                        + "' threw an exception:" + e.getMessage() + " (see server log for stacktrace)")
+                                .sendNowWith(this);
+                    }
                 }
             }
         }
@@ -231,7 +232,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                     return message;
                 }
             });
-        } else {
+        }
+        else {
             throw new NoSubscribersToDeliverTo("for: " + subject);
         }
     }
@@ -239,9 +241,11 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     public void send(CommandMessage message) {
         if (message.hasResource("Session")) {
             send((String) getSession(message).getAttribute(WS_SESSION_ID), message.getSubject(), message);
-        } else if (message.hasPart(MessageParts.SessionID)) {
+        }
+        else if (message.hasPart(MessageParts.SessionID)) {
             send(message.get(String.class, MessageParts.SessionID), message.getSubject(), message);
-        } else {
+        }
+        else {
             sendGlobal(message);
         }
     }

@@ -5,23 +5,23 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Command;
-import static com.google.gwt.user.client.DeferredCommand.addCommand;
 import com.google.gwt.user.client.Event;
-import static com.google.gwt.user.client.Event.addNativePreviewHandler;
 import com.google.gwt.user.client.Window;
-import static com.google.gwt.user.client.Window.getClientHeight;
-import static com.google.gwt.user.client.Window.getClientWidth;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.widgets.client.effects.Effects;
 import org.jboss.errai.widgets.client.icons.ErraiWidgetsImageBundle;
 import org.jboss.errai.widgets.client.layout.WSDropShadowLayout;
 import org.jboss.errai.widgets.client.util.LayoutUtil;
 
-import static java.lang.Math.round;
-
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+
+import static com.google.gwt.user.client.DeferredCommand.addCommand;
+import static com.google.gwt.user.client.Event.addNativePreviewHandler;
+import static com.google.gwt.user.client.Window.getClientHeight;
+import static com.google.gwt.user.client.Window.getClientWidth;
+import static java.lang.Math.round;
 
 /**
  * Workspace Window Panel implementation.  Provides basic popup window facilities.
@@ -70,7 +70,7 @@ public class WSWindowPanel extends Composite {
         titleArea.setCellVerticalAlignment(label, HasVerticalAlignment.ALIGN_MIDDLE);
 
         Button closeButton = new Button();
-        closeButton.setHTML("<img src='" + imageBundle.cancel().getURL() +"' />");
+        closeButton.setHTML("<img src='" + imageBundle.cancel().getURL() + "' />");
 
         closeButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
@@ -88,8 +88,7 @@ public class WSWindowPanel extends Composite {
         dockPanel.setCellVerticalAlignment(fPanel, HasVerticalAlignment.ALIGN_TOP);
         dockPanel.setCellHeight(fPanel, "25px");
 
-       initWidget(dropShadow);
-      //  setElement(dropShadow.getElement());
+        initWidget(dropShadow);
 
         setVisible(false);
         RootPanel.get().add(this);
@@ -145,7 +144,7 @@ public class WSWindowPanel extends Composite {
     public void show() {
         Effects.setOpacity(getElement(), 0);
         setVisible(true);
-        
+
         getElement().getStyle().setProperty("zIndex", zIndex++ + "");
         Effects.fade(getElement(), 0.5, 0, 100);
     }
@@ -159,8 +158,6 @@ public class WSWindowPanel extends Composite {
         Effects.fade(getElement(), 0.5, 0, 100);
 
     }
-
-
 
     public void add(Widget w) {
         dockPanel.add(w, DockPanel.CENTER);

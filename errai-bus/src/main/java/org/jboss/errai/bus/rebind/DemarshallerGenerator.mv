@@ -3,9 +3,7 @@
      # This class is used to generate the demarshaller code used by the ErraiBus
      # serialization engine.
 
-}
-
-@declare{'binding'}
+}@declare{'binding'}
     @if{targetType.isPrimitive()}
         @code{targetType = org.mvel2.util.ParseTools.boxPrimitive(targetType);}
         @if{Integer.isAssignableFrom(targetType)}
@@ -25,22 +23,19 @@
         n.@{org.mvel2.util.ReflectionUtil.getSetter(fieldName)}(org.jboss.errai.common.client.types.JSONTypeHelper.convert(o.get("@{fieldName}"), ${targetType.getName()}.class));
     @end{}
 @end{}
-
 org.jboss.errai.common.client.types.TypeDemarshallers.addDemarshaller(
     @{className}.class,
     new org.jboss.errai.common.client.types.Demarshaller<@{className}>() {
         public @{className} demarshall(com.google.gwt.json.client.JSONObject o) {
             try {
-            ${className} n = new @{className}();
+            @{className} n = new @{className}();
             @foreach{fieldName : fields}
                 @includeNamed{'binding'; setter=org.mvel2.util.ReflectionUtil.getSetter(fieldName); targetType=targetTypes.get(fieldName); fieldName=fieldName}
             @end{}
             return n;
             }
             catch (Exception e) {
-                System.out.println("demarshalling error");
-                e.printStackTrace();
-                return null;
+                throw new RuntimeException("could not demarshall type: @{className}", e);
             }
         }
     }
