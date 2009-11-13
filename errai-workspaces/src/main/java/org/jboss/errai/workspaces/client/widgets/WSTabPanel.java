@@ -32,7 +32,6 @@ public class WSTabPanel extends Composite {
         });
 
         initWidget(layoutPanel);
-
     }
 
 
