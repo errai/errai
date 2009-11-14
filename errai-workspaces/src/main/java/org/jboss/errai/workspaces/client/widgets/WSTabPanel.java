@@ -34,7 +34,6 @@ public class WSTabPanel extends Composite {
         initWidget(layoutPanel);
     }
 
-
     public void addSelectionHandler(SelectionHandler<Integer> handler) {
         tabBar.addSelectionHandler(handler);
     }
@@ -44,7 +43,6 @@ public class WSTabPanel extends Composite {
         tab.setPanel(this);
         deckPanel.add(panel);
     }
-
 
     public void remove(Widget tab) {
         remove(deckPanel.getWidgetIndex(tab));

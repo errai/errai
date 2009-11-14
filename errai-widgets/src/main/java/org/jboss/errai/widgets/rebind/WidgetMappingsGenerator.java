@@ -146,7 +146,6 @@ public class WidgetMappingsGenerator extends Generator {
         try {
             JClassType widgetMapper = typeOracle.getType(CollectionWidgetMapper.class.getName());
 
-
             for (JField currField : targetClass.getFields()) {
                 if (currField.isAnnotationPresent(WidgetMapper.class) && widgetMapper.isAssignableFrom(currField.getType().isClassOrInterface())) {
                     WidgetMapper mf = currField.getAnnotation(WidgetMapper.class);
@@ -278,7 +277,6 @@ public class WidgetMappingsGenerator extends Generator {
                                             fieldName) });
                         }
 
-
                         Map<String, Object> vars = new HashMap<String, Object>();
                         vars.put("typeOracle", typeOracle);
                         vars.put("variableName", varName);      
@@ -288,17 +286,11 @@ public class WidgetMappingsGenerator extends Generator {
                         vars.put("fieldIndexPositions", fieldIndexPositions);
                         vars.put("entityFieldName", entityFieldName);
 
-
                         String s = (String) TemplateRuntime.execute(entityMappingGen, vars);
-                        System.out.println("GENER8:" + s);
                         sourceWriter.print(s);
                     }
-
-
                 }
             }
-
-
         }
         catch (Exception e) {
             logger.log(TreeLogger.Type.ERROR, "failed to map field (does not exist)", e);

@@ -1668,7 +1668,7 @@ public class WSGrid extends Composite {
     public void setPreciseHeight(int height) {
         int offsetHeight = height - getTitlebarOffsetHeight() - 10;
         setHeight(height + "px");
-        dataGrid.getScrollPanel().setHeight((offsetHeight) + "px");
+        dataGrid.getScrollPanel().setHeight((offsetHeight - 20) + "px");
     }
 
     /**
