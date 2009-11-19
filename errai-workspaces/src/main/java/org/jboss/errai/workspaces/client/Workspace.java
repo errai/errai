@@ -18,6 +18,7 @@ import org.jboss.errai.bus.client.protocols.SecurityParts;
 import org.jboss.errai.bus.client.security.SecurityService;
 import org.jboss.errai.common.client.framework.AcceptsCallback;
 import org.jboss.errai.common.client.framework.WSComponent;
+import org.jboss.errai.widgets.client.WSAlert;
 import org.jboss.errai.widgets.client.WSModalDialog;
 import org.jboss.errai.widgets.client.WSWindowPanel;
 import org.jboss.errai.workspaces.client.framework.*;
@@ -31,7 +32,6 @@ import java.util.*;
  * Entry point classes define <code>onModuleLoad()</code>.
  */
 public class Workspace implements EntryPoint {
-
     public static PickupDragController dragController;
     private static WorkspaceLayout workspaceLayout;
     private static SecurityService securityService = new SecurityService();
@@ -64,7 +64,6 @@ public class Workspace implements EntryPoint {
         }
     };
 
-
     private Workspace() {
     }
 
@@ -80,7 +79,13 @@ public class Workspace implements EntryPoint {
             public void onSuccess() {
                 init("rootPanel");
             }
-        });        
+        });
+
+        GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
+            public void onUncaughtException(Throwable e) {
+                WSAlert.alert("An exception was thrown: " + e.getMessage() + " -- See console for more details.");
+            }
+        });
     }
 
     private void init(final String rootId) {

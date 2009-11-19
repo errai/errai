@@ -5,12 +5,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * Specifies that the field should be bound as a widget mapper class. WidgetMappers are responsible
- * for mapping a collection of many elements to a single, complex widget. 
- */
-@Target(ElementType.FIELD)
+@Target({ElementType.FIELD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface WidgetMapper {
+public @interface AddAllTo {
     String value();
 }

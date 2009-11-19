@@ -277,7 +277,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                         procIncomingPayload(response);
                     }
                     catch (Exception e) {
-                        showError("Problem decoding incoming message:", "None", e);
+                        e.printStackTrace();
+                        showError("Problem decoding incoming message:", response.getText(), e);
                     }
 
                     sendAll();

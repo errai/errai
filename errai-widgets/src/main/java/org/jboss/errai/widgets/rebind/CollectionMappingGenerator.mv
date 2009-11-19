@@ -5,9 +5,11 @@
 
 @{mapperClass.getName()}@{strTypeParms} @{variableName} = new @{mapperClass.getName()}@{strTypeParms}(widget.@{targetFieldName});
 
-@{fieldMapper.init(typeOracle, targetWidget, targetType, variableName, fieldsToMap)}
-
-@{variableName}.setFields(new org.jboss.errai.widgets.client.mapping.FieldMapper[] {@foreach{targetField : fieldsToMap}
-      @{fieldMapper.generateFieldMapperGenerator(typeOracle, targetWidget, targetType, null, targetField.getName())}
+@foreach{init : initializers}
+    @{init}
+@end{}
+final org.jboss.errai.widgets.client.mapping.FieldMapper[] fieldMappers = new org.jboss.errai.widgets.client.mapping.FieldMapper[] {@foreach{binding : bindings}
+       @{binding}
   @end{','}
-});
+};
+@{variableName}.setFields(fieldMappers);

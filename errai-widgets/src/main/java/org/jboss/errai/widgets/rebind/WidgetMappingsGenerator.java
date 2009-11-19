@@ -193,21 +193,56 @@ public class WidgetMappingsGenerator extends Generator {
                         }
                     }
 
+                    List<String> generatedInitializations = new LinkedList<String>();
+                    List<String> generatedBindings = new LinkedList<String>();
+
+                    FieldMapperGenerator g =
+                            getFieldMapper(widgetField.getType().getQualifiedSourceName());
+
+                    generatedInitializations.add(g.init(typeOracle, widgetField,
+                            jEntityTarget, varName, fieldsToMap));
+
+                    if (g == null) {
+                        throw new RuntimeException("Cannot generate mapper for widget: " + jEntityTarget.getName());
+                    }
+
+                    for (JField fld : fieldsToMap) {
+                        String fieldName = fld.getName();
+
+                        JField targetField = jEntityTarget.getField(fieldName);
+                        if (targetField == null) {
+                            throw new RuntimeException("The field '" + fieldName + "' does not correspond with a field in the class: "
+                                    + jEntityTarget.getQualifiedSourceName());
+                        }
+
+                        generatedBindings.add(
+                                g.generateFieldMapperGenerator(typeOracle,
+                                        widgetField,
+                                        jEntityTarget,
+                                        null,
+                                        targetField.getName()));
+                    }
+
+
                     Map<String, Object> vars = new HashMap<String, Object>();
                     vars.put("typeOracle", typeOracle);
                     vars.put("variableName", varName);
                     vars.put("strTypeParms", strTypeParms);
                     vars.put("targetWidget", widgetField.getType().getQualifiedSourceName());
                     vars.put("targetType", jEntityTarget.getQualifiedSourceName());
+                    vars.put("initializers", generatedInitializations);
+                    vars.put("bindings", generatedBindings);
                     vars.put("targetFieldName", widgetField.getName());
-                    vars.put("fieldsToMap", fieldsToMap);
 
                     String s = (String) TemplateRuntime.execute(mappingsGen, vars);
+                    System.out.println(s);
                     sourceWriter.print(s);
 
                     s = "widget." + currField.getName() + " = " + varName + ";";
 
                     sourceWriter.println(s);
+
+
                 } else if (currField.isAnnotationPresent(EntityMapped.class)) {
                     EntityMapped entityMappedA = currField.getAnnotation(EntityMapped.class);
 
@@ -232,54 +267,58 @@ public class WidgetMappingsGenerator extends Generator {
                         }
                     }
 
+                    /**
+                     * Generate the field mappings.
+                     */
                     for (Map.Entry<String, List<JField>> entry : toBeMapped.entrySet()) {
                         List<String> generatedInitializations = new LinkedList<String>();
                         List<String> generatedBindings = new LinkedList<String>();
                         ArrayList<String[]> fieldIndexPositions = new ArrayList<String[]>();
 
                         for (JField fld : entry.getValue()) {
-                           JClassType classType = fld.getType().isClassOrInterface();
+                            JClassType classType = fld.getType().isClassOrInterface();
 
-                           String fieldName = fld.getAnnotation(MapField.class).value();
-                           if ("".equals(fieldName)) {
-                               fieldName = fld.getName();
-                           }
+                            String fieldName = fld.getAnnotation(MapField.class).value();
+                            if ("".equals(fieldName)) {
+                                fieldName = fld.getName();
+                            }
 
-                           JField targetField = entityType.getField(fieldName);
-                           if (targetField == null) {
-                               throw new RuntimeException("The field '" + fieldName + "' does not correspond with a field in the class: "
-                                       + entityType.getQualifiedSourceName());
-                           }
+                            JField targetField = entityType.getField(fieldName);
+                            if (targetField == null) {
+                                throw new RuntimeException("The field '" + fieldName + "' does not correspond with a field in the class: "
+                                        + entityType.getQualifiedSourceName());
+                            }
 
-                           JClassType targetFieldType = targetField.getType().isClassOrInterface();
+                            JClassType targetFieldType = targetField.getType().isClassOrInterface();
 
-                           FieldMapperGenerator g =
-                                   getFieldMapper(classType.getQualifiedSourceName());
+                            FieldMapperGenerator g =
+                                    getFieldMapper(classType.getQualifiedSourceName());
 
                             if (g == null) {
                                 throw new RuntimeException("Cannot generate mapper for widget: " + classType.getName());
                             }
 
-                            generatedInitializations.add(g.init(typeOracle, entityFieldName,
-                                    entityType.getQualifiedSourceName(), null, null));
+                            generatedInitializations.add(g.init(typeOracle, currField,
+                                    entityType, null, null));
+
                             generatedBindings.add(
                                     g.generateFieldMapperGenerator(typeOracle,
-                                    classType.getQualifiedSourceName(),
-                                    entityType.getQualifiedSourceName(),
-                                    targetFieldType.getQualifiedSourceName(),
+                                            fld,
+                                            entityType,
+                                            targetField,
                                             fieldName));
 
-                            fieldIndexPositions.add(new String[] { fieldName,
+                            fieldIndexPositions.add(new String[]{fieldName,
                                     g.generateValueExtractorStatement(typeOracle,
-                                            classType.getQualifiedSourceName(),
-                                            entityType.getQualifiedSourceName(),
-                                            targetFieldType.getQualifiedSourceName(),
-                                            fieldName) });
+                                            fld,
+                                            entityType,
+                                            targetField,
+                                            fieldName)});
                         }
 
                         Map<String, Object> vars = new HashMap<String, Object>();
                         vars.put("typeOracle", typeOracle);
-                        vars.put("variableName", varName);      
+                        vars.put("variableName", varName);
                         vars.put("initializers", generatedInitializations);
                         vars.put("targetFieldName", entityFieldName);
                         vars.put("bindings", generatedBindings);

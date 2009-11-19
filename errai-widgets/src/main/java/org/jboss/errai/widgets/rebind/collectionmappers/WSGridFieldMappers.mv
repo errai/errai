@@ -1,5 +1,5 @@
 @code{
-    jtype = typeOracle.getType(targetType).getField(fieldName).getType().isClassOrInterface();
+    jtype = targetType.getField(fieldName).getType().isClassOrInterface();
     getter = org.mvel2.util.ReflectionUtil.getGetter(fieldName);
 
     cellFormatter = "";
@@ -23,12 +23,12 @@
         setValue = "cellValue.getTextValue()";
     }
 }
-new org.jboss.errai.widgets.client.mapping.FieldMapper<@{targetWidget}, @{cellFormatter}, @{targetType}>() {
-    public @{cellFormatter} getFieldValue(@{targetWidget} w, @{targetType} value) {
+new org.jboss.errai.widgets.client.mapping.FieldMapper<@{targetWidget}, @{cellFormatter}, @{targetTypeName}>() {
+    public @{cellFormatter} getFieldValue(@{targetWidget} w, @{targetTypeName} value) {
         return @if{getValue == empty}new @{cellFormatter}(value.@{getter}());@else{}@{getValue}@end{}
     }
 
-    public void setFieldValue(@{cellFormatter} cellValue, @{targetType} value) {
+    public void setFieldValue(@{cellFormatter} cellValue, @{targetTypeName} value) {
         value.@{org.mvel2.util.ReflectionUtil.getSetter(fieldName)}(@{setValue});
     }
 }

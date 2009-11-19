@@ -1,0 +1,15 @@
+@code{
+        getter = org.mvel2.util.ReflectionUtil.getGetter(fieldName);
+        setter = org.mvel2.util.ReflectionUtil.getSetter(fieldName);
+}
+new org.jboss.errai.widgets.client.mapping.FieldMapper<@{targetWidget}, @{fieldType}, @{targetType}>() {
+    public @{fieldType} getFieldValue(@{targetWidget} w, @{targetType} value) {
+        @{fieldType} val = String.valueOf(value.@{getter}());
+        w.setText(val);
+        return val;
+    }
+
+    public void setFieldValue(@{fieldType} fieldValue, @{targetType} value) {
+        value.@{setter}(org.jboss.errai.common.client.types.TypeHandlerFactory.convert(String.class, @{fieldType}.class, fieldValue));
+    }
+}

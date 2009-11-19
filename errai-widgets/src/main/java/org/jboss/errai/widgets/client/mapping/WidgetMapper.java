@@ -35,7 +35,7 @@ public class WidgetMapper<T extends Widget, V> {
     }
 
     @SuppressWarnings({"unchecked"})
-    protected void fireAreChangeHandlers(Object o) {
+    protected void fireAllChangeHandlers(Object o) {
         if (changeHandlers == null) return;
 
         for (MapperChangeHandler handler : changeHandlers) {

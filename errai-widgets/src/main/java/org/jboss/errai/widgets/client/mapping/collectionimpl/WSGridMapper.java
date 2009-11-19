@@ -14,17 +14,20 @@ import java.util.List;
 public class WSGridMapper<V extends List<X>, X> extends CollectionWidgetMapper<WSGrid, WSCellFormatter, V> {
     private WSGrid grid;
     private List<X> list;
+    private boolean noupdate = false;
 
     public WSGridMapper(WSGrid grid) {
         this.grid = grid;
         this.grid.addAfterCellChangeHandler(new ChangeHandler() {
             public void onChange(ChangeEvent event) {
+                if (noupdate) return;
+
                 CellChangeEvent evt = (CellChangeEvent) event;
 
                 if (list != null) {
                     X v = list.get(evt.getCell().getOriginalRow());
                     fields[evt.getCell().getCol()].setFieldValue(evt.getCell().getCellFormat(), v);
-                    fireAreChangeHandlers(v);
+                    fireAllChangeHandlers(v);
                 }
             }
         });
@@ -41,6 +44,7 @@ public class WSGridMapper<V extends List<X>, X> extends CollectionWidgetMapper<W
 
     @Override
     public void map(V list) {
+        noupdate = true;
         grid.clear();
         
         this.list = list;
@@ -63,6 +67,8 @@ public class WSGridMapper<V extends List<X>, X> extends CollectionWidgetMapper<W
         for (X o : list) {
             mapper.mapRow(row++, fields, grid, o);
         }
+
+        noupdate = false;
     }
 
     public X getSelected() {
