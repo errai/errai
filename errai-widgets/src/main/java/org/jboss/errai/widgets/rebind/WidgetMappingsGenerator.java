@@ -1,13 +1,27 @@
+/*
+ * Copyright 2009 JBoss, a divison Red Hat, Inc
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.jboss.errai.widgets.rebind;
 
 import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.JField;
-import com.google.gwt.core.ext.typeinfo.JParameterizedType;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import com.google.gwt.core.ext.typeinfo.*;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
 import org.jboss.errai.widgets.client.mapping.CollectionWidgetMapper;
@@ -53,10 +67,8 @@ public class WidgetMappingsGenerator extends Generator {
         istream = this.getClass().getResourceAsStream("WidgetMappings.mv");
         entityMappingGen = TemplateCompiler.compileTemplate(istream, null);
 
-
         try {
             // get classType and save instance variables
-
             JClassType classType = typeOracle.getType(typeName);
             JClassType widgetBindingIface = typeOracle.getType(ErraiWidgetBinding.class.getName());
 
@@ -92,7 +104,7 @@ public class WidgetMappingsGenerator extends Generator {
             generateClass(logger, context);
 
         }
-        catch (Exception e) {
+        catch (Throwable e) {
 
             // record sendNowWith logger that Map generation threw an exception
             logger.log(TreeLogger.ERROR, "Error generating extensions", e);
@@ -103,19 +115,14 @@ public class WidgetMappingsGenerator extends Generator {
         return packageName + "." + className;
     }
 
-    /**
-     * Generate source code for new class. Class extends
-     * <code>HashMap</code>.
-     *
-     * @param logger  Logger object
-     * @param context Generator context
-     */
     private void generateClass(TreeLogger logger, GeneratorContext context) {
         // get print writer that receives the source code
         PrintWriter printWriter = context.tryCreate(logger, packageName, className);
         // print writer if null, source code has ALREADY been generated,
 
-        if (printWriter == null) return;
+        if (printWriter == null) {
+            throw new RuntimeException("PrintWriter was not created for: " + packageName + "." + className);
+        }
 
         // init composer, set class properties, create source writer
         ClassSourceFileComposerFactory composer = new ClassSourceFileComposerFactory(packageName,
@@ -164,7 +171,6 @@ public class WidgetMappingsGenerator extends Generator {
 
                     // The last type arg shall always be our domain object type per this spec.
                     JClassType jEntityTarget = pType.getTypeArgs()[pType.getTypeArgs().length - 1];
-
                     String strTypeParms = generateTypeParmString(pType);
 
                     List<JField> fieldsToMap = new LinkedList<JField>();
@@ -200,7 +206,7 @@ public class WidgetMappingsGenerator extends Generator {
                             getFieldMapper(widgetField.getType().getQualifiedSourceName());
 
                     generatedInitializations.add(g.init(typeOracle, widgetField,
-                            jEntityTarget, varName, fieldsToMap));
+                            jEntityTarget, currField, null, varName, fieldsToMap));
 
                     if (g == null) {
                         throw new RuntimeException("Cannot generate mapper for widget: " + jEntityTarget.getName());
@@ -216,11 +222,8 @@ public class WidgetMappingsGenerator extends Generator {
                         }
 
                         generatedBindings.add(
-                                g.generateFieldMapperGenerator(typeOracle,
-                                        widgetField,
-                                        jEntityTarget,
-                                        null,
-                                        targetField.getName()));
+                                g.generateFieldMapperGenerator(typeOracle, widgetField, jEntityTarget, null, targetField)
+                        );
                     }
 
 
@@ -241,7 +244,6 @@ public class WidgetMappingsGenerator extends Generator {
                     s = "widget." + currField.getName() + " = " + varName + ";";
 
                     sourceWriter.println(s);
-
 
                 } else if (currField.isAnnotationPresent(EntityMapped.class)) {
                     EntityMapped entityMappedA = currField.getAnnotation(EntityMapped.class);
@@ -298,22 +300,25 @@ public class WidgetMappingsGenerator extends Generator {
                                 throw new RuntimeException("Cannot generate mapper for widget: " + classType.getName());
                             }
 
-                            generatedInitializations.add(g.init(typeOracle, currField,
-                                    entityType, null, null));
+                            generatedInitializations.add(g.init(typeOracle, fld,
+                                    entityType, targetField, currField, null, null));
 
                             generatedBindings.add(
                                     g.generateFieldMapperGenerator(typeOracle,
                                             fld,
                                             entityType,
                                             targetField,
-                                            fieldName));
+                                            currField));
 
-                            fieldIndexPositions.add(new String[]{fieldName,
-                                    g.generateValueExtractorStatement(typeOracle,
-                                            fld,
-                                            entityType,
-                                            targetField,
-                                            fieldName)});
+
+                            if (getType(typeOracle, Widget.class).isAssignableFrom(classType)) {
+                                fieldIndexPositions.add(new String[]{fieldName,
+                                        g.generateValueExtractorStatement(typeOracle,
+                                                fld,
+                                                entityType,
+                                                targetField,
+                                                currField)});
+                            }
                         }
 
                         Map<String, Object> vars = new HashMap<String, Object>();
@@ -326,6 +331,9 @@ public class WidgetMappingsGenerator extends Generator {
                         vars.put("entityFieldName", entityFieldName);
 
                         String s = (String) TemplateRuntime.execute(entityMappingGen, vars);
+
+                        System.out.println(s);
+
                         sourceWriter.print(s);
                     }
                 }
@@ -354,6 +362,15 @@ public class WidgetMappingsGenerator extends Generator {
             if ((i + 1) < typeArgsLength) builder.append(",");
         }
         return builder.append(">").toString();
+    }
+
+    private JClassType getType(TypeOracle oracle, Class cls) {
+        try {
+            return oracle.getType(cls.getName());
+        }
+        catch (NotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
