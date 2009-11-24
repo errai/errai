@@ -27,7 +27,12 @@ import org.jboss.errai.bus.client.protocols.MessageParts;
 
 import java.util.*;
 
+import static org.jboss.errai.bus.client.CommandMessage.create;
 import static org.jboss.errai.bus.client.json.JSONUtilCli.decodePayload;
+import static org.jboss.errai.bus.client.json.JSONUtilCli.encodeMap;
+import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteSubscribe;
+import static org.jboss.errai.bus.client.protocols.MessageParts.ReplyTo;
+import static org.jboss.errai.bus.client.protocols.MessageParts.Subject;
 
 public class ClientMessageBusImpl implements ClientMessageBus {
     private static final String SERVICE_ENTRY_POINT = "erraiBus";
@@ -127,7 +132,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     public void conversationWith(final CommandMessage message, final MessageCallback callback) {
         final String tempSubject = "temp:Conversation:" + (++conversationCounter);
 
-        message.set(MessageParts.ReplyTo, tempSubject);
+        message.set(ReplyTo, tempSubject);
 
         subscribe(tempSubject, new MessageCallback() {
             public void callback(CommandMessage message) {
@@ -157,16 +162,16 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         if (!initialized) {
             postInitTasks.add(new Runnable() {
                 public void run() {
-                    store(subject, JSONUtilCli.encodeMap(message));
+                    store(subject, encodeMap(message));
                 }
             });
         } else {
-            store(subject, JSONUtilCli.encodeMap(message));
+            store(subject, encodeMap(message));
         }
     }
 
     public void send(String subject, Enum commandType) {
-        send(subject, CommandMessage.create(commandType));
+        send(subject, create(commandType));
     }
 
     public void send(CommandMessage message) {
@@ -179,7 +184,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
 
     public void enqueueForRemoteTransmit(CommandMessage message) {
-        outgoingQueue.add(JSONUtilCli.encodeMap(message.getParts()));
+        outgoingQueue.add(encodeMap(message.getParts()));
         sendAll();
     }
 
@@ -241,6 +246,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                         if (outgoingQueue.isEmpty()) {
                             cancel();
                         }
+
                         sendAll();
 
                         /**
@@ -323,7 +329,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             public void callback(CommandMessage message) {
                 switch (BusCommands.valueOf(message.getCommandType())) {
                     case RemoteSubscribe:
-                        subscribe(message.get(String.class, MessageParts.Subject), new MessageCallback() {
+                        subscribe(message.get(String.class, Subject), new MessageCallback() {
                             public void callback(CommandMessage message) {
                                 enqueueForRemoteTransmit(message);
                             }
@@ -331,16 +337,16 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                         break;
 
                     case RemoteUnsubscribe:
-                        unsubscribeAll(message.get(String.class, MessageParts.Subject));
+                        unsubscribeAll(message.get(String.class, Subject));
                         break;
 
                     case FinishStateSync:
                         for (String s : subscriptions.keySet()) {
                             if (s.startsWith("local:")) continue;
 
-                            CommandMessage.create(BusCommands.RemoteSubscribe)
+                            create(RemoteSubscribe)
                                     .toSubject("ServerBus")
-                                    .set(MessageParts.Subject, s)
+                                    .set(Subject, s)
                                     .sendNowWith(self);
                         }
 
@@ -363,9 +369,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 if (event.getSubject().startsWith("local:")) {
                     return;
                 }
-                CommandMessage.create(BusCommands.RemoteSubscribe)
+                create(RemoteSubscribe)
                         .toSubject("ServerBus")
-                        .set(MessageParts.Subject, event.getSubject())
+                        .set(Subject, event.getSubject())
                         .sendNowWith(self);
             }
         });
@@ -376,9 +382,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
         addUnsubscribeListener(new UnsubscribeListener() {
             public void onUnsubscribe(SubscriptionEvent event) {
-                CommandMessage.create(BusCommands.RemoteUnsubscribe)
+                create(BusCommands.RemoteUnsubscribe)
                         .toSubject("ServerBus")
-                        .set(MessageParts.Subject, event.getSubject())
+                        .set(Subject, event.getSubject())
                         .sendNowWith(self);
             }
         });
@@ -450,7 +456,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                             new RequestCallback() {
                                 public void onError(Request request, Throwable throwable) {
                                     block = false;
-
                                     showError("Communication Error", "None", throwable);
                                     schedule(1);
                                 }

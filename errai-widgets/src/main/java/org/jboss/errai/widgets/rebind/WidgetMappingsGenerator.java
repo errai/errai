@@ -55,6 +55,7 @@ public class WidgetMappingsGenerator extends Generator {
 
     private CompiledTemplate mappingsGen;
     private CompiledTemplate entityMappingGen;
+    private CompiledTemplate addAllToGen;
 
     @Override
     public String generate(TreeLogger logger, GeneratorContext context, String typeName) throws UnableToCompleteException {
@@ -66,6 +67,9 @@ public class WidgetMappingsGenerator extends Generator {
 
         istream = this.getClass().getResourceAsStream("WidgetMappings.mv");
         entityMappingGen = TemplateCompiler.compileTemplate(istream, null);
+
+        istream = this.getClass().getResourceAsStream("AddAllTo.mv");
+        addAllToGen = TemplateCompiler.compileTemplate(istream, null);
 
         try {
             // get classType and save instance variables
@@ -128,6 +132,9 @@ public class WidgetMappingsGenerator extends Generator {
         ClassSourceFileComposerFactory composer = new ClassSourceFileComposerFactory(packageName,
                 className);
         composer.addImplementedInterface(typeName);
+        composer.addImport(Widget.class.getName());
+        
+
 
         SourceWriter sourceWriter = composer.createSourceWriter(context, printWriter);
 
@@ -139,7 +146,6 @@ public class WidgetMappingsGenerator extends Generator {
 
         // commit generated class
         context.commit(logger, printWriter);
-
     }
 
     private void generateExtensions(GeneratorContext context, TreeLogger logger, SourceWriter sourceWriter) {
@@ -336,6 +342,19 @@ public class WidgetMappingsGenerator extends Generator {
 
                         sourceWriter.print(s);
                     }
+                } else if (currField.isAnnotationPresent(AddAllTo.class)) {
+                    String copyToField = currField.getAnnotation(AddAllTo.class).value();
+                    String copyFromField = currField.getName();
+
+                    Map<String, Object> vars = new HashMap<String, Object>();
+                    vars.put("copyToField", copyToField);
+                    vars.put("copyFromField", copyFromField);
+
+                    String s = (String) TemplateRuntime.execute(addAllToGen, vars);
+
+                    System.out.println(s);
+
+                    sourceWriter.print(s);
                 }
             }
         }
@@ -372,5 +391,4 @@ public class WidgetMappingsGenerator extends Generator {
             throw new RuntimeException(e);
         }
     }
-
 }

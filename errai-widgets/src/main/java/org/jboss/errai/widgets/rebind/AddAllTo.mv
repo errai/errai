@@ -1,0 +1,3 @@
+for (Widget w : widget.@{copyFromField}) {
+    widget.@{copyToField}.add(w);
+}

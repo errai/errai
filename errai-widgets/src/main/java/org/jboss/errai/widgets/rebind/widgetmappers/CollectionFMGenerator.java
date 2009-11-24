@@ -65,20 +65,30 @@ public class CollectionFMGenerator implements FieldMapperGenerator {
         gen.append("   widget.").append(targetWidgetField.getName()).append(" = new ");
         if (getType(oracle, Set.class).isAssignableFrom(widgetCollectionType)) {
             gen.append(HashSet.class.getName());
-        }
-        else if (getType(oracle, List.class).isAssignableFrom(widgetCollectionType)) {
+        } else if (getType(oracle, List.class).isAssignableFrom(widgetCollectionType)) {
             gen.append(ArrayList.class.getName());
         }
 
         gen.append("();\n");
 
-        gen.append("for (Object o : widget.").append(targetEntityField.getName()).append(".")
-                .append(getGetter(targetEntityMember.getName()))
-                .append("()) {\n")
-                .append("widget.").append(targetWidgetField.getName()).append(".add(new ")
-                .append(widgetType.getQualifiedSourceName()).append("(String.valueOf(o)));\n");
-        gen.append("}\n}\n");
+        gen.append("if (widget.").append(targetEntityField.getName()).append(" == null)").append(" {\n")
+                .append("throw new RuntimeException(\"Target field '").append(targetEntityField.getName()).append("' is null\");\n");
+        gen.append("}\n");
 
+        gen.append("if (widget.").append(targetEntityField.getName()).append(".")
+                .append(getGetter(targetEntityMember.getName())).append("() == null) {\n")
+                .append("throw new RuntimeException(\"Target field '").append(targetEntityField.getName())
+                .append(".").append(targetEntityMember.getName()).append("' is null\");\n");
+        gen.append("}\n");
+
+//        gen.append("for (Object o : widget.").append(targetEntityField.getName()).append(".")
+//                .append(getGetter(targetEntityMember.getName()))
+//                .append("()) {\n")
+//                .append("widget.").append(targetWidgetField.getName()).append(".add(new ")
+//                .append(widgetType.getQualifiedSourceName()).append("(String.valueOf(o)));\n");
+//        gen.append("}\n");
+
+        gen.append("}\n");
 
         varName = targetEntityField.getType().isClassOrInterface().getName() + targetWidgetField.getName() + "Mapper";
         gen.append("final ").append(FieldMapper.class.getName()).append(" ").append(varName).append(" = ");
@@ -99,7 +109,7 @@ public class CollectionFMGenerator implements FieldMapperGenerator {
             gen.append("            wid.setValue(false);\n");
             gen.append("        }\n");
         }
-                
+
         gen.append("        }\n");
         gen.append("return w;\n");
         gen.append("     }\n");
