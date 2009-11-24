@@ -338,7 +338,7 @@ public class WidgetMappingsGenerator extends Generator {
 
                         String s = (String) TemplateRuntime.execute(entityMappingGen, vars);
 
-                        System.out.println(s);
+                    //    System.out.println(s);
 
                         sourceWriter.print(s);
                     }
@@ -352,7 +352,7 @@ public class WidgetMappingsGenerator extends Generator {
 
                     String s = (String) TemplateRuntime.execute(addAllToGen, vars);
 
-                    System.out.println(s);
+               //     System.out.println(s);
 
                     sourceWriter.print(s);
                 }
