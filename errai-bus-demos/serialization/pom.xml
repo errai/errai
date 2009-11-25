@@ -40,6 +40,100 @@
             <artifactId>guice</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.google.code.guice</groupId>
+            <artifactId>guice-servlet</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.guice</groupId>
+            <artifactId>guice</artifactId>
+            <classifier>aopalliance</classifier>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mvel</groupId>
+            <artifactId>mvel2</artifactId>            
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
+
+    <build>
+        <outputDirectory>war/WEB-INF/classes</outputDirectory>
+        <plugins>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>gwt-maven-plugin</artifactId>
+                <version>${gwt.maven}</version>
+                <configuration>
+                    <inplace>true</inplace>
+                    <logLevel>DEBUG</logLevel>
+                    <runTarget>Serialization.html</runTarget>
+                    <warSourceDirectory>war</warSourceDirectory>
+                    <extraJvmArgs>-Xmx512m</extraJvmArgs>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <warSourceDirectory>war</warSourceDirectory>
+                    <webappDirectory>war</webappDirectory>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>2.2</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.2</version>
+                <executions>
+                    <execution>
+                        <id>clean.war</id>
+                        <phase>clean</phase>
+                        <configuration>
+                            <tasks>
+                                <!--
+                                    The gwt-maven-plugin use the war source folder
+                                    as it's build directory. We need to cleanup after we'd run
+                                    the plugin and remove all GWT related artifacts that are required
+                                    to run the hosted mode.
+                                -->
+                                <delete>
+                                    <fileset dir="war/WEB-INF/classes"
+                                             includes="**/*.java,**/*.class,**/*.png, **/*.gif,**/*.jpg,**/*.jar, ErraiApp.properties" />
+                                    <fileset dir="war/WEB-INF/lib"
+                                             includes="**/*"
+                                             excludes="KEEPME.txt"/>
+                                </delete>
+
+                                <delete dir="war/WEB-INF/classes/org" />
+                                <delete dir="war/Serialization" />
+                                <delete dir="target"/>
+
+                            </tasks>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
 
 </project>
