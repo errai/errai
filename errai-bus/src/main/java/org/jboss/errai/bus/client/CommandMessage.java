@@ -22,14 +22,50 @@ import org.jboss.errai.common.client.types.TypeHandlerFactory;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * CommandMessage represents a message payload.  It implements a builder (or fluent) API which is used for constructing
+ * sendable messages.<br/>
+ * <br/>
+ * <strong>Example Message:</strong>
+ * <tt><pre>
+ * CommandMessage msg = CommandMessage.create()
+ *                          .toSubject("Foo")
+ *                          .set("Text", "I like chocolate cake.");
+ * </pre></tt><br/>
+ * You can transmit a message using the the <tt>sendNowWith()</tt> method by providing an instance of
+ * {@link org.jboss.errai.bus.client.MessageBus}.<br/>
+ * <br/>
+ * Messages can be contructed using user-defined standard protocols through the use of enumerations. Both
+ * <tt>commandType</em> and message parts can be defined through the use of enumerations.  This helps create
+ * strongly-defined protocols for communicating with services.  For instance:
+ * <tt><pre>
+ * public enum LoginParts {
+ *    Username, Password
+ * }
+ * </pre></tt><br/>
+ * .. and ..
+ * <tt><pre>
+ * public enum LoginCommands {
+ *    Login, Logout
+ * }
+ * </pre></tt><br/>
+ * These enumerations can than be directly used to build messages and decode incoming messages by a service. For example:
+ * <tt><pre>
+ *  CommandMessage.create()
+ *      .set
+ *
+ * @see org.jboss.errai.bus.client.ConversationMessage
+ */
 public class CommandMessage {
     protected Map<String, Object> parts = new HashMap<String, Object>();
     protected Map<String, Object> resources;
 
+    @Deprecated
     public static CommandMessage create(String commandType) {
         return new CommandMessage(commandType);
     }
 
+    @Deprecated
     public static CommandMessage create(Enum commandType) {
         return new CommandMessage(commandType);
     }
@@ -70,11 +106,23 @@ public class CommandMessage {
         return this;
     }
 
+    public CommandMessage command(Enum type) {
+        parts.put(MessageParts.CommandType.name(), type.name());
+        return this;
+    }
+
+    public CommandMessage command(String type) {
+        parts.put(MessageParts.CommandType.name(), type);
+        return this;
+    }
+
+    @Deprecated
     public CommandMessage setCommandType(Enum type) {
         parts.put(MessageParts.CommandType.name(), type.name());
         return this;
     }
 
+    @Deprecated
     public CommandMessage setCommandType(String type) {
         parts.put(MessageParts.CommandType.name(), type);
         return this;

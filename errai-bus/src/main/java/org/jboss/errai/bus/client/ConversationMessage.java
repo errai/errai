@@ -20,6 +20,21 @@ import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
 
 public class ConversationMessage extends CommandMessage {
+
+    @Deprecated
+    public static CommandMessage create(String commandType) {
+        throw new BadlyFormedMessageException("You must create a ConversationMessage by specifying an incoming message.");
+    }
+
+    @Deprecated
+    public static CommandMessage create(Enum commandType) {
+        throw new BadlyFormedMessageException("You must create a ConversationMessage by specifying an incoming message.");
+    }
+
+    public static CommandMessage create() {
+        throw new BadlyFormedMessageException("You must create a ConversationMessage by specifying an incoming message.");
+    }
+
     public static ConversationMessage create(String commandType, CommandMessage inReplyTo) {
         return new ConversationMessage(commandType, inReplyTo);
     }
@@ -45,7 +60,6 @@ public class ConversationMessage extends CommandMessage {
         }
     }
 
-
     public ConversationMessage(Enum commandType, CommandMessage inReplyTo) {
         this(inReplyTo);
         setCommandType(commandType.name());
@@ -55,7 +69,6 @@ public class ConversationMessage extends CommandMessage {
         this(inReplyTo);
         setCommandType(commandType);
     }
-
 
     public ConversationMessage toSubject(String subject) {
         parts.put(MessageParts.ToSubject.name(), subject);
@@ -73,6 +86,7 @@ public class ConversationMessage extends CommandMessage {
 
     /**
      * Copy the same value from the specified message into this message.
+     *
      * @param part
      * @param message
      * @return

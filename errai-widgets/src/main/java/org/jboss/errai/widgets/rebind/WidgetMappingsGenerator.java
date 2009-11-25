@@ -244,7 +244,7 @@ public class WidgetMappingsGenerator extends Generator {
                     vars.put("targetFieldName", widgetField.getName());
 
                     String s = (String) TemplateRuntime.execute(mappingsGen, vars);
-                    System.out.println(s);
+                //    System.out.println(s);
                     sourceWriter.print(s);
 
                     s = "widget." + currField.getName() + " = " + varName + ";";
@@ -338,8 +338,6 @@ public class WidgetMappingsGenerator extends Generator {
 
                         String s = (String) TemplateRuntime.execute(entityMappingGen, vars);
 
-                    //    System.out.println(s);
-
                         sourceWriter.print(s);
                     }
                 } else if (currField.isAnnotationPresent(AddAllTo.class)) {
@@ -351,8 +349,6 @@ public class WidgetMappingsGenerator extends Generator {
                     vars.put("copyFromField", copyFromField);
 
                     String s = (String) TemplateRuntime.execute(addAllToGen, vars);
-
-               //     System.out.println(s);
 
                     sourceWriter.print(s);
                 }
