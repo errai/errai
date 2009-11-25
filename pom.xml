@@ -38,7 +38,7 @@
         <module>errai-widgets</module>
         <module>errai-bus</module>
         <module>errai-persistence</module>
-        <module>errai-bus-demos</module>
+        <!--module>errai-bus-demos</module-->
     </modules>
 
     <dependencyManagement>
@@ -76,10 +76,10 @@
                 <artifactId>guice</artifactId>
                 <version>${guice.version}</version>
             </dependency>
-             <dependency>
+            <dependency>
                 <groupId>com.google.code.guice</groupId>
                 <artifactId>guice</artifactId>
-                 <classifier>aopalliance</classifier>
+                <classifier>aopalliance</classifier>
                 <version>${guice.version}</version>
             </dependency>
             <dependency>
@@ -289,6 +289,20 @@
                 </os>
             </activation>
         </profile>
+
+        <profile>
+            <id>quick-hosted-mode</id>
+            <activation>
+                <property>
+                    <name>hosted</name>
+                </property>
+            </activation>
+            <properties>
+                <google.webtoolkit.compileSkip>true</google.webtoolkit.compileSkip>
+                <o>true</o> <!-- offline -->
+            </properties>
+        </profile>
+
     </profiles>
 
 
