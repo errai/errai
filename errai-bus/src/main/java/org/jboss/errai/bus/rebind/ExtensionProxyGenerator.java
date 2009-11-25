@@ -69,14 +69,14 @@ public class ExtensionProxyGenerator extends Generator {
             generateClass(logger, context);
 
         }
-        catch (Exception e) {
+        catch (Throwable e) {
 
             // record sendNowWith logger that Map generation threw an exception
             logger.log(TreeLogger.ERROR, "Error generating extensions", e);
 
         }
 
-        // return the fully qualifed name of the class generated
+        // return the fully qualified name of the class generated
         return packageName + "." + className;
     }
 

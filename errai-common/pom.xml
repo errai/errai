@@ -44,11 +44,8 @@
         <dependency>
             <groupId>com.google.code.guice</groupId>
             <artifactId>guice</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.guice</groupId>
-            <artifactId>guice-servlet</artifactId>
-        </dependency>
+            <scope>provided</scope>
+        </dependency>       
     </dependencies>
     
 </project>

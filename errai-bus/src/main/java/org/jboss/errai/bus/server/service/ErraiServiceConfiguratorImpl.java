@@ -127,20 +127,25 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
 
                         final Runnable create = new Runnable() {
                             public void run() {
-                                Guice.createInjector(new AbstractModule() {
-                                    @Override
-                                    protected void configure() {
-                                        bind(ErraiConfigExtension.class).to(clazz);
-                                        bind(ErraiServiceConfigurator.class).toInstance(configInst);
-                                        bind(MessageBus.class).toInstance(bus);
+                              AbstractModule module = new AbstractModule()
+                              {
+                                @Override
+                                protected void configure()
+                                {
+                                  bind(ErraiConfigExtension.class).to(clazz);
+                                  bind(ErraiServiceConfigurator.class).toInstance(configInst);
+                                  bind(MessageBus.class).toInstance(bus);
 
-                                        // Add any extension bindings.
-                                        for (Map.Entry<Class, Provider> entry : extensionBindings.entrySet()) {
-                                            bind(entry.getKey()).toProvider(entry.getValue());
-                                        }
-                                    }
-                                }).getInstance(ErraiConfigExtension.class)
-                                        .configure(extensionBindings, resourceProviders);
+                                  // Add any extension bindings.
+                                  for (Map.Entry<Class, Provider> entry : extensionBindings.entrySet())
+                                  {
+                                    bind(entry.getKey()).toProvider(entry.getValue());
+                                  }
+                                }
+                              };
+                              Guice.createInjector(module)
+                                  .getInstance(ErraiConfigExtension.class)
+                                  .configure(extensionBindings, resourceProviders);
                             }
                         };
 

@@ -18,6 +18,7 @@
         <module>clientservice</module>
         <module>helloworld</module>
         <module>queryservice</module>
+        <module>serialization</module>
     </modules>
 
     <dependencies>

@@ -51,6 +51,11 @@
             <artifactId>gwt-user</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.google.code.guice</groupId>
+            <artifactId>guice</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
 </project>

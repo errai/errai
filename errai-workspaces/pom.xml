@@ -32,7 +32,7 @@
 
 
     <dependencies>
-         <dependency>
+        <dependency>
             <groupId>org.jboss.errai</groupId>
             <artifactId>errai-common</artifactId>
             <version>${version}</version>
@@ -52,9 +52,9 @@
             <artifactId>gwt-user</artifactId>
             <scope>provided</scope>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>com.google.gwt</groupId>
-            <artifactId>gwt-dev-${platform}</artifactId>
+            <artifactId>gwt-dev</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -65,10 +65,12 @@
         <dependency>
             <groupId>com.google.code.guice</groupId>
             <artifactId>guice</artifactId>
+            <scope>provided</scope>
         </dependency>
-          <dependency>
+        <dependency>
             <groupId>com.google.code.guice</groupId>
             <artifactId>guice-servlet</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 

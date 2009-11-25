@@ -44,7 +44,7 @@
         </dependency>
         <dependency>
             <groupId>com.google.gwt</groupId>
-            <artifactId>gwt-dev-${platform}</artifactId>
+            <artifactId>gwt-dev</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -55,14 +55,17 @@
         <dependency>
             <groupId>com.google.code.guice</groupId>
             <artifactId>guice</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.google.code.guice</groupId>
             <artifactId>guice-servlet</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.mvel</groupId>
             <artifactId>mvel2</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
