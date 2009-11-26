@@ -21,6 +21,15 @@
     <groupId>org.jboss.errai</groupId>
     <artifactId>errai-bus</artifactId>
     <packaging>jar</packaging>
+    <description>Errai Bus</description>
+    <url>http://www.jboss.org/errai/erraibus</url>
+    <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
 
     <!-- Parent -->
     <parent>
