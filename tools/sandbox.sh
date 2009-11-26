@@ -9,6 +9,6 @@ mvn archetype:generate \
 	-DarchetypeArtifactId=sandbox-archetype \
 	-DarchetypeVersion=1.0-SNAPSHOT \
 	-DarchetypeRepository=http://snapshots.jboss.org/maven2 \
-	-Dpackage=org.jboss.errai
+#	-Dpackage=org.jboss.errai
 	
 	
