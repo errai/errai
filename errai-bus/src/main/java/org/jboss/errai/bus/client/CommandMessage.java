@@ -52,7 +52,11 @@ import java.util.Map;
  * These enumerations can than be directly used to build messages and decode incoming messages by a service. For example:
  * <tt><pre>
  *  CommandMessage.create()
- *      .set
+ *      .command(LoginCommands.Login)
+ *      .set(LoginParts.Username, "foo")
+ *      .set(LoginParts.Password, "bar )
+ *      .sendNowWith(busInstance);
+ * </pre></tt>
  *
  * @see org.jboss.errai.bus.client.ConversationMessage
  */
