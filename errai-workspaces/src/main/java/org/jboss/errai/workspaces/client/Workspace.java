@@ -61,7 +61,7 @@ public class Workspace implements EntryPoint {
     static {
         loginWindowClosingHandler = new Window.ClosingHandler() {
             public void onWindowClosing(Window.ClosingEvent event) {
-                ErraiBus.get().send("ServerEchoService", new CommandMessage());
+                ErraiBus.get().send("ServerEchoService", CommandMessage.create());
             }
         };
     }
@@ -144,7 +144,7 @@ public class Workspace implements EntryPoint {
                     switch (SecurityCommands.valueOf(message.getCommandType())) {
                         case SecurityChallenge:
                             if (message.hasPart(SecurityParts.RejectedMessage)) {
-                                deferredMessage = new CommandMessage();
+                                deferredMessage = CommandMessage.create();
                                 deferredMessage.setParts(JSONUtilCli.decodeMap(message.get(String.class, SecurityParts.RejectedMessage)));
                             }
 

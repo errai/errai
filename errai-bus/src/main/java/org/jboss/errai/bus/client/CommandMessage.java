@@ -36,13 +36,13 @@ import java.util.Map;
  * {@link org.jboss.errai.bus.client.MessageBus}.<br/>
  * <br/>
  * Messages can be contructed using user-defined standard protocols through the use of enumerations. Both
- * <tt>commandType</em> and message parts can be defined through the use of enumerations.  This helps create
+ * <tt>commandType</tt> and message parts can be defined through the use of enumerations.  This helps create
  * strongly-defined protocols for communicating with services.  For instance:
  * <tt><pre>
  * public enum LoginParts {
  *    Username, Password
  * }
- * </pre></tt><br/>
+ * </pre></tt>
  * .. and ..
  * <tt><pre>
  * public enum LoginCommands {
@@ -64,11 +64,21 @@ public class CommandMessage {
     protected Map<String, Object> parts = new HashMap<String, Object>();
     protected Map<String, Object> resources;
 
+    /**
+     * @deprecated Use create() and the command() method instead.
+     * @param commandType
+     * @return
+     */
     @Deprecated
     public static CommandMessage create(String commandType) {
         return new CommandMessage(commandType);
     }
 
+    /**
+     * @deprecated Use create() and the command() method instead.
+     * @param commandType
+     * @return
+     */
     @Deprecated
     public static CommandMessage create(Enum commandType) {
         return new CommandMessage(commandType);
@@ -78,22 +88,22 @@ public class CommandMessage {
         return new CommandMessage();
     }
 
-    public CommandMessage() {
+    protected CommandMessage() {
     }
 
-    public CommandMessage(Map<String, Object> parts) {
+    private CommandMessage(Map<String, Object> parts) {
         this.parts = parts;
     }
 
-    public CommandMessage(String commandType) {
+    private CommandMessage(String commandType) {
         setCommandType(commandType);
     }
 
-    public CommandMessage(Enum commandType) {
+    private CommandMessage(Enum commandType) {
         setCommandType(commandType.name());
     }
 
-    public CommandMessage(String subject, String commandType) {
+    private CommandMessage(String subject, String commandType) {
         toSubject(subject).setCommandType(commandType);
     }
 

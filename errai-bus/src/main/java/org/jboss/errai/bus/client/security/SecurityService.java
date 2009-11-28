@@ -64,8 +64,10 @@ public class SecurityService {
 
                         handler.doLogin(credentials);
 
-                        CommandMessage challenge = new CommandMessage(SecurityCommands.AuthRequest.name());
-                        challenge.set(SecurityParts.ReplyTo, SUBJECT);
+                        CommandMessage challenge = CommandMessage.create()
+                                .toSubject("AuthorizationService")
+                                .command(SecurityCommands.AuthRequest)
+                                .set(SecurityParts.ReplyTo, SUBJECT);
 
                         for (int i = 0; i < credentialNames.length; i++) {
                             switch (CredentialTypes.valueOf(credentialNames[i])) {
@@ -78,8 +80,8 @@ public class SecurityService {
                             }
                         }
 
-                        ErraiBus.get().send("AuthorizationService", challenge);
-
+                        challenge.sendNowWith(ErraiBus.get());
+                        
                         break;
 
                     case SecurityResponse:
@@ -102,15 +104,15 @@ public class SecurityService {
                         authenticationContext = new BasicAuthenticationContext(roleSet, name);
 
                         break;
-
                 }
             }
         });
 
-
-        CommandMessage message = new CommandMessage(SecurityCommands.WhatCredentials);
-        message.set(SecurityParts.ReplyTo, SUBJECT);
-        ErraiBus.get().send("AuthorizationService", message);
+        CommandMessage.create()
+                .toSubject("AuthorizationService")
+                .command(SecurityCommands.WhatCredentials)
+                .set(SecurityParts.ReplyTo, SUBJECT)
+                .sendNowWith(ErraiBus.get());
     }
 
 }
