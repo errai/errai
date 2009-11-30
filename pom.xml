@@ -39,6 +39,7 @@
         <module>errai-bus</module>
         <module>errai-persistence</module>
         <!--module>errai-bus-demos</module-->
+        <module>userguide</module>
     </modules>
 
     <dependencyManagement>

@@ -1,0 +1,32 @@
+<chapter id="installation">
+  <title>Installation</title>
+  
+  <section id="thedistribution">
+    <title>The distribution</title>
+    <para>Unzip the Errai download (<literal>Errai-1.X.zip</literal>) to some location on your hard drive.
+    You'll see following subdirectories:
+    </para>
+    <itemizedlist>
+      <listitem><literal>doc</literal>: User guide, javadocs and developers guide</listitem>
+      <listitem><literal>examples</literal>: Examples that are used in the user guide</listitem>
+      <listitem><literal>install</literal>: Installation scripts for several environments</listitem>
+      <listitem><literal>lib</literal>: Third party libraries</listitem>
+      <listitem><literal>src</literal>: Source files</listitem>
+    </itemizedlist>
+  </section>
+
+  <section>
+    <title>Required software</title>
+    <para>Errai requires a JDK (standard java) version 5 or higher.
+    </para>
+    <ulink url="http://java.sun.com/javase/downloads/index.jsp">http://java.sun.com/javase/downloads/index.jsp</ulink>
+    <para>To execute the ant scripts, you'll need apache ant version <emphasis role="bold">1.7.0</emphasis> or higher:
+    </para>
+    <ulink url="http://ant.apache.org/bindownload.cgi">http://ant.apache.org/bindownload.cgi</ulink>
+  </section>
+
+  <section id="gettingstartedquickly">
+    <title>Getting started quickly</title>
+    <para>...</para>
+  </section>
+</chapter>
