@@ -70,7 +70,7 @@
     </dependencies>
 
     <build>
-        <outputDirectory>war/WEB-INF/classes</outputDirectory>
+        <outputDirectory>target/war/WEB-INF/classes</outputDirectory>
         <plugins>
 
             <plugin>
