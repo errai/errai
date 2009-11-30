@@ -48,7 +48,10 @@
     </dependencySets>
 
     <fileSets>
-        <!-- User Guide -->
+        <fileSet>
+            <directory>contents/</directory>
+            <outputDirectory>/</outputDirectory>            
+        </fileSet>
         <fileSet>
             <directory>../userguide/target/docbook/publish/en</directory>
             <outputDirectory>doc/userguide</outputDirectory>
@@ -56,13 +59,6 @@
                 <exclude>**/*.fo</exclude>
             </excludes>
         </fileSet>
-        <!--fileSet>
-          <directory>../api/target/schemadocs</directory>
-          <outputDirectory>doc/schemadocs</outputDirectory>
-          <excludes>
-            <exclude>**/*.fo</exclude>
-          </excludes>
-        </fileSet-->
         <fileSet>
             <directory>../errai-bus-demos/</directory>
             <outputDirectory>examples/</outputDirectory>
