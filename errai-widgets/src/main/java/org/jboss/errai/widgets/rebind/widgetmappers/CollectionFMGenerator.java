@@ -81,13 +81,6 @@ public class CollectionFMGenerator implements FieldMapperGenerator {
                 .append(".").append(targetEntityMember.getName()).append("' is null\");\n");
         gen.append("}\n");
 
-//        gen.append("for (Object o : widget.").append(targetEntityField.getName()).append(".")
-//                .append(getGetter(targetEntityMember.getName()))
-//                .append("()) {\n")
-//                .append("widget.").append(targetWidgetField.getName()).append(".add(new ")
-//                .append(widgetType.getQualifiedSourceName()).append("(String.valueOf(o)));\n");
-//        gen.append("}\n");
-
         gen.append("}\n");
 
         varName = targetEntityField.getType().isClassOrInterface().getName() + targetWidgetField.getName() + "Mapper";
