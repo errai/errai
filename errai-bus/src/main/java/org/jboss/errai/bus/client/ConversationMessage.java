@@ -62,13 +62,13 @@ public class ConversationMessage extends CommandMessage {
         throw new BadlyFormedMessageException("You must create a ConversationMessage by specifying an incoming message.");
     }
 
-    public static ConversationMessage create(String commandType, CommandMessage inReplyTo) {
-        return new ConversationMessage(commandType, inReplyTo);
-    }
-
-    public static ConversationMessage create(Enum commandType, CommandMessage inReplyTo) {
-        return new ConversationMessage(commandType, inReplyTo);
-    }
+//    public static ConversationMessage create(String commandType, CommandMessage inReplyTo) {
+//        return new ConversationMessage(commandType, inReplyTo);
+//    }
+//
+//    public static ConversationMessage create(Enum commandType, CommandMessage inReplyTo) {
+//        return new ConversationMessage(commandType, inReplyTo);
+//    }
 
     public static ConversationMessage create(CommandMessage inReplyTo) {
         return new ConversationMessage(inReplyTo);
@@ -128,4 +128,15 @@ public class ConversationMessage extends CommandMessage {
         parts.put(part, value);
         return this;
     }
+
+    @Override
+    public ConversationMessage command(Enum type) {
+        return (ConversationMessage) super.command(type);
+    }
+
+    @Override
+    public ConversationMessage command(String type) {
+        return (ConversationMessage) super.command(type);   
+    }
 }
+

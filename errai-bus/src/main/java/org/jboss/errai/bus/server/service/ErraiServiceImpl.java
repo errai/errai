@@ -54,10 +54,14 @@ public class ErraiServiceImpl implements ErraiService {
                          * Respond with what credentials the authentication system requires.
                          */
                         //todo: we only support login/password for now
-                        bus.send(c.get(String.class, SecurityParts.ReplyTo),
-                                ConversationMessage.create(SecurityCommands.WhatCredentials, c)
-                                        .set(SecurityParts.CredentialsRequired, "Name,Password")
-                                        .set(SecurityParts.ReplyTo, AUTHORIZATION_SVC_SUBJECT));
+
+
+                        ConversationMessage.create(c)
+                               .command(SecurityCommands.WhatCredentials)
+                                .set(SecurityParts.CredentialsRequired, "Name,Password")
+                                .set(SecurityParts.ReplyTo, AUTHORIZATION_SVC_SUBJECT)
+                                .sendNowWith(bus);
+
                         break;
 
                     case AuthRequest:

@@ -127,7 +127,8 @@ public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
              * been performed.
              */
             ConversationMessage.
-                    create(SecurityCommands.SuccessfulAuth, message)
+                    create(message)
+                    .command(SecurityCommands.SuccessfulAuth)
                     .toSubject("LoginClient")
                     .set(SecurityParts.Roles, authSubject.toRolesString())
                     .set(SecurityParts.Name, name)
@@ -137,7 +138,8 @@ public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
              * The login failed. How upsetting. Life must go on, and we must inform the client of the
              * unfortunate news.
              */
-            ConversationMessage.create(SecurityCommands.FailedAuth, message)
+            ConversationMessage.create(message)
+                    .command(SecurityCommands.FailedAuth)
                     .toSubject("LoginClient")
                     .set(SecurityParts.Name, name)
                     .sendNowWith(bus);

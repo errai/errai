@@ -61,8 +61,7 @@ public class Workspace implements EntryPoint {
     static {
         loginWindowClosingHandler = new Window.ClosingHandler() {
             public void onWindowClosing(Window.ClosingEvent event) {
-                ErraiBus.get().send("ServerEchoService", CommandMessage.create());
-            }
+                CommandMessage.create().toSubject("ServerEchoService").sendNowWith(ErraiBus.get());            }
         };
     }
 

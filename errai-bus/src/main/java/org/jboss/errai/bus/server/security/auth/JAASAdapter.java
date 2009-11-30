@@ -79,8 +79,7 @@ public class JAASAdapter implements AuthenticationAdapter {
                     for (Callback cb : callbacks) {
                         if (cb instanceof PasswordCallback) {
                             ((PasswordCallback) cb).setPassword(password.toCharArray());
-                        }
-                        else if (cb instanceof NameCallback) {
+                        } else if (cb instanceof NameCallback) {
                             ((NameCallback) cb).setName(name);
                         }
 
@@ -99,19 +98,20 @@ public class JAASAdapter implements AuthenticationAdapter {
             loginContext.login();
 
             AuthSubject authSubject = new AuthSubject(name, name, (Set) loginContext.getSubject().getPrincipals());
-            
+
             /**
              * If we got this far, then the authentication succeeded. So grab access to the HTTPSession and
              * add the authorization token.
              */
-            addAuthenticationToken(message,authSubject);
+            addAuthenticationToken(message, authSubject);
 
             /**
              * Prepare to send a message back to the client, informing it that a successful login has
              * been performed.
              */
-            ConversationMessage successfulMsg = ConversationMessage.
-                    create(SecurityCommands.SuccessfulAuth, message)
+            ConversationMessage successfulMsg = ConversationMessage.create(message)
+                    .command(SecurityCommands.SuccessfulAuth)
+                    .toSubject("LoginClient")
                     .set(SecurityParts.Roles, authSubject.toRolesString())
                     .set(SecurityParts.Name, name);
 
@@ -133,15 +133,18 @@ public class JAASAdapter implements AuthenticationAdapter {
             /**
              * Transmit the message back to the client.
              */
-            bus.send("LoginClient", successfulMsg);
+            successfulMsg.sendNowWith(bus);
         }
         catch (LoginException e) {
             /**
              * The login failed. How upsetting. Life must go on, and we must inform the client of the
              * unfortunate news.
              */
-            bus.send("LoginClient", ConversationMessage.create(SecurityCommands.FailedAuth, message)
-                    .set(SecurityParts.Name, name));
+            ConversationMessage.create(message)
+                    .command(SecurityCommands.FailedAuth)
+                    .toSubject("LoginClient")
+                    .set(SecurityParts.Name, name)
+                    .sendNowWith(bus);
 
             throw new AuthenticationFailedException(e.getMessage(), e);
         }
@@ -164,30 +167,28 @@ public class JAASAdapter implements AuthenticationAdapter {
         boolean sessionEnded = isAuthenticated(message);
         if (sessionEnded) {
             getAuthDescriptor(message).remove(new SimpleRole(CredentialTypes.Authenticated.name()));
-            ((HttpSession)message.getResource("Session")).removeAttribute(ErraiService.SESSION_AUTH_DATA);
+            ((HttpSession) message.getResource("Session")).removeAttribute(ErraiService.SESSION_AUTH_DATA);
             return true;
-        }
-        else {
+        } else {
             return false;
         }
     }
 
     private Set getAuthDescriptor(CommandMessage message) {
-         Set credentials = message.get(Set.class, SecurityParts.Credentials);
-         if (credentials == null) {
-             message.set(SecurityParts.Credentials, credentials = new HashSet());
-         }
-         return credentials;
-     }
+        Set credentials = message.get(Set.class, SecurityParts.Credentials);
+        if (credentials == null) {
+            message.set(SecurityParts.Credentials, credentials = new HashSet());
+        }
+        return credentials;
+    }
 
 
     public void process(CommandMessage message) {
         if (isAuthenticated(message)) {
-         //   getAuthDescriptor(message).add(new SimpleRole(CredentialTypes.Authenticated.name()));
+            //   getAuthDescriptor(message).add(new SimpleRole(CredentialTypes.Authenticated.name()));
 
         }
     }
-
 
 
 }
