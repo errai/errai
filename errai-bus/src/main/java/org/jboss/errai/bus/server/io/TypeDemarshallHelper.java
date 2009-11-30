@@ -81,7 +81,9 @@ public class TypeDemarshallHelper {
 
                     for (Map.Entry<?, ?> entry : oMap.entrySet()) {
                         if ("__EncodedType".equals(entry.getKey())) continue;
-                        MVEL.setProperty(newInstance, (String) entry.getKey(), _demarshallAll(entry.getValue()));
+                        Object value =_demarshallAll(entry.getValue());
+
+                        MVEL.setProperty(newInstance, (String) entry.getKey(), value);
                     }
 
                     return newInstance;

@@ -29,9 +29,6 @@ public class MessageUtil {
     }
 
     public static CommandMessage[] createCommandMessage(Object session, String json) {
-        System.out.println("decoding:" + json);
-
-
         if (json.length() == 0) return new CommandMessage[0];
         String[] pkg = json.split("\\|\\|");
         CommandMessage[] c = new CommandMessage[pkg.length];

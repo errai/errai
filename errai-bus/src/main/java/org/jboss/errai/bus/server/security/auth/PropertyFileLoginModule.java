@@ -40,7 +40,7 @@ public class PropertyFileLoginModule implements LoginModule {
         try {
             callbackHandler.handle(new Callback[]{name, password});
             this.login = name.getName();
-            this.password = new String(password.getPassword());
+            this.password = new String(password.getPassword() == null ? new char[0] : password.getPassword());
 
             loadRoles();
 

@@ -77,12 +77,11 @@ public class JAASAdapter implements AuthenticationAdapter {
             CallbackHandler callbackHandler = new CallbackHandler() {
                 public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
                     for (Callback cb : callbacks) {
-                        if (cb instanceof PasswordCallback) {
+                        if (password != null && cb instanceof PasswordCallback) {
                             ((PasswordCallback) cb).setPassword(password.toCharArray());
-                        } else if (cb instanceof NameCallback) {
+                        } else if (name != null && cb instanceof NameCallback) {
                             ((NameCallback) cb).setName(name);
                         }
-
                     }
                 }
             };

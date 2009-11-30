@@ -29,7 +29,7 @@
         <gwt.version>2.0.0-6757</gwt.version>
         <gwt.maven>1.2.0-11137</gwt.maven>
         <guice.version>2.0</guice.version>
-        <mvel.version>2.0.14</mvel.version>
+        <mvel.version>2.0.15-SNAPSHOT</mvel.version>
     </properties>
 
     <modules>
@@ -38,7 +38,7 @@
         <module>errai-widgets</module>
         <module>errai-bus</module>
         <module>errai-persistence</module>
-        <!--module>errai-bus-demos</module-->       
+        <!--module>errai-bus-demos</module-->
     </modules>
 
     <dependencyManagement>
@@ -256,7 +256,8 @@
             </activation>
             <properties>
                 <google.webtoolkit.compileSkip>true</google.webtoolkit.compileSkip>
-                <o>true</o> <!-- offline -->
+                <o>true</o>
+                <!-- offline -->
             </properties>
         </profile>
 
@@ -267,7 +268,7 @@
                 <module>dist</module>
             </modules>
         </profile>
-    </profiles>            
+    </profiles>
 
 
     <!-- Repositories -->
@@ -303,6 +304,16 @@
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
+        </repository>
+        <repository><!-- used by mvel to publish snapshots -->
+            <id>codehaus-snapshot</id>
+            <url>http://snapshots.repository.codehaus.org</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
         </repository>
         <repository>
             <id>gwt-maven</id>
