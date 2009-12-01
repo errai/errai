@@ -38,8 +38,7 @@ import java.util.List;
 import static org.jboss.errai.bus.server.io.MessageUtil.createCommandMessage;
 
 /**
- * The main gateway of the Workspace application to the server.  All communication between the client and the
- * server passes through this class.
+ * The default ErraiServletImpl which provides the HTTP-protocol gateway between the server bus and the client buses.
  */
 @Singleton
 public class ErraiServletImpl extends HttpServlet {

@@ -27,6 +27,27 @@ import java.security.Principal;
 import java.util.Map;
 import java.util.ResourceBundle;
 
+/**
+ * This simple Login Module provides a simple authentication mechanism using property files to define users and groups.<br/>
+ * <br/>
+ * When in use, this LoginModule will search for <tt>users.properties</tt> and <tt>roles.properties</tt>.<br/>
+ * <br/>
+ * <strong>Example users.properties:</strong>
+ * <tt><pre>
+ * john=foo123
+ * mary=abc
+ * </pre></tt>
+ * The left-hand value is the <em>user name</em> and the right-hand value is the <em>password</em><br/>
+ * <br/>
+ * <strong>Example roles.properties:</strong>
+ * <tt><pre>
+ * john=admin,users,finance
+ * mary=users,humanResources
+ * </pre></tt>
+ * The left-hand value is the <em>user name</em> corresponding with the user defined in the <tt>user.properties</tt> file, and
+ * the right-hand value are the roles assigned to each user.  
+ *
+ */
 public class PropertyFileLoginModule implements LoginModule {
     private String login;
     private String password;

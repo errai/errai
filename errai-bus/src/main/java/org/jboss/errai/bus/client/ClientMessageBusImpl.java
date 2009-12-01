@@ -34,6 +34,10 @@ import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteSubscribe;
 import static org.jboss.errai.bus.client.protocols.MessageParts.ReplyTo;
 import static org.jboss.errai.bus.client.protocols.MessageParts.Subject;
 
+/**
+ * The default client <tt>MessageBus</tt> implementation.  This bus runs in the browser and automatically federates
+ * with the server immediately upon initialization.
+ */
 public class ClientMessageBusImpl implements ClientMessageBus {
     private static final String SERVICE_ENTRY_POINT = "erraiBus";
 

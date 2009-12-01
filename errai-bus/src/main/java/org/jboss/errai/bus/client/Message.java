@@ -16,7 +16,19 @@
 
 package org.jboss.errai.bus.client;
 
+/**
+ * A simple interface for defining a message.
+ */
 public interface Message {
+    /**
+     * The target subject
+     * @return -
+     */
     public String getSubject();
+
+    /**
+     * The message data.
+     * @return -
+     */
     public Object getMessage();
 }

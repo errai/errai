@@ -65,9 +65,9 @@ public class CommandMessage {
     protected Map<String, Object> resources;
 
     /**
-     * @deprecated Use create() and the command() method instead.
      * @param commandType
      * @return
+     * @deprecated Use create() and the command() method instead.
      */
     @Deprecated
     public static CommandMessage create(String commandType) {
@@ -75,15 +75,20 @@ public class CommandMessage {
     }
 
     /**
-     * @deprecated Use create() and the command() method instead.
      * @param commandType
      * @return
+     * @deprecated Use create() and the command() method instead.
      */
     @Deprecated
     public static CommandMessage create(Enum commandType) {
         return new CommandMessage(commandType);
     }
 
+    /**
+     * Create a new CommandMessage.
+     *
+     * @return
+     */
     public static CommandMessage create() {
         return new CommandMessage();
     }
@@ -96,51 +101,79 @@ public class CommandMessage {
     }
 
     private CommandMessage(String commandType) {
-        setCommandType(commandType);
+        command(commandType);
     }
 
     private CommandMessage(Enum commandType) {
-        setCommandType(commandType.name());
+        command(commandType.name());
     }
 
     private CommandMessage(String subject, String commandType) {
-        toSubject(subject).setCommandType(commandType);
+        toSubject(subject).command(commandType);
     }
 
+    /**
+     * Return the specified command type.  Returns <tt>null</tt> if not specified.
+     *
+     * @return - String representing the command type.
+     */
     public String getCommandType() {
         return (String) parts.get(MessageParts.CommandType.name());
     }
 
+    /**
+     * Return the specified message subject.
+     *
+     * @return
+     */
     public String getSubject() {
         return String.valueOf(parts.get(MessageParts.ToSubject.name()));
     }
 
+    /**
+     * Set the subject which is the intended recipient of the message.
+     *
+     * @param subject - subject name.
+     * @return -
+     */
     public CommandMessage toSubject(String subject) {
         parts.put(MessageParts.ToSubject.name(), subject);
         return this;
     }
 
+    /**
+     * Set the optional command type.
+     *
+     * @param type
+     * @return
+     */
     public CommandMessage command(Enum type) {
         parts.put(MessageParts.CommandType.name(), type.name());
         return this;
     }
 
+    /**
+     * Set the optional command type.
+     *
+     * @param type
+     * @return
+     */
     public CommandMessage command(String type) {
         parts.put(MessageParts.CommandType.name(), type);
         return this;
     }
 
-    @Deprecated
-    public CommandMessage setCommandType(Enum type) {
-        parts.put(MessageParts.CommandType.name(), type.name());
-        return this;
-    }
-
-    @Deprecated
-    public CommandMessage setCommandType(String type) {
-        parts.put(MessageParts.CommandType.name(), type);
-        return this;
-    }
+//    @Deprecated
+//    public CommandMessage setCommandType(Enum type) {
+//        parts.put(MessageParts.CommandType.name(), type.name());
+//        return this;
+//    }
+//
+//    @Deprecated
+//    public CommandMessage setCommandType(String type) {
+//        parts.put(MessageParts.CommandType.name(), type);
+//        return this;
+//    }
 
     public CommandMessage set(Enum part, Object value) {
         return set(part.name(), value);
@@ -154,8 +187,8 @@ public class CommandMessage {
     /**
      * Copy the same value from the specified message into this message.
      *
-     * @param part    -
-     * @param message -
+     * @param part    - Part to copy
+     * @param message - CommandMessage to copy from
      * @return -
      */
     public CommandMessage copy(Enum part, CommandMessage message) {
@@ -163,16 +196,36 @@ public class CommandMessage {
         return this;
     }
 
+    /**
+     * Copy the same value from the specified message into this message.
+     *
+     * @param part    - Part to copy
+     * @param message - CommandMessage to copy from
+     * @return -
+     */
     public CommandMessage copy(String part, CommandMessage message) {
         set(part, message.get(Object.class, part));
         return this;
     }
 
-
+    /**
+     * Remove the specified part from the message.
+     *
+     * @param part - Message part.
+     */
     public void remove(String part) {
         parts.remove(part);
     }
 
+    /**
+     * Get the specified message part in the specified type.  A <tt>ClassCastException</tt> is thrown if the value
+     * cannot be coerced to the specified type.
+     *
+     * @param type - Type to be returned.
+     * @param part - Message part.
+     * @param <T>  - Type to be returned.
+     * @return - Value in the specified type.
+     */
     @SuppressWarnings({"UnusedDeclaration"})
     public <T> T get(Class<T> type, Enum part) {
         //noinspection unchecked
@@ -180,6 +233,15 @@ public class CommandMessage {
         return value == null ? null : (T) TypeHandlerFactory.convert(value.getClass(), type, value);
     }
 
+    /**
+     * Get the specified message part in the specified type.  A <tt>ClassCastException</tt> is thrown if the value
+     * cannot be coerced to the specified type.
+     *
+     * @param type - Type to be returned.
+     * @param part - Message part.
+     * @param <T>  - Type to be returned.
+     * @return - Value in the specified type.
+     */
     @SuppressWarnings({"UnusedDeclaration"})
     public <T> T get(Class<T> type, String part) {
         //noinspection unchecked
@@ -187,33 +249,82 @@ public class CommandMessage {
         return value == null ? null : (T) TypeHandlerFactory.convert(value.getClass(), type, value);
     }
 
+    /**
+     * Returns true if the specified part is defined in the message.
+     *
+     * @param part - Message part.
+     * @return - boolean value indiciating whether or not specified part is present in the message.
+     */
     public boolean hasPart(Enum part) {
         return hasPart(part.name());
     }
 
+    /**
+     * Returns true if the specified part is defined in the message.
+     *
+     * @param part - Message part.
+     * @return - boolean value indiciating whether or not specified part is present in the message.
+     */
     public boolean hasPart(String part) {
         return parts.containsKey(part);
     }
 
+    /**
+     * Return a Map of all the specified parts.
+     * @return - A Map of parts.
+     */
     public Map<String, Object> getParts() {
         return parts;
     }
 
+    /**
+     * Set the message to contain the specified parts.  Note: This overrides any existing message contents.
+     * @param parts - Parts to be used in the message.
+     * @return -
+     */
     public CommandMessage setParts(Map<String, Object> parts) {
         this.parts = parts;
         return this;
     }
 
+    /**
+     * Add the specified parts to the message.
+     * @param parts - Parts to be added to the message.
+     * @return -
+     */
+    public CommandMessage addAllParts(Map<String, Object> parts) {
+        this.parts.putAll(parts);
+        return this;
+    }
+
+    /**
+     * Set a transient resource.  A resource is not transmitted beyond the current bus scope.  It can be used for
+     * managing the lifecycle of a message within a bus.
+     * @param key - Name of resource
+     * @param res - Instance of resouce
+     * @return -
+     */
     public CommandMessage setResource(String key, Object res) {
         if (this.resources == null) this.resources = new HashMap<String, Object>();
         this.resources.put(key, res);
         return this;
     }
 
+    /**
+     * Obtain a transient resource based on the specified key.
+     * @param key - Name of resource.
+     * @return  - Instancee of resource.
+     */
     public Object getResource(String key) {
         return this.resources == null ? null : this.resources.get(key);
     }
 
+    /**
+     * Copy a transient resource to this mesage from the specified message.
+     * @param key - Name of resource.
+     * @param copyFrom - Message to copy from.
+     * @return
+     */
     public CommandMessage copyResource(String key, CommandMessage copyFrom) {
         if (!copyFrom.hasResource(key)) {
             throw new RuntimeException("Cannot copy resource '" + key + "': no such resource.");
@@ -222,10 +333,19 @@ public class CommandMessage {
         return this;
     }
 
+    /**
+     * Returns true if the specified transient resource is present.
+     * @param key - Name of resouce
+     * @return - boolean value indicating if the specified resource is present in the message.
+     */
     public boolean hasResource(String key) {
         return this.resources != null && this.resources.containsKey(key);
     }
 
+    /**
+     * Add the Map of resources to the message.
+     * @param resources - Map of resource
+     */
     public void addResources(Map<String, ?> resources) {
         if (this.resources == null) this.resources = new HashMap<String, Object>(resources);
         else {
@@ -233,6 +353,10 @@ public class CommandMessage {
         }
     }
 
+    /**
+     * Transmit this message to the specified {@link org.jboss.errai.bus.client.MessageBus} instance.
+     * @param viaThis
+     */
     public void sendNowWith(MessageBus viaThis) {
         viaThis.send(this);
     }
