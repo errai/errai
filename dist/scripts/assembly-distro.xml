@@ -52,13 +52,13 @@
             <directory>contents/</directory>
             <outputDirectory>/</outputDirectory>            
         </fileSet>
-        <fileSet>
-            <directory>../userguide/target/docbook/publish/en</directory>
-            <outputDirectory>doc/userguide</outputDirectory>
-            <excludes>
-                <exclude>**/*.fo</exclude>
-            </excludes>
-        </fileSet>
+        <!--<fileSet>-->
+            <!--<directory>../userguide/target/docbook/publish/en</directory>-->
+            <!--<outputDirectory>doc/userguide</outputDirectory>-->
+            <!--<excludes>-->
+                <!--<exclude>**/*.fo</exclude>-->
+            <!--</excludes>-->
+        <!--</fileSet>-->
         <fileSet>
             <directory>../errai-bus-demos/</directory>
             <outputDirectory>examples/</outputDirectory>
