@@ -8,9 +8,9 @@
     <packaging>pom</packaging>
 
     <scm>
-        <connection>scm:svn:https://svn.jboss.org/repos/jbossworkspace/trunk</connection>
-        <developerConnection>scm:svn:https://svn.jboss.org/repos/jbossworkspace/trunk</developerConnection>
-        <url>https://svn.jboss.org/repos/jbossworkspace/trunk</url>
+        <connection>scm:svn:https://svn.jboss.org/repos/errai/trunk/</connection>
+        <developerConnection>scm:svn:https://svn.jboss.org/repos/errai/trunk/</developerConnection>
+        <url>https://svn.jboss.org/repos/errai/trunk/</url>
     </scm>
 
     <organization>
@@ -196,6 +196,16 @@
                     <target>1.5</target>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.0-beta-7</version>
+                <configuration>
+                    <tagBase>https://svn.jboss.org/repos/errai/tags/</tagBase>
+                </configuration>
+            </plugin>
+
         </plugins>
 
         <!-- PluginManagement -->
