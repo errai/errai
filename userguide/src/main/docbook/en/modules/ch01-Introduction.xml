@@ -1,4 +1,6 @@
-<?xml version='1.0' encoding='UTF-8'?><chapter id="introduction">
+<?xml version='1.0' encoding='UTF-8'?>
+
+<chapter id="introduction">
   <title>Introduction</title>
   <para>This documentation is best viewed in <ulink url="http://www.mozilla.com/firefox/">firefox</ulink>. There are some known issues with internet explorer. </para>
   <section>

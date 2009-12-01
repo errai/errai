@@ -1,9 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <chapter id="bus">
   <title>Errai Bus</title>
-
   <section id="bus-into">
     <title>What is Errai Bus?</title>
-    <para>...</para>
+    <para>ErraiBus forms the backbone of the Errai framework's approach to application design. Most
+      importantly, it provides a straight-forward approach to a complex problem space. Providing
+      common APIs across the client and server, developers will have no trouble working with complex
+      messaging scenarios from building instant messaging clients, stock tickers, to monitoring
+      instruments. There's no more messing with RPC APIs, or unweildy AJAX or COMET frameworks.
+      We've built it all in to one, consice messaging framework. It's single-paradigm, and it's fun
+      to work wit</para>
   </section>
+  <section>
+    <title>Asynchronous Messaging</title>
+    <para> This is the one concept you'll need to get used to--and you'll get used to it fast--as
+      messages in Errai are completely asynchronous. There's no request-response pattern here. Every
+      message has a sender and at least one receiver. A receiver is as it sounds--it receives the
+      message and does something with it. Implementing a receiver (also referred to as a service) is
+      as simple as implementing our standard MessageCallback interface, which is used pervasively
+      across, both client and server code. Let's look at an example: </para>
+      <para>
+          <programlisting language="java" role="JAVA">
+import org.jboss.errai.bus.client.CommandMessage;
+import org.jboss.errai.bus.client.MessageCallback;
+import org.jboss.errai.bus.server.annotations.Service;
 
+@Service("HelloWorld")
+public class HelloWorld implements MessageCallback {
+    public void callback(CommandMessage message) {
+        System.out.println("Hello, World!");
+    }
+}
+          </programlisting>
+      </para>
+  </section>
 </chapter>
