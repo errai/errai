@@ -163,22 +163,24 @@ public class CommandMessage {
         return this;
     }
 
-//    @Deprecated
-//    public CommandMessage setCommandType(Enum type) {
-//        parts.put(MessageParts.CommandType.name(), type.name());
-//        return this;
-//    }
-//
-//    @Deprecated
-//    public CommandMessage setCommandType(String type) {
-//        parts.put(MessageParts.CommandType.name(), type);
-//        return this;
-//    }
-
+    /**
+     * Set a message part to the specified value.
+     *
+     * @param part  - Mesage part
+     * @param value - Value instance
+     * @return -
+     */
     public CommandMessage set(Enum part, Object value) {
         return set(part.name(), value);
     }
 
+    /**
+     * Set a message part to the specified value.
+     *
+     * @param part  - Mesage part
+     * @param value - Value instance
+     * @return -
+     */
     public CommandMessage set(String part, Object value) {
         parts.put(part, value);
         return this;
@@ -271,6 +273,7 @@ public class CommandMessage {
 
     /**
      * Return a Map of all the specified parts.
+     *
      * @return - A Map of parts.
      */
     public Map<String, Object> getParts() {
@@ -279,6 +282,7 @@ public class CommandMessage {
 
     /**
      * Set the message to contain the specified parts.  Note: This overrides any existing message contents.
+     *
      * @param parts - Parts to be used in the message.
      * @return -
      */
@@ -289,6 +293,7 @@ public class CommandMessage {
 
     /**
      * Add the specified parts to the message.
+     *
      * @param parts - Parts to be added to the message.
      * @return -
      */
@@ -300,6 +305,7 @@ public class CommandMessage {
     /**
      * Set a transient resource.  A resource is not transmitted beyond the current bus scope.  It can be used for
      * managing the lifecycle of a message within a bus.
+     *
      * @param key - Name of resource
      * @param res - Instance of resouce
      * @return -
@@ -312,8 +318,9 @@ public class CommandMessage {
 
     /**
      * Obtain a transient resource based on the specified key.
+     *
      * @param key - Name of resource.
-     * @return  - Instancee of resource.
+     * @return - Instancee of resource.
      */
     public Object getResource(String key) {
         return this.resources == null ? null : this.resources.get(key);
@@ -321,7 +328,8 @@ public class CommandMessage {
 
     /**
      * Copy a transient resource to this mesage from the specified message.
-     * @param key - Name of resource.
+     *
+     * @param key      - Name of resource.
      * @param copyFrom - Message to copy from.
      * @return
      */
@@ -335,6 +343,7 @@ public class CommandMessage {
 
     /**
      * Returns true if the specified transient resource is present.
+     *
      * @param key - Name of resouce
      * @return - boolean value indicating if the specified resource is present in the message.
      */
@@ -344,6 +353,7 @@ public class CommandMessage {
 
     /**
      * Add the Map of resources to the message.
+     *
      * @param resources - Map of resource
      */
     public void addResources(Map<String, ?> resources) {
@@ -355,6 +365,7 @@ public class CommandMessage {
 
     /**
      * Transmit this message to the specified {@link org.jboss.errai.bus.client.MessageBus} instance.
+     *
      * @param viaThis
      */
     public void sendNowWith(MessageBus viaThis) {
