@@ -14,7 +14,7 @@
       <listitem><literal>src</literal>: Source files</listitem>
     </itemizedlist>
   </section>
-
+    
   <section>
     <title>Required software</title>
     <para>Errai requires a JDK (standard java) version 5 or higher.
