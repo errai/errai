@@ -16,6 +16,13 @@
 
 package org.jboss.errai.bus.client.security;
 
+/**
+ * A credential used for authentication.
+ */
 public interface Credential {
+    /**
+     * The value of the credential.
+     * @return - Value instance of the credential.
+     */
     public Object getValue();
 }

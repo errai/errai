@@ -19,7 +19,10 @@ package org.jboss.errai.bus.server.security.auth;
 import com.google.gwt.core.client.GWT;
 import org.jboss.errai.bus.client.CommandMessage;
 
-
+/**
+ * A simple placeholder adapter which provides no authentication functionality whatsoever.  This can be used for
+ * development purposes, if one wishes to avoid authentication for testing.
+ */
 public class DefaultAdapter implements AuthenticationAdapter {
     public DefaultAdapter() {
         GWT.log("Warning: DefaultAdapter being used. This provides no security.", null);

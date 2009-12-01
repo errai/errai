@@ -18,6 +18,9 @@ package org.jboss.errai.bus.client.security.impl;
 
 import org.jboss.errai.bus.client.security.Credential;
 
+/**
+ * A basic password credential.
+ */
 public class PasswordCredential implements Credential {
     public String password;
 
