@@ -16,6 +16,12 @@
 
 package org.jboss.errai.bus.client;
 
+/**
+ * Contains details on the subscription event that has occured on the bus.
+ *
+ * @see org.jboss.errai.bus.client.SubscribeListener
+ * @see org.jboss.errai.bus.client.UnsubscribeListener
+ */
 public class SubscriptionEvent {
     private boolean disposeListener = false;
     private boolean remote = false;

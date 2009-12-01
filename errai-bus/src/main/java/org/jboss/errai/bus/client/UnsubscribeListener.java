@@ -16,6 +16,9 @@
 
 package org.jboss.errai.bus.client;
 
+/**
+ * A listener that is fired when a subject is unsubscribed from th bus.
+ */
 public interface UnsubscribeListener {
     public void onUnsubscribe(SubscriptionEvent event);
 }

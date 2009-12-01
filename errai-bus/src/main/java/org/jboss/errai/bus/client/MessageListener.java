@@ -16,6 +16,11 @@
 
 package org.jboss.errai.bus.client;
 
+/**
+ * Listens to a message and makes a routing decision.
+ *
+ * @see org.jboss.errai.bus.client.BooleanRoutingRule
+ */
 public interface MessageListener {
     public boolean handleMessage(CommandMessage message);
 }

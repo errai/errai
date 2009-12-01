@@ -19,6 +19,9 @@ package org.jboss.errai.bus.client;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * An extended client-specific/in-browser interface of {@link MessageBus}, which defines client-specific functionalities.
+ */
 public interface ClientMessageBus extends MessageBus {
     public Map<String, Set<Object>> getCapturedRegistrations();
     public void unregisterAll(Map<String, Set<Object>> all);

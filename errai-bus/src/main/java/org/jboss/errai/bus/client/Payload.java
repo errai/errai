@@ -19,6 +19,9 @@ package org.jboss.errai.bus.client;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * The <tt>Payload</tt> class represents one-or-more messages to be transmitted from one bus to another.
+ */
 public class Payload {
     private List<Message> messages = new LinkedList<Message>();
 

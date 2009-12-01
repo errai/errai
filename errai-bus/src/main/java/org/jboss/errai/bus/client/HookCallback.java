@@ -16,6 +16,9 @@
 
 package org.jboss.errai.bus.client;
 
+/**
+ * A simple callback interface used for creating a post-initializing callback hook in the client message bus.
+ */
 public interface HookCallback {
     public void callback(String subject);
 }
