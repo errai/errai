@@ -77,7 +77,7 @@ public class ErraiServiceImpl implements ErraiService {
                         configurator.getResource(AuthenticationAdapter.class)
                                 .challenge(c);
                         bus.send(ConversationMessage.create(c).toSubject("LoginClient")
-                                .setCommandType(SecurityCommands.SecurityChallenge));
+                                .command(SecurityCommands.SecurityChallenge));
                         break;
                 }
             }
