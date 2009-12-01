@@ -53,7 +53,7 @@ public class ErraiServletImpl extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
             throws ServletException, IOException {
-          pollForMessages(httpServletRequest, httpServletResponse, true);
+        pollForMessages(httpServletRequest, httpServletResponse, true);
     }
 
     @Override
@@ -85,51 +85,81 @@ public class ErraiServletImpl extends HttpServlet {
         pollForMessages(httpServletRequest, httpServletResponse, false);
     }
 
-    private void pollForMessages(HttpServletRequest httpServletRequest, 
+    private void pollForMessages(HttpServletRequest httpServletRequest,
                                  HttpServletResponse httpServletResponse, boolean wait) throws IOException {
 
-        List<Message> messages = service.getBus().nextMessage(
-                httpServletRequest.getSession().getAttribute(MessageBus.WS_SESSION_ID), wait).getMessages();
+        try {
+            List<Message> messages = service.getBus().nextMessage(
+                    httpServletRequest.getSession().getAttribute(MessageBus.WS_SESSION_ID), wait).getMessages();
 
-        httpServletResponse.setHeader("Cache-Control", "no-cache");
-        httpServletResponse.addHeader("Payload-Size", String.valueOf(messages.size()));
-        httpServletResponse.setContentType("application/io");
-        OutputStream stream = httpServletResponse.getOutputStream();
+            httpServletResponse.setHeader("Cache-Control", "no-cache");
+            httpServletResponse.addHeader("Payload-Size", String.valueOf(messages.size()));
+            httpServletResponse.setContentType("application/io");
+            OutputStream stream = httpServletResponse.getOutputStream();
 
-        Iterator<Message> iter = messages.iterator();
-        Message m;
+            Iterator<Message> iter = messages.iterator();
+            Message m;
 
-        stream.write('[');
-        while (iter.hasNext()) {
-            m = iter.next();
-            stream.write('{');
-            stream.write('"');
-            for (byte b : (m.getSubject()).getBytes()) {
-                stream.write(b);
-            }
-            stream.write('"');
-            stream.write(':');
-
-            if (m.getMessage() == null) {
-                stream.write('n');
-                stream.write('u');
-                stream.write('l');
-                stream.write('l');
-            }
-            else {
-                for (byte b : ((String) m.getMessage()).getBytes()) {
-                    stream.write(b);
+            stream.write('[');
+            while (iter.hasNext()) {
+                writeToOutputStream(stream, iter.next());
+                if (iter.hasNext()) {
+                    stream.write(',');
                 }
             }
-            stream.write('}');
+            stream.write(']');
 
-            if (iter.hasNext()) {
-                stream.write(',');
+            stream.close();
+        }
+        catch (final Throwable t) {
+
+            httpServletResponse.setHeader("Cache-Control", "no-cache");
+            httpServletResponse.addHeader("Payload-Size", "1");
+            httpServletResponse.setContentType("application/io");
+            OutputStream stream = httpServletResponse.getOutputStream();
+
+            stream.write('[');
+
+            writeToOutputStream(stream, new Message() {
+                public String getSubject() {
+                     return "ClientBusErrors";
+                }
+
+                public Object getMessage() {
+                    StringBuilder b = new StringBuilder("{ErrorMessage:\"").append(t.getMessage()).append("\",AdditionalDetails:\"");
+                    for (StackTraceElement e : t.getStackTrace()) {
+                        b.append(e.toString()).append("<br/>");
+                    }
+
+                    return b.append("\"}").toString();
+                }
+            });
+
+            stream.write(']');
+        }
+    }
+
+    public static void writeToOutputStream(OutputStream stream, Message m) throws IOException {
+        stream.write('{');
+        stream.write('"');
+        for (byte b : (m.getSubject()).getBytes()) {
+            stream.write(b);
+        }
+        stream.write('"');
+        stream.write(':');
+
+        if (m.getMessage() == null) {
+            stream.write('n');
+            stream.write('u');
+            stream.write('l');
+            stream.write('l');
+        } else {
+            for (byte b : ((String) m.getMessage()).getBytes()) {
+                stream.write(b);
             }
         }
-        stream.write(']');
+        stream.write('}');
 
-        stream.close();
     }
 
 

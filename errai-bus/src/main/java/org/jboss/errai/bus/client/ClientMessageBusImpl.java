@@ -364,6 +364,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             }
         });
 
+        subscribe("ClientBusErrors", new MessageCallback() {
+            public void callback(CommandMessage message) {
+                showError(message.get(String.class, "ErrorMessage"),
+                        message.get(String.class, "AdditionalDetails"), null);
+            }
+        });
+
         addSubscribeListener(new SubscribeListener() {
             public void onSubscribe(SubscriptionEvent event) {
                 if (event.getSubject().startsWith("local:")) {
