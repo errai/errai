@@ -1,54 +1,30 @@
-<chapter id="introduction">
+<?xml version='1.0' encoding='UTF-8'?><chapter id="introduction">
   <title>Introduction</title>
-
-  <para>This documentation is best viewed in <ulink url="http://www.mozilla.com/firefox/">firefox</ulink>. There are some known issues
-  with internet explorer.
-  </para>
-  
+  <para>This documentation is best viewed in <ulink url="http://www.mozilla.com/firefox/">firefox</ulink>. There are some known issues with internet explorer. </para>
   <section>
     <title>License and EULA</title>
-    <para>Errai is distributed under the terms of the the Apache License, Version 2.0.  
-    See <ulink url="http://www.apache.org/licenses/LICENSE-2.0">the full Apache license text</ulink>.
-    </para>
+    <para>Errai is distributed under the terms of the the Apache License, Version 2.0. See <ulink url="http://www.apache.org/licenses/LICENSE-2.0">the full Apache license text</ulink>. </para>
   </section>
-
   <section>
     <title>Downloads</title>
-    <para>The distribution packages can be downloaded from jboss.org
-    </para>
+    <para>The distribution packages can be downloaded from jboss.org </para>
     <ulink url="http://jboss.org/errai/">http://jboss.org/errai/</ulink>
   </section>
-
   <section>
     <title>Sources</title>
-    <para>The source code for this component can be found in the Errai SVN repository:
-    </para>
+    <para>The source code for this component can be found in the Errai SVN repository: </para>
     <ulink url="http://anonsvn.jboss.org/repos/errai/trunk/">https://anonsvn.jboss.org/repos/errai/trunk/</ulink>
   </section>
-
   <section>
     <title>What is it</title>
-    <para>Errai is a GWT-based framework for building rich web applications
-        using next-generation web technologies. Built on-top of ErraiBus,
-        the framework provides a unified federation and RPC infrastructure with true,
-        uniform, asynchronous messaging across the client and server.
-        Errai also provides a widget library, ErraiWidgets to help you build
-        professional applications using pure GWT components,
-        that can be extended and composited.
-    </para>
-  </section>  
-
+    <para>Errai is a GWT-based framework for building rich web applications using next-generation web technologies. Built on-top of ErraiBus, the framework provides a unified federation and RPC infrastructure with true, uniform, asynchronous messaging across the client and server. Errai also provides a widget library, ErraiWidgets to help you build professional applications using pure GWT components, that can be extended and composited. </para>
+  </section>
   <section>
     <title>Contents of this userguide</title>
     <para>...</para>
   </section>
-
-
   <section>
     <title>Reporting problems</title>
-    <para>
-        ...
-    </para>
+    <para> ... </para>
   </section>
-
 </chapter>

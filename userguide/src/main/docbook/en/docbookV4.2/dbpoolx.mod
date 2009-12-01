@@ -8,7 +8,7 @@
      Organization for the Advancement of Structured Information
      Standards (OASIS).
 
-     $Id: dbpoolx.mod,v 1.46 2002/07/17 15:26:16 nwalsh Exp $
+     $Id: dbpoolx.mod,v 1.3 2004/04/12 16:42:05 ilia Exp $
 
      Permission to use, copy, modify and distribute the DocBook XML DTD
      and its accompanying documentation for any purpose and without fee
