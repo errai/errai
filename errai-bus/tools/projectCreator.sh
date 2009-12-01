@@ -6,6 +6,6 @@
 
 mvn archetype:generate \
 	-DarchetypeGroupId=org.jboss.errai.bus \
-	-DarchetypeArtifactId=helloworld-archetype \
+	-DarchetypeArtifactId=bus-starter-archetype \
 	-DarchetypeVersion=1.0-SNAPSHOT \
 	-DarchetypeRepository=http://snapshots.jboss.org/maven2 \
