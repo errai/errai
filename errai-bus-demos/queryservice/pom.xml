@@ -160,7 +160,7 @@
                                 -->
                                 <delete>
                                     <fileset dir="war/WEB-INF/classes"
-                                             includes="**/*.java,**/*.class,**/*.png, **/*.gif,**/*.jpg,**/*.jar, ErraiApp.properties,**/*.gwt.xml" />
+                                             includes="**/*.ui.xml, **/*.java,**/*.class,**/*.png, **/*.gif,**/*.jpg,**/*.jar, ErraiApp.properties,**/*.gwt.xml" />
                                     <fileset dir="war/WEB-INF/lib"
                                              includes="**/*"
                                              excludes="KEEPME.txt"/>
