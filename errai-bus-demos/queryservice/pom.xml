@@ -105,7 +105,7 @@
     </dependencies>
 
     <build>
-        <outputDirectory>target/war/WEB-INF/classes</outputDirectory>
+        <outputDirectory>war/WEB-INF/classes</outputDirectory>
         <plugins>
 
             <plugin>
@@ -160,7 +160,7 @@
                                 -->
                                 <delete>
                                     <fileset dir="war/WEB-INF/classes"
-                                             includes="**/*.java,**/*.class,**/*.png, **/*.gif,**/*.jpg,**/*.jar, ErraiApp.properties" />
+                                             includes="**/*.java,**/*.class,**/*.png, **/*.gif,**/*.jpg,**/*.jar, ErraiApp.properties,**/*.gwt.xml" />
                                     <fileset dir="war/WEB-INF/lib"
                                              includes="**/*"
                                              excludes="KEEPME.txt"/>
