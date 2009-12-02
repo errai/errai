@@ -17,48 +17,63 @@
 package org.errai.samples.serialization.client;
 
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.*;
 import org.errai.samples.serialization.client.model.Record;
 import org.jboss.errai.bus.client.*;
 
 import java.util.List;
 
 public class Serialization implements EntryPoint {
-    private MessageBus bus = ErraiBus.get();
+  private MessageBus bus = ErraiBus.get();
 
-    public void onModuleLoad() {
-        final FlexTable table = new FlexTable();
+  public void onModuleLoad() {
 
-        bus.conversationWith(ConversationMessage.create()
-                .toSubject("ObjectService"),
-                new MessageCallback() {
-                    public void callback(CommandMessage message) {
-                        List<Record> records = message.get(List.class, "Records");
+    VerticalPanel p = new VerticalPanel();
 
-                        int row = 0;
-                        for (Record r : records) {
-                            table.setWidget(row, 0, new HTML(String.valueOf(r.getRecordId())));
-                            table.setWidget(row, 1, new HTML(r.getName()));
-                            table.setWidget(row, 2, new HTML(String.valueOf(r.getBalance())));
-                            table.setWidget(row, 3, new HTML(r.getAccountOpened().toString()));
-                            table.setWidget(row, 4, new HTML(String.valueOf(r.getStuff())));
-                            row++;
-                        }
+    final FlexTable table = new FlexTable();
 
-                        try {
-                            CommandMessage.create().toSubject("ObjectService")
-                                    .set("Recs", records).sendNowWith(bus);
-                        }
-                        catch (Throwable e) {
-                            e.printStackTrace();
-                        }
+    bus.subscribe("ClientEndpoint",
+        new MessageCallback() {
+          public void callback(CommandMessage message) {
+            List<Record> records = message.get(List.class, "Records");
 
-                    }
-                }
-        );
+            int row = 0;
+            for (Record r : records)
+            {
+              table.setWidget(row, 0, new HTML(String.valueOf(r.getRecordId())));
+              table.setWidget(row, 1, new HTML(r.getName()));
+              table.setWidget(row, 2, new HTML(String.valueOf(r.getBalance())));
+              table.setWidget(row, 3, new HTML(r.getAccountOpened().toString()));
+              table.setWidget(row, 4, new HTML(String.valueOf(r.getStuff())));
+              row++;            
+            }
 
-        RootPanel.get().add(table);
-    }
+            try {
+              CommandMessage.create().toSubject("ObjectService")
+                  .set("Recs", records).sendNowWith(bus);
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+            }
+
+          }
+        }
+    );
+
+    Button button = new Button("Load Objects", new ClickHandler()
+    {
+      public void onClick(ClickEvent clickEvent)
+      {
+        CommandMessage.create()
+                .toSubject("ObjectService")
+                .sendNowWith(bus);            
+      }
+    });
+
+    p.add(table);
+    p.add(button);
+    RootPanel.get().add(p);
+  }
 }
