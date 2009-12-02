@@ -27,4 +27,10 @@ public class WSAlert {
         });
         panel.showModal();
     }
+
+    public static void alert(String message, AcceptsCallback callback) {
+        WSModalDialog panel = new WSModalDialog();
+        panel.ask(message, callback);
+        panel.showModal();
+    }
 }

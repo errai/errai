@@ -25,6 +25,7 @@ import org.jboss.errai.bus.client.protocols.SecurityParts;
 import org.jboss.errai.bus.server.ServerMessageBus;
 import org.jboss.errai.bus.server.security.auth.AuthSubject;
 import org.jboss.errai.bus.server.security.auth.AuthenticationAdapter;
+import org.jboss.errai.bus.server.security.auth.AuthenticationFailedException;
 
 import javax.servlet.http.HttpSession;
 
@@ -57,7 +58,7 @@ public class ErraiServiceImpl implements ErraiService {
 
 
                         ConversationMessage.create(c)
-                               .command(SecurityCommands.WhatCredentials)
+                                .command(SecurityCommands.WhatCredentials)
                                 .set(SecurityParts.CredentialsRequired, "Name,Password")
                                 .set(SecurityParts.ReplyTo, AUTHORIZATION_SVC_SUBJECT)
                                 .sendNowWith(bus);
@@ -69,15 +70,20 @@ public class ErraiServiceImpl implements ErraiService {
                          * Send a challenge.
                          */
 
-                        configurator.getResource(AuthenticationAdapter.class)
-                                .challenge(c);
+                        try {
+                            configurator.getResource(AuthenticationAdapter.class)
+                                    .challenge(c);
+                        }
+                        catch (AuthenticationFailedException a) {
+                        }
                         break;
 
                     case EndSession:
                         configurator.getResource(AuthenticationAdapter.class)
-                                .challenge(c);
+                                .endSession(c);
+
                         bus.send(ConversationMessage.create(c).toSubject("LoginClient")
-                                .command(SecurityCommands.SecurityChallenge));
+                                .command(SecurityCommands.EndSession));
                         break;
                 }
             }
@@ -127,7 +133,6 @@ public class ErraiServiceImpl implements ErraiService {
             t.printStackTrace();
         }
     }
-
 
 
     public ServerMessageBus getBus() {

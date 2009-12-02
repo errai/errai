@@ -19,12 +19,16 @@ package org.jboss.errai.workspaces.client;
 import com.allen_sauer.gwt.dnd.client.PickupDragController;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+
 import static com.google.gwt.core.client.GWT.create;
+
 import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
+
 import static com.google.gwt.user.client.Window.enableScrolling;
+
 import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.client.json.JSONUtilCli;
@@ -61,7 +65,8 @@ public class Workspace implements EntryPoint {
     static {
         loginWindowClosingHandler = new Window.ClosingHandler() {
             public void onWindowClosing(Window.ClosingEvent event) {
-                CommandMessage.create().toSubject("ServerEchoService").sendNowWith(ErraiBus.get());            }
+                CommandMessage.create().toSubject("ServerEchoService").sendNowWith(ErraiBus.get());
+            }
         };
     }
 
@@ -151,6 +156,17 @@ public class Workspace implements EntryPoint {
 
                             showLoginPanel();
                             break;
+
+                        case EndSession:
+                            workspaceLayout.getUserInfoPanel().clear();
+
+                            WSAlert.alert("Logout successful.", new AcceptsCallback() {
+                                public void callback(Object message, Object data) {
+                                    showLoginPanel();
+                                }
+                            });
+                            break;
+
 
                         case FailedAuth:
                             closeLoginPanel();
@@ -358,8 +374,7 @@ public class Workspace implements EntryPoint {
         Image img;
         if (icon == null || "".equals(icon)) {
             img = new Image(erraiImageBundle.application());
-        }
-        else
+        } else
             img = new Image(GWT.getModuleBaseURL() + icon);
 
         final Tool toolImpl = new ToolImpl(name, toolId, multipleAllowed, img, component);
@@ -380,8 +395,7 @@ public class Workspace implements EntryPoint {
         Image img;
         if (icon == null || "".equals(icon)) {
             img = new Image(erraiImageBundle.application());
-        }
-        else
+        } else
             img = new Image(GWT.getModuleBaseURL() + icon);
 
         final Set<String> roles = new HashSet<String>();
