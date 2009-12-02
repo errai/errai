@@ -3,13 +3,13 @@
     <name>Errai</name>
     <groupId>org.jboss.errai</groupId>
     <artifactId>errai-parent</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0-Beta1</version>
     <packaging>pom</packaging>
 
     <scm>
-        <connection>scm:svn:https://svn.jboss.org/repos/jbossworkspace/trunk</connection>
-        <developerConnection>scm:svn:https://svn.jboss.org/repos/jbossworkspace/trunk</developerConnection>
-        <url>https://svn.jboss.org/repos/jbossworkspace/trunk</url>
+        <connection>scm:svn:https://svn.jboss.org/repos/errai/tags/errai-1.0-Beta</connection>
+        <developerConnection>scm:svn:https://svn.jboss.org/repos/errai/tags/errai-1.0-Beta</developerConnection>
+        <url>https://svn.jboss.org/repos/errai/tags/errai-1.0-Beta</url>
     </scm>
 
     <organization>

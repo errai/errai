@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <name>Errai::Bus::Demos::Serialization</name>
     <groupId>org.jboss.errai</groupId>
@@ -10,7 +9,7 @@
     <parent>
         <groupId>org.jboss.errai</groupId>
         <artifactId>errai-bus-demos</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0-Beta1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -113,16 +112,13 @@
                                     to run the hosted mode.
                                 -->
                                 <delete>
-                                    <fileset dir="war/WEB-INF/classes"
-                                             includes="**/*.java,**/*.class,**/*.png, **/*.gif,**/*.jpg,**/*.jar, ErraiApp.properties,**/*.gwt.xml" />
-                                    <fileset dir="war/WEB-INF/lib"
-                                             includes="**/*"
-                                             excludes="KEEPME.txt"/>
+                                    <fileset dir="war/WEB-INF/classes" includes="**/*.java,**/*.class,**/*.png, **/*.gif,**/*.jpg,**/*.jar, ErraiApp.properties,**/*.gwt.xml" />
+                                    <fileset dir="war/WEB-INF/lib" includes="**/*" excludes="KEEPME.txt" />
                                 </delete>
 
                                 <delete dir="war/WEB-INF/classes/org" />
                                 <delete dir="war/Serialization" />
-                                <delete dir="target"/>
+                                <delete dir="target" />
 
                             </tasks>
                         </configuration>
