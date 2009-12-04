@@ -16,6 +16,7 @@
 
 package org.jboss.errai.bus.client.protocols;
 
+
 public enum LayoutCommands {
     OpenNewTab,
     CloseTab,

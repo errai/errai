@@ -16,6 +16,72 @@
 
 package org.jboss.errai.bus.client.protocols;
 
+/**
+ * Defines the standard protocol commands for interaction between federated {@link org.jboss.errai.bus.client.MessageBus}
+ * instances.
+ */
 public enum BusCommands {
-    ConnectToQueue, RemoteSubscribe, RemoteUnsubscribe, FinishStateSync
+    /**
+     * The first command sent from a client bus to a remote bus.  This message indicates the bus would like to
+     * establish a connection to the queue.  There is no authentication associated with this command.  Any
+     * unauthenticated bus can connect to the bus, as establishing a communication channel is necessary
+     * for all communication, including authentication.
+     */
+    ConnectToQueue,
+
+    /**
+     * The command sent from the remote bus back to the client bus to tell it that it should transition to a
+     * normal communications mode, as all remote subscription data will have been sent at this point.
+     */
+    FinishStateSync,
+
+    /**
+     * Notifies the remote bus that a local subscription has been registered.  This is an advertisement to the
+     * remote bus, so it can update it's routing tables.
+     * <p/>
+     * Parameters Accepted:
+     * <p/>
+     * <table style="border: 1px solid gray" cellpadding="3">
+     * <thead style="font-weight: bold;">
+     * <tr>
+     * <td>Part</td>
+     * <td>Type</td>
+     * <td>Description</td>
+     * </tr>
+     * <thead>
+     * <tbody>
+     * <tr>
+     * <td>{@link MessageParts.Subject}</td>
+     * <td>{@link String}</td>
+     * <td>The name of the subject being subscribed to</td>
+     * </tr>
+     * </tbody>
+     * </table>
+     */
+    RemoteSubscribe,
+
+    /**
+     * Notifies the remote bus that a particular subject is no longer subscribed to locally.
+     * <p/>
+     * Parameters Accepted:
+     * <p/>
+     * <table style="border: 1px solid gray" cellpadding="3">
+     * <thead style="font-weight: bold;">
+     * <tr>
+     * <td>Part</td>
+     * <td>Type</td>
+     * <td>Description</td>
+     * </tr>
+     * <thead>
+     * <tbody>
+     * <tr>
+     * <td>{@link MessageParts.Subject}</td>
+     * <td>{@link String}</td>
+     * <td>The name of the subject being subscribed to</td>
+     * </tr>
+     * </tbody>
+     * </table>
+     */
+    RemoteUnsubscribe
+
 }

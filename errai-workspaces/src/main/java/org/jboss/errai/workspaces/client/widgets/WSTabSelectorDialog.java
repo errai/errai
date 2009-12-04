@@ -24,7 +24,7 @@ import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.json.JSONUtilCli;
 import org.jboss.errai.bus.client.protocols.LayoutCommands;
-import org.jboss.errai.bus.client.protocols.LayoutParts;
+import org.jboss.errai.workspaces.client.protocols.LayoutParts;
 import org.jboss.errai.common.client.framework.AcceptsCallback;
 import org.jboss.errai.widgets.client.WSModalDialog;
 import org.jboss.errai.widgets.client.WSWindowPanel;

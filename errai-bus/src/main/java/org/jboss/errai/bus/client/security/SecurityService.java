@@ -19,6 +19,7 @@ package org.jboss.errai.bus.client.security;
 import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.MessageCallback;
+import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
 import static org.jboss.errai.bus.client.protocols.SecurityParts.CredentialsRequired;
@@ -67,7 +68,7 @@ public class SecurityService {
                         CommandMessage challenge = CommandMessage.create()
                                 .toSubject("AuthorizationService")
                                 .command(SecurityCommands.AuthRequest)
-                                .set(SecurityParts.ReplyTo, SUBJECT);
+                                .set(MessageParts.ReplyTo, SUBJECT);
 
                         for (int i = 0; i < credentialNames.length; i++) {
                             switch (CredentialTypes.valueOf(credentialNames[i])) {
@@ -111,7 +112,7 @@ public class SecurityService {
         CommandMessage.create()
                 .toSubject("AuthorizationService")
                 .command(SecurityCommands.WhatCredentials)
-                .set(SecurityParts.ReplyTo, SUBJECT)
+                .set(MessageParts.ReplyTo, SUBJECT)
                 .sendNowWith(ErraiBus.get());
     }
 

@@ -36,7 +36,7 @@ public class JSONUtilCli {
 
         ArrayList<Message> list = new ArrayList<Message>();
         JSONValue a = JSONParser.parse(str);
-
+        
         if (a instanceof JSONArray) {
             JSONArray arr = (JSONArray) a;
 
@@ -58,7 +58,6 @@ public class JSONUtilCli {
                         }
                     });
                 }
-
             }
         }
         return list;

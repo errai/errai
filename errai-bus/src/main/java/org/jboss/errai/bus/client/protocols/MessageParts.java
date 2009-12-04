@@ -16,6 +16,55 @@
 
 package org.jboss.errai.bus.client.protocols;
 
+/**
+ * The parts comprising the core messaging protocol used by ErraiBus.
+ * <p/>
+ * As a general rule, you should avoid using the words reserved by this protocol.
+ */
 public enum MessageParts {
-    CommandType, Subject, SessionID, MessageText, ReplyTo, ToSubject, ErrorMessage, StackTrace
+    /**
+     * Specifies the specific command within the service that is being requested.  This is an optional element,
+     * and is not required for signal-only services.  However it's use is encouraged for building multi-command
+     * services.  It is used as the underlying protocol representation in
+     * {@link org.jboss.errai.bus.client.CommandMessage#toSubject(String)}.  The <tt>CommandType</tt> is
+     * represented as a <tt>String</tt>.
+     */
+    CommandType,
+
+    /**
+     * Specifies a subject being referenced for use in an command.  This should not be confused with {@link #ToSubject},
+     * which is used for message routing.
+     */
+    Subject,
+
+    /**
+     * A unique identifier for identifying the session with which a message is associated.
+     */
+    SessionID,
+
+    /**
+     * Specifies any specific message text to be communicated as part of the command being sent.
+     */
+    MessageText,
+
+    /**
+     * Specifies what subject which should be replied-to in response to the message being sent.  Usually handled
+     * automatically with conversations.
+     */
+    ReplyTo,
+
+    /**
+     * Specifies the intended recipient queue for the message.
+     */
+    ToSubject,
+
+    /**
+     * Specifies error message test.
+     */
+    ErrorMessage,
+
+    /**
+     * Specifies stack trace data in String form.
+     */
+    StackTrace
 }

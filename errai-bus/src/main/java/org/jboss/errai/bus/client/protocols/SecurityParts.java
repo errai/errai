@@ -16,6 +16,37 @@
 
 package org.jboss.errai.bus.client.protocols;
 
+/**
+ * The parts comprising the standard security protocols.
+ */
 public enum SecurityParts {
-    Name, Password, CredentialsRequired, Roles, ReplyTo, Credentials, RejectedMessage
+    /**
+     * The <tt>name</tt> of the principle being discussed.
+     */
+    Name,
+
+    /**
+     * The password for the principle.
+     */
+    Password,
+
+    /**
+     * A comma-seperated string of credentials required.
+     */
+    CredentialsRequired,
+
+    /**
+     * A comma-seperated string of roles.
+     */
+    Roles,
+
+    /**
+     * The actual credential objects associted with the session.
+     */
+    Credentials,
+
+    /**
+     * Message explaining the reason for a security rejectin.
+     */
+    RejectedMessage
 }

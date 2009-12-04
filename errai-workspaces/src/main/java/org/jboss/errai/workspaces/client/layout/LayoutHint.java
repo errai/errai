@@ -20,7 +20,7 @@ import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.MessageCallback;
-import org.jboss.errai.bus.client.protocols.LayoutParts;
+import org.jboss.errai.workspaces.client.protocols.LayoutParts;
 
 import java.util.LinkedHashMap;
 
