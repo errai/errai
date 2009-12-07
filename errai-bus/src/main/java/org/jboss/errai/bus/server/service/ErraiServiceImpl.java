@@ -20,6 +20,7 @@ import com.google.inject.Inject;
 import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.ConversationMessage;
 import org.jboss.errai.bus.client.MessageCallback;
+import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
 import org.jboss.errai.bus.server.ServerMessageBus;
@@ -60,7 +61,7 @@ public class ErraiServiceImpl implements ErraiService {
                         ConversationMessage.create(c)
                                 .command(SecurityCommands.WhatCredentials)
                                 .set(SecurityParts.CredentialsRequired, "Name,Password")
-                                .set(SecurityParts.ReplyTo, AUTHORIZATION_SVC_SUBJECT)
+                                .set(MessageParts.ReplyTo, AUTHORIZATION_SVC_SUBJECT)
                                 .sendNowWith(bus);
 
                         break;
