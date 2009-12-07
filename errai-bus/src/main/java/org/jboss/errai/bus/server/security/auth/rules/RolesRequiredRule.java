@@ -62,7 +62,7 @@ public class RolesRequiredRule implements BooleanRoutingRule {
                 bus.send(CommandMessage.create(SecurityCommands.SecurityChallenge)
                         .toSubject("LoginClient")
                         .set(SecurityParts.CredentialsRequired, "Name,Password")
-                        .set(SecurityParts.ReplyTo, ErraiService.AUTHORIZATION_SVC_SUBJECT)
+                        .set(MessageParts.ReplyTo, ErraiService.AUTHORIZATION_SVC_SUBJECT)
                         .copyResource("Session", message)
                         .set(SecurityParts.RejectedMessage, ServerBusUtils.encodeJSON(message.getParts()))
                         , false);
