@@ -29,6 +29,9 @@ import java.util.ArrayList;
 import java.util.Map;
 
 public class JSONUtilCli {
+    public static String MULTI_PAYLOAD_SEPER = "||";
+    public static String MULTI_PAYLOAD_SEPER_REGEX = "\\|\\|";
+
     public static ArrayList<Message> decodePayload(Object value) {
         String str = String.valueOf(value);
 
@@ -53,7 +56,6 @@ public class JSONUtilCli {
                         }
 
                         public Object getMessage() {
-
                             return eMap.get(subject);
                         }
                     });

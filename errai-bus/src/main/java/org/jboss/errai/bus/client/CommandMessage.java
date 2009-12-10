@@ -24,17 +24,18 @@ import java.util.Map;
 
 /**
  * CommandMessage represents a message payload.  It implements a builder (or fluent) API which is used for constructing
- * sendable messages.<br/>
- * <br/>
+ * sendable messages.  It is the core messageing API for ErraiBus, and will be the foremost used class within ErraiBus
+ * by most users.
+ * <p/>
  * <strong>Example Message:</strong>
  * <tt><pre>
  * CommandMessage msg = CommandMessage.create()
  *                          .toSubject("Foo")
  *                          .set("Text", "I like chocolate cake.");
- * </pre></tt><br/>
+ * </pre></tt>
  * You can transmit a message using the the <tt>sendNowWith()</tt> method by providing an instance of
- * {@link org.jboss.errai.bus.client.MessageBus}.<br/>
- * <br/>
+ * {@link org.jboss.errai.bus.client.MessageBus}.
+ * <p/>
  * Messages can be contructed using user-defined standard protocols through the use of enumerations. Both
  * <tt>commandType</tt> and message parts can be defined through the use of enumerations.  This helps create
  * strongly-defined protocols for communicating with services.  For instance:
@@ -48,7 +49,7 @@ import java.util.Map;
  * public enum LoginCommands {
  *    Login, Logout
  * }
- * </pre></tt><br/>
+ * </pre></tt>
  * These enumerations can than be directly used to build messages and decode incoming messages by a service. For example:
  * <tt><pre>
  *  CommandMessage.create()
@@ -57,6 +58,12 @@ import java.util.Map;
  *      .set(LoginParts.Password, "bar )
  *      .sendNowWith(busInstance);
  * </pre></tt>
+ * Messages may contain serialized objects provided they meet the following criteria:
+ * <ol>
+ *  <li>The class is annotated with {@link org.jboss.errai.bus.server.annotations.ExposeEntity}</li>
+ *  <li>The class implements {@link java.io.Serializable}.
+ *  <li>The class contains a default, no-argument constructor.
+ * </ol>
  *
  * @see org.jboss.errai.bus.client.ConversationMessage
  */
@@ -87,7 +94,7 @@ public class CommandMessage {
     /**
      * Create a new CommandMessage.
      *
-     * @return
+     * @return a new instance of CommandMessage
      */
     public static CommandMessage create() {
         return new CommandMessage();
@@ -281,7 +288,7 @@ public class CommandMessage {
     }
 
     /**
-     * Set the message to contain the specified parts.  Note: This overrides any existing message contents.
+     * Set the message to contain the specified parts.  Note: This overwrites any existing message contents.
      *
      * @param parts - Parts to be used in the message.
      * @return -

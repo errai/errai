@@ -47,7 +47,6 @@ public enum SecurityCommands {
      */
     FailedAuth,
 
-
     /**
      * Sent to indicate that the authentication was successful.
      */

@@ -32,6 +32,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+/**
+ * This routing rule specifies a set of required roles that a message must posess in order for this routing rule
+ * to return true.
+ */
 public class RolesRequiredRule implements BooleanRoutingRule {
     private Set<Object> requiredRoles;
     private MessageBus bus;

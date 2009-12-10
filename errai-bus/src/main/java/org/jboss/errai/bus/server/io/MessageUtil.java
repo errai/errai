@@ -17,6 +17,7 @@
 package org.jboss.errai.bus.server.io;
 
 import org.jboss.errai.bus.client.CommandMessage;
+import org.jboss.errai.bus.client.json.JSONUtilCli;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
 
@@ -30,7 +31,7 @@ public class MessageUtil {
 
     public static CommandMessage[] createCommandMessage(Object session, String json) {
         if (json.length() == 0) return new CommandMessage[0];
-        String[] pkg = json.split("\\|\\|");
+        String[] pkg = json.split(JSONUtilCli.MULTI_PAYLOAD_SEPER_REGEX);
         CommandMessage[] c = new CommandMessage[pkg.length];
 
         for (int i = 0; i < pkg.length; i++) {

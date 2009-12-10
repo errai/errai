@@ -278,7 +278,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             outgoing.append(outgoingQueue.poll());
 
             if ((i + 1) < transmissionSize) {
-                outgoing.append("||");
+                outgoing.append(JSONUtilCli.MULTI_PAYLOAD_SEPER);
             }
         }
 

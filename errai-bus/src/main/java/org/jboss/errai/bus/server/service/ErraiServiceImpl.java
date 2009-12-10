@@ -30,6 +30,9 @@ import org.jboss.errai.bus.server.security.auth.AuthenticationFailedException;
 
 import javax.servlet.http.HttpSession;
 
+/**
+ * Default implementation of the ErraiBus server-side service.
+ */
 public class ErraiServiceImpl implements ErraiService {
     private ServerMessageBus bus;
     private ErraiServiceConfigurator configurator;
@@ -44,9 +47,6 @@ public class ErraiServiceImpl implements ErraiService {
     }
 
     private void init() {
-        // just use the simple bus for now.  more integration options sendNowWith come...
-        //bus.addGlobalListener(new BasicAuthorizationListener(authorizationAdapter, bus));
-
         //todo: this all needs sendNowWith be refactored at some point.
         bus.subscribe(AUTHORIZATION_SVC_SUBJECT, new MessageCallback() {
             public void callback(CommandMessage c) {
@@ -56,7 +56,6 @@ public class ErraiServiceImpl implements ErraiService {
                          * Respond with what credentials the authentication system requires.
                          */
                         //todo: we only support login/password for now
-
 
                         ConversationMessage.create(c)
                                 .command(SecurityCommands.WhatCredentials)
