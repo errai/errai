@@ -240,7 +240,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         if (!initialized) {
             return;
         }
-        if (transmitting) {
+        else if (transmitting) {
             if (sendTimer == null) {
                 sendTimer = new com.google.gwt.user.client.Timer() {
                     int timeout = 0;
@@ -498,8 +498,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             @Override
             public void run() {
                 incoming.scheduleRepeating(1000);
-                //  incoming.scheduleRepeating((60 * 45) * 1000);
-
                 ExtensionsLoader loader = GWT.create(ExtensionsLoader.class);
                 loader.initExtensions(bus);
             }
@@ -579,10 +577,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         }
 
         VerticalPanel panel = new VerticalPanel();
-        panel.getElement().getStyle().setProperty("border", "1px");
-        panel.getElement().getStyle().setProperty("borderStyle", "solid");
-        panel.getElement().getStyle().setProperty("borderColor", "black");
-        panel.getElement().getStyle().setProperty("backgroundColor", "lightgrey");
+        Style s = panel.getElement().getStyle();
+
+        s.setProperty("border", "1px");
+        s.setProperty("borderStyle", "solid");
+        s.setProperty("borderColor", "black");
+        s.setProperty("backgroundColor", "lightgrey");
 
         panel.add(new HTML("<strong style='background:red;color:white;'>" + message + "</strong>"));
 

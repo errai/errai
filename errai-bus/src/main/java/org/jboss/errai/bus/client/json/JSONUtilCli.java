@@ -44,9 +44,7 @@ public class JSONUtilCli {
             JSONArray arr = (JSONArray) a;
 
             for (int i = 0; i < arr.size(); i++) {
-                a = arr.get(i);
-
-                if (a instanceof JSONObject) {
+                if ((a = arr.get(i)) instanceof JSONObject) {
                     final JSONObject eMap = (JSONObject) a;
                     final String subject = eMap.keySet().iterator().next();
 
@@ -62,6 +60,7 @@ public class JSONUtilCli {
                 }
             }
         }
+
         return list;
     }
 

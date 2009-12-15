@@ -28,6 +28,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.jboss.errai.common.client.types.TypeDemarshallers.getDemarshaller;
+import static org.jboss.errai.common.client.types.TypeDemarshallers.hasDemarshaller;
+
 
 public class JSONDecoderCli {
     public Object decode(Object value) {
@@ -57,8 +60,8 @@ public class JSONDecoderCli {
         for (String key : eMap.keySet()) {
             if ("__EncodedType".equals(key)) {
                 String className = eMap.get(key).isString().stringValue();
-                if (TypeDemarshallers.hasDemarshaller(className)) {
-                    return TypeDemarshallers.getDemarshaller(className).demarshall(eMap);
+                if (hasDemarshaller(className)) {
+                    return getDemarshaller(className).demarshall(eMap);
                 }
                 else {
                     GWT.log("Could not demartial class. There is no available demarshaller. " +
@@ -79,5 +82,4 @@ public class JSONDecoderCli {
         }
         return list;
     }
-
 }

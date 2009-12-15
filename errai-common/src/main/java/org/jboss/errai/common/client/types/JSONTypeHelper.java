@@ -27,15 +27,12 @@ public class JSONTypeHelper {
 
         JSONValue v;
         if ((v = value.isString()) != null) {
-            return TypeHandlerFactory.convert(String.class, to, ((JSONString)v).stringValue());
-        }
-        else if ((v = value.isNumber()) != null) {
-            return TypeHandlerFactory.convert(Number.class, to, ((JSONNumber)v).doubleValue());
-        }
-        else if ((v = value.isBoolean()) != null) {
-            return TypeHandlerFactory.convert(Boolean.class, to, ((JSONBoolean)v).booleanValue());
-        }
-        else if ((v = value.isArray()) != null) {
+            return TypeHandlerFactory.convert(String.class, to, ((JSONString) v).stringValue());
+        } else if ((v = value.isNumber()) != null) {
+            return TypeHandlerFactory.convert(Number.class, to, ((JSONNumber) v).doubleValue());
+        } else if ((v = value.isBoolean()) != null) {
+            return TypeHandlerFactory.convert(Boolean.class, to, ((JSONBoolean) v).booleanValue());
+        } else if ((v = value.isArray()) != null) {
             List list = new ArrayList();
             JSONArray arr = (JSONArray) v;
 
@@ -44,27 +41,25 @@ public class JSONTypeHelper {
             }
 
             return TypeHandlerFactory.convert(Collection.class, to, list);
-        }
-        else if ((v = value.isObject()) != null) {
+        } else if ((v = value.isObject()) != null) {
             JSONObject eMap = (JSONObject) v;
 
             Map<String, Object> m = new HashMap<String, Object>();
 
-             for (String key : eMap.keySet()) {
-                 if ("__EncodedType".equals(key)) {
-                     String className = eMap.get(key).isString().stringValue();
+            for (String key : eMap.keySet()) {
+                if ("__EncodedType".equals(key)) {
+                    String className = eMap.get(key).isString().stringValue();
 
-                     if (TypeDemarshallers.hasDemarshaller(className)) {
-                         return (T) TypeDemarshallers.getDemarshaller(className).demarshall(eMap);
-                     }
-                     else {
-                         throw new RuntimeException("no available demarshaller: " + className);
-                     }
+                    if (TypeDemarshallers.hasDemarshaller(className)) {
+                        return (T) TypeDemarshallers.getDemarshaller(className).demarshall(eMap);
+                    } else {
+                        throw new RuntimeException("no available demarshaller: " + className);
+                    }
 
-                 }
+                }
 
-                 m.put(key, new JSONDecoderCli().decode(eMap.get(key)));
-             }
+                m.put(key, new JSONDecoderCli().decode(eMap.get(key)));
+            }
 
             return TypeHandlerFactory.convert(Map.class, to, m);
         }
@@ -75,11 +70,9 @@ public class JSONTypeHelper {
     public static String encodeHelper(Object v) {
         if (v instanceof String) {
             return "\\\"" + v + "\\\"";
-        }
-        else if (v instanceof Character) {
+        } else if (v instanceof Character) {
             return "'" + v + "'";
-        }
-        else {
+        } else {
             return String.valueOf(v);
         }
     }

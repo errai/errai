@@ -1,0 +1,35 @@
+@code{
+    import java.util.*;
+
+    getGetter = org.mvel2.util.ReflectionUtil.getGetter;
+    getSetter = org.mvel2.util.ReflectionUtil.getSetter;
+
+    def getType(cls) {
+         return typeOracle.getType(cls.getName());
+    }
+        
+    collectionDefaults =
+        [
+            getType(java.util.Set),          "java.util.HashSet",
+            getType(java.util.Collection),   "java.util.Collection"
+        ];
+
+    def getDefaultCollection(colType) {
+        for (t : collectionDefaults.keySet()) {
+            if (t.isAssignableFrom(colType)) return collectionDefaults[t];
+        }
+        return null;
+    };
+}
+
+if (widget.@{targetWidgetField.name} == null) {
+    widget.@{targetWidgetField.name} = new @{getDefaultCollection(widgetCollectionType)}(); 
+}
+
+if (widget.@{targetEntityField.name} == null) {
+    throw new RuntimeException("Target field '@{targetEntityField.name}' is null");
+}
+
+if (widget.@{targetEntityField.name}.@{getGetter(targetEntityMember.name)}() == null) {
+    throw new RuntimeException("Target field '@{targetEntityField.name}.@{targetEntityMember.name}' is null");
+}

@@ -48,5 +48,4 @@ public class ErraiModule extends ServletModule {
         bind(ErraiService.class).to(ErraiServiceImpl.class);
         bind(ErraiServiceConfigurator.class).to(ErraiServiceConfiguratorImpl.class);
     }
-
 }
