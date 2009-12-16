@@ -20,7 +20,7 @@
       as simple as implementing our standard MessageCallback interface, which is used pervasively
       across, both client and server code. Let's look at an example: </para>
       <para>
-          <programlisting language="java" role="JAVA">
+          <programlisting>
 import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.MessageCallback;
 import org.jboss.errai.bus.server.annotations.Service;

@@ -2,7 +2,11 @@
 
 <chapter id="introduction">
   <title>Introduction</title>
-  <para>This documentation is best viewed in <ulink url="http://www.mozilla.com/firefox/">firefox</ulink>. There are some known issues with internet explorer. </para>
+
+   <section>
+    <title>What is it</title>
+    <para>Errai is a GWT-based framework for building rich web applications using next-generation web technologies. Built on-top of ErraiBus, the framework provides a unified federation and RPC infrastructure with true, uniform, asynchronous messaging across the client and server.</para>
+  </section>
   <section>
     <title>License and EULA</title>
     <para>Errai is distributed under the terms of the the Apache License, Version 2.0. See <ulink url="http://www.apache.org/licenses/LICENSE-2.0">the full Apache license text</ulink>. </para>
@@ -18,15 +22,16 @@
     <ulink url="http://anonsvn.jboss.org/repos/errai/trunk/">https://anonsvn.jboss.org/repos/errai/trunk/</ulink>
   </section>
   <section>
-    <title>What is it</title>
-    <para>Errai is a GWT-based framework for building rich web applications using next-generation web technologies. Built on-top of ErraiBus, the framework provides a unified federation and RPC infrastructure with true, uniform, asynchronous messaging across the client and server. Errai also provides a widget library, ErraiWidgets to help you build professional applications using pure GWT components, that can be extended and composited. </para>
-  </section>
-  <section>
-    <title>Contents of this userguide</title>
-    <para>...</para>
-  </section>
-  <section>
     <title>Reporting problems</title>
-    <para> ... </para>
+    <para>
+        If you run into trouble don't hesitate to get in touch with us:
+
+         <itemizedlist>
+            <listitem>User Forum: <ulink url="http://www.jboss.org/index.html?module=bb&amp;op=viewforum&amp;f=295">http://www.jboss.org/index.html?module=bb&amp;op=viewforum&amp;f=295</ulink> </listitem>
+            <listitem>Mailing List: <ulink url="http://jboss.org/errai/MailingLists.html">http://jboss.org/errai/MailingLists.html</ulink></listitem>
+            <listitem>IRC: irc://irc.freenode.net/errai</listitem>
+        </itemizedlist>
+
+    </para>
   </section>
 </chapter>

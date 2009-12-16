@@ -4,6 +4,7 @@
   <!ENTITY ch01-Introduction SYSTEM "modules/ch01-Introduction.xml">
   <!ENTITY ch02-Installation SYSTEM "modules/ch02-Installation.xml">
   <!ENTITY ch03-ErraiBus SYSTEM "modules/ch03-errai-bus.xml">
+  <!ENTITY appendix-A-Quickstart SYSTEM "modules/appendix-A-Quickstart.xml">
 ]>
 <book lang="en">
   <bookinfo>
@@ -13,4 +14,5 @@
     &ch01-Introduction;
     &ch02-Installation;
     &ch03-ErraiBus;
+    &appendix-A-Quickstart;
 </book>
