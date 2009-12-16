@@ -34,7 +34,7 @@
         <itemizedlist>
             <listitem><literal>doc</literal>: User guide, javadocs and developers guide</listitem>
             <listitem><literal>examples</literal>: Examples that are used in the user guide</listitem>
-            <listitem><literal>lib</literal>: Third party libraries</listitem>
+            <listitem><literal>lib</literal>: Required libraries</listitem>
         </itemizedlist>
     </section>
 
