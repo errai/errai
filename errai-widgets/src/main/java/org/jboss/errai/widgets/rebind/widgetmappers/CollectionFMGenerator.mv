@@ -20,10 +20,11 @@
     }
 
     /*
-     * Define some default class implementations to use.
+     * Define some default class implementations to use for specific collection types.
      */
     collectionDefaults =
         [
+            getType(java.util.Map)          : "java.util.HashMap",
             getType(java.util.Set)          : "java.util.HashSet",
             getType(java.util.Collection)   : "java.util.ArrayList"
         ];
