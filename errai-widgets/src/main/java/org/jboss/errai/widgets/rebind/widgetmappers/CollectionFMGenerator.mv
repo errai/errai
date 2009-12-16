@@ -1,8 +1,9 @@
 @code{
     /*
-     * import all the java.util classes.
+     * import various packages.
      */
     import java.util.*;
+    import org.jboss.errai.widgets.rebind.widgetmappers.*;
 
     /*
      * Map these reflection utility methods in.
@@ -57,7 +58,7 @@ final org.jboss.errai.widgets.client.mapping.FieldMapper<@{widgetType.qualifiedS
         new org.jboss.errai.widgets.client.mapping.FieldMapper<@{widgetType.qualifiedSourceName}, @{widgetType.qualifiedSourceName}, @{entityCollectionType.qualifiedSourceName}>() {
              public @{widgetType.qualifiedSourceName} getFieldValue(@{widgetType.qualifiedSourceName} w, @{entityCollectionType.qualifiedSourceName} value) {
                 for (@{widgetType.qualifiedSourceName} wld : widget.@{targetWidgetField.name}) {
-                    @eval{org.jboss.errai.widgets.rebind.widgetmappers.ColMappers.getMapper(widgetType.qualifiedSourceName).generateGetField(typeOracle,targetEntityField.type.isClassOrInterface())}
+                    @eval{ColMappers.getMapper(widgetType.qualifiedSourceName).generateGetField(typeOracle,targetEntityField.type.isClassOrInterface())}
                 }
 
                 return w;
@@ -65,12 +66,12 @@ final org.jboss.errai.widgets.client.mapping.FieldMapper<@{widgetType.qualifiedS
 
              public void setFieldValue(@{widgetType.qualifiedSourceName} w, @{entityCollectionType.qualifiedSourceName} value) {
                 for (@{widgetType.qualifiedSourceName} wld : widget.@{targetWidgetField.name}) {
-                     @eval{org.jboss.errai.widgets.rebind.widgetmappers.ColMappers.getMapper(widgetType.qualifiedSourceName).generateSetField(typeOracle,targetEntityField.type.isClassOrInterface())}
+                     @eval{ColMappers.getMapper(widgetType.qualifiedSourceName).generateSetField(typeOracle,targetEntityField.type.isClassOrInterface())}
                 }
              }
 
         };
 
 for (final @{widgetType.qualifiedSourceName} wld : widget.@{targetWidgetField.name}) {
-   @eval{org.jboss.errai.widgets.rebind.widgetmappers.ColMappers.getMapper(widgetType.qualifiedSourceName).generateValueChange(typeOracle,targetEntityField.type.isClassOrInterface())}
+   @eval{ColMappers.getMapper(widgetType.qualifiedSourceName).generateValueChange(typeOracle,targetEntityField.type.isClassOrInterface())}
 }
