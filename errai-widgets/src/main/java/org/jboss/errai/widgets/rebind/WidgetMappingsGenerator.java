@@ -215,7 +215,7 @@ public class WidgetMappingsGenerator extends Generator {
                             jEntityTarget, currField, null, varName, fieldsToMap));
 
                     if (g == null) {
-                        throw new RuntimeException("Cannot generate mapper for widget: " + jEntityTarget.getName());
+                        throw new RuntimeException("Cannot generateGetField mapper for widget: " + jEntityTarget.getName());
                     }
 
                     for (JField fld : fieldsToMap) {
@@ -303,7 +303,7 @@ public class WidgetMappingsGenerator extends Generator {
                                     getFieldMapper(classType.getQualifiedSourceName());
 
                             if (g == null) {
-                                throw new RuntimeException("Cannot generate mapper for widget: " + classType.getName());
+                                throw new RuntimeException("Cannot generateGetField mapper for widget: " + classType.getName());
                             }
 
                             generatedInitializations.add(g.init(typeOracle, fld,

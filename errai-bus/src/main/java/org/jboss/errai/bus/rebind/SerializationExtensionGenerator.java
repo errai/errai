@@ -34,6 +34,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.jboss.errai.bus.server.util.ConfigUtil.visitAllTargets;
+
 public class SerializationExtensionGenerator implements ExtensionGenerator {
     private CompiledTemplate demarshallerGenerator;
     private CompiledTemplate marshallerGenerator;
@@ -47,7 +49,7 @@ public class SerializationExtensionGenerator implements ExtensionGenerator {
     }
 
     public void generate(GeneratorContext context, TreeLogger logger, SourceWriter writer, List<File> roots) {
-        ConfigUtil.visitAllTargets(roots, context, logger, writer,
+        visitAllTargets(roots, context, logger, writer,
                 new RebindVisitor() {
                     public void visit(Class<?> visit, GeneratorContext context, TreeLogger logger, SourceWriter writer) {
                         if (visit.isAnnotationPresent(ExposeEntity.class)) {
