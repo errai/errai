@@ -23,8 +23,7 @@ before reading any further:
     |---helloworld
     |---queryservice
     |---serialization
-    |-lib
-    |-tools
+    |-lib    
 
 The examples document the core features that currently ship with Errai:
 
@@ -50,10 +49,14 @@ Alternatively you can import the example in your IDE
 
 [Quickstart]
 
-In order to get you started quickly, we've included a sandbox generator
-script that creates a project structure similar to the examples:
+In order to get you started quickly, we've included a mavena archetype
+that creates a project structure similar to the examples:
 
-    tools/sandbox.sh
+    mvn archetype:generate \
+	-DarchetypeGroupId=org.jboss.errai \
+	-DarchetypeArtifactId=sandbox-archetype \
+	-DarchetypeVersion=1.0-SNAPSHOT \
+	-DarchetypeRepository=http://snapshots.jboss.org/maven2
 
 Run it in a directory of your choice and create a bare bone Errai project
 within minutes.

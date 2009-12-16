@@ -67,13 +67,6 @@
                 <exclude>**/*.iml</exclude>
                 <exclude>**/target/**</exclude>
             </excludes>
-        </fileSet>
-        <fileSet>
-            <directory>../tools/</directory>
-            <outputDirectory>tools/</outputDirectory>
-            <includes>
-                <include>sandbox.sh</include>
-            </includes>
-        </fileSet>
+        </fileSet>        
     </fileSets>
 </assembly>
