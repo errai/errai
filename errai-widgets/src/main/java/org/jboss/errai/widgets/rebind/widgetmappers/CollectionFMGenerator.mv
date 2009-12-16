@@ -1,20 +1,37 @@
 @code{
+    /*
+     * import all the java.util classes.
+     */
     import java.util.*;
 
+    /*
+     * Map these reflection utility methods in.
+     */
     getGetter = org.mvel2.util.ReflectionUtil.getGetter;
     getSetter = org.mvel2.util.ReflectionUtil.getSetter;
     getIsGetter = org.mvel2.util.ReflectionUtil.getIsGetter;
 
+    /*
+     * Create a simple convenience function for extracting the JClassType instance for a particular
+     * class from the type oracle.
+     */
     def getType(cls) {
          return typeOracle.getType(cls.getName());
     }
-        
+
+    /*
+     * Define some default class implementations to use.
+     */
     collectionDefaults =
         [
             getType(java.util.Set)          : "java.util.HashSet",
             getType(java.util.Collection)   : "java.util.ArrayList"
         ];
 
+    /*
+     * Create a function which finds an appropriate class implementation for a specified interface and
+     * returns it.
+     */
     def getDefaultCollection(colType) {
         for (t : collectionDefaults.keySet()) {
             if (t.isAssignableFrom(colType)) return collectionDefaults[t];
