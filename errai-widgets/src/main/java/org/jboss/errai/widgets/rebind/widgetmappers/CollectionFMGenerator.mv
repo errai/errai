@@ -42,7 +42,7 @@
 }
 
 if (widget.@{targetWidgetField.name} == null) {
-    widget.@{targetWidgetField.name} = new @{getDefaultCollection(widgetCollectionType)}<@{widgetType.getQualifiedSourceName()}>();
+    widget.@{targetWidgetField.name} = new @{getDefaultCollection(widgetCollectionType)}<@{widgetType.qualifiedSourceName}>();
 }
 
 if (widget.@{targetEntityField.name} == null) {
@@ -53,24 +53,24 @@ if (widget.@{targetEntityField.name}.@{getGetter(targetEntityMember.name)}() == 
     throw new RuntimeException("Target field '@{targetEntityField.name}.@{targetEntityMember.name}' is null");
 }
 
-final org.jboss.errai.widgets.client.mapping.FieldMapper<@{widgetType.getQualifiedSourceName()}, @{widgetType.getQualifiedSourceName()}, @{entityCollectionType.getQualifiedSourceName()}> @{varName} =
-        new org.jboss.errai.widgets.client.mapping.FieldMapper<@{widgetType.getQualifiedSourceName()}, @{widgetType.getQualifiedSourceName()}, @{entityCollectionType.getQualifiedSourceName()}>() {
-             public @{widgetType.getQualifiedSourceName()} getFieldValue(@{widgetType.getQualifiedSourceName()} w, @{entityCollectionType.getQualifiedSourceName()} value) {
-                for (@{widgetType.getQualifiedSourceName()} wld : widget.@{targetWidgetField.getName()}) {
-                    @eval{org.jboss.errai.widgets.rebind.widgetmappers.ColMappers.getMapper(widgetType.getQualifiedSourceName()).generateGetField(typeOracle,targetEntityField.getType().isClassOrInterface())}
+final org.jboss.errai.widgets.client.mapping.FieldMapper<@{widgetType.qualifiedSourceName}, @{widgetType.qualifiedSourceName}, @{entityCollectionType.qualifiedSourceName}> @{varName} =
+        new org.jboss.errai.widgets.client.mapping.FieldMapper<@{widgetType.qualifiedSourceName}, @{widgetType.qualifiedSourceName}, @{entityCollectionType.qualifiedSourceName}>() {
+             public @{widgetType.qualifiedSourceName} getFieldValue(@{widgetType.qualifiedSourceName} w, @{entityCollectionType.qualifiedSourceName} value) {
+                for (@{widgetType.qualifiedSourceName} wld : widget.@{targetWidgetField.name}) {
+                    @eval{org.jboss.errai.widgets.rebind.widgetmappers.ColMappers.getMapper(widgetType.qualifiedSourceName).generateGetField(typeOracle,targetEntityField.type.isClassOrInterface())}
                 }
 
                 return w;
              }
 
-             public void setFieldValue(@{widgetType.getQualifiedSourceName()} w, @{entityCollectionType.getQualifiedSourceName()} value) {
-                for (@{widgetType.getQualifiedSourceName()} wld : widget.@{targetWidgetField.getName()}) {
-                     @eval{org.jboss.errai.widgets.rebind.widgetmappers.ColMappers.getMapper(widgetType.getQualifiedSourceName()).generateSetField(typeOracle,targetEntityField.getType().isClassOrInterface())}
+             public void setFieldValue(@{widgetType.qualifiedSourceName} w, @{entityCollectionType.qualifiedSourceName} value) {
+                for (@{widgetType.qualifiedSourceName} wld : widget.@{targetWidgetField.name}) {
+                     @eval{org.jboss.errai.widgets.rebind.widgetmappers.ColMappers.getMapper(widgetType.qualifiedSourceName).generateSetField(typeOracle,targetEntityField.type.isClassOrInterface())}
                 }
              }
 
         };
 
-for (final @{widgetType.getQualifiedSourceName()} wld : widget.@{targetWidgetField.getName()}) {
-   @eval{org.jboss.errai.widgets.rebind.widgetmappers.ColMappers.getMapper(widgetType.getQualifiedSourceName()).generateValueChange(typeOracle,targetEntityField.getType().isClassOrInterface())}
+for (final @{widgetType.qualifiedSourceName} wld : widget.@{targetWidgetField.name}) {
+   @eval{org.jboss.errai.widgets.rebind.widgetmappers.ColMappers.getMapper(widgetType.qualifiedSourceName).generateValueChange(typeOracle,targetEntityField.type.isClassOrInterface())}
 }
