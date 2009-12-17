@@ -88,11 +88,14 @@ public class ConfigUtil {
     {
         final String pathToJar = start.getPath();
 
-        if((!pathToJar.startsWith("file:/") && !pathToJar.startsWith("/")) && !pathToJar.endsWith(".jar"))
+        boolean startsWithFile = pathToJar.startsWith("file:/");
+
+        if (pathToJar.lastIndexOf(".jar") == -1)
             throw new RuntimeException("Not a jar: "+start.getAbsolutePath());
 
         try{
-            String jarName = pathToJar.substring(5, pathToJar.length()-1);
+            int startIdx = startsWithFile ? 5 : 0;
+            String jarName = pathToJar.substring(startIdx, pathToJar.lastIndexOf(".jar") + 4);
             JarInputStream jarFile = new JarInputStream (new FileInputStream(jarName));
             JarEntry jarEntry;
 
