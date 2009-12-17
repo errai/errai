@@ -88,7 +88,7 @@ public class ConfigUtil {
     {
         final String pathToJar = start.getPath();
 
-        if((!pathToJar.startsWith("file:/") && !pathToJar.startsWith("/")) || !pathToJar.endsWith(".jar"))
+        if((!pathToJar.startsWith("file:/") && !pathToJar.startsWith("/")) && !pathToJar.endsWith(".jar"))
             throw new RuntimeException("Not a jar: "+start.getAbsolutePath());
 
         try{
