@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Reader;
@@ -58,8 +59,7 @@ public class ErraiServletImpl extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
             throws ServletException, IOException {
-
-        Reader reader = httpServletRequest.getReader();
+        BufferedReader reader = httpServletRequest.getReader();
         StringBuilder sb = new StringBuilder(httpServletRequest.getContentLength());
         HttpSession session = httpServletRequest.getSession();
         CharBuffer buffer = CharBuffer.allocate(10);
@@ -86,7 +86,6 @@ public class ErraiServletImpl extends HttpServlet {
 
     private void pollForMessages(HttpServletRequest httpServletRequest,
                                  HttpServletResponse httpServletResponse, boolean wait) throws IOException {
-
         try {
             List<Message> messages = service.getBus().nextMessage(
                     httpServletRequest.getSession().getAttribute(MessageBus.WS_SESSION_ID), wait).getMessages();
@@ -97,7 +96,6 @@ public class ErraiServletImpl extends HttpServlet {
             OutputStream stream = httpServletResponse.getOutputStream();
 
             Iterator<Message> iter = messages.iterator();
-            Message m;
 
             stream.write('[');
             while (iter.hasNext()) {
@@ -111,7 +109,6 @@ public class ErraiServletImpl extends HttpServlet {
             stream.close();
         }
         catch (final Throwable t) {
-
             httpServletResponse.setHeader("Cache-Control", "no-cache");
             httpServletResponse.addHeader("Payload-Size", "1");
             httpServletResponse.setContentType("application/io");
@@ -158,8 +155,5 @@ public class ErraiServletImpl extends HttpServlet {
             }
         }
         stream.write('}');
-
     }
-
-
 }
