@@ -58,13 +58,30 @@ public class ConfigUtil {
     }
 
     private static Map<String, File> scanAreas = new HashMap<String, File>();
-    private static String tmpUUID =  "erraiBootstrap_" + UUID.randomUUID().toString().replaceAll("\\-", "_");
+    private static Map<String, List<Class>> scanCache = new HashMap<String, List<Class>>();
+    private static Set<String> activeCacheContexts = new HashSet<String>();
+
+    private static String tmpUUID = "erraiBootstrap_" + UUID.randomUUID().toString().replaceAll("\\-", "_");
+
+    private static void recordCache(String context, Class cls) {
+        List<Class> cache = scanCache.get(context);
+
+        if (cache == null) {
+            System.out.println("adding context '" + context + "'");
+            scanCache.put(context, cache = new LinkedList<Class>());
+        }
+
+        cache.add(cls);
+    }
+
 
     public static void cleanupStartupTempFiles() {
         for (File f : scanAreas.values()) {
             f.delete();
         }
         new File(System.getProperty("java.io.tmpdir") + "/" + tmpUUID).delete();
+        scanAreas = null;
+        scanCache = null;
     }
 
     public static void visitAll(File root, final ConfigVisitor visitor) {
@@ -73,6 +90,7 @@ public class ConfigUtil {
                 visitor.visit(clazz);
             }
         });
+        activeCacheContexts.add(root.getPath());
     }
 
     public static void visitAllTargets(List<File> targets, ConfigVisitor visitor) {
@@ -87,6 +105,7 @@ public class ConfigUtil {
                 visitor.visit(clazz, context, logger, writer);
             }
         });
+        activeCacheContexts.add(root.getPath());
     }
 
     public static void visitAllTargets(List<File> targets, final GeneratorContext context, final TreeLogger logger, final SourceWriter writer, RebindVisitor visitor) {
@@ -122,8 +141,6 @@ public class ConfigUtil {
 
         } while (!start.isFile() && pivotPoint > 0);
 
-
-        System.out.println("About to look inside: " + start.getName());
         if (start.isFile()) {
             loadFromZippedResource(root, start, loadedTargets, visitor, originalPath.substring(pivotPoint + 1));
         }
@@ -182,60 +199,67 @@ public class ConfigUtil {
         ZipInputStream zipFile = new ZipInputStream(inStream);
         ZipEntry zipEntry;
 
-        System.out.println("Scanning " + zipName + " for: " + scanFilter);
-        while ((zipEntry = zipFile.getNextEntry()) != null) {
-            if (scanFilter != null && !zipEntry.getName().startsWith(scanFilter)) continue;
+        if (activeCacheContexts.contains(zipName)) {
+            List<Class> cache = scanCache.get(zipName);
+            for (Class loadClass : cache) {
+                visitor.visit(loadClass);
+            }
+        } else {
+            while ((zipEntry = zipFile.getNextEntry()) != null) {
+                if (scanFilter != null && !zipEntry.getName().startsWith(scanFilter)) continue;
 
-            if (zipEntry.getName().endsWith(".class")) {
-                //   System.out.println("ScanningEntry: " + zipEntry.getName());
-                String classEntry;
-                String className = null;
-                try {
-                    classEntry = zipEntry.getName().replaceAll("/", "\\.");
-                    int beginIdx = classEntry.indexOf(CLASS_RESOURCES_ROOT);
-                    if (beginIdx == -1) {
-                        beginIdx = 0;
-                    } else {
-                        beginIdx += CLASS_RESOURCES_ROOT.length();
+                if (zipEntry.getName().endsWith(".class")) {
+                    //   System.out.println("ScanningEntry: " + zipEntry.getName());
+                    String classEntry;
+                    String className = null;
+                    try {
+                        classEntry = zipEntry.getName().replaceAll("/", "\\.");
+                        int beginIdx = classEntry.indexOf(CLASS_RESOURCES_ROOT);
+                        if (beginIdx == -1) {
+                            beginIdx = 0;
+                        } else {
+                            beginIdx += CLASS_RESOURCES_ROOT.length();
+                        }
+
+                        className = classEntry.substring(beginIdx, classEntry.lastIndexOf(".class"));
+                        Class<?> loadClass = Class.forName(className);
+                        recordCache(zipName, loadClass);
+                        visitor.visit(loadClass);
                     }
-
-                    className = classEntry.substring(beginIdx, classEntry.lastIndexOf(".class"));
-                    System.out.println("Attempting to load: " + className);
-                    Class<?> loadClass = Class.forName(className);
-                    visitor.visit(loadClass);
-                }
-                catch (Throwable e) {
-                    System.out.println("Could not load: " + className + " (" + e.getMessage() + ")");
-                }
-            } else if (zipEntry.getName().matches(".+\\.(zip|jar|war)$")) {
-                /**
-                 * Let's decompress this to a temp dir so we can look at it:
-                 */
-
-                InputStream tmpZipStream = null;
-                try {
-
-                    if (scanAreas.containsKey(zipEntry.getName())) {
-                        File tmpFile = scanAreas.get(zipEntry.getName());
-                        tmpZipStream = new FileInputStream(tmpFile);
-                        loadZipFromStream(tmpFile.getName(), tmpZipStream, loadedTargets, visitor, null);
-                    } else {
-                        File tmpUnZip = expandZipEntry(zipFile, zipEntry);
-
-                        scanAreas.put(zipEntry.getName(), tmpUnZip);
-
-                        tmpZipStream = new FileInputStream(tmpUnZip);
-
-                        loadZipFromStream(tmpUnZip.getName(), tmpZipStream, loadedTargets, visitor, null);
+                    catch (Throwable e) {
+                        System.out.println("Could not load: " + className + " (" + e.getMessage() + ")");
                     }
-                }
-                finally {
-                    if (tmpZipStream != null) {
-                        tmpZipStream.close();
+                } else if (zipEntry.getName().matches(".+\\.(zip|jar|war)$")) {
+                    /**
+                     * Let's decompress this to a temp dir so we can look at it:
+                     */
+
+                    InputStream tmpZipStream = null;
+                    try {
+
+                        if (scanAreas.containsKey(zipEntry.getName())) {
+                            File tmpFile = scanAreas.get(zipEntry.getName());
+                            tmpZipStream = new FileInputStream(tmpFile);
+                            loadZipFromStream(tmpFile.getName(), tmpZipStream, loadedTargets, visitor, null);
+                        } else {
+                            File tmpUnZip = expandZipEntry(zipFile, zipEntry);
+
+                            scanAreas.put(zipEntry.getName(), tmpUnZip);
+
+                            tmpZipStream = new FileInputStream(tmpUnZip);
+
+                            loadZipFromStream(tmpUnZip.getName(), tmpZipStream, loadedTargets, visitor, null);
+                        }
                     }
-                    //    tmpUnZip.delete();
+                    finally {
+                        if (tmpZipStream != null) {
+                            tmpZipStream.close();
+                        }
+                    }
                 }
             }
+
+            activeCacheContexts.add(zipName);
         }
     }
 
@@ -272,36 +296,44 @@ public class ConfigUtil {
 
 
     private static void loadFromDirectory(File root, File start, Set<String> loadedTargets, VisitDelegate visitor) {
-        for (File file : start.listFiles()) {
-            if (file.isDirectory()) _findLoadableModules(root, file, loadedTargets, visitor);
-            if (file.getName().endsWith(".class")) {
-                try {
-                    String FQCN = getCandidateFQCN(root.getAbsolutePath(), file.getAbsolutePath());
+        if (activeCacheContexts.contains(root.getPath())) {
+            for (Class loadClass : scanCache.get(root.getPath())) {
+                visitor.visit(loadClass);
+            }
+        } else {
+            for (File file : start.listFiles()) {
+                if (file.isDirectory()) _findLoadableModules(root, file, loadedTargets, visitor);
+                if (file.getName().endsWith(".class")) {
+                    try {
+                        String FQCN = getCandidateFQCN(root.getAbsolutePath(), file.getAbsolutePath());
 
-                    if (loadedTargets.contains(FQCN)) {
-                        return;
-                    } else {
-                        loadedTargets.add(FQCN);
+                        if (loadedTargets.contains(FQCN)) {
+                            return;
+                        } else {
+                            loadedTargets.add(FQCN);
+                        }
+
+                        Class<?> loadClass = Class.forName(FQCN);
+
+                        recordCache(root.getPath(), loadClass);
+
+                        visitor.visit(loadClass);
                     }
-
-                    Class<?> loadClass = Class.forName(FQCN);
-
-                    visitor.visit(loadClass);
-                }
-                catch (NoClassDefFoundError e) {
-                    // do nothing.
-                }
-                catch (ExceptionInInitializerError e) {
-                    // do nothing.
-                }
-                catch (UnsupportedOperationException e) {
-                    // do nothing.
-                }
-                catch (ClassNotFoundException e) {
-                    // do nothing.
-                }
-                catch (UnsatisfiedLinkError e) {
-                    // do nothing.
+                    catch (NoClassDefFoundError e) {
+                        // do nothing.
+                    }
+                    catch (ExceptionInInitializerError e) {
+                        // do nothing.
+                    }
+                    catch (UnsupportedOperationException e) {
+                        // do nothing.
+                    }
+                    catch (ClassNotFoundException e) {
+                        // do nothing.
+                    }
+                    catch (UnsatisfiedLinkError e) {
+                        // do nothing.
+                    }
                 }
             }
         }
@@ -310,9 +342,8 @@ public class ConfigUtil {
     private static InputStream findResource(ClassLoader loader, String resourceName) {
         ClassLoader cl = loader;
         InputStream is = null;
-        do {
-            is = cl.getResourceAsStream(resourceName);
-        } while (is == null && (cl = cl.getParent()) != null);
+
+        while ((is = cl.getResourceAsStream(resourceName)) == null && (cl = cl.getParent()) != null) ;
 
         return is;
     }
@@ -325,10 +356,4 @@ public class ConfigUtil {
     public static boolean isAnnotated(Class clazz, Class<? extends Annotation> annotation, Class ofType) {
         return ofType.isAssignableFrom(clazz) && clazz.isAnnotationPresent(annotation);
     }
-
-    public static void main(String[] args) {
-        InputStream s = findResource(ConfigUtil.class.getClassLoader(), "tmp.MobileDevice.log");
-        System.out.println(s);
-    }
-
 }
