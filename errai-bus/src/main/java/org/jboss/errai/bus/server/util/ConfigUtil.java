@@ -74,7 +74,7 @@ public class ConfigUtil {
         cache.add(cls);
     }
 
-    public static void cleanupStartupTempFiles() {
+    public static void cleanupStartupTempFiles() {        
         for (File f : scanAreas.values()) {
             f.delete();
         }
@@ -197,7 +197,7 @@ public class ConfigUtil {
         ZipInputStream zipFile = new ZipInputStream(inStream);
         ZipEntry zipEntry;
 
-        String ctx = zipName + (scanFilter == null ? ":*" : ":" +scanFilter);
+        String ctx = zipName + (scanFilter == null ? ":*" : ":" + scanFilter);
 
         if (activeCacheContexts.contains(ctx) && scanCache.containsKey(ctx)) {
             List<Class> cache = scanCache.get(ctx);
