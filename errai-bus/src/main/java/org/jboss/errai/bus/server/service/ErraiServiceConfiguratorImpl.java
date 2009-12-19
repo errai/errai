@@ -229,6 +229,10 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
             bus.addRule("ClientNegotiationService", new RolesRequiredRule(new HashSet<Object>(), bus));
         }
 
+        System.out.println("Performing Cleanup ...");
+
+        ConfigUtil.cleanupStartupTempFiles();
+
         for (Runnable r : deferred) {
             r.run();
         }
