@@ -74,7 +74,6 @@ public class ConfigUtil {
         cache.add(cls);
     }
 
-
     public static void cleanupStartupTempFiles() {
         for (File f : scanAreas.values()) {
             f.delete();
@@ -127,7 +126,6 @@ public class ConfigUtil {
              */
             findValidPath(root, start, loadedTargets, visitor);
         }
-
     }
 
     private static void findValidPath(File root, File start, Set<String> loadedTargets, VisitDelegate visitor) {
@@ -199,8 +197,10 @@ public class ConfigUtil {
         ZipInputStream zipFile = new ZipInputStream(inStream);
         ZipEntry zipEntry;
 
-        if (activeCacheContexts.contains(zipName)) {
-            List<Class> cache = scanCache.get(zipName);
+        String ctx = zipName + (scanFilter == null ? ":*" : ":" +scanFilter);
+
+        if (activeCacheContexts.contains(ctx) && scanCache.containsKey(ctx)) {
+            List<Class> cache = scanCache.get(ctx);
             for (Class loadClass : cache) {
                 visitor.visit(loadClass);
             }
@@ -223,7 +223,7 @@ public class ConfigUtil {
 
                         className = classEntry.substring(beginIdx, classEntry.lastIndexOf(".class"));
                         Class<?> loadClass = Class.forName(className);
-                        recordCache(zipName, loadClass);
+                        recordCache(ctx, loadClass);
                         visitor.visit(loadClass);
                     }
                     catch (Throwable e) {
@@ -296,7 +296,7 @@ public class ConfigUtil {
 
 
     private static void loadFromDirectory(File root, File start, Set<String> loadedTargets, VisitDelegate visitor) {
-        if (activeCacheContexts.contains(root.getPath())) {
+        if (activeCacheContexts.contains(root.getPath()) && scanCache.containsKey(root.getPath())) {
             for (Class loadClass : scanCache.get(root.getPath())) {
                 visitor.visit(loadClass);
             }
