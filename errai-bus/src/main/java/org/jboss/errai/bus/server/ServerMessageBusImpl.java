@@ -127,7 +127,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         /**
          * If we're in development mode, start the monitor.
          */
-        if (!GWT.isClient()) {
+        if (Boolean.getBoolean("errai.bus.showmonitor")) {
             thread.setPriority(Thread.MIN_PRIORITY);
             thread.start();
         }
