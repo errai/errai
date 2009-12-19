@@ -125,7 +125,7 @@ public class WidgetMappingsGenerator extends Generator {
         // print writer if null, source code has ALREADY been generated,
 
         if (printWriter == null) {
-            throw new RuntimeException("PrintWriter was not created for: " + packageName + "." + className);
+           return;
         }
 
         // init composer, set class properties, create source writer
@@ -244,7 +244,6 @@ public class WidgetMappingsGenerator extends Generator {
                     vars.put("targetFieldName", widgetField.getName());
 
                     String s = (String) TemplateRuntime.execute(mappingsGen, vars);
-                //    System.out.println(s);
                     sourceWriter.print(s);
 
                     s = "widget." + currField.getName() + " = " + varName + ";";
