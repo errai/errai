@@ -599,6 +599,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         errorDialog.show();
     }
 
+    /**
+     * Process the incoming payload and push all the incoming messages onto the bus.
+     * @param response
+     * @throws Exception
+     */
     private static void procIncomingPayload(Response response) throws Exception {
         try {
             for (Message m : decodePayload(response.getText())) {

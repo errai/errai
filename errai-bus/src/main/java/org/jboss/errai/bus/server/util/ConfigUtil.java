@@ -39,10 +39,22 @@ public class ConfigUtil {
             Enumeration<URL> t = ConfigUtil.class.getClassLoader().getResources(ERRAI_CONFIG_STUB_NAME);
             List<File> targets = new LinkedList<File>();
             while (t.hasMoreElements()) {
-                File f = new File(t.nextElement().getFile()).getParentFile();
-                if (f.getName().endsWith("-sources.jar")) continue;
+                String fileName = t.nextElement().getFile();
+                int trimIdx = fileName.lastIndexOf("!");
+                if (trimIdx != -1) {
+                    fileName = fileName.substring(0, trimIdx);
+                }
 
-                targets.add(f);
+                if (fileName.startsWith("file:/")) {
+                    fileName = fileName.substring(5);
+                }
+                
+                if (fileName.endsWith("-sources.jar")) {
+                    continue;
+                }
+                File file = new File(fileName);
+
+                targets.add(trimIdx == -1 ? file.getParentFile() : file);
             }
 
             System.out.println("Scan Targets:");
@@ -212,6 +224,7 @@ public class ConfigUtil {
                     //   System.out.println("ScanningEntry: " + zipEntry.getName());
                     String classEntry;
                     String className = null;
+                    boolean cached = false;
                     try {
                         classEntry = zipEntry.getName().replaceAll("/", "\\.");
                         int beginIdx = classEntry.indexOf(CLASS_RESOURCES_ROOT);
@@ -224,10 +237,15 @@ public class ConfigUtil {
                         className = classEntry.substring(beginIdx, classEntry.lastIndexOf(".class"));
                         Class<?> loadClass = Class.forName(className);
                         recordCache(ctx, loadClass);
+
+                        cached = true;
+
                         visitor.visit(loadClass);
                     }
                     catch (Throwable e) {
-                        System.out.println("Could not load: " + className + " (" + e.getMessage() + ")");
+                        if (!cached) {
+                            System.out.println("Could not load: " + className + " (" + e.getMessage() + ")");
+                        }
                     }
                 } else if (zipEntry.getName().matches(".+\\.(zip|jar|war)$")) {
                     /**
