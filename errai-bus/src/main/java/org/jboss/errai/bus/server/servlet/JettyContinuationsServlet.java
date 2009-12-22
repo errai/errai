@@ -64,7 +64,7 @@ public class JettyContinuationsServlet extends HttpServlet {
         }
 
         for (CommandMessage msg : createCommandMessage(httpServletRequest.getSession(), sb.toString())) {
-            service.store(msg);
+            service.storeAsync(msg);
         }
 
         pollForMessages(httpServletRequest, httpServletResponse, false);
