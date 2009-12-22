@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.server;
+package org.jboss.errai.bus.server.servlet;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -31,7 +31,6 @@ import javax.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.Reader;
 import java.nio.CharBuffer;
 import java.util.Iterator;
 import java.util.List;
@@ -39,14 +38,14 @@ import java.util.List;
 import static org.jboss.errai.bus.server.io.MessageUtil.createCommandMessage;
 
 /**
- * The default ErraiServletImpl which provides the HTTP-protocol gateway between the server bus and the client buses.
+ * The default DefaultBlockingServlet which provides the HTTP-protocol gateway between the server bus and the client buses.
  */
 @Singleton
-public class ErraiServletImpl extends HttpServlet {
+public class DefaultBlockingServlet extends HttpServlet {
     private ErraiService service;
 
     @Inject
-    public ErraiServletImpl(ErraiService service) {
+    public DefaultBlockingServlet(ErraiService service) {
         this.service = service;
     }
 

@@ -17,6 +17,7 @@
 package org.jboss.errai.bus.server.service;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.ConversationMessage;
 import org.jboss.errai.bus.client.MessageCallback;
@@ -134,6 +135,11 @@ public class ErraiServiceImpl implements ErraiService {
         }
     }
 
+
+    public void storeAsync(final CommandMessage message) {
+        message.addResources(configurator.getResourceProviders());
+        bus.sendGlobalAsync(message);
+    }
 
     public ServerMessageBus getBus() {
         return bus;

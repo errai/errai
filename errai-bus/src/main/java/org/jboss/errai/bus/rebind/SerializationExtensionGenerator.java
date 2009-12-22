@@ -35,6 +35,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.jboss.errai.bus.server.util.ConfigUtil.visitAllTargets;
+import static org.mvel2.templates.TemplateCompiler.compileTemplate;
+import static org.mvel2.templates.TemplateRuntime.execute;
 
 public class SerializationExtensionGenerator implements ExtensionGenerator {
     private CompiledTemplate demarshallerGenerator;
@@ -42,10 +44,10 @@ public class SerializationExtensionGenerator implements ExtensionGenerator {
 
     public SerializationExtensionGenerator() {
         InputStream istream = this.getClass().getResourceAsStream("DemarshallerGenerator.mv");
-        demarshallerGenerator = TemplateCompiler.compileTemplate(istream, null);
+        demarshallerGenerator = compileTemplate(istream, null);
 
         istream = this.getClass().getResourceAsStream("MarshallerGenerator.mv");
-        marshallerGenerator = TemplateCompiler.compileTemplate(istream, null);
+        marshallerGenerator = compileTemplate(istream, null);
     }
 
     public void generate(GeneratorContext context, TreeLogger logger, SourceWriter writer, List<File> roots) {
@@ -70,11 +72,11 @@ public class SerializationExtensionGenerator implements ExtensionGenerator {
 
                             String genStr;
 
-                            writer.print(genStr = (String) TemplateRuntime.execute(demarshallerGenerator, templateVars));
+                            writer.print(genStr = (String) execute(demarshallerGenerator, templateVars));
 
                             logger.log(TreeLogger.Type.INFO, genStr);
 
-                            writer.print(genStr = (String) TemplateRuntime.execute(marshallerGenerator, templateVars));
+                            writer.print(genStr = (String) execute(marshallerGenerator, templateVars));
 
                             logger.log(TreeLogger.Type.INFO, genStr);
                             logger.log(TreeLogger.Type.INFO, "Generated mashaller/demarshaller for: " + visit.getName());

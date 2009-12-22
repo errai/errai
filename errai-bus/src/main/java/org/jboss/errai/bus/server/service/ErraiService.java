@@ -24,5 +24,6 @@ public interface ErraiService {
     public static final String SESSION_AUTH_DATA = "ErraiAuthData";
 
     public void store(CommandMessage message);
+    public void storeAsync(CommandMessage message);
     public ServerMessageBus getBus();
 }

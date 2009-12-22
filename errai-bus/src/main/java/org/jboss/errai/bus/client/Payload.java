@@ -53,4 +53,8 @@ public class Payload {
     public List<Message> getMessages() {
         return messages;
     }
+
+    public boolean waitingMessages() {
+        return messages.size() > 1 ||!messages.get(0).getSubject().equals("HeartBeat");
+    }
 }

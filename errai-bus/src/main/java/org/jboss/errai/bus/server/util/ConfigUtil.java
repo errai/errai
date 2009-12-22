@@ -21,14 +21,10 @@ import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.user.rebind.SourceWriter;
 
 import java.io.*;
-
 import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.util.*;
-import java.util.jar.JarEntry;
-import java.util.jar.JarInputStream;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 public class ConfigUtil {
@@ -57,10 +53,10 @@ public class ConfigUtil {
                 targets.add(trimIdx == -1 ? file.getParentFile() : file);
             }
 
-            System.out.println("Scan Targets:");
-            for (File tg : targets) {
-                System.out.println(" -> " + tg.getPath());
-            }
+//            System.out.println("Scan Targets:");
+//            for (File tg : targets) {
+//                System.out.println(" -> " + tg.getPath());
+//            }
 
             return targets;
         }
@@ -79,7 +75,7 @@ public class ConfigUtil {
         List<Class> cache = scanCache.get(context);
 
         if (cache == null) {
-            System.out.println("adding context '" + context + "'");
+       //     System.out.println("adding context '" + context + "'");
             scanCache.put(context, cache = new LinkedList<Class>());
         }
 

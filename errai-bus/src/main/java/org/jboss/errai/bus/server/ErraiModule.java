@@ -22,29 +22,49 @@ import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
 import org.jboss.errai.bus.server.service.ErraiServiceImpl;
+import org.jboss.errai.bus.server.servlet.DefaultBlockingServlet;
 
+import javax.servlet.http.HttpServlet;
 import java.util.Enumeration;
 import java.util.ResourceBundle;
 
 
 public class ErraiModule extends ServletModule {
+    private static final String ERRAI_APPLICATION_CONTEXT = "errai.application_context";
+    private static final String ERRAI_SERVLET_IMPLEMENTATION = "errai.servlet_implementation";
+
     @Override
     protected void configureServlets() {
         ResourceBundle bundle = ResourceBundle.getBundle("ErraiService");
         Enumeration<String> keys = bundle.getKeys();
 
+        String appContext = "/erraiapp/";
+        Class<? extends HttpServlet> servletImplementation = DefaultBlockingServlet.class;
+
         String key;
         while (keys.hasMoreElements()) {
             key = keys.nextElement();
 
-            if ("errai.application_context".equals(key)) {
-                String appContext = bundle.getString("errai.application_context") + "erraiBus";
-                serve(appContext).with(ErraiServletImpl.class);
+            if (ERRAI_APPLICATION_CONTEXT.equals(key)) {
+                appContext = bundle.getString(ERRAI_APPLICATION_CONTEXT) + "erraiBus";
+                //  serve(appContext).with(DefaultBlockingServlet.class);
+            } else if (ERRAI_SERVLET_IMPLEMENTATION.equals(key)) {
+                try {
+                    servletImplementation = Class.forName(bundle.getString(ERRAI_SERVLET_IMPLEMENTATION))
+                            .asSubclass(HttpServlet.class);
+
+                    System.out.println("Loaded Servlet Implementation: " + servletImplementation.getName());
+                }
+                catch (Exception e) {
+                    throw new RuntimeException("could not load servlet implementation class", e);
+                }
             }
         }
 
+        serve(appContext).with(servletImplementation);
+
         bind(MessageBus.class).to(ServerMessageBusImpl.class);
-        bind(ServerMessageBus.class).to(ServerMessageBusImpl.class); 
+        bind(ServerMessageBus.class).to(ServerMessageBusImpl.class);
         bind(ErraiService.class).to(ErraiServiceImpl.class);
         bind(ErraiServiceConfigurator.class).to(ErraiServiceConfiguratorImpl.class);
     }

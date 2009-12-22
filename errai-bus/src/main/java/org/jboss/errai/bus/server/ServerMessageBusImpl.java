@@ -18,6 +18,7 @@ package org.jboss.errai.bus.server;
 
 import com.google.gwt.core.client.GWT;
 import com.google.inject.Singleton;
+import org.jboss.errai.bus.WorkerFactory;
 import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;
@@ -37,6 +38,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     private final List<MessageListener> listeners = new ArrayList<MessageListener>();
 
+    private final WorkerFactory workerFactory = new WorkerFactory(5, this);
+
     private final Map<String, List<MessageCallback>> subscriptions = new HashMap<String, List<MessageCallback>>();
     private final Map<String, Set<Object>> remoteSubscriptions = new HashMap<String, Set<Object>>();
 
@@ -46,6 +49,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     private final List<UnsubscribeListener> unsubscribeListeners = new LinkedList<UnsubscribeListener>();
 
     private final HouseKeeper houseKeeper = new HouseKeeper(this);
+
+    private boolean busReady = false;
 
     public ServerMessageBusImpl() {
         Thread thread = new Thread() {
@@ -173,6 +178,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         });
 
         houseKeeper.start();
+        workerFactory.startPool();
     }
 
     public void sendGlobal(CommandMessage message) {
@@ -306,9 +312,21 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 (String) session.getAttribute(WS_SESSION_ID), subject, message, fireListeners);
     }
 
+    public void sendAsync(CommandMessage message) {
+        workerFactory.deliver(message);
+    }
+
+    public void sendGlobalAsync(CommandMessage message) {
+        message.setResource("sendGlobal", "");
+        workerFactory.deliver(message);
+    }
 
     public Payload nextMessage(Object sessionContext, boolean wait) {
         return messageQueues.get(sessionContext).poll(wait);
+    }
+
+    public MessageQueue getQueue(Object sessionContext) {
+        return messageQueues.get(sessionContext);
     }
 
     public void addRule(String subject, BooleanRoutingRule rule) {

@@ -55,7 +55,7 @@ public class ConversationMessage extends CommandMessage {
 
     /**
      * Calling this method on this class will always result in a {@link org.jboss.errai.bus.client.BadlyFormedMessageException}.
-     * You must call either {@link #create(String, CommandMessage)} or {@link #create(Enum, CommandMessage)}.
+     * You must call {@link #create(CommandMessage)}.
      * @return - this method will never return.
      */
     public static CommandMessage create() {

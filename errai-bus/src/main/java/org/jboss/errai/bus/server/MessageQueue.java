@@ -27,7 +27,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 public class MessageQueue {
-    private static final long TIMEOUT = Boolean.getBoolean("org.jboss.errai.debugmode") ? (1000 * 60 * 60) : (1000 * 30);
+    private static final long TIMEOUT = Boolean.getBoolean("org.jboss.errai.debugmode") ? (1000 * 60 * 60) : (1000 * 46);
     private static final int MAXIMUM_PAYLOAD_SIZE = 10;
     private static final long DEFAULT_TRANSMISSION_WINDOW = 25;
 
@@ -37,6 +37,7 @@ public class MessageQueue {
 
     private volatile boolean pollActive = false;
 
+    private QueueActivationCallback activationCallback;
     private BlockingQueue<Message> queue;
 
     public MessageQueue(int queueSize) {
@@ -53,11 +54,10 @@ public class MessageQueue {
                 pollActive = true;
                 m = queue.poll(45, TimeUnit.SECONDS);
                 pollActive = false;
+            } else {
+                m = queue.poll();
             }
-            else {
-                m = queue.poll();  
-            }
-            
+
             long startWindow = currentTimeMillis();
             int payLoadSize = 0;
 
@@ -86,23 +86,34 @@ public class MessageQueue {
 
     public boolean offer(final Message message) {
         boolean b = false;
-        try {
-            b = queue.offer(message, 100, TimeUnit.MILLISECONDS);
+//        try {
+        b = queue.offer(message);
+        lastEnqueue = currentTimeMillis();
 
-            if (!b) {
-                throw new QueueOverloadedException("cannot deliver message.");
-            }
+        if (!b) {
+            throw new QueueOverloadedException("cannot deliver message.");
+        } else if (activationCallback != null) {
+            activationCallback.activate();
+        }
 
-            lastEnqueue = currentTimeMillis();
-            return b;
-        }
-        catch (InterruptedException e) {
-            //todo: create a delivery failure notice.
-            if (!b) {
-                throw new QueueOverloadedException("cannot deliver message.");
-            }
-            return b;
-        }
+
+        return b;
+        //  }
+//        catch (InterruptedException e) {
+//            //todo: create a delivery failure notice.
+//            if (!b) {
+//                throw new QueueOverloadedException("cannot deliver message.");
+//            }
+//            return b;
+//        }
+    }
+
+    public boolean messagesWaiting() {
+        return !queue.isEmpty();
+    }
+
+    public void setActivationCallback(QueueActivationCallback activationCallback) {
+        this.activationCallback = activationCallback;
     }
 
     public BlockingQueue<Message> getQueue() {
@@ -115,6 +126,10 @@ public class MessageQueue {
 
     public boolean isActive() {
         return pollActive;
+    }
+
+    public void heartBeat() {
+        lastTransmission = System.currentTimeMillis();
     }
 
     private static final Message heartBeat = new Message() {
