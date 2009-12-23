@@ -6,6 +6,7 @@ import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.client.Payload;
+import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.server.MessageQueue;
 import org.jboss.errai.bus.server.QueueActivationCallback;
 import org.jboss.errai.bus.server.service.ErraiService;
@@ -65,7 +66,11 @@ public class JettyContinuationsServlet extends HttpServlet {
         }
 
         for (CommandMessage msg : createCommandMessage(httpServletRequest.getSession(), sb.toString())) {
-            service.storeAsync(msg);
+            if (msg.hasPart(MessageParts.PriorityProcessing)) {
+                service.store(msg);
+            } else {
+                service.storeAsync(msg);
+            }
         }
 
         pollForMessages(httpServletRequest, httpServletResponse, false);

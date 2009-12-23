@@ -30,10 +30,13 @@ public class MessageQueue {
     private static final long TIMEOUT = Boolean.getBoolean("org.jboss.errai.debugmode") ? (1000 * 60 * 60) : (1000 * 46);
     private static final int MAXIMUM_PAYLOAD_SIZE = 10;
     private static final long DEFAULT_TRANSMISSION_WINDOW = 25;
+    private static final long MAX_TRANSMISSION_WINDOW = 100;
 
     private long transmissionWindow = 25;
     private long lastTransmission = currentTimeMillis();
     private long lastEnqueue = currentTimeMillis();
+    private int lastQueueSize = 0;
+    private boolean throttleIncoming = false;
 
     private volatile boolean pollActive = false;
 
@@ -69,20 +72,39 @@ public class MessageQueue {
             if (_windowPolling) {
                 windowPolling = true;
                 _windowPolling = false;
-            }
-            else if (windowPolling) {
+            } else if (windowPolling) {
+                long endWindow = startWindow + transmissionWindow;
                 while (!queue.isEmpty() && payLoadSize < MAXIMUM_PAYLOAD_SIZE
-                        && (currentTimeMillis() - startWindow) < transmissionWindow) {
+                        && currentTimeMillis() < endWindow) {
                     p.addMessage(queue.poll());
                     payLoadSize++;
+
+                    try {
+                        if (queue.isEmpty())
+                            Thread.sleep(currentTimeMillis() - endWindow);
+                    }
+                    catch (Exception e) {
+                        // just resume.
+                    }
                 }
 
-                if ((lastTransmission = currentTimeMillis()) - lastEnqueue > transmissionWindow) {
-                    transmissionWindow = (lastTransmission - lastEnqueue);
-                } else {
+                if (!throttleIncoming && queue.size() > lastQueueSize) {
+                    if (transmissionWindow < MAX_TRANSMISSION_WINDOW) {
+                        transmissionWindow += 5;
+                        System.err.println("Congestion on queue -- New transmission window: " + transmissionWindow + "]");
+                    } else {
+                        throttleIncoming = true;
+                        System.err.println("[Warning: A queue has become saturated and performance is now being degraded.]");
+                    }
+
+                } else if (queue.isEmpty()) {
                     transmissionWindow = DEFAULT_TRANSMISSION_WINDOW;
+                    throttleIncoming = false;
                 }
             }
+
+            lastTransmission = currentTimeMillis();
+            lastQueueSize = queue.size();
 
             return p;
         }
@@ -93,11 +115,16 @@ public class MessageQueue {
 
     public boolean offer(final Message message) {
         boolean b = false;
-        b = queue.offer(message);
         lastEnqueue = currentTimeMillis();
+        try {
+            b = (throttleIncoming ? queue.offer(message, 250, TimeUnit.MILLISECONDS) : queue.offer(message));
+        }
+        catch (InterruptedException e) {
+            // fall-through.
+        }
 
         if (!b) {
-            throw new QueueOverloadedException("cannot deliver message.");
+            throw new QueueOverloadedException("too many undelievered messages in queue: cannot deliver message.");
         } else if (activationCallback != null) {
             activationCallback.activate();
         }

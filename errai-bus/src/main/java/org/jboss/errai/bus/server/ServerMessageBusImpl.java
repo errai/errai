@@ -34,6 +34,8 @@ import java.util.Queue;
 
 @Singleton
 public class ServerMessageBusImpl implements ServerMessageBus {
+    private static final String ERRAI_BUS_SHOWMONITOR = "errai.bus.showmonitor";
+    
     private final static int QUEUE_SIZE = 200;
 
     private final List<MessageListener> listeners = new ArrayList<MessageListener>();
@@ -132,7 +134,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         /**
          * If we're in development mode, start the monitor.
          */
-        if (Boolean.getBoolean("errai.bus.showmonitor")) {
+        if (Boolean.getBoolean(ERRAI_BUS_SHOWMONITOR)) {
             thread.setPriority(Thread.MIN_PRIORITY);
             thread.start();
         }

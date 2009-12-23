@@ -28,8 +28,9 @@ public class Worker extends Thread {
     @Override
     public void run() {
         while (true) {
+            CommandMessage m;
             try {
-                CommandMessage m = messages.poll(45, TimeUnit.SECONDS);
+                m = messages.poll(45, TimeUnit.SECONDS);
                 if (m == null) {
                     continue;
                 } else if (m.getResource("sendGlobal") != null) {
