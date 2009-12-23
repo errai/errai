@@ -102,10 +102,6 @@ public class JettyContinuationsServlet extends HttpServlet {
 
             List<Message> messages = queue.poll(false).getMessages();
 
-            if (messages.size() > 1) {
-                System.out.println("TurboPayload:" + messages.size());
-            }
-
             httpServletResponse.setHeader("Cache-Control", "no-cache");
             httpServletResponse.addHeader("Payload-Size", String.valueOf(messages.size()));
             httpServletResponse.setContentType("application/io");
