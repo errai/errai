@@ -172,6 +172,12 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
                         send(ConversationMessage.create(message).command(BusCommands.FinishStateSync)
                                 .toSubject("ClientBus"), false);
+
+                        /**
+                         * Now the session is established, turn WindowPolling on.
+                         */
+                        getQueue(sessionContext).setWindowPolling(true);
+
                         break;
                 }
             }

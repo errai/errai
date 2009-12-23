@@ -31,6 +31,7 @@ import static org.jboss.errai.bus.client.CommandMessage.create;
 import static org.jboss.errai.bus.client.json.JSONUtilCli.decodePayload;
 import static org.jboss.errai.bus.client.json.JSONUtilCli.encodeMap;
 import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteSubscribe;
+import static org.jboss.errai.bus.client.protocols.MessageParts.PriorityProcessing;
 import static org.jboss.errai.bus.client.protocols.MessageParts.ReplyTo;
 import static org.jboss.errai.bus.client.protocols.MessageParts.Subject;
 
@@ -383,6 +384,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 create(RemoteSubscribe)
                         .toSubject("ServerBus")
                         .set(Subject, event.getSubject())
+                        .set(PriorityProcessing, "true")
                         .sendNowWith(self);
             }
         });
@@ -396,6 +398,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 create(BusCommands.RemoteUnsubscribe)
                         .toSubject("ServerBus")
                         .set(Subject, event.getSubject())
+                        .set(PriorityProcessing, "true")
                         .sendNowWith(self);
             }
         });

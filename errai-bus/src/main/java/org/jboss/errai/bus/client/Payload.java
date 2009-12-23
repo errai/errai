@@ -55,6 +55,6 @@ public class Payload {
     }
 
     public boolean waitingMessages() {
-        return messages.size() > 1 ||!messages.get(0).getSubject().equals("HeartBeat");
+        return messages.size() > 1 ||! messages.get(0).getSubject().equals("HeartBeat");
     }
 }

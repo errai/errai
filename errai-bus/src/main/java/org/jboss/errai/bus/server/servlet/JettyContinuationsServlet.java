@@ -12,6 +12,7 @@ import org.jboss.errai.bus.server.service.ErraiService;
 import org.mortbay.jetty.RetryRequest;
 import org.mortbay.util.ajax.Continuation;
 import org.mortbay.util.ajax.ContinuationSupport;
+import org.mvel2.util.StringAppender;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -46,7 +47,7 @@ public class JettyContinuationsServlet extends HttpServlet {
     protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
             throws ServletException, IOException {
         BufferedReader reader = httpServletRequest.getReader();
-        StringBuilder sb = new StringBuilder(httpServletRequest.getContentLength());
+        StringAppender sb = new StringAppender(httpServletRequest.getContentLength());
         HttpSession session = httpServletRequest.getSession();
         CharBuffer buffer = CharBuffer.allocate(10);
 
@@ -100,6 +101,10 @@ public class JettyContinuationsServlet extends HttpServlet {
             queue.heartBeat();
 
             List<Message> messages = queue.poll(false).getMessages();
+
+            if (messages.size() > 1) {
+                System.out.println("TurboPayload:" + messages.size());
+            }
 
             httpServletResponse.setHeader("Cache-Control", "no-cache");
             httpServletResponse.addHeader("Payload-Size", String.valueOf(messages.size()));

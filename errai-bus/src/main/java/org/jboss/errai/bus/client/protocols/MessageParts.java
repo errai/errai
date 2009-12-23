@@ -66,5 +66,11 @@ public enum MessageParts {
     /**
      * Specifies stack trace data in String form.
      */
-    StackTrace
+    StackTrace,
+
+    /**
+     * If this attribute is present, the bus should give priority to processing it and not subject it to
+     * window matching.
+     */
+    PriorityProcessing
 }

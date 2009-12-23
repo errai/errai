@@ -22,6 +22,7 @@ import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.server.service.ErraiService;
+import org.mvel2.util.StringAppender;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -59,7 +60,7 @@ public class DefaultBlockingServlet extends HttpServlet {
     protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
             throws ServletException, IOException {
         BufferedReader reader = httpServletRequest.getReader();
-        StringBuilder sb = new StringBuilder(httpServletRequest.getContentLength());
+        StringAppender sb = new StringAppender(httpServletRequest.getContentLength());
         HttpSession session = httpServletRequest.getSession();
         CharBuffer buffer = CharBuffer.allocate(10);
 

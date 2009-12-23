@@ -37,6 +37,9 @@ public class MessageQueue {
 
     private volatile boolean pollActive = false;
 
+    private boolean _windowPolling = false;
+    private boolean windowPolling = false;
+
     private QueueActivationCallback activationCallback;
     private BlockingQueue<Message> queue;
 
@@ -63,7 +66,11 @@ public class MessageQueue {
 
             Payload p = new Payload(m == null ? heartBeat : m);
 
-            if (wait) {
+            if (_windowPolling) {
+                windowPolling = true;
+                _windowPolling = false;
+            }
+            else if (windowPolling) {
                 while (!queue.isEmpty() && payLoadSize < MAXIMUM_PAYLOAD_SIZE
                         && (currentTimeMillis() - startWindow) < transmissionWindow) {
                     p.addMessage(queue.poll());
@@ -86,7 +93,6 @@ public class MessageQueue {
 
     public boolean offer(final Message message) {
         boolean b = false;
-//        try {
         b = queue.offer(message);
         lastEnqueue = currentTimeMillis();
 
@@ -96,16 +102,7 @@ public class MessageQueue {
             activationCallback.activate();
         }
 
-
         return b;
-        //  }
-//        catch (InterruptedException e) {
-//            //todo: create a delivery failure notice.
-//            if (!b) {
-//                throw new QueueOverloadedException("cannot deliver message.");
-//            }
-//            return b;
-//        }
     }
 
     public boolean messagesWaiting() {
@@ -130,6 +127,14 @@ public class MessageQueue {
 
     public void heartBeat() {
         lastTransmission = System.currentTimeMillis();
+    }
+
+    public boolean isWindowPolling() {
+        return windowPolling;
+    }
+
+    public void setWindowPolling(boolean windowPolling) {
+        this._windowPolling = windowPolling;
     }
 
     private static final Message heartBeat = new Message() {
