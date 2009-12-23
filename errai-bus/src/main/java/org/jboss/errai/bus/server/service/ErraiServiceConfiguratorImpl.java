@@ -104,10 +104,9 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                 catch (CreationException e) {
                     deferred.add(create);
                 }
-
-
             }
             catch (Exception e) {
+                e.printStackTrace();
                 throw new RuntimeException("cannot configure authentication adapter", e);
             }
         }

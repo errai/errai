@@ -75,7 +75,7 @@ public class ConfigUtil {
         List<Class> cache = scanCache.get(context);
 
         if (cache == null) {
-       //     System.out.println("adding context '" + context + "'");
+           System.out.println("adding context '" + context + "'");
             scanCache.put(context, cache = new LinkedList<Class>());
         }
 
@@ -187,7 +187,7 @@ public class ConfigUtil {
 
         }
         catch (Exception e) {
-            System.out.println("Skipped:" + pathToJar + " (" + e.getMessage() + ")");
+        //    System.out.println("Skipped:" + pathToJar + " (" + e.getMessage() + ")");
             e.printStackTrace();
         }
         finally {
@@ -215,9 +215,11 @@ public class ConfigUtil {
         } else {
             while ((zipEntry = zipFile.getNextEntry()) != null) {
                 if (scanFilter != null && !zipEntry.getName().startsWith(scanFilter)) continue;
+       //         System.out.print("Scanning ...");
 
                 if (zipEntry.getName().endsWith(".class")) {
-                    //   System.out.println("ScanningEntry: " + zipEntry.getName());
+         //           System.out.print("ZipEntry Class:" + zipEntry.getName() + " ... ");
+
                     String classEntry;
                     String className = null;
                     boolean cached = false;
@@ -232,6 +234,9 @@ public class ConfigUtil {
 
                         className = classEntry.substring(beginIdx, classEntry.lastIndexOf(".class"));
                         Class<?> loadClass = Class.forName(className);
+
+          //              System.out.print("Loaded(" + loadClass.getName() + ")");
+
                         recordCache(ctx, loadClass);
 
                         cached = true;
@@ -243,6 +248,9 @@ public class ConfigUtil {
                             System.out.println("Could not load: " + className + " (" + e.getMessage() + ")");
                         }
                     }
+
+           //         System.out.println(" ... Done.");
+                    
                 } else if (zipEntry.getName().matches(".+\\.(zip|jar|war)$")) {
                     /**
                      * Let's decompress this to a temp dir so we can look at it:
@@ -316,8 +324,10 @@ public class ConfigUtil {
             }
         } else {
             for (File file : start.listFiles()) {
+              //  System.out.print("Scanning ...");
                 if (file.isDirectory()) _findLoadableModules(root, file, loadedTargets, visitor);
                 if (file.getName().endsWith(".class")) {
+               //     System.out.print("Class:" + file.getName() + " ... ");
                     try {
                         String FQCN = getCandidateFQCN(root.getAbsolutePath(), file.getAbsolutePath());
 
@@ -328,6 +338,8 @@ public class ConfigUtil {
                         }
 
                         Class<?> loadClass = Class.forName(FQCN);
+
+              //          System.out.print("Loaded(" + loadClass.getName() + ")");
 
                         recordCache(root.getPath(), loadClass);
 
@@ -348,6 +360,8 @@ public class ConfigUtil {
                     catch (UnsatisfiedLinkError e) {
                         // do nothing.
                     }
+
+               //     System.out.println(" ... Done.");
                 }
             }
         }

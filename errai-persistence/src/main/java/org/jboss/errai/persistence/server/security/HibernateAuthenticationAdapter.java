@@ -67,21 +67,38 @@ public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
                 new ConfigVisitor() {
                     public void visit(Class<?> clazz) {
                         if (clazz.isAnnotationPresent(AuthUserEntity.class)) {
-                            userEntity = clazz;
+
+                            System.out.println("Found AuthUserEntity:" + clazz);
+
+                            System.out.print("[");
                             for (Field f : clazz.getDeclaredFields()) {
-                                if (f.isAnnotationPresent(AuthUsernameField.class)) {
-                                    if (f.getType() != String.class) {
-                                        throw new RuntimeException("@AuthUsernameField must annotated a String field");
+                                System.out.print("<" + f.getName() + ">");
+                            }
+                            System.out.println("]");
+
+                            userEntity = clazz;
+                            try {
+                                for (Field f : clazz.getDeclaredFields()) {
+                                    System.out.println("Inspecting Entity Field: " + f.getName() + " (" + f.getAnnotations() + ")");
+                                    if (f.isAnnotationPresent(AuthUsernameField.class)) {
+                                        if (f.getType() != String.class) {
+                                            System.out.println("Stopping A");
+                                            throw new RuntimeException("@AuthUsernameField must annotated a String field");
+                                        }
+                                        userField = f.getName();
+                                    } else if (f.isAnnotationPresent(AuthPasswordField.class)) {
+                                        if (f.getType() != String.class) {
+                                            System.out.println("Stopping B");
+                                            throw new RuntimeException("@AuthPasswordField must annotated a String field");
+                                        }
+                                        passworldField = f.getName();
+                                    } else if (f.isAnnotationPresent(AuthRolesField.class)) {
+                                        rolesField = f.getName();
                                     }
-                                    userField = f.getName();
-                                } else if (f.isAnnotationPresent(AuthPasswordField.class)) {
-                                    if (f.getType() != String.class) {
-                                        throw new RuntimeException("@AuthPasswordField must annotated a String field");
-                                    }
-                                    passworldField = f.getName();
-                                } else if (f.isAnnotationPresent(AuthRolesField.class)) {
-                                    rolesField = f.getName();
                                 }
+                            }
+                            catch (Throwable t) {
+                                t.printStackTrace();
                             }
                         }
                     }
