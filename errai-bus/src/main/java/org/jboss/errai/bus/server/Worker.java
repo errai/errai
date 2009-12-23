@@ -8,17 +8,14 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 public class Worker extends Thread {
-    private ArrayBlockingQueue<CommandMessage> messages = new ArrayBlockingQueue<CommandMessage>(25);
+    private ArrayBlockingQueue<CommandMessage> messages;
     private MessageBus bus;
     private boolean active = true;
 
-    public Worker(MessageBus bus) {
+    public Worker(ArrayBlockingQueue<CommandMessage> messageQueue, MessageBus bus) {
+        this.messages = messageQueue;
         this.bus = bus;
         setPriority(Thread.MIN_PRIORITY);
-    }
-
-    public void deliver(CommandMessage m) {
-        messages.offer(m);
     }
 
     public void setActive(boolean active) {
