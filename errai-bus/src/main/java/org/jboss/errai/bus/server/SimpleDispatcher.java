@@ -6,6 +6,11 @@ import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.server.service.ErraiService;
 
+/**
+ * Simple request dispatcher implementation.
+ *
+ * @see org.jboss.errai.bus.server.AsyncDispatcher
+ */
 @Singleton
 public class SimpleDispatcher implements RequestDispatcher {
     private ErraiService svc;

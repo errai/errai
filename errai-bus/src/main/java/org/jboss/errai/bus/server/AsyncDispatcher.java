@@ -13,7 +13,7 @@ import org.jboss.errai.bus.server.service.ErraiService;
  * ended.
  * </p>
  * This dispatcher implementation can be used with the {@link org.jboss.errai.bus.server.servlet.DefaultBlockingServlet}
- * as this pertains to incoming--as opposed to outgoing--message handling. Some appservers or servlet environments
+ * as this pertains to incoming--as opposed to outgoing--message handling. Note: some appservers or servlet environments
  * may restrict thread creation within the container, in which case this implementation cannot be used.
  */
 @Singleton
