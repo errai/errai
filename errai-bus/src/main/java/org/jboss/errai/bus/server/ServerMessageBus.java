@@ -24,9 +24,9 @@ import org.jboss.errai.bus.client.Payload;
 public interface ServerMessageBus extends MessageBus {
     public Payload nextMessage(Object sessionContext, boolean wait);
 
-    public void sendAsync(CommandMessage message);
+  //  public void sendAsync(CommandMessage message);
 
-    public void sendGlobalAsync(CommandMessage message);
+//    public void sendGlobalAsync(CommandMessage message);
 
     public MessageQueue getQueue(Object sessionContext);
 

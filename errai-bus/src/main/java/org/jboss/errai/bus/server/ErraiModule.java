@@ -32,8 +32,9 @@ import java.util.ResourceBundle;
 
 
 public class ErraiModule extends ServletModule {
-    private static final String ERRAI_APPLICATION_CONTEXT = "errai.application_context";
-    private static final String ERRAI_SERVLET_IMPLEMENTATION = "errai.servlet_implementation";
+    public static final String ERRAI_APPLICATION_CONTEXT = "errai.application_context";
+    public static final String ERRAI_SERVLET_IMPLEMENTATION = "errai.servlet_implementation";
+    public static final String ERRAI_DISPATCHER_IMPLEMENTATION = "errai.dispatcher_implementation";
 
     private Logger log = LoggerFactory.getLogger("ErraiBootstrap");
 
@@ -44,6 +45,7 @@ public class ErraiModule extends ServletModule {
 
         String appContext = "/erraiapp/";
         Class<? extends HttpServlet> servletImplementation = DefaultBlockingServlet.class;
+
 
         log.info("processing configuration.");
 

@@ -78,7 +78,7 @@ public class DefaultBlockingServlet extends HttpServlet {
         }
 
         for (CommandMessage msg : createCommandMessage(httpServletRequest.getSession(), sb.toString())) {
-            service.storeAsync(msg);
+            service.store(msg);
         }
 
         pollForMessages(httpServletRequest, httpServletResponse, false);

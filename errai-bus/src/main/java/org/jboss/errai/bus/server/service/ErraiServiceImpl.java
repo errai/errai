@@ -16,33 +16,48 @@
 
 package org.jboss.errai.bus.server.service;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.sun.xml.internal.ws.api.server.BoundEndpoint;
+import com.sun.xml.internal.ws.api.server.Module;
 import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.ConversationMessage;
+import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.client.MessageCallback;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
-import org.jboss.errai.bus.server.ServerMessageBus;
+import org.jboss.errai.bus.server.*;
 import org.jboss.errai.bus.server.security.auth.AuthSubject;
 import org.jboss.errai.bus.server.security.auth.AuthenticationAdapter;
 import org.jboss.errai.bus.server.security.auth.AuthenticationFailedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpSession;
+import java.util.List;
+
+import static com.google.inject.Guice.createInjector;
+import static org.jboss.errai.bus.server.ErraiModule.ERRAI_DISPATCHER_IMPLEMENTATION;
 
 /**
  * Default implementation of the ErraiBus server-side service.
  */
 public class ErraiServiceImpl implements ErraiService {
     private ServerMessageBus bus;
+    private RequestDispatcher dispatcher;
     private ErraiServiceConfigurator configurator;
 
+    private Logger log = LoggerFactory.getLogger("ErraiBootstrap");
+
     @Inject
-    public ErraiServiceImpl(ServerMessageBus bus,
-                            ErraiServiceConfigurator configurator) {
+    public ErraiServiceImpl(final ServerMessageBus bus,
+                            final ErraiServiceConfigurator configurator) {
         this.bus = bus;
         this.configurator = configurator;
+
 
         init();
     }
@@ -117,6 +132,34 @@ public class ErraiServiceImpl implements ErraiService {
         });
 
         configurator.configure();
+
+        final ErraiService erraiSvc = this;
+        this.dispatcher = createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                Class<? extends RequestDispatcher> dispatcherImplementation = SimpleDispatcher.class;
+
+                if (configurator.hasProperty(ERRAI_DISPATCHER_IMPLEMENTATION)) {
+                    try {
+                        dispatcherImplementation = Class.forName(configurator.getProperty(ERRAI_DISPATCHER_IMPLEMENTATION))
+                                .asSubclass(RequestDispatcher.class);
+
+                    }
+                    catch (Exception e) {
+                        throw new ErraiBootstrapFailure("could not load servlet implementation class", e);
+                    }
+
+                }
+
+                log.info("using dispatcher implementation: " + dispatcherImplementation.getName());
+
+                bind(RequestDispatcher.class).to(dispatcherImplementation);
+                bind(ErraiService.class).toInstance(erraiSvc);
+                bind(MessageBus.class).toInstance(bus);
+                bind(ErraiServiceConfigurator.class).toInstance(configurator);
+            }
+        }).getInstance(RequestDispatcher.class);
+
     }
 
     public void store(CommandMessage message) {
@@ -127,7 +170,8 @@ public class ErraiServiceImpl implements ErraiService {
          * Pass the message off to the messaging bus for handling.
          */
         try {
-            bus.sendGlobal(message);
+            dispatcher.deliver(message);
+            // bus.sendGlobal(message);
         }
         catch (Throwable t) {
             System.err.println("Message was not delivered.");
@@ -136,12 +180,16 @@ public class ErraiServiceImpl implements ErraiService {
     }
 
 
-    public void storeAsync(final CommandMessage message) {
-        message.addResources(configurator.getResourceProviders());
-        bus.sendGlobalAsync(message);
-    }
+//    public void storeAsync(final CommandMessage message) {
+//        message.addResources(configurator.getResourceProviders());
+//        bus.sendGlobalAsync(message);
+//    }
 
     public ServerMessageBus getBus() {
         return bus;
+    }
+
+    public ErraiServiceConfigurator getConfiguration() {
+        return configurator;
     }
 }

@@ -2,6 +2,7 @@ package org.jboss.errai.bus.server;
 
 import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.MessageBus;
+import org.jboss.errai.bus.server.service.ErraiService;
 
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -12,9 +13,9 @@ public class Worker extends Thread {
     private MessageBus bus;
     private boolean active = true;
 
-    public Worker(ArrayBlockingQueue<CommandMessage> messageQueue, MessageBus bus) {
+    public Worker(ArrayBlockingQueue<CommandMessage> messageQueue, ErraiService svc) {
         this.messages = messageQueue;
-        this.bus = bus;
+        this.bus = svc.getBus();
         setPriority(Thread.MIN_PRIORITY);
     }
 
@@ -27,13 +28,10 @@ public class Worker extends Thread {
         while (true) {
             CommandMessage m;
             try {
-                m = messages.poll(45, TimeUnit.SECONDS);
-                if (m == null) {
+                if ((m = messages.poll(45, TimeUnit.SECONDS)) == null) {
                     continue;
-                } else if (m.getResource("sendGlobal") != null) {
-                    bus.sendGlobal(m);
                 } else {
-                    bus.send(m);
+                    bus.sendGlobal(m);
                 }
             }
             catch (InterruptedException e) {
