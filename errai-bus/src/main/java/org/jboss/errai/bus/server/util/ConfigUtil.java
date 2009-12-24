@@ -19,6 +19,7 @@ package org.jboss.errai.bus.server.util;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.user.rebind.SourceWriter;
+import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,10 +30,12 @@ import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+/**
+ * Contains methods used for configuring and bootstrapping Errai.
+ */
 public class ConfigUtil {
     public static final String ERRAI_CONFIG_STUB_NAME = "ErraiApp.properties";
     public static final Logger log = LoggerFactory.getLogger("Configuration");
-
 
     public static List<File> findAllConfigTargets() {
         try {
@@ -40,20 +43,28 @@ public class ConfigUtil {
             List<File> targets = new LinkedList<File>();
             while (t.hasMoreElements()) {
                 String fileName = t.nextElement().getFile();
+
+                // this is referencing a file inside a compressed archive.
                 int trimIdx = fileName.lastIndexOf("!");
                 if (trimIdx != -1) {
+                    // get the path to the archive
                     fileName = fileName.substring(0, trimIdx);
                 }
 
+                // if it starts with a URI scheme prefix, let's strip it away.
                 if (fileName.startsWith("file:/")) {
                     fileName = fileName.substring(5);
                 }
 
+                // we don't want to bother with source JARs.
                 if (fileName.endsWith("-sources.jar")) {
                     continue;
                 }
+
+                // obtain a File object
                 File file = new File(fileName);
 
+                // If this is a direct filesystem path, we get the parent file (directory)
                 targets.add(trimIdx == -1 ? file.getParentFile() : file);
             }
 
@@ -65,7 +76,7 @@ public class ConfigUtil {
             return targets;
         }
         catch (Exception e) {
-            throw new RuntimeException("Could not generate extension proxies", e);
+            throw new ErraiBootstrapFailure("could not locate config target paths", e);
         }
     }
 
@@ -360,7 +371,7 @@ public class ConfigUtil {
 
     private static InputStream findResource(ClassLoader loader, String resourceName) {
         ClassLoader cl = loader;
-        InputStream is = null;
+        InputStream is;
 
         while ((is = cl.getResourceAsStream(resourceName)) == null && (cl = cl.getParent()) != null) ;
 
