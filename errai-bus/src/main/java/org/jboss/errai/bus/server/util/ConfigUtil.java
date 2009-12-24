@@ -19,6 +19,8 @@ package org.jboss.errai.bus.server.util;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.user.rebind.SourceWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.lang.annotation.Annotation;
@@ -29,6 +31,8 @@ import java.util.zip.ZipInputStream;
 
 public class ConfigUtil {
     public static final String ERRAI_CONFIG_STUB_NAME = "ErraiApp.properties";
+    public static final Logger log = LoggerFactory.getLogger("Configuration");
+
 
     public static List<File> findAllConfigTargets() {
         try {
@@ -44,7 +48,7 @@ public class ConfigUtil {
                 if (fileName.startsWith("file:/")) {
                     fileName = fileName.substring(5);
                 }
-                
+
                 if (fileName.endsWith("-sources.jar")) {
                     continue;
                 }
@@ -53,10 +57,10 @@ public class ConfigUtil {
                 targets.add(trimIdx == -1 ? file.getParentFile() : file);
             }
 
-//            System.out.println("Scan Targets:");
-//            for (File tg : targets) {
-//                System.out.println(" -> " + tg.getPath());
-//            }
+            log.info("configuration scan targets");
+            for (File tg : targets) {
+                log.info(" -> " + tg.getPath());
+            }
 
             return targets;
         }
@@ -75,14 +79,15 @@ public class ConfigUtil {
         List<Class> cache = scanCache.get(context);
 
         if (cache == null) {
-           System.out.println("adding context '" + context + "'");
+            log.info("caching context '" + context + "'");
             scanCache.put(context, cache = new LinkedList<Class>());
         }
 
         cache.add(cls);
     }
 
-    public static void cleanupStartupTempFiles() {        
+    public static void cleanupStartupTempFiles() {
+        log.info("Cleaning up ...");
         for (File f : scanAreas.values()) {
             f.delete();
         }
@@ -187,15 +192,14 @@ public class ConfigUtil {
 
         }
         catch (Exception e) {
-        //    System.out.println("Skipped:" + pathToJar + " (" + e.getMessage() + ")");
-            e.printStackTrace();
+            log.warn("did not process '" + pathToJar + "' (probably non-fatal)", e);
         }
         finally {
             try {
                 if (inStream != null) inStream.close();
             }
             catch (Exception e) {
-                e.printStackTrace();
+                log.error("failed to close stream", e);
             }
         }
     }
@@ -215,10 +219,8 @@ public class ConfigUtil {
         } else {
             while ((zipEntry = zipFile.getNextEntry()) != null) {
                 if (scanFilter != null && !zipEntry.getName().startsWith(scanFilter)) continue;
-       //         System.out.print("Scanning ...");
 
                 if (zipEntry.getName().endsWith(".class")) {
-         //           System.out.print("ZipEntry Class:" + zipEntry.getName() + " ... ");
 
                     String classEntry;
                     String className = null;
@@ -235,8 +237,6 @@ public class ConfigUtil {
                         className = classEntry.substring(beginIdx, classEntry.lastIndexOf(".class"));
                         Class<?> loadClass = Class.forName(className);
 
-          //              System.out.print("Loaded(" + loadClass.getName() + ")");
-
                         recordCache(ctx, loadClass);
 
                         cached = true;
@@ -245,12 +245,10 @@ public class ConfigUtil {
                     }
                     catch (Throwable e) {
                         if (!cached) {
-                            System.out.println("Could not load: " + className + " (" + e.getMessage() + ")");
+                            log.error("Failed to load: " + className + "(" + e.getMessage() + ") -- Probably non-fatal.");
                         }
                     }
 
-           //         System.out.println(" ... Done.");
-                    
                 } else if (zipEntry.getName().matches(".+\\.(zip|jar|war)$")) {
                     /**
                      * Let's decompress this to a temp dir so we can look at it:
@@ -310,8 +308,7 @@ public class ConfigUtil {
             return newFile;
         }
         catch (Exception e) {
-            System.out.println("could not expand file");
-            e.printStackTrace();
+            log.error("error reading from stream", e);
             return null;
         }
     }
@@ -324,10 +321,8 @@ public class ConfigUtil {
             }
         } else {
             for (File file : start.listFiles()) {
-              //  System.out.print("Scanning ...");
                 if (file.isDirectory()) _findLoadableModules(root, file, loadedTargets, visitor);
                 if (file.getName().endsWith(".class")) {
-               //     System.out.print("Class:" + file.getName() + " ... ");
                     try {
                         String FQCN = getCandidateFQCN(root.getAbsolutePath(), file.getAbsolutePath());
 
@@ -338,8 +333,6 @@ public class ConfigUtil {
                         }
 
                         Class<?> loadClass = Class.forName(FQCN);
-
-              //          System.out.print("Loaded(" + loadClass.getName() + ")");
 
                         recordCache(root.getPath(), loadClass);
 
@@ -360,8 +353,6 @@ public class ConfigUtil {
                     catch (UnsatisfiedLinkError e) {
                         // do nothing.
                     }
-
-               //     System.out.println(" ... Done.");
                 }
             }
         }

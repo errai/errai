@@ -143,7 +143,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
 
             sourceWriter.println("new " + bundle.getString(key) + "().initModule(errai);");
         }
- 
+
         List<File> targets = ConfigUtil.findAllConfigTargets();
 
         ConfigUtil.visitAllTargets(targets, context, logger, sourceWriter, new RebindVisitor() {

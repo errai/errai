@@ -32,6 +32,8 @@ import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.bus.server.util.ConfigUtil;
 import org.jboss.errai.bus.server.util.ConfigVisitor;
 import org.jboss.errai.persistence.server.security.annotations.AuthUserEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
@@ -47,10 +49,13 @@ import java.util.Map;
 @ExtensionComponent
 public class ErraiPersistenceConfigurator implements ErraiConfigExtension {
     private ErraiServiceConfigurator config;
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Inject
     public ErraiPersistenceConfigurator(ErraiServiceConfigurator config) {
         this.config = config;
+
+        logger.info("Configuring persistence extension.");
     }
 
     public void configure(Map<Class, Provider> bindings, Map<String, Provider> resourceProviders) {
@@ -65,13 +70,14 @@ public class ErraiPersistenceConfigurator implements ErraiConfigExtension {
         cfg.setProperty("hibernate.current_session_context_class", "thread");
         cfg.setProperty("hibernate.cache.use_second_level_cache", "false");
         cfg.setProperty("hibernate.cache.provider_class", "org.hibernate.cache.NoCacheProvider");
-        
+
 
         cfg.setProperty("hibernate.show_sql", "true");
         cfg.setProperty("hibernate.hbm2ddl.auto", "update");
 
         List<File> roots = config.getConfigurationRoots();
 
+        logger.info("Begin scan for annotated classes.");
         ConfigUtil.visitAllTargets(roots, new ConfigVisitor() {
             public void visit(Class<?> clazz) {
                 if (clazz.isAnnotationPresent(Entity.class)) {
@@ -96,7 +102,7 @@ public class ErraiPersistenceConfigurator implements ErraiConfigExtension {
         bindings.put(Session.class, sessionProvider);
         bindings.put(SessionFactory.class, sessionFactoryProvider);
 
-        resourceProviders.put("SessionProvider",  sessionProvider);
+        resourceProviders.put("SessionProvider", sessionProvider);
     }
 
 

@@ -26,6 +26,7 @@ import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
 import org.jboss.errai.bus.client.security.CredentialTypes;
+import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.security.auth.AuthSubject;
 import org.jboss.errai.bus.server.security.auth.AuthenticationAdapter;
 import org.jboss.errai.bus.server.security.auth.AuthenticationFailedException;
@@ -39,6 +40,8 @@ import org.jboss.errai.persistence.server.security.annotations.AuthRolesField;
 import org.jboss.errai.persistence.server.security.annotations.AuthUserEntity;
 import org.jboss.errai.persistence.server.security.annotations.AuthUsernameField;
 import org.mvel2.MVEL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpSession;
 import java.lang.reflect.Field;
@@ -58,8 +61,11 @@ public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
 
     private String challengeQueryString;
 
+    private Logger log = LoggerFactory.getLogger(this.getClass());
+
     @Inject
     public HibernateAuthenticationAdapter(ErraiServiceConfigurator configurator, MessageBus bus) {
+        log.info("initializing.");
         this.configurator = configurator;
         this.bus = bus;
 
@@ -67,38 +73,26 @@ public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
                 new ConfigVisitor() {
                     public void visit(Class<?> clazz) {
                         if (clazz.isAnnotationPresent(AuthUserEntity.class)) {
-
-                            System.out.println("Found AuthUserEntity:" + clazz);
-
-                            System.out.print("[");
-                            for (Field f : clazz.getDeclaredFields()) {
-                                System.out.print("<" + f.getName() + ">");
+                            if (userEntity != null) {
+                                throw new ErraiBootstrapFailure("More than one @AuthUserEntity defined in classpath (" + userEntity.getName() + " and " + clazz.getName() + " cannot co-exist)");
                             }
-                            System.out.println("]");
 
                             userEntity = clazz;
-                            try {
-                                for (Field f : clazz.getDeclaredFields()) {
-                                    System.out.println("Inspecting Entity Field: " + f.getName() + " (" + f.getAnnotations() + ")");
-                                    if (f.isAnnotationPresent(AuthUsernameField.class)) {
-                                        if (f.getType() != String.class) {
-                                            System.out.println("Stopping A");
-                                            throw new RuntimeException("@AuthUsernameField must annotated a String field");
-                                        }
-                                        userField = f.getName();
-                                    } else if (f.isAnnotationPresent(AuthPasswordField.class)) {
-                                        if (f.getType() != String.class) {
-                                            System.out.println("Stopping B");
-                                            throw new RuntimeException("@AuthPasswordField must annotated a String field");
-                                        }
-                                        passworldField = f.getName();
-                                    } else if (f.isAnnotationPresent(AuthRolesField.class)) {
-                                        rolesField = f.getName();
+                            for (Field f : clazz.getDeclaredFields()) {
+                                if (f.isAnnotationPresent(AuthUsernameField.class)) {
+                                    if (f.getType() != String.class) {
+                                        throw new ErraiBootstrapFailure("@AuthUsernameField must annotated a String field");
                                     }
+                                    userField = f.getName();
+                                } else if (f.isAnnotationPresent(AuthPasswordField.class)) {
+                                    if (f.getType() != String.class) {
+                                        System.out.println("Stopping B");
+                                        throw new ErraiBootstrapFailure("@AuthPasswordField must annotated a String field");
+                                    }
+                                    passworldField = f.getName();
+                                } else if (f.isAnnotationPresent(AuthRolesField.class)) {
+                                    rolesField = f.getName();
                                 }
-                            }
-                            catch (Throwable t) {
-                                t.printStackTrace();
                             }
                         }
                     }
@@ -115,8 +109,12 @@ public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
             throw new RuntimeException("You must specify a @AuthRolesField in the '" + userEntity.getName() + "' entity.");
         }
 
+        log.info("configured authentication entity: " + userEntity.getName());
+
         challengeQueryString = "from " + userEntity.getSimpleName() + " a where a." + userField + "=:name and "
                 + " a." + passworldField + "=:password";
+
+        log.info("challenge query string: " + challengeQueryString);
     }
 
     public void challenge(CommandMessage message) {

@@ -23,6 +23,8 @@ import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
 import org.jboss.errai.bus.server.service.ErraiServiceImpl;
 import org.jboss.errai.bus.server.servlet.DefaultBlockingServlet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServlet;
 import java.util.Enumeration;
@@ -33,6 +35,8 @@ public class ErraiModule extends ServletModule {
     private static final String ERRAI_APPLICATION_CONTEXT = "errai.application_context";
     private static final String ERRAI_SERVLET_IMPLEMENTATION = "errai.servlet_implementation";
 
+    private Logger log = LoggerFactory.getLogger("ErraiBootstrap");
+
     @Override
     protected void configureServlets() {
         ResourceBundle bundle = ResourceBundle.getBundle("ErraiService");
@@ -40,6 +44,9 @@ public class ErraiModule extends ServletModule {
 
         String appContext = "/erraiapp/";
         Class<? extends HttpServlet> servletImplementation = DefaultBlockingServlet.class;
+
+        log.info("processing configuration.");
+
 
         String key;
         while (keys.hasMoreElements()) {
@@ -53,10 +60,10 @@ public class ErraiModule extends ServletModule {
                     servletImplementation = Class.forName(bundle.getString(ERRAI_SERVLET_IMPLEMENTATION))
                             .asSubclass(HttpServlet.class);
 
-                    System.out.println("Loaded Servlet Implementation: " + servletImplementation.getName());
+                    log.info("using servlet implementation: " + servletImplementation.getName());
                 }
                 catch (Exception e) {
-                    throw new RuntimeException("could not load servlet implementation class", e);
+                    throw new ErraiBootstrapFailure("could not load servlet implementation class", e);
                 }
             }
         }

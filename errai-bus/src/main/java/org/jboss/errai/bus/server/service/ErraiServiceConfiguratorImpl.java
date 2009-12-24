@@ -19,6 +19,7 @@ package org.jboss.errai.bus.server.service;
 import com.google.inject.*;
 import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.client.MessageCallback;
+import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.Module;
 import org.jboss.errai.bus.server.ServerMessageBus;
 import org.jboss.errai.bus.server.annotations.ExtensionComponent;
@@ -31,6 +32,8 @@ import org.jboss.errai.bus.server.security.auth.AuthenticationAdapter;
 import org.jboss.errai.bus.server.security.auth.rules.RolesRequiredRule;
 import org.jboss.errai.bus.server.util.ConfigUtil;
 import org.jboss.errai.bus.server.util.ConfigVisitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.*;
@@ -44,6 +47,8 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
     private Map<String, Provider> resourceProviders;
 
     private ErraiServiceConfigurator configInst = this;
+
+    private Logger log = LoggerFactory.getLogger(ErraiServiceConfigurator.class);
 
     @Inject
     public ErraiServiceConfiguratorImpl(ServerMessageBus bus) {
@@ -64,7 +69,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
             }
         }
         catch (Exception e) {
-            throw new RuntimeException("error reading from configuration", e);
+            throw new ErraiBootstrapFailure("error reading from configuration", e);
         }
 
 
@@ -78,6 +83,8 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
             try {
                 final Class<? extends AuthenticationAdapter> authAdapterClass = Class.forName(properties.get("errai.authentication_adapter"))
                         .asSubclass(AuthenticationAdapter.class);
+
+                log.info("authentication adapter configured: " + authAdapterClass.getName());
 
                 final Runnable create = new Runnable() {
                     public void run() {
@@ -102,15 +109,19 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                     create.run();
                 }
                 catch (CreationException e) {
+                    log.info("authentication adapter " + authAdapterClass.getName() + " cannot be bound yet, deferring ...");
                     deferred.add(create);
                 }
             }
+            catch (ErraiBootstrapFailure e) {
+                throw e;
+            }
             catch (Exception e) {
-                e.printStackTrace();
-                throw new RuntimeException("cannot configure authentication adapter", e);
+                throw new ErraiBootstrapFailure("cannot configure authentication adapter", e);
             }
         }
 
+        log.info("beging searching for Errai extensions ...");
 
         // Search for Errai extensions.
         ConfigUtil.visitAllTargets(configRootTargets, new ConfigVisitor() {
@@ -121,6 +132,8 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                     // We have an annotated ErraiConfigExtension.  So let's configure it.
                     final Class<? extends ErraiConfigExtension> clazz =
                             loadClass.asSubclass(ErraiConfigExtension.class);
+
+                    log.info("found extension " + clazz.getName());
 
                     try {
 
@@ -152,13 +165,13 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                             create.run();
                         }
                         catch (CreationException e) {
+                            log.info("extension " + clazz.getName() + " cannot be bound yet, deferring ...");
                             deferred.add(create);
                         }
 
                     }
                     catch (Throwable e) {
-                        e.printStackTrace();
-                        throw new RuntimeException("could not initialize extension: " + loadClass.getName(), e);
+                        throw new ErraiBootstrapFailure("could not initialize extension: " + loadClass.getName(), e);
                     }
                 }
             }
@@ -171,6 +184,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                             final Class<? extends Module> clazz = loadClass.asSubclass(Module.class);
 
                             if (clazz.isAnnotationPresent(LoadModule.class)) {
+                                log.info("discovered module : " + clazz.getName() + " -- don't use Modules! Use @Service and MessageCallback!");
                                 Guice.createInjector(new AbstractModule() {
                                     @Override
                                     protected void configure() {
@@ -183,6 +197,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                         } else if (MessageCallback.class.isAssignableFrom(loadClass)) {
                             final Class<? extends MessageCallback> clazz = loadClass.asSubclass(MessageCallback.class);
                             if (clazz.isAnnotationPresent(Service.class)) {
+                                log.info("discovered service: " + clazz.getName());
                                 MessageCallback svc = Guice.createInjector(new AbstractModule() {
                                     @Override
                                     protected void configure() {
@@ -225,16 +240,18 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
         String requireAuthenticationForAll = "errai.require_authentication_for_all";
 
         if (hasProperty(requireAuthenticationForAll) && "true".equals(getProperty(requireAuthenticationForAll))) {
+            log.info("authentication for all requests required, adding rule ... ");
             bus.addRule("ClientNegotiationService", new RolesRequiredRule(new HashSet<Object>(), bus));
         }
 
-        System.out.println("Performing Cleanup ...");
-
         ConfigUtil.cleanupStartupTempFiles();
 
+        log.info("running deferred configuration tasks ...");
         for (Runnable r : deferred) {
             r.run();
         }
+
+        log.info("Errai bootstraping complete!");
     }
 
     public static interface Creator {
