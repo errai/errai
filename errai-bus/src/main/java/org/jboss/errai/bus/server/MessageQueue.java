@@ -109,6 +109,7 @@ public class MessageQueue {
             return p;
         }
         catch (InterruptedException e) {
+            e.printStackTrace();
             return new Payload(heartBeat);
         }
     }

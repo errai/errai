@@ -18,6 +18,8 @@ package org.jboss.errai.bus.client;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.bus.client.ext.ExtensionsLoader;
@@ -31,9 +33,7 @@ import static org.jboss.errai.bus.client.CommandMessage.create;
 import static org.jboss.errai.bus.client.json.JSONUtilCli.decodePayload;
 import static org.jboss.errai.bus.client.json.JSONUtilCli.encodeMap;
 import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteSubscribe;
-import static org.jboss.errai.bus.client.protocols.MessageParts.PriorityProcessing;
-import static org.jboss.errai.bus.client.protocols.MessageParts.ReplyTo;
-import static org.jboss.errai.bus.client.protocols.MessageParts.Subject;
+import static org.jboss.errai.bus.client.protocols.MessageParts.*;
 
 /**
  * The default client <tt>MessageBus</tt> implementation.  This bus runs in the browser and automatically federates
@@ -240,8 +240,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     private void sendAll() {
         if (!initialized) {
             return;
-        }
-        else if (transmitting) {
+        } else if (transmitting) {
             if (sendTimer == null) {
                 sendTimer = new com.google.gwt.user.client.Timer() {
                     int timeout = 0;
@@ -476,7 +475,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
                                 public void onResponseReceived(Request request, Response response) {
                                     block = false;
-                                    
+
                                     try {
                                         procIncomingPayload(response);
                                         schedule(1);
@@ -571,15 +570,30 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
 
     private static void showError(String message, String additionalDetails, Throwable e) {
-        DialogBox errorDialog = new DialogBox();
+        final DialogBox errorDialog = new DialogBox();
+        errorDialog.setText("Message Bus Error");
 
         StringBuffer buildTrace = new StringBuffer("<tt>");
-        buildTrace.append(e.getClass().getName()).append(": ").append(e.getMessage()).append("<br/>");
-        for (StackTraceElement ste : e.getStackTrace()) {
-            buildTrace.append(ste.toString()).append("<br/>");
+
+        if (e != null) {
+            buildTrace.append(e.getClass().getName()).append(": ").append(e.getMessage()).append("<br/>");
+            for (StackTraceElement ste : e.getStackTrace()) {
+                buildTrace.append(ste.toString()).append("<br/>");
+            }
         }
 
         VerticalPanel panel = new VerticalPanel();
+        Button closeButton = new Button("Dismiss");
+        closeButton.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                errorDialog.hide();  
+            }
+        });
+
+
+        panel.add(closeButton);
+        panel.setCellHorizontalAlignment(closeButton, HasHorizontalAlignment.ALIGN_RIGHT);
+
         Style s = panel.getElement().getStyle();
 
         s.setProperty("border", "1px");
@@ -596,6 +610,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
         panel.add(scrollPanel);
 
+
         errorDialog.add(panel);
 
         errorDialog.center();
@@ -604,6 +619,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     /**
      * Process the incoming payload and push all the incoming messages onto the bus.
+     *
      * @param response
      * @throws Exception
      */

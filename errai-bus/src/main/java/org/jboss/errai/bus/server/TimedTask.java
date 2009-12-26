@@ -14,6 +14,7 @@ public abstract class TimedTask implements Runnable {
 
     public void runIfDue(long time) {
         if ((lastRunTime + period) < time) {
+            lastRunTime = System.currentTimeMillis();
             run();
         }
     }

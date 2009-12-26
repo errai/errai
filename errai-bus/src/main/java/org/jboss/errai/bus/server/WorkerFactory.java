@@ -37,6 +37,8 @@ public class WorkerFactory {
             workerTimeout = seconds(Integer.parseInt(cfg.getProperty(CONFIG_ASYNC_WORKER_TIMEOUT)));
         }
 
+        log.info("initializing async worker pools (poolSize: " + poolSize + "; workerTimeout: " + workerTimeout + ")");
+
 
         this.workerPool = new Worker[poolSize];
         this.svc = svc;
@@ -60,7 +62,7 @@ public class WorkerFactory {
                     for (Worker w : workerPool) {
                         if (!w.isValid()) {
                             log.warn("Terminating worker.  Process exceeds maximum time to live.");
-                            w.interrupt();
+                            w.timeoutInterrupt();
                         }
                     }
                 }
@@ -83,6 +85,7 @@ public class WorkerFactory {
     }
 
     public void startPool() {
+        log.info("starting worker pool.");
         for (int i = 0; i < poolSize; i++) {
             workerPool[i].start();
         }
@@ -90,9 +93,5 @@ public class WorkerFactory {
 
     private long seconds(int seconds) {
         return seconds * 1000;
-    }
-
-    public enum Strategy {
-        ROUND_ROBIN
     }
 }

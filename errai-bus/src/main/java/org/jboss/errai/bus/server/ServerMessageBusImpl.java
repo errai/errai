@@ -118,7 +118,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                     }
                 }
                 catch (InterruptedException e) {
-                    // do nothing.
+                    e.printStackTrace();
                 }
                 catch (ConcurrentModificationException e) {
                     run();
