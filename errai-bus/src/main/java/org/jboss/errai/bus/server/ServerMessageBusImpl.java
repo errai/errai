@@ -16,9 +16,7 @@
 
 package org.jboss.errai.bus.server;
 
-import com.google.gwt.core.client.GWT;
 import com.google.inject.Singleton;
-import org.jboss.errai.bus.WorkerFactory;
 import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;
@@ -35,7 +33,7 @@ import java.util.Queue;
 @Singleton
 public class ServerMessageBusImpl implements ServerMessageBus {
     private static final String ERRAI_BUS_SHOWMONITOR = "errai.bus.showmonitor";
-    
+
     private final static int QUEUE_SIZE = 200;
 
     private final List<MessageListener> listeners = new ArrayList<MessageListener>();
@@ -186,7 +184,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         });
 
         houseKeeper.start();
-    //    workerFactory.startPool();
+        //    workerFactory.startPool();
     }
 
     public void sendGlobal(CommandMessage message) {
@@ -482,22 +480,65 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         return ((HttpSession) message.getResource("Session"));
     }
 
-    private static class HouseKeeper extends Thread {
+    public HouseKeeper getHouseKeeper() {
+        return houseKeeper;
+    }
+
+    public static class HouseKeeper extends Thread {
         private boolean running = true;
         private ServerMessageBusImpl bus;
+        private List<TimedTask> tasks = new LinkedList<TimedTask>();
 
-        public HouseKeeper(ServerMessageBusImpl bus) {
+        public HouseKeeper(final ServerMessageBusImpl bus) {
             super();
             this.bus = bus;
             setPriority(Thread.MIN_PRIORITY);
+
+            tasks.add(new TimedTask() {
+                {
+                    this.period = (1000 * 10);
+                }
+
+                public void run() {
+                    boolean houseKeepingPerformed = false;
+                    List<Object> endSessions = new LinkedList<Object>();
+
+                    while (!houseKeepingPerformed) {
+                        try {
+
+                            Iterator<Object> iter = bus.messageQueues.keySet().iterator();
+                            Object ref;
+
+                            while (iter.hasNext()) {
+                                if (bus.messageQueues.get(ref = iter.next()).isStale()) {
+                                    endSessions.add(ref);
+                                }
+                            }
+
+                            houseKeepingPerformed = true;
+                        }
+                        catch (ConcurrentModificationException cme) {
+                            // fall-through and try again.
+                        }
+                    }
+
+                    for (Object ref : endSessions) {
+                        for (String subject : new HashSet<String>(bus.remoteSubscriptions.keySet())) {
+                            bus.remoteUnsubscribe(ref, subject);
+                        }
+
+                        bus.messageQueues.remove(ref);
+                    }
+                }
+            });
         }
 
         @Override
         public void run() {
             try {
                 while (running) {
-                    Thread.sleep(1000 * 10);
-                    houseKeep();
+                    Thread.sleep(1000 * 1);
+                    runAllDue();
                 }
             }
             catch (InterruptedException e) {
@@ -505,36 +546,14 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             }
         }
 
-        private void houseKeep() {
-            boolean houseKeepingPerformed = false;
-            List<Object> endSessions = new LinkedList<Object>();
-
-            while (!houseKeepingPerformed) {
-                try {
-
-                    Iterator<Object> iter = bus.messageQueues.keySet().iterator();
-                    Object ref;
-
-                    while (iter.hasNext()) {
-                        if (bus.messageQueues.get(ref = iter.next()).isStale()) {
-                            endSessions.add(ref);
-                        }
-                    }
-
-                    houseKeepingPerformed = true;
-                }
-                catch (ConcurrentModificationException cme) {
-                    // fall-through and try again.
-                }
+        private void runAllDue() {
+            for (TimedTask task : tasks) {
+                task.runIfDue(System.currentTimeMillis());
             }
+        }
 
-            for (Object ref : endSessions) {
-                for (String subject : new HashSet<String>(bus.remoteSubscriptions.keySet())) {
-                    bus.remoteUnsubscribe(ref, subject);
-                }
-
-                bus.messageQueues.remove(ref);
-            }
+        public void addTask(TimedTask task) {
+            tasks.add(task);
         }
     }
 }
