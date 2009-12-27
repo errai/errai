@@ -65,9 +65,9 @@ public class WSCellTitle extends WSCellFormatter<String> {
         if (wsGrid.getSortedColumnHeader() == cell) {
 
             if (wsGrid.getColumnSortOrder(cell.getCol()))
-                img.setUrl(imageBundle.sortDown().getURL());
+                img.setResource(imageBundle.sortDown());
             else
-                img.setUrl(imageBundle.sortUp().getURL());
+                img.setResource(imageBundle.sortUp());
 
             img.setVisible(true);
         }
