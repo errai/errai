@@ -742,6 +742,7 @@ span {
     border-bottom: 1px #cccccc solid;
     vertical-align: middle;
     width: 100%;
+    height: 25px;
 }
 
 .WS-WorkPanel-title-label {

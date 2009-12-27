@@ -91,7 +91,6 @@ public class WSCellSimpleTextCell extends WSCellFormatter<String> {
 
     public void stopedit() {
         if (!readonly) setValue(textBox.getText());
-
         textBox.setVisible(false);
         wsCellReference.stopedit();
     }

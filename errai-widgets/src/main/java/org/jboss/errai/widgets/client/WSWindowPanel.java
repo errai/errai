@@ -84,13 +84,7 @@ public class WSWindowPanel extends Composite {
 
         titleArea.add(label);
         titleArea.setCellVerticalAlignment(label, HasVerticalAlignment.ALIGN_MIDDLE);
-
-      //  Button closeButton = new Button();
-
         Image closeButton = new Image(imageBundle.cancel());
-
-
-       // closeButton.setHTML("<img src='" + imageBundle.cancel().getURL() + "' />");
 
         closeButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {

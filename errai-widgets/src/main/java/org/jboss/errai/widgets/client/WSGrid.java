@@ -1083,7 +1083,7 @@ public class WSGrid extends Composite {
         public void stopedit() {
             if (edit) {
                 edit = false;
-                focusPanel.setFocus(true);
+                if (!_msie_compatibility) focusPanel.setFocus(true);
             }
         }
 
@@ -1229,7 +1229,6 @@ public class WSGrid extends Composite {
                                     absoluteVel = (int) Math.round(vel);
                                     if (absoluteVel < 1) absoluteVel = 1;
                                 }
-                                //  x = !x;
                             }
 
                             grid.scrollPanel.setScrollPosition(i);
@@ -1787,7 +1786,8 @@ public class WSGrid extends Composite {
     }
 
     private void fireAllAfterCellChangeHandlers(WSCell cell) {
-        for (ChangeHandler c : afterCellChangeHandlers) c.onChange(new CellChangeEvent(cell, cell.getCellFormat().getValue()));
+        for (ChangeHandler c : afterCellChangeHandlers)
+            c.onChange(new CellChangeEvent(cell, cell.getCellFormat().getValue()));
 
     }
 

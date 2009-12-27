@@ -20,7 +20,8 @@ import com.google.gwt.user.client.ui.*;
 
 import java.util.Iterator;
 
-public class WorkPanel extends Panel {
+public class
+        WorkPanel extends Panel {
     VerticalPanel vPanel = new VerticalPanel();
 
     private Label titleLabel = new Label("New WorkPanel");

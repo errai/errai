@@ -21,7 +21,6 @@ import com.google.gwt.resources.client.ImageResource;
 
 
 public interface ErraiWidgetsImageBundle extends ClientBundle {
-
     @Source("sort-up.png")
     public ImageResource sortUp();
 
