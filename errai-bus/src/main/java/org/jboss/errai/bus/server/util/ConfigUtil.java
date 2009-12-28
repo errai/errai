@@ -87,6 +87,8 @@ public class ConfigUtil {
     private static String tmpUUID = "erraiBootstrap_" + UUID.randomUUID().toString().replaceAll("\\-", "_");
 
     private static void recordCache(String context, Class cls) {
+        if (scanCache == null) return;
+        
         List<Class> cache = scanCache.get(context);
 
         if (cache == null) {
@@ -98,6 +100,8 @@ public class ConfigUtil {
     }
 
     public static void cleanupStartupTempFiles() {
+        if (scanAreas == null) return;
+        
         log.info("Cleaning up ...");
         for (File f : scanAreas.values()) {
             f.delete();
@@ -113,7 +117,8 @@ public class ConfigUtil {
                 visitor.visit(clazz);
             }
         });
-        activeCacheContexts.add(root.getPath());
+
+        if (activeCacheContexts != null) activeCacheContexts.add(root.getPath());
     }
 
     public static void visitAllTargets(List<File> targets, ConfigVisitor visitor) {
@@ -128,7 +133,8 @@ public class ConfigUtil {
                 visitor.visit(clazz, context, logger, writer);
             }
         });
-        activeCacheContexts.add(root.getPath());
+
+        if (activeCacheContexts != null) activeCacheContexts.add(root.getPath());
     }
 
     public static void visitAllTargets(List<File> targets, final GeneratorContext context, final TreeLogger logger, final SourceWriter writer, RebindVisitor visitor) {
@@ -171,6 +177,7 @@ public class ConfigUtil {
     private static String CLASS_RESOURCES_ROOT = "WEB-INF.classes.";
 
     private static void loadFromZippedResource(File root, File start, Set<String> loadedTargets, VisitDelegate visitor, String scanFilter) {
+
         final String pathToJar = start.getPath();
         boolean startsWithFile = pathToJar.startsWith("file:/");
 
@@ -222,7 +229,8 @@ public class ConfigUtil {
 
         String ctx = zipName + (scanFilter == null ? ":*" : ":" + scanFilter);
 
-        if (activeCacheContexts.contains(ctx) && scanCache.containsKey(ctx)) {
+        if (activeCacheContexts != null && scanCache != null &&
+                activeCacheContexts.contains(ctx) && scanCache.containsKey(ctx)) {
             List<Class> cache = scanCache.get(ctx);
             for (Class loadClass : cache) {
                 visitor.visit(loadClass);
@@ -295,6 +303,7 @@ public class ConfigUtil {
     }
 
     private static File expandZipEntry(ZipInputStream stream, ZipEntry entry) {
+
         String tmpDir = System.getProperty("java.io.tmpdir") + "/" + tmpUUID;
         int idx = entry.getName().lastIndexOf('/');
         String tmpFileName = tmpDir + "/" + entry.getName().substring(idx == -1 ? 0 : idx);
@@ -326,7 +335,7 @@ public class ConfigUtil {
 
 
     private static void loadFromDirectory(File root, File start, Set<String> loadedTargets, VisitDelegate visitor) {
-        if (activeCacheContexts.contains(root.getPath()) && scanCache.containsKey(root.getPath())) {
+        if (scanCache != null && activeCacheContexts != null && activeCacheContexts.contains(root.getPath()) && scanCache.containsKey(root.getPath())) {
             for (Class loadClass : scanCache.get(root.getPath())) {
                 visitor.visit(loadClass);
             }

@@ -17,6 +17,7 @@
 package org.jboss.errai.bus.server.service;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
@@ -35,6 +36,7 @@ import static com.google.inject.Guice.createInjector;
 /**
  * Default implementation of the ErraiBus server-side service.
  */
+@Singleton
 public class ErraiServiceImpl implements ErraiService {
     private ServerMessageBus bus;
     private RequestDispatcher dispatcher;

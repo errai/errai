@@ -40,12 +40,12 @@ import static org.jboss.errai.bus.client.protocols.MessageParts.*;
  * with the server immediately upon initialization.
  */
 public class ClientMessageBusImpl implements ClientMessageBus {
-    private static final String SERVICE_ENTRY_POINT = "erraiBus";
+    private static final String SERVICE_ENTRY_POINT = "in.erraiBus";
 
     private List<SubscribeListener> onSubscribeHooks = new ArrayList<SubscribeListener>();
     private List<UnsubscribeListener> onUnsubscribeHooks = new ArrayList<UnsubscribeListener>();
 
-    private final RequestBuilder sendBuilder;
+    private RequestBuilder sendBuilder;
     private final RequestBuilder recvBuilder;
 
     private final Map<String, List<Object>> subscriptions = new HashMap<String, List<Object>>();
@@ -403,34 +403,63 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         });
 
 
-        String initialMessage = "{\"CommandType\":\"ConnectToQueue\",\"ToSubject\":\"ServerBus\"}";
-
         /**
          * Send initial message to connect to the queue, to establish an HTTP session. Otherwise, concurrent
-         * requests will result in multiple sessions being creatd.  Which is bad.  Avoid this at all costs.
+         * requests will result in multiple sessions being created.  Which is bad.  Avoid this at all costs.
          * Please.
          */
+
+
+        if (!sendInitialMessage(callback)) {
+            showError("Could not connect to remote bus", "", null);
+        }
+    }
+
+    private boolean useSeperateIncoming = false;
+
+    private boolean sendInitialMessage(final HookCallback callback) {
         try {
+
+            String initialMessage = "{\"CommandType\":\"ConnectToQueue\",\"ToSubject\":\"ServerBus\"}";
+
             sendBuilder.sendRequest(initialMessage, new RequestCallback() {
                 public void onResponseReceived(Request request, Response response) {
                     try {
                         procIncomingPayload(response);
                     }
                     catch (Exception e) {
-                        return;
+                   //     if (useSeperateIncoming) {
+                            showError("Error attaching to bus", e.getMessage() + "<br/>Message Contents:<br/>" + response.getText(), e);
+                            return;
+//                        } else {
+//                            /**
+//                             * Try and switch to the alternative incoming servlet
+//                             */
+//                            (sendBuilder = new RequestBuilder(
+//                                    RequestBuilder.POST,
+//                                    URL.encode(SERVICE_ENTRY_POINT + "Incoming")
+//                            )).setHeader("Connection", "Keep-Alive");
+//
+//                            useSeperateIncoming = true;
+//
+//                            sendInitialMessage(callback);
+//                            return;
+                     //   }
                     }
                     initializeMessagingBus(callback);
                 }
 
                 public void onError(Request request, Throwable exception) {
-                    exception.printStackTrace();
+                    System.out.println("ERROR");
                 }
             });
         }
         catch (RequestException e) {
-            //todo: handle this.
+            return false;
         }
+        return true;
     }
+
 
     public boolean isInitialized() {
         return initialized;
@@ -482,6 +511,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                                     }
                                     catch (Exception e) {
                                         showError("Errai MessageBus Disconnected Due to Fatal Error", response.getText(), e);
+                                        cancel();
                                     }
                                 }
                             }
@@ -549,7 +579,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             _store(subject, value);
         }
         catch (Exception e) {
-            showError("Error sending data to client bus for '" + subject + "'", "Value:" + value, e);
+            showError("Error `sending data to client bus for '" + subject + "'", "Value:" + value, e);
         }
     }
 
@@ -586,7 +616,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         Button closeButton = new Button("Dismiss");
         closeButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                errorDialog.hide();  
+                errorDialog.hide();
             }
         });
 
@@ -624,14 +654,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      * @throws Exception
      */
     private static void procIncomingPayload(Response response) throws Exception {
-        try {
-            for (Message m : decodePayload(response.getText())) {
-                store(m.getSubject(), m.getMessage());
-            }
-        }
-        catch (Exception t) {
-            showError("Error Receiving Message", response.getText(), t);
-            throw t;
+        for (Message m : decodePayload(response.getText())) {
+            store(m.getSubject(), m.getMessage());
         }
     }
 }

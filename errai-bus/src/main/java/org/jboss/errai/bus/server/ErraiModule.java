@@ -23,9 +23,12 @@ import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
 import org.jboss.errai.bus.server.service.ErraiServiceImpl;
 import org.jboss.errai.bus.server.servlet.DefaultBlockingServlet;
+import org.jboss.errai.bus.server.servlet.TomcatCometServlet;
+import org.jboss.errai.bus.server.servlet.UseIncomingServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.Servlet;
 import javax.servlet.http.HttpServlet;
 import java.util.Enumeration;
 import java.util.ResourceBundle;
@@ -43,12 +46,11 @@ public class ErraiModule extends ServletModule {
         ResourceBundle bundle = ResourceBundle.getBundle("ErraiService");
         Enumeration<String> keys = bundle.getKeys();
 
-        String appContext = "/erraiapp/";
+        String appContext = "";
         Class<? extends HttpServlet> servletImplementation = DefaultBlockingServlet.class;
-
+        Class<? extends HttpServlet> incomingServletImplementation = null;
 
         log.info("processing configuration.");
-
 
         String key;
         while (keys.hasMoreElements()) {
@@ -56,21 +58,31 @@ public class ErraiModule extends ServletModule {
 
             if (ERRAI_APPLICATION_CONTEXT.equals(key)) {
                 appContext = bundle.getString(ERRAI_APPLICATION_CONTEXT) + "erraiBus";
-                //  serve(appContext).with(DefaultBlockingServlet.class);
             } else if (ERRAI_SERVLET_IMPLEMENTATION.equals(key)) {
                 try {
+                    System.out.println("BAH!");
+
                     servletImplementation = Class.forName(bundle.getString(ERRAI_SERVLET_IMPLEMENTATION))
                             .asSubclass(HttpServlet.class);
+
+                    if (servletImplementation.isAnnotationPresent(UseIncomingServlet.class)) {
+                        incomingServletImplementation
+                                = servletImplementation.getAnnotation(UseIncomingServlet.class).value();
+                    }
 
                     log.info("using servlet implementation: " + servletImplementation.getName());
                 }
                 catch (Exception e) {
+                    e.printStackTrace();
                     throw new ErraiBootstrapFailure("could not load servlet implementation class", e);
                 }
             }
         }
 
-        serve(appContext).with(servletImplementation);
+        serve("*.erraiBus").with(servletImplementation);
+        if (incomingServletImplementation != null) {
+            serve("*.erraiBusIncoming").with(incomingServletImplementation);
+        }
 
         bind(MessageBus.class).to(ServerMessageBusImpl.class);
         bind(ServerMessageBus.class).to(ServerMessageBusImpl.class);
