@@ -5,6 +5,7 @@ import org.jboss.errai.bus.client.ConversationMessage;
 import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.client.RoutingFlags;
 import org.jboss.errai.bus.server.service.ErraiService;
+import org.mvel2.util.StringAppender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,11 +67,28 @@ public class Worker extends Thread {
                     } else {
                         bus.sendGlobal(message);
                     }
-                    workExpiry = 0;
                 }
             }
             catch (InterruptedException e) {
                 if (!active) return;
+            }
+            catch (Exception e) {
+                ConversationMessage m = ConversationMessage.create(message)
+                        .toSubject("ClientBusErrors")
+                        .set("ErrorMessage", "An exception was thrown by service: " + message.getSubject());
+
+                StringAppender a = new StringAppender();
+                for (StackTraceElement sel : e.getStackTrace()) {
+                    a.append(sel.toString()).append("<br/>");
+                }
+
+                m.set("AdditionalDetails", a.toString())
+                        .sendNowWith(bus);
+
+
+            }
+            finally {
+                workExpiry = 0;
             }
         }
     }
