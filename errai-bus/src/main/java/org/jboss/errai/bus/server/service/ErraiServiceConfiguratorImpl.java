@@ -19,9 +19,11 @@ package org.jboss.errai.bus.server.service;
 import com.google.inject.*;
 import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.client.MessageCallback;
+import org.jboss.errai.bus.client.RequestDispatcher;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.Module;
 import org.jboss.errai.bus.server.ServerMessageBus;
+import org.jboss.errai.bus.server.SimpleDispatcher;
 import org.jboss.errai.bus.server.annotations.ExtensionComponent;
 import org.jboss.errai.bus.server.annotations.LoadModule;
 import org.jboss.errai.bus.server.annotations.Service;
@@ -38,6 +40,9 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.util.*;
 
+import static com.google.inject.Guice.createInjector;
+import static org.jboss.errai.bus.server.ErraiModule.ERRAI_DISPATCHER_IMPLEMENTATION;
+
 public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
     private ServerMessageBus bus;
     private List<File> configRootTargets;
@@ -45,6 +50,8 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
 
     private Map<Class, Provider> extensionBindings;
     private Map<String, Provider> resourceProviders;
+
+    private RequestDispatcher dispatcher;
 
     private ErraiServiceConfigurator configInst = this;
 
@@ -55,7 +62,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
         this.bus = bus;
     }
 
-    public void configure() {
+    public void configure(final ErraiService erraiService) {
         properties = new HashMap<String, String>();
         configRootTargets = ConfigUtil.findAllConfigTargets();
 
@@ -120,6 +127,32 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                 throw new ErraiBootstrapFailure("cannot configure authentication adapter", e);
             }
         }
+
+
+         this.dispatcher = createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                Class<? extends RequestDispatcher> dispatcherImplementation = SimpleDispatcher.class;
+
+                if (configInst.hasProperty(ERRAI_DISPATCHER_IMPLEMENTATION)) {
+                    try {
+                        dispatcherImplementation = Class.forName(configInst.getProperty(ERRAI_DISPATCHER_IMPLEMENTATION))
+                                .asSubclass(RequestDispatcher.class);
+
+                    }
+                    catch (Exception e) {
+                        throw new ErraiBootstrapFailure("could not load servlet implementation class", e);
+                    }
+                }
+
+                log.info("using dispatcher implementation: " + dispatcherImplementation.getName());
+
+                bind(RequestDispatcher.class).to(dispatcherImplementation);
+                bind(ErraiService.class).toInstance(erraiService);
+                bind(MessageBus.class).toInstance(bus);
+                bind(ErraiServiceConfigurator.class).toInstance(configInst);
+            }
+        }).getInstance(RequestDispatcher.class);
 
         log.info("beging searching for Errai extensions ...");
 
@@ -203,6 +236,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                                     protected void configure() {
                                         bind(MessageCallback.class).to(clazz);
                                         bind(MessageBus.class).toInstance(bus);
+                                        bind(RequestDispatcher.class).toInstance(dispatcher);
 
                                         // Add any extension bindings.
                                         for (Map.Entry<Class, Provider> entry : extensionBindings.entrySet()) {
@@ -276,5 +310,9 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
 
     public <T> T getResource(Class<? extends T> resourceClass) {
         return (T) extensionBindings.get(resourceClass).get();
+    }
+
+    public RequestDispatcher getConfiguredDispatcher() {
+        return dispatcher;
     }
 }

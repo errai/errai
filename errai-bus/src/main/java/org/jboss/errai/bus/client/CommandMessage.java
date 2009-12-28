@@ -70,6 +70,10 @@ import java.util.Map;
 public class CommandMessage {
     protected Map<String, Object> parts = new HashMap<String, Object>();
     protected Map<String, Object> resources;
+    protected int routingFlags;
+
+    public static final int ROUTE_GLOBAL = 1;
+    public static final int PRIORITY_ROUTING = 2;
 
     /**
      * @param commandType
@@ -216,6 +220,21 @@ public class CommandMessage {
         set(part, message.get(Object.class, part));
         return this;
     }
+
+    public void setFlag(RoutingFlags flag) {
+        routingFlags |= flag.flag();
+    }
+
+    public void unsetFlag(RoutingFlags flag) {
+        if ((routingFlags & flag.flag()) != 0) {
+           routingFlags ^= flag.flag();
+        }
+    }
+
+    public boolean isFlagSet(RoutingFlags flag) {
+        return (routingFlags & flag.flag()) != 0;
+    }
+
 
     /**
      * Remove the specified part from the message.
@@ -377,6 +396,14 @@ public class CommandMessage {
      */
     public void sendNowWith(MessageBus viaThis) {
         viaThis.send(this);
+    }
+
+    /**
+     * Transmit this message using the specified {@link org.jboss.errai.bus.client.RequestDispatcher}.
+     * @param viaThis
+     */
+    public void sendNowWith(RequestDispatcher viaThis) {
+        viaThis.dispatchGlobal(this);
     }
 
     @Override

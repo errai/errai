@@ -1,6 +1,7 @@
 package org.jboss.errai.bus.server;
 
 import org.jboss.errai.bus.client.CommandMessage;
+import org.jboss.errai.bus.client.RoutingFlags;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.slf4j.Logger;
@@ -72,9 +73,16 @@ public class WorkerFactory {
         startPool();
     }
 
-    public void deliver(CommandMessage m) {
+    public void deliverGlobal(CommandMessage m) {
         messages.offer(m);
     }
+
+    public void deliver(CommandMessage m) {
+        m.setFlag(RoutingFlags.NonGlobalRouting);
+        messages.offer(m);
+    }
+
+
 
     protected ArrayBlockingQueue<CommandMessage> getMessages() {
         return messages;

@@ -16,7 +16,6 @@
 
 package org.jboss.errai.bus.server;
 
-import com.google.gwt.core.client.GWT;
 import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.Payload;
 
@@ -125,7 +124,7 @@ public class MessageQueue {
         }
 
         if (!b) {
-            throw new QueueOverloadedException("too many undelievered messages in queue: cannot deliver message.");
+            throw new QueueOverloadedException("too many undelievered messages in queue: cannot dispatchGlobal message.");
         } else if (activationCallback != null) {
             activationCallback.activate();
         }

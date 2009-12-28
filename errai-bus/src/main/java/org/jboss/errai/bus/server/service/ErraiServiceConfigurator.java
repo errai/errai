@@ -17,13 +17,14 @@
 package org.jboss.errai.bus.server.service;
 
 import com.google.inject.Provider;
+import org.jboss.errai.bus.client.RequestDispatcher;
 
 import java.io.File;
 import java.util.List;
 import java.util.Map;
 
 public interface ErraiServiceConfigurator {
-    public void configure();
+    public void configure(final ErraiService service);
 
     public List<File> getConfigurationRoots();
     public Map<String, Provider> getResourceProviders();
@@ -31,4 +32,6 @@ public interface ErraiServiceConfigurator {
 
     public boolean hasProperty(String key);
     public String getProperty(String key);
+
+    public RequestDispatcher getConfiguredDispatcher();
 }

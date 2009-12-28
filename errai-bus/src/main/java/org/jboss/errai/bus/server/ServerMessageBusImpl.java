@@ -203,7 +203,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         if (fireListeners && !fireGlobalMessageListeners(message)) {
             if (message.hasPart(MessageParts.ReplyTo) && message.hasResource("Session")) {
                 /**
-                 * Inform the sender that we did not deliver the message.
+                 * Inform the sender that we did not dispatchGlobal the message.
                  */
 
                 store((String) getSession(message).getAttribute(WS_SESSION_ID),
@@ -319,12 +319,12 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
 
 //    public void sendAsync(CommandMessage message) {
-//        workerFactory.deliver(message);
+//        workerFactory.dispatchGlobal(message);
 //    }
 //
 //    public void sendGlobalAsync(CommandMessage message) {
 //        message.setResource("sendGlobal", "");
-//        workerFactory.deliver(message);
+//        workerFactory.dispatchGlobal(message);
 //    }
 
     public Payload nextMessage(Object sessionContext, boolean wait) {

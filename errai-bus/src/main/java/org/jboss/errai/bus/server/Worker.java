@@ -3,6 +3,7 @@ package org.jboss.errai.bus.server;
 import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.ConversationMessage;
 import org.jboss.errai.bus.client.MessageBus;
+import org.jboss.errai.bus.client.RoutingFlags;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +61,11 @@ public class Worker extends Thread {
                     continue;
                 } else {
                     workExpiry = System.currentTimeMillis() + workerFactory.getWorkerTimeout();
-                    bus.sendGlobal(message);
+                    if (message.isFlagSet(RoutingFlags.NonGlobalRouting)) {
+                        bus.send(message);
+                    } else {
+                        bus.sendGlobal(message);
+                    }
                     workExpiry = 0;
                 }
             }

@@ -66,11 +66,7 @@ public class JettyContinuationsServlet extends HttpServlet {
         }
 
         for (CommandMessage msg : createCommandMessage(httpServletRequest.getSession(), sb.toString())) {
-//            if (msg.hasPart(MessageParts.PriorityProcessing)) {
                 service.store(msg);
-//            } else {
-//                service.storeAsync(msg);
-//            }
         }
 
         pollForMessages(httpServletRequest, httpServletResponse, false);

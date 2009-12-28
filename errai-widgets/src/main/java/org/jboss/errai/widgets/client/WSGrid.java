@@ -1099,7 +1099,7 @@ public class WSGrid extends Composite {
             removeStyleDependentName("selected");
 
             if (rowSelectionOnly) {
-                for (int i = 0; i < cols; i++) {
+                for (int i = 0; i < cols; i++) {     
                     WSCell c = grid.getCell(row, i);
 
                     if (i == 0) {
