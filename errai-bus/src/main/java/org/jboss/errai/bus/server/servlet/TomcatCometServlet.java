@@ -87,7 +87,7 @@ public class TomcatCometServlet extends HttpServlet implements CometProcessor {
 
                             if ("POST".equals(request.getMethod())) {
                                 // do not pause incoming messages.
-             //                   log.info("Do not pause POST event: " + event.hashCode());
+                                //                   log.info("Do not pause POST event: " + event.hashCode());
                                 break;
                             }
 
@@ -97,10 +97,10 @@ public class TomcatCometServlet extends HttpServlet implements CometProcessor {
                             }
 
                             if (events.contains(event)) {
-             //                   log.info("Resuming Event: " + event);
+                                //                   log.info("Resuming Event: " + event);
                                 event.close();
                             } else {
-             //                   log.info("Add Active Event (" + event.hashCode() + ") ActiveInSession: " + activeEvents.size() + "; MessagesWaiting:" + queue.messagesWaiting() + ")");
+                                //                   log.info("Add Active Event (" + event.hashCode() + ") ActiveInSession: " + activeEvents.size() + "; MessagesWaiting:" + queue.messagesWaiting() + ")");
                                 events.add(event);
                             }
                         }
@@ -118,11 +118,11 @@ public class TomcatCometServlet extends HttpServlet implements CometProcessor {
                     Set<CometEvent> evt = activeEvents.get(session);
                     if (evt != null) {
                         evt.remove(event);
-               //         log.info("Remove Active Event (ActiveInSession: " + evt.size() + ")");
+                        //         log.info("Remove Active Event (ActiveInSession: " + evt.size() + ")");
                     }
                 }
 
-               // log.info("End: Queue:" + (queue == null ? "NOQUEUE!" : queue.hashCode()) + "; Event:" + event.hashCode());
+                // log.info("End: Queue:" + (queue == null ? "NOQUEUE!" : queue.hashCode()) + "; Event:" + event.hashCode());
 
                 event.close();
                 break;
@@ -140,9 +140,15 @@ public class TomcatCometServlet extends HttpServlet implements CometProcessor {
                 }
                 if (event.getEventSubType() == CometEvent.EventSubType.TIMEOUT) {
                     if (queue != null) queue.heartBeat();
-                }
-                else {
-                    queueToSession.remove(queue);
+                } else {
+                    if (queue != null) {
+                        queueToSession.remove(queue);
+                        service.getBus().closeQueue(session.getId());
+                      //  session.invalidate();
+                        activeEvents.remove(session);
+                    }
+
+
                     log.error("An Error Occured" + event.getEventSubType());
                 }
 
@@ -150,7 +156,7 @@ public class TomcatCometServlet extends HttpServlet implements CometProcessor {
                 break;
 
             case READ:
-           //     log.info("READ:" + event.hashCode());
+                //     log.info("READ:" + event.hashCode());
                 readInRequest(request);
                 event.close();
         }
@@ -219,7 +225,7 @@ public class TomcatCometServlet extends HttpServlet implements CometProcessor {
                 public void activate(MessageQueue queue) {
                     synchronized (queue) {
                         if (resumed) {
-                //            log.info("Blocking");
+                            //            log.info("Blocking");
                             return;
                         }
                         resumed = true;
