@@ -2,8 +2,10 @@ package org.jboss.errai.bus.server.servlet;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.apache.catalina.CometEvent;
+import org.apache.catalina.CometFilter;
 import org.apache.catalina.CometProcessor;
 import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.Message;
@@ -34,7 +36,6 @@ import java.util.*;
 import static org.jboss.errai.bus.server.io.MessageUtil.createCommandMessage;
 
 @Singleton
-//@UseIncomingServlet(TomcatIncomingServlet.class)
 public class TomcatCometServlet extends HttpServlet implements CometProcessor {
     private ErraiService service;
 
@@ -48,6 +49,12 @@ public class TomcatCometServlet extends HttpServlet implements CometProcessor {
                 bind(ErraiServiceConfigurator.class).to(ErraiServiceConfiguratorImpl.class);
             }
         }).getInstance(ErraiService.class);
+    }
+
+    @Inject
+    public TomcatCometServlet(ErraiService service) {
+        this.service = service;
+
     }
 
     private final Map<MessageQueue, HttpSession> queueToSession = new HashMap<MessageQueue, HttpSession>();
@@ -118,6 +125,31 @@ public class TomcatCometServlet extends HttpServlet implements CometProcessor {
                 readInRequest(request);
                 event.close();
         }
+    }
+
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse httpServletResponse) throws ServletException, IOException {
+        System.out.println(CONFIG_PROBLEM_TEXT);
+        httpServletResponse.setHeader("Cache-Control", "no-cache");
+        httpServletResponse.addHeader("Payload-Size", "1");
+        httpServletResponse.setContentType("application/json");
+        OutputStream stream = httpServletResponse.getOutputStream();
+
+        stream.write('[');
+
+        writeToOutputStream(stream, new Message() {
+            public String getSubject() {
+                return "ClientBusErrors";
+            }
+
+            public Object getMessage() {
+                StringBuilder b = new StringBuilder("{ErrorMessage:\"").append(CONFIG_PROBLEM_TEXT).append("\",AdditionalDetails:\"");
+                return b.append("\"}").toString();
+            }
+        });
+
+        stream.write(']');
+
     }
 
     private int readInRequest(HttpServletRequest request) throws IOException {
@@ -277,4 +309,28 @@ public class TomcatCometServlet extends HttpServlet implements CometProcessor {
         }
     }
 
+    private static final String CONFIG_PROBLEM_TEXT =
+                      "\n\n*************************************************************************************************\n"
+                    + "** PROBLEM!\n"
+                    + "** It appears something has been incorrectly configured. In order to use ErraiBus\n"
+                    + "** on Tomcat, you must ensure that you are using the NIO or APR connector. Also \n"
+                    + "** make sure that you have added these lines to your WEB-INF/web.xml file:\n"
+                    + "**                                              ---\n"
+                    + "**    <servlet>\n" +
+                    "**        <servlet-name>TomcatErraiServlet</servlet-name>\n" +
+                    "**        <servlet-class>org.jboss.errai.bus.server.servlet.TomcatCometServlet</servlet-class>\n" +
+                    "**        <load-on-startup>1</load-on-startup>\n" +
+                    "**    </servlet>\n" +
+                    "**\n" +
+                    "**    <servlet-mapping>\n" +
+                    "**        <servlet-name>TomcatErraiServlet</servlet-name>\n" +
+                    "**        <url-pattern>*.erraiBus</url-pattern>\n" +
+                    "**    </servlet-mapping>\n"
+                    + "**                                              ---\n"
+                    + "** If you have the following lines in your WEB-INF/web.xml, you must comment or remove them:\n"
+                    + "**                                              ---\n"
+                  + "**    <listener>\n" +
+                    "**        <listener-class>org.jboss.errai.bus.server.ErraiServletConfig</listener-class>\n" +
+                    "**    </listener>\n"
+                   + "*************************************************************************************************\n\n";
 }

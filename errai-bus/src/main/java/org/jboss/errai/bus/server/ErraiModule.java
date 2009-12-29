@@ -23,12 +23,11 @@ import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
 import org.jboss.errai.bus.server.service.ErraiServiceImpl;
 import org.jboss.errai.bus.server.servlet.DefaultBlockingServlet;
-import org.jboss.errai.bus.server.servlet.TomcatCometServlet;
-import org.jboss.errai.bus.server.servlet.UseIncomingServlet;
+import org.jboss.errai.bus.server.servlet.UseFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.Servlet;
+import javax.servlet.Filter;
 import javax.servlet.http.HttpServlet;
 import java.util.Enumeration;
 import java.util.ResourceBundle;
@@ -48,7 +47,7 @@ public class ErraiModule extends ServletModule {
 
         String appContext = "";
         Class<? extends HttpServlet> servletImplementation = DefaultBlockingServlet.class;
-        Class<? extends HttpServlet> incomingServletImplementation = null;
+        Class<? extends Filter> filter = null;
 
         log.info("processing configuration.");
 
@@ -63,9 +62,9 @@ public class ErraiModule extends ServletModule {
                     servletImplementation = Class.forName(bundle.getString(ERRAI_SERVLET_IMPLEMENTATION))
                             .asSubclass(HttpServlet.class);
 
-                    if (servletImplementation.isAnnotationPresent(UseIncomingServlet.class)) {
-                        incomingServletImplementation
-                                = servletImplementation.getAnnotation(UseIncomingServlet.class).value();
+                    if (servletImplementation.isAnnotationPresent(UseFilter.class)) {
+                        filter
+                                = servletImplementation.getAnnotation(UseFilter.class).value();
                     }
 
                     log.info("using servlet implementation: " + servletImplementation.getName());
@@ -78,13 +77,15 @@ public class ErraiModule extends ServletModule {
         }
 
         serve("*.erraiBus").with(servletImplementation);
-        if (incomingServletImplementation != null) {
-            serve("*.erraiBusIncoming").with(incomingServletImplementation);
+        if (filter != null) {
+            filter("*.erraiBus").through(filter);
         }
 
         bind(MessageBus.class).to(ServerMessageBusImpl.class);
         bind(ServerMessageBus.class).to(ServerMessageBusImpl.class);
         bind(ErraiService.class).to(ErraiServiceImpl.class);
         bind(ErraiServiceConfigurator.class).to(ErraiServiceConfiguratorImpl.class);
+
+
     }
 }
