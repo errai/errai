@@ -1,8 +1,8 @@
 package org.jboss.errai.bus.server.servlet;
 
-import com.google.inject.*;
-import com.sun.xml.internal.ws.api.server.BoundEndpoint;
-import com.sun.xml.internal.ws.api.server.Module;
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Singleton;
 import org.apache.catalina.CometEvent;
 import org.apache.catalina.CometProcessor;
 import org.jboss.errai.bus.client.CommandMessage;
@@ -12,12 +12,13 @@ import org.jboss.errai.bus.server.MessageQueue;
 import org.jboss.errai.bus.server.QueueActivationCallback;
 import org.jboss.errai.bus.server.ServerMessageBus;
 import org.jboss.errai.bus.server.ServerMessageBusImpl;
-import org.jboss.errai.bus.server.io.MessageUtil;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
 import org.jboss.errai.bus.server.service.ErraiServiceImpl;
 import org.mvel2.util.StringAppender;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -28,9 +29,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.CharBuffer;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import static org.jboss.errai.bus.server.io.MessageUtil.createCommandMessage;
 
@@ -38,9 +37,6 @@ import static org.jboss.errai.bus.server.io.MessageUtil.createCommandMessage;
 //@UseIncomingServlet(TomcatIncomingServlet.class)
 public class TomcatCometServlet extends HttpServlet implements CometProcessor {
     private ErraiService service;
-
-    protected final ArrayList<HttpServletResponse> connections =
-            new ArrayList<HttpServletResponse>();
 
     public TomcatCometServlet() {
         // bypass guice-servlet
@@ -54,60 +50,81 @@ public class TomcatCometServlet extends HttpServlet implements CometProcessor {
         }).getInstance(ErraiService.class);
     }
 
-    @Inject
-    public TomcatCometServlet(ErraiService service) {
-        this.service = service;
-    }
+    private final Map<MessageQueue, HttpSession> queueToSession = new HashMap<MessageQueue, HttpSession>();
+    private final HashMap<HttpSession, Set<CometEvent>> activeEvents = new HashMap<HttpSession, Set<CometEvent>>();
 
-    public void event(CometEvent event) throws IOException, ServletException {
+    private Logger log = LoggerFactory.getLogger(this.getClass());
+
+    public void event(final CometEvent event) throws IOException, ServletException {
         HttpServletRequest request = event.getHttpServletRequest();
-        HttpServletResponse response = event.getHttpServletResponse();
+        final HttpSession session = request.getSession();
 
-        HttpSession session = request.getSession();
-
-        if (session.getAttribute(MessageBus.WS_SESSION_ID) == null) {
-            session.setAttribute(MessageBus.WS_SESSION_ID, request.getSession().getId());
-        }
-
+        MessageQueue queue;
         switch (event.getEventType()) {
             case BEGIN:
-                synchronized (connections) {
-                    connections.add(response);
+
+                if (session.getAttribute(MessageBus.WS_SESSION_ID) == null) {
+                    session.setAttribute(MessageBus.WS_SESSION_ID, session.getId());
+                } else {
+                    //  log.info("BEGIN:" + event.hashCode());
+                    if ((queue = getQueue(session)) != null && queue.messagesWaiting()) {
+                        transmitMessages(event.getHttpServletResponse(), queue);
+                        event.close();
+                        break;
+                    }
+
+                    synchronized (session) {
+                        if (queue != null && !queueToSession.containsKey(queue)) {
+                            queueToSession.put(queue, session);
+                        }
+
+                        if (!activeEvents.containsKey(session)) {
+                            activeEvents.put(session, new LinkedHashSet<CometEvent>());
+                        }
+
+                        activeEvents.get(session).add(event);
+                    }
                 }
                 break;
 
             case END:
-                synchronized (connections) {
-                    connections.remove(response);
+                MessageQueue toRemove = getQueue(request.getSession());
+                if (toRemove != null) toRemove.heartBeat();
+
+                synchronized (session) {
+                    activeEvents.get(session).remove(event);
+                    //     log.info("Remove Active Event (ActiveInSession: " + activeEvents.get(request.getSession()).size() + ")");
                 }
+                event.getHttpServletResponse().flushBuffer();
+                //     log.info("END:" + event.hashCode());
+                event.close();
+
+                break;
+
+            case ERROR:
+                //   log.error("An error occured: " + event.getEventSubType());
+                synchronized (session) {
+                    activeEvents.get(session).remove(event);
+                    log.error(event.toString());
+                    toRemove = getQueue(request.getSession());
+
+                    queueToSession.remove(toRemove);
+                }
+                event.close();
+                break;
+
             case READ:
-                BufferedReader reader = request.getReader();
-                StringAppender sb = new StringAppender(request.getContentLength());
-                CharBuffer buffer = CharBuffer.allocate(10);
-                int read;
-                while ((read = reader.read(buffer)) > 0) {
-                    buffer.rewind();
-                    for (; read > 0; read--) {
-                        sb.append(buffer.get());
-                    }
-                    buffer.rewind();
-                }
-                for (CommandMessage msg : createCommandMessage(session, sb.toString())) {
-                    service.store(msg);
-                }
-
-                pollForMessages(request, response, true);
-
+                //    log.info("READ:" + event.hashCode());
+                readInRequest(request);
+                event.close();
         }
     }
 
-    protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
-            throws ServletException, IOException {
-        BufferedReader reader = httpServletRequest.getReader();
-        StringAppender sb = new StringAppender(httpServletRequest.getContentLength());
-        HttpSession session = httpServletRequest.getSession();
+    private int readInRequest(HttpServletRequest request) throws IOException {
+        BufferedReader reader = request.getReader();
+        if (!reader.ready()) return 0;
+        StringAppender sb = new StringAppender(request.getContentLength());
         CharBuffer buffer = CharBuffer.allocate(10);
-
         int read;
         while ((read = reader.read(buffer)) > 0) {
             buffer.rewind();
@@ -117,83 +134,73 @@ public class TomcatCometServlet extends HttpServlet implements CometProcessor {
             buffer.rewind();
         }
 
-        if (session.getAttribute(MessageBus.WS_SESSION_ID) == null) {
-            session.setAttribute(MessageBus.WS_SESSION_ID, httpServletRequest.getSession().getId());
-        }
+        //    log.info("ReceivedFromClient:" + sb.toString());
 
-        for (CommandMessage msg : MessageUtil.createCommandMessage(httpServletRequest.getSession(), sb.toString())) {
+        int messagesSent = 0;
+        for (CommandMessage msg : createCommandMessage(request.getSession(), sb.toString())) {
             service.store(msg);
+            messagesSent++;
         }
 
-        pollForMessages(httpServletRequest, httpServletResponse, false);
+        //   log.info("Messages stored into bus: " + messagesSent);
+
+        return messagesSent;
     }
 
 
-    private void pollForMessages(final HttpServletRequest httpServletRequest,
-                                 final HttpServletResponse httpServletResponse, boolean wait) throws IOException {
-        try {
+    private MessageQueue getQueue(HttpSession session) {
+        // final HttpSession session = event.getHttpServletRequest().getSession();
+        MessageQueue queue = service.getBus().getQueue(session.getAttribute(MessageBus.WS_SESSION_ID));
 
-            final MessageQueue queue = service.getBus().getQueue(httpServletRequest.getSession().getAttribute(MessageBus.WS_SESSION_ID));
-            if (queue == null) return;
+        if (queue != null && queue.getActivationCallback() == null) {
+            queue.setActivationCallback(new QueueActivationCallback() {
+                public void activate(MessageQueue queue) {
+                    try {
+                        Set<CometEvent> activeSessEvents;
+                        HttpSession session = queueToSession.get(queue);
+                        if (session == null) return;
 
-            if (wait) {
-                synchronized (queue) {
-                    queue.setActivationCallback(new QueueActivationCallback() {
-                        public void activate() {
-                            try {
-                                transmitMessages(httpServletRequest, httpServletResponse, queue);
+                        synchronized (session) {
+                            activeSessEvents = activeEvents.get(queueToSession.get(queue));
+
+                            if (activeSessEvents == null) {
+                                log.warn("No active events to resume with");
+                                return;
                             }
-                            catch (IOException e) {
-                                //todo: figure out a way to more gracefully handle this.
-                                e.printStackTrace();
+
+                            Iterator<CometEvent> iter = activeSessEvents.iterator();
+                            CometEvent et;
+                            while (iter.hasNext()) {
+                                try {
+                                    transmitMessages((et = iter.next()).getHttpServletResponse(), queue);
+                                    et.close();
+                                }
+                                catch (Exception e) {
+                                    e.printStackTrace();
+                                    return;
+                                }
                             }
+
                         }
                     }
-                    );
-
-                }
-            }
-
-            transmitMessages(httpServletRequest, httpServletResponse, queue);
-        }
-        catch (final Throwable t) {
-            t.printStackTrace();
-
-            httpServletResponse.setHeader("Cache-Control", "no-cache");
-            httpServletResponse.addHeader("Payload-Size", "1");
-            httpServletResponse.setContentType("application/io");
-            OutputStream stream = httpServletResponse.getOutputStream();
-
-            stream.write('[');
-
-            writeToOutputStream(stream, new Message() {
-                public String getSubject() {
-                    return "ClientBusErrors";
-                }
-
-                public Object getMessage() {
-                    StringBuilder b = new StringBuilder("{ErrorMessage:\"").append(t.getMessage()).append("\",AdditionalDetails:\"");
-                    for (StackTraceElement e : t.getStackTrace()) {
-                        b.append(e.toString()).append("<br/>");
+                    catch (Exception e) {
+                        e.printStackTrace();
                     }
-
-                    return b.append("\"}").toString();
                 }
             });
-
-            stream.write(']');
-            stream.flush();
         }
+
+        return queue;
     }
 
-    public void transmitMessages(HttpServletRequest httpServletRequest,
-                                 HttpServletResponse httpServletResponse, MessageQueue queue) throws IOException {
 
+    public void transmitMessages(final HttpServletResponse httpServletResponse, MessageQueue queue) throws IOException {
+
+        //   log.info("Transmitting messages to client (Queue:" + queue.hashCode() + ")");
         List<Message> messages = queue.poll(false).getMessages();
-
         httpServletResponse.setHeader("Cache-Control", "no-cache");
         httpServletResponse.addHeader("Payload-Size", String.valueOf(messages.size()));
-        httpServletResponse.setContentType("application/io");
+        httpServletResponse.setContentType("application/json");
         OutputStream stream = httpServletResponse.getOutputStream();
 
         Iterator<Message> iter = messages.iterator();
@@ -207,11 +214,12 @@ public class TomcatCometServlet extends HttpServlet implements CometProcessor {
         }
         stream.write(']');
         stream.flush();
-
-        queue.heartBeat();
+        //   queue.heartBeat();
     }
 
-    public static void writeToOutputStream(OutputStream stream, Message m) throws IOException {
+    public void writeToOutputStream(OutputStream stream, Message m) throws IOException {
+        //    log.info("SendToClient:" + m.getMessage());
+
         stream.write('{');
         stream.write('"');
         for (byte b : (m.getSubject()).getBytes()) {
@@ -232,4 +240,41 @@ public class TomcatCometServlet extends HttpServlet implements CometProcessor {
         }
         stream.write('}');
     }
+
+    private static final class PausedEvent {
+        private HttpServletResponse response;
+        private HttpSession session;
+        private CometEvent event;
+
+        private PausedEvent(HttpServletResponse response, HttpSession session, CometEvent event) {
+            this.response = response;
+            this.session = session;
+            this.event = event;
+        }
+
+        public HttpServletResponse getResponse() {
+            return response;
+        }
+
+        public void setResponse(HttpServletResponse response) {
+            this.response = response;
+        }
+
+        public HttpSession getSession() {
+            return session;
+        }
+
+        public void setSession(HttpSession session) {
+            this.session = session;
+        }
+
+        public CometEvent getEvent() {
+            return event;
+        }
+
+        public void setEvent(CometEvent event) {
+            this.event = event;
+        }
+    }
+
 }

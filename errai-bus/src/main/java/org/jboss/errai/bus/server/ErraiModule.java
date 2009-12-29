@@ -60,8 +60,6 @@ public class ErraiModule extends ServletModule {
                 appContext = bundle.getString(ERRAI_APPLICATION_CONTEXT) + "erraiBus";
             } else if (ERRAI_SERVLET_IMPLEMENTATION.equals(key)) {
                 try {
-                    System.out.println("BAH!");
-
                     servletImplementation = Class.forName(bundle.getString(ERRAI_SERVLET_IMPLEMENTATION))
                             .asSubclass(HttpServlet.class);
 

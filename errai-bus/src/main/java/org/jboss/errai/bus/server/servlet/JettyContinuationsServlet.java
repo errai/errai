@@ -85,7 +85,7 @@ public class JettyContinuationsServlet extends HttpServlet {
                     if (!queue.messagesWaiting()) {
                         final Continuation cont = ContinuationSupport.getContinuation(httpServletRequest, queue);
                         queue.setActivationCallback(new QueueActivationCallback() {
-                            public void activate() {
+                            public void activate(MessageQueue queue) {
                                 cont.resume();
                             }
                         });
@@ -105,7 +105,7 @@ public class JettyContinuationsServlet extends HttpServlet {
 
             httpServletResponse.setHeader("Cache-Control", "no-cache");
             httpServletResponse.addHeader("Payload-Size", String.valueOf(messages.size()));
-            httpServletResponse.setContentType("application/io");
+            httpServletResponse.setContentType("application/json");
             OutputStream stream = httpServletResponse.getOutputStream();
 
             Iterator<Message> iter = messages.iterator();

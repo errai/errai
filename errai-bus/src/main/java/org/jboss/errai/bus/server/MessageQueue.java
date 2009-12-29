@@ -34,6 +34,8 @@ public class MessageQueue {
     private long transmissionWindow = 25;
     private long lastTransmission = currentTimeMillis();
     private long lastEnqueue = currentTimeMillis();
+    private long endWindow;
+
     private int lastQueueSize = 0;
     private boolean throttleIncoming = false;
 
@@ -72,9 +74,9 @@ public class MessageQueue {
                 windowPolling = true;
                 _windowPolling = false;
             } else if (windowPolling) {
-                long endWindow = startWindow + transmissionWindow;
+           //     long endWindow = startWindow + transmissionWindow;
                 while (!queue.isEmpty() && payLoadSize < MAXIMUM_PAYLOAD_SIZE
-                        && currentTimeMillis() < endWindow) {
+                        && !isWindowExceeded()) {
                     p.addMessage(queue.poll());
                     payLoadSize++;
 
@@ -104,6 +106,7 @@ public class MessageQueue {
 
             lastTransmission = currentTimeMillis();
             lastQueueSize = queue.size();
+            endWindow = lastTransmission + transmissionWindow;
 
             return p;
         }
@@ -126,10 +129,14 @@ public class MessageQueue {
         if (!b) {
             throw new QueueOverloadedException("too many undelievered messages in queue: cannot dispatchGlobal message.");
         } else if (activationCallback != null) {
-            activationCallback.activate();
+            activationCallback.activate(this);
         }
 
         return b;
+    }
+
+    private boolean isWindowExceeded() {
+        return currentTimeMillis() > endWindow;
     }
 
     public boolean messagesWaiting() {
@@ -138,6 +145,10 @@ public class MessageQueue {
 
     public void setActivationCallback(QueueActivationCallback activationCallback) {
         this.activationCallback = activationCallback;
+    }
+
+    public QueueActivationCallback getActivationCallback() {
+        return activationCallback;
     }
 
     public BlockingQueue<Message> getQueue() {

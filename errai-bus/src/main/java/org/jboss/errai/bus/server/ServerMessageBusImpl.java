@@ -151,11 +151,17 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                         break;
 
                     case ConnectToQueue:
+                        System.out.println("[Bus] ConnectToQueue");
+
                         Object sessionContext = getSession(message).getAttribute(WS_SESSION_ID);
+
+                        System.out.println("[Bus] Session = " + sessionContext);
 
                         if (!messageQueues.containsKey(getSession(message)))
                             messageQueues.put(sessionContext,
                                     new MessageQueue(QUEUE_SIZE));
+
+                        System.out.println("[Bus] Queue started for = " + sessionContext);
 
                         remoteSubscribe(sessionContext, "ClientBus");
 
@@ -335,6 +341,12 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         return messageQueues.get(sessionContext);
     }
 
+    public void closeQueue(Object sessionContext) {
+        messageQueues.remove(sessionContext);
+        remoteSubscriptions.remove(sessionContext);
+
+    }
+
     public void addRule(String subject, BooleanRoutingRule rule) {
         Iterator<MessageCallback> iter = subscriptions.get(subject).iterator();
 
@@ -493,6 +505,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             super();
             this.bus = bus;
             setPriority(Thread.MIN_PRIORITY);
+            setDaemon(true);
 
             tasks.add(new TimedTask() {
                 {

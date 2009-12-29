@@ -403,7 +403,7 @@ public class CommandMessage {
      * @param viaThis
      */
     public void sendNowWith(RequestDispatcher viaThis) {
-        viaThis.dispatchGlobal(this);
+        viaThis.dispatch(this);
     }
 
     @Override

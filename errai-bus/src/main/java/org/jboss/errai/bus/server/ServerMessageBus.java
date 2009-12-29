@@ -30,5 +30,7 @@ public interface ServerMessageBus extends MessageBus {
 
     public MessageQueue getQueue(Object sessionContext);
 
+    public void closeQueue(Object sessionContext);
+
     public void addRule(String subject, BooleanRoutingRule rule);
 }

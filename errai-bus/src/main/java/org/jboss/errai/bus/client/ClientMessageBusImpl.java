@@ -21,6 +21,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.*;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.bus.client.ext.ExtensionsLoader;
 import org.jboss.errai.bus.client.json.JSONUtilCli;
@@ -383,7 +384,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 create(RemoteSubscribe)
                         .toSubject("ServerBus")
                         .set(Subject, event.getSubject())
-                        .set(PriorityProcessing, "true")
+                        .set(PriorityProcessing, "1")
                         .sendNowWith(self);
             }
         });
@@ -397,7 +398,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 create(BusCommands.RemoteUnsubscribe)
                         .toSubject("ServerBus")
                         .set(Subject, event.getSubject())
-                        .set(PriorityProcessing, "true")
+                        .set(PriorityProcessing, "1")
                         .sendNowWith(self);
             }
         });
@@ -415,38 +416,21 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         }
     }
 
-    private boolean useSeperateIncoming = false;
-
     private boolean sendInitialMessage(final HookCallback callback) {
         try {
 
-            String initialMessage = "{\"CommandType\":\"ConnectToQueue\",\"ToSubject\":\"ServerBus\"}";
+            String initialMessage = "{\"CommandType\":\"ConnectToQueue\",\"ToSubject\":\"ServerBus\", \"PriorityProcessing\":\"1\"}";
 
             sendBuilder.sendRequest(initialMessage, new RequestCallback() {
                 public void onResponseReceived(Request request, Response response) {
                     try {
                         procIncomingPayload(response);
+                        initializeMessagingBus(callback);
                     }
                     catch (Exception e) {
-                   //     if (useSeperateIncoming) {
-                            showError("Error attaching to bus", e.getMessage() + "<br/>Message Contents:<br/>" + response.getText(), e);
-                            return;
-//                        } else {
-//                            /**
-//                             * Try and switch to the alternative incoming servlet
-//                             */
-//                            (sendBuilder = new RequestBuilder(
-//                                    RequestBuilder.POST,
-//                                    URL.encode(SERVICE_ENTRY_POINT + "Incoming")
-//                            )).setHeader("Connection", "Keep-Alive");
-//
-//                            useSeperateIncoming = true;
-//
-//                            sendInitialMessage(callback);
-//                            return;
-                     //   }
+                        showError("Error attaching to bus", e.getMessage() + "<br/>Message Contents:<br/>" + response.getText(), e);
+                        return;
                     }
-                    initializeMessagingBus(callback);
                 }
 
                 public void onError(Request request, Throwable exception) {
@@ -455,6 +439,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             });
         }
         catch (RequestException e) {
+            e.printStackTrace();
             return false;
         }
         return true;
@@ -467,24 +452,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     @SuppressWarnings({"UnusedDeclaration"})
     private void initializeMessagingBus(final HookCallback initCallback) {
-        final SimplePanel heartBeat = new SimplePanel();
-        final HTML hBtext = new HTML("*Heartbeat*");
-        hBtext.getElement().getStyle().setProperty("color", "red");
-
-        heartBeat.add(hBtext);
-
-        Style s = heartBeat.getElement().getStyle();
-        s.setProperty("position", "absolute");
-        s.setProperty("left", "300");
-        s.setProperty("top", "10");
-
-        heartBeat.setVisible(false);
-
-        RootPanel.get().add(heartBeat);
-
         final com.google.gwt.user.client.Timer incoming = new com.google.gwt.user.client.Timer() {
             boolean block = false;
-
             @Override
             public void run() {
                 if (block) {
@@ -499,7 +468,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                                 public void onError(Request request, Throwable throwable) {
                                     block = false;
                                     showError("Communication Error", "None", throwable);
-                                    schedule(1);
+                                    cancel();
+                                //    schedule(1);
                                 }
 
                                 public void onResponseReceived(Request request, Response response) {
@@ -529,7 +499,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         final com.google.gwt.user.client.Timer outerTimer = new com.google.gwt.user.client.Timer() {
             @Override
             public void run() {
-                incoming.scheduleRepeating(1000);
+                incoming.scheduleRepeating(500);
                 ExtensionsLoader loader = GWT.create(ExtensionsLoader.class);
                 loader.initExtensions(bus);
             }

@@ -27,6 +27,7 @@ public class Worker extends Thread {
         this.workerFactory = factory;
         this.bus = svc.getBus();
         setPriority(Thread.MIN_PRIORITY);
+        setDaemon(true);
     }
 
     public void setActive(boolean active) {

@@ -92,7 +92,7 @@ public class DefaultBlockingServlet extends HttpServlet {
 
             httpServletResponse.setHeader("Cache-Control", "no-cache");
             httpServletResponse.addHeader("Payload-Size", String.valueOf(messages.size()));
-            httpServletResponse.setContentType("application/io");
+            httpServletResponse.setContentType("application/json");
             OutputStream stream = httpServletResponse.getOutputStream();
 
             Iterator<Message> iter = messages.iterator();
@@ -111,7 +111,7 @@ public class DefaultBlockingServlet extends HttpServlet {
         catch (final Throwable t) {
             httpServletResponse.setHeader("Cache-Control", "no-cache");
             httpServletResponse.addHeader("Payload-Size", "1");
-            httpServletResponse.setContentType("application/io");
+            httpServletResponse.setContentType("application/json");
             OutputStream stream = httpServletResponse.getOutputStream();
 
             stream.write('[');
