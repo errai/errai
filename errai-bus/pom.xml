@@ -119,6 +119,13 @@
             <version>6.0.20</version>
         </dependency>
 
+        <dependency>
+            <groupId>jboss.web</groupId>
+            <artifactId>jbossweb</artifactId>
+            <scope>provided</scope>
+            <version>2.1.6.GA</version>
+        </dependency>
+
     </dependencies>
 
 </project>

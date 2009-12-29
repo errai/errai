@@ -203,7 +203,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     public void sendGlobal(final String subject, final CommandMessage message, boolean fireListeners) {
         if (!subscriptions.containsKey(subject) && !remoteSubscriptions.containsKey(subject)) {
-            throw new NoSubscribersToDeliverTo("for: " + subject);
+            throw new NoSubscribersToDeliverTo("for: " + subject  + " [commandType:" + message.getCommandType() + "]");
         }
 
         if (fireListeners && !fireGlobalMessageListeners(message)) {
