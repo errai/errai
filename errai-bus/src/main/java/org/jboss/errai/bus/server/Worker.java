@@ -76,16 +76,30 @@ public class Worker extends Thread {
             catch (Exception e) {
                 ConversationMessage m = ConversationMessage.create(message)
                         .toSubject("ClientBusErrors")
-                        .set("ErrorMessage", "An exception was thrown by service: " + message.getSubject());
+                        .set("ErrorMessage", "Remote service through an exception: " + message.getSubject());
 
-                StringAppender a = new StringAppender();
+                StringAppender a = new StringAppender("<br/>");
+
+                a.append(e.getClass().getName() + ": " + e.getMessage()).append("<br/>");
+
+                boolean first = true;
                 for (StackTraceElement sel : e.getStackTrace()) {
-                    a.append(sel.toString()).append("<br/>");
+                    a.append(first ? "" : "&nbsp;&nbsp;").append(sel.toString()).append("<br/>");
+                    first = false;
                 }
+
+                if (e.getCause() != null) {
+                    first = false;
+                    a.append("Caused by:<br/>");
+                    for (StackTraceElement sel : e.getCause().getStackTrace()) {
+                        a.append(first ? "" : "&nbsp;&nbsp;").append(sel.toString()).append("<br/>");
+                        first = false;
+                    }
+                }
+
 
                 m.set("AdditionalDetails", a.toString())
                         .sendNowWith(bus);
-
 
             }
             finally {

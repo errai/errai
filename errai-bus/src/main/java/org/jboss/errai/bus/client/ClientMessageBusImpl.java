@@ -38,7 +38,7 @@ import static org.jboss.errai.bus.client.protocols.MessageParts.*;
 
 /**
  * The default client <tt>MessageBus</tt> implementation.  This bus runs in the browser and automatically federates
- * with the server immediately upon initialization.
+ * with the server immediately upon initialization.  
  */
 public class ClientMessageBusImpl implements ClientMessageBus {
     private static final String SERVICE_ENTRY_POINT = "in.erraiBus";

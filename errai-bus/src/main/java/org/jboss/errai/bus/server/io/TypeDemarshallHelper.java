@@ -22,10 +22,8 @@ import org.mvel2.DataConversion;
 import org.mvel2.MVEL;
 
 import javax.swing.text.html.HTMLDocument;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
+import java.io.Serializable;
+import java.util.*;
 
 import static org.mvel2.DataConversion.addConversionHandler;
 
@@ -63,6 +61,8 @@ public class TypeDemarshallHelper {
         }
     }
 
+    private static final Map<Class, Map<String, Serializable>> MVELDencodingCache = new HashMap<Class, Map<String, Serializable>>();
+
     public static Object _demarshallAll(Object o) throws Exception {
         try {
             if (o instanceof String) {
@@ -78,12 +78,28 @@ public class TypeDemarshallHelper {
                 Map<?, ?> oMap = (Map) o;
                 if (oMap.containsKey("__EncodedType")) {
                     Object newInstance = Class.forName((String) oMap.get("__EncodedType")).newInstance();
+                    Map<String, Serializable> s = MVELDencodingCache.get(newInstance.getClass());
+                    int i = 0;
+                    if (s == null) {
+                        synchronized (MVELDencodingCache) {
+                            s = MVELDencodingCache.get(newInstance.getClass());
+                            if (s == null) {
+                                s = new HashMap<String, Serializable>();
+                                for (String key : (Set<String>) oMap.keySet()) {
+                                    if ("__EncodedType".equals(key)) continue;
+                                    s.put(key, MVEL.compileSetExpression(key));
+                                }
+                            }
+                            MVELDencodingCache.put(newInstance.getClass(), s);
+                        }
+                    }
+
 
                     for (Map.Entry<?, ?> entry : oMap.entrySet()) {
                         if ("__EncodedType".equals(entry.getKey())) continue;
-                        Object value =_demarshallAll(entry.getValue());
-
-                        MVEL.setProperty(newInstance, (String) entry.getKey(), value);
+                    //    Object value =;
+                        MVEL.executeSetExpression(s.get(entry.getKey()), newInstance, _demarshallAll(entry.getValue()));
+                    //    MVEL.setProperty(newInstance, (String) entry.getKey(), value);
                     }
 
                     return newInstance;

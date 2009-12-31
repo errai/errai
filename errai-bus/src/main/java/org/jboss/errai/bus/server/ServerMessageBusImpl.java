@@ -38,8 +38,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     private final List<MessageListener> listeners = new ArrayList<MessageListener>();
 
-//    private final WorkerFactory workerFactory = new WorkerFactory(5, this);
-
     private final Map<String, List<MessageCallback>> subscriptions = new HashMap<String, List<MessageCallback>>();
     private final Map<String, Set<Object>> remoteSubscriptions = new HashMap<String, Set<Object>>();
 

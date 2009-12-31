@@ -54,6 +54,8 @@ public class JSONEncoder {
         }
     }
 
+    private static final Map<Class, Serializable[]> MVELEncodingCache = new HashMap<Class, Serializable[]>();
+
     public String encodeObject(Serializable o) {
         if (o == null) return "null";
 
@@ -62,13 +64,34 @@ public class JSONEncoder {
         if (tHandlers.containsKey(cls)) {
             return _encode(convert(o));
         }
-        
+
         StringBuilder build = new StringBuilder("{__EncodedType:'" + cls.getName() + "',");
         Field[] fields = cls.getDeclaredFields();
+        int i = 0;
 
-        String k;
+        Serializable[] s = MVELEncodingCache.get(cls);
+        if (s == null) {
+            synchronized (MVELEncodingCache) {
+                // double check after the lock.
+                s = MVELEncodingCache.get(cls);
+                if (s == null) {
+                    s = new Serializable[fields.length];
+                    for (Field f : fields) {
+                        if ((f.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
+                                || f.isSynthetic()) {
+                            continue;
+                        }
+                        s[i++] = MVEL.compileExpression(f.getName());
+                    }
+                    MVELEncodingCache.put(cls, s);
+                }
+            }
+        }
+
+        i = 0;
         boolean first = true;
         for (Field field : fields) {
+
             if ((field.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
                     || field.isSynthetic()) {
                 continue;
@@ -76,7 +99,7 @@ public class JSONEncoder {
                 build.append(',');
             }
 
-            build.append(k = field.getName()).append(':').append(_encode(MVEL.getProperty(k, o)));
+            build.append(field.getName()).append(':').append(_encode(MVEL.executeExpression(s[i++], o)));
             first = false;
         }
 
@@ -141,5 +164,5 @@ public class JSONEncoder {
             //noinspection unchecked
             return tHandlers.get(in.getClass()).getConverted(in);
         }
-    }  
+    }
 }
