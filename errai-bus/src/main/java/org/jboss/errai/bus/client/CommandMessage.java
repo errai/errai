@@ -380,7 +380,7 @@ public class CommandMessage implements Message {
 
 
     public Message errorsCall(ErrorCallback callback) {
-        if (callback != null) {
+        if (this.errorsCall != null) {
             throw new RuntimeException("An ErrorCallback is already registered");
         }
         this.errorsCall = callback;

@@ -32,7 +32,16 @@ public class AsyncDispatcher implements RequestDispatcher {
 
     public void dispatchGlobal(Message message) {
         if (message.hasPart(MessageParts.PriorityProcessing)) {
+            try {
             service.getBus().sendGlobal(message);
+            }
+            catch (Throwable t) {
+                if (message.getErrorCallback() != null) {
+                    if (!message.getErrorCallback().error(message, t)) {
+                        return;
+                    }
+                }
+            }
         } else {
             workerFactory.deliverGlobal(message);
         }

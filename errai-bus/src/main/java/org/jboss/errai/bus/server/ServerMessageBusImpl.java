@@ -218,28 +218,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
         if (subscriptions.containsKey(subject)) {
             for (MessageCallback c : subscriptions.get(subject)) {
-                try {
-                    c.callback(message);
-                }
-                catch (Exception e) {
-                    boolean showError = true;
-                    if (message.getErrorCallback() != null) {
-                        if (!message.getErrorCallback().error(message, e)) {
-                            showError = false;
-                        }
-                    }
-
-                    if (showError) {
-                        e.printStackTrace();
-                        if (message.hasResource("Session")) {
-                            ConversationMessage.create(message)
-                                    .toSubject("ClientErrorService")
-                                    .set(MessageParts.ErrorMessage, "Service '" + c.getClass().getName()
-                                            + "' threw an exception:" + e.getMessage() + " (see server log for stacktrace)")
-                                    .sendNowWith(this);
-                        }
-                    }
-                }
+                c.callback(message);
             }
         }
 
@@ -295,17 +274,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             return;
         }
 
-        try {
-            enqueueForDelivery(sessionid, message.getSubject(), encodeJSON(message.getParts()));
-        }
-        catch (RuntimeException t) {
-            if (message.getErrorCallback() != null) {
-                if (!message.getErrorCallback().error(message, t)) {
-                    return;
-                }
-            }
-            throw t;
-        }
+        enqueueForDelivery(sessionid, message.getSubject(), encodeJSON(message.getParts()));
     }
 
     private void enqueueForDelivery(final String sessionId, final String subject, final Object message) {

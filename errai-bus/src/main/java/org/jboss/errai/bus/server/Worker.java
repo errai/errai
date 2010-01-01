@@ -2,11 +2,13 @@ package org.jboss.errai.bus.server;
 
 import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.server.service.ErraiService;
-import org.mvel2.util.StringAppender;
+import org.jboss.errai.bus.server.util.ErrorHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.TimeUnit;
+
+import static org.jboss.errai.bus.server.util.ErrorHelper.sendClientError;
 
 public class Worker extends Thread {
     private WorkerFactory workerFactory;
@@ -44,11 +46,10 @@ public class Worker extends Thread {
         } else {
             workExpiry = 0;
             timeout = false;
-            ConversationMessage.create(message)
-                    .toSubject("ClientBusErrors")
-                    .set("ErrorMessage", "Request for '" + message.getSubject() + "' timed out.")
-                    .set("AdditionalDetails", "The process was terminated because it exceeded the maximum timeout.")
-                    .sendNowWith(bus);
+
+            sendClientError(bus, message,
+                    "Request for '" + message.getSubject() + "' timed out.",
+                    "The process was terminated because it exceed the maximum timeout.");
         }
     }
 
@@ -73,35 +74,11 @@ public class Worker extends Thread {
             catch (Exception e) {
                 if (message.getErrorCallback() != null) {
                     if (!message.getErrorCallback().error(message, e)) {
-                       continue;
+                        continue;
                     }
                 }
-
-                Message m = ConversationMessage.create(message)
-                        .toSubject("ClientBusErrors")
-                        .set("ErrorMessage", "Remote service through an exception: " + message.getSubject());
-
-                StringAppender a = new StringAppender("<br/>").append(e.getClass().getName() + ": " + e.getMessage()).append("<br/>");
-
-                boolean first = true;
-                for (StackTraceElement sel : e.getStackTrace()) {
-                    a.append(first ? "" : "&nbsp;&nbsp;").append(sel.toString()).append("<br/>");
-                    first = false;
-                }
-
-                if (e.getCause() != null) {
-                    first = false;
-                    a.append("Caused by:<br/>");
-                    for (StackTraceElement sel : e.getCause().getStackTrace()) {
-                        a.append(first ? "" : "&nbsp;&nbsp;").append(sel.toString()).append("<br/>");
-                        first = false;
-                    }
-                }
-
-                m.set("AdditionalDetails", a.toString())
-                        .sendNowWith(bus);
-
-
+                ErrorHelper.sendClientError(bus, message,
+                        "Error calling remote service: " + message.getSubject(), e);
             }
             finally {
                 workExpiry = 0;
