@@ -61,8 +61,6 @@ public class JettyContinuationsServlet extends HttpServlet {
             buffer.rewind();
         }
 
-        System.out.println("IncomingMessage:" + sb);
-
         if (session.getAttribute(MessageBus.WS_SESSION_ID) == null) {
             session.setAttribute(MessageBus.WS_SESSION_ID, httpServletRequest.getSession().getId());
         }
