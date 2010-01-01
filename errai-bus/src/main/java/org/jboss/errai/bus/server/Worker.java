@@ -71,13 +71,17 @@ public class Worker extends Thread {
                 if (!active) return;
             }
             catch (Exception e) {
+                if (message.getErrorCallback() != null) {
+                    if (!message.getErrorCallback().error(message, e)) {
+                       continue;
+                    }
+                }
+
                 Message m = ConversationMessage.create(message)
                         .toSubject("ClientBusErrors")
                         .set("ErrorMessage", "Remote service through an exception: " + message.getSubject());
 
-                StringAppender a = new StringAppender("<br/>");
-
-                a.append(e.getClass().getName() + ": " + e.getMessage()).append("<br/>");
+                StringAppender a = new StringAppender("<br/>").append(e.getClass().getName() + ": " + e.getMessage()).append("<br/>");
 
                 boolean first = true;
                 for (StackTraceElement sel : e.getStackTrace()) {
@@ -96,6 +100,7 @@ public class Worker extends Thread {
 
                 m.set("AdditionalDetails", a.toString())
                         .sendNowWith(bus);
+
 
             }
             finally {

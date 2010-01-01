@@ -2,5 +2,5 @@ package org.jboss.errai.bus.client;
 
 
 public interface ErrorCallback {
-    public void error(Message message, Throwable throwable);
+    public boolean error(Message message, Throwable throwable);
 }

@@ -387,6 +387,11 @@ public class CommandMessage implements Message {
         return this;
     }
 
+
+    public ErrorCallback getErrorCallback() {
+        return errorsCall;
+    }
+
     /**
      * Returns true if the specified transient resource is present.
      *

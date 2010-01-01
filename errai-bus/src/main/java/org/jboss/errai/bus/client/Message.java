@@ -33,6 +33,7 @@ public interface Message {
     public Message copyResource(String key, Message m);
 
     public Message errorsCall(ErrorCallback callback);
+    public ErrorCallback getErrorCallback();
 
     public <T> T get(Class<T> type, String part);
     public <T> T get(Class<T> type, Enum part);

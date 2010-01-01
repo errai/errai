@@ -41,7 +41,6 @@ public class WorkerFactory {
 
         log.info("initializing async worker pools (poolSize: " + poolSize + "; workerTimeout: " + workerTimeout + ")");
 
-
         this.workerPool = new Worker[poolSize];
         this.svc = svc;
 
@@ -82,8 +81,6 @@ public class WorkerFactory {
         m.setFlag(RoutingFlags.NonGlobalRouting);
         messages.offer(m);
     }
-
-
 
     protected ArrayBlockingQueue<Message> getMessages() {
         return messages;

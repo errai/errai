@@ -92,29 +92,6 @@ public interface MessageBus {
      */
     public void send(Message message);
 
-    /**
-     * Transmits a message and may optionally supress message listeners from firing.  This is useful if you are
-     * modifying a message from within a listener itself, and wish to retransmit the message.
-     *
-     * @param message
-     * @param fireListeners
-     */
-    public void send(Message message, boolean fireListeners, ErrorCallback errorCallback);
-
-
-    /**
-     * Transmits the message to all directly-peered buses (global in relation to this bus only).
-     *
-     * @param message - The message to be sent.
-     */
-    public void sendGlobal(Message message, ErrorCallback errorCallback);
-
-    /**
-     * Transmits a message.
-     *
-     * @param message
-     */
-    public void send(Message message, ErrorCallback errorCallback);
 
     /**
      * Transmits a message and may optionally supress message listeners from firing.  This is useful if you are

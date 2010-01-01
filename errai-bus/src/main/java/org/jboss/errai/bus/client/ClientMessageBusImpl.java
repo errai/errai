@@ -150,26 +150,14 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
 
     public void sendGlobal(Message message) {
-        send(message, null);
-    }
-
-    public void sendGlobal(Message message, ErrorCallback errorCallback) {
-        send(message, errorCallback);
+        send(message);
     }
 
     public void send(Message message, boolean fireListeners) {
-        send(message, fireListeners, null);
+        send(message, fireListeners);
     }
 
-    public void send(Message message, boolean fireListeners, ErrorCallback errorCallback) {
-        send(message, errorCallback);
-    }
-
-    public void send(Message message) {
-        send(message, null);
-    }
-
-    public void send(final Message message, final ErrorCallback errorCallback) {
+    public void send(final Message message) {
         try {
             if (message.hasPart(MessageParts.ToSubject)) {
                 if (!initialized) {
@@ -188,27 +176,14 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             }
         }
         catch (RuntimeException e) {
-            if (errorCallback != null) {
-                errorCallback.error(message, e);
+            if (message.getErrorCallback() != null) {
+                if (!message.getErrorCallback().error(message, e)) {
+                    return;
+                }
             }
-            else {
-                throw e;
-            }
+            throw e;
         }
     }
-
-//    private void send(final String subject, final Map<String, Object> message) {
-//        message.put("ToSubject", subject);
-//        if (!initialized) {
-//            postInitTasks.add(new Runnable() {
-//                public void run() {
-//                    _store(subject, encodeMap(message));
-//                }
-//            });
-//        } else {
-//            _store(subject, encodeMap(message));
-//        }
-//    }
 
     public void enqueueForRemoteTransmit(Message message) {
         outgoingQueue.add(encodeMap(message.getParts()));
@@ -402,7 +377,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 if (event.getSubject().startsWith("local:")) {
                     return;
                 }
-                create(RemoteSubscribe)
+                create().command(RemoteSubscribe)
                         .toSubject("ServerBus")
                         .set(Subject, event.getSubject())
                         .set(PriorityProcessing, "1")
@@ -416,7 +391,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
         addUnsubscribeListener(new UnsubscribeListener() {
             public void onUnsubscribe(SubscriptionEvent event) {
-                create(BusCommands.RemoteUnsubscribe)
+                create().command(RemoteSubscribe)
                         .toSubject("ServerBus")
                         .set(Subject, event.getSubject())
                         .set(PriorityProcessing, "1")
@@ -558,14 +533,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                   null);
      }-*/;
 
-//    public static void store(String subject, Object value, ErrorCallback errorCallback) {
-//        try {
-//            _store(subject, value);
-//        }
-//        catch (Exception e) {
-//            showError("Error `sending data to client bus for '" + subject + "'", "Value:" + value, e);
-//        }
-//    }
 
     public native static void _store(String subject, Object value) /*-{
           $wnd.PageBus.store(subject, value);

@@ -135,7 +135,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             thread.setPriority(Thread.MIN_PRIORITY);
             thread.start();
         }
-  
+
         subscribe("ServerBus", new MessageCallback() {
             public void callback(Message message) {
                 String s = message.get(String.class, "Foo");
@@ -194,28 +194,21 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         //    workerFactory.startPool();
     }
 
-    public void sendGlobal(Message message) {
-        sendGlobal(message, null);
-    }
-
-    public void sendGlobal(Message message, ErrorCallback callback) {
-        sendGlobal(message.getSubject(), message, true, callback);
-    }
-
-    public void sendGlobal(final String subject, final Message message, boolean fireListeners, ErrorCallback errorCallback) {
+    public void sendGlobal(final Message message) {
+        final String subject = message.getSubject();
         if (!subscriptions.containsKey(subject) && !remoteSubscriptions.containsKey(subject)) {
             throw new NoSubscribersToDeliverTo("for: " + subject + " [commandType:" + message.getCommandType() + "]");
         }
 
-        if (fireListeners && !fireGlobalMessageListeners(message)) {
+        if (!fireGlobalMessageListeners(message)) {
             if (message.hasPart(MessageParts.ReplyTo) && message.hasResource("Session")) {
                 /**
                  * Inform the sender that we did not dispatchGlobal the message.
                  */
 
-                store((String) getSession(message).getAttribute(WS_SESSION_ID),
+                enqueueForDelivery((String) getSession(message).getAttribute(WS_SESSION_ID),
                         message.get(String.class, MessageParts.ReplyTo),
-                        encodeJSON(CommandMessage.create(SecurityCommands.MessageNotDelivered).getParts()), errorCallback);
+                        encodeJSON(CommandMessage.create(SecurityCommands.MessageNotDelivered).getParts()));
             }
 
             return;
@@ -229,9 +222,14 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                     c.callback(message);
                 }
                 catch (Exception e) {
-                    if (errorCallback != null) {
-                        errorCallback.error(message, e);
-                    } else {
+                    boolean showError = true;
+                    if (message.getErrorCallback() != null) {
+                        if (!message.getErrorCallback().error(message, e)) {
+                            showError = false;
+                        }
+                    }
+
+                    if (showError) {
                         e.printStackTrace();
                         if (message.hasResource("Session")) {
                             ConversationMessage.create(message)
@@ -263,29 +261,16 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
 
     public void send(Message message) {
-        send(message, null);
-    }
-
-    public void send(Message message, ErrorCallback errorCallback) {
         if (message.hasResource("Session")) {
-            send((String) getSession(message).getAttribute(WS_SESSION_ID), message.getSubject(), message, true, errorCallback);
+            send((String) getSession(message).getAttribute(WS_SESSION_ID), message, true);
         } else if (message.hasPart(MessageParts.SessionID)) {
-            send(message.get(String.class, MessageParts.SessionID), message.getSubject(), message, true, errorCallback);
+            send(message.get(String.class, MessageParts.SessionID), message, true);
         } else {
-            sendGlobal(message, errorCallback);
+            sendGlobal(message);
         }
     }
 
-
     public void send(Message message, boolean fireListeners) {
-        send(message, fireListeners, null);
-    }
-
-    public void send(Message message, boolean fireListeners, ErrorCallback errorCallback) {
-        send(message.getSubject(), message, fireListeners, errorCallback);
-    }
-
-    private void send(String subject, Message message, boolean fireListeners, ErrorCallback callback) {
         if (!message.hasResource("Session")) {
             throw new RuntimeException("cannot automatically route message. no session contained in message.");
         }
@@ -297,33 +282,33 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
 
         send(message.hasPart(MessageParts.SessionID) ? message.get(String.class, MessageParts.SessionID) :
-                (String) session.getAttribute(WS_SESSION_ID), subject, message, fireListeners, callback);
+                (String) session.getAttribute(WS_SESSION_ID), message, fireListeners);
     }
 
-    private void send(String sessionid, String subject, Message message, boolean fireListeners, ErrorCallback callback) {
+    private void send(String sessionid, Message message, boolean fireListeners) {
         if (fireListeners && !fireGlobalMessageListeners(message)) {
             if (message.hasPart(MessageParts.ReplyTo)) {
-                store(sessionid, message.get(String.class, MessageParts.ReplyTo),
-                        encodeJSON(CommandMessage.create(SecurityCommands.MessageNotDelivered).getParts())
-                        , callback);
+                enqueueForDelivery(sessionid, message.get(String.class, MessageParts.ReplyTo),
+                        encodeJSON(CommandMessage.create(SecurityCommands.MessageNotDelivered).getParts()));
             }
 
             return;
         }
 
         try {
-            store(sessionid, subject, encodeJSON(message.getParts()), callback);
+            enqueueForDelivery(sessionid, message.getSubject(), encodeJSON(message.getParts()));
         }
         catch (RuntimeException t) {
-            if (callback != null) {
-                callback.error(message, t);
-            } else {
-                throw t;
+            if (message.getErrorCallback() != null) {
+                if (!message.getErrorCallback().error(message, t)) {
+                    return;
+                }
             }
+            throw t;
         }
     }
 
-    private void store(final String sessionId, final String subject, final Object message, ErrorCallback callback) {
+    private void enqueueForDelivery(final String sessionId, final String subject, final Object message) {
         if (messageQueues.containsKey(sessionId) && isAnyoneListening(sessionId, subject)) {
             messageQueues.get(sessionId).offer(new MarshalledMessage() {
                 public String getSubject() {
