@@ -16,10 +16,7 @@
 
 package org.jboss.errai.workspaces.client.svc.shoutbox;
 
-import org.jboss.errai.bus.client.CommandMessage;
-import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.MessageBus;
-import org.jboss.errai.bus.client.MessageCallback;
+import org.jboss.errai.bus.client.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +42,7 @@ public class ShoutboxService
     bus.subscribe(INBOX,
         new MessageCallback()
         {
-          public void callback(CommandMessage message)
+          public void callback(Message message)
           {
             System.out.println("Shoutbox service: "+ message.getCommandType());
             
@@ -97,7 +94,7 @@ public class ShoutboxService
   /**
    * provider submits an offer
    */
-  private void handleSubmitOffer(CommandMessage message)
+  private void handleSubmitOffer(Message message)
   {
     String subjectMatter = message.get(String.class, ShoutboxCmdParts.SUBJECT);
     Offer offer = containsOffer(subjectMatter);
@@ -117,7 +114,7 @@ public class ShoutboxService
   /**
    * provider retracts an offer   
    */
-  private void handleRetractOffer(CommandMessage message)
+  private void handleRetractOffer(Message message)
   {
     String subjectMatter = message.get(String.class, ShoutboxCmdParts.SUBJECT);
     Offer offer = containsOffer(subjectMatter);
@@ -131,7 +128,7 @@ public class ShoutboxService
   /**
    * client engages an offer   
    */
-  private void handleEngageOffer(CommandMessage message)
+  private void handleEngageOffer(Message message)
   {
     String subjectMatter = message.get(String.class, ShoutboxCmdParts.SUBJECT);
     String client = message.get(String.class, ShoutboxCmdParts.CLIENT);
@@ -152,7 +149,7 @@ public class ShoutboxService
   /**
    * client retires an offer   
    */
-  private void handleRetireOffer(CommandMessage message)
+  private void handleRetireOffer(Message message)
   {
     String subjectMatter = message.get(String.class, ShoutboxCmdParts.SUBJECT);
     String client = message.get(String.class, ShoutboxCmdParts.CLIENT);

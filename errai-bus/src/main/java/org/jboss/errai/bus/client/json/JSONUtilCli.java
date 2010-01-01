@@ -21,6 +21,7 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.bus.client.CommandMessage;
+import org.jboss.errai.bus.client.MarshalledMessage;
 import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.common.client.json.JSONDecoderCli;
 import org.jboss.errai.common.client.json.JSONEncoderCli;
@@ -32,12 +33,12 @@ public class JSONUtilCli {
     public static String MULTI_PAYLOAD_SEPER = "||";
     public static String MULTI_PAYLOAD_SEPER_REGEX = "\\|\\|";
 
-    public static ArrayList<Message> decodePayload(Object value) {
+    public static ArrayList<MarshalledMessage> decodePayload(Object value) {
         String str = String.valueOf(value);
 
-        if (value == null || str.trim().length() == 0) return new ArrayList<Message>(0);
+        if (value == null || str.trim().length() == 0) return new ArrayList<MarshalledMessage>(0);
 
-        ArrayList<Message> list = new ArrayList<Message>();
+        ArrayList<MarshalledMessage> list = new ArrayList<MarshalledMessage>();
         JSONValue a = JSONParser.parse(str);
         
         if (a instanceof JSONArray) {
@@ -48,7 +49,7 @@ public class JSONUtilCli {
                     final JSONObject eMap = (JSONObject) a;
                     final String subject = eMap.keySet().iterator().next();
 
-                    list.add(new Message() {
+                    list.add(new MarshalledMessage() {
                         public String getSubject() {
                             return subject;
                         }
@@ -68,7 +69,7 @@ public class JSONUtilCli {
         return (Map<String, Object>) new JSONDecoderCli().decode(value);
     }
 
-    public static CommandMessage decodeCommandMessage(Object value) {
+    public static Message decodeCommandMessage(Object value) {
         return CommandMessage.create().setParts(decodeMap(value));
     }
 

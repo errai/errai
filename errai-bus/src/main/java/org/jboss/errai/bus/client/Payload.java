@@ -28,13 +28,13 @@ import java.util.List;
  * Messages are always transmitted in the order the arrive for transmission.
  */
 public class Payload {
-    private List<Message> messages = new LinkedList<Message>();
+    private List<MarshalledMessage> messages = new LinkedList<MarshalledMessage>();
 
     /**
-     * Creates a new <tt>Payload</tt> with a single initial {@link org.jboss.errai.bus.client.Message}.
+     * Creates a new <tt>Payload</tt> with a single initial {@link MarshalledMessage}.
      * @param m a message
      */
-    public Payload(Message m) {
+    public Payload(MarshalledMessage m) {
         messages.add(m);
     }
 
@@ -42,7 +42,7 @@ public class Payload {
      * Adds a new message to the <tt>Payload</tt>.
      * @param m
      */
-    public void addMessage(Message m) {
+    public void addMessage(MarshalledMessage m) {
         messages.add(m);
     }
 
@@ -50,7 +50,7 @@ public class Payload {
      * Return all messages within the <tt>Payload</tt>
      * @return a list of all messages in the payload.
      */
-    public List<Message> getMessages() {
+    public List<MarshalledMessage> getMessages() {
         return messages;
     }
 

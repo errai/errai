@@ -17,6 +17,7 @@
 package org.jboss.errai.bus.server.io;
 
 import org.jboss.errai.bus.client.CommandMessage;
+import org.jboss.errai.bus.client.Message;
 import org.mvel2.ConversionHandler;
 import org.mvel2.DataConversion;
 import org.mvel2.MVEL;
@@ -50,7 +51,7 @@ public class TypeDemarshallHelper {
         });
     }
 
-    public static void demarshallAll(String object, CommandMessage command) {
+    public static void demarshallAll(String object, Message command) {
         try {
             for (String t : object.split(",")) {
                 command.set(t, _demarshallAll(command.get(Object.class, t)));

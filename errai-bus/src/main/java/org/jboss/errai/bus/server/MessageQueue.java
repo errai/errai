@@ -16,7 +16,7 @@
 
 package org.jboss.errai.bus.server;
 
-import org.jboss.errai.bus.client.Message;
+import org.jboss.errai.bus.client.MarshalledMessage;
 import org.jboss.errai.bus.client.Payload;
 
 import static java.lang.System.currentTimeMillis;
@@ -45,15 +45,15 @@ public class MessageQueue {
     private boolean windowPolling = false;
 
     private QueueActivationCallback activationCallback;
-    private BlockingQueue<Message> queue;
+    private BlockingQueue<MarshalledMessage> queue;
 
     public MessageQueue(int queueSize) {
-        this.queue = new LinkedBlockingQueue<Message>(queueSize);
+        this.queue = new LinkedBlockingQueue<MarshalledMessage>(queueSize);
     }
 
     public Payload poll(boolean wait) {
         try {
-            Message m;
+            MarshalledMessage m;
             if (wait) {
                 if (pollActive) {
                     throw new RuntimeException("concurrent polling not allowed!");
@@ -116,7 +116,7 @@ public class MessageQueue {
         }
     }
 
-    public boolean offer(final Message message) {
+    public boolean offer(final MarshalledMessage message) {
         boolean b = false;
         lastEnqueue = currentTimeMillis();
         try {
@@ -152,7 +152,7 @@ public class MessageQueue {
         return activationCallback;
     }
 
-    public BlockingQueue<Message> getQueue() {
+    public BlockingQueue<MarshalledMessage> getQueue() {
         return queue;
     }
 
@@ -176,7 +176,7 @@ public class MessageQueue {
         this._windowPolling = windowPolling;
     }
 
-    private static final Message heartBeat = new Message() {
+    private static final MarshalledMessage heartBeat = new MarshalledMessage() {
         public String getSubject() {
             return "HeartBeat";
         }

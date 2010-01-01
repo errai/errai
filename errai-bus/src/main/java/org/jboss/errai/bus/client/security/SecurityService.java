@@ -18,6 +18,7 @@ package org.jboss.errai.bus.client.security;
 
 import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.ErraiBus;
+import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.MessageCallback;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
@@ -40,7 +41,7 @@ public class SecurityService {
     public void doAuthentication(final AuthenticationHandler handler) {
       
         ErraiBus.get().subscribe(SUBJECT, new MessageCallback() {
-            public void callback(CommandMessage msg) {
+            public void callback(Message msg) {
                 ErraiBus.get().unsubscribeAll(SUBJECT);
 
                 switch (SecurityCommands.valueOf(msg.getCommandType())) {
@@ -65,7 +66,7 @@ public class SecurityService {
 
                         handler.doLogin(credentials);
 
-                        CommandMessage challenge = CommandMessage.create()
+                        Message challenge = CommandMessage.create()
                                 .toSubject("AuthorizationService")
                                 .command(SecurityCommands.AuthRequest)
                                 .set(MessageParts.ReplyTo, SUBJECT);

@@ -17,6 +17,7 @@
 package org.jboss.errai.bus.server.util;
 
 import org.jboss.errai.bus.client.CommandMessage;
+import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
 import org.jboss.errai.bus.server.io.JSONEncoder;
@@ -30,7 +31,7 @@ public class ServerBusUtils {
         System.out.println("\"".replaceAll("\"", "\\\\\""));                                                       
     }
 
-    public static CommandMessage decodeToCommandMessage(Object in) {
+    public static Message decodeToCommandMessage(Object in) {
         return CommandMessage.create().setParts(decodeMap(in));
     }
 
@@ -42,7 +43,7 @@ public class ServerBusUtils {
         return new JSONEncoder().encode(value);
     }
 
-    public static String getSessionId(CommandMessage message) {
+    public static String getSessionId(Message message) {
         return (String) ((HttpSession) message.getResource("Session")).getAttribute(MessageBus.WS_SESSION_ID);
     }
 }

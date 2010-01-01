@@ -67,9 +67,10 @@ import java.util.Map;
  *
  * @see org.jboss.errai.bus.client.ConversationMessage
  */
-public class CommandMessage {
+public class CommandMessage implements Message {
     protected Map<String, Object> parts = new HashMap<String, Object>();
     protected Map<String, Object> resources;
+    protected ErrorCallback errorsCall;
     protected int routingFlags;
 
     public static final int ROUTE_GLOBAL = 1;
@@ -123,6 +124,8 @@ public class CommandMessage {
         toSubject(subject).command(commandType);
     }
 
+
+
     /**
      * Return the specified command type.  Returns <tt>null</tt> if not specified.
      *
@@ -147,7 +150,7 @@ public class CommandMessage {
      * @param subject - subject name.
      * @return -
      */
-    public CommandMessage toSubject(String subject) {
+    public Message toSubject(String subject) {
         parts.put(MessageParts.ToSubject.name(), subject);
         return this;
     }
@@ -158,7 +161,7 @@ public class CommandMessage {
      * @param type
      * @return
      */
-    public CommandMessage command(Enum type) {
+    public Message command(Enum type) {
         parts.put(MessageParts.CommandType.name(), type.name());
         return this;
     }
@@ -169,7 +172,7 @@ public class CommandMessage {
      * @param type
      * @return
      */
-    public CommandMessage command(String type) {
+    public Message command(String type) {
         parts.put(MessageParts.CommandType.name(), type);
         return this;
     }
@@ -181,7 +184,7 @@ public class CommandMessage {
      * @param value - Value instance
      * @return -
      */
-    public CommandMessage set(Enum part, Object value) {
+    public Message set(Enum part, Object value) {
         return set(part.name(), value);
     }
 
@@ -192,9 +195,17 @@ public class CommandMessage {
      * @param value - Value instance
      * @return -
      */
-    public CommandMessage set(String part, Object value) {
+    public Message set(String part, Object value) {
         parts.put(part, value);
         return this;
+    }
+
+    public void remove(String part) {
+        parts.remove(part);
+    }
+
+    public void remove(Enum part) {
+        parts.remove(part.name());
     }
 
     /**
@@ -204,7 +215,7 @@ public class CommandMessage {
      * @param message - CommandMessage to copy from
      * @return -
      */
-    public CommandMessage copy(Enum part, CommandMessage message) {
+    public Message copy(Enum part, Message message) {
         set(part, message.get(Object.class, part));
         return this;
     }
@@ -216,7 +227,7 @@ public class CommandMessage {
      * @param message - CommandMessage to copy from
      * @return -
      */
-    public CommandMessage copy(String part, CommandMessage message) {
+    public Message copy(String part, Message message) {
         set(part, message.get(Object.class, part));
         return this;
     }
@@ -241,7 +252,7 @@ public class CommandMessage {
      *
      * @param part - Message part.
      */
-    public void remove(String part) {
+    public void xremove(String part) {
         parts.remove(part);
     }
 
@@ -312,7 +323,7 @@ public class CommandMessage {
      * @param parts - Parts to be used in the message.
      * @return -
      */
-    public CommandMessage setParts(Map<String, Object> parts) {
+    public Message setParts(Map<String, Object> parts) {
         this.parts = parts;
         return this;
     }
@@ -323,7 +334,7 @@ public class CommandMessage {
      * @param parts - Parts to be added to the message.
      * @return -
      */
-    public CommandMessage addAllParts(Map<String, Object> parts) {
+    public Message addAllParts(Map<String, Object> parts) {
         this.parts.putAll(parts);
         return this;
     }
@@ -336,7 +347,7 @@ public class CommandMessage {
      * @param res - Instance of resouce
      * @return -
      */
-    public CommandMessage setResource(String key, Object res) {
+    public Message setResource(String key, Object res) {
         if (this.resources == null) this.resources = new HashMap<String, Object>();
         this.resources.put(key, res);
         return this;
@@ -359,11 +370,20 @@ public class CommandMessage {
      * @param copyFrom - Message to copy from.
      * @return
      */
-    public CommandMessage copyResource(String key, CommandMessage copyFrom) {
+    public Message copyResource(String key, Message copyFrom) {
         if (!copyFrom.hasResource(key)) {
             throw new RuntimeException("Cannot copy resource '" + key + "': no such resource.");
         }
         setResource(key, copyFrom.getResource(key));
+        return this;
+    }
+
+
+    public Message errorsCall(ErrorCallback callback) {
+        if (callback != null) {
+            throw new RuntimeException("An ErrorCallback is already registered");
+        }
+        this.errorsCall = callback;
         return this;
     }
 

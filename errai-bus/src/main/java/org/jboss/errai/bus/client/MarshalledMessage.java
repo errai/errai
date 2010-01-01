@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.server.service;
+package org.jboss.errai.bus.client;
 
-import org.jboss.errai.bus.client.CommandMessage;
-import org.jboss.errai.bus.client.Message;
-import org.jboss.errai.bus.server.ServerMessageBus;
+/**
+ * A simple interface for defining a message.
+ */
+public interface MarshalledMessage {
+    /**
+     * The target subject
+     * @return -
+     */
+    public String getSubject();
 
-public interface ErraiService {
-    public static final String AUTHORIZATION_SVC_SUBJECT = "AuthorizationService";
-    public static final String SESSION_AUTH_DATA = "ErraiAuthData";
-
-    public void store(Message message);
-
-    public ServerMessageBus getBus();
-    public ErraiServiceConfigurator getConfiguration();
+    /**
+     * The message data.
+     * @return -
+     */
+    public Object getMessage();
 }

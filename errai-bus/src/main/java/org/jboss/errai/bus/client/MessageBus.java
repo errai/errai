@@ -83,14 +83,14 @@ public interface MessageBus {
      *
      * @param message - The message to be sent.
      */
-    public void sendGlobal(CommandMessage message);
+    public void sendGlobal(Message message);
 
     /**
      * Transmits a message.
      *
      * @param message
      */
-    public void send(CommandMessage message);
+    public void send(Message message);
 
     /**
      * Transmits a message and may optionally supress message listeners from firing.  This is useful if you are
@@ -99,7 +99,7 @@ public interface MessageBus {
      * @param message
      * @param fireListeners
      */
-    public void send(CommandMessage message, boolean fireListeners, ErrorCallback errorCallback);
+    public void send(Message message, boolean fireListeners, ErrorCallback errorCallback);
 
 
     /**
@@ -107,14 +107,14 @@ public interface MessageBus {
      *
      * @param message - The message to be sent.
      */
-    public void sendGlobal(CommandMessage message, ErrorCallback errorCallback);
+    public void sendGlobal(Message message, ErrorCallback errorCallback);
 
     /**
      * Transmits a message.
      *
      * @param message
      */
-    public void send(CommandMessage message, ErrorCallback errorCallback);
+    public void send(Message message, ErrorCallback errorCallback);
 
     /**
      * Transmits a message and may optionally supress message listeners from firing.  This is useful if you are
@@ -123,7 +123,7 @@ public interface MessageBus {
      * @param message
      * @param fireListeners
      */
-    public void send(CommandMessage message, boolean fireListeners);
+    public void send(Message message, boolean fireListeners);
 
 
 
@@ -133,7 +133,7 @@ public interface MessageBus {
      * @param message
      * @param callback
      */
-    public void conversationWith(CommandMessage message, MessageCallback callback);
+    public void conversationWith(Message message, MessageCallback callback);
 
     /**
      * Subscribe a listener to the specified subject.

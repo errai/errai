@@ -15,10 +15,7 @@
  */
 package org.jboss.errai.workspaces.client.svc.shoutbox;
 
-import org.jboss.errai.bus.client.CommandMessage;
-import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.MessageBus;
-import org.jboss.errai.bus.client.MessageCallback;
+import org.jboss.errai.bus.client.*;
 
 /**
  * Interface to to the shoutbox service.<br>
@@ -95,7 +92,7 @@ public class Shoutbox
     bus.subscribe(subject,
         new MessageCallback()
         {
-          public void callback(CommandMessage message)
+          public void callback(Message message)
           {
             System.out.println("Shoutbox client: " +message.getCommandType());
             switch (ShoutboxCmd.valueOf(message.getCommandType()))

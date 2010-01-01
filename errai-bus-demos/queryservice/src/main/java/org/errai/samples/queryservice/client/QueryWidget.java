@@ -34,7 +34,7 @@ public class QueryWidget extends Composite {
         /**
          * Define a message to be sent.
          */
-        CommandMessage msg = CommandMessage.create()
+        Message msg = CommandMessage.create()
                 .toSubject("QueryService")
                 .set("QueryString", queryBox.getText());
      
@@ -42,7 +42,7 @@ public class QueryWidget extends Composite {
          * Define a MessageCallback to handle the response.
          */
         MessageCallback responseHandler = new MessageCallback() {
-            public void callback(CommandMessage message) {
+            public void callback(Message message) {
                 /**
                  * Extract the results String[] from the incoming message.
                  */

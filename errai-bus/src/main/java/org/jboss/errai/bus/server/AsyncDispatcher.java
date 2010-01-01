@@ -2,6 +2,7 @@ package org.jboss.errai.bus.server;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.RequestDispatcher;
 import org.jboss.errai.bus.server.WorkerFactory;
 import org.jboss.errai.bus.client.CommandMessage;
@@ -28,7 +29,7 @@ public class AsyncDispatcher implements RequestDispatcher {
         this.workerFactory = new WorkerFactory(service);
     }
 
-    public void dispatchGlobal(CommandMessage message) {
+    public void dispatchGlobal(Message message) {
         if (message.hasPart(MessageParts.PriorityProcessing)) {
             service.getBus().sendGlobal(message);
         } else {
@@ -36,7 +37,7 @@ public class AsyncDispatcher implements RequestDispatcher {
         }
     }
 
-    public void dispatch(CommandMessage message) {
+    public void dispatch(Message message) {
          workerFactory.deliver(message);
     }
 }

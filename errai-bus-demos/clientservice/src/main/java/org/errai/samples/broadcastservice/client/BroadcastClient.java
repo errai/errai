@@ -50,7 +50,7 @@ public class BroadcastClient implements EntryPoint {
          * "BroadCastReceiver".
          */
         bus.subscribe("BroadcastReceiver", new MessageCallback() {
-            public void callback(CommandMessage message) {
+            public void callback(Message message) {
                 /**
                  * When a message arrives, extract the "BroadcastText" field and
                  * update the broadcastReceive Label widget with the contents.

@@ -56,7 +56,7 @@ public class ErraiServiceImpl implements ErraiService {
     private void init() {
         //todo: this all needs sendNowWith be refactored at some point.
         bus.subscribe(AUTHORIZATION_SVC_SUBJECT, new MessageCallback() {
-            public void callback(CommandMessage c) {
+            public void callback(Message c) {
                 switch (SecurityCommands.valueOf(c.getCommandType())) {
                     case WhatCredentials:
                         /**
@@ -101,13 +101,13 @@ public class ErraiServiceImpl implements ErraiService {
          * The standard ServerEchoService.
          */
         bus.subscribe("ServerEchoService", new MessageCallback() {
-            public void callback(CommandMessage c) {
+            public void callback(Message c) {
                 bus.send(ConversationMessage.create(c));
             }
         });
 
         bus.subscribe("ClientNegotiationService", new MessageCallback() {
-            public void callback(CommandMessage message) {
+            public void callback(Message message) {
                 AuthSubject subject = (AuthSubject)
                         ((HttpSession) message.getResource("Session")).getAttribute(ErraiService.SESSION_AUTH_DATA);
 
@@ -129,7 +129,7 @@ public class ErraiServiceImpl implements ErraiService {
         final ErraiService erraiSvc = this;
     }
 
-    public void store(CommandMessage message) {
+    public void store(Message message) {
 
         message.addResources(configurator.getResourceProviders());
 

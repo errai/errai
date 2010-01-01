@@ -39,7 +39,6 @@ import org.jboss.errai.bus.client.protocols.MessageParts;
  * as opposed to a <em>receiver-driven conversation</em> which is demonstrated in the code example above.  The
  * {@link org.jboss.errai.bus.client.MessageBus#conversationWith(CommandMessage, MessageCallback)} convenience method
  * for having conversations uses sender-driven conversations, for example.
- *
  */
 public class ConversationMessage extends CommandMessage {
 
@@ -56,17 +55,18 @@ public class ConversationMessage extends CommandMessage {
     /**
      * Calling this method on this class will always result in a {@link org.jboss.errai.bus.client.BadlyFormedMessageException}.
      * You must call {@link #create(CommandMessage)}.
+     *
      * @return - this method will never return.
      */
     public static CommandMessage create() {
         throw new BadlyFormedMessageException("You must create a ConversationMessage by specifying an incoming message.");
     }
 
-    public static ConversationMessage create(CommandMessage inReplyTo) {
+    public static ConversationMessage create(Message inReplyTo) {
         return new ConversationMessage(inReplyTo);
     }
 
-    private ConversationMessage(CommandMessage inReplyTo) {
+    private ConversationMessage(Message inReplyTo) {
         super();
         if (inReplyTo.hasResource("Session")) {
             setResource("Session", inReplyTo.getResource("Session"));
@@ -82,53 +82,12 @@ public class ConversationMessage extends CommandMessage {
 
     public ConversationMessage(Enum commandType, CommandMessage inReplyTo) {
         this(inReplyTo);
-        setCommandType(commandType.name());
+        command(commandType.name());
     }
 
     public ConversationMessage(String commandType, CommandMessage inReplyTo) {
         this(inReplyTo);
-        setCommandType(commandType);
-    }
-
-    public ConversationMessage toSubject(String subject) {
-        parts.put(MessageParts.ToSubject.name(), subject);
-        return this;
-    }
-
-    public ConversationMessage setCommandType(String type) {
-        parts.put(MessageParts.CommandType.name(), type);
-        return this;
-    }
-
-    public ConversationMessage set(Enum part, Object value) {
-        return set(part.name(), value);
-    }
-
-    /**
-     * Copy the same value from the specified message into this message.
-     *
-     * @param part
-     * @param message
-     * @return
-     */
-    public ConversationMessage copy(Enum part, CommandMessage message) {
-        set(part, message.get(Object.class, part));
-        return this;
-    }
-
-    public ConversationMessage set(String part, Object value) {
-        parts.put(part, value);
-        return this;
-    }
-
-    @Override
-    public ConversationMessage command(Enum type) {
-        return (ConversationMessage) super.command(type);
-    }
-
-    @Override
-    public ConversationMessage command(String type) {
-        return (ConversationMessage) super.command(type);   
+        command(commandType);
     }
 }
 

@@ -6,6 +6,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.apache.catalina.CometEvent;
 import org.jboss.errai.bus.client.CommandMessage;
+import org.jboss.errai.bus.client.MarshalledMessage;
 import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.server.MessageQueue;
@@ -180,7 +181,7 @@ public class JBossCometServlet extends HttpServlet implements HttpEventServlet {
 
         stream.write('[');
 
-        writeToOutputStream(stream, new Message() {
+        writeToOutputStream(stream, new MarshalledMessage() {
             public String getSubject() {
                 return "ClientBusErrors";
             }
@@ -212,7 +213,7 @@ public class JBossCometServlet extends HttpServlet implements HttpEventServlet {
 //         log.info("ReceivedFromClient:" + sb.toString());
 
         int messagesSent = 0;
-        for (CommandMessage msg : createCommandMessage(request.getSession(), sb.toString())) {
+        for (Message msg : createCommandMessage(request.getSession(), sb.toString())) {
             service.store(msg);
             messagesSent++;
         }
@@ -294,13 +295,13 @@ public class JBossCometServlet extends HttpServlet implements HttpEventServlet {
     public void transmitMessages(final HttpServletResponse httpServletResponse, MessageQueue queue) throws IOException {
 
 //          log.info("Transmitting messages to client (Queue:" + queue.hashCode() + ")");
-        List<Message> messages = queue.poll(false).getMessages();
+        List<MarshalledMessage> messages = queue.poll(false).getMessages();
         httpServletResponse.setHeader("Cache-Control", "no-cache");
         httpServletResponse.addHeader("Payload-Size", String.valueOf(messages.size()));
         httpServletResponse.setContentType("application/json");
         OutputStream stream = httpServletResponse.getOutputStream();
 
-        Iterator<Message> iter = messages.iterator();
+        Iterator<MarshalledMessage> iter = messages.iterator();
 
         stream.write('[');
         while (iter.hasNext()) {
@@ -314,7 +315,7 @@ public class JBossCometServlet extends HttpServlet implements HttpEventServlet {
         //   queue.heartBeat();
     }
 
-    public void writeToOutputStream(OutputStream stream, Message m) throws IOException {
+    public void writeToOutputStream(OutputStream stream, MarshalledMessage m) throws IOException {
 //           log.info("SendToClient:" + m.getMessage());
 
         stream.write('{');

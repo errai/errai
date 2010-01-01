@@ -24,5 +24,5 @@ public interface MessageCallback {
      * This method is called to handle the message.
      * @param message -
      */
-    public void callback(CommandMessage message);
+    public void callback(Message message);
 }

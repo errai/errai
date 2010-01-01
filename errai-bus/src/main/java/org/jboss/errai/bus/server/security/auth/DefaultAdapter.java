@@ -18,6 +18,7 @@ package org.jboss.errai.bus.server.security.auth;
 
 import com.google.gwt.core.client.GWT;
 import org.jboss.errai.bus.client.CommandMessage;
+import org.jboss.errai.bus.client.Message;
 
 /**
  * A simple placeholder adapter which provides no authentication functionality whatsoever.  This can be used for
@@ -28,22 +29,22 @@ public class DefaultAdapter implements AuthenticationAdapter {
         GWT.log("Warning: DefaultAdapter being used. This provides no security.", null);
     }
 
-    public void challenge(CommandMessage message) {
+    public void challenge(Message message) {
 
     }
 
-    public void process(CommandMessage message) {
+    public void process(Message message) {
     }
 
-    public boolean endSession(CommandMessage message) {
+    public boolean endSession(Message message) {
         return false;
     }
 
-    public boolean isAuthenticated(CommandMessage message) {
+    public boolean isAuthenticated(Message message) {
         return false;
     }
 
-    public boolean requiresAuthorization(CommandMessage message) {
+    public boolean requiresAuthorization(Message message) {
         return false;
     }
 }

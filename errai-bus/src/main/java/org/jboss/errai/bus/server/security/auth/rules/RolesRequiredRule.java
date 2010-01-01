@@ -16,10 +16,7 @@
 
 package org.jboss.errai.bus.server.security.auth.rules;
 
-import org.jboss.errai.bus.client.BooleanRoutingRule;
-import org.jboss.errai.bus.client.CommandMessage;
-import org.jboss.errai.bus.client.ConversationMessage;
-import org.jboss.errai.bus.client.MessageBus;
+import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
@@ -53,7 +50,7 @@ public class RolesRequiredRule implements BooleanRoutingRule {
         this.bus = bus;
     }
 
-    public boolean decision(CommandMessage message) {
+    public boolean decision(Message message) {
         if (!message.hasResource("Session")) return false;
         else {
             AuthSubject subject = (AuthSubject) getSession(message)
@@ -102,7 +99,7 @@ public class RolesRequiredRule implements BooleanRoutingRule {
         return builder.toString();
     }
 
-    private static HttpSession getSession(CommandMessage message) {
+    private static HttpSession getSession(Message message) {
         return ((HttpSession) message.getResource("Session"));
     }
 }

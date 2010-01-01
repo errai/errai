@@ -19,10 +19,7 @@ package org.errai.samples.serialization.server;
 import com.google.inject.Inject;
 import org.errai.samples.serialization.client.model.Item;
 import org.errai.samples.serialization.client.model.Record;
-import org.jboss.errai.bus.client.CommandMessage;
-import org.jboss.errai.bus.client.ConversationMessage;
-import org.jboss.errai.bus.client.MessageBus;
-import org.jboss.errai.bus.client.MessageCallback;
+import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.server.annotations.Service;
 
 import java.sql.Date;
@@ -37,7 +34,7 @@ public class ObjectService implements MessageCallback {
         this.bus = bus;
     }
 
-    public void callback(CommandMessage message) {
+    public void callback(Message message) {
 
         List<Record> records = new ArrayList<Record>();
         records.add(new Record(1, "Mike", -40.23f, getDate(2004, 5, 2), new Item[]{new Item(2, "iPhone3G"),

@@ -21,6 +21,7 @@ import com.google.inject.Provider;
 import org.hibernate.Session;
 import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.ConversationMessage;
+import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
@@ -117,7 +118,7 @@ public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
         log.info("challenge query string: " + challengeQueryString);
     }
 
-    public void challenge(CommandMessage message) {
+    public void challenge(Message message) {
         Session session = (Session) ((Provider) message.getResource("SessionProvider")).get();
         final String name = message.get(String.class, SecurityParts.Name);
         final String password = message.get(String.class, SecurityParts.Password);
@@ -164,17 +165,17 @@ public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
 
     }
 
-    private void addAuthenticationToken(CommandMessage message, AuthSubject loginSubject) {
+    private void addAuthenticationToken(Message message, AuthSubject loginSubject) {
         HttpSession session = (HttpSession) message.getResource("Session");
         session.setAttribute(ErraiService.SESSION_AUTH_DATA, loginSubject);
     }
 
-    public boolean isAuthenticated(CommandMessage message) {
+    public boolean isAuthenticated(Message message) {
         HttpSession session = (HttpSession) message.getResource("Session");
         return session != null && session.getAttribute(ErraiService.SESSION_AUTH_DATA) != null;
     }
 
-    public boolean endSession(CommandMessage message) {
+    public boolean endSession(Message message) {
         boolean sessionEnded = isAuthenticated(message);
         if (sessionEnded) {
             getAuthDescriptor(message).remove(new SimpleRole(CredentialTypes.Authenticated.name()));
@@ -185,7 +186,7 @@ public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
         }
     }
 
-    private Set getAuthDescriptor(CommandMessage message) {
+    private Set getAuthDescriptor(Message message) {
         Set credentials = message.get(Set.class, SecurityParts.Credentials);
         if (credentials == null) {
             message.set(SecurityParts.Credentials, credentials = new HashSet());
@@ -193,7 +194,7 @@ public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
         return credentials;
     }
 
-    public void process(CommandMessage message) {
+    public void process(Message message) {
 
     }
 }

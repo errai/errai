@@ -17,10 +17,7 @@
 package org.errai.samples.queryservice.server;
 
 import com.google.inject.Inject;
-import org.jboss.errai.bus.client.CommandMessage;
-import org.jboss.errai.bus.client.ConversationMessage;
-import org.jboss.errai.bus.client.MessageBus;
-import org.jboss.errai.bus.client.MessageCallback;
+import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.server.annotations.Service;
 
 import java.util.HashMap;
@@ -46,7 +43,7 @@ public class QueryService implements MessageCallback {
         dataMap.put("animals", new String[]{"Monkeys", "Giraffes", "Lions"});
     }
 
-    public void callback(CommandMessage message) {
+    public void callback(Message message) {
         /**
          * Extract the "QueryString" field from the incoming message
          */

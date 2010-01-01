@@ -102,12 +102,12 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                             MessageQueue mq = messageQueues.get(queue);
 
                             builder.append("   __________________________").append("\n");
-                            Queue<Message> q = mq.getQueue();
+                            Queue<MarshalledMessage> q = mq.getQueue();
 
                             builder.append("   Queue: ").append(queue).append(" (size:").append(q.size()).append("; active:")
                                     .append(mq.isActive()).append("; stale:").append(mq.isStale()).append(")")
                                     .append(q.size() == QUEUE_SIZE ? " ** QUEUE FULL (BLOCKING) **" : "").append("\n");
-                            for (Message message : q) {
+                            for (MarshalledMessage message : q) {
                                 builder.append("     -> @").append(message.getSubject()).append(" = ").append(message.getMessage()).append("\n");
                             }
 
@@ -135,9 +135,11 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             thread.setPriority(Thread.MIN_PRIORITY);
             thread.start();
         }
-
+  
         subscribe("ServerBus", new MessageCallback() {
-            public void callback(CommandMessage message) {
+            public void callback(Message message) {
+                String s = message.get(String.class, "Foo");
+
                 switch (BusCommands.valueOf(message.getCommandType())) {
                     case RemoteSubscribe:
                         remoteSubscribe(getSession(message).getAttribute(WS_SESSION_ID),
@@ -192,15 +194,15 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         //    workerFactory.startPool();
     }
 
-    public void sendGlobal(CommandMessage message) {
+    public void sendGlobal(Message message) {
         sendGlobal(message, null);
     }
 
-    public void sendGlobal(CommandMessage message, ErrorCallback callback) {
+    public void sendGlobal(Message message, ErrorCallback callback) {
         sendGlobal(message.getSubject(), message, true, callback);
     }
 
-    public void sendGlobal(final String subject, final CommandMessage message, boolean fireListeners, ErrorCallback errorCallback) {
+    public void sendGlobal(final String subject, final Message message, boolean fireListeners, ErrorCallback errorCallback) {
         if (!subscriptions.containsKey(subject) && !remoteSubscriptions.containsKey(subject)) {
             throw new NoSubscribersToDeliverTo("for: " + subject + " [commandType:" + message.getCommandType() + "]");
         }
@@ -246,7 +248,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         if (remoteSubscriptions.containsKey(subject)) {
             for (Map.Entry<Object, MessageQueue> entry : messageQueues.entrySet()) {
                 if (remoteSubscriptions.get(subject).contains(entry.getKey())) {
-                    messageQueues.get(entry.getKey()).offer(new Message() {
+                    messageQueues.get(entry.getKey()).offer(new MarshalledMessage() {
                         public String getSubject() {
                             return subject;
                         }
@@ -260,11 +262,11 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
     }
 
-    public void send(CommandMessage message) {
+    public void send(Message message) {
         send(message, null);
     }
 
-    public void send(CommandMessage message, ErrorCallback errorCallback) {
+    public void send(Message message, ErrorCallback errorCallback) {
         if (message.hasResource("Session")) {
             send((String) getSession(message).getAttribute(WS_SESSION_ID), message.getSubject(), message, true, errorCallback);
         } else if (message.hasPart(MessageParts.SessionID)) {
@@ -275,15 +277,15 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
 
 
-    public void send(CommandMessage message, boolean fireListeners) {
+    public void send(Message message, boolean fireListeners) {
         send(message, fireListeners, null);
     }
 
-    public void send(CommandMessage message, boolean fireListeners, ErrorCallback errorCallback) {
+    public void send(Message message, boolean fireListeners, ErrorCallback errorCallback) {
         send(message.getSubject(), message, fireListeners, errorCallback);
     }
 
-    private void send(String subject, CommandMessage message, boolean fireListeners, ErrorCallback callback) {
+    private void send(String subject, Message message, boolean fireListeners, ErrorCallback callback) {
         if (!message.hasResource("Session")) {
             throw new RuntimeException("cannot automatically route message. no session contained in message.");
         }
@@ -298,7 +300,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 (String) session.getAttribute(WS_SESSION_ID), subject, message, fireListeners, callback);
     }
 
-    private void send(String sessionid, String subject, CommandMessage message, boolean fireListeners, ErrorCallback callback) {
+    private void send(String sessionid, String subject, Message message, boolean fireListeners, ErrorCallback callback) {
         if (fireListeners && !fireGlobalMessageListeners(message)) {
             if (message.hasPart(MessageParts.ReplyTo)) {
                 store(sessionid, message.get(String.class, MessageParts.ReplyTo),
@@ -323,7 +325,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     private void store(final String sessionId, final String subject, final Object message, ErrorCallback callback) {
         if (messageQueues.containsKey(sessionId) && isAnyoneListening(sessionId, subject)) {
-            messageQueues.get(sessionId).offer(new Message() {
+            messageQueues.get(sessionId).offer(new MarshalledMessage() {
                 public String getSubject() {
                     return subject;
                 }
@@ -416,7 +418,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
          * Any messages still in the queue for this subject, will now never be delivered.  So we must purge them,
          * like the unwanted and forsaken messages they are.
          */
-        Iterator<Message> iter = messageQueues.get(sessionContext).getQueue().iterator();
+        Iterator<MarshalledMessage> iter = messageQueues.get(sessionContext).getQueue().iterator();
         while (iter.hasNext()) {
             if (subject.equals(iter.next().getSubject())) {
                 iter.remove();
@@ -428,7 +430,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         throw new RuntimeException("unsubscribeAll not yet implemented.");
     }
 
-    public void conversationWith(CommandMessage message, MessageCallback callback) {
+    public void conversationWith(Message message, MessageCallback callback) {
         throw new RuntimeException("conversationWith not yet implemented.");
     }
 
@@ -441,7 +443,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 (remoteSubscriptions.containsKey(subject) && remoteSubscriptions.get(subject).contains(sessionContext));
     }
 
-    private boolean fireGlobalMessageListeners(CommandMessage message) {
+    private boolean fireGlobalMessageListeners(Message message) {
         boolean allowContinue = true;
 
         for (MessageListener listener : listeners) {
@@ -493,7 +495,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         unsubscribeListeners.add(listener);
     }
 
-    private static HttpSession getSession(CommandMessage message) {
+    private static HttpSession getSession(Message message) {
         return ((HttpSession) message.getResource("Session"));
     }
 

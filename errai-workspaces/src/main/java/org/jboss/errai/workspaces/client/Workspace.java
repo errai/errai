@@ -126,7 +126,7 @@ public class Workspace implements EntryPoint {
          *  Declare the standard LoginClient here.
          */
         bus.subscribe("ClientErrorService", new MessageCallback() {
-            public void callback(CommandMessage message) {
+            public void callback(Message message) {
                 String errorMessage = message.get(String.class, MessageParts.ErrorMessage);
 
                 WSModalDialog errorDialog = new WSModalDialog();
@@ -140,9 +140,9 @@ public class Workspace implements EntryPoint {
 
 
         bus.subscribe("LoginClient", new MessageCallback() {
-            private CommandMessage deferredMessage;
+            private Message deferredMessage;
 
-            public void callback(CommandMessage message) {
+            public void callback(Message message) {
                 try {
 
                     switch (SecurityCommands.valueOf(message.getCommandType())) {
@@ -301,7 +301,7 @@ public class Workspace implements EntryPoint {
          */
         bus.subscribe("ClientConfiguratorService",
                 new MessageCallback() {
-                    public void callback(CommandMessage message) {
+                    public void callback(Message message) {
                         if (message.hasPart(SecurityParts.Roles)) {
                             String[] roleStrs = message.get(String.class, SecurityParts.Roles).split(",");
                             for (String s : roleStrs) {

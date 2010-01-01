@@ -1,6 +1,7 @@
 package org.jboss.errai.bus.server;
 
 import org.jboss.errai.bus.client.CommandMessage;
+import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.RoutingFlags;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
@@ -17,7 +18,7 @@ public class WorkerFactory {
     private Worker[] workerPool;
 
     private ErraiService svc;
-    private ArrayBlockingQueue<CommandMessage> messages;
+    private ArrayBlockingQueue<Message> messages;
 
     private int poolSize = DEFAULT_THREAD_POOL_SIZE;
     private long workerTimeout = seconds(30);
@@ -27,7 +28,7 @@ public class WorkerFactory {
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
     public WorkerFactory(ErraiService svc) {
-        this.messages = new ArrayBlockingQueue<CommandMessage>(100);
+        this.messages = new ArrayBlockingQueue<Message>(100);
         ErraiServiceConfigurator cfg = svc.getConfiguration();
 
         if (cfg.hasProperty(CONFIG_ASYNC_THREAD_POOL_SIZE)) {
@@ -73,18 +74,18 @@ public class WorkerFactory {
         startPool();
     }
 
-    public void deliverGlobal(CommandMessage m) {
+    public void deliverGlobal(Message m) {
         messages.offer(m);
     }
 
-    public void deliver(CommandMessage m) {
+    public void deliver(Message m) {
         m.setFlag(RoutingFlags.NonGlobalRouting);
         messages.offer(m);
     }
 
 
 
-    protected ArrayBlockingQueue<CommandMessage> getMessages() {
+    protected ArrayBlockingQueue<Message> getMessages() {
         return messages;
     }
 

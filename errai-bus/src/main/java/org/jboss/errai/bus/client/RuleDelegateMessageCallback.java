@@ -32,7 +32,7 @@ public class RuleDelegateMessageCallback implements MessageCallback {
         this.routingRule = rule;
     }
 
-    public void callback(CommandMessage message) {
+    public void callback(Message message) {
         if (routingRule.decision(message)) {
             this.delegate.callback(message);
         }

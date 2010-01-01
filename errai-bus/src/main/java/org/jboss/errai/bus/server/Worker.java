@@ -1,9 +1,6 @@
 package org.jboss.errai.bus.server;
 
-import org.jboss.errai.bus.client.CommandMessage;
-import org.jboss.errai.bus.client.ConversationMessage;
-import org.jboss.errai.bus.client.MessageBus;
-import org.jboss.errai.bus.client.RoutingFlags;
+import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.mvel2.util.StringAppender;
 import org.slf4j.Logger;
@@ -19,7 +16,7 @@ public class Worker extends Thread {
     private boolean timeout = false;
 
     private long workExpiry;
-    private CommandMessage message;
+    private Message message;
 
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -74,7 +71,7 @@ public class Worker extends Thread {
                 if (!active) return;
             }
             catch (Exception e) {
-                ConversationMessage m = ConversationMessage.create(message)
+                Message m = ConversationMessage.create(message)
                         .toSubject("ClientBusErrors")
                         .set("ErrorMessage", "Remote service through an exception: " + message.getSubject());
 

@@ -21,7 +21,6 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.*;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.bus.client.ext.ExtensionsLoader;
 import org.jboss.errai.bus.client.json.JSONUtilCli;
@@ -88,7 +87,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         fireAllSubcribeListener(subject);
 
         MessageCallback dispatcher = new MessageCallback() {
-            public void callback(CommandMessage message) {
+            public void callback(Message message) {
                 try {
                     callback.callback(message);
                 }
@@ -135,13 +134,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      * @param message  -
      * @param callback -
      */
-    public void conversationWith(final CommandMessage message, final MessageCallback callback) {
+    public void conversationWith(final Message message, final MessageCallback callback) {
         final String tempSubject = "temp:Conversation:" + (++conversationCounter);
 
         message.set(ReplyTo, tempSubject);
 
         subscribe(tempSubject, new MessageCallback() {
-            public void callback(CommandMessage message) {
+            public void callback(Message message) {
                 unsubscribeAll(tempSubject);
                 callback.callback(message);
             }
@@ -150,27 +149,27 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         send(message);
     }
 
-    public void sendGlobal(CommandMessage message) {
+    public void sendGlobal(Message message) {
         send(message, null);
     }
 
-    public void sendGlobal(CommandMessage message, ErrorCallback errorCallback) {
+    public void sendGlobal(Message message, ErrorCallback errorCallback) {
         send(message, errorCallback);
     }
 
-    public void send(CommandMessage message, boolean fireListeners) {
+    public void send(Message message, boolean fireListeners) {
         send(message, fireListeners, null);
     }
 
-    public void send(CommandMessage message, boolean fireListeners, ErrorCallback errorCallback) {
+    public void send(Message message, boolean fireListeners, ErrorCallback errorCallback) {
         send(message, errorCallback);
     }
 
-    public void send(CommandMessage message) {
+    public void send(Message message) {
         send(message, null);
     }
 
-    public void send(final CommandMessage message, final ErrorCallback errorCallback) {
+    public void send(final Message message, final ErrorCallback errorCallback) {
         try {
             if (message.hasPart(MessageParts.ToSubject)) {
                 if (!initialized) {
@@ -211,7 +210,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 //        }
 //    }
 
-    public void enqueueForRemoteTransmit(CommandMessage message) {
+    public void enqueueForRemoteTransmit(Message message) {
         outgoingQueue.add(encodeMap(message.getParts()));
         sendAll();
     }
@@ -353,11 +352,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         final MessageBus self = this;
 
         subscribe("ClientBus", new MessageCallback() {
-            public void callback(CommandMessage message) {
+            public void callback(Message message) {
                 switch (BusCommands.valueOf(message.getCommandType())) {
                     case RemoteSubscribe:
                         subscribe(message.get(String.class, Subject), new MessageCallback() {
-                            public void callback(CommandMessage message) {
+                            public void callback(Message message) {
                                 enqueueForRemoteTransmit(message);
                             }
                         });
@@ -392,7 +391,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         });
 
         subscribe("ClientBusErrors", new MessageCallback() {
-            public void callback(CommandMessage message) {
+            public void callback(Message message) {
                 showError(message.get(String.class, "ErrorMessage"),
                         message.get(String.class, "AdditionalDetails"), null);
             }
@@ -538,10 +537,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     public void addGlobalListener(MessageListener listener) {
     }
 
-//    public void send(String subject, CommandMessage message, boolean fireListener) {
-//        send(subject, message);
-//    }
-
     public void addSubscribeListener(SubscribeListener listener) {
         this.onSubscribeHooks.add(listener);
     }
@@ -558,7 +553,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                                             Object subscriberData) /*-{
           return $wnd.PageBus.subscribe(subject, null,
                   function (subject, message, subcriberData) {
-                     callback.@org.jboss.errai.bus.client.MessageCallback::callback(Lorg/jboss/errai/bus/client/CommandMessage;)(@org.jboss.errai.bus.client.json.JSONUtilCli::decodeCommandMessage(Ljava/lang/Object;)(message))
+                     callback.@org.jboss.errai.bus.client.MessageCallback::callback(Lorg/jboss/errai/bus/client/Message;)(@org.jboss.errai.bus.client.json.JSONUtilCli::decodeCommandMessage(Ljava/lang/Object;)(message))
                   },
                   null);
      }-*/;
@@ -576,7 +571,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           $wnd.PageBus.store(subject, value);
      }-*/;
 
-    private static String decodeCommandMessage(CommandMessage msg) {
+    private static String decodeCommandMessage(Message msg) {
         StringBuffer decode = new StringBuffer(
                 "<table><thead style='font-weight:bold;'><tr><td>Field</td><td>Value</td></tr></thead><tbody>");
 
@@ -644,7 +639,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      */
     private static void procIncomingPayload(Response response) throws Exception {
         try {
-            for (Message m : decodePayload(response.getText())) {
+            for (MarshalledMessage m : decodePayload(response.getText())) {
                 _store(m.getSubject(), m.getMessage());
             }
         }

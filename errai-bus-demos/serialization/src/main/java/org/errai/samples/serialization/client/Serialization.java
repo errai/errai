@@ -36,7 +36,7 @@ public class Serialization implements EntryPoint {
 
     bus.subscribe("ClientEndpoint",
         new MessageCallback() {
-          public void callback(CommandMessage message) {
+          public void callback(Message message) {
             List<Record> records = message.get(List.class, "Records");
 
             int row = 0;

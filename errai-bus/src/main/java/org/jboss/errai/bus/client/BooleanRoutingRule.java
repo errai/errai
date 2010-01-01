@@ -27,5 +27,5 @@ public interface BooleanRoutingRule {
      * @param message - the command message to be inspected.
      * @return boolean - indicating whether or not the message should be routed.
      */
-    public boolean decision(CommandMessage message);
+    public boolean decision(Message message);
 }

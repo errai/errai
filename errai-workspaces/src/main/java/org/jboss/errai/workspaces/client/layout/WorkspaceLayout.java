@@ -146,7 +146,7 @@ public class WorkspaceLayout extends Composite {
         super.onAttach();
         ErraiBus.get().subscribe(LayoutCommands.RegisterWorkspaceEnvironment.getSubject(),
                 new MessageCallback() {
-                    public void callback(CommandMessage message) {
+                    public void callback(Message message) {
                         try {
                             switch (LayoutCommands.valueOf(message.getCommandType())) {
                                 case OpenNewTab:
@@ -445,7 +445,7 @@ public class WorkspaceLayout extends Composite {
                 CommandMessage.create().set(LayoutParts.DOMID, DOMID)
                         .toSubject(initSubject),
                 new MessageCallback() {
-                    public void callback(CommandMessage message) {
+                    public void callback(Message message) {
                         final ExtSimplePanel panel = new ExtSimplePanel();
                         panel.getElement().getStyle().setProperty("overflow", "hidden");
 
@@ -503,7 +503,7 @@ public class WorkspaceLayout extends Composite {
                                 new MessageCallback() {
                                     private Map<String, Set<Object>> toUnregister = ((ClientMessageBus) bus).getCapturedRegistrations();
 
-                                    public void callback(CommandMessage message) {
+                                    public void callback(Message message) {
                                         switch (LayoutCommands.valueOf(message.getCommandType())) {
                                             case CloseTab:
                                                 tabDragController.unregisterDropController(newWSTab.getTabDropController());

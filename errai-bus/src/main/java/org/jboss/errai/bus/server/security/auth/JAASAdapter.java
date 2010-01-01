@@ -19,6 +19,7 @@ package org.jboss.errai.bus.server.security.auth;
 import com.google.inject.Inject;
 import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.ConversationMessage;
+import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
@@ -70,7 +71,7 @@ public class JAASAdapter implements AuthenticationAdapter {
      *
      * @param message
      */
-    public void challenge(final CommandMessage message) {
+    public void challenge(final Message message) {
         final String name = message.get(String.class, SecurityParts.Name);
         final String password = message.get(String.class, SecurityParts.Password);
         try {
@@ -108,7 +109,7 @@ public class JAASAdapter implements AuthenticationAdapter {
              * Prepare to send a message back to the client, informing it that a successful login has
              * been performed.
              */
-            ConversationMessage successfulMsg = ConversationMessage.create(message)
+            Message successfulMsg = ConversationMessage.create(message)
                     .command(SecurityCommands.SuccessfulAuth)
                     .toSubject("LoginClient")
                     .set(SecurityParts.Roles, authSubject.toRolesString())
@@ -152,17 +153,17 @@ public class JAASAdapter implements AuthenticationAdapter {
         }
     }
 
-    private void addAuthenticationToken(CommandMessage message, AuthSubject loginSubject) {
+    private void addAuthenticationToken(Message message, AuthSubject loginSubject) {
         HttpSession session = (HttpSession) message.getResource("Session");
         session.setAttribute(ErraiService.SESSION_AUTH_DATA, loginSubject);
     }
 
-    public boolean isAuthenticated(CommandMessage message) {
+    public boolean isAuthenticated(Message message) {
         HttpSession session = (HttpSession) message.getResource("Session");
         return session != null && session.getAttribute(ErraiService.SESSION_AUTH_DATA) != null;
     }
 
-    public boolean endSession(CommandMessage message) {
+    public boolean endSession(Message message) {
         boolean sessionEnded = isAuthenticated(message);
         if (sessionEnded) {
             getAuthDescriptor(message).remove(new SimpleRole(CredentialTypes.Authenticated.name()));
@@ -173,7 +174,7 @@ public class JAASAdapter implements AuthenticationAdapter {
         }
     }
 
-    private Set getAuthDescriptor(CommandMessage message) {
+    private Set getAuthDescriptor(Message message) {
         Set credentials = message.get(Set.class, SecurityParts.Credentials);
         if (credentials == null) {
             message.set(SecurityParts.Credentials, credentials = new HashSet());
@@ -182,7 +183,7 @@ public class JAASAdapter implements AuthenticationAdapter {
     }
 
 
-    public void process(CommandMessage message) {
+    public void process(Message message) {
         if (isAuthenticated(message)) {
             //   getAuthDescriptor(message).add(new SimpleRole(CredentialTypes.Authenticated.name()));
 

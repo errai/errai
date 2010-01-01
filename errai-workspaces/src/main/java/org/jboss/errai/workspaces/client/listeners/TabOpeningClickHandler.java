@@ -42,7 +42,7 @@ public class TabOpeningClickHandler implements ClickHandler {
 
         if (!bus.isSubscribed(initSubject)) {
             bus.subscribe(initSubject, new MessageCallback() {
-                public void callback(CommandMessage message) {
+                public void callback(Message message) {
 
                     try {
                         final Widget w = tool.getWidget();

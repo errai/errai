@@ -3,6 +3,7 @@ package org.jboss.errai.bus.server;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.jboss.errai.bus.client.CommandMessage;
+import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.client.RequestDispatcher;
 import org.jboss.errai.bus.server.service.ErraiService;
@@ -23,11 +24,11 @@ public class SimpleDispatcher implements RequestDispatcher {
         this.bus = svc.getBus();
     }
 
-    public void dispatchGlobal(CommandMessage message) {
+    public void dispatchGlobal(Message message) {
         bus.sendGlobal(message);
     }
 
-    public void dispatch(CommandMessage message) {
+    public void dispatch(Message message) {
         bus.send(message);
     }
 }

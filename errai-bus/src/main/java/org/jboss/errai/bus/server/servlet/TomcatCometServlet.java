@@ -5,9 +5,9 @@ import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.apache.catalina.CometEvent;
-import org.apache.catalina.CometFilter;
 import org.apache.catalina.CometProcessor;
 import org.jboss.errai.bus.client.CommandMessage;
+import org.jboss.errai.bus.client.MarshalledMessage;
 import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.server.MessageQueue;
@@ -172,7 +172,7 @@ public class TomcatCometServlet extends HttpServlet implements CometProcessor {
 
         stream.write('[');
 
-        writeToOutputStream(stream, new Message() {
+        writeToOutputStream(stream, new MarshalledMessage() {
             public String getSubject() {
                 return "ClientBusErrors";
             }
@@ -203,7 +203,7 @@ public class TomcatCometServlet extends HttpServlet implements CometProcessor {
 //        log.info("ReceivedFromClient:" + sb.toString());
 
         int messagesSent = 0;
-        for (CommandMessage msg : createCommandMessage(request.getSession(), sb.toString())) {
+        for (Message msg : createCommandMessage(request.getSession(), sb.toString())) {
             service.store(msg);
             messagesSent++;
         }
@@ -282,13 +282,13 @@ public class TomcatCometServlet extends HttpServlet implements CometProcessor {
     public void transmitMessages(final HttpServletResponse httpServletResponse, MessageQueue queue) throws IOException {
 
 //        log.info("Transmitting messages to client (Queue:" + queue.hashCode() + ")");
-        List<Message> messages = queue.poll(false).getMessages();
+        List<MarshalledMessage> messages = queue.poll(false).getMessages();
         httpServletResponse.setHeader("Cache-Control", "no-cache");
         httpServletResponse.addHeader("Payload-Size", String.valueOf(messages.size()));
         httpServletResponse.setContentType("application/json");
         OutputStream stream = httpServletResponse.getOutputStream();
 
-        Iterator<Message> iter = messages.iterator();
+        Iterator<MarshalledMessage> iter = messages.iterator();
 
         stream.write('[');
         while (iter.hasNext()) {
@@ -304,7 +304,7 @@ public class TomcatCometServlet extends HttpServlet implements CometProcessor {
         //   queue.heartBeat();
     }
 
-    public void writeToOutputStream(OutputStream stream, Message m) throws IOException {
+    public void writeToOutputStream(OutputStream stream, MarshalledMessage m) throws IOException {
 //        log.info("SendToClient:(Subject:" + m.getSubject() + "::" + m.getMessage() + ")");
 
         stream.write('{');

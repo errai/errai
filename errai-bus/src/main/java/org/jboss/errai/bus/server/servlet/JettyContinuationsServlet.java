@@ -3,10 +3,9 @@ package org.jboss.errai.bus.server.servlet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.jboss.errai.bus.client.CommandMessage;
+import org.jboss.errai.bus.client.MarshalledMessage;
 import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.MessageBus;
-import org.jboss.errai.bus.client.Payload;
-import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.server.MessageQueue;
 import org.jboss.errai.bus.server.QueueActivationCallback;
 import org.jboss.errai.bus.server.service.ErraiService;
@@ -65,7 +64,7 @@ public class JettyContinuationsServlet extends HttpServlet {
             session.setAttribute(MessageBus.WS_SESSION_ID, httpServletRequest.getSession().getId());
         }
 
-        for (CommandMessage msg : createCommandMessage(httpServletRequest.getSession(), sb.toString())) {
+        for (Message msg : createCommandMessage(httpServletRequest.getSession(), sb.toString())) {
                 service.store(msg);
         }
 
@@ -101,14 +100,14 @@ public class JettyContinuationsServlet extends HttpServlet {
 
             queue.heartBeat();
 
-            List<Message> messages = queue.poll(false).getMessages();
+            List<MarshalledMessage> messages = queue.poll(false).getMessages();
 
             httpServletResponse.setHeader("Cache-Control", "no-cache");
             httpServletResponse.addHeader("Payload-Size", String.valueOf(messages.size()));
             httpServletResponse.setContentType("application/json");
             OutputStream stream = httpServletResponse.getOutputStream();
 
-            Iterator<Message> iter = messages.iterator();
+            Iterator<MarshalledMessage> iter = messages.iterator();
 
             stream.write('[');
             while (iter.hasNext()) {
@@ -138,7 +137,7 @@ public class JettyContinuationsServlet extends HttpServlet {
 
             stream.write('[');
 
-            writeToOutputStream(stream, new Message() {
+            writeToOutputStream(stream, new MarshalledMessage() {
                 public String getSubject() {
                     return "ClientBusErrors";
                 }
@@ -157,7 +156,7 @@ public class JettyContinuationsServlet extends HttpServlet {
         }
     }
 
-    public static void writeToOutputStream(OutputStream stream, Message m) throws IOException {
+    public static void writeToOutputStream(OutputStream stream, MarshalledMessage m) throws IOException {
         stream.write('{');
         stream.write('"');
         for (byte b : (m.getSubject()).getBytes()) {

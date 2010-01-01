@@ -17,6 +17,7 @@
 package org.jboss.errai.persistence.server;
 
 import org.jboss.errai.bus.client.CommandMessage;
+import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.MessageCallback;
 import org.jboss.errai.persistence.client.PersistenceCommands;
 import org.jboss.errai.persistence.client.PersistenceParts;
@@ -31,7 +32,7 @@ public class ErraiPersistenceService implements MessageCallback {
         this.emFactory = emFactory;
     }
 
-    public void callback(CommandMessage message) {
+    public void callback(Message message) {
         switch (PersistenceCommands.valueOf(message.getCommandType())) {
             case Find:
                 String type = message.get(String.class, PersistenceParts.Type);
