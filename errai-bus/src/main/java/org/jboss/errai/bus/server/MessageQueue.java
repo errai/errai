@@ -127,7 +127,8 @@ public class MessageQueue {
         }
 
         if (!b) {
-            throw new QueueOverloadedException("too many undelievered messages in queue: cannot dispatchGlobal message.");
+            queue.clear();
+            throw new QueueOverloadedException("too many undelievered messages in queue: cannot dispatch message.");
         } else if (activationCallback != null) {
             activationCallback.activate(this);
         }

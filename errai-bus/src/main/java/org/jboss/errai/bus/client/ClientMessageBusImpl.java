@@ -38,7 +38,7 @@ import static org.jboss.errai.bus.client.protocols.MessageParts.*;
 
 /**
  * The default client <tt>MessageBus</tt> implementation.  This bus runs in the browser and automatically federates
- * with the server immediately upon initialization.  
+ * with the server immediately upon initialization.
  */
 public class ClientMessageBusImpl implements ClientMessageBus {
     private static final String SERVICE_ENTRY_POINT = "in.erraiBus";
@@ -151,43 +151,65 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
 
     public void sendGlobal(CommandMessage message) {
-        send(message);
+        send(message, null);
     }
 
-    public void send(String subject, CommandMessage message) {
-        try {
-            send(subject, message.getParts());
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
+    public void sendGlobal(CommandMessage message, ErrorCallback errorCallback) {
+        send(message, errorCallback);
     }
 
-    public void send(final String subject, final Map<String, Object> message) {
-        message.put("ToSubject", subject);
-        if (!initialized) {
-            postInitTasks.add(new Runnable() {
-                public void run() {
-                    store(subject, encodeMap(message));
-                }
-            });
-        } else {
-            store(subject, encodeMap(message));
-        }
+    public void send(CommandMessage message, boolean fireListeners) {
+        send(message, fireListeners, null);
     }
 
-    public void send(String subject, Enum commandType) {
-        send(subject, create(commandType));
+    public void send(CommandMessage message, boolean fireListeners, ErrorCallback errorCallback) {
+        send(message, errorCallback);
     }
 
     public void send(CommandMessage message) {
-        if (message.hasPart(MessageParts.ToSubject)) {
-            send(message.get(String.class, MessageParts.ToSubject), message);
-        } else {
-            throw new RuntimeException("Cannot send message using this method" +
-                    " if the message does not contain a ToSubject field.");
+        send(message, null);
+    }
+
+    public void send(final CommandMessage message, final ErrorCallback errorCallback) {
+        try {
+            if (message.hasPart(MessageParts.ToSubject)) {
+                if (!initialized) {
+                    postInitTasks.add(new Runnable() {
+                        public void run() {
+                            _store(message.getSubject(), encodeMap(message.getParts()));
+                        }
+                    });
+                } else {
+                    _store(message.getSubject(), encodeMap(message.getParts()));
+                }
+
+            } else {
+                throw new RuntimeException("Cannot send message using this method" +
+                        " if the message does not contain a ToSubject field.");
+            }
+        }
+        catch (RuntimeException e) {
+            if (errorCallback != null) {
+                errorCallback.error(message, e);
+            }
+            else {
+                throw e;
+            }
         }
     }
+
+//    private void send(final String subject, final Map<String, Object> message) {
+//        message.put("ToSubject", subject);
+//        if (!initialized) {
+//            postInitTasks.add(new Runnable() {
+//                public void run() {
+//                    _store(subject, encodeMap(message));
+//                }
+//            });
+//        } else {
+//            _store(subject, encodeMap(message));
+//        }
+//    }
 
     public void enqueueForRemoteTransmit(CommandMessage message) {
         outgoingQueue.add(encodeMap(message.getParts()));
@@ -454,6 +476,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     private void initializeMessagingBus(final HookCallback initCallback) {
         final com.google.gwt.user.client.Timer incoming = new com.google.gwt.user.client.Timer() {
             boolean block = false;
+
             @Override
             public void run() {
                 if (block) {
@@ -469,7 +492,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                                     block = false;
                                     showError("Communication Error", "None", throwable);
                                     cancel();
-                                //    schedule(1);
+                                    //    schedule(1);
                                 }
 
                                 public void onResponseReceived(Request request, Response response) {
@@ -515,13 +538,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     public void addGlobalListener(MessageListener listener) {
     }
 
-    public void send(CommandMessage message, boolean fireListeners) {
-        send(message);
-    }
-
-    public void send(String subject, CommandMessage message, boolean fireListener) {
-        send(subject, message);
-    }
+//    public void send(String subject, CommandMessage message, boolean fireListener) {
+//        send(subject, message);
+//    }
 
     public void addSubscribeListener(SubscribeListener listener) {
         this.onSubscribeHooks.add(listener);
@@ -544,14 +563,14 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                   null);
      }-*/;
 
-    public static void store(String subject, Object value) {
-        try {
-            _store(subject, value);
-        }
-        catch (Exception e) {
-            showError("Error `sending data to client bus for '" + subject + "'", "Value:" + value, e);
-        }
-    }
+//    public static void store(String subject, Object value, ErrorCallback errorCallback) {
+//        try {
+//            _store(subject, value);
+//        }
+//        catch (Exception e) {
+//            showError("Error `sending data to client bus for '" + subject + "'", "Value:" + value, e);
+//        }
+//    }
 
     public native static void _store(String subject, Object value) /*-{
           $wnd.PageBus.store(subject, value);
@@ -624,8 +643,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      * @throws Exception
      */
     private static void procIncomingPayload(Response response) throws Exception {
-        for (Message m : decodePayload(response.getText())) {
-            store(m.getSubject(), m.getMessage());
+        try {
+            for (Message m : decodePayload(response.getText())) {
+                _store(m.getSubject(), m.getMessage());
+            }
+        }
+        catch (RuntimeException e) {
+            showError("Error delivering message into bus", response.getText(), e);
         }
     }
 }

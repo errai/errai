@@ -21,7 +21,6 @@ import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
-import org.jboss.errai.bus.server.util.ServerBusUtils;
 
 import javax.servlet.http.HttpSession;
 import javax.swing.*;
@@ -29,6 +28,8 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.Queue;
+
+import static org.jboss.errai.bus.server.util.ServerBusUtils.encodeJSON;
 
 @Singleton
 public class ServerMessageBusImpl implements ServerMessageBus {
@@ -192,16 +193,16 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
 
     public void sendGlobal(CommandMessage message) {
-        sendGlobal(message.getSubject(), message);
+        sendGlobal(message, null);
     }
 
-    public void sendGlobal(String subject, CommandMessage message) {
-        sendGlobal(subject, message, true);
+    public void sendGlobal(CommandMessage message, ErrorCallback callback) {
+        sendGlobal(message.getSubject(), message, true, callback);
     }
 
-    public void sendGlobal(final String subject, final CommandMessage message, boolean fireListeners) {
+    public void sendGlobal(final String subject, final CommandMessage message, boolean fireListeners, ErrorCallback errorCallback) {
         if (!subscriptions.containsKey(subject) && !remoteSubscriptions.containsKey(subject)) {
-            throw new NoSubscribersToDeliverTo("for: " + subject  + " [commandType:" + message.getCommandType() + "]");
+            throw new NoSubscribersToDeliverTo("for: " + subject + " [commandType:" + message.getCommandType() + "]");
         }
 
         if (fireListeners && !fireGlobalMessageListeners(message)) {
@@ -212,13 +213,13 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
                 store((String) getSession(message).getAttribute(WS_SESSION_ID),
                         message.get(String.class, MessageParts.ReplyTo),
-                        ServerBusUtils.encodeJSON(CommandMessage.create(SecurityCommands.MessageNotDelivered).getParts()));
+                        encodeJSON(CommandMessage.create(SecurityCommands.MessageNotDelivered).getParts()), errorCallback);
             }
 
             return;
         }
 
-        final String jsonMessage = ServerBusUtils.encodeJSON(message.getParts());
+        final String jsonMessage = encodeJSON(message.getParts());
 
         if (subscriptions.containsKey(subject)) {
             for (MessageCallback c : subscriptions.get(subject)) {
@@ -226,14 +227,17 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                     c.callback(message);
                 }
                 catch (Exception e) {
-                    e.printStackTrace();
-
-                    if (message.hasResource("Session")) {
-                        ConversationMessage.create(message)
-                                .toSubject("ClientErrorService")
-                                .set(MessageParts.ErrorMessage, "Service '" + c.getClass().getName()
-                                        + "' threw an exception:" + e.getMessage() + " (see server log for stacktrace)")
-                                .sendNowWith(this);
+                    if (errorCallback != null) {
+                        errorCallback.error(message, e);
+                    } else {
+                        e.printStackTrace();
+                        if (message.hasResource("Session")) {
+                            ConversationMessage.create(message)
+                                    .toSubject("ClientErrorService")
+                                    .set(MessageParts.ErrorMessage, "Service '" + c.getClass().getName()
+                                            + "' threw an exception:" + e.getMessage() + " (see server log for stacktrace)")
+                                    .sendNowWith(this);
+                        }
                     }
                 }
             }
@@ -256,7 +260,68 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
     }
 
-    private void store(final String sessionId, final String subject, final Object message) {
+    public void send(CommandMessage message) {
+        send(message, null);
+    }
+
+    public void send(CommandMessage message, ErrorCallback errorCallback) {
+        if (message.hasResource("Session")) {
+            send((String) getSession(message).getAttribute(WS_SESSION_ID), message.getSubject(), message, true, errorCallback);
+        } else if (message.hasPart(MessageParts.SessionID)) {
+            send(message.get(String.class, MessageParts.SessionID), message.getSubject(), message, true, errorCallback);
+        } else {
+            sendGlobal(message, errorCallback);
+        }
+    }
+
+
+    public void send(CommandMessage message, boolean fireListeners) {
+        send(message, fireListeners, null);
+    }
+
+    public void send(CommandMessage message, boolean fireListeners, ErrorCallback errorCallback) {
+        send(message.getSubject(), message, fireListeners, errorCallback);
+    }
+
+    private void send(String subject, CommandMessage message, boolean fireListeners, ErrorCallback callback) {
+        if (!message.hasResource("Session")) {
+            throw new RuntimeException("cannot automatically route message. no session contained in message.");
+        }
+
+        HttpSession session = getSession(message);
+
+        if (session == null) {
+            throw new RuntimeException("cannot automatically route message. no session contained in message.");
+        }
+
+        send(message.hasPart(MessageParts.SessionID) ? message.get(String.class, MessageParts.SessionID) :
+                (String) session.getAttribute(WS_SESSION_ID), subject, message, fireListeners, callback);
+    }
+
+    private void send(String sessionid, String subject, CommandMessage message, boolean fireListeners, ErrorCallback callback) {
+        if (fireListeners && !fireGlobalMessageListeners(message)) {
+            if (message.hasPart(MessageParts.ReplyTo)) {
+                store(sessionid, message.get(String.class, MessageParts.ReplyTo),
+                        encodeJSON(CommandMessage.create(SecurityCommands.MessageNotDelivered).getParts())
+                        , callback);
+            }
+
+            return;
+        }
+
+        try {
+            store(sessionid, subject, encodeJSON(message.getParts()), callback);
+        }
+        catch (RuntimeException t) {
+            if (callback != null) {
+                callback.error(message, t);
+            } else {
+                throw t;
+            }
+        }
+    }
+
+    private void store(final String sessionId, final String subject, final Object message, ErrorCallback callback) {
         if (messageQueues.containsKey(sessionId) && isAnyoneListening(sessionId, subject)) {
             messageQueues.get(sessionId).offer(new Message() {
                 public String getSubject() {
@@ -272,64 +337,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
     }
 
-    public void send(CommandMessage message) {
-        if (message.hasResource("Session")) {
-            send((String) getSession(message).getAttribute(WS_SESSION_ID), message.getSubject(), message);
-        } else if (message.hasPart(MessageParts.SessionID)) {
-            send(message.get(String.class, MessageParts.SessionID), message.getSubject(), message);
-        } else {
-            sendGlobal(message);
-        }
-    }
-
-    public void send(String sessionid, String subject, CommandMessage message) {
-        send(sessionid, subject, message, true);
-    }
-
-    public void send(String sessionid, String subject, CommandMessage message, boolean fireListeners) {
-        if (fireListeners && !fireGlobalMessageListeners(message)) {
-            if (message.hasPart(MessageParts.ReplyTo)) {
-                store(sessionid, message.get(String.class, MessageParts.ReplyTo),
-                        ServerBusUtils.encodeJSON(CommandMessage.create(SecurityCommands.MessageNotDelivered).getParts()));
-            }
-
-            return;
-        }
-
-        store(sessionid, subject, ServerBusUtils.encodeJSON(message.getParts()));
-    }
-
-    public void send(String subject, CommandMessage message) {
-        send(subject, message, true);
-    }
-
-    public void send(CommandMessage message, boolean fireListeners) {
-        send(message.getSubject(), message, fireListeners);
-    }
-
-    public void send(String subject, CommandMessage message, boolean fireListeners) {
-        if (!message.hasResource("Session")) {
-            throw new RuntimeException("cannot automatically route message. no session contained in message.");
-        }
-
-        HttpSession session = getSession(message);
-
-        if (session == null) {
-            throw new RuntimeException("cannot automatically route message. no session contained in message.");
-        }
-
-        send(message.hasPart(MessageParts.SessionID) ? message.get(String.class, MessageParts.SessionID) :
-                (String) session.getAttribute(WS_SESSION_ID), subject, message, fireListeners);
-    }
-
-//    public void sendAsync(CommandMessage message) {
-//        workerFactory.dispatchGlobal(message);
-//    }
-//
-//    public void sendGlobalAsync(CommandMessage message) {
-//        message.setResource("sendGlobal", "");
-//        workerFactory.dispatchGlobal(message);
-//    }
 
     public Payload nextMessage(Object sessionContext, boolean wait) {
         return messageQueues.get(sessionContext).poll(wait);

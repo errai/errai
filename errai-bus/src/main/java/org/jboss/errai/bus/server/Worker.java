@@ -97,7 +97,6 @@ public class Worker extends Thread {
                     }
                 }
 
-
                 m.set("AdditionalDetails", a.toString())
                         .sendNowWith(bus);
 
