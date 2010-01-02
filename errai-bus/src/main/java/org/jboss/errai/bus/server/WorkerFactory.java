@@ -1,14 +1,15 @@
 package org.jboss.errai.bus.server;
 
-import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.RoutingFlags;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
+import org.jboss.errai.bus.server.util.ErrorHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 public class WorkerFactory {
     private static final int DEFAULT_THREAD_POOL_SIZE = 4;
@@ -18,16 +19,16 @@ public class WorkerFactory {
     private Worker[] workerPool;
 
     private ErraiService svc;
+
     private ArrayBlockingQueue<Message> messages;
 
     private int poolSize = DEFAULT_THREAD_POOL_SIZE;
     private long workerTimeout = seconds(30);
 
-    private int idx = 0;
-
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
     public WorkerFactory(ErraiService svc) {
+        this.svc = svc;
         this.messages = new ArrayBlockingQueue<Message>(100);
         ErraiServiceConfigurator cfg = svc.getConfiguration();
 
@@ -42,7 +43,6 @@ public class WorkerFactory {
         log.info("initializing async worker pools (poolSize: " + poolSize + "; workerTimeout: " + workerTimeout + ")");
 
         this.workerPool = new Worker[poolSize];
-        this.svc = svc;
 
         for (int i = 0; i < poolSize; i++) {
             workerPool[i] = new Worker(this, svc);
@@ -74,12 +74,40 @@ public class WorkerFactory {
     }
 
     public void deliverGlobal(Message m) {
-        messages.offer(m);
+        try {
+            if (messages.offer(m, 100, TimeUnit.MILLISECONDS)) {
+                return;
+            }
+        }
+        catch (InterruptedException e) {
+            // fall through.
+        }
+
+        sendDeliveryFailure(m);
     }
 
     public void deliver(Message m) {
-        m.setFlag(RoutingFlags.NonGlobalRouting);
-        messages.offer(m);
+        try {
+            m.setFlag(RoutingFlags.NonGlobalRouting);
+           if (messages.offer(m, 100, TimeUnit.MILLISECONDS)) {
+               return;
+           }
+        }
+        catch (InterruptedException e) {
+            // fall through.
+        }
+
+        sendDeliveryFailure(m);
+    }
+
+    private void sendDeliveryFailure(Message m) {
+        MessageDeliveryFailure mdf
+                = new MessageDeliveryFailure("could not deliver message because the outgoing queue is full");
+
+        if (m.getErrorCallback() == null || m.getErrorCallback().error(m, mdf)) {
+            ErrorHelper.sendClientError(svc.getBus(), m, mdf.getMessage(), mdf);
+            throw mdf;
+        }
     }
 
     protected ArrayBlockingQueue<Message> getMessages() {

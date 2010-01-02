@@ -15,7 +15,6 @@ public class Worker extends Thread {
     private MessageBus bus;
 
     private boolean active = true;
-    private boolean timeout = false;
 
     private long workExpiry;
     private Message message;
@@ -38,14 +37,14 @@ public class Worker extends Thread {
     }
 
     public void timeoutInterrupt() {
-        timeout = true;
+      //  timeout = true;
         interrupt();
 
         if (!isInterrupted()) {
             log.info("failed to interrupt worker.");
         } else {
             workExpiry = 0;
-            timeout = false;
+       //     timeout = false;
 
             sendClientError(bus, message,
                     "Request for '" + message.getSubject() + "' timed out.",
@@ -71,7 +70,7 @@ public class Worker extends Thread {
             catch (InterruptedException e) {
                 if (!active) return;
             }
-            catch (Exception e) {
+            catch (Throwable e) {
                 if (message.getErrorCallback() != null) {
                     if (!message.getErrorCallback().error(message, e)) {
                         continue;

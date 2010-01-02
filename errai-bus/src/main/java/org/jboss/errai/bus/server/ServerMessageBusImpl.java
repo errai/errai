@@ -152,17 +152,10 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                         break;
 
                     case ConnectToQueue:
-                        System.out.println("[Bus] ConnectToQueue");
-
                         Object sessionContext = getSession(message).getAttribute(WS_SESSION_ID);
-
-                        System.out.println("[Bus] Session = " + sessionContext);
-
                         if (!messageQueues.containsKey(getSession(message)))
                             messageQueues.put(sessionContext,
                                     new MessageQueue(QUEUE_SIZE));
-
-                        System.out.println("[Bus] Queue started for = " + sessionContext);
 
                         remoteSubscribe(sessionContext, "ClientBus");
 
