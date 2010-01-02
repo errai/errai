@@ -17,7 +17,7 @@
 package org.jboss.errai.bus.server.security.auth;
 
 import com.google.inject.Inject;
-import org.jboss.errai.bus.client.CommandMessage;
+import org.jboss.errai.bus.QueueSession;
 import org.jboss.errai.bus.client.ConversationMessage;
 import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.MessageBus;
@@ -30,7 +30,6 @@ import org.jboss.errai.bus.server.service.ErraiService;
 import javax.security.auth.callback.*;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashSet;
@@ -100,7 +99,7 @@ public class JAASAdapter implements AuthenticationAdapter {
             AuthSubject authSubject = new AuthSubject(name, name, (Set) loginContext.getSubject().getPrincipals());
 
             /**
-             * If we got this far, then the authentication succeeded. So grab access to the HTTPSession and
+             * If we got this far, then the authentication succeeded. So grab access to the Session and
              * add the authorization token.
              */
             addAuthenticationToken(message, authSubject);
@@ -154,20 +153,20 @@ public class JAASAdapter implements AuthenticationAdapter {
     }
 
     private void addAuthenticationToken(Message message, AuthSubject loginSubject) {
-        HttpSession session = (HttpSession) message.getResource("Session");
+        QueueSession session = message.getResource(QueueSession.class, "Session");
         session.setAttribute(ErraiService.SESSION_AUTH_DATA, loginSubject);
     }
 
     public boolean isAuthenticated(Message message) {
-        HttpSession session = (HttpSession) message.getResource("Session");
-        return session != null && session.getAttribute(ErraiService.SESSION_AUTH_DATA) != null;
+        QueueSession session = message.getResource(QueueSession.class, "Session");
+        return session != null && session.hasAttribute(ErraiService.SESSION_AUTH_DATA);
     }
 
     public boolean endSession(Message message) {
         boolean sessionEnded = isAuthenticated(message);
         if (sessionEnded) {
             getAuthDescriptor(message).remove(new SimpleRole(CredentialTypes.Authenticated.name()));
-            ((HttpSession) message.getResource("Session")).removeAttribute(ErraiService.SESSION_AUTH_DATA);
+            message.getResource(QueueSession.class, "Session").removeAttribute(ErraiService.SESSION_AUTH_DATA);
             return true;
         } else {
             return false;

@@ -38,12 +38,12 @@ public class MessageQueue {
 
     private int lastQueueSize = 0;
     private boolean throttleIncoming = false;
-
     private volatile boolean pollActive = false;
 
     private boolean _windowPolling = false;
     private boolean windowPolling = false;
 
+    private SessionControl sessionControl;
     private QueueActivationCallback activationCallback;
     private BlockingQueue<MarshalledMessage> queue;
 
@@ -52,6 +52,7 @@ public class MessageQueue {
     }
 
     public Payload poll(boolean wait) {
+        checkSession();
         try {
             MarshalledMessage m;
             if (wait) {
@@ -74,7 +75,6 @@ public class MessageQueue {
                 windowPolling = true;
                 _windowPolling = false;
             } else if (windowPolling) {
-           //     long endWindow = startWindow + transmissionWindow;
                 while (!queue.isEmpty() && payLoadSize < MAXIMUM_PAYLOAD_SIZE
                         && !isWindowExceeded()) {
                     p.addMessage(queue.poll());
@@ -107,7 +107,6 @@ public class MessageQueue {
             lastTransmission = currentTimeMillis();
             lastQueueSize = queue.size();
             endWindow = lastTransmission + transmissionWindow;
-
             return p;
         }
         catch (InterruptedException e) {
@@ -119,6 +118,7 @@ public class MessageQueue {
     public boolean offer(final MarshalledMessage message) {
         boolean b = false;
         lastEnqueue = currentTimeMillis();
+        activity();
         try {
             b = (throttleIncoming ? queue.offer(message, 250, TimeUnit.MILLISECONDS) : queue.offer(message));
         }
@@ -134,6 +134,17 @@ public class MessageQueue {
         }
 
         return b;
+    }
+
+    private void checkSession() {
+        if (sessionControl != null && !sessionControl.isSessionValid()) {
+            System.out.println("SessionExpired");
+            throw new MessageQueueExpired("session has expired");
+        }
+    }
+
+    public void activity() {
+        if (sessionControl != null) sessionControl.activity();
     }
 
     private boolean isWindowExceeded() {
@@ -175,6 +186,7 @@ public class MessageQueue {
     public void setWindowPolling(boolean windowPolling) {
         this._windowPolling = windowPolling;
     }
+
 
     private static final MarshalledMessage heartBeat = new MarshalledMessage() {
         public String getSubject() {

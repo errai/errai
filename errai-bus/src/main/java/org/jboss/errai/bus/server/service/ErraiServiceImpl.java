@@ -18,6 +18,7 @@ package org.jboss.errai.bus.server.service;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.jboss.errai.bus.QueueSession;
 import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
@@ -108,8 +109,8 @@ public class ErraiServiceImpl implements ErraiService {
 
         bus.subscribe("ClientNegotiationService", new MessageCallback() {
             public void callback(Message message) {
-                AuthSubject subject = (AuthSubject)
-                        ((HttpSession) message.getResource("Session")).getAttribute(ErraiService.SESSION_AUTH_DATA);
+                AuthSubject subject =  message.getResource(QueueSession.class, "Session")
+                        .getAttribute(AuthSubject.class, ErraiService.SESSION_AUTH_DATA);
 
                 ConversationMessage reply = ConversationMessage.create(message);
 

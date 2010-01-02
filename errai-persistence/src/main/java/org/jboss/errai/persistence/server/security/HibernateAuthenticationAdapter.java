@@ -19,6 +19,7 @@ package org.jboss.errai.persistence.server.security;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.hibernate.Session;
+import org.jboss.errai.bus.QueueSession;
 import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.ConversationMessage;
 import org.jboss.errai.bus.client.Message;
@@ -119,7 +120,7 @@ public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
     }
 
     public void challenge(Message message) {
-        Session session = (Session) ((Provider) message.getResource("SessionProvider")).get();
+        Session session = ((Provider<Session>) message.getResource(Provider.class, "SessionProvider")).get();
         final String name = message.get(String.class, SecurityParts.Name);
         final String password = message.get(String.class, SecurityParts.Password);
 
@@ -166,20 +167,18 @@ public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
     }
 
     private void addAuthenticationToken(Message message, AuthSubject loginSubject) {
-        HttpSession session = (HttpSession) message.getResource("Session");
-        session.setAttribute(ErraiService.SESSION_AUTH_DATA, loginSubject);
+        message.getResource(QueueSession.class, "Session").setAttribute(ErraiService.SESSION_AUTH_DATA, loginSubject);
     }
 
     public boolean isAuthenticated(Message message) {
-        HttpSession session = (HttpSession) message.getResource("Session");
-        return session != null && session.getAttribute(ErraiService.SESSION_AUTH_DATA) != null;
+        return message.hasResource("Session") && message.getResource(QueueSession.class, "Session").hasAttribute(ErraiService.SESSION_AUTH_DATA);
     }
 
     public boolean endSession(Message message) {
         boolean sessionEnded = isAuthenticated(message);
         if (sessionEnded) {
             getAuthDescriptor(message).remove(new SimpleRole(CredentialTypes.Authenticated.name()));
-            ((HttpSession) message.getResource("Session")).removeAttribute(ErraiService.SESSION_AUTH_DATA);
+            message.get(QueueSession.class, "Session").removeAttribute(ErraiService.SESSION_AUTH_DATA);
             return true;
         } else {
             return false;

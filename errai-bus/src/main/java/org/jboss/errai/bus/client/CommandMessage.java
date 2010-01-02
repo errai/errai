@@ -359,8 +359,8 @@ public class CommandMessage implements Message {
      * @param key - Name of resource.
      * @return - Instancee of resource.
      */
-    public Object getResource(String key) {
-        return this.resources == null ? null : this.resources.get(key);
+    public <T> T getResource(Class<T> type, String key) {
+        return (T) (this.resources == null ? null : this.resources.get(key));
     }
 
     /**
@@ -374,7 +374,7 @@ public class CommandMessage implements Message {
         if (!copyFrom.hasResource(key)) {
             throw new RuntimeException("Cannot copy resource '" + key + "': no such resource.");
         }
-        setResource(key, copyFrom.getResource(key));
+        setResource(key, copyFrom.getResource(Object.class, key));
         return this;
     }
 

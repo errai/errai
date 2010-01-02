@@ -5,14 +5,11 @@ import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.apache.catalina.CometEvent;
-import org.jboss.errai.bus.client.CommandMessage;
+import org.jboss.errai.bus.QueueSession;
 import org.jboss.errai.bus.client.MarshalledMessage;
 import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.MessageBus;
-import org.jboss.errai.bus.server.MessageQueue;
-import org.jboss.errai.bus.server.QueueActivationCallback;
-import org.jboss.errai.bus.server.ServerMessageBus;
-import org.jboss.errai.bus.server.ServerMessageBusImpl;
+import org.jboss.errai.bus.server.*;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
@@ -34,11 +31,12 @@ import java.io.OutputStream;
 import java.nio.CharBuffer;
 import java.util.*;
 
-import static org.jboss.errai.bus.server.io.MessageUtil.createCommandMessage;
+import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
 
 @Singleton
 public class JBossCometServlet extends HttpServlet implements HttpEventServlet {
     private ErraiService service;
+    private HttpSessionProvider sessionProvider = new HttpSessionProvider();
 
     public JBossCometServlet() {
         // bypass guice-servlet
@@ -58,21 +56,19 @@ public class JBossCometServlet extends HttpServlet implements HttpEventServlet {
 
     }
 
-    private final Map<MessageQueue, HttpSession> queueToSession = new HashMap<MessageQueue, HttpSession>();
-    private final HashMap<HttpSession, Set<HttpEvent>> activeEvents = new HashMap<HttpSession, Set<HttpEvent>>();
+    private final Map<MessageQueue, QueueSession> queueToSession = new HashMap<MessageQueue, QueueSession>();
+    private final HashMap<QueueSession, Set<HttpEvent>> activeEvents = new HashMap<QueueSession, Set<HttpEvent>>();
 
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
     public void event(final HttpEvent event) throws IOException, ServletException {
         final HttpServletRequest request = event.getHttpServletRequest();
-        final HttpSession session = request.getSession();
+       // final HttpSession session = request.getSession();
+        final QueueSession session = sessionProvider.getSession(request.getSession());
 
         MessageQueue queue;
         switch (event.getType()) {
             case BEGIN:
-                if (session.getAttribute(MessageBus.WS_SESSION_ID) == null) {
-                    session.setAttribute(MessageBus.WS_SESSION_ID, session.getId());
-                } else {
                     queue = getQueue(session);
                     if (queue == null) {
                         return;
@@ -110,13 +106,12 @@ public class JBossCometServlet extends HttpServlet implements HttpEventServlet {
                             events.add(event);
                         }
                     }
-                }
                 break;
 
 
             case END:
 //                log.info("__END__ " + event.hashCode());
-                if ((queue = getQueue(request.getSession())) != null) {
+                if ((queue = getQueue(session)) != null) {
                     queue.heartBeat();
                 }
 
@@ -154,7 +149,7 @@ public class JBossCometServlet extends HttpServlet implements HttpEventServlet {
                 } else {
                     if (queue != null) {
                         queueToSession.remove(queue);
-                        service.getBus().closeQueue(session.getId());
+                        service.getBus().closeQueue(session.getSessionId());
                         //   session.invalidate();
                         activeEvents.remove(session);
                     }
@@ -213,7 +208,7 @@ public class JBossCometServlet extends HttpServlet implements HttpEventServlet {
 //         log.info("ReceivedFromClient:" + sb.toString());
 
         int messagesSent = 0;
-        for (Message msg : createCommandMessage(request.getSession(), sb.toString())) {
+        for (Message msg : createCommandMessage(sessionProvider.getSession(request.getSession()), sb.toString())) {
             service.store(msg);
             messagesSent++;
         }
@@ -224,9 +219,9 @@ public class JBossCometServlet extends HttpServlet implements HttpEventServlet {
     }
 
 
-    private MessageQueue getQueue(HttpSession session) {
+    private MessageQueue getQueue(QueueSession session) {
          // final HttpSession session = event.getHttpServletRequest().getSession();
-         MessageQueue queue = service.getBus().getQueue(session.getAttribute(MessageBus.WS_SESSION_ID));
+         MessageQueue queue = service.getBus().getQueue(session.getSessionId());
 
          if (queue != null && queue.getActivationCallback() == null) {
              queue.setActivationCallback(new QueueActivationCallback() {
@@ -245,7 +240,7 @@ public class JBossCometServlet extends HttpServlet implements HttpEventServlet {
                      //     log.info("Attempt to resume queue: " + queue.hashCode());
                      try {
                          Set<HttpEvent> activeSessEvents;
-                         HttpSession session;
+                         QueueSession session;
                          session = queueToSession.get(queue);
                          if (session == null) {
                              log.error("Could not resume: No session.");

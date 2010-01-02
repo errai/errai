@@ -76,8 +76,6 @@ package org.jboss.errai.bus.client;
  *
  */
 public interface MessageBus {
-    public static final String WS_SESSION_ID = "WSSessionID";
-
     /**
      * Transmits the message to all directly-peered buses (global in relation to this bus only).
      *

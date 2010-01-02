@@ -8,7 +8,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.TimeUnit;
 
+import static java.lang.System.currentTimeMillis;
 import static org.jboss.errai.bus.server.util.ErrorHelper.sendClientError;
+import static org.slf4j.LoggerFactory.getLogger;
 
 public class Worker extends Thread {
     private WorkerFactory workerFactory;
@@ -19,7 +21,7 @@ public class Worker extends Thread {
     private long workExpiry;
     private Message message;
 
-    private Logger log = LoggerFactory.getLogger(this.getClass());
+    private Logger log = getLogger(this.getClass());
 
     public Worker(WorkerFactory factory, ErraiService svc) {
         this.workerFactory = factory;
@@ -33,7 +35,7 @@ public class Worker extends Thread {
     }
 
     public boolean isValid() {
-        return workExpiry == 0 || System.currentTimeMillis() < workExpiry;
+        return workExpiry == 0 || currentTimeMillis() < workExpiry;
     }
 
     public void timeoutInterrupt() {
@@ -44,8 +46,6 @@ public class Worker extends Thread {
             log.info("failed to interrupt worker.");
         } else {
             workExpiry = 0;
-       //     timeout = false;
-
             sendClientError(bus, message,
                     "Request for '" + message.getSubject() + "' timed out.",
                     "The process was terminated because it exceed the maximum timeout.");
@@ -59,7 +59,7 @@ public class Worker extends Thread {
                 if ((message = workerFactory.getMessages().poll(workerFactory.getWorkerTimeout(), TimeUnit.MILLISECONDS)) == null) {
                     continue;
                 } else {
-                    workExpiry = System.currentTimeMillis() + workerFactory.getWorkerTimeout();
+                    workExpiry = currentTimeMillis() + workerFactory.getWorkerTimeout();
                     if (message.isFlagSet(RoutingFlags.NonGlobalRouting)) {
                         bus.send(message);
                     } else {

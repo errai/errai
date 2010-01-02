@@ -27,7 +27,7 @@ public interface Message {
 
     public void addResources(Map<String, ?> resources);
     public Message setResource(String key, Object res);
-    public Object getResource(String key);
+    public <T> T getResource(Class<T> type, String key);
     public boolean hasResource(String key);
 
     public Message copyResource(String key, Message m);

@@ -2,10 +2,10 @@ package org.jboss.errai.bus.server.servlet;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.MarshalledMessage;
 import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.MessageBus;
+import org.jboss.errai.bus.server.HttpSessionProvider;
 import org.jboss.errai.bus.server.MessageQueue;
 import org.jboss.errai.bus.server.QueueActivationCallback;
 import org.jboss.errai.bus.server.service.ErraiService;
@@ -26,11 +26,12 @@ import java.nio.CharBuffer;
 import java.util.Iterator;
 import java.util.List;
 
-import static org.jboss.errai.bus.server.io.MessageUtil.createCommandMessage;
+import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
 
 @Singleton
 public class JettyContinuationsServlet extends HttpServlet {
     private ErraiService service;
+    private HttpSessionProvider sessionProvider = new HttpSessionProvider();
 
     @Inject
     public JettyContinuationsServlet(ErraiService service) {
@@ -48,7 +49,6 @@ public class JettyContinuationsServlet extends HttpServlet {
             throws ServletException, IOException {
         BufferedReader reader = httpServletRequest.getReader();
         StringAppender sb = new StringAppender(httpServletRequest.getContentLength());
-        HttpSession session = httpServletRequest.getSession();
         CharBuffer buffer = CharBuffer.allocate(10);
 
         int read;
@@ -60,31 +60,31 @@ public class JettyContinuationsServlet extends HttpServlet {
             buffer.rewind();
         }
 
-        if (session.getAttribute(MessageBus.WS_SESSION_ID) == null) {
-            session.setAttribute(MessageBus.WS_SESSION_ID, httpServletRequest.getSession().getId());
+        for (Message msg : createCommandMessage(sessionProvider.getSession(httpServletRequest.getSession()), sb.toString())) {
+            service.store(msg);
         }
 
-        for (Message msg : createCommandMessage(httpServletRequest.getSession(), sb.toString())) {
-                service.store(msg);
-        }
-
-        pollForMessages(httpServletRequest, httpServletResponse, false);
+        pollQueue(service.getBus().getQueue(httpServletRequest.getSession().getId()), httpServletRequest, httpServletResponse);
     }
 
     private void pollForMessages(HttpServletRequest httpServletRequest,
                                  HttpServletResponse httpServletResponse, boolean wait) throws IOException {
         try {
+            final MessageQueue queue = service.getBus().getQueue(httpServletRequest.getSession().getId());
 
-            MessageQueue queue = service.getBus().getQueue(httpServletRequest.getSession().getAttribute(MessageBus.WS_SESSION_ID));
+            if (queue == null) {
+                return;
+            }
+            synchronized (queue) {
 
-            if (queue == null) return;
+                if (wait) {
+                    final Continuation cont = ContinuationSupport.getContinuation(httpServletRequest, queue);
 
-            if (wait) {
-                synchronized (queue) {
                     if (!queue.messagesWaiting()) {
-                        final Continuation cont = ContinuationSupport.getContinuation(httpServletRequest, queue);
+
                         queue.setActivationCallback(new QueueActivationCallback() {
                             public void activate(MessageQueue queue) {
+                                queue.setActivationCallback(null);
                                 cont.resume();
                             }
                         });
@@ -95,30 +95,11 @@ public class JettyContinuationsServlet extends HttpServlet {
                     } else {
                         queue.setActivationCallback(null);
                     }
+
                 }
+
+                pollQueue(queue, httpServletRequest, httpServletResponse);
             }
-
-            queue.heartBeat();
-
-            List<MarshalledMessage> messages = queue.poll(false).getMessages();
-
-            httpServletResponse.setHeader("Cache-Control", "no-cache");
-            httpServletResponse.addHeader("Payload-Size", String.valueOf(messages.size()));
-            httpServletResponse.setContentType("application/json");
-            OutputStream stream = httpServletResponse.getOutputStream();
-
-            Iterator<MarshalledMessage> iter = messages.iterator();
-
-            stream.write('[');
-            while (iter.hasNext()) {
-                writeToOutputStream(stream, iter.next());
-                if (iter.hasNext()) {
-                    stream.write(',');
-                }
-            }
-            stream.write(']');
-
-            stream.close();
         }
         catch (RetryRequest r) {
             /**
@@ -132,7 +113,7 @@ public class JettyContinuationsServlet extends HttpServlet {
 
             httpServletResponse.setHeader("Cache-Control", "no-cache");
             httpServletResponse.addHeader("Payload-Size", "1");
-            httpServletResponse.setContentType("application/io");
+            httpServletResponse.setContentType("application/json");
             OutputStream stream = httpServletResponse.getOutputStream();
 
             stream.write('[');
@@ -154,6 +135,33 @@ public class JettyContinuationsServlet extends HttpServlet {
 
             stream.write(']');
         }
+    }
+
+    private static void pollQueue(MessageQueue queue, HttpServletRequest httpServletRequest,
+                           HttpServletResponse httpServletResponse) throws IOException {
+
+        queue.heartBeat();
+
+        List<MarshalledMessage> messages = queue.poll(false).getMessages();
+
+        httpServletResponse.setHeader("Cache-Control", "no-cache");
+    //    httpServletResponse.addHeader("Payload-Size", String.valueOf(messages.size()));
+        httpServletResponse.setContentType("application/json");
+        OutputStream stream = httpServletResponse.getOutputStream();
+
+        Iterator<MarshalledMessage> iter = messages.iterator();
+
+        stream.write('[');
+        while (iter.hasNext()) {
+            writeToOutputStream(stream, iter.next());
+            if (iter.hasNext()) {
+                stream.write(',');
+            }
+        }
+        stream.write(']');
+        stream.flush();
+        // stream.close();
+
     }
 
     public static void writeToOutputStream(OutputStream stream, MarshalledMessage m) throws IOException {

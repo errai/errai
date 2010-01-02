@@ -16,21 +16,22 @@
 
 package org.jboss.errai.bus.server.io;
 
+import org.jboss.errai.bus.QueueSession;
 import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.json.JSONUtilCli;
 import org.jboss.errai.bus.client.protocols.MessageParts;
-import org.jboss.errai.bus.client.protocols.SecurityParts;
+import org.jboss.errai.bus.server.SessionProvider;
 
 import java.util.Map;
 
-public class MessageUtil {
+public class MessageFactory {
     public static Map<String, Object> decodeToMap(String in) {
         //noinspection unchecked
         return (Map<String, Object>) new JSONDecoder(in).parse();
     }
 
-    public static Message[] createCommandMessage(Object session, String json) {
+    public static Message[] createCommandMessage(QueueSession session, String json) {
         if (json.length() == 0) return new CommandMessage[0];
         String[] pkg = json.split(JSONUtilCli.MULTI_PAYLOAD_SEPER_REGEX);
         Message[] c = new Message[pkg.length];

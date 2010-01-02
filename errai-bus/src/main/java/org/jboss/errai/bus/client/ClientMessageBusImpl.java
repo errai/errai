@@ -299,7 +299,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                     try {
                         procIncomingPayload(response);
                     }
-                    catch (Exception e) {
+                    catch (Throwable e) {
                         e.printStackTrace();
                         showError("Problem decoding incoming message:", response.getText(), e);
                     }
@@ -476,7 +476,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                                         procIncomingPayload(response);
                                         schedule(1);
                                     }
-                                    catch (Exception e) {
+                                    catch (Throwable e) {
                                         showError("Errai MessageBus Disconnected Due to Fatal Error", response.getText(), e);
                                         cancel();
                                     }

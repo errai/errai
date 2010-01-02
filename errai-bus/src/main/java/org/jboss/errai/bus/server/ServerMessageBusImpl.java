@@ -17,12 +17,12 @@
 package org.jboss.errai.bus.server;
 
 import com.google.inject.Singleton;
+import org.jboss.errai.bus.QueueSession;
 import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 
-import javax.servlet.http.HttpSession;
 import javax.swing.*;
 import java.awt.*;
 import java.util.*;
@@ -142,22 +142,22 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
                 switch (BusCommands.valueOf(message.getCommandType())) {
                     case RemoteSubscribe:
-                        remoteSubscribe(getSession(message).getAttribute(WS_SESSION_ID),
+                        remoteSubscribe(getSessionId(message),
                                 message.get(String.class, MessageParts.Subject));
                         break;
 
                     case RemoteUnsubscribe:
-                        remoteUnsubscribe(getSession(message).getAttribute(WS_SESSION_ID),
+                        remoteUnsubscribe(getSessionId(message),
                                 message.get(String.class, MessageParts.Subject));
                         break;
 
                     case ConnectToQueue:
-                        Object sessionContext = getSession(message).getAttribute(WS_SESSION_ID);
-                        if (!messageQueues.containsKey(getSession(message)))
-                            messageQueues.put(sessionContext,
-                                    new MessageQueue(QUEUE_SIZE));
+                        String sessionId = getSessionId(message);
 
-                        remoteSubscribe(sessionContext, "ClientBus");
+                        messageQueues.put(sessionId,
+                                new MessageQueue(QUEUE_SIZE));
+
+                        remoteSubscribe(sessionId, "ClientBus");
 
                         for (String service : subscriptions.keySet()) {
                             if (service.startsWith("local:")) {
@@ -176,7 +176,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                         /**
                          * Now the session is established, turn WindowPolling on.
                          */
-                        getQueue(sessionContext).setWindowPolling(true);
+                        getQueue(sessionId).setWindowPolling(true);
 
                         break;
                 }
@@ -199,7 +199,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                  * Inform the sender that we did not dispatchGlobal the message.
                  */
 
-                enqueueForDelivery((String) getSession(message).getAttribute(WS_SESSION_ID),
+                enqueueForDelivery(getSessionId(message),
                         message.get(String.class, MessageParts.ReplyTo),
                         encodeJSON(CommandMessage.create(SecurityCommands.MessageNotDelivered).getParts()));
             }
@@ -234,7 +234,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     public void send(Message message) {
         if (message.hasResource("Session")) {
-            send((String) getSession(message).getAttribute(WS_SESSION_ID), message, true);
+            send(getSessionId(message), message, true);
         } else if (message.hasPart(MessageParts.SessionID)) {
             send(message.get(String.class, MessageParts.SessionID), message, true);
         } else {
@@ -247,14 +247,14 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             throw new RuntimeException("cannot automatically route message. no session contained in message.");
         }
 
-        HttpSession session = getSession(message);
+        String sessionId = getSessionId(message);
 
-        if (session == null) {
+        if (sessionId == null) {
             throw new RuntimeException("cannot automatically route message. no session contained in message.");
         }
 
         send(message.hasPart(MessageParts.SessionID) ? message.get(String.class, MessageParts.SessionID) :
-                (String) session.getAttribute(WS_SESSION_ID), message, fireListeners);
+                sessionId, message, fireListeners);
     }
 
     private void send(String sessionid, Message message, boolean fireListeners) {
@@ -288,17 +288,27 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
 
     public Payload nextMessage(Object sessionContext, boolean wait) {
-        return messageQueues.get(sessionContext).poll(wait);
+        try {
+            return messageQueues.get(sessionContext).poll(wait);
+        }
+        catch (MessageQueueExpired e) {
+            MessageQueue mq = messageQueues.get(sessionContext);
+
+            if (mq != null) {
+                // terminate the queue
+                messageQueues.remove(sessionContext);
+            }
+            throw e;
+        }
     }
 
-    public MessageQueue getQueue(Object sessionContext) {
-        return messageQueues.get(sessionContext);
+    public MessageQueue getQueue(String sessionId) {
+        return messageQueues.get(sessionId);
     }
 
-    public void closeQueue(Object sessionContext) {
+    public void closeQueue(String sessionContext) {
         messageQueues.remove(sessionContext);
         remoteSubscriptions.remove(sessionContext);
-
     }
 
     public void addRule(String subject, BooleanRoutingRule rule) {
@@ -442,8 +452,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         unsubscribeListeners.add(listener);
     }
 
-    private static HttpSession getSession(Message message) {
-        return ((HttpSession) message.getResource("Session"));
+    private static String getSessionId(Message message) {
+        return message.getResource(QueueSession.class, "Session").getSessionId();
     }
 
     public HouseKeeper getHouseKeeper() {

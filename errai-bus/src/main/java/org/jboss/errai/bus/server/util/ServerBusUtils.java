@@ -16,14 +16,12 @@
 
 package org.jboss.errai.bus.server.util;
 
+import org.jboss.errai.bus.QueueSession;
 import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.Message;
-import org.jboss.errai.bus.client.MessageBus;
-import org.jboss.errai.bus.client.protocols.SecurityParts;
 import org.jboss.errai.bus.server.io.JSONEncoder;
-import org.jboss.errai.bus.server.io.MessageUtil;
+import org.jboss.errai.bus.server.io.MessageFactory;
 
-import javax.servlet.http.HttpSession;
 import java.util.Map;
 
 public class ServerBusUtils {
@@ -36,7 +34,7 @@ public class ServerBusUtils {
     }
 
     public static Map<String, Object> decodeMap(Object value) {
-        return MessageUtil.decodeToMap(String.valueOf(value));
+        return MessageFactory.decodeToMap(String.valueOf(value));
     }
 
     public static String encodeJSON(Object value) {
@@ -44,6 +42,6 @@ public class ServerBusUtils {
     }
 
     public static String getSessionId(Message message) {
-        return (String) ((HttpSession) message.getResource("Session")).getAttribute(MessageBus.WS_SESSION_ID);
+        return message.getResource(QueueSession.class, "Session").getSessionId();
     }
 }

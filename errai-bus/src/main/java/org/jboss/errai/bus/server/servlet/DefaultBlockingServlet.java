@@ -18,10 +18,11 @@ package org.jboss.errai.bus.server.servlet;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.MarshalledMessage;
 import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.MessageBus;
+import org.jboss.errai.bus.server.HttpSessionProvider;
+import org.jboss.errai.bus.server.SessionProvider;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.mvel2.util.StringAppender;
 
@@ -37,7 +38,7 @@ import java.nio.CharBuffer;
 import java.util.Iterator;
 import java.util.List;
 
-import static org.jboss.errai.bus.server.io.MessageUtil.createCommandMessage;
+import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
 
 /**
  * The default DefaultBlockingServlet which provides the HTTP-protocol gateway between the server bus and the client buses.
@@ -45,6 +46,7 @@ import static org.jboss.errai.bus.server.io.MessageUtil.createCommandMessage;
 @Singleton
 public class DefaultBlockingServlet extends HttpServlet {
     private ErraiService service;
+    private HttpSessionProvider sessionProvider = new HttpSessionProvider();
 
     @Inject
     public DefaultBlockingServlet(ErraiService service) {
@@ -62,7 +64,6 @@ public class DefaultBlockingServlet extends HttpServlet {
             throws ServletException, IOException {
         BufferedReader reader = httpServletRequest.getReader();
         StringAppender sb = new StringAppender(httpServletRequest.getContentLength());
-        HttpSession session = httpServletRequest.getSession();
         CharBuffer buffer = CharBuffer.allocate(10);
 
         int read;
@@ -74,11 +75,7 @@ public class DefaultBlockingServlet extends HttpServlet {
             buffer.rewind();
         }
 
-        if (session.getAttribute(MessageBus.WS_SESSION_ID) == null) {
-            session.setAttribute(MessageBus.WS_SESSION_ID, httpServletRequest.getSession().getId());
-        }
-
-        for (Message msg : createCommandMessage(httpServletRequest.getSession(), sb.toString())) {
+        for (Message msg : createCommandMessage(sessionProvider.getSession(httpServletRequest.getSession()), sb.toString())) {
             service.store(msg);
         }
 
@@ -89,7 +86,7 @@ public class DefaultBlockingServlet extends HttpServlet {
                                  HttpServletResponse httpServletResponse, boolean wait) throws IOException {
         try {
             List<MarshalledMessage> messages = service.getBus().nextMessage(
-                    httpServletRequest.getSession().getAttribute(MessageBus.WS_SESSION_ID), wait).getMessages();
+                    httpServletRequest.getSession().getId(), wait).getMessages();
 
             httpServletResponse.setHeader("Cache-Control", "no-cache");
             httpServletResponse.addHeader("Payload-Size", String.valueOf(messages.size()));

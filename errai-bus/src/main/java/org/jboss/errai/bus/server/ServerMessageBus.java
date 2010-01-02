@@ -24,9 +24,8 @@ import org.jboss.errai.bus.client.Payload;
 public interface ServerMessageBus extends MessageBus {
     public Payload nextMessage(Object sessionContext, boolean wait);
 
-    public MessageQueue getQueue(Object sessionContext);
-
-    public void closeQueue(Object sessionContext);
+    public MessageQueue getQueue(String sessionId);
+    public void closeQueue(String sessionId);
 
     public void addRule(String subject, BooleanRoutingRule rule);
 }
