@@ -38,6 +38,7 @@ public class MessageQueue {
 
     private int lastQueueSize = 0;
     private boolean throttleIncoming = false;
+    private boolean queueRunning = true;
     private volatile boolean pollActive = false;
 
     private boolean _windowPolling = false;
@@ -52,6 +53,10 @@ public class MessageQueue {
     }
 
     public Payload poll(boolean wait) {
+        if (!queueRunning) {
+            throw new MessageDeliveryFailure("queue is not available");
+        }
+
         checkSession();
         try {
             MarshalledMessage m;
@@ -66,7 +71,7 @@ public class MessageQueue {
                 m = queue.poll();
             }
 
-            long startWindow = currentTimeMillis();
+           // long startWindow = currentTimeMillis();
             int payLoadSize = 0;
 
             Payload p = new Payload(m == null ? heartBeat : m);
@@ -92,7 +97,7 @@ public class MessageQueue {
                 if (!throttleIncoming && queue.size() > lastQueueSize) {
                     if (transmissionWindow < MAX_TRANSMISSION_WINDOW) {
                         transmissionWindow += 5;
-                        System.err.println("Congestion on queue -- New transmission window: " + transmissionWindow + "]");
+                        System.err.println("Congestion on queue -- New transmission window: " + transmissionWindow + "; Queue size: " + queue.size() + ")]");
                     } else {
                         throttleIncoming = true;
                         System.err.println("[Warning: A queue has become saturated and performance is now being degraded.]");
@@ -107,6 +112,7 @@ public class MessageQueue {
             lastTransmission = currentTimeMillis();
             lastQueueSize = queue.size();
             endWindow = lastTransmission + transmissionWindow;
+
             return p;
         }
         catch (InterruptedException e) {
@@ -116,6 +122,10 @@ public class MessageQueue {
     }
 
     public boolean offer(final MarshalledMessage message) {
+        if (!queueRunning) {
+            throw new MessageDeliveryFailure("queue is not available");
+        }
+
         boolean b = false;
         lastEnqueue = currentTimeMillis();
         activity();
@@ -127,7 +137,7 @@ public class MessageQueue {
         }
 
         if (!b) {
-            queue.clear();
+            stopQueue();
             throw new QueueOverloadedException("too many undelievered messages in queue: cannot dispatch message.");
         } else if (activationCallback != null) {
             activationCallback.activate(this);
@@ -187,6 +197,11 @@ public class MessageQueue {
         this._windowPolling = windowPolling;
     }
 
+
+    public void stopQueue() {
+        queueRunning = false;
+        queue.clear();
+    }
 
     private static final MarshalledMessage heartBeat = new MarshalledMessage() {
         public String getSubject() {

@@ -154,6 +154,12 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                     case ConnectToQueue:
                         String sessionId = getSessionId(message);
 
+                        System.out.println("CreatingNewQueue:" + sessionId);
+
+                        if (messageQueues.containsKey(sessionId)) {
+                            messageQueues.get(sessionId).stopQueue();
+                        }
+
                         messageQueues.put(sessionId,
                                 new MessageQueue(QUEUE_SIZE));
 

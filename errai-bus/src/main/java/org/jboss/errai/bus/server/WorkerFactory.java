@@ -12,10 +12,12 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 public class WorkerFactory {
+    private static final int DEFAULT_DELIVERY_QUEUE_SIZE = 250;
     private static final int DEFAULT_THREAD_POOL_SIZE = 4;
 
     private static final String CONFIG_ASYNC_THREAD_POOL_SIZE = "errai.async.thread_pool_size";
     private static final String CONFIG_ASYNC_WORKER_TIMEOUT = "errai.async.worker.timeout";
+    private static final String CONFIG_ASYNC_DELIVERY_QUEUE_SIZE = "errai.async.delivery.queue_size";
     private Worker[] workerPool;
 
     private ErraiService svc;
@@ -23,14 +25,19 @@ public class WorkerFactory {
     private ArrayBlockingQueue<Message> messages;
 
     private int poolSize = DEFAULT_THREAD_POOL_SIZE;
+    private int deliveryQueueSize = DEFAULT_DELIVERY_QUEUE_SIZE;
     private long workerTimeout = seconds(30);
 
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
     public WorkerFactory(ErraiService svc) {
         this.svc = svc;
-        this.messages = new ArrayBlockingQueue<Message>(100);
+
         ErraiServiceConfigurator cfg = svc.getConfiguration();
+
+        if (cfg.hasProperty(CONFIG_ASYNC_DELIVERY_QUEUE_SIZE)) {
+            deliveryQueueSize = Integer.parseInt(cfg.getProperty(CONFIG_ASYNC_DELIVERY_QUEUE_SIZE));
+        }
 
         if (cfg.hasProperty(CONFIG_ASYNC_THREAD_POOL_SIZE)) {
             poolSize = Integer.parseInt(cfg.getProperty(CONFIG_ASYNC_THREAD_POOL_SIZE));
@@ -39,6 +46,8 @@ public class WorkerFactory {
         if (cfg.hasProperty(CONFIG_ASYNC_WORKER_TIMEOUT)) {
             workerTimeout = seconds(Integer.parseInt(cfg.getProperty(CONFIG_ASYNC_WORKER_TIMEOUT)));
         }
+
+        this.messages = new ArrayBlockingQueue<Message>(deliveryQueueSize);
 
         log.info("initializing async worker pools (poolSize: " + poolSize + "; workerTimeout: " + workerTimeout + ")");
 
@@ -74,30 +83,22 @@ public class WorkerFactory {
     }
 
     public void deliverGlobal(Message m) {
-        try {
-            if (messages.offer(m, 100, TimeUnit.MILLISECONDS)) {
-                return;
-            }
+        if (messages.offer(m)) {
+            return;
+        } else {
+            sendDeliveryFailure(m);
+            throw new RuntimeException("delivery queue is overloaded!");
         }
-        catch (InterruptedException e) {
-            // fall through.
-        }
-
-        sendDeliveryFailure(m);
     }
 
     public void deliver(Message m) {
-        try {
-            m.setFlag(RoutingFlags.NonGlobalRouting);
-           if (messages.offer(m, 100, TimeUnit.MILLISECONDS)) {
-               return;
-           }
+        m.setFlag(RoutingFlags.NonGlobalRouting);
+        if (messages.offer(m)) {
+            return;
+        } else {
+            sendDeliveryFailure(m);
+            throw new RuntimeException("delivery queue is overloaded!");
         }
-        catch (InterruptedException e) {
-            // fall through.
-        }
-
-        sendDeliveryFailure(m);
     }
 
     private void sendDeliveryFailure(Message m) {
