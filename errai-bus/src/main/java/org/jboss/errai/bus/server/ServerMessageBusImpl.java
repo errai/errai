@@ -163,7 +163,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                         messageQueues.put(sessionId,
                                queue = new MessageQueue(QUEUE_SIZE, busInst));
 
-                        System.out.println("NEW QUEUE");
+                  //      System.out.println("NEW QUEUE");
 
                         remoteSubscribe(sessionId, queue, "ClientBus");
 

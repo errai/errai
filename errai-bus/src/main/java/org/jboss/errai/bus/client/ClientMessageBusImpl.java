@@ -21,6 +21,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.*;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.bus.client.ext.ExtensionsLoader;
 import org.jboss.errai.bus.client.json.JSONUtilCli;
@@ -56,6 +57,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     private Map<String, Set<Object>> registeredInThisSession = new HashMap<String, Set<Object>>();
 
     private ArrayList<Runnable> postInitTasks = new ArrayList<Runnable>();
+
+    private Timer incomingTimer;
 
     private boolean initialized = false;
 
@@ -361,6 +364,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                         initialized = true;
 
                         break;
+
+                    case Disconnect:
+                        incomingTimer.cancel();
+                        break;
                 }
             }
         });
@@ -448,7 +455,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     @SuppressWarnings({"UnusedDeclaration"})
     private void initializeMessagingBus(final HookCallback initCallback) {
-        final com.google.gwt.user.client.Timer incoming = new com.google.gwt.user.client.Timer() {
+        incomingTimer = new Timer() {
             boolean block = false;
 
             @Override
@@ -493,10 +500,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
         final MessageBus bus = this;
 
-        final com.google.gwt.user.client.Timer outerTimer = new com.google.gwt.user.client.Timer() {
+        final Timer outerTimer = new Timer() {
             @Override
             public void run() {
-                incoming.scheduleRepeating(500);
+                incomingTimer.scheduleRepeating(500);
                 ExtensionsLoader loader = GWT.create(ExtensionsLoader.class);
                 loader.initExtensions(bus);
             }

@@ -1,6 +1,7 @@
 package org.jboss.errai.bus.server;
 
 import org.jboss.errai.bus.client.*;
+import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.util.ErrorHelper;
 import org.slf4j.Logger;
@@ -9,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.System.currentTimeMillis;
+import static org.jboss.errai.bus.server.util.ErrorHelper.handleMessageDeliveryFailure;
 import static org.jboss.errai.bus.server.util.ErrorHelper.sendClientError;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -39,7 +41,7 @@ public class Worker extends Thread {
     }
 
     public void timeoutInterrupt() {
-      //  timeout = true;
+        //  timeout = true;
         interrupt();
 
         if (!isInterrupted()) {
@@ -70,15 +72,11 @@ public class Worker extends Thread {
             catch (InterruptedException e) {
                 if (!active) return;
             }
+            catch (QueueUnavailableException e) {
+                handleMessageDeliveryFailure(bus, message, "Queue is not available", e, true);
+            }
             catch (Throwable e) {
-                e.printStackTrace();
-                if (message.getErrorCallback() != null) {
-                    if (!message.getErrorCallback().error(message, e)) {
-                        continue;
-                    }
-                }
-                ErrorHelper.sendClientError(bus, message,
-                        "Error calling remote service: " + message.getSubject(), e);
+                handleMessageDeliveryFailure(bus, message, "Error calling remote service: " + message.getSubject(), e, false);
             }
             finally {
                 workExpiry = 0;

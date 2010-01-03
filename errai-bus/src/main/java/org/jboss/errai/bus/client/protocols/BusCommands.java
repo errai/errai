@@ -82,6 +82,7 @@ public enum BusCommands {
      * </tbody>
      * </table>
      */
-    RemoteUnsubscribe
+    RemoteUnsubscribe,
 
+    Disconnect
 }

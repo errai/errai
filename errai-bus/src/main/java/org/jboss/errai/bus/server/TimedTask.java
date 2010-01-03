@@ -24,7 +24,10 @@ public abstract class TimedTask implements Runnable, Comparable<TimedTask> {
 
     public boolean runIfDue(long time) {
         if (nextRuntime < time) {
-            if (nextRuntime == -1) return false;
+            if (nextRuntime == -1) {
+            //    System.out.println("Do Not Fire:" + this);
+                return false;
+            }
             run();
             if (period != -1) {
                 nextRuntime = currentTimeMillis() + period;

@@ -58,7 +58,7 @@ public class MessageQueue {
 
     public Payload poll(boolean wait) {
         if (!queueRunning) {
-            throw new MessageDeliveryFailure("queue is not available");
+            throw new QueueUnavailableException("queue is not available");
         }
 
         checkSession();
@@ -127,7 +127,7 @@ public class MessageQueue {
 
     public boolean offer(final MarshalledMessage message) {
         if (!queueRunning) {
-            throw new MessageDeliveryFailure("queue is not available");
+            throw new QueueUnavailableException("queue is not available");
         }
 
         boolean b = false;
@@ -149,8 +149,9 @@ public class MessageQueue {
                 activationCallback.activate(this);
             } else if (task == null) {
                 final MessageQueue inst = this;
-
-                System.out.println("addTask");
+                /**
+                 * Use the bus scheduler to handle resuming in a fully asynchronous environment.
+                 */
                 bus.getScheduler().addTask(
                         task = new TimedTask() {
                             {
@@ -159,6 +160,7 @@ public class MessageQueue {
                             }
 
                             public void run() {
+
                                 if (activationCallback != null)
                                     activationCallback.activate(inst);
 

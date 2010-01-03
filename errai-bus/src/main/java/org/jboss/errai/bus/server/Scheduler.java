@@ -42,8 +42,13 @@ public class Scheduler extends Thread {
             TimedTask task;
             while (iter.hasNext()) {
                 if ((task = iter.next()).runIfDue(n = currentTimeMillis())) {
-                //    System.out.println("Executed:" + task);
-                    nextRunTime = task.nextRuntime();
+                    if (task.nextRuntime() == -1) {
+                        iter.remove();
+                    } else {
+                        nextRunTime = task.nextRuntime();
+                    }
+                } else if (task.nextRuntime() == -1) {
+                    iter.remove();
                 } else if (nextRunTime == 0 || task.nextRuntime() < nextRunTime) {
                     nextRunTime = task.nextRuntime();
                 } else if (n > task.nextRuntime()) {
@@ -56,6 +61,7 @@ public class Scheduler extends Thread {
     }
 
     public void addTask(TimedTask task) {
+   //     System.out.println("Task Scheduled: " + task);
         synchronized (tasks) {
             tasks.add(task);
             if (nextRunTime == 0 || task.nextRuntime() < nextRunTime) {

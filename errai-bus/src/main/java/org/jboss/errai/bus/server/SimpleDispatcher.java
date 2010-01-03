@@ -8,6 +8,8 @@ import org.jboss.errai.bus.client.RequestDispatcher;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.util.ErrorHelper;
 
+import static org.jboss.errai.bus.server.util.ErrorHelper.handleMessageDeliveryFailure;
+
 /**
  * Simple request dispatcher implementation.
  *
@@ -28,14 +30,11 @@ public class SimpleDispatcher implements RequestDispatcher {
         try {
             bus.sendGlobal(message);
         }
+        catch (QueueUnavailableException e) {
+            handleMessageDeliveryFailure(bus, message, "Queue is not available", e, true);
+        }
         catch (Exception e) {
-            if (message.getErrorCallback() != null) {
-                if (!message.getErrorCallback().error(message, e)) {
-                    return;
-                }
-                ErrorHelper.sendClientError(bus, message, "Error calling remote service: " + message.getSubject(), e);
-            }
-            throw new MessageDeliveryFailure(e);
+            handleMessageDeliveryFailure(bus, message, "Error calling remote service: " + message.getSubject(), e, false);
         }
     }
 
@@ -43,14 +42,11 @@ public class SimpleDispatcher implements RequestDispatcher {
         try {
             bus.send(message);
         }
+        catch (QueueUnavailableException e) {
+            handleMessageDeliveryFailure(bus, message, "Queue is not available", e, true);
+        }
         catch (Exception e) {
-            if (message.getErrorCallback() != null) {
-                if (!message.getErrorCallback().error(message, e)) {
-                    return;
-                }
-                ErrorHelper.sendClientError(bus, message, "Error calling remote service: " + message.getSubject(), e);
-            }
-            throw new MessageDeliveryFailure(e);
+            handleMessageDeliveryFailure(bus, message, "Error calling remote service: " + message.getSubject(), e, false);
         }
     }
 }
