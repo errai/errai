@@ -235,14 +235,14 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         }
     }
 
-    private com.google.gwt.user.client.Timer sendTimer;
+    private Timer sendTimer;
 
     private void sendAll() {
         if (!initialized) {
             return;
         } else if (transmitting) {
             if (sendTimer == null) {
-                sendTimer = new com.google.gwt.user.client.Timer() {
+                sendTimer = new Timer() {
                     int timeout = 0;
 
                     @Override
@@ -272,7 +272,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         }
 
         int transmissionSize = outgoingQueue.size();
-
         StringBuffer outgoing = new StringBuffer();
         for (int i = 0; i < transmissionSize; i++) {
             outgoing.append(outgoingQueue.poll());
@@ -473,7 +472,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                                     block = false;
                                     showError("Communication Error", "None", throwable);
                                     cancel();
-                                    //    schedule(1);
                                 }
 
                                 public void onResponseReceived(Request request, Response response) {

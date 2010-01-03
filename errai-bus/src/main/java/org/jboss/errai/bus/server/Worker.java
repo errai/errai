@@ -25,7 +25,8 @@ public class Worker extends Thread {
 
     private Logger log = getLogger(this.getClass());
 
-    public Worker(WorkerFactory factory, ErraiService svc) {
+    public Worker(ThreadGroup threadGroup, WorkerFactory factory, ErraiService svc) {
+        super(threadGroup, "Dispatch Worker Thread");
         this.workerFactory = factory;
         this.bus = svc.getBus();
         setPriority(Thread.MIN_PRIORITY);

@@ -53,8 +53,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     private final Scheduler houseKeeper = new Scheduler();
 
-  //  private boolean busReady = false;
-
     public ServerMessageBusImpl() {
 
         Thread thread = new Thread() {
@@ -140,7 +138,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             thread.setPriority(Thread.MIN_PRIORITY);
             thread.start();
         }
-
 
         final ServerMessageBusImpl busInst = this;
 
@@ -240,7 +237,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         });
 
         houseKeeper.start();
-        //    workerFactory.startPool();
     }
 
     public void configure(ErraiServiceConfigurator config) {
@@ -350,7 +346,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
     }
 
-
     public Payload nextMessage(Object sessionContext, boolean wait) {
         try {
             return messageQueues.get(sessionContext).poll(wait);
@@ -387,14 +382,11 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
 
     public void addRule(String subject, BooleanRoutingRule rule) {
-        Iterator<MessageCallback> iter = subscriptions.get(subject).iterator();
-
         List<MessageCallback> newCallbacks = new LinkedList<MessageCallback>();
-
+        Iterator<MessageCallback> iter = subscriptions.get(subject).iterator();
         while (iter.hasNext()) {
-            final MessageCallback mc = iter.next();
+            newCallbacks.add(new RuleDelegateMessageCallback(iter.next(), rule));
             iter.remove();
-            newCallbacks.add(new RuleDelegateMessageCallback(mc, rule));
         }
 
         List<MessageCallback> slist = subscriptions.get(subject);

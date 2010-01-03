@@ -17,6 +17,8 @@ public class WorkerFactory {
     private static final String CONFIG_ASYNC_THREAD_POOL_SIZE = "errai.async.thread_pool_size";
     private static final String CONFIG_ASYNC_WORKER_TIMEOUT = "errai.async.worker.timeout";
     private static final String CONFIG_ASYNC_DELIVERY_QUEUE_SIZE = "errai.async.delivery.queue_size";
+
+    private ThreadGroup threadGroup;
     private Worker[] workerPool;
 
     private ErraiService svc;
@@ -31,6 +33,9 @@ public class WorkerFactory {
 
     public WorkerFactory(ErraiService svc) {
         this.svc = svc;
+        this.threadGroup = new ThreadGroup("Workers");
+        this.threadGroup.setDaemon(true);
+        this.threadGroup.setMaxPriority(Thread.MIN_PRIORITY);
 
         ErraiServiceConfigurator cfg = svc.getConfiguration();
 
@@ -53,13 +58,11 @@ public class WorkerFactory {
         this.workerPool = new Worker[poolSize];
 
         for (int i = 0; i < poolSize; i++) {
-            workerPool[i] = new Worker(this, svc);
+            workerPool[i] = new Worker(threadGroup, this, svc);
         }
 
         if (svc.getBus() instanceof ServerMessageBusImpl) {
             ServerMessageBusImpl busImpl = (ServerMessageBusImpl) svc.getBus();
-
-            System.out.println("AddTask");
             /**
              * Add a housekeeper task to the bus housekeeper to timeout long-running tasks.
              */
@@ -81,10 +84,8 @@ public class WorkerFactory {
                     return "WorkerTimeout";
                 }
             });
-            System.out.println("Added Task");
         }
 
-        System.out.println("startPool()");
         startPool();
     }
 
