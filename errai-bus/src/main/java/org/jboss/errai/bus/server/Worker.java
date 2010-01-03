@@ -7,6 +7,7 @@ import org.jboss.errai.bus.server.util.ErrorHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.System.currentTimeMillis;
@@ -15,8 +16,10 @@ import static org.jboss.errai.bus.server.util.ErrorHelper.sendClientError;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class Worker extends Thread {
-    private WorkerFactory workerFactory;
+    //  private WorkerFactory workerFactory;
     private MessageBus bus;
+    private ArrayBlockingQueue<Message> messages;
+    private long timeout;
 
     private boolean active = true;
 
@@ -27,7 +30,8 @@ public class Worker extends Thread {
 
     public Worker(ThreadGroup threadGroup, WorkerFactory factory, ErraiService svc) {
         super(threadGroup, "Dispatch Worker Thread");
-        this.workerFactory = factory;
+        this.timeout = factory.getWorkerTimeout();
+        this.messages = factory.getMessages();
         this.bus = svc.getBus();
         setPriority(Thread.MIN_PRIORITY);
         setDaemon(true);
@@ -42,7 +46,7 @@ public class Worker extends Thread {
     }
 
     public void timeoutInterrupt() {
-        //  timeout = true;
+        System.out.println("interrupt()");
         interrupt();
 
         if (!isInterrupted()) {
@@ -59,15 +63,21 @@ public class Worker extends Thread {
     public void run() {
         while (true) {
             try {
-                if ((message = workerFactory.getMessages().poll(workerFactory.getWorkerTimeout(), TimeUnit.MILLISECONDS)) == null) {
-                    continue;
-                } else {
-                    workExpiry = currentTimeMillis() + workerFactory.getWorkerTimeout();
-                    if (message.isFlagSet(RoutingFlags.NonGlobalRouting)) {
-                        bus.send(message);
+                // looping inside a catch block is cheaper than entering and leaving it
+                // every time.
+                while (true) {
+                    if ((message = messages.poll(1, TimeUnit.MINUTES)) == null) {
+                        continue;
                     } else {
-                        bus.sendGlobal(message);
+                        workExpiry = currentTimeMillis() + timeout;
+                        if (message.isFlagSet(RoutingFlags.NonGlobalRouting)) {
+                            bus.send(message);
+                        } else {
+                            bus.sendGlobal(message);
+                        }
+                        workExpiry = 0;
                     }
+
                 }
             }
             catch (InterruptedException e) {
@@ -78,9 +88,6 @@ public class Worker extends Thread {
             }
             catch (Throwable e) {
                 handleMessageDeliveryFailure(bus, message, "Error calling remote service: " + message.getSubject(), e, false);
-            }
-            finally {
-                workExpiry = 0;
             }
         }
     }
