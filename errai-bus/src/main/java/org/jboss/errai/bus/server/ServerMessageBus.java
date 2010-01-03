@@ -17,7 +17,6 @@
 package org.jboss.errai.bus.server;
 
 import org.jboss.errai.bus.client.BooleanRoutingRule;
-import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.client.Payload;
 
@@ -26,6 +25,9 @@ public interface ServerMessageBus extends MessageBus {
 
     public MessageQueue getQueue(String sessionId);
     public void closeQueue(String sessionId);
-
+    public void closeQueue(MessageQueue queue);
+   
     public void addRule(String subject, BooleanRoutingRule rule);
+
+    public Scheduler getScheduler();
 }

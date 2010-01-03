@@ -40,14 +40,14 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     private final List<MessageListener> listeners = new ArrayList<MessageListener>();
 
     private final Map<String, List<MessageCallback>> subscriptions = new HashMap<String, List<MessageCallback>>();
-    private final Map<String, Set<Object>> remoteSubscriptions = new HashMap<String, Set<Object>>();
+    private final Map<String, Set<MessageQueue>> remoteSubscriptions = new HashMap<String, Set<MessageQueue>>();
 
     private final Map<Object, MessageQueue> messageQueues = new HashMap<Object, MessageQueue>();
 
     private final List<SubscribeListener> subscribeListeners = new LinkedList<SubscribeListener>();
     private final List<UnsubscribeListener> unsubscribeListeners = new LinkedList<UnsubscribeListener>();
 
-    private final HouseKeeper houseKeeper = new HouseKeeper(this);
+    private final Scheduler houseKeeper = new Scheduler(this);
 
     private boolean busReady = false;
 
@@ -136,34 +136,36 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             thread.start();
         }
 
+        final ServerMessageBusImpl busInst = this;
+
         subscribe("ServerBus", new MessageCallback() {
             public void callback(Message message) {
-                String s = message.get(String.class, "Foo");
+                String sessionId = getSessionId(message);
+                MessageQueue queue;
 
                 switch (BusCommands.valueOf(message.getCommandType())) {
                     case RemoteSubscribe:
-                        remoteSubscribe(getSessionId(message),
+                        remoteSubscribe(sessionId, messageQueues.get(sessionId),
                                 message.get(String.class, MessageParts.Subject));
                         break;
 
                     case RemoteUnsubscribe:
-                        remoteUnsubscribe(getSessionId(message),
+                        remoteUnsubscribe(sessionId, messageQueues.get(sessionId),
                                 message.get(String.class, MessageParts.Subject));
                         break;
 
                     case ConnectToQueue:
-                        String sessionId = getSessionId(message);
-
-                        System.out.println("CreatingNewQueue:" + sessionId);
 
                         if (messageQueues.containsKey(sessionId)) {
                             messageQueues.get(sessionId).stopQueue();
                         }
 
                         messageQueues.put(sessionId,
-                                new MessageQueue(QUEUE_SIZE));
+                               queue = new MessageQueue(QUEUE_SIZE, busInst));
 
-                        remoteSubscribe(sessionId, "ClientBus");
+                        System.out.println("NEW QUEUE BITCH");
+
+                        remoteSubscribe(sessionId, queue, "ClientBus");
 
                         for (String service : subscriptions.keySet()) {
                             if (service.startsWith("local:")) {
@@ -185,6 +187,43 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                         getQueue(sessionId).setWindowPolling(true);
 
                         break;
+                }
+            }
+        });
+
+        houseKeeper.addTask(new TimedTask() {
+            {
+                this.period = (1000 * 10);
+            }
+
+            public void run() {
+                boolean houseKeepingPerformed = false;
+                List<MessageQueue> endSessions = new LinkedList<MessageQueue>();
+
+                while (!houseKeepingPerformed) {
+                    try {
+                        Iterator<MessageQueue> iter = busInst.messageQueues.values().iterator();
+                        MessageQueue q;
+                        while (iter.hasNext()) {
+                            if ((q = iter.next()).isStale()) {
+                                iter.remove();
+                                endSessions.add(q);
+                            }
+                        }
+
+                        houseKeepingPerformed = true;
+                    }
+                    catch (ConcurrentModificationException cme) {
+                        // fall-through and try again.
+                    }
+                }
+
+                for (MessageQueue ref : endSessions) {
+                    for (String subject : new HashSet<String>(busInst.remoteSubscriptions.keySet())) {
+                        busInst.remoteUnsubscribe("Housekeeper", ref, subject);
+                    }
+
+                    busInst.messageQueues.remove(ref);
                 }
             }
         });
@@ -223,8 +262,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
         if (remoteSubscriptions.containsKey(subject)) {
             for (Map.Entry<Object, MessageQueue> entry : messageQueues.entrySet()) {
-                if (remoteSubscriptions.get(subject).contains(entry.getKey())) {
-                    messageQueues.get(entry.getKey()).offer(new MarshalledMessage() {
+                if (remoteSubscriptions.get(subject).contains(entry.getValue())) {
+                    messageQueues.get(entry.getValue()).offer(new MarshalledMessage() {
                         public String getSubject() {
                             return subject;
                         }
@@ -277,8 +316,9 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
 
     private void enqueueForDelivery(final String sessionId, final String subject, final Object message) {
-        if (messageQueues.containsKey(sessionId) && isAnyoneListening(sessionId, subject)) {
-            messageQueues.get(sessionId).offer(new MarshalledMessage() {
+        MessageQueue queue = messageQueues.get(sessionId);
+        if (queue != null && isAnyoneListening(queue, subject)) {
+            queue.offer(new MarshalledMessage() {
                 public String getSubject() {
                     return subject;
                 }
@@ -313,8 +353,13 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
 
     public void closeQueue(String sessionContext) {
+        remoteSubscriptions.values().remove(getQueue(sessionContext));
         messageQueues.remove(sessionContext);
-        remoteSubscriptions.remove(sessionContext);
+    }
+
+    public void closeQueue(MessageQueue queue) {
+        remoteSubscriptions.values().remove(queue);          
+        messageQueues.values().remove(queue);
     }
 
     public void addRule(String subject, BooleanRoutingRule rule) {
@@ -344,18 +389,18 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         subscriptions.get(subject).add(receiver);
     }
 
-    public void remoteSubscribe(Object sessionContext, String subject) {
+    public void remoteSubscribe(String sessionContext, MessageQueue queue, String subject) {
         if (subscriptions.containsKey(subject) || subject == null) return;
 
         fireSubscribeListeners(new SubscriptionEvent(true, sessionContext, subject));
 
         if (!remoteSubscriptions.containsKey(subject)) {
-            remoteSubscriptions.put(subject, new HashSet<Object>());
+            remoteSubscriptions.put(subject, new HashSet<MessageQueue>());
         }
-        remoteSubscriptions.get(subject).add(sessionContext);
+        remoteSubscriptions.get(subject).add(queue);
     }
 
-    public void remoteUnsubscribe(Object sessionContext, String subject) {
+    public void remoteUnsubscribe(Object sessionContext, MessageQueue queue, String subject) {
         if (!remoteSubscriptions.containsKey(subject)) {
             return;
         }
@@ -369,9 +414,9 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             return;
         }
 
-        Set<Object> sessionsToSubject = remoteSubscriptions.get(subject);
+        Set<MessageQueue> sessionsToSubject = remoteSubscriptions.get(subject);
 
-        sessionsToSubject.remove(sessionContext);
+        sessionsToSubject.remove(queue);
 
         if (sessionsToSubject.isEmpty()) {
             remoteSubscriptions.remove(subject);
@@ -381,12 +426,14 @@ public class ServerMessageBusImpl implements ServerMessageBus {
          * Any messages still in the queue for this subject, will now never be delivered.  So we must purge them,
          * like the unwanted and forsaken messages they are.
          */
-        Iterator<MarshalledMessage> iter = messageQueues.get(sessionContext).getQueue().iterator();
+        Iterator<MarshalledMessage> iter = queue.getQueue().iterator();
         while (iter.hasNext()) {
             if (subject.equals(iter.next().getSubject())) {
                 iter.remove();
             }
         }
+
+
     }
 
     public void unsubscribeAll(String subject) {
@@ -401,9 +448,9 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         return subscriptions.containsKey(subject);
     }
 
-    private boolean isAnyoneListening(Object sessionContext, String subject) {
+    private boolean isAnyoneListening(MessageQueue queue, String subject) {
         return subscriptions.containsKey(subject) ||
-                (remoteSubscriptions.containsKey(subject) && remoteSubscriptions.get(subject).contains(sessionContext));
+                (remoteSubscriptions.containsKey(subject) && remoteSubscriptions.get(subject).contains(queue));
     }
 
     private boolean fireGlobalMessageListeners(Message message) {
@@ -462,81 +509,13 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         return message.getResource(QueueSession.class, "Session").getSessionId();
     }
 
-    public HouseKeeper getHouseKeeper() {
+    public Map<Object, MessageQueue> getMessageQueues() {
+        return messageQueues;
+    }
+
+    public Scheduler getScheduler() {
         return houseKeeper;
     }
 
-    public static class HouseKeeper extends Thread {
-        private boolean running = true;
-        private ServerMessageBusImpl bus;
-        private List<TimedTask> tasks = new LinkedList<TimedTask>();
 
-        public HouseKeeper(final ServerMessageBusImpl bus) {
-            super();
-            this.bus = bus;
-            setPriority(Thread.MIN_PRIORITY);
-            setDaemon(true);
-
-            tasks.add(new TimedTask() {
-                {
-                    this.period = (1000 * 10);
-                }
-
-                public void run() {
-                    boolean houseKeepingPerformed = false;
-                    List<Object> endSessions = new LinkedList<Object>();
-
-                    while (!houseKeepingPerformed) {
-                        try {
-
-                            Iterator<Object> iter = bus.messageQueues.keySet().iterator();
-                            Object ref;
-
-                            while (iter.hasNext()) {
-                                if (bus.messageQueues.get(ref = iter.next()).isStale()) {
-                                    endSessions.add(ref);
-                                }
-                            }
-
-                            houseKeepingPerformed = true;
-                        }
-                        catch (ConcurrentModificationException cme) {
-                            // fall-through and try again.
-                        }
-                    }
-
-                    for (Object ref : endSessions) {
-                        for (String subject : new HashSet<String>(bus.remoteSubscriptions.keySet())) {
-                            bus.remoteUnsubscribe(ref, subject);
-                        }
-
-                        bus.messageQueues.remove(ref);
-                    }
-                }
-            });
-        }
-
-        @Override
-        public void run() {
-            try {
-                while (running) {
-                    Thread.sleep(1000 * 1);
-                    runAllDue();
-                }
-            }
-            catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
-        private void runAllDue() {
-            for (TimedTask task : tasks) {
-                task.runIfDue(System.currentTimeMillis());
-            }
-        }
-
-        public void addTask(TimedTask task) {
-            tasks.add(task);
-        }
-    }
 }

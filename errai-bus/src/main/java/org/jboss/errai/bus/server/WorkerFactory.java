@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 public class WorkerFactory {
     private static final int DEFAULT_DELIVERY_QUEUE_SIZE = 250;
@@ -63,7 +62,7 @@ public class WorkerFactory {
             /**
              * Add a housekeeper task to the bus housekeeper to timeout long-running tasks.
              */
-            busImpl.getHouseKeeper().addTask(new TimedTask() {
+            busImpl.getScheduler().addTask(new TimedTask() {
                 {
                     period = 1000;
                 }

@@ -63,13 +63,14 @@ public class JBossCometServlet extends HttpServlet implements HttpEventServlet {
 
     public void event(final HttpEvent event) throws IOException, ServletException {
         final HttpServletRequest request = event.getHttpServletRequest();
-       // final HttpSession session = request.getSession();
+        // final HttpSession session = request.getSession();
         final QueueSession session = sessionProvider.getSession(request.getSession());
 
         MessageQueue queue;
         switch (event.getType()) {
             case BEGIN:
-                    queue = getQueue(session);
+                queue = getQueue(session);
+                synchronized (queue) {
                     if (queue == null) {
                         return;
                     }
@@ -92,20 +93,19 @@ public class JBossCometServlet extends HttpServlet implements HttpEventServlet {
                         break;
                     }
 
-                    synchronized (session) {
-                        Set<HttpEvent> events = activeEvents.get(session);
-                        if (events == null) {
-                            activeEvents.put(session, events = new LinkedHashSet<HttpEvent>());
-                        }
-
-                        if (events.contains(event)) {
-//                                              log.info("Resuming Event: " + event);
-                            event.close();
-                        } else {
-//                                               log.info("Add Active Event (" + event.hashCode() + ") ActiveInSession: " + activeEvents.size() + "; MessagesWaiting:" + queue.messagesWaiting() + ")");
-                            events.add(event);
-                        }
+                    Set<HttpEvent> events = activeEvents.get(session);
+                    if (events == null) {
+                        activeEvents.put(session, events = new LinkedHashSet<HttpEvent>());
                     }
+
+                    if (events.contains(event)) {
+//                                              log.info("Resuming Event: " + event);
+                        event.close();
+                    } else {
+//                                               log.info("Add Active Event (" + event.hashCode() + ") ActiveInSession: " + activeEvents.size() + "; MessagesWaiting:" + queue.messagesWaiting() + ")");
+                        events.add(event);
+                    }
+                }
                 break;
 
 
@@ -115,17 +115,17 @@ public class JBossCometServlet extends HttpServlet implements HttpEventServlet {
                     queue.heartBeat();
                 }
 
-                synchronized (session) {
+                synchronized (queue) {
                     Set<HttpEvent> evt = activeEvents.get(session);
                     if (evt != null) {
                         evt.remove(event);
 //                                log.info("Remove Active Event (ActiveInSession: " + evt.size() + ")");
                     }
-                }
 
 //                log.info("End: Queue:" + (queue == null ? "NOQUEUE!" : queue.hashCode()) + "; Event:" + event.hashCode());
 
-                event.close();
+                    event.close();
+                }
                 break;
 
             case EOF:
@@ -134,14 +134,13 @@ public class JBossCometServlet extends HttpServlet implements HttpEventServlet {
 
             case TIMEOUT:
             case ERROR:
+                queue = getQueue(session);
 
-                synchronized (session) {
+                synchronized (queue) {
                     Set<HttpEvent> evt = activeEvents.get(session);
                     if (evt != null) {
                         evt.remove(event);
                     }
-
-                    queue = getQueue(session);
 
                 }
                 if (event.getType() == HttpEvent.EventType.TIMEOUT) {
@@ -220,71 +219,70 @@ public class JBossCometServlet extends HttpServlet implements HttpEventServlet {
 
 
     private MessageQueue getQueue(QueueSession session) {
-         // final HttpSession session = event.getHttpServletRequest().getSession();
-         MessageQueue queue = service.getBus().getQueue(session.getSessionId());
+        // final HttpSession session = event.getHttpServletRequest().getSession();
+        MessageQueue queue = service.getBus().getQueue(session.getSessionId());
 
-         if (queue != null && queue.getActivationCallback() == null) {
-             queue.setActivationCallback(new QueueActivationCallback() {
-                 boolean resumed = false;
+        if (queue != null && queue.getActivationCallback() == null) {
+            queue.setActivationCallback(new QueueActivationCallback() {
+                boolean resumed = false;
 
-                 public void activate(MessageQueue queue) {
-                     synchronized (queue) {
-                         if (resumed) {
-                             //            log.info("Blocking");
-                             return;
-                         }
-                         resumed = true;
-                         queue.setActivationCallback(null);
-                     }
+                public void activate(MessageQueue queue) {
+                    synchronized (queue) {
+                        if (resumed) {
+                            //            log.info("Blocking");
+                            return;
+                        }
+                        resumed = true;
+                        queue.setActivationCallback(null);
+                    }
 
-                     //     log.info("Attempt to resume queue: " + queue.hashCode());
-                     try {
-                         Set<HttpEvent> activeSessEvents;
-                         QueueSession session;
-                         session = queueToSession.get(queue);
-                         if (session == null) {
-                             log.error("Could not resume: No session.");
-                             return;
-                         }
+                    //     log.info("Attempt to resume queue: " + queue.hashCode());
+                    try {
+                        Set<HttpEvent> activeSessEvents;
+                        QueueSession session;
+                        session = queueToSession.get(queue);
+                        if (session == null) {
+                            log.error("Could not resume: No session.");
+                            return;
+                        }
 
-                         synchronized (session) {
-                             activeSessEvents = activeEvents.get(queueToSession.get(queue));
+                        synchronized (session) {
+                            activeSessEvents = activeEvents.get(queueToSession.get(queue));
 
-                             if (activeSessEvents == null || activeSessEvents.isEmpty()) {
-                                 log.warn("No active events to resume with");
-                                 return;
-                             }
+                            if (activeSessEvents == null || activeSessEvents.isEmpty()) {
+                                log.warn("No active events to resume with");
+                                return;
+                            }
 
-                             Iterator<HttpEvent> iter = activeSessEvents.iterator();
-                             HttpEvent et;
-                             while (iter.hasNext()) {
-                                 //            try {
-                                 et = iter.next();
+                            Iterator<HttpEvent> iter = activeSessEvents.iterator();
+                            HttpEvent et;
+                            while (iter.hasNext()) {
+                                //            try {
+                                et = iter.next();
 //                                 log.info("Resume:" + et.hashCode());
-                                 transmitMessages(et.getHttpServletResponse(), queue);
+                                transmitMessages(et.getHttpServletResponse(), queue);
 //                                 log.info("Resumed OK:" + et.hashCode());
-                                 iter.remove();
-                                 et.close();
-                                 return;
+                                iter.remove();
+                                et.close();
+                                return;
 //                                }
 //                                catch (Exception e) {
 //                                    e.printStackTrace();
 //                                    return;
 //                                }
-                             }
+                            }
 
-                         }
-                     }
-                     catch (Exception e) {
-                         e.printStackTrace();
-                     }
-                 }
-             });
-         }
+                        }
+                    }
+                    catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
 
-         return queue;
-     }
-
+        return queue;
+    }
 
 
     public void transmitMessages(final HttpServletResponse httpServletResponse, MessageQueue queue) throws IOException {

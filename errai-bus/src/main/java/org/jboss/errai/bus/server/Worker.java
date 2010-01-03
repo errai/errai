@@ -71,6 +71,7 @@ public class Worker extends Thread {
                 if (!active) return;
             }
             catch (Throwable e) {
+                e.printStackTrace();
                 if (message.getErrorCallback() != null) {
                     if (!message.getErrorCallback().error(message, e)) {
                         continue;

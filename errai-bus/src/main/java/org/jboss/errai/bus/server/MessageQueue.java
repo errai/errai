@@ -21,6 +21,8 @@ import org.jboss.errai.bus.client.Payload;
 
 import static java.lang.System.currentTimeMillis;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -31,7 +33,7 @@ public class MessageQueue {
     private static final long DEFAULT_TRANSMISSION_WINDOW = 25;
     private static final long MAX_TRANSMISSION_WINDOW = 100;
 
-    private long transmissionWindow = 25;
+    private long transmissionWindow = 50;
     private long lastTransmission = currentTimeMillis();
     private long lastEnqueue = currentTimeMillis();
     private long endWindow;
@@ -48,8 +50,12 @@ public class MessageQueue {
     private QueueActivationCallback activationCallback;
     private BlockingQueue<MarshalledMessage> queue;
 
-    public MessageQueue(int queueSize) {
+    private ServerMessageBus bus;
+    private volatile TimedTask task;
+
+    public MessageQueue(int queueSize, ServerMessageBus bus) {
         this.queue = new LinkedBlockingQueue<MarshalledMessage>(queueSize);
+        this.bus = bus;
     }
 
     public Payload poll(boolean wait) {
@@ -71,7 +77,7 @@ public class MessageQueue {
                 m = queue.poll();
             }
 
-           // long startWindow = currentTimeMillis();
+            // long startWindow = currentTimeMillis();
             int payLoadSize = 0;
 
             Payload p = new Payload(m == null ? heartBeat : m);
@@ -97,7 +103,7 @@ public class MessageQueue {
                 if (!throttleIncoming && queue.size() > lastQueueSize) {
                     if (transmissionWindow < MAX_TRANSMISSION_WINDOW) {
                         transmissionWindow += 5;
-                        System.err.println("Congestion on queue -- New transmission window: " + transmissionWindow + "; Queue size: " + queue.size() + ")]");
+                        System.err.println("[Congestion on queue -- New transmission window: " + transmissionWindow + "; Queue size: " + queue.size() + ")]");
                     } else {
                         throttleIncoming = true;
                         System.err.println("[Warning: A queue has become saturated and performance is now being degraded.]");
@@ -140,7 +146,29 @@ public class MessageQueue {
             stopQueue();
             throw new QueueOverloadedException("too many undelievered messages in queue: cannot dispatch message.");
         } else if (activationCallback != null) {
-            activationCallback.activate(this);
+            if (isWindowExceeded()) {
+                descheduleTask();
+                activationCallback.activate(this);
+            } else if (task == null) {
+                final MessageQueue inst = this;
+
+                System.out.println("addTask");
+                bus.getScheduler().addTask(
+                        task = new TimedTask() {
+                            {
+                                period = -1; // only fire once.
+                                nextRunTime = getEndOfWindow();
+                            }
+
+                            public void run() {
+                                if (activationCallback != null)
+                                    activationCallback.activate(inst);
+
+                                task = null;
+                            }
+                        }
+                );
+            }
         }
 
         return b;
@@ -161,6 +189,17 @@ public class MessageQueue {
         return currentTimeMillis() > endWindow;
     }
 
+    private long getEndOfWindow() {
+        return endWindow - currentTimeMillis();
+    }
+
+    private void descheduleTask() {
+        if (task != null) {
+            task.disable();
+            task = null;
+        }
+    }
+
     public boolean messagesWaiting() {
         return !queue.isEmpty();
     }
@@ -178,7 +217,7 @@ public class MessageQueue {
     }
 
     public boolean isStale() {
-        return !pollActive && (currentTimeMillis() - lastTransmission) > TIMEOUT;
+        return !queueRunning || (!pollActive && (currentTimeMillis() - lastTransmission) > TIMEOUT);
     }
 
     public boolean isActive() {
@@ -201,6 +240,7 @@ public class MessageQueue {
     public void stopQueue() {
         queueRunning = false;
         queue.clear();
+        bus.closeQueue(this);
     }
 
     private static final MarshalledMessage heartBeat = new MarshalledMessage() {
