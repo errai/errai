@@ -81,11 +81,9 @@ public class ErraiModule extends ServletModule {
             filter("*.erraiBus").through(filter);
         }
 
+        bind(ErraiServiceConfigurator.class).to(ErraiServiceConfiguratorImpl.class);
+        bind(ErraiService.class).to(ErraiServiceImpl.class);
         bind(MessageBus.class).to(ServerMessageBusImpl.class);
         bind(ServerMessageBus.class).to(ServerMessageBusImpl.class);
-        bind(ErraiService.class).to(ErraiServiceImpl.class);
-        bind(ErraiServiceConfigurator.class).to(ErraiServiceConfiguratorImpl.class);
-
-
     }
 }

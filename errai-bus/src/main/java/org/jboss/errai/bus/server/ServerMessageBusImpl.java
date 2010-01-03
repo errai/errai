@@ -16,12 +16,14 @@
 
 package org.jboss.errai.bus.server;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.jboss.errai.bus.QueueSession;
 import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
+import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 
 import javax.swing.*;
 import java.awt.*;
@@ -34,8 +36,11 @@ import static org.jboss.errai.bus.server.util.ServerBusUtils.encodeJSON;
 @Singleton
 public class ServerMessageBusImpl implements ServerMessageBus {
     private static final String ERRAI_BUS_SHOWMONITOR = "errai.bus.showmonitor";
+    private static final String ERRAI_BUS_QUEUESIZE = "errai.bus.queuesize";
 
-    private final static int QUEUE_SIZE = 200;
+    private final static int DEFAULT_QUEUE_SIZE = 25;
+
+    private int queueSize = DEFAULT_QUEUE_SIZE;
 
     private final List<MessageListener> listeners = new ArrayList<MessageListener>();
 
@@ -52,6 +57,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     private boolean busReady = false;
 
     public ServerMessageBusImpl() {
+
         Thread thread = new Thread() {
             @Override
             public void run() {
@@ -106,7 +112,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
                             builder.append("   Queue: ").append(queue).append(" (size:").append(q.size()).append("; active:")
                                     .append(mq.isActive()).append("; stale:").append(mq.isStale()).append(")")
-                                    .append(q.size() == QUEUE_SIZE ? " ** QUEUE FULL (BLOCKING) **" : "").append("\n");
+                                    .append(q.size() == DEFAULT_QUEUE_SIZE ? " ** QUEUE FULL (BLOCKING) **" : "").append("\n");
                             for (MarshalledMessage message : q) {
                                 builder.append("     -> @").append(message.getSubject()).append(" = ").append(message.getMessage()).append("\n");
                             }
@@ -136,6 +142,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             thread.start();
         }
 
+
         final ServerMessageBusImpl busInst = this;
 
         subscribe("ServerBus", new MessageCallback() {
@@ -161,9 +168,9 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                         }
 
                         messageQueues.put(sessionId,
-                               queue = new MessageQueue(QUEUE_SIZE, busInst));
+                                queue = new MessageQueue(queueSize, busInst));
 
-                  //      System.out.println("NEW QUEUE");
+                        //      System.out.println("NEW QUEUE");
 
                         remoteSubscribe(sessionId, queue, "ClientBus");
 
@@ -237,6 +244,13 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         //    workerFactory.startPool();
     }
 
+    public void configure(ErraiServiceConfigurator config) {
+        queueSize = DEFAULT_QUEUE_SIZE;
+        if (config.hasProperty(ERRAI_BUS_QUEUESIZE)) {
+            queueSize = Integer.parseInt(config.getProperty(ERRAI_BUS_QUEUESIZE));
+        }
+    }
+
     public void sendGlobal(final Message message) {
         final String subject = message.getSubject();
         if (!subscriptions.containsKey(subject) && !remoteSubscriptions.containsKey(subject)) {
@@ -268,7 +282,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         if (remoteSubscriptions.containsKey(subject)) {
             for (Map.Entry<Object, MessageQueue> entry : messageQueues.entrySet()) {
                 if (remoteSubscriptions.get(subject).contains(entry.getValue())) {
-                    messageQueues.get(entry.getValue()).offer(new MarshalledMessage() {
+                    messageQueues.get(entry.getKey()).offer(new MarshalledMessage() {
                         public String getSubject() {
                             return subject;
                         }
@@ -363,7 +377,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
 
     public void closeQueue(MessageQueue queue) {
-        remoteSubscriptions.values().remove(queue);          
+        remoteSubscriptions.values().remove(queue);
         messageQueues.values().remove(queue);
     }
 
@@ -437,8 +451,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 iter.remove();
             }
         }
-
-
     }
 
     public void unsubscribeAll(String subject) {

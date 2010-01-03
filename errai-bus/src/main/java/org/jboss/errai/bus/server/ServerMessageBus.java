@@ -19,6 +19,7 @@ package org.jboss.errai.bus.server;
 import org.jboss.errai.bus.client.BooleanRoutingRule;
 import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.client.Payload;
+import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 
 public interface ServerMessageBus extends MessageBus {
     public Payload nextMessage(Object sessionContext, boolean wait);
@@ -30,4 +31,6 @@ public interface ServerMessageBus extends MessageBus {
     public void addRule(String subject, BooleanRoutingRule rule);
 
     public Scheduler getScheduler();
+
+    public void configure(ErraiServiceConfigurator service);
 }

@@ -33,7 +33,7 @@ public class SimpleDispatcher implements RequestDispatcher {
         catch (QueueUnavailableException e) {
             handleMessageDeliveryFailure(bus, message, "Queue is not available", e, true);
         }
-        catch (Exception e) {
+        catch (Throwable e) {
             handleMessageDeliveryFailure(bus, message, "Error calling remote service: " + message.getSubject(), e, false);
         }
     }
@@ -45,7 +45,7 @@ public class SimpleDispatcher implements RequestDispatcher {
         catch (QueueUnavailableException e) {
             handleMessageDeliveryFailure(bus, message, "Queue is not available", e, true);
         }
-        catch (Exception e) {
+        catch (Throwable e) {
             handleMessageDeliveryFailure(bus, message, "Error calling remote service: " + message.getSubject(), e, false);
         }
     }
