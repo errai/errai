@@ -16,7 +16,6 @@
 
 package org.jboss.errai.bus.server;
 
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.jboss.errai.bus.QueueSession;
 import org.jboss.errai.bus.client.*;
@@ -54,7 +53,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     private final Scheduler houseKeeper = new Scheduler();
 
-    private boolean busReady = false;
+  //  private boolean busReady = false;
 
     public ServerMessageBusImpl() {
 
@@ -265,7 +264,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
                 enqueueForDelivery(getSessionId(message),
                         message.get(String.class, MessageParts.ReplyTo),
-                        encodeJSON(CommandMessage.create(SecurityCommands.MessageNotDelivered).getParts()));
+                        encodeJSON(CommandMessage.create().command(SecurityCommands.MessageNotDelivered).getParts()));
             }
 
             return;
@@ -325,7 +324,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         if (fireListeners && !fireGlobalMessageListeners(message)) {
             if (message.hasPart(MessageParts.ReplyTo)) {
                 enqueueForDelivery(sessionid, message.get(String.class, MessageParts.ReplyTo),
-                        encodeJSON(CommandMessage.create(SecurityCommands.MessageNotDelivered).getParts()));
+                        encodeJSON(CommandMessage.create().command(SecurityCommands.MessageNotDelivered).getParts()));
             }
 
             return;
@@ -372,12 +371,18 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
 
     public void closeQueue(String sessionContext) {
-        remoteSubscriptions.values().remove(getQueue(sessionContext));
+        MessageQueue q = getQueue(sessionContext);
+        for (Set<MessageQueue> sq : remoteSubscriptions.values()) {
+            sq.remove(q);
+        }
         messageQueues.remove(sessionContext);
     }
 
     public void closeQueue(MessageQueue queue) {
-        remoteSubscriptions.values().remove(queue);
+        for (Set<MessageQueue> sq : remoteSubscriptions.values()) {
+            sq.remove(queue);
+        }
+
         messageQueues.values().remove(queue);
     }
 
