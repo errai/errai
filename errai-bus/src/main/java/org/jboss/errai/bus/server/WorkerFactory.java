@@ -59,6 +59,7 @@ public class WorkerFactory {
         if (svc.getBus() instanceof ServerMessageBusImpl) {
             ServerMessageBusImpl busImpl = (ServerMessageBusImpl) svc.getBus();
 
+            System.out.println("AddTask");
             /**
              * Add a housekeeper task to the bus housekeeper to timeout long-running tasks.
              */
@@ -66,7 +67,6 @@ public class WorkerFactory {
                 {
                     period = 1000;
                 }
-
                 public void run() {
                     for (Worker w : workerPool) {
                         if (!w.isValid()) {
@@ -75,9 +75,16 @@ public class WorkerFactory {
                         }
                     }
                 }
+
+                @Override
+                public String toString() {
+                    return "WorkerTimeout";
+                }
             });
+            System.out.println("Added Task");
         }
 
+        System.out.println("startPool()");
         startPool();
     }
 

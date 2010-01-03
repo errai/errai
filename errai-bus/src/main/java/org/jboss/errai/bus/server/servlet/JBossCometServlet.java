@@ -63,35 +63,29 @@ public class JBossCometServlet extends HttpServlet implements HttpEventServlet {
 
     public void event(final HttpEvent event) throws IOException, ServletException {
         final HttpServletRequest request = event.getHttpServletRequest();
-        // final HttpSession session = request.getSession();
         final QueueSession session = sessionProvider.getSession(request.getSession());
 
         MessageQueue queue;
         switch (event.getType()) {
             case BEGIN:
                 queue = getQueue(session);
+                if (queue == null) {
+                    return;
+                }
                 synchronized (queue) {
-                    if (queue == null) {
-                        return;
+                    if ("POST".equals(request.getMethod())) {
+                        // do not pause incoming messages.
+                        break;
+                    } else if (queue.messagesWaiting()) {
+                        transmitMessages(event.getHttpServletResponse(), queue);
+                        event.close();
+                        break;
                     }
 
                     if (!queueToSession.containsKey(queue)) {
                         queueToSession.put(queue, session);
                     }
 
-                    if ("POST".equals(request.getMethod())) {
-                        // do not pause incoming messages.
-                        //                   log.info("Do not pause POST event: " + event.hashCode());
-                        break;
-                    }
-
-//                     log.info("BEGIN:" + event.hashCode());
-                    if (queue.messagesWaiting()) {
-//                        log.info("Transmit: " + event.hashCode());
-                        transmitMessages(event.getHttpServletResponse(), queue);
-                        event.close();
-                        break;
-                    }
 
                     Set<HttpEvent> events = activeEvents.get(session);
                     if (events == null) {
@@ -99,10 +93,8 @@ public class JBossCometServlet extends HttpServlet implements HttpEventServlet {
                     }
 
                     if (events.contains(event)) {
-//                                              log.info("Resuming Event: " + event);
                         event.close();
                     } else {
-//                                               log.info("Add Active Event (" + event.hashCode() + ") ActiveInSession: " + activeEvents.size() + "; MessagesWaiting:" + queue.messagesWaiting() + ")");
                         events.add(event);
                     }
                 }
@@ -110,7 +102,6 @@ public class JBossCometServlet extends HttpServlet implements HttpEventServlet {
 
 
             case END:
-//                log.info("__END__ " + event.hashCode());
                 if ((queue = getQueue(session)) != null) {
                     queue.heartBeat();
                 }
@@ -119,10 +110,7 @@ public class JBossCometServlet extends HttpServlet implements HttpEventServlet {
                     Set<HttpEvent> evt = activeEvents.get(session);
                     if (evt != null) {
                         evt.remove(event);
-//                                log.info("Remove Active Event (ActiveInSession: " + evt.size() + ")");
                     }
-
-//                log.info("End: Queue:" + (queue == null ? "NOQUEUE!" : queue.hashCode()) + "; Event:" + event.hashCode());
 
                     event.close();
                 }
@@ -159,7 +147,6 @@ public class JBossCometServlet extends HttpServlet implements HttpEventServlet {
                 break;
 
             case READ:
-//                    log.info("READ:" + event.hashCode());
                 readInRequest(request);
                 event.close();
         }
@@ -204,22 +191,17 @@ public class JBossCometServlet extends HttpServlet implements HttpEventServlet {
             buffer.rewind();
         }
 
-//         log.info("ReceivedFromClient:" + sb.toString());
-
         int messagesSent = 0;
         for (Message msg : createCommandMessage(sessionProvider.getSession(request.getSession()), sb.toString())) {
             service.store(msg);
             messagesSent++;
         }
 
-//          log.info("Messages stored into bus: " + messagesSent);
-
         return messagesSent;
     }
 
 
     private MessageQueue getQueue(QueueSession session) {
-        // final HttpSession session = event.getHttpServletRequest().getSession();
         MessageQueue queue = service.getBus().getQueue(session.getSessionId());
 
         if (queue != null && queue.getActivationCallback() == null) {
@@ -256,22 +238,9 @@ public class JBossCometServlet extends HttpServlet implements HttpEventServlet {
 
                             Iterator<HttpEvent> iter = activeSessEvents.iterator();
                             HttpEvent et;
-                            while (iter.hasNext()) {
-                                //            try {
-                                et = iter.next();
-//                                 log.info("Resume:" + et.hashCode());
-                                transmitMessages(et.getHttpServletResponse(), queue);
-//                                 log.info("Resumed OK:" + et.hashCode());
-                                iter.remove();
-                                et.close();
-                                return;
-//                                }
-//                                catch (Exception e) {
-//                                    e.printStackTrace();
-//                                    return;
-//                                }
-                            }
-
+                            transmitMessages((et = iter.next()).getHttpServletResponse(), queue);
+                            iter.remove();
+                            et.close();
                         }
                     }
                     catch (Exception e) {

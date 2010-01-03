@@ -47,7 +47,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     private final List<SubscribeListener> subscribeListeners = new LinkedList<SubscribeListener>();
     private final List<UnsubscribeListener> unsubscribeListeners = new LinkedList<UnsubscribeListener>();
 
-    private final Scheduler houseKeeper = new Scheduler(this);
+    private final Scheduler houseKeeper = new Scheduler();
 
     private boolean busReady = false;
 
@@ -163,7 +163,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                         messageQueues.put(sessionId,
                                queue = new MessageQueue(QUEUE_SIZE, busInst));
 
-                        System.out.println("NEW QUEUE BITCH");
+                        System.out.println("NEW QUEUE");
 
                         remoteSubscribe(sessionId, queue, "ClientBus");
 
@@ -225,6 +225,11 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
                     busInst.messageQueues.remove(ref);
                 }
+            }
+
+            @Override
+            public String toString() {
+                return "Bus Housekeeper";
             }
         });
 

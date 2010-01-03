@@ -21,8 +21,6 @@ import org.jboss.errai.bus.client.Payload;
 
 import static java.lang.System.currentTimeMillis;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -157,7 +155,7 @@ public class MessageQueue {
                         task = new TimedTask() {
                             {
                                 period = -1; // only fire once.
-                                nextRunTime = getEndOfWindow();
+                                nextRuntime = getEndOfWindow();
                             }
 
                             public void run() {
@@ -165,6 +163,11 @@ public class MessageQueue {
                                     activationCallback.activate(inst);
 
                                 task = null;
+                            }
+
+                            @Override
+                            public String toString() {
+                                return "MessageResumer";
                             }
                         }
                 );

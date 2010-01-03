@@ -67,19 +67,12 @@ public class TomcatCometServlet extends HttpServlet implements CometProcessor {
         switch (event.getEventType()) {
             case BEGIN:
                 event.setTimeout(30000);
-//                if ((queue = getQueue(session)) != null && queue.messagesWaiting()) {
-//                    transmitMessages(event.getHttpServletResponse(), queue);
-//                    event.close();
-//                    break;
-//                }
-
                 if ((queue = getQueue(session)) != null) {
                     synchronized (queue) {
                         if ("POST".equals(request.getMethod())) {
                             // do not pause incoming messages.
                             break;
-                        }
-                        else if (queue.messagesWaiting()) {
+                        } else if (queue.messagesWaiting()) {
                             transmitMessages(event.getHttpServletResponse(), queue);
                             event.close();
                             break;
@@ -89,15 +82,15 @@ public class TomcatCometServlet extends HttpServlet implements CometProcessor {
                             queueToSession.put(queue, session);
                         }
 
-
                         Set<CometEvent> events = activeEvents.get(session);
                         if (events == null) {
-                            activeEvents.put(session, events = new LinkedHashSet<CometEvent>());
+                            activeEvents.put(session, events = new HashSet<CometEvent>());
                         }
 
                         if (events.contains(event)) {
                             event.close();
                         } else {
+                            //   log.info("Add Event:" + event);
                             events.add(event);
                         }
                     }
@@ -111,9 +104,7 @@ public class TomcatCometServlet extends HttpServlet implements CometProcessor {
 
                 synchronized (queue) {
                     Set<CometEvent> evt = activeEvents.get(session);
-                    if (evt != null) {
-                        evt.remove(event);
-                    } else {
+                    if (evt != null && !evt.remove(event)) {
                         return;
                     }
 
@@ -125,10 +116,11 @@ public class TomcatCometServlet extends HttpServlet implements CometProcessor {
                 queue = getQueue(session);
                 synchronized (queue) {
                     Set<CometEvent> evt = activeEvents.get(session);
-                    if (evt != null) {
-                        evt.remove(event);
+                    if (evt != null && !evt.remove(event)) {
+                        return;
                     }
                 }
+
                 if (event.getEventSubType() == CometEvent.EventSubType.TIMEOUT) {
                     if (queue != null) queue.heartBeat();
                 } else {
@@ -137,7 +129,6 @@ public class TomcatCometServlet extends HttpServlet implements CometProcessor {
                         service.getBus().closeQueue(session.getSessionId());
                         activeEvents.remove(session);
                     }
-
 
                     log.error("An Error Occured" + event.getEventSubType());
                 }
@@ -190,15 +181,11 @@ public class TomcatCometServlet extends HttpServlet implements CometProcessor {
                 buffer.rewind();
             }
 
-            //    log.info("ReceivedFromClient:" + sb.toString());
-
             int messagesSent = 0;
             for (Message msg : createCommandMessage(sessionProvider.getSession(request.getSession()), sb.toString())) {
                 service.store(msg);
                 messagesSent++;
             }
-
-            //    log.info("Messages stored into bus: " + messagesSent);
 
             return messagesSent;
         }
@@ -214,9 +201,7 @@ public class TomcatCometServlet extends HttpServlet implements CometProcessor {
 
 
     private MessageQueue getQueue(QueueSession session) {
-        // final HttpSession session = event.getHttpServletRequest().getSession();
         MessageQueue queue = service.getBus().getQueue(session.getSessionId());
-
         if (queue != null && queue.getActivationCallback() == null) {
             queue.setActivationCallback(new QueueActivationCallback() {
                 boolean resumed = false;
@@ -228,9 +213,7 @@ public class TomcatCometServlet extends HttpServlet implements CometProcessor {
                         }
                         resumed = true;
                         queue.setActivationCallback(null);
-                        //       queue.setActivationCallback(null);
 
-                //        log.info("Attempt to resume queue: " + queue.hashCode());
                         try {
                             Set<CometEvent> activeSessEvents;
                             QueueSession session;
@@ -244,34 +227,13 @@ public class TomcatCometServlet extends HttpServlet implements CometProcessor {
                             activeSessEvents = activeEvents.get(queueToSession.get(queue));
 
                             if (activeSessEvents == null || activeSessEvents.isEmpty()) {
-                                //    log.error("Stopping queue...");
-                                //     queue.stopQueue();
+                                log.error("Nothing active man");
                                 return;
                             }
 
-                            Iterator<CometEvent> iter = activeSessEvents.iterator();
-                            CometEvent et = null;
-                            if (iter.hasNext()) {
-                                try {
-                                    et = iter.next();
-                                    //   log.error("Stopping event... " + et);
-                                    transmitMessages(et.getHttpServletResponse(), queue);
-                                    //      return;
-                                }
-                                catch (NullPointerException e) {
-
-                                    e.printStackTrace();
-                                    //      return;
-                                }
-                                finally {
-                                    iter.remove();
-                                    try {
-                                        if (et != null) et.close();
-                                    }
-                                    catch (IllegalStateException e) {
-                                    }
-                                }
-                            }
+                            CometEvent et = activeSessEvents.iterator().next();
+                            transmitMessages(et.getHttpServletResponse(), queue);
+                            et.close();
                         }
                         catch (Exception e) {
                             e.printStackTrace();

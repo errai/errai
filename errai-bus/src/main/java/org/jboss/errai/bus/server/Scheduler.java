@@ -2,25 +2,26 @@ package org.jboss.errai.bus.server;
 
 import java.util.*;
 
+import static java.lang.System.currentTimeMillis;
+
 public class Scheduler extends Thread {
     private boolean running = true;
     private long nextRunTime = 0;
-    private ServerMessageBusImpl bus;
-    private Set<TimedTask> tasks = new LinkedHashSet<TimedTask>();
+    // private ServerMessageBusImpl bus;
+    private final TreeSet<TimedTask> tasks = new TreeSet<TimedTask>();
 
-    public Scheduler(final ServerMessageBusImpl bus) {
+    public Scheduler() {
         super();
-        this.bus = bus;
+        //   this.bus = bus;
         setPriority(Thread.MIN_PRIORITY);
         setDaemon(true);
     }
 
     @Override
     public void run() {
-
         while (running) {
             try {
-                long sleep = nextRunTime = System.currentTimeMillis();
+                long sleep = nextRunTime - currentTimeMillis();
                 if (sleep > 0) {
                     Thread.sleep(sleep);
                 }
@@ -34,28 +35,39 @@ public class Scheduler extends Thread {
     }
 
     private void runAllDue() {
-        long nextRun;
-        Iterator<TimedTask> iter = tasks.iterator();
-        while (iter.hasNext()) {
-            nextRun = iter.next().runIfDue(System.currentTimeMillis());
-            if (nextRun == -1) {
-                iter.remove();
-            } else if (nextRun < nextRunTime) {
-                nextRunTime = nextRun;
+        long n = 0;
+
+        synchronized (tasks) {
+            Iterator<TimedTask> iter = tasks.iterator();
+            TimedTask task;
+            while (iter.hasNext()) {
+                if ((task = iter.next()).runIfDue(n = currentTimeMillis())) {
+                //    System.out.println("Executed:" + task);
+                    nextRunTime = task.nextRuntime();
+                } else if (nextRunTime == 0 || task.nextRuntime() < nextRunTime) {
+                    nextRunTime = task.nextRuntime();
+                } else if (n > task.nextRuntime()) {
+                    return;
+                }
             }
         }
 
+        if (n == 0) nextRunTime = currentTimeMillis() + 10000;
     }
 
     public void addTask(TimedTask task) {
-        if (task.nextRuntime() < nextRunTime) {
-            nextRunTime = nextRunTime - System.currentTimeMillis();
-            interrupt();
+        synchronized (tasks) {
+            tasks.add(task);
+            if (nextRunTime == 0 || task.nextRuntime() < nextRunTime) {
+                nextRunTime = task.nextRuntime();
+                interrupt();
+            }
         }
-        tasks.add(task);
     }
 
     public void removeTask(TimedTask task) {
-        tasks.remove(task);
+        synchronized (tasks) {
+            tasks.remove(task);
+        }
     }
 }

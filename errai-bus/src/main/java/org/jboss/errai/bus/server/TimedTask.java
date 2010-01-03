@@ -1,7 +1,9 @@
 package org.jboss.errai.bus.server;
 
-public abstract class TimedTask implements Runnable {
-    protected long nextRunTime;
+import static java.lang.System.currentTimeMillis;
+
+public abstract class TimedTask implements Runnable, Comparable<TimedTask> {
+    protected long nextRuntime;
     protected long period;
 
     public long getPeriod() {
@@ -13,21 +15,34 @@ public abstract class TimedTask implements Runnable {
     }
 
     public long nextRuntime() {
-        return nextRunTime;
+        return nextRuntime;
     }
 
     public void disable() {
-        nextRunTime = -1;
+        nextRuntime = -1;
     }
 
-    public long runIfDue(long time) {
-        if (nextRunTime == -1) return -1;
-        else if ((nextRunTime) < time) {
+    public boolean runIfDue(long time) {
+        if (nextRuntime < time) {
+            if (nextRuntime == -1) return false;
             run();
             if (period != -1) {
-                nextRunTime = System.currentTimeMillis() + period;
+                nextRuntime = currentTimeMillis() + period;
             }
+            else {
+                nextRuntime = -1;
+            }
+            return true;
         }
-        return nextRunTime;
+        return false;
+    }
+
+    public int compareTo(TimedTask o) {
+        if (nextRuntime > o.nextRuntime)
+            return 1;
+        else if (nextRuntime < o.nextRuntime)
+            return 1;
+        else
+            return 0;
     }
 }
