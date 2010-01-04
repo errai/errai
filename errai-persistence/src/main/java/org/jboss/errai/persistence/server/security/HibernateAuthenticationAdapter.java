@@ -19,12 +19,10 @@ package org.jboss.errai.persistence.server.security;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.hibernate.Session;
-import org.jboss.errai.bus.QueueSession;
-import org.jboss.errai.bus.client.CommandMessage;
+import org.jboss.errai.bus.server.QueueSession;
 import org.jboss.errai.bus.client.ConversationMessage;
 import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.MessageBus;
-import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
 import org.jboss.errai.bus.client.security.CredentialTypes;
@@ -45,11 +43,9 @@ import org.mvel2.MVEL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpSession;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.ResourceBundle;
 import java.util.Set;
 
 public class HibernateAuthenticationAdapter implements AuthenticationAdapter {

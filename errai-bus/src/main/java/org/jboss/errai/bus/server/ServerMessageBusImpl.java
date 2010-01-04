@@ -17,7 +17,7 @@
 package org.jboss.errai.bus.server;
 
 import com.google.inject.Singleton;
-import org.jboss.errai.bus.QueueSession;
+import org.jboss.errai.bus.server.QueueSession;
 import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;

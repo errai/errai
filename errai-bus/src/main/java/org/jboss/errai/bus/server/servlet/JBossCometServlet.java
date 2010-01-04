@@ -5,7 +5,7 @@ import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.apache.catalina.CometEvent;
-import org.jboss.errai.bus.QueueSession;
+import org.jboss.errai.bus.server.QueueSession;
 import org.jboss.errai.bus.client.MarshalledMessage;
 import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.MessageBus;

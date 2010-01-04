@@ -1,6 +1,6 @@
 package org.jboss.errai.bus.server;
 
-import org.jboss.errai.bus.QueueSession;
+import org.jboss.errai.bus.server.QueueSession;
 
 import javax.servlet.http.HttpSession;
 import java.util.HashMap;

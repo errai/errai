@@ -1,4 +1,4 @@
-package org.jboss.errai.bus;
+package org.jboss.errai.bus.server;
 
 public interface QueueSession {
     public String getSessionId();

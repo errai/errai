@@ -18,7 +18,7 @@ package org.jboss.errai.bus.server.service;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.jboss.errai.bus.QueueSession;
+import org.jboss.errai.bus.server.QueueSession;
 import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
@@ -29,8 +29,6 @@ import org.jboss.errai.bus.server.security.auth.AuthenticationAdapter;
 import org.jboss.errai.bus.server.security.auth.AuthenticationFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.servlet.http.HttpSession;
 
 import static com.google.inject.Guice.createInjector;
 

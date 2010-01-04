@@ -17,7 +17,7 @@
 package org.jboss.errai.bus.server.security.auth;
 
 import com.google.inject.Inject;
-import org.jboss.errai.bus.QueueSession;
+import org.jboss.errai.bus.server.QueueSession;
 import org.jboss.errai.bus.client.ConversationMessage;
 import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.MessageBus;

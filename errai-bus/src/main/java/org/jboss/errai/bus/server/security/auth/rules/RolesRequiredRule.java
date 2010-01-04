@@ -16,7 +16,7 @@
 
 package org.jboss.errai.bus.server.security.auth.rules;
 
-import org.jboss.errai.bus.QueueSession;
+import org.jboss.errai.bus.server.QueueSession;
 import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
@@ -25,7 +25,6 @@ import org.jboss.errai.bus.server.util.ServerBusUtils;
 import org.jboss.errai.bus.server.security.auth.AuthSubject;
 import org.jboss.errai.bus.server.service.ErraiService;
 
-import javax.servlet.http.HttpSession;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
