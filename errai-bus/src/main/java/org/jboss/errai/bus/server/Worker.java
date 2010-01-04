@@ -49,7 +49,7 @@ public class Worker extends Thread {
         System.out.println("interrupt()");
         interrupt();
 
-        if (!isInterrupted()) {
+        if (!isInterrupted() && workExpiry != 0) {
             log.info("failed to interrupt worker.");
         } else {
             workExpiry = 0;
@@ -88,6 +88,9 @@ public class Worker extends Thread {
             }
             catch (Throwable e) {
                 handleMessageDeliveryFailure(bus, message, "Error calling remote service: " + message.getSubject(), e, false);
+            }
+            finally {
+                workExpiry = 0;
             }
         }
     }

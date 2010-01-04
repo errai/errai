@@ -14,22 +14,14 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.common.client.types.handlers.collections;
+package org.jboss.errai.bus.server.annotations;
 
-import org.jboss.errai.common.client.types.TypeHandler;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import java.util.Collection;
-
-public class CollectionToObjArray implements TypeHandler<Collection, Object[]> {
-    public Object[] getConverted(Collection in) {
-        if (in == null) return null;
-        Object[] newArray = new Object[in.size()];
-
-        int i = 0;
-        for (Object o : in) {
-           newArray[i++] = o;
-        }
-
-        return newArray;
-    }
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface Endpoint {
 }

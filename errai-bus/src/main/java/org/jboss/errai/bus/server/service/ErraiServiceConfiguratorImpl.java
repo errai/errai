@@ -17,6 +17,7 @@
 package org.jboss.errai.bus.server.service;
 
 import com.google.inject.*;
+import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.client.MessageCallback;
 import org.jboss.errai.bus.client.RequestDispatcher;
@@ -24,12 +25,16 @@ import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.Module;
 import org.jboss.errai.bus.server.ServerMessageBus;
 import org.jboss.errai.bus.server.SimpleDispatcher;
+import org.jboss.errai.bus.server.annotations.Endpoint;
 import org.jboss.errai.bus.server.annotations.ExtensionComponent;
 import org.jboss.errai.bus.server.annotations.LoadModule;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.annotations.security.RequireAuthentication;
 import org.jboss.errai.bus.server.annotations.security.RequireRoles;
 import org.jboss.errai.bus.server.ext.ErraiConfigExtension;
+import org.jboss.errai.bus.server.io.ConversationalEndpointCallback;
+import org.jboss.errai.bus.server.io.EndpointCallback;
+import org.jboss.errai.bus.server.io.RemoteServiceCallback;
 import org.jboss.errai.bus.server.security.auth.AuthenticationAdapter;
 import org.jboss.errai.bus.server.security.auth.rules.RolesRequiredRule;
 import org.jboss.errai.bus.server.util.ConfigUtil;
@@ -38,6 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.util.*;
 
 import static com.google.inject.Guice.createInjector;
@@ -103,7 +109,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                                 bind(MessageBus.class).toInstance(bus);
                             }
                         }).getInstance(AuthenticationAdapter.class);
-                        
+
                         extensionBindings.put(AuthenticationAdapter.class, new Provider() {
                             public Object get() {
                                 return authAdapterInst;
@@ -129,7 +135,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
         }
 
 
-         this.dispatcher = createInjector(new AbstractModule() {
+        this.dispatcher = createInjector(new AbstractModule() {
             @Override
             protected void configure() {
                 Class<? extends RequestDispatcher> dispatcherImplementation = SimpleDispatcher.class;
@@ -172,25 +178,22 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
 
                         final Runnable create = new Runnable() {
                             public void run() {
-                              AbstractModule module = new AbstractModule()
-                              {
-                                @Override
-                                protected void configure()
-                                {
-                                  bind(ErraiConfigExtension.class).to(clazz);
-                                  bind(ErraiServiceConfigurator.class).toInstance(configInst);
-                                  bind(MessageBus.class).toInstance(bus);
+                                AbstractModule module = new AbstractModule() {
+                                    @Override
+                                    protected void configure() {
+                                        bind(ErraiConfigExtension.class).to(clazz);
+                                        bind(ErraiServiceConfigurator.class).toInstance(configInst);
+                                        bind(MessageBus.class).toInstance(bus);
 
-                                  // Add any extension bindings.
-                                  for (Map.Entry<Class, Provider> entry : extensionBindings.entrySet())
-                                  {
-                                    bind(entry.getKey()).toProvider(entry.getValue());
-                                  }
-                                }
-                              };
-                              Guice.createInjector(module)
-                                  .getInstance(ErraiConfigExtension.class)
-                                  .configure(extensionBindings, resourceProviders);
+                                        // Add any extension bindings.
+                                        for (Map.Entry<Class, Provider> entry : extensionBindings.entrySet()) {
+                                            bind(entry.getKey()).toProvider(entry.getValue());
+                                        }
+                                    }
+                                };
+                                Guice.createInjector(module)
+                                        .getInstance(ErraiConfigExtension.class)
+                                        .configure(extensionBindings, resourceProviders);
                             }
                         };
 
@@ -227,11 +230,12 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                                 }).getInstance(Module.class).init();
                             }
 
-                        } else if (MessageCallback.class.isAssignableFrom(loadClass)) {
-                            final Class<? extends MessageCallback> clazz = loadClass.asSubclass(MessageCallback.class);
-                            if (clazz.isAnnotationPresent(Service.class)) {
+                        } else if (loadClass.isAnnotationPresent(Service.class)) {
+                            Object svc = null;
+                            if (MessageCallback.class.isAssignableFrom(loadClass)) {
+                                final Class<? extends MessageCallback> clazz = loadClass.asSubclass(MessageCallback.class);
                                 log.info("discovered service: " + clazz.getName());
-                                MessageCallback svc = Guice.createInjector(new AbstractModule() {
+                                svc = Guice.createInjector(new AbstractModule() {
                                     @Override
                                     protected void configure() {
                                         bind(MessageCallback.class).to(clazz);
@@ -254,7 +258,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                                 }
 
                                 // Subscribe the service to the bus.
-                                bus.subscribe(svcName, svc);
+                                bus.subscribe(svcName, (MessageCallback) svc);
 
                                 RolesRequiredRule rule = null;
                                 if (clazz.isAnnotationPresent(RequireRoles.class)) {
@@ -264,6 +268,36 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                                 }
                                 if (rule != null) {
                                     bus.addRule(svcName, rule);
+                                }
+                            }
+
+                            if (svc == null) {
+                                svc = Guice.createInjector(new AbstractModule() {
+                                    @Override
+                                    protected void configure() {
+                                        bind(Object.class).toInstance(loadClass);
+                                        bind(MessageBus.class).toInstance(bus);
+                                        bind(RequestDispatcher.class).toInstance(dispatcher);
+
+                                        // Add any extension bindings.
+                                        for (Map.Entry<Class, Provider> entry : extensionBindings.entrySet()) {
+                                            bind(entry.getKey()).toProvider(entry.getValue());
+                                        }
+                                    }
+                                }).getInstance(Object.class);
+                            }
+
+                            Map<String, MessageCallback> epts = new HashMap<String, MessageCallback>();
+
+                            // we scan for endpoints
+                            for (final Method method : loadClass.getDeclaredMethods()) {
+                                if (method.isAnnotationPresent(Endpoint.class)) {
+                                    //   Endpoint endpoint = method.getAnnotation(Endpoint.class);
+                                    epts.put(method.getName(), method.getReturnType() == Void.class ?
+                                            new EndpointCallback(svc, method) :
+                                            new ConversationalEndpointCallback(svc, method, bus));
+
+                                    bus.subscribe(loadClass.getSimpleName(), new RemoteServiceCallback(epts));
                                 }
                             }
                         }

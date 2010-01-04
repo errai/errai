@@ -97,7 +97,6 @@ public class ErraiServiceImpl implements ErraiService {
             }
         });
 
-
         /**
          * The standard ServerEchoService.
          */
@@ -126,6 +125,7 @@ public class ErraiServiceImpl implements ErraiService {
         configurator.configure(this);
         dispatcher = configurator.getConfiguredDispatcher();
         bus.configure(configurator);
+
         final ErraiService erraiSvc = this;
     }
 

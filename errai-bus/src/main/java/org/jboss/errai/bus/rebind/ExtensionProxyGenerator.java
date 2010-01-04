@@ -16,7 +16,6 @@
 
 package org.jboss.errai.bus.rebind;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
@@ -28,7 +27,6 @@ import com.google.gwt.user.rebind.SourceWriter;
 import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.client.ext.ExtensionsLoader;
 import org.jboss.errai.bus.server.annotations.ExtensionComponent;
-import org.jboss.errai.bus.server.util.ConfigUtil;
 import org.jboss.errai.bus.server.util.RebindVisitor;
 
 import java.io.File;
@@ -127,7 +125,7 @@ public class ExtensionProxyGenerator extends Generator {
 
         final List<File> targets = findAllConfigTargets();
 
-        new SerializationExtensionGenerator().generate(context, logger, sourceWriter, targets);
+        new BusClientConfigGenerator().generate(context, logger, sourceWriter, targets);
         
         visitAllTargets(targets, context, logger, sourceWriter,
                 new RebindVisitor() {

@@ -20,6 +20,7 @@ import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.user.rebind.SourceWriter;
 import org.jboss.errai.bus.server.annotations.ExposeEntity;
+import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.util.ConfigUtil;
 import org.jboss.errai.bus.server.util.RebindVisitor;
 import org.mvel2.templates.CompiledTemplate;
@@ -38,11 +39,11 @@ import static org.jboss.errai.bus.server.util.ConfigUtil.visitAllTargets;
 import static org.mvel2.templates.TemplateCompiler.compileTemplate;
 import static org.mvel2.templates.TemplateRuntime.execute;
 
-public class SerializationExtensionGenerator implements ExtensionGenerator {
+public class BusClientConfigGenerator implements ExtensionGenerator {
     private CompiledTemplate demarshallerGenerator;
     private CompiledTemplate marshallerGenerator;
 
-    public SerializationExtensionGenerator() {
+    public BusClientConfigGenerator() {
         InputStream istream = this.getClass().getResourceAsStream("DemarshallerGenerator.mv");
         demarshallerGenerator = compileTemplate(istream, null);
 
@@ -65,6 +66,15 @@ public class SerializationExtensionGenerator implements ExtensionGenerator {
                                 types.put(f.getName(), f.getType());
                             }
 
+                            try {
+                                visit.getConstructor(new Class[0]);
+                            }
+                            catch (NoSuchMethodException e) {
+                                String errorMsg = "Type annotated with @ExposeEntity does not expose a default constructor";
+                                logger.log(TreeLogger.Type.ERROR, errorMsg, e);
+                                throw new GenerationException(errorMsg, e);
+                            }
+
                             Map<String, Object> templateVars = new HashMap<String, Object>();
                             templateVars.put("className", visit.getName());
                             templateVars.put("fields", types.keySet());
@@ -81,6 +91,10 @@ public class SerializationExtensionGenerator implements ExtensionGenerator {
                             logger.log(TreeLogger.Type.INFO, genStr);
                             logger.log(TreeLogger.Type.INFO, "Generated mashaller/demarshaller for: " + visit.getName());
                         }
+                        else if (visit.isAnnotationPresent(Service.class)) {
+
+                        }
+
                     }
                 }
         );
