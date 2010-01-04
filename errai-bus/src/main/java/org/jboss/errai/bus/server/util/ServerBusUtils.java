@@ -38,7 +38,7 @@ public class ServerBusUtils {
     }
 
     public static String encodeJSON(Object value) {
-        return new JSONEncoder().encode(value);
+        return JSONEncoder.encode(value);
     }
 
     public static String getSessionId(Message message) {

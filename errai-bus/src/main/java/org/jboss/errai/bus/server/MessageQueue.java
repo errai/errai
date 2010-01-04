@@ -26,14 +26,15 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 public class MessageQueue {
-    private static final long TIMEOUT = Boolean.getBoolean("org.jboss.errai.debugmode") ? (1000 * 60 * 60) : (1000 * 46);
+    private static final long TIMEOUT = Boolean.getBoolean("org.jboss.errai.debugmode") ?
+            (1000 * 60 * 60) : (1000 * 46);
+
     private static final int MAXIMUM_PAYLOAD_SIZE = 10;
     private static final long DEFAULT_TRANSMISSION_WINDOW = 25;
     private static final long MAX_TRANSMISSION_WINDOW = 100;
 
     private long transmissionWindow = 50;
     private long lastTransmission = currentTimeMillis();
-    private long lastEnqueue = currentTimeMillis();
     private long endWindow;
 
     private int lastQueueSize = 0;
@@ -75,7 +76,6 @@ public class MessageQueue {
                 m = queue.poll();
             }
 
-            // long startWindow = currentTimeMillis();
             int payLoadSize = 0;
 
             Payload p = new Payload(m == null ? heartBeat : m);
@@ -101,10 +101,12 @@ public class MessageQueue {
                 if (!throttleIncoming && queue.size() > lastQueueSize) {
                     if (transmissionWindow < MAX_TRANSMISSION_WINDOW) {
                         transmissionWindow += 5;
-                        System.err.println("[Congestion on queue -- New transmission window: " + transmissionWindow + "; Queue size: " + queue.size() + ")]");
+                        System.err.println("[Congestion on queue -- New transmission window: "
+                                + transmissionWindow + "; Queue size: " + queue.size() + ")]");
                     } else {
                         throttleIncoming = true;
-                        System.err.println("[Warning: A queue has become saturated and performance is now being degraded.]");
+                        System.err.println("[Warning: A queue has become saturated and " +
+                                "performance is now being degraded.]");
                     }
 
                 } else if (queue.isEmpty()) {
@@ -113,9 +115,8 @@ public class MessageQueue {
                 }
             }
 
-            lastTransmission = currentTimeMillis();
             lastQueueSize = queue.size();
-            endWindow = lastTransmission + transmissionWindow;
+            endWindow = (lastTransmission = currentTimeMillis()) + transmissionWindow;
 
             return p;
         }
@@ -131,7 +132,6 @@ public class MessageQueue {
         }
 
         boolean b = false;
-        lastEnqueue = currentTimeMillis();
         activity();
         try {
             b = (throttleIncoming ? queue.offer(message, 250, TimeUnit.MILLISECONDS) : queue.offer(message));

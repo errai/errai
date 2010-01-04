@@ -28,11 +28,11 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class JSONEncoder {
-    public String encode(Object v) {
+    public static String encode(Object v) {
         return _encode(v);
     }
 
-    public String _encode(Object v) {
+    private static String _encode(Object v) {
         if (v == null) {
             return "null";
         } else if (v instanceof String) {
@@ -56,7 +56,7 @@ public class JSONEncoder {
 
     private static final Map<Class, Serializable[]> MVELEncodingCache = new HashMap<Class, Serializable[]>();
 
-    public String encodeObject(Serializable o) {
+    private static String encodeObject(Serializable o) {
         if (o == null) return "null";
 
         Class cls = o.getClass();
@@ -106,7 +106,7 @@ public class JSONEncoder {
         return build.append('}').toString();
     }
 
-    public String encodeMap(Map<Object, Object> map) {
+    private static String encodeMap(Map<Object, Object> map) {
         StringBuilder mapBuild = new StringBuilder("{");
         boolean first = true;
 
@@ -124,7 +124,7 @@ public class JSONEncoder {
         return mapBuild.append('}').toString();
     }
 
-    private String encodeCollection(Collection col) {
+    private static String encodeCollection(Collection col) {
         StringBuilder buildCol = new StringBuilder("[");
         Iterator iter = col.iterator();
         while (iter.hasNext()) {
@@ -134,7 +134,7 @@ public class JSONEncoder {
         return buildCol.append(']').toString();
     }
 
-    private String encodeArray(Object[] array) {
+    private static String encodeArray(Object[] array) {
         StringBuilder buildCol = new StringBuilder("[");
         for (int i = 0; i < array.length; i++) {
             buildCol.append(_encode(array[i]));

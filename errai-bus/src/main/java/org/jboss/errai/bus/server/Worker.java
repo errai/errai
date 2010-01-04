@@ -1,11 +1,10 @@
 package org.jboss.errai.bus.server;
 
-import org.jboss.errai.bus.client.*;
-import org.jboss.errai.bus.client.protocols.BusCommands;
+import org.jboss.errai.bus.client.Message;
+import org.jboss.errai.bus.client.MessageBus;
+import org.jboss.errai.bus.client.RoutingFlags;
 import org.jboss.errai.bus.server.service.ErraiService;
-import org.jboss.errai.bus.server.util.ErrorHelper;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -16,7 +15,6 @@ import static org.jboss.errai.bus.server.util.ErrorHelper.sendClientError;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class Worker extends Thread {
-    //  private WorkerFactory workerFactory;
     private MessageBus bus;
     private ArrayBlockingQueue<Message> messages;
     private long timeout;
@@ -46,7 +44,6 @@ public class Worker extends Thread {
     }
 
     public void timeoutInterrupt() {
-        System.out.println("interrupt()");
         interrupt();
 
         if (!isInterrupted() && workExpiry != 0) {
@@ -66,9 +63,7 @@ public class Worker extends Thread {
                 // looping inside a catch block is cheaper than entering and leaving it
                 // every time.
                 while (true) {
-                    if ((message = messages.poll(1, TimeUnit.MINUTES)) == null) {
-                        continue;
-                    } else {
+                    if ((message = messages.poll(1, TimeUnit.MINUTES)) != null) {
                         workExpiry = currentTimeMillis() + timeout;
                         if (message.isFlagSet(RoutingFlags.NonGlobalRouting)) {
                             bus.send(message);
@@ -77,7 +72,9 @@ public class Worker extends Thread {
                         }
                         workExpiry = 0;
                     }
-
+                    if (!active) {
+                        return;
+                    }
                 }
             }
             catch (InterruptedException e) {

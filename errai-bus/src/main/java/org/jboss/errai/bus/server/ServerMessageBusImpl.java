@@ -30,6 +30,8 @@ import java.util.*;
 import java.util.List;
 import java.util.Queue;
 
+import static org.jboss.errai.bus.client.protocols.MessageParts.ReplyTo;
+import static org.jboss.errai.bus.client.protocols.SecurityCommands.MessageNotDelivered;
 import static org.jboss.errai.bus.server.util.ServerBusUtils.encodeJSON;
 
 @Singleton
@@ -166,8 +168,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                         messageQueues.put(sessionId,
                                 queue = new MessageQueue(queueSize, busInst));
 
-                        //      System.out.println("NEW QUEUE");
-
                         remoteSubscribe(sessionId, queue, "ClientBus");
 
                         for (String service : subscriptions.keySet()) {
@@ -253,14 +253,14 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
 
         if (!fireGlobalMessageListeners(message)) {
-            if (message.hasPart(MessageParts.ReplyTo) && message.hasResource("Session")) {
+            if (message.hasPart(ReplyTo) && message.hasResource("Session")) {
                 /**
                  * Inform the sender that we did not dispatchGlobal the message.
                  */
 
                 enqueueForDelivery(getSessionId(message),
-                        message.get(String.class, MessageParts.ReplyTo),
-                        encodeJSON(CommandMessage.create().command(SecurityCommands.MessageNotDelivered).getParts()));
+                        message.get(String.class, ReplyTo),
+                        encodeJSON(CommandMessage.create().command(MessageNotDelivered).getParts()));
             }
 
             return;
@@ -318,11 +318,10 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     private void send(String sessionid, Message message, boolean fireListeners) {
         if (fireListeners && !fireGlobalMessageListeners(message)) {
-            if (message.hasPart(MessageParts.ReplyTo)) {
-                enqueueForDelivery(sessionid, message.get(String.class, MessageParts.ReplyTo),
-                        encodeJSON(CommandMessage.create().command(SecurityCommands.MessageNotDelivered).getParts()));
+            if (message.hasPart(ReplyTo)) {
+                enqueueForDelivery(sessionid, message.get(String.class, ReplyTo),
+                        encodeJSON(CommandMessage.create().command(MessageNotDelivered).getParts()));
             }
-
             return;
         }
 
