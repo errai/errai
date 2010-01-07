@@ -30,6 +30,10 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
+    <properties>
+        <mosaic.version>0.3.0-rc1</mosaic.version>
+    </properties>
+
 
     <dependencies>
         <dependency>
@@ -51,6 +55,35 @@
             <groupId>com.googlecode.gwtmosaic</groupId>
             <artifactId>gwt-mosaic-dnd</artifactId>
             <version>0.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.googlecode.gwtmosaic</groupId>
+            <artifactId>gwt-mosaic</artifactId>
+            <version>0.4.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.googlecode.gwtmosaic</groupId>
+            <artifactId>gwt-beans-binding</artifactId>
+            <version>${mosaic.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.googlecode.gwtmosaic</groupId>
+            <artifactId>gwt-dnd</artifactId>
+            <version>${mosaic.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.googlecode.gwtmosaic</groupId>
+            <artifactId>gwt-incubator</artifactId>
+            <version>${mosaic.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.googlecode.gwtmosaic</groupId>
+            <artifactId>gwtx</artifactId>
+            <version>${mosaic.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.guice</groupId>
