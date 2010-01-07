@@ -59,7 +59,7 @@
         <dependency>
             <groupId>com.googlecode.gwtmosaic</groupId>
             <artifactId>gwt-mosaic</artifactId>
-            <version>0.4.0</version>
+            <version>${mosaic.version}</version>
         </dependency>
 
         <dependency>
