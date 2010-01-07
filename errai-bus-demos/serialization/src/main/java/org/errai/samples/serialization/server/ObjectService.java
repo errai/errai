@@ -54,10 +54,10 @@ public class ObjectService implements MessageCallback {
             return;
         }
 
-        ConversationMessage.create(message)
-                .toSubject("ClientEndpoint")
-                .set("Records", records)
-                .sendNowWith(bus);
+        MessageBuilder.createConversation(message)
+                .toSubject("ClientEndpoint").signalling()
+                .with("Records", records)
+                .noErrorHandling().sendNowWith(bus);
     }
 
     private static Date getDate(int year, int month, int day) {
