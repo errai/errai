@@ -28,7 +28,7 @@ public class WSTabPanel extends Composite {
 
     private int activeTab;
 
-    public WSTabPanel() {
+    public WSTabPanel() {                                
         layoutPanel = new DockPanel();
         layoutPanel.setSize("98%", "100%");
 

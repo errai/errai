@@ -275,7 +275,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                                 svc = Guice.createInjector(new AbstractModule() {
                                     @Override
                                     protected void configure() {
-                                        bind(Object.class).toInstance(loadClass);
+                          //              bind(Object.class).toInstance(loadClass);
                                         bind(MessageBus.class).toInstance(bus);
                                         bind(RequestDispatcher.class).toInstance(dispatcher);
 
@@ -284,7 +284,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                                             bind(entry.getKey()).toProvider(entry.getValue());
                                         }
                                     }
-                                }).getInstance(Object.class);
+                                }).getInstance(loadClass);
                             }
 
                             Map<String, MessageCallback> epts = new HashMap<String, MessageCallback>();

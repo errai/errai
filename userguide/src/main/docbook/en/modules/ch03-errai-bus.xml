@@ -1,47 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook V4.2//EN" "../docbookV4.2/docbookx.dtd">
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook V4.2//EN"
+"../docbookV4.2/docbookx.dtd">
 <chapter id="bus">
-    <title>Errai Bus</title>
-    <sect1 id="bus-intro">
-        <title>What is Errai Bus?</title>
-        <para>
-            ErraiBus forms the backbone of the Errai framework's approach to application design. Most
-            importantly, it provides a straight-forward approach to a complex problem space. Providing
-            common APIs across the client and server, developers will have no trouble working with complex
-            messaging scenarios from building instant messaging clients, stock tickers, to monitoring
-            instruments. There's no more messing with RPC APIs, or unweildy AJAX or COMET frameworks.
-            We've built it all in to one, consice messaging framework. It's single-paradigm, and it's fun
-            to work wit
-        </para>
-    </sect1>
+  <title>Errai Bus</title>
 
-    <sect1><title>Basic message exchange patterns</title>
-        <sect2>
-            <title>Receiving messages on the server side</title>
-            <para>
-                Every message has a sender and at least one receiver.
-                A receiver is as it sounds--it receives the message and does something with it. Implementing a receiver (also referred to as a service) is as simple as implementing our standard MessageCallback interface,
-                which is used pervasively across, both client and server code.
-                Let's begin with server side component that receives messages:
+  <sect1 id="bus-intro">
+    <title>What is Errai Bus?</title>
 
-                <programlisting>
+    <para>ErraiBus forms the backbone of the Errai framework's approach to
+    application design. Most importantly, it provides a straight-forward
+    approach to a complex problem space. Providing common APIs across the
+    client and server, developers will have no trouble working with complex
+    messaging scenarios from building instant messaging clients, stock
+    tickers, to monitoring instruments. There's no more messing with RPC APIs,
+    or unweildy AJAX or COMET frameworks. We've built it all in to one,
+    consice messaging framework. It's single-paradigm, and it's fun to work
+    with.</para>
+
+    <para></para>
+  </sect1>
+
+  <sect1>
+    <title>Basic message exchange patterns</title>
+
+    <sect2>
+      <title>Receiving messages on the server side</title>
+
+      <para>Every message has a sender and at least one receiver. A receiver
+      is as it sounds--it receives the message and does something with it.
+      Implementing a receiver (also referred to as a service) is as simple as
+      implementing our standard MessageCallback interface, which is used
+      pervasively across, both client and server code. Let's begin with server
+      side component that receives messages: <programlisting>
 @Service("HelloWorldService")
 public class HelloWorldService implements MessageCallback {
     public void callback(CommandMessage message) {
         System.out.println("Hello, World!");
     }
 }
-                </programlisting>
-            </para>
-        </sect2>
+                </programlisting></para>
+    </sect2>
 
-        <sect2>
-            <title>Sending messages from a client</title>
-            <para>
-                In order to send a message from a client you need to create a CommandMessage
-                and send it through an instance of MessageBus. In this simple example we send it to
-                the subject 'HelloWorldService'
-                <programlisting>
+    <sect2>
+      <title>Sending messages from a client</title>
+
+      <para>In order to send a message from a client you need to create a
+      <emphasis><emphasis><filename>CommandMessage</filename></emphasis></emphasis>
+      and send it through an instance of <filename>MessageBus</filename>. In
+      this simple example we send it to the subject 'HelloWorldService'
+      <programlisting>
 public class HelloWorld implements EntryPoint {
 
     // Get an instance of the MessageBus
@@ -63,18 +70,16 @@ public class HelloWorld implements EntryPoint {
         [...]
      }
 }
-                </programlisting>
-            </para>
-        </sect2>
+                </programlisting></para>
+    </sect2>
 
-        <sect2>
-            <title>Sending messages to a client</title>
-            <para>
-                In the following example we extend our server side component
-                to reply with a message when the callback method is invoked.
-                It will create a CommadnMessage and address it to the subject 'HelloWorldClient':
-                
-                <programlisting>
+    <sect2>
+      <title>Sending messages to a client</title>
+
+      <para>In the following example we extend our server side component to
+      reply with a message when the callback method is invoked. It will create
+      a CommadnMessage and address it to the subject 'HelloWorldClient':
+      <programlisting>
 @Service("HelloWorldService")
 public class HelloWorldService implements MessageCallback {
 
@@ -95,25 +100,20 @@ public class HelloWorldService implements MessageCallback {
         });
     }
 }               
-                </programlisting>
+                </programlisting> <tip>
+          <title>The @Inject annotation</title>
 
-                <tip>
-                    <title>The @Inject annotation</title>
-                    <para>
-                    Confused about the @Inject annotation? Take a look at the
-                    section about wiring server side components.
-                    </para>
-                </tip>
-            </para>
+          <para>Confused about the @Inject annotation? Take a look at the
+          section about wiring server side components.</para>
+        </tip></para>
+    </sect2>
 
-        </sect2>
+    <sect2>
+      <title>Receiving messages on the client side</title>
 
-        <sect2>
-            <title>Receiving messages on the client side</title>
-            <para>
-             If a client needs to receive messages that are "pushed" from the server side
-             it needs to register a listener on a certain subject.      
-             <programlisting>
+      <para>If a client needs to receive messages that are "pushed" from the
+      server side it needs to register a listener on a certain subject.
+      <programlisting>
 
 public class HelloWorld implements EntryPoint {
     private MessageBus bus = ErraiBus.get();
@@ -123,7 +123,7 @@ public class HelloWorld implements EntryPoint {
                  
     /**
     * Declare a local service to receive messages on the subject
-    * "HelloWorldClient".
+    * "BroadcastReceiver".
     */
     bus.subscribe("BroadcastReceiver", new MessageCallback() {
         public void callback(CommandMessage message) {
@@ -137,42 +137,38 @@ public class HelloWorld implements EntryPoint {
 
     [...]                 
 }
-             </programlisting>
-            </para>
+             </programlisting></para>
+    </sect2>
+  </sect1>
 
-        </sect2>
+  <sect1>
+    <title>Advanced messaging scenarios</title>
 
-    </sect1>
+    <sect2>
+      <title>Broadcasting messages</title>
+    </sect2>
 
-    <sect1>
-        <title>Advanced messaging scenarios</title>
-        <sect2>
-            <title>Broadcasting messages</title>
-        </sect2>
-        <sect2>
-            <title>Conversational message exchange</title>
-        </sect2>
-    </sect1>
+    <sect2>
+      <title>Conversational message exchange</title>
+    </sect2>
+  </sect1>
 
-    <sect1>
-        <title>Message payload and serialization</title>
-        <para>
-            How does the low level API work and how should people
-            work with domain models.            
-        </para>
-    </sect1>
+  <sect1>
+    <title>Message payload and serialization</title>
 
-    <sect1 id="wiring">
-        <title>Wiring server side components</title>
-        <para>
-         Put some explanation about the guice integration here.   
-        </para>
-    </sect1>
+    <para>How does the low level API work and how should people work with
+    domain models.</para>
+  </sect1>
 
-     <sect1>
-        <title>Bus configuration</title>
-         <para>
-             Explain ErraiService.properties and ErraiApp.properties
-         </para>
-    </sect1>
+  <sect1 id="wiring">
+    <title>Wiring server side components</title>
+
+    <para>Put some explanation about the guice integration here.</para>
+  </sect1>
+
+  <sect1>
+    <title>Bus configuration</title>
+
+    <para>Explain ErraiService.properties and ErraiApp.properties</para>
+  </sect1>
 </chapter>

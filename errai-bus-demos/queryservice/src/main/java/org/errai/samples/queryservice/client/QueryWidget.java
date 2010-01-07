@@ -31,45 +31,27 @@ import org.jboss.errai.bus.client.*;
 public class QueryWidget extends Composite {
     @UiHandler("sendQuery")
     void doSubmit(ClickEvent event) {
-        /**
-         * Define a message to be sent.
-         */
-        Message msg = CommandMessage.create()
-                .toSubject("QueryService")
-                .set("QueryString", queryBox.getText());
-     
-        /**
-         * Define a MessageCallback to handle the response.
-         */
-        MessageCallback responseHandler = new MessageCallback() {
-            public void callback(Message message) {
-                /**
-                 * Extract the results String[] from the incoming message.
-                 */
-                String[] resultsString = message.get(String[].class, "QueryResponse");
 
-                /**
-                 * If there's no results, display a message.
-                 */
-                if (resultsString == null) {
-                    resultsString = new String[]{"No results."};
-                }
+        RemoteCall.create()
+                .call("QueryService")
+                .endpoint("getQuery", queryBox.getText())
+                .respondTo(String[].class, new RemoteCallback<String[]>() {
+                    public void callback(String[] resultsString) {
+                        if (resultsString == null) {
+                            resultsString = new String[]{"No results."};
+                        }
 
-                /**
-                 * Build an HTML unordered list based on the results.
-                 */
-                StringBuffer buf = new StringBuffer("<ul>");
-                for (String result : resultsString) {
-                    buf.append("<li>").append(result).append("</li>");
-                }
-                results.setHTML(buf.append("</ul>").toString());
-            }
-        };
-
-        /**
-         * Initiate the conversation.
-         */
-        bus.conversationWith(msg, responseHandler);
+                        /**
+                         * Build an HTML unordered list based on the results.
+                         */
+                        StringBuffer buf = new StringBuffer("<ul>");
+                        for (String result : resultsString) {
+                            buf.append("<li>").append(result).append("</li>");
+                        }
+                        results.setHTML(buf.append("</ul>").toString());
+                    }
+                })
+                .sendNowWith(bus);
     }
 
     /**

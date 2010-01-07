@@ -14,8 +14,7 @@ public class MessageBuilder {
         return new AbstractMessageBuilder(CommandMessage.create());
     }
 
-    /*
-     *
+    /**
      * Create a conversational messages
      * @param message
      * @return
