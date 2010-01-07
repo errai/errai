@@ -16,13 +16,12 @@
 
 package org.jboss.errai.bus.client.security;
 
-import org.jboss.errai.bus.client.CommandMessage;
-import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.Message;
-import org.jboss.errai.bus.client.MessageCallback;
+import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
+
+import static org.jboss.errai.bus.client.MessageBuilder.createMessage;
 import static org.jboss.errai.bus.client.protocols.SecurityParts.CredentialsRequired;
 import org.jboss.errai.bus.client.security.impl.BasicAuthenticationContext;
 import org.jboss.errai.bus.client.security.impl.NameCredential;
@@ -66,10 +65,11 @@ public class SecurityService {
 
                         handler.doLogin(credentials);
 
-                        Message challenge = CommandMessage.create()
+                        Message challenge = createMessage()
                                 .toSubject("AuthorizationService")
                                 .command(SecurityCommands.AuthRequest)
-                                .set(MessageParts.ReplyTo, SUBJECT);
+                                .with(MessageParts.ReplyTo, SUBJECT)
+                                .getMessage();
 
                         for (int i = 0; i < credentialNames.length; i++) {
                             switch (CredentialTypes.valueOf(credentialNames[i])) {
@@ -110,11 +110,12 @@ public class SecurityService {
             }
         });
 
-        CommandMessage.create()
+        MessageBuilder.createMessage()
                 .toSubject("AuthorizationService")
                 .command(SecurityCommands.WhatCredentials)
-                .set(MessageParts.ReplyTo, SUBJECT)
-                .sendNowWith(ErraiBus.get());
+                .with(MessageParts.ReplyTo, SUBJECT)
+                .noErrorHandling().sendNowWith(ErraiBus.get());
+
     }
 
 }

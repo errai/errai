@@ -2,10 +2,13 @@ package org.jboss.errai.bus.server.util;
 
 import org.jboss.errai.bus.client.ConversationMessage;
 import org.jboss.errai.bus.client.Message;
+import org.jboss.errai.bus.client.MessageBuilder;
 import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.server.MessageDeliveryFailure;
 import org.mvel2.util.StringAppender;
+
+import static org.jboss.errai.bus.client.MessageBuilder.createMessage;
 
 public class ErrorHelper {
     public static void sendClientError(MessageBus bus, Message message, String errorMessage, Throwable e) {
@@ -32,19 +35,19 @@ public class ErrorHelper {
 
 
     public static void sendClientError(MessageBus bus, Message message, String errorMessage, String additionalDetails) {
-        ConversationMessage.create(message)
-                .toSubject("ClientBusErrors")
-                .set("ErrorMessage", errorMessage)
-                .set("AdditionalDetails", additionalDetails).sendNowWith(bus);
+        createMessage()
+                .toSubject("ClientBusErrors").signalling()
+                .with("ErrorMessage", errorMessage)
+                .with("AdditionalDetails", additionalDetails)
+                .noErrorHandling().sendNowWith(bus);
 
     }
 
     public static void disconnectRemoteBus(MessageBus bus, Message message) {
-        ConversationMessage.create(message)
+        createMessage()
                 .toSubject("ClientBus")
                 .command(BusCommands.Disconnect)
-                .sendNowWith(bus);
-
+                .noErrorHandling().sendNowWith(bus);
     }
 
     public static void handleMessageDeliveryFailure(MessageBus bus, Message message, String errorMessage, Throwable e, boolean disconnect) {

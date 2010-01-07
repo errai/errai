@@ -32,7 +32,7 @@ public class QueryWidget extends Composite {
     @UiHandler("sendQuery")
     void doSubmit(ClickEvent event) {
 
-        RemoteCall.create()
+        MessageBuilder.createCall()
                 .call("QueryService")
                 .endpoint("getQuery", queryBox.getText())
                 .respondTo(String[].class, new RemoteCallback<String[]>() {
@@ -51,6 +51,7 @@ public class QueryWidget extends Composite {
                         results.setHTML(buf.append("</ul>").toString());
                     }
                 })
+                .noErrorHandling()
                 .sendNowWith(bus);
     }
 

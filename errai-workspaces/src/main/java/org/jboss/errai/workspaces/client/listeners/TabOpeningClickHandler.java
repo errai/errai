@@ -28,6 +28,9 @@ import org.jboss.errai.workspaces.client.framework.Tool;
 import org.jboss.errai.workspaces.client.layout.LayoutHint;
 import org.jboss.errai.workspaces.client.layout.LayoutHintProvider;
 
+import static org.jboss.errai.bus.client.MessageBuilder.createConversation;
+import static org.jboss.errai.bus.client.MessageBuilder.createMessage;
+
 public class TabOpeningClickHandler implements ClickHandler {
     private Tool tool;
 
@@ -60,7 +63,7 @@ public class TabOpeningClickHandler implements ClickHandler {
                             }
                         });
 
-                        ConversationMessage.create(message).sendNowWith(bus);
+                        createConversation(message).getMessage().sendNowWith(bus);
                     }
                     catch (Exception e) {
                         e.printStackTrace();
@@ -77,15 +80,16 @@ public class TabOpeningClickHandler implements ClickHandler {
          */
         ((ClientMessageBus)bus).beginCapture();
 
-        CommandMessage.create(LayoutCommands.OpenNewTab)
+        createMessage()
                 .toSubject("org.jboss.errai.WorkspaceLayout")
-                .set(LayoutParts.ComponentID, tool.getId())
-                .set(LayoutParts.IconURI, tool.getIcon().getUrl())
-                .set(LayoutParts.MultipleInstances, tool.multipleAllowed())
-                .set(LayoutParts.Name, tool.getName())
-                .set(LayoutParts.DOMID, tool.getId() + "_" + System.currentTimeMillis())
-                .set(LayoutParts.InitSubject, initSubject)
-                .sendNowWith(bus);
+                .command(LayoutCommands.OpenNewTab)
+                .with(LayoutParts.ComponentID, tool.getId())
+                .with(LayoutParts.IconURI, tool.getIcon().getUrl())
+                .with(LayoutParts.MultipleInstances, tool.multipleAllowed())
+                .with(LayoutParts.Name, tool.getName())
+                .with(LayoutParts.DOMID, tool.getId() + "_" + System.currentTimeMillis())
+                .with(LayoutParts.InitSubject, initSubject)
+                .noErrorHandling().sendNowWith(bus);
         }
         catch (Exception e) {
             e.printStackTrace();

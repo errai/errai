@@ -79,20 +79,20 @@ public class CommandMessage implements Message {
     /**
      * @param commandType
      * @return
-     * @deprecated Use create() and the command() method instead.
+     * @deprecated Please use the MessageBuilder class.
      */
     @Deprecated
-    public static CommandMessage create(String commandType) {
+    static CommandMessage create(String commandType) {
         return new CommandMessage(commandType);
     }
 
     /**
      * @param commandType
      * @return
-     * @deprecated Use create() and the command() method instead.
+     * @deprecated Please use the MessageBuilder class.
      */
     @Deprecated
-    public static CommandMessage create(Enum commandType) {
+    static CommandMessage create(Enum commandType) {
         return new CommandMessage(commandType);
     }
 
@@ -101,8 +101,18 @@ public class CommandMessage implements Message {
      *
      * @return a new instance of CommandMessage
      */
-    public static CommandMessage create() {
+
+    static CommandMessage create() {
         return new CommandMessage();
+    }
+
+    /**
+     * For internal use. This method should not be directly used.
+     * @param parts
+     * @return
+     */
+    public static CommandMessage createWithParts(Map<String, Object> parts) {
+        return new CommandMessage(parts);
     }
 
     protected CommandMessage() {

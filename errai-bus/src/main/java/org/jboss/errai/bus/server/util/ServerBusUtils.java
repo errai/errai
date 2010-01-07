@@ -30,7 +30,7 @@ public class ServerBusUtils {
     }
 
     public static Message decodeToCommandMessage(Object in) {
-        return CommandMessage.create().setParts(decodeMap(in));
+        return CommandMessage.createWithParts(decodeMap(in));
     }
 
     public static Map<String, Object> decodeMap(Object value) {

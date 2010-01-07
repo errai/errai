@@ -22,6 +22,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.ErraiBus;
+import org.jboss.errai.bus.client.MessageBuilder;
 import org.jboss.errai.bus.client.json.JSONUtilCli;
 import org.jboss.errai.bus.client.protocols.LayoutCommands;
 import org.jboss.errai.workspaces.client.protocols.LayoutParts;
@@ -32,6 +33,8 @@ import org.jboss.errai.widgets.client.listeners.ClickCallbackListener;
 
 import java.util.Map;
 import java.util.Set;
+
+import static org.jboss.errai.bus.client.MessageBuilder.createMessage;
 
 
 public class WSTabSelectorDialog extends WSModalDialog {
@@ -68,9 +71,9 @@ public class WSTabSelectorDialog extends WSModalDialog {
                     , new ClickHandler() {
 
                         public void onClick(ClickEvent event) {
-                            CommandMessage.create(LayoutCommands.ActivateTool)
+                            createMessage()
                                     .toSubject((String) instanceProperties.get(LayoutParts.Subject.name()))
-                                    .sendNowWith(ErraiBus.get());
+                                    .signalling().noErrorHandling().sendNowWith(ErraiBus.get());
 
                             window.hide();
                         }

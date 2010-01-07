@@ -6,23 +6,29 @@ import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.client.RequestDispatcher;
 
 
-public class AbstractMessageBuilder  {
+public class AbstractMessageBuilder {
     private final Message message;
 
     public AbstractMessageBuilder(Message message) {
         this.message = message;
     }
 
-    public MessageBuildCommand toSubject(final String subjectName) {
-        message.toSubject(subjectName);
-
+    public MessageBuildSubject start() {
         final MessageBuildSendable sendable = new MessageBuildSendable() {
             public void sendNowWith(MessageBus viaThis) {
                 message.sendNowWith(viaThis);
             }
 
+            public void sendNowWith(MessageBus viaThis, boolean fireMessageListener) {
+                viaThis.send(message, false);
+            }
+
             public void sendNowWith(RequestDispatcher viaThis) {
                 message.sendNowWith(viaThis);
+            }
+
+            public Message getMessage() {
+                return message;
             }
         };
 
@@ -47,6 +53,11 @@ public class AbstractMessageBuilder  {
                 return this;
             }
 
+            public MessageBuildParms copyResource(String part, Message m) {
+                message.copyResource(part, m);
+                return this;
+            }
+
             public MessageBuildSendable errorsHandledBy(ErrorCallback callback) {
                 message.errorsCall(callback);
                 return sendable;
@@ -56,9 +67,13 @@ public class AbstractMessageBuilder  {
             public MessageBuildSendable noErrorHandling() {
                 return sendable;
             }
+
+            public Message getMessage() {
+                return message;
+            }
         };
 
-        return new MessageBuildCommand() {
+        final MessageBuildCommand command = new MessageBuildCommand() {
             public MessageBuildParms command(Enum command) {
                 message.command(command);
                 return parmBuilder;
@@ -72,8 +87,25 @@ public class AbstractMessageBuilder  {
             public MessageBuildParms signalling() {
                 return parmBuilder;
             }
+
+            public Message getMessage() {
+                return message;
+            }
+        };
+
+        return new MessageBuildSubject() {
+            public MessageBuildCommand toSubject(String subject) {
+                message.toSubject(subject);
+                return command;
+            }
+
+            public MessageBuildCommand subjectProvided() {
+               return command;
+            }
+
+            public Message getMessage() {
+                return message;
+            }
         };
     }
-
-
 }

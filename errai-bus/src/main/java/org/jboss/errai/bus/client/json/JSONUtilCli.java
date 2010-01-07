@@ -70,7 +70,7 @@ public class JSONUtilCli {
     }
 
     public static Message decodeCommandMessage(Object value) {
-        return CommandMessage.create().setParts(decodeMap(value));
+        return CommandMessage.createWithParts(decodeMap(value));
     }
 
     public static String encodeMap(Map<String, Object> map) {

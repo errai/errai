@@ -21,7 +21,7 @@
   </sect1>
 
   <sect1>
-    <title>Basic message exchange patterns</title>
+    <title>Messaging Patterns</title>
 
     <sect2>
       <title>Receiving messages on the server side</title>
@@ -61,10 +61,11 @@ public class HelloWorld implements EntryPoint {
 
         public void onClick(ClickEvent event) {
             // Send a message to the 'HelloWorldService'.
-            CommandMessage.create()
-                .toSubject("HelloWorldService")
-                .sendNowWith(bus);
-                }
+            MessageBuilder.createMessage()                  
+                .toSubject("HelloWorldService")             // (1)
+                .signalling()                               // (2)
+                .noErrorHandling()                          // (3)
+                .sendNowWithBus();                          // (4)
         });
 
         [...]
@@ -78,9 +79,9 @@ public class HelloWorld implements EntryPoint {
 
       <para>In the following example we extend our server side component to
       reply with a message when the callback method is invoked. It will create
-      a CommadnMessage and address it to the subject 'HelloWorldClient':
+      a message and address it to the subject 'HelloWorldClient':
       <programlisting>
-@Service("HelloWorldService")
+@Service
 public class HelloWorldService implements MessageCallback {
 
     private MessageBus bus;
@@ -92,20 +93,16 @@ public class HelloWorldService implements MessageCallback {
 
     public void callback(CommandMessage message) {
             // Send a message to the 'HelloWorldClient'.
-            CommandMessage.create()
-                .toSubject("HelloWorldClient")
-                .set("text", "Hi There")
-                .sendNowWith(bus);
-                }
+            MessageBuilder.createMessage()    
+                .toSubject("HelloWorldClient")              // (1)
+                .signalling()                               // (2)
+                .with("text", "Hi There")                   // (3)
+                .noErrorHandling()                          // (4)
+                .sendNowWith(bus);                          // (5)
         });
     }
 }               
-                </programlisting> <tip>
-          <title>The @Inject annotation</title>
-
-          <para>Confused about the @Inject annotation? Take a look at the
-          section about wiring server side components.</para>
-        </tip></para>
+                </programlisting> </para>
     </sect2>
 
     <sect2>
@@ -137,7 +134,110 @@ public class HelloWorld implements EntryPoint {
 
     [...]                 
 }
-             </programlisting></para>
+           </programlisting></para>
+    </sect2>
+  </sect1>
+
+  <sect1>
+    <title>Remote Procedure Calls (RPC)</title>
+
+    <sect2>
+      <title>Creating callable endpoints</title>
+
+      <para>ErraiBus provides facility to making asynchronous RPC calls on-top
+      of the bus archhitecture without the need to explicitly declare services
+      or any specific mapping or boilerplate code. This method of
+      communicating with the server is straight-forward and utilizes the
+      simple <filename>RemoteCall</filename> API.</para>
+
+      <para>Remote procedure calls can be be performed against against service
+      class which has been annoted with the <filename>@Service</filename>
+      annotation and the accompanying method which is being called has been
+      annotated with the <filename>@Endpoint</filename> annotation, and the
+      method has public access.</para>
+
+      <programlisting>@Service
+public class QueryService {
+    private Map&lt;String, String[]&gt; dataMap;
+
+    public QueryService() {
+        setupMap();
+    }
+
+    private void setupMap() {
+        dataMap = new HashMap&lt;String, String[]&gt;();
+        dataMap.put("beer", new String[]{"Heineken", "Budweiser", "Hoogaarden"});
+        dataMap.put("fruit", new String[]{"Apples", "Oranges", "Grapes"});
+        dataMap.put("animals", new String[]{"Monkeys", "Giraffes", "Lions"});
+    }
+
+    @Endpoint
+    public String[] getQuery(String queryString) {
+        return dataMap.get(queryString.toLowerCase());
+    }
+}</programlisting>
+
+      <para>Notice the <filename>@Endpoint </filename>annotation on the
+      <filename>getQuery()</filename> method in the above figure. In this
+      example, the method simply accepts a single String parameter and returns
+      an array of Strings. The method can accept and return any serializable
+      types that have been exposed to the bus within the rules of
+      serializability as laid out in the section on <emphasis>Object
+      Serialization</emphasis>.</para>
+
+      <para>Also note that in this example, the service class is not required
+      to implement the <filename>MessageCallback</filename> interface and is a
+      simple POJO class</para>
+    </sect2>
+
+    <sect2>
+      <title>Making calls</title>
+
+      <para>Calls to RPC endpoints are made using the RemoteCall API which is
+      very similar to the MessageBuilder API, with a few key differences. Here
+      is some code for calling the RPC endpoint we defined in section
+      3.1.</para>
+
+      <programlisting>MessageBuilder.createCall()                                            
+       .call("QueryService")                                         // (1) 
+       .endpoint("getQuery", queryBox.getText())                     // (2) 
+       .respondTo(String[].class, new RemoteCallback&lt;String[]&gt;() {   // (3) 
+           public void callback(String[] resultsString) {             
+               if (resultsString == null) {                           
+                   resultsString = new String[]{"No results."};       
+               }                                                      
+                                                                      
+               /**                                                    
+                * Build an HTML unordered list based on the results.  
+                */                                                    
+               StringBuffer buf = new StringBuffer("&lt;ul&gt;");           
+               for (String result : resultsString) {                  
+                   buf.append("&lt;li&gt;").append(result).append("&lt;/li&gt;"); 
+               }                                                      
+               results.setHTML(buf.append("&lt;/ul&gt;").toString());       
+           }                                                          
+       })                                                             
+       .noErrorHandling()                                             
+       .sendNowWith(bus);                                           // (4)</programlisting>
+
+      <para>In this example we <emphasis role="bold"><emphasis
+      role="bold">(1)</emphasis></emphasis> send a call to the
+      <filename>"QueryService"</filename> class with <emphasis
+      role="bold">(2)</emphasis> the endpoint <filename>"getQuery"</filename>,
+      which is the name of the method which we annotated, along with the
+      parameter we which to pass to the method. Note that you can send as many
+      parameters as you want as the <filename>endpoint()</filename> method
+      accepts varargs parameter.</para>
+
+      <para>Then <emphasis role="bold">(3)</emphasis> we declare a
+      <filename>RemoteCallback</filename> to handle the response back from the
+      server. We declare the response type to be that of
+      <filename>String[]</filename> to correlate with the return type of the
+      endpoint on the server and fill in handling code for the response. In
+      this case we output an HTML unordered list manually. </para>
+
+      <para>Finally <emphasis role="bold">(4)</emphasis> we send the
+      call.</para>
     </sect2>
   </sect1>
 

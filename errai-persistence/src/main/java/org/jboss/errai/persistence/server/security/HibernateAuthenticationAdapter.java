@@ -19,6 +19,7 @@ package org.jboss.errai.persistence.server.security;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.hibernate.Session;
+import org.jboss.errai.bus.client.MessageBuilder;
 import org.jboss.errai.bus.server.QueueSession;
 import org.jboss.errai.bus.client.ConversationMessage;
 import org.jboss.errai.bus.client.Message;
@@ -47,6 +48,8 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+
+import static org.jboss.errai.bus.client.MessageBuilder.createConversation;
 
 public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
     private ErraiServiceConfigurator configurator;
@@ -139,23 +142,23 @@ public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
              * Prepare to send a message back to the client, informing it that a successful login has
              * been performed.
              */
-            ConversationMessage.
-                    create(message)
-                    .command(SecurityCommands.SuccessfulAuth)
+            createConversation(message)
                     .toSubject("LoginClient")
-                    .set(SecurityParts.Roles, authSubject.toRolesString())
-                    .set(SecurityParts.Name, name)
+                    .command(SecurityCommands.SuccessfulAuth)
+                    .with(SecurityParts.Roles, authSubject.toRolesString())
+                    .with(SecurityParts.Name, name)
+                    .noErrorHandling()
                     .sendNowWith(bus);
         } else {
             /**
              * The login failed. How upsetting. Life must go on, and we must inform the client of the
              * unfortunate news.
              */
-            ConversationMessage.create(message)
-                    .command(SecurityCommands.FailedAuth)
+            createConversation(message)
                     .toSubject("LoginClient")
-                    .set(SecurityParts.Name, name)
-                    .sendNowWith(bus);
+                    .command(SecurityCommands.FailedAuth)
+                    .with(SecurityParts.Name, name)
+                    .noErrorHandling().sendNowWith(bus);
 
             throw new AuthenticationFailedException();
         }

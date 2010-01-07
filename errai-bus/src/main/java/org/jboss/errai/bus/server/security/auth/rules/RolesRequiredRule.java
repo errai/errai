@@ -29,6 +29,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import static org.jboss.errai.bus.client.MessageBuilder.createConversation;
+import static org.jboss.errai.bus.client.MessageBuilder.createMessage;
+
 /**
  * This routing rule specifies a set of required roles that a message must posess in order for this routing rule
  * to return true.
@@ -59,23 +62,28 @@ public class RolesRequiredRule implements BooleanRoutingRule {
                 /**
                  * Inform the client they must login.
                  */
-                bus.send(CommandMessage.create(SecurityCommands.SecurityChallenge)
+
+                createMessage()
                         .toSubject("LoginClient")
-                        .set(SecurityParts.CredentialsRequired, "Name,Password")
-                        .set(MessageParts.ReplyTo, ErraiService.AUTHORIZATION_SVC_SUBJECT)
+                        .command(SecurityCommands.SecurityChallenge)
+                        .with(SecurityParts.CredentialsRequired, "Name,Password")
+                        .with(MessageParts.ReplyTo, ErraiService.AUTHORIZATION_SVC_SUBJECT)
+                        .with(SecurityParts.RejectedMessage, ServerBusUtils.encodeJSON(message.getParts()))
                         .copyResource("Session", message)
-                        .set(SecurityParts.RejectedMessage, ServerBusUtils.encodeJSON(message.getParts()))
-                        , false);
+                        .noErrorHandling().sendNowWith(bus, false);
+
                 return false;
             }
 
             if (!subject.getRoles().containsAll(requiredRoles)) {
-                ConversationMessage.create()
+                createConversation(message)
                         .toSubject("ClientErrorService")
-                        .set(MessageParts.ErrorMessage, "Access denied to service: "
+                        .signalling()
+                        .with(MessageParts.ErrorMessage, "Access denied to service: "
                                 + message.get(String.class, MessageParts.ToSubject) +
                                 " (Required Roles: [" + getRequiredRolesString() + "])")
-                        .sendNowWith(bus);
+                        .noErrorHandling().sendNowWith(bus);
+
                 return false;
 
             } else {

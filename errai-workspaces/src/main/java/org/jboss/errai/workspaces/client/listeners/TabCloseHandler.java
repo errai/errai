@@ -20,10 +20,13 @@ import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.ErraiBus;
+import org.jboss.errai.bus.client.MessageBuilder;
 import org.jboss.errai.bus.client.protocols.LayoutCommands;
 import org.jboss.errai.workspaces.client.protocols.LayoutParts;
 import org.jboss.errai.common.client.framework.AcceptsCallback;
 import org.jboss.errai.workspaces.client.widgets.WSTab;
+
+import static org.jboss.errai.bus.client.MessageBuilder.createMessage;
 
 
 public class TabCloseHandler implements CloseHandler<WSTab>, AcceptsCallback {
@@ -37,10 +40,11 @@ public class TabCloseHandler implements CloseHandler<WSTab>, AcceptsCallback {
     }
 
     public void onClose(CloseEvent closeEvent) {
-        CommandMessage.create(LayoutCommands.CloseTab)
+        createMessage()
                 .toSubject("org.jboss.errai.WorkspaceLayout")
-                .set(LayoutParts.InstanceID, instanceId)
-                .sendNowWith(ErraiBus.get());
+                .command(LayoutCommands.CloseTab)
+                .with(LayoutParts.InstanceID, instanceId)
+                .noErrorHandling().sendNowWith(ErraiBus.get());
     }
 
 

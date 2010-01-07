@@ -43,12 +43,12 @@ import org.jboss.errai.bus.client.protocols.MessageParts;
 public class ConversationMessage extends CommandMessage {
 
     @Deprecated
-    public static CommandMessage create(String commandType) {
+    static CommandMessage create(String commandType) {
         throw new BadlyFormedMessageException("You must create a ConversationMessage by specifying an incoming message.");
     }
 
     @Deprecated
-    public static CommandMessage create(Enum commandType) {
+    static CommandMessage create(Enum commandType) {
         throw new BadlyFormedMessageException("You must create a ConversationMessage by specifying an incoming message.");
     }
 
@@ -58,11 +58,11 @@ public class ConversationMessage extends CommandMessage {
      *
      * @return - this method will never return.
      */
-    public static CommandMessage create() {
+    static CommandMessage create() {
         throw new BadlyFormedMessageException("You must create a ConversationMessage by specifying an incoming message.");
     }
 
-    public static ConversationMessage create(Message inReplyTo) {
+    static ConversationMessage create(Message inReplyTo) {
         return new ConversationMessage(inReplyTo);
     }
 

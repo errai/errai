@@ -1,15 +1,13 @@
 package org.jboss.errai.bus.server.io;
 
-import org.jboss.errai.bus.client.ConversationMessage;
-import org.jboss.errai.bus.client.Message;
-import org.jboss.errai.bus.client.MessageBus;
-import org.jboss.errai.bus.client.MessageCallback;
+import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.server.MessageDeliveryFailure;
 import org.jboss.errai.bus.server.util.ErrorHelper;
 import org.mvel2.DataConversion;
 
 import java.lang.reflect.Method;
 
+import static org.jboss.errai.bus.client.MessageBuilder.createConversation;
 import static org.mvel2.DataConversion.canConvert;
 import static org.mvel2.DataConversion.convert;
 
@@ -43,9 +41,11 @@ public class ConversationalEndpointCallback implements MessageCallback {
         }
 
         try {
-            ConversationMessage.create(message)
-                    .set("MethodReply", method.invoke(genericSvc, parms))
-                    .sendNowWith(bus);
+            createConversation(message)
+                    .subjectProvided().signalling()
+                    .with("MethodReply", method.invoke(genericSvc, parms))
+                    .noErrorHandling().sendNowWith(bus);
+       
         }
         catch (Exception e) {
             throw new MessageDeliveryFailure("error invoking endpoint", e);

@@ -17,10 +17,7 @@
 package org.errai.samples.broadcastservice.server;
 
 import com.google.inject.Inject;
-import org.jboss.errai.bus.client.CommandMessage;
-import org.jboss.errai.bus.client.Message;
-import org.jboss.errai.bus.client.MessageBus;
-import org.jboss.errai.bus.client.MessageCallback;
+import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.server.annotations.Service;
 
 @Service
@@ -33,9 +30,9 @@ public class BroadcastService implements MessageCallback {
     }
 
     public void callback(Message message) {
-        CommandMessage.create()
-                .toSubject("BroadcastReceiver")
+        MessageBuilder.createMessage()
+                .toSubject("BroadcastReceiver").signalling()
                 .copy("BroadcastText", message)
-                .sendNowWith(bus);
+                .noErrorHandling().sendNowWith(bus);
     }
 }

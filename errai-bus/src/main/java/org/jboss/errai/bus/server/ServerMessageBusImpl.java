@@ -30,6 +30,7 @@ import java.util.*;
 import java.util.List;
 import java.util.Queue;
 
+import static org.jboss.errai.bus.client.MessageBuilder.createConversation;
 import static org.jboss.errai.bus.client.protocols.MessageParts.ReplyTo;
 import static org.jboss.errai.bus.client.protocols.SecurityCommands.MessageNotDelivered;
 import static org.jboss.errai.bus.server.util.ServerBusUtils.encodeJSON;
@@ -175,14 +176,18 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                                 continue;
                             }
 
-                            send(ConversationMessage.create(message)
+                            createConversation(message)
+                                    .toSubject("ClientBus")
                                     .command(BusCommands.RemoteSubscribe)
-                                    .set(MessageParts.Subject, service)
-                                    .toSubject("ClientBus"), false);
+                                    .with(MessageParts.Subject, service)
+                                    .noErrorHandling().sendNowWith(busInst, false);
                         }
 
-                        send(ConversationMessage.create(message).command(BusCommands.FinishStateSync)
-                                .toSubject("ClientBus"), false);
+                        createConversation(message)
+                                .toSubject("ClientBus")
+                                .command(BusCommands.FinishStateSync)
+                                .noErrorHandling().sendNowWith(busInst, false);
+
 
                         /**
                          * Now the session is established, turn WindowPolling on.
@@ -258,9 +263,12 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                  * Inform the sender that we did not dispatchGlobal the message.
                  */
 
+                Map<String, Object> rawMsg = new HashMap<String, Object>();
+                rawMsg.put(MessageParts.CommandType.name(), MessageNotDelivered.name());
+
                 enqueueForDelivery(getSessionId(message),
                         message.get(String.class, ReplyTo),
-                        encodeJSON(CommandMessage.create().command(MessageNotDelivered).getParts()));
+                        encodeJSON(rawMsg));
             }
 
             return;
@@ -319,8 +327,11 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     private void send(String sessionid, Message message, boolean fireListeners) {
         if (fireListeners && !fireGlobalMessageListeners(message)) {
             if (message.hasPart(ReplyTo)) {
+
+                Map<String, Object> rawMsg = new HashMap<String, Object>();
+                rawMsg.put(MessageParts.CommandType.name(), MessageNotDelivered.name());
                 enqueueForDelivery(sessionid, message.get(String.class, ReplyTo),
-                        encodeJSON(CommandMessage.create().command(MessageNotDelivered).getParts()));
+                        encodeJSON(rawMsg));
             }
             return;
         }

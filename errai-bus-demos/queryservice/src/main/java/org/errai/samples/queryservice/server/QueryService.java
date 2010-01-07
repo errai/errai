@@ -29,7 +29,6 @@ public class QueryService {
     private Map<String, String[]> dataMap;
 
     public QueryService() {
-        // setup the default values.
         setupMap();
     }
 

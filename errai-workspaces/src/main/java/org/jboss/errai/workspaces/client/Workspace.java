@@ -28,6 +28,9 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 
 import static com.google.gwt.user.client.Window.enableScrolling;
+import static org.jboss.errai.bus.client.CommandMessage.createWithParts;
+import static org.jboss.errai.bus.client.MessageBuilder.createMessage;
+import static org.jboss.errai.bus.client.json.JSONUtilCli.decodeMap;
 
 import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.bus.client.*;
@@ -65,7 +68,10 @@ public class Workspace implements EntryPoint {
     static {
         loginWindowClosingHandler = new Window.ClosingHandler() {
             public void onWindowClosing(Window.ClosingEvent event) {
-                CommandMessage.create().toSubject("ServerEchoService").sendNowWith(ErraiBus.get());
+                createMessage()
+                        .toSubject("ServerEchoService")
+                        .signalling()
+                        .noErrorHandling().sendNowWith(ErraiBus.get());
             }
         };
     }
@@ -77,10 +83,11 @@ public class Workspace implements EntryPoint {
 
     private final Runnable negotiate = new Runnable() {
         public void run() {
-            CommandMessage.create()
+            createMessage()
                     .toSubject("ClientNegotiationService")
-                    .set(MessageParts.ReplyTo, "ClientConfiguratorService")
-                    .sendNowWith(ErraiBus.get());
+                    .signalling()
+                    .with(MessageParts.ReplyTo, "ClientConfiguratorService")
+                    .noErrorHandling().sendNowWith(ErraiBus.get());
         }
     };
 
@@ -148,8 +155,7 @@ public class Workspace implements EntryPoint {
                     switch (SecurityCommands.valueOf(message.getCommandType())) {
                         case SecurityChallenge:
                             if (message.hasPart(SecurityParts.RejectedMessage)) {
-                                deferredMessage = CommandMessage.create();
-                                deferredMessage.setParts(JSONUtilCli.decodeMap(message.get(String.class, SecurityParts.RejectedMessage)));
+                                deferredMessage = createWithParts(decodeMap(message.get(String.class, SecurityParts.RejectedMessage)));
                             }
 
                             workspaceLayout.getUserInfoPanel().clear();
@@ -320,11 +326,11 @@ public class Workspace implements EntryPoint {
                             userInfo.add(logout);
                             logout.addClickHandler(new ClickHandler() {
                                 public void onClick(ClickEvent event) {
-                                    CommandMessage.create(SecurityCommands.EndSession)
+                                    MessageBuilder.createMessage()
                                             .toSubject("AuthorizationService")
-                                            .sendNowWith(bus);
-
-
+                                            .command(SecurityCommands.EndSession)
+                                            .noErrorHandling().sendNowWith(bus);
+                                    
                                     bus.unsubscribeAll("org.jboss.errai.WorkspaceLayout");
                                     sessionRoles.clear();
 

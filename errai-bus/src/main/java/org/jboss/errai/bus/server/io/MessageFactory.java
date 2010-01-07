@@ -39,8 +39,8 @@ public class MessageFactory {
             Map<String, Object> parts = decodeToMap(pkg[i]);
             parts.remove(MessageParts.SessionID.name());
 
-            Message msg = CommandMessage.create().setParts(parts);
-            msg.setResource("Session", session);
+            Message msg = CommandMessage.createWithParts(parts)
+                    .setResource("Session", session);
 
             if (parts.containsKey("__MarshalledTypes")) {
                 TypeDemarshallHelper.demarshallAll((String) parts.get("__MarshalledTypes"), msg);

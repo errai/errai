@@ -23,13 +23,17 @@ import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+
 import static com.google.gwt.user.client.DOM.getElementById;
 
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
+
 import static com.google.gwt.user.client.Window.addResizeHandler;
+import static org.jboss.errai.bus.client.MessageBuilder.createMessage;
+
 import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.client.json.JSONUtilCli;
@@ -358,17 +362,22 @@ public class WorkspaceLayout extends Composite {
 
         MessageBus bus = ErraiBus.get();
 
-        CommandMessage.create(LayoutCommands.RegisterToolSet)
+
+        createMessage()
                 .toSubject("org.jboss.errai.WorkspaceLayout")
-                .set(LayoutParts.Name, toolSet.getToolSetName())
-                .set(LayoutParts.DOMID, id)
+                .command(LayoutCommands.RegisterToolSet)
+                .with(LayoutParts.Name, toolSet.getToolSetName())
+                .with(LayoutParts.DOMID, id)
+                .noErrorHandling()
                 .sendNowWith(bus);
 
 
         for (final Tool tool : toolSet.getAllProvidedTools()) {
-            CommandMessage.create(LayoutCommands.PublishTool)
+            createMessage()
                     .toSubject("org.jboss.errai.WorkspaceLayout")
-                    .set(LayoutParts.ComponentID, tool.getId())
+                    .command(LayoutCommands.PublishTool)
+                    .with(LayoutParts.ComponentID, tool.getId())
+                    .noErrorHandling()
                     .sendNowWith(bus);
         }
     }
@@ -385,9 +394,11 @@ public class WorkspaceLayout extends Composite {
                          final Image icon, boolean multipleAllowed) {
         if (isToolActive(componentId)) {
             if (!multipleAllowed) {
-                CommandMessage.create(LayoutCommands.ActivateTool)
-                        .toSubject(getInstanceSubject(componentId))
-                        .sendNowWith(ErraiBus.get());
+               createMessage()
+                       .toSubject(getInstanceSubject(componentId))
+                       .command(LayoutCommands.ActivateTool)
+                       .noErrorHandling()
+                       .sendNowWith(ErraiBus.get());
 
                 return;
             } else {
@@ -421,8 +432,10 @@ public class WorkspaceLayout extends Composite {
 
                                 wsd.showModal();
                             } else {
-                                CommandMessage.create(LayoutCommands.ActivateTool)
+                                createMessage()
                                         .toSubject(getInstanceSubject(componentId))
+                                        .command(LayoutCommands.ActivateTool)
+                                        .noErrorHandling()
                                         .sendNowWith(ErraiBus.get());
                             }
                         }
@@ -442,7 +455,7 @@ public class WorkspaceLayout extends Composite {
         final MessageBus bus = ErraiBus.get();
 
         bus.conversationWith(
-                CommandMessage.create().set(LayoutParts.DOMID, DOMID)
+                createMessage().getMessage().set(LayoutParts.DOMID, DOMID)
                         .toSubject(initSubject),
                 new MessageCallback() {
                     public void callback(Message message) {
@@ -547,10 +560,11 @@ public class WorkspaceLayout extends Composite {
     }
 
     public void closeTab(String instanceId) {
-        CommandMessage.create(LayoutCommands.CloseTab)
+        MessageBuilder.createMessage()
                 .toSubject(getInstanceSubject(instanceId))
-                .set(LayoutParts.InstanceID, instanceId)
-                .sendNowWith(ErraiBus.get());
+                .command(LayoutCommands.CloseTab)
+                .with(LayoutParts.InstanceID, instanceId)
+                .noErrorHandling().sendNowWith(ErraiBus.get());
     }
 
     public void activateTool(String componentTypeId) {

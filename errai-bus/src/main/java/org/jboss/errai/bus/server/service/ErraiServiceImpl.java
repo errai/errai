@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static com.google.inject.Guice.createInjector;
+import static org.jboss.errai.bus.client.MessageBuilder.createConversation;
 
 /**
  * Default implementation of the ErraiBus server-side service.
@@ -63,11 +64,12 @@ public class ErraiServiceImpl implements ErraiService {
                          */
                         //todo: we only support login/password for now
 
-                        ConversationMessage.create(c)
+                        createConversation(c)
+                                .subjectProvided()
                                 .command(SecurityCommands.WhatCredentials)
-                                .set(SecurityParts.CredentialsRequired, "Name,Password")
-                                .set(MessageParts.ReplyTo, AUTHORIZATION_SVC_SUBJECT)
-                                .sendNowWith(bus);
+                                .with(SecurityParts.CredentialsRequired, "Name,Password")
+                                .with(MessageParts.ReplyTo, AUTHORIZATION_SVC_SUBJECT)
+                                .noErrorHandling().sendNowWith(bus);
 
                         break;
 
@@ -88,8 +90,11 @@ public class ErraiServiceImpl implements ErraiService {
                         configurator.getResource(AuthenticationAdapter.class)
                                 .endSession(c);
 
-                        bus.send(ConversationMessage.create(c).toSubject("LoginClient")
-                                .command(SecurityCommands.EndSession));
+                        createConversation(c)
+                                .toSubject("LoginClient")
+                                .command(SecurityCommands.EndSession)
+                                .noErrorHandling()
+                                .sendNowWith(bus);
                         break;
                 }
             }
@@ -100,7 +105,9 @@ public class ErraiServiceImpl implements ErraiService {
          */
         bus.subscribe("ServerEchoService", new MessageCallback() {
             public void callback(Message c) {
-                bus.send(ConversationMessage.create(c));
+                 MessageBuilder.createConversation(c)
+                         .subjectProvided().signalling().noErrorHandling()
+                         .sendNowWith(bus);
             }
         });
 
@@ -109,7 +116,7 @@ public class ErraiServiceImpl implements ErraiService {
                 AuthSubject subject =  message.getResource(QueueSession.class, "Session")
                         .getAttribute(AuthSubject.class, ErraiService.SESSION_AUTH_DATA);
 
-                ConversationMessage reply = ConversationMessage.create(message);
+                Message reply = MessageBuilder.createConversation(message).getMessage();
 
                 if (subject != null) {
                     reply.set(SecurityParts.Roles, subject.toRolesString());

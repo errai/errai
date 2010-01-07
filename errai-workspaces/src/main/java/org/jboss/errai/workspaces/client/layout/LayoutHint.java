@@ -17,10 +17,7 @@
 package org.jboss.errai.workspaces.client.layout;
 
 import com.google.gwt.user.client.ui.Widget;
-import org.jboss.errai.bus.client.CommandMessage;
-import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.Message;
-import org.jboss.errai.bus.client.MessageCallback;
+import org.jboss.errai.bus.client.*;
 import org.jboss.errai.workspaces.client.protocols.LayoutParts;
 
 import java.util.LinkedHashMap;
@@ -59,11 +56,11 @@ public class LayoutHint {
         LayoutHintProvider p;
         for (String s : MANAGED_SUBJECTS.keySet()) {
             if ((p = findProvider(s)) != null && p.getWidthHint() > 0 && p.getHeightHint() > 0) {
-                CommandMessage.create()
-                        .toSubject(s)
-                        .set(LayoutParts.Width, p.getWidthHint())
-                        .set(LayoutParts.Height, p.getHeightHint())
-                        .sendNowWith(ErraiBus.get());
+                MessageBuilder.createMessage()
+                        .toSubject(s).signalling()
+                        .with(LayoutParts.Width, p.getWidthHint())
+                        .with(LayoutParts.Height, p.getHeightHint())
+                        .noErrorHandling().sendNowWith(ErraiBus.get());
             }
         }
 

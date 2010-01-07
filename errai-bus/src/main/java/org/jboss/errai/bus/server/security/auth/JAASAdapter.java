@@ -17,6 +17,7 @@
 package org.jboss.errai.bus.server.security.auth;
 
 import com.google.inject.Inject;
+import org.jboss.errai.bus.client.MessageBuilder;
 import org.jboss.errai.bus.server.QueueSession;
 import org.jboss.errai.bus.client.ConversationMessage;
 import org.jboss.errai.bus.client.Message;
@@ -108,11 +109,11 @@ public class JAASAdapter implements AuthenticationAdapter {
              * Prepare to send a message back to the client, informing it that a successful login has
              * been performed.
              */
-            Message successfulMsg = ConversationMessage.create(message)
-                    .command(SecurityCommands.SuccessfulAuth)
+            Message successfulMsg = MessageBuilder.createConversation(message)
                     .toSubject("LoginClient")
-                    .set(SecurityParts.Roles, authSubject.toRolesString())
-                    .set(SecurityParts.Name, name);
+                    .command(SecurityCommands.SuccessfulAuth)
+                    .with(SecurityParts.Roles, authSubject.toRolesString())
+                    .with(SecurityParts.Name, name).getMessage();
 
             try {
                 ResourceBundle bundle = ResourceBundle.getBundle("errai");
@@ -139,11 +140,11 @@ public class JAASAdapter implements AuthenticationAdapter {
              * The login failed. How upsetting. Life must go on, and we must inform the client of the
              * unfortunate news.
              */
-            ConversationMessage.create(message)
-                    .command(SecurityCommands.FailedAuth)
+            MessageBuilder.createConversation(message)
                     .toSubject("LoginClient")
-                    .set(SecurityParts.Name, name)
-                    .sendNowWith(bus);
+                    .command(SecurityCommands.FailedAuth)
+                    .with(SecurityParts.Name, name)
+                    .noErrorHandling().sendNowWith(bus);
 
             throw new AuthenticationFailedException(e.getMessage(), e);
         }
