@@ -7,6 +7,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.RootPanel;
 import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.ErraiBus;
+import org.jboss.errai.bus.client.MessageBuilder;
 import org.jboss.errai.bus.client.MessageBus;
 
 public class HelloWorld implements EntryPoint {
@@ -26,8 +27,9 @@ public class HelloWorld implements EntryPoint {
                 /**
                  * Send a message to the 'HelloWorld' service.
                  */
-                CommandMessage.create()
+                MessageBuilder.createMessage()
                         .toSubject("HelloWorld")
+                        .signalling().noErrorHandling()
                         .sendNowWith(bus);
            }
         });
