@@ -26,13 +26,9 @@ import java.util.Map;
 
 @Service
 public class QueryService {
-    private MessageBus bus;
     private Map<String, String[]> dataMap;
 
-    @Inject
-    public QueryService(MessageBus bus) {
-        this.bus = bus;
-
+    public QueryService() {
         // setup the default values.
         setupMap();
     }
