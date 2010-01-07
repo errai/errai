@@ -51,8 +51,10 @@ public class Serialization implements EntryPoint {
             }
 
             try {
-              CommandMessage.create().toSubject("ObjectService")
-                  .set("Recs", records).sendNowWith(bus);
+              MessageBuilder.createMessage().toSubject("ObjectService")
+                      .signalling()
+                      .with("Recs", records)
+                      .noErrorHandling().sendNowWith(bus);
             }
             catch (Throwable e) {
               e.printStackTrace();
@@ -66,9 +68,9 @@ public class Serialization implements EntryPoint {
     {
       public void onClick(ClickEvent clickEvent)
       {
-        CommandMessage.create()
+        MessageBuilder.createMessage()
                 .toSubject("ObjectService")
-                .sendNowWith(bus);            
+                .signalling().noErrorHandling().sendNowWith(bus);
       }
     });
 
