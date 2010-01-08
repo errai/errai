@@ -36,7 +36,7 @@ public class ErrorHelper {
 
 
     public static void sendClientError(MessageBus bus, Message message, String errorMessage, String additionalDetails) {
-        createMessage()
+        MessageBuilder.createConversation(message)
                 .toSubject("ClientBusErrors").signalling()
                 .with("ErrorMessage", errorMessage)
                 .with("AdditionalDetails", additionalDetails)
@@ -45,7 +45,7 @@ public class ErrorHelper {
     }
 
     public static void disconnectRemoteBus(MessageBus bus, Message message) {
-        createMessage()
+        MessageBuilder.createConversation(message)
                 .toSubject("ClientBus")
                 .command(BusCommands.Disconnect)
                 .noErrorHandling().sendNowWith(bus);
