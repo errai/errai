@@ -47,7 +47,9 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 import static com.google.inject.Guice.createInjector;
+import static java.util.ResourceBundle.getBundle;
 import static org.jboss.errai.bus.server.ErraiModule.ERRAI_DISPATCHER_IMPLEMENTATION;
+import static org.jboss.errai.bus.server.util.ConfigUtil.visitAllTargets;
 
 public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
     private ServerMessageBus bus;
@@ -73,7 +75,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
         configRootTargets = ConfigUtil.findAllConfigTargets();
 
         try {
-            ResourceBundle erraiServiceConfig = ResourceBundle.getBundle("ErraiService");
+            ResourceBundle erraiServiceConfig = getBundle("ErraiService");
             Enumeration<String> keys = erraiServiceConfig.getKeys();
             String key;
             while (keys.hasMoreElements()) {
@@ -134,7 +136,6 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
             }
         }
 
-
         this.dispatcher = createInjector(new AbstractModule() {
             @Override
             protected void configure() {
@@ -144,7 +145,6 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                     try {
                         dispatcherImplementation = Class.forName(configInst.getProperty(ERRAI_DISPATCHER_IMPLEMENTATION))
                                 .asSubclass(RequestDispatcher.class);
-
                     }
                     catch (Exception e) {
                         throw new ErraiBootstrapFailure("could not load servlet implementation class", e);
@@ -163,7 +163,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
         log.info("beging searching for Errai extensions ...");
 
         // Search for Errai extensions.
-        ConfigUtil.visitAllTargets(configRootTargets, new ConfigVisitor() {
+        visitAllTargets(configRootTargets, new ConfigVisitor() {
             public void visit(Class<?> loadClass) {
                 if (ErraiConfigExtension.class.isAssignableFrom(loadClass)
                         && loadClass.isAnnotationPresent(ExtensionComponent.class)) {
@@ -213,7 +213,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
             }
         });
 
-        ConfigUtil.visitAllTargets(configRootTargets,
+        visitAllTargets(configRootTargets,
                 new ConfigVisitor() {
                     public void visit(final Class<?> loadClass) {
                         if (Module.class.isAssignableFrom(loadClass)) {
@@ -275,7 +275,6 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                                 svc = Guice.createInjector(new AbstractModule() {
                                     @Override
                                     protected void configure() {
-                          //              bind(Object.class).toInstance(loadClass);
                                         bind(MessageBus.class).toInstance(bus);
                                         bind(RequestDispatcher.class).toInstance(dispatcher);
 
@@ -292,7 +291,6 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                             // we scan for endpoints
                             for (final Method method : loadClass.getDeclaredMethods()) {
                                 if (method.isAnnotationPresent(Endpoint.class)) {
-                                    //   Endpoint endpoint = method.getAnnotation(Endpoint.class);
                                     epts.put(method.getName(), method.getReturnType() == Void.class ?
                                             new EndpointCallback(svc, method) :
                                             new ConversationalEndpointCallback(svc, method, bus));

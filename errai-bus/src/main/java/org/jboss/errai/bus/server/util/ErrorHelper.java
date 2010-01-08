@@ -14,14 +14,16 @@ public class ErrorHelper {
     public static void sendClientError(MessageBus bus, Message message, String errorMessage, Throwable e) {
         StringAppender a = new StringAppender("<br/>").append(e.getClass().getName() + ": " + e.getMessage()).append("<br/>");
 
+        // Let's build-up the stacktrace.
         boolean first = true;
         for (StackTraceElement sel : e.getStackTrace()) {
             a.append(first ? "" : "&nbsp;&nbsp;").append(sel.toString()).append("<br/>");
             first = false;
         }
 
-        if (e.getCause() != null) {
-            first = false;
+        // And add the entire causal chain.
+        while ((e = e.getCause()) != null) {
+            first = true;
             a.append("Caused by:<br/>");
             for (StackTraceElement sel : e.getCause().getStackTrace()) {
                 a.append(first ? "" : "&nbsp;&nbsp;").append(sel.toString()).append("<br/>");
@@ -29,7 +31,6 @@ public class ErrorHelper {
             }
         }
 
-        System.out.println("Sending client error");
         sendClientError(bus, message, errorMessage, a.toString());
     }
 
