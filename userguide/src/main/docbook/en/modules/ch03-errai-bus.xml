@@ -45,7 +45,7 @@ public class HelloWorldService implements MessageCallback {
       <title>Sending messages from a client</title>
 
       <para>In order to send a message from a client you need to create a
-      <emphasis><emphasis><filename>CommandMessage</filename></emphasis></emphasis>
+      <emphasis><emphasis><filename>Message</filename></emphasis></emphasis>
       and send it through an instance of <filename>MessageBus</filename>. In
       this simple example we send it to the subject 'HelloWorldService'
       <programlisting>

@@ -101,6 +101,9 @@ public class TomcatCometServlet extends HttpServlet implements CometProcessor {
                 if ((queue = getQueue(session)) != null) {
                     queue.heartBeat();
                 }
+                else {
+                    return;
+                }
 
                 synchronized (queue) {
                     Set<CometEvent> evt = activeEvents.get(session);
