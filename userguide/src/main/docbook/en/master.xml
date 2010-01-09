@@ -100,7 +100,7 @@
             <ulink
             url="http://maven.apache.org/download.html">http://maven.apache.org/download.html</ulink>
           </listitem>
-        </itemizedlist> <note>
+        </itemizedlist> <blockquote>
           <title>Launching maven the first time</title>
 
           <para>Please note, that when launching maven the first time on your
@@ -108,7 +108,7 @@
           This may take a while, because it includes downloading large
           binaries like GWT SDK. However subsequent builds are not required to
           go through this step and will be much faster.</para>
-        </note></para>
+        </blockquote></para>
     </section>
 
     <section id="thedistribution">
@@ -442,15 +442,33 @@
     </sect1>
 
     <sect1>
-      <title>Serializaiton</title>
+      <title>Serialization</title>
 
-      <para>Serialization on the ErraiBus</para>
+      <para>Serialization on the ErraiBus supports serialization within the
+      same scope and limitations as the default GWT RPC serialization rules.
+      In order to expose your domain objects to the bus so they can be
+      exported across the bus, you must annotate them with the
+      <filename>org.jboss.errai.bus.server.annotations.ExposeEntity</filename>
+      annotation. The presence of this annotation will cause Errai's GWT
+      compiler extensions to generate marshall/demarshall stubs for the
+      annotated objects at compile-time. </para>
+
+      <para>For example:</para>
+
+      <programlisting>@ExposeEntity
+public class Beer {
+    public boolean free;
+    public String brandName;
+    ...
+}</programlisting>
+
+      <para>Note: All exposed entities must have a default constructor.</para>
     </sect1>
 
     <sect1 id="wiring">
       <title>Wiring server side components</title>
 
-      <para>Put some explanation about the guice integration here.</para>
+      <para>Currently, ErraiBus uses Google Guice.</para>
     </sect1>
 
     <sect1>

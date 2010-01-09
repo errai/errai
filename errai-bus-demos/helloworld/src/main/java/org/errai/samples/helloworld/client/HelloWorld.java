@@ -22,8 +22,6 @@ public class HelloWorld implements EntryPoint {
     public void onModuleLoad() {
         Button clickMe = new Button("Click Me!");
 
-
-
         /**
          * Register a click handler for the button.
          */
