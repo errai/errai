@@ -1,18 +1,447 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<!-- This document was created with Syntext Serna Free. -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook V4.2//EN" "docbookV4.2/docbookx.dtd" [
-  <!ENTITY ch01-Introduction SYSTEM "modules/ch01-Introduction.xml">
-  <!ENTITY ch02-Installation SYSTEM "modules/ch02-Installation.xml">
-  <!ENTITY ch03-ErraiBus SYSTEM "modules/ch03-errai-bus.xml">
-  <!ENTITY appendix-A-Quickstart SYSTEM "modules/appendix-A-Quickstart.xml">
-]>
+        <!ENTITY ch01-Introduction SYSTEM "modules/ch01-Introduction.xml">
+        <!ENTITY ch02-Installation SYSTEM "modules/ch02-Installation.xml">
+        <!ENTITY ch03-ErraiBus SYSTEM "modules/ch03-errai-bus.xml">
+        <!ENTITY appendix-A-Quickstart SYSTEM "modules/appendix-A-Quickstart.xml">
+        ]>
 <book lang="en">
-  <bookinfo>
-    <title>Errai User Guide</title>
-  </bookinfo>
-  <toc/>
-    &ch01-Introduction;
-    &ch02-Installation;
-    &ch03-ErraiBus;
-    &appendix-A-Quickstart;
+    <bookinfo>
+        <title>Errai User Guide</title>
+    </bookinfo>
+    <toc/>
+    <chapter id="introduction">
+        <title>Introduction</title>
+
+        <section>
+            <title>What is it</title>
+            <para>Errai is a GWT-based framework for building rich web applications using next-generation web
+                technologies. Built on-top of ErraiBus, the framework provides a unified federation and RPC
+                infrastructure with true, uniform, asynchronous messaging across the client and server.
+            </para>
+        </section>
+        <section>
+            <title>License and EULA</title>
+            <para>Errai is distributed under the terms of the the Apache License, Version 2.0. See<ulink
+                    url="http://www.apache.org/licenses/LICENSE-2.0">the full Apache license text</ulink>.
+            </para>
+        </section>
+        <section>
+            <title>Downloads</title>
+            <para>The distribution packages can be downloaded from jboss.org</para>
+            <ulink url="http://jboss.org/errai/">http://jboss.org/errai/</ulink>
+        </section>
+        <section>
+            <title>Sources</title>
+            <para>The source code for this component can be found in the Errai SVN repository:</para>
+            <ulink url="http://anonsvn.jboss.org/repos/errai/trunk/">https://anonsvn.jboss.org/repos/errai/trunk/
+            </ulink>
+        </section>
+        <section>
+            <title>Reporting problems</title>
+            <para>
+                If you run into trouble don't hesitate to get in touch with us:
+
+                <itemizedlist>
+                    <listitem>User Forum:
+                        <ulink url="http://www.jboss.org/index.html?module=bb&amp;op=viewforum&amp;f=295">
+                            http://www.jboss.org/index.html?module=bb&amp;op=viewforum&amp;f=295
+                        </ulink>
+                    </listitem>
+                    <listitem>Mailing List:
+                        <ulink url="http://jboss.org/errai/MailingLists.html">http://jboss.org/errai/MailingLists.html
+                        </ulink>
+                    </listitem>
+                    <listitem>IRC: irc://irc.freenode.net/errai</listitem>
+                </itemizedlist>
+
+            </para>
+        </section>
+    </chapter>
+    <chapter id="installation">
+    <title>Installation</title>
+
+    <section>
+        <title>Required software</title>
+        <para>
+            Errai requires a JDK version 5 or higher and depends on Apache Maven
+            to build and run the examples, and for leverging the quickstart
+            utilities.
+
+            <itemizedlist>
+                <listitem>JDK 5: <ulink url="http://java.sun.com/javase/downloads/index.jsp">http://java.sun.com/javase/downloads/index.jsp</ulink></listitem>
+                <listitem>Apache Maven: <ulink url="http://maven.apache.org/download.html">http://maven.apache.org/download.html</ulink></listitem>
+            </itemizedlist>
+
+            <note>
+                <title>Launching maven the first time</title>
+                <para>
+                    Please note, that when launching maven the first time on your machine,
+                    it will fetch all dependecies from a central repository. This may take a while,
+                    because it includes downloading large binaries like GWT SDK. However subsequent builds
+                    are not required to go through this step and will be much faster.
+                </para>
+            </note>
+        </para>
+    </section>
+
+
+    <section id="thedistribution">
+        <title>Distribution Package</title>
+        <para>Unzip the Errai download (<literal>Errai-X.Y.zip</literal>) to some location on your hard drive.
+            You'll see following subdirectories:
+        </para>
+        <itemizedlist>
+            <listitem><literal>doc</literal>: User guide, javadocs and developers guide</listitem>
+            <listitem><literal>examples</literal>: Examples that are used in the user guide</listitem>
+            <listitem><literal>lib</literal>: Required libraries</listitem>
+        </itemizedlist>
+    </section>
+
+</chapter>
+    <chapter id="bus">
+      <title>Errai Bus</title>
+
+      <sect1 id="bus-intro">
+        <title>What is Errai Bus?</title>
+
+        <para>ErraiBus forms the backbone of the Errai framework's approach to
+        application design. Most importantly, it provides a straight-forward
+        approach to a complex problem space. Providing common APIs across the
+        client and server, developers will have no trouble working with complex
+        messaging scenarios from building instant messaging clients, stock
+        tickers, to monitoring instruments. There's no more messing with RPC APIs,
+        or unweildy AJAX or COMET frameworks. We've built it all in to one,
+        consice messaging framework. It's single-paradigm, and it's fun to work
+        with.</para>
+      </sect1>
+
+      <sect1>
+        <title>Messaging Patterns</title>
+
+        <sect2>
+          <title>Receiving messages on the server side</title>
+
+          <para>Every message has a sender and at least one receiver. A receiver
+          is as it sounds--it receives the message and does something with it.
+          Implementing a receiver (also referred to as a service) is as simple as
+          implementing our standard MessageCallback interface, which is used
+          pervasively across, both client and server code. Let's begin with server
+          side component that receives messages: <programlisting>
+    @Service("HelloWorldService")
+    public class HelloWorldService implements MessageCallback {
+        public void callback(CommandMessage message) {
+            System.out.println("Hello, World!");
+        }
+    }
+                    </programlisting></para>
+        </sect2>
+
+        <sect2>
+          <title>Sending messages from a client</title>
+
+          <para>In order to send a message from a client you need to create a
+          <emphasis><emphasis><filename>Message</filename></emphasis></emphasis>
+          and send it through an instance of <filename>MessageBus</filename>. In
+          this simple example we send it to the subject 'HelloWorldService'
+          <programlisting>
+    public class HelloWorld implements EntryPoint {
+
+        // Get an instance of the MessageBus
+        private MessageBus bus = ErraiBus.get();
+
+        public void onModuleLoad() {
+            Button button = new Button("Send message");
+
+            button.addClickHandler(new ClickHandler() {
+
+            public void onClick(ClickEvent event) {
+                // Send a message to the 'HelloWorldService'.
+                MessageBuilder.createMessage()
+                    .toSubject("HelloWorldService")             // (1)
+                    .signalling()                               // (2)
+                    .noErrorHandling()                          // (3)
+                    .sendNowWithBus();                          // (4)
+            });
+
+            [...]
+         }
+    }
+                    </programlisting></para>
+        </sect2>
+
+        <sect2>
+          <title>Sending messages to a client</title>
+
+          <para>In the following example we extend our server side component to
+          reply with a message when the callback method is invoked. It will create
+          a message and address it to the subject 'HelloWorldClient':
+          <programlisting>
+    @Service
+    public class HelloWorldService implements MessageCallback {
+
+        private MessageBus bus;
+
+        @Inject
+        public HelloWorldService(MessageBus bus) {
+            this.bus = bus;
+        }
+
+        public void callback(CommandMessage message) {
+                // Send a message to the 'HelloWorldClient'.
+                MessageBuilder.createMessage()
+                    .toSubject("HelloWorldClient")              // (1)
+                    .signalling()                               // (2)
+                    .with("text", "Hi There")                   // (3)
+                    .noErrorHandling()                          // (4)
+                    .sendNowWith(bus);                          // (5)
+            });
+        }
+    }
+                    </programlisting></para>
+        </sect2>
+
+        <sect2>
+          <title>Receiving messages on the client side</title>
+
+          <para>If a client needs to receive messages that are "pushed" from the
+          server side it needs to register a listener on a certain subject.
+          <programlisting>
+
+    public class HelloWorld implements EntryPoint {
+        private MessageBus bus = ErraiBus.get();
+
+        public void onModuleLoad() {
+        [...]
+
+        /**
+        * Declare a local service to receive messages on the subject
+        * "BroadcastReceiver".
+        */
+        bus.subscribe("BroadcastReceiver", new MessageCallback() {
+            public void callback(CommandMessage message) {
+                /**
+                * When a message arrives, extract the "text" field and
+                * do something with it
+                */
+                String messageText = message.get(String.class, "text");
+            }
+        });
+
+        [...]
+    }
+               </programlisting></para>
+        </sect2>
+      </sect1>
+
+      <sect1>
+        <title>Remote Procedure Calls (RPC)</title>
+
+        <para>ErraiBus supports a high-level RPC layer to make typical
+        client-server RPC communication easy on top of the bus. </para>
+
+        <sect2>
+          <title>Creating callable endpoints</title>
+
+          <para>ErraiBus provides facility to making asynchronous RPC calls on-top
+          of the bus archhitecture without the need to explicitly declare services
+          or any specific mapping or boilerplate code. This method of
+          communicating with the server is straight-forward and utilizes the
+          simple <filename>RemoteCall</filename> API.</para>
+
+          <para>Remote procedure calls can be be performed against against service
+          class which has been annoted with the <filename>@Service</filename>
+          annotation and the accompanying method which is being called has been
+          annotated with the <filename>@Endpoint</filename> annotation, and the
+          method has public access.</para>
+
+          <programlisting>@Service
+    public class QueryService {
+        private Map&lt;String, String[]&gt; dataMap;
+
+        public QueryService() {
+            setupMap();
+        }
+
+        private void setupMap() {
+            dataMap = new HashMap&lt;String, String[]&gt;();
+            dataMap.put("beer", new String[]{"Heineken", "Budweiser", "Hoogaarden"});
+            dataMap.put("fruit", new String[]{"Apples", "Oranges", "Grapes"});
+            dataMap.put("animals", new String[]{"Monkeys", "Giraffes", "Lions"});
+        }
+
+        @Endpoint
+        public String[] getQuery(String queryString) {
+            return dataMap.get(queryString.toLowerCase());
+        }
+    }</programlisting>
+
+          <para>Notice the <filename>@Endpoint </filename>annotation on the
+          <filename>getQuery()</filename> method in the above figure. In this
+          example, the method simply accepts a single String parameter and returns
+          an array of Strings. The method can accept and return any serializable
+          types that have been exposed to the bus within the rules of
+          serializability as laid out in the section on <emphasis>Object
+          Serialization</emphasis>.</para>
+
+          <para>Also note that in this example, the service class is not required
+          to implement the <filename>MessageCallback</filename> interface and is a
+          simple POJO class</para>
+        </sect2>
+
+        <sect2>
+          <title>Making calls</title>
+
+          <para>Calls to RPC endpoints are made using the RemoteCall API which is
+          very similar to the MessageBuilder API, with a few key differences. Here
+          is some code for calling the RPC endpoint we defined in section
+          3.1.</para>
+
+          <programlisting>MessageBuilder.createCall()
+           .call("QueryService")                                         // (1)
+           .endpoint("getQuery", queryBox.getText())                     // (2)
+           .respondTo(String[].class, new RemoteCallback&lt;String[]&gt;() {   // (3)
+               public void callback(String[] resultsString) {
+                   if (resultsString == null) {
+                       resultsString = new String[]{"No results."};
+                   }
+
+                   /**
+                    * Build an HTML unordered list based on the results.
+                    */
+                   StringBuffer buf = new StringBuffer("&lt;ul&gt;");
+                   for (String result : resultsString) {
+                       buf.append("&lt;li&gt;").append(result).append("&lt;/li&gt;");
+                   }
+                   results.setHTML(buf.append("&lt;/ul&gt;").toString());
+               }
+           })
+           .noErrorHandling()
+           .sendNowWith(bus);                                           // (4)</programlisting>
+
+          <para>In this example we <emphasis role="bold"><emphasis
+          role="bold">(1)</emphasis></emphasis> send a call to the
+          <filename>"QueryService"</filename> class with <emphasis
+          role="bold">(2)</emphasis> the endpoint <filename>"getQuery"</filename>,
+          which is the name of the method which we annotated, along with the
+          parameter we which to pass to the method. Note that you can send as many
+          parameters as you want as the <filename>endpoint()</filename> method
+          accepts varargs parameter.</para>
+
+          <para>Then <emphasis role="bold">(3)</emphasis> we declare a
+          <filename>RemoteCallback</filename> to handle the response back from the
+          server. We declare the response type to be that of
+          <filename>String[]</filename> to correlate with the return type of the
+          endpoint on the server and fill in handling code for the response. In
+          this case we output an HTML unordered list manually.</para>
+
+          <para>Finally <emphasis role="bold">(4)</emphasis> we send the
+          call.</para>
+        </sect2>
+      </sect1>
+
+      <sect1>
+        <title>Advanced messaging scenarios</title>
+
+        <sect2>
+          <title>Broadcasting messages</title>
+        </sect2>
+
+        <sect2>
+          <title>Conversational message exchange</title>
+        </sect2>
+      </sect1>
+
+      <sect1>
+        <title>Message payload and serialization</title>
+
+        <para>How does the low level API work and how should people work with
+        domain models.</para>
+      </sect1>
+
+      <sect1 id="wiring">
+        <title>Wiring server side components</title>
+
+        <para>Put some explanation about the guice integration here.</para>
+      </sect1>
+
+      <sect1>
+        <title>Bus configuration</title>
+
+        <para>Explain ErraiService.properties and ErraiApp.properties</para>
+      </sect1>
+    </chapter>
+    <chapter id="quickstart">
+      <title>Appendix A: Quickstart</title>
+      <section id="quickstart-intro">
+        <title>Using the maven archetype</title>
+        <para>
+            If you have taken a look at the examples that ship with the distribution,
+            you realized that we use maven to build them. The way it is setup, the maven build
+            has several benefits:
+
+            <itemizedlist>
+                <listitem>It pulls the GWT from a central repository. No need for manual installation of the SDK</listitem>
+                <listitem>It provides us with the proper dependencies in order to run the examples</listitem>
+                <listitem>IDE setup is greatly simplfied, since most modern IDE's can directly import the maven structure</listitem>
+            </itemizedlist>
+
+            In order to get you going quickly, we've provided a project archetype, that allows you
+            to create a project skeleton similiar to the one we use for building the examples.
+            It's based on the maven archetype plugin
+            <footnote>http://maven.apache.org/plugins/maven-archetype-plugin/</footnote>
+            and needs to be invoked from the command line:
+
+            <programlisting>
+    mvn archetype:generate
+        -DarchetypeGroupId=org.jboss.errai
+        -DarchetypeArtifactId=sandbox-archetype
+        -DarchetypeVersion=1.0-SNAPSHOT
+        -DarchetypeRepository=http://snapshots.jboss.org/maven2
+            </programlisting>
+
+            When invoking the archetype build it ask you about the maven groupId, artifactId and package
+            name your GWT application should use:
+
+            <programlisting>
+    Define value for groupId: : foo.bar
+    Define value for artifactId: : gwt-app
+    Define value for version:  1.0-SNAPSHOT: :
+    Define value for package:  foo.bar: : foo.bar.ui
+    Confirm properties configuration:
+    groupId: foo.bar
+    artifactId: gwt-app
+    version: 1.0-SNAPSHOT
+    package: foo.bar.ui
+    Y: : Y
+            </programlisting>
+
+            What will be created for you, is a maven build structure, including references to the GWT SDK
+            and the Errai dependencies necessary to launch a simple application:
+
+            <programlisting>
+    Laika:test hbraun$ cd gwt-app/
+    Laika:gwt-app hbraun$ lstree
+    |-src
+    |---main
+    |-----java
+    |-------foo
+    |---------bar
+    |-----------client
+    |-----------server
+    |-war
+    |---WEB-INF
+            </programlisting>
+
+            In order launch the GWT hosted mode, change into the project directory
+            and type:
+            <programlisting>
+    mvn gwt:run
+            </programlisting>
+
+            The default project includes both a HelloWorld client (GWT), and a HelloWorld service.
+        </para>
+      </section>
+    </chapter>
+   
 </book>

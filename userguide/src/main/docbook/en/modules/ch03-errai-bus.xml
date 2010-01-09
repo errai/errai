@@ -16,8 +16,6 @@
     or unweildy AJAX or COMET frameworks. We've built it all in to one,
     consice messaging framework. It's single-paradigm, and it's fun to work
     with.</para>
-
-    <para></para>
   </sect1>
 
   <sect1>
@@ -102,7 +100,7 @@ public class HelloWorldService implements MessageCallback {
         });
     }
 }               
-                </programlisting> </para>
+                </programlisting></para>
     </sect2>
 
     <sect2>
@@ -140,6 +138,9 @@ public class HelloWorld implements EntryPoint {
 
   <sect1>
     <title>Remote Procedure Calls (RPC)</title>
+
+    <para>ErraiBus supports a high-level RPC layer to make typical
+    client-server RPC communication easy on top of the bus. </para>
 
     <sect2>
       <title>Creating callable endpoints</title>
@@ -234,7 +235,7 @@ public class QueryService {
       server. We declare the response type to be that of
       <filename>String[]</filename> to correlate with the return type of the
       endpoint on the server and fill in handling code for the response. In
-      this case we output an HTML unordered list manually. </para>
+      this case we output an HTML unordered list manually.</para>
 
       <para>Finally <emphasis role="bold">(4)</emphasis> we send the
       call.</para>

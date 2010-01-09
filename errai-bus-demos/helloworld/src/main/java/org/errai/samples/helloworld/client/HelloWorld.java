@@ -10,7 +10,10 @@ import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.MessageBuilder;
 import org.jboss.errai.bus.client.MessageBus;
 
+import static org.jboss.errai.bus.client.MessageBuilder.createMessage;
+
 public class HelloWorld implements EntryPoint {
+
     /**
      * Get an instance of the MessageBus
      */
@@ -18,6 +21,8 @@ public class HelloWorld implements EntryPoint {
 
     public void onModuleLoad() {
         Button clickMe = new Button("Click Me!");
+
+
 
         /**
          * Register a click handler for the button.
@@ -27,7 +32,7 @@ public class HelloWorld implements EntryPoint {
                 /**
                  * Send a message to the 'HelloWorld' service.
                  */
-                MessageBuilder.createMessage()
+                createMessage()
                         .toSubject("HelloWorld")
                         .signalling().noErrorHandling()
                         .sendNowWith(bus);
