@@ -30,6 +30,7 @@
         <gwt.maven>1.2.0-11137</gwt.maven>
         <guice.version>2.0</guice.version>
         <mvel.version>2.0.16-SNAPSHOT</mvel.version>
+        <mosaic.version>0.3.0-rc1</mosaic.version>
     </properties>
 
     <modules>
@@ -54,14 +55,12 @@
                 <groupId>com.google.gwt</groupId>
                 <artifactId>gwt-user</artifactId>
                 <version>${gwt.version}</version>
-                <scope>provided</scope>
             </dependency>
 
             <dependency>
                 <groupId>com.google.gwt</groupId>
                 <artifactId>gwt-dev</artifactId>
                 <version>${gwt.version}</version>
-                <scope>provided</scope>
             </dependency>
 
             <dependency>

@@ -30,44 +30,25 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <properties>
-        <mosaic.version>0.3.0-rc1</mosaic.version>
-    </properties>
-
-
     <dependencies>
+        <!-- Errai -->
         <dependency>
             <groupId>org.jboss.errai</groupId>
-            <artifactId>errai-common</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <artifactId>errai-bus</artifactId>
+            <version>${version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.google.gwt</groupId>
-            <artifactId>gwt-user</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.google.gwt</groupId>
-            <artifactId>gwt-dev</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.googlecode.gwtmosaic</groupId>
-            <artifactId>gwt-mosaic-dnd</artifactId>
-            <version>0.2.0</version>
-        </dependency>
+
+        <!-- Mosaic -->
         <dependency>
             <groupId>com.googlecode.gwtmosaic</groupId>
             <artifactId>gwt-mosaic</artifactId>
             <version>${mosaic.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.googlecode.gwtmosaic</groupId>
             <artifactId>gwt-beans-binding</artifactId>
             <version>${mosaic.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.googlecode.gwtmosaic</groupId>
             <artifactId>gwt-dnd</artifactId>
@@ -79,27 +60,12 @@
             <artifactId>gwt-incubator</artifactId>
             <version>${mosaic.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.googlecode.gwtmosaic</groupId>
             <artifactId>gwtx</artifactId>
             <version>${mosaic.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.google.code.guice</groupId>
-            <artifactId>guice</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.guice</groupId>
-            <artifactId>guice-servlet</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mvel</groupId>
-            <artifactId>mvel2</artifactId>
-            <scope>provided</scope>
-        </dependency>
+        
     </dependencies>
 
 </project>
