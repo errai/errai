@@ -23,10 +23,11 @@ package org.jboss.errai.workspaces.client.auth;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.HasAlignment;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.event.dom.client.HasClickHandlers;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.event.logical.shared.HasCloseHandlers;
+import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.MessageBus;
@@ -34,17 +35,22 @@ import org.jboss.errai.bus.client.MessageCallback;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
+import org.jboss.errai.bus.client.security.AuthenticationHandler;
+import org.jboss.errai.bus.client.security.Credential;
+import org.jboss.errai.bus.client.security.impl.NameCredential;
+import org.jboss.errai.bus.client.security.impl.PasswordCredential;
 import org.jboss.errai.common.client.framework.AcceptsCallback;
 import org.jboss.errai.widgets.client.WSAlert;
 import org.jboss.errai.widgets.client.WSModalDialog;
 import org.jboss.errai.widgets.client.WSWindowPanel;
+import org.jboss.errai.workspaces.client.Workspace;
 
 import static org.jboss.errai.bus.client.CommandMessage.createWithParts;
 import static org.jboss.errai.bus.client.MessageBuilder.createMessage;
 import static org.jboss.errai.bus.client.json.JSONUtilCli.decodeMap;
 
 /**
- * Authentication handler that allows to replace the displayed form.
+ * Authentication handler.
  */
 public class AuthenticationPresenter implements MessageCallback
 {
@@ -52,7 +58,14 @@ public class AuthenticationPresenter implements MessageCallback
   {
     void showLoginPanel();
     void clearPanel();
-    void closeLoginPanel();
+    void hideLoginPanel();
+
+    HasText getUsernameInput();
+    HasText getPasswordInput();
+
+    HasClickHandlers getSubmitButton();
+
+    HasCloseHandlers getWindowPanel();
   }
 
   private final Runnable negotiationTask = new Runnable() {
@@ -75,6 +88,46 @@ public class AuthenticationPresenter implements MessageCallback
   public AuthenticationPresenter()
   {
     display = new DefaultAuthenticationDisplay();
+    registerHandlers();
+  }
+
+  private void registerHandlers()
+  {
+    // Form Submission Handler
+    display.getSubmitButton().addClickHandler(
+        new ClickHandler() {
+          public void onClick(ClickEvent event) {
+            Workspace.getSecurityService().doAuthentication(
+                new AuthenticationHandler() {
+                  public void doLogin(Credential[] credentials) {
+                    for (Credential c : credentials) {
+                      if (c instanceof NameCredential) {
+                        ((NameCredential) c).setName(display.getUsernameInput().getText());
+                      }
+                      else if (c instanceof PasswordCredential) {
+                        ((PasswordCredential) c).setPassword(display.getPasswordInput().getText());
+                      }
+                    }
+                  }
+                });
+          }
+        }
+    );
+
+    // CloseHandler
+    display.getWindowPanel().addCloseHandler(
+        new CloseHandler()
+        {
+          @Override
+          public void onClose(CloseEvent closeEvent)
+          {
+            createMessage()
+                .toSubject("ServerEchoService")
+                .signalling()
+                .noErrorHandling().sendNowWith(ErraiBus.get());
+          }
+        }
+    );
   }
 
   /**
@@ -94,7 +147,7 @@ public class AuthenticationPresenter implements MessageCallback
   @Override
   public void callback(Message message)
   {
-     try {
+    try {
 
       switch (SecurityCommands.valueOf(message.getCommandType())) {
         case SecurityChallenge:
@@ -119,7 +172,7 @@ public class AuthenticationPresenter implements MessageCallback
 
 
         case FailedAuth:
-          display.closeLoginPanel();
+          display.hideLoginPanel();
 
           WSModalDialog failed = new WSModalDialog();
           failed.ask("Authentication Failure. Please Try Again.", new AcceptsCallback() {
@@ -131,7 +184,7 @@ public class AuthenticationPresenter implements MessageCallback
           break;
 
         case SuccessfulAuth:
-          display.closeLoginPanel();
+          display.hideLoginPanel();
 
 
           // display welcome panel
@@ -193,6 +246,6 @@ public class AuthenticationPresenter implements MessageCallback
     }
     catch (Exception e) {
       e.printStackTrace();
-    }  
+    }
   }
 }

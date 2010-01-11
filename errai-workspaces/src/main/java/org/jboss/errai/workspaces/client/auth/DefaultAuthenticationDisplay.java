@@ -21,40 +21,95 @@
  */
 package org.jboss.errai.workspaces.client.auth;
 
+import com.google.gwt.event.dom.client.HasClickHandlers;
+import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.event.logical.shared.HasCloseHandlers;
+import com.google.gwt.event.shared.GwtEvent;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.RootPanel;
-import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.common.client.framework.WSComponent;
 import org.jboss.errai.widgets.client.WSWindowPanel;
 import org.jboss.errai.workspaces.client.widgets.WSLoginPanel;
 
-import static org.jboss.errai.bus.client.MessageBuilder.createMessage;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Default authentication form
  */
-public class DefaultAuthenticationDisplay implements AuthenticationPresenter.Display
+public class DefaultAuthenticationDisplay implements AuthenticationPresenter.Display,
+    HasCloseHandlers<Object>
 {
-  private WSComponent loginComponent = new WSLoginPanel();
+  private WSLoginPanel loginComponent = new WSLoginPanel();
   private WSWindowPanel loginWindowPanel;
+
+  // requires adoption
+  private List<CloseHandler> closeHandlers = new ArrayList<CloseHandler>();
 
   private Window.ClosingHandler loginWindowClosingHandler = new Window.ClosingHandler() {
     public void onWindowClosing(Window.ClosingEvent event) {
-      createMessage()
-          .toSubject("ServerEchoService")
-          .signalling()
-          .noErrorHandling().sendNowWith(ErraiBus.get());
+
+      // cheap delegation between WSWindowPanel and Presenter.Display
+      for(CloseHandler handler : closeHandlers)
+      {
+        handler.onClose(null);
+      }
     }
   };
 
+  @Override
+  public HandlerRegistration addCloseHandler(final CloseHandler handler)
+  {
+    this.closeHandlers.add(handler);
+    return new HandlerRegistration()
+    {
+      @Override
+      public void removeHandler()
+      {
+        closeHandlers.remove(handler);
+      }
+    };
+  }
+
+  @Override
+  public void fireEvent(GwtEvent<?> gwtEvent)
+  {
+
+  }
 
   @Override
   public void clearPanel()
   {
-    //workspaceLayout.getUserInfoPanel().clear();
+    getUsernameInput().setText("");
+    getPasswordInput().setText("");
   }
 
-  public void closeLoginPanel() {
+  @Override
+  public HasText getUsernameInput()
+  {
+    return loginComponent.getUserNameInput();
+  }
+
+  @Override
+  public HasText getPasswordInput()
+  {
+    return loginComponent.getPasswordInput();
+  }
+
+  @Override
+  public HasClickHandlers getSubmitButton()
+  {
+    return loginComponent.getLoginButton(); 
+  }
+
+  @Override
+  public HasCloseHandlers getWindowPanel()
+  {
+    return this;
+  }
+
+  public void hideLoginPanel() {
     if (loginWindowPanel != null) {
       loginWindowPanel.removeClosingHandler(loginWindowClosingHandler);
       loginWindowPanel.hide();
@@ -64,7 +119,7 @@ public class DefaultAuthenticationDisplay implements AuthenticationPresenter.Dis
   }
 
   private void newWindowPanel() {
-    closeLoginPanel();
+    hideLoginPanel();
 
     loginWindowPanel = new WSWindowPanel();
     loginWindowPanel.addClosingHandler(loginWindowClosingHandler);
