@@ -78,12 +78,7 @@
             <groupId>org.mvel</groupId>
             <artifactId>mvel2</artifactId>
         </dependency>
-        <dependency>
-            <groupId>javax.persistence</groupId>
-            <artifactId>persistence-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
+        
         <dependency>
             <groupId>com.google.code.guice</groupId>
             <artifactId>guice-servlet</artifactId>
