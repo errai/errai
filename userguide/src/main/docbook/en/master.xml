@@ -58,21 +58,21 @@
       <para>If you run into trouble don't hesitate to get in touch with us:
       <itemizedlist>
           <listitem>
-            User Forum:
+             User Forum:
 
             <ulink
             url="http://www.jboss.org/index.html?module=bb&amp;op=viewforum&amp;f=295">http://www.jboss.org/index.html?module=bb&amp;op=viewforum&amp;f=295</ulink>
           </listitem>
 
           <listitem>
-            Mailing List:
+             Mailing List:
 
             <ulink
             url="http://jboss.org/errai/MailingLists.html">http://jboss.org/errai/MailingLists.html</ulink>
           </listitem>
 
           <listitem>
-            IRC: irc://irc.freenode.net/errai
+             IRC: irc://irc.freenode.net/errai
           </listitem>
         </itemizedlist></para>
     </section>
@@ -88,14 +88,14 @@
       Maven to build and run the examples, and for leverging the quickstart
       utilities. <itemizedlist>
           <listitem>
-            JDK 5: 
+             JDK 5: 
 
             <ulink
             url="http://java.sun.com/javase/downloads/index.jsp">http://java.sun.com/javase/downloads/index.jsp</ulink>
           </listitem>
 
           <listitem>
-            Apache Maven: 
+             Apache Maven: 
 
             <ulink
             url="http://maven.apache.org/download.html">http://maven.apache.org/download.html</ulink>
@@ -122,19 +122,19 @@
         <listitem>
           <literal>doc</literal>
 
-          : User guide, javadocs and developers guide
+           : User guide, javadocs and developers guide
         </listitem>
 
         <listitem>
           <literal>examples</literal>
 
-          : Examples that are used in the user guide
+           : Examples that are used in the user guide
         </listitem>
 
         <listitem>
           <literal>lib</literal>
 
-          : Required libraries
+           : Required libraries
         </listitem>
       </itemizedlist>
     </section>
@@ -158,7 +158,7 @@
     </sect1>
 
     <sect1>
-      <title>Messaging </title>
+      <title>Messaging</title>
 
       <para>This section will start off with some solid code examples and
       describe the different messaging patterns that are employed by ErraiBus.
@@ -294,7 +294,7 @@
         <para>Conversations are message exchanges which are between a single
         client and a service. They are a fundmentally important concept in
         ErraiBus, since by default, a message will be broadcast to all client
-        services listening on a particular channel. </para>
+        services listening on a particular channel.</para>
 
         <para>When you create a conversation with an incoming message, you
         ensure that the message you are sending back is received by the same
@@ -335,9 +335,9 @@
 
       <para>ErraiBus supports a high-level RPC layer to make typical
       client-server RPC communication easy on top of the bus. While it is
-      possible to use ErraiBus without every using this API, you may find it
-      to be a more useful and concise approach to exposing services to the
-      clients. </para>
+      possible to use ErraiBus without ever using this API, you may find it to
+      be a more useful and concise approach to exposing services to the
+      clients.</para>
 
       <sect2>
         <title>Creating callable endpoints</title>
@@ -451,7 +451,7 @@
       <filename>org.jboss.errai.bus.server.annotations.ExposeEntity</filename>
       annotation. The presence of this annotation will cause Errai's GWT
       compiler extensions to generate marshall/demarshall stubs for the
-      annotated objects at compile-time. </para>
+      annotated objects at compile-time.</para>
 
       <para>For example:</para>
 
@@ -468,13 +468,141 @@ public class Beer {
     <sect1 id="wiring">
       <title>Wiring server side components</title>
 
-      <para>Currently, ErraiBus uses Google Guice.</para>
+      <para>Currently, ErraiBus uses Google Guice to wire components. However,
+      we plan on falling back on the <emphasis>JSR-330 Dependency
+      Injection</emphasis> specification in the near future. When deploying
+      services on the server-side, it is currently possible to obtain
+      references to the <filename>MessageBus</filename>,
+      <filename>RequestDispatcher</filename>, the
+      <filename>ErraiServiceConfigurator</filename>, and
+      <filename>ErraiService</filename> by declaring them as injection
+      dependencies. </para>
     </sect1>
 
     <sect1>
       <title>Bus configuration</title>
 
-      <para>Explain ErraiService.properties and ErraiApp.properties</para>
+      <para><emphasis>Note: The details in this section are currently subject
+      to change. Please consult this section if you are working off
+      pre-release versions of ErraiBus.</emphasis></para>
+
+      <sect2>
+        <title>web.xml and app server configuration</title>
+
+        <para>Depending on what application server you are deploying on, you
+        must provide an appropriate servlet implementation if you wish to use
+        true, asynchronous I/O. </para>
+
+        <para>Here's a sample web.xml file:</para>
+
+        <programlisting>&lt;web-app xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+		  http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+         version="2.5"&gt;
+
+    &lt;!--
+        Start Guice-Servlet Boilerplate
+    --&gt;
+
+    &lt;filter&gt;
+        &lt;filter-name&gt;guiceFilter&lt;/filter-name&gt;
+        &lt;filter-class&gt;com.google.inject.servlet.GuiceFilter&lt;/filter-class&gt;
+    &lt;/filter&gt;
+
+    &lt;filter-mapping&gt;
+        &lt;filter-name&gt;guiceFilter&lt;/filter-name&gt;
+        &lt;url-pattern&gt;/*&lt;/url-pattern&gt;
+    &lt;/filter-mapping&gt;
+
+
+    &lt;listener&gt;
+        &lt;listener-class&gt;org.jboss.errai.bus.server.ErraiServletConfig&lt;/listener-class&gt;
+    &lt;/listener&gt;
+
+    &lt;!--
+        End Guice-Servlet Boilerplate.
+    --&gt;
+
+    &lt;context-param&gt;
+        &lt;param-name&gt;errai.properties&lt;/param-name&gt;
+        &lt;param-value&gt;/WEB-INF/errai.properties&lt;/param-value&gt;
+    &lt;/context-param&gt;
+
+    &lt;context-param&gt;
+        &lt;param-name&gt;login.config&lt;/param-name&gt;
+        &lt;param-value&gt;/WEB-INF/login.config&lt;/param-value&gt;
+    &lt;/context-param&gt;
+
+    &lt;context-param&gt;
+        &lt;param-name&gt;users.properties&lt;/param-name&gt;
+        &lt;param-value&gt;/WEB-INF/users.properties&lt;/param-value&gt;
+    &lt;/context-param&gt;
+
+&lt;/web-app&gt;</programlisting>
+      </sect2>
+
+      <sect2>
+        <title>ErraiService.properties</title>
+
+        <para>The ErraiService.properties file contains basic configuration
+        for the bus itself. </para>
+
+        <para>Example Configuration:</para>
+
+        <programlisting>
+##
+## Servlet implementation (default is DefaultBlockingServlet);
+##
+errai.servlet_implementation=org.jboss.errai.bus.server.servlet.DefaultBlockingServlet
+#errai.servlet_implementation=org.jboss.errai.bus.server.servlet.JettyContinuationsServlet
+
+
+##
+## Request dispatcher implementation (default is SimpleDispatcher)
+##
+#errai.dispatcher_implementation=org.jboss.errai.bus.server.SimpleDispatcher
+errai.dispatcher_implementation=org.jboss.errai.bus.server.AsyncDispatcher
+
+
+#
+## Worker pool size.  This is the number of threads the asynchronous worker pool should provide for processing
+## incoming messages. This option is only valid when using the AsyncDispatcher implementation.
+##
+errai.async.thread_pool_size=5
+
+##
+## Worker timeout (in seconds).  This defines the time that a single asychronous process may run, before the worker pool
+## terminates it and reclaims the thread.   This option is only valid when using the AsyncDispatcher implementation.
+##
+errai.async.worker.timeout=5
+
+##
+## Specify the Authentication/Authorization Adapter to use
+##
+#errai.authentication_adapter=org.jboss.errai.persistence.server.security.HibernateAuthenticationAdapter
+#errai.authentication_adapter=org.jboss.errai.bus.server.security.auth.JAASAdapter
+
+##
+## This property indicates whether or not authentication is required for all communication with the bus.  Set this
+## to 'true' if all access to your application should be secure.
+##
+#errai.require_authentication_for_all=true
+
+
+
+</programlisting>
+      </sect2>
+
+      <sect2>
+        <title>ErraiApp.properties</title>
+
+        <para>The ErraiApp.properties is a marker file. It does not contain
+        any configuration, but it is required that it be present in any module
+        you wish Errai to scan for deployable extensions and services. It
+        should be located as the top-level directory of any JAR or
+        Directory-based module.</para>
+      </sect2>
     </sect1>
   </chapter>
 
@@ -488,21 +616,21 @@ public class Beer {
       distribution, you realized that we use maven to build them. The way it
       is setup, the maven build has several benefits: <itemizedlist>
           <listitem>
-            It pulls the GWT from a central repository. No need for manual installation of the SDK
+             It pulls the GWT from a central repository. No need for manual installation of the SDK
           </listitem>
 
           <listitem>
-            It provides us with the proper dependencies in order to run the examples
+             It provides us with the proper dependencies in order to run the examples
           </listitem>
 
           <listitem>
-            IDE setup is greatly simplfied, since most modern IDE's can directly import the maven structure
+             IDE setup is greatly simplfied, since most modern IDE's can directly import the maven structure
           </listitem>
         </itemizedlist> In order to get you going quickly, we've provided a
       project archetype, that allows you to create a project skeleton similiar
       to the one we use for building the examples. It's based on the maven
       archetype plugin <footnote>
-          http://maven.apache.org/plugins/maven-archetype-plugin/
+           http://maven.apache.org/plugins/maven-archetype-plugin/
         </footnote> and needs to be invoked from the command line:
       <programlisting>
     mvn archetype:generate
