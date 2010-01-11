@@ -54,7 +54,8 @@ import java.util.*;
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
  */
-public class Workspace implements EntryPoint {
+public class Workspace implements EntryPoint, ToolContainer
+{
     public static PickupDragController dragController;
     private static WorkspaceLayout workspaceLayout;
     private static SecurityService securityService = new SecurityService();
@@ -361,17 +362,20 @@ public class Workspace implements EntryPoint {
         return loginComponent;
     }
 
-    public static void setLoginComponent(WSComponent loginComponent) {
+    @Override
+    public void setLoginComponent(WSComponent loginComponent) {
         Workspace.loginComponent = loginComponent;
     }
 
-    public static void addToolSet(ToolSet toolSet) {
+    @Override
+    public  void addToolSet(ToolSet toolSet) {
         toBeLoaded.add(toolSet);
     }
 
     private static int toolCounter = 0;
 
-    public static void addTool(String group, String name, String icon,
+    @Override
+    public void addTool(String group, String name, String icon,
                                boolean multipleAllowed, int priority, WSComponent component) {
         if (!toBeLoadedGroups.containsKey(group)) toBeLoadedGroups.put(group, new ArrayList<ToolProvider>());
 
@@ -393,7 +397,8 @@ public class Workspace implements EntryPoint {
         toBeLoadedGroups.get(group).add(provider);
     }
 
-    public static void addTool(String group, String name, String icon,
+    @Override
+    public void addTool(String group, String name, String icon,
                                boolean multipleAllowed, int priority, WSComponent component, final String[] renderIfRoles) {
         if (!toBeLoadedGroups.containsKey(group)) toBeLoadedGroups.put(group, new ArrayList<ToolProvider>());
 
@@ -428,7 +433,7 @@ public class Workspace implements EntryPoint {
 
     public void renderToolPallete() {
         ModuleLoaderBootstrap mlb = create(ModuleLoaderBootstrap.class);
-        mlb.initAll(workspaceLayout);
+        mlb.initAll(this);
 
         Set<String> loaded = new HashSet<String>();
         if (!preferredGroupOrdering.isEmpty()) {
@@ -523,7 +528,8 @@ public class Workspace implements EntryPoint {
     }
 
 
-    public static void setPreferredGroupOrdering(String[] groups) {
+    @Override
+    public void setPreferredGroupOrdering(String[] groups) {
         preferredGroupOrdering.addAll(Arrays.asList(groups));
     }
 

@@ -30,7 +30,7 @@
         <gwt.maven>1.2.0-11137</gwt.maven>
         <guice.version>2.0</guice.version>
         <mvel.version>2.0.16-SNAPSHOT</mvel.version>
-        <mosaic.version>0.3.0-rc1</mosaic.version>
+        <mosaic.version>0.4.0-rc2</mosaic.version>
     </properties>
 
     <modules>

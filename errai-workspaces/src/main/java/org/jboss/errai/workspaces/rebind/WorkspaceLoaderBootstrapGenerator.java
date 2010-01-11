@@ -133,7 +133,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
         sourceWriter.outdent();
         sourceWriter.println("}");
 
-        sourceWriter.println("public void initAll(org.jboss.errai.workspaces.client.layout.WorkspaceLayout errai) { ");
+        sourceWriter.println("public void initAll(org.jboss.errai.workspaces.client.ToolContainer workspace) { ");
         sourceWriter.outdent();
 
         // add statements sendNowWith pub key/value pairs from the resrouce bundle
@@ -149,7 +149,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
         ConfigUtil.visitAllTargets(targets, context, logger, sourceWriter, new RebindVisitor() {
             public void visit(Class<?> clazz, GeneratorContext context, TreeLogger logger, SourceWriter writer) {
                 if (clazz.isAnnotationPresent(LoadToolSet.class)) {
-                        writer.println("org.jboss.errai.workspaces.client.Workspace.addToolSet(new " + clazz.getName() + "());");
+                        writer.println("workspace.addToolSet(new " + clazz.getName() + "());");
                         logger.log(TreeLogger.Type.INFO, "Adding Errai Toolset: " + clazz.getName());
                     }
                     else if (clazz.isAnnotationPresent(LoadTool.class)) {
@@ -167,18 +167,18 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
                             }
                             rolesBuilder.append("}");
 
-                            writer.println("org.jboss.errai.workspaces.client.Workspace.addTool(\"" + loadTool.group() + "\"," +
+                            writer.println("workspace.addTool(\"" + loadTool.group() + "\"," +
                                     " \"" + loadTool.name() + "\", \"" + loadTool.icon() + "\", " + loadTool.multipleAllowed()
                                     + ", " + loadTool.priority() + ", new " + clazz.getName() + "(), " + rolesBuilder.toString() + ");");
                         }
                         else {
-                            writer.println("org.jboss.errai.workspaces.client.Workspace.addTool(\"" + loadTool.group() + "\"," +
+                            writer.println("workspace.addTool(\"" + loadTool.group() + "\"," +
                                     " \"" + loadTool.name() + "\", \"" + loadTool.icon() + "\", " + loadTool.multipleAllowed()
                                     + ", " + loadTool.priority() + ", new " + clazz.getName() + "());");
                         }
                     }
                     else if (clazz.isAnnotationPresent(LoginComponent.class)) {
-                        writer.println("org.jboss.errai.workspaces.client.Workspace.setLoginComponent(new " + clazz.getName() + "());");
+                        writer.println("workspace.setLoginComponent(new " + clazz.getName() + "());");
                     }
                     else if (clazz.isAnnotationPresent(GroupOrder.class)) {
                         GroupOrder groupOrder = clazz.getAnnotation(GroupOrder.class);
@@ -187,7 +187,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
 
                         String[] order = groupOrder.value().split(",");
 
-                        writer.print("org.jboss.errai.workspaces.client.Workspace.setPreferredGroupOrdering(new String[] {");
+                        writer.print("workspace.setPreferredGroupOrdering(new String[] {");
 
                         for (int i = 0; i < order.length; i++) {
                             writer.print("\"");
