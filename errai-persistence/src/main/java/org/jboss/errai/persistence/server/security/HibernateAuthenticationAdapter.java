@@ -177,7 +177,7 @@ public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
         boolean sessionEnded = isAuthenticated(message);
         if (sessionEnded) {
             getAuthDescriptor(message).remove(new SimpleRole(CredentialTypes.Authenticated.name()));
-            message.get(QueueSession.class, "Session").removeAttribute(ErraiService.SESSION_AUTH_DATA);
+            message.getResource(QueueSession.class, "Session").removeAttribute(ErraiService.SESSION_AUTH_DATA);
             return true;
         } else {
             return false;
