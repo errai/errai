@@ -19,22 +19,12 @@ package org.jboss.errai.workspaces.client;
 import com.allen_sauer.gwt.dnd.client.PickupDragController;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
-
-import static com.google.gwt.core.client.GWT.create;
-
 import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
-
-import static com.google.gwt.user.client.Window.enableScrolling;
-import static org.jboss.errai.bus.client.CommandMessage.createWithParts;
-import static org.jboss.errai.bus.client.MessageBuilder.createMessage;
-import static org.jboss.errai.bus.client.json.JSONUtilCli.decodeMap;
-
 import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.bus.client.*;
-import org.jboss.errai.bus.client.json.JSONUtilCli;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
@@ -43,522 +33,378 @@ import org.jboss.errai.common.client.framework.AcceptsCallback;
 import org.jboss.errai.common.client.framework.WSComponent;
 import org.jboss.errai.widgets.client.WSAlert;
 import org.jboss.errai.widgets.client.WSModalDialog;
-import org.jboss.errai.widgets.client.WSWindowPanel;
+import org.jboss.errai.workspaces.client.auth.AuthenticationPresenter;
 import org.jboss.errai.workspaces.client.framework.*;
 import org.jboss.errai.workspaces.client.icons.ErraiImageBundle;
 import org.jboss.errai.workspaces.client.layout.WorkspaceLayout;
-import org.jboss.errai.workspaces.client.widgets.WSLoginPanel;
 
 import java.util.*;
+
+import static com.google.gwt.core.client.GWT.create;
+import static com.google.gwt.user.client.Window.enableScrolling;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
  */
 public class Workspace implements EntryPoint, ToolContainer
 {
-    public static PickupDragController dragController;
-    private static WorkspaceLayout workspaceLayout;
-    private static SecurityService securityService = new SecurityService();
-    private static WSComponent loginComponent = new WSLoginPanel();
+  public static PickupDragController dragController;
+  private static WorkspaceLayout workspaceLayout;
+  private static SecurityService securityService = new SecurityService();
 
-    private static WSWindowPanel loginWindowPanel;
-    private static Window.ClosingHandler loginWindowClosingHandler;
+  private static ErraiImageBundle erraiImageBundle = GWT.create(ErraiImageBundle.class);
 
-    private static ErraiImageBundle erraiImageBundle = GWT.create(ErraiImageBundle.class);
+  private AuthenticationPresenter authentication = new AuthenticationPresenter();
+    
+  private static List<ToolSet> toBeLoaded = new ArrayList<ToolSet>();
+  private static Map<String, List<ToolProvider>> toBeLoadedGroups = new HashMap<String, List<ToolProvider>>();
+  private static List<String> preferredGroupOrdering = new ArrayList<String>();
+  private static Set<String> sessionRoles = new HashSet<String>();
 
-    static {
-        loginWindowClosingHandler = new Window.ClosingHandler() {
-            public void onWindowClosing(Window.ClosingEvent event) {
-                createMessage()
-                        .toSubject("ServerEchoService")
-                        .signalling()
-                        .noErrorHandling().sendNowWith(ErraiBus.get());
-            }
-        };
+
+  private Workspace() {
+  }
+
+  /**
+   * This is the entry point method.
+   */
+  public void onModuleLoad() {
+    GWT.runAsync(new RunAsyncCallback() {
+
+      public void onFailure(Throwable reason) {
+      }
+
+      public void onSuccess() {
+        init("rootPanel");
+      }
+    });
+
+    GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
+      public void onUncaughtException(Throwable e) {
+        WSAlert.alert("An exception was thrown: " + e.getMessage() + " -- See console for more details.");
+        e.printStackTrace();
+      }
+    });
+  }
+
+  private void init(final String rootId) {
+    if (workspaceLayout != null) {
+      return;
     }
 
-    private static List<ToolSet> toBeLoaded = new ArrayList<ToolSet>();
-    private static Map<String, List<ToolProvider>> toBeLoadedGroups = new HashMap<String, List<ToolProvider>>();
-    private static List<String> preferredGroupOrdering = new ArrayList<String>();
-    private static Set<String> sessionRoles = new HashSet<String>();
+    final MessageBus bus = ErraiBus.get();
 
-    private final Runnable negotiate = new Runnable() {
-        public void run() {
-            createMessage()
-                    .toSubject("ClientNegotiationService")
-                    .signalling()
-                    .with(MessageParts.ReplyTo, "ClientConfiguratorService")
-                    .noErrorHandling().sendNowWith(ErraiBus.get());
-        }
+    /**
+     * Configure the local client message bus to send RemoteSubscribe signals to the remote bus when
+     * new subscriptions are created locally.
+     */
+
+
+    /**
+     *  Declare the standard erro client here.
+     */
+    bus.subscribe("ClientErrorService", new MessageCallback() {
+      public void callback(Message message) {
+        String errorMessage = message.get(String.class, MessageParts.ErrorMessage);
+
+        WSModalDialog errorDialog = new WSModalDialog();
+        errorDialog.ask(errorMessage, new AcceptsCallback() {
+          public void callback(Object message, Object data) {
+          }
+        });
+        errorDialog.showModal();
+      }
+    });
+
+
+    /**
+     *  Declare the standard login client here.
+     */
+    bus.subscribe("LoginClient", authentication);
+
+    /**
+     * Initialize the workspace UI.
+     */
+
+    initWorkspace(rootId);
+
+    try {
+      /**
+       * Specifiy a callback interface to execute the _initAfterWSLoad() tasks when we know the bus
+       * is fully up and running.
+       */
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  /**
+   * Initialize the actual Workspace UI.
+   *
+   * @param rootId -
+   */
+  private void initWorkspace(final String rootId) {
+    /**
+     * Instantiate layout.
+     */
+    workspaceLayout = new WorkspaceLayout(rootId);
+
+    enableScrolling(false);
+
+    if (rootId == null) {
+      Window.alert("No root ID specified!");
+      return;
+    }
+
+    /**
+     * Create the main drag and drop controller for the UI.
+     */
+    dragController = new PickupDragController(RootPanel.get(), true);
+
+
+    final ClientMessageBus bus = (ClientMessageBus) ErraiBus.get();
+
+
+    if (bus.isInitialized()) {
+      authentication.getNegotiationTask().run();
+    } else {
+      bus.addPostInitTask(authentication.getNegotiationTask());
+    }
+
+    /**
+     * This service is used for setting up and restoring the session.
+     */
+    bus.subscribe("ClientConfiguratorService",
+        new MessageCallback() {
+          public void callback(Message message) {
+            if (message.hasPart(SecurityParts.Roles)) {
+              String[] roleStrs = message.get(String.class, SecurityParts.Roles).split(",");
+              for (String s : roleStrs) {
+                sessionRoles.add(s.trim());
+              }
+            }
+
+            if (message.hasPart(SecurityParts.Name)) {
+              HorizontalPanel userInfo = new HorizontalPanel();
+              Label userName = new Label(message.get(String.class, SecurityParts.Name));
+              userName.getElement().getStyle().setProperty("fontWeight", "bold");
+
+              userInfo.add(userName);
+              Button logout = new Button("Logout");
+              logout.setStyleName("logoutButton");
+              userInfo.add(logout);
+              logout.addClickHandler(new ClickHandler() {
+                public void onClick(ClickEvent event) {
+                  MessageBuilder.createMessage()
+                      .toSubject("AuthorizationService")
+                      .command(SecurityCommands.EndSession)
+                      .noErrorHandling().sendNowWith(bus);
+
+                  bus.unsubscribeAll("org.jboss.errai.WorkspaceLayout");
+                  sessionRoles.clear();
+
+                  RootPanel.get(rootId).remove(workspaceLayout);
+                  workspaceLayout = new WorkspaceLayout(rootId);
+
+
+                }
+              });
+
+              workspaceLayout.getUserInfoPanel().clear();
+              workspaceLayout.getUserInfoPanel().add(userInfo);
+            }
+
+            RootPanel.get(rootId).add(workspaceLayout);
+            renderToolPallete();
+          }
+        });
+
+
+  }
+
+  public static SecurityService getSecurityService() {
+    return securityService;
+  }
+
+  public static WSComponent getLoginComponent() {
+    //return loginComponent;
+    throw new RuntimeException("Not implemented");
+  }
+
+  @Override
+  public void setLoginComponent(WSComponent loginComponent) {
+    //this.loginComponent = loginComponent;
+    throw new RuntimeException("Not implemented");
+  }
+
+  @Override
+  public  void addToolSet(ToolSet toolSet) {
+    toBeLoaded.add(toolSet);
+  }
+
+  private static int toolCounter = 0;
+
+  @Override
+  public void addTool(String group, String name, String icon,
+                      boolean multipleAllowed, int priority, WSComponent component) {
+    if (!toBeLoadedGroups.containsKey(group)) toBeLoadedGroups.put(group, new ArrayList<ToolProvider>());
+
+    final String toolId = name.replaceAll(" ", "_") + "." + toolCounter++;
+
+    Image img;
+    if (icon == null || "".equals(icon)) {
+      img = new Image(erraiImageBundle.application());
+    } else
+      img = new Image(GWT.getModuleBaseURL() + icon);
+
+    final Tool toolImpl = new ToolImpl(name, toolId, multipleAllowed, img, component);
+    ToolProvider provider = new ToolProvider() {
+      public Tool getTool() {
+        return toolImpl;
+      }
     };
 
-    private Workspace() {
+    toBeLoadedGroups.get(group).add(provider);
+  }
+
+  @Override
+  public void addTool(String group, String name, String icon,
+                      boolean multipleAllowed, int priority, WSComponent component, final String[] renderIfRoles) {
+    if (!toBeLoadedGroups.containsKey(group)) toBeLoadedGroups.put(group, new ArrayList<ToolProvider>());
+
+    final String toolId = name.replaceAll(" ", "_") + "." + toolCounter++;
+    Image img;
+    if (icon == null || "".equals(icon)) {
+      img = new Image(erraiImageBundle.application());
+    } else
+      img = new Image(GWT.getModuleBaseURL() + icon);
+
+    final Set<String> roles = new HashSet<String>();
+
+    for (String role : renderIfRoles) {
+      roles.add(role.trim());
     }
 
-    /**
-     * This is the entry point method.
-     */
-    public void onModuleLoad() {
-        GWT.runAsync(new RunAsyncCallback() {
 
-            public void onFailure(Throwable reason) {
-            }
-
-            public void onSuccess() {
-                init("rootPanel");
-            }
-        });
-
-        GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
-            public void onUncaughtException(Throwable e) {
-                WSAlert.alert("An exception was thrown: " + e.getMessage() + " -- See console for more details.");
-                e.printStackTrace();
-            }
-        });
-    }
-
-    private void init(final String rootId) {
-        if (workspaceLayout != null) {
-            return;
-        }
-
-        final MessageBus bus = ErraiBus.get();
-
-        /**
-         * Configure the local client message bus to send RemoteSubscribe signals to the remote bus when
-         * new subscriptions are created locally.
-         */
-
-
-        /**
-         *  Declare the standard LoginClient here.
-         */
-        bus.subscribe("ClientErrorService", new MessageCallback() {
-            public void callback(Message message) {
-                String errorMessage = message.get(String.class, MessageParts.ErrorMessage);
-
-                WSModalDialog errorDialog = new WSModalDialog();
-                errorDialog.ask(errorMessage, new AcceptsCallback() {
-                    public void callback(Object message, Object data) {
-                    }
-                });
-                errorDialog.showModal();
-            }
-        });
-
-
-        bus.subscribe("LoginClient", new MessageCallback() {
-            private Message deferredMessage;
-
-            public void callback(Message message) {
-                try {
-
-                    switch (SecurityCommands.valueOf(message.getCommandType())) {
-                        case SecurityChallenge:
-                            if (message.hasPart(SecurityParts.RejectedMessage)) {
-                                deferredMessage = createWithParts(decodeMap(message.get(String.class, SecurityParts.RejectedMessage)));
-                            }
-
-                            workspaceLayout.getUserInfoPanel().clear();
-
-                            showLoginPanel();
-                            break;
-
-                        case EndSession:
-                            workspaceLayout.getUserInfoPanel().clear();
-
-                            WSAlert.alert("Logout successful.", new AcceptsCallback() {
-                                public void callback(Object message, Object data) {
-                                    showLoginPanel();
-                                }
-                            });
-                            break;
-
-
-                        case FailedAuth:
-                            closeLoginPanel();
-
-                            WSModalDialog failed = new WSModalDialog();
-                            failed.ask("Authentication Failure. Please Try Again.", new AcceptsCallback() {
-                                public void callback(Object message, Object data) {
-                                    if ("WindowClosed".equals(message)) showLoginPanel();
-                                }
-                            });
-                            failed.showModal();
-                            break;
-
-                        case SuccessfulAuth:
-                            closeLoginPanel();
-
-
-                            final WSWindowPanel welcome = new WSWindowPanel();
-                            welcome.setWidth("250px");
-                            VerticalPanel vp = new VerticalPanel();
-                            vp.setWidth("100%");
-
-                            Label label = new Label("Welcome " + message.get(String.class, SecurityParts.Name)
-                                    + ", you are now logged in -- "
-                                    + (message.hasPart(MessageParts.MessageText) ?
-                                    message.get(String.class, MessageParts.MessageText) : ""));
-
-                            label.getElement().getStyle().setProperty("margin", "20px");
-
-                            vp.add(label);
-                            vp.setCellVerticalAlignment(label, HasAlignment.ALIGN_MIDDLE);
-                            vp.setCellHeight(label, "50px");
-
-                            Button okButton = new Button("OK");
-                            okButton.getElement().getStyle().setProperty("margin", "20px");
-
-                            vp.add(okButton);
-                            vp.setCellHorizontalAlignment(okButton, HasAlignment.ALIGN_CENTER);
-
-                            okButton.addClickHandler(new ClickHandler() {
-                                public void onClick(ClickEvent event) {
-                                    welcome.hide();
-                                }
-                            });
-
-                            welcome.add(vp);
-                            welcome.show();
-                            welcome.center();
-
-                            okButton.setFocus(true);
-
-
-                            if (deferredMessage != null) {
-                                /**
-                                 * Send the message that was originally rejected, and prompted the
-                                 * authentication requirement.
-                                 */
-                                bus.send(deferredMessage);
-                                deferredMessage = null;
-                            } else {
-                                /**
-                                 * Send the standard negotiation because no message was intercepted
-                                 * to resend
-                                 */
-                                negotiate.run();
-                            }
-
-                            break;
-
-                        default:
-                            // I don't know this command. :(
-                    }
-                }
-                catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-
-        /**
-         * Initialize the workspace UI.
-         */
-
-        initWorkspace(rootId);
-
-        try {
-            /**
-             * Specifiy a callback interface to execute the _initAfterWSLoad() tasks when we know the bus
-             * is fully up and running.
-             */
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Initialize the actual Workspace UI.
-     *
-     * @param rootId -
-     */
-    private void initWorkspace(final String rootId) {
-        /**
-         * Instantiate layout.
-         */
-        workspaceLayout = new WorkspaceLayout(rootId);
-
-        enableScrolling(false);
-
-        if (rootId == null) {
-            Window.alert("No root ID specified!");
-            return;
-        }
-
-        /**
-         * Create the main drag and drop controller for the UI.
-         */
-        dragController = new PickupDragController(RootPanel.get(), true);
-
-
-        final ClientMessageBus bus = (ClientMessageBus) ErraiBus.get();
-
-
-        if (bus.isInitialized()) {
-            negotiate.run();
+    final Tool toolImpl = new ToolImpl(name, toolId, multipleAllowed,
+        img, component);
+    ToolProvider provider = new ToolProvider() {
+      public Tool getTool() {
+        if (sessionRoles.containsAll(roles)) {
+          return toolImpl;
         } else {
-            bus.addPostInitTask(negotiate);
+          return null;
         }
+      }
+    };
 
-        /**
-         * This service is used for setting up and restoring the session.
-         */
-        bus.subscribe("ClientConfiguratorService",
-                new MessageCallback() {
-                    public void callback(Message message) {
-                        if (message.hasPart(SecurityParts.Roles)) {
-                            String[] roleStrs = message.get(String.class, SecurityParts.Roles).split(",");
-                            for (String s : roleStrs) {
-                                sessionRoles.add(s.trim());
-                            }
-                        }
+    toBeLoadedGroups.get(group).add(provider);
+  }
 
-                        if (message.hasPart(SecurityParts.Name)) {
-                            HorizontalPanel userInfo = new HorizontalPanel();
-                            Label userName = new Label(message.get(String.class, SecurityParts.Name));
-                            userName.getElement().getStyle().setProperty("fontWeight", "bold");
+  public void renderToolPallete() {
+    ModuleLoaderBootstrap mlb = create(ModuleLoaderBootstrap.class);
+    mlb.initAll(this);
 
-                            userInfo.add(userName);
-                            Button logout = new Button("Logout");
-                            logout.setStyleName("logoutButton");
-                            userInfo.add(logout);
-                            logout.addClickHandler(new ClickHandler() {
-                                public void onClick(ClickEvent event) {
-                                    MessageBuilder.createMessage()
-                                            .toSubject("AuthorizationService")
-                                            .command(SecurityCommands.EndSession)
-                                            .noErrorHandling().sendNowWith(bus);
-                                    
-                                    bus.unsubscribeAll("org.jboss.errai.WorkspaceLayout");
-                                    sessionRoles.clear();
-
-                                    RootPanel.get(rootId).remove(workspaceLayout);
-                                    workspaceLayout = new WorkspaceLayout(rootId);
-
-
-                                }
-                            });
-
-                            workspaceLayout.getUserInfoPanel().clear();
-                            workspaceLayout.getUserInfoPanel().add(userInfo);
-                        }
-
-                        RootPanel.get(rootId).add(workspaceLayout);
-                        renderToolPallete();
-                    }
-                });
-
-
-    }
-
-    public static SecurityService getSecurityService() {
-        return securityService;
-    }
-
-    public static WSComponent getLoginComponent() {
-        return loginComponent;
-    }
-
-    @Override
-    public void setLoginComponent(WSComponent loginComponent) {
-        Workspace.loginComponent = loginComponent;
-    }
-
-    @Override
-    public  void addToolSet(ToolSet toolSet) {
-        toBeLoaded.add(toolSet);
-    }
-
-    private static int toolCounter = 0;
-
-    @Override
-    public void addTool(String group, String name, String icon,
-                               boolean multipleAllowed, int priority, WSComponent component) {
-        if (!toBeLoadedGroups.containsKey(group)) toBeLoadedGroups.put(group, new ArrayList<ToolProvider>());
-
-        final String toolId = name.replaceAll(" ", "_") + "." + toolCounter++;
-
-        Image img;
-        if (icon == null || "".equals(icon)) {
-            img = new Image(erraiImageBundle.application());
-        } else
-            img = new Image(GWT.getModuleBaseURL() + icon);
-
-        final Tool toolImpl = new ToolImpl(name, toolId, multipleAllowed, img, component);
-        ToolProvider provider = new ToolProvider() {
-            public Tool getTool() {
-                return toolImpl;
-            }
-        };
-
-        toBeLoadedGroups.get(group).add(provider);
-    }
-
-    @Override
-    public void addTool(String group, String name, String icon,
-                               boolean multipleAllowed, int priority, WSComponent component, final String[] renderIfRoles) {
-        if (!toBeLoadedGroups.containsKey(group)) toBeLoadedGroups.put(group, new ArrayList<ToolProvider>());
-
-        final String toolId = name.replaceAll(" ", "_") + "." + toolCounter++;
-        Image img;
-        if (icon == null || "".equals(icon)) {
-            img = new Image(erraiImageBundle.application());
-        } else
-            img = new Image(GWT.getModuleBaseURL() + icon);
-
-        final Set<String> roles = new HashSet<String>();
-
-        for (String role : renderIfRoles) {
-            roles.add(role.trim());
-        }
-
-
-        final Tool toolImpl = new ToolImpl(name, toolId, multipleAllowed,
-                img, component);
-        ToolProvider provider = new ToolProvider() {
-            public Tool getTool() {
-                if (sessionRoles.containsAll(roles)) {
-                    return toolImpl;
-                } else {
-                    return null;
-                }
-            }
-        };
-
-        toBeLoadedGroups.get(group).add(provider);
-    }
-
-    public void renderToolPallete() {
-        ModuleLoaderBootstrap mlb = create(ModuleLoaderBootstrap.class);
-        mlb.initAll(this);
-
-        Set<String> loaded = new HashSet<String>();
-        if (!preferredGroupOrdering.isEmpty()) {
-            for (final String group : preferredGroupOrdering) {
-                if (loaded.contains(group)) continue;
-
-                for (ToolSet ts : toBeLoaded) {
-                    if (ts.getToolSetName().equals(group)) {
-                        loaded.add(group);
-                        workspaceLayout.addToolSet(ts);
-                    }
-                }
-
-                if (loaded.contains(group)) continue;
-
-                if (toBeLoadedGroups.containsKey(group)) {
-                    loaded.add(group);
-
-                    final List<Tool> toBeRendered = new ArrayList<Tool>();
-                    for (ToolProvider provider : toBeLoadedGroups.get(group)) {
-                        Tool t = provider.getTool();
-                        if (t != null) {
-                            toBeRendered.add(t);
-                        }
-                    }
-
-                    if (!toBeRendered.isEmpty()) {
-                        ToolSet ts = new ToolSet() {
-                            public Tool[] getAllProvidedTools() {
-                                Tool[] toolArray = new Tool[toBeRendered.size()];
-                                toBeRendered.toArray(toolArray);
-                                return toolArray;
-                            }
-
-                            public String getToolSetName() {
-                                return group;
-                            }
-
-                            public Widget getWidget() {
-                                return null;
-                            }
-                        };
-
-                        workspaceLayout.addToolSet(ts);
-                    }
-                }
-            }
-        }
+    Set<String> loaded = new HashSet<String>();
+    if (!preferredGroupOrdering.isEmpty()) {
+      for (final String group : preferredGroupOrdering) {
+        if (loaded.contains(group)) continue;
 
         for (ToolSet ts : toBeLoaded) {
-            if (loaded.contains(ts.getToolSetName())) continue;
+          if (ts.getToolSetName().equals(group)) {
+            loaded.add(group);
             workspaceLayout.addToolSet(ts);
+          }
         }
 
-        for (final String group : toBeLoadedGroups.keySet()) {
-            if (loaded.contains(group)) continue;
+        if (loaded.contains(group)) continue;
 
-            final List<Tool> toBeRendered = new ArrayList<Tool>();
-            for (ToolProvider provider : toBeLoadedGroups.get(group)) {
-                Tool t = provider.getTool();
-                if (t != null) {
-                    toBeRendered.add(t);
-                }
+        if (toBeLoadedGroups.containsKey(group)) {
+          loaded.add(group);
+
+          final List<Tool> toBeRendered = new ArrayList<Tool>();
+          for (ToolProvider provider : toBeLoadedGroups.get(group)) {
+            Tool t = provider.getTool();
+            if (t != null) {
+              toBeRendered.add(t);
             }
+          }
 
-            if (!toBeRendered.isEmpty()) {
+          if (!toBeRendered.isEmpty()) {
+            ToolSet ts = new ToolSet() {
+              public Tool[] getAllProvidedTools() {
+                Tool[] toolArray = new Tool[toBeRendered.size()];
+                toBeRendered.toArray(toolArray);
+                return toolArray;
+              }
 
-                ToolSet ts = new ToolSet() {
-                    public Tool[] getAllProvidedTools() {
-                        Tool[] toolArray = new Tool[toBeRendered.size()];
-                        toBeRendered.toArray(toolArray);
-                        return toolArray;
-                    }
+              public String getToolSetName() {
+                return group;
+              }
 
-                    public String getToolSetName() {
-                        return group;
-                    }
+              public Widget getWidget() {
+                return null;
+              }
+            };
 
-                    public Widget getWidget() {
-                        return null;
-                    }
-                };
-
-                workspaceLayout.addToolSet(ts);
-            }
+            workspaceLayout.addToolSet(ts);
+          }
         }
-
-        toBeLoaded.clear();
-        toBeLoadedGroups.clear();
-        preferredGroupOrdering.clear();
-        toolCounter = 0;
+      }
     }
 
-
-    @Override
-    public void setPreferredGroupOrdering(String[] groups) {
-        preferredGroupOrdering.addAll(Arrays.asList(groups));
+    for (ToolSet ts : toBeLoaded) {
+      if (loaded.contains(ts.getToolSetName())) continue;
+      workspaceLayout.addToolSet(ts);
     }
 
-    private static void closeLoginPanel() {
-        if (loginWindowPanel != null) {
-            loginWindowPanel.removeClosingHandler(loginWindowClosingHandler);
-            loginWindowPanel.hide();
-            RootPanel.get().remove(loginWindowPanel);
-            loginWindowPanel = null;
+    for (final String group : toBeLoadedGroups.keySet()) {
+      if (loaded.contains(group)) continue;
+
+      final List<Tool> toBeRendered = new ArrayList<Tool>();
+      for (ToolProvider provider : toBeLoadedGroups.get(group)) {
+        Tool t = provider.getTool();
+        if (t != null) {
+          toBeRendered.add(t);
         }
+      }
+
+      if (!toBeRendered.isEmpty()) {
+
+        ToolSet ts = new ToolSet() {
+          public Tool[] getAllProvidedTools() {
+            Tool[] toolArray = new Tool[toBeRendered.size()];
+            toBeRendered.toArray(toolArray);
+            return toolArray;
+          }
+
+          public String getToolSetName() {
+            return group;
+          }
+
+          public Widget getWidget() {
+            return null;
+          }
+        };
+
+        workspaceLayout.addToolSet(ts);
+      }
     }
 
-    private static void newWindowPanel() {
-        closeLoginPanel();
-
-        loginWindowPanel = new WSWindowPanel();
-        loginWindowPanel.addClosingHandler(loginWindowClosingHandler);
-    }
-
-    public static void showLoginPanel() {
-        newWindowPanel();
-        loginWindowPanel.setTitle("Security Challenge");
-        loginWindowPanel.add(loginComponent.getWidget());
-        loginWindowPanel.showModal();
-        loginWindowPanel.center();
-    }
+    toBeLoaded.clear();
+    toBeLoadedGroups.clear();
+    preferredGroupOrdering.clear();
+    toolCounter = 0;
+  }
 
 
-    private native static void _initAfterWSLoad() /*-{
+  @Override
+  public void setPreferredGroupOrdering(String[] groups) {
+    preferredGroupOrdering.addAll(Arrays.asList(groups));
+  }
+
+  private native static void _initAfterWSLoad() /*-{
         try {
             $wnd.initAfterWSLoad();
         }
