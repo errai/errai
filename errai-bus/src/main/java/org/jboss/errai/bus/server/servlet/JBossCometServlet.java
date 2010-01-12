@@ -37,23 +37,23 @@ import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
 public class JBossCometServlet extends HttpServlet implements HttpEventServlet {
     private ErraiService service;
     private HttpSessionProvider sessionProvider = new HttpSessionProvider();
-
-    public JBossCometServlet() {
-        // bypass guice-servlet
-        service = Guice.createInjector(new AbstractModule() {
-            public void configure() {
-                bind(MessageBus.class).to(ServerMessageBusImpl.class);
-                bind(ServerMessageBus.class).to(ServerMessageBusImpl.class);
-                bind(ErraiService.class).to(ErraiServiceImpl.class);
-                bind(ErraiServiceConfigurator.class).to(ErraiServiceConfiguratorImpl.class);
-            }
-        }).getInstance(ErraiService.class);
-    }
+//
+//    public JBossCometServlet() {
+//        // bypass guice-servlet
+//        service = Guice.createInjector(new AbstractModule() {
+//            public void configure() {
+//                bind(MessageBus.class).to(ServerMessageBusImpl.class);
+//                bind(ServerMessageBus.class).to(ServerMessageBusImpl.class);
+//                bind(ErraiService.class).to(ErraiServiceImpl.class);
+//                bind(ErraiServiceConfigurator.class).to(ErraiServiceConfiguratorImpl.class);
+//            }
+//        }).getInstance(ErraiService.class);
+//    }
 
     @Inject
     public JBossCometServlet(ErraiService service) {
         this.service = service;
-
+        HttpEvent.class.toString();
     }
 
     private final Map<MessageQueue, QueueSession> queueToSession = new HashMap<MessageQueue, QueueSession>();

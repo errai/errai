@@ -327,6 +327,17 @@
         previous section (2.4) and this is the use of the
         <filename>createConversation() </filename>method with
         <filename>MessageBuilder</filename>.</para>
+
+        <para></para>
+
+        <sect3>
+          <title>Sender Inferred Subjects</title>
+
+          <para>It is possible for the sender to infer, to whatever
+          conversational service it is calling, what subject it would like the
+          reply to go to. This is accomplished by utilizing the standard
+          <filename>MessageParts.ReplyTo</filename> message part.</para>
+        </sect3>
       </sect2>
     </sect1>
 
@@ -476,7 +487,7 @@ public class Beer {
       <filename>RequestDispatcher</filename>, the
       <filename>ErraiServiceConfigurator</filename>, and
       <filename>ErraiService</filename> by declaring them as injection
-      dependencies. </para>
+      dependencies.</para>
     </sect1>
 
     <sect1>
@@ -491,7 +502,7 @@ public class Beer {
 
         <para>Depending on what application server you are deploying on, you
         must provide an appropriate servlet implementation if you wish to use
-        true, asynchronous I/O. </para>
+        true, asynchronous I/O.</para>
 
         <para>Here's a sample web.xml file:</para>
 
@@ -546,7 +557,7 @@ public class Beer {
         <title>ErraiService.properties</title>
 
         <para>The ErraiService.properties file contains basic configuration
-        for the bus itself. </para>
+        for the bus itself.</para>
 
         <para>Example Configuration:</para>
 

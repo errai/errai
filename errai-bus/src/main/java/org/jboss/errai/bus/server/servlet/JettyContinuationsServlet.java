@@ -36,6 +36,9 @@ public class JettyContinuationsServlet extends HttpServlet {
     @Inject
     public JettyContinuationsServlet(ErraiService service) {
         this.service = service;
+
+        // do this just to confirm the class exists.
+        ContinuationSupport.class.toString();
     }
 
     @Override
