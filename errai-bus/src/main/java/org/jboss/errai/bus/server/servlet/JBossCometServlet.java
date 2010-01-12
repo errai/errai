@@ -52,6 +52,10 @@ public class JBossCometServlet extends HttpServlet implements HttpEventServlet {
 
     @Inject
     public JBossCometServlet(ErraiService service) throws ClassNotFoundException {
+        // ensure this class exists.
+        Class.forName("org.jboss.servlet.http.HttpEventFilter");
+
+        // ensure we can support the APR protocol
         Class.forName("org.apache.coyote.http11.Http11AprProtocol");
         this.service = service;
     }

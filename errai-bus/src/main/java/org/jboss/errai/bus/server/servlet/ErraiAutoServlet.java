@@ -45,7 +45,7 @@ public class ErraiAutoServlet extends HttpServlet implements HttpEventServlet, C
             try {
                 delegate = new JettyContinuationsServlet(service);
             }
-            catch (Exception e) {
+            catch (Throwable e) {
             }
         }
 
@@ -53,7 +53,7 @@ public class ErraiAutoServlet extends HttpServlet implements HttpEventServlet, C
             try {
                 delegate = new JBossCometServlet(service);
             }
-            catch (Exception e) {
+            catch (Throwable e) {
             }
         }
 
@@ -61,7 +61,7 @@ public class ErraiAutoServlet extends HttpServlet implements HttpEventServlet, C
             try {
                 delegate = new TomcatCometServlet(service);
             }
-            catch (Exception e) {
+            catch (Throwable e) {
             }
         }
 
@@ -79,11 +79,13 @@ public class ErraiAutoServlet extends HttpServlet implements HttpEventServlet, C
 
     @Override
     public void event(CometEvent cometEvent) throws IOException, ServletException {
+        System.out.println("EVENT");
         ((CometProcessor) delegate).event(cometEvent);
     }
 
     @Override
     public void event(HttpEvent httpEvent) throws IOException, ServletException {
+        System.out.println("EVENT");
         ((HttpEventServlet) delegate).event(httpEvent);
     }
 }

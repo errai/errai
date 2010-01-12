@@ -397,7 +397,7 @@
 
         <para>Also note that in this example, the service class is not
         required to implement the <filename>MessageCallback</filename>
-        interface and is a simple POJO class</para>
+        interface and is a simple POJO class.</para>
       </sect2>
 
       <sect2>
@@ -512,28 +512,16 @@ public class Beer {
 		  http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
          version="2.5"&gt;
 
-    &lt;!--
-        Start Guice-Servlet Boilerplate
-    --&gt;
+    &lt;servlet&gt;
+        &lt;servlet-name&gt;ErraiAutoServlet&lt;/servlet-name&gt;
+        &lt;servlet-class&gt;org.jboss.errai.bus.server.servlet.ErraiAutoServlet&lt;/servlet-class&gt;
+        &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
+    &lt;/servlet&gt;
 
-    &lt;filter&gt;
-        &lt;filter-name&gt;guiceFilter&lt;/filter-name&gt;
-        &lt;filter-class&gt;com.google.inject.servlet.GuiceFilter&lt;/filter-class&gt;
-    &lt;/filter&gt;
-
-    &lt;filter-mapping&gt;
-        &lt;filter-name&gt;guiceFilter&lt;/filter-name&gt;
-        &lt;url-pattern&gt;/*&lt;/url-pattern&gt;
-    &lt;/filter-mapping&gt;
-
-
-    &lt;listener&gt;
-        &lt;listener-class&gt;org.jboss.errai.bus.server.ErraiServletConfig&lt;/listener-class&gt;
-    &lt;/listener&gt;
-
-    &lt;!--
-        End Guice-Servlet Boilerplate.
-    --&gt;
+    &lt;servlet-mapping&gt;
+        &lt;servlet-name&gt;ErraiAutoServlet&lt;/servlet-name&gt;
+        &lt;url-pattern&gt;*.erraiBus&lt;/url-pattern&gt;
+    &lt;/servlet-mapping&gt;
 
     &lt;context-param&gt;
         &lt;param-name&gt;errai.properties&lt;/param-name&gt;
