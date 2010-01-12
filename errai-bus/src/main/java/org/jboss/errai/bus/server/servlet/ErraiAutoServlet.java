@@ -22,7 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-public class ErraiAutoServlet extends HttpServlet implements HttpEventServlet, CometProcessor {
+public class ErraiAutoServlet extends HttpServlet implements CometProcessor {
     private HttpServlet delegate;
 
     private Logger log = LoggerFactory.getLogger(this.getClass());
@@ -39,7 +39,7 @@ public class ErraiAutoServlet extends HttpServlet implements HttpEventServlet, C
             }
         }).getInstance(ErraiService.class);
 
-        log.info("determining evnironment...");
+        log.info("determining environment...");
 
         if (delegate == null) {
             try {
@@ -49,13 +49,13 @@ public class ErraiAutoServlet extends HttpServlet implements HttpEventServlet, C
             }
         }
 
-        if (delegate == null) {
-            try {
-                delegate = new JBossCometServlet(service);
-            }
-            catch (Throwable e) {
-            }
-        }
+//        if (delegate == null) {
+//            try {
+//                delegate = new JBossCometServlet(service);
+//            }
+//            catch (Throwable e) {
+//            }
+//        }
 
         if (delegate == null) {
             try {
@@ -82,8 +82,9 @@ public class ErraiAutoServlet extends HttpServlet implements HttpEventServlet, C
         ((CometProcessor) delegate).event(cometEvent);
     }
 
-    @Override
-    public void event(HttpEvent httpEvent) throws IOException, ServletException {
-        ((HttpEventServlet) delegate).event(httpEvent);
-    }
+//    @Override
+//    public void event(HttpEvent httpEvent) throws IOException, ServletException {
+//        System.out.println("Event:" + httpEvent);
+//        ((HttpEventServlet) delegate).event(httpEvent);
+//    }
 }
