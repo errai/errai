@@ -51,9 +51,9 @@ public class JBossCometServlet extends HttpServlet implements HttpEventServlet {
 //    }
 
     @Inject
-    public JBossCometServlet(ErraiService service) {
+    public JBossCometServlet(ErraiService service) throws ClassNotFoundException {
+        Class.forName("org.apache.coyote.http11.Http11AprProtocol");
         this.service = service;
-        HttpEvent.class.toString();
     }
 
     private final Map<MessageQueue, QueueSession> queueToSession = new HashMap<MessageQueue, QueueSession>();

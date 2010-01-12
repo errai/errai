@@ -50,7 +50,8 @@ public class TomcatCometServlet extends HttpServlet implements CometProcessor {
     }
 
     @Inject
-    public TomcatCometServlet(ErraiService service) {
+    public TomcatCometServlet(ErraiService service) throws ClassNotFoundException {
+        Class.forName("org.apache.coyote.http11.Http11NioProcessor");
         this.service = service;
     }
 
