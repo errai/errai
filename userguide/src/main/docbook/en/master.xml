@@ -336,7 +336,133 @@
           <para>It is possible for the sender to infer, to whatever
           conversational service it is calling, what subject it would like the
           reply to go to. This is accomplished by utilizing the standard
-          <filename>MessageParts.ReplyTo</filename> message part.</para>
+          <filename>MessageParts.ReplyTo</filename> message part. Using this
+          methodology for building conversations is generally
+          encouraged.</para>
+
+          <para>Consider the following client side code:</para>
+
+          <programlisting>MessageBuilder.createMessage()
+       .toSubject("ObjectService").signalling()
+       .with(MessageParts.ReplyTo, "ClientEndpoint")
+       .noErrorHandling().sendNowWith(bus);</programlisting>
+
+          <para>And the conversational code on the server (for service
+          <emphasis>ObjectService</emphasis>):</para>
+
+          <programlisting>MessageBuilder.createConversation(message)
+                .subjectProvided().signalling()
+                .with("Records", records)
+                .noErrorHandling().sendNowWith(bus);</programlisting>
+
+          <para>In the above examples, assuming that the latter example is
+          inside a service called "ObjectService" and is referencing the
+          incoming message that was send in the former example, the message
+          created will automatically reference the
+          <filename>ReplyTo</filename> subject that was provided by the
+          sender, and send the message back to the subject desired by the
+          client on the client that sent the message.</para>
+        </sect3>
+      </sect2>
+
+      <sect2>
+        <title>Broadcasting</title>
+
+        <para>Broadcasting messages to all clients listening on a specific
+        subject is quite simple and involves nothing more than forgoing use of
+        the conversation API. For instance:</para>
+
+        <programlisting>MessageBuilder.createMessage().
+                 .toSubject("MessageListener")
+                 .with("Text", "Hello, from your overlords in the cloud")
+                 .noErrorHandling().sendNowWith(bus);</programlisting>
+
+        <para>If sent from the server, all clients currently connected, who
+        are listening to the subject <filename>"MessageListener"</filename>
+        will receive the message. It's as simple as that.</para>
+      </sect2>
+
+      <sect2>
+        <title>Client-to-Client Communication</title>
+
+        <para>Communication from one client to another client is not directly
+        possible within the bus federation, by design. This isn't to say that
+        it's not possible. But one client cannot see a service within the
+        federation of another client. We institute this limitation as a matter
+        of basic security. But many software engineers will likely find the
+        prospects of such communication appealing, so this section will
+        provide some basic pointers on how to go about accomplishing
+        it.</para>
+
+        <sect3>
+          <title>Relay Services</title>
+
+          <para>The essential architectural thing you'll need to do is create
+          a relay service that runs on the server. Since a service advertised
+          on the server is visible to all clients and all clients are visible
+          to the server, you might already see where we're going with
+          this.</para>
+
+          <para>By creating a service on the server which accepts messages
+          from clients, you can create a simple protocol on-top of the bus to
+          enable quasi peer-to-peer communication. (We say quasi, because it
+          still needs to be routed through the server) </para>
+
+          <para>While you can probably imagine simply creating a
+          broadcast-like service which accepts a message from one client and
+          broadcasts it to the rest of the world, it may be less clear how to
+          go about routing from one particular client to another particualr
+          client, so we'll focus on that problem.</para>
+
+          <para><emphasis role="bold">Message Routing
+          Information</emphasis></para>
+
+          <para>Every message that is sent between a local and remote (or
+          server and client) buses contain session routing information. This
+          information is used by the bus to determine what outbound queue's to
+          use to deliver the message to their intended recipients. It is
+          possible to manually specify this information to indicate to the
+          bus, where you want a specific message to go. </para>
+
+          <para>The utility class
+          <filename>org.jboss.errai.bus.server.util.ServerBusUtils</filename>
+          contains a utility method for extracting the String-based SessionID
+          which is used to identify the message queue associated with any
+          particular client. You may use this method to extract the SessionID
+          from a message so that you may use it for routing. For
+          example:</para>
+
+          <programlisting>... 
+public void callback(Message message) {
+    String sessionId = ServerBusUtils.getSessionId(message);
+    
+    // Record this sessionId somewhere.
+    ...
+}
+...
+
+</programlisting>
+
+          <para>The SessionID can then be stored in a medium, say a Map, to
+          cross-reference specific users or whatever identifier you wish to
+          allow one client to obtain a reference to the specific ClientId of
+          another client. In which case, you can then provide the SessionID as
+          a MessagePart to indicate to the bus where you want the message to
+          go.</para>
+
+          <programlisting>MessageBuilder.createMessage()
+    .toSubject("ClientMessageListener")
+    .signalling()
+    .with(MessageParts.SessionID, sessionId)
+    .with("Message", "We're relaying a message!")
+    .noErrorHandling().sendNowWith(bus);
+</programlisting>
+
+          <para>By providing the SessionID part in the message, the bus will
+          see this and use it for routing the message to the relevant queue.
+          </para>
+
+          <para>Now you're routing from client-to-client!</para>
         </sect3>
       </sect2>
     </sect1>
@@ -367,25 +493,25 @@
         access.</para>
 
         <programlisting>@Service
-    public class QueryService {
-        private Map&lt;String, String[]&gt; dataMap;
+public class QueryService {
+   private Map&lt;String, String[]&gt; dataMap;
 
-        public QueryService() {
-            setupMap();
-        }
+   public QueryService() {
+      setupMap();
+   }
 
-        private void setupMap() {
-            dataMap = new HashMap&lt;String, String[]&gt;();
-            dataMap.put("beer", new String[]{"Heineken", "Budweiser", "Hoogaarden"});
-            dataMap.put("fruit", new String[]{"Apples", "Oranges", "Grapes"});
-            dataMap.put("animals", new String[]{"Monkeys", "Giraffes", "Lions"});
-        }
+   private void setupMap() {
+      dataMap = new HashMap&lt;String, String[]&gt;();
+      dataMap.put("beer", new String[]{"Heineken", "Budweiser", "Hoogaarden"});
+      dataMap.put("fruit", new String[]{"Apples", "Oranges", "Grapes"});
+      dataMap.put("animals", new String[]{"Monkeys", "Giraffes", "Lions"});
+   }
 
-        @Endpoint
-        public String[] getQuery(String queryString) {
-            return dataMap.get(queryString.toLowerCase());
-        }
-    }</programlisting>
+   @Endpoint
+   public String[] getQuery(String queryString) {
+      return dataMap.get(queryString.toLowerCase());
+   }
+}</programlisting>
 
         <para>Notice the <filename>@Endpoint </filename>annotation on the
         <filename>getQuery()</filename> method in the above figure. In this
@@ -551,13 +677,6 @@ public class Beer {
 
         <programlisting>
 ##
-## Servlet implementation (default is DefaultBlockingServlet);
-##
-errai.servlet_implementation=org.jboss.errai.bus.server.servlet.DefaultBlockingServlet
-#errai.servlet_implementation=org.jboss.errai.bus.server.servlet.JettyContinuationsServlet
-
-
-##
 ## Request dispatcher implementation (default is SimpleDispatcher)
 ##
 #errai.dispatcher_implementation=org.jboss.errai.bus.server.SimpleDispatcher
@@ -591,6 +710,54 @@ errai.async.worker.timeout=5
 
 
 </programlisting>
+
+        <sect3>
+          <title>errai.dispatcher_implementation</title>
+
+          <para>The <filename>errai.dispatcher_implementation</filename>
+          defines, as it's name quite succinctly implies, the dispatcher
+          implementation to be used by the bus. There are two implementations
+          which come with Errai out of the box: the
+          <filename>SimpleDispatcher</filename> and the
+          <filename>AsyncDispatcher</filename>. See section on Dispatchers for
+          more information about the differences between the two.</para>
+        </sect3>
+
+        <sect3>
+          <title>errai.async_thread_pool_size</title>
+
+          <para>Specifies the total number of worker threads in the worker
+          pool for handling and delivering messages. Adjusting this value does
+          not have an effect if you are using the SimpleDispatcher.</para>
+        </sect3>
+
+        <sect3>
+          <title>errai.async_worker.timeout</title>
+
+          <para>Specifies the total amount of a time (in seconds) a service
+          has to finish processing an incoming message before the pool
+          interrupts the thread and returns an error. Adjusting this value
+          does not have an effect if you are using the
+          SimpleDispatcher.</para>
+        </sect3>
+
+        <sect3>
+          <title>errai.authentication_adapter</title>
+
+          <para>Specifies the authentication adapter the bus should use for
+          determining whether calls should be serviced based on authentication
+          and security principles.</para>
+        </sect3>
+
+        <sect3>
+          <title>errai.require_authentication_for_all</title>
+
+          <para>Indicates whether or not the bus should always require the use
+          of authentication for all requests inbound for the bus. If this is
+          turned on, an authentication adapter must be defined, and any user
+          must be authenticated before the bus will deliver any messages from
+          the client to any service.</para>
+        </sect3>
       </sect2>
 
       <sect2>
