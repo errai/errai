@@ -80,7 +80,9 @@
           </listitem>
 
           <listitem>
-             IRC: irc://irc.freenode.net/errai
+              <para>
+              IRC: irc://irc.freenode.net/errai
+              </para>
           </listitem>
         </itemizedlist></para>
     </section>
@@ -855,22 +857,22 @@ errai.async.worker.timeout=5
       distribution, you realized that we use maven to build them. The way it
       is setup, the maven build has several benefits: <itemizedlist>
           <listitem>
-             It pulls the GWT from a central repository. No need for manual installation of the SDK
+             <para>It pulls the GWT from a central repository. No need for manual installation of the SDK</para>
           </listitem>
 
           <listitem>
-             It provides us with the proper dependencies in order to run the examples
+             <para>It provides us with the proper dependencies in order to run the examples</para>
           </listitem>
 
           <listitem>
-             IDE setup is greatly simplfied, since most modern IDE's can directly import the maven structure
+             <para>IDE setup is greatly simplfied, since most modern IDE's can directly import the maven structure</para>
           </listitem>
         </itemizedlist> In order to get you going quickly, we've provided a
       project archetype, that allows you to create a project skeleton similiar
       to the one we use for building the examples. It's based on the maven
-      archetype plugin <footnote>
-           http://maven.apache.org/plugins/maven-archetype-plugin/
-        </footnote> and needs to be invoked from the command line:
+      archetype plugin <footnote><para>
+              http://maven.apache.org/plugins/maven-archetype-plugin/
+        </para></footnote> and needs to be invoked from the command line:
       <programlisting>
     mvn archetype:generate \
         -DarchetypeGroupId=org.jboss.errai \
