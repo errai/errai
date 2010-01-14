@@ -799,11 +799,12 @@ errai.async.worker.timeout=5
            http://maven.apache.org/plugins/maven-archetype-plugin/
         </footnote> and needs to be invoked from the command line:
       <programlisting>
-    mvn archetype:generate
-        -DarchetypeGroupId=org.jboss.errai
-        -DarchetypeArtifactId=sandbox-archetype
-        -DarchetypeVersion=1.0-SNAPSHOT
-        -DarchetypeRepository=http://snapshots.jboss.org/maven2
+#/bin/sh
+mvn -U archetype:generate \
+	-DarchetypeGroupId=org.jboss.errai \
+	-DarchetypeArtifactId=sandbox-archetype \
+	-DarchetypeVersion=1.0-SNAPSHOT \
+	-DarchetypeRepository=http://snapshots.jboss.org/maven2   
             </programlisting> When invoking the archetype build it ask you
       about the maven groupId, artifactId and package name your GWT
       application should use: <programlisting>
