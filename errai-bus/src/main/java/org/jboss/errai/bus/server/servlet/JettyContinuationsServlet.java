@@ -29,16 +29,7 @@ import java.util.List;
 import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
 
 @Singleton
-public class JettyContinuationsServlet extends HttpServlet {
-    private ErraiService service;
-    private HttpSessionProvider sessionProvider = new HttpSessionProvider();
-
-    @Inject
-    public JettyContinuationsServlet(ErraiService service) {
-        ContinuationSupport.class.toString();
-        this.service = service;
-        // do this just to confirm the class exists.
-    }
+public class JettyContinuationsServlet extends AbstractErraiServlet {
 
     @Override
     protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)

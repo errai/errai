@@ -16,14 +16,21 @@
 
 package org.jboss.errai.bus.server.servlet;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.jboss.errai.bus.client.MarshalledMessage;
 import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.server.HttpSessionProvider;
+import org.jboss.errai.bus.server.ServerMessageBus;
+import org.jboss.errai.bus.server.ServerMessageBusImpl;
 import org.jboss.errai.bus.server.SessionProvider;
 import org.jboss.errai.bus.server.service.ErraiService;
+import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
+import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
+import org.jboss.errai.bus.server.service.ErraiServiceImpl;
 import org.mvel2.util.StringAppender;
 
 import javax.servlet.ServletException;
@@ -44,13 +51,8 @@ import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
  * The default DefaultBlockingServlet which provides the HTTP-protocol gateway between the server bus and the client buses.
  */
 @Singleton
-public class DefaultBlockingServlet extends HttpServlet {
-    private ErraiService service;
-    private HttpSessionProvider sessionProvider = new HttpSessionProvider();
-
-    @Inject
-    public DefaultBlockingServlet(ErraiService service) {
-        this.service = service;
+public class DefaultBlockingServlet extends AbstractErraiServlet {
+    public DefaultBlockingServlet() {
     }
 
     @Override
@@ -116,7 +118,7 @@ public class DefaultBlockingServlet extends HttpServlet {
 
             writeToOutputStream(stream, new MarshalledMessage() {
                 public String getSubject() {
-                     return "ClientBusErrors";
+                    return "ClientBusErrors";
                 }
 
                 public Object getMessage() {

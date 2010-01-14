@@ -48,10 +48,11 @@ import java.util.*;
 
 import static com.google.inject.Guice.createInjector;
 import static java.util.ResourceBundle.getBundle;
-import static org.jboss.errai.bus.server.ErraiModule.ERRAI_DISPATCHER_IMPLEMENTATION;
 import static org.jboss.errai.bus.server.util.ConfigUtil.visitAllTargets;
 
 public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
+
+
     private ServerMessageBus bus;
     private List<File> configRootTargets;
     private Map<String, String> properties;
@@ -59,7 +60,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
     private Map<Class, Provider> extensionBindings;
     private Map<String, Provider> resourceProviders;
 
-    private RequestDispatcher dispatcher;
+    private RequestDispatcher dispatcher;                                                                                                                 
 
     private ErraiServiceConfigurator configInst = this;
 

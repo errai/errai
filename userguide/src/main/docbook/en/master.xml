@@ -406,7 +406,7 @@
           <para>By creating a service on the server which accepts messages
           from clients, you can create a simple protocol on-top of the bus to
           enable quasi peer-to-peer communication. (We say quasi, because it
-          still needs to be routed through the server) </para>
+          still needs to be routed through the server)</para>
 
           <para>While you can probably imagine simply creating a
           broadcast-like service which accepts a message from one client and
@@ -422,7 +422,7 @@
           information is used by the bus to determine what outbound queue's to
           use to deliver the message to their intended recipients. It is
           possible to manually specify this information to indicate to the
-          bus, where you want a specific message to go. </para>
+          bus, where you want a specific message to go.</para>
 
           <para>The utility class
           <filename>org.jboss.errai.bus.server.util.ServerBusUtils</filename>
@@ -459,8 +459,8 @@ public void callback(Message message) {
 </programlisting>
 
           <para>By providing the SessionID part in the message, the bus will
-          see this and use it for routing the message to the relevant queue.
-          </para>
+          see this and use it for routing the message to the relevant
+          queue.</para>
 
           <para>Now you're routing from client-to-client!</para>
         </sect3>
@@ -639,13 +639,13 @@ public class Beer {
          version="2.5"&gt;
 
     &lt;servlet&gt;
-        &lt;servlet-name&gt;ErraiAutoServlet&lt;/servlet-name&gt;
-        &lt;servlet-class&gt;org.jboss.errai.bus.server.servlet.ErraiAutoServlet&lt;/servlet-class&gt;
+        &lt;servlet-name&gt;ErraiServlet&lt;/servlet-name&gt;
+        &lt;servlet-class&gt;org.jboss.errai.bus.server.servlet.DefaultBlockingServlet&lt;/servlet-class&gt;
         &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
     &lt;/servlet&gt;
 
     &lt;servlet-mapping&gt;
-        &lt;servlet-name&gt;ErraiAutoServlet&lt;/servlet-name&gt;
+        &lt;servlet-name&gt;ErraiServlet&lt;/servlet-name&gt;
         &lt;url-pattern&gt;*.erraiBus&lt;/url-pattern&gt;
     &lt;/servlet-mapping&gt;
 

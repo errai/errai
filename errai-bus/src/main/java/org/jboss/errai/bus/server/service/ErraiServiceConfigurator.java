@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 
 public interface ErraiServiceConfigurator {
+    public static final String ERRAI_DISPATCHER_IMPLEMENTATION = "errai.dispatcher_implementation";
+
     public void configure(final ErraiService service);
 
     public List<File> getConfigurationRoots();
