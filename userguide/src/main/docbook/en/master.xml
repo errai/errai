@@ -37,19 +37,21 @@
     <section>
       <title>Downloads</title>
 
-      <para>The distribution packages can be downloaded from jboss.org</para>
+      <para>The distribution packages can be downloaded from jboss.org
 
       <ulink url="http://jboss.org/errai/">http://jboss.org/errai/</ulink>
+        </para>
     </section>
 
     <section>
       <title>Sources</title>
 
       <para>The source code for this component can be found in the Errai SVN
-      repository:</para>
+      repository:
 
       <ulink
       url="http://anonsvn.jboss.org/repos/errai/trunk/">https://anonsvn.jboss.org/repos/errai/trunk/</ulink>
+        </para>
     </section>
 
     <section>
@@ -58,23 +60,23 @@
       <para>If you run into trouble don't hesitate to get in touch with us:
       <itemizedlist>
           <listitem>
-            <para>JIRA Issue Tracking: <link
-            linkend="???">https://jira.jboss.org/jira/browse/ERRAI
-            </link></para>
+            <para>JIRA Issue Tracking: <ulink url="https://jira.jboss.org/jira/browse/ERRAI">https://jira.jboss.org/jira/browse/ERRAI </ulink></para>
           </listitem>
 
           <listitem>
-             User Forum:
+              <para>
+              User Forum:
 
-            <ulink
-            url="http://www.jboss.org/index.html?module=bb&amp;op=viewforum&amp;f=295">http://www.jboss.org/index.html?module=bb&amp;op=viewforum&amp;f=295</ulink>
+            <ulink url="http://www.jboss.org/index.html?module=bb&amp;op=viewforum&amp;f=295">http://www.jboss.org/index.html?module=bb&amp;op=viewforum&amp;f=295</ulink>
+              </para>
           </listitem>
 
           <listitem>
-             Mailing List:
+              <para>
+              Mailing List:
 
-            <ulink
-            url="http://jboss.org/errai/MailingLists.html">http://jboss.org/errai/MailingLists.html</ulink>
+            <ulink url="http://jboss.org/errai/MailingLists.html">http://jboss.org/errai/MailingLists.html</ulink>
+              </para>
           </listitem>
 
           <listitem>
@@ -94,17 +96,15 @@
       Maven to build and run the examples, and for leverging the quickstart
       utilities. <itemizedlist>
           <listitem>
-             JDK 5: 
-
-            <ulink
-            url="http://java.sun.com/javase/downloads/index.jsp">http://java.sun.com/javase/downloads/index.jsp</ulink>
+              <para>
+              JDK 5: <ulink url="http://java.sun.com/javase/downloads/index.jsp">http://java.sun.com/javase/downloads/index.jsp</ulink>
+              </para>
           </listitem>
 
           <listitem>
-             Apache Maven: 
-
-            <ulink
-            url="http://maven.apache.org/download.html">http://maven.apache.org/download.html</ulink>
+              <para>
+              Apache Maven: <ulink url="http://maven.apache.org/download.html">http://maven.apache.org/download.html</ulink>
+              </para>
           </listitem>
         </itemizedlist> <blockquote>
           <title>Launching maven the first time</title>
@@ -126,21 +126,21 @@
 
       <itemizedlist>
         <listitem>
-          <literal>doc</literal>
-
-           : User guide, javadocs and developers guide
+            <para>
+          <filename>doc</filename>: User guide, javadocs and developers guide
+            </para>
         </listitem>
 
         <listitem>
-          <literal>examples</literal>
-
-           : Examples that are used in the user guide
+            <para>
+          <filename>examples</filename>: Examples that are used in the user guide
+            </para>
         </listitem>
 
         <listitem>
-          <literal>lib</literal>
-
-           : Required libraries
+            <para>
+          <filename>lib</filename>: Required libraries
+            </para>
         </listitem>
       </itemizedlist>
     </section>
@@ -188,14 +188,18 @@
         Implementing a receiver (also referred to as a service) is as simple
         as implementing our standard MessageCallback interface, which is used
         pervasively across, both client and server code. Let's begin with
-        server side component that receives messages: <programlisting>
-    @Service("HelloWorldService")
+        server side component that receives messages: </para>
+
+        <programlisting>   @Service
     public class HelloWorldService implements MessageCallback {
-        public void callback(CommandMessage message) {
+        public void callback(Message message) {
             System.out.println("Hello, World!");
         }
-    }
-                    </programlisting></para>
+    }</programlisting>
+
+        <para>He we declare an extremely simple service. The @Service
+        annotation provides a convenient, meta-data based way of having the
+        bus auto-discover and deploy the service.</para>
       </sect2>
 
       <sect2>
@@ -204,9 +208,10 @@
         <para>In order to send a message from a client you need to create a
         <emphasis><emphasis><filename>Message</filename></emphasis></emphasis>
         and send it through an instance of <filename>MessageBus</filename>. In
-        this simple example we send it to the subject 'HelloWorldService'
-        <programlisting>
-    public class HelloWorld implements EntryPoint {
+        this simple example we send it to the subject
+        'HelloWorldService'.</para>
+
+        <programlisting>    public class HelloWorld implements EntryPoint {
 
         // Get an instance of the MessageBus
         private MessageBus bus = ErraiBus.get();
@@ -222,13 +227,42 @@
                     .toSubject("HelloWorldService")             // (1)
                     .signalling()                               // (2)
                     .noErrorHandling()                          // (3)
-                    .sendNowWithBus();                          // (4)
+                    .sendNowWith(bus);                          // (4)
             });
 
             [...]
          }
-    }
-                    </programlisting></para>
+    }</programlisting>
+
+        <para>In the above example we build and send a message every time the
+        button is clicked. Here's an explanation of what's going on as
+        annotated above:</para>
+
+        <orderedlist>
+          <listitem>
+            <para>We specify the subject we wish to send a message to. In this
+            case, "HelloWorldService".</para>
+          </listitem>
+
+          <listitem>
+            <para>We indicate that we wish to only signal the service,
+            meaning, that we're not sending a qualifying command to the
+            service. For information on this, read the section on
+            <emphasis>Protocols</emphasis>.</para>
+          </listitem>
+
+          <listitem>
+            <para>We indicate that we do not want to provide an ErrorCallback
+            to deal with errors for this message.</para>
+          </listitem>
+
+          <listitem>
+            <para>We transmit the message by providing an instance of the
+            MessageBus</para>
+          </listitem>
+        </orderedlist>
+
+        <para></para>
       </sect2>
 
       <sect2>
@@ -237,8 +271,9 @@
         <para>In the following example we extend our server side component to
         reply with a message when the callback method is invoked. It will
         create a message and address it to the subject 'HelloWorldClient':
-        <programlisting>
-    @Service
+        </para>
+
+        <programlisting>    @Service
     public class HelloWorldService implements MessageCallback {
 
         private MessageBus bus;
@@ -258,8 +293,40 @@
                     .sendNowWith(bus);                          // (5)
             });
         }
-    }
-                    </programlisting></para>
+    }   </programlisting>
+
+        <para>The above example shows a service which sends a message in
+        response to receiving a message. Here's what's going on:</para>
+
+        <orderedlist>
+          <listitem>
+            <para>We specify the subject we wish to send a message to. In this
+            case, "HelloWorldClient". We are sending this message to all
+            clients which are listening in on this subject. For information on
+            how to communicate with a single client, see Section 2.6.</para>
+          </listitem>
+
+          <listitem>
+            <para>We indicate that we wish to only signal the service, meaning
+            that we're not sending a qualifying command to the service. For
+            information on this, read the section on Protocols.</para>
+          </listitem>
+
+          <listitem>
+            <para>We add a message part called "text" which contains the value
+            "Hi there".</para>
+          </listitem>
+
+          <listitem>
+            <para>We indicate that we do not want to provide an ErrorCallback
+            to deal with errors for this message.</para>
+          </listitem>
+
+          <listitem>
+            <para>We transmit the message by providing an instance of the
+            MessageBus.</para>
+          </listitem>
+        </orderedlist>
       </sect2>
 
       <sect2>
@@ -317,14 +384,14 @@
         }
 
         public void callback(CommandMessage message) {
-                // Send a message to the 'HelloWorldClient' on the client that sent us the 
+                // Send a message to the 'HelloWorldClient' on the client that sent us the
                 // the message.
-                MessageBuilder.createConversation(message)          
-                    .toSubject("HelloWorldClient")              
-                    .signalling()                               
-                    .with("text", "Hi There! We're having a conversation!")                 
-                    .noErrorHandling()                          
-                    .sendNowWith(bus);                          
+                MessageBuilder.createConversation(message)
+                    .toSubject("HelloWorldClient")
+                    .signalling()
+                    .with("text", "Hi There! We're having a conversation!")
+                    .noErrorHandling()
+                    .sendNowWith(bus);
             });
         }
     }</programlisting>
@@ -438,10 +505,10 @@
           from a message so that you may use it for routing. For
           example:</para>
 
-          <programlisting>... 
+          <programlisting>...
 public void callback(Message message) {
     String sessionId = ServerBusUtils.getSessionId(message);
-    
+
     // Record this sessionId somewhere.
     ...
 }
@@ -805,10 +872,10 @@ errai.async.worker.timeout=5
            http://maven.apache.org/plugins/maven-archetype-plugin/
         </footnote> and needs to be invoked from the command line:
       <programlisting>
-    mvn archetype:generate
-        -DarchetypeGroupId=org.jboss.errai
-        -DarchetypeArtifactId=sandbox-archetype
-        -DarchetypeVersion=1.0-SNAPSHOT
+    mvn archetype:generate \
+        -DarchetypeGroupId=org.jboss.errai \
+        -DarchetypeArtifactId=sandbox-archetype \
+        -DarchetypeVersion=1.0-SNAPSHOT \
         -DarchetypeRepository=http://snapshots.jboss.org/maven2
             </programlisting> When invoking the archetype build it ask you
       about the maven groupId, artifactId and package name your GWT
