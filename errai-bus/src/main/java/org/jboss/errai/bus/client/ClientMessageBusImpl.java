@@ -157,7 +157,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
 
     public void send(Message message, boolean fireListeners) {
-        send(message, fireListeners);
+        send(message);
     }
 
     public void send(final Message message) {
@@ -411,8 +411,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
          * requests will result in multiple sessions being created.  Which is bad.  Avoid this at all costs.
          * Please.
          */
-
-
         if (!sendInitialMessage(callback)) {
             showError("Could not connect to remote bus", "", null);
         }
@@ -420,7 +418,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     private boolean sendInitialMessage(final HookCallback callback) {
         try {
-
             String initialMessage = "{\"CommandType\":\"ConnectToQueue\",\"ToSubject\":\"ServerBus\", \"PriorityProcessing\":\"1\"}";
 
             sendBuilder.sendRequest(initialMessage, new RequestCallback() {
@@ -431,7 +428,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                     }
                     catch (Exception e) {
                         showError("Error attaching to bus", e.getMessage() + "<br/>Message Contents:<br/>" + response.getText(), e);
-                        return;
                     }
                 }
 
@@ -550,9 +546,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         for (Map.Entry<String, Object> entry : msg.getParts().entrySet()) {
             decode.append("<tr><td>").append(entry.getKey()).append("</td><td>").append(entry.getValue()).append("</td></tr>");
         }
-        decode.append("</tbody></table>");
 
-        return decode.toString();
+        return decode.append("</tbody></table>").toString();
     }
 
     private static void showError(String message, String additionalDetails, Throwable e) {
@@ -576,7 +571,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             }
         });
 
-
         panel.add(closeButton);
         panel.setCellHorizontalAlignment(closeButton, HasHorizontalAlignment.ALIGN_RIGHT);
 
@@ -595,7 +589,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         scrollPanel.setHeight("500px");
 
         panel.add(scrollPanel);
-
 
         errorDialog.add(panel);
 
