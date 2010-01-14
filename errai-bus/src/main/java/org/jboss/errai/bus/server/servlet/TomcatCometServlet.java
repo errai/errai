@@ -101,8 +101,7 @@ public class TomcatCometServlet extends HttpServlet implements CometProcessor {
             case END:
                 if ((queue = getQueue(session)) != null) {
                     queue.heartBeat();
-                }
-                else {
+                } else {
                     return;
                 }
 
@@ -166,6 +165,19 @@ public class TomcatCometServlet extends HttpServlet implements CometProcessor {
                 return b.append("\"}").toString();
             }
         });
+
+        stream.write(',');
+
+        writeToOutputStream(stream, new MarshalledMessage() {
+            public String getSubject() {
+                return "ClientBus";
+            }
+
+            public Object getMessage() {
+                return "{CommandType:\"Disconnect\"}";
+            }
+        });
+
 
         stream.write(']');
     }

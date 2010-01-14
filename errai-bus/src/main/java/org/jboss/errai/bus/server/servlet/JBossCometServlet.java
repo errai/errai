@@ -178,6 +178,19 @@ public class JBossCometServlet extends HttpServlet implements HttpEventServlet {
             }
         });
 
+        stream.write(',');
+
+        writeToOutputStream(stream, new MarshalledMessage() {
+            public String getSubject() {
+                return "ClientBus";
+            }
+
+            public Object getMessage() {
+                return "{CommandType:\"Disconnect\"}";
+            }
+        });
+
+
         stream.write(']');
 
     }
