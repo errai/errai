@@ -192,7 +192,6 @@ public class JBossCometServlet extends HttpServlet implements HttpEventServlet {
 
 
         stream.write(']');
-
     }
 
     private int readInRequest(HttpServletRequest request) throws IOException {
