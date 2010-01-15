@@ -37,7 +37,7 @@ import static org.jboss.errai.bus.client.MessageBuilder.createMessage;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.client.json.JSONUtilCli;
-import org.jboss.errai.bus.client.protocols.LayoutCommands;
+import org.jboss.errai.workspaces.client.protocols.LayoutCommands;
 import org.jboss.errai.workspaces.client.protocols.LayoutParts;
 import org.jboss.errai.common.client.framework.AcceptsCallback;
 import org.jboss.errai.widgets.client.WSElementWrapper;

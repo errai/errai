@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.protocols;
+package org.jboss.errai.workspaces.client.protocols;
 
 
 public enum LayoutCommands {

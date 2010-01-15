@@ -51,7 +51,7 @@ public enum BusCommands {
      * <thead>
      * <tbody>
      * <tr>
-     * <td>{@link MessageParts.Subject}</td>
+     * <td>{@link org.jboss.errai.bus.client.protocols.MessageParts#Subject}</td>
      * <td>{@link String}</td>
      * <td>The name of the subject being subscribed to</td>
      * </tr>
@@ -75,7 +75,7 @@ public enum BusCommands {
      * <thead>
      * <tbody>
      * <tr>
-     * <td>{@link MessageParts.Subject}</td>
+     * <td>{@link org.jboss.errai.bus.client.protocols.MessageParts#Subject}</td>
      * <td>{@link String}</td>
      * <td>The name of the subject being subscribed to</td>
      * </tr>
