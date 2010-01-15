@@ -119,7 +119,7 @@ public interface MessageBus {
     public void subscribe(String subject, MessageCallback receiver);
 
     /*
-     ¥ Unsubscribe all listeners registered for the specified subject.
+     * Unsubscribe all listeners registered for the specified subject.
      */
 
     public void unsubscribeAll(String subject);
