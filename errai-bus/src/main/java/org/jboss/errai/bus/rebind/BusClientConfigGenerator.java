@@ -89,7 +89,7 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
                             writer.print(genStr = (String) execute(marshallerGenerator, templateVars));
 
                             logger.log(TreeLogger.Type.INFO, genStr);
-                            logger.log(TreeLogger.Type.INFO, "Generated mashaller/demarshaller for: " + visit.getName());
+                            logger.log(TreeLogger.Type.INFO, "Generated marshaller/demarshaller for: " + visit.getName());
                         }
                         else if (visit.isAnnotationPresent(Service.class)) {
 

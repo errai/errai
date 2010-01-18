@@ -28,7 +28,7 @@ public class ErraiBus implements EntryPoint {
 
     /**
      * Obtain an instance of the client MessageBus.
-     * @return
+     * @return Returns instance of MessageBus
      */
     public static MessageBus get() {
         return bus;
