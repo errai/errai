@@ -16,63 +16,43 @@
 
 <!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 1.6//EN"
         "http://google-web-toolkit.googlecode.com/svn/releases/1.6/distro-source/core/src/gwt-module.dtd">
-<module>    
+<module>
+    
     <inherits name="org.jboss.errai.bus.ErraiBus"/>
     <inherits name="org.jboss.errai.widgets.ErraiWidgets" />
 
-    <inherits name="com.allen_sauer.gwt.dnd.gwt-dnd"/>
-    <inherits name="com.google.gwt.user.theme.chrome.Chrome"/>
-    <inherits name="org.jboss.errai.common.ErraiCommon"/>
-    <inherits name="org.jboss.errai.widgets.ErraiWidgets"/>
+    <!-- Inherit Mosaic Web Toolkit stuff.                          -->
+    <inherits name='org.gwt.mosaic.Mosaic' />   
 
+    <!-- Includes the public resources used by the GWT Mosaic       -->
+    <!-- themes. Those files do not inject a style sheet into the   -->
+    <!-- application.                                               -->
+    <inherits name='org.gwt.mosaic.theme.standard.StandardResources' />
+    <inherits name="org.gwt.mosaic.theme.chrome.ChromeResources" />
+    <inherits name="org.gwt.mosaic.theme.dark.DarkResources" />
+    <inherits name="org.gwt.mosaic.theme.aegean.AegeanResources" />
+
+    <!-- Inherit the default GWT Mosaic style sheet. You can change -->
+    <!-- the theme of your GWT Mosaic application by uncommenting   -->
+    <!-- any one of the following lines.                            -->
+    <!-- <inherits name='org.gwt.mosaic.theme.standard.Standard' /> -->
+    <!-- <inherits name="org.gwt.mosaic.chrome.Chrome"/>            -->
+    <!-- <inherits name="org.gwt.mosaic.dark.Dark"/>                -->
+    <inherits name='org.gwt.mosaic.theme.aegean.Aegean' />
+   
     <generate-with class="org.jboss.errai.workspaces.rebind.WorkspaceLoaderBootstrapGenerator">
         <when-type-assignable
-                class="org.jboss.errai.workspaces.client.framework.ModuleLoaderBootstrap"/>
+                class="org.jboss.errai.workspaces.client.framework.WorkspaceLauncher"/>
     </generate-with>
 
     <!-- Specify the app entry point class.                   -->
-    <entry-point class='org.jboss.errai.workspaces.client.Workspace'/>
-    <stylesheet src="errai-workspaces-default.css"/>
-
-    <replace-with class="org.jboss.errai.widgets.client.effects.effectimpl.KHTMLEffectImpl">
-        <when-type-is class="org.jboss.errai.widgets.client.effects.Effect"/>
-        <when-property-is name="user.agent" value="opera"/>
-    </replace-with>
-
-    <replace-with class="org.jboss.errai.widgets.client.effects.effectimpl.KHTMLEffectImpl">
-        <when-type-is class="org.jboss.errai.widgets.client.effects.Effect"/>
-        <when-property-is name="user.agent" value="safari"/>
-    </replace-with>
-
-    <replace-with class="org.jboss.errai.widgets.client.effects.effectimpl.KHTMLEffectImpl">
-        <when-type-is class="org.jboss.errai.widgets.client.effects.Effect"/>
-        <when-property-is name="user.agent" value="webkit"/>
-    </replace-with>
-
-    <replace-with class="org.jboss.errai.widgets.client.effects.effectimpl.MozillaEffectImpl">
-        <when-type-is class="org.jboss.errai.widgets.client.effects.Effect"/>
-        <when-property-is name="user.agent" value="gecko"/>
-    </replace-with>
-
-    <replace-with class="org.jboss.errai.widgets.client.effects.effectimpl.MozillaEffectImpl">
-        <when-type-is class="org.jboss.errai.widgets.client.effects.Effect"/>
-        <when-property-is name="user.agent" value="gecko1_8"/>
-    </replace-with>
-
-    <replace-with class="org.jboss.errai.widgets.client.effects.effectimpl.IEEffectImpl">
-        <when-type-is class="org.jboss.errai.widgets.client.effects.Effect"/>
-        <when-property-is name="user.agent" value="ie6"/>
-    </replace-with>
-
-    <replace-with class="org.jboss.errai.widgets.client.effects.effectimpl.IEEffectImpl">
-        <when-type-is class="org.jboss.errai.widgets.client.effects.Effect"/>
-        <when-property-is name="user.agent" value="ie8"/>
-    </replace-with>
-
-    <replace-with class="com.allen_sauer.gwt.dnd.client.util.impl.DOMUtilImplIE6">
+    <entry-point class='org.jboss.errai.workspaces.client.MosaicLayout'/>
+    <stylesheet src="workspace.css"/>
+   
+    <!--replace-with class="com.allen_sauer.gwt.dnd.client.util.impl.DOMUtilImplIE6">
         <when-type-is class="com.allen_sauer.gwt.dnd.client.util.impl.DOMUtilImpl"/>
         <when-property-is name="user.agent" value="ie8"/>
-    </replace-with>
-    
+    </replace-with-->
+
 
 </module>

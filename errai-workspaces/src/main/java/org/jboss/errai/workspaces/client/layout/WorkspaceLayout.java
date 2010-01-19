@@ -56,7 +56,7 @@ import java.util.*;
 
 
 /**
- * This is the main layout implementation for the Guvnor UI.
+ * This is the main layout implementation for the workspace UI.
  */
 public class WorkspaceLayout extends Composite {
     /**

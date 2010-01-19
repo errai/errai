@@ -19,8 +19,10 @@ package org.jboss.errai.workspaces.client.framework;
 import org.jboss.errai.workspaces.client.ToolContainer;
 
 /**
- * Main Bootstrap interface.  The implementation is automatically generated at compile-time.
+ * Main Bootstrap interface.
+ * The implementation is automatically generated at compile-time.
  */
-public interface ModuleLoaderBootstrap {
-    public void initAll(ToolContainer container);
+public interface WorkspaceLauncher
+{
+    public void launch(ToolContainer container);
 }

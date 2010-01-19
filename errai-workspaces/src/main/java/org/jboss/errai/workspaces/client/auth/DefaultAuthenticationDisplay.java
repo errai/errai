@@ -21,14 +21,15 @@
  */
 package org.jboss.errai.workspaces.client.auth;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.HasCloseHandlers;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.HasText;
-import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.widgets.client.WSWindowPanel;
 import org.jboss.errai.workspaces.client.widgets.WSLoginPanel;
 
@@ -100,7 +101,7 @@ public class DefaultAuthenticationDisplay implements AuthenticationPresenter.Dis
   @Override
   public HasClickHandlers getSubmitButton()
   {
-    return loginComponent.getLoginButton(); 
+    return loginComponent.getLoginButton();
   }
 
   @Override
@@ -131,6 +132,44 @@ public class DefaultAuthenticationDisplay implements AuthenticationPresenter.Dis
     loginWindowPanel.add(loginComponent.getWidget());
     loginWindowPanel.showModal();
     loginWindowPanel.center();
+  }
+
+  @Override
+  public void showWelcomeMessage(String messageText)
+  {
+// display welcome panel
+    final WSWindowPanel welcome = new WSWindowPanel();
+    welcome.setWidth("250px");
+    VerticalPanel vp = new VerticalPanel();
+    vp.setWidth("100%");
+
+
+    Label label = new Label(messageText);
+
+    label.getElement().getStyle().setProperty("margin", "20px");
+
+    vp.add(label);
+    vp.setCellVerticalAlignment(label, HasAlignment.ALIGN_MIDDLE);
+    vp.setCellHeight(label, "50px");
+
+    Button okButton = new Button("OK");
+    okButton.getElement().getStyle().setProperty("margin", "20px");
+
+    vp.add(okButton);
+    vp.setCellHorizontalAlignment(okButton, HasAlignment.ALIGN_CENTER);
+
+    okButton.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        welcome.hide();
+      }
+    });
+
+    welcome.add(vp);
+    welcome.show();
+    welcome.center();
+
+    okButton.setFocus(true);
+
   }
 }
 

@@ -25,7 +25,8 @@ import com.google.gwt.user.client.ui.TextBox;
 import java.util.ArrayList;
 
 
-public class WSAutoCompleteTextBox extends TextBox implements ClickHandler, ChangeHandler, KeyUpHandler {
+public class WSAutoCompleteTextBox extends TextBox
+    implements ClickHandler, ChangeHandler, KeyUpHandler {
 
     private ListBox list = new ListBox();
     private PopupPanel popup = new PopupPanel(true);
@@ -40,7 +41,7 @@ public class WSAutoCompleteTextBox extends TextBox implements ClickHandler, Chan
         addKeyUpHandler(this);
         addChangeHandler(this);
         popup.add(list);
-        RootPanel.get().add(popup);
+        //RootPanel.get().add(popup);
     }
 
     /**

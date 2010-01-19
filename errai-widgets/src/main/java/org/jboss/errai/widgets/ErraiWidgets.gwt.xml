@@ -23,7 +23,7 @@
 
     <entry-point class='org.jboss.errai.widgets.client.ErraiWidgets'/>
 
-    <stylesheet src="errai-default.css"/>
+    <!--stylesheet src="errai-default.css"/-->
 
     <generate-with class="org.jboss.errai.widgets.rebind.WidgetMappingsGenerator">
         <when-type-assignable

@@ -27,11 +27,8 @@ import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.HasCloseHandlers;
-import com.google.gwt.user.client.ui.*;
-import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.Message;
-import org.jboss.errai.bus.client.MessageBus;
-import org.jboss.errai.bus.client.MessageCallback;
+import com.google.gwt.user.client.ui.HasText;
+import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
@@ -40,10 +37,9 @@ import org.jboss.errai.bus.client.security.Credential;
 import org.jboss.errai.bus.client.security.impl.NameCredential;
 import org.jboss.errai.bus.client.security.impl.PasswordCredential;
 import org.jboss.errai.common.client.framework.AcceptsCallback;
-import org.jboss.errai.widgets.client.WSAlert;
 import org.jboss.errai.widgets.client.WSModalDialog;
-import org.jboss.errai.widgets.client.WSWindowPanel;
-import org.jboss.errai.workspaces.client.Workspace;
+import org.jboss.errai.workspaces.client.AbstractLayout;
+import org.jboss.errai.workspaces.client.DefaultLayout;
 
 import static org.jboss.errai.bus.client.CommandMessage.createWithParts;
 import static org.jboss.errai.bus.client.MessageBuilder.createMessage;
@@ -66,6 +62,8 @@ public class AuthenticationPresenter implements MessageCallback
     HasClickHandlers getSubmitButton();
 
     HasCloseHandlers getWindowPanel();
+
+    void showWelcomeMessage(String messageText);
   }
 
   private final Runnable negotiationTask = new Runnable() {
@@ -80,7 +78,6 @@ public class AuthenticationPresenter implements MessageCallback
 
   private Message deferredMessage;
   private AuthenticationPresenter.Display display;
-  private MessageBus bus = ErraiBus.get();
 
   /**
    * Using the default display
@@ -91,13 +88,23 @@ public class AuthenticationPresenter implements MessageCallback
     registerHandlers();
   }
 
+   /**
+   * Overriding the display
+   * @param display
+   */
+  public AuthenticationPresenter(Display display)
+  {
+    this.display = display;
+    registerHandlers();
+  }
+  
   private void registerHandlers()
   {
     // Form Submission Handler
     display.getSubmitButton().addClickHandler(
         new ClickHandler() {
           public void onClick(ClickEvent event) {
-            Workspace.getSecurityService().doAuthentication(
+            DefaultLayout.getSecurityService().doAuthentication(
                 new AuthenticationHandler() {
                   public void doLogin(Credential[] credentials) {
                     for (Credential c : credentials) {
@@ -121,22 +128,14 @@ public class AuthenticationPresenter implements MessageCallback
           @Override
           public void onClose(CloseEvent closeEvent)
           {
-            createMessage()
+            // Verify when https://jira.jboss.org/jira/browse/ERRAI-36 is done
+            /*createMessage()
                 .toSubject("ServerEchoService")
                 .signalling()
-                .noErrorHandling().sendNowWith(ErraiBus.get());
+                .noErrorHandling().sendNowWith(ErraiBus.get());*/
           }
         }
     );
-  }
-
-  /**
-   * Overriding the display
-   * @param display
-   */
-  public AuthenticationPresenter(Display display)
-  {
-    this.display = display;
   }
 
   public Runnable getNegotiationTask()
@@ -163,11 +162,15 @@ public class AuthenticationPresenter implements MessageCallback
         case EndSession:
           display.clearPanel();
 
-          WSAlert.alert("Logout successful.", new AcceptsCallback() {
+          /*WSAlert.alert("Logout successful.", new AcceptsCallback() {
             public void callback(Object message, Object data) {
               display.showLoginPanel();
             }
-          });
+          });*/
+
+          // kill app and reload
+          AbstractLayout.forceReload();
+          
           break;
 
 
@@ -186,49 +189,29 @@ public class AuthenticationPresenter implements MessageCallback
         case SuccessfulAuth:
           display.hideLoginPanel();
 
-
-          // display welcome panel
-          final WSWindowPanel welcome = new WSWindowPanel();
-          welcome.setWidth("250px");
-          VerticalPanel vp = new VerticalPanel();
-          vp.setWidth("100%");
-
-          Label label = new Label("Welcome " + message.get(String.class, SecurityParts.Name)
-              + ", you are now logged in -- "
-              + (message.hasPart(MessageParts.MessageText) ?
-              message.get(String.class, MessageParts.MessageText) : ""));
-
-          label.getElement().getStyle().setProperty("margin", "20px");
-
-          vp.add(label);
-          vp.setCellVerticalAlignment(label, HasAlignment.ALIGN_MIDDLE);
-          vp.setCellHeight(label, "50px");
-
-          Button okButton = new Button("OK");
-          okButton.getElement().getStyle().setProperty("margin", "20px");
-
-          vp.add(okButton);
-          vp.setCellHorizontalAlignment(okButton, HasAlignment.ALIGN_CENTER);
-
-          okButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-              welcome.hide();
-            }
-          });
-
-          welcome.add(vp);
-          welcome.show();
-          welcome.center();
-
-          okButton.setFocus(true);
+          String username = message.get(String.class, SecurityParts.Name);
+          String messageText = "Welcome " + username
+                        + ", you are now logged in. "
+                        + (message.hasPart(MessageParts.MessageText) ?
+                        message.get(String.class, MessageParts.MessageText) : "");
 
 
-          if (deferredMessage != null) {
+          MessageBuilder.createMessage()
+              .toSubject("appContext")
+              .signalling()
+              .with("username", username)              
+              .noErrorHandling()
+              .sendNowWith(ErraiBus.get());
+          
+          //display.showWelcomeMessage(messageText);
+
+          if (deferredMessage != null)
+          {
             /**
              * Send the message that was originally rejected, and prompted the
              * authentication requirement.
              */
-            bus.send(deferredMessage);
+            ErraiBus.get().send(deferredMessage);
             deferredMessage = null;
           } else {
             /**
