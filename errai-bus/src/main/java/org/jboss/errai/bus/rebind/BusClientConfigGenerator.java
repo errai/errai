@@ -20,12 +20,8 @@ import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.user.rebind.SourceWriter;
 import org.jboss.errai.bus.server.annotations.ExposeEntity;
-import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.bus.server.util.ConfigUtil;
 import org.jboss.errai.bus.server.util.RebindVisitor;
 import org.mvel2.templates.CompiledTemplate;
-import org.mvel2.templates.TemplateCompiler;
-import org.mvel2.templates.TemplateRuntime;
 
 import java.io.File;
 import java.io.InputStream;
