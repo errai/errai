@@ -92,8 +92,12 @@ public class MosaicAuthenticationDisplay extends LayoutPanel
   @Override
   public void showLoginPanel()
   {
+    if(null==windowPanel)
+      createLayoutWindowPanel();
+
+    clearPanel();
     windowPanel.pack();
-    windowPanel.center();
+    windowPanel.center();    
   }
 
   @Override

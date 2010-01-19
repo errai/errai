@@ -27,9 +27,12 @@ import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.HasCloseHandlers;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.HasText;
+import org.gwt.mosaic.ui.client.MessageBox;
 import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
@@ -90,7 +93,7 @@ public class AuthenticationPresenter implements MessageCallback
     registerHandlers();
   }
 
-   /**
+  /**
    * Overriding the display
    * @param display
    */
@@ -99,26 +102,31 @@ public class AuthenticationPresenter implements MessageCallback
     this.display = display;
     registerHandlers();
   }
-  
+
   private void registerHandlers()
   {
     // Form Submission Handler
     display.getSubmitButton().addClickHandler(
         new ClickHandler() {
           public void onClick(ClickEvent event) {
-            DefaultLayout.getSecurityService().doAuthentication(
-                new AuthenticationHandler() {
-                  public void doLogin(Credential[] credentials) {
-                    for (Credential c : credentials) {
-                      if (c instanceof NameCredential) {
-                        ((NameCredential) c).setName(display.getUsernameInput().getText());
+            
+            DeferredCommand.addCommand(new Command() {
+              public void execute() {
+                DefaultLayout.getSecurityService().doAuthentication(
+                    new AuthenticationHandler() {
+                      public void doLogin(Credential[] credentials) {
+                        for (Credential c : credentials) {
+                          if (c instanceof NameCredential) {
+                            ((NameCredential) c).setName(display.getUsernameInput().getText());
+                          }
+                          else if (c instanceof PasswordCredential) {
+                            ((PasswordCredential) c).setPassword(display.getPasswordInput().getText());
+                          }
+                        }
                       }
-                      else if (c instanceof PasswordCredential) {
-                        ((PasswordCredential) c).setPassword(display.getPasswordInput().getText());
-                      }
-                    }
-                  }
-                });
+                    });
+              }
+            });
           }
         }
     );
@@ -148,7 +156,7 @@ public class AuthenticationPresenter implements MessageCallback
   @Override
   public void callback(Message message)
   {
-    try {     
+    try {
       switch (SecurityCommands.valueOf(message.getCommandType())) {
         case SecurityChallenge:
           if (message.hasPart(SecurityParts.RejectedMessage)) {
@@ -171,20 +179,23 @@ public class AuthenticationPresenter implements MessageCallback
 
           // kill app and reload
           AbstractLayout.forceReload();
-          
+
           break;
 
 
         case FailedAuth:
           display.hideLoginPanel();
 
-          WSModalDialog failed = new WSModalDialog();
-          failed.ask("Authentication Failure. Please Try Again.", new AcceptsCallback() {
-            public void callback(Object message, Object data) {
-              if ("WindowClosed".equals(message)) display.showLoginPanel();
-            }
-          });
-          failed.showModal();
+          MessageBox.confirm("Authentication Failure", "Please try again.",
+              new MessageBox.ConfirmationCallback()
+              {
+                @Override
+                public void onResult(boolean b)
+                {
+                  display.showLoginPanel();
+                }
+              });
+
           break;
 
         case SuccessfulAuth:
