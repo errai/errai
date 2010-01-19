@@ -1,3 +1,26 @@
+.bpm-header{
+  background-color:#ffffff;
+}
+
+.bpm-header-left {
+  background-color:#ffffff;
+  vertical-align:bottom;
+  margin-left:15px;
+}
+
+.bpm-header-right {
+  background-color:#ffffff;
+  vertical-align:bottom;
+  margin-right:15px;
+}
+
+.bpm-user-info-popup {
+  font-family: sans-serif;
+  color: #000000;
+  font-size:9px;
+  margin:5px;
+}
+
 
 .WSGrid-header {
     border-collapse: collapse;
@@ -34,7 +57,7 @@
 
 .WSGrid-datagrid {
     padding:0;
-    margin:0;    
+    margin:0;
 }
 
 .WSCell {
