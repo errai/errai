@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.lang.annotation.Annotation;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -42,7 +43,7 @@ public class ConfigUtil {
             Enumeration<URL> t = ConfigUtil.class.getClassLoader().getResources(ERRAI_CONFIG_STUB_NAME);
             List<File> targets = new LinkedList<File>();
             while (t.hasMoreElements()) {
-                String fileName = t.nextElement().getFile();
+                String fileName = URLDecoder.decode(t.nextElement().getFile(), "UTF-8");
 
                 // this is referencing a file inside a compressed archive.
                 int trimIdx = fileName.lastIndexOf("!");
