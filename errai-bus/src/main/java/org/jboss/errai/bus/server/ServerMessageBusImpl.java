@@ -342,8 +342,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
 
     private void enqueueForDelivery(final String sessionId, final String subject, final Object message) {
-        System.out.println("<<" + message + ">>");
-
         MessageQueue queue = messageQueues.get(sessionId);
         if (queue != null && isAnyoneListening(queue, subject)) {
             queue.offer(new MarshalledMessage() {
