@@ -540,13 +540,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      }-*/;
 
 
-    public static void _store(String subject, Object value) {
-        System.out.println("<<" + value + ">>");
+//    public static void _store(String subject, Object value) {
+//        System.out.println("<<" + value + ">>");
+//
+//        __store(subject, value);
+//    }
 
-        __store(subject, value);
-    }
-
-    public native static void __store(String subject, Object value) /*-{
+    public native static void _store(String subject, Object value) /*-{
           $wnd.PageBus.store(subject, value);
      }-*/;
 
