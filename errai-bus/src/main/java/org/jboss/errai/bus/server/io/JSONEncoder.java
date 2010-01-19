@@ -16,6 +16,9 @@
 
 package org.jboss.errai.bus.server.io;
 
+import org.jboss.errai.bus.client.Message;
+import org.jboss.errai.bus.client.MessageBuilder;
+import org.jboss.errai.bus.client.MessageProvider;
 import org.jboss.errai.common.client.types.TypeHandler;
 import org.mvel2.MVEL;
 
@@ -28,6 +31,15 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class JSONEncoder {
+    static {
+        MessageBuilder.setProvider(new MessageProvider() {
+            @Override
+            public Message get() {
+                return JSONMessageServer.create();
+            }
+        });
+    }
+
     public static String encode(Object v) {
         return _encode(v);
     }

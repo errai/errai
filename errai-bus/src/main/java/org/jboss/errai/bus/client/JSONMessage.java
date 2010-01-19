@@ -17,6 +17,7 @@
 package org.jboss.errai.bus.client;
 
 import org.jboss.errai.bus.client.protocols.MessageParts;
+import org.jboss.errai.common.client.json.JSONEncoderCli;
 import org.jboss.errai.common.client.types.TypeHandlerFactory;
 
 import java.util.HashMap;
@@ -34,7 +35,7 @@ import java.util.Map;
  *                          .set("Text", "I like chocolate cake.");
  * </pre></tt>
  * You can transmit a message using the the <tt>sendNowWith()</tt> method by providing an instance of
- * {@link org.jboss.errai.bus.client.MessageBus}.
+ * {@link MessageBus}.
  * <p/>
  * Messages can be contructed using user-defined standard protocols through the use of enumerations. Both
  * <tt>commandType</tt> and message parts can be defined through the use of enumerations.  This helps create
@@ -60,41 +61,17 @@ import java.util.Map;
  * </pre></tt>
  * Messages may contain serialized objects provided they meet the following criteria:
  * <ol>
- *  <li>The class is annotated with {@link org.jboss.errai.bus.server.annotations.ExposeEntity}</li>
- *  <li>The class implements {@link java.io.Serializable}.
- *  <li>The class contains a default, no-argument constructor.
+ * <li>The class is annotated with {@link org.jboss.errai.bus.server.annotations.ExposeEntity}</li>
+ * <li>The class implements {@link java.io.Serializable}.
+ * <li>The class contains a default, no-argument constructor.
  * </ol>
  *
- * @see org.jboss.errai.bus.client.ConversationMessage
+ * @see ConversationMessage
  */
-public class CommandMessage implements Message {
-    protected Map<String, Object> parts = new HashMap<String, Object>();
-    protected Map<String, Object> resources;
-    protected ErrorCallback errorsCall;
-    protected int routingFlags;
-
-    public static final int ROUTE_GLOBAL = 1;
-    public static final int PRIORITY_ROUTING = 2;
-
-    /**
-     * @param commandType
-     * @return
-     * @deprecated Please use the MessageBuilder class.
-     */
-    @Deprecated
-    static CommandMessage create(String commandType) {
-        return new CommandMessage(commandType);
-    }
-
-    /**
-     * @param commandType
-     * @return
-     * @deprecated Please use the MessageBuilder class.
-     */
-    @Deprecated
-    static CommandMessage create(Enum commandType) {
-        return new CommandMessage(commandType);
-    }
+public class JSONMessage extends CommandMessage implements HasEncoded {
+    protected StringBuffer buf = new StringBuffer();
+    protected boolean first = true;
+    protected boolean committed;
 
     /**
      * Create a new CommandMessage.
@@ -102,40 +79,14 @@ public class CommandMessage implements Message {
      * @return a new instance of CommandMessage
      */
 
-    static CommandMessage create() {
-        return new CommandMessage();
+    static JSONMessage create() {
+        return new JSONMessage();
     }
 
-    /**
-     * For internal use. This method should not be directly used.
-     * @param parts
-     * @return
-     */
-    public static CommandMessage createWithParts(Map<String, Object> parts) {
-        return new CommandMessage(parts);
+    protected JSONMessage() {
+        _start();
     }
-
-    protected CommandMessage() {
-    }
-
-    private CommandMessage(Map<String, Object> parts) {
-        this.parts = parts;
-    }
-
-    private CommandMessage(String commandType) {
-        command(commandType);
-    }
-
-    private CommandMessage(Enum commandType) {
-        command(commandType.name());
-    }
-
-    private CommandMessage(String subject, String commandType) {
-        toSubject(subject).command(commandType);
-    }
-
-
-
+    
     /**
      * Return the specified command type.  Returns <tt>null</tt> if not specified.
      *
@@ -161,6 +112,7 @@ public class CommandMessage implements Message {
      * @return -
      */
     public Message toSubject(String subject) {
+        _addStringPart(MessageParts.ToSubject.name(), subject);
         parts.put(MessageParts.ToSubject.name(), subject);
         return this;
     }
@@ -172,6 +124,7 @@ public class CommandMessage implements Message {
      * @return
      */
     public Message command(Enum type) {
+        _addStringPart(MessageParts.CommandType.name(), type.name());
         parts.put(MessageParts.CommandType.name(), type.name());
         return this;
     }
@@ -183,6 +136,7 @@ public class CommandMessage implements Message {
      * @return
      */
     public Message command(String type) {
+        _addStringPart(MessageParts.CommandType.name(), type);
         parts.put(MessageParts.CommandType.name(), type);
         return this;
     }
@@ -195,6 +149,7 @@ public class CommandMessage implements Message {
      * @return -
      */
     public Message set(Enum part, Object value) {
+        _addObjectPart(part.name(), value);
         return set(part.name(), value);
     }
 
@@ -206,16 +161,18 @@ public class CommandMessage implements Message {
      * @return -
      */
     public Message set(String part, Object value) {
+        _addObjectPart(part, value);
         parts.put(part, value);
         return this;
     }
 
     public void remove(String part) {
-        parts.remove(part);
+        throw new UnsupportedOperationException();
+        //  parts.remove(part);
     }
 
     public void remove(Enum part) {
-        parts.remove(part.name());
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -248,7 +205,7 @@ public class CommandMessage implements Message {
 
     public void unsetFlag(RoutingFlags flag) {
         if ((routingFlags & flag.flag()) != 0) {
-           routingFlags ^= flag.flag();
+            routingFlags ^= flag.flag();
         }
     }
 
@@ -325,8 +282,7 @@ public class CommandMessage implements Message {
      * @return -
      */
     public Message setParts(Map<String, Object> parts) {
-        this.parts = parts;
-        return this;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -336,8 +292,7 @@ public class CommandMessage implements Message {
      * @return -
      */
     public Message addAllParts(Map<String, Object> parts) {
-        this.parts.putAll(parts);
-        return this;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -416,7 +371,7 @@ public class CommandMessage implements Message {
     }
 
     /**
-     * Transmit this message to the specified {@link org.jboss.errai.bus.client.MessageBus} instance.
+     * Transmit this message to the specified {@link MessageBus} instance.
      *
      * @param viaThis
      */
@@ -425,7 +380,8 @@ public class CommandMessage implements Message {
     }
 
     /**
-     * Transmit this message using the specified {@link org.jboss.errai.bus.client.RequestDispatcher}.
+     * Transmit this message using the specified {@link RequestDispatcher}.
+     *
      * @param viaThis
      */
     public void sendNowWith(RequestDispatcher viaThis) {
@@ -433,7 +389,44 @@ public class CommandMessage implements Message {
     }
 
     @Override
+    public String getEncoded() {
+        _end();
+        return buf.toString();
+    }
+
+    @Override
     public String toString() {
         return "CommandMessage(toSubject=" + getSubject() + ";CommandType=" + getCommandType() + ")";
+    }
+
+    protected void _start() {
+        first = true;
+        buf.append("{");
+    }
+
+    protected void _end() {
+        committed = true;
+        buf.append("}");
+    }
+
+
+    protected void _sep() {
+        if (first) {
+            first = false;
+        } else {
+            buf.append(',');
+        }
+    }
+
+    protected void _addStringPart(String a, String b) {
+        _sep();
+        buf.append(a).append(':')
+                .append('\"').append(b).append("\"");
+    }
+
+    protected void _addObjectPart(String a, Object b) {
+        _sep();
+        buf.append(a).append(':')
+                .append(new JSONEncoderCli().encode(b));
     }
 }

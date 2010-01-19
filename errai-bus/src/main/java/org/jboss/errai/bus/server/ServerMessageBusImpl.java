@@ -274,7 +274,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             return;
         }
 
-        final String jsonMessage = encodeJSON(message.getParts());
+        final String jsonMessage = message instanceof HasEncoded ? ((HasEncoded)message).getEncoded() :
+                encodeJSON(message.getParts());
 
         if (subscriptions.containsKey(subject)) {
             for (MessageCallback c : subscriptions.get(subject)) {
@@ -327,7 +328,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     private void send(String sessionid, Message message, boolean fireListeners) {
         if (fireListeners && !fireGlobalMessageListeners(message)) {
             if (message.hasPart(ReplyTo)) {
-
                 Map<String, Object> rawMsg = new HashMap<String, Object>();
                 rawMsg.put(MessageParts.CommandType.name(), MessageNotDelivered.name());
                 enqueueForDelivery(sessionid, message.get(String.class, ReplyTo),
@@ -336,10 +336,14 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             return;
         }
 
-        enqueueForDelivery(sessionid, message.getSubject(), encodeJSON(message.getParts()));
+        enqueueForDelivery(sessionid, message.getSubject(), message instanceof HasEncoded ?
+                ((HasEncoded) message).getEncoded() :
+                encodeJSON(message.getParts()));
     }
 
     private void enqueueForDelivery(final String sessionId, final String subject, final Object message) {
+        System.out.println("<<" + message + ">>");
+
         MessageQueue queue = messageQueues.get(sessionId);
         if (queue != null && isAnyoneListening(queue, subject)) {
             queue.offer(new MarshalledMessage() {

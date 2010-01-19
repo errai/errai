@@ -51,7 +51,8 @@ public class ExtensionProxyGenerator extends Generator {
     private TypeOracle typeOracle;
 
     @Override
-    public String generate(TreeLogger logger, GeneratorContext context, String typeName) throws UnableToCompleteException {
+    public String generate(TreeLogger logger, GeneratorContext context, String typeName)
+            throws UnableToCompleteException {
         typeOracle = context.getTypeOracle();
 
         try {

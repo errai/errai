@@ -166,11 +166,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 if (!initialized) {
                     postInitTasks.add(new Runnable() {
                         public void run() {
-                            _store(message.getSubject(), encodeMap(message.getParts()));
+                            _store(message.getSubject(), message instanceof HasEncoded
+                                    ? ((HasEncoded) message).getEncoded() : encodeMap(message.getParts()));
                         }
                     });
                 } else {
-                    _store(message.getSubject(), encodeMap(message.getParts()));
+                    _store(message.getSubject(), message instanceof HasEncoded
+                            ? ((HasEncoded) message).getEncoded() : encodeMap(message.getParts()));
                 }
 
             } else {
@@ -189,7 +191,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
 
     public void enqueueForRemoteTransmit(Message message) {
-        outgoingQueue.add(encodeMap(message.getParts()));
+        outgoingQueue.add(message instanceof HasEncoded ?
+                ((HasEncoded) message).getEncoded() : encodeMap(message.getParts()));
         sendAll();
     }
 
@@ -347,9 +350,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                         for (String s : subscriptions.keySet()) {
                             if (s.startsWith("local:")) continue;
 
-                            create(RemoteSubscribe)
+                            MessageBuilder.createMessage()
                                     .toSubject("ServerBus")
-                                    .set(Subject, s)
+                                    .command(RemoteSubscribe)
+                                    .with(Subject, s)
+                                    .noErrorHandling()
                                     .sendNowWith(self);
                         }
 
@@ -397,7 +402,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
         addUnsubscribeListener(new UnsubscribeListener() {
             public void onUnsubscribe(SubscriptionEvent event) {
-                create().command(RemoteSubscribe)
+                create().command(BusCommands.RemoteUnsubscribe)
                         .toSubject("ServerBus")
                         .set(Subject, event.getSubject())
                         .set(PriorityProcessing, "1")
@@ -535,7 +540,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      }-*/;
 
 
-    public native static void _store(String subject, Object value) /*-{
+    public static void _store(String subject, Object value) {
+        System.out.println("<<" + value + ">>");
+
+        __store(subject, value);
+    }
+
+    public native static void __store(String subject, Object value) /*-{
           $wnd.PageBus.store(subject, value);
      }-*/;
 

@@ -128,7 +128,8 @@ public class ConfigUtil {
         }
     }
 
-    public static void visitAll(File root, final GeneratorContext context, final TreeLogger logger, final SourceWriter writer, final RebindVisitor visitor) {
+    public static void visitAll(File root, final GeneratorContext context, final TreeLogger logger,
+                                final SourceWriter writer, final RebindVisitor visitor) {
         _findLoadableModules(root, root, new HashSet<String>(), new VisitDelegate() {
             public void visit(Class clazz) {
                 visitor.visit(clazz, context, logger, writer);
@@ -138,7 +139,8 @@ public class ConfigUtil {
         if (activeCacheContexts != null) activeCacheContexts.add(root.getPath());
     }
 
-    public static void visitAllTargets(List<File> targets, final GeneratorContext context, final TreeLogger logger, final SourceWriter writer, RebindVisitor visitor) {
+    public static void visitAllTargets(List<File> targets, final GeneratorContext context,
+                                       final TreeLogger logger, final SourceWriter writer, RebindVisitor visitor) {
         for (File file : targets) {
             visitAll(file, context, logger, writer, visitor);
         }
@@ -177,7 +179,8 @@ public class ConfigUtil {
 
     private static String CLASS_RESOURCES_ROOT = "WEB-INF.classes.";
 
-    private static void loadFromZippedResource(File root, File start, Set<String> loadedTargets, VisitDelegate visitor, String scanFilter) {
+    private static void loadFromZippedResource(File root, File start, Set<String> loadedTargets, VisitDelegate visitor,
+                                               String scanFilter) {
 
         final String pathToJar = start.getPath();
         boolean startsWithFile = pathToJar.startsWith("file:/");
@@ -265,7 +268,8 @@ public class ConfigUtil {
                     }
                     catch (Throwable e) {
                         if (!cached) {
-                            log.error("Failed to load: " + className + "(" + e.getMessage() + ") -- Probably non-fatal.");
+                            log.error("Failed to load: " + className
+                                    + "(" + e.getMessage() + ") -- Probably non-fatal.");
                         }
                     }
 
@@ -336,7 +340,8 @@ public class ConfigUtil {
 
 
     private static void loadFromDirectory(File root, File start, Set<String> loadedTargets, VisitDelegate visitor) {
-        if (scanCache != null && activeCacheContexts != null && activeCacheContexts.contains(root.getPath()) && scanCache.containsKey(root.getPath())) {
+        if (scanCache != null && activeCacheContexts != null && activeCacheContexts.contains(root.getPath())
+                && scanCache.containsKey(root.getPath())) {
             for (Class loadClass : scanCache.get(root.getPath())) {
                 visitor.visit(loadClass);
             }
