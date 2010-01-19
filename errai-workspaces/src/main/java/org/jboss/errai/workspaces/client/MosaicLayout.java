@@ -24,6 +24,7 @@ package org.jboss.errai.workspaces.client;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.*;
 import com.google.gwt.user.client.ui.*;
 import org.gwt.mosaic.ui.client.MessageBox;
 import org.gwt.mosaic.ui.client.Viewport;
@@ -84,7 +85,7 @@ public class MosaicLayout extends AbstractLayout implements EntryPoint
     menu = new Menu();
     workspace = new Workspace(menu);
     header = new Header();
-    
+
     // Declare the standard login client here.
     authenticationHandler = new AuthenticationPresenter(new MosaicAuthenticationDisplay());
     bus.subscribe("LoginClient", authenticationHandler);
@@ -124,40 +125,14 @@ public class MosaicLayout extends AbstractLayout implements EntryPoint
 
             if (message.hasPart(SecurityParts.Name))
             {
-              HorizontalPanel userInfo = new HorizontalPanel();
-              Label userName = new Label(message.get(String.class, SecurityParts.Name));
-              userName.getElement().getStyle().setProperty("fontWeight", "bold");
-
-              userInfo.add(userName);
-              Button logout = new Button("Logout");
-              logout.setStyleName("logoutButton");
-              userInfo.add(logout);
-
-              logout.addClickHandler(new ClickHandler()
-              {
-                public void onClick(ClickEvent event)
-                {
-
-                  MessageBuilder.createMessage()
-                      .toSubject("AuthorizationService")
-                      .command(SecurityCommands.EndSession)
-                      .noErrorHandling().sendNowWith(bus);
-
-                  bus.unsubscribeAll("org.jboss.errai.WorkspaceLayout");
-                  sessionRoles.clear();
-
-                  //RootPanel.get(rootId).remove(workspaceLayout);
-                  //workspaceLayout = new WorkspaceLayout(rootId);
-
-                }
-              });
-
-              //workspaceLayout.getUserInfoPanel().clear();
-              //workspaceLayout.getUserInfoPanel().add(userInfo);
+              String username = message.get(String.class, SecurityParts.Name);
+              MessageBuilder.createMessage()
+                  .toSubject("appContext")
+                  .signalling()
+                  .with("username", username)
+                  .noErrorHandling()
+                  .sendNowWith(ErraiBus.get());
             }
-
-            //RootPanel.get(rootId).add(workspaceLayout);
-
 
             launchWorkspace();
           }
@@ -226,7 +201,7 @@ public class MosaicLayout extends AbstractLayout implements EntryPoint
 
     for (ToolSet ts : toBeLoaded) {
       if (loaded.contains(ts.getToolSetName())) continue;
-       workspace.addToolSet(ts);
+      workspace.addToolSet(ts);
     }
 
     for (final String group : toBeLoadedGroups.keySet()) {
@@ -258,7 +233,7 @@ public class MosaicLayout extends AbstractLayout implements EntryPoint
           }
         };
 
-         workspace.addToolSet(ts);
+        workspace.addToolSet(ts);
       }
     }
 
@@ -282,11 +257,11 @@ public class MosaicLayout extends AbstractLayout implements EntryPoint
 
     // editor panel    
     mainLayout.add(workspace, new BorderLayoutData(BorderLayout.Region.CENTER, false));
-    
+
     viewport.getLayoutPanel().add(mainLayout);
   }
 
-   /**
+  /**
    * hack in order to correctly display widgets that have
    * been rendered hidden
    */

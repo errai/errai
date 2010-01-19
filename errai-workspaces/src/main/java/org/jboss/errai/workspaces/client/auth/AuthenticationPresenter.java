@@ -27,6 +27,8 @@ import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.HasCloseHandlers;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.HasText;
 import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.client.protocols.MessageParts;
@@ -146,8 +148,7 @@ public class AuthenticationPresenter implements MessageCallback
   @Override
   public void callback(Message message)
   {
-    try {
-
+    try {     
       switch (SecurityCommands.valueOf(message.getCommandType())) {
         case SecurityChallenge:
           if (message.hasPart(SecurityParts.RejectedMessage)) {
@@ -189,21 +190,13 @@ public class AuthenticationPresenter implements MessageCallback
         case SuccessfulAuth:
           display.hideLoginPanel();
 
-          String username = message.get(String.class, SecurityParts.Name);
-          String messageText = "Welcome " + username
+          /*String messageText = "Welcome " + username
                         + ", you are now logged in. "
                         + (message.hasPart(MessageParts.MessageText) ?
                         message.get(String.class, MessageParts.MessageText) : "");
-
-
-          MessageBuilder.createMessage()
-              .toSubject("appContext")
-              .signalling()
-              .with("username", username)              
-              .noErrorHandling()
-              .sendNowWith(ErraiBus.get());
-          
-          //display.showWelcomeMessage(messageText);
+            
+          display.showWelcomeMessage(messageText);
+          */
 
           if (deferredMessage != null)
           {
