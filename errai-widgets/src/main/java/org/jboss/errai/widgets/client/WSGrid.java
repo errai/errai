@@ -41,7 +41,7 @@ import java.util.*;
  * A Grid/Table implementation for working with structured data.
  */
 @SuppressWarnings({"UnusedDeclaration", "ConstantConditions"})
-public class WSGrid extends Composite {
+public class WSGrid extends Composite implements RequiresResize {
     private static final int CELL_HEIGHT_PX = 18;
 
     private FocusPanel focusPanel;
@@ -1826,6 +1826,12 @@ public class WSGrid extends Composite {
         }
     }
 
+    @Override
+    public void onResize() {
+        System.out.println("Resize called.");
+        setPixelSize(getParent().getOffsetWidth(), getParent().getOffsetHeight());
+    }
+
     private static final int NONEDITABLE = 0;
     private static final int EDITABLE = 1;
     private static final int TITLEGRID = 1 << 1;
@@ -1865,8 +1871,6 @@ public class WSGrid extends Composite {
     public void setRowSelectionOnly(boolean rowSelectionOnly) {
         this.rowSelectionOnly = rowSelectionOnly;
     }
-
-
 
     private native static void disableTextSelectInternal(Element e, boolean disable)/*-{
       if (disable) {

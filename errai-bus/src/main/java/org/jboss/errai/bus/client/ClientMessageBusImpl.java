@@ -543,7 +543,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      */
     private boolean sendInitialMessage(final HookCallback callback) {
         try {
-            String initialMessage = "{\"CommandType\":\"ConnectToQueue\",\"ToSubject\":\"ServerBus\", \"PriorityProcessing\":\"1\"}";
+            String initialMessage = "{\"CommandType\":\"ConnectToQueue\",\"ToSubject\":\"ServerBus\"," +
+                    " \"PriorityProcessing\":\"1\"}";
 
             sendBuilder.sendRequest(initialMessage, new RequestCallback() {
                 public void onResponseReceived(Request request, Response response) {
@@ -552,7 +553,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                         initializeMessagingBus(callback);
                     }
                     catch (Exception e) {
-                        showError("Error attaching to bus", e.getMessage() + "<br/>Message Contents:<br/>" + response.getText(), e);
+                        showError("Error attaching to bus", e.getMessage() + "<br/>Message Contents:<br/>"
+                                + response.getText(), e);
                     }
                 }
 
