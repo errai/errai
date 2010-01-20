@@ -379,7 +379,12 @@ public class CommandMessage implements Message {
         return this;
     }
 
-
+    /**
+     * Sets the error callback for this message
+     *
+     * @param callback - error callback
+     * @return this
+     */
     public Message errorsCall(ErrorCallback callback) {
         if (this.errorsCall != null) {
             throw new RuntimeException("An ErrorCallback is already registered");
@@ -388,7 +393,11 @@ public class CommandMessage implements Message {
         return this;
     }
 
-
+    /**
+     * Gets the error callback for this message
+     * 
+     * @return the error callback
+     */
     public ErrorCallback getErrorCallback() {
         return errorsCall;
     }
@@ -432,6 +441,11 @@ public class CommandMessage implements Message {
         viaThis.dispatch(this);
     }
 
+    /**
+     * Gets a <tt>String</tt> representation of this message, which contains the subject and type
+     *
+     * @return String representation of message
+     */
     @Override
     public String toString() {
         return "CommandMessage(toSubject=" + getSubject() + ";CommandType=" + getCommandType() + ")";
