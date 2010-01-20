@@ -92,7 +92,9 @@ public class MosaicAuthenticationDisplay extends LayoutPanel
         userNameInput.addKeyDownHandler(clickOnEnter);
         passwordInput.addKeyDownHandler(clickOnEnter);
 
-        // close the window immediately to improve user feedback.
+        /**
+         * Close the window immediately upon submission.
+         */
         loginButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {

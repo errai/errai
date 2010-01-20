@@ -1706,11 +1706,14 @@ public class WSGrid extends Composite implements RequiresResize {
         dataGrid.getScrollPanel().setWidth(width + "px");
     }
 
-
     @Override
     public void setPixelSize(int width, int height) {
         setPreciseWidth(width);
         setPreciseHeight(height);
+    }
+
+    public void sizeToParent() {
+        setPixelSize(getParent().getOffsetWidth() - 5, getParent().getOffsetHeight());
     }
 
     /**
