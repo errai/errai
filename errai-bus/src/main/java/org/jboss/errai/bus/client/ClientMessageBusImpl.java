@@ -41,27 +41,48 @@ import static org.jboss.errai.bus.client.protocols.MessageParts.*;
  * with the server immediately upon initialization.
  */
 public class ClientMessageBusImpl implements ClientMessageBus {
+
+    /* The encoded URL to be used for the bus */
     private static final String SERVICE_ENTRY_POINT = "in.erraiBus";
 
+    /* ArrayList of all subscription listeners */
     private List<SubscribeListener> onSubscribeHooks = new ArrayList<SubscribeListener>();
+
+    /* ArrayList of all unsubscription listeners */
     private List<UnsubscribeListener> onUnsubscribeHooks = new ArrayList<UnsubscribeListener>();
 
+    /* Used to build the HTTP POST request */
     private RequestBuilder sendBuilder;
+
+    /* Used to build the HTTP GET request */
     private final RequestBuilder recvBuilder;
 
+    /* Map of subjects to subscriptions  */
     private final Map<String, List<Object>> subscriptions = new HashMap<String, List<Object>>();
 
+    /* Outgoing queue of messages to be transmitted */
     private final Queue<String> outgoingQueue = new LinkedList<String>();
+
+    /* True if transmitting is in process */
     private boolean transmitting = false;
 
+    /* Map of subjects to references registered in this session */
     private Map<String, Set<Object>> registeredInThisSession = new HashMap<String, Set<Object>>();
 
+    /* A list of {@link Runnable} initialization tasks to be executed after the bus has successfully finished it's
+     * initialization and is now communicating with the remote bus. */ 
     private ArrayList<Runnable> postInitTasks = new ArrayList<Runnable>();
 
+    /* The timer constantly ensures the client's polling with the server is active */
     private Timer incomingTimer;
 
+    /* True if the client's message bus has been initialized */
     private boolean initialized = false;
 
+    /**
+     * Constructor creates sendBuilder for HTTP POST requests, recvBuilder for HTTP GET requests and
+     * initializes the message bus.
+     */
     public ClientMessageBusImpl() {
         (sendBuilder = new RequestBuilder(
                 RequestBuilder.POST,
@@ -76,18 +97,29 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         init();
     }
 
+    /**
+     * Removes all subscriptions attached to the specified subject
+     *
+     * @param subject - the subject to have all it's subscriptions removed
+     */
     public void unsubscribeAll(String subject) {
         if (subscriptions.containsKey(subject)) {
             for (Object o : subscriptions.get(subject)) {
                 _unsubscribe(o);
             }
 
-            fireAllUnSubcribeListener(subject);
+            fireAllUnSubscribeListeners(subject);
         }
     }
 
+    /**
+     * Add a subscription for the specified subject
+     *
+     * @param subject - the subject to add a subscription for
+     * @param callback - function called when the message is dispatched
+     */
     public void subscribe(final String subject, final MessageCallback callback) {
-        fireAllSubcribeListener(subject);
+        fireAllSubscribeListeners(subject);
 
         MessageCallback dispatcher = new MessageCallback() {
             public void callback(Message message) {
@@ -103,7 +135,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         addSubscription(subject, _subscribe(subject, dispatcher, null));
     }
 
-    private void fireAllSubcribeListener(String subject) {
+    /**
+     * Fire listeners to notify that a new subscription has been registered on the bus.
+     *
+     * @param subject - new subscription registered
+     */
+    private void fireAllSubscribeListeners(String subject) {
         Iterator<SubscribeListener> iter = onSubscribeHooks.iterator();
         SubscriptionEvent evt = new SubscriptionEvent(false, "InBrowser", subject);
 
@@ -116,7 +153,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         }
     }
 
-    private void fireAllUnSubcribeListener(String subject) {
+    /**
+     * Fire listeners to notify that a subscription has been unregistered from the bus
+     *
+     * @param subject - subscription unregistered
+     */
+    private void fireAllUnSubscribeListeners(String subject) {
         Iterator<UnsubscribeListener> iter = onUnsubscribeHooks.iterator();
         SubscriptionEvent evt = new SubscriptionEvent(false, "InBrowser", subject);
 
@@ -134,8 +176,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     /**
      * Have a single two-way conversation
      *
-     * @param message  -
-     * @param callback -
+     * @param message  - The message to be sent in the conversation
+     * @param callback - The function to be called when the message is received
      */
     public void conversationWith(final Message message, final MessageCallback callback) {
         final String tempSubject = "temp:Conversation:" + (++conversationCounter);
@@ -152,14 +194,35 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         send(message);
     }
 
+    /**
+     * Globally send message to all receivers.
+     *
+     * @param message - The message to be sent.
+     */
     public void sendGlobal(Message message) {
         send(message);
     }
 
+    /**
+     *  Sends the specified message, and notifies the listeners.
+     *
+     * @param message - the message to be sent
+     * @param fireListeners - true if the appropriate listeners should be fired
+     */
     public void send(Message message, boolean fireListeners) {
+        // TODO: fire listeners?
+        
         send(message);
     }
 
+    /**
+     * Sends the message using it's encoded subject. If the bus has not been initialized, it will be added to
+     * <tt>postInitTasks</tt>.
+     *
+     * @param message
+     * @throws RuntimeException - if message does not contain a ToSubject field or if the message's callback throws
+     * an error.
+     */
     public void send(final Message message) {
         try {
             if (message.hasPart(MessageParts.ToSubject)) {
@@ -190,6 +253,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         }
     }
 
+    /**
+     * Add message to the queue that remotely transmits messages to the server.
+     * All messages in the queue are then sent.
+     *
+     * @param message
+     */
     public void enqueueForRemoteTransmit(Message message) {
         outgoingQueue.add(message instanceof HasEncoded ?
                 ((HasEncoded) message).getEncoded() : encodeMap(message.getParts()));
@@ -209,22 +278,49 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         if (registeredInThisSession != null) registeredInThisSession.get(subject).add(reference);
     }
 
+    /**
+     * Checks if subject is already listed in the subscriptions map
+     *
+     * @param subject - subject to look for
+     * @return true if the subject is already subscribed
+     */
     public boolean isSubscribed(String subject) {
         return subscriptions.containsKey(subject);
     }
 
+    /**
+     * Retrieve all registrations that have occured during the current capture context.
+     * <p/>
+     * The Map returned has the subject of the registrations as the key, and Sets of registration objects as the
+     * value of the Map.
+     * 
+     * @return A map of registrations captured in the current capture context.
+     */
     public Map<String, Set<Object>> getCapturedRegistrations() {
         return registeredInThisSession;
     }
 
+    /**
+     * Marks the beginning of a new capture context.<p/>  From this point, the message is called forward, all
+     * registration events which occur will be captured.
+     */
     public void beginCapture() {
         registeredInThisSession = new HashMap<String, Set<Object>>();
     }
 
+    /**
+     * End the current capturing context.
+     */
     public void endCapture() {
         registeredInThisSession = null;
     }
 
+    /**
+     * Unregister all registrations in the specified Map.<p/>  It accepts a Map format returned from
+     * {@link #getCapturedRegistrations()}.
+     * 
+     * @param all A map of registrations to deregister.
+     */
     public void unregisterAll(Map<String, Set<Object>> all) {
         for (Map.Entry<String, Set<Object>> entry : all.entrySet()) {
             for (Object o : entry.getValue()) {
@@ -233,13 +329,16 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             }
 
             if (subscriptions.get(entry.getKey()).isEmpty()) {
-                fireAllUnSubcribeListener(entry.getKey());
+                fireAllUnSubscribeListeners(entry.getKey());
             }
         }
     }
 
     private Timer sendTimer;
 
+    /**
+     * Appends all messages in the queue to as a JSON-like string, and remotely transmits them all.
+     */
     private void sendAll() {
         if (!initialized) {
             return;
@@ -287,6 +386,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         if (transmissionSize != 0) transmitRemote(outgoing.toString());
     }
 
+    /**
+     * Transmits JSON string containing message, using the <tt>sendBuilder</tt>
+     *
+     * @param message - JSON string representation of message
+     */
     private void transmitRemote(String message) {
         if (message == null) return;
 
@@ -324,10 +428,19 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         }
     }
 
+    /**
+     * Initializes client message bus without a callback function
+     */
     public void init() {
         init(null);
     }
 
+    /**
+     * Initializes the message bus, by subscribing to the ClientBus (to receive subscription messages) and the
+     * ClientErrorBus to dispatch errors when called.
+     *
+     * @param callback - callback function used for to send the initial message to connect to the queue.
+     */
     public void init(final HookCallback callback) {
         final MessageBus self = this;
 
@@ -421,6 +534,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         }
     }
 
+    /**
+     * Sends the initial message to connect to the queue, to estabish an HTTP session. Otherwise, concurrent
+     * requests will result in multiple sessions being created.
+     *
+     * @param callback - callback function used for initializing the message bus
+     * @return true if initial message was sent successfully.
+     */
     private boolean sendInitialMessage(final HookCallback callback) {
         try {
             String initialMessage = "{\"CommandType\":\"ConnectToQueue\",\"ToSubject\":\"ServerBus\", \"PriorityProcessing\":\"1\"}";
@@ -448,11 +568,21 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         return true;
     }
 
-
+    /**
+     * Returns true if client message bus is initialized.
+     *
+     * @return true if client message bus is initialized.
+     */
     public boolean isInitialized() {
         return initialized;
     }
 
+    /**
+     * Initializes the message bus by setting up the <tt>recvBuilder</tt> to accept responses. Also, initializes the
+     * incoming timer to ensure the client's polling with the server is active.
+     *
+     * @param initCallback - not used
+     */
     @SuppressWarnings({"UnusedDeclaration"})
     private void initializeMessagingBus(final HookCallback initCallback) {
         incomingTimer = new Timer() {
@@ -511,17 +641,38 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         outerTimer.schedule(10);
     }
 
+    /**
+     * Add runnable tasks to be run after the message bus is initialized
+     *
+     * @param run a {@link Runnable} task.
+     */
     public void addPostInitTask(Runnable run) {
         postInitTasks.add(run);
     }
 
+    /**
+     * Do-nothing function, should eventually be able to add a global listener to receive all messages. Though global
+     * message dispatches the message to all listeners attached.
+     *
+     * @param listener - listener to accept all messages dispatched
+     */
     public void addGlobalListener(MessageListener listener) {
     }
 
+    /**
+     * Adds a subscription listener, so it is possible to add subscriptions to the client.
+     *
+     * @param listener - subscription listener
+     */
     public void addSubscribeListener(SubscribeListener listener) {
         this.onSubscribeHooks.add(listener);
     }
 
+    /**
+     * Adds an unsubscription listener, so it is possible for applications to remove subscriptions from the client
+     *
+     * @param listener - unsubscription listener
+     */
     public void addUnsubscribeListener(UnsubscribeListener listener) {
         this.onUnsubscribeHooks.add(listener);
     }
