@@ -24,8 +24,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * CommandMessage represents a message payload.  It implements a builder (or fluent) API which is used for constructing
- * sendable messages.  It is the core messageing API for ErraiBus, and will be the foremost used class within ErraiBus
+ * JSONMessage extends CommandMessage. It represents a message payload.  It implements a builder (or fluent) API
+ * which is used for constructing sendable messages.
+ * It is the core messageing API for ErraiBus, and will be the foremost used class within ErraiBus
  * by most users.
  * <p/>
  * <strong>Example Message:</strong>
@@ -69,14 +70,19 @@ import java.util.Map;
  * @see ConversationMessage
  */
 public class JSONMessage extends CommandMessage implements HasEncoded {
+    /* String representation of this message and all it's parts */
     protected StringBuffer buf = new StringBuffer();
+
+    /* First is true if the <tt>buf</tt> is empty */
     protected boolean first = true;
+
+    /* true if the message has been completely pushed into the <tt>buf</tt> */
     protected boolean committed;
 
     /**
-     * Create a new CommandMessage.
+     * Create a new JSONMessage.
      *
-     * @return a new instance of CommandMessage
+     * @return a new instance of JSONMessage
      */
 
     static JSONMessage create() {
@@ -166,11 +172,21 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
         return this;
     }
 
+    /**
+     * Removes a message part
+     *
+     * @param part - Message part
+     */
     public void remove(String part) {
         throw new UnsupportedOperationException();
         //  parts.remove(part);
     }
 
+    /**
+     * Removes a message part
+     *
+     * @param part - Message part
+     */
     public void remove(Enum part) {
         throw new UnsupportedOperationException();
     }
@@ -199,16 +215,32 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
         return this;
     }
 
+    /**
+     * Set routing flags for message.
+     *
+     * @param flag - Routing flag to set
+     */
     public void setFlag(RoutingFlags flag) {
         routingFlags |= flag.flag();
     }
 
+    /**
+     * Unset routing flags for message.
+     *
+     * @param flag - Routing flag to unset
+     */
     public void unsetFlag(RoutingFlags flag) {
         if ((routingFlags & flag.flag()) != 0) {
             routingFlags ^= flag.flag();
         }
     }
 
+    /**
+     * Checks if specified routing flag has been set.
+     *
+     * @param flag - flag to check for
+     * @return true if flag has been set.
+     */
     public boolean isFlagSet(RoutingFlags flag) {
         return (routingFlags & flag.flag()) != 0;
     }
@@ -334,7 +366,12 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
         return this;
     }
 
-
+    /**
+     * Registers an error callback function for this message.
+     *
+     * @param callback - error callback
+     * @return this message
+     */
     public Message errorsCall(ErrorCallback callback) {
         if (this.errorsCall != null) {
             throw new RuntimeException("An ErrorCallback is already registered");
@@ -343,7 +380,11 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
         return this;
     }
 
-
+    /**
+     * Gets the error callback set for this message
+     *
+     * @return the error callback function
+     */
     public ErrorCallback getErrorCallback() {
         return errorsCall;
     }
@@ -388,28 +429,46 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
         viaThis.dispatch(this);
     }
 
+    /**
+     * Returns an encoded string representation of this message in the buffer
+     *
+     * @return an encoded string of the buffer
+     */
     @Override
     public String getEncoded() {
         _end();
         return buf.toString();
     }
 
+    /**
+     * Returns a <tt>String</tt> representation of this message
+     *
+     * @return a string representation of this message
+     */
     @Override
     public String toString() {
         return "CommandMessage(toSubject=" + getSubject() + ";CommandType=" + getCommandType() + ")";
     }
 
+    /**
+     * Starts appending the beginning of the JSON message to the buffer <tt>buf</tt>
+     */
     protected void _start() {
         first = true;
         buf.append("{");
     }
 
+    /**
+     * Appends the closing brace to the end of the buffer denoting the end of the message
+     */
     protected void _end() {
         committed = true;
         buf.append("}");
     }
 
-
+    /**
+     * Appends a separator to the buffer where needed
+     */
     protected void _sep() {
         if (first) {
             first = false;
@@ -418,12 +477,24 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
         }
     }
 
+    /**
+     * Append strings in JSON notation to the <tt>buf</tt>
+     *
+     * @param a - the real name of the part
+     * @param b - the value of the part
+     */
     protected void _addStringPart(String a, String b) {
         _sep();
         buf.append(a).append(':')
                 .append('\"').append(b).append("\"");
     }
 
+    /**
+     * Append objects in JSON notation to the <tt>buf</tt>
+     *
+     * @param a - message part
+     * @param b - the value of the message's part
+     */
     protected void _addObjectPart(String a, Object b) {
         _sep();
         buf.append(a).append(':')
