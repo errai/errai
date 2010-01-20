@@ -18,11 +18,10 @@ package org.jboss.errai.widgets.client;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.*;
-import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.*;
 
 import static com.google.gwt.user.client.DOM.setStyleAttribute;
 
-import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.*;
 
@@ -1713,7 +1712,13 @@ public class WSGrid extends Composite implements RequiresResize {
     }
 
     public void sizeToParent() {
-        setPixelSize(getParent().getOffsetWidth() - 5, getParent().getOffsetHeight());
+        DeferredCommand.addCommand(new Command() {
+            @Override
+            public void execute() {
+                 setPixelSize(getParent().getOffsetWidth() - 5, getParent().getOffsetHeight() - 15);
+            }
+        });
+
     }
 
     /**

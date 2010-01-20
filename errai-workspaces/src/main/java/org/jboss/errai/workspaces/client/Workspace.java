@@ -25,6 +25,7 @@ import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
+import com.google.gwt.user.client.IncrementalCommand;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
@@ -39,6 +40,7 @@ import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.MessageCallback;
 import org.jboss.errai.workspaces.client.framework.Tool;
 import org.jboss.errai.workspaces.client.framework.ToolSet;
+import org.jboss.errai.workspaces.client.util.LayoutUtil;
 import org.jboss.errai.workspaces.client.widgets.WSToolSetLauncher;
 
 /**
@@ -46,7 +48,7 @@ import org.jboss.errai.workspaces.client.widgets.WSToolSetLauncher;
  *
  * @author Heiko.Braun <heiko.braun@jboss.com>
  */
-public class Workspace extends DeckLayoutPanel {
+public class Workspace extends DeckLayoutPanel implements RequiresResize {
     private Menu menu;
 
     public Workspace(Menu menu) {
@@ -212,24 +214,13 @@ public class Workspace extends DeckLayoutPanel {
 
             final ToolSetDeck toolSetDesk = this;
 
-            Window.addResizeHandler(new ResizeHandler() {
-                @Override
-                public void onResize(ResizeEvent event) {
-                    toolSetDesk.onResize();
-                }
-            });
-
             this.add(tabLayout);
         }
 
         @Override
         public void onResize() {
             setPixelSize(getParent().getOffsetWidth(), getParent().getOffsetHeight());
-            for (Widget w : tabLayout) {
-                if (w instanceof RequiresResize) {
-                    ((RequiresResize) w).onResize();
-                }
-            }
+            LayoutUtil.layoutHints(tabLayout);
         }
     }
 
@@ -245,12 +236,13 @@ public class Workspace extends DeckLayoutPanel {
         @Override
         public void onResize() {
             setPixelSize(getParent().getOffsetWidth(), getParent().getOffsetHeight());
-            for (Widget w : this) {                
-                if (w instanceof RequiresResize) {
-                    ((RequiresResize) w).onResize();
-                }
-            }
+            LayoutUtil.layoutHints(this);
         }
+    }
+
+    @Override
+    public void onResize() {
+        LayoutUtil.layoutHints(this);
     }
 
     /*public final class ToolSetRef
