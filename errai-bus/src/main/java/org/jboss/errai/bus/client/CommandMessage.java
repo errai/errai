@@ -242,16 +242,32 @@ public class CommandMessage implements Message {
         return this;
     }
 
+    /**
+     * Set flags for this message
+     *
+     * @param flag - <tt>RoutingFlags</tt> can be set to NonGlobalRouting or PriorityProcessing
+     */
     public void setFlag(RoutingFlags flag) {
         routingFlags |= flag.flag();
     }
 
+    /**
+     * Unset flags for this message
+     *
+     * @param flag - <tt>RoutingFlags</tt> can be set to NonGlobalRouting or PriorityProcessing
+     */
     public void unsetFlag(RoutingFlags flag) {
         if ((routingFlags & flag.flag()) != 0) {
            routingFlags ^= flag.flag();
         }
     }
 
+    /**
+     * Checks if a flag is setfor this message
+     *
+     * @param flag - <tt>RoutingFlags</tt> can be set to NonGlobalRouting or PriorityProcessing
+     * @return true if the flag is set
+     */
     public boolean isFlagSet(RoutingFlags flag) {
         return (routingFlags & flag.flag()) != 0;
     }
