@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 
 public class MessageQueue {
     private static final long TIMEOUT = Boolean.getBoolean("org.jboss.errai.debugmode") ?
-            (1000 * 60 * 60) : (1000 * 46);
+            (1000 * 60 * 60) : (1000 * 25);
 
     private static final int MAXIMUM_PAYLOAD_SIZE = 10;
     private static final long DEFAULT_TRANSMISSION_WINDOW = 25;
@@ -148,35 +148,36 @@ public class MessageQueue {
                 descheduleTask();
                 activationCallback.activate(this);
             } else if (task == null) {
-                final MessageQueue inst = this;
-                /**
-                 * Use the bus scheduler to handle resuming in a fully asynchronous environment.
-                 */
-                bus.getScheduler().addTask(
-                        task = new TimedTask() {
-                            {
-                                period = -1; // only fire once.
-                                nextRuntime = getEndOfWindow();
-                            }
-
-                            public void run() {
-
-                                if (activationCallback != null)
-                                    activationCallback.activate(inst);
-
-                                task = null;
-                            }
-
-                            @Override
-                            public String toString() {
-                                return "MessageResumer";
-                            }
-                        }
-                );
+                scheduleActivation();
             }
         }
 
         return b;
+    }
+
+    public void scheduleActivation() {
+        final MessageQueue inst = this;
+        bus.getScheduler().addTask(
+                task = new TimedTask() {
+                    {
+                        period = -1; // only fire once.
+                        nextRuntime = getEndOfWindow();
+                    }
+
+                    public void run() {
+
+                        if (activationCallback != null)
+                            activationCallback.activate(inst);
+
+                        task = null;
+                    }
+
+                    @Override
+                    public String toString() {
+                        return "MessageResumer";
+                    }
+                }
+        );
     }
 
     private void checkSession() {

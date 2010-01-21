@@ -40,15 +40,16 @@ public class Scheduler extends Thread {
     private void runAllDue() {
         long n = 0;
 
-        synchronized (tasks) {
+        synchronized (this) {
             Iterator<TimedTask> iter = tasks.iterator();
+            List<TimedTask> toRemove = new LinkedList<TimedTask>();
             TimedTask task;
             while (iter.hasNext()) {
                 if ((task = iter.next()).runIfDue(n = currentTimeMillis())) {
                     if (task.nextRuntime() == -1) {
                         // if the next runtime is -1, that means this event
                         // is never scheduled to run again, so we remove it.
-                        iter.remove();
+                        toRemove.add(task);
                     } else {
                         // set the nextRuntime to the nextRuntim of this event
                         nextRunTime = task.nextRuntime();
@@ -67,6 +68,9 @@ public class Scheduler extends Thread {
                     return;
                 }
             }
+
+            for (TimedTask t : toRemove)
+                tasks.remove(t);
         }
 
         if (n == 0) nextRunTime = currentTimeMillis() + 10000;
@@ -80,7 +84,7 @@ public class Scheduler extends Thread {
      * @param task
      */
     public void addTask(TimedTask task) {
-        synchronized (tasks) {
+        synchronized (this) {
             tasks.add(task);
             if (nextRunTime == 0 || task.nextRuntime() < nextRunTime) {
                 nextRunTime = task.nextRuntime();

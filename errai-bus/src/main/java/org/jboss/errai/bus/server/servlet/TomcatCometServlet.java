@@ -52,7 +52,6 @@ public class TomcatCometServlet extends AbstractErraiServlet implements CometPro
                 case BEGIN:
                     event.setTimeout(30000);
                     if ((queue = getQueue(session)) != null) {
-                        //              synchronized (queue) {
                         if ("POST".equals(request.getMethod())) {
                             // do not pause incoming messages.
                             break;
@@ -76,7 +75,6 @@ public class TomcatCometServlet extends AbstractErraiServlet implements CometPro
                         } else {
                             events.add(event);
                         }
-                        //           }
                     }
                     break;
 
@@ -87,14 +85,12 @@ public class TomcatCometServlet extends AbstractErraiServlet implements CometPro
                         return;
                     }
 
-                    //            synchronized (queue) {
                     Set<CometEvent> evt = activeEvents.get(session);
                     if (evt != null && !evt.remove(event)) {
                         return;
                     }
 
                     event.close();
-                    //           }
                     break;
 
                 case ERROR:
@@ -103,12 +99,10 @@ public class TomcatCometServlet extends AbstractErraiServlet implements CometPro
                         return;
                     }
 
-                    //            synchronized (queue) {
                     evt = activeEvents.get(session);
                     if (evt != null && !evt.remove(event)) {
                         return;
                     }
-                    //          }
 
                     if (event.getEventSubType() == CometEvent.EventSubType.TIMEOUT) {
                         if (queue != null) queue.heartBeat();
@@ -207,11 +201,10 @@ public class TomcatCometServlet extends AbstractErraiServlet implements CometPro
         MessageQueue queue = service.getBus().getQueue(session.getSessionId());
         if (queue != null && queue.getActivationCallback() == null) {
             queue.setActivationCallback(new QueueActivationCallback() {
-                boolean resumed = false;
+                volatile boolean resumed = false;
 
                 public void activate(MessageQueue queue) {
                     //      log.info("Resume...");
-                    //             synchronized (queue) {
                     if (resumed) {
                         return;
                     }
@@ -236,13 +229,20 @@ public class TomcatCometServlet extends AbstractErraiServlet implements CometPro
                         }
 
                         CometEvent et = activeSessEvents.iterator().next();
+
+                        if (et == null)  {
+                            resumed = false;
+                            queue.setActivationCallback(this);
+                            queue.scheduleActivation();
+                            return;
+                        }
+
                         transmitMessages(et.getHttpServletResponse(), queue);
                         et.close();
                     }
                     catch (Exception e) {
                         e.printStackTrace();
                     }
-                    //       }
                 }
             });
         }
