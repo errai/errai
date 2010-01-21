@@ -1,28 +1,19 @@
 package org.jboss.errai.bus.server.servlet;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.apache.catalina.CometEvent;
-import org.jboss.errai.bus.client.MessageBus;
-import org.jboss.errai.bus.server.QueueSession;
 import org.jboss.errai.bus.client.MarshalledMessage;
 import org.jboss.errai.bus.client.Message;
-import org.jboss.errai.bus.server.*;
-import org.jboss.errai.bus.server.service.ErraiService;
-import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
-import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
-import org.jboss.errai.bus.server.service.ErraiServiceImpl;
+import org.jboss.errai.bus.server.MessageQueue;
+import org.jboss.errai.bus.server.QueueActivationCallback;
+import org.jboss.errai.bus.server.QueueSession;
 import org.jboss.servlet.http.HttpEvent;
 import org.jboss.servlet.http.HttpEventServlet;
-
 import org.mvel2.util.StringAppender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -46,14 +37,15 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
         final HttpServletRequest request = event.getHttpServletRequest();
         final QueueSession session = sessionProvider.getSession(request.getSession());
 
-        MessageQueue queue;
-        switch (event.getType()) {
-            case BEGIN:
-                queue = getQueue(session);
-                if (queue == null) {
-                    return;
-                }
-                synchronized (queue) {
+        synchronized (session) {
+
+            MessageQueue queue;
+            switch (event.getType()) {
+                case BEGIN:
+                    queue = getQueue(session);
+                    if (queue == null) {
+                        return;
+                    }
                     if ("POST".equals(request.getMethod())) {
                         // do not pause incoming messages.
                         break;
@@ -78,58 +70,54 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
                     } else {
                         events.add(event);
                     }
-                }
-                break;
+
+                    break;
 
 
-            case END:
-                if ((queue = getQueue(session)) != null) {
-                    queue.heartBeat();
-                }
+                case END:
+                    if ((queue = getQueue(session)) != null) {
+                        queue.heartBeat();
+                    }
 
-                synchronized (queue) {
                     Set<HttpEvent> evt = activeEvents.get(session);
                     if (evt != null) {
                         evt.remove(event);
                     }
 
                     event.close();
-                }
-                break;
+                    break;
 
-            case EOF:
-                event.close();
-                break;
+                case EOF:
+                    event.close();
+                    break;
 
-            case TIMEOUT:
-            case ERROR:
-                queue = getQueue(session);
+                case TIMEOUT:
+                case ERROR:
+                    queue = getQueue(session);
 
-                synchronized (queue) {
-                    Set<HttpEvent> evt = activeEvents.get(session);
+                    evt = activeEvents.get(session);
                     if (evt != null) {
                         evt.remove(event);
                     }
-
-                }
-                if (event.getType() == HttpEvent.EventType.TIMEOUT) {
-                    if (queue != null) queue.heartBeat();
-                } else {
-                    if (queue != null) {
-                        queueToSession.remove(queue);
-                        service.getBus().closeQueue(session.getSessionId());
-                        //   session.invalidate();
-                        activeEvents.remove(session);
+                    if (event.getType() == HttpEvent.EventType.TIMEOUT) {
+                        if (queue != null) queue.heartBeat();
+                    } else {
+                        if (queue != null) {
+                            queueToSession.remove(queue);
+                            service.getBus().closeQueue(session.getSessionId());
+                            //   session.invalidate();
+                            activeEvents.remove(session);
+                        }
+                        log.error("An Error Occured" + event.getType());
                     }
-                    log.error("An Error Occured" + event.getType());
-                }
 
-                event.close();
-                break;
+                    event.close();
+                    break;
 
-            case READ:
-                readInRequest(request);
-                event.close();
+                case READ:
+                    readInRequest(request);
+                    event.close();
+            }
         }
     }
 
@@ -202,14 +190,12 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
                 boolean resumed = false;
 
                 public void activate(MessageQueue queue) {
-                    synchronized (queue) {
-                        if (resumed) {
-                            //            log.info("Blocking");
-                            return;
-                        }
-                        resumed = true;
-                        queue.setActivationCallback(null);
+                    if (resumed) {
+                        //            log.info("Blocking");
+                        return;
                     }
+                    resumed = true;
+                    queue.setActivationCallback(null);
 
                     //     log.info("Attempt to resume queue: " + queue.hashCode());
                     try {
@@ -221,20 +207,18 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
                             return;
                         }
 
-                        synchronized (session) {
-                            activeSessEvents = activeEvents.get(queueToSession.get(queue));
+                        activeSessEvents = activeEvents.get(queueToSession.get(queue));
 
-                            if (activeSessEvents == null || activeSessEvents.isEmpty()) {
-                                log.warn("No active events to resume with");
-                                return;
-                            }
-
-                            Iterator<HttpEvent> iter = activeSessEvents.iterator();
-                            HttpEvent et;
-                            transmitMessages((et = iter.next()).getHttpServletResponse(), queue);
-                            iter.remove();
-                            et.close();
+                        if (activeSessEvents == null || activeSessEvents.isEmpty()) {
+                            log.warn("No active events to resume with");
+                            return;
                         }
+
+                        Iterator<HttpEvent> iter = activeSessEvents.iterator();
+                        HttpEvent et;
+                        transmitMessages((et = iter.next()).getHttpServletResponse(), queue);
+                        iter.remove();
+                        et.close();
                     }
                     catch (Exception e) {
                         e.printStackTrace();
