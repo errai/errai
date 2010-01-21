@@ -46,87 +46,89 @@ public class TomcatCometServlet extends AbstractErraiServlet implements CometPro
         final HttpServletRequest request = event.getHttpServletRequest();
         final QueueSession session = sessionProvider.getSession(request.getSession());
 
-        MessageQueue queue;
-        switch (event.getEventType()) {
-            case BEGIN:
-                event.setTimeout(30000);
-                if ((queue = getQueue(session)) != null) {
-                    //              synchronized (queue) {
-                    if ("POST".equals(request.getMethod())) {
-                        // do not pause incoming messages.
-                        break;
-                    } else if (queue.messagesWaiting()) {
-                        transmitMessages(event.getHttpServletResponse(), queue);
-                        event.close();
-                        break;
-                    }
+        synchronized (session) {
+            MessageQueue queue;
+            switch (event.getEventType()) {
+                case BEGIN:
+                    event.setTimeout(30000);
+                    if ((queue = getQueue(session)) != null) {
+                        //              synchronized (queue) {
+                        if ("POST".equals(request.getMethod())) {
+                            // do not pause incoming messages.
+                            break;
+                        } else if (queue.messagesWaiting()) {
+                            transmitMessages(event.getHttpServletResponse(), queue);
+                            event.close();
+                            break;
+                        }
 
-                    if (!queueToSession.containsKey(queue)) {
-                        queueToSession.put(queue, session);
-                    }
+                        if (!queueToSession.containsKey(queue)) {
+                            queueToSession.put(queue, session);
+                        }
 
-                    Set<CometEvent> events = activeEvents.get(session);
-                    if (events == null) {
-                        activeEvents.put(session, events = new HashSet<CometEvent>());
-                    }
+                        Set<CometEvent> events = activeEvents.get(session);
+                        if (events == null) {
+                            activeEvents.put(session, events = new HashSet<CometEvent>());
+                        }
 
-                    if (events.contains(event)) {
-                        event.close();
+                        if (events.contains(event)) {
+                            event.close();
+                        } else {
+                            events.add(event);
+                        }
+                        //           }
+                    }
+                    break;
+
+                case END:
+                    if ((queue = getQueue(session)) != null) {
+                        queue.heartBeat();
                     } else {
-                        events.add(event);
+                        return;
                     }
+
+                    //            synchronized (queue) {
+                    Set<CometEvent> evt = activeEvents.get(session);
+                    if (evt != null && !evt.remove(event)) {
+                        return;
+                    }
+
+                    event.close();
                     //           }
-                }
-                break;
+                    break;
 
-            case END:
-                if ((queue = getQueue(session)) != null) {
-                    queue.heartBeat();
-                } else {
-                    return;
-                }
-
-                //            synchronized (queue) {
-                Set<CometEvent> evt = activeEvents.get(session);
-                if (evt != null && !evt.remove(event)) {
-                    return;
-                }
-
-                event.close();
-                //           }
-                break;
-
-            case ERROR:
-                queue = getQueue(session);
-                if (queue == null) {
-                    return;
-                }
-
-                //            synchronized (queue) {
-                evt = activeEvents.get(session);
-                if (evt != null && !evt.remove(event)) {
-                    return;
-                }
-                //          }
-
-                if (event.getEventSubType() == CometEvent.EventSubType.TIMEOUT) {
-                    if (queue != null) queue.heartBeat();
-                } else {
-                    if (queue != null) {
-                        queueToSession.remove(queue);
-                        service.getBus().closeQueue(session.getSessionId());
-                        activeEvents.remove(session);
+                case ERROR:
+                    queue = getQueue(session);
+                    if (queue == null) {
+                        return;
                     }
 
-                    log.error("An Error Occured" + event.getEventSubType());
-                }
+                    //            synchronized (queue) {
+                    evt = activeEvents.get(session);
+                    if (evt != null && !evt.remove(event)) {
+                        return;
+                    }
+                    //          }
 
-                event.close();
-                break;
+                    if (event.getEventSubType() == CometEvent.EventSubType.TIMEOUT) {
+                        if (queue != null) queue.heartBeat();
+                    } else {
+                        if (queue != null) {
+                            queueToSession.remove(queue);
+                            service.getBus().closeQueue(session.getSessionId());
+                            activeEvents.remove(session);
+                        }
 
-            case READ:
-                readInRequest(request);
-                event.close();
+                        log.error("An Error Occured" + event.getEventSubType());
+                    }
+
+                    event.close();
+                    break;
+
+                case READ:
+                    readInRequest(request);
+                    event.close();
+            }
         }
     }
 
@@ -208,7 +210,7 @@ public class TomcatCometServlet extends AbstractErraiServlet implements CometPro
                 boolean resumed = false;
 
                 public void activate(MessageQueue queue) {
-              //      log.info("Resume...");
+                    //      log.info("Resume...");
                     //             synchronized (queue) {
                     if (resumed) {
                         return;
@@ -250,7 +252,7 @@ public class TomcatCometServlet extends AbstractErraiServlet implements CometPro
 
 
     public void transmitMessages(final HttpServletResponse httpServletResponse, MessageQueue queue) throws IOException {
-      //  log.info("Transmitting messages to client (Queue:" + queue.hashCode() + ")");
+        //  log.info("Transmitting messages to client (Queue:" + queue.hashCode() + ")");
         List<MarshalledMessage> messages = queue.poll(false).getMessages();
         httpServletResponse.setHeader("Cache-Control", "no-cache");
         httpServletResponse.addHeader("Payload-Size", String.valueOf(messages.size()));
