@@ -42,6 +42,7 @@ import static org.jboss.errai.bus.client.protocols.MessageParts.*;
  * with the server immediately upon initialization.
  */
 public class ClientMessageBusImpl implements ClientMessageBus {
+    private static final int HEARTBEAT_DELAY = 20000;
 
     /* The encoded URL to be used for the bus */
     private static final String SERVICE_ENTRY_POINT = "in.erraiBus";
@@ -652,19 +653,19 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         heartBeatTimer = new Timer() {
             @Override
             public void run() {
-                if (System.currentTimeMillis() - lastTransmit >= 25000) {
+                if (System.currentTimeMillis() - lastTransmit >= HEARTBEAT_DELAY) {
                     enqueueForRemoteTransmit(MessageBuilder.createMessage().toSubject("ServerBus")
                             .command(BusCommands.Heartbeat).noErrorHandling().getMessage());
-                    schedule(25000);
+                    schedule(HEARTBEAT_DELAY);
                 } else {
                     long win = System.currentTimeMillis() - lastTransmit;
-                    int diff = 25000 - (int) win;
+                    int diff = HEARTBEAT_DELAY - (int) win;
                     schedule(diff);
                 }
             }
         };
 
-        heartBeatTimer.schedule(25000);
+        heartBeatTimer.schedule(HEARTBEAT_DELAY);
     }
 
     /**
