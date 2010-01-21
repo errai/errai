@@ -150,6 +150,12 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 MessageQueue queue;
 
                 switch (BusCommands.valueOf(message.getCommandType())) {
+                    case Heartbeat:
+                        if (messageQueues.containsKey(sessionId)) {
+                            messageQueues.get(sessionId).heartBeat();
+                        }
+                        break;
+
                     case RemoteSubscribe:
                         remoteSubscribe(sessionId, messageQueues.get(sessionId),
                                 message.get(String.class, MessageParts.Subject));

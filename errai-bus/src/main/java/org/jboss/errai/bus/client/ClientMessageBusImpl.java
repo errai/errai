@@ -22,6 +22,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.bus.client.ext.ExtensionsLoader;
 import org.jboss.errai.bus.client.json.JSONUtilCli;
@@ -70,7 +71,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     private Map<String, Set<Object>> registeredInThisSession = new HashMap<String, Set<Object>>();
 
     /* A list of {@link Runnable} initialization tasks to be executed after the bus has successfully finished it's
-     * initialization and is now communicating with the remote bus. */ 
+     * initialization and is now communicating with the remote bus. */
     private ArrayList<Runnable> postInitTasks = new ArrayList<Runnable>();
 
     /* The timer constantly ensures the client's polling with the server is active */
@@ -78,6 +79,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     /* True if the client's message bus has been initialized */
     private boolean initialized = false;
+
+    private Timer heartBeatTimer;
+    private long lastTransmit = 0;
+
 
     /**
      * Constructor creates sendBuilder for HTTP POST requests, recvBuilder for HTTP GET requests and
@@ -115,7 +120,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     /**
      * Add a subscription for the specified subject
      *
-     * @param subject - the subject to add a subscription for
+     * @param subject  - the subject to add a subscription for
      * @param callback - function called when the message is dispatched
      */
     public void subscribe(final String subject, final MessageCallback callback) {
@@ -204,14 +209,14 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
 
     /**
-     *  Sends the specified message, and notifies the listeners.
+     * Sends the specified message, and notifies the listeners.
      *
-     * @param message - the message to be sent
+     * @param message       - the message to be sent
      * @param fireListeners - true if the appropriate listeners should be fired
      */
     public void send(Message message, boolean fireListeners) {
         // TODO: fire listeners?
-        
+
         send(message);
     }
 
@@ -221,7 +226,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      *
      * @param message
      * @throws RuntimeException - if message does not contain a ToSubject field or if the message's callback throws
-     * an error.
+     *                          an error.
      */
     public void send(final Message message) {
         try {
@@ -293,7 +298,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      * <p/>
      * The Map returned has the subject of the registrations as the key, and Sets of registration objects as the
      * value of the Map.
-     * 
+     *
      * @return A map of registrations captured in the current capture context.
      */
     public Map<String, Set<Object>> getCapturedRegistrations() {
@@ -318,7 +323,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     /**
      * Unregister all registrations in the specified Map.<p/>  It accepts a Map format returned from
      * {@link #getCapturedRegistrations()}.
-     * 
+     *
      * @param all A map of registrations to deregister.
      */
     public void unregisterAll(Map<String, Set<Object>> all) {
@@ -426,6 +431,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             transmitting = false;
             e.printStackTrace();
         }
+
+        lastTransmit = System.currentTimeMillis();
     }
 
     /**
@@ -641,6 +648,23 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         };
 
         outerTimer.schedule(10);
+
+        heartBeatTimer = new Timer() {
+            @Override
+            public void run() {
+                if (System.currentTimeMillis() - lastTransmit >= 25000) {
+                    enqueueForRemoteTransmit(MessageBuilder.createMessage().toSubject("ServerBus")
+                            .command(BusCommands.Heartbeat).noErrorHandling().getMessage());
+                    schedule(25000);
+                } else {
+                    long win = System.currentTimeMillis() - lastTransmit;
+                    int diff = 25000 - (int) win;
+                    schedule(diff);
+                }
+            }
+        };
+
+        heartBeatTimer.schedule(25000);
     }
 
     /**
@@ -691,13 +715,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                   },
                   null);
      }-*/;
-
-
-//    public static void _store(String subject, Object value) {
-//        System.out.println("<<" + value + ">>");
-//
-//        __store(subject, value);
-//    }
 
     public native static void _store(String subject, Object value) /*-{
           $wnd.PageBus.store(subject, value);

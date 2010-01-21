@@ -231,9 +231,10 @@ public class TomcatCometServlet extends AbstractErraiServlet implements CometPro
                         CometEvent et = activeSessEvents.iterator().next();
 
                         if (et == null)  {
-                            resumed = false;
-                            queue.setActivationCallback(this);
-                            queue.scheduleActivation();
+//                            System.out.println("Scheduling activation");
+//                            resumed = false;
+//                            queue.setActivationCallback(this);
+//                            queue.scheduleActivation();
                             return;
                         }
 
@@ -272,7 +273,7 @@ public class TomcatCometServlet extends AbstractErraiServlet implements CometPro
         stream.flush();
 
 //        log.info("Finished writing to stream");
-        //   queue.heartBeat();
+         queue.heartBeat();
     }
 
     public void writeToOutputStream(OutputStream stream, MarshalledMessage m) throws IOException {

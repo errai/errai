@@ -84,5 +84,7 @@ public enum BusCommands {
      */
     RemoteUnsubscribe,
 
+    Heartbeat,
+
     Disconnect
 }
