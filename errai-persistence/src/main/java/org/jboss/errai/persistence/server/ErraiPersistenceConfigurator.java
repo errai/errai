@@ -52,6 +52,10 @@ public class ErraiPersistenceConfigurator implements ErraiConfigExtension {
 
     public void configure(Map<Class, Provider> bindings, Map<String, Provider> resourceProviders) {
         final AnnotationConfiguration cfg = new AnnotationConfiguration();
+        if (!config.hasProperty("errai.prototyping.persistence.connection.driver_class")) {
+            return;
+        }
+
         cfg.setProperty("hibernate.connection.driver_class", config.getProperty("errai.prototyping.persistence.connection.driver_class"));
         cfg.setProperty("hibernate.connection.url", config.getProperty("errai.prototyping.persistence.connection.url"));
         cfg.setProperty("hibernate.connection.username", config.getProperty("errai.prototyping.persistence.connection.username"));

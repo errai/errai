@@ -125,6 +125,14 @@
             <version>2.1.6.GA</version>
         </dependency>
 
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.3.1</version>
+            <scope>provided</scope>
+        </dependency>
+
+
     </dependencies>
 
 </project>

@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.util.*;
 
 import static com.google.inject.Guice.createInjector;
@@ -63,6 +64,8 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
 
     private ErraiServiceConfigurator configInst = this;
 
+    private boolean autoScanModules = true;
+
     private Logger log = LoggerFactory.getLogger(ErraiServiceConfigurator.class);
 
     @Inject
@@ -75,7 +78,8 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
         configRootTargets = ConfigUtil.findAllConfigTargets();
 
         try {
-            ResourceBundle erraiServiceConfig = getBundle("ErraiService");
+            String bundlePath = System.getProperty("errai.service_config_prefix_path");
+            ResourceBundle erraiServiceConfig = getBundle(bundlePath == null ? "ErraiService" : bundlePath + ".ErraiService");
             Enumeration<String> keys = erraiServiceConfig.getKeys();
             String key;
             while (keys.hasMoreElements()) {
@@ -137,6 +141,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
             }
         }
 
+
         this.dispatcher = createInjector(new AbstractModule() {
             @Override
             protected void configure() {
@@ -163,151 +168,161 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
 
         log.info("beging searching for Errai extensions ...");
 
-        // Search for Errai extensions.
-        visitAllTargets(configRootTargets, new ConfigVisitor() {
-            public void visit(Class<?> loadClass) {
-                if (ErraiConfigExtension.class.isAssignableFrom(loadClass)
-                        && loadClass.isAnnotationPresent(ExtensionComponent.class)) {
+        if (properties.containsKey("errai.auto_scan_modules")) {
+            autoScanModules = Boolean.parseBoolean(properties.get("errai.auto_scan_modules"));
+        }
+        if (autoScanModules) {
 
-                    // We have an annotated ErraiConfigExtension.  So let's configure it.
-                    final Class<? extends ErraiConfigExtension> clazz =
-                            loadClass.asSubclass(ErraiConfigExtension.class);
+            // Search for Errai extensions.
+            visitAllTargets(configRootTargets, new ConfigVisitor() {
+                public void visit(Class<?> loadClass) {
+                    if (ErraiConfigExtension.class.isAssignableFrom(loadClass)
+                            && loadClass.isAnnotationPresent(ExtensionComponent.class)) {
 
-                    log.info("found extension " + clazz.getName());
+                        // We have an annotated ErraiConfigExtension.  So let's configure it.
+                        final Class<? extends ErraiConfigExtension> clazz =
+                                loadClass.asSubclass(ErraiConfigExtension.class);
 
-                    try {
-
-                        final Runnable create = new Runnable() {
-                            public void run() {
-                                AbstractModule module = new AbstractModule() {
-                                    @Override
-                                    protected void configure() {
-                                        bind(ErraiConfigExtension.class).to(clazz);
-                                        bind(ErraiServiceConfigurator.class).toInstance(configInst);
-                                        bind(MessageBus.class).toInstance(bus);
-
-                                        // Add any extension bindings.
-                                        for (Map.Entry<Class, Provider> entry : extensionBindings.entrySet()) {
-                                            bind(entry.getKey()).toProvider(entry.getValue());
-                                        }
-                                    }
-                                };
-                                Guice.createInjector(module)
-                                        .getInstance(ErraiConfigExtension.class)
-                                        .configure(extensionBindings, resourceProviders);
-                            }
-                        };
+                        log.info("found extension " + clazz.getName());
 
                         try {
-                            create.run();
-                        }
-                        catch (CreationException e) {
-                            log.info("extension " + clazz.getName() + " cannot be bound yet, deferring ...");
-                            deferred.add(create);
-                        }
 
-                    }
-                    catch (Throwable e) {
-                        throw new ErraiBootstrapFailure("could not initialize extension: " + loadClass.getName(), e);
-                    }
-                }
-            }
-        });
+                            final Runnable create = new Runnable() {
+                                public void run() {
+                                    AbstractModule module = new AbstractModule() {
+                                        @Override
+                                        protected void configure() {
+                                            bind(ErraiConfigExtension.class).to(clazz);
+                                            bind(ErraiServiceConfigurator.class).toInstance(configInst);
+                                            bind(MessageBus.class).toInstance(bus);
 
-        visitAllTargets(configRootTargets,
-                new ConfigVisitor() {
-                    public void visit(final Class<?> loadClass) {
-
-
-                        if (Module.class.isAssignableFrom(loadClass)) {
-                            final Class<? extends Module> clazz = loadClass.asSubclass(Module.class);
-
-                            if (clazz.isAnnotationPresent(LoadModule.class)) {
-                                log.info("discovered module : " + clazz.getName() + " -- don't use Modules! Use @Service and MessageCallback!");
-                                Guice.createInjector(new AbstractModule() {
-                                    @Override
-                                    protected void configure() {
-                                        bind(Module.class).to(clazz);
-                                        bind(MessageBus.class).toInstance(bus);
-                                    }
-                                }).getInstance(Module.class).init();
-                            }
-
-                        } else if (loadClass.isAnnotationPresent(Service.class)) {
-                            Object svc = null;
-                            if (MessageCallback.class.isAssignableFrom(loadClass)) {
-                                final Class<? extends MessageCallback> clazz = loadClass.asSubclass(MessageCallback.class);
-                                log.info("discovered service: " + clazz.getName());
-                                svc = Guice.createInjector(new AbstractModule() {
-                                    @Override
-                                    protected void configure() {
-                                        bind(MessageCallback.class).to(clazz);
-                                        bind(MessageBus.class).toInstance(bus);
-                                        bind(RequestDispatcher.class).toInstance(dispatcher);
-
-                                        // Add any extension bindings.
-                                        for (Map.Entry<Class, Provider> entry : extensionBindings.entrySet()) {
-                                            bind(entry.getKey()).toProvider(entry.getValue());
+                                            // Add any extension bindings.
+                                            for (Map.Entry<Class, Provider> entry : extensionBindings.entrySet()) {
+                                                bind(entry.getKey()).toProvider(entry.getValue());
+                                            }
                                         }
-                                    }
-                                }).getInstance(MessageCallback.class);
-
-                                String svcName = clazz.getAnnotation(Service.class).value();
-
-                                // If no name is specified, just use the class name as the service
-                                // by default.
-                                if ("".equals(svcName)) {
-                                    svcName = clazz.getSimpleName();
+                                    };
+                                    Guice.createInjector(module)
+                                            .getInstance(ErraiConfigExtension.class)
+                                            .configure(extensionBindings, resourceProviders);
                                 }
+                            };
 
-                                // Subscribe the service to the bus.
-                                bus.subscribe(svcName, (MessageCallback) svc);
-
-                                RolesRequiredRule rule = null;
-                                if (clazz.isAnnotationPresent(RequireRoles.class)) {
-                                    rule = new RolesRequiredRule(clazz.getAnnotation(RequireRoles.class).value(), bus);
-                                } else if (clazz.isAnnotationPresent(RequireAuthentication.class)) {
-                                    rule = new RolesRequiredRule(new HashSet<Object>(), bus);
-                                }
-                                if (rule != null) {
-                                    bus.addRule(svcName, rule);
-                                }
+                            try {
+                                create.run();
+                            }
+                            catch (CreationException e) {
+                                log.info("extension " + clazz.getName() + " cannot be bound yet, deferring ...");
+                                deferred.add(create);
                             }
 
-                            if (svc == null) {
-                                svc = Guice.createInjector(new AbstractModule() {
-                                    @Override
-                                    protected void configure() {
-                                        bind(MessageBus.class).toInstance(bus);
-                                        bind(RequestDispatcher.class).toInstance(dispatcher);
-
-                                        // Add any extension bindings.
-                                        for (Map.Entry<Class, Provider> entry : extensionBindings.entrySet()) {
-                                            bind(entry.getKey()).toProvider(entry.getValue());
-                                        }
-                                    }
-                                }).getInstance(loadClass);
-                            }
-
-                            Map<String, MessageCallback> epts = new HashMap<String, MessageCallback>();
-
-                            // we scan for endpoints
-                            for (final Method method : loadClass.getDeclaredMethods()) {
-                                if (method.isAnnotationPresent(Endpoint.class)) {
-                                    epts.put(method.getName(), method.getReturnType() == Void.class ?
-                                            new EndpointCallback(svc, method) :
-                                            new ConversationalEndpointCallback(svc, method, bus));
-
-                                    bus.subscribe(loadClass.getSimpleName(), new RemoteServiceCallback(epts));
-                                }
-                            }
-                        } else if (loadClass.isAnnotationPresent(ExposeEntity.class)) {
-                            log.info("Marked " + loadClass + " as serializable.");
-                            serializableTypes.add(loadClass);
+                        }
+                        catch (Throwable e) {
+                            throw new ErraiBootstrapFailure("could not initialize extension: " + loadClass.getName(), e);
                         }
                     }
                 }
-        );
+            });
+
+
+            visitAllTargets(configRootTargets,
+                    new ConfigVisitor() {
+                        public void visit(final Class<?> loadClass) {
+
+
+                            if (Module.class.isAssignableFrom(loadClass)) {
+                                final Class<? extends Module> clazz = loadClass.asSubclass(Module.class);
+
+                                if (clazz.isAnnotationPresent(LoadModule.class)) {
+                                    log.info("discovered module : " + clazz.getName() + " -- don't use Modules! Use @Service and MessageCallback!");
+                                    Guice.createInjector(new AbstractModule() {
+                                        @Override
+                                        protected void configure() {
+                                            bind(Module.class).to(clazz);
+                                            bind(MessageBus.class).toInstance(bus);
+                                        }
+                                    }).getInstance(Module.class).init();
+                                }
+
+                            } else if (loadClass.isAnnotationPresent(Service.class)) {
+                                Object svc = null;
+                                if (MessageCallback.class.isAssignableFrom(loadClass)) {
+                                    final Class<? extends MessageCallback> clazz = loadClass.asSubclass(MessageCallback.class);
+                                    log.info("discovered service: " + clazz.getName());
+                                    svc = Guice.createInjector(new AbstractModule() {
+                                        @Override
+                                        protected void configure() {
+                                            bind(MessageCallback.class).to(clazz);
+                                            bind(MessageBus.class).toInstance(bus);
+                                            bind(RequestDispatcher.class).toInstance(dispatcher);
+
+                                            // Add any extension bindings.
+                                            for (Map.Entry<Class, Provider> entry : extensionBindings.entrySet()) {
+                                                bind(entry.getKey()).toProvider(entry.getValue());
+                                            }
+                                        }
+                                    }).getInstance(MessageCallback.class);
+
+                                    String svcName = clazz.getAnnotation(Service.class).value();
+
+                                    // If no name is specified, just use the class name as the service
+                                    // by default.
+                                    if ("".equals(svcName)) {
+                                        svcName = clazz.getSimpleName();
+                                    }
+
+                                    // Subscribe the service to the bus.
+                                    bus.subscribe(svcName, (MessageCallback) svc);
+
+                                    RolesRequiredRule rule = null;
+                                    if (clazz.isAnnotationPresent(RequireRoles.class)) {
+                                        rule = new RolesRequiredRule(clazz.getAnnotation(RequireRoles.class).value(), bus);
+                                    } else if (clazz.isAnnotationPresent(RequireAuthentication.class)) {
+                                        rule = new RolesRequiredRule(new HashSet<Object>(), bus);
+                                    }
+                                    if (rule != null) {
+                                        bus.addRule(svcName, rule);
+                                    }
+                                }
+
+                                if (svc == null) {
+                                    svc = Guice.createInjector(new AbstractModule() {
+                                        @Override
+                                        protected void configure() {
+                                            bind(MessageBus.class).toInstance(bus);
+                                            bind(RequestDispatcher.class).toInstance(dispatcher);
+
+                                            // Add any extension bindings.
+                                            for (Map.Entry<Class, Provider> entry : extensionBindings.entrySet()) {
+                                                bind(entry.getKey()).toProvider(entry.getValue());
+                                            }
+                                        }
+                                    }).getInstance(loadClass);
+                                }
+
+                                Map<String, MessageCallback> epts = new HashMap<String, MessageCallback>();
+
+                                // we scan for endpoints
+                                for (final Method method : loadClass.getDeclaredMethods()) {
+                                    if (method.isAnnotationPresent(Endpoint.class)) {
+                                        epts.put(method.getName(), method.getReturnType() == Void.class ?
+                                                new EndpointCallback(svc, method) :
+                                                new ConversationalEndpointCallback(svc, method, bus));
+
+                                        bus.subscribe(loadClass.getSimpleName(), new RemoteServiceCallback(epts));
+                                    }
+                                }
+                            } else if (loadClass.isAnnotationPresent(ExposeEntity.class)) {
+                                log.info("Marked " + loadClass + " as serializable.");
+                                serializableTypes.add(loadClass);
+                            }
+                        }
+                    }
+            );
+        }
+        else {
+            log.info("auto-scan disabled.");
+        }
 
         String requireAuthenticationForAll = "errai.require_authentication_for_all";
 

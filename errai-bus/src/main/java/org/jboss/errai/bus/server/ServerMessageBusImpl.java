@@ -61,8 +61,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     @Inject
     public ServerMessageBusImpl(ErraiServiceConfigurator config) {
-
-
         Thread thread = new Thread() {
             @Override
             public void run() {
