@@ -54,6 +54,11 @@ public class Payload {
         return messages;
     }
 
+    /**
+     * Returns true if there are any messages waiting to be transmitted
+     *
+     * @return true if there are messages waiting
+     */
     public boolean waitingMessages() {
         return messages.size() > 1 ||! messages.get(0).getSubject().equals("HeartBeat");
     }
