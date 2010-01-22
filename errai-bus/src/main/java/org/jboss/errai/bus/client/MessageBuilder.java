@@ -17,7 +17,9 @@ public class MessageBuilder {
 
     /**
      * Create a new message.
-     * @return
+     *
+     * @return a <tt>MessageBuildSubject</tt> which essentially is a <tt>Message</tt>, but ensures that the user
+     * constructs messages properly
      */
     public static MessageBuildSubject createMessage() {
         return new AbstractMessageBuilder(provider.get()).start();
@@ -25,17 +27,29 @@ public class MessageBuilder {
 
     /**
      * Create a conversational messages
-     * @param message
-     * @return
+     *
+     * @param message - reference message to create conversation from
+     * @return a <tt>MessageBuildSubject</tt> which essentially is a <tt>Message</tt>, but ensures that the user
+     * constructs messages properly
      */
     public static MessageBuildSubject createConversation(Message message) {
         return new AbstractMessageBuilder(ConversationMessage.create(message)).start();
     }
 
+    /**
+     * Creates an <tt>AbstractRemoteCallBuilder</tt> to construct a call
+     *
+     * @return an instance of <tt>AbstractRemoteCallBuilder</tt>
+     */
     public static AbstractRemoteCallBuilder createCall() {
         return new AbstractRemoteCallBuilder(CommandMessage.create());
     }
 
+    /**
+     * Sets the message provide for this instance of <tt>MessageBuilder</tt>
+     *
+     * @param provider - to set this' provider to
+     */
     public static void setProvider(MessageProvider provider) {
         MessageBuilder.provider = provider;
     }
