@@ -23,6 +23,7 @@ import org.jboss.errai.bus.server.io.JSONEncoder;
 import org.jboss.errai.bus.server.io.MessageFactory;
 
 import java.util.Map;
+import java.util.Set;
 
 public class ServerBusUtils {
     public static void main(String[] args) {

@@ -25,15 +25,13 @@ import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.Module;
 import org.jboss.errai.bus.server.ServerMessageBus;
 import org.jboss.errai.bus.server.SimpleDispatcher;
-import org.jboss.errai.bus.server.annotations.Endpoint;
-import org.jboss.errai.bus.server.annotations.ExtensionComponent;
-import org.jboss.errai.bus.server.annotations.LoadModule;
-import org.jboss.errai.bus.server.annotations.Service;
+import org.jboss.errai.bus.server.annotations.*;
 import org.jboss.errai.bus.server.annotations.security.RequireAuthentication;
 import org.jboss.errai.bus.server.annotations.security.RequireRoles;
 import org.jboss.errai.bus.server.ext.ErraiConfigExtension;
 import org.jboss.errai.bus.server.io.ConversationalEndpointCallback;
 import org.jboss.errai.bus.server.io.EndpointCallback;
+import org.jboss.errai.bus.server.io.JSONEncoder;
 import org.jboss.errai.bus.server.io.RemoteServiceCallback;
 import org.jboss.errai.bus.server.security.auth.AuthenticationAdapter;
 import org.jboss.errai.bus.server.security.auth.rules.RolesRequiredRule;
@@ -59,8 +57,9 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
 
     private Map<Class, Provider> extensionBindings;
     private Map<String, Provider> resourceProviders;
+    private Set<Class> serializableTypes;
 
-    private RequestDispatcher dispatcher;                                                                                                                 
+    private RequestDispatcher dispatcher;
 
     private ErraiServiceConfigurator configInst = this;
 
@@ -93,6 +92,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
         // services.
         extensionBindings = new HashMap<Class, Provider>();
         resourceProviders = new HashMap<String, Provider>();
+        serializableTypes = new HashSet<Class>();
         final List<Runnable> deferred = new LinkedList<Runnable>();
 
         if (properties.containsKey("errai.authentication_adapter")) {
@@ -217,6 +217,8 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
         visitAllTargets(configRootTargets,
                 new ConfigVisitor() {
                     public void visit(final Class<?> loadClass) {
+
+
                         if (Module.class.isAssignableFrom(loadClass)) {
                             final Class<? extends Module> clazz = loadClass.asSubclass(Module.class);
 
@@ -299,6 +301,9 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                                     bus.subscribe(loadClass.getSimpleName(), new RemoteServiceCallback(epts));
                                 }
                             }
+                        } else if (loadClass.isAnnotationPresent(ExposeEntity.class)) {
+                            log.info("Marked " + loadClass + " as serializable.");
+                            serializableTypes.add(loadClass);
                         }
                     }
                 }
@@ -317,6 +322,9 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
         for (Runnable r : deferred) {
             r.run();
         }
+
+        // configure the JSONEncoder...
+        JSONEncoder.setSerializableTypes(serializableTypes);
 
         log.info("Errai bootstraping complete!");
     }
@@ -343,6 +351,11 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
 
     public <T> T getResource(Class<? extends T> resourceClass) {
         return (T) extensionBindings.get(resourceClass).get();
+    }
+
+    @Override
+    public Set<Class> getAllSerializableTypes() {
+        return serializableTypes;
     }
 
     public RequestDispatcher getConfiguredDispatcher() {

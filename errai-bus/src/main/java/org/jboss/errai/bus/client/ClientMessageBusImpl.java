@@ -732,50 +732,69 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         return decode.append("</tbody></table>").toString();
     }
 
-    private static void showError(String message, String additionalDetails, Throwable e) {
-        final DialogBox errorDialog = new DialogBox();
-        errorDialog.setText("Message Bus Error");
+    class BusErrorDialog extends DialogBox {
+        ScrollPanel scrollPanel;
+        VerticalPanel contentPanel = new VerticalPanel();
 
-        StringBuffer buildTrace = new StringBuffer("<tt>");
+        public BusErrorDialog() {
+            setText("Message Bus Error");
 
-        if (e != null) {
-            buildTrace.append(e.getClass().getName()).append(": ").append(e.getMessage()).append("<br/>");
-            for (StackTraceElement ste : e.getStackTrace()) {
-                buildTrace.append(ste.toString()).append("<br/>");
-            }
+            VerticalPanel panel = new VerticalPanel();
+            Button closeButton = new Button("Dismiss");
+            closeButton.addClickHandler(new ClickHandler() {
+                public void onClick(ClickEvent event) {
+                    errorDialog.hide();
+                }
+            });
+
+            panel.add(closeButton);
+            panel.setCellHorizontalAlignment(closeButton, HasHorizontalAlignment.ALIGN_RIGHT);
+
+            Style s = panel.getElement().getStyle();
+
+            s.setProperty("border", "1px");
+            s.setProperty("borderStyle", "solid");
+            s.setProperty("borderColor", "black");
+            s.setProperty("backgroundColor", "lightgrey");
+
+
+            scrollPanel = new ScrollPanel();
+            scrollPanel.setHeight("500px");
+            scrollPanel.setAlwaysShowScrollBars(true);
+            panel.add(scrollPanel);
+            scrollPanel.add(contentPanel);
+
+            add(panel);
         }
 
-        VerticalPanel panel = new VerticalPanel();
-        Button closeButton = new Button("Dismiss");
-        closeButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                errorDialog.hide();
+        public void addError(String message, String additionalDetails, Throwable e) {
+            contentPanel.add(new HTML("<strong style='background:red;color:white;'>" + message + "</strong>"));
+
+            StringBuffer buildTrace = new StringBuffer("<tt style=\"font-size:11px;\"><pre>");
+            if (e != null) {
+                buildTrace.append(e.getClass().getName()).append(": ").append(e.getMessage()).append("<br/>");
+                for (StackTraceElement ste : e.getStackTrace()) {
+                    buildTrace.append("  ").append(ste.toString()).append("<br/>");
+                }
             }
-        });
+            buildTrace.append("</pre>");
 
-        panel.add(closeButton);
-        panel.setCellHorizontalAlignment(closeButton, HasHorizontalAlignment.ALIGN_RIGHT);
+            contentPanel.add(new HTML(buildTrace.toString() + "<br/><strong>Additional Details:</strong>" + additionalDetails + "</tt>"));
 
-        Style s = panel.getElement().getStyle();
+            if (!isShowing()) {
+                show();
+                center();
+            }
+        }
+    }
 
-        s.setProperty("border", "1px");
-        s.setProperty("borderStyle", "solid");
-        s.setProperty("borderColor", "black");
-        s.setProperty("backgroundColor", "lightgrey");
+    BusErrorDialog errorDialog;
 
-        panel.add(new HTML("<strong style='background:red;color:white;'>" + message + "</strong>"));
-
-        ScrollPanel scrollPanel = new ScrollPanel();
-        scrollPanel.add(new HTML(buildTrace.toString() + "<br/><strong>Additional Details:</strong>" + additionalDetails + "</tt>"));
-        scrollPanel.setAlwaysShowScrollBars(true);
-        scrollPanel.setHeight("500px");
-
-        panel.add(scrollPanel);
-
-        errorDialog.add(panel);
-
-        errorDialog.center();
-        errorDialog.show();
+    private void showError(String message, String additionalDetails, Throwable e) {
+        if (errorDialog == null) {
+            errorDialog = new BusErrorDialog();
+        }
+        errorDialog.addError(message, additionalDetails, e);
     }
 
     /**
@@ -784,7 +803,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      * @param response
      * @throws Exception
      */
-    private static void procIncomingPayload(Response response) throws Exception {
+    private void procIncomingPayload(Response response) throws Exception {
         try {
             for (MarshalledMessage m : decodePayload(response.getText())) {
                 _store(m.getSubject(), m.getMessage());
@@ -793,5 +812,20 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         catch (RuntimeException e) {
             showError("Error delivering message into bus", response.getText(), e);
         }
+    }
+
+    private final MessageProvider provider = new MessageProvider() {
+        {
+            MessageBuilder.setProvider(this);
+        }
+        @Override
+        public Message get() {
+            return new JSONMessage();
+        }
+    };
+    
+    @Override
+    public MessageProvider getMessageProvider() {
+        return provider;
     }
 }

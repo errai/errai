@@ -25,19 +25,13 @@ import org.mvel2.MVEL;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 public class JSONEncoder {
-    static {
-        MessageBuilder.setProvider(new MessageProvider() {
-            @Override
-            public Message get() {
-                return JSONMessageServer.create();
-            }
-        });
+    private static Set<Class> serializableTypes;
+
+    public static void setSerializableTypes(Set<Class> serializableTypes) {
+        JSONEncoder.serializableTypes = serializableTypes;
     }
 
     public static String encode(Object v) {
@@ -59,8 +53,8 @@ public class JSONEncoder {
             return encodeMap((Map) v);
         } else if (v instanceof Object[]) {
             return encodeArray((Object[]) v);
-        } else if (v instanceof Serializable) {
-            return encodeObject((Serializable) v);
+        } else if (serializableTypes.contains(v.getClass())) {
+            return encodeObject(v);
         } else {
             return null;
         }
@@ -68,7 +62,7 @@ public class JSONEncoder {
 
     private static final Map<Class, Serializable[]> MVELEncodingCache = new HashMap<Class, Serializable[]>();
 
-    private static String encodeObject(Serializable o) {
+    private static String encodeObject(Object o) {
         if (o == null) return "null";
 
         Class cls = o.getClass();

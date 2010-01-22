@@ -21,6 +21,8 @@ import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.client.Payload;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 
+import java.util.Set;
+
 public interface ServerMessageBus extends MessageBus {
     public Payload nextMessage(Object sessionContext, boolean wait);
 

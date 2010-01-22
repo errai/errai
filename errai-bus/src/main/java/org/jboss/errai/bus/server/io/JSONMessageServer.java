@@ -3,7 +3,7 @@ package org.jboss.errai.bus.server.io;
 import org.jboss.errai.bus.client.JSONMessage;
 
 public class JSONMessageServer extends JSONMessage {
-    static JSONMessage create() {
+    public static JSONMessage create() {
         return new JSONMessageServer();
     }
 

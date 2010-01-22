@@ -22,6 +22,7 @@ import org.jboss.errai.bus.client.RequestDispatcher;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface ErraiServiceConfigurator {
     public static final String ERRAI_DISPATCHER_IMPLEMENTATION = "errai.dispatcher_implementation";
@@ -31,6 +32,7 @@ public interface ErraiServiceConfigurator {
     public List<File> getConfigurationRoots();
     public Map<String, Provider> getResourceProviders();
     public <T> T getResource(Class<? extends T> resourceClass);
+    public Set<Class> getAllSerializableTypes();
 
     public boolean hasProperty(String key);
     public String getProperty(String key);

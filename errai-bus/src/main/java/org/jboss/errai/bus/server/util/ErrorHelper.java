@@ -25,7 +25,7 @@ public class ErrorHelper {
         while ((e = e.getCause()) != null) {
             first = true;
             a.append("Caused by:<br/>");
-            for (StackTraceElement sel : e.getCause().getStackTrace()) {
+            for (StackTraceElement sel : e.getStackTrace()) {
                 a.append(first ? "" : "&nbsp;&nbsp;").append(sel.toString()).append("<br/>");
                 first = false;
             }

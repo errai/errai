@@ -21,6 +21,7 @@ import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
+import org.jboss.errai.bus.server.ServerMessageBus;
 import org.jboss.errai.bus.server.util.ServerBusUtils;
 import org.jboss.errai.bus.server.security.auth.AuthSubject;
 import org.jboss.errai.bus.server.service.ErraiService;
@@ -38,9 +39,9 @@ import static org.jboss.errai.bus.client.MessageBuilder.createMessage;
  */
 public class RolesRequiredRule implements BooleanRoutingRule {
     private Set<Object> requiredRoles;
-    private MessageBus bus;
+    private ServerMessageBus bus;
 
-    public RolesRequiredRule(String[] requiredRoles, MessageBus bus) {
+    public RolesRequiredRule(String[] requiredRoles, ServerMessageBus bus) {
         this.requiredRoles = new HashSet<Object>();
         for (String role : requiredRoles) {
             this.requiredRoles.add(role.trim());
@@ -48,7 +49,7 @@ public class RolesRequiredRule implements BooleanRoutingRule {
         this.bus = bus;
     }
 
-    public RolesRequiredRule(Set<Object> requiredRoles, MessageBus bus) {
+    public RolesRequiredRule(Set<Object> requiredRoles, ServerMessageBus bus) {
         this.requiredRoles = requiredRoles;
         this.bus = bus;
     }
