@@ -3,6 +3,7 @@ package org.jboss.errai.bus.server;
 import org.jboss.errai.bus.server.QueueSession;
 
 import javax.servlet.http.HttpSession;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,7 +18,7 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
         return sess;
     }
 
-    public static class HttpSessionWrapper implements QueueSession {
+    public static class HttpSessionWrapper implements QueueSession, Serializable {
         private Map<String, Object> attributes = new HashMap<String, Object>();
         private String sessionId;
         private boolean valid;
