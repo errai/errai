@@ -27,11 +27,22 @@ public class RuleDelegateMessageCallback implements MessageCallback {
     private MessageCallback delegate;
     private BooleanRoutingRule routingRule;
 
+    /**
+     * Creates the <tt>RuleDelegateMessageCallback</tt> instance using a given delegate and a routing rule
+     *
+     * @param delegate - Message callback function
+     * @param rule - indicates whether or not the message should be routed.
+     */
     public RuleDelegateMessageCallback(MessageCallback delegate, BooleanRoutingRule rule) {
         this.delegate = delegate;
         this.routingRule = rule;
     }
 
+    /**
+     * Callback calls the delegate if the routing rule allows it
+     *
+     * @param message - message to pass to the delegate callback, if called
+     */
     public void callback(Message message) {
         if (routingRule.decision(message)) {
             this.delegate.callback(message);

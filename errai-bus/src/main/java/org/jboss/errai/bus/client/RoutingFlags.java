@@ -1,5 +1,8 @@
 package org.jboss.errai.bus.client;
 
+/**
+ * Enumeration of flags that can be used when sending messages, to specify how they should be sent
+ */
 public enum RoutingFlags {
     NonGlobalRouting {
         @Override
@@ -12,6 +15,11 @@ public enum RoutingFlags {
             return 1 << 1;
         }}
     ;
-    
+
+    /**
+     * Returns the integer representing the flag
+     *
+     * @return integer representation of the flag
+     */
     public abstract int flag();
 }
