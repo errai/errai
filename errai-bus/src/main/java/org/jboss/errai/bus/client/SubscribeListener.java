@@ -20,5 +20,11 @@ package org.jboss.errai.bus.client;
  * A listener that is fired when a new subscription is registered on the bus.
  */
 public interface SubscribeListener {
+
+    /**
+     * Function is called when a new subscription is registered on the bus
+     *
+     * @param event - the subscription event that occurred
+     */
     public void onSubscribe(SubscriptionEvent event);
 }
