@@ -23,7 +23,15 @@ package org.jboss.errai.bus.client.api.builder;
 
 import org.jboss.errai.bus.client.Message;
 
-public interface MessageBuild
-{
-  Message getMessage();
+/**
+ * This interface, <tt>MessageBuild</tt> is the template for creating any message builders. The message builders
+ * ensure that all messages are properly created with all appropriate fields
+ */
+public interface MessageBuild {
+
+    /**
+     * Gets the message created
+     * @return the message in question
+     */
+    Message getMessage();
 }

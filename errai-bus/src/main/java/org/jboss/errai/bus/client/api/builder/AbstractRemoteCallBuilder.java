@@ -3,18 +3,33 @@ package org.jboss.errai.bus.client.api.builder;
 import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 
-
+/**
+ * The <tt>AbstractRemoteCallBuilder</tt> facilitates the building of a remote call. Ensures that the remote call is
+ * constructed properly
+ */
 public class AbstractRemoteCallBuilder {
+
+    /* Used to generate a unique number */
     private volatile static int callCounter = 0;
 
     private final Message message;
     private RemoteCallback remoteCallback;
+
+    /* The type of response that is expected by the callback */
     private Class<?> responseType = Object.class;
 
     public AbstractRemoteCallBuilder(Message message) {
         this.message = message;
     }
 
+    /**
+     * Creates, implements and returns an instance of <tt>RemoteCallEndpointDef</tt> and all applicable arguments,
+     * which should be instantiated after this call to <tt>serviceName</tt>. The endpoint allows a function from a
+     * service to be called directly, rather than waiting for a response to a message.
+     *
+     * @param serviceName - the service to call, and create a remote call endpoint for
+     * @return the remote call endpoint created
+     */
     public RemoteCallEndpointDef call(final String serviceName) {
         message.toSubject(serviceName);
 
@@ -76,7 +91,7 @@ public class AbstractRemoteCallBuilder {
         };
 
     }
-
+    
     private static int uniqueNumber() {
         return ++callCounter > 10000 ? callCounter = 0 : callCounter;
     }

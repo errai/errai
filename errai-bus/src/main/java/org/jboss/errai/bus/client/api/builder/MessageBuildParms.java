@@ -3,18 +3,69 @@ package org.jboss.errai.bus.client.api.builder;
 import org.jboss.errai.bus.client.ErrorCallback;
 import org.jboss.errai.bus.client.Message;
 
+/**
+ * This interface, <tt>MessageBuildParms</tt>, is a template for building the different parameters of a message. This
+ * ensures that they are constructed properly
+ */
 public interface MessageBuildParms extends MessageBuild {
-         public MessageBuildParms with(String part, Object value);
 
-        public MessageBuildParms with(Enum part, Object value);
+    /**
+     * Sets the message part to the specified value
+     *
+     * @param part - the message part
+     * @param value - the value of the message part
+     * @return the updated instance of <tt>MessageBuildParms</tt>
+     */
+    public MessageBuildParms with(String part, Object value);
 
-        public MessageBuildParms copy(String part, Message m);
+    /**
+     * Sets the message part to the specified value
+     *
+     * @param part - the message part
+     * @param value - the value of the message part
+     * @return the updated instance of <tt>MessageBuildParms</tt>
+     */
+    public MessageBuildParms with(Enum part, Object value);
 
-        public MessageBuildParms copy(Enum part, Message m);
+    /**
+     * Copies the message part to the specified message
+     *
+     * @param part - the message part
+     * @param m - the message
+     * @return the updated instance of <tt>MessageBuildParms</tt>
+     */
+    public MessageBuildParms copy(String part, Message m);
 
-        public MessageBuildParms copyResource(String part, Message m);
+    /**
+     * Copies the message part to the specified message
+     *
+     * @param part - the message part
+     * @param m - the message
+     * @return the updated instance of <tt>MessageBuildParms</tt>
+     */
+    public MessageBuildParms copy(Enum part, Message m);
 
-        public MessageBuildSendable errorsHandledBy(ErrorCallback callback);
+    /**
+     * Copies the message resource to the specified message
+     *
+     * @param part - the message resource
+     * @param m - the message
+     * @return the updated instance of <tt>MessageBuildParms</tt>
+     */
+    public MessageBuildParms copyResource(String part, Message m);
 
-        public MessageBuildSendable noErrorHandling();
+    /**
+     * Sets the error callback function for the message
+     *
+     * @param callback - the callback function called if an error occurs
+     * @return an instance of <tt>MessageBuildSendable</tt>
+     */
+    public MessageBuildSendable errorsHandledBy(ErrorCallback callback);
+
+    /**
+     * Specifies that the message's errors will not be handled
+     *
+     * @return an instance of <tt>MessageBuildSendable</tt>
+     */
+    public MessageBuildSendable noErrorHandling();
 }

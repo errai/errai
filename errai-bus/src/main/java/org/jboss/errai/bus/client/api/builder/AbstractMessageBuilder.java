@@ -5,7 +5,10 @@ import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.client.RequestDispatcher;
 
-
+/**
+ * The <tt>AbstractMessageBuilder</tt> facilitates the building of a message, and ensures that it is created and used
+ * properly.
+ */
 public class AbstractMessageBuilder {
     private final Message message;
 
@@ -13,6 +16,12 @@ public class AbstractMessageBuilder {
         this.message = message;
     }
 
+    /**
+     * Implements, creates and returns an instance of <tt>MessageBuildSubject</tt>. This is called initially when a
+     * new message is created
+     *
+     * @return the <tt>MessageBuildSubject</tt> with the appropriate fields and functions for the message builder
+     */
     public MessageBuildSubject start() {
         final MessageBuildSendable sendable = new MessageBuildSendable() {
             public void sendNowWith(MessageBus viaThis) {
