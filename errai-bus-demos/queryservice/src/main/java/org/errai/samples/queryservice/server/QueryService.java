@@ -41,7 +41,10 @@ public class QueryService {
 
     @Endpoint
     public String[] getQuery(String queryString) {
-        return dataMap.get(queryString.toLowerCase());
+        return new String[] { System.currentTimeMillis() + "" };
+
+
+      //  return dataMap.get(queryString.toLowerCase());
     }
 }
 

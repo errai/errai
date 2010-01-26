@@ -51,7 +51,7 @@
                 <artifactId>gwt-maven-plugin</artifactId>
                 <version>${gwt.maven}</version>
                 <configuration>
-                    <skip>true</skip>
+                    <!--<skip>true</skip>-->
                 </configuration>
             </plugin>
         </plugins>

@@ -3,7 +3,7 @@
     <name>Errai::Bus::Demos::QueryService</name>
     <groupId>org.jboss.errai</groupId>
     <artifactId>errai-bus-demos-queryservice</artifactId>
-    <packaging>jar</packaging>
+    <packaging>war</packaging>
 
     <!-- Parent -->
     <parent>
