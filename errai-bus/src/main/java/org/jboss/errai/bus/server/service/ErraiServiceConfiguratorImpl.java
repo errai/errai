@@ -97,6 +97,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
         extensionBindings = new HashMap<Class, Provider>();
         resourceProviders = new HashMap<String, Provider>();
         serializableTypes = new HashSet<Class>();
+        final Set<String>  loadedComponents = new HashSet<String>();
         final List<Runnable> deferred = new LinkedList<Runnable>();
 
         if (properties.containsKey("errai.authentication_adapter")) {
@@ -177,11 +178,16 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
             visitAllTargets(configRootTargets, new ConfigVisitor() {
                 public void visit(Class<?> loadClass) {
                     if (ErraiConfigExtension.class.isAssignableFrom(loadClass)
-                            && loadClass.isAnnotationPresent(ExtensionComponent.class)) {
+                            && loadClass.isAnnotationPresent(ExtensionComponent.class) && !loadedComponents.contains(loadClass.getName())) {
+
+                        loadedComponents.add(loadClass.getName());
 
                         // We have an annotated ErraiConfigExtension.  So let's configure it.
                         final Class<? extends ErraiConfigExtension> clazz =
                                 loadClass.asSubclass(ErraiConfigExtension.class);
+
+
+
 
                         log.info("found extension " + clazz.getName());
 
@@ -228,10 +234,13 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
             visitAllTargets(configRootTargets,
                     new ConfigVisitor() {
                         public void visit(final Class<?> loadClass) {
+                            if (loadedComponents.contains(loadClass.getName()))  return;
 
 
                             if (Module.class.isAssignableFrom(loadClass)) {
                                 final Class<? extends Module> clazz = loadClass.asSubclass(Module.class);
+
+                                loadedComponents.add(loadClass.getName());
 
                                 if (clazz.isAnnotationPresent(LoadModule.class)) {
                                     log.info("discovered module : " + clazz.getName() + " -- don't use Modules! Use @Service and MessageCallback!");
@@ -248,6 +257,9 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                                 Object svc = null;
                                 if (MessageCallback.class.isAssignableFrom(loadClass)) {
                                     final Class<? extends MessageCallback> clazz = loadClass.asSubclass(MessageCallback.class);
+
+                                    loadedComponents.add(loadClass.getName());
+
                                     log.info("discovered service: " + clazz.getName());
                                     svc = Guice.createInjector(new AbstractModule() {
                                         @Override
@@ -314,6 +326,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                                 }
                             } else if (loadClass.isAnnotationPresent(ExposeEntity.class)) {
                                 log.info("Marked " + loadClass + " as serializable.");
+                                loadedComponents.add(loadClass.getName());
                                 serializableTypes.add(loadClass);
                             }
                         }
