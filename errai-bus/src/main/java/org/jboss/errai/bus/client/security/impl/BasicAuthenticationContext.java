@@ -21,33 +21,65 @@ import org.jboss.errai.bus.client.security.Role;
 
 import java.util.Set;
 
+/**
+ * This class implements a basic form of the <tt>AuthenticationContext</tt>, nothing fancy is done here.
+ */
 public class BasicAuthenticationContext implements AuthenticationContext {
     private Set<Role> roles;
     private String name;
     private boolean valid;
 
+    /**
+     * Sets the roles corresponding to the name
+     *
+     * @param roles - the roles that correspond to <tt>name</tt>
+     * @param name - the name of the person
+     */
     public BasicAuthenticationContext(Set<Role> roles, String name) {
         this.roles = roles;
         this.name = name;
         valid = true;
     }
 
+    /**
+     * Gets the roles for this instance
+     *
+     * @return the roles
+     */
     public Set<Role> getRoles() {
         return roles;
     }
 
+    /**
+     * Gets the name for this instance
+     *
+     * @return the name
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Sets the name
+     *
+     * @param name - the new name
+     */
     public void setName(String name) {
         this.name = name;
     }
 
+    /**
+     * Logs current instance out
+     */
     public void logout() {
         valid = false;
     }
 
+    /**
+     * Returns validity, if logged in
+     *
+     * @return true if logged in
+     */
     public boolean isValid() {
         return valid;
     }

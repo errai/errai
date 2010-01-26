@@ -18,6 +18,16 @@ package org.jboss.errai.bus.client.ext;
 
 import org.jboss.errai.bus.client.MessageBus;
 
+/**
+ * This interface, <tt>ExtensionsLoader</tt>, is used internally during compile time to produce all the things
+ * we want to initialize at runtime.
+ */
 public interface ExtensionsLoader {
+
+    /**
+     * Loads all the initialization extentions for the specified bus
+     *
+     * @param bus - the <tt>MessageBus</tt> to load the extensions for
+     */
     public void initExtensions(MessageBus bus);
 }
