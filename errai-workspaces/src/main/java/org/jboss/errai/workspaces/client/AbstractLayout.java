@@ -64,9 +64,12 @@ public abstract class AbstractLayout implements ToolContainer {
                 new Runnable() {
                     @Override
                     public void run() {
-
                         authenticationService.start();
 
+                        /**
+                         * This is the Workspace Service.  Integration with the Workspace system should be through
+                         * this service.  
+                         */
                         bus.subscribe(WORKSPACE_SVC, new MessageCallback() {
                             @Override
                             public void callback(Message message) {
@@ -97,7 +100,6 @@ public abstract class AbstractLayout implements ToolContainer {
                                 .with(MessageParts.ReplyTo, SecurityService.SUBJECT)
                                 .noErrorHandling().sendNowWith(bus);
                     }
-
                 });
     }
 
