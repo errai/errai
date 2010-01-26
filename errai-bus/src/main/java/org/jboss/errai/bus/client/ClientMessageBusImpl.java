@@ -811,6 +811,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         }
         catch (RuntimeException e) {
             showError("Error delivering message into bus", response.getText(), e);
+            incomingTimer.cancel();
         }
     }
 
