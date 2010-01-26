@@ -44,211 +44,212 @@ import org.jboss.errai.workspaces.client.widgets.WSToolSetLauncher;
  * @author Heiko.Braun <heiko.braun@jboss.com>
  */
 public class Workspace extends DeckLayoutPanel implements RequiresResize {
-    private Menu menu;
+  private Menu menu;
 
-    public Workspace(Menu menu) {
-        super();
-        this.menu = menu;
-        this.setPadding(5);
+  public Workspace(Menu menu) {
+    super();
+    this.menu = menu;
+    this.setPadding(5);
 
-        ErraiBus.get().subscribe(
-                "appContext.toolset", new MessageCallback() {
-                    @Override
-                    public void callback(final Message message) {
-                        String toolsetId = message.get(String.class, "toolsetId");
-                        String toolId = message.get(String.class, "toolId");
+    ErraiBus.get().subscribe(
+        "appContext.toolset", new MessageCallback() {
+          @Override
+          public void callback(final Message message) {
+            String toolsetId = message.get(String.class, "toolsetId");
+            String toolId = message.get(String.class, "toolId");
 
-                        showToolSet(toolsetId, toolId);
-                    }
-                }
-        );
-    }
-
-    public void addToolSet(ToolSet toolSet) {
-        // Menu
-        Widget w = toolSet.getWidget();
-        String id = "ToolSet_" + toolSet.getToolSetName().replace(" ", "_");
-
-        if (w != null) {
-            w.getElement().setId(id);
-            menu.getStack().add(w, toolSet.getToolSetName());
-        } else {
-            WSToolSetLauncher toolSetLauncher = new WSToolSetLauncher(toolSet.getToolSetName());
-
-            for (Tool t : toolSet.getAllProvidedTools()) {
-                toolSetLauncher.addLink(t.getName(), t);
-            }
-
-            toolSetLauncher.getElement().setId(id);
-            menu.getStack().add(toolSetLauncher, toolSet.getToolSetName());
+            showToolSet(toolsetId, toolId);
+          }
         }
+    );
+  }
 
-        menu.getStack().layout();
+  public void addToolSet(ToolSet toolSet) {
+    // Menu
+    Widget w = toolSet.getWidget();
+    String id = "ToolSet_" + toolSet.getToolSetName().replace(" ", "_");
 
-        // ToolSet deck
-        ToolSetDeck deck = createDeck(toolSet);
-        deck.index = this.getWidgetCount();
-        this.add(deck);
-    }
+    if (w != null) {
+      w.getElement().setId(id);
+      menu.getStack().add(w, toolSet.getToolSetName());
+    } else {
+      WSToolSetLauncher toolSetLauncher = new WSToolSetLauncher(toolSet.getToolSetName());
 
-    public boolean hasToolSet(String id) {
-        return findToolSet(id) != null;
-    }
-
-    public void showToolSet(final String id) {
-        showToolSet(id, null);  // opens the default tool
-    }
-
-    public void showToolSet(final String toolSetId, final String toolId) {
-        ToolSetDeck deck = findToolSet(toolSetId);
-        if (null == deck)
-            throw new IllegalArgumentException("No such toolSet: " + toolSetId);
-
-        // select tool
-        ToolSet selectedToolSet = deck.toolSet;
-        Tool selectedTool = null;
-        if (toolId != null) {
-            for (Tool t : selectedToolSet.getAllProvidedTools()) {
-                if (toolId.equals(t.getId())) {
-                    selectedTool = t;
-                    break;
-                }
-            }
-        } else {
-            Tool[] availableTools = selectedToolSet.getAllProvidedTools();
-            if (availableTools == null || availableTools.length == 0)
-                throw new IllegalArgumentException("Empty toolset: " + toolSetId);
-
-            selectedTool = availableTools[0]; // Default
-        }
-
-        // is it already open?
-        boolean isOpen = false;
-        for (int i = 0; i < deck.tabLayout.getWidgetCount(); i++) {
-            TabWrapper tab = (TabWrapper) deck.tabLayout.getWidget(i);
-            if (tab.id.equals(toolId)) {
-                isOpen = true;
-                deck.tabLayout.selectTab(i);
-            }
-        }
-
-        if (!isOpen) // & selectedTool.multipleAllowed()==false
-        {
-            final TabWrapper wrapper = new TabWrapper(selectedTool.getId(), selectedTool.getWidget());
-            wrapper.invalidate();
-            deck.tabLayout.add(
-                    wrapper,
-                    selectedTool.getName()
-            );
-
-            deck.tabLayout.selectTab(
-                    deck.tabLayout.getWidgetCount() - 1
-            );
-
-            DeferredCommand.addCommand(new Command() {
-                @Override
-                public void execute() {
-                    wrapper.onResize();
-                }
-            });
-        }
-
-        // display toolset
-        this.showWidget(deck.index);
-        this.layout();
-
-        DeferredCommand.addCommand(new Command() {
-            public void execute() {
-                menu.toggle(toolSetId);
-            }
-        });
-    }
-
-    private ToolSetDeck createDeck(ToolSet toolSet) {
-        ToolSetDeck deck = new ToolSetDeck(toolSet);
-        //deck.add(toolSet);
-        return deck;
-    }
-
-    private ToolSetDeck findToolSet(String id) {
-        ToolSetDeck match = null;
-        for (int i = 0; i < this.getWidgetCount(); i++) {
-            ToolSetDeck deck = (ToolSetDeck) this.getWidget(i);
-            if (id.equals(deck.toolSet.getToolSetName())) {
-                match = deck;
-                break;
-            }
-        }
-
-        return match;
-    }
-
-    /*public List<ToolSetRef> getTools()
-    {
-      List<ToolSetRef> result = new ArrayList<ToolSetRef>(this.getWidgetCount());
-      for(int i=0; i<this.getWidgetCount(); i++)
-      {
-        ToolSetDeck deck = (ToolSetDeck) this.getWidget(i);
-        ToolSet toolSet = deck.toolSet;
-        result.add(new ToolSetRef(toolSet.getToolSetName(), editor.getEditorId()));
+      for (Tool t : toolSet.getAllProvidedTools()) {
+        toolSetLauncher.addLink(t.getName(), t);
       }
 
-      return result;
-    }*/
-
-    private class ToolSetDeck extends LayoutPanel implements RequiresResize, ProvidesResize {
-        ToolSet toolSet;
-        int index;
-
-        DecoratedTabLayoutPanel tabLayout;
-
-        public ToolSetDeck(ToolSet toolSet) {
-            super();
-            this.toolSet = toolSet;
-            this.tabLayout = new DecoratedTabLayoutPanel();
-
-            final ToolSetDeck toolSetDesk = this;
-
-            this.add(tabLayout);
-        }
-
-        @Override
-        public void onResize() {
-            setPixelSize(getParent().getOffsetWidth(), getParent().getOffsetHeight());
-            LayoutUtil.layoutHints(tabLayout);
-        }
+      toolSetLauncher.getElement().setId(id);
+      menu.getStack().add(toolSetLauncher, toolSet.getToolSetName());
     }
 
-    class TabWrapper extends LayoutPanel implements RequiresResize, ProvidesResize {
-        String id;
+    menu.getStack().layout();
 
-        TabWrapper(String id, Widget content) {
-            this.id = id;
-            this.add(content);
-            WidgetHelper.invalidate(content);
+    // ToolSet deck
+    ToolSetDeck deck = createDeck(toolSet);
+    deck.index = this.getWidgetCount();
+    this.add(deck);
+  }
+
+  public boolean hasToolSet(String id) {
+    return findToolSet(id) != null;
+  }
+
+  public void showToolSet(final String id) {
+    showToolSet(id, null);  // opens the default tool
+  }
+
+  public void showToolSet(final String toolSetId, final String toolId) {
+    ToolSetDeck deck = findToolSet(toolSetId);
+    if (null == deck)
+      throw new IllegalArgumentException("No such toolSet: " + toolSetId);
+
+    // select tool
+    ToolSet selectedToolSet = deck.toolSet;
+    Tool selectedTool = null;
+    if (toolId != null) {
+      for (Tool t : selectedToolSet.getAllProvidedTools()) {
+        if (toolId.equals(t.getId())) {
+          selectedTool = t;
+          break;
         }
+      }
+    } else {
+      Tool[] availableTools = selectedToolSet.getAllProvidedTools();
+      if (availableTools == null || availableTools.length == 0)
+        throw new IllegalArgumentException("Empty toolset: " + toolSetId);
 
+      selectedTool = availableTools[0]; // Default
+    }
+
+    // is it already open?
+    boolean isOpen = false;
+    for (int i = 0; i < deck.tabLayout.getWidgetCount(); i++) {
+      TabWrapper tab = (TabWrapper) deck.tabLayout.getWidget(i);
+      if (tab.id.equals(toolId)) {
+        isOpen = true;
+        deck.tabLayout.selectTab(i);
+      }
+    }
+
+    if (!isOpen) // & selectedTool.multipleAllowed()==false
+    {
+      final TabWrapper wrapper = new TabWrapper(selectedTool.getId(), selectedTool.getWidget());
+      wrapper.invalidate();
+
+      deck.tabLayout.add(
+          wrapper,
+          selectedTool.getName()
+      );
+
+      deck.tabLayout.selectTab(
+          deck.tabLayout.getWidgetCount() - 1
+      );
+
+      DeferredCommand.addCommand(new Command() {
         @Override
-        public void onResize() {
-            setPixelSize(getParent().getOffsetWidth(), getParent().getOffsetHeight());
-            LayoutUtil.layoutHints(this);
+        public void execute() {
+          wrapper.onResize();
         }
+      });
+    }
+
+    // display toolset
+    this.showWidget(deck.index);
+    this.layout();
+
+    DeferredCommand.addCommand(new Command() {
+      public void execute() {
+        menu.toggle(toolSetId);
+      }
+    });
+  }
+
+  private ToolSetDeck createDeck(ToolSet toolSet) {
+    ToolSetDeck deck = new ToolSetDeck(toolSet);
+    //deck.add(toolSet);
+    return deck;
+  }
+
+  private ToolSetDeck findToolSet(String id) {
+    ToolSetDeck match = null;
+    for (int i = 0; i < this.getWidgetCount(); i++) {
+      ToolSetDeck deck = (ToolSetDeck) this.getWidget(i);
+      if (id.equals(deck.toolSet.getToolSetName())) {
+        match = deck;
+        break;
+      }
+    }
+
+    return match;
+  }
+
+  /*public List<ToolSetRef> getTools()
+  {
+    List<ToolSetRef> result = new ArrayList<ToolSetRef>(this.getWidgetCount());
+    for(int i=0; i<this.getWidgetCount(); i++)
+    {
+      ToolSetDeck deck = (ToolSetDeck) this.getWidget(i);
+      ToolSet toolSet = deck.toolSet;
+      result.add(new ToolSetRef(toolSet.getToolSetName(), editor.getEditorId()));
+    }
+
+    return result;
+  }*/
+
+  private class ToolSetDeck extends LayoutPanel implements RequiresResize, ProvidesResize {
+    ToolSet toolSet;
+    int index;
+
+    DecoratedTabLayoutPanel tabLayout;
+
+    public ToolSetDeck(ToolSet toolSet) {
+      super();
+      this.toolSet = toolSet;
+      this.tabLayout = new DecoratedTabLayoutPanel();
+
+      final ToolSetDeck toolSetDesk = this;
+
+      this.add(tabLayout);
     }
 
     @Override
     public void onResize() {
-        LayoutUtil.layoutHints(this);
+      setPixelSize(getParent().getOffsetWidth(), getParent().getOffsetHeight());
+      LayoutUtil.layoutHints(tabLayout);
+    }
+  }
+
+  class TabWrapper extends LayoutPanel implements RequiresResize, ProvidesResize {
+    String id;
+
+    TabWrapper(String id, Widget content) {
+      this.id = id;
+      this.add(content);
+      WidgetHelper.invalidate(content);
     }
 
-    /*public final class ToolSetRef
-   {
-     String title;
-     String id;
+    @Override
+    public void onResize() {
+      setPixelSize(getParent().getOffsetWidth(), getParent().getOffsetHeight());
+      LayoutUtil.layoutHints(this);
+    }
+  }
 
-     public ToolSetRef(String title, String id)
-     {
-       this.title = title;
-       this.id = id;
-     }
-   } */
+  @Override
+  public void onResize() {
+    LayoutUtil.layoutHints(this);
+  }
+
+  /*public final class ToolSetRef
+ {
+   String title;
+   String id;
+
+   public ToolSetRef(String title, String id)
+   {
+     this.title = title;
+     this.id = id;
+   }
+ } */
 }

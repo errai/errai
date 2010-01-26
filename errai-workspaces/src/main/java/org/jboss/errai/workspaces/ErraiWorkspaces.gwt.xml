@@ -36,9 +36,9 @@
     <!-- the theme of your GWT Mosaic application by uncommenting   -->
     <!-- any one of the following lines.                            -->
     <!-- <inherits name='org.gwt.mosaic.theme.standard.Standard' /> -->
-     <inherits name="org.gwt.mosaic.theme.chrome.Chrome" />
+     <!--inherits name="org.gwt.mosaic.theme.chrome.Chrome" /-->
     <!-- <inherits name="org.gwt.mosaic.dark.Dark"/>                -->
-    <!--<inherits name='org.gwt.mosaic.theme.aegean.Aegean' />-->
+    <inherits name='org.gwt.mosaic.theme.aegean.Aegean' />
    
     <generate-with class="org.jboss.errai.workspaces.rebind.WorkspaceLoaderBootstrapGenerator">
         <when-type-assignable
