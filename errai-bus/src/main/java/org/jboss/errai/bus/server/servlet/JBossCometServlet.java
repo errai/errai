@@ -40,12 +40,15 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
         MessageQueue queue;
         switch (event.getType()) {
             case BEGIN:
+                boolean post = "POST".equals(request.getMethod());
+                queue = getQueue(session, !post);
+                if (queue == null) {
+                    return;
+                }
+
                 synchronized (activeEvents) {
-                    queue = getQueue(session);
-                    if (queue == null) {
-                        return;
-                    }
-                    if ("POST".equals(request.getMethod())) {
+
+                    if (post) {
                         // do not pause incoming messages.
                         break;
                     } else if (queue.messagesWaiting()) {
@@ -74,7 +77,7 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
 
 
             case END:
-                if ((queue = getQueue(session)) != null) {
+                if ((queue = getQueue(session, false)) != null) {
                     queue.heartBeat();
                 }
 
@@ -94,7 +97,7 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
 
             case TIMEOUT:
             case ERROR:
-                queue = getQueue(session);
+                queue = getQueue(session, false);
 
                 synchronized (activeEvents) {
                     Set<HttpEvent> evt = activeEvents.get(session);
@@ -102,7 +105,7 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
                         evt.remove(event);
                     }
                 }
-                
+
                 if (event.getType() == HttpEvent.EventType.TIMEOUT) {
                     if (queue != null) queue.heartBeat();
                 } else {
@@ -185,10 +188,10 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
     }
 
 
-    private MessageQueue getQueue(QueueSession session) {
+    private MessageQueue getQueue(QueueSession session, boolean post) {
         MessageQueue queue = service.getBus().getQueue(session.getSessionId());
 
-        if (queue != null && queue.getActivationCallback() == null) {
+        if (post && queue != null && queue.getActivationCallback() == null) {
             queue.setActivationCallback(new QueueActivationCallback() {
                 boolean resumed = false;
 
