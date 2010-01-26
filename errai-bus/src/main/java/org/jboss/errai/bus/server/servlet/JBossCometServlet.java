@@ -37,11 +37,10 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
         final HttpServletRequest request = event.getHttpServletRequest();
         final QueueSession session = sessionProvider.getSession(request.getSession());
 
-        synchronized (session) {
-
-            MessageQueue queue;
-            switch (event.getType()) {
-                case BEGIN:
+        MessageQueue queue;
+        switch (event.getType()) {
+            case BEGIN:
+                synchronized (activeEvents) {
                     queue = getQueue(session);
                     if (queue == null) {
                         return;
@@ -70,54 +69,58 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
                     } else {
                         events.add(event);
                     }
+                }
+                break;
 
-                    break;
 
+            case END:
+                if ((queue = getQueue(session)) != null) {
+                    queue.heartBeat();
+                }
 
-                case END:
-                    if ((queue = getQueue(session)) != null) {
-                        queue.heartBeat();
-                    }
-
+                synchronized (activeEvents) {
                     Set<HttpEvent> evt = activeEvents.get(session);
                     if (evt != null) {
                         evt.remove(event);
                     }
+                }
 
-                    event.close();
-                    break;
+                event.close();
+                break;
 
-                case EOF:
-                    event.close();
-                    break;
+            case EOF:
+                event.close();
+                break;
 
-                case TIMEOUT:
-                case ERROR:
-                    queue = getQueue(session);
+            case TIMEOUT:
+            case ERROR:
+                queue = getQueue(session);
 
-                    evt = activeEvents.get(session);
+                synchronized (activeEvents) {
+                    Set<HttpEvent> evt = activeEvents.get(session);
                     if (evt != null) {
                         evt.remove(event);
                     }
-                    if (event.getType() == HttpEvent.EventType.TIMEOUT) {
-                        if (queue != null) queue.heartBeat();
-                    } else {
-                        if (queue != null) {
-                            queueToSession.remove(queue);
-                            service.getBus().closeQueue(session.getSessionId());
-                            //   session.invalidate();
-                            activeEvents.remove(session);
-                        }
-                        log.error("An Error Occured" + event.getType());
+                }
+                
+                if (event.getType() == HttpEvent.EventType.TIMEOUT) {
+                    if (queue != null) queue.heartBeat();
+                } else {
+                    if (queue != null) {
+                        queueToSession.remove(queue);
+                        service.getBus().closeQueue(session.getSessionId());
+                        //   session.invalidate();
+                        activeEvents.remove(session);
                     }
+                    log.error("An Error Occured" + event.getType());
+                }
 
-                    event.close();
-                    break;
+                event.close();
+                break;
 
-                case READ:
-                    readInRequest(request);
-                    event.close();
-            }
+            case READ:
+                readInRequest(request);
+                event.close();
         }
     }
 
