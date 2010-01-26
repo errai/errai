@@ -36,7 +36,7 @@ import java.util.zip.ZipInputStream;
  */
 public class ConfigUtil {
     public static final String ERRAI_CONFIG_STUB_NAME = "ErraiApp.properties";
-    public static final Logger log = LoggerFactory.getLogger("Configuration");
+    public static final Logger log = LoggerFactory.getLogger(ConfigUtil.class);
 
     public static List<File> findAllConfigTargets() {
         try {
@@ -268,7 +268,7 @@ public class ConfigUtil {
                     }
                     catch (Throwable e) {
                         if (!cached) {
-                            log.error("Failed to load: " + className
+                            log.trace("Failed to load: " + className
                                     + "(" + e.getMessage() + ") -- Probably non-fatal.");
                         }
                     }
