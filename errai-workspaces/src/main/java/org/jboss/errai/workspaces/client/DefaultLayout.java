@@ -28,7 +28,7 @@ import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
 import org.jboss.errai.common.client.framework.WSComponent;
 import org.jboss.errai.widgets.client.WSAlert;
-import org.jboss.errai.workspaces.client.auth.AuthenticationPresenter;
+import org.jboss.errai.workspaces.client.svc.auth.AuthenticationPresenter;
 import org.jboss.errai.workspaces.client.framework.WorkspaceLauncher;
 import org.jboss.errai.workspaces.client.framework.Tool;
 import org.jboss.errai.workspaces.client.framework.ToolProvider;

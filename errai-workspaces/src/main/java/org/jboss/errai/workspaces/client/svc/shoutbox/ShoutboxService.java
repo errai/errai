@@ -17,6 +17,7 @@
 package org.jboss.errai.workspaces.client.svc.shoutbox;
 
 import org.jboss.errai.bus.client.*;
+import org.jboss.errai.workspaces.client.svc.Service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +28,7 @@ import java.util.List;
  */
 
 
-public class ShoutboxService
+public class ShoutboxService implements Service
 {
   public static final String INBOX = "errai.shoutbox.inbox";
   
@@ -35,17 +36,18 @@ public class ShoutboxService
 
   private List<Offer> offers = new ArrayList<Offer>();
 
-  public ShoutboxService()
-  {
 
-    // listen for control messages
+  @Override
+  public void start()
+  {
+      // listen for control messages
     bus.subscribe(INBOX,
         new MessageCallback()
         {
           public void callback(Message message)
           {
             System.out.println("Shoutbox service: "+ message.getCommandType());
-            
+
             switch (ShoutboxCmd.valueOf(message.getCommandType()))
             {
               case SUBMIT_OFFER:
@@ -73,9 +75,9 @@ public class ShoutboxService
             {
               if(!o.hasClients() && o.getProvider() == null)
                 toBeRemoved.add(o.getSubject());
-              
+
               o.match();
-              
+
             }
 
             // cleanup
@@ -89,6 +91,12 @@ public class ShoutboxService
           }
         }
     );
+  }
+
+  @Override
+  public void stop()
+  {
+    
   }
 
   /**

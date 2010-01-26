@@ -25,7 +25,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Image;
 import org.jboss.errai.bus.client.security.SecurityService;
 import org.jboss.errai.common.client.framework.WSComponent;
-import org.jboss.errai.workspaces.client.auth.AuthenticationPresenter;
 import org.jboss.errai.workspaces.client.framework.Tool;
 import org.jboss.errai.workspaces.client.framework.ToolImpl;
 import org.jboss.errai.workspaces.client.framework.ToolProvider;

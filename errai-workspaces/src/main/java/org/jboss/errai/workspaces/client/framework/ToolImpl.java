@@ -21,37 +21,37 @@ import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.common.client.framework.WSComponent;
 
 public class ToolImpl implements Tool {
-    private String name;
-    private String id;
-    private boolean multipleAllowed;
-    private Image icon;
-    private WSComponent component;
+  private String name;
+  private String id;
+  private boolean multipleAllowed;
+  private Image icon;
+  private WSComponent component;
 
-    public ToolImpl(String name, String id, boolean multipleAllowed, Image icon, WSComponent component) {
-        this.name = name;
-        this.id = id;
-        this.multipleAllowed = multipleAllowed;
-        this.icon = icon;
-        this.component = component;
-    }
+  public ToolImpl(String name, String id, boolean multipleAllowed, Image icon, WSComponent component) {
+    this.name = name;
+    this.id = id;
+    this.multipleAllowed = multipleAllowed;
+    this.icon = icon;
+    this.component = component;
+  }
 
-    public String getName() {
-        return name;
-    }
+  public String getName() {
+    return name;
+  }
 
-    public String getId() {
-        return id;
-    }
+  public String getId() {
+    return id;
+  }
 
-    public boolean multipleAllowed() {
-        return multipleAllowed;
-    }
+  public boolean multipleAllowed() {
+    return multipleAllowed;
+  }
 
-    public Image getIcon() {
-        return icon;
-    }
+  public Image getIcon() {
+    return icon;
+  }
 
-    public Widget getWidget() {
-        return component.getWidget();
-    }
+  public Widget getWidget() {
+    return component.getWidget();
+  }  
 }

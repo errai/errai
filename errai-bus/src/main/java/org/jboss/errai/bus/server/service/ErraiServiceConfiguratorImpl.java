@@ -88,7 +88,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
             }
         }
         catch (Exception e) {
-            throw new ErraiBootstrapFailure("error reading from configuration", e);
+            throw new ErraiBootstrapFailure("Error reading from configuration. Did you include ErraiService.properties?", e);
         }
 
 

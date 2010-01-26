@@ -20,11 +20,11 @@ import com.google.gwt.user.client.ui.Image;
 import org.jboss.errai.common.client.framework.WSComponent;
 
 public interface Tool extends WSComponent {
-    public String getName();
+  public String getName();
 
-    public String getId();
+  public String getId();
 
-    public Image getIcon();
+  public Image getIcon();
 
-    public boolean multipleAllowed();
+  public boolean multipleAllowed();
 }

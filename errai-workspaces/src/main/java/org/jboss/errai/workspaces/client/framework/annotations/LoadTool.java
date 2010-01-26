@@ -25,5 +25,5 @@ public @interface LoadTool {
     String icon() default "";
     String group();
     int priority() default 0;
-    boolean multipleAllowed() default false;
+    boolean multipleAllowed() default false;    
 }
