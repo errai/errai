@@ -80,7 +80,7 @@ public class MosaicLayout extends AbstractLayout implements EntryPoint {
 
     // these are stateful and might receive bus messages already
     menu = new Menu();
-    workspace = new Workspace(menu);
+    workspace = Workspace.createInstance(menu);
     header = new Header();
     
     bus.subscribe("Workspace", new MessageCallback()

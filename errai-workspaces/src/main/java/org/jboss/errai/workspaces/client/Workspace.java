@@ -38,6 +38,9 @@ import org.jboss.errai.workspaces.client.framework.ToolSet;
 import org.jboss.errai.workspaces.client.util.LayoutUtil;
 import org.jboss.errai.workspaces.client.widgets.WSToolSetLauncher;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Maintains {@link Tool}'s
  *
@@ -46,7 +49,23 @@ import org.jboss.errai.workspaces.client.widgets.WSToolSetLauncher;
 public class Workspace extends DeckLayoutPanel implements RequiresResize {
   private Menu menu;
 
-  public Workspace(Menu menu) {
+  private static List<ToolSet> toolSets = new ArrayList<ToolSet>();
+
+  private static Workspace instance;
+
+  public static Workspace createInstance(Menu menu)
+  {
+    if(null==instance)
+      instance = new Workspace(menu);
+    return instance;
+  }
+
+  public static Workspace getInstance()
+  {
+    return instance;
+  }
+
+  private Workspace(Menu menu) {
     super();
     this.menu = menu;
     this.setPadding(5);
@@ -65,6 +84,10 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
   }
 
   public void addToolSet(ToolSet toolSet) {
+
+    // register for lookup, late reference
+    toolSets.add(toolSet);
+
     // Menu
     Widget w = toolSet.getWidget();
     String id = "ToolSet_" + toolSet.getToolSetName().replace(" ", "_");
@@ -184,18 +207,18 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
     return match;
   }
 
-  /*public List<ToolSetRef> getTools()
+  public List<ToolSet> getToolsets()
   {
-    List<ToolSetRef> result = new ArrayList<ToolSetRef>(this.getWidgetCount());
+    /*List<ToolSetRef> result = new ArrayList<ToolSetRef>(this.getWidgetCount());
     for(int i=0; i<this.getWidgetCount(); i++)
     {
       ToolSetDeck deck = (ToolSetDeck) this.getWidget(i);
       ToolSet toolSet = deck.toolSet;
       result.add(new ToolSetRef(toolSet.getToolSetName(), editor.getEditorId()));
-    }
+    } */
 
-    return result;
-  }*/
+    return toolSets;
+  }
 
   private class ToolSetDeck extends LayoutPanel implements RequiresResize, ProvidesResize {
     ToolSet toolSet;

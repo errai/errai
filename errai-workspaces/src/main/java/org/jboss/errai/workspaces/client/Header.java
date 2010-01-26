@@ -134,6 +134,7 @@ public class Header extends LayoutPanel
 
       public void onClick(Widget widget)
       {
+        // TODO: Optional service: send to appContext#logout instead 
          MessageBuilder.createMessage()
                       .toSubject("AuthorizationService")
                       .command(SecurityCommands.EndSession)
