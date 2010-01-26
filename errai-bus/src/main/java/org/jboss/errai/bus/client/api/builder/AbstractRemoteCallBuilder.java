@@ -31,7 +31,7 @@ public class AbstractRemoteCallBuilder {
      * @return the remote call endpoint created
      */
     public RemoteCallEndpointDef call(final String serviceName) {
-        message.toSubject(serviceName);
+        message.toSubject(serviceName + ":RPC");
 
         final RemoteCallSendable sendable = new RemoteCallSendable() {
             public void sendNowWith(final MessageBus bus) {

@@ -24,13 +24,6 @@ package org.jboss.errai.workspaces.client;
 import org.jboss.errai.common.client.framework.WSComponent;
 import org.jboss.errai.workspaces.client.framework.ToolSet;
 
-/**
- * Created by IntelliJ IDEA.
- * User: hbraun
- * Date: Jan 11, 2010
- * Time: 2:59:33 PM
- * To change this template use File | Settings | File Templates.
- */
 public interface ToolContainer
 {
   void addToolSet(ToolSet toolSet);

@@ -41,7 +41,7 @@ public class DefaultAdapter implements AuthenticationAdapter {
     }
 
     public boolean isAuthenticated(Message message) {
-        return false;
+        return true;
     }
 
     public boolean requiresAuthorization(Message message) {

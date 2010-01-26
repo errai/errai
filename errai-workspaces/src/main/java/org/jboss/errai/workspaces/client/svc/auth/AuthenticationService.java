@@ -23,6 +23,8 @@ package org.jboss.errai.workspaces.client.svc.auth;
 
 import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
+import org.jboss.errai.workspaces.client.AbstractLayout;
+import org.jboss.errai.workspaces.client.protocols.LayoutCommands;
 import org.jboss.errai.workspaces.client.svc.Service;
 
 import java.util.ArrayList;
@@ -31,62 +33,63 @@ import java.util.List;
 /**
  * Upon successful login, sends a message to 'appContext:username'.
  */
-public class AuthenticationService implements Service
-{
-  protected AuthenticationPresenter authenticationHandler;
+public class AuthenticationService implements Service {
+    protected AuthenticationPresenter authenticationHandler;
 
-  private List<String> sessionRoles;
+    private List<String> sessionRoles = new ArrayList<String>();
 
-  public AuthenticationService()
-  {
-    authenticationHandler = new AuthenticationPresenter(new MosaicAuthenticationDisplay());
-    sessionRoles = new ArrayList<String>();
-  }
-
-  @Override
-  public void start()
-  {
-    final ClientMessageBus bus = (ClientMessageBus) ErraiBus.get();
-
-    bus.subscribe("LoginClient", authenticationHandler);
-
-    // negotiate login
-    if (bus.isInitialized())
-    {
-      authenticationHandler.getNegotiationTask().run();
-    } else {
-      bus.addPostInitTask(authenticationHandler.getNegotiationTask());
+    public AuthenticationService() {
+        authenticationHandler = new AuthenticationPresenter(new MosaicAuthenticationDisplay());
+        sessionRoles = new ArrayList<String>();
     }
-    
-    // This service is used for setting up and restoring the session.
-    bus.subscribe("ClientConfiguratorService",
-        new MessageCallback() {
-          public void callback(Message message) {
-            if (message.hasPart(SecurityParts.Roles)) {
-              String[] roleStrs = message.get(String.class, SecurityParts.Roles).split(",");
-              for (String s : roleStrs) {
-                sessionRoles.add(s.trim());
-              }
-            }
 
-            if (message.hasPart(SecurityParts.Name))
-            {
-              String username = message.get(String.class, SecurityParts.Name);
+    @Override
+    public void start() {
+        final ClientMessageBus bus = (ClientMessageBus) ErraiBus.get();
 
-              MessageBuilder.createMessage()
-                  .toSubject("appContext")
-                  .signalling()
-                  .with("username", username)
-                  .noErrorHandling()
-                  .sendNowWith(ErraiBus.get());
-            }            
-          }
-        });
-  }
+        bus.subscribe("LoginClient", authenticationHandler);
 
-  @Override
-  public void stop()
-  {
-      
-  }
+        // negotiate login
+        if (bus.isInitialized()) {
+            authenticationHandler.getNegotiationTask().run();
+        } else {
+            bus.addPostInitTask(authenticationHandler.getNegotiationTask());
+        }
+
+        // This service is used for setting up and restoring the session.
+        bus.subscribe("ClientConfiguratorService",
+                new MessageCallback() {
+                    public void callback(Message message) {
+
+
+                        if (message.hasPart(SecurityParts.Roles)) {
+                            String[] roleStrs = message.get(String.class, SecurityParts.Roles).split(",");
+                            for (String s : roleStrs) {
+                                sessionRoles.add(s.trim());
+                            }
+                        }
+
+                        if (message.hasPart(SecurityParts.Name)) {
+                            String username = message.get(String.class, SecurityParts.Name);
+
+                            MessageBuilder.createMessage()
+                                    .toSubject(AbstractLayout.WORKSPACE_SVC)
+                                    .command(LayoutCommands.Initialize)
+                                    .noErrorHandling()
+                                    .sendNowWith(ErraiBus.get());
+
+
+                        }
+                    }
+                });
+    }
+
+    @Override
+    public void stop() {
+
+    }
+
+    public List<String> getSessionRoles() {
+        return sessionRoles;
+    }
 }

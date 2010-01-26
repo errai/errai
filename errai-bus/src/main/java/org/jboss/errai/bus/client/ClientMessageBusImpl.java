@@ -674,7 +674,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      * @param run a {@link Runnable} task.
      */
     public void addPostInitTask(Runnable run) {
-        postInitTasks.add(run);
+        if (isInitialized()) {
+            run.run();
+        } else {
+            postInitTasks.add(run);
+        }
     }
 
     /**
@@ -819,12 +823,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         {
             MessageBuilder.setProvider(this);
         }
+
         @Override
         public Message get() {
             return new JSONMessage();
         }
     };
-    
+
     @Override
     public MessageProvider getMessageProvider() {
         return provider;

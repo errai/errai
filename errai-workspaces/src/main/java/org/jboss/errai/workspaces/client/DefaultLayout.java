@@ -77,7 +77,12 @@ public class DefaultLayout extends AbstractLayout implements EntryPoint
     });
   }
 
-  private void init(final String rootId) {
+    @Override
+    protected void initializeUI() {
+
+    }
+
+    private void init(final String rootId) {
     if (workspaceLayout != null) {
       return;
     }
@@ -121,53 +126,53 @@ public class DefaultLayout extends AbstractLayout implements EntryPoint
     /**
      * This service is used for setting up and restoring the session.
      */
-    bus.subscribe("ClientConfiguratorService",
-        new MessageCallback() {
-          public void callback(Message message) {
-            if (message.hasPart(SecurityParts.Roles)) {
-              String[] roleStrs = message.get(String.class, SecurityParts.Roles).split(",");
-              for (String s : roleStrs) {
-                sessionRoles.add(s.trim());
-              }
-            }
-
-            if (message.hasPart(SecurityParts.Name)) {
-              HorizontalPanel userInfo = new HorizontalPanel();
-              Label userName = new Label(message.get(String.class, SecurityParts.Name));
-              userName.getElement().getStyle().setProperty("fontWeight", "bold");
-
-              userInfo.add(userName);
-              Button logout = new Button("Logout");
-              logout.setStyleName("logoutButton");
-              userInfo.add(logout);
-
-              logout.addClickHandler(new ClickHandler()
-              {
-                public void onClick(ClickEvent event)
-                {
-
-                  MessageBuilder.createMessage()
-                      .toSubject("AuthorizationService")
-                      .command(SecurityCommands.EndSession)
-                      .noErrorHandling().sendNowWith(bus);
-
-                  bus.unsubscribeAll("org.jboss.errai.WorkspaceLayout");
-                  sessionRoles.clear();
-
-                  RootPanel.get(rootId).remove(workspaceLayout);
-                  workspaceLayout = new WorkspaceLayout(rootId);
-
-                }
-              });
-
-              workspaceLayout.getUserInfoPanel().clear();
-              workspaceLayout.getUserInfoPanel().add(userInfo);
-            }
-
-            RootPanel.get(rootId).add(workspaceLayout);
-            renderToolPallete();
-          }
-        });
+//    bus.subscribe("ClientConfiguratorService",
+//        new MessageCallback() {
+//          public void callback(Message message) {
+//            if (message.hasPart(SecurityParts.Roles)) {
+//              String[] roleStrs = message.get(String.class, SecurityParts.Roles).split(",");
+//              for (String s : roleStrs) {
+//                sessionRoles.add(s.trim());
+//              }
+//            }
+//
+//            if (message.hasPart(SecurityParts.Name)) {
+//              HorizontalPanel userInfo = new HorizontalPanel();
+//              Label userName = new Label(message.get(String.class, SecurityParts.Name));
+//              userName.getElement().getStyle().setProperty("fontWeight", "bold");
+//
+//              userInfo.add(userName);
+//              Button logout = new Button("Logout");
+//              logout.setStyleName("logoutButton");
+//              userInfo.add(logout);
+//
+//              logout.addClickHandler(new ClickHandler()
+//              {
+//                public void onClick(ClickEvent event)
+//                {
+//
+//                  MessageBuilder.createMessage()
+//                      .toSubject("AuthorizationService")
+//                      .command(SecurityCommands.EndSession)
+//                      .noErrorHandling().sendNowWith(bus);
+//
+//                  bus.unsubscribeAll("org.jboss.errai.WorkspaceLayout");
+//                  sessionRoles.clear();
+//
+//                  RootPanel.get(rootId).remove(workspaceLayout);
+//                  workspaceLayout = new WorkspaceLayout(rootId);
+//
+//                }
+//              });
+//
+//              workspaceLayout.getUserInfoPanel().clear();
+//              workspaceLayout.getUserInfoPanel().add(userInfo);
+//            }
+//
+//            RootPanel.get(rootId).add(workspaceLayout);
+//            renderToolPallete();
+//          }
+//        });
   }
 
   // ---------------------------------------------------------

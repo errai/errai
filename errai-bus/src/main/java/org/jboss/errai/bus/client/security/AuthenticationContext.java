@@ -22,6 +22,8 @@ import java.util.Set;
  * Defines the context of an authenticated session.
  */
 public interface AuthenticationContext {
+    public String getName();
+
     /**
      * Return any roles associated with the session.
      * @return

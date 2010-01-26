@@ -97,7 +97,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
         extensionBindings = new HashMap<Class, Provider>();
         resourceProviders = new HashMap<String, Provider>();
         serializableTypes = new HashSet<Class>();
-        final Set<String>  loadedComponents = new HashSet<String>();
+        final Set<String> loadedComponents = new HashSet<String>();
         final List<Runnable> deferred = new LinkedList<Runnable>();
 
         if (properties.containsKey("errai.authentication_adapter")) {
@@ -187,8 +187,6 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                                 loadClass.asSubclass(ErraiConfigExtension.class);
 
 
-
-
                         log.info("found extension " + clazz.getName());
 
                         try {
@@ -234,7 +232,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
             visitAllTargets(configRootTargets,
                     new ConfigVisitor() {
                         public void visit(final Class<?> loadClass) {
-                            if (loadedComponents.contains(loadClass.getName()))  return;
+                            if (loadedComponents.contains(loadClass.getName())) return;
 
 
                             if (Module.class.isAssignableFrom(loadClass)) {
@@ -314,16 +312,18 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
 
                                 Map<String, MessageCallback> epts = new HashMap<String, MessageCallback>();
 
+
                                 // we scan for endpoints
                                 for (final Method method : loadClass.getDeclaredMethods()) {
                                     if (method.isAnnotationPresent(Endpoint.class)) {
                                         epts.put(method.getName(), method.getReturnType() == Void.class ?
                                                 new EndpointCallback(svc, method) :
                                                 new ConversationalEndpointCallback(svc, method, bus));
-
-                                        bus.subscribe(loadClass.getSimpleName(), new RemoteServiceCallback(epts));
                                     }
                                 }
+
+                                bus.subscribe(loadClass.getSimpleName() + ":RPC", new RemoteServiceCallback(epts));
+
                             } else if (loadClass.isAnnotationPresent(ExposeEntity.class)) {
                                 log.info("Marked " + loadClass + " as serializable.");
                                 loadedComponents.add(loadClass.getName());
@@ -332,8 +332,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                         }
                     }
             );
-        }
-        else {
+        } else {
             log.info("auto-scan disabled.");
         }
 
@@ -378,7 +377,12 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
     }
 
     public <T> T getResource(Class<? extends T> resourceClass) {
-        return (T) extensionBindings.get(resourceClass).get();
+        if (extensionBindings.containsKey(resourceClass)) {
+            return (T) extensionBindings.get(resourceClass).get();
+        }
+        else {
+            return null;
+        }
     }
 
     @Override

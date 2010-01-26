@@ -41,6 +41,7 @@ import org.jboss.errai.bus.client.security.impl.NameCredential;
 import org.jboss.errai.bus.client.security.impl.PasswordCredential;
 import org.jboss.errai.workspaces.client.AbstractLayout;
 import org.jboss.errai.workspaces.client.DefaultLayout;
+import org.jboss.errai.workspaces.client.protocols.LayoutCommands;
 
 import static org.jboss.errai.bus.client.CommandMessage.createWithParts;
 import static org.jboss.errai.bus.client.MessageBuilder.createMessage;
@@ -49,186 +50,181 @@ import static org.jboss.errai.bus.client.json.JSONUtilCli.decodeMap;
 /**
  * Authentication handler.
  */
-public class AuthenticationPresenter implements MessageCallback
-{
-  public interface Display
-  {
-    void showLoginPanel();
-    void clearPanel();
-    void hideLoginPanel();
+public class AuthenticationPresenter implements MessageCallback {
+    public interface Display {
+        void showLoginPanel();
 
-    HasText getUsernameInput();
-    HasText getPasswordInput();
+        void clearPanel();
 
-    HasClickHandlers getSubmitButton();
+        void hideLoginPanel();
 
-    HasCloseHandlers getWindowPanel();
+        HasText getUsernameInput();
 
-    void showWelcomeMessage(String messageText);
-  }
+        HasText getPasswordInput();
 
-  private final Runnable negotiationTask = new Runnable() {
-    public void run() {
-      createMessage()
-          .toSubject("ClientNegotiationService")
-          .signalling()
-          .with(MessageParts.ReplyTo, "ClientConfiguratorService")
-          .noErrorHandling().sendNowWith(ErraiBus.get());
+        HasClickHandlers getSubmitButton();
+
+        HasCloseHandlers getWindowPanel();
+
+        void showWelcomeMessage(String messageText);
     }
-  };
 
-  private Message deferredMessage;
-  private AuthenticationPresenter.Display display;
-
-  /**
-   * Using the default display
-   */
-  public AuthenticationPresenter()
-  {
-    display = new DefaultAuthenticationDisplay();
-    registerHandlers();
-  }
-
-  /**
-   * Overriding the display
-   * @param display
-   */
-  public AuthenticationPresenter(Display display)
-  {
-    this.display = display;
-    registerHandlers();
-  }
-
-  private void registerHandlers()
-  {
-    // Form Submission Handler
-    display.getSubmitButton().addClickHandler(
-        new ClickHandler() {
-          public void onClick(ClickEvent event) {
-            
-            DeferredCommand.addCommand(new Command() {
-              public void execute() {
-                DefaultLayout.getSecurityService().doAuthentication(
-                    new AuthenticationHandler() {
-                      public void doLogin(Credential[] credentials) {
-                        for (Credential c : credentials) {
-                          if (c instanceof NameCredential) {
-                            ((NameCredential) c).setName(display.getUsernameInput().getText());
-                          }
-                          else if (c instanceof PasswordCredential) {
-                            ((PasswordCredential) c).setPassword(display.getPasswordInput().getText());
-                          }
-                        }
-                      }
-                    });
-              }
-            });
-          }
+    private final Runnable negotiationTask = new Runnable() {
+        public void run() {
+            createMessage()
+                    .toSubject("ClientNegotiationService")
+                    .signalling()
+                    .with(MessageParts.ReplyTo, "ClientConfiguratorService")
+                    .noErrorHandling().sendNowWith(ErraiBus.get());
         }
-    );
+    };
 
-    // CloseHandler
-    display.getWindowPanel().addCloseHandler(
-        new CloseHandler()
-        {
-          @Override
-          public void onClose(CloseEvent closeEvent)
-          {
-            // Verify when https://jira.jboss.org/jira/browse/ERRAI-36 is done
-            /*createMessage()
-                .toSubject("ServerEchoService")
-                .signalling()
-                .noErrorHandling().sendNowWith(ErraiBus.get());*/
-          }
-        }
-    );
-  }
+    private Message deferredMessage;
+    private AuthenticationPresenter.Display display;
 
-  public Runnable getNegotiationTask()
-  {
-    return negotiationTask;
-  }
+    /**
+     * Using the default display
+     */
+    public AuthenticationPresenter() {
+        display = new DefaultAuthenticationDisplay();
+        registerHandlers();
+    }
 
-  @Override
-  public void callback(Message message)
-  {
-    try {
-      switch (SecurityCommands.valueOf(message.getCommandType())) {
-        case SecurityChallenge:
-          if (message.hasPart(SecurityParts.RejectedMessage)) {
-            deferredMessage = createWithParts(decodeMap(message.get(String.class, SecurityParts.RejectedMessage)));
-          }
+    /**
+     * Overriding the display
+     *
+     * @param display
+     */
+    public AuthenticationPresenter(Display display) {
+        this.display = display;
+        registerHandlers();
+    }
 
-          display.clearPanel();
+    private void registerHandlers() {
+        // Form Submission Handler
+        display.getSubmitButton().addClickHandler(
+                new ClickHandler() {
+                    public void onClick(ClickEvent event) {
 
-          display.showLoginPanel();
-          break;
-
-        case EndSession:
-          display.clearPanel();
-
-          /*WSAlert.alert("Logout successful.", new AcceptsCallback() {
-            public void callback(Object message, Object data) {
-              display.showLoginPanel();
-            }
-          });*/
-
-          // kill app and reload
-          AbstractLayout.forceReload();
-
-          break;
-
-
-        case FailedAuth:
-          display.hideLoginPanel();
-
-          MessageBox.confirm("Authentication Failure", "Please try again.",
-              new MessageBox.ConfirmationCallback()
-              {
-                @Override
-                public void onResult(boolean b)
-                {
-                  display.showLoginPanel();
+                        DeferredCommand.addCommand(new Command() {
+                            public void execute() {
+                                DefaultLayout.getSecurityService().doAuthentication(
+                                        new AuthenticationHandler() {
+                                            public void doLogin(Credential[] credentials) {
+                                                for (Credential c : credentials) {
+                                                    if (c instanceof NameCredential) {
+                                                        ((NameCredential) c).setName(display.getUsernameInput().getText());
+                                                    } else if (c instanceof PasswordCredential) {
+                                                        ((PasswordCredential) c).setPassword(display.getPasswordInput().getText());
+                                                    }
+                                                }
+                                            }
+                                        });
+                            }
+                        });
+                    }
                 }
-              });
+        );
 
-          break;
+        // CloseHandler
+        display.getWindowPanel().addCloseHandler(
+                new CloseHandler() {
+                    @Override
+                    public void onClose(CloseEvent closeEvent) {
+                        // Verify when https://jira.jboss.org/jira/browse/ERRAI-36 is done
+                        /*createMessage()
+                        .toSubject("ServerEchoService")
+                        .signalling()
+                        .noErrorHandling().sendNowWith(ErraiBus.get());*/
+                    }
+                }
+        );
+    }
 
-        case SuccessfulAuth:
-          display.hideLoginPanel();
+    public Runnable getNegotiationTask() {
+        return negotiationTask;
+    }
 
-          /*String messageText = "Welcome " + username
-                        + ", you are now logged in. "
-                        + (message.hasPart(MessageParts.MessageText) ?
-                        message.get(String.class, MessageParts.MessageText) : "");
-            
-          display.showWelcomeMessage(messageText);
-          */
+    @Override
+    public void callback(Message message) {
+        try {
+            switch (SecurityCommands.valueOf(message.getCommandType())) {
+                case SecurityChallenge:
+                    if (message.hasPart(SecurityParts.RejectedMessage)) {
+                        deferredMessage = createWithParts(decodeMap(message.get(String.class, SecurityParts.RejectedMessage)));
+                    }
 
-          if (deferredMessage != null)
-          {
+                    display.clearPanel();
+
+                    display.showLoginPanel();
+                    break;
+
+                case EndSession:
+                    display.clearPanel();
+
+                    /*WSAlert.alert("Logout successful.", new AcceptsCallback() {
+                      public void callback(Object message, Object data) {
+                        display.showLoginPanel();
+                      }
+                    });*/
+
+                    // kill app and reload
+                    AbstractLayout.forceReload();
+
+                    break;
+
+
+
+
+                case FailedAuth:
+                    display.hideLoginPanel();
+
+                    MessageBox.confirm("Authentication Failure", "Please try again.",
+                            new MessageBox.ConfirmationCallback() {
+                                @Override
+                                public void onResult(boolean b) {
+                                    display.showLoginPanel();
+                                }
+                            });
+
+                    break;
+
+                case AuthenticationNotRequired:
+                    MessageBuilder.createMessage()
+                            .toSubject(AbstractLayout.WORKSPACE_SVC)
+                            .command(LayoutCommands.Initialize)
+                            .noErrorHandling().sendNowWith(ErraiBus.get());
+                    break;
+
+                case SuccessfulAuth:
+                    display.hideLoginPanel();
+                    performNegotiation();
+
+                    break;
+
+                default:
+                    // I don't know this command. :(
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void performNegotiation() {
+        if (deferredMessage != null) {
             /**
              * Send the message that was originally rejected, and prompted the
              * authentication requirement.
              */
             ErraiBus.get().send(deferredMessage);
             deferredMessage = null;
-          } else {
+        } else {
             /**
              * Send the standard negotiation because no message was intercepted
              * to resend
              */
             negotiationTask.run();
-          }
-
-          break;
-
-        default:
-          // I don't know this command. :(
-      }
+        }
     }
-    catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
 }

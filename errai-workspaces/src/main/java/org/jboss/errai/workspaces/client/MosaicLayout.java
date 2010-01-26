@@ -83,19 +83,19 @@ public class MosaicLayout extends AbstractLayout implements EntryPoint {
     workspace = Workspace.createInstance(menu);
     header = new Header();
     
-    bus.subscribe("Workspace", new MessageCallback()
-    {
-      @Override
-      public void callback(Message message)
-      {
-        if(message.getCommandType().equals("launch"))
-          initializeUI();
-      }
-    });
+//    bus.subscribe("Workspace", new MessageCallback()
+//    {
+//      @Override
+//      public void callback(Message message)
+//      {
+//        if(message.getCommandType().equals("launch"))
+//          initializeUI();
+//      }
+//    });
 
   }
 
-  private void initializeUI() {
+  protected void initializeUI() {
     viewport = new WSViewport();
     
     launchWorkspace();

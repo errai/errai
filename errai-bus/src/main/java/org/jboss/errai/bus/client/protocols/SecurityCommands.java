@@ -53,6 +53,11 @@ public enum SecurityCommands {
     SuccessfulAuth,
 
     /**
+     * Send if authentication is not required.
+     */
+    AuthenticationNotRequired,
+
+    /**
      * Terminates any existing session.
      */
     EndSession,

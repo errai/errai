@@ -16,6 +16,8 @@
 
 package org.jboss.errai.bus.client.security;
 
+import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.DeferredCommand;
 import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
@@ -23,6 +25,7 @@ import org.jboss.errai.bus.client.protocols.SecurityParts;
 
 import static org.jboss.errai.bus.client.MessageBuilder.createMessage;
 import static org.jboss.errai.bus.client.protocols.SecurityParts.CredentialsRequired;
+
 import org.jboss.errai.bus.client.security.impl.BasicAuthenticationContext;
 import org.jboss.errai.bus.client.security.impl.NameCredential;
 import org.jboss.errai.bus.client.security.impl.PasswordCredential;
@@ -32,19 +35,20 @@ import java.util.Set;
 
 public class SecurityService {
     private AuthenticationContext authenticationContext;
+    private AuthenticationHandler authHandler;
     public static final String SUBJECT = "ClientAuthenticationService";
 
     public SecurityService() {
-    }
-
-    public void doAuthentication(final AuthenticationHandler handler) {
-      
         ErraiBus.get().subscribe(SUBJECT, new MessageCallback() {
             public void callback(Message msg) {
-                ErraiBus.get().unsubscribeAll(SUBJECT);
-
+             
                 switch (SecurityCommands.valueOf(msg.getCommandType())) {
                     case WhatCredentials:
+                        if (authHandler == null) {
+             //               msg.toSubject("LoginClient").sendNowWith(ErraiBus.get());
+                            return;
+                        }
+
                         String credentialsRequired = msg.get(String.class, CredentialsRequired);
                         String[] credentialNames = credentialsRequired.split(",");
                         Credential[] credentials = new Credential[credentialNames.length];
@@ -63,7 +67,7 @@ public class SecurityService {
                             }
                         }
 
-                        handler.doLogin(credentials);
+                        authHandler.doLogin(credentials);
 
                         Message challenge = createMessage()
                                 .toSubject("AuthorizationService")
@@ -83,39 +87,64 @@ public class SecurityService {
                         }
 
                         challenge.sendNowWith(ErraiBus.get());
-                        
+
+                        break;
+                    case AuthenticationNotRequired:
+                        msg.toSubject("LoginClient").sendNowWith(ErraiBus.get());
                         break;
 
-                    case SecurityResponse:
+                    case FailedAuth:
+                    case SuccessfulAuth:
                         String name = msg.get(String.class, SecurityParts.Name);
-                        String rolesString =  msg.get(String.class, SecurityParts.Roles);
+                        String rolesString = msg.get(String.class, SecurityParts.Roles);
 
                         if (authenticationContext != null && authenticationContext.isValid()) return;
 
-                        String[] roles =  rolesString.split(",");
-
                         Set<Role> roleSet = new HashSet<Role>();
-                        for (final String role : roles) {
-                            roleSet.add(new Role() {
-                                public String getRoleName() {
-                                    return role;
-                                }
-                            });
-                        }
+                        if (rolesString != null) {
+                            String[] roles = rolesString.split(",");
 
+                            for (final String role : roles) {
+                                roleSet.add(new Role() {
+                                    public String getRoleName() {
+                                        return role;
+                                    }
+                                });
+                            }
+                        } else {
+
+                        }
                         authenticationContext = new BasicAuthenticationContext(roleSet, name);
+
+                        // forward this message on to the login client.
+                        msg.toSubject("LoginClient").sendNowWith(ErraiBus.get());
 
                         break;
                 }
             }
         });
-
-        MessageBuilder.createMessage()
-                .toSubject("AuthorizationService")
-                .command(SecurityCommands.WhatCredentials)
-                .with(MessageParts.ReplyTo, SUBJECT)
-                .noErrorHandling().sendNowWith(ErraiBus.get());
-
     }
 
+    public void doAuthentication(final AuthenticationHandler handler) {
+        authHandler = handler;
+
+        DeferredCommand.addCommand(new Command() {
+            @Override
+            public void execute() {
+                MessageBuilder.createMessage()
+                        .toSubject("AuthorizationService")
+                        .command(SecurityCommands.WhatCredentials)
+                        .with(MessageParts.ReplyTo, SUBJECT)
+                        .noErrorHandling().sendNowWith(ErraiBus.get());
+            }
+        });
+    }
+
+    public AuthenticationContext getAuthenticationContext() {
+        return authenticationContext;
+    }
+
+    public void setAuthenticationContext(AuthenticationContext authenticationContext) {
+        this.authenticationContext = authenticationContext;
+    }
 }

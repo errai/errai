@@ -59,17 +59,25 @@ public class ErraiServiceImpl implements ErraiService {
             public void callback(Message c) {
                 switch (SecurityCommands.valueOf(c.getCommandType())) {
                     case WhatCredentials:
-                        /**
-                         * Respond with what credentials the authentication system requires.
-                         */
-                        //todo: we only support login/password for now
+                        if (authenticationConfigured()) {
 
-                        createConversation(c)
-                                .subjectProvided()
-                                .command(SecurityCommands.WhatCredentials)
-                                .with(SecurityParts.CredentialsRequired, "Name,Password")
-                                .with(MessageParts.ReplyTo, AUTHORIZATION_SVC_SUBJECT)
-                                .noErrorHandling().sendNowWith(bus);
+                            /**
+                             * Respond with what credentials the authentication system requires.
+                             */
+                            //todo: we only support login/password for now
+
+                            createConversation(c)
+                                    .subjectProvided()
+                                    .command(SecurityCommands.WhatCredentials)
+                                    .with(SecurityParts.CredentialsRequired, "Name,Password")
+                                    .with(MessageParts.ReplyTo, AUTHORIZATION_SVC_SUBJECT)
+                                    .noErrorHandling().sendNowWith(bus);
+                        } else {
+                            createConversation(c)
+                                    .subjectProvided()
+                                    .command(SecurityCommands.AuthenticationNotRequired)
+                                    .noErrorHandling().sendNowWith(bus);
+                        }
 
                         break;
 
@@ -78,23 +86,27 @@ public class ErraiServiceImpl implements ErraiService {
                          * Send a challenge.
                          */
 
-                        try {
-                            configurator.getResource(AuthenticationAdapter.class)
-                                    .challenge(c);
-                        }
-                        catch (AuthenticationFailedException a) {
+                        if (authenticationConfigured()) {
+                            try {
+                                configurator.getResource(AuthenticationAdapter.class)
+                                        .challenge(c);
+                            }
+                            catch (AuthenticationFailedException a) {
+                            }
                         }
                         break;
 
                     case EndSession:
-                        configurator.getResource(AuthenticationAdapter.class)
-                                .endSession(c);
+                        if (authenticationConfigured()) {
+                            configurator.getResource(AuthenticationAdapter.class)
+                                    .endSession(c);
 
-                        createConversation(c)
-                                .toSubject("LoginClient")
-                                .command(SecurityCommands.EndSession)
-                                .noErrorHandling()
-                                .sendNowWith(bus);
+                            createConversation(c)
+                                    .toSubject("LoginClient")
+                                    .command(SecurityCommands.EndSession)
+                                    .noErrorHandling()
+                                    .sendNowWith(bus);
+                        }
                         break;
                 }
             }
@@ -105,15 +117,15 @@ public class ErraiServiceImpl implements ErraiService {
          */
         bus.subscribe("ServerEchoService", new MessageCallback() {
             public void callback(Message c) {
-                 MessageBuilder.createConversation(c)
-                         .subjectProvided().signalling().noErrorHandling()
-                         .sendNowWith(bus);
+                MessageBuilder.createConversation(c)
+                        .subjectProvided().signalling().noErrorHandling()
+                        .sendNowWith(bus);
             }
         });
 
         bus.subscribe("ClientNegotiationService", new MessageCallback() {
             public void callback(Message message) {
-                AuthSubject subject =  message.getResource(QueueSession.class, "Session")
+                AuthSubject subject = message.getResource(QueueSession.class, "Session")
                         .getAttribute(AuthSubject.class, ErraiService.SESSION_AUTH_DATA);
 
                 Message reply = MessageBuilder.createConversation(message).getMessage();
@@ -132,6 +144,10 @@ public class ErraiServiceImpl implements ErraiService {
         bus.configure(configurator);
 
         final ErraiService erraiSvc = this;
+    }
+
+    private boolean authenticationConfigured() {
+        return configurator.getResource(AuthenticationAdapter.class) != null;
     }
 
     public void store(Message message) {
