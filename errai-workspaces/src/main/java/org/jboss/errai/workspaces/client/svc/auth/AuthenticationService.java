@@ -56,8 +56,8 @@ public class AuthenticationService implements Service {
             bus.addPostInitTask(authenticationHandler.getNegotiationTask());
         }
 
-        // This service is used for setting up and restoring the session.
-        bus.subscribe("ClientConfiguratorService",
+        // listener for the negotiation task response
+        bus.subscribe("AuthorizationListener",
                 new MessageCallback() {
                     public void callback(Message message) {
 

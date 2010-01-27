@@ -72,9 +72,9 @@ public class AuthenticationPresenter implements MessageCallback {
     private final Runnable negotiationTask = new Runnable() {
         public void run() {
             createMessage()
-                    .toSubject("ClientNegotiationService")
+                    .toSubject("AuthorizationService")
                     .signalling()
-                    .with(MessageParts.ReplyTo, "ClientConfiguratorService")
+                    .with(MessageParts.ReplyTo, "AuthorizationListener")
                     .noErrorHandling().sendNowWith(ErraiBus.get());
         }
     };

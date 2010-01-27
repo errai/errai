@@ -340,7 +340,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
 
         if (hasProperty(requireAuthenticationForAll) && "true".equals(getProperty(requireAuthenticationForAll))) {
             log.info("authentication for all requests required, adding rule ... ");
-            bus.addRule("ClientNegotiationService", new RolesRequiredRule(new HashSet<Object>(), bus));
+            bus.addRule("AuthorizationService", new RolesRequiredRule(new HashSet<Object>(), bus));
         }
 
         ConfigUtil.cleanupStartupTempFiles();

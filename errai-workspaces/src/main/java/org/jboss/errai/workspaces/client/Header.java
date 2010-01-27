@@ -136,7 +136,7 @@ public class Header extends LayoutPanel
       {
         // TODO: Optional service: send to appContext#logout instead 
          MessageBuilder.createMessage()
-                      .toSubject("AuthorizationService")
+                      .toSubject("AuthenticationService")
                       .command(SecurityCommands.EndSession)
                       .noErrorHandling().sendNowWith(ErraiBus.get());
       }

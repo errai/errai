@@ -42,157 +42,159 @@ import java.util.*;
  * Basic workspace abstraction. Merely the ToolContainer impl.
  */
 public abstract class AbstractLayout implements ToolContainer {
-    public static final String WORKSPACE_SVC = "Workspace";
+  public static final String WORKSPACE_SVC = "Workspace";
 
-    private static ErraiImageBundle erraiImageBundle = GWT.create(ErraiImageBundle.class);
-    protected static List<ToolSet> toBeLoaded = new ArrayList<ToolSet>();
-    protected static Map<String, List<ToolProvider>> toBeLoadedGroups = new HashMap<String, List<ToolProvider>>();
-    protected static List<String> preferredGroupOrdering = new ArrayList<String>();
-    protected static int toolCounter = 0;
+  private static ErraiImageBundle erraiImageBundle = GWT.create(ErraiImageBundle.class);
+  protected static List<ToolSet> toBeLoaded = new ArrayList<ToolSet>();
+  protected static Map<String, List<ToolProvider>> toBeLoadedGroups = new HashMap<String, List<ToolProvider>>();
+  protected static List<String> preferredGroupOrdering = new ArrayList<String>();
+  protected static int toolCounter = 0;
 
-    private AuthenticationService authenticationService = new AuthenticationService();
-    private static SecurityService securityService = new SecurityService();
+  private AuthenticationService authenticationService = new AuthenticationService();
+  private static SecurityService securityService = new SecurityService();
 
-    protected ClientMessageBus bus = (ClientMessageBus) ErraiBus.get();
+  protected ClientMessageBus bus = (ClientMessageBus) ErraiBus.get();
 
-    public AbstractLayout() {
+  public AbstractLayout() {
 
-        /**
-         * Don't do any of this until the MessageBus is fully initialized.
-         */
-        bus.addPostInitTask(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        authenticationService.start();
-
-                        /**
-                         * This is the Workspace Service.  Integration with the Workspace system should be through
-                         * this service.  
-                         */
-                        bus.subscribe(WORKSPACE_SVC, new MessageCallback() {
-                            @Override
-                            public void callback(Message message) {
-                                switch (LayoutCommands.valueOf(message.getCommandType())) {
-                                    case Initialize:
-
-                                        MessageBuilder.createMessage()
-                                                .toSubject("appContext")
-                                                .signalling()
-                                                .with("username", securityService.getAuthenticationContext() != null ?
-                                                        securityService.getAuthenticationContext().getName() : "NoAuthentication")
-                                                .noErrorHandling()
-                                                .sendNowWith(ErraiBus.get());
-
-                                        initializeUI();
-                                        break;
-                                }
-                            }
-                        });
-
-                        /**
-                         * The purpose of this initial call is to determine whether or not the server requires authentication.  If it
-                         * doesn't, the server will reply back to the AuthenticationService that authorization is not required.
-                         */
-                        MessageBuilder.createMessage()
-                                .toSubject("AuthorizationService")
-                                .command(SecurityCommands.WhatCredentials)
-                                .with(MessageParts.ReplyTo, SecurityService.SUBJECT)
-                                .noErrorHandling().sendNowWith(bus);
-                    }
-                });
-    }
+    /**
+     * Don't do any of this until the MessageBus is fully initialized.
+     */
+    bus.addPostInitTask(
+        new Runnable() {
+          @Override
+          public void run() {
+            authenticationService.start();
 
 
-    @Override
-    public void setLoginComponent(WSComponent loginComponent) {
-        //this.loginComponent = loginComponent;
-        throw new RuntimeException("Not implemented");
-    }
+            // This is the Workspace Service.  Integration with the Workspace system 
+            // should be through this service.
+            bus.subscribe(WORKSPACE_SVC, new MessageCallback() {
+              @Override
+              public void callback(Message message) {
+                switch (LayoutCommands.valueOf(message.getCommandType())) {
+                  case Initialize:
 
-    @Override
-    public void setPreferredGroupOrdering(String[] groups) {
-        preferredGroupOrdering.addAll(Arrays.asList(groups));
-    }
+                    String userName =
+                        securityService.getAuthenticationContext() != null ?
+                            securityService.getAuthenticationContext().getName()
+                            : "NoAuthentication";
 
-    @Override
-    public void addToolSet(ToolSet toolSet) {
-        toBeLoaded.add(toolSet);
-    }
+                    MessageBuilder.createMessage()
+                        .toSubject("appContext")
+                        .signalling()
+                        .with("username", userName)
+                        .noErrorHandling()
+                        .sendNowWith(ErraiBus.get());
 
-    @Override
-    public void addTool(String group, String name, String icon,
-                        boolean multipleAllowed, int priority, WSComponent component) {
-        if (!toBeLoadedGroups.containsKey(group)) toBeLoadedGroups.put(group, new ArrayList<ToolProvider>());
-
-        final String toolId = name.replaceAll(" ", "_") + "." + toolCounter++;
-
-        Image img;
-        if (icon == null || "".equals(icon)) {
-            img = new Image(erraiImageBundle.application());
-        } else
-            img = new Image(GWT.getModuleBaseURL() + icon);
-
-        final Tool toolImpl = new ToolImpl(name, toolId, multipleAllowed, img, component);
-        ToolProvider provider = new ToolProvider() {
-            public Tool getTool() {
-                return toolImpl;
-            }
-        };
-
-        toBeLoadedGroups.get(group).add(provider);
-    }
-
-    @Override
-    public void addTool(String group, String name, String icon,
-                        boolean multipleAllowed, int priority, WSComponent component, final String[] renderIfRoles) {
-        if (!toBeLoadedGroups.containsKey(group)) toBeLoadedGroups.put(group, new ArrayList<ToolProvider>());
-
-        final String toolId = name.replaceAll(" ", "_") + "." + toolCounter++;
-        Image img;
-        if (icon == null || "".equals(icon)) {
-            img = new Image(erraiImageBundle.application());
-        } else
-            img = new Image(GWT.getModuleBaseURL() + icon);
-
-        final Set<String> roles = new HashSet<String>();
-
-        for (String role : renderIfRoles) {
-            roles.add(role.trim());
-        }
-
-
-        final Tool toolImpl = new ToolImpl(name, toolId, multipleAllowed,
-                img, component);
-        ToolProvider provider = new ToolProvider() {
-            public Tool getTool() {
-                if (authenticationService.getSessionRoles().containsAll(roles)) {
-                    return toolImpl;
-                } else {
-                    return null;
+                    initializeUI();
+                    break;
                 }
-            }
-        };
+              }
+            });
 
-        toBeLoadedGroups.get(group).add(provider);
+            // The purpose of this initial call is to determine whether or not the server
+            // requires authentication.  If it doesn't, the server will reply back
+            // to the AuthenticationService that authorization is not required.
+            MessageBuilder.createMessage()
+                .toSubject("AuthenticationService")
+                .command(SecurityCommands.WhatCredentials)
+                .with(MessageParts.ReplyTo, SecurityService.SUBJECT)
+                .noErrorHandling().sendNowWith(bus);
+          }
+        });
+  }
+
+
+  @Override
+  public void setLoginComponent(WSComponent loginComponent) {
+    //this.loginComponent = loginComponent;
+    throw new RuntimeException("Not implemented");
+  }
+
+  @Override
+  public void setPreferredGroupOrdering(String[] groups) {
+    preferredGroupOrdering.addAll(Arrays.asList(groups));
+  }
+
+  @Override
+  public void addToolSet(ToolSet toolSet) {
+    toBeLoaded.add(toolSet);
+  }
+
+  @Override
+  public void addTool(String group, String name, String icon,
+                      boolean multipleAllowed, int priority, WSComponent component) {
+    if (!toBeLoadedGroups.containsKey(group)) toBeLoadedGroups.put(group, new ArrayList<ToolProvider>());
+
+    final String toolId = name.replaceAll(" ", "_") + "." + toolCounter++;
+
+    Image img;
+    if (icon == null || "".equals(icon)) {
+      img = new Image(erraiImageBundle.application());
+    } else
+      img = new Image(GWT.getModuleBaseURL() + icon);
+
+    final Tool toolImpl = new ToolImpl(name, toolId, multipleAllowed, img, component);
+    ToolProvider provider = new ToolProvider() {
+      public Tool getTool() {
+        return toolImpl;
+      }
+    };
+
+    toBeLoadedGroups.get(group).add(provider);
+  }
+
+  @Override
+  public void addTool(String group, String name, String icon,
+                      boolean multipleAllowed, int priority, WSComponent component, final String[] renderIfRoles) {
+    if (!toBeLoadedGroups.containsKey(group)) toBeLoadedGroups.put(group, new ArrayList<ToolProvider>());
+
+    final String toolId = name.replaceAll(" ", "_") + "." + toolCounter++;
+    Image img;
+    if (icon == null || "".equals(icon)) {
+      img = new Image(erraiImageBundle.application());
+    } else
+      img = new Image(GWT.getModuleBaseURL() + icon);
+
+    final Set<String> roles = new HashSet<String>();
+
+    for (String role : renderIfRoles) {
+      roles.add(role.trim());
     }
 
 
-    protected abstract void initializeUI();
+    final Tool toolImpl = new ToolImpl(name, toolId, multipleAllowed,
+        img, component);
+    ToolProvider provider = new ToolProvider() {
+      public Tool getTool() {
+        if (authenticationService.getSessionRoles().containsAll(roles)) {
+          return toolImpl;
+        } else {
+          return null;
+        }
+      }
+    };
 
-    public static SecurityService getSecurityService() {
-        return securityService;
-    }
+    toBeLoadedGroups.get(group).add(provider);
+  }
 
-    public static void forceReload() {
-        reload();
-    }
 
-    private native static void reload() /*-{
+  protected abstract void initializeUI();
+
+  public static SecurityService getSecurityService() {
+    return securityService;
+  }
+
+  public static void forceReload() {
+    reload();
+  }
+
+  private native static void reload() /*-{
        $wnd.location.reload();
      }-*/;
 
-    private native static void _initAfterWSLoad() /*-{
+  private native static void _initAfterWSLoad() /*-{
          try {
              $wnd.initAfterWSLoad();
          }

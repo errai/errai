@@ -70,7 +70,7 @@ public class SecurityService {
                         authHandler.doLogin(credentials);
 
                         Message challenge = createMessage()
-                                .toSubject("AuthorizationService")
+                                .toSubject("AuthenticationService")
                                 .command(SecurityCommands.AuthRequest)
                                 .with(MessageParts.ReplyTo, SUBJECT)
                                 .getMessage();
@@ -132,7 +132,7 @@ public class SecurityService {
             @Override
             public void execute() {
                 MessageBuilder.createMessage()
-                        .toSubject("AuthorizationService")
+                        .toSubject("AuthenticationService")
                         .command(SecurityCommands.WhatCredentials)
                         .with(MessageParts.ReplyTo, SUBJECT)
                         .noErrorHandling().sendNowWith(ErraiBus.get());

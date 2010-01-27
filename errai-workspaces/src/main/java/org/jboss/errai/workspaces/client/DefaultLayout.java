@@ -152,7 +152,7 @@ public class DefaultLayout extends AbstractLayout implements EntryPoint
 //                {
 //
 //                  MessageBuilder.createMessage()
-//                      .toSubject("AuthorizationService")
+//                      .toSubject("AuthenticationService")
 //                      .command(SecurityCommands.EndSession)
 //                      .noErrorHandling().sendNowWith(bus);
 //

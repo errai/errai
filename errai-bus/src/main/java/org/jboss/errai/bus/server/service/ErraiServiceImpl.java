@@ -123,7 +123,7 @@ public class ErraiServiceImpl implements ErraiService {
             }
         });
 
-        bus.subscribe("ClientNegotiationService", new MessageCallback() {
+        bus.subscribe("AuthorizationService", new MessageCallback() {
             public void callback(Message message) {
                 AuthSubject subject = message.getResource(QueueSession.class, "Session")
                         .getAttribute(AuthSubject.class, ErraiService.SESSION_AUTH_DATA);
