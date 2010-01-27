@@ -25,6 +25,12 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * A message queue is keeps track of which messages need to be sent outbound. It keeps track of the amount of messages
+ * that can be stored, transmitted and those which timeout. The <tt>MessageQueue</tt> is implemented using a
+ * {@link java.util.concurrent.LinkedBlockingQueue} to store the messages, and a <tt>ServerMessageBus</tt> to send the
+ * messages.
+ */
 public class MessageQueue {
     private static final long TIMEOUT = Boolean.getBoolean("org.jboss.errai.debugmode") ?
             (1000 * 60 * 60) : (1000 * 25);
@@ -52,11 +58,25 @@ public class MessageQueue {
     private ServerMessageBus bus;
     private volatile TimedTask task;
 
+    /**
+     * Initializes the message queue with an initial size and a specified bus
+     *
+     * @param queueSize - the size of the queue
+     * @param bus - the bus that will send the messages
+     */
     public MessageQueue(int queueSize, ServerMessageBus bus) {
         this.queue = new LinkedBlockingQueue<MarshalledMessage>(queueSize);
         this.bus = bus;
     }
 
+    /**
+     * Gets the next message to send, and returns the <tt>Payload</tt>, which contains the current messages that
+     * need to be sent from the specified bus to another.
+     *
+     * @param wait - boolean is true if we should wait until the queue is ready. In this case, a
+     * <tt>RuntimeException</tt> will be thrown if the polling is active already. Concurrent polling is not allowed.
+     * @return The <tt>Payload</tt> instance which contains the messages that need to be sent 
+     */
     public Payload poll(boolean wait) {
         if (!queueRunning) {
             throw new QueueUnavailableException("queue is not available");
@@ -126,6 +146,12 @@ public class MessageQueue {
         }
     }
 
+    /**
+     * Inserts the specified message into the queue, and returns true if it was successful
+     *
+     * @param message - the message to insert into the queue
+     * @return true if insertion was successful
+     */
     public boolean offer(final MarshalledMessage message) {
         if (!queueRunning) {
             throw new QueueUnavailableException("queue is not available");
@@ -155,6 +181,10 @@ public class MessageQueue {
         return b;
     }
 
+    /**
+     * Schedules the activation, by sending off the queue. All message should be processed and sent once the task is
+     * processed
+     */
     public void scheduleActivation() {
         final MessageQueue inst = this;
         bus.getScheduler().addTask(
@@ -187,6 +217,10 @@ public class MessageQueue {
         }
     }
 
+    /**
+     * This function indicates activity on the session, so the session knows when the last time there was activity.
+     * The <tt>MessageQueue</tt> relies on this to figure out whether or not to timeout
+     */
     public void activity() {
         if (sessionControl != null) sessionControl.activity();
     }
@@ -206,43 +240,89 @@ public class MessageQueue {
         }
     }
 
+    /**
+     * Returns true if there is a message in the queue
+     *
+     * @return true if the queue is not empty
+     */
     public boolean messagesWaiting() {
         return !queue.isEmpty();
     }
 
+    /**
+     * Sets the activation callback function which is called when the queue is scheduled for activation
+     *
+     * @param activationCallback - new activation callback function
+     */
     public void setActivationCallback(QueueActivationCallback activationCallback) {
         this.activationCallback = activationCallback;
     }
 
+    /**
+     * Returns the current activation callback function
+     *
+     * @return the current activation callback function
+     */
     public QueueActivationCallback getActivationCallback() {
         return activationCallback;
     }
 
+    /**
+     * Returns the current queue that is storing the messages
+     *
+     * @return the queue containing the messages to be sent
+     */
     public BlockingQueue<MarshalledMessage> getQueue() {
         return queue;
     }
 
+    /**
+     * Returns true if the queue is not running, or it has timed out
+     *
+     * @return true if the queue is stale
+     */
     public boolean isStale() {
         return !queueRunning || (!pollActive && (currentTimeMillis() - lastTransmission) > TIMEOUT);
     }
 
+    /**
+     * Returns true if the queue is currently active and polling
+     *
+     * @return true if the queue is actively polling
+     */
     public boolean isActive() {
         return pollActive;
     }
 
+    /**
+     * Fakes a transmission, shows life with a heartbeat
+     */
     public void heartBeat() {
         lastTransmission = System.currentTimeMillis();
     }
 
+    /**
+     * Returns true if the window is polling
+     *
+     * @return true if the window is polling
+     */
     public boolean isWindowPolling() {
         return windowPolling;
     }
 
+    /**
+     * Sets window polling
+     *
+     * @param windowPolling -
+     */
     public void setWindowPolling(boolean windowPolling) {
         this._windowPolling = windowPolling;
     }
 
 
+    /**
+     * Stops the queue, closes it on the bus and clears it completely
+     */
     public void stopQueue() {
         queueRunning = false;
         queue.clear();
