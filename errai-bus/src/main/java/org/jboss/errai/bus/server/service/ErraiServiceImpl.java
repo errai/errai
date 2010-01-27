@@ -58,7 +58,7 @@ public class ErraiServiceImpl implements ErraiService {
         bus.subscribe(AUTHORIZATION_SVC_SUBJECT, new MessageCallback() {
             public void callback(Message c) {
                 switch (SecurityCommands.valueOf(c.getCommandType())) {
-                    case WhatCredentials:
+                    case DemandCredentials:
                         if (authenticationConfigured()) {
 
                             /**
@@ -68,7 +68,7 @@ public class ErraiServiceImpl implements ErraiService {
 
                             createConversation(c)
                                     .subjectProvided()
-                                    .command(SecurityCommands.WhatCredentials)
+                                    .command(SecurityCommands.DemandCredentials)
                                     .with(SecurityParts.CredentialsRequired, "Name,Password")
                                     .with(MessageParts.ReplyTo, AUTHORIZATION_SVC_SUBJECT)
                                     .noErrorHandling().sendNowWith(bus);

@@ -43,7 +43,7 @@ public class SecurityService {
             public void callback(Message msg) {
              
                 switch (SecurityCommands.valueOf(msg.getCommandType())) {
-                    case WhatCredentials:
+                    case DemandCredentials:
                         if (authHandler == null) {
              //               msg.toSubject("LoginClient").sendNowWith(ErraiBus.get());
                             return;
@@ -133,7 +133,7 @@ public class SecurityService {
             public void execute() {
                 MessageBuilder.createMessage()
                         .toSubject("AuthenticationService")
-                        .command(SecurityCommands.WhatCredentials)
+                        .command(SecurityCommands.DemandCredentials)
                         .with(MessageParts.ReplyTo, SUBJECT)
                         .noErrorHandling().sendNowWith(ErraiBus.get());
             }

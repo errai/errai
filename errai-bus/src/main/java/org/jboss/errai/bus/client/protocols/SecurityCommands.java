@@ -23,7 +23,7 @@ public enum SecurityCommands {
     /**
      * Requests what credentials are required in order to proceed.  Used as both a request and response command.
      */
-    WhatCredentials,
+    DemandCredentials,
 
     /**
      * Sent to attempt actual authorization with the remote server.
@@ -62,7 +62,7 @@ public enum SecurityCommands {
      */
     EndSession,
 
-    /**
+  /**
      * Sent back to the senders ReplyTo subject if the message sent by the client cannot be delivered to the intended
      * recipient.
      */

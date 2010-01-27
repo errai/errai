@@ -98,7 +98,7 @@ public abstract class AbstractLayout implements ToolContainer {
             // to the AuthenticationService that authorization is not required.
             MessageBuilder.createMessage()
                 .toSubject("AuthenticationService")
-                .command(SecurityCommands.WhatCredentials)
+                .command(SecurityCommands.DemandCredentials)
                 .with(MessageParts.ReplyTo, SecurityService.SUBJECT)
                 .noErrorHandling().sendNowWith(bus);
           }

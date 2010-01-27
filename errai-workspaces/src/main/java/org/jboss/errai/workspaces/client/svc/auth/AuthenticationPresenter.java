@@ -40,7 +40,6 @@ import org.jboss.errai.bus.client.security.Credential;
 import org.jboss.errai.bus.client.security.impl.NameCredential;
 import org.jboss.errai.bus.client.security.impl.PasswordCredential;
 import org.jboss.errai.workspaces.client.AbstractLayout;
-import org.jboss.errai.workspaces.client.DefaultLayout;
 import org.jboss.errai.workspaces.client.protocols.LayoutCommands;
 
 import static org.jboss.errai.bus.client.CommandMessage.createWithParts;
@@ -86,7 +85,7 @@ public class AuthenticationPresenter implements MessageCallback {
      * Using the default display
      */
     public AuthenticationPresenter() {
-        display = new DefaultAuthenticationDisplay();
+        display = new MosaicAuthenticationDisplay();
         registerHandlers();
     }
 
@@ -108,7 +107,7 @@ public class AuthenticationPresenter implements MessageCallback {
 
                         DeferredCommand.addCommand(new Command() {
                             public void execute() {
-                                DefaultLayout.getSecurityService().doAuthentication(
+                                AbstractLayout.getSecurityService().doAuthentication(
                                         new AuthenticationHandler() {
                                             public void doLogin(Credential[] credentials) {
                                                 for (Credential c : credentials) {
