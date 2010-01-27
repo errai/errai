@@ -1,19 +1,24 @@
 package org.jboss.errai.bus.server;
 
+/**
+ * <tt>ErraiBootstrapFailure</tt> extends the <tt>RuntimeException</tt>. It is thrown when configurations and/or
+ * initializations of the server fail
+ */
 public class ErraiBootstrapFailure extends RuntimeException {
+
     public ErraiBootstrapFailure() {
-        super();    //To change body of overridden methods use File | Settings | File Templates.
+        super();
     }
 
     public ErraiBootstrapFailure(String message) {
-        super(message);    //To change body of overridden methods use File | Settings | File Templates.
+        super(message);
     }
 
     public ErraiBootstrapFailure(String message, Throwable cause) {
-        super(message, cause);    //To change body of overridden methods use File | Settings | File Templates.
+        super(message, cause);
     }
 
     public ErraiBootstrapFailure(Throwable cause) {
-        super(cause);    //To change body of overridden methods use File | Settings | File Templates.
+        super(cause);
     }
 }

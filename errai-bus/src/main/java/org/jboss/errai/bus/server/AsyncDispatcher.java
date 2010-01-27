@@ -24,12 +24,24 @@ public class AsyncDispatcher implements RequestDispatcher {
     private WorkerFactory workerFactory;
     private ErraiService service;
 
+    /**
+     * Constructs the <tt>AsyncDispatcher</tt> with the specified service. The injection makes it possible to obtain
+     * a reference to the <tt>ErraiService</tt>
+     *
+     * @param service - the service where the bus is located
+     */
     @Inject
     public AsyncDispatcher(ErraiService service) {
         this.service = service;
         this.workerFactory = new WorkerFactory(service);
     }
 
+    /**
+     * Sends the message globally. If the <tt>PriorityProcessing</tt> routing flag is set, then the message is sent
+     * globally on the bus. If not, the message is sent globally through the <tt>workerFactory</tt>
+     *
+     * @param message - a message to dispatch globally
+     */
     public void dispatchGlobal(Message message) {
         if (message.hasPart(MessageParts.PriorityProcessing)) {
             try {
@@ -47,6 +59,10 @@ public class AsyncDispatcher implements RequestDispatcher {
         }
     }
 
+    /**
+     *
+     * @param message - a message to dispatch
+     */
     public void dispatch(Message message) {
          workerFactory.deliver(message);
     }

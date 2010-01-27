@@ -16,6 +16,10 @@
 
 package org.jboss.errai.bus.server;
 
+/**
+ * <tt>MessageDeliveryFailure</tt> extends the <tt>RuntimeException</tt>. It is thrown when there is an error
+ * delivering a message
+ */
 public class MessageDeliveryFailure extends RuntimeException {
     public MessageDeliveryFailure() {
     }
