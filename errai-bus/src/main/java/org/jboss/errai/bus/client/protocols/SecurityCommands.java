@@ -20,51 +20,56 @@ package org.jboss.errai.bus.client.protocols;
  * The standard security protocol commands for use with ErraiBus.
  */
 public enum SecurityCommands {
-    /**
-     * Requests what credentials are required in order to proceed.  Used as both a request and response command.
-     */
-    AuthenticationScheme,
-
-    /**
-     * Sent to attempt actual authorization with the remote server.
-     */
-    AuthRequest,
-
-    /**
-     * Sent to the client if the security authorization was successful.  The message will contain session context
-     * and security principles information.
-     */
-    SecurityResponse,
-
-    /**
-     * Sent out as a challenge to a client when security constraints have been violated.  The message should contain
-     * information on the required credentials to proceed.
-     */
-    SecurityChallenge,
-
-    /**
-     * Sent if the authentication has failed.
-     */
-    FailedAuth,
-
-    /**
-     * Sent to indicate that the authentication was successful.
-     */
-    SuccessfulAuth,
-
-    /**
-     * Send if authentication is not required.
-     */
-    AuthenticationNotRequired,
-
-    /**
-     * Terminates any existing session.
-     */
-    EndSession,
+  /**
+   * Requests what credentials are required in order to proceed.  Used as both a request and response command.
+   */
+  AuthenticationScheme,
 
   /**
-     * Sent back to the senders ReplyTo subject if the message sent by the client cannot be delivered to the intended
-     * recipient.
-     */
-    MessageNotDelivered
+   * Sent to attempt actual authorization with the remote server.
+   */
+  AuthRequest,
+
+  /**
+   * Sent to the client if the security authorization was successful.  The message will contain session context
+   * and security principles information.
+   */
+  SecurityResponse,
+
+  /**
+   * Sent out as a challenge to a client when security constraints have been violated.  The message should contain
+   * information on the required credentials to proceed.
+   */
+  SecurityChallenge,
+
+  /**
+   * Sent if the authentication has failed.
+   */
+  FailedAuth,
+
+  /**
+   * Sent to indicate that the authentication was successful.
+   */
+  SuccessfulAuth,
+
+  /**
+   * Send if authentication is not required.
+   */
+  AuthenticationNotRequired,
+
+  /**
+   * Terminates any existing session.
+   */
+  EndSession,
+
+  /**
+   * Sent back to the senders ReplyTo subject if the message sent by the client cannot be delivered to the intended
+   * recipient.
+   */
+  MessageNotDelivered,
+
+  /**
+   * Send after successfull authentication and authorizazion
+   */
+  HandshakeComplete
 }

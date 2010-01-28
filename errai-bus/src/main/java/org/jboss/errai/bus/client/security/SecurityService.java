@@ -127,8 +127,8 @@ public class SecurityService {
             authenticationContext = createAuthContext(message);
 
             MessageBuilder.createMessage()
-                .toSubject("HandshakeComplete")
-                .signalling()
+                .toSubject("LoginClient")
+                .command(SecurityCommands.HandshakeComplete)
                 .noErrorHandling()
                 .sendNowWith(ErraiBus.get());
           }
