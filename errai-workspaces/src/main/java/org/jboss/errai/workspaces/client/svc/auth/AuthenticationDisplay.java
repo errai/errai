@@ -36,8 +36,8 @@ import org.gwt.mosaic.ui.client.layout.LayoutPanel;
 /**
  * A mosaic based based login box
  */
-public class MosaicAuthenticationDisplay extends LayoutPanel
-        implements AuthenticationPresenter.Display
+public class AuthenticationDisplay extends LayoutPanel
+        implements AuthenticationModule.Display
 
 {
     private TextBox userNameInput;
@@ -46,7 +46,7 @@ public class MosaicAuthenticationDisplay extends LayoutPanel
 
     private WindowPanel windowPanel;
 
-    public MosaicAuthenticationDisplay() {
+    public AuthenticationDisplay() {
         super();
 
         userNameInput = new TextBox();
@@ -57,7 +57,7 @@ public class MosaicAuthenticationDisplay extends LayoutPanel
         createLayoutWindowPanel();
     }
 
-    private void createLayoutWindowPanel() {
+  private void createLayoutWindowPanel() {
         windowPanel = new WindowPanel("Authentication required");
         windowPanel.setAnimationEnabled(true);
         LayoutPanel panel = new LayoutPanel();

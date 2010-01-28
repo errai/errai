@@ -23,7 +23,7 @@ public enum SecurityCommands {
     /**
      * Requests what credentials are required in order to proceed.  Used as both a request and response command.
      */
-    DemandCredentials,
+    AuthenticationScheme,
 
     /**
      * Sent to attempt actual authorization with the remote server.

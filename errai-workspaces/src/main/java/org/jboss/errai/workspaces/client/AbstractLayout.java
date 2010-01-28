@@ -24,8 +24,8 @@ package org.jboss.errai.workspaces.client;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Image;
 import org.jboss.errai.bus.client.*;
-import org.jboss.errai.bus.client.protocols.MessageParts;
-import org.jboss.errai.bus.client.protocols.SecurityCommands;
+import org.jboss.errai.bus.client.security.AuthenticationContext;
+import org.jboss.errai.bus.client.security.Role;
 import org.jboss.errai.bus.client.security.SecurityService;
 import org.jboss.errai.common.client.framework.WSComponent;
 import org.jboss.errai.workspaces.client.framework.Tool;
@@ -33,8 +33,7 @@ import org.jboss.errai.workspaces.client.framework.ToolImpl;
 import org.jboss.errai.workspaces.client.framework.ToolProvider;
 import org.jboss.errai.workspaces.client.framework.ToolSet;
 import org.jboss.errai.workspaces.client.icons.ErraiImageBundle;
-import org.jboss.errai.workspaces.client.protocols.LayoutCommands;
-import org.jboss.errai.workspaces.client.svc.auth.AuthenticationService;
+import org.jboss.errai.workspaces.client.svc.auth.AuthenticationModule;
 
 import java.util.*;
 
@@ -50,7 +49,7 @@ public abstract class AbstractLayout implements ToolContainer {
   protected static List<String> preferredGroupOrdering = new ArrayList<String>();
   protected static int toolCounter = 0;
 
-  private AuthenticationService authenticationService = new AuthenticationService();
+  private AuthenticationModule authenticationModule = new AuthenticationModule();
   private static SecurityService securityService = new SecurityService();
 
   protected ClientMessageBus bus = (ClientMessageBus) ErraiBus.get();
@@ -64,43 +63,31 @@ public abstract class AbstractLayout implements ToolContainer {
         new Runnable() {
           @Override
           public void run() {
-            authenticationService.start();
-
 
             // This is the Workspace Service.  Integration with the Workspace system 
             // should be through this service.
-            bus.subscribe(WORKSPACE_SVC, new MessageCallback() {
+            bus.subscribe("HandshakeComplete", new MessageCallback() {
               @Override
               public void callback(Message message) {
-                switch (LayoutCommands.valueOf(message.getCommandType())) {
-                  case Initialize:
 
-                    String userName =
-                        securityService.getAuthenticationContext() != null ?
-                            securityService.getAuthenticationContext().getName()
-                            : "NoAuthentication";
+                String userName =
+                    securityService.getAuthenticationContext() != null ?
+                        securityService.getAuthenticationContext().getName()
+                        : "NoAuthentication";
 
-                    MessageBuilder.createMessage()
-                        .toSubject("appContext")
-                        .signalling()
-                        .with("username", userName)
-                        .noErrorHandling()
-                        .sendNowWith(ErraiBus.get());
+                MessageBuilder.createMessage()
+                    .toSubject("appContext")
+                    .signalling()
+                    .with("username", userName)
+                    .noErrorHandling()
+                    .sendNowWith(ErraiBus.get());
 
-                    initializeUI();
-                    break;
-                }
+                initializeUI();
+
               }
             });
 
-            // The purpose of this initial call is to determine whether or not the server
-            // requires authentication.  If it doesn't, the server will reply back
-            // to the AuthenticationService that authorization is not required.
-            MessageBuilder.createMessage()
-                .toSubject("AuthenticationService")
-                .command(SecurityCommands.DemandCredentials)
-                .with(MessageParts.ReplyTo, SecurityService.SUBJECT)
-                .noErrorHandling().sendNowWith(bus);
+            authenticationModule.start();
           }
         });
   }
@@ -157,18 +144,34 @@ public abstract class AbstractLayout implements ToolContainer {
     } else
       img = new Image(GWT.getModuleBaseURL() + icon);
 
-    final Set<String> roles = new HashSet<String>();
+    final Set<String> requiredRoles = new HashSet<String>();
 
     for (String role : renderIfRoles) {
-      roles.add(role.trim());
+      requiredRoles.add(role.trim());
     }
 
 
-    final Tool toolImpl = new ToolImpl(name, toolId, multipleAllowed,
-        img, component);
+    final Tool toolImpl = new ToolImpl(name, toolId, multipleAllowed, img, component);
     ToolProvider provider = new ToolProvider() {
       public Tool getTool() {
-        if (authenticationService.getSessionRoles().containsAll(roles)) {
+
+        AuthenticationContext authContext = securityService.getAuthenticationContext();
+        boolean isAuthorized = false;
+
+        if(authContext!=null)
+        {
+          Set<Role> roleSet = authContext.getRoles();
+          for(Role assignedRole : roleSet)
+          {
+            for(String s : requiredRoles)
+            {
+              if(s.equals(assignedRole.getRoleName()))
+                isAuthorized = true;
+            }
+          }
+        }
+
+        if (isAuthorized) {
           return toolImpl;
         } else {
           return null;

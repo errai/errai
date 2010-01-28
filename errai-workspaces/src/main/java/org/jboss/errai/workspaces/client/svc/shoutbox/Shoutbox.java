@@ -60,7 +60,7 @@ import static org.jboss.errai.bus.client.MessageBuilder.createMessage;
  * </pre>
  *
  * @author Heiko Braun <hbraun@redhat.com>
- * @see org.jboss.errai.workspaces.client.svc.shoutbox.ShoutboxService
+ * @see ShoutboxModule
  */
 public class Shoutbox {
     private final MessageBus bus = ErraiBus.get();
@@ -68,7 +68,7 @@ public class Shoutbox {
 
     public void submitOffer(String provider, String subjectMatter) {
         createMessage()
-                .toSubject(ShoutboxService.INBOX)
+                .toSubject(ShoutboxModule.INBOX)
                 .command(ShoutboxCmd.SUBMIT_OFFER)
                 .with(ShoutboxCmdParts.SUBJECT, subjectMatter)
                 .with(ShoutboxCmdParts.PROVIDER, provider)
@@ -77,7 +77,7 @@ public class Shoutbox {
 
     public void retractOffer(String provider, String subjectMatter) {
         createMessage()
-                .toSubject(ShoutboxService.INBOX)
+                .toSubject(ShoutboxModule.INBOX)
                 .command(ShoutboxCmd.RETIRE_OFFER)
                 .with(ShoutboxCmdParts.SUBJECT, subjectMatter)
                 .with(ShoutboxCmdParts.PROVIDER, provider)
@@ -106,7 +106,7 @@ public class Shoutbox {
 
         // engage an offer right away
         MessageBuilder.createMessage()
-                .toSubject(ShoutboxService.INBOX)
+                .toSubject(ShoutboxModule.INBOX)
                 .command(ShoutboxCmd.ENGAGE_OFFER)
                 .with(ShoutboxCmdParts.SUBJECT, subject)
                 .with(ShoutboxCmdParts.CLIENT, client)
@@ -116,7 +116,7 @@ public class Shoutbox {
     public void retireOffer(String client, String subjectMatter) {
 
         MessageBuilder.createMessage()
-                .toSubject(ShoutboxService.INBOX)
+                .toSubject(ShoutboxModule.INBOX)
                 .command(ShoutboxCmd.RETIRE_OFFER)
                 .with(ShoutboxCmdParts.SUBJECT, subjectMatter)
                 .with(ShoutboxCmdParts.CLIENT, client)

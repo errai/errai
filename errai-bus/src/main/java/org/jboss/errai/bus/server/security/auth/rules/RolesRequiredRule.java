@@ -64,6 +64,8 @@ public class RolesRequiredRule implements BooleanRoutingRule {
                  * Inform the client they must login.
                  */
 
+            // TODO: This reside with the "AuthenticationService" listener, no
+              // i.e. by forwarding to that subject. See ErraiServiceImpl
                 createMessage()
                         .toSubject("LoginClient")
                         .command(SecurityCommands.SecurityChallenge)

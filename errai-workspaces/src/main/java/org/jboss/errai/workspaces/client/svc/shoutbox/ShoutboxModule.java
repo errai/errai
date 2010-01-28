@@ -17,7 +17,7 @@
 package org.jboss.errai.workspaces.client.svc.shoutbox;
 
 import org.jboss.errai.bus.client.*;
-import org.jboss.errai.workspaces.client.svc.Service;
+import org.jboss.errai.workspaces.client.svc.Module;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +28,7 @@ import java.util.List;
  */
 
 
-public class ShoutboxService implements Service
+public class ShoutboxModule implements Module
 {
   public static final String INBOX = "errai.shoutbox.inbox";
   

@@ -56,9 +56,9 @@ public class ErraiServiceImpl implements ErraiService {
     private void init() {
         //todo: this all needs sendNowWith be refactored at some point.
         bus.subscribe(AUTHORIZATION_SVC_SUBJECT, new MessageCallback() {
-            public void callback(Message c) {
-                switch (SecurityCommands.valueOf(c.getCommandType())) {
-                    case DemandCredentials:
+            public void callback(Message message) {
+                switch (SecurityCommands.valueOf(message.getCommandType())) {
+                    case AuthenticationScheme:
                         if (authenticationConfigured()) {
 
                             /**
@@ -66,14 +66,14 @@ public class ErraiServiceImpl implements ErraiService {
                              */
                             //todo: we only support login/password for now
 
-                            createConversation(c)
+                            createConversation(message)
                                     .subjectProvided()
-                                    .command(SecurityCommands.DemandCredentials)
+                                    .command(SecurityCommands.AuthenticationScheme)
                                     .with(SecurityParts.CredentialsRequired, "Name,Password")
                                     .with(MessageParts.ReplyTo, AUTHORIZATION_SVC_SUBJECT)
                                     .noErrorHandling().sendNowWith(bus);
                         } else {
-                            createConversation(c)
+                            createConversation(message)
                                     .subjectProvided()
                                     .command(SecurityCommands.AuthenticationNotRequired)
                                     .noErrorHandling().sendNowWith(bus);
@@ -83,13 +83,13 @@ public class ErraiServiceImpl implements ErraiService {
 
                     case AuthRequest:
                         /**
-                         * Send a challenge.
+                         * Receive a challenge.
                          */
 
                         if (authenticationConfigured()) {
                             try {
                                 configurator.getResource(AuthenticationAdapter.class)
-                                        .challenge(c);
+                                        .challenge(message);
                             }
                             catch (AuthenticationFailedException a) {
                             }
@@ -99,9 +99,9 @@ public class ErraiServiceImpl implements ErraiService {
                     case EndSession:
                         if (authenticationConfigured()) {
                             configurator.getResource(AuthenticationAdapter.class)
-                                    .endSession(c);
+                                    .endSession(message);
 
-                            createConversation(c)
+                            createConversation(message)
                                     .toSubject("LoginClient")
                                     .command(SecurityCommands.EndSession)
                                     .noErrorHandling()

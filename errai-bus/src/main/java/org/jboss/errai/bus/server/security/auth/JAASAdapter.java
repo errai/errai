@@ -110,7 +110,7 @@ public class JAASAdapter implements AuthenticationAdapter {
              * been performed.
              */
             Message successfulMsg = MessageBuilder.createConversation(message)
-                    .toSubject("LoginClient")
+                    .subjectProvided()
                     .command(SecurityCommands.SuccessfulAuth)
                     .with(SecurityParts.Roles, authSubject.toRolesString())
                     .with(SecurityParts.Name, name).getMessage();
@@ -141,7 +141,7 @@ public class JAASAdapter implements AuthenticationAdapter {
              * unfortunate news.
              */
             MessageBuilder.createConversation(message)
-                    .toSubject("LoginClient")
+                    .subjectProvided()
                     .command(SecurityCommands.FailedAuth)
                     .with(SecurityParts.Name, name)
                     .noErrorHandling().sendNowWith(bus);

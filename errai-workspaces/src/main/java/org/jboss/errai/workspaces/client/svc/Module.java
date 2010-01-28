@@ -21,7 +21,14 @@
  */
 package org.jboss.errai.workspaces.client.svc;
 
-public interface Service
+/**
+ * A module is a client side piece of code that intertacts
+ * with the message bus. Modules may have UI components associated with
+ * them, but they don't need to.<p/>
+ * Initialization of a module (i.e. registering message callbacks)
+ * should be done in the {@link #start()} method.
+ */
+public interface Module
 {
   void start();
   void stop();
