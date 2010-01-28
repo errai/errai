@@ -14,18 +14,12 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.workspaces.client.svc.shoutbox;
+package org.jboss.errai.workspaces.client.modules.shoutbox;
 
 /**
- * Client callback for notifications when a provider submits
- * or retracts an offer.
- *  
  * @author Heiko Braun <hbraun@redhat.com>
  */
-public interface ShoutboxCallback
+public enum ShoutboxCmdParts
 {
-
-  void offerSubmitted(String providerId);
-
-  void offerRetracted(String providerId);
+  PROVIDER, CLIENT, SUBJECT
 }

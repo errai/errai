@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.errai.workspaces.client.svc;
+package org.jboss.errai.workspaces.client.modules;
 
 /**
  * A module is a client side piece of code that intertacts

@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.errai.workspaces.client.svc.auth;
+package org.jboss.errai.workspaces.client.modules.auth;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -39,7 +39,7 @@ import org.jboss.errai.bus.client.security.impl.NameCredential;
 import org.jboss.errai.bus.client.security.impl.PasswordCredential;
 import org.jboss.errai.workspaces.client.AbstractLayout;
 import org.jboss.errai.workspaces.client.protocols.LayoutCommands;
-import org.jboss.errai.workspaces.client.svc.Module;
+import org.jboss.errai.workspaces.client.modules.Module;
 
 import static org.jboss.errai.bus.client.CommandMessage.createWithParts;
 import static org.jboss.errai.bus.client.MessageBuilder.createMessage;

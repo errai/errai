@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.workspaces.client.svc.shoutbox;
+package org.jboss.errai.workspaces.client.modules.shoutbox;
 
-import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.MessageBuilder;
 import org.jboss.errai.bus.client.MessageBus;

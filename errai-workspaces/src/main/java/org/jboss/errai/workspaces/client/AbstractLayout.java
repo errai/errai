@@ -33,7 +33,7 @@ import org.jboss.errai.workspaces.client.framework.ToolImpl;
 import org.jboss.errai.workspaces.client.framework.ToolProvider;
 import org.jboss.errai.workspaces.client.framework.ToolSet;
 import org.jboss.errai.workspaces.client.icons.ErraiImageBundle;
-import org.jboss.errai.workspaces.client.svc.auth.AuthenticationModule;
+import org.jboss.errai.workspaces.client.modules.auth.AuthenticationModule;
 
 import java.util.*;
 

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.workspaces.client.svc.shoutbox;
+package org.jboss.errai.workspaces.client.modules.shoutbox;
 
 import org.jboss.errai.bus.client.*;
-import org.jboss.errai.workspaces.client.svc.Module;
+import org.jboss.errai.workspaces.client.modules.Module;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.workspaces.client.svc.shoutbox;
+package org.jboss.errai.workspaces.client.modules.shoutbox;
 
 /**
  * @author Heiko Braun <hbraun@redhat.com>
