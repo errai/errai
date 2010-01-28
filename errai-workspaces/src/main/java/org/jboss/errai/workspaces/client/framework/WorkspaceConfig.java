@@ -16,13 +16,13 @@
 
 package org.jboss.errai.workspaces.client.framework;
 
-import org.jboss.errai.workspaces.client.ToolContainer;
+import org.jboss.errai.workspaces.client.framework.ToolContainer;
 
 /**
- * Main Bootstrap interface.
+ * Workspace configuration.
  * The implementation is automatically generated at compile-time.
  */
-public interface WorkspaceLauncher
+public interface WorkspaceConfig
 {
-    public void launch(ToolContainer container);
+    public void configure(ToolContainer container);
 }

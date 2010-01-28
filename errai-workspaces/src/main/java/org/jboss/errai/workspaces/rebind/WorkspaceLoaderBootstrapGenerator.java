@@ -98,7 +98,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
     ClassSourceFileComposerFactory composer = new ClassSourceFileComposerFactory(packageName,
         className);
 
-    composer.addImplementedInterface("org.jboss.errai.workspaces.client.framework.WorkspaceLauncher");
+    composer.addImplementedInterface("org.jboss.errai.workspaces.client.framework.WorkspaceConfig");
 
     SourceWriter sourceWriter = composer.createSourceWriter(context, printWriter);
 
@@ -134,7 +134,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
     sourceWriter.outdent();
     sourceWriter.println("}");
 
-    sourceWriter.println("public void launch(org.jboss.errai.workspaces.client.ToolContainer workspace) { ");
+    sourceWriter.println("public void configure(org.jboss.errai.workspaces.client.framework.ToolContainer workspace) { ");
     sourceWriter.outdent();
 
     // add statements sendNowWith pub key/value pairs from the resrouce bundle

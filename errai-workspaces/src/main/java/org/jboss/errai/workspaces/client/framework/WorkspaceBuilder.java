@@ -19,97 +19,49 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.errai.workspaces.client;
+package org.jboss.errai.workspaces.client.framework;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Image;
-import org.jboss.errai.bus.client.*;
+import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.bus.client.security.AuthenticationContext;
 import org.jboss.errai.bus.client.security.Role;
 import org.jboss.errai.bus.client.security.SecurityService;
 import org.jboss.errai.common.client.framework.WSComponent;
-import org.jboss.errai.workspaces.client.framework.Tool;
-import org.jboss.errai.workspaces.client.framework.ToolImpl;
-import org.jboss.errai.workspaces.client.framework.ToolProvider;
-import org.jboss.errai.workspaces.client.framework.ToolSet;
+import org.jboss.errai.workspaces.client.Registry;
+import org.jboss.errai.workspaces.client.Workspace;
 import org.jboss.errai.workspaces.client.icons.ErraiImageBundle;
-import org.jboss.errai.workspaces.client.modules.auth.AuthenticationModule;
 
 import java.util.*;
 
 /**
- * Basic workspace abstraction. Merely the ToolContainer impl.
+ * Acts as an intermediary between the deferred binding
+ * and actual assembly of a workspace. Responsible for things
+ * like ordering of tools.
  */
-public abstract class AbstractLayout implements ToolContainer {
-  public static final String WORKSPACE_SVC = "Workspace";
+public class WorkspaceBuilder implements ToolContainer
+{
 
   private static ErraiImageBundle erraiImageBundle = GWT.create(ErraiImageBundle.class);
+
   protected static List<ToolSet> toBeLoaded = new ArrayList<ToolSet>();
   protected static Map<String, List<ToolProvider>> toBeLoadedGroups = new HashMap<String, List<ToolProvider>>();
   protected static List<String> preferredGroupOrdering = new ArrayList<String>();
-  protected static int toolCounter = 0;
+  protected static int toolCounter = 0;  
 
-  private AuthenticationModule authenticationModule = new AuthenticationModule();
-  private static SecurityService securityService = new SecurityService();
-
-  protected ClientMessageBus bus = (ClientMessageBus) ErraiBus.get();
-
-  public AbstractLayout() {
-
-    /**
-     * Don't do any of this until the MessageBus is fully initialized.
-     */
-    bus.addPostInitTask(
-        new Runnable() {
-          @Override
-          public void run() {
-
-            // This is the Workspace Service.  Integration with the Workspace system 
-            // should be through this service.
-            bus.subscribe("HandshakeComplete", new MessageCallback() {
-              @Override
-              public void callback(Message message) {
-
-                String userName =
-                    securityService.getAuthenticationContext() != null ?
-                        securityService.getAuthenticationContext().getName()
-                        : "NoAuthentication";
-
-                MessageBuilder.createMessage()
-                    .toSubject("appContext")
-                    .signalling()
-                    .with("username", userName)
-                    .noErrorHandling()
-                    .sendNowWith(ErraiBus.get());
-
-                initializeUI();
-
-              }
-            });
-
-            authenticationModule.start();
-          }
-        });
-  }
-
-
-  @Override
   public void setLoginComponent(WSComponent loginComponent) {
     //this.loginComponent = loginComponent;
     throw new RuntimeException("Not implemented");
   }
 
-  @Override
   public void setPreferredGroupOrdering(String[] groups) {
     preferredGroupOrdering.addAll(Arrays.asList(groups));
   }
 
-  @Override
   public void addToolSet(ToolSet toolSet) {
     toBeLoaded.add(toolSet);
   }
 
-  @Override
   public void addTool(String group, String name, String icon,
                       boolean multipleAllowed, int priority, WSComponent component) {
     if (!toBeLoadedGroups.containsKey(group)) toBeLoadedGroups.put(group, new ArrayList<ToolProvider>());
@@ -132,7 +84,6 @@ public abstract class AbstractLayout implements ToolContainer {
     toBeLoadedGroups.get(group).add(provider);
   }
 
-  @Override
   public void addTool(String group, String name, String icon,
                       boolean multipleAllowed, int priority, WSComponent component, final String[] renderIfRoles) {
     if (!toBeLoadedGroups.containsKey(group)) toBeLoadedGroups.put(group, new ArrayList<ToolProvider>());
@@ -155,7 +106,9 @@ public abstract class AbstractLayout implements ToolContainer {
     ToolProvider provider = new ToolProvider() {
       public Tool getTool() {
 
-        AuthenticationContext authContext = securityService.getAuthenticationContext();
+        AuthenticationContext authContext =
+            Registry.get(SecurityService.class).getAuthenticationContext();
+        
         boolean isAuthorized = false;
 
         if(authContext!=null)
@@ -182,27 +135,96 @@ public abstract class AbstractLayout implements ToolContainer {
     toBeLoadedGroups.get(group).add(provider);
   }
 
+  /**
+   * Actual assembly of a workspace instance
+   * @param workspace
+   */
+  public void build(Workspace workspace)
+  {     
+    Set<String> loaded = new HashSet<String>();
+    if (!preferredGroupOrdering.isEmpty()) {
+      for (final String group : preferredGroupOrdering) {
+        if (loaded.contains(group)) continue;
 
-  protected abstract void initializeUI();
+        for (ToolSet ts : toBeLoaded) {
+          if (ts.getToolSetName().equals(group)) {
+            loaded.add(group);
+            workspace.addToolSet(ts);
+          }
+        }
 
-  public static SecurityService getSecurityService() {
-    return securityService;
+        if (loaded.contains(group)) continue;
+
+        if (toBeLoadedGroups.containsKey(group)) {
+          loaded.add(group);
+
+          final List<Tool> toBeRendered = new ArrayList<Tool>();
+          for (ToolProvider provider : toBeLoadedGroups.get(group)) {
+            Tool t = provider.getTool();
+            if (t != null) {
+              toBeRendered.add(t);
+            }
+          }
+
+          if (!toBeRendered.isEmpty()) {
+            ToolSet ts = new ToolSet() {
+              public Tool[] getAllProvidedTools() {
+                Tool[] toolArray = new Tool[toBeRendered.size()];
+                toBeRendered.toArray(toolArray);
+                return toolArray;
+              }
+
+              public String getToolSetName() {
+                return group;
+              }
+
+              public Widget getWidget() {
+                return null;
+              }
+            };
+
+            workspace.addToolSet(ts);
+          }
+        }
+      }
+    }
+
+    for (ToolSet ts : toBeLoaded) {
+      if (loaded.contains(ts.getToolSetName())) continue;
+      workspace.addToolSet(ts);
+    }
+
+    for (final String group : toBeLoadedGroups.keySet()) {
+      if (loaded.contains(group)) continue;
+
+      final List<Tool> toBeRendered = new ArrayList<Tool>();
+      for (ToolProvider provider : toBeLoadedGroups.get(group)) {
+        Tool t = provider.getTool();
+        if (t != null) {
+          toBeRendered.add(t);
+        }
+      }
+
+      if (!toBeRendered.isEmpty()) {
+
+        ToolSet ts = new ToolSet() {
+          public Tool[] getAllProvidedTools() {
+            Tool[] toolArray = new Tool[toBeRendered.size()];
+            toBeRendered.toArray(toolArray);
+            return toolArray;
+          }
+
+          public String getToolSetName() {
+            return group;
+          }
+
+          public Widget getWidget() {
+            return null;
+          }
+        };
+
+        workspace.addToolSet(ts);
+      }
+    }
   }
-
-  public static void forceReload() {
-    reload();
-  }
-
-  private native static void reload() /*-{
-       $wnd.location.reload();
-     }-*/;
-
-  private native static void _initAfterWSLoad() /*-{
-         try {
-             $wnd.initAfterWSLoad();
-         }
-         catch (e) {
-         }
-     }-*/;
 }
-

@@ -42,11 +42,11 @@
    
     <generate-with class="org.jboss.errai.workspaces.rebind.WorkspaceLoaderBootstrapGenerator">
         <when-type-assignable
-                class="org.jboss.errai.workspaces.client.framework.WorkspaceLauncher"/>
+                class="org.jboss.errai.workspaces.client.framework.WorkspaceConfig"/>
     </generate-with>
 
     <!-- Specify the app entry point class.                   -->
-    <entry-point class='org.jboss.errai.workspaces.client.MosaicLayout'/>
+    <entry-point class='org.jboss.errai.workspaces.client.Application'/>
     <stylesheet src="workspace.css"/>
    
     <!--replace-with class="com.allen_sauer.gwt.dnd.client.util.impl.DOMUtilImplIE6">

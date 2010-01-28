@@ -35,9 +35,11 @@ import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
 import org.jboss.errai.bus.client.security.AuthenticationHandler;
 import org.jboss.errai.bus.client.security.Credential;
+import org.jboss.errai.bus.client.security.SecurityService;
 import org.jboss.errai.bus.client.security.impl.NameCredential;
 import org.jboss.errai.bus.client.security.impl.PasswordCredential;
-import org.jboss.errai.workspaces.client.AbstractLayout;
+import org.jboss.errai.workspaces.client.Application;
+import org.jboss.errai.workspaces.client.Registry;
 import org.jboss.errai.workspaces.client.protocols.LayoutCommands;
 import org.jboss.errai.workspaces.client.modules.Module;
 
@@ -45,6 +47,9 @@ import static org.jboss.errai.bus.client.CommandMessage.createWithParts;
 import static org.jboss.errai.bus.client.MessageBuilder.createMessage;
 import static org.jboss.errai.bus.client.json.JSONUtilCli.decodeMap;
 
+/**
+ * Listens as <code>'LoginClient'</code>
+ */
 public class AuthenticationModule implements Module, MessageCallback
 {
   private Message deferredMessage;
@@ -81,7 +86,7 @@ public class AuthenticationModule implements Module, MessageCallback
   public AuthenticationModule()
   {
     display = new AuthenticationDisplay();
-    registerHandlers();
+    bindEventHandlers();
   }
 
   public void start() {
@@ -101,7 +106,7 @@ public class AuthenticationModule implements Module, MessageCallback
 
   }
 
-  private void registerHandlers() {
+  private void bindEventHandlers() {
     // Form Submission Handler
     display.getSubmitButton().addClickHandler(
         new ClickHandler() {
@@ -109,7 +114,7 @@ public class AuthenticationModule implements Module, MessageCallback
 
             DeferredCommand.addCommand(new Command() {
               public void execute() {
-                AbstractLayout.getSecurityService().doAuthentication(
+                Registry.get(SecurityService.class).doAuthentication(
                     new AuthenticationHandler() {
                       public void doLogin(Credential[] credentials) {
                         for (Credential c : credentials) {
@@ -128,12 +133,12 @@ public class AuthenticationModule implements Module, MessageCallback
     );   
   }
 
-  public Runnable getNegotiationTask() {
-    return negotiationTask;
-  }
-
-
-  public void callback(Message message) {
+  /**
+   * Listens as 'LoginClient'
+   * @param message - a message forwarded from the SecurityService
+   */
+  public void callback(Message message)
+  {
     try {
       switch (SecurityCommands.valueOf(message.getCommandType()))
       {
@@ -142,12 +147,9 @@ public class AuthenticationModule implements Module, MessageCallback
           // the first message send to the AuthorizationService
           // will be rejected if not authenticated
           if (message.hasPart(SecurityParts.RejectedMessage))
-          {
-            deferredMessage = createWithParts(decodeMap(message.get(String.class, SecurityParts.RejectedMessage)));
-          }
+            deferredMessage = createWithParts(decodeMap(message.get(String.class, SecurityParts.RejectedMessage)));          
 
           display.clearPanel();
-
           display.showLoginPanel();
           break;
 
@@ -161,7 +163,7 @@ public class AuthenticationModule implements Module, MessageCallback
           });*/
 
           // kill app and reload
-          AbstractLayout.forceReload();
+          Application.forceReload();
           break;
 
         case FailedAuth:
@@ -179,7 +181,7 @@ public class AuthenticationModule implements Module, MessageCallback
 
         case AuthenticationNotRequired:
           MessageBuilder.createMessage()
-              .toSubject(AbstractLayout.WORKSPACE_SVC)
+              .toSubject(Application.WORKSPACE_SVC)
               .command(LayoutCommands.Initialize)
               .noErrorHandling().sendNowWith(ErraiBus.get());
           break;
@@ -191,11 +193,12 @@ public class AuthenticationModule implements Module, MessageCallback
           break;
 
         default:
-          // I don't know this command. :(
+          throw new IllegalArgumentException("Unknown command: "+message.getCommandType());
       }
     }
-    catch (Exception e) {
-      e.printStackTrace();
+    catch (Exception e)
+    {
+      throw new RuntimeException("Failed to process message", e);
     }
   }
 
