@@ -154,13 +154,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
         {
           public void visit(Class<?> clazz, GeneratorContext context, TreeLogger logger, SourceWriter writer)
           {
-
-            if(clazz.getName().indexOf("ProcessEditor")!=-1)
-            {
-              writer.println("// inspected " + clazz.getName());
-              Annotation[] annotations = clazz.getAnnotations();
-            }
-
+           
             if (clazz.isAnnotationPresent(LoadToolSet.class))
             {
               writer.println("workspace.addToolSet(new " + clazz.getName() + "());");
