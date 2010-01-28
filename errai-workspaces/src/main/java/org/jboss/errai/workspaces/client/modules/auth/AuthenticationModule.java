@@ -74,6 +74,8 @@ public class AuthenticationModule implements Module, MessageCallback
     void showWelcomeMessage(String messageText);
   }
 
+  private boolean deferredNotification = false;
+  
   private final Runnable negotiationTask = new Runnable() {
     public void run() {
       createMessage()
@@ -206,21 +208,24 @@ public class AuthenticationModule implements Module, MessageCallback
 
   private void notifyWorkspace()
   {
-    MessageBuilder.createMessage()
-        .toSubject(Application.SUBJECT)
-        .command(LayoutCommands.Initialize)
-        .noErrorHandling().sendNowWith(ErraiBus.get());
+    if(!deferredNotification)
+    {
+      MessageBuilder.createMessage()
+          .toSubject(Application.SUBJECT)
+          .command(LayoutCommands.Initialize)
+          .noErrorHandling().sendNowWith(ErraiBus.get());
 
-    AuthenticationContext authenticationContext = Registry.get(SecurityService.class).getAuthenticationContext();
-    String userName = authenticationContext != null ?
-        authenticationContext.getName() : "NoAuthentication";
+      AuthenticationContext authenticationContext = Registry.get(SecurityService.class).getAuthenticationContext();
+      String userName = authenticationContext != null ?
+          authenticationContext.getName() : "NoAuthentication";
 
-    MessageBuilder.createMessage()
-        .toSubject("appContext")
-        .signalling()
-        .with("username", userName)
-        .noErrorHandling()
-        .sendNowWith(ErraiBus.get());
+      MessageBuilder.createMessage()
+          .toSubject("appContext")
+          .signalling()
+          .with("username", userName)
+          .noErrorHandling()
+          .sendNowWith(ErraiBus.get());
+    }
   }
 
   private void performNegotiation()
@@ -238,5 +243,10 @@ public class AuthenticationModule implements Module, MessageCallback
       // no message was intercepted to resend       
       negotiationTask.run();
     }
+  }
+  
+  public void setDeferredNotification(boolean deferredNotification)
+  {
+    this.deferredNotification = deferredNotification;
   }
 }

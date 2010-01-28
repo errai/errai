@@ -72,7 +72,7 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
 
     ErraiBus.get().subscribe(
         "appContext.toolset", new MessageCallback() {
-          @Override
+          
           public void callback(final Message message) {
             String toolsetId = message.get(String.class, "toolsetId");
             String toolId = message.get(String.class, "toolId");
@@ -170,7 +170,7 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
       );
 
       DeferredCommand.addCommand(new Command() {
-        @Override
+
         public void execute() {
           wrapper.onResize();
         }
@@ -236,7 +236,6 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
       this.add(tabLayout);
     }
 
-    @Override
     public void onResize() {
       setPixelSize(getParent().getOffsetWidth(), getParent().getOffsetHeight());
       LayoutUtil.layoutHints(tabLayout);
@@ -252,14 +251,12 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
       WidgetHelper.invalidate(content);
     }
 
-    @Override
     public void onResize() {
       setPixelSize(getParent().getOffsetWidth(), getParent().getOffsetHeight());
       LayoutUtil.layoutHints(this);
     }
   }
 
-  @Override
   public void onResize() {
     LayoutUtil.layoutHints(this);
   }

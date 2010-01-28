@@ -26,9 +26,11 @@ import com.google.gwt.user.client.ui.RootPanel;
 import org.gwt.mosaic.ui.client.MessageBox;
 import org.gwt.mosaic.ui.client.layout.BorderLayout;
 import org.gwt.mosaic.ui.client.layout.BorderLayoutData;
-import org.jboss.errai.bus.client.*;
+import org.jboss.errai.bus.client.ClientMessageBus;
+import org.jboss.errai.bus.client.ErraiBus;
+import org.jboss.errai.bus.client.Message;
+import org.jboss.errai.bus.client.MessageCallback;
 import org.jboss.errai.bus.client.protocols.MessageParts;
-import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.security.SecurityService;
 import org.jboss.errai.workspaces.client.framework.WorkspaceBuilder;
 import org.jboss.errai.workspaces.client.framework.WorkspaceConfig;
@@ -63,6 +65,7 @@ public class Application implements EntryPoint {
 
     // global service registry
     Registry.set(SecurityService.class, securityService);
+    Registry.set(AuthenticationModule.class, authenticationModule);
   }
 
   public void onModuleLoad()
