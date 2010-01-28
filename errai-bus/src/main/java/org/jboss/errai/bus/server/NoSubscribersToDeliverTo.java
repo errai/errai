@@ -16,6 +16,10 @@
 
 package org.jboss.errai.bus.server;
 
+/**
+ * <tt>NoSubscribersToDeliverTo</tt> extends the <tt>RuntimeException</tt>. It is thrown when there is no where to
+ * deliver a message to
+ */
 public class NoSubscribersToDeliverTo extends MessageDeliveryFailure {
     private static final long serialVersionUID = -5385972750788483158L;
 
