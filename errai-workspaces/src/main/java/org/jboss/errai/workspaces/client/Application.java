@@ -22,21 +22,24 @@
 package org.jboss.errai.workspaces.client;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.RootPanel;
 import org.gwt.mosaic.ui.client.MessageBox;
 import org.gwt.mosaic.ui.client.layout.BorderLayout;
 import org.gwt.mosaic.ui.client.layout.BorderLayoutData;
-import org.jboss.errai.bus.client.ClientMessageBus;
-import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.Message;
-import org.jboss.errai.bus.client.MessageCallback;
+import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.security.SecurityService;
+import org.jboss.errai.workspaces.client.framework.ToolSet;
 import org.jboss.errai.workspaces.client.framework.WorkspaceBuilder;
 import org.jboss.errai.workspaces.client.framework.WorkspaceConfig;
 import org.jboss.errai.workspaces.client.layout.WSLayoutPanel;
 import org.jboss.errai.workspaces.client.modules.auth.AuthenticationModule;
 import org.jboss.errai.workspaces.client.protocols.LayoutCommands;
+import org.jboss.errai.workspaces.client.protocols.LayoutParts;
+
+import java.util.List;
 
 import static com.google.gwt.core.client.GWT.create;
 
@@ -135,6 +138,41 @@ public class Application implements EntryPoint {
     refreshView();
 
     RootPanel.get().add(viewport);
+
+    // show default toolset
+    DeferredCommand.addCommand(
+        new Command()
+        {
+          public void execute()
+          {
+            String initialToolSetName = null;
+            if(Preferences.has(Preferences.DEFAULT_TOOL))
+            {
+              initialToolSetName = Preferences.get(Preferences.DEFAULT_TOOL);
+            }
+            else
+            {
+              // launch first available tool
+              List<ToolSet> toolSets = workspace.getToolsets();
+              if(toolSets.size()>0)
+              {
+                initialToolSetName = toolSets.get(0).getToolSetName();
+              }
+            }
+
+            if(initialToolSetName!=null)
+            {
+              MessageBuilder.createMessage()
+                  .toSubject(Workspace.SUBJECT)
+                  .command(LayoutCommands.ActivateTool)
+                  .with(LayoutParts.TOOLSET, initialToolSetName)
+                  .noErrorHandling()
+                  .sendNowWith(ErraiBus.get()
+                  );
+            }
+          }
+        }
+    );
   }
 
   /**
