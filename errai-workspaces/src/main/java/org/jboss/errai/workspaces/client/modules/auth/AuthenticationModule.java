@@ -33,6 +33,7 @@ import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
+import org.jboss.errai.bus.client.security.AuthenticationContext;
 import org.jboss.errai.bus.client.security.AuthenticationHandler;
 import org.jboss.errai.bus.client.security.Credential;
 import org.jboss.errai.bus.client.security.SecurityService;
@@ -130,7 +131,7 @@ public class AuthenticationModule implements Module, MessageCallback
             });
           }
         }
-    );   
+    );
   }
 
   /**
@@ -147,7 +148,7 @@ public class AuthenticationModule implements Module, MessageCallback
           // the first message send to the AuthorizationService
           // will be rejected if not authenticated
           if (message.hasPart(SecurityParts.RejectedMessage))
-            deferredMessage = createWithParts(decodeMap(message.get(String.class, SecurityParts.RejectedMessage)));          
+            deferredMessage = createWithParts(decodeMap(message.get(String.class, SecurityParts.RejectedMessage)));
 
           display.clearPanel();
           display.showLoginPanel();
@@ -171,7 +172,7 @@ public class AuthenticationModule implements Module, MessageCallback
 
           MessageBox.confirm("Authentication Failure", "Please try again.",
               new MessageBox.ConfirmationCallback() {
-                
+
                 public void onResult(boolean b) {
                   display.showLoginPanel();
                 }
@@ -180,16 +181,17 @@ public class AuthenticationModule implements Module, MessageCallback
           break;
 
         case AuthenticationNotRequired:
-          MessageBuilder.createMessage()
-              .toSubject(Application.WORKSPACE_SVC)
-              .command(LayoutCommands.Initialize)
-              .noErrorHandling().sendNowWith(ErraiBus.get());
+          notifyWorkspace();
           break;
 
         case SuccessfulAuth:
           display.hideLoginPanel();
           performNegotiation();
 
+          break;
+
+        case HandshakeComplete:
+          notifyWorkspace();
           break;
 
         default:
@@ -200,6 +202,25 @@ public class AuthenticationModule implements Module, MessageCallback
     {
       throw new RuntimeException("Failed to process message", e);
     }
+  }
+
+  private void notifyWorkspace()
+  {
+    MessageBuilder.createMessage()
+        .toSubject(Application.SUBJECT)
+        .command(LayoutCommands.Initialize)
+        .noErrorHandling().sendNowWith(ErraiBus.get());
+
+    AuthenticationContext authenticationContext = Registry.get(SecurityService.class).getAuthenticationContext();
+    String userName = authenticationContext != null ?
+        authenticationContext.getName() : "NoAuthentication";
+
+    MessageBuilder.createMessage()
+        .toSubject("appContext")
+        .signalling()
+        .with("username", userName)
+        .noErrorHandling()
+        .sendNowWith(ErraiBus.get());
   }
 
   private void performNegotiation()

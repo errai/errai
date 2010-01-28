@@ -28,11 +28,13 @@ import org.gwt.mosaic.ui.client.layout.BorderLayout;
 import org.gwt.mosaic.ui.client.layout.BorderLayoutData;
 import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.client.protocols.MessageParts;
+import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.security.SecurityService;
 import org.jboss.errai.workspaces.client.framework.WorkspaceBuilder;
 import org.jboss.errai.workspaces.client.framework.WorkspaceConfig;
 import org.jboss.errai.workspaces.client.layout.WSLayoutPanel;
 import org.jboss.errai.workspaces.client.modules.auth.AuthenticationModule;
+import org.jboss.errai.workspaces.client.protocols.LayoutCommands;
 
 import static com.google.gwt.core.client.GWT.create;
 
@@ -41,7 +43,7 @@ import static com.google.gwt.core.client.GWT.create;
  */
 public class Application implements EntryPoint {
 
-  public static final String WORKSPACE_SVC = "Workspace";
+  public static final String SUBJECT = "Workspace";
 
   private Viewport viewport;
   private WSLayoutPanel mainLayout;
@@ -84,26 +86,20 @@ public class Application implements EntryPoint {
                 }
             );
 
-            // This is the Workspace Service.  Integration with the Workspace system
-            // should be through this service.
-            bus.subscribe("HandshakeComplete", new MessageCallback() {
+            // The main workspace listener            
+            bus.subscribe(SUBJECT, new MessageCallback() {
 
               public void callback(Message message)
               {
 
-                String userName =
-                    securityService.getAuthenticationContext() != null ?
-                        securityService.getAuthenticationContext().getName()
-                        : "NoAuthentication";
-
-                MessageBuilder.createMessage()
-                    .toSubject("appContext")
-                    .signalling()
-                    .with("username", userName)
-                    .noErrorHandling()
-                    .sendNowWith(ErraiBus.get());
-
-                initializeUI();
+                if(message.getCommandType().equals(LayoutCommands.Initialize.toString()))
+                {
+                  initializeUI();
+                }
+                else
+                {
+                  throw new IllegalArgumentException("Unknown command: "+ message.getCommandType());
+                }
 
               }
             });
