@@ -22,6 +22,8 @@
 package org.jboss.errai.workspaces.client;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.*;
 import org.gwt.mosaic.ui.client.LayoutPopupPanel;
@@ -32,6 +34,8 @@ import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.workspaces.client.icons.ErraiImageBundle;
 
+import java.util.Date;
+
 
 /**
  * Top header
@@ -41,6 +45,7 @@ public class Header extends LayoutPanel
   private Image loadingImage;
   
   private HTML username = new HTML("Unknown user");
+  private Date loginDate;
 
   // avoid flickering image
   final Timer turnOffLoading = new Timer() {
@@ -62,6 +67,7 @@ public class Header extends LayoutPanel
       public void callback(Message message)
       {
         username.setText( message.get(String.class, "username"));
+        loginDate = new Date();
         layout();
       }
     });
@@ -108,7 +114,7 @@ public class Header extends LayoutPanel
           {
             StringBuffer sb = new StringBuffer("<h3>User information</h3>");
             sb.append("- User: ").append(username.getText()).append("<br/>");
-            sb.append("- Logged in since: ").append("").append("<br/>");
+            sb.append("- Logged in since: ").append(loginDate).append("<br/>");
             sb.append("- SID: ").append("").append("<br/>");
             sb.append("- Roles: ").append("").append("<br/>");
 
@@ -129,16 +135,15 @@ public class Header extends LayoutPanel
     );
 
 
-    Button btn = new Button("Logout", new ClickListener()
+    Button btn = new Button("Logout", new ClickHandler()
     {
 
-      public void onClick(Widget widget)
+      public void onClick(ClickEvent clickEvent)
       {
-        // TODO: Optional service: send to appContext#logout instead 
-         MessageBuilder.createMessage()
-                      .toSubject("AuthenticationService")
-                      .command(SecurityCommands.EndSession)
-                      .noErrorHandling().sendNowWith(ErraiBus.get());
+        MessageBuilder.createMessage()
+            .toSubject("AuthenticationService")
+            .command(SecurityCommands.EndSession)
+            .noErrorHandling().sendNowWith(ErraiBus.get());
       }
     }
     );

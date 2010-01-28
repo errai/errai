@@ -41,6 +41,7 @@ import org.jboss.errai.bus.client.security.impl.NameCredential;
 import org.jboss.errai.bus.client.security.impl.PasswordCredential;
 import org.jboss.errai.workspaces.client.Application;
 import org.jboss.errai.workspaces.client.Registry;
+import org.jboss.errai.workspaces.client.Workspace;
 import org.jboss.errai.workspaces.client.protocols.LayoutCommands;
 import org.jboss.errai.workspaces.client.modules.Module;
 
@@ -211,7 +212,7 @@ public class AuthenticationModule implements Module, MessageCallback
     if(!deferredNotification)
     {
       MessageBuilder.createMessage()
-          .toSubject(Application.SUBJECT)
+          .toSubject(Workspace.SUBJECT)
           .command(LayoutCommands.Initialize)
           .noErrorHandling().sendNowWith(ErraiBus.get());
 

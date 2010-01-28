@@ -35,6 +35,8 @@ import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.MessageCallback;
 import org.jboss.errai.workspaces.client.framework.Tool;
 import org.jboss.errai.workspaces.client.framework.ToolSet;
+import org.jboss.errai.workspaces.client.protocols.LayoutCommands;
+import org.jboss.errai.workspaces.client.protocols.LayoutParts;
 import org.jboss.errai.workspaces.client.util.LayoutUtil;
 import org.jboss.errai.workspaces.client.widgets.WSToolSetLauncher;
 
@@ -47,6 +49,9 @@ import java.util.List;
  * @author Heiko.Braun <heiko.braun@jboss.com>
  */
 public class Workspace extends DeckLayoutPanel implements RequiresResize {
+
+  public static final String SUBJECT = "Workspace";
+
   private Menu menu;
 
   private static List<ToolSet> toolSets = new ArrayList<ToolSet>();
@@ -71,13 +76,23 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
     this.setPadding(5);
 
     ErraiBus.get().subscribe(
-        "appContext.toolset", new MessageCallback() {
-          
-          public void callback(final Message message) {
-            String toolsetId = message.get(String.class, "toolsetId");
-            String toolId = message.get(String.class, "toolId");
+        Workspace.SUBJECT,
+        new MessageCallback()
+        {
+          public void callback(final Message message)
+          {
+            switch(LayoutCommands.valueOf(message.getCommandType()))
+            {
+              case ActivateTool:
+                String toolsetId = message.get(String.class, LayoutParts.TOOLSET);
+                String toolId = message.get(String.class, LayoutParts.TOOL);
 
-            showToolSet(toolsetId, toolId);
+                showToolSet(toolsetId, toolId);
+                
+                break;
+            }
+
+
           }
         }
     );
@@ -122,7 +137,8 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
     showToolSet(id, null);  // opens the default tool
   }
 
-  public void showToolSet(final String toolSetId, final String toolId) {
+  public void showToolSet(final String toolSetId, final String toolId)
+  {
     ToolSetDeck deck = findToolSet(toolSetId);
     if (null == deck)
       throw new IllegalArgumentException("No such toolSet: " + toolSetId);
@@ -130,24 +146,28 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
     // select tool
     ToolSet selectedToolSet = deck.toolSet;
     Tool selectedTool = null;
-    if (toolId != null) {
+    if (toolId != null)  // particular tool
+    {
       for (Tool t : selectedToolSet.getAllProvidedTools()) {
         if (toolId.equals(t.getId())) {
           selectedTool = t;
           break;
         }
       }
-    } else {
+    }
+    else  // default tool, the first one
+    {
       Tool[] availableTools = selectedToolSet.getAllProvidedTools();
       if (availableTools == null || availableTools.length == 0)
         throw new IllegalArgumentException("Empty toolset: " + toolSetId);
 
-      selectedTool = availableTools[0]; // Default
+      selectedTool = availableTools[0];
     }
 
     // is it already open?
     boolean isOpen = false;
-    for (int i = 0; i < deck.tabLayout.getWidgetCount(); i++) {
+    for (int i = 0; i < deck.tabLayout.getWidgetCount(); i++)
+    {
       TabWrapper tab = (TabWrapper) deck.tabLayout.getWidget(i);
       if (tab.id.equals(toolId)) {
         isOpen = true;

@@ -45,8 +45,6 @@ import static com.google.gwt.core.client.GWT.create;
  */
 public class Application implements EntryPoint {
 
-  public static final String SUBJECT = "Workspace";
-
   private Viewport viewport;
   private WSLayoutPanel mainLayout;
   private Menu menu;
@@ -90,20 +88,16 @@ public class Application implements EntryPoint {
             );
 
             // The main workspace listener            
-            bus.subscribe(SUBJECT, new MessageCallback() {
+            bus.subscribe(Workspace.SUBJECT, new MessageCallback() {
 
               public void callback(Message message)
               {
-
-                if(message.getCommandType().equals(LayoutCommands.Initialize.toString()))
+                switch(LayoutCommands.valueOf(message.getCommandType()))
                 {
-                  initializeUI();
+                  case Initialize:
+                    initializeUI();
+                    break;
                 }
-                else
-                {
-                  throw new IllegalArgumentException("Unknown command: "+ message.getCommandType());
-                }
-
               }
             });
 

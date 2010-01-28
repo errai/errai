@@ -25,8 +25,11 @@ import org.gwt.mosaic.ui.client.layout.LayoutPanel;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.MessageBuilder;
 import org.jboss.errai.widgets.client.WSLaunchButton;
+import org.jboss.errai.workspaces.client.Workspace;
 import org.jboss.errai.workspaces.client.framework.Tool;
 import org.jboss.errai.workspaces.client.icons.ErraiImageBundle;
+import org.jboss.errai.workspaces.client.protocols.LayoutCommands;
+import org.jboss.errai.workspaces.client.protocols.LayoutParts;
 
 
 /**
@@ -66,17 +69,16 @@ public class WSToolSetLauncher extends LayoutPanel
     WSLaunchButton button = new WSLaunchButton(newIcon, name);
     button.addClickListener(
         new ClickHandler()
-        {
-          @Override
+        {          
           public void onClick(ClickEvent clickEvent)
           {
             System.out.println("Click " + tool.getId());
             
             MessageBuilder.createMessage()
-                .toSubject("appContext.toolset")
-                .signalling()
-                .with("toolId", tool.getId())
-                .with("toolsetId", toolSetId)
+                .toSubject(Workspace.SUBJECT)
+                .command(LayoutCommands.ActivateTool)
+                .with(LayoutParts.TOOL, tool.getId())
+                .with(LayoutParts.TOOLSET, toolSetId)
                 .noErrorHandling()
                 .sendNowWith(ErraiBus.get());
           }
