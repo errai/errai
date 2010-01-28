@@ -137,21 +137,27 @@ public class SecurityService {
 
   private static AuthenticationContext createAuthContext(Message msg)
   {
-    String name = msg.get(String.class, SecurityParts.Name);
-    String rolesString = msg.get(String.class, SecurityParts.Roles);
+    String username = "";
+    HashSet<Role> assingnedRoles = new HashSet<Role>();
 
-    Set<Role> roleSet = new HashSet<Role>();
-    String[] roles = rolesString.split(",");
+    if(msg.hasPart(SecurityParts.Roles))
+    {
+      username = msg.get(String.class, SecurityParts.Name);
+      String rolesString = msg.get(String.class, SecurityParts.Roles);
 
-    for (final String role : roles) {
-      roleSet.add(new Role() {
-        public String getRoleName() {
-          return role;
-        }
-      });
+
+      String[] roles = rolesString.split(",");
+
+      for (final String role : roles) {
+        assingnedRoles.add(new Role() {
+          public String getRoleName() {
+            return role;
+          }
+        });
+      }
     }
 
-    return new BasicAuthenticationContext(roleSet, name);
+    return new BasicAuthenticationContext(assingnedRoles, username);
   }
 
   /**
