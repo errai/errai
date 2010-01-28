@@ -100,13 +100,15 @@ public class ErraiServiceImpl implements ErraiService {
                         if (authenticationConfigured()) {
                             configurator.getResource(AuthenticationAdapter.class)
                                     .endSession(message);
-
-                            createConversation(message)
-                                    .toSubject("LoginClient")
-                                    .command(SecurityCommands.EndSession)
-                                    .noErrorHandling()
-                                    .sendNowWith(bus);
                         }
+
+                      // reply in any case
+                      createConversation(message)
+                          .toSubject("LoginClient")
+                          .command(SecurityCommands.EndSession)
+                          .noErrorHandling()
+                          .sendNowWith(bus);
+
                         break;
                 }
             }
