@@ -1,3 +1,9 @@
+.WSLoadInitPanel {
+    background:yellow;
+    cursor: wait;
+    position: absolute; top: 0; left: 0;
+    z-index:1000;
+}
 
 .WSGrid-header {
     border-collapse: collapse;

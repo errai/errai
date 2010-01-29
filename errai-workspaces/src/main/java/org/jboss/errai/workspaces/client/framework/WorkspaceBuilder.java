@@ -22,6 +22,7 @@
 package org.jboss.errai.workspaces.client.framework;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.bus.client.security.AuthenticationContext;
@@ -47,7 +48,7 @@ public class WorkspaceBuilder implements ToolContainer
   protected static List<ToolSet> toBeLoaded = new ArrayList<ToolSet>();
   protected static Map<String, List<ToolProvider>> toBeLoadedGroups = new HashMap<String, List<ToolProvider>>();
   protected static List<String> preferredGroupOrdering = new ArrayList<String>();
-  protected static int toolCounter = 0;  
+  protected static int toolCounter = 0;
 
   public void setLoginComponent(WSComponent loginComponent) {
     //this.loginComponent = loginComponent;
@@ -66,13 +67,8 @@ public class WorkspaceBuilder implements ToolContainer
                       boolean multipleAllowed, int priority, WSComponent component) {
     if (!toBeLoadedGroups.containsKey(group)) toBeLoadedGroups.put(group, new ArrayList<ToolProvider>());
 
-    final String toolId = name.replaceAll(" ", "_") + "." + toolCounter++;
-
-    Image img;
-    if (icon == null || "".equals(icon)) {
-      img = new Image(erraiImageBundle.application());
-    } else
-      img = new Image(GWT.getModuleBaseURL() + icon);
+    final String toolId = createToolId(name);
+    Image img = createIcon(name,icon);
 
     final Tool toolImpl = new ToolImpl(name, toolId, multipleAllowed, img, component);
     ToolProvider provider = new ToolProvider() {
@@ -84,16 +80,33 @@ public class WorkspaceBuilder implements ToolContainer
     toBeLoadedGroups.get(group).add(provider);
   }
 
+  private String createToolId(String name)
+  {
+    final String toolId = name.replaceAll(" ", "_") + "." + toolCounter++;
+    return toolId;
+  }
+
+  private Image createIcon(String toolName, String icon)
+  {
+    IconFactory iconFactory = GWT.create(IconFactory.class);
+
+    Image img;
+    ImageResource imgres = iconFactory.createIcon(toolName);
+
+    if(imgres!=null)
+      img = new Image(imgres);
+    else
+      img = new Image(erraiImageBundle.application());
+
+    return img;
+  }
+
   public void addTool(String group, String name, String icon,
                       boolean multipleAllowed, int priority, WSComponent component, final String[] renderIfRoles) {
     if (!toBeLoadedGroups.containsKey(group)) toBeLoadedGroups.put(group, new ArrayList<ToolProvider>());
 
-    final String toolId = name.replaceAll(" ", "_") + "." + toolCounter++;
-    Image img;
-    if (icon == null || "".equals(icon)) {
-      img = new Image(erraiImageBundle.application());
-    } else
-      img = new Image(GWT.getModuleBaseURL() + icon);
+    final String toolId = createToolId(name);
+    Image img = createIcon(name, icon);
 
     final Set<String> requiredRoles = new HashSet<String>();
 
@@ -108,7 +121,7 @@ public class WorkspaceBuilder implements ToolContainer
 
         AuthenticationContext authContext =
             Registry.get(SecurityService.class).getAuthenticationContext();
-        
+
         boolean isAuthorized = false;
 
         if(authContext!=null)
@@ -140,7 +153,7 @@ public class WorkspaceBuilder implements ToolContainer
    * @param workspace
    */
   public void build(Workspace workspace)
-  {     
+  {
     Set<String> loaded = new HashSet<String>();
     if (!preferredGroupOrdering.isEmpty()) {
       for (final String group : preferredGroupOrdering) {
@@ -226,5 +239,6 @@ public class WorkspaceBuilder implements ToolContainer
         workspace.addToolSet(ts);
       }
     }
+
   }
 }

@@ -21,21 +21,9 @@
  */
 package org.jboss.errai.workspaces.client.framework;
 
-import org.jboss.errai.common.client.framework.WSComponent;
-import org.jboss.errai.workspaces.client.framework.ToolSet;
+import com.google.gwt.resources.client.ImageResource;
 
-public interface ToolContainer
+public interface IconFactory
 {
-  void addToolSet(ToolSet toolSet);
-
-  void addTool(String group, String name, String icon,
-                             boolean multipleAllowed, int priority, WSComponent component);
-
-  void addTool(String group, String name, String icon,
-                                                        boolean multipleAllowed, int priority, WSComponent component, String[] renderIfRoles);
-
-  void setLoginComponent(WSComponent loginComponent);
-
-  void setPreferredGroupOrdering(String[] groups);
-
+  ImageResource createIcon(String name);
 }

@@ -19,23 +19,14 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.errai.workspaces.client.framework;
+package org.jboss.errai.workspaces.client.framework.annotations;
 
-import org.jboss.errai.common.client.framework.WSComponent;
-import org.jboss.errai.workspaces.client.framework.ToolSet;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
-public interface ToolContainer
+
+@Retention(RetentionPolicy.RUNTIME)
+public @interface DefaultBundle
 {
-  void addToolSet(ToolSet toolSet);
-
-  void addTool(String group, String name, String icon,
-                             boolean multipleAllowed, int priority, WSComponent component);
-
-  void addTool(String group, String name, String icon,
-                                                        boolean multipleAllowed, int priority, WSComponent component, String[] renderIfRoles);
-
-  void setLoginComponent(WSComponent loginComponent);
-
-  void setPreferredGroupOrdering(String[] groups);
-
+  Class value();
 }

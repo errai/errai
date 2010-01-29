@@ -22,7 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface LoadTool {
     String name();
-    String icon() default "";
+    String icon() default "";    
     String group();
     int priority() default 0;
     boolean multipleAllowed() default false;    

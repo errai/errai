@@ -111,7 +111,7 @@ public class Application implements EntryPoint {
     // --------------------
 
     // these are stateful and might receive bus messages already
-    mainLayout = new WSLayoutPanel(new BorderLayout());
+    mainLayout = new WSLayoutPanel(new BorderLayout());    
 
     menu = new Menu();
     workspace = Workspace.createInstance(menu);
@@ -125,7 +125,7 @@ public class Application implements EntryPoint {
   private void initializeUI()
   {
     viewport = new Viewport();
-
+    
     WorkspaceBuilder builder = new WorkspaceBuilder();
     WorkspaceConfig config = create(WorkspaceConfig.class);
     config.configure(builder);
@@ -135,10 +135,8 @@ public class Application implements EntryPoint {
 
     // finally attach the main layout to the viewport
     viewport.getLayoutPanel().add(mainLayout);
-    refreshView();
-
     RootPanel.get().add(viewport);
-
+    
     // show default toolset
     DeferredCommand.addCommand(
         new Command()
@@ -174,9 +172,11 @@ public class Application implements EntryPoint {
                   .sendNowWith(ErraiBus.get()
                   );
             }
+
+            refreshView();
           }
         }
-    );
+    );    
   }
 
   /**

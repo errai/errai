@@ -28,10 +28,7 @@ import com.google.gwt.user.rebind.SourceWriter;
 import org.jboss.errai.bus.server.annotations.security.RequireRoles;
 import org.jboss.errai.bus.server.util.ConfigUtil;
 import org.jboss.errai.bus.server.util.RebindVisitor;
-import org.jboss.errai.workspaces.client.framework.annotations.GroupOrder;
-import org.jboss.errai.workspaces.client.framework.annotations.LoadTool;
-import org.jboss.errai.workspaces.client.framework.annotations.LoadToolSet;
-import org.jboss.errai.workspaces.client.framework.annotations.LoginComponent;
+import org.jboss.errai.workspaces.client.framework.annotations.*;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -154,7 +151,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
         {
           public void visit(Class<?> clazz, GeneratorContext context, TreeLogger logger, SourceWriter writer)
           {
-           
+
             if (clazz.isAnnotationPresent(LoadToolSet.class))
             {
               writer.println("workspace.addToolSet(new " + clazz.getName() + "());");
@@ -189,7 +186,8 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
             else if (clazz.isAnnotationPresent(LoginComponent.class)) {
               writer.println("workspace.setLoginComponent(new " + clazz.getName() + "());");
             }
-            else if (clazz.isAnnotationPresent(GroupOrder.class)) {
+
+            if (clazz.isAnnotationPresent(GroupOrder.class)) {
               GroupOrder groupOrder = clazz.getAnnotation(GroupOrder.class);
 
               if ("".equals(groupOrder.value().trim())) return;
@@ -209,7 +207,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
               }
 
               writer.println("});");
-            }
+            }            
           }
         });
 
