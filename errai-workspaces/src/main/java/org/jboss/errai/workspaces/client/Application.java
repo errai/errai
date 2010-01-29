@@ -146,9 +146,13 @@ public class Application implements EntryPoint {
           public void execute()
           {
             String initialToolSetName = null;
-            if(Preferences.has(Preferences.DEFAULT_TOOL))
+
+            String preferedTool = Preferences.has(Preferences.DEFAULT_TOOL) ?
+                Preferences.get(Preferences.DEFAULT_TOOL) : null;
+
+            if(preferedTool!=null && workspace.hasToolSet(preferedTool))
             {
-              initialToolSetName = Preferences.get(Preferences.DEFAULT_TOOL);
+              initialToolSetName = preferedTool;
             }
             else
             {

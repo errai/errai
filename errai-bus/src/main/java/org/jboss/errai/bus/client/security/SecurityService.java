@@ -30,7 +30,6 @@ import org.jboss.errai.bus.client.security.impl.NameCredential;
 import org.jboss.errai.bus.client.security.impl.PasswordCredential;
 
 import java.util.HashSet;
-import java.util.Set;
 
 import static org.jboss.errai.bus.client.MessageBuilder.createMessage;
 import static org.jboss.errai.bus.client.protocols.SecurityParts.CredentialsRequired;
@@ -39,6 +38,10 @@ public class SecurityService {
   private AuthenticationContext authenticationContext;
   private AuthenticationHandler authHandler;
   public static final String SUBJECT = "AuthenticationListener";
+
+  // deferr notification of LoginClient in case
+  // a workspace wants to override the authentication or authorizazion scheme
+  private boolean deferredNotification;
 
   public SecurityService() {
     ErraiBus.get().subscribe(SUBJECT, new MessageCallback()
@@ -96,22 +99,17 @@ public class SecurityService {
             challenge.sendNowWith(ErraiBus.get());
 
             break;
-          case AuthenticationNotRequired:
-            // forward this message on to the login client.
-            msg.toSubject("LoginClient").sendNowWith(ErraiBus.get());
+          case AuthenticationNotRequired:           
+            notifyLoginClient(msg);
             break;
 
           case FailedAuth:
-            // forward this message on to the login client.
-            msg.toSubject("LoginClient").sendNowWith(ErraiBus.get());
+            notifyLoginClient(msg);
             break;
           case SuccessfulAuth:
             if (authenticationContext != null && authenticationContext.isValid()) return;
-
             authenticationContext = createAuthContext(msg);
-
-            // forward this message on to the login client.
-            msg.toSubject("LoginClient").sendNowWith(ErraiBus.get());
+            notifyLoginClient(msg);
 
             break;
         }
@@ -126,13 +124,22 @@ public class SecurityService {
 
             authenticationContext = createAuthContext(message);
 
-            MessageBuilder.createMessage()
-                .toSubject("LoginClient")
-                .command(SecurityCommands.HandshakeComplete)
-                .noErrorHandling()
-                .sendNowWith(ErraiBus.get());
+            if(!deferredNotification)
+            {
+              MessageBuilder.createMessage()
+                  .toSubject("LoginClient")
+                  .command(SecurityCommands.HandshakeComplete)
+                  .noErrorHandling()
+                  .sendNowWith(ErraiBus.get());
+            }
           }
         });
+  }
+
+  private void notifyLoginClient(Message msg)
+  {
+    // forward this message on to the login client.
+    msg.toSubject("LoginClient").sendNowWith(ErraiBus.get());
   }
 
   private static AuthenticationContext createAuthContext(Message msg)
@@ -186,5 +193,10 @@ public class SecurityService {
 
   public void setAuthenticationContext(AuthenticationContext authenticationContext) {
     this.authenticationContext = authenticationContext;
+  }
+
+  public void setDeferredNotification(boolean deferredNotification)
+  {
+    this.deferredNotification = deferredNotification;
   }
 }

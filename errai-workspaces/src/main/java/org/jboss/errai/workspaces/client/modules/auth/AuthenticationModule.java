@@ -75,8 +75,6 @@ public class AuthenticationModule implements Module, MessageCallback
     void showWelcomeMessage(String messageText);
   }
 
-  private boolean deferredNotification = false;
-  
   private final Runnable negotiationTask = new Runnable() {
     public void run() {
       createMessage()
@@ -90,6 +88,16 @@ public class AuthenticationModule implements Module, MessageCallback
   public AuthenticationModule()
   {
     display = new AuthenticationDisplay();
+    bindEventHandlers();
+  }
+
+  /**
+   * replace default login display
+   * @param display
+   */
+  public AuthenticationModule(Display display)
+  {
+    this.display = display;
     bindEventHandlers();
   }
 
@@ -209,24 +217,22 @@ public class AuthenticationModule implements Module, MessageCallback
 
   private void notifyWorkspace()
   {
-    if(!deferredNotification)
-    {
-      MessageBuilder.createMessage()
-          .toSubject(Workspace.SUBJECT)
-          .command(LayoutCommands.Initialize)
-          .noErrorHandling().sendNowWith(ErraiBus.get());
+    MessageBuilder.createMessage()
+        .toSubject(Workspace.SUBJECT)
+        .command(LayoutCommands.Initialize)
+        .noErrorHandling().sendNowWith(ErraiBus.get());
 
-      AuthenticationContext authenticationContext = Registry.get(SecurityService.class).getAuthenticationContext();
-      String userName = authenticationContext != null ?
-          authenticationContext.getName() : "NoAuthentication";
+    AuthenticationContext authenticationContext = Registry.get(SecurityService.class).getAuthenticationContext();
+    String userName = authenticationContext != null ?
+        authenticationContext.getName() : "NoAuthentication";
 
-      MessageBuilder.createMessage()
-          .toSubject("appContext")
-          .signalling()
-          .with("username", userName)
-          .noErrorHandling()
-          .sendNowWith(ErraiBus.get());
-    }
+    MessageBuilder.createMessage()
+        .toSubject("appContext")
+        .signalling()
+        .with("username", userName)
+        .noErrorHandling()
+        .sendNowWith(ErraiBus.get());
+
   }
 
   private void performNegotiation()
@@ -245,9 +251,5 @@ public class AuthenticationModule implements Module, MessageCallback
       negotiationTask.run();
     }
   }
-  
-  public void setDeferredNotification(boolean deferredNotification)
-  {
-    this.deferredNotification = deferredNotification;
-  }
+
 }
