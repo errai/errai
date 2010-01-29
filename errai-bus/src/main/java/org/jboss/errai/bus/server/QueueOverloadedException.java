@@ -16,6 +16,10 @@
 
 package org.jboss.errai.bus.server;
 
+/**
+ * <tt>QueueOverloadedException</tt> extends the <tt>MessageDeliveryFailure</tt>. It is thrown when a queue is
+ * completely maxed out with undelivered messages
+ */
 public class QueueOverloadedException extends MessageDeliveryFailure {
     private static final long serialVersionUID = 6014530858847384745L;
 
