@@ -92,7 +92,7 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
     protected JSONMessage() {
         _start();
     }
-    
+
     /**
      * Return the specified command type.  Returns <tt>null</tt> if not specified.
      *
@@ -118,6 +118,10 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
      * @return -
      */
     public Message toSubject(String subject) {
+        if (parts.containsKey(MessageParts.ToSubject.name()))
+                throw new IllegalArgumentException("cannot set subject more than once.");
+
+
         _addStringPart(MessageParts.ToSubject.name(), subject);
         parts.put(MessageParts.ToSubject.name(), subject);
         return this;
@@ -130,6 +134,9 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
      * @return
      */
     public Message command(Enum type) {
+        if (parts.containsKey(MessageParts.CommandType.name()))
+                throw new IllegalArgumentException("cannot set command type more than once.");
+
         _addStringPart(MessageParts.CommandType.name(), type.name());
         parts.put(MessageParts.CommandType.name(), type.name());
         return this;
@@ -142,6 +149,10 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
      * @return
      */
     public Message command(String type) {
+        if (parts.containsKey(MessageParts.CommandType.name()))
+                throw new IllegalArgumentException("cannot set command type more than once.");
+
+
         _addStringPart(MessageParts.CommandType.name(), type);
         parts.put(MessageParts.CommandType.name(), type);
         return this;
@@ -155,6 +166,9 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
      * @return -
      */
     public Message set(Enum part, Object value) {
+        if (parts.containsKey(part.name()))
+            throw new IllegalArgumentException("cannot set a part more than once.");
+
         _addObjectPart(part.name(), value);
         return set(part.name(), value);
     }
@@ -167,6 +181,9 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
      * @return -
      */
     public Message set(String part, Object value) {
+        if (parts.containsKey(part))
+            throw new IllegalArgumentException("cannot set a part more than once.");
+
         _addObjectPart(part, value);
         parts.put(part, value);
         return this;
@@ -411,6 +428,8 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
         }
     }
 
+    
+
     /**
      * Transmit this message to the specified {@link MessageBus} instance.
      *
@@ -434,7 +453,6 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
      *
      * @return an encoded string of the buffer
      */
-    @Override
     public String getEncoded() {
         _end();
         return buf.toString();

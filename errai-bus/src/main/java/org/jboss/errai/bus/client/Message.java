@@ -235,6 +235,12 @@ public interface Message {
     public boolean isFlagSet(RoutingFlags flag);
 
     /**
+     * Commit the message in it's current structure.  After this method is called, there is no guarantee that
+     * any changes in the message will be communicated across the bus.
+     */
+    public void commit();
+
+    /**
      * Transmit this message to the specified {@link org.jboss.errai.bus.client.MessageBus} instance.
      *
      * @param viaThis - <tt>MessageBus</tt> instance to send message to

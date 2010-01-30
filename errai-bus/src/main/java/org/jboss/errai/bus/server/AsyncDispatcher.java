@@ -53,6 +53,9 @@ public class AsyncDispatcher implements RequestDispatcher {
                         return;
                     }
                 }
+                else {
+                    t.printStackTrace();
+                }
             }
         } else {
             workerFactory.deliverGlobal(message);

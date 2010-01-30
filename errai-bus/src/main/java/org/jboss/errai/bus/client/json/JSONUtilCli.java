@@ -33,13 +33,13 @@ public class JSONUtilCli {
     public static String MULTI_PAYLOAD_SEPER = "||";
     public static String MULTI_PAYLOAD_SEPER_REGEX = "\\|\\|";
 
-    public static ArrayList<MarshalledMessage> decodePayload(Object value) {
-        String str = String.valueOf(value);
+    public static ArrayList<MarshalledMessage> decodePayload(String value) {
+        System.out.println("**:" + value);
 
-        if (value == null || str.trim().length() == 0) return new ArrayList<MarshalledMessage>(0);
+        if (value == null || value.trim().length() == 0) return new ArrayList<MarshalledMessage>(0);
 
         ArrayList<MarshalledMessage> list = new ArrayList<MarshalledMessage>();
-        JSONValue a = JSONParser.parse(str);
+        JSONValue a = JSONParser.parse(value);
         
         if (a instanceof JSONArray) {
             JSONArray arr = (JSONArray) a;

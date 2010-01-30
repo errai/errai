@@ -440,6 +440,9 @@ public class CommandMessage implements Message {
         }
     }
 
+    public void commit() {
+    }
+
     /**
      * Transmit this message to the specified {@link org.jboss.errai.bus.client.MessageBus} instance.
      *

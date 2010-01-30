@@ -53,10 +53,10 @@ public class JSONEncoder {
             return encodeMap((Map) v);
         } else if (v instanceof Object[]) {
             return encodeArray((Object[]) v);
-        } else if (serializableTypes.contains(v.getClass())) {
+        } else if (serializableTypes.contains(v.getClass()) || tHandlers.containsKey(v.getClass())) {
             return encodeObject(v);
         } else {
-            return null;
+            throw new RuntimeException("cannot serialize type: " + v.getClass().getName());
         }
     }
 
@@ -105,7 +105,8 @@ public class JSONEncoder {
                 build.append(',');
             }
 
-            build.append(field.getName()).append(':').append(_encode(MVEL.executeExpression(s[i++], o)));
+            Object v = MVEL.executeExpression(s[i++], o);
+            build.append(field.getName()).append(':').append(_encode(v));
             first = false;
         }
 

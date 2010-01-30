@@ -1713,7 +1713,7 @@ public class WSGrid extends Composite implements RequiresResize {
 
     public void sizeToParent() {
         DeferredCommand.addCommand(new Command() {
-            @Override
+           
             public void execute() {
                  setPixelSize(getParent().getOffsetWidth() - 5, getParent().getOffsetHeight() - 15);
             }
@@ -1834,9 +1834,7 @@ public class WSGrid extends Composite implements RequiresResize {
         }
     }
 
-    @Override
     public void onResize() {
-        System.out.println("Resize called.");
         setPixelSize(getParent().getOffsetWidth(), getParent().getOffsetHeight());
     }
 

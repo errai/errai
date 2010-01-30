@@ -230,6 +230,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      *                          an error.
      */
     public void send(final Message message) {
+        message.commit();
         try {
             if (message.hasPart(MessageParts.ToSubject)) {
                 if (!initialized) {
@@ -824,13 +825,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             MessageBuilder.setProvider(this);
         }
 
-        @Override
         public Message get() {
             return new JSONMessage();
         }
     };
 
-    @Override
     public MessageProvider getMessageProvider() {
         return provider;
     }

@@ -261,6 +261,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
 
     public void sendGlobal(final Message message) {
+        message.commit();
         final String subject = message.getSubject();
         if (!subscriptions.containsKey(subject) && !remoteSubscriptions.containsKey(subject)) {
             throw new NoSubscribersToDeliverTo("for: " + subject + " [commandType:" + message.getCommandType() + "]");
@@ -310,6 +311,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
 
     public void send(Message message) {
+        message.commit();
         if (message.hasResource("Session")) {
             send(getSessionId(message), message, true);
         } else if (message.hasPart(MessageParts.SessionID)) {
@@ -320,6 +322,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
 
     public void send(Message message, boolean fireListeners) {
+        message.commit();
         if (!message.hasResource("Session")) {
             throw new RuntimeException("cannot automatically route message. no session contained in message.");
         }
@@ -556,13 +559,11 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         {
             MessageBuilder.setProvider(this);
         }
-        @Override
         public Message get() {
             return JSONMessageServer.create();
         }
     };
 
-    @Override
     public MessageProvider getMessageProvider() {
         return provider;
     }

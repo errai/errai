@@ -1,15 +1,15 @@
 package org.jboss.errai.bus.client;
 
-import org.jboss.errai.bus.client.api.builder.AbstractMessageBuilder;
-import org.jboss.errai.bus.client.api.builder.AbstractRemoteCallBuilder;
-import org.jboss.errai.bus.client.api.builder.MessageBuildSubject;
+import org.jboss.errai.bus.client.api.builder.*;
+import org.jboss.errai.bus.client.protocols.MessageParts;
+
+import java.util.Map;
 
 /**
  * The MessageBuilder API provides a fluent method of building Messages.
  */
 public class MessageBuilder {
     private static MessageProvider provider = new MessageProvider() {
-        @Override
         public Message get() {
             return JSONMessage.create();
         }
@@ -19,7 +19,7 @@ public class MessageBuilder {
      * Create a new message.
      *
      * @return a <tt>MessageBuildSubject</tt> which essentially is a <tt>Message</tt>, but ensures that the user
-     * constructs messages properly
+     *         constructs messages properly
      */
     public static MessageBuildSubject createMessage() {
         return new AbstractMessageBuilder(provider.get()).start();
@@ -30,10 +30,16 @@ public class MessageBuilder {
      *
      * @param message - reference message to create conversation from
      * @return a <tt>MessageBuildSubject</tt> which essentially is a <tt>Message</tt>, but ensures that the user
-     * constructs messages properly
+     *         constructs messages properly
      */
     public static MessageBuildSubject createConversation(Message message) {
-        return new AbstractMessageBuilder(ConversationMessage.create(message)).start();
+        Message newMessage = provider.get();
+        if (newMessage instanceof HasEncoded) {
+            return new AbstractMessageBuilder(new HasEncodedConvMessageWrapper(message, newMessage)).start();
+        }
+        else {
+            return new AbstractMessageBuilder(new ConversationMessageWrapper(message, newMessage)).start();
+        }
     }
 
     /**

@@ -176,7 +176,6 @@ public class SecurityService {
     authHandler = handler;
 
     DeferredCommand.addCommand(new Command() {
-      @Override
       public void execute() {
         MessageBuilder.createMessage()
             .toSubject("AuthenticationService")
