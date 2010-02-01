@@ -21,8 +21,11 @@
  */
 package org.jboss.errai.workspaces.client;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
+import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
@@ -33,6 +36,7 @@ import org.gwt.mosaic.ui.client.util.WidgetHelper;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.MessageCallback;
+import org.jboss.errai.workspaces.client.framework.IconFactory;
 import org.jboss.errai.workspaces.client.framework.Tool;
 import org.jboss.errai.workspaces.client.framework.ToolSet;
 import org.jboss.errai.workspaces.client.protocols.LayoutCommands;
@@ -109,7 +113,7 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
 
     if (w != null) {
       w.getElement().setId(id);
-      menu.getStack().add(w, toolSet.getToolSetName());
+      menu.addLauncher(w, toolSet.getToolSetName());
     } else {
       WSToolSetLauncher toolSetLauncher = new WSToolSetLauncher(toolSet.getToolSetName());
 
@@ -118,7 +122,7 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
       }
 
       toolSetLauncher.getElement().setId(id);
-      menu.getStack().add(toolSetLauncher, toolSet.getToolSetName());
+      menu.addLauncher(toolSetLauncher, toolSet.getToolSetName());
     }
 
     menu.getStack().layout();
@@ -168,8 +172,8 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
     boolean isOpen = false;
     for (int i = 0; i < deck.tabLayout.getWidgetCount(); i++)
     {
-      TabWrapper tab = (TabWrapper) deck.tabLayout.getWidget(i);
-      if (tab.id.equals(toolId)) {
+      ToolTabPanel toolTab = (ToolTabPanel) deck.tabLayout.getWidget(i);
+      if (toolTab.id.equals(toolId)) {
         isOpen = true;
         deck.tabLayout.selectTab(i);
       }
@@ -177,14 +181,19 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
 
     if (!isOpen) // & selectedTool.multipleAllowed()==false
     {
-      final TabWrapper wrapper = new TabWrapper(selectedTool.getId(), selectedTool.getWidget());
-      wrapper.invalidate();
+      final ToolTabPanel panelTool = new ToolTabPanel(selectedTool);
+      panelTool.invalidate();
+
+      IconFactory iconFactory = GWT.create(IconFactory.class);
+      ImageResource resource = iconFactory.createIcon(selectedTool.getName());      
 
       deck.tabLayout.add(
-          wrapper,
-          selectedTool.getName()
+          panelTool,
+          AbstractImagePrototype.create(resource).getHTML() + "&nbsp;" + selectedTool.getName(),
+          true
       );
 
+      
       deck.tabLayout.selectTab(
           deck.tabLayout.getWidgetCount() - 1
       );
@@ -192,7 +201,7 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
       DeferredCommand.addCommand(new Command() {
 
         public void execute() {
-          wrapper.onResize();
+          panelTool.onResize();
         }
       });
     }
@@ -250,9 +259,7 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
       super();
       this.toolSet = toolSet;
       this.tabLayout = new DecoratedTabLayoutPanel();
-
-      final ToolSetDeck toolSetDesk = this;
-
+      
       this.add(tabLayout);
     }
 
@@ -262,11 +269,12 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
     }
   }
 
-  class TabWrapper extends LayoutPanel implements RequiresResize, ProvidesResize {
+  class ToolTabPanel extends LayoutPanel implements RequiresResize, ProvidesResize {
     String id;
 
-    TabWrapper(String id, Widget content) {
-      this.id = id;
+    ToolTabPanel(Tool tool) {
+      this.id = tool.getId();
+      Widget content = tool.getWidget();
       this.add(content);
       WidgetHelper.invalidate(content);
     }
