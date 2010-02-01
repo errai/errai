@@ -106,12 +106,12 @@ public class Header extends LayoutPanel
     // account info
     ErraiImageBundle icons = GWT.create(ErraiImageBundle.class);
     Image img = new Image(icons.user());
-    img.addClickListener(
-        new ClickListener()
+    img.addClickHandler(
+        new ClickHandler()
         {
 
-          public void onClick(Widget widget)
-          {
+          public void onClick(ClickEvent clickEvent)
+          {            
             StringBuffer sb = new StringBuffer("<h3>User information</h3>");
             sb.append("- User: ").append(username.getText()).append("<br/>");
             sb.append("- Logged in since: ").append(loginDate).append("<br/>");
@@ -121,8 +121,8 @@ public class Header extends LayoutPanel
 
             final LayoutPopupPanel popup = new LayoutPopupPanel(true);
             popup.setPopupPosition(
-                widget.getAbsoluteLeft()-120,
-                widget.getAbsoluteTop()+20
+                clickEvent.getRelativeElement().getAbsoluteLeft()-120,
+                clickEvent.getRelativeElement().getAbsoluteTop()+20
             );
             popup.setAnimationEnabled(true);
             popup.setSize("240px", "130px");
