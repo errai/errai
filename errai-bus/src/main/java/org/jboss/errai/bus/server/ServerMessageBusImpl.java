@@ -38,6 +38,10 @@ import static org.jboss.errai.bus.client.protocols.MessageParts.ReplyTo;
 import static org.jboss.errai.bus.client.protocols.SecurityCommands.MessageNotDelivered;
 import static org.jboss.errai.bus.server.util.ServerBusUtils.encodeJSON;
 
+/**
+ * The <tt>ServerMessageBusImpl</tt> implements the <tt>ServerMessageBus</tt>, making it possible for the server to
+ * send and receive messages
+ */
 @Singleton
 public class ServerMessageBusImpl implements ServerMessageBus {
     private static final String ERRAI_BUS_SHOWMONITOR = "errai.bus.showmonitor";
@@ -59,6 +63,15 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     private final Scheduler houseKeeper = new Scheduler();
 
+    /**
+     * Sets up the <tt>ServerMessageBusImpl</tt> with the configuration supplied. Also, initializes the bus' callback
+     * functions, scheduler, and monitor
+     *
+     * When deploying services on the server-side, it is possible to obtain references to the
+     * <tt>ErraiServiceConfigurator</tt> by declaring it as injection dependencies
+     *
+     * @param config - the configuration used to initialize the server message bus
+     */
     @Inject
     public ServerMessageBusImpl(ErraiServiceConfigurator config) {
         Thread thread = new Thread() {
@@ -253,6 +266,12 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         houseKeeper.start();
     }
 
+    /**
+     * Configures the server message bus with the specified <tt>ErraiServiceConfigurator</tt>. It only takes the queue
+     * size specified by the configuration
+     *
+     * @param config
+     */
     public void configure(ErraiServiceConfigurator config) {
         queueSize = DEFAULT_QUEUE_SIZE;
         if (config.hasProperty(ERRAI_BUS_QUEUESIZE)) {
@@ -260,6 +279,11 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
     }
 
+    /**
+     * Sends a message globally to all subscriptions containing the same subject as the specified message.
+     *
+     * @param message - The message to be sent.
+     */
     public void sendGlobal(final Message message) {
         message.commit();
         final String subject = message.getSubject();
@@ -310,6 +334,11 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
     }
 
+    /**
+     * Sends the <tt>message</tt>
+     *
+     * @param message - the message to send
+     */
     public void send(Message message) {
         message.commit();
         if (message.hasResource("Session")) {
@@ -321,6 +350,12 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
     }
 
+    /**
+     * Parses the message appropriately and enqueues it for delivery
+     *
+     * @param message - the message to be sent
+     * @param fireListeners - true if all listeners attached should be notified of delivery
+     */
     public void send(Message message, boolean fireListeners) {
         message.commit();
         if (!message.hasResource("Session")) {
@@ -370,6 +405,14 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
     }
 
+    /**
+     * Gets the next message in the form of a <tt>Payload</tt>, which contains one-or-more messages that need to be
+     * sent.
+     *
+     * @param sessionContext - key of messages. Only want to obtain messages that have the same <tt>sessionContext</tt>
+     * @param wait - set to true if the bus will wait for the next message
+     * @return the <tt>Payload</tt> containing the next messages to be sent
+     */
     public Payload nextMessage(Object sessionContext, boolean wait) {
         try {
             return messageQueues.get(sessionContext).poll(wait);
@@ -385,10 +428,21 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
     }
 
+    /**
+     * Gets the queue corresponding to the session id given
+     *
+     * @param sessionId - the session id of the queue
+     * @return the message queue
+     */
     public MessageQueue getQueue(String sessionId) {
         return messageQueues.get(sessionId);
     }
 
+    /**
+     * Closes the queue with <tt>sessionContext</tt>
+     *
+     * @param sessionContext - the session context of the queue to close
+     */
     public void closeQueue(String sessionContext) {
         MessageQueue q = getQueue(sessionContext);
         for (Set<MessageQueue> sq : remoteSubscriptions.values()) {
@@ -397,6 +451,11 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         messageQueues.remove(sessionContext);
     }
 
+    /**
+     * Closes the message queue
+     * 
+     * @param queue - the message queue to close
+     */
     public void closeQueue(MessageQueue queue) {
         for (Set<MessageQueue> sq : remoteSubscriptions.values()) {
             sq.remove(queue);
@@ -405,6 +464,13 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         messageQueues.values().remove(queue);
     }
 
+    /**
+     * Adds a rule for a specific subscription. The <tt>BooleanRoutingRule</tt> determines if a message should
+     * be routed based on the already specified rules or not.
+     *
+     * @param subject - the subject of the subscription
+     * @param rule - the <tt>BooleanRoutingRule</tt> instance specifying the routing rules
+     */
     public void addRule(String subject, BooleanRoutingRule rule) {
         List<MessageCallback> newCallbacks = new LinkedList<MessageCallback>();
         Iterator<MessageCallback> iter = subscriptions.get(subject).iterator();
@@ -419,6 +485,12 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
     }
 
+    /**
+     * Adds a subscription
+     *
+     * @param subject - the subject to subscribe to
+     * @param receiver - the callback function called when a message is dispatched
+     */
     public void subscribe(String subject, MessageCallback receiver) {
         if (!subscriptions.containsKey(subject)) {
             subscriptions.put(subject, new ArrayList<MessageCallback>());
@@ -429,6 +501,13 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         subscriptions.get(subject).add(receiver);
     }
 
+    /**
+     * Adds a new remote subscription and fires subscription listeners
+     * 
+     * @param sessionContext - session context of queue
+     * @param queue - the message queue
+     * @param subject - the subject to subscribe to
+     */
     public void remoteSubscribe(String sessionContext, MessageQueue queue, String subject) {
         if (subscriptions.containsKey(subject) || subject == null) return;
 
@@ -440,6 +519,13 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         remoteSubscriptions.get(subject).add(queue);
     }
 
+    /**
+     * Unsubscribes a remote subsciption and fires the appropriate listeners
+     *
+     * @param sessionContext - session context of queue
+     * @param queue - the message queue
+     * @param subject - the subject to unsubscribe from
+     */
     public void remoteUnsubscribe(Object sessionContext, MessageQueue queue, String subject) {
         if (!remoteSubscriptions.containsKey(subject)) {
             return;
@@ -474,14 +560,31 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
     }
 
+    /**
+     * Unsubscribe all subscriptions attached to <tt>subject</tt>
+     *
+     * @param subject - the subject to unsubscribe from
+     */
     public void unsubscribeAll(String subject) {
         throw new RuntimeException("unsubscribeAll not yet implemented.");
     }
 
+    /**
+     * Starts a conversation using the specified message
+     *
+     * @param message - the message to initiate the conversation
+     * @param callback - the message's callback function
+     */
     public void conversationWith(Message message, MessageCallback callback) {
         throw new RuntimeException("conversationWith not yet implemented.");
     }
 
+    /**
+     * Checks if a subscription exists for <tt>subject</tt>
+     *
+     * @param subject - the subject to search the subscriptions for
+     * @return true if a subscription exists
+     */
     public boolean isSubscribed(String subject) {
         return subscriptions.containsKey(subject);
     }
@@ -531,14 +634,29 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
     }
 
+    /**
+     * Adds a global listener
+     *
+     * @param listener - global listener to add
+     */
     public void addGlobalListener(MessageListener listener) {
         listeners.add(listener);
     }
 
+    /**
+     * Adds subscription listener
+     *
+     * @param listener - subscription listener to add
+     */
     public void addSubscribeListener(SubscribeListener listener) {
         subscribeListeners.add(listener);
     }
 
+    /**
+     * Adds unsubscription listener
+     *
+     * @param listener - adds an unsubscription listener
+     */
     public void addUnsubscribeListener(UnsubscribeListener listener) {
         unsubscribeListeners.add(listener);
     }
@@ -547,10 +665,20 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         return message.getResource(QueueSession.class, "Session").getSessionId();
     }
 
+    /**
+     * Gets all the message queues
+     *
+     * @return a map of the message queues that exist
+     */
     public Map<Object, MessageQueue> getMessageQueues() {
         return messageQueues;
     }
 
+    /**
+     * Gets the scheduler being used for the housekeeping
+     *
+     * @return the scheduler
+     */
     public Scheduler getScheduler() {
         return houseKeeper;
     }
@@ -564,6 +692,11 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
     };
 
+    /**
+     * Gets the current message provider
+     *
+     * @return the message provider
+     */
     public MessageProvider getMessageProvider() {
         return provider;
     }
