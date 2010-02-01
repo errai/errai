@@ -63,7 +63,7 @@ public class Worker extends Thread {
                 // looping inside a catch block is cheaper than entering and leaving it
                 // every time.
                 while (true) {
-                    if ((message = messages.poll(1, TimeUnit.MINUTES)) != null) {
+                    if ((message = messages.poll(60, TimeUnit.SECONDS)) != null) {
                         workExpiry = currentTimeMillis() + timeout;
                         if (message.isFlagSet(RoutingFlags.NonGlobalRouting)) {
                             bus.send(message);
