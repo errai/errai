@@ -24,6 +24,7 @@ package org.jboss.errai.workspaces.client;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.*;
 import org.gwt.mosaic.ui.client.LayoutPopupPanel;
@@ -32,9 +33,15 @@ import org.gwt.mosaic.ui.client.layout.BoxLayoutData;
 import org.gwt.mosaic.ui.client.layout.LayoutPanel;
 import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
+import org.jboss.errai.bus.client.security.AuthenticationContext;
+import org.jboss.errai.bus.client.security.Role;
+import org.jboss.errai.bus.client.security.SecurityService;
 import org.jboss.errai.workspaces.client.icons.ErraiImageBundle;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.Set;
 
 
 /**
@@ -62,11 +69,14 @@ public class Header extends LayoutPanel
     createInfoPanel();
 
     ErraiBus.get().subscribe("appContext", new MessageCallback()
-    {
-      @Override
+    {      
       public void callback(Message message)
       {
-        username.setText( message.get(String.class, "username"));
+        AuthenticationContext authContext =
+            Registry.get(SecurityService.class).getAuthenticationContext();
+        String userName = authContext.getName() != "" ?
+            authContext.getName() : "Not authenticated";
+        username.setText(userName);
         loginDate = new Date();
         layout();
       }
@@ -112,11 +122,21 @@ public class Header extends LayoutPanel
 
           public void onClick(ClickEvent clickEvent)
           {            
+            String sessionId = Cookies.getCookie("jsessionid") != null ?
+                            Cookies.getCookie("jsessionid") : "";
+            Set<Role> roleSet = Registry.get(SecurityService.class).getAuthenticationContext().getRoles();
+
+            StringBuffer roles = new StringBuffer();
+            for(Role r : roleSet)
+            {
+              roles.append(r.getRoleName()).append(" ");
+            }
+
             StringBuffer sb = new StringBuffer("<h3>User information</h3>");
             sb.append("- User: ").append(username.getText()).append("<br/>");
             sb.append("- Logged in since: ").append(loginDate).append("<br/>");
-            sb.append("- SID: ").append("").append("<br/>");
-            sb.append("- Roles: ").append("").append("<br/>");
+            sb.append("- SID: ").append(sessionId).append("<br/>");
+            sb.append("- Roles: ").append(roles.toString()).append("<br/>");
 
 
             final LayoutPopupPanel popup = new LayoutPopupPanel(true);
