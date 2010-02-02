@@ -667,14 +667,29 @@ public class QueryService {
 
       <para>For example:</para>
 
-      <programlisting>@ExposeEntity
-public class Beer {
-    public boolean free;
-    public String brandName;
-    ...
-}</programlisting>
+      <programlisting>
 
-      <para>Note: All exposed entities must have a default constructor.</para>
+@ExposeEntity
+public class User implements java.io.Serializable {
+    private int userId;
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+ [...]
+}
+      </programlisting>
+
+      <note>
+          <para>
+          All exposed entities must follow the <ulink url="http://en.wikipedia.org/wiki/JavaBean">java bean convention</ulink>              
+        </para>
+      </note>
+        
     </sect1>
 
     <sect1 id="wiring">
