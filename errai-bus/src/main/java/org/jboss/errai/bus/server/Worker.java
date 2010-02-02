@@ -14,6 +14,9 @@ import static org.jboss.errai.bus.server.util.ErrorHelper.handleMessageDeliveryF
 import static org.jboss.errai.bus.server.util.ErrorHelper.sendClientError;
 import static org.slf4j.LoggerFactory.getLogger;
 
+/**
+ * A <tt>Worker</tt> is a specialized thread made to work with the messages and services of Errai
+ */
 public class Worker extends Thread {
     private MessageBus bus;
     private ArrayBlockingQueue<Message> messages;
@@ -26,6 +29,13 @@ public class Worker extends Thread {
 
     private Logger log = getLogger(this.getClass());
 
+    /**
+     * Initializes the thread with the specified <tt>ThreadGroup</tt>, <tt>factory</tt> and service
+     *
+     * @param threadGroup - the group this worker thread will belong to
+     * @param factory - the factory this worker thread will belong to
+     * @param svc - the service the thread is attached to
+     */
     public Worker(ThreadGroup threadGroup, WorkerFactory factory, ErraiService svc) {
         super(threadGroup, "Dispatch Worker Thread");
         this.timeout = factory.getWorkerTimeout();
@@ -35,14 +45,28 @@ public class Worker extends Thread {
         setDaemon(true);
     }
 
+    /**
+     * Sets the <tt>Worker</tt> to an active or inactive state
+     *
+     * @param active - true if the thread should be active
+     */
     public void setActive(boolean active) {
         this.active = active;
     }
 
+    /**
+     * Returns true if this thread is valid, and hasn't expired
+     *
+     * @return false if this thread is invalid or has expired
+     */
     public boolean isValid() {
         return workExpiry == 0 || currentTimeMillis() < workExpiry;
     }
 
+    /**
+     * Interrupts this worker thread, and expire it due to a timeout.
+     * Creates an error message if they could not be interrupted  
+     */
     public void timeoutInterrupt() {
         interrupt();
 
@@ -56,6 +80,9 @@ public class Worker extends Thread {
         }
     }
 
+    /**
+     * Runs the thread, setting the expiry time, and sends the messages associated with this thread 
+     */
     @Override
     public void run() {
         while (true) {

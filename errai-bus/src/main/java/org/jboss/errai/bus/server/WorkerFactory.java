@@ -10,6 +10,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ArrayBlockingQueue;
 
+/**
+ * The <tt>WorkerFactory</tt> maintains a pool of <tt>Worker</tt>s, and takes care of running and terminating them
+ */
 public class WorkerFactory {
     private static final int DEFAULT_DELIVERY_QUEUE_SIZE = 250;
     private static final int DEFAULT_THREAD_POOL_SIZE = 4;
@@ -31,6 +34,11 @@ public class WorkerFactory {
 
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
+    /**
+     * Initializes the worker factory with a new thread group, service, all the properties, messages and workers
+     *
+     * @param svc - the <tt>ErraiService</tt> that is to be associated to this factory of workers
+     */
     public WorkerFactory(ErraiService svc) {
         this.svc = svc;
         this.threadGroup = new ThreadGroup("Workers");
@@ -89,6 +97,11 @@ public class WorkerFactory {
         startPool();
     }
 
+    /**
+     * Attempts to deliver the specified message globally
+     *
+     * @param m - message to be delivered
+     */
     public void deliverGlobal(Message m) {
         if (messages.offer(m)) {
             return;
@@ -98,6 +111,11 @@ public class WorkerFactory {
         }
     }
 
+    /**
+     * Attempts to send the message
+     *
+     * @param m - message to be sent
+     */
     public void deliver(Message m) {
         m.setFlag(RoutingFlags.NonGlobalRouting);
         if (messages.offer(m)) {
@@ -118,14 +136,27 @@ public class WorkerFactory {
         }
     }
 
+    /**
+     * Gets the messages in the queue
+     *
+     * @return the messages in the queue
+     */
     protected ArrayBlockingQueue<Message> getMessages() {
         return messages;
     }
 
+    /**
+     * Gets the timeout
+     *
+     * @return the timeout time
+     */
     protected long getWorkerTimeout() {
         return workerTimeout;
     }
 
+    /**
+     * Starts execution of all the threads in the pool of threads
+     */
     public void startPool() {
         log.info("starting worker pool.");
         for (int i = 0; i < poolSize; i++) {
