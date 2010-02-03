@@ -7,16 +7,31 @@ import org.mvel2.DataConversion;
 
 import java.lang.reflect.Method;
 
+/**
+ * <tt>EndpointCallback</tt> is a callback function for a message being sent. It invokes the endpoint function
+ * specified
+ */
 public class EndpointCallback implements MessageCallback {
     private Object genericSvc;
     private Class[] targetTypes;
     private Method method;
 
+    /**
+     * Initializes the service and endpoint method
+     *
+     * @param genericSvc - the service that delivers the message
+     * @param method - the endpoint function
+     */
     public EndpointCallback(Object genericSvc, Method method) {
         this.genericSvc = genericSvc;
         this.targetTypes = (this.method = method).getParameterTypes();
     }
 
+    /**
+     * Invokes the endpoint function based on the details of the message
+     * 
+     * @param message - the message 
+     */
     public void callback(Message message) {
         Object[] parms = message.get(Object[].class, "MethodParms");
 

@@ -11,18 +11,33 @@ import static org.jboss.errai.bus.client.MessageBuilder.createConversation;
 import static org.mvel2.DataConversion.canConvert;
 import static org.mvel2.DataConversion.convert;
 
+/**
+ * <tt>ConversationalEndpointCallback</tt> creates a conversation that invokes an endpoint function
+ */
 public class ConversationalEndpointCallback implements MessageCallback {
     private Object genericSvc;
     private Class[] targetTypes;
     private Method method;
     private MessageBus bus;
 
+    /**
+     * Initializes the service, method and bus
+     *
+     * @param genericSvc - the service the bus is subscribed to
+     * @param method - the endpoint function
+     * @param bus - the bus to send the messages on
+     */
     public ConversationalEndpointCallback(Object genericSvc, Method method, MessageBus bus) {
         this.genericSvc = genericSvc;
         this.targetTypes = (this.method = method).getParameterTypes();
         this.bus = bus;
     }
 
+    /**
+     * Callback function. Creates the conversation and invokes the endpoint using the message specified
+     *
+     * @param message - the message to initiate the conversation
+     */
     public void callback(Message message) {
         Object[] parms = message.get(Object[].class, "MethodParms");
 
