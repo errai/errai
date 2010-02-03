@@ -27,6 +27,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
+/**
+ * Encodes an object into a JSON string
+ */
 public class JSONEncoder {
     private static Set<Class> serializableTypes;
 

@@ -25,6 +25,9 @@ import static java.lang.Character.isDigit;
 import static java.lang.Character.isJavaIdentifierPart;
 import static java.lang.Double.parseDouble;
 
+/**
+ * Decodes a JSON string or character array, and provides a proper collection of elements
+ */
 public class JSONDecoder {
     private char[] json;
     private int length;
