@@ -24,18 +24,67 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * The <tt>ErraiServiceConfigurator</tt> is a template for creating a configuration for a service 
+ */
 public interface ErraiServiceConfigurator {
     public static final String ERRAI_DISPATCHER_IMPLEMENTATION = "errai.dispatcher_implementation";
 
+    /**
+     * Configures the specified service
+     *
+     * @param service - the service to configure
+     */
     public void configure(final ErraiService service);
 
+    /**
+     * Gets a list of all configuration targets
+     * @return list of all configuration targets
+     */
     public List<File> getConfigurationRoots();
+
+    /**
+     * Gets the resource providers associated with this configurator
+     *
+     * @return the resource providers associated with this configurator
+     */
     public Map<String, Provider> getResourceProviders();
+
+    /**
+     * Gets the resources attached to the specified resource class
+     *
+     * @param resourceClass - the class to search the resources for
+     * @param <T> - the class type
+     * @return the resource of type <tt>T</tt>
+     */
     public <T> T getResource(Class<? extends T> resourceClass);
+
+    /**
+     * Gets all serializable types
+     *
+     * @return all serializable types
+     */
     public Set<Class> getAllSerializableTypes();
 
+    /**
+     * Returns true if the configuration has this <tt>key</tt> property
+     *
+     * @param key - the property too search for
+     * @return false if the property does not exist 
+     */
     public boolean hasProperty(String key);
+
+    /**
+     * Gets the property associated with the key
+     *
+     * @param key - the key to search for
+     * @return the property, if it exists, null otherwise
+     */
     public String getProperty(String key);
 
+    /**
+     * Gets the configured dispatcher, which is used to deliver the messages
+     * @return the configured dispatcher
+     */
     public RequestDispatcher getConfiguredDispatcher();
 }

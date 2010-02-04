@@ -20,12 +20,32 @@ import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.server.ServerMessageBus;
 
+/**
+ * The <tt>ErraiService</tt> is a minimal template for waht is needed. It facilitates the ability to store a message,
+ * obtain the server bus and configuration
+ */
 public interface ErraiService {
     public static final String AUTHORIZATION_SVC_SUBJECT = "AuthenticationService";
     public static final String SESSION_AUTH_DATA = "ErraiAuthData";
 
+    /**
+     * Stores the specified message
+     *
+     * @param message - the message to store
+     */
     public void store(Message message);
 
+    /**
+     * Retrieves the server message bus employed by this service
+     *
+     * @return the server message bus
+     */
     public ServerMessageBus getBus();
+
+    /**
+     * Gets the configuration used to initalize the service
+     *
+     * @return the errai service configurator
+     */
     public ErraiServiceConfigurator getConfiguration();
 }
