@@ -38,8 +38,7 @@
         <module>errai-workspaces</module>
         <module>errai-widgets</module>
         <module>errai-bus</module>
-        <module>errai-persistence</module>
-        <module>errai-bus-demos</module>
+        <module>errai-persistence</module>        
     </modules>
 
     <dependencyManagement>
@@ -264,6 +263,7 @@
             <modules>
                 <module>userguide</module>
                 <module>dist</module>
+                <module>errai-bus-demos</module>
             </modules>
         </profile>
     </profiles>
