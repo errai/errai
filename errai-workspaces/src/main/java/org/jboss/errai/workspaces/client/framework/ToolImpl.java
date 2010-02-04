@@ -19,6 +19,7 @@ package org.jboss.errai.workspaces.client.framework;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.common.client.framework.WSComponent;
+import org.jboss.errai.common.client.framework.WidgetCallback;
 
 public class ToolImpl implements Tool {
   private String name;
@@ -51,7 +52,7 @@ public class ToolImpl implements Tool {
     return icon;
   }
 
-  public Widget getWidget() {
-    return component.getWidget();
+  public void getWidget(final WidgetCallback callback) {
+    component.getWidget(callback);
   }  
 }

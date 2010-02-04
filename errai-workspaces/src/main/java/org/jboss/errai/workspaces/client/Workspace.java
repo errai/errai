@@ -36,9 +36,12 @@ import org.gwt.mosaic.ui.client.util.WidgetHelper;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.MessageCallback;
+import org.jboss.errai.common.client.framework.WSComponent;
+import org.jboss.errai.common.client.framework.WidgetCallback;
 import org.jboss.errai.workspaces.client.framework.IconFactory;
 import org.jboss.errai.workspaces.client.framework.Tool;
 import org.jboss.errai.workspaces.client.framework.ToolSet;
+import org.jboss.errai.workspaces.client.icons.ErraiImageBundle;
 import org.jboss.errai.workspaces.client.protocols.LayoutCommands;
 import org.jboss.errai.workspaces.client.protocols.LayoutParts;
 import org.jboss.errai.workspaces.client.util.LayoutUtil;
@@ -185,7 +188,9 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
       panelTool.invalidate();
 
       IconFactory iconFactory = GWT.create(IconFactory.class);
-      ImageResource resource = iconFactory.createIcon(selectedTool.getName());      
+      ErraiImageBundle erraiImageBundle = GWT.create(ErraiImageBundle.class);
+      ImageResource resource = iconFactory.createIcon(selectedTool.getName()) != null ?
+          iconFactory.createIcon(selectedTool.getName()) : erraiImageBundle.questionCube();
 
       deck.tabLayout.add(
           panelTool,
@@ -193,7 +198,7 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
           true
       );
 
-      
+
       deck.tabLayout.selectTab(
           deck.tabLayout.getWidgetCount() - 1
       );
@@ -272,11 +277,22 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
   class ToolTabPanel extends LayoutPanel implements RequiresResize, ProvidesResize {
     String id;
 
-    ToolTabPanel(Tool tool) {
+    ToolTabPanel(final Tool tool) {
       this.id = tool.getId();
-      Widget content = tool.getWidget();
-      this.add(content);
-      WidgetHelper.invalidate(content);
+      tool.getWidget(new WidgetCallback ()
+      {
+        public void onSuccess(Widget instance)
+        {
+          add(instance);
+          WidgetHelper.invalidate(instance);
+          layout();
+        }
+
+        public void onUnavailable()
+        {
+          throw new RuntimeException("Failed to load tool: " + tool.getId());
+        }
+      });
     }
 
     public void onResize() {

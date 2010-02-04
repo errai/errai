@@ -21,6 +21,7 @@ import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.common.client.framework.WSComponent;
+import org.jboss.errai.common.client.framework.WidgetCallback;
 
 public class WSLoginPanel implements WSComponent {
 
@@ -97,8 +98,8 @@ public class WSLoginPanel implements WSComponent {
     return passwordInput;
   }
 
-  public Widget getWidget() {
-    return this.widget;
+  public void getWidget(WidgetCallback callback) {
+    callback.onSuccess(this.widget);
   }
 
 }

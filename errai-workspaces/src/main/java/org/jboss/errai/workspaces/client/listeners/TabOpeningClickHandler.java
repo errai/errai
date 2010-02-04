@@ -22,6 +22,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.bus.client.*;
+import org.jboss.errai.common.client.framework.WidgetCallback;
 import org.jboss.errai.workspaces.client.protocols.LayoutCommands;
 import org.jboss.errai.workspaces.client.protocols.LayoutParts;
 import org.jboss.errai.workspaces.client.framework.Tool;
@@ -32,68 +33,80 @@ import static org.jboss.errai.bus.client.MessageBuilder.createConversation;
 import static org.jboss.errai.bus.client.MessageBuilder.createMessage;
 
 public class TabOpeningClickHandler implements ClickHandler {
-    private Tool tool;
+  private Tool tool;
 
-    public TabOpeningClickHandler(Tool tool) {
-        this.tool = tool;
-    }
+  public TabOpeningClickHandler(Tool tool) {
+    this.tool = tool;
+  }
 
-    public void onClick(ClickEvent event) {
-        String initSubject = tool.getId() + ":init";
+  public void onClick(ClickEvent event) {
+    String initSubject = tool.getId() + ":init";
 
-        final MessageBus bus = ErraiBus.get();
+    final MessageBus bus = ErraiBus.get();
 
-        if (!bus.isSubscribed(initSubject)) {
-            bus.subscribe(initSubject, new MessageCallback() {
-                public void callback(Message message) {
+    if (!bus.isSubscribed(initSubject)) {
+      bus.subscribe(initSubject, new MessageCallback() {
+        public void callback(final Message message) {
 
-                    try {
-                        final Widget w = tool.getWidget();
-                        w.getElement().setId(message.get(String.class, LayoutParts.DOMID));
+          try {
 
-                        RootPanel.get().add(w);
+            tool.getWidget(new WidgetCallback()
+            {
+              public void onSuccess(final Widget instance)
+              {
+                instance.getElement().setId(message.get(String.class, LayoutParts.DOMID));
 
-                        LayoutHint.attach(w, new LayoutHintProvider() {
-                            public int getHeightHint() {
-                                return Window.getClientHeight() - w.getAbsoluteTop() - 20;
-                            }
+                RootPanel.get().add(instance);
 
-                            public int getWidthHint() {
-                                return Window.getClientWidth() - w.getAbsoluteLeft() - 5;
-                            }
-                        });
+                LayoutHint.attach(instance, new LayoutHintProvider() {
+                  public int getHeightHint() {
+                    return Window.getClientHeight() - instance.getAbsoluteTop() - 20;
+                  }
 
-                        createConversation(message).getMessage().sendNowWith(bus);
-                    }
-                    catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                  public int getWidthHint() {
+                    return Window.getClientWidth() - instance.getAbsoluteLeft() - 5;
+                  }
+                });
 
-                }
+              }
+
+              public void onUnavailable()
+              {
+                throw new RuntimeException("Failed to create component");
+              }
             });
-        }
-        try {
 
-        /**
-         * Being capturing all message registration activity. This is necessary if you want to use the automatic
-         * clean-up features and close the messaging channels when the tool instance closes.
-         */
-        ((ClientMessageBus)bus).beginCapture();
-
-        createMessage()
-                .toSubject("org.jboss.errai.WorkspaceLayout")
-                .command(LayoutCommands.OpenNewTab)
-                .with(LayoutParts.ComponentID, tool.getId())
-                .with(LayoutParts.IconURI, tool.getIcon().getUrl())
-                .with(LayoutParts.MultipleInstances, tool.multipleAllowed())
-                .with(LayoutParts.Name, tool.getName())
-                .with(LayoutParts.DOMID, tool.getId() + "_" + System.currentTimeMillis())
-                .with(LayoutParts.InitSubject, initSubject)
-                .noErrorHandling().sendNowWith(bus);
-        }
-        catch (Exception e) {
+            createConversation(message).getMessage().sendNowWith(bus);
+          }
+          catch (Exception e) {
             e.printStackTrace();
+          }
+
         }
+      });
     }
+    try {
+
+      /**
+       * Being capturing all message registration activity. This is necessary if you want to use the automatic
+       * clean-up features and close the messaging channels when the tool instance closes.
+       */
+      ((ClientMessageBus)bus).beginCapture();
+
+      createMessage()
+          .toSubject("org.jboss.errai.WorkspaceLayout")
+          .command(LayoutCommands.OpenNewTab)
+          .with(LayoutParts.ComponentID, tool.getId())
+          .with(LayoutParts.IconURI, tool.getIcon().getUrl())
+          .with(LayoutParts.MultipleInstances, tool.multipleAllowed())
+          .with(LayoutParts.Name, tool.getName())
+          .with(LayoutParts.DOMID, tool.getId() + "_" + System.currentTimeMillis())
+          .with(LayoutParts.InitSubject, initSubject)
+          .noErrorHandling().sendNowWith(bus);
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
 
 }

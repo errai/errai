@@ -22,6 +22,8 @@
 package org.jboss.errai.workspaces.client;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -98,7 +100,22 @@ public class Application implements EntryPoint {
                 switch(LayoutCommands.valueOf(message.getCommandType()))
                 {
                   case Initialize:
-                    initializeUI();
+
+                    GWT.runAsync(
+                        new RunAsyncCallback()
+                        {
+                          public void onFailure(Throwable throwable)
+                          {
+                            GWT.log("Failed to load workspace", throwable);
+                          }
+
+                          public void onSuccess()
+                          {
+                            initializeUI();  
+                          }
+                        }
+                    );
+
                     break;
                 }
               }
