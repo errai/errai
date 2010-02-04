@@ -16,6 +16,9 @@
 
 package org.jboss.errai.bus.server.security.auth;
 
+/**
+ * This class represents a role for an entity that requires authentication. There may be more than one role per entity
+ */
 public abstract class Role {
     protected Role() {
     }

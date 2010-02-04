@@ -16,6 +16,9 @@
 
 package org.jboss.errai.bus.server.security.auth;
 
+/**
+ * <tt>SimpleRole</tt> extends the standard <tt>Role</tt> class. The name of the role is the only distinguishing factor
+ */
 public class SimpleRole extends Role {
     public SimpleRole(String name) {
         this.name = name;
