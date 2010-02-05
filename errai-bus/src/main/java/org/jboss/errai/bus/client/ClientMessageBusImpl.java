@@ -22,7 +22,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.bus.client.ext.ExtensionsLoader;
 import org.jboss.errai.bus.client.json.JSONUtilCli;
@@ -81,7 +80,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     /* True if the client's message bus has been initialized */
     private boolean initialized = false;
 
-    private Timer heartBeatTimer;
     private long lastTransmit = 0;
 
 
@@ -227,7 +225,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      * Sends the message using it's encoded subject. If the bus has not been initialized, it will be added to
      * <tt>postInitTasks</tt>.
      *
-     * @param message
+     * @param message -
      * @throws RuntimeException - if message does not contain a ToSubject field or if the message's callback throws
      *                          an error.
      */
@@ -266,7 +264,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      * Add message to the queue that remotely transmits messages to the server.
      * All messages in the queue are then sent.
      *
-     * @param message
+     * @param message -
      */
     public void enqueueForRemoteTransmit(Message message) {
         outgoingQueue.add(message instanceof HasEncoded ?
@@ -415,7 +413,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                       // Sending the message failed.
                       // Although the response may still be valid
                       // Handle it gracefully
-                      GWT.log("Server didn't accept the message: "+message, new RuntimeException());
+                        //noinspection ThrowableInstanceNeverThrown
+                        GWT.log("Server didn't accept the message: "+message, new RuntimeException());
                     }
 
                     /**
@@ -661,7 +660,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
         outerTimer.schedule(10);
 
-        heartBeatTimer = new Timer() {
+        Timer heartBeatTimer = new Timer() {
             @Override
             public void run() {
                 if (System.currentTimeMillis() - lastTransmit >= HEARTBEAT_DELAY) {
@@ -815,8 +814,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     /**
      * Process the incoming payload and push all the incoming messages onto the bus.
      *
-     * @param response
-     * @throws Exception
+     * @param response -
+     * @throws Exception -
      */
     private void procIncomingPayload(Response response) throws Exception {
         try {

@@ -34,8 +34,6 @@ public class JSONUtilCli {
     public static String MULTI_PAYLOAD_SEPER_REGEX = "\\|\\|";
 
     public static ArrayList<MarshalledMessage> decodePayload(String value) {
-        System.out.println("**:" + value);
-
         if (value == null || value.trim().length() == 0) return new ArrayList<MarshalledMessage>(0);
 
         ArrayList<MarshalledMessage> list = new ArrayList<MarshalledMessage>();

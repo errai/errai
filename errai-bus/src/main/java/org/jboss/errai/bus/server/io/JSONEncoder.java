@@ -168,6 +168,11 @@ public class JSONEncoder {
         });
     }
 
+    public static void addEncodingHandler(Class from, TypeHandler handler) {
+        tHandlers.put(from, handler);
+    }
+
+
     private static Object convert(Object in) {
         if (in == null || !tHandlers.containsKey(in.getClass())) return in;
         else {

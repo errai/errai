@@ -84,7 +84,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
     /**
      * Configures the specified service and the bus. All components and extensions are loaded, also anything that
      * needs to be done during the initialization stage. The configuration is read in and everything is set up
-     * 
+     *
      * @param erraiService - the service associated with the bus
      */
     public void configure(final ErraiService erraiService) {
@@ -336,7 +336,9 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                                     }
                                 }
 
-                                bus.subscribe(loadClass.getSimpleName() + ":RPC", new RemoteServiceCallback(epts));
+                                if (!epts.isEmpty()) {
+                                    bus.subscribe(loadClass.getSimpleName() + ":RPC", new RemoteServiceCallback(epts));
+                                }
 
                             } else if (loadClass.isAnnotationPresent(ExposeEntity.class)) {
                                 log.info("Marked " + loadClass + " as serializable.");
@@ -416,14 +418,13 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
      * Gets the resources attached to the specified resource class
      *
      * @param resourceClass - the class to search the resources for
-     * @param <T> - the class type
+     * @param <T>           - the class type
      * @return the resource of type <tt>T</tt>
      */
     public <T> T getResource(Class<? extends T> resourceClass) {
         if (extensionBindings.containsKey(resourceClass)) {
             return (T) extensionBindings.get(resourceClass).get();
-        }
-        else {
+        } else {
             return null;
         }
     }
@@ -440,6 +441,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
 
     /**
      * Gets the configured dispatcher, which is used to deliver the messages
+     *
      * @return the configured dispatcher
      */
     public RequestDispatcher getConfiguredDispatcher() {
