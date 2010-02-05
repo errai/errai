@@ -25,7 +25,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Cookies;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.*;
 import org.gwt.mosaic.ui.client.LayoutPopupPanel;
 import org.gwt.mosaic.ui.client.layout.BoxLayout;
@@ -50,17 +49,8 @@ import java.util.Set;
  */
 public class Header extends LayoutPanel
 {
-  private Image loadingImage;
-  
   private HTML username = new HTML("Unknown user");
   private Date loginDate;
-
-  // avoid flickering image
-  final Timer turnOffLoading = new Timer() {
-    public void run() {
-      //loadingImage.setVisible(false);
-    }
-  };
 
   public Header()
   {
@@ -69,7 +59,7 @@ public class Header extends LayoutPanel
 
     createInfoPanel();
 
-    ErraiBus.get().subscribe("appContext", new MessageCallback()
+    ErraiBus.get().subscribe("appContext.login", new MessageCallback()
     {      
       public void callback(Message message)
       {
@@ -83,12 +73,7 @@ public class Header extends LayoutPanel
       }
     });
   }
-
-  private void updateUser()
-  {
-  }
-
-
+  
   private void createInfoPanel()
   {
 
@@ -106,14 +91,6 @@ public class Header extends LayoutPanel
     infoPanel.setSpacing(5);
     infoPanel.setStyleName("bpm-header-right");
 
-    /*LayoutPanel loadingImageContainer = new LayoutPanel();
-    loadingImageContainer.setStyleName("bpm-loading-image");
-
-    loadingImage = new Image("images/ajax-loader.gif");
-    loadingImageContainer.add(loadingImage);*/
-
-    setLoading(false);
-
     // account info
     ErraiImageBundle icons = GWT.create(ErraiImageBundle.class);
     Image img = new Image(icons.user());
@@ -123,9 +100,10 @@ public class Header extends LayoutPanel
 
           public void onClick(ClickEvent clickEvent)
           {            
-            String sessionId = Cookies.getCookie("jsessionid") != null ?
-                            Cookies.getCookie("jsessionid") : "";
-            Set<Role> roleSet = Registry.get(SecurityService.class).getAuthenticationContext().getRoles();
+            String sessionId = Cookies.getCookie("JSESSIONID") != null ?
+                            Cookies.getCookie("JSESSIONID") : "";
+            AuthenticationContext authContext = Registry.get(SecurityService.class).getAuthenticationContext();
+            Set<Role> roleSet = authContext.getRoles();
 
             StringBuffer roles = new StringBuffer();
             for(Role r : roleSet)
@@ -134,7 +112,7 @@ public class Header extends LayoutPanel
             }
 
             StringBuffer sb = new StringBuffer("<h3>User information</h3>");
-            sb.append("- User: ").append(username.getText()).append("<br/>");
+            sb.append("- User: ").append(authContext.getName()).append("<br/>");
             sb.append("- Logged in since: ").append(loginDate).append("<br/>");
             sb.append("- SID: ").append(sessionId).append("<br/>");
             sb.append("- Roles: ").append(roles.toString()).append("<br/>");
@@ -168,21 +146,12 @@ public class Header extends LayoutPanel
       }
     }
     );
-
-    //infoPanel.add(loadingImageContainer);
+    
     infoPanel.add(img);
     infoPanel.add(username);
     infoPanel.add(btn);
 
     this.add(logoPanel, new BoxLayoutData(BoxLayoutData.FillStyle.HORIZONTAL));
     this.add(infoPanel, new BoxLayoutData(177, 50));
-  }
-
-  public void setLoading(boolean doDisplay)
-  {
-    if(doDisplay)
-      loadingImage.setVisible(doDisplay);
-    else
-      turnOffLoading.schedule(1000);
   }
 }

@@ -227,7 +227,7 @@ public class AuthenticationModule implements Module, MessageCallback
         authenticationContext.getName() : "NoAuthentication";
 
     MessageBuilder.createMessage()
-        .toSubject("appContext")
+        .toSubject("appContext.login")
         .signalling()
         .with("username", userName)
         .noErrorHandling()

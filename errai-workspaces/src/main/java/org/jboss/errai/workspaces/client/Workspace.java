@@ -22,9 +22,12 @@
 package org.jboss.errai.workspaces.client;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
@@ -94,7 +97,12 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
                 String toolId = message.get(String.class, LayoutParts.TOOL);
 
                 showToolSet(toolsetId, toolId);
-                
+
+                // create browser history
+                /*String toolToken = toolId!=null ? toolId : "none";
+                String historyToken = "errai_"+toolsetId+"#"+toolToken;
+                History.newItem(historyToken, false);*/
+
                 break;
             }
 
@@ -102,6 +110,26 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
           }
         }
     );
+
+    // handle browser history
+    /*History.addValueChangeHandler(
+        new ValueChangeHandler<String>()
+        {
+          public void onValueChange(ValueChangeEvent<String> event)
+          {
+            // avoid interference with other history tokens
+            if(event.getValue().startsWith("errai_"))
+            {
+              String s = event.getValue().substring(0,6);
+              String[] token = s.split("#");
+
+              String toolsetId = token[0];
+              String toolId = token[1].equals("none") ? null : token[1];
+              showToolSet(toolsetId, toolId);
+            }
+          }
+        }
+    );*/
   }
 
   public void addToolSet(ToolSet toolSet) {
