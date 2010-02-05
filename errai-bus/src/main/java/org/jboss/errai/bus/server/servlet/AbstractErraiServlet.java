@@ -14,7 +14,13 @@ import org.jboss.errai.bus.server.service.ErraiServiceImpl;
 
 import javax.servlet.http.HttpServlet;
 
+/**
+ * The <tt>AbstractErraiServlet</tt> provides a starting point for creating Http-protocol gateway between the server
+ * bus and the client buses. 
+ */
 public abstract class AbstractErraiServlet extends HttpServlet {
+
+    /* New and configured errai service */
     protected ErraiService service =
             Guice.createInjector(new AbstractModule() {
                 public void configure() {
@@ -25,5 +31,6 @@ public abstract class AbstractErraiServlet extends HttpServlet {
                 }
             }).getInstance(ErraiService.class);
 
+    /* A default Http session provider */
     protected SessionProvider sessionProvider = new HttpSessionProvider();
 }
