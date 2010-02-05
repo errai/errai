@@ -434,7 +434,6 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
      *
      * @return all serializable types
      */
-    @Override
     public Set<Class> getAllSerializableTypes() {
         return serializableTypes;
     }
