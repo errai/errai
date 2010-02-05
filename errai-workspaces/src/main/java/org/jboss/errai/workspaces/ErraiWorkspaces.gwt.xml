@@ -27,9 +27,9 @@
     <!-- Includes the public resources used by the GWT Mosaic       -->
     <!-- themes. Those files do not inject a style sheet into the   -->
     <!-- application.                                               -->
-    <inherits name='org.gwt.mosaic.theme.standard.StandardResources' />
+    <!--inherits name='org.gwt.mosaic.theme.standard.StandardResources' />
     <inherits name="org.gwt.mosaic.theme.chrome.ChromeResources" />
-    <inherits name="org.gwt.mosaic.theme.dark.DarkResources" />
+    <inherits name="org.gwt.mosaic.theme.dark.DarkResources" /-->
     <inherits name="org.gwt.mosaic.theme.aegean.AegeanResources" />
 
     <!-- Inherit the default GWT Mosaic style sheet. You can change -->

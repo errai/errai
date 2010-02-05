@@ -36,7 +36,6 @@ import org.gwt.mosaic.ui.client.util.WidgetHelper;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.MessageCallback;
-import org.jboss.errai.common.client.framework.WSComponent;
 import org.jboss.errai.common.client.framework.WidgetCallback;
 import org.jboss.errai.workspaces.client.framework.IconFactory;
 import org.jboss.errai.workspaces.client.framework.Tool;

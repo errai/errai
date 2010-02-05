@@ -18,8 +18,6 @@ package org.jboss.errai.workspaces.client.icons;
 
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
-import com.google.gwt.user.client.ui.AbstractImagePrototype;
-import com.google.gwt.user.client.ui.ImageBundle;
 
 /**
  * Icons that ship as part of the workspace framework.

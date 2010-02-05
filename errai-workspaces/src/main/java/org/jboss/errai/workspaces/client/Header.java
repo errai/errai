@@ -31,15 +31,16 @@ import org.gwt.mosaic.ui.client.LayoutPopupPanel;
 import org.gwt.mosaic.ui.client.layout.BoxLayout;
 import org.gwt.mosaic.ui.client.layout.BoxLayoutData;
 import org.gwt.mosaic.ui.client.layout.LayoutPanel;
-import org.jboss.errai.bus.client.*;
+import org.jboss.errai.bus.client.ErraiBus;
+import org.jboss.errai.bus.client.Message;
+import org.jboss.errai.bus.client.MessageBuilder;
+import org.jboss.errai.bus.client.MessageCallback;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.security.AuthenticationContext;
 import org.jboss.errai.bus.client.security.Role;
 import org.jboss.errai.bus.client.security.SecurityService;
 import org.jboss.errai.workspaces.client.icons.ErraiImageBundle;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Set;
 

@@ -26,8 +26,9 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
-import org.gwt.mosaic.ui.client.MessageBox;
 import org.gwt.mosaic.ui.client.layout.BorderLayout;
 import org.gwt.mosaic.ui.client.layout.BorderLayoutData;
 import org.jboss.errai.bus.client.*;
@@ -87,7 +88,9 @@ public class Application implements EntryPoint {
 
                   public void callback(Message message) {
                     String errorMessage = message.get(String.class, MessageParts.ErrorMessage);
-                    MessageBox.error("Error", errorMessage);
+                    PopupPanel popup = new PopupPanel();
+                    popup.add(new HTML(errorMessage));
+                    popup.center();                    
                   }
                 }
             );
@@ -125,10 +128,13 @@ public class Application implements EntryPoint {
           }
         });
 
-    // --------------------
+  }
 
-    // these are stateful and might receive bus messages already
-    mainLayout = new WSLayoutPanel(new BorderLayout());    
+  private void initializeUI()
+  {
+    viewport = new Viewport();
+    
+    mainLayout = new WSLayoutPanel(new BorderLayout());
 
     menu = new Menu();
     workspace = Workspace.createInstance(menu);
@@ -137,11 +143,6 @@ public class Application implements EntryPoint {
     mainLayout.add(menu, new BorderLayoutData(BorderLayout.Region.WEST, 180));
     mainLayout.add(header, new BorderLayoutData(BorderLayout.Region.NORTH, 50));
     mainLayout.add(workspace, new BorderLayoutData(BorderLayout.Region.CENTER, false));
-  }
-
-  private void initializeUI()
-  {
-    viewport = new Viewport();
     
     WorkspaceBuilder builder = new WorkspaceBuilder();
     WorkspaceConfig config = create(WorkspaceConfig.class);

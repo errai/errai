@@ -23,11 +23,11 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.bus.client.*;
 import org.jboss.errai.common.client.framework.WidgetCallback;
-import org.jboss.errai.workspaces.client.protocols.LayoutCommands;
-import org.jboss.errai.workspaces.client.protocols.LayoutParts;
 import org.jboss.errai.workspaces.client.framework.Tool;
 import org.jboss.errai.workspaces.client.layout.LayoutHint;
 import org.jboss.errai.workspaces.client.layout.LayoutHintProvider;
+import org.jboss.errai.workspaces.client.protocols.LayoutCommands;
+import org.jboss.errai.workspaces.client.protocols.LayoutParts;
 
 import static org.jboss.errai.bus.client.MessageBuilder.createConversation;
 import static org.jboss.errai.bus.client.MessageBuilder.createMessage;

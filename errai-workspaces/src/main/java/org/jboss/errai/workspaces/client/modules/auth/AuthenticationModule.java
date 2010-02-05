@@ -42,8 +42,8 @@ import org.jboss.errai.bus.client.security.impl.PasswordCredential;
 import org.jboss.errai.workspaces.client.Application;
 import org.jboss.errai.workspaces.client.Registry;
 import org.jboss.errai.workspaces.client.Workspace;
-import org.jboss.errai.workspaces.client.protocols.LayoutCommands;
 import org.jboss.errai.workspaces.client.modules.Module;
+import org.jboss.errai.workspaces.client.protocols.LayoutCommands;
 
 import static org.jboss.errai.bus.client.CommandMessage.createWithParts;
 import static org.jboss.errai.bus.client.MessageBuilder.createMessage;

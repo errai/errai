@@ -17,7 +17,6 @@
 package org.jboss.errai.workspaces.client.framework;
 
 import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.common.client.framework.WSComponent;
 import org.jboss.errai.common.client.framework.WidgetCallback;
 

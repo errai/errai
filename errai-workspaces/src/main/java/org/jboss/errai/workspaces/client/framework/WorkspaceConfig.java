@@ -16,8 +16,6 @@
 
 package org.jboss.errai.workspaces.client.framework;
 
-import org.jboss.errai.workspaces.client.framework.ToolContainer;
-
 /**
  * Workspace configuration.
  * The implementation is automatically generated at compile-time.

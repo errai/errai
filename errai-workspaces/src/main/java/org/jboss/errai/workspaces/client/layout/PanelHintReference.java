@@ -17,7 +17,6 @@
 package org.jboss.errai.workspaces.client.layout;
 
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
 
 public class PanelHintReference implements LayoutHintProvider {
     private Panel p;

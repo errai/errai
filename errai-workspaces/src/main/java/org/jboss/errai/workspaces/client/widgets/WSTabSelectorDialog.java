@@ -22,11 +22,11 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.json.JSONUtilCli;
-import org.jboss.errai.workspaces.client.protocols.LayoutParts;
 import org.jboss.errai.common.client.framework.AcceptsCallback;
 import org.jboss.errai.widgets.client.WSModalDialog;
 import org.jboss.errai.widgets.client.WSWindowPanel;
 import org.jboss.errai.widgets.client.listeners.ClickCallbackListener;
+import org.jboss.errai.workspaces.client.protocols.LayoutParts;
 
 import java.util.Map;
 import java.util.Set;

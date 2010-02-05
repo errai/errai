@@ -23,22 +23,13 @@ import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
-
-import static com.google.gwt.user.client.DOM.getElementById;
-
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
-
-import static com.google.gwt.user.client.Window.addResizeHandler;
-import static org.jboss.errai.bus.client.MessageBuilder.createMessage;
-
 import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.client.json.JSONUtilCli;
-import org.jboss.errai.workspaces.client.protocols.LayoutCommands;
-import org.jboss.errai.workspaces.client.protocols.LayoutParts;
 import org.jboss.errai.common.client.framework.AcceptsCallback;
 import org.jboss.errai.widgets.client.WSElementWrapper;
 import org.jboss.errai.widgets.client.WSModalDialog;
@@ -49,10 +40,16 @@ import org.jboss.errai.workspaces.client.framework.ToolSet;
 import org.jboss.errai.workspaces.client.framework.WorkspaceSizeChangeListener;
 import org.jboss.errai.workspaces.client.icons.ErraiImageBundle;
 import org.jboss.errai.workspaces.client.listeners.TabCloseHandler;
+import org.jboss.errai.workspaces.client.protocols.LayoutCommands;
+import org.jboss.errai.workspaces.client.protocols.LayoutParts;
 import org.jboss.errai.workspaces.client.widgets.*;
 import org.jboss.errai.workspaces.client.widgets.dnd.TabDragHandler;
 
 import java.util.*;
+
+import static com.google.gwt.user.client.DOM.getElementById;
+import static com.google.gwt.user.client.Window.addResizeHandler;
+import static org.jboss.errai.bus.client.MessageBuilder.createMessage;
 
 
 /**
