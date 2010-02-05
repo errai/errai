@@ -44,6 +44,12 @@ public class ErraiServiceImpl implements ErraiService {
 
     private Logger log = LoggerFactory.getLogger("ErraiBootstrap");
 
+    /**
+     * Initializes the errai service with a bus and configurator
+     *
+     * @param bus - the bus to be associated with this service
+     * @param configurator - the configurator to take care of the configuration for the service
+     */
     @Inject
     public ErraiServiceImpl(final ServerMessageBus bus,
                             final ErraiServiceConfigurator configurator) {
@@ -152,6 +158,11 @@ public class ErraiServiceImpl implements ErraiService {
         return configurator.getResource(AuthenticationAdapter.class) != null;
     }
 
+    /**
+     * Passes off the message to the bus for handling
+     *
+     * @param message - the message to store/deliver
+     */
     public void store(Message message) {
 
         message.addResources(configurator.getResourceProviders());
@@ -175,10 +186,20 @@ public class ErraiServiceImpl implements ErraiService {
 //        bus.sendGlobalAsync(message);
 //    }
 
+    /**
+     * Gets the bus associated with this service
+     *
+     * @return the bus associated with this service
+     */
     public ServerMessageBus getBus() {
         return bus;
     }
 
+    /**
+     * Gets the configuration used to initalize the service
+     *
+     * @return the errai service configurator
+     */
     public ErraiServiceConfigurator getConfiguration() {
         return configurator;
     }

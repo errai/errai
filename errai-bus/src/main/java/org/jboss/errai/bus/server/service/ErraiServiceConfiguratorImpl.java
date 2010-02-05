@@ -49,6 +49,9 @@ import static com.google.inject.Guice.createInjector;
 import static java.util.ResourceBundle.getBundle;
 import static org.jboss.errai.bus.server.util.ConfigUtil.visitAllTargets;
 
+/**
+ * Default implementation of the ErraiBus server-side configurator.
+ */
 public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
 
 
@@ -68,11 +71,22 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
 
     private Logger log = LoggerFactory.getLogger(ErraiServiceConfigurator.class);
 
+    /**
+     * Initializes the <tt>ErraiServiceConfigurator</tt> with a specified <tt>ServerMessageBus</tt>
+     *
+     * @param bus - the server message bus in charge of transmitting messages
+     */
     @Inject
     public ErraiServiceConfiguratorImpl(ServerMessageBus bus) {
         this.bus = bus;
     }
 
+    /**
+     * Configures the specified service and the bus. All components and extensions are loaded, also anything that
+     * needs to be done during the initialization stage. The configuration is read in and everything is set up
+     * 
+     * @param erraiService - the service associated with the bus
+     */
     public void configure(final ErraiService erraiService) {
         properties = new HashMap<String, String>();
         configRootTargets = ConfigUtil.findAllConfigTargets();
@@ -360,22 +374,51 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
         public void create(Inject injector);
     }
 
+    /**
+     * Gets the resource providers associated with this configurator
+     *
+     * @return the resource providers associated with this configurator
+     */
     public Map<String, Provider> getResourceProviders() {
         return this.resourceProviders;
     }
 
+    /**
+     * Gets a list of all configuration targets
+     *
+     * @return list of all configuration targets
+     */
     public List<File> getConfigurationRoots() {
         return this.configRootTargets;
     }
 
+    /**
+     * Returns true if the configuration has this <tt>key</tt> property
+     *
+     * @param key - the property too search for
+     * @return false if the property does not exist
+     */
     public boolean hasProperty(String key) {
         return properties.containsKey(key);
     }
 
+    /**
+     * Gets the property associated with the key
+     *
+     * @param key - the key to search for
+     * @return the property, if it exists, null otherwise
+     */
     public String getProperty(String key) {
         return properties.get(key);
     }
 
+    /**
+     * Gets the resources attached to the specified resource class
+     *
+     * @param resourceClass - the class to search the resources for
+     * @param <T> - the class type
+     * @return the resource of type <tt>T</tt>
+     */
     public <T> T getResource(Class<? extends T> resourceClass) {
         if (extensionBindings.containsKey(resourceClass)) {
             return (T) extensionBindings.get(resourceClass).get();
@@ -385,11 +428,20 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
         }
     }
 
+    /**
+     * Gets all serializable types
+     *
+     * @return all serializable types
+     */
     @Override
     public Set<Class> getAllSerializableTypes() {
         return serializableTypes;
     }
 
+    /**
+     * Gets the configured dispatcher, which is used to deliver the messages
+     * @return the configured dispatcher
+     */
     public RequestDispatcher getConfiguredDispatcher() {
         return dispatcher;
     }
