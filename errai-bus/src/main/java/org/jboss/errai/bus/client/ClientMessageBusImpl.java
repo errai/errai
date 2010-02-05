@@ -95,6 +95,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 URL.encode(SERVICE_ENTRY_POINT)
         )).setHeader("Connection", "Keep-Alive");
 
+        sendBuilder.setHeader("Content-Type", "application/json");
+      
         (recvBuilder = new RequestBuilder(
                 RequestBuilder.GET,
                 URL.encode(SERVICE_ENTRY_POINT)
@@ -398,7 +400,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      *
      * @param message - JSON string representation of message
      */
-    private void transmitRemote(String message) {
+    private void transmitRemote(final String message) {
         if (message == null) return;
 
         try {
@@ -407,6 +409,14 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             sendBuilder.sendRequest(message, new RequestCallback() {
                 public void onResponseReceived(Request request, Response response) {
                     transmitting = false;
+
+                    if(503 == response.getStatusCode()) // Service Unavailable
+                    {
+                      // Sending the message failed.
+                      // Although the response may still be valid
+                      // Handle it gracefully
+                      GWT.log("Server didn't accept the message: "+message, new RuntimeException());
+                    }
 
                     /**
                      * If the server bus returned us some client-destined messages

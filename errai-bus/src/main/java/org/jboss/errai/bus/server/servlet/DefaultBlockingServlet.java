@@ -34,12 +34,14 @@ import org.jboss.errai.bus.server.service.ErraiServiceImpl;
 import org.mvel2.util.StringAppender;
 
 import javax.servlet.ServletException;
+import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.CharBuffer;
 import java.util.Iterator;
@@ -64,7 +66,12 @@ public class DefaultBlockingServlet extends AbstractErraiServlet {
     @Override
     protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
             throws ServletException, IOException {
-        BufferedReader reader = httpServletRequest.getReader();
+      try
+      {
+        ServletInputStream inputStream = httpServletRequest.getInputStream();
+        BufferedReader reader = new BufferedReader(
+            new InputStreamReader(inputStream, "UTF-8")
+        );
         StringAppender sb = new StringAppender(httpServletRequest.getContentLength());
         CharBuffer buffer = CharBuffer.allocate(10);
 
@@ -80,8 +87,16 @@ public class DefaultBlockingServlet extends AbstractErraiServlet {
         for (Message msg : createCommandMessage(sessionProvider.getSession(httpServletRequest.getSession()), sb.toString())) {
             service.store(msg);
         }
+      }
+      catch (Throwable e)
+      {
+        // handle gracefully
+        System.out.println("Error: https://jira.jboss.org/jira/browse/ERRAI-37");
+        e.printStackTrace();
+        httpServletResponse.setStatus(503); // Service Unavailable        
+      }
 
-        pollForMessages(httpServletRequest, httpServletResponse, false);
+      pollForMessages(httpServletRequest, httpServletResponse, false);
     }
 
     private void pollForMessages(HttpServletRequest httpServletRequest,
