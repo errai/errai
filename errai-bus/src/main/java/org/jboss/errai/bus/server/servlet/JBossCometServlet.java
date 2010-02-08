@@ -25,6 +25,10 @@ import java.util.*;
 
 import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
 
+/**
+ * The <tt>JBossCometServlet</tt> provides the HTTP-protocol gateway between the server bus and the client buses,
+ * using JBoss Comet.
+ */
 @Singleton
 public class JBossCometServlet extends AbstractErraiServlet implements HttpEventServlet {
 
@@ -33,6 +37,14 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
 
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
+    /**
+     * When an event is received, it is processed accordingly. A post event will tell the servlet to wait for the
+     * messages, if there are messages waiting, they will be transmitted. Any errors will be handled.
+     * 
+     * @param event - the Http event that occured
+     * @throws IOException - thrown if there is a read/write error
+     * @throws ServletException - thrown if a servlet error occurs
+     */
     public void event(final HttpEvent event) throws IOException, ServletException {
         final HttpServletRequest request = event.getHttpServletRequest();
         final QueueSession session = sessionProvider.getSession(request.getSession());
@@ -127,6 +139,14 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
         }
     }
 
+    /**
+     * Receives standard HTTP requests from the public, and writes it to the response's output stream in JSON format
+     *
+     * @param req - the object that contains the request the client made of the servlet
+     * @param httpServletResponse - the object that contains the response the servlet returns to the client
+     * @exception IOException - if an input or output error occurs while the servlet is handling the HTTP request
+     * @exception ServletException - if the HTTP request cannot be handled
+     */
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse httpServletResponse) throws ServletException, IOException {
         System.out.println(CONFIG_PROBLEM_TEXT);
@@ -236,7 +256,14 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
         return queue;
     }
 
-
+    /**
+     * Transmits messages from the queue to the response, by writing them to the response's output stream in JSON
+     * format
+     *
+     * @param httpServletResponse - the response that will contain all the messages to be transmitted
+     * @param queue - the queue holding the messages to be transmitted
+     * @throws IOException - if an input or output error occurs while the servlet is handling the HTTP request
+     */
     public void transmitMessages(final HttpServletResponse httpServletResponse, MessageQueue queue) throws IOException {
 
 //          log.info("Transmitting messages to client (Queue:" + queue.hashCode() + ")");
@@ -260,6 +287,13 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
         //   queue.heartBeat();
     }
 
+    /**
+     * Writes the message to the output stream
+     *
+     * @param stream - the output stream to write the message to
+     * @param m - the message to write to the output stream
+     * @throws IOException - if an input or output error occurs while the servlet is handling the HTTP request
+     */
     public void writeToOutputStream(OutputStream stream, MarshalledMessage m) throws IOException {
 //           log.info("SendToClient:" + m.getMessage());
 

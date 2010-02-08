@@ -28,15 +28,37 @@ import java.util.List;
 
 import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
 
+/**
+ * The <tt>JettyContinuationsServlet</tt> provides the HTTP-protocol gateway between the server bus and the client buses,
+ * using Jetty Continuations.
+ */
 @Singleton
 public class JettyContinuationsServlet extends AbstractErraiServlet {
 
+    /**
+     * Called by the server (via the <tt>service</tt> method) to allow a servlet to handle a GET request by supplying
+     * a response
+     *
+     * @param httpServletRequest - object that contains the request the client has made of the servlet
+     * @param httpServletResponse - object that contains the response the servlet sends to the client
+     * @exception IOException - if an input or output error is detected when the servlet handles the GET request
+     * @exception ServletException - if the request for the GET could not be handled
+     */
     @Override
     protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
             throws ServletException, IOException {
         pollForMessages(httpServletRequest, httpServletResponse, true);
     }
 
+    /**
+     * Called by the server (via the <code>service</code> method) to allow a servlet to handle a POST request, by
+     * sending the request
+     *
+     * @param httpServletRequest - object that contains the request the client has made of the servlet
+     * @param httpServletResponse - object that contains the response the servlet sends to the client
+     * @exception IOException - if an input or output error is detected when the servlet handles the request
+     * @exception ServletException - if the request for the POST could not be handled
+     */
     @Override
     protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
             throws ServletException, IOException {
@@ -157,6 +179,13 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
 
     }
 
+    /**
+     * Writes the message to the output stream
+     *
+     * @param stream - the output stream to write the message to
+     * @param m - the message to write to the output stream
+     * @throws IOException - if an input or output error occurs while the servlet is handling the HTTP request
+     */
     public static void writeToOutputStream(OutputStream stream, MarshalledMessage m) throws IOException {
         stream.write('{');
         stream.write('"');
