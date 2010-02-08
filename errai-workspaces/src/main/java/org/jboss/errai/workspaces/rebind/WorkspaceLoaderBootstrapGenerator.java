@@ -28,11 +28,13 @@ import com.google.gwt.user.rebind.SourceWriter;
 import org.jboss.errai.bus.server.annotations.security.RequireRoles;
 import org.jboss.errai.bus.server.util.ConfigUtil;
 import org.jboss.errai.bus.server.util.RebindVisitor;
-import org.jboss.errai.workspaces.client.framework.annotations.*;
+import org.jboss.errai.workspaces.client.framework.annotations.GroupOrder;
+import org.jboss.errai.workspaces.client.framework.annotations.LoadTool;
+import org.jboss.errai.workspaces.client.framework.annotations.LoadToolSet;
+import org.jboss.errai.workspaces.client.framework.annotations.LoginComponent;
 
-import java.io.File;
-import java.io.PrintWriter;
-import java.lang.annotation.Annotation;
+import java.io.*;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -48,6 +50,8 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
    */
   private String packageName = null;
 
+  private final static String TOOLSET_PROFILE = "toolset-profile.properties";
+  
   // inherited generator method
   public String generate(TreeLogger logger, GeneratorContext context,
                          String typeName) throws UnableToCompleteException {
@@ -134,13 +138,47 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
     sourceWriter.println("public void configure(org.jboss.errai.workspaces.client.framework.ToolContainer workspace) { ");
     sourceWriter.outdent();
 
-    // add statements sendNowWith pub key/value pairs from the resrouce bundle
+    // add statements sendNowWith pub key/value pairs from the resource bundle
     for (Enumeration<String> keys = bundle.getKeys();
          keys.hasMoreElements();) {
       String key = keys.nextElement();
 
       sourceWriter.println("new " + bundle.getString(key) + "().initModule(errai);");
     }
+
+    // toolset profile (acts as whitelist). Used with BPM console atm
+    final List<String> enabledTools = new ArrayList<String>();
+
+    InputStream in = getClass().getClassLoader().getResourceAsStream(TOOLSET_PROFILE);
+
+    try
+    {
+      //use buffering, reading one line at a time
+      //FileReader always assumes default encoding is OK!
+      BufferedReader input = new BufferedReader(new InputStreamReader(in));
+      try
+      {
+        String line = null;
+        while ((line = input.readLine()) != null)
+        {
+
+          // ignore comments and empty lines
+          if (line.equals("") || line.startsWith("#"))
+            continue;
+
+          enabledTools.add(line);
+        }
+      }
+      finally
+      {
+        input.close();
+      }
+    }
+    catch (IOException ex)
+    {
+      throw new RuntimeException("Error reading '"+TOOLSET_PROFILE+"'");
+    }
+
 
     List<File> targets = ConfigUtil.findAllConfigTargets();
 
@@ -152,12 +190,14 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
           public void visit(Class<?> clazz, GeneratorContext context, TreeLogger logger, SourceWriter writer)
           {
 
-            if (clazz.isAnnotationPresent(LoadToolSet.class))
+            if (clazz.isAnnotationPresent(LoadToolSet.class)
+                && enabledTools.contains(clazz.getName()))
             {
               writer.println("workspace.addToolSet(new " + clazz.getName() + "());");
               logger.log(TreeLogger.Type.INFO, "Adding Errai Toolset: " + clazz.getName());
             }
-            else if (clazz.isAnnotationPresent(LoadTool.class))
+            else if (clazz.isAnnotationPresent(LoadTool.class)
+                && enabledTools.contains(clazz.getName()) )
             {
               LoadTool loadTool = clazz.getAnnotation(LoadTool.class);
 
@@ -207,7 +247,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
               }
 
               writer.println("});");
-            }            
+            }
           }
         });
 

@@ -27,7 +27,8 @@ import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
 import org.jboss.errai.bus.server.util.ConfigUtil;
 import org.jboss.errai.bus.server.util.RebindVisitor;
-import org.jboss.errai.workspaces.client.framework.annotations.*;
+import org.jboss.errai.workspaces.client.framework.annotations.DefaultBundle;
+import org.jboss.errai.workspaces.client.framework.annotations.LoadTool;
 
 import java.io.File;
 import java.io.PrintWriter;
