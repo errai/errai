@@ -40,222 +40,212 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 public class WorkspaceLoaderBootstrapGenerator extends Generator {
-  /**
-   * Simple name of class to be generated
-   */
-  private String className = null;
+    /**
+     * Simple name of class to be generated
+     */
+    private String className = null;
 
-  /**
-   * Package name of class to be generated
-   */
-  private String packageName = null;
+    /**
+     * Package name of class to be generated
+     */
+    private String packageName = null;
 
-  private final static String TOOLSET_PROFILE = "toolset-profile.properties";
-  
-  // inherited generator method
-  public String generate(TreeLogger logger, GeneratorContext context,
-                         String typeName) throws UnableToCompleteException {
+    private final static String TOOLSET_PROFILE = "toolset-profile.properties";
 
-    TypeOracle typeOracle = context.getTypeOracle();
+    // inherited generator method
 
-    try {
-      // get classType and save instance variables
+    public String generate(TreeLogger logger, GeneratorContext context,
+                           String typeName) throws UnableToCompleteException {
 
-      JClassType classType = typeOracle.getType(typeName);
-      packageName = classType.getPackage().getName();
-      className = classType.getSimpleSourceName() + "Impl";
+        TypeOracle typeOracle = context.getTypeOracle();
 
-      // Generate class source code
-      generateClass(logger, context);
+        try {
+            // get classType and save instance variables
 
-    }
-    catch (Exception e) {
+            JClassType classType = typeOracle.getType(typeName);
+            packageName = classType.getPackage().getName();
+            className = classType.getSimpleSourceName() + "Impl";
 
-      // record sendNowWith logger that Map generation threw an exception
-      logger.log(TreeLogger.ERROR, "Error generating bootstrap loader", e);
+            // Generate class source code
+            generateClass(logger, context);
 
-    }
-
-    // return the fully qualifed name of the class generated
-    return packageName + "." + className;
-  }
-
-  /**
-   * Generate source code for new class. Class extends
-   * <code>HashMap</code>.
-   *
-   * @param logger  Logger object
-   * @param context Generator context
-   */
-  private void generateClass(TreeLogger logger, GeneratorContext context) {
-
-    // get print writer that receives the source code
-    PrintWriter printWriter = context.tryCreate(logger, packageName, className);
-    // print writer if null, source code has ALREADY been generated,
-
-    if (printWriter == null) return;
-
-    // init composer, set class properties, create source writer
-    ClassSourceFileComposerFactory composer = new ClassSourceFileComposerFactory(packageName,
-        className);
-
-    composer.addImplementedInterface("org.jboss.errai.workspaces.client.framework.WorkspaceConfig");
-
-    SourceWriter sourceWriter = composer.createSourceWriter(context, printWriter);
-
-    // generator constructor source code
-    generateBootstrapClass(context, logger, sourceWriter);
-    // close generated class
-    sourceWriter.outdent();
-    sourceWriter.println("}");
-
-    // commit generated class
-    context.commit(logger, printWriter);
-  }
-
-  private void generateBootstrapClass(GeneratorContext context, TreeLogger logger, SourceWriter sourceWriter) {
-
-    // init resource bundle
-
-    ResourceBundle bundle;
-
-    try {
-      bundle = ResourceBundle.getBundle("org.jboss.errai.workspaces.rebind.WorkspaceModules");
-    }
-    catch (Exception e) {
-      logger.log(TreeLogger.Type.ERROR, "can't find WorkspaceModules.properties in classpath");
-      logger.log(TreeLogger.Type.ERROR, e.getMessage());
-      throw new RuntimeException();
-    }
-
-    // start constructor source generation
-    sourceWriter.println("public " + className + "() { ");
-    sourceWriter.indent();
-    sourceWriter.println("super();");
-    sourceWriter.outdent();
-    sourceWriter.println("}");
-
-    sourceWriter.println("public void configure(org.jboss.errai.workspaces.client.framework.ToolContainer workspace) { ");
-    sourceWriter.outdent();
-
-    // add statements sendNowWith pub key/value pairs from the resource bundle
-    for (Enumeration<String> keys = bundle.getKeys();
-         keys.hasMoreElements();) {
-      String key = keys.nextElement();
-
-      sourceWriter.println("new " + bundle.getString(key) + "().initModule(errai);");
-    }
-
-    // toolset profile (acts as whitelist). Used with BPM console atm
-    final List<String> enabledTools = new ArrayList<String>();
-
-    InputStream in = getClass().getClassLoader().getResourceAsStream(TOOLSET_PROFILE);
-
-    try
-    {
-      //use buffering, reading one line at a time
-      //FileReader always assumes default encoding is OK!
-      BufferedReader input = new BufferedReader(new InputStreamReader(in));
-      try
-      {
-        String line = null;
-        while ((line = input.readLine()) != null)
-        {
-
-          // ignore comments and empty lines
-          if (line.equals("") || line.startsWith("#"))
-            continue;
-
-          enabledTools.add(line);
         }
-      }
-      finally
-      {
-        input.close();
-      }
+        catch (Exception e) {
+
+            // record sendNowWith logger that Map generation threw an exception
+            logger.log(TreeLogger.ERROR, "Error generating bootstrap loader", e);
+
+        }
+
+        // return the fully qualifed name of the class generated
+        return packageName + "." + className;
     }
-    catch (IOException ex)
-    {
-      throw new RuntimeException("Error reading '"+TOOLSET_PROFILE+"'");
+
+    /**
+     * Generate source code for new class. Class extends
+     * <code>HashMap</code>.
+     *
+     * @param logger  Logger object
+     * @param context Generator context
+     */
+    private void generateClass(TreeLogger logger, GeneratorContext context) {
+
+        // get print writer that receives the source code
+        PrintWriter printWriter = context.tryCreate(logger, packageName, className);
+        // print writer if null, source code has ALREADY been generated,
+
+        if (printWriter == null) return;
+
+        // init composer, set class properties, create source writer
+        ClassSourceFileComposerFactory composer = new ClassSourceFileComposerFactory(packageName,
+                className);
+
+        composer.addImplementedInterface("org.jboss.errai.workspaces.client.framework.WorkspaceConfig");
+
+        SourceWriter sourceWriter = composer.createSourceWriter(context, printWriter);
+
+        // generator constructor source code
+        generateBootstrapClass(context, logger, sourceWriter);
+        // close generated class
+        sourceWriter.outdent();
+        sourceWriter.println("}");
+
+        // commit generated class
+        context.commit(logger, printWriter);
     }
 
+    private void generateBootstrapClass(GeneratorContext context, TreeLogger logger, SourceWriter sourceWriter) {
 
-    List<File> targets = ConfigUtil.findAllConfigTargets();
+        // init resource bundle
 
-    ConfigUtil.visitAllTargets(
-        targets, context, logger,
-        sourceWriter,
-        new RebindVisitor()
-        {
-          public void visit(Class<?> clazz, GeneratorContext context, TreeLogger logger, SourceWriter writer)
-          {
+        ResourceBundle bundle;
 
-            if (clazz.isAnnotationPresent(LoadToolSet.class)
-                && enabledTools.contains(clazz.getName()))
-            {
-              writer.println("workspace.addToolSet(new " + clazz.getName() + "());");
-              logger.log(TreeLogger.Type.INFO, "Adding Errai Toolset: " + clazz.getName());
-            }
-            else if (clazz.isAnnotationPresent(LoadTool.class)
-                && enabledTools.contains(clazz.getName()) )
-            {
-              LoadTool loadTool = clazz.getAnnotation(LoadTool.class);
+        try {
+            bundle = ResourceBundle.getBundle("org.jboss.errai.workspaces.rebind.WorkspaceModules");
+        }
+        catch (Exception e) {
+            logger.log(TreeLogger.Type.ERROR, "can't find WorkspaceModules.properties in classpath");
+            logger.log(TreeLogger.Type.ERROR, e.getMessage());
+            throw new RuntimeException();
+        }
 
-              if (clazz.isAnnotationPresent(RequireRoles.class)) {
-                RequireRoles requireRoles = clazz.getAnnotation(RequireRoles.class);
+        // start constructor source generation
+        sourceWriter.println("public " + className + "() { ");
+        sourceWriter.indent();
+        sourceWriter.println("super();");
+        sourceWriter.outdent();
+        sourceWriter.println("}");
 
-                StringBuilder rolesBuilder = new StringBuilder("new String[] {");
-                String[] roles = requireRoles.value();
+        sourceWriter.println("public void configure(org.jboss.errai.workspaces.client.framework.ToolContainer workspace) { ");
+        sourceWriter.outdent();
 
-                for (int i = 0; i < roles.length; i++) {
-                  rolesBuilder.append("\"").append(roles[i].trim()).append("\"");
-                  if ((i + 1) < roles.length) rolesBuilder.append(", ");
+        // add statements sendNowWith pub key/value pairs from the resource bundle
+        for (Enumeration<String> keys = bundle.getKeys();
+             keys.hasMoreElements();) {
+            String key = keys.nextElement();
+
+            sourceWriter.println("new " + bundle.getString(key) + "().initModule(errai);");
+        }
+
+        // toolset profile (acts as whitelist). Used with BPM console atm
+        final List<String> enabledTools = new ArrayList<String>();
+
+        InputStream in = getClass().getClassLoader().getResourceAsStream(TOOLSET_PROFILE);
+
+        if (in != null) {
+            try {
+                //use buffering, reading one line at a time
+                //FileReader always assumes default encoding is OK!
+                BufferedReader input = new BufferedReader(new InputStreamReader(in));
+                try {
+                    String line = null;
+                    while ((line = input.readLine()) != null) {
+
+                        // ignore comments and empty lines
+                        if (line.equals("") || line.startsWith("#"))
+                            continue;
+
+                        enabledTools.add(line);
+                    }
                 }
-                rolesBuilder.append("}");
-
-                writer.println("workspace.addTool(\"" + loadTool.group() + "\"," +
-                    " \"" + loadTool.name() + "\", \"" + loadTool.icon() + "\", " + loadTool.multipleAllowed()
-                    + ", " + loadTool.priority() + ", new " + clazz.getName() + "(), " + rolesBuilder.toString() + ");");
-              }
-              else {
-                writer.println("workspace.addTool(\"" + loadTool.group() + "\"," +
-                    " \"" + loadTool.name() + "\", \"" + loadTool.icon() + "\", " + loadTool.multipleAllowed()
-                    + ", " + loadTool.priority() + ", new " + clazz.getName() + "());");
-              }
-            }
-            else if (clazz.isAnnotationPresent(LoginComponent.class)) {
-              writer.println("workspace.setLoginComponent(new " + clazz.getName() + "());");
-            }
-
-            if (clazz.isAnnotationPresent(GroupOrder.class)) {
-              GroupOrder groupOrder = clazz.getAnnotation(GroupOrder.class);
-
-              if ("".equals(groupOrder.value().trim())) return;
-
-              String[] order = groupOrder.value().split(",");
-
-              writer.print("workspace.setPreferredGroupOrdering(new String[] {");
-
-              for (int i = 0; i < order.length; i++) {
-                writer.print("\"");
-                writer.print(order[i].trim());
-                writer.print("\"");
-
-                if (i + 1 < order.length) {
-                  writer.print(",");
+                finally {
+                    input.close();
                 }
-              }
-
-              writer.println("});");
             }
-          }
-        });
+            catch (IOException ex) {
+                throw new RuntimeException("Error reading '" + TOOLSET_PROFILE + "'");
+            }
+        }
 
 
-    sourceWriter.outdent();
-    sourceWriter.println("}");
-  }
+        List<File> targets = ConfigUtil.findAllConfigTargets();
 
+        ConfigUtil.visitAllTargets(
+                targets, context, logger,
+                sourceWriter,
+                new RebindVisitor() {
+                    public void visit(Class<?> clazz, GeneratorContext context, TreeLogger logger, SourceWriter writer) {
+
+                        if (clazz.isAnnotationPresent(LoadToolSet.class)
+                                && enabledTools.contains(clazz.getName())) {
+                            writer.println("workspace.addToolSet(new " + clazz.getName() + "());");
+                            logger.log(TreeLogger.Type.INFO, "Adding Errai Toolset: " + clazz.getName());
+                        } else if (clazz.isAnnotationPresent(LoadTool.class)
+                                && enabledTools.contains(clazz.getName())) {
+                            LoadTool loadTool = clazz.getAnnotation(LoadTool.class);
+
+                            if (clazz.isAnnotationPresent(RequireRoles.class)) {
+                                RequireRoles requireRoles = clazz.getAnnotation(RequireRoles.class);
+
+                                StringBuilder rolesBuilder = new StringBuilder("new String[] {");
+                                String[] roles = requireRoles.value();
+
+                                for (int i = 0; i < roles.length; i++) {
+                                    rolesBuilder.append("\"").append(roles[i].trim()).append("\"");
+                                    if ((i + 1) < roles.length) rolesBuilder.append(", ");
+                                }
+                                rolesBuilder.append("}");
+
+                                writer.println("workspace.addTool(\"" + loadTool.group() + "\"," +
+                                        " \"" + loadTool.name() + "\", \"" + loadTool.icon() + "\", " + loadTool.multipleAllowed()
+                                        + ", " + loadTool.priority() + ", new " + clazz.getName() + "(), " + rolesBuilder.toString() + ");");
+                            } else {
+                                writer.println("workspace.addTool(\"" + loadTool.group() + "\"," +
+                                        " \"" + loadTool.name() + "\", \"" + loadTool.icon() + "\", " + loadTool.multipleAllowed()
+                                        + ", " + loadTool.priority() + ", new " + clazz.getName() + "());");
+                            }
+                        } else if (clazz.isAnnotationPresent(LoginComponent.class)) {
+                            writer.println("workspace.setLoginComponent(new " + clazz.getName() + "());");
+                        }
+
+                        if (clazz.isAnnotationPresent(GroupOrder.class)) {
+                            GroupOrder groupOrder = clazz.getAnnotation(GroupOrder.class);
+
+                            if ("".equals(groupOrder.value().trim())) return;
+
+                            String[] order = groupOrder.value().split(",");
+
+                            writer.print("workspace.setPreferredGroupOrdering(new String[] {");
+
+                            for (int i = 0; i < order.length; i++) {
+                                writer.print("\"");
+                                writer.print(order[i].trim());
+                                writer.print("\"");
+
+                                if (i + 1 < order.length) {
+                                    writer.print(",");
+                                }
+                            }
+
+                            writer.println("});");
+                        }
+                    }
+                });
+
+
+        sourceWriter.outdent();
+        sourceWriter.println("}");
+    }
 
 
 }
