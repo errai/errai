@@ -139,15 +139,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
         sourceWriter.println("public void configure(org.jboss.errai.workspaces.client.framework.ToolContainer workspace) { ");
         sourceWriter.outdent();
 
-        // add statements sendNowWith pub key/value pairs from the resource bundle
-        for (Enumeration<String> keys = bundle.getKeys();
-             keys.hasMoreElements();) {
-            String key = keys.nextElement();
-
-            sourceWriter.println("new " + bundle.getString(key) + "().initModule(errai);");
-        }
-
-        // toolset profile (acts as whitelist). Used with BPM console atm
+                // toolset profile (acts as whitelist). Used with BPM console atm
         final List<String> enabledTools = new ArrayList<String>();
 
         InputStream in = getClass().getClassLoader().getResourceAsStream(TOOLSET_PROFILE);
@@ -178,7 +170,17 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
         }
 
 
+        for (Enumeration<String> keys = bundle.getKeys();
+             keys.hasMoreElements();) {
+            String key = keys.nextElement();
+
+            sourceWriter.println("new " + bundle.getString(key) + "().initModule(errai);");
+        }
+
+
         List<File> targets = ConfigUtil.findAllConfigTargets();
+
+        final boolean applyFilter = in != null;
 
         ConfigUtil.visitAllTargets(
                 targets, context, logger,
@@ -187,11 +189,11 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
                     public void visit(Class<?> clazz, GeneratorContext context, TreeLogger logger, SourceWriter writer) {
 
                         if (clazz.isAnnotationPresent(LoadToolSet.class)
-                                && enabledTools.contains(clazz.getName())) {
+                                && (!applyFilter || enabledTools.contains(clazz.getName()))) {
                             writer.println("workspace.addToolSet(new " + clazz.getName() + "());");
                             logger.log(TreeLogger.Type.INFO, "Adding Errai Toolset: " + clazz.getName());
                         } else if (clazz.isAnnotationPresent(LoadTool.class)
-                                && enabledTools.contains(clazz.getName())) {
+                                && (!applyFilter || enabledTools.contains(clazz.getName()))) {
                             LoadTool loadTool = clazz.getAnnotation(LoadTool.class);
 
                             if (clazz.isAnnotationPresent(RequireRoles.class)) {
