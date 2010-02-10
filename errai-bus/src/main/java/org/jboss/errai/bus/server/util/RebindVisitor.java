@@ -20,6 +20,20 @@ import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.user.rebind.SourceWriter;
 
+/**
+ * The <tt>RebindVisitor</tt> offers a template for searching and rebinds the class if certain annotations are present.
+ * This visitor class separation gives the ability to add new operations to existing object structures without 
+ * modifying those structures
+ */
 public interface RebindVisitor {
+
+    /**
+     * Visits the specified class and rebinds it according to the annotations present
+     *
+     * @param visit - the class to be visited
+     * @param context - provides metadata to deferred binding generators
+     * @param logger - log messages in deferred binding generators
+     * @param writer - supports the source file regeneration
+     */
     public void visit(Class<?> visit, GeneratorContext context, TreeLogger logger, SourceWriter writer);
 }
