@@ -38,6 +38,11 @@ public class ConfigUtil {
     public static final String ERRAI_CONFIG_STUB_NAME = "ErraiApp.properties";
     public static final Logger log = LoggerFactory.getLogger(ConfigUtil.class);
 
+    /**
+     * Gets a list of all the configuration targets in the form of <tt>File</tt>s
+     *
+     * @return a <tt>File</tt> list of all the configuration targets
+     */
     public static List<File> findAllConfigTargets() {
         try {
             Enumeration<URL> t = ConfigUtil.class.getClassLoader().getResources(ERRAI_CONFIG_STUB_NAME);
@@ -100,6 +105,9 @@ public class ConfigUtil {
         cache.add(cls);
     }
 
+    /**
+     * Cleans up the startup temporary files, including those stored under the system's temp directory
+     */
     public static void cleanupStartupTempFiles() {
         if (scanAreas == null) return;
         
@@ -112,6 +120,12 @@ public class ConfigUtil {
         scanCache = null;
     }
 
+    /**
+     * Visits all targets that can be found under <tt>root</tt>, using the <tt>ConfigVisitor</tt> specified
+     *
+     * @param root - the root file to start visiting from
+     * @param visitor - the visitor delegate to use
+     */
     public static void visitAll(File root, final ConfigVisitor visitor) {
         _findLoadableModules(root, root, new HashSet<String>(), new VisitDelegate() {
             public void visit(Class clazz) {
@@ -122,12 +136,27 @@ public class ConfigUtil {
         if (activeCacheContexts != null) activeCacheContexts.add(root.getPath());
     }
 
+    /**
+     * Visits all the targets listed in the file, using the <tt>ConfigVisitor</tt> specified
+     *
+     * @param targets - the file targets to visit
+     * @param visitor - the visitor delegate to use
+     */
     public static void visitAllTargets(List<File> targets, ConfigVisitor visitor) {
         for (File file : targets) {
             visitAll(file, visitor);
         }
     }
 
+    /**
+     * Visits all targets that can be found under <tt>root</tt>
+     *
+     * @param root - the root file to start visiting from
+     * @param context - provides metadata to deferred binding generators
+     * @param logger - log messages in deferred binding generators
+     * @param writer - supports the source file regeneration
+     * @param visitor - the visitor delegate to use
+     */
     public static void visitAll(File root, final GeneratorContext context, final TreeLogger logger,
                                 final SourceWriter writer, final RebindVisitor visitor) {
         _findLoadableModules(root, root, new HashSet<String>(), new VisitDelegate() {
@@ -139,6 +168,15 @@ public class ConfigUtil {
         if (activeCacheContexts != null) activeCacheContexts.add(root.getPath());
     }
 
+    /**
+     * Visits all the file targets specified in the list using the <tt>RebindVisitor</tt>
+     *
+     * @param targets - the file targets to visit
+     * @param context - provides metadata to deferred binding generators
+     * @param logger - log messages in deferred binding generators
+     * @param writer - supports the source file regeneration
+     * @param visitor - the visitor delegate to use
+     */
     public static void visitAllTargets(List<File> targets, final GeneratorContext context,
                                        final TreeLogger logger, final SourceWriter writer, RebindVisitor visitor) {
         for (File file : targets) {
@@ -398,6 +436,15 @@ public class ConfigUtil {
                 .substring(rootFile.length() + 1, fileName.lastIndexOf('.'));
     }
 
+    /**
+     * Returns true if the specified class, <tt>clazz</tt>, has annotations from the class <tt>annotation</tt>. Also,
+     * checks that <tt>clazz</tt> is represented by <tt>ofType</tt>
+     * 
+     * @param clazz - the class to check for the annotations
+     * @param annotation - the annotations to look for
+     * @param ofType - the class type we want to be sure to check, as <tt>clazz</tt> could be a visitor delegate.
+     * @return true if the <tt>clazz</tt> has those <tt>annotation</tt>s
+     */
     public static boolean isAnnotated(Class clazz, Class<? extends Annotation> annotation, Class ofType) {
         return ofType.isAssignableFrom(clazz) && clazz.isAnnotationPresent(annotation);
     }
