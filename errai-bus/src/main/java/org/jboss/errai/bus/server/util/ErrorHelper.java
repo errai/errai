@@ -12,26 +12,32 @@ import static org.jboss.errai.bus.client.MessageBuilder.createMessage;
 
 public class ErrorHelper {
     public static void sendClientError(MessageBus bus, Message message, String errorMessage, Throwable e) {
-        StringAppender a = new StringAppender("<br/>").append(e.getClass().getName() + ": " + e.getMessage()).append("<br/>");
 
-        // Let's build-up the stacktrace.
-        boolean first = true;
-        for (StackTraceElement sel : e.getStackTrace()) {
-            a.append(first ? "" : "&nbsp;&nbsp;").append(sel.toString()).append("<br/>");
-            first = false;
-        }
+        if (e != null) {
+            StringAppender a = new StringAppender("<br/>").append(e.getClass().getName() + ": " + e.getMessage()).append("<br/>");
 
-        // And add the entire causal chain.
-        while ((e = e.getCause()) != null) {
-            first = true;
-            a.append("Caused by:<br/>");
+            // Let's build-up the stacktrace.
+            boolean first = true;
             for (StackTraceElement sel : e.getStackTrace()) {
                 a.append(first ? "" : "&nbsp;&nbsp;").append(sel.toString()).append("<br/>");
                 first = false;
             }
-        }
 
-        sendClientError(bus, message, errorMessage, a.toString());
+            // And add the entire causal chain.
+            while ((e = e.getCause()) != null) {
+                first = true;
+                a.append("Caused by:<br/>");
+                for (StackTraceElement sel : e.getStackTrace()) {
+                    a.append(first ? "" : "&nbsp;&nbsp;").append(sel.toString()).append("<br/>");
+                    first = false;
+                }
+            }
+            sendClientError(bus, message, errorMessage, a.toString());
+
+        }
+        else {
+            sendClientError(bus, message, errorMessage, "No additional details.");
+        }
     }
 
 

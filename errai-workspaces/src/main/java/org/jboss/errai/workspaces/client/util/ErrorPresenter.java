@@ -32,7 +32,6 @@ import org.jboss.errai.widgets.client.WSModalDialog;
  */
 public class ErrorPresenter implements MessageCallback
 {
-  @Override
   public void callback(Message message)
   {
     String errorMessage = message.get(String.class, MessageParts.ErrorMessage);

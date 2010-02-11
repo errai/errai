@@ -26,6 +26,7 @@ import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.server.io.JSONEncoder;
 import org.jboss.errai.bus.server.io.JSONMessageServer;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
+import org.jboss.errai.bus.server.util.ErrorHelper;
 
 import javax.swing.*;
 import java.awt.*;
@@ -36,6 +37,7 @@ import java.util.Queue;
 import static org.jboss.errai.bus.client.MessageBuilder.createConversation;
 import static org.jboss.errai.bus.client.protocols.MessageParts.ReplyTo;
 import static org.jboss.errai.bus.client.protocols.SecurityCommands.MessageNotDelivered;
+import static org.jboss.errai.bus.server.util.ErrorHelper.handleMessageDeliveryFailure;
 import static org.jboss.errai.bus.server.util.ServerBusUtils.encodeJSON;
 
 /**
@@ -66,7 +68,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     /**
      * Sets up the <tt>ServerMessageBusImpl</tt> with the configuration supplied. Also, initializes the bus' callback
      * functions, scheduler, and monitor
-     *
+     * <p/>
      * When deploying services on the server-side, it is possible to obtain references to the
      * <tt>ErraiServiceConfigurator</tt> by declaring it as injection dependencies
      *
@@ -300,9 +302,14 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 Map<String, Object> rawMsg = new HashMap<String, Object>();
                 rawMsg.put(MessageParts.CommandType.name(), MessageNotDelivered.name());
 
+                try {
                 enqueueForDelivery(getSessionId(message),
                         message.get(String.class, ReplyTo),
                         encodeJSON(rawMsg));
+                }
+                catch (NoSubscribersToDeliverTo nstdt) {
+                    handleMessageDeliveryFailure(this, message, nstdt.getMessage(), nstdt, false);
+                }
             }
 
             return;
@@ -353,19 +360,20 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     /**
      * Parses the message appropriately and enqueues it for delivery
      *
-     * @param message - the message to be sent
+     * @param message       - the message to be sent
      * @param fireListeners - true if all listeners attached should be notified of delivery
      */
     public void send(Message message, boolean fireListeners) {
         message.commit();
         if (!message.hasResource("Session")) {
-            throw new RuntimeException("cannot automatically route message. no session contained in message.");
+            handleMessageDeliveryFailure(this, message, "cannot automatically route message. no session contained in message.", null, false);
         }
 
         String sessionId = getSessionId(message);
 
         if (sessionId == null) {
-            throw new RuntimeException("cannot automatically route message. no session contained in message.");
+            handleMessageDeliveryFailure(this, message, "cannot automatically route message. no session contained in message.", null, false);
+
         }
 
         send(message.hasPart(MessageParts.SessionID) ? message.get(String.class, MessageParts.SessionID) :
@@ -373,19 +381,25 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
 
     private void send(String sessionid, Message message, boolean fireListeners) {
-        if (fireListeners && !fireGlobalMessageListeners(message)) {
-            if (message.hasPart(ReplyTo)) {
-                Map<String, Object> rawMsg = new HashMap<String, Object>();
-                rawMsg.put(MessageParts.CommandType.name(), MessageNotDelivered.name());
-                enqueueForDelivery(sessionid, message.get(String.class, ReplyTo),
-                        encodeJSON(rawMsg));
+        try {
+            if (fireListeners && !fireGlobalMessageListeners(message)) {
+                if (message.hasPart(ReplyTo)) {
+                    Map<String, Object> rawMsg = new HashMap<String, Object>();
+                    rawMsg.put(MessageParts.CommandType.name(), MessageNotDelivered.name());
+                    enqueueForDelivery(sessionid, message.get(String.class, ReplyTo),
+                            encodeJSON(rawMsg));
+                }
+                return;
             }
-            return;
-        }
 
-        enqueueForDelivery(sessionid, message.getSubject(), message instanceof HasEncoded ?
-                ((HasEncoded) message).getEncoded() :
-                encodeJSON(message.getParts()));
+            enqueueForDelivery(sessionid, message.getSubject(), message instanceof HasEncoded ?
+                    ((HasEncoded) message).getEncoded() :
+                    encodeJSON(message.getParts()));
+        }
+        catch (NoSubscribersToDeliverTo nstdt) {
+            // catch this so we can get a full trace
+            handleMessageDeliveryFailure(this, message, nstdt.getMessage(), nstdt, false);
+        }
     }
 
     private void enqueueForDelivery(final String sessionId, final String subject, final Object message) {
@@ -410,7 +424,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
      * sent.
      *
      * @param sessionContext - key of messages. Only want to obtain messages that have the same <tt>sessionContext</tt>
-     * @param wait - set to true if the bus will wait for the next message
+     * @param wait           - set to true if the bus will wait for the next message
      * @return the <tt>Payload</tt> containing the next messages to be sent
      */
     public Payload nextMessage(Object sessionContext, boolean wait) {
@@ -453,7 +467,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     /**
      * Closes the message queue
-     * 
+     *
      * @param queue - the message queue to close
      */
     public void closeQueue(MessageQueue queue) {
@@ -469,7 +483,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
      * be routed based on the already specified rules or not.
      *
      * @param subject - the subject of the subscription
-     * @param rule - the <tt>BooleanRoutingRule</tt> instance specifying the routing rules
+     * @param rule    - the <tt>BooleanRoutingRule</tt> instance specifying the routing rules
      */
     public void addRule(String subject, BooleanRoutingRule rule) {
         List<MessageCallback> newCallbacks = new LinkedList<MessageCallback>();
@@ -488,7 +502,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     /**
      * Adds a subscription
      *
-     * @param subject - the subject to subscribe to
+     * @param subject  - the subject to subscribe to
      * @param receiver - the callback function called when a message is dispatched
      */
     public void subscribe(String subject, MessageCallback receiver) {
@@ -503,10 +517,10 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     /**
      * Adds a new remote subscription and fires subscription listeners
-     * 
+     *
      * @param sessionContext - session context of queue
-     * @param queue - the message queue
-     * @param subject - the subject to subscribe to
+     * @param queue          - the message queue
+     * @param subject        - the subject to subscribe to
      */
     public void remoteSubscribe(String sessionContext, MessageQueue queue, String subject) {
         if (subscriptions.containsKey(subject) || subject == null) return;
@@ -523,8 +537,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
      * Unsubscribes a remote subsciption and fires the appropriate listeners
      *
      * @param sessionContext - session context of queue
-     * @param queue - the message queue
-     * @param subject - the subject to unsubscribe from
+     * @param queue          - the message queue
+     * @param subject        - the subject to unsubscribe from
      */
     public void remoteUnsubscribe(Object sessionContext, MessageQueue queue, String subject) {
         if (!remoteSubscriptions.containsKey(subject)) {
@@ -572,7 +586,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     /**
      * Starts a conversation using the specified message
      *
-     * @param message - the message to initiate the conversation
+     * @param message  - the message to initiate the conversation
      * @param callback - the message's callback function
      */
     public void conversationWith(Message message, MessageCallback callback) {
@@ -687,6 +701,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         {
             MessageBuilder.setProvider(this);
         }
+
         public Message get() {
             return JSONMessageServer.create();
         }

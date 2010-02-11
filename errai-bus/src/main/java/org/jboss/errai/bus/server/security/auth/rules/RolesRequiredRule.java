@@ -22,6 +22,7 @@ import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
 import org.jboss.errai.bus.server.ServerMessageBus;
+import org.jboss.errai.bus.server.util.ErrorHelper;
 import org.jboss.errai.bus.server.util.ServerBusUtils;
 import org.jboss.errai.bus.server.security.auth.AuthSubject;
 import org.jboss.errai.bus.server.service.ErraiService;
@@ -54,7 +55,7 @@ public class RolesRequiredRule implements BooleanRoutingRule {
         this.bus = bus;
     }
 
-    public boolean decision(Message message) {
+    public boolean decision(final Message message) {
         if (!message.hasResource("Session")) return false;
         else {
             AuthSubject subject = getSession(message).getAttribute(AuthSubject.class, ErraiService.SESSION_AUTH_DATA);
@@ -64,8 +65,8 @@ public class RolesRequiredRule implements BooleanRoutingRule {
                  * Inform the client they must login.
                  */
 
-            // TODO: This reside with the "AuthenticationService" listener, no
-              // i.e. by forwarding to that subject. See ErraiServiceImpl
+                // TODO: This reside with the "AuthenticationService" listener, no
+                // i.e. by forwarding to that subject. See ErraiServiceImpl
                 createMessage()
                         .toSubject("LoginClient")
                         .command(SecurityCommands.SecurityChallenge)
@@ -73,7 +74,13 @@ public class RolesRequiredRule implements BooleanRoutingRule {
                         .with(MessageParts.ReplyTo, ErraiService.AUTHORIZATION_SVC_SUBJECT)
                         .with(SecurityParts.RejectedMessage, ServerBusUtils.encodeJSON(message.getParts()))
                         .copyResource("Session", message)
-                        .noErrorHandling().sendNowWith(bus, false);
+                        .errorsHandledBy(new ErrorCallback() {
+                            public boolean error(Message message, Throwable throwable) {
+                                ErrorHelper.sendClientError(bus, message, "Could not contact LoginClient to handle access denial, due to insufficient privileges for: " + message.getSubject(), throwable);
+                                return false;
+                            }
+                        })
+                        .sendNowWith(bus, false);
 
                 return false;
             }
