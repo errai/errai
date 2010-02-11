@@ -1,6 +1,5 @@
 package org.jboss.errai.bus.server.util;
 
-import org.jboss.errai.bus.client.ConversationMessage;
 import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.MessageBuilder;
 import org.jboss.errai.bus.client.MessageBus;
@@ -8,9 +7,21 @@ import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.server.MessageDeliveryFailure;
 import org.mvel2.util.StringAppender;
 
-import static org.jboss.errai.bus.client.MessageBuilder.createMessage;
 
+/**
+ * The <tt>ErrorHelper</tt> class facilitates handling and sending error messages to the correct place
+ */
 public class ErrorHelper {
+
+    /**
+     * Creates the stacktrace for the error message and sends it via conversation to the <tt>ClientBusErrors</tt>
+     * subject
+     *
+     * @param bus - the <tt>MessageBus</tt> that has received the <tt>message</tt> and <tt>errorMessage</tt>
+     * @param message - the message that has encountered the error
+     * @param errorMessage - the error message produced
+     * @param e - the exception received
+     */
     public static void sendClientError(MessageBus bus, Message message, String errorMessage, Throwable e) {
 
         if (e != null) {
@@ -40,7 +51,14 @@ public class ErrorHelper {
         }
     }
 
-
+    /**
+     * Sends the error message via conversation to the <tt>ClientBusErrors</tt> subject
+     *
+     * @param bus - the <tt>MessageBus</tt> that has received the <tt>message</tt> and <tt>errorMessage</tt>
+     * @param message - the message that has encountered the error
+     * @param errorMessage - the error message produced
+     * @param additionalDetails - the stacktrace represented as a <tt>String</tt>
+     */
     public static void sendClientError(MessageBus bus, Message message, String errorMessage, String additionalDetails) {
         MessageBuilder.createConversation(message)
                 .toSubject("ClientBusErrors").signalling()
@@ -50,6 +68,12 @@ public class ErrorHelper {
 
     }
 
+    /**
+     * Sends a disconnect command message to the client bus
+     *
+     * @param bus - the bus responsible for sending messages for the server
+     * @param message - the message that has encountered the error
+     */
     public static void disconnectRemoteBus(MessageBus bus, Message message) {
         MessageBuilder.createConversation(message)
                 .toSubject("ClientBus")
@@ -57,6 +81,15 @@ public class ErrorHelper {
                 .noErrorHandling().sendNowWith(bus);
     }
 
+    /**
+     * Handles the failed delivery of a message, and sends the error to the appropriate place
+     * 
+     * @param bus - the <tt>MessageBus</tt> that has received the <tt>message</tt> and <tt>errorMessage</tt>
+     * @param message - the message that has encountered the error
+     * @param errorMessage - the error message produced
+     * @param e - the exception received
+     * @param disconnect - true if the bus should be disconnected after the error has been sent
+     */
     public static void handleMessageDeliveryFailure(MessageBus bus, Message message, String errorMessage, Throwable e, boolean disconnect) {
         try {
             if (message.getErrorCallback() != null) {
