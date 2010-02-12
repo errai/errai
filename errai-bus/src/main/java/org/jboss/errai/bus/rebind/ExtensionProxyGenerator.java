@@ -33,9 +33,7 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.util.List;
 
-import static org.jboss.errai.bus.server.util.ConfigUtil.findAllConfigTargets;
-import static org.jboss.errai.bus.server.util.ConfigUtil.isAnnotated;
-import static org.jboss.errai.bus.server.util.ConfigUtil.visitAllTargets;
+import static org.jboss.errai.bus.server.util.ConfigUtil.*;
 
 public class ExtensionProxyGenerator extends Generator {
     /**

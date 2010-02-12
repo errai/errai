@@ -16,7 +16,6 @@
 
 package org.jboss.errai.bus.server.service;
 
-import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.server.ServerMessageBus;
 

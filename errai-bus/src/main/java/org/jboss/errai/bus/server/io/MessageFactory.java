@@ -16,11 +16,11 @@
 
 package org.jboss.errai.bus.server.io;
 
-import org.jboss.errai.bus.server.QueueSession;
 import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.json.JSONUtilCli;
 import org.jboss.errai.bus.client.protocols.MessageParts;
+import org.jboss.errai.bus.server.QueueSession;
 
 import java.util.Map;
 

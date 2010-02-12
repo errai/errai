@@ -18,19 +18,21 @@ package org.jboss.errai.bus.server.service;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.jboss.errai.bus.server.QueueSession;
-import org.jboss.errai.bus.client.*;
+import org.jboss.errai.bus.client.Message;
+import org.jboss.errai.bus.client.MessageBuilder;
+import org.jboss.errai.bus.client.MessageCallback;
+import org.jboss.errai.bus.client.RequestDispatcher;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
-import org.jboss.errai.bus.server.*;
+import org.jboss.errai.bus.server.QueueSession;
+import org.jboss.errai.bus.server.ServerMessageBus;
 import org.jboss.errai.bus.server.security.auth.AuthSubject;
 import org.jboss.errai.bus.server.security.auth.AuthenticationAdapter;
 import org.jboss.errai.bus.server.security.auth.AuthenticationFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.google.inject.Guice.createInjector;
 import static org.jboss.errai.bus.client.MessageBuilder.createConversation;
 
 /**

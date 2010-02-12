@@ -2,11 +2,8 @@ package org.jboss.errai.bus.server;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.jboss.errai.bus.client.ErrorCallback;
 import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.RequestDispatcher;
-import org.jboss.errai.bus.server.WorkerFactory;
-import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.server.service.ErraiService;
 

@@ -1,7 +1,5 @@
 package org.jboss.errai.bus.client.api.builder;
 
-import org.jboss.errai.bus.client.RemoteCallback;
-
 /**
  * This interface, <tt>RemoteCallServiceDef</tt> is a template for setting a service for a remote call. It ensures that
  * it is constructed properly

@@ -1,9 +1,6 @@
 package org.jboss.errai.bus.client;
 
 import org.jboss.errai.bus.client.api.builder.*;
-import org.jboss.errai.bus.client.protocols.MessageParts;
-
-import java.util.Map;
 
 /**
  * The MessageBuilder API provides a fluent method of building Messages.

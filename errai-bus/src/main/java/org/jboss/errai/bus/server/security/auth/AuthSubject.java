@@ -18,7 +18,6 @@ package org.jboss.errai.bus.server.security.auth;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Set;
 
 /**
  * <tt>AuthSubject</tt> creates an entity that requires authentication. It contains the username, full name of the user,

@@ -1,7 +1,5 @@
 package org.jboss.errai.bus.client;
 
-import org.jboss.errai.bus.client.CommandMessage;
-
 /**
  * The <tt>RequestDispatcher</tt> interface provides a way to create a message delivery system into the bus
  */

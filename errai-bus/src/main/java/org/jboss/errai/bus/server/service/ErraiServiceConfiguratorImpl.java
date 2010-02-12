@@ -17,7 +17,6 @@
 package org.jboss.errai.bus.server.service;
 
 import com.google.inject.*;
-import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.client.MessageCallback;
 import org.jboss.errai.bus.client.RequestDispatcher;
@@ -42,7 +41,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.lang.reflect.Method;
-import java.net.URL;
 import java.util.*;
 
 import static com.google.inject.Guice.createInjector;

@@ -16,14 +16,13 @@
 
 package org.jboss.errai.bus.server.util;
 
-import org.jboss.errai.bus.server.QueueSession;
 import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.Message;
+import org.jboss.errai.bus.server.QueueSession;
 import org.jboss.errai.bus.server.io.JSONEncoder;
 import org.jboss.errai.bus.server.io.MessageFactory;
 
 import java.util.Map;
-import java.util.Set;
 
 /**
  * The <tt>ServerBusUtils</tt> contains utilities for extracting information or converting information using

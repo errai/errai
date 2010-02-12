@@ -16,13 +16,10 @@
 
 package org.jboss.errai.bus.server.io;
 
-import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.Message;
 import org.mvel2.ConversionHandler;
-import org.mvel2.DataConversion;
 import org.mvel2.MVEL;
 
-import javax.swing.text.html.HTMLDocument;
 import java.io.Serializable;
 import java.util.*;
 

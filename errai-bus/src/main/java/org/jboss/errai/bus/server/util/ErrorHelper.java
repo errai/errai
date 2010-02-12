@@ -7,7 +7,6 @@ import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.server.MessageDeliveryFailure;
 import org.mvel2.util.StringAppender;
 
-
 /**
  * The <tt>ErrorHelper</tt> class facilitates handling and sending error messages to the correct place
  */

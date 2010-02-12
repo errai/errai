@@ -6,7 +6,6 @@ import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.client.RequestDispatcher;
 import org.jboss.errai.bus.server.service.ErraiService;
-import org.jboss.errai.bus.server.util.ErrorHelper;
 
 import static org.jboss.errai.bus.server.util.ErrorHelper.handleMessageDeliveryFailure;
 

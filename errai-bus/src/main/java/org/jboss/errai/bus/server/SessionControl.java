@@ -1,7 +1,5 @@
 package org.jboss.errai.bus.server;
 
-import org.jboss.errai.bus.client.Message;
-
 /**
  * This interface, <tt>SessionControl</tt>, provides functions for checking up on a session
  */

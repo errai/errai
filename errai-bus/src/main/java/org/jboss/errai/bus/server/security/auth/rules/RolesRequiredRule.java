@@ -16,16 +16,16 @@
 
 package org.jboss.errai.bus.server.security.auth.rules;
 
-import org.jboss.errai.bus.server.QueueSession;
-import org.jboss.errai.bus.client.*;
+import org.jboss.errai.bus.client.BooleanRoutingRule;
+import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
+import org.jboss.errai.bus.server.QueueSession;
 import org.jboss.errai.bus.server.ServerMessageBus;
-import org.jboss.errai.bus.server.util.ErrorHelper;
-import org.jboss.errai.bus.server.util.ServerBusUtils;
 import org.jboss.errai.bus.server.security.auth.AuthSubject;
 import org.jboss.errai.bus.server.service.ErraiService;
+import org.jboss.errai.bus.server.util.ServerBusUtils;
 
 import java.util.HashSet;
 import java.util.Iterator;

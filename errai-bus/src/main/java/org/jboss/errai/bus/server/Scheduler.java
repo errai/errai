@@ -1,9 +1,11 @@
 package org.jboss.errai.bus.server;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.TreeSet;
 
 import static java.lang.System.currentTimeMillis;
-import static java.lang.Thread.sleep;
 
 /**
  * A basic and efficient scheduler implementation for use by the MessageBus to run housekeeper and other timed

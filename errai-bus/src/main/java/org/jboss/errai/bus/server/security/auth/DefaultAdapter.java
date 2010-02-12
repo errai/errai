@@ -17,7 +17,6 @@
 package org.jboss.errai.bus.server.security.auth;
 
 import com.google.gwt.core.client.GWT;
-import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.Message;
 
 /**

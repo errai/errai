@@ -16,9 +16,6 @@
 
 package org.jboss.errai.bus.server.io;
 
-import org.jboss.errai.bus.client.Message;
-import org.jboss.errai.bus.client.MessageBuilder;
-import org.jboss.errai.bus.client.MessageProvider;
 import org.jboss.errai.common.client.types.TypeHandler;
 import org.mvel2.MVEL;
 

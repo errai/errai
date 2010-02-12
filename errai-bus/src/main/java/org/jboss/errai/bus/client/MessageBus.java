@@ -16,9 +16,6 @@
 
 package org.jboss.errai.bus.client;
 
-import java.util.Set;
-
-
 /**
  * A message bus is capable of transmitting and receiving messages using the publisher/subscriber
  * mode. All implementations of the bus should implement this interface for both the client-side and the server-side.

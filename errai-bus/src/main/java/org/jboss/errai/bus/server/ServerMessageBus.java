@@ -21,8 +21,6 @@ import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.client.Payload;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 
-import java.util.Set;
-
 /**
  * This interface, <tt>ServerMessageBus</tt>, extends the client's {@link org.jboss.errai.bus.client.MessageBus},
  * and adds functionality so the server can transmit messages to a client and vice versa
