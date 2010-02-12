@@ -16,14 +16,12 @@
 
 package org.jboss.errai.persistence.server;
 
-import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.MessageCallback;
 import org.jboss.errai.persistence.client.PersistenceCommands;
 import org.jboss.errai.persistence.client.PersistenceParts;
 
 import javax.persistence.EntityManagerFactory;
-import java.util.Map;
 
 public class ErraiPersistenceService implements MessageCallback {
     private EntityManagerFactory emFactory;
