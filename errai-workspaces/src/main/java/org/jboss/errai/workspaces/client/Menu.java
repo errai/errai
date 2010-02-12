@@ -43,8 +43,9 @@ public class Menu extends LayoutPanel
   public Menu()
   {
     super(new BoxLayout(BoxLayout.Orientation.VERTICAL));
-
+    
     stack = new StackLayoutPanel();
+    stack.setStyleName("");
     stack.setAnimationEnabled(false);
 
     this.add(stack, new BoxLayoutData(BoxLayoutData.FillStyle.BOTH, true));
@@ -67,6 +68,8 @@ public class Menu extends LayoutPanel
    */
   public void toggle(String toolsetName)
   {
-    stack.showStack(toolsetIndex.get(toolsetName));    
+    stack.showStack(toolsetIndex.get(toolsetName));
+    stack.invalidate();
+    stack.layout();
   }
 }

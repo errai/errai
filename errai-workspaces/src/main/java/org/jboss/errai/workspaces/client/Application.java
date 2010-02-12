@@ -140,8 +140,8 @@ public class Application implements EntryPoint {
     workspace = Workspace.createInstance(menu);
     header = new Header();
 
-    mainLayout.add(menu, new BorderLayoutData(BorderLayout.Region.WEST, 180));
-    mainLayout.add(header, new BorderLayoutData(BorderLayout.Region.NORTH, 50));
+    mainLayout.add(menu, new BorderLayoutData(BorderLayout.Region.WEST, "180 px", false));
+    mainLayout.add(header, new BorderLayoutData(BorderLayout.Region.NORTH, "50 px"));
     mainLayout.add(workspace, new BorderLayoutData(BorderLayout.Region.CENTER, false));
     
     WorkspaceBuilder builder = new WorkspaceBuilder();

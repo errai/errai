@@ -884,23 +884,6 @@ span {
     text-decoration: underline;
 }
 
-
-.bpm-header{
-  background-color:#ffffff;
-}
-
-.bpm-header-left {
-  background-color:#ffffff;
-  vertical-align:bottom;
-  margin-left:15px;
-}
-
-.bpm-header-right {
-  background-color:#ffffff;
-  vertical-align:bottom;
-  margin-right:15px;
-}
-
 .bpm-user-info-popup {
   font-family: sans-serif;
   color: #000000;

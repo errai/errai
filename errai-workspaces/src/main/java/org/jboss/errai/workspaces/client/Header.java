@@ -55,7 +55,7 @@ public class Header extends LayoutPanel
   public Header()
   {
     super(new BoxLayout(BoxLayout.Orientation.HORIZONTAL));
-    this.setStyleName("bpm-header");
+    //this.setStyleName("bpm-header");
 
     createInfoPanel();
 
