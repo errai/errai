@@ -19,7 +19,10 @@ package org.jboss.errai.common.client.json;
 import org.jboss.errai.common.client.types.TypeMarshallers;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 public class JSONEncoderCli {
     boolean defer;
