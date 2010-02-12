@@ -1,3 +1,15 @@
+body {
+    height: 100%;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    background:#edf0f4 url(header_background.png) repeat-x;
+}
+
+WSLogin {
+    background: #edf0f4;
+}
+
 .WSLoadInitPanel {
     background:yellow;
     cursor: wait;

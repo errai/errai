@@ -61,6 +61,7 @@ public class AuthenticationDisplay extends LayoutPanel
         windowPanel = new WindowPanel("Authentication required");
         windowPanel.setAnimationEnabled(false);
         LayoutPanel panel = new LayoutPanel();
+        //panel.addStyleName("WSLogin");
         windowPanel.setWidget(panel);
 
 
