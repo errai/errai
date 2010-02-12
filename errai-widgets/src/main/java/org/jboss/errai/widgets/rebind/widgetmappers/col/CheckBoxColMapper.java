@@ -22,7 +22,6 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.TextBox;
 import org.jboss.errai.widgets.rebind.widgetmappers.ColMapper;
-import org.mvel2.util.ReflectionUtil;
 
 public class CheckBoxColMapper implements ColMapper<TextBox> {
     public String generateGetField(TypeOracle oracle, JClassType fromType) {

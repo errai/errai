@@ -17,20 +17,15 @@
 package org.jboss.errai.widgets.rebind.widgetmappers;
 
 import com.google.gwt.core.ext.typeinfo.*;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.user.client.ui.CheckBox;
-import org.jboss.errai.widgets.client.mapping.FieldMapper;
 import org.jboss.errai.widgets.rebind.FieldMapperGenerator;
 import org.mvel2.templates.CompiledTemplate;
 import org.mvel2.templates.TemplateCompiler;
-import org.mvel2.MVEL;
 import org.mvel2.templates.TemplateRuntime;
 
 import java.io.InputStream;
-import java.util.*;
-
-import static org.mvel2.util.ReflectionUtil.getGetter;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class CollectionFMGenerator implements FieldMapperGenerator {
     CompiledTemplate compiledTemplate;

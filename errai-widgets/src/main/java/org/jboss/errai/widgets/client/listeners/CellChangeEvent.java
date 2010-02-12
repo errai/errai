@@ -18,7 +18,6 @@ package org.jboss.errai.widgets.client.listeners;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import org.jboss.errai.widgets.client.WSGrid;
-import org.jboss.errai.widgets.client.format.WSCellFormatter;
 
 public class CellChangeEvent extends ChangeEvent {
     private WSGrid.WSCell cell;

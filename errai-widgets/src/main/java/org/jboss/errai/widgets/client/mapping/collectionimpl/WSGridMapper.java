@@ -21,9 +21,9 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import org.jboss.errai.widgets.client.WSGrid;
 import org.jboss.errai.widgets.client.format.WSCellFormatter;
 import org.jboss.errai.widgets.client.listeners.CellChangeEvent;
+import org.jboss.errai.widgets.client.mapping.CollectionWidgetMapper;
 import org.jboss.errai.widgets.client.mapping.ColumnMapper;
 import org.jboss.errai.widgets.client.mapping.FieldMapper;
-import org.jboss.errai.widgets.client.mapping.CollectionWidgetMapper;
 
 import java.util.List;
 

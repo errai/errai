@@ -19,22 +19,18 @@ package org.jboss.errai.widgets.client;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.*;
-
-import static com.google.gwt.user.client.DOM.setStyleAttribute;
-
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.*;
-
-import static com.google.gwt.user.client.ui.RootPanel.getBodyElement;
-
 import org.jboss.errai.widgets.client.format.WSCellFormatter;
 import org.jboss.errai.widgets.client.format.WSCellSimpleTextCell;
 import org.jboss.errai.widgets.client.format.WSCellTitle;
 import org.jboss.errai.widgets.client.listeners.CellChangeEvent;
 
-import static java.lang.Double.parseDouble;
-
 import java.util.*;
+
+import static com.google.gwt.user.client.DOM.setStyleAttribute;
+import static com.google.gwt.user.client.ui.RootPanel.getBodyElement;
+import static java.lang.Double.parseDouble;
 
 /**
  * A Grid/Table implementation for working with structured data.

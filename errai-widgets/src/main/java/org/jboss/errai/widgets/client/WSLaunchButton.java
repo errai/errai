@@ -18,7 +18,6 @@ package org.jboss.errai.widgets.client;
 
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Event;
-import static com.google.gwt.user.client.Event.*;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Image;
@@ -26,6 +25,8 @@ import com.google.gwt.user.client.ui.SimplePanel;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.google.gwt.user.client.Event.*;
 
 
 public class WSLaunchButton extends Composite {

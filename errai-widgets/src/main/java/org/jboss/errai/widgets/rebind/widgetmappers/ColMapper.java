@@ -17,7 +17,6 @@
 package org.jboss.errai.widgets.rebind.widgetmappers;
 
 import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 public interface ColMapper<T> {

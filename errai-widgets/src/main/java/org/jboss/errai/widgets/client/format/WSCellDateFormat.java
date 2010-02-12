@@ -26,8 +26,9 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.datepicker.client.DatePicker;
 import org.jboss.errai.widgets.client.WSGrid;
 
-import static java.lang.String.valueOf;
 import java.util.Date;
+
+import static java.lang.String.valueOf;
 
 
 public class WSCellDateFormat extends WSCellFormatter<Date> {

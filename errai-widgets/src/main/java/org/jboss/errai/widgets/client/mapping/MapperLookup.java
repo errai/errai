@@ -16,7 +16,6 @@
 
 package org.jboss.errai.widgets.client.mapping;
 
-import com.google.gwt.user.client.ui.TextBox;
 import org.jboss.errai.widgets.client.WSGrid;
 import org.jboss.errai.widgets.client.mapping.collectionimpl.WSGridMapper;
 
