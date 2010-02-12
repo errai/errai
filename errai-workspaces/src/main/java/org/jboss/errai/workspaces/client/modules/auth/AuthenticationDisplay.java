@@ -59,7 +59,7 @@ public class AuthenticationDisplay extends LayoutPanel
 
   private void createLayoutWindowPanel() {
         windowPanel = new WindowPanel("Authentication required");
-        windowPanel.setAnimationEnabled(true);
+        windowPanel.setAnimationEnabled(false);
         LayoutPanel panel = new LayoutPanel();
         windowPanel.setWidget(panel);
 
