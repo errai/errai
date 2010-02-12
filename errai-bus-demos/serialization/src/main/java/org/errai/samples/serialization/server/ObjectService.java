@@ -19,11 +19,16 @@ package org.errai.samples.serialization.server;
 import com.google.inject.Inject;
 import org.errai.samples.serialization.client.model.Item;
 import org.errai.samples.serialization.client.model.Record;
-import org.jboss.errai.bus.client.*;
+import org.jboss.errai.bus.client.Message;
+import org.jboss.errai.bus.client.MessageBuilder;
+import org.jboss.errai.bus.client.MessageBus;
+import org.jboss.errai.bus.client.MessageCallback;
 import org.jboss.errai.bus.server.annotations.Service;
 
 import java.sql.Date;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
 
 @Service
 public class ObjectService implements MessageCallback {

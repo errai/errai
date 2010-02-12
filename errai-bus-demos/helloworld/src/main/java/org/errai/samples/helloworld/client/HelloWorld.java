@@ -5,9 +5,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.RootPanel;
-import org.jboss.errai.bus.client.CommandMessage;
 import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.MessageBuilder;
 import org.jboss.errai.bus.client.MessageBus;
 
 import static org.jboss.errai.bus.client.MessageBuilder.createMessage;

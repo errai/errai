@@ -16,8 +16,6 @@
 
 package org.errai.samples.queryservice.server;
 
-import com.google.inject.Inject;
-import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.server.annotations.Endpoint;
 import org.jboss.errai.bus.server.annotations.Service;
 

@@ -17,7 +17,8 @@
 package org.errai.samples.helloworld.client;
 
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.RootPanel;
 import org.jboss.errai.bus.client.*;
 
 public class HelloWorld implements EntryPoint {
