@@ -38,7 +38,7 @@
         <module>errai-workspaces</module>
         <module>errai-widgets</module>
         <module>errai-bus</module>
-        <module>errai-persistence</module>        
+        <module>errai-persistence</module>
     </modules>
 
     <dependencyManagement>
@@ -224,7 +224,30 @@
             <plugin>
                 <artifactId>maven-surefire-report-plugin</artifactId>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.6.1</version>
+                <configuration>
+                    <aggregate>true</aggregate>
+                    <show>public</show>
+
+                    <groups>
+                        <group>
+                            <title>Bus</title>
+                            <packages>org.jboss.errai.bus.*</packages>
+                        </group>
+                        <group>
+                            <title>Workspaces</title>
+                            <packages>org.jboss.errai.workspaces.*</packages>
+                        </group>
+                    </groups>
+                    <subpackages>org.jboss.errai.bus.client.api:org.jboss.errai.bus.client.framework:org.jboss.errai.workspaces.client.api:org.jboss.errai.workspaces.client.framework</subpackages>
+                </configuration>
+            </plugin>
         </plugins>
+
     </reporting>
 
     <!-- Profiles -->
