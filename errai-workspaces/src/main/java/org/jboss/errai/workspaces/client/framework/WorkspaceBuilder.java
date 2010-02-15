@@ -28,8 +28,11 @@ import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.bus.client.security.AuthenticationContext;
 import org.jboss.errai.bus.client.security.Role;
 import org.jboss.errai.bus.client.security.SecurityService;
-import org.jboss.errai.workspaces.client.framework.WSComponent;
-import org.jboss.errai.workspaces.client.Registry;
+import org.jboss.errai.workspaces.client.api.ResourceFactory;
+import org.jboss.errai.workspaces.client.api.Tool;
+import org.jboss.errai.workspaces.client.api.ToolSet;
+import org.jboss.errai.workspaces.client.api.WSComponent;
+import org.jboss.errai.workspaces.client.framework.Registry;
 import org.jboss.errai.workspaces.client.Workspace;
 import org.jboss.errai.workspaces.client.icons.ErraiImageBundle;
 
@@ -88,10 +91,10 @@ public class WorkspaceBuilder implements ToolContainer
 
   private Image createIcon(String toolName, String icon)
   {
-    IconFactory iconFactory = GWT.create(IconFactory.class);
+    ResourceFactory resourceFactory = GWT.create(ResourceFactory.class);
 
     Image img;
-    ImageResource imgres = iconFactory.createIcon(toolName);
+    ImageResource imgres = resourceFactory.createImage(toolName);
 
     if(imgres!=null)
       img = new Image(imgres);

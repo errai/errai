@@ -28,10 +28,10 @@ import com.google.gwt.user.rebind.SourceWriter;
 import org.jboss.errai.bus.server.annotations.security.RequireRoles;
 import org.jboss.errai.bus.server.util.ConfigUtil;
 import org.jboss.errai.bus.server.util.RebindVisitor;
-import org.jboss.errai.workspaces.client.framework.annotations.GroupOrder;
-import org.jboss.errai.workspaces.client.framework.annotations.LoadTool;
-import org.jboss.errai.workspaces.client.framework.annotations.LoadToolSet;
-import org.jboss.errai.workspaces.client.framework.annotations.LoginComponent;
+import org.jboss.errai.workspaces.client.api.annotations.GroupOrder;
+import org.jboss.errai.workspaces.client.api.annotations.LoadTool;
+import org.jboss.errai.workspaces.client.api.annotations.LoadToolSet;
+import org.jboss.errai.workspaces.client.api.annotations.LoginComponent;
 
 import java.io.*;
 import java.util.ArrayList;

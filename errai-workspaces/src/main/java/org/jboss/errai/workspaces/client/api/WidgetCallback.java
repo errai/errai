@@ -19,39 +19,12 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.errai.workspaces.client;
+package org.jboss.errai.workspaces.client.api;
 
-import com.google.gwt.user.client.Cookies;
+import com.google.gwt.user.client.ui.Widget;
 
-import java.util.Date;
-
-/**
- * Cookie based workspace preferences
- */
-public class Preferences
+public interface WidgetCallback
 {
-  // Tool that should be launched at startup
-  public static final String DEFAULT_TOOL = "workspace.default.tool";
-
-  public static boolean has(String key)
-  {
-    return Preferences.get(key)!=null;
-  }
-
-  public static String get(String key)
-  {
-    return Cookies.getCookie(key);
-  }
-
-  public static void set(String key, String value)
-  {
-    Date twoWeeks = new Date(System.currentTimeMillis()+(2*604800*1000));
-    Cookies.setCookie(key, value, twoWeeks);
-  }
-
-  public static void clear(String key)
-  {
-    Cookies.removeCookie(key);
-  }
+  void onSuccess(Widget instance);
+  void onUnavailable();
 }
-

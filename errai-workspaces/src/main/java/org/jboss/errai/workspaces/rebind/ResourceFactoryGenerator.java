@@ -27,8 +27,8 @@ import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
 import org.jboss.errai.bus.server.util.ConfigUtil;
 import org.jboss.errai.bus.server.util.RebindVisitor;
-import org.jboss.errai.workspaces.client.framework.annotations.DefaultBundle;
-import org.jboss.errai.workspaces.client.framework.annotations.LoadTool;
+import org.jboss.errai.workspaces.client.api.annotations.DefaultBundle;
+import org.jboss.errai.workspaces.client.api.annotations.LoadTool;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -36,7 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class IconFactoryGenerator extends Generator {
+public class ResourceFactoryGenerator extends Generator {
   /**
    * Simple name of class to be generated
    */
@@ -99,11 +99,11 @@ public class IconFactoryGenerator extends Generator {
 
     composer.addImport("java.util.HashMap");
     composer.addImport("java.util.Map");
-    composer.addImport("org.jboss.errai.workspaces.client.framework.IconFactory");
+    composer.addImport("org.jboss.errai.workspaces.client.api.ResourceFactory");
     composer.addImport("com.google.gwt.core.client.GWT");
     composer.addImport("com.google.gwt.resources.client.ImageResource");
 
-    composer.addImplementedInterface("org.jboss.errai.workspaces.client.framework.IconFactory");
+    composer.addImplementedInterface("org.jboss.errai.workspaces.client.api.ResourceFactory");
 
     SourceWriter sourceWriter = composer.createSourceWriter(context, printWriter);
 
@@ -162,7 +162,7 @@ public class IconFactoryGenerator extends Generator {
     sourceWriter.outdent();
     sourceWriter.println("}");
 
-    sourceWriter.println("public ImageResource createIcon(String name) { ");
+    sourceWriter.println("public ImageResource createImage(String name) { ");
     sourceWriter.outdent();
     sourceWriter.println("    return mapping.get(name);");
     sourceWriter.outdent();

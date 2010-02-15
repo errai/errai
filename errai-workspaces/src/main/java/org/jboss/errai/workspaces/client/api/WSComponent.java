@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.workspaces.client.framework.annotations;
+package org.jboss.errai.workspaces.client.api;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import org.jboss.errai.workspaces.client.api.WidgetCallback;
 
-@Retention(RetentionPolicy.RUNTIME)
-public @interface GroupOrder {
-    String value() default "";
+public interface WSComponent {
+  
+  public void getWidget(WidgetCallback callback);
 }

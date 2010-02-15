@@ -19,14 +19,34 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.errai.workspaces.client.framework.annotations;
+package org.jboss.errai.workspaces.client.framework;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import java.util.HashMap;
+import java.util.Map;
 
-
-@Retention(RetentionPolicy.RUNTIME)
-public @interface DefaultBundle
+/**
+ * Registry for application wide services
+ */
+public class Registry
 {
-  Class value();
+  private static Map<Class, Object> registry = new HashMap<Class,Object>();
+
+   public static void set(Class key, Object obj)
+   {
+     registry.put(key, obj);
+   }
+
+   public static <T> T get(Class<T> key)
+   {
+     T t = (T) registry.get(key);
+     if(null==t)
+       throw new IllegalArgumentException(key + " not registered");
+     return t;
+   }
+
+   public static boolean has(Class key)
+   {
+     return get(key)!=null;
+   }
+  
 }

@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.workspaces.client.framework.annotations;
+package org.jboss.errai.workspaces.client.api.annotations;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
-public @interface LoadToolSet {
+public @interface GroupOrder {
+    String value() default "";
 }

@@ -17,10 +17,12 @@
 package org.jboss.errai.workspaces.client.framework;
 
 import com.google.gwt.user.client.ui.Image;
-import org.jboss.errai.workspaces.client.framework.WSComponent;
-import org.jboss.errai.workspaces.client.framework.WidgetCallback;
+import org.jboss.errai.workspaces.client.api.Tool;
+import org.jboss.errai.workspaces.client.api.WSComponent;
+import org.jboss.errai.workspaces.client.api.WidgetCallback;
 
-public class ToolImpl implements Tool {
+public class ToolImpl implements Tool
+{
   private String name;
   private String id;
   private boolean multipleAllowed;

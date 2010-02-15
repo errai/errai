@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.workspaces.client.framework;
+package org.jboss.errai.workspaces.client.api;
 
-public interface WSComponent {
-  
-  public void getWidget(WidgetCallback callback);
+import com.google.gwt.user.client.ui.Widget;
+
+/**
+ * This is a callback interface which produces a widget when called.
+ */
+public interface WidgetProvider {
+    public Widget getWidget();
 }

@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.workspaces.client.framework;
+package org.jboss.errai.workspaces.client.api;
 
-import com.google.gwt.user.client.ui.Widget;
+import org.jboss.errai.workspaces.client.api.Tool;
 
-/**
- * This is a callback interface which produces a widget when called.
- */
-public interface WidgetProvider {
-    public Widget getWidget();
+public interface ToolSet extends WidgetProvider
+{
+    public Tool[] getAllProvidedTools();
+    public String getToolSetName();
 }

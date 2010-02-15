@@ -26,7 +26,7 @@ import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.MessageBuilder;
 import org.jboss.errai.widgets.client.WSLaunchButton;
 import org.jboss.errai.workspaces.client.Workspace;
-import org.jboss.errai.workspaces.client.framework.Tool;
+import org.jboss.errai.workspaces.client.api.Tool;
 import org.jboss.errai.workspaces.client.icons.ErraiImageBundle;
 import org.jboss.errai.workspaces.client.protocols.LayoutCommands;
 import org.jboss.errai.workspaces.client.protocols.LayoutParts;

@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.workspaces.client.framework;
+package org.jboss.errai.workspaces.client.api.annotations;
 
-import org.jboss.errai.workspaces.client.framework.WidgetProvider;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
-public interface ToolSet extends WidgetProvider {
-    public Tool[] getAllProvidedTools();
-    public String getToolSetName();
+@Retention(RetentionPolicy.RUNTIME)
+public @interface LoadTool {
+    String name();
+    String icon() default "";    
+    String group();
+    int priority() default 0;
+    boolean multipleAllowed() default false;    
 }

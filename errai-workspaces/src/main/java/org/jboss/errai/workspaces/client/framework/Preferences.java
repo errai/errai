@@ -21,10 +21,37 @@
  */
 package org.jboss.errai.workspaces.client.framework;
 
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.Cookies;
 
-public interface WidgetCallback
+import java.util.Date;
+
+/**
+ * Cookie based workspace preferences
+ */
+public class Preferences
 {
-  void onSuccess(Widget instance);
-  void onUnavailable();
+  // Tool that should be launched at startup
+  public static final String DEFAULT_TOOL = "workspace.default.tool";
+
+  public static boolean has(String key)
+  {
+    return Preferences.get(key)!=null;
+  }
+
+  public static String get(String key)
+  {
+    return Cookies.getCookie(key);
+  }
+
+  public static void set(String key, String value)
+  {
+    Date twoWeeks = new Date(System.currentTimeMillis()+(2*604800*1000));
+    Cookies.setCookie(key, value, twoWeeks);
+  }
+
+  public static void clear(String key)
+  {
+    Cookies.removeCookie(key);
+  }
 }
+

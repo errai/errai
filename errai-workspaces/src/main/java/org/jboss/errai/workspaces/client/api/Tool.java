@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.workspaces.client.framework;
+package org.jboss.errai.workspaces.client.api;
 
 import com.google.gwt.user.client.ui.Image;
-import org.jboss.errai.workspaces.client.framework.WSComponent;
+import org.jboss.errai.workspaces.client.api.WSComponent;
 
 public interface Tool extends WSComponent {
   public String getName();

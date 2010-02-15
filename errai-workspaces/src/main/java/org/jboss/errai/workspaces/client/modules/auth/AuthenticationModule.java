@@ -40,7 +40,7 @@ import org.jboss.errai.bus.client.security.SecurityService;
 import org.jboss.errai.bus.client.security.impl.NameCredential;
 import org.jboss.errai.bus.client.security.impl.PasswordCredential;
 import org.jboss.errai.workspaces.client.Application;
-import org.jboss.errai.workspaces.client.Registry;
+import org.jboss.errai.workspaces.client.framework.Registry;
 import org.jboss.errai.workspaces.client.Workspace;
 import org.jboss.errai.workspaces.client.modules.Module;
 import org.jboss.errai.workspaces.client.protocols.LayoutCommands;

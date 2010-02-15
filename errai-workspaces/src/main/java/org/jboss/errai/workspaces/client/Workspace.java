@@ -36,10 +36,10 @@ import org.gwt.mosaic.ui.client.util.WidgetHelper;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.MessageCallback;
-import org.jboss.errai.workspaces.client.framework.WidgetCallback;
-import org.jboss.errai.workspaces.client.framework.IconFactory;
-import org.jboss.errai.workspaces.client.framework.Tool;
-import org.jboss.errai.workspaces.client.framework.ToolSet;
+import org.jboss.errai.workspaces.client.api.ResourceFactory;
+import org.jboss.errai.workspaces.client.api.Tool;
+import org.jboss.errai.workspaces.client.api.WidgetCallback;
+import org.jboss.errai.workspaces.client.api.ToolSet;
 import org.jboss.errai.workspaces.client.icons.ErraiImageBundle;
 import org.jboss.errai.workspaces.client.protocols.LayoutCommands;
 import org.jboss.errai.workspaces.client.protocols.LayoutParts;
@@ -211,10 +211,10 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
       final ToolTabPanel panelTool = new ToolTabPanel(selectedTool);
       panelTool.invalidate();
 
-      IconFactory iconFactory = GWT.create(IconFactory.class);
+      ResourceFactory resourceFactory = GWT.create(ResourceFactory.class);
       ErraiImageBundle erraiImageBundle = GWT.create(ErraiImageBundle.class);
-      ImageResource resource = iconFactory.createIcon(selectedTool.getName()) != null ?
-          iconFactory.createIcon(selectedTool.getName()) : erraiImageBundle.questionCube();
+      ImageResource resource = resourceFactory.createImage(selectedTool.getName()) != null ?
+          resourceFactory.createImage(selectedTool.getName()) : erraiImageBundle.questionCube();
 
       deck.tabLayout.add(
           panelTool,

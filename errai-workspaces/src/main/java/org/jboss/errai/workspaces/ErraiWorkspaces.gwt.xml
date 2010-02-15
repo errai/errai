@@ -45,9 +45,9 @@
                 class="org.jboss.errai.workspaces.client.framework.WorkspaceConfig"/>
     </generate-with>
 
-     <generate-with class="org.jboss.errai.workspaces.rebind.IconFactoryGenerator">
+     <generate-with class="org.jboss.errai.workspaces.rebind.ResourceFactoryGenerator">
         <when-type-assignable
-                class="org.jboss.errai.workspaces.client.framework.IconFactory"/>
+                class="org.jboss.errai.workspaces.client.api.ResourceFactory"/>
     </generate-with>
 
     <!-- Specify the app entry point class.                   -->

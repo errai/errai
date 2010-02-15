@@ -38,6 +38,7 @@ import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.security.AuthenticationContext;
 import org.jboss.errai.bus.client.security.Role;
 import org.jboss.errai.bus.client.security.SecurityService;
+import org.jboss.errai.workspaces.client.framework.Registry;
 import org.jboss.errai.workspaces.client.icons.ErraiImageBundle;
 
 import java.util.Date;

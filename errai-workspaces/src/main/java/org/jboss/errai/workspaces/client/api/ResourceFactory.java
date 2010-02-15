@@ -19,11 +19,14 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.errai.workspaces.client.framework;
+package org.jboss.errai.workspaces.client.api;
 
 import com.google.gwt.resources.client.ImageResource;
 
-public interface IconFactory
+/**
+ * Loads resource declared in {@link org.jboss.errai.workspaces.client.api.annotations.DefaultBundle}
+ */
+public interface ResourceFactory
 {
-  ImageResource createIcon(String name);
+  ImageResource createImage(String name);
 }

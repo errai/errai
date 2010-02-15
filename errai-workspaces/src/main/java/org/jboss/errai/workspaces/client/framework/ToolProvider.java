@@ -16,6 +16,8 @@
 
 package org.jboss.errai.workspaces.client.framework;
 
+import org.jboss.errai.workspaces.client.api.Tool;
+
 public interface ToolProvider {
     public Tool getTool();
 }

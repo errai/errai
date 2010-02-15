@@ -21,7 +21,8 @@
  */
 package org.jboss.errai.workspaces.client.framework;
 
-import org.jboss.errai.workspaces.client.framework.WSComponent;
+import org.jboss.errai.workspaces.client.api.ToolSet;
+import org.jboss.errai.workspaces.client.api.WSComponent;
 
 public interface ToolContainer
 {
