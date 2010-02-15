@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.common.client.framework;
+package org.jboss.errai.workspaces.client.framework;
 
 public interface WSComponent {
   

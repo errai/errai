@@ -20,10 +20,11 @@ import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.user.client.ui.*;
-import org.jboss.errai.common.client.framework.WSComponent;
-import org.jboss.errai.common.client.framework.WidgetCallback;
+import org.jboss.errai.workspaces.client.framework.WSComponent;
+import org.jboss.errai.workspaces.client.framework.WidgetCallback;
 
-public class WSLoginPanel implements WSComponent {
+public class WSLoginPanel implements WSComponent
+{
 
   private TextBox userNameInput = new TextBox();
   private TextBox passwordInput = new PasswordTextBox();

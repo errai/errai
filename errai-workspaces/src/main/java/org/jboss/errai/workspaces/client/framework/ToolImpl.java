@@ -17,8 +17,8 @@
 package org.jboss.errai.workspaces.client.framework;
 
 import com.google.gwt.user.client.ui.Image;
-import org.jboss.errai.common.client.framework.WSComponent;
-import org.jboss.errai.common.client.framework.WidgetCallback;
+import org.jboss.errai.workspaces.client.framework.WSComponent;
+import org.jboss.errai.workspaces.client.framework.WidgetCallback;
 
 public class ToolImpl implements Tool {
   private String name;

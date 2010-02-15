@@ -28,7 +28,7 @@ import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.bus.client.security.AuthenticationContext;
 import org.jboss.errai.bus.client.security.Role;
 import org.jboss.errai.bus.client.security.SecurityService;
-import org.jboss.errai.common.client.framework.WSComponent;
+import org.jboss.errai.workspaces.client.framework.WSComponent;
 import org.jboss.errai.workspaces.client.Registry;
 import org.jboss.errai.workspaces.client.Workspace;
 import org.jboss.errai.workspaces.client.icons.ErraiImageBundle;

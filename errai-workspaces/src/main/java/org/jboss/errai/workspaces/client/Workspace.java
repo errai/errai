@@ -36,7 +36,7 @@ import org.gwt.mosaic.ui.client.util.WidgetHelper;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.client.MessageCallback;
-import org.jboss.errai.common.client.framework.WidgetCallback;
+import org.jboss.errai.workspaces.client.framework.WidgetCallback;
 import org.jboss.errai.workspaces.client.framework.IconFactory;
 import org.jboss.errai.workspaces.client.framework.Tool;
 import org.jboss.errai.workspaces.client.framework.ToolSet;
@@ -303,7 +303,7 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
 
     ToolTabPanel(final Tool tool) {
       this.id = tool.getId();
-      tool.getWidget(new WidgetCallback ()
+      tool.getWidget(new WidgetCallback()
       {
         public void onSuccess(Widget instance)
         {
