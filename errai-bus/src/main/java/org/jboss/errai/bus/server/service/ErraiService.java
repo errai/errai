@@ -18,9 +18,10 @@ package org.jboss.errai.bus.server.service;
 
 import org.jboss.errai.bus.client.Message;
 import org.jboss.errai.bus.server.ServerMessageBus;
+import org.jboss.errai.bus.server.SessionProvider;
 
 /**
- * The <tt>ErraiService</tt> is a minimal template for waht is needed. It facilitates the ability to store a message,
+ * The <tt>ErraiService</tt> is a minimal template for what is needed. It facilitates the ability to store a message,
  * obtain the server bus and configuration
  */
 public interface ErraiService {
@@ -40,6 +41,7 @@ public interface ErraiService {
      * @return the server message bus
      */
     public ServerMessageBus getBus();
+
 
     /**
      * Gets the configuration used to initalize the service

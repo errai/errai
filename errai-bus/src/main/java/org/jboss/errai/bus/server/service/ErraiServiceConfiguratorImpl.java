@@ -20,10 +20,8 @@ import com.google.inject.*;
 import org.jboss.errai.bus.client.MessageBus;
 import org.jboss.errai.bus.client.MessageCallback;
 import org.jboss.errai.bus.client.RequestDispatcher;
-import org.jboss.errai.bus.server.ErraiBootstrapFailure;
+import org.jboss.errai.bus.server.*;
 import org.jboss.errai.bus.server.Module;
-import org.jboss.errai.bus.server.ServerMessageBus;
-import org.jboss.errai.bus.server.SimpleDispatcher;
 import org.jboss.errai.bus.server.annotations.*;
 import org.jboss.errai.bus.server.annotations.security.RequireAuthentication;
 import org.jboss.errai.bus.server.annotations.security.RequireRoles;
@@ -443,5 +441,9 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
      */
     public RequestDispatcher getConfiguredDispatcher() {
         return dispatcher;
+    }
+
+    public SessionProvider getConfiguredSessionProvider() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 }

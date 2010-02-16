@@ -798,6 +798,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             if (!isShowing()) {
                 show();
                 center();
+                getElement().getStyle().setProperty("zIndex", "5000");
             }
         }
     }

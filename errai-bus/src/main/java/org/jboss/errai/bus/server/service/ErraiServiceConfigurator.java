@@ -18,6 +18,7 @@ package org.jboss.errai.bus.server.service;
 
 import com.google.inject.Provider;
 import org.jboss.errai.bus.client.RequestDispatcher;
+import org.jboss.errai.bus.server.SessionProvider;
 
 import java.io.File;
 import java.util.List;
@@ -87,4 +88,13 @@ public interface ErraiServiceConfigurator {
      * @return the configured dispatcher
      */
     public RequestDispatcher getConfiguredDispatcher();
+
+    /**
+     * Get the configured session provide;
+     * @return
+     */
+    public SessionProvider getConfiguredSessionProvider();
 }
+
+
+
