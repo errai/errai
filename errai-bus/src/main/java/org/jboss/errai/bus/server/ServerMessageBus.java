@@ -35,6 +35,7 @@ public interface ServerMessageBus extends MessageBus {
      * @param wait - set to true if the bus will wait for the next message
      * @return the <tt>Payload</tt> instance containing all the messages that need to be transmitted
      */
+    @Deprecated
     public Payload nextMessage(Object sessionContext, boolean wait);
 
     /**

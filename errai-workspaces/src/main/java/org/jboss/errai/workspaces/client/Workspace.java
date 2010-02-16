@@ -22,9 +22,12 @@
 package org.jboss.errai.workspaces.client;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
@@ -96,9 +99,9 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
                 showToolSet(toolsetId, toolId);
 
                 // create browser history
-                /*String toolToken = toolId!=null ? toolId : "none";
-                String historyToken = "errai_"+toolsetId+"#"+toolToken;
-                History.newItem(historyToken, false);*/
+                String toolToken = toolId!=null ? toolId : "none";
+                String historyToken = "errai_"+toolsetId+";"+toolToken;
+                History.newItem(historyToken, false);
 
                 break;
             }
@@ -109,24 +112,41 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
     );
 
     // handle browser history
-    /*History.addValueChangeHandler(
+    History.addValueChangeHandler(
         new ValueChangeHandler<String>()
         {
           public void onValueChange(ValueChangeEvent<String> event)
           {
             // avoid interference with other history tokens
-            if(event.getValue().startsWith("errai_"))
-            {
-              String s = event.getValue().substring(0,6);
-              String[] token = s.split("#");
+            // example token: errai_Administration;Users.5
 
-              String toolsetId = token[0];
-              String toolId = token[1].equals("none") ? null : token[1];
+            String tokenString = event.getValue();
+            if(tokenString.startsWith("errai_"))
+            {
+              String[] tokens = splitHistoryToken(tokenString);
+
+              String toolsetId = tokens[0];
+              String toolId = tokens[1].equals("none") ? null : tokens[1];
+              
               showToolSet(toolsetId, toolId);
+
+              // correlation id
+              if(tokens.length>2)
+              {
+                String corrId = tokens[3];
+                // not used at the moment
+              }
             }
           }
         }
-    );*/
+    );
+  }
+
+  public static String[] splitHistoryToken(String tokenString)
+  {
+    String s = tokenString.substring(6, tokenString.length());
+    String[] token = s.split(";");
+    return token;
   }
 
   public void addToolSet(ToolSet toolSet) {
@@ -138,10 +158,13 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
     Widget w = toolSet.getWidget();
     String id = "ToolSet_" + toolSet.getToolSetName().replace(" ", "_");
 
-    if (w != null) {
+    if (w != null)
+    {            
       w.getElement().setId(id);
       menu.addLauncher(w, toolSet.getToolSetName());
-    } else {
+    }
+    else
+    {
       WSToolSetLauncher toolSetLauncher = new WSToolSetLauncher(toolSet.getToolSetName());
 
       for (Tool t : toolSet.getAllProvidedTools()) {
@@ -200,7 +223,7 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
     for (int i = 0; i < deck.tabLayout.getWidgetCount(); i++)
     {
       ToolTabPanel toolTab = (ToolTabPanel) deck.tabLayout.getWidget(i);
-      if (toolTab.id.equals(toolId)) {
+      if (toolTab.toolId.equals(toolId)) {
         isOpen = true;
         deck.tabLayout.selectTab(i);
       }
@@ -208,7 +231,7 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
 
     if (!isOpen) // & selectedTool.multipleAllowed()==false
     {
-      final ToolTabPanel panelTool = new ToolTabPanel(selectedTool);
+      final ToolTabPanel panelTool = new ToolTabPanel(toolSetId, selectedTool);
       panelTool.invalidate();
 
       ResourceFactory resourceFactory = GWT.create(ResourceFactory.class);
@@ -288,7 +311,7 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
       super();
       this.toolSet = toolSet;
       this.tabLayout = new DecoratedTabLayoutPanel();
-      
+
       this.add(tabLayout);
     }
 
@@ -299,14 +322,18 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
   }
 
   class ToolTabPanel extends LayoutPanel implements RequiresResize, ProvidesResize {
-    String id;
+    String toolId;
+    String toolsetId;
 
-    ToolTabPanel(final Tool tool) {
-      this.id = tool.getId();
+    ToolTabPanel(final String toolsetId, final Tool tool) {
+      this.toolsetId = toolsetId;
+      this.toolId = tool.getId();
       tool.getWidget(new WidgetCallback()
       {
         public void onSuccess(Widget instance)
         {
+          String baseRef = toolsetId+";"+toolId;
+          instance.getElement().setAttribute("baseRef", baseRef); // used by history management & perma links
           add(instance);
           WidgetHelper.invalidate(instance);
           layout();

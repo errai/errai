@@ -26,6 +26,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -64,6 +65,8 @@ public class Application implements EntryPoint {
 
   protected ClientMessageBus bus = (ClientMessageBus) ErraiBus.get();
 
+  private static String deferredToken = null;
+
   public Application()
   {
     authenticationModule = new AuthenticationModule();
@@ -92,7 +95,7 @@ public class Application implements EntryPoint {
                     String errorMessage = message.get(String.class, MessageParts.ErrorMessage);
                     PopupPanel popup = new PopupPanel();
                     popup.add(new HTML(errorMessage));
-                    popup.center();                    
+                    popup.center();
                   }
                 }
             );
@@ -116,7 +119,7 @@ public class Application implements EntryPoint {
 
                           public void onSuccess()
                           {
-                            initializeUI();  
+                            initializeUI();
                           }
                         }
                     );
@@ -130,12 +133,15 @@ public class Application implements EntryPoint {
           }
         });
 
-  }
+   
+    // initial history token
+    deferredToken = History.getToken();    
+  }  
 
   private void initializeUI()
   {
     viewport = new Viewport();
-    
+
     mainLayout = new WSLayoutPanel(new BorderLayout());
 
     menu = new Menu();
@@ -145,7 +151,7 @@ public class Application implements EntryPoint {
     mainLayout.add(menu, new BorderLayoutData(BorderLayout.Region.WEST, "180 px", false));
     mainLayout.add(header, new BorderLayoutData(BorderLayout.Region.NORTH, "50 px"));
     mainLayout.add(workspace, new BorderLayoutData(BorderLayout.Region.CENTER, false));
-    
+
     WorkspaceBuilder builder = new WorkspaceBuilder();
     WorkspaceConfig config = create(WorkspaceConfig.class);
     config.configure(builder);
@@ -156,7 +162,7 @@ public class Application implements EntryPoint {
     // finally attach the main layout to the viewport
     viewport.getLayoutPanel().add(mainLayout);
     RootPanel.get().add(viewport);
-    
+
     // show default toolset
     DeferredCommand.addCommand(
         new Command()
@@ -164,30 +170,46 @@ public class Application implements EntryPoint {
           public void execute()
           {
             String initialToolSetName = null;
+            String initialTool = null;
 
-            String preferedTool = Preferences.has(Preferences.DEFAULT_TOOL) ?
-                Preferences.get(Preferences.DEFAULT_TOOL) : null;
-
-            if(preferedTool!=null && workspace.hasToolSet(preferedTool))
+            // init by history token
+            if(deferredToken!=null && deferredToken.startsWith("errai_"))
             {
-              initialToolSetName = preferedTool;
+              String[] token = Workspace.splitHistoryToken(deferredToken);
+
+              initialToolSetName = token[0];
+              initialTool = token[1].equals("none") ? null : token[1];
             }
-            else
+
+            // init by preferences
+            if(null==initialToolSetName)
             {
-              // launch first available tool
-              List<ToolSet> toolSets = workspace.getToolsets();
-              if(toolSets.size()>0)
+              String preferedTool = Preferences.has(Preferences.DEFAULT_TOOL) ?
+                  Preferences.get(Preferences.DEFAULT_TOOL) : null;
+
+              if(preferedTool!=null && workspace.hasToolSet(preferedTool))
               {
-                initialToolSetName = toolSets.get(0).getToolSetName();
+                initialToolSetName = preferedTool;
+              }
+              else
+              {
+                // launch first available tool
+                List<ToolSet> toolSets = workspace.getToolsets();
+                if(toolSets.size()>0)
+                {
+                  initialToolSetName = toolSets.get(0).getToolSetName();
+                }
               }
             }
 
+            // activate default tool
             if(initialToolSetName!=null)
             {
               MessageBuilder.createMessage()
                   .toSubject(Workspace.SUBJECT)
                   .command(LayoutCommands.ActivateTool)
                   .with(LayoutParts.TOOLSET, initialToolSetName)
+                  .with(LayoutParts.TOOL, initialTool)
                   .noErrorHandling()
                   .sendNowWith(ErraiBus.get()
                   );
@@ -196,7 +218,7 @@ public class Application implements EntryPoint {
             refreshView();
           }
         }
-    );    
+    );
   }
 
   /**
