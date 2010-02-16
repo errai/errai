@@ -237,7 +237,7 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
       ResourceFactory resourceFactory = GWT.create(ResourceFactory.class);
       ErraiImageBundle erraiImageBundle = GWT.create(ErraiImageBundle.class);
       ImageResource resource = resourceFactory.createImage(selectedTool.getName()) != null ?
-          resourceFactory.createImage(selectedTool.getName()) : erraiImageBundle.questionCube();
+          resourceFactory.createImage(selectedTool.getName()) : erraiImageBundle.application();
 
       deck.tabLayout.add(
           panelTool,
