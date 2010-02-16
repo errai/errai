@@ -22,6 +22,8 @@
 package org.jboss.errai.workspaces.client;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.resources.client.ImageResource;
@@ -99,9 +101,7 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
                 showToolSet(toolsetId, toolId);
 
                 // create browser history
-                String toolToken = toolId!=null ? toolId : "none";
-                String historyToken = "errai_"+toolsetId+";"+toolToken;
-                History.newItem(historyToken, false);
+                recordHistory(toolsetId, toolId);
 
                 break;
             }
@@ -140,6 +140,13 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
           }
         }
     );
+  }
+
+  private void recordHistory(String toolsetId, String toolId)
+  {
+    String toolToken = toolId!=null ? toolId : "none";
+    String historyToken = "errai_"+toolsetId+";"+toolToken;
+    History.newItem(historyToken, false);
   }
 
   public static String[] splitHistoryToken(String tokenString)
@@ -223,7 +230,7 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
     for (int i = 0; i < deck.tabLayout.getWidgetCount(); i++)
     {
       ToolTabPanel toolTab = (ToolTabPanel) deck.tabLayout.getWidget(i);
-      if (toolTab.toolId.equals(toolId)) {
+      if (toolTab.toolId.equals(selectedTool.getId())) {
         isOpen = true;
         deck.tabLayout.selectTab(i);
       }
@@ -301,6 +308,10 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
     return toolSets;
   }
 
+  /**
+   * A group of tools that belong to the same context.
+   * In this case represented as a {@link org.gwt.mosaic.ui.client.TabLayoutPanel}.
+   */
   private class ToolSetDeck extends LayoutPanel implements RequiresResize, ProvidesResize {
     ToolSet toolSet;
     int index;
@@ -312,6 +323,15 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
       this.toolSet = toolSet;
       this.tabLayout = new DecoratedTabLayoutPanel();
 
+      this.tabLayout.addSelectionHandler(new SelectionHandler<Integer>()
+      {
+        public void onSelection(SelectionEvent<Integer> selectionEvent)
+        {
+          ToolTabPanel toolTab = (ToolTabPanel)tabLayout.getWidget(selectionEvent.getSelectedItem());
+          recordHistory(toolTab.toolsetId, toolTab.toolId);
+        }
+      });
+
       this.add(tabLayout);
     }
 
@@ -321,7 +341,11 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
     }
   }
 
-  class ToolTabPanel extends LayoutPanel implements RequiresResize, ProvidesResize {
+  /**
+   * A tabpanel within a {@link org.jboss.errai.workspaces.client.Workspace.ToolSetDeck}
+   * that contains a single tool.
+   */
+  private class ToolTabPanel extends LayoutPanel implements RequiresResize, ProvidesResize {
     String toolId;
     String toolsetId;
 
