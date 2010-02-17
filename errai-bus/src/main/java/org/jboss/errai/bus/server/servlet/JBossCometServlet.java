@@ -287,37 +287,6 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
         //   queue.heartBeat();
     }
 
-    /**
-     * Writes the message to the output stream
-     *
-     * @param stream - the output stream to write the message to
-     * @param m - the message to write to the output stream
-     * @throws IOException - if an input or output error occurs while the servlet is handling the HTTP request
-     */
-    public void writeToOutputStream(OutputStream stream, MarshalledMessage m) throws IOException {
-//           log.info("SendToClient:" + m.getMessage());
-
-        stream.write('{');
-        stream.write('"');
-        for (byte b : (m.getSubject()).getBytes()) {
-            stream.write(b);
-        }
-        stream.write('"');
-        stream.write(':');
-
-        if (m.getMessage() == null) {
-            stream.write('n');
-            stream.write('u');
-            stream.write('l');
-            stream.write('l');
-        } else {
-            for (byte b : ((String) m.getMessage()).getBytes()) {
-                stream.write(b);
-            }
-        }
-        stream.write('}');
-    }
-
     private static final class PausedEvent {
         private HttpServletResponse response;
         private HttpSession session;

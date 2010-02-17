@@ -112,6 +112,12 @@ public class DefaultBlockingServlet extends AbstractErraiServlet {
 
             final MessageQueue queue = service.getBus().getQueue(httpServletRequest.getSession().getId());
 
+            if (queue == null) {
+                sendDisconnectWithReason(httpServletResponse.getOutputStream(),
+                        "There is no queue associated with this session.");
+                return;
+            }
+
             queue.heartBeat();
 
             List<MarshalledMessage> messages = queue.poll(wait).getMessages();
@@ -165,32 +171,4 @@ public class DefaultBlockingServlet extends AbstractErraiServlet {
         }
     }
 
-    /**
-     * Writes the message to the output stream
-     *
-     * @param stream - the stream to write to
-     * @param m      - the message to write to the stream
-     * @throws IOException - is thrown if any input/output errors occur while writing to the stream
-     */
-    public static void writeToOutputStream(OutputStream stream, MarshalledMessage m) throws IOException {
-        stream.write('{');
-        stream.write('"');
-        for (byte b : (m.getSubject()).getBytes()) {
-            stream.write(b);
-        }
-        stream.write('"');
-        stream.write(':');
-
-        if (m.getMessage() == null) {
-            stream.write('n');
-            stream.write('u');
-            stream.write('l');
-            stream.write('l');
-        } else {
-            for (byte b : ((String) m.getMessage()).getBytes()) {
-                stream.write(b);
-            }
-        }
-        stream.write('}');
-    }
 }

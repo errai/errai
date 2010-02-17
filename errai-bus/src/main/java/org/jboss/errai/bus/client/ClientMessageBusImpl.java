@@ -414,7 +414,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                       // Although the response may still be valid
                       // Handle it gracefully
                         //noinspection ThrowableInstanceNeverThrown
-                        GWT.log("Server didn't accept the message: "+message, new RuntimeException());
+
+                        showError("Problem communicating with remote bus (Received HTTP 503 Error)", message, null);
                     }
 
                     /**
@@ -502,6 +503,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
                     case Disconnect:
                         incomingTimer.cancel();
+
+                        if (message.hasPart("Reason")) {
+                            showError("The bus was diconnected by the server", "Reason: "
+                                    + message.get(String.class, "Reason"), null);
+                        }
                         break;
                 }
             }
@@ -577,7 +583,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 }
 
                 public void onError(Request request, Throwable exception) {
-                    System.out.println("ERROR");
+                    showError("Could not connect to remote bus", "", exception);
                 }
             });
         }

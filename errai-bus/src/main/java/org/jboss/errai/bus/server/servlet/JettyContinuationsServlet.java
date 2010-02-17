@@ -33,10 +33,10 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
      * Called by the server (via the <tt>service</tt> method) to allow a servlet to handle a GET request by supplying
      * a response
      *
-     * @param httpServletRequest - object that contains the request the client has made of the servlet
+     * @param httpServletRequest  - object that contains the request the client has made of the servlet
      * @param httpServletResponse - object that contains the response the servlet sends to the client
-     * @exception IOException - if an input or output error is detected when the servlet handles the GET request
-     * @exception ServletException - if the request for the GET could not be handled
+     * @throws IOException      - if an input or output error is detected when the servlet handles the GET request
+     * @throws ServletException - if the request for the GET could not be handled
      */
     @Override
     protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
@@ -48,10 +48,10 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
      * Called by the server (via the <code>service</code> method) to allow a servlet to handle a POST request, by
      * sending the request
      *
-     * @param httpServletRequest - object that contains the request the client has made of the servlet
+     * @param httpServletRequest  - object that contains the request the client has made of the servlet
      * @param httpServletResponse - object that contains the response the servlet sends to the client
-     * @exception IOException - if an input or output error is detected when the servlet handles the request
-     * @exception ServletException - if the request for the POST could not be handled
+     * @throws IOException      - if an input or output error is detected when the servlet handles the request
+     * @throws ServletException - if the request for the POST could not be handled
      */
     @Override
     protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
@@ -82,8 +82,10 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
             final MessageQueue queue = service.getBus().getQueue(httpServletRequest.getSession().getId());
 
             if (queue == null) {
-                return;
+                sendDisconnectWithReason(httpServletResponse.getOutputStream(),
+                        "There is no queue associated with this session.");
             }
+
             synchronized (queue) {
 
                 if (wait) {
@@ -147,14 +149,14 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
     }
 
     private static void pollQueue(MessageQueue queue, HttpServletRequest httpServletRequest,
-                           HttpServletResponse httpServletResponse) throws IOException {
+                                  HttpServletResponse httpServletResponse) throws IOException {
 
         queue.heartBeat();
 
         List<MarshalledMessage> messages = queue.poll(false).getMessages();
 
         httpServletResponse.setHeader("Cache-Control", "no-cache");
-    //    httpServletResponse.addHeader("Payload-Size", String.valueOf(messages.size()));
+        //    httpServletResponse.addHeader("Payload-Size", String.valueOf(messages.size()));
         httpServletResponse.setContentType("application/json");
         OutputStream stream = httpServletResponse.getOutputStream();
 
@@ -173,32 +175,5 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
 
     }
 
-    /**
-     * Writes the message to the output stream
-     *
-     * @param stream - the output stream to write the message to
-     * @param m - the message to write to the output stream
-     * @throws IOException - if an input or output error occurs while the servlet is handling the HTTP request
-     */
-    public static void writeToOutputStream(OutputStream stream, MarshalledMessage m) throws IOException {
-        stream.write('{');
-        stream.write('"');
-        for (byte b : (m.getSubject()).getBytes()) {
-            stream.write(b);
-        }
-        stream.write('"');
-        stream.write(':');
 
-        if (m.getMessage() == null) {
-            stream.write('n');
-            stream.write('u');
-            stream.write('l');
-            stream.write('l');
-        } else {
-            for (byte b : ((String) m.getMessage()).getBytes()) {
-                stream.write(b);
-            }
-        }
-        stream.write('}');
-    }
 }
