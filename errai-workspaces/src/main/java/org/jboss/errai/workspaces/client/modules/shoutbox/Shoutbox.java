@@ -17,7 +17,7 @@ package org.jboss.errai.workspaces.client.modules.shoutbox;
 
 import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageBus;
+import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 

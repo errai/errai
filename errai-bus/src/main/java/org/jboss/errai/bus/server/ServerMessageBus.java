@@ -16,13 +16,13 @@
 
 package org.jboss.errai.bus.server;
 
-import org.jboss.errai.bus.client.api.BooleanRoutingRule;
-import org.jboss.errai.bus.client.api.MessageBus;
-import org.jboss.errai.bus.client.api.Payload;
+import org.jboss.errai.bus.client.framework.BooleanRoutingRule;
+import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.framework.Payload;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 
 /**
- * This interface, <tt>ServerMessageBus</tt>, extends the client's {@link org.jboss.errai.bus.client.api.MessageBus},
+ * This interface, <tt>ServerMessageBus</tt>, extends the client's {@link org.jboss.errai.bus.client.framework.MessageBus},
  * and adds functionality so the server can transmit messages to a client and vice versa
  */
 public interface ServerMessageBus extends MessageBus {

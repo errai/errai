@@ -2,8 +2,8 @@ package org.jboss.errai.bus.client.api.builder;
 
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageBus;
-import org.jboss.errai.bus.client.api.RequestDispatcher;
+import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.framework.RequestDispatcher;
 
 /**
  * The <tt>AbstractMessageBuilder</tt> facilitates the building of a message, and ensures that it is created and used

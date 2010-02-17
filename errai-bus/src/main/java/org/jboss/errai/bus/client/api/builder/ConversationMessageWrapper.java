@@ -1,6 +1,9 @@
 package org.jboss.errai.bus.client.api.builder;
 
 import org.jboss.errai.bus.client.api.*;
+import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.framework.RequestDispatcher;
+import org.jboss.errai.bus.client.framework.RoutingFlags;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 
 import java.util.Map;

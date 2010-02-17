@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.api;
+package org.jboss.errai.bus.client.framework;
 
 /**
  * A simple interface for defining a message.

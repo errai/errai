@@ -16,7 +16,7 @@
 
 package org.jboss.errai.bus.client.api;
 
-import org.jboss.errai.bus.client.api.SubscriptionEvent;
+import org.jboss.errai.bus.client.framework.SubscriptionEvent;
 
 /**
  * A listener that is fired when a new subscription is registered on the bus.

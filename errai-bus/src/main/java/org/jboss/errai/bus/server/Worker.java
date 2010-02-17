@@ -1,8 +1,8 @@
 package org.jboss.errai.bus.server;
 
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageBus;
-import org.jboss.errai.bus.client.api.RoutingFlags;
+import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.framework.RoutingFlags;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.slf4j.Logger;
 

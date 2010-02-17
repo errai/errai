@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.api;
+package org.jboss.errai.bus.client.framework;
 
 import java.util.Map;
 import java.util.Set;

@@ -16,8 +16,10 @@
 
 package org.jboss.errai.bus.client.api.base;
 
-import org.jboss.errai.bus.client.api.RoutingFlags;
+import org.jboss.errai.bus.client.framework.RoutingFlags;
 import org.jboss.errai.bus.client.api.*;
+import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.common.client.json.JSONEncoderCli;
 import org.jboss.errai.common.client.types.TypeHandlerFactory;
@@ -38,7 +40,7 @@ import java.util.Map;
  *                          .set("Text", "I like chocolate cake.");
  * </pre></tt>
  * You can transmit a message using the the <tt>sendNowWith()</tt> method by providing an instance of
- * {@link org.jboss.errai.bus.client.api.MessageBus}.
+ * {@link org.jboss.errai.bus.client.framework.MessageBus}.
  * <p/>
  * Messages can be contructed using user-defined standard protocols through the use of enumerations. Both
  * <tt>commandType</tt> and message parts can be defined through the use of enumerations.  This helps create
@@ -433,7 +435,7 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
     
 
     /**
-     * Transmit this message to the specified {@link MessageBus} instance.
+     * Transmit this message to the specified {@link org.jboss.errai.bus.client.framework.MessageBus} instance.
      *
      * @param viaThis
      */

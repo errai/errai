@@ -5,7 +5,7 @@ import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.api.base.JSONMessage;
 import org.jboss.errai.bus.client.api.HasEncoded;
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageProvider;
+import org.jboss.errai.bus.client.framework.MessageProvider;
 
 /**
  * The MessageBuilder API provides a fluent method of building Messages.
@@ -60,5 +60,9 @@ public class MessageBuilder {
      */
     public static void setProvider(MessageProvider provider) {
         MessageBuilder.provider = provider;
+    }
+
+    public static MessageProvider getProvider() {
+        return provider;
     }
 }

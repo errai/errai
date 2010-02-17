@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.api.base;
+package org.jboss.errai.bus.client.framework;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
@@ -23,8 +23,8 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.*;
-import org.jboss.errai.bus.client.api.SubscriptionEvent;
 import org.jboss.errai.bus.client.api.*;
+import org.jboss.errai.bus.client.api.base.JSONMessage;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.ext.ExtensionsLoader;
 import org.jboss.errai.bus.client.json.JSONUtilCli;
@@ -33,7 +33,6 @@ import org.jboss.errai.bus.client.protocols.MessageParts;
 
 import java.util.*;
 
-import static org.jboss.errai.bus.client.api.base.CommandMessage.create;
 import static org.jboss.errai.bus.client.json.JSONUtilCli.decodePayload;
 import static org.jboss.errai.bus.client.json.JSONUtilCli.encodeMap;
 import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteSubscribe;
@@ -97,7 +96,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         )).setHeader("Connection", "Keep-Alive");
 
         sendBuilder.setHeader("Content-Type", "application/json");
-      
+
         (recvBuilder = new RequestBuilder(
                 RequestBuilder.GET,
                 URL.encode(SERVICE_ENTRY_POINT)
@@ -411,11 +410,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 public void onResponseReceived(Request request, Response response) {
                     transmitting = false;
 
-                    if(503 == response.getStatusCode()) // Service Unavailable
+                    if (503 == response.getStatusCode()) // Service Unavailable
                     {
-                      // Sending the message failed.
-                      // Although the response may still be valid
-                      // Handle it gracefully
+                        // Sending the message failed.
+                        // Although the response may still be valid
+                        // Handle it gracefully
                         //noinspection ThrowableInstanceNeverThrown
 
                         showError("Problem communicating with remote bus (Received HTTP 503 Error)", message, null);
@@ -528,7 +527,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 if (event.getSubject().startsWith("local:")) {
                     return;
                 }
-                create().command(RemoteSubscribe)
+
+
+                MessageBuilder.getProvider().get().command(RemoteSubscribe)
                         .toSubject("ServerBus")
                         .set(Subject, event.getSubject())
                         .set(PriorityProcessing, "1")
@@ -542,7 +543,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
         addUnsubscribeListener(new UnsubscribeListener() {
             public void onUnsubscribe(SubscriptionEvent event) {
-                create().command(BusCommands.RemoteUnsubscribe)
+                MessageBuilder.getProvider().get().command(BusCommands.RemoteUnsubscribe)
                         .toSubject("ServerBus")
                         .set(Subject, event.getSubject())
                         .set(PriorityProcessing, "1")
@@ -839,17 +840,4 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         }
     }
 
-    private final MessageProvider provider = new MessageProvider() {
-        {
-            MessageBuilder.setProvider(this);
-        }
-
-        public Message get() {
-            return new JSONMessage();
-        }
-    };
-
-    public MessageProvider getMessageProvider() {
-        return provider;
-    }
 }

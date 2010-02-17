@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.api;
+package org.jboss.errai.bus.client.framework;
 
-import org.jboss.errai.bus.client.api.MarshalledMessage;
+import org.jboss.errai.bus.client.framework.MarshalledMessage;
 
 import java.util.LinkedList;
 import java.util.List;

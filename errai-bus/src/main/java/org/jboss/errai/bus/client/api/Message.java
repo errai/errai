@@ -1,6 +1,8 @@
 package org.jboss.errai.bus.client.api;
 
-import org.jboss.errai.bus.client.api.RoutingFlags;
+import org.jboss.errai.bus.client.framework.RoutingFlags;
+import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.framework.RequestDispatcher;
 
 import java.util.Map;
 
@@ -250,7 +252,7 @@ public interface Message {
     public void sendNowWith(MessageBus viaThis);
 
     /**
-     * Transmit this message using the specified {@link RequestDispatcher}.
+     * Transmit this message using the specified {@link org.jboss.errai.bus.client.framework.RequestDispatcher}.
      *
      * @param viaThis - <tt>RequestDispatcher</tt> instance to send message to
      */

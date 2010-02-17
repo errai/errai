@@ -16,7 +16,7 @@
 
 package org.jboss.errai.bus.server.security.auth.rules;
 
-import org.jboss.errai.bus.client.api.BooleanRoutingRule;
+import org.jboss.errai.bus.client.framework.BooleanRoutingRule;
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.protocols.MessageParts;

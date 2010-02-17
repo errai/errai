@@ -19,7 +19,7 @@ package org.jboss.errai.bus.client.api;
 /**
  * Listens to a message and makes a routing decision.
  *
- * @see BooleanRoutingRule
+ * @see org.jboss.errai.bus.client.framework.BooleanRoutingRule
  */
 public interface MessageListener {
     public boolean handleMessage(Message message);

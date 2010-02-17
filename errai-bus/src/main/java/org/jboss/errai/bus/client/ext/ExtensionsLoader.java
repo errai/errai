@@ -16,7 +16,7 @@
 
 package org.jboss.errai.bus.client.ext;
 
-import org.jboss.errai.bus.client.api.MessageBus;
+import org.jboss.errai.bus.client.framework.MessageBus;
 
 /**
  * This interface, <tt>ExtensionsLoader</tt>, is used internally during compile time to produce all the things

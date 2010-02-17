@@ -1,4 +1,4 @@
-package org.jboss.errai.bus.client.api;
+package org.jboss.errai.bus.client.framework;
 
 /**
  * Enumeration of flags that can be used when sending messages, to specify how they should be sent

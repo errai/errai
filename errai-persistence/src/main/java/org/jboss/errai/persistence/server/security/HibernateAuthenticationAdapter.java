@@ -20,7 +20,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.hibernate.Session;
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageBus;
+import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
 import org.jboss.errai.bus.client.security.CredentialTypes;

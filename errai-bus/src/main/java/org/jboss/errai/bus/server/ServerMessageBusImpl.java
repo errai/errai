@@ -21,6 +21,7 @@ import com.google.inject.Singleton;
 import org.jboss.errai.bus.client.api.*;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.RuleDelegateMessageCallback;
+import org.jboss.errai.bus.client.framework.*;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.server.io.JSONMessageServer;

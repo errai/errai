@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.api;
+package org.jboss.errai.bus.client.framework;
+
+import org.jboss.errai.bus.client.api.Message;
 
 /**
  * A RoutingRule that is called by the bus before routing any message.

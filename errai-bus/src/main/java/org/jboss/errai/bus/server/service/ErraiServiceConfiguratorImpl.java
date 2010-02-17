@@ -17,9 +17,9 @@
 package org.jboss.errai.bus.server.service;
 
 import com.google.inject.*;
-import org.jboss.errai.bus.client.api.MessageBus;
+import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.api.RequestDispatcher;
+import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.server.*;
 import org.jboss.errai.bus.server.Module;
 import org.jboss.errai.bus.server.annotations.*;

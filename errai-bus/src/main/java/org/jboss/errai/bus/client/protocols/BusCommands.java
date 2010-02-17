@@ -17,7 +17,7 @@
 package org.jboss.errai.bus.client.protocols;
 
 /**
- * Defines the standard protocol commands for interaction between federated {@link org.jboss.errai.bus.client.api.MessageBus}
+ * Defines the standard protocol commands for interaction between federated {@link org.jboss.errai.bus.client.framework.MessageBus}
  * instances.
  */
 public enum BusCommands {

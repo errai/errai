@@ -19,7 +19,7 @@ package org.errai.samples.helloworld.server;
 import com.google.inject.Inject;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.api.base.ConversationMessage;
-import org.jboss.errai.bus.client.api.MessageBus;
+import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.server.annotations.Service;
 
