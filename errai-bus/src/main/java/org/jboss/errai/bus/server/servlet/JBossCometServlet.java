@@ -40,9 +40,9 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
     /**
      * When an event is received, it is processed accordingly. A post event will tell the servlet to wait for the
      * messages, if there are messages waiting, they will be transmitted. Any errors will be handled.
-     * 
+     *
      * @param event - the Http event that occured
-     * @throws IOException - thrown if there is a read/write error
+     * @throws IOException      - thrown if there is a read/write error
      * @throws ServletException - thrown if a servlet error occurs
      */
     public void event(final HttpEvent event) throws IOException, ServletException {
@@ -55,7 +55,8 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
                 boolean post = "POST".equals(request.getMethod());
                 queue = getQueue(session, !post);
                 if (queue == null) {
-                    return;
+                    sendDisconnectWithReason(event.getHttpServletResponse().getOutputStream(),
+                            "There is no queue associated with this session.");
                 }
 
                 synchronized (activeEvents) {
@@ -142,10 +143,10 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
     /**
      * Receives standard HTTP requests from the public, and writes it to the response's output stream in JSON format
      *
-     * @param req - the object that contains the request the client made of the servlet
+     * @param req                 - the object that contains the request the client made of the servlet
      * @param httpServletResponse - the object that contains the response the servlet returns to the client
-     * @exception IOException - if an input or output error occurs while the servlet is handling the HTTP request
-     * @exception ServletException - if the HTTP request cannot be handled
+     * @throws IOException      - if an input or output error occurs while the servlet is handling the HTTP request
+     * @throws ServletException - if the HTTP request cannot be handled
      */
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse httpServletResponse) throws ServletException, IOException {
@@ -261,7 +262,7 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
      * format
      *
      * @param httpServletResponse - the response that will contain all the messages to be transmitted
-     * @param queue - the queue holding the messages to be transmitted
+     * @param queue               - the queue holding the messages to be transmitted
      * @throws IOException - if an input or output error occurs while the servlet is handling the HTTP request
      */
     public void transmitMessages(final HttpServletResponse httpServletResponse, MessageQueue queue) throws IOException {
