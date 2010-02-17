@@ -18,9 +18,9 @@ package org.jboss.errai.workspaces.client.layout;
 
 import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.Message;
-import org.jboss.errai.bus.client.MessageBuilder;
-import org.jboss.errai.bus.client.MessageCallback;
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.workspaces.client.protocols.LayoutParts;
 
 import java.util.LinkedHashMap;

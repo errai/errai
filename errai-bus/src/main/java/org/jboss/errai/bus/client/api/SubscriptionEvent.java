@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client;
+package org.jboss.errai.bus.client.api;
 
 /**
  * Contains details on the subscription event that has occured on the bus.
  *
- * @see org.jboss.errai.bus.client.SubscribeListener
- * @see org.jboss.errai.bus.client.UnsubscribeListener
+ * @see org.jboss.errai.bus.client.api.SubscribeListener
+ * @see org.jboss.errai.bus.client.api.UnsubscribeListener
  */
 public class SubscriptionEvent {
     private boolean disposeListener = false;

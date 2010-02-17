@@ -16,13 +16,13 @@
 package org.jboss.errai.workspaces.client.modules.shoutbox;
 
 import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.MessageBuilder;
-import org.jboss.errai.bus.client.MessageBus;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.api.MessageBus;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.jboss.errai.bus.client.MessageBuilder.createMessage;
+import static org.jboss.errai.bus.client.api.base.MessageBuilder.createMessage;
 
 /**
  * Represents the engagement of a provider and a client

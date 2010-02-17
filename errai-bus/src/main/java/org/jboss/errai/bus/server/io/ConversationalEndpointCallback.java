@@ -1,13 +1,13 @@
 package org.jboss.errai.bus.server.io;
 
-import org.jboss.errai.bus.client.Message;
-import org.jboss.errai.bus.client.MessageBus;
-import org.jboss.errai.bus.client.MessageCallback;
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.MessageBus;
+import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.server.MessageDeliveryFailure;
 
 import java.lang.reflect.Method;
 
-import static org.jboss.errai.bus.client.MessageBuilder.createConversation;
+import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversation;
 import static org.mvel2.DataConversion.canConvert;
 import static org.mvel2.DataConversion.convert;
 

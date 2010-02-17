@@ -18,10 +18,11 @@ package org.jboss.errai.bus.client;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import org.jboss.errai.bus.client.api.MessageBus;
 
 /**
  * The main GWT <tt>EntryPoint</tt> class for ErraiBus.  This class also contains a static global reference to the
- * client {@link org.jboss.errai.bus.client.MessageBus} which can be obtained by calling: <tt>ErraiBus.get()</tt>
+ * client {@link org.jboss.errai.bus.client.api.MessageBus} which can be obtained by calling: <tt>ErraiBus.get()</tt>
  */
 public class ErraiBus implements EntryPoint {
     private static MessageBus bus = GWT.create(MessageBus.class);

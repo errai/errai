@@ -1,4 +1,4 @@
-package org.jboss.errai.bus.client;
+package org.jboss.errai.bus.client.api;
 
 /**
  * The <tt>RequestDispatcher</tt> interface provides a way to create a message delivery system into the bus

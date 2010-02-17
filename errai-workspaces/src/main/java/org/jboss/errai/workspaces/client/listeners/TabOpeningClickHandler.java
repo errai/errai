@@ -22,6 +22,10 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.bus.client.*;
+import org.jboss.errai.bus.client.api.ClientMessageBus;
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.MessageBus;
+import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.workspaces.client.api.Tool;
 import org.jboss.errai.workspaces.client.api.WidgetCallback;
 import org.jboss.errai.workspaces.client.layout.LayoutHint;
@@ -29,8 +33,8 @@ import org.jboss.errai.workspaces.client.layout.LayoutHintProvider;
 import org.jboss.errai.workspaces.client.protocols.LayoutCommands;
 import org.jboss.errai.workspaces.client.protocols.LayoutParts;
 
-import static org.jboss.errai.bus.client.MessageBuilder.createConversation;
-import static org.jboss.errai.bus.client.MessageBuilder.createMessage;
+import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversation;
+import static org.jboss.errai.bus.client.api.base.MessageBuilder.createMessage;
 
 public class TabOpeningClickHandler implements ClickHandler {
   private Tool tool;

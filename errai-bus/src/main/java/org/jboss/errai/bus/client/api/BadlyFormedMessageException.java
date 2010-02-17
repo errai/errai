@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client;
+package org.jboss.errai.bus.client.api;
 
 /**
  *  An exception thrown when a message has not been properly formed and is therefore, not transmittable.

@@ -17,10 +17,10 @@
 package org.errai.samples.broadcastservice.server;
 
 import com.google.inject.Inject;
-import org.jboss.errai.bus.client.Message;
-import org.jboss.errai.bus.client.MessageBuilder;
-import org.jboss.errai.bus.client.MessageBus;
-import org.jboss.errai.bus.client.MessageCallback;
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.api.MessageBus;
+import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.server.annotations.Service;
 
 @Service

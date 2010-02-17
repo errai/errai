@@ -1,6 +1,6 @@
 package org.jboss.errai.bus.server.io;
 
-import org.jboss.errai.bus.client.JSONMessage;
+import org.jboss.errai.bus.client.api.base.JSONMessage;
 
 public class JSONMessageServer extends JSONMessage {
     public static JSONMessage create() {

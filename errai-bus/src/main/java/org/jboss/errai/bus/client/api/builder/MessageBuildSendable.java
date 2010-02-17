@@ -1,7 +1,7 @@
 package org.jboss.errai.bus.client.api.builder;
 
-import org.jboss.errai.bus.client.MessageBus;
-import org.jboss.errai.bus.client.RequestDispatcher;
+import org.jboss.errai.bus.client.api.MessageBus;
+import org.jboss.errai.bus.client.api.RequestDispatcher;
 
 /**
  * This interface, <tt>MessageBuildSendable</tt>, is a template for sending a message. This ensures that the message is

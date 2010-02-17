@@ -27,9 +27,9 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.TextBox;
 import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.MessageBuilder;
-import org.jboss.errai.bus.client.MessageBus;
-import org.jboss.errai.bus.client.RemoteCallback;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.api.MessageBus;
+import org.jboss.errai.bus.client.api.RemoteCallback;
 
 public class QueryWidget extends Composite {
     @UiHandler("sendQuery")

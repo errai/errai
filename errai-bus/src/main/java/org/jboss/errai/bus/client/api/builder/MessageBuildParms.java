@@ -1,7 +1,7 @@
 package org.jboss.errai.bus.client.api.builder;
 
-import org.jboss.errai.bus.client.ErrorCallback;
-import org.jboss.errai.bus.client.Message;
+import org.jboss.errai.bus.client.api.ErrorCallback;
+import org.jboss.errai.bus.client.api.Message;
 
 /**
  * This interface, <tt>MessageBuildParms</tt>, is a template for building the different parameters of a message. This

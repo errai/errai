@@ -14,13 +14,19 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client;
+package org.jboss.errai.bus.client.api;
+
+import org.jboss.errai.bus.client.api.SubscriptionEvent;
 
 /**
- * Listens to a message and makes a routing decision.
- *
- * @see org.jboss.errai.bus.client.BooleanRoutingRule
+ * A listener that is fired when a subject is unsubscribed from the bus.
  */
-public interface MessageListener {
-    public boolean handleMessage(Message message);
+public interface UnsubscribeListener {
+
+    /**
+     * Function is called when a subscription is deregistered from the bus
+     *
+     * @param event - the subscription event that occurred 
+     */
+    public void onUnsubscribe(SubscriptionEvent event);
 }

@@ -18,12 +18,13 @@ package org.jboss.errai.bus.server;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.jboss.errai.bus.client.*;
+import org.jboss.errai.bus.client.api.*;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.api.base.RuleDelegateMessageCallback;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.server.io.JSONMessageServer;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
-import org.jboss.errai.bus.server.util.ErrorHelper;
 
 import javax.swing.*;
 import java.awt.*;
@@ -31,7 +32,7 @@ import java.util.*;
 import java.util.List;
 import java.util.Queue;
 
-import static org.jboss.errai.bus.client.MessageBuilder.createConversation;
+import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversation;
 import static org.jboss.errai.bus.client.protocols.MessageParts.ReplyTo;
 import static org.jboss.errai.bus.client.protocols.SecurityCommands.MessageNotDelivered;
 import static org.jboss.errai.bus.server.util.ErrorHelper.handleMessageDeliveryFailure;

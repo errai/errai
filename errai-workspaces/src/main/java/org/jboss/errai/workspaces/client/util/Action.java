@@ -23,8 +23,8 @@ package org.jboss.errai.workspaces.client.util;
 
 import com.google.gwt.user.client.Command;
 import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.Message;
-import org.jboss.errai.bus.client.MessageCallback;
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.MessageCallback;
 
 /**
  * Utility builder pattern to improve readbility

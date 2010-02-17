@@ -22,6 +22,10 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.*;
 import org.errai.samples.serialization.client.model.Record;
 import org.jboss.errai.bus.client.*;
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.MessageBus;
+import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
 
 import java.util.List;
 

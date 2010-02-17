@@ -21,7 +21,7 @@
  */
 package org.jboss.errai.bus.client.api.builder;
 
-import org.jboss.errai.bus.client.Message;
+import org.jboss.errai.bus.client.api.Message;
 
 /**
  * This interface, <tt>MessageBuild</tt> is the template for creating any message builders. The message builders

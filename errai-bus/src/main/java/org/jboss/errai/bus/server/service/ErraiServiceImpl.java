@@ -18,10 +18,10 @@ package org.jboss.errai.bus.server.service;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.jboss.errai.bus.client.Message;
-import org.jboss.errai.bus.client.MessageBuilder;
-import org.jboss.errai.bus.client.MessageCallback;
-import org.jboss.errai.bus.client.RequestDispatcher;
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.RequestDispatcher;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
@@ -33,7 +33,7 @@ import org.jboss.errai.bus.server.security.auth.AuthenticationFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.jboss.errai.bus.client.MessageBuilder.createConversation;
+import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversation;
 
 /**
  * Default implementation of the ErraiBus server-side service.

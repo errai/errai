@@ -1,4 +1,6 @@
-package org.jboss.errai.bus.client;
+package org.jboss.errai.bus.client.api;
+
+import org.jboss.errai.bus.client.api.RoutingFlags;
 
 import java.util.Map;
 
@@ -241,14 +243,14 @@ public interface Message {
     public void commit();
 
     /**
-     * Transmit this message to the specified {@link org.jboss.errai.bus.client.MessageBus} instance.
+     * Transmit this message to the specified {@link MessageBus} instance.
      *
      * @param viaThis - <tt>MessageBus</tt> instance to send message to
      */
     public void sendNowWith(MessageBus viaThis);
 
     /**
-     * Transmit this message using the specified {@link org.jboss.errai.bus.client.RequestDispatcher}.
+     * Transmit this message using the specified {@link RequestDispatcher}.
      *
      * @param viaThis - <tt>RequestDispatcher</tt> instance to send message to
      */

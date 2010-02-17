@@ -23,7 +23,7 @@ import com.google.gwt.user.client.ui.Image;
 import org.gwt.mosaic.ui.client.layout.BoxLayout;
 import org.gwt.mosaic.ui.client.layout.LayoutPanel;
 import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.MessageBuilder;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.widgets.client.WSLaunchButton;
 import org.jboss.errai.workspaces.client.Workspace;
 import org.jboss.errai.workspaces.client.api.Tool;

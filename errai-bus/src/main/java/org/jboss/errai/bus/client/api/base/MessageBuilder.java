@@ -1,6 +1,11 @@
-package org.jboss.errai.bus.client;
+package org.jboss.errai.bus.client.api.base;
 
 import org.jboss.errai.bus.client.api.builder.*;
+import org.jboss.errai.bus.client.api.base.CommandMessage;
+import org.jboss.errai.bus.client.api.base.JSONMessage;
+import org.jboss.errai.bus.client.api.HasEncoded;
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.MessageProvider;
 
 /**
  * The MessageBuilder API provides a fluent method of building Messages.

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client;
+package org.jboss.errai.bus.client.api;
 
 /**
  * A message bus is capable of transmitting and receiving messages using the publisher/subscriber
@@ -56,7 +56,7 @@ package org.jboss.errai.bus.client;
  * );
  * </code></pre>
  * The API for creating services is heterogeneous in both client and server code.  The only semantic difference involves
- * obtaining an instance of the <tt>MessageBus</tt> which is done using the {@link ErraiBus#get()} method in client code,
+ * obtaining an instance of the <tt>MessageBus</tt> which is done using the {@link org.jboss.errai.bus.client.ErraiBus#get()} method in client code,
  * and by default, is provided by the container using dependency injection in the server code.  For example:
  * <p/>
  * <pre><code>

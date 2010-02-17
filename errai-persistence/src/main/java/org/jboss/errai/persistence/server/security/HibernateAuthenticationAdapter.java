@@ -19,8 +19,8 @@ package org.jboss.errai.persistence.server.security;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.hibernate.Session;
-import org.jboss.errai.bus.client.Message;
-import org.jboss.errai.bus.client.MessageBus;
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.MessageBus;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
 import org.jboss.errai.bus.client.security.CredentialTypes;
@@ -47,7 +47,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.jboss.errai.bus.client.MessageBuilder.createConversation;
+import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversation;
 
 public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
     private ErraiServiceConfigurator configurator;

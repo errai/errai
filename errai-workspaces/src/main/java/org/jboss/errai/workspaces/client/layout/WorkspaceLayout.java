@@ -29,6 +29,11 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.bus.client.*;
+import org.jboss.errai.bus.client.api.ClientMessageBus;
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.MessageBus;
+import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.json.JSONUtilCli;
 import org.jboss.errai.common.client.framework.AcceptsCallback;
 import org.jboss.errai.widgets.client.WSElementWrapper;
@@ -49,7 +54,7 @@ import java.util.*;
 
 import static com.google.gwt.user.client.DOM.getElementById;
 import static com.google.gwt.user.client.Window.addResizeHandler;
-import static org.jboss.errai.bus.client.MessageBuilder.createMessage;
+import static org.jboss.errai.bus.client.api.base.MessageBuilder.createMessage;
 
 
 /**

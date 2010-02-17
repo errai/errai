@@ -1,4 +1,4 @@
-package org.jboss.errai.bus.client;
+package org.jboss.errai.bus.client.api;
 
 /**
  * Interface for a remote callback that takes any specified type

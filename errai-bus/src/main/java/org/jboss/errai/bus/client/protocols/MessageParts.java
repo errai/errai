@@ -26,7 +26,7 @@ public enum MessageParts {
      * Specifies the specific command within the service that is being requested.  This is an optional element,
      * and is not required for signal-only services.  However it's use is encouraged for building multi-command
      * services.  It is used as the underlying protocol representation in
-     * {@link org.jboss.errai.bus.client.CommandMessage#toSubject(String)}.  The <tt>CommandType</tt> is
+     * {@link org.jboss.errai.bus.client.api.base.CommandMessage#toSubject(String)}.  The <tt>CommandType</tt> is
      * represented as a <tt>String</tt>.
      */
     CommandType,

@@ -20,9 +20,9 @@ import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
-import org.jboss.errai.bus.client.CommandMessage;
-import org.jboss.errai.bus.client.MarshalledMessage;
-import org.jboss.errai.bus.client.Message;
+import org.jboss.errai.bus.client.api.base.CommandMessage;
+import org.jboss.errai.bus.client.api.MarshalledMessage;
+import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.common.client.json.JSONDecoderCli;
 import org.jboss.errai.common.client.json.JSONEncoderCli;
 

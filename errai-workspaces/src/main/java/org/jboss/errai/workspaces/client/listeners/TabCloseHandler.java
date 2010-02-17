@@ -24,7 +24,7 @@ import org.jboss.errai.workspaces.client.protocols.LayoutCommands;
 import org.jboss.errai.workspaces.client.protocols.LayoutParts;
 import org.jboss.errai.workspaces.client.widgets.WSTab;
 
-import static org.jboss.errai.bus.client.MessageBuilder.createMessage;
+import static org.jboss.errai.bus.client.api.base.MessageBuilder.createMessage;
 
 
 public class TabCloseHandler implements CloseHandler<WSTab>, AcceptsCallback {

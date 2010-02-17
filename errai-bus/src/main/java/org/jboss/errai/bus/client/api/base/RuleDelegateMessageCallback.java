@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client;
+package org.jboss.errai.bus.client.api.base;
+
+import org.jboss.errai.bus.client.api.BooleanRoutingRule;
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.MessageCallback;
 
 
 /**
  * A delegate message handler for encapsulating an endpoint around a routing rule.  This is the underlying way
  * the bus secures individual endpoints based on security rules.
  *
- * @see org.jboss.errai.bus.client.BooleanRoutingRule
+ * @see org.jboss.errai.bus.client.api.BooleanRoutingRule
  */
 public class RuleDelegateMessageCallback implements MessageCallback {
     private MessageCallback delegate;

@@ -14,15 +14,19 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client;
+package org.jboss.errai.bus.client.api;
+
+import org.jboss.errai.bus.client.api.SubscriptionEvent;
 
 /**
- * A <tt>MessageCallback</tt> defines an interface for receiving messages on the bus.
+ * A listener that is fired when a new subscription is registered on the bus.
  */
-public interface MessageCallback {
+public interface SubscribeListener {
+
     /**
-     * This method is called to handle the message.
-     * @param message -
+     * Function is called when a new subscription is registered on the bus
+     *
+     * @param event - the subscription event that occurred
      */
-    public void callback(Message message);
+    public void onSubscribe(SubscriptionEvent event);
 }

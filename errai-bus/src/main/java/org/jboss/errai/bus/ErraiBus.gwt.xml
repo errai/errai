@@ -30,8 +30,8 @@
 
     <entry-point class='org.jboss.errai.bus.client.ErraiBus'/>
 
-    <replace-with class="org.jboss.errai.bus.client.ClientMessageBusImpl">
-        <when-type-is class="org.jboss.errai.bus.client.MessageBus"/>
+    <replace-with class="org.jboss.errai.bus.client.api.base.ClientMessageBusImpl">
+        <when-type-is class="org.jboss.errai.bus.client.api.MessageBus"/>
     </replace-with>
 
     <generate-with class="org.jboss.errai.bus.rebind.ExtensionProxyGenerator">

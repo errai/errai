@@ -1,7 +1,7 @@
 package org.jboss.errai.bus.client.api.builder;
 
-import org.jboss.errai.bus.client.HasEncoded;
-import org.jboss.errai.bus.client.Message;
+import org.jboss.errai.bus.client.api.HasEncoded;
+import org.jboss.errai.bus.client.api.Message;
 
 
 public class HasEncodedConvMessageWrapper extends ConversationMessageWrapper implements HasEncoded {

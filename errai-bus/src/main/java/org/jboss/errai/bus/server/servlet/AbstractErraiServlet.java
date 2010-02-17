@@ -2,8 +2,8 @@ package org.jboss.errai.bus.server.servlet;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
-import org.jboss.errai.bus.client.MarshalledMessage;
-import org.jboss.errai.bus.client.MessageBus;
+import org.jboss.errai.bus.client.api.MarshalledMessage;
+import org.jboss.errai.bus.client.api.MessageBus;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.server.HttpSessionProvider;
 import org.jboss.errai.bus.server.ServerMessageBus;

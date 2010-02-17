@@ -16,9 +16,9 @@
 
 package org.jboss.errai.bus.server.security.auth.rules;
 
-import org.jboss.errai.bus.client.BooleanRoutingRule;
-import org.jboss.errai.bus.client.ErrorCallback;
-import org.jboss.errai.bus.client.Message;
+import org.jboss.errai.bus.client.api.BooleanRoutingRule;
+import org.jboss.errai.bus.client.api.ErrorCallback;
+import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
@@ -33,8 +33,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import static org.jboss.errai.bus.client.MessageBuilder.createConversation;
-import static org.jboss.errai.bus.client.MessageBuilder.createMessage;
+import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversation;
+import static org.jboss.errai.bus.client.api.base.MessageBuilder.createMessage;
 
 /**
  * This routing rule specifies a set of required roles that a message must posess in order for this routing rule

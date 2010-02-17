@@ -21,8 +21,8 @@
  */
 package org.jboss.errai.workspaces.client.util;
 
-import org.jboss.errai.bus.client.Message;
-import org.jboss.errai.bus.client.MessageCallback;
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.common.client.framework.AcceptsCallback;
 import org.jboss.errai.widgets.client.WSModalDialog;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client;
+package org.jboss.errai.bus.client.api.base;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
@@ -23,6 +23,9 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.*;
+import org.jboss.errai.bus.client.api.SubscriptionEvent;
+import org.jboss.errai.bus.client.api.*;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.ext.ExtensionsLoader;
 import org.jboss.errai.bus.client.json.JSONUtilCli;
 import org.jboss.errai.bus.client.protocols.BusCommands;
@@ -30,7 +33,7 @@ import org.jboss.errai.bus.client.protocols.MessageParts;
 
 import java.util.*;
 
-import static org.jboss.errai.bus.client.CommandMessage.create;
+import static org.jboss.errai.bus.client.api.base.CommandMessage.create;
 import static org.jboss.errai.bus.client.json.JSONUtilCli.decodePayload;
 import static org.jboss.errai.bus.client.json.JSONUtilCli.encodeMap;
 import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteSubscribe;
@@ -732,7 +735,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                                             Object subscriberData) /*-{
           return $wnd.PageBus.subscribe(subject, null,
                   function (subject, message, subcriberData) {
-                     callback.@org.jboss.errai.bus.client.MessageCallback::callback(Lorg/jboss/errai/bus/client/Message;)(@org.jboss.errai.bus.client.json.JSONUtilCli::decodeCommandMessage(Ljava/lang/Object;)(message))
+                     callback.@org.jboss.errai.bus.client.api.MessageCallback::callback(Lorg/jboss/errai/bus/client/api/Message;)(@org.jboss.errai.bus.client.json.JSONUtilCli::decodeCommandMessage(Ljava/lang/Object;)(message))
                   },
                   null);
      }-*/;

@@ -17,7 +17,7 @@
 package org.jboss.errai.bus.server.security.auth;
 
 import com.google.gwt.core.client.GWT;
-import org.jboss.errai.bus.client.Message;
+import org.jboss.errai.bus.client.api.Message;
 
 /**
  * A simple placeholder adapter which provides no authentication functionality whatsoever.  This can be used for

@@ -16,7 +16,7 @@
 
 package org.jboss.errai.bus.server.io;
 
-import org.jboss.errai.bus.client.Message;
+import org.jboss.errai.bus.client.api.Message;
 import org.mvel2.ConversionHandler;
 import org.mvel2.MVEL;
 

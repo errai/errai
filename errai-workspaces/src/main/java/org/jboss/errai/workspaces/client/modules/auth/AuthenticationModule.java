@@ -30,6 +30,10 @@ import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.HasText;
 import org.gwt.mosaic.ui.client.MessageBox;
 import org.jboss.errai.bus.client.*;
+import org.jboss.errai.bus.client.api.ClientMessageBus;
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
@@ -45,8 +49,8 @@ import org.jboss.errai.workspaces.client.Workspace;
 import org.jboss.errai.workspaces.client.modules.Module;
 import org.jboss.errai.workspaces.client.protocols.LayoutCommands;
 
-import static org.jboss.errai.bus.client.CommandMessage.createWithParts;
-import static org.jboss.errai.bus.client.MessageBuilder.createMessage;
+import static org.jboss.errai.bus.client.api.base.CommandMessage.createWithParts;
+import static org.jboss.errai.bus.client.api.base.MessageBuilder.createMessage;
 import static org.jboss.errai.bus.client.json.JSONUtilCli.decodeMap;
 
 /**

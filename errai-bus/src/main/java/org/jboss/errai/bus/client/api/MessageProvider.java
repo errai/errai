@@ -1,4 +1,4 @@
-package org.jboss.errai.bus.client;
+package org.jboss.errai.bus.client.api;
 
 /**
  * This class allows different implementations of Message to be provided based on whether or not you're on the

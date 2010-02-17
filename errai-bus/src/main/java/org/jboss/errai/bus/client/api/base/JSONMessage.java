@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client;
+package org.jboss.errai.bus.client.api.base;
 
+import org.jboss.errai.bus.client.api.RoutingFlags;
+import org.jboss.errai.bus.client.api.*;
 import org.jboss.errai.bus.client.protocols.MessageParts;
+import org.jboss.errai.common.client.json.JSONEncoderCli;
 import org.jboss.errai.common.client.types.TypeHandlerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * CommandMessage represents a message payload.  It implements a builder (or fluent) API which is used for constructing
- * sendable messages.  It is the core messageing API for ErraiBus, and will be the foremost used class within ErraiBus
+ * JSONMessage extends CommandMessage. It represents a message payload.  It implements a builder (or fluent) API
+ * which is used for constructing sendable messages.
+ * It is the core messageing API for ErraiBus, and will be the foremost used class within ErraiBus
  * by most users.
  * <p/>
  * <strong>Example Message:</strong>
@@ -34,7 +38,7 @@ import java.util.Map;
  *                          .set("Text", "I like chocolate cake.");
  * </pre></tt>
  * You can transmit a message using the the <tt>sendNowWith()</tt> method by providing an instance of
- * {@link org.jboss.errai.bus.client.MessageBus}.
+ * {@link org.jboss.errai.bus.client.api.MessageBus}.
  * <p/>
  * Messages can be contructed using user-defined standard protocols through the use of enumerations. Both
  * <tt>commandType</tt> and message parts can be defined through the use of enumerations.  This helps create
@@ -60,81 +64,36 @@ import java.util.Map;
  * </pre></tt>
  * Messages may contain serialized objects provided they meet the following criteria:
  * <ol>
- *  <li>The class is annotated with {@link org.jboss.errai.bus.server.annotations.ExposeEntity}</li>
- *  <li>The class implements {@link java.io.Serializable}.
- *  <li>The class contains a default, no-argument constructor.
+ * <li>The class is annotated with {@link org.jboss.errai.bus.server.annotations.ExposeEntity}</li>
+ * <li>The class implements {@link java.io.Serializable}.
+ * <li>The class contains a default, no-argument constructor.
  * </ol>
  *
- * @see org.jboss.errai.bus.client.ConversationMessage
+ * @see ConversationMessage
  */
-public class CommandMessage implements Message {
-    protected Map<String, Object> parts = new HashMap<String, Object>();
-    protected Map<String, Object> resources;
-    protected ErrorCallback errorsCall;
-    protected int routingFlags;
+public class JSONMessage extends CommandMessage implements HasEncoded {
+    /* String representation of this message and all it's parts */
+    protected StringBuffer buf = new StringBuffer();
 
-    public static final int ROUTE_GLOBAL = 1;
-    public static final int PRIORITY_ROUTING = 2;
+    /* First is true if the <tt>buf</tt> is empty */
+    protected boolean first = true;
 
-    /**
-     * @param commandType
-     * @return
-     * @deprecated Please use the MessageBuilder class.
-     */
-    @Deprecated
-    static CommandMessage create(String commandType) {
-        return new CommandMessage(commandType);
-    }
+    /* true if the message has been completely pushed into the <tt>buf</tt> */
+    protected boolean committed;
 
     /**
-     * @param commandType
-     * @return
-     * @deprecated Please use the MessageBuilder class.
-     */
-    @Deprecated
-    static CommandMessage create(Enum commandType) {
-        return new CommandMessage(commandType);
-    }
-
-    /**
-     * Create a new CommandMessage.
+     * Create a new JSONMessage.
      *
-     * @return a new instance of CommandMessage
+     * @return a new instance of JSONMessage
      */
 
-    static CommandMessage create() {
-        return new CommandMessage();
+    static JSONMessage create() {
+        return new JSONMessage();
     }
 
-    /**
-     * For internal use. This method should not be directly used.
-     * @param parts
-     * @return
-     */
-    public static CommandMessage createWithParts(Map<String, Object> parts) {
-        return new CommandMessage(parts);
+    protected JSONMessage() {
+        _start();
     }
-
-    protected CommandMessage() {
-    }
-
-    private CommandMessage(Map<String, Object> parts) {
-        this.parts = parts;
-    }
-
-    private CommandMessage(String commandType) {
-        command(commandType);
-    }
-
-    private CommandMessage(Enum commandType) {
-        command(commandType.name());
-    }
-
-    private CommandMessage(String subject, String commandType) {
-        toSubject(subject).command(commandType);
-    }
-
-
 
     /**
      * Return the specified command type.  Returns <tt>null</tt> if not specified.
@@ -161,6 +120,11 @@ public class CommandMessage implements Message {
      * @return -
      */
     public Message toSubject(String subject) {
+        if (parts.containsKey(MessageParts.ToSubject.name()))
+                throw new IllegalArgumentException("cannot set subject more than once.");
+
+
+        _addStringPart(MessageParts.ToSubject.name(), subject);
         parts.put(MessageParts.ToSubject.name(), subject);
         return this;
     }
@@ -172,6 +136,10 @@ public class CommandMessage implements Message {
      * @return
      */
     public Message command(Enum type) {
+        if (parts.containsKey(MessageParts.CommandType.name()))
+                throw new IllegalArgumentException("cannot set command type more than once.");
+
+        _addStringPart(MessageParts.CommandType.name(), type.name());
         parts.put(MessageParts.CommandType.name(), type.name());
         return this;
     }
@@ -183,6 +151,11 @@ public class CommandMessage implements Message {
      * @return
      */
     public Message command(String type) {
+        if (parts.containsKey(MessageParts.CommandType.name()))
+                throw new IllegalArgumentException("cannot set command type more than once.");
+
+
+        _addStringPart(MessageParts.CommandType.name(), type);
         parts.put(MessageParts.CommandType.name(), type);
         return this;
     }
@@ -195,6 +168,10 @@ public class CommandMessage implements Message {
      * @return -
      */
     public Message set(Enum part, Object value) {
+        if (parts.containsKey(part.name()))
+            throw new IllegalArgumentException("cannot set a part more than once.");
+
+        _addObjectPart(part.name(), value);
         return set(part.name(), value);
     }
 
@@ -206,16 +183,31 @@ public class CommandMessage implements Message {
      * @return -
      */
     public Message set(String part, Object value) {
+        if (parts.containsKey(part))
+            throw new IllegalArgumentException("cannot set a part more than once.");
+
+        _addObjectPart(part, value);
         parts.put(part, value);
         return this;
     }
 
+    /**
+     * Removes a message part
+     *
+     * @param part - Message part
+     */
     public void remove(String part) {
-        parts.remove(part);
+        throw new UnsupportedOperationException();
+        //  parts.remove(part);
     }
 
+    /**
+     * Removes a message part
+     *
+     * @param part - Message part
+     */
     public void remove(Enum part) {
-        parts.remove(part.name());
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -243,30 +235,30 @@ public class CommandMessage implements Message {
     }
 
     /**
-     * Set flags for this message
+     * Set routing flags for message.
      *
-     * @param flag - <tt>RoutingFlags</tt> can be set to NonGlobalRouting or PriorityProcessing
+     * @param flag - Routing flag to set
      */
     public void setFlag(RoutingFlags flag) {
         routingFlags |= flag.flag();
     }
 
     /**
-     * Unset flags for this message
+     * Unset routing flags for message.
      *
-     * @param flag - <tt>RoutingFlags</tt> can be set to NonGlobalRouting or PriorityProcessing
+     * @param flag - Routing flag to unset
      */
     public void unsetFlag(RoutingFlags flag) {
         if ((routingFlags & flag.flag()) != 0) {
-           routingFlags ^= flag.flag();
+            routingFlags ^= flag.flag();
         }
     }
 
     /**
-     * Checks if a flag is setfor this message
+     * Checks if specified routing flag has been set.
      *
-     * @param flag - <tt>RoutingFlags</tt> can be set to NonGlobalRouting or PriorityProcessing
-     * @return true if the flag is set
+     * @param flag - flag to check for
+     * @return true if flag has been set.
      */
     public boolean isFlagSet(RoutingFlags flag) {
         return (routingFlags & flag.flag()) != 0;
@@ -341,8 +333,7 @@ public class CommandMessage implements Message {
      * @return -
      */
     public Message setParts(Map<String, Object> parts) {
-        this.parts = parts;
-        return this;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -352,8 +343,7 @@ public class CommandMessage implements Message {
      * @return -
      */
     public Message addAllParts(Map<String, Object> parts) {
-        this.parts.putAll(parts);
-        return this;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -396,10 +386,10 @@ public class CommandMessage implements Message {
     }
 
     /**
-     * Sets the error callback for this message
+     * Registers an error callback function for this message.
      *
      * @param callback - error callback
-     * @return this
+     * @return this message
      */
     public Message errorsCall(ErrorCallback callback) {
         if (this.errorsCall != null) {
@@ -410,9 +400,9 @@ public class CommandMessage implements Message {
     }
 
     /**
-     * Gets the error callback for this message
-     * 
-     * @return the error callback
+     * Gets the error callback set for this message
+     *
+     * @return the error callback function
      */
     public ErrorCallback getErrorCallback() {
         return errorsCall;
@@ -440,11 +430,10 @@ public class CommandMessage implements Message {
         }
     }
 
-    public void commit() {
-    }
+    
 
     /**
-     * Transmit this message to the specified {@link org.jboss.errai.bus.client.MessageBus} instance.
+     * Transmit this message to the specified {@link MessageBus} instance.
      *
      * @param viaThis
      */
@@ -453,7 +442,8 @@ public class CommandMessage implements Message {
     }
 
     /**
-     * Transmit this message using the specified {@link org.jboss.errai.bus.client.RequestDispatcher}.
+     * Transmit this message using the specified {@link RequestDispatcher}.
+     *
      * @param viaThis
      */
     public void sendNowWith(RequestDispatcher viaThis) {
@@ -461,12 +451,73 @@ public class CommandMessage implements Message {
     }
 
     /**
-     * Gets a <tt>String</tt> representation of this message, which contains the subject and type
+     * Returns an encoded string representation of this message in the buffer
      *
-     * @return String representation of message
+     * @return an encoded string of the buffer
+     */
+    public String getEncoded() {
+        _end();
+        return buf.toString();
+    }
+
+    /**
+     * Returns a <tt>String</tt> representation of this message
+     *
+     * @return a string representation of this message
      */
     @Override
     public String toString() {
         return "CommandMessage(toSubject=" + getSubject() + ";CommandType=" + getCommandType() + ")";
+    }
+
+    /**
+     * Starts appending the beginning of the JSON message to the buffer <tt>buf</tt>
+     */
+    protected void _start() {
+        first = true;
+        buf.append("{");
+    }
+
+    /**
+     * Appends the closing brace to the end of the buffer denoting the end of the message
+     */
+    protected void _end() {
+        committed = true;
+        buf.append("}");
+    }
+
+    /**
+     * Appends a separator to the buffer where needed
+     */
+    protected void _sep() {
+        if (first) {
+            first = false;
+        } else {
+            buf.append(',');
+        }
+    }
+
+    /**
+     * Append strings in JSON notation to the <tt>buf</tt>
+     *
+     * @param a - the real name of the part
+     * @param b - the value of the part
+     */
+    protected void _addStringPart(String a, String b) {
+        _sep();
+        buf.append(a).append(':')
+                .append('\"').append(b).append("\"");
+    }
+
+    /**
+     * Append objects in JSON notation to the <tt>buf</tt>
+     *
+     * @param a - message part
+     * @param b - the value of the message's part
+     */
+    protected void _addObjectPart(String a, Object b) {
+        _sep();
+        buf.append(a).append(':')
+                .append(new JSONEncoderCli().encode(b));
     }
 }

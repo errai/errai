@@ -20,6 +20,10 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.RootPanel;
 import org.jboss.errai.bus.client.*;
+import org.jboss.errai.bus.client.api.MessageBus;
+import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.base.CommandMessage;
+import org.jboss.errai.bus.client.api.base.ConversationMessage;
 
 public class HelloWorld implements EntryPoint {
     private MessageBus bus = ErraiBus.get();

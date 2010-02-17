@@ -19,9 +19,9 @@ package org.jboss.errai.bus.client.security;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
 import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.Message;
-import org.jboss.errai.bus.client.MessageBuilder;
-import org.jboss.errai.bus.client.MessageCallback;
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
@@ -31,7 +31,7 @@ import org.jboss.errai.bus.client.security.impl.PasswordCredential;
 
 import java.util.HashSet;
 
-import static org.jboss.errai.bus.client.MessageBuilder.createMessage;
+import static org.jboss.errai.bus.client.api.base.MessageBuilder.createMessage;
 import static org.jboss.errai.bus.client.protocols.SecurityParts.CredentialsRequired;
 
 public class SecurityService {

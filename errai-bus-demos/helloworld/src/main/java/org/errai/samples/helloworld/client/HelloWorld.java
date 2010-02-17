@@ -9,9 +9,9 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.RootPanel;
 import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.MessageBus;
+import org.jboss.errai.bus.client.api.MessageBus;
 
-import static org.jboss.errai.bus.client.MessageBuilder.createMessage;
+import static org.jboss.errai.bus.client.api.base.MessageBuilder.createMessage;
 
 public class HelloWorld implements EntryPoint {
 

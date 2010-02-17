@@ -17,8 +17,8 @@
 package org.jboss.errai.bus.server.servlet;
 
 import com.google.inject.Singleton;
-import org.jboss.errai.bus.client.MarshalledMessage;
-import org.jboss.errai.bus.client.Message;
+import org.jboss.errai.bus.client.api.MarshalledMessage;
+import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.server.MessageQueue;
 import org.mvel2.util.StringAppender;
 

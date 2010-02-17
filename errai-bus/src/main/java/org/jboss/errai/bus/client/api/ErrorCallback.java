@@ -1,4 +1,4 @@
-package org.jboss.errai.bus.client;
+package org.jboss.errai.bus.client.api;
 
 
 public interface ErrorCallback {

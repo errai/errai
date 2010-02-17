@@ -16,8 +16,8 @@
 
 package org.jboss.errai.persistence.server;
 
-import org.jboss.errai.bus.client.Message;
-import org.jboss.errai.bus.client.MessageCallback;
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.persistence.client.PersistenceCommands;
 import org.jboss.errai.persistence.client.PersistenceParts;
 

@@ -1,6 +1,6 @@
 package org.jboss.errai.bus.client.api.builder;
 
-import org.jboss.errai.bus.client.ErrorCallback;
+import org.jboss.errai.bus.client.api.ErrorCallback;
 
 /**
  * This interface, <tt>RemoteCallErrorDef</tt> is a template for creating a remote call error handler. It ensures that

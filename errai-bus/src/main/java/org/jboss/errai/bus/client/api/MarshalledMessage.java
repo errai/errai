@@ -14,11 +14,21 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client;
+package org.jboss.errai.bus.client.api;
 
 /**
- * A simple callback interface used for creating a post-initializing callback hook in the client message bus.
+ * A simple interface for defining a message.
  */
-public interface HookCallback {
-    public void callback(String subject);
+public interface MarshalledMessage {
+    /**
+     * The target subject
+     * @return -
+     */
+    public String getSubject();
+
+    /**
+     * The message data.
+     * @return -
+     */
+    public Object getMessage();
 }

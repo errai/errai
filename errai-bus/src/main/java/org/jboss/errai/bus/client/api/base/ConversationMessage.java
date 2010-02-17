@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client;
+package org.jboss.errai.bus.client.api.base;
 
+import org.jboss.errai.bus.client.api.BadlyFormedMessageException;
+import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 
 /**
@@ -37,7 +39,7 @@ import org.jboss.errai.bus.client.protocols.MessageParts;
  * It is possible for a message sender to specify a {@link org.jboss.errai.bus.client.protocols.MessageParts#ReplyTo}
  * message component, which by default will be used to route the message.  We refer to this as a: <em>sender-driven conversation</em>
  * as opposed to a <em>receiver-driven conversation</em> which is demonstrated in the code example above.  The
- * {@link org.jboss.errai.bus.client.MessageBus#conversationWith(Message, MessageCallback)} convenience method
+ * {@link org.jboss.errai.bus.client.api.MessageBus#conversationWith(Message, org.jboss.errai.bus.client.api.MessageCallback)} convenience method
  * for having conversations uses sender-driven conversations, for example.
  */
 public class ConversationMessage extends CommandMessage {
@@ -53,7 +55,7 @@ public class ConversationMessage extends CommandMessage {
     }
 
     /**
-     * Calling this method on this class will always result in a {@link org.jboss.errai.bus.client.BadlyFormedMessageException}.
+     * Calling this method on this class will always result in a {@link org.jboss.errai.bus.client.api.BadlyFormedMessageException}.
      * You must call {@link #create(Message)}.
      *
      * @return - this method will never return.
