@@ -17,8 +17,8 @@
 package org.jboss.errai.bus.server.service;
 
 import com.google.inject.*;
-import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.server.*;
 import org.jboss.errai.bus.server.Module;
@@ -49,8 +49,6 @@ import static org.jboss.errai.bus.server.util.ConfigUtil.visitAllTargets;
  * Default implementation of the ErraiBus server-side configurator.
  */
 public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
-
-
     private ServerMessageBus bus;
     private List<File> configRootTargets;
     private Map<String, String> properties;
@@ -60,6 +58,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
     private Set<Class> serializableTypes;
 
     private RequestDispatcher dispatcher;
+    private SessionProvider sessionProvider;
 
     private ErraiServiceConfigurator configInst = this;
 
@@ -152,7 +151,6 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
             }
         }
 
-
         this.dispatcher = createInjector(new AbstractModule() {
             @Override
             protected void configure() {
@@ -164,7 +162,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                                 .asSubclass(RequestDispatcher.class);
                     }
                     catch (Exception e) {
-                        throw new ErraiBootstrapFailure("could not load servlet implementation class", e);
+                        throw new ErraiBootstrapFailure("could not load request dispatcher implementation class", e);
                     }
                 }
 
@@ -176,6 +174,30 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                 bind(ErraiServiceConfigurator.class).toInstance(configInst);
             }
         }).getInstance(RequestDispatcher.class);
+
+        this.sessionProvider = createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                Class<? extends SessionProvider> sessionProviderImplementation = HttpSessionProvider.class;
+
+                if (configInst.hasProperty(ERRAI_SESSION_PROVIDER_IMPLEMENTATION)) {
+                    try {
+                        sessionProviderImplementation = Class.forName(configInst.getProperty(ERRAI_SESSION_PROVIDER_IMPLEMENTATION))
+                                .asSubclass(SessionProvider.class);
+                    }
+                    catch (Exception e) {
+                        throw new ErraiBootstrapFailure("could not load session provider implementation class", e);
+                    }
+                }
+
+                log.info("using session provider implementation: " + sessionProviderImplementation.getName());
+
+                bind(SessionProvider.class).to(sessionProviderImplementation);
+                bind(ErraiService.class).toInstance(erraiService);
+                bind(MessageBus.class).toInstance(bus);
+                bind(ErraiServiceConfigurator.class).toInstance(configInst);
+            }
+        }).getInstance(SessionProvider.class);
 
         log.info("beging searching for Errai extensions ...");
 
@@ -261,7 +283,8 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                                     }).getInstance(Module.class).init();
                                 }
 
-                            } else if (loadClass.isAnnotationPresent(Service.class)) {
+                            }
+                            else if (loadClass.isAnnotationPresent(Service.class)) {
                                 Object svc = null;
                                 if (MessageCallback.class.isAssignableFrom(loadClass)) {
                                     final Class<? extends MessageCallback> clazz = loadClass.asSubclass(MessageCallback.class);
@@ -297,7 +320,8 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                                     RolesRequiredRule rule = null;
                                     if (clazz.isAnnotationPresent(RequireRoles.class)) {
                                         rule = new RolesRequiredRule(clazz.getAnnotation(RequireRoles.class).value(), bus);
-                                    } else if (clazz.isAnnotationPresent(RequireAuthentication.class)) {
+                                    }
+                                    else if (clazz.isAnnotationPresent(RequireAuthentication.class)) {
                                         rule = new RolesRequiredRule(new HashSet<Object>(), bus);
                                     }
                                     if (rule != null) {
@@ -336,7 +360,8 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                                     bus.subscribe(loadClass.getSimpleName() + ":RPC", new RemoteServiceCallback(epts));
                                 }
 
-                            } else if (loadClass.isAnnotationPresent(ExposeEntity.class)) {
+                            }
+                            else if (loadClass.isAnnotationPresent(ExposeEntity.class)) {
                                 log.info("Marked " + loadClass + " as serializable.");
                                 loadedComponents.add(loadClass.getName());
                                 serializableTypes.add(loadClass);
@@ -344,7 +369,8 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                         }
                     }
             );
-        } else {
+        }
+        else {
             log.info("auto-scan disabled.");
         }
 
@@ -420,7 +446,8 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
     public <T> T getResource(Class<? extends T> resourceClass) {
         if (extensionBindings.containsKey(resourceClass)) {
             return (T) extensionBindings.get(resourceClass).get();
-        } else {
+        }
+        else {
             return null;
         }
     }
@@ -444,6 +471,6 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
     }
 
     public SessionProvider getConfiguredSessionProvider() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return sessionProvider;
     }
 }

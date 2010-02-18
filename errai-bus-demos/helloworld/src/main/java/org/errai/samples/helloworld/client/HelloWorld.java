@@ -15,46 +15,44 @@ import static org.jboss.errai.bus.client.api.base.MessageBuilder.createMessage;
 
 public class HelloWorld implements EntryPoint {
 
-  /**
-   * Get an instance of the MessageBus
-   */
-  private MessageBus bus = ErraiBus.get();
-  int numMesages = 0;
-
-  public void onModuleLoad() {
-    Button clickMe = new Button("Click Me!");
-
     /**
-     * Register a click handler for the button.
+     * Get an instance of the MessageBus
      */
-    clickMe.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
+    private MessageBus bus = ErraiBus.get();
+    int numMesages = 0;
+
+    public void onModuleLoad() {
+        Button clickMe = new Button("Click Me!");
+
         /**
-         * Send a message to the 'HelloWorld' service.
+         * Register a click handler for the button.
          */
-        createMessage()
-            .toSubject("HelloWorld")
-            .signalling().noErrorHandling()
-            .sendNowWith(bus);
+        clickMe.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                /**
+                 * Send a message to the 'HelloWorld' service.
+                 */
+                createMessage()
+                        .toSubject("HelloWorld")
+                        .signalling().noErrorHandling()
+                        .sendNowWith(bus);
 
-        numMesages++;
+                numMesages++;
 
-        History.newItem("msg"+numMesages, false);
-      }
-    });
+                History.newItem("msg" + numMesages, false);
+            }
+        });
 
-    History.addValueChangeHandler(
-        new ValueChangeHandler<String>()
-        {
-          public void onValueChange(ValueChangeEvent<String> event)
-          {
-            System.out.println("-> "+ event.getValue());
-          }
-        }
-    );
-    /**
-     * Just add the button to the RootPanel in the DOM.
-     */
-    RootPanel.get().add(clickMe);
-  }
+        History.addValueChangeHandler(
+                new ValueChangeHandler<String>() {
+                    public void onValueChange(ValueChangeEvent<String> event) {
+                        System.out.println("-> " + event.getValue());
+                    }
+                }
+        );
+        /**
+         * Just add the button to the RootPanel in the DOM.
+         */
+        RootPanel.get().add(clickMe);
+    }
 }

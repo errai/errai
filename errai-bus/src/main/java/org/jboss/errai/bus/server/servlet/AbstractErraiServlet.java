@@ -35,8 +35,9 @@ public abstract class AbstractErraiServlet extends HttpServlet {
                 }
             }).getInstance(ErraiService.class);
 
+    
     /* A default Http session provider */
-    protected SessionProvider sessionProvider = new HttpSessionProvider();
+    protected SessionProvider sessionProvider = service.getConfiguration().getConfiguredSessionProvider();
 
 
     /**
