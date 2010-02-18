@@ -137,7 +137,9 @@ public class Application implements EntryPoint {
           }
         });
 
-   
+
+    header = new Header(); // stateful
+
     // initial history token
     deferredToken = History.getToken();    
   }  
@@ -150,7 +152,6 @@ public class Application implements EntryPoint {
 
     menu = new Menu();
     workspace = Workspace.createInstance(menu);
-    header = new Header();
 
     mainLayout.add(menu, new BorderLayoutData(BorderLayout.Region.WEST, "180 px", false));
     mainLayout.add(header, new BorderLayoutData(BorderLayout.Region.NORTH, "50 px"));
@@ -173,7 +174,7 @@ public class Application implements EntryPoint {
         {
           public void execute()
           {
-            String initialToolSetName = null;
+            String initialToolSet = null;
             String initialTool = null;
 
             // init by history token
@@ -181,19 +182,19 @@ public class Application implements EntryPoint {
             {
               String[] token = Workspace.splitHistoryToken(deferredToken);
 
-              initialToolSetName = token[0];
+              initialToolSet = token[0];
               initialTool = token[1].equals("none") ? null : token[1];
             }
 
             // init by preferences
-            if(null==initialToolSetName)
+            if(null==initialToolSet)
             {
               String preferedTool = Preferences.has(Preferences.DEFAULT_TOOL) ?
-                  Preferences.get(Preferences.DEFAULT_TOOL) : null;
+                  Workspace.encode(Preferences.get(Preferences.DEFAULT_TOOL)) : null;
 
               if(preferedTool!=null && workspace.hasToolSet(preferedTool))
               {
-                initialToolSetName = preferedTool;
+                initialToolSet = preferedTool;
               }
               else
               {
@@ -201,18 +202,18 @@ public class Application implements EntryPoint {
                 List<ToolSet> toolSets = workspace.getToolsets();
                 if(toolSets.size()>0)
                 {
-                  initialToolSetName = toolSets.get(0).getToolSetName();
+                  initialToolSet = Workspace.encode(toolSets.get(0).getToolSetName());                   
                 }
               }
             }
 
             // activate default tool
-            if(initialToolSetName!=null)
+            if(initialToolSet!=null)
             {
               MessageBuilder.createMessage()
                   .toSubject(Workspace.SUBJECT)
                   .command(LayoutCommands.ActivateTool)
-                  .with(LayoutParts.TOOLSET, initialToolSetName)
+                  .with(LayoutParts.TOOLSET, initialToolSet)
                   .with(LayoutParts.TOOL, initialTool)
                   .noErrorHandling()
                   .sendNowWith(ErraiBus.get()

@@ -28,12 +28,11 @@ import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.bus.client.security.AuthenticationContext;
 import org.jboss.errai.bus.client.security.Role;
 import org.jboss.errai.bus.client.security.SecurityService;
+import org.jboss.errai.workspaces.client.Workspace;
 import org.jboss.errai.workspaces.client.api.ResourceFactory;
 import org.jboss.errai.workspaces.client.api.Tool;
 import org.jboss.errai.workspaces.client.api.ToolSet;
 import org.jboss.errai.workspaces.client.api.WSComponent;
-import org.jboss.errai.workspaces.client.framework.Registry;
-import org.jboss.errai.workspaces.client.Workspace;
 import org.jboss.errai.workspaces.client.icons.ErraiImageBundle;
 
 import java.util.*;

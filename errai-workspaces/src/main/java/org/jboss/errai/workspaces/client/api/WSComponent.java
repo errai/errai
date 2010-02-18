@@ -16,8 +16,6 @@
 
 package org.jboss.errai.workspaces.client.api;
 
-import org.jboss.errai.workspaces.client.api.WidgetCallback;
-
 public interface WSComponent {
   
   public void getWidget(WidgetCallback callback);

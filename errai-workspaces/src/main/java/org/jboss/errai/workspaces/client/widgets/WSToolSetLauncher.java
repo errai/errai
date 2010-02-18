@@ -20,6 +20,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.Widget;
 import org.gwt.mosaic.ui.client.layout.BoxLayout;
 import org.gwt.mosaic.ui.client.layout.LayoutPanel;
 import org.jboss.errai.bus.client.ErraiBus;
@@ -27,13 +28,14 @@ import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.widgets.client.WSLaunchButton;
 import org.jboss.errai.workspaces.client.Workspace;
 import org.jboss.errai.workspaces.client.api.Tool;
+import org.jboss.errai.workspaces.client.api.ToolSet;
 import org.jboss.errai.workspaces.client.icons.ErraiImageBundle;
 import org.jboss.errai.workspaces.client.protocols.LayoutCommands;
 import org.jboss.errai.workspaces.client.protocols.LayoutParts;
 
 
 /**
- * A simiple dock area to list and provide links to different features.
+ * A simple dock area to list and provide links to different tools.
  */
 public class WSToolSetLauncher extends LayoutPanel
 {
@@ -42,17 +44,28 @@ public class WSToolSetLauncher extends LayoutPanel
 
   private String toolSetId = null;
 
-  @Deprecated
-  public WSToolSetLauncher()
+  public WSToolSetLauncher(String id, final ToolSet toolSet)
   {
     super(new BoxLayout(BoxLayout.Orientation.VERTICAL));
     setPadding(0);
-  }
-
-  public WSToolSetLauncher(String id)
-  {
-    super(new BoxLayout(BoxLayout.Orientation.VERTICAL));
+   
+     // widget, if available
+    Widget w = toolSet.getWidget();
     this.toolSetId = id;
+
+    if (w != null)
+    {
+      w.getElement().setId(toolSetId);
+      this.add(w);
+    }
+
+    // tool links
+    for (Tool t : toolSet.getAllProvidedTools()) {
+      this.addLink(t.getName(), t);
+    }
+
+    this.getElement().setId(toolSetId);
+
   }
 
   public void addLink(final String name, final Tool tool)
@@ -62,7 +75,7 @@ public class WSToolSetLauncher extends LayoutPanel
       newIcon = new Image(tool.getIcon().getUrl());
     }
     else {
-      newIcon = new Image(erraiImageBundle.questionCube());
+      newIcon = new Image(erraiImageBundle.application());
     }
 
     newIcon.setSize("16px", "16px");
@@ -74,7 +87,7 @@ public class WSToolSetLauncher extends LayoutPanel
           public void onClick(ClickEvent clickEvent)
           {
             System.out.println("Click " + tool.getId());
-            
+
             MessageBuilder.createMessage()
                 .toSubject(Workspace.SUBJECT)
                 .command(LayoutCommands.ActivateTool)

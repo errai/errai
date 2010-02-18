@@ -160,32 +160,14 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
 
     // register for lookup, late reference
     toolSets.add(toolSet);
+    String toolSetId= encode(toolSet.getToolSetName());
 
     // Menu
-    Widget w = toolSet.getWidget();
-    String id = "ToolSet_" + toolSet.getToolSetName().replace(" ", "_");
-
-    if (w != null)
-    {            
-      w.getElement().setId(id);
-      menu.addLauncher(w, toolSet.getToolSetName());
-    }
-    else
-    {
-      WSToolSetLauncher toolSetLauncher = new WSToolSetLauncher(toolSet.getToolSetName());
-
-      for (Tool t : toolSet.getAllProvidedTools()) {
-        toolSetLauncher.addLink(t.getName(), t);
-      }
-
-      toolSetLauncher.getElement().setId(id);
-      menu.addLauncher(toolSetLauncher, toolSet.getToolSetName());
-    }
-
+    menu.addLauncher(new WSToolSetLauncher(toolSetId, toolSet), toolSet.getToolSetName());
     menu.getStack().layout();
 
     // ToolSet deck
-    ToolSetDeck deck = createDeck(toolSet);
+    ToolSetDeck deck = new ToolSetDeck(toolSetId, toolSet);
     deck.index = this.getWidgetCount();
     this.add(deck);
   }
@@ -276,17 +258,11 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
     });
   }
 
-  private ToolSetDeck createDeck(ToolSet toolSet) {
-    ToolSetDeck deck = new ToolSetDeck(toolSet);
-    //deck.add(toolSet);
-    return deck;
-  }
-
   private ToolSetDeck findToolSet(String id) {
     ToolSetDeck match = null;
     for (int i = 0; i < this.getWidgetCount(); i++) {
       ToolSetDeck deck = (ToolSetDeck) this.getWidget(i);
-      if (id.equals(deck.toolSet.getToolSetName())) {
+      if (id.equals(deck.toolSetId)) {
         match = deck;
         break;
       }
@@ -308,6 +284,11 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
     return toolSets;
   }
 
+  public static String encode(String toolSetName)
+  {
+    return "ToolSet_" + toolSetName.replace(" ", "_");
+  }
+
   /**
    * A group of tools that belong to the same context.
    * In this case represented as a {@link org.gwt.mosaic.ui.client.TabLayoutPanel}.
@@ -315,12 +296,14 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
   private class ToolSetDeck extends LayoutPanel implements RequiresResize, ProvidesResize {
     ToolSet toolSet;
     int index;
+    String toolSetId;
 
     DecoratedTabLayoutPanel tabLayout;
 
-    public ToolSetDeck(ToolSet toolSet) {
+    public ToolSetDeck(String toolSetId, ToolSet toolSet) {
       super();
       this.toolSet = toolSet;
+      this.toolSetId = toolSetId;
       this.tabLayout = new DecoratedTabLayoutPanel();
 
       this.tabLayout.addSelectionHandler(new SelectionHandler<Integer>()

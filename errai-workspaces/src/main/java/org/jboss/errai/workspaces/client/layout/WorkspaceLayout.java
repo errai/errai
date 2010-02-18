@@ -60,6 +60,7 @@ import static org.jboss.errai.bus.client.api.base.MessageBuilder.createMessage;
 /**
  * This is the main layout implementation for the workspace UI.
  */
+@Deprecated
 public class WorkspaceLayout extends Composite {
     /**
      * The main layout panel.
@@ -351,7 +352,7 @@ public class WorkspaceLayout extends Composite {
             /**
              * Create a default launcher panel.
              */
-            WSToolSetLauncher toolSetLauncher = new WSToolSetLauncher();
+            WSToolSetLauncher toolSetLauncher = new WSToolSetLauncher(id, toolSet);
 
             for (Tool t : toolSet.getAllProvidedTools()) {
                 toolSetLauncher.addLink(t.getName(), t);
