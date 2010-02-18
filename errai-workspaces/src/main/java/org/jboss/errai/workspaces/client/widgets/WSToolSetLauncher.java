@@ -47,7 +47,7 @@ public class WSToolSetLauncher extends LayoutPanel
   public WSToolSetLauncher(String id, final ToolSet toolSet)
   {
     super(new BoxLayout(BoxLayout.Orientation.VERTICAL));
-    setPadding(0);
+    setPadding(3);
    
      // widget, if available
     Widget w = toolSet.getWidget();

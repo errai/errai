@@ -297,6 +297,7 @@ WSLogin {
     margin: 0;
     color: black;
     cursor: default;
+    padding-left:10px;
 }
 
 .WSLaunchButton-hover {
@@ -494,8 +495,7 @@ WSLogin {
 	cursor: pointer;
 	cursor: hand;
 }
-.mosaic-StackLayoutPanelContent {
-	padding-left:10px;
+.mosaic-StackLayoutPanelContent {	
 	background:#ffffff;
 	border-bottom:1px solid #ccc;
 }
