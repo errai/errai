@@ -45,7 +45,7 @@
 
       <para>The distribution packages can be downloaded from jboss.org
 
-      <ulink url="http://jboss.org/errai/">http://jboss.org/errai/</ulink>
+      <ulink url="http://jboss.org/errai/Downloads.html">http://jboss.org/errai/Downloads.html</ulink>
         </para>
     </section>
 
@@ -929,32 +929,38 @@ errai.async.worker.timeout=5
             </sect2>
 
             <sect2>
-                <title>More then just API</title>
+                <title>Sandbox</title>
                 <para>
                     Workspaces goes beyond simple API. It's not just another GWT module.
                     It was designed to get you started quickly,
                     without getting in your way. This includes the environment to build, deploy and test
                     your tools. We've decided to use maven to provide these capabilities.
-                    It allows you to quickly get started (see <link linkend="quickstart">Maven archetype</link>,
+                    It allows you to quickly get started (see <link linkend="quickstart">Maven archetype</link>),
                     but more importantly, maven repositories are used to share tool implementations across workspace assemblies.
-                    This for instance allows you to combine 3rd party tools with you own as part of a custom workspace compilation.                    
+                    This way you can easily combine your own and 3rd party tools as part of a custom workspace compilation.
+                    <note>
+                        <para>
+                           The GWT SDK is already part of the sandbox bootstrap.
+                           You get everything to get going within minutes: GWT, Errai and 3rd party libraries. 
+                        </para>
+                    </note>
                 </para>
             </sect2>
         </sect1>
 
 
-        <sect1>
+        <sect1 id="workspace-api">
             <title>Workspace API</title>
             <para>
-                To begin with we'll look at some examples how to declare tool sets
+                To begin with, we'll look at some examples how to declare tool sets
                 and launch them in a workspace. 
             </para>
             <sect2>
                 <title>Declaring and implementing tools</title>
                 <para>
-                    Tools are declared through thre @LoadToolSet annotation.
+                    Tools are declared through the @LoadToolSet annotation.
                     This instructs the workspace to generate all the boiler plate to
-                    hook it up into the workspace. A tool needs to implement the WidgetProvider
+                    wire your tools with the workspace. A tool needs to implement the WidgetProvider
                     interface. It's used by the workspace to instruct the tool to create it's UI widget when needed.
                     This widget will then be embedded in the workspace.
   <programlisting>
@@ -989,12 +995,12 @@ public class UserManagement implements WidgetProvider
                 </para>
             </sect2>
 
-            <sect2>
+            <sect2 id="rolebased">
                 <title>Authorization and access to tools</title>
                 <para>
                     Workspaces relies on a authentication scheme similiar to
                     JAAS. It ships with different authentication modules (i.e. Hibernate, JAAS)
-                    that allow for role based access to tool on the client side and service on the server side.
+                    that enable role based access to tools on the client side and services on the server side.
 <programlisting>
 @LoadTool(name = "Inventory", group = "Administration")                (1)
 @RequireRoles({"admin"})                                               (2)
@@ -1065,6 +1071,97 @@ public class OpenTasksModule implements WidgetProvider
 
                 </para>
             </sect2>
+        </sect1>
+
+        <sect1>
+            <title>Building Blocks</title>
+            <para>
+                The workspace itself doesn't require any attention apart from the
+                common API that is decribed in the chapter <link linkend="workspace-api">"Workspace API"</link>.
+                Still, in some cases you may need to go beyond the out-of-the-box functionlity.
+                In this chapter we are going to explain the building blocks used in the workspace implementation
+                and how they can be used to replace or extend the default workspace behaviour.
+            </para>
+
+            <sect2 id="workspace-registry">
+                <title>Workspace Registry</title>
+                <para>
+                    The workspace registry (org.jboss.errai.workspaces.client.framework.Registry)
+                    is a simple all purpose lookup for common workspace API that should be available
+                    to any workspace component. 
+                </para>
+            </sect2>
+            <sect2>
+                <title>Authentication and Authorization</title>
+                <para>
+                    The workspace itself doesn't provide an authentication component.
+                    Instead it relies on the Authentication provided by errai bus.
+                    When the workspace is loaded two thing happen: The workspace checks if authentication
+                    is required and, after authentication if needed, loads the tool sets. 
+                </para>
+                <para>
+                    The bus component in charge is the SecurityService (org.jboss.errai.bus.client.security.SecurityService).
+                    It is available through <link linkend="workspace-registry">workspace Registry</link>.
+                    For people extending the workspace functionality it offers two intersting options:
+                    <itemizedlist>
+                        <listitem>
+                            <para>
+                                Obtain access to the authentication context (username, roles, etc)
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                Deferred workspace assembly                                
+                            </para>
+                        </listitem>
+                    </itemizedlist>
+                   The later is important of you want to provide your own way of authenticating users,
+                   but still use the <link linkend="rolebased">role based authorization</link> build into workspaces.
+
+                    <note>
+                        <para>
+                            Don't mess with the authentication unless you now what you are doing.
+                            In many cases it might be better to extend the server side authentication adapters
+                            instead of overriding the client behaviour. However for the sake of completeness,
+                            this mechanism should be mentioned here.
+                        </para>
+                    </note>
+                </para>
+
+            </sect2>
+
+            <sect2>
+                <title>LoginClient</title>
+                <para>
+                  The LoginClient is the counter part of the SecurityService. It is instructed
+                  by the SecurityService to request the credentials upon demand. This typically happens
+                  when the workspace is initialized, but might also occur later on, when a particular service requires a different role set, then the one assigned initially. We call this elevation.
+                  Similiar to the operating system of your choice that demands administrator priviledges for certain
+                  operations.
+                </para>
+                <para>
+                    After the initial authentication (or lack of) the LoginClient instructs the actual workspace
+                    to assemble the tool sets.
+                </para>
+            </sect2>
+
+            <sect2>
+                <title>History management and perma links</title>
+                <para>
+                    History is build into the workspaces. It's wired to the main navigation and allows
+                    to use the browser navigation to switch between previously selected tools.
+                    In addition to that, the same mechanism can be used to perma link tools from external applications.
+                    I.e. when notifying users via email that contains a link back to a particular tool.
+                </para>
+            </sect2>
+
+            <sect2>
+                <title>Preferences</title>
+                <para>
+
+                </para>
+            </sect2>
+                        
         </sect1>
 
     </chapter>
