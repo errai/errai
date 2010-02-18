@@ -13,6 +13,12 @@
 
   <toc></toc>
 
+     <!---
+        =====================================================
+        INTRODUCTION
+        =====================================================
+    -->
+
   <chapter id="introduction">
     <title>Introduction</title>
 
@@ -88,6 +94,12 @@
     </section>
   </chapter>
 
+     <!---
+        =====================================================
+        INSTALLATION
+        =====================================================
+    -->
+
   <chapter id="installation">
     <title>Installation</title>
 
@@ -148,6 +160,12 @@
     </section>
   </chapter>
 
+     <!---
+        =====================================================
+        BUS
+        =====================================================
+    -->
+
   <chapter id="bus">
     <title>Errai Bus</title>
 
@@ -174,12 +192,20 @@
       API, implications, and more complex cases.</para>
 
       <sect2>
-        <title>The MessageBuilder</title>
+        <title>MessageBuilder and MessageListener API</title>
 
         <para>The MessageBuilder is the heart of the messaging API in
         ErraiBus. It provides a fluent / builder API, that is used for
         constructing messages. All three major message patterns can be
-        constructed from the MessageBuilder.</para>
+        constructed from the MessageBuilder.
+        </para>
+
+          <para>
+              Components that want to receive messages need to implement
+              the MessageCallback interface.
+          </para>
+
+          <para>But before we dive into the details, let look at some use cases first.</para>
       </sect2>
 
       <sect2>
@@ -264,7 +290,14 @@
           </listitem>
         </orderedlist>
 
-        <para></para>
+        <note>
+            <para>
+                On the client side a reference to the bus is obtained
+                through the singleton ErraiBus.get(). On the server side however
+                it's slightly different. Here the <ulink url="http://code.google.com/p/google-guice/">Guice dependency injection</ulink> provides us with
+                a bus reference, as we can see in the next example.
+            </para>
+        </note>
       </sect2>
 
       <sect2>
@@ -280,7 +313,7 @@
 
         private MessageBus bus;
 
-        @Inject
+        @Inject                                         
         public HelloWorldService(MessageBus bus) {
             this.bus = bus;
         }
@@ -862,6 +895,108 @@ errai.async.worker.timeout=5
     </sect1>
   </chapter>
 
+     <!---
+        =====================================================
+        QUICKSTART
+        =====================================================
+    -->
+    <chapter id="workspaces">
+        <title>Errai Workspaces</title>
+
+        <sect1>
+            <title>What is workspaces?</title>
+            <para>
+                ErraiWorkspaces provides a fully managed working UI enviroment for which to deploy your console and tooling.
+                Put more succinctly: we provide you the places. All you need to do is put stuff there.
+            </para>
+
+            <sect2>
+                <title>Basic concepts</title>
+                <para>
+                    It's good to start with an explanation of the basic workspace concepts and terminlogy that
+                    we chose for it.
+                </para>
+                <para>
+                    A workspace, in our term, is basically a collection of tools.
+                    Each tool serves a distinct purpose and can represent anything you like.
+                    The workspace manages the tools (or tool sets) and access to them.
+                    This includes loading and initialization, history, preferences
+                    and authorization amongst other things.
+                    Usually tools rely on the message bus for inter component communication as well as
+                    backend integration. But they are not tight to that. Workspaces makes no assumption
+                    about the implementation of your tool, it merely provides the glue to keep everything together.
+                </para>
+            </sect2>
+
+            <sect2>
+                <title>More then just API</title>
+                <para>
+                    Workspaces goes beyond simple API. It's not just another GWT module.
+                    It was designed to get you started quickly,
+                    without getting in your way. This includes the environment to build, deploy and test
+                    your tools. We've decided to use maven to achieve this achieve this goal.
+                    It allows you to quickly get started (see <link linkend="quickstart">Maven archetype</link>,
+                    but more importantly, maven repositories are used to share tool implementations across workspace assemblies.
+                    This for instance allows you to combine 3rd party tools with you own on a cutom workspace compilation.                    
+                </para>
+            </sect2>
+        </sect1>
+
+
+        <sect1>
+            <title>Workspace API</title>
+            <para>
+                To begin with we'll look at some examples how to declare tool sets
+                and launch them in a workspace. 
+            </para>
+            <sect2>
+                <title>Declaring and implementing tools</title>
+                <para>
+                    Tools are declared through thre @LoadToolSet annotation.
+                    This instructs the workspace to generate all the boiler plate to
+                    hook it up into the workspace. A tool needs to implement the WidgetProvider
+                    interface. It's used by the workspace to instruct the tool to create it's UI widget when needed.
+                    This widget will then be embedded in the workspace.
+  <programlisting>
+@LoadTool(name = "Users", group = "Administration")                          (1)
+public class UserManagement implements WidgetProvider
+{
+
+  public void provideWidget(final ProvisioningCallback callback) {           (2)
+    callback.onSuccess(new UserManagementWidget());
+  }
+
+  class UserManagementWidget extends LayoutPanel                             (3)
+  {
+      [...]
+  }
+}
+  </programlisting>
+                    <orderedlist>
+                        <listitem>
+                            <para>Toolset declaration including the name and group this tool belongs to</para>
+                        </listitem>
+
+                        <listitem>
+                            <para>The WidgetProvider implementation is manadatory.</para>
+                        </listitem>
+
+                        <listitem>
+                            <para>In this example our widget is LayoutPanel with unknown contents.
+                            The implementation is up to you.</para>
+                        </listitem>                        
+                    </orderedlist>
+                </para>
+            </sect2>
+        </sect1>
+    </chapter>
+
+
+    <!---
+        =====================================================
+        QUICKSTART
+        =====================================================
+    -->
   <chapter id="quickstart">
     <title>Appendix A: Quickstart</title>
 
