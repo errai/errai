@@ -2,8 +2,13 @@ package org.jboss.errai.bus.client.api.builder;
 
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.base.ConversationHelper;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
+
+import static org.jboss.errai.bus.client.api.base.ConversationHelper.createConversationService;
+import static org.jboss.errai.bus.client.api.base.ConversationHelper.makeConversational;
 
 /**
  * The <tt>AbstractMessageBuilder</tt> facilitates the building of a message, and ensures that it is created and used
@@ -23,12 +28,21 @@ public class AbstractMessageBuilder {
      * @return the <tt>MessageBuildSubject</tt> with the appropriate fields and functions for the message builder
      */
     public MessageBuildSubject start() {
-        final MessageBuildSendable sendable = new MessageBuildSendable() {
+        final MessageBuildSendableWithReply sendable = new MessageBuildSendableWithReply() {
+            boolean reply = false;
+            public MessageBuildSendable repliesTo(MessageCallback callback) {
+                reply = true;
+                makeConversational(message, callback);
+                return this;
+            }
+
             public void sendNowWith(MessageBus viaThis) {
+                if (reply) createConversationService(viaThis, message);
                 message.sendNowWith(viaThis);
             }
 
             public void sendNowWith(MessageBus viaThis, boolean fireMessageListener) {
+                if (reply) createConversationService(viaThis, message);
                 viaThis.send(message, false);
             }
 
@@ -67,13 +81,13 @@ public class AbstractMessageBuilder {
                 return this;
             }
 
-            public MessageBuildSendable errorsHandledBy(ErrorCallback callback) {
+            public MessageBuildSendableWithReply errorsHandledBy(ErrorCallback callback) {
                 message.errorsCall(callback);
                 return sendable;
 
             }
 
-            public MessageBuildSendable noErrorHandling() {
+            public MessageBuildSendableWithReply noErrorHandling() {
                 return sendable;
             }
 

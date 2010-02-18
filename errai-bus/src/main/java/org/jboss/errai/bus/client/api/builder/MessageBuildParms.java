@@ -60,12 +60,12 @@ public interface MessageBuildParms extends MessageBuild {
      * @param callback - the callback function called if an error occurs
      * @return an instance of <tt>MessageBuildSendable</tt>
      */
-    public MessageBuildSendable errorsHandledBy(ErrorCallback callback);
+    public MessageBuildSendableWithReply errorsHandledBy(ErrorCallback callback);
 
     /**
      * Specifies that the message's errors will not be handled
      *
      * @return an instance of <tt>MessageBuildSendable</tt>
      */
-    public MessageBuildSendable noErrorHandling();
+    public MessageBuildSendableWithReply noErrorHandling();
 }
