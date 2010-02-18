@@ -20,10 +20,10 @@ import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.user.client.ui.*;
-import org.jboss.errai.workspaces.client.api.WSComponent;
-import org.jboss.errai.workspaces.client.api.WidgetCallback;
+import org.jboss.errai.workspaces.client.api.WidgetProvider;
+import org.jboss.errai.workspaces.client.api.ProvisioningCallback;
 
-public class WSLoginPanel implements WSComponent
+public class WSLoginPanel implements WidgetProvider
 {
 
   private TextBox userNameInput = new TextBox();
@@ -99,7 +99,7 @@ public class WSLoginPanel implements WSComponent
     return passwordInput;
   }
 
-  public void getWidget(WidgetCallback callback) {
+  public void provideWidget(ProvisioningCallback callback) {
     callback.onSuccess(this.widget);
   }
 

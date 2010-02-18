@@ -43,7 +43,7 @@ import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.workspaces.client.api.ResourceFactory;
 import org.jboss.errai.workspaces.client.api.Tool;
-import org.jboss.errai.workspaces.client.api.WidgetCallback;
+import org.jboss.errai.workspaces.client.api.ProvisioningCallback;
 import org.jboss.errai.workspaces.client.api.ToolSet;
 import org.jboss.errai.workspaces.client.icons.ErraiImageBundle;
 import org.jboss.errai.workspaces.client.protocols.LayoutCommands;
@@ -276,7 +276,7 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
     /*List<ToolSetRef> result = new ArrayList<ToolSetRef>(this.getWidgetCount());
     for(int i=0; i<this.getWidgetCount(); i++)
     {
-      ToolSetDeck deck = (ToolSetDeck) this.getWidget(i);
+      ToolSetDeck deck = (ToolSetDeck) this.provideWidget(i);
       ToolSet toolSet = deck.toolSet;
       result.add(new ToolSetRef(toolSet.getToolSetName(), editor.getEditorId()));
     } */
@@ -335,7 +335,7 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
     ToolTabPanel(final String toolsetId, final Tool tool) {
       this.toolsetId = toolsetId;
       this.toolId = tool.getId();
-      tool.getWidget(new WidgetCallback()
+      tool.provideWidget(new ProvisioningCallback()
       {
         public void onSuccess(Widget instance)
         {

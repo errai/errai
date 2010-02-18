@@ -23,7 +23,11 @@ package org.jboss.errai.workspaces.client.api;
 
 import com.google.gwt.user.client.ui.Widget;
 
-public interface WidgetCallback
+/**
+ * Used as a callback within a {@link org.jboss.errai.workspaces.client.api.WidgetProvider}
+ * that allows both asynchronous and synchronous widget creation when required. 
+ */
+public interface ProvisioningCallback
 {
   void onSuccess(Widget instance);
   void onUnavailable();

@@ -32,7 +32,7 @@ import org.jboss.errai.workspaces.client.Workspace;
 import org.jboss.errai.workspaces.client.api.ResourceFactory;
 import org.jboss.errai.workspaces.client.api.Tool;
 import org.jboss.errai.workspaces.client.api.ToolSet;
-import org.jboss.errai.workspaces.client.api.WSComponent;
+import org.jboss.errai.workspaces.client.api.WidgetProvider;
 import org.jboss.errai.workspaces.client.icons.ErraiImageBundle;
 
 import java.util.*;
@@ -52,7 +52,7 @@ public class WorkspaceBuilder implements ToolContainer
   protected static List<String> preferredGroupOrdering = new ArrayList<String>();
   protected static int toolCounter = 0;
 
-  public void setLoginComponent(WSComponent loginComponent) {
+  public void setLoginComponent(WidgetProvider loginComponent) {
     //this.loginComponent = loginComponent;
     throw new RuntimeException("Not implemented");
   }
@@ -66,7 +66,7 @@ public class WorkspaceBuilder implements ToolContainer
   }
 
   public void addTool(String group, String name, String icon,
-                      boolean multipleAllowed, int priority, WSComponent component) {
+                      boolean multipleAllowed, int priority, WidgetProvider component) {
     if (!toBeLoadedGroups.containsKey(group)) toBeLoadedGroups.put(group, new ArrayList<ToolProvider>());
 
     final String toolId = createToolId(name);
@@ -104,7 +104,7 @@ public class WorkspaceBuilder implements ToolContainer
   }
 
   public void addTool(String group, String name, String icon,
-                      boolean multipleAllowed, int priority, WSComponent component, final String[] renderIfRoles) {
+                      boolean multipleAllowed, int priority, WidgetProvider component, final String[] renderIfRoles) {
     if (!toBeLoadedGroups.containsKey(group)) toBeLoadedGroups.put(group, new ArrayList<ToolProvider>());
 
     final String toolId = createToolId(name);

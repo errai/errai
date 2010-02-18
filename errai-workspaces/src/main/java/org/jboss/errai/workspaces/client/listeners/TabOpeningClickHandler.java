@@ -27,7 +27,7 @@ import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.workspaces.client.api.Tool;
-import org.jboss.errai.workspaces.client.api.WidgetCallback;
+import org.jboss.errai.workspaces.client.api.ProvisioningCallback;
 import org.jboss.errai.workspaces.client.layout.LayoutHint;
 import org.jboss.errai.workspaces.client.layout.LayoutHintProvider;
 import org.jboss.errai.workspaces.client.protocols.LayoutCommands;
@@ -54,7 +54,7 @@ public class TabOpeningClickHandler implements ClickHandler {
 
           try {
 
-            tool.getWidget(new WidgetCallback()
+            tool.provideWidget(new ProvisioningCallback()
             {
               public void onSuccess(final Widget instance)
               {

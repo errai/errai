@@ -22,19 +22,19 @@
 package org.jboss.errai.workspaces.client.framework;
 
 import org.jboss.errai.workspaces.client.api.ToolSet;
-import org.jboss.errai.workspaces.client.api.WSComponent;
+import org.jboss.errai.workspaces.client.api.WidgetProvider;
 
 public interface ToolContainer
 {
   void addToolSet(ToolSet toolSet);
 
   void addTool(String group, String name, String icon,
-                             boolean multipleAllowed, int priority, WSComponent component);
+                             boolean multipleAllowed, int priority, WidgetProvider component);
 
   void addTool(String group, String name, String icon,
-                                                        boolean multipleAllowed, int priority, WSComponent component, String[] renderIfRoles);
+                                                        boolean multipleAllowed, int priority, WidgetProvider component, String[] renderIfRoles);
 
-  void setLoginComponent(WSComponent loginComponent);
+  void setLoginComponent(WidgetProvider loginComponent);
 
   void setPreferredGroupOrdering(String[] groups);
 

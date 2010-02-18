@@ -17,9 +17,9 @@
 package org.jboss.errai.workspaces.client.framework;
 
 import com.google.gwt.user.client.ui.Image;
+import org.jboss.errai.workspaces.client.api.ProvisioningCallback;
 import org.jboss.errai.workspaces.client.api.Tool;
-import org.jboss.errai.workspaces.client.api.WSComponent;
-import org.jboss.errai.workspaces.client.api.WidgetCallback;
+import org.jboss.errai.workspaces.client.api.WidgetProvider;
 
 public class ToolImpl implements Tool
 {
@@ -27,9 +27,9 @@ public class ToolImpl implements Tool
   private String id;
   private boolean multipleAllowed;
   private Image icon;
-  private WSComponent component;
+  private WidgetProvider component;
 
-  public ToolImpl(String name, String id, boolean multipleAllowed, Image icon, WSComponent component) {
+  public ToolImpl(String name, String id, boolean multipleAllowed, Image icon, WidgetProvider component) {
     this.name = name;
     this.id = id;
     this.multipleAllowed = multipleAllowed;
@@ -53,7 +53,7 @@ public class ToolImpl implements Tool
     return icon;
   }
 
-  public void getWidget(final WidgetCallback callback) {
-    component.getWidget(callback);
-  }  
+  public void provideWidget(final ProvisioningCallback callback) {
+    component.provideWidget(callback);
+  }
 }
