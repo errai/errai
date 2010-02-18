@@ -1025,6 +1025,46 @@ public class Inventory implements WidgetProvider
                     </orderedlist>
                 </para>
             </sect2>
+
+            <sect2>
+                <title>Common coding pattern</title>
+                <para>
+                    It's common to use the WidgetProvider API in a way that <ulink url="http://code.google.com/p/google-web-toolkit/wiki/CodeSplitting">GWT 2.0
+                    code splitting</ulink> can kick in. This allows true lazy loading of tools upon demand,
+                    including all .js and resources necessary to run your tools:
+<programlisting>
+@LoadTool(name = "Group Tasks", group = "Tasks")
+public class OpenTasksModule implements WidgetProvider
+{
+    static OpenTasksView instance = null;
+
+    public void provideWidget(final ProvisioningCallback callback)
+    {
+        GWT.runAsync(
+            new RunAsyncCallback()
+            {
+              public void onFailure(Throwable err)
+              {
+                GWT.log("Failed to load tool", err);
+              }
+
+              public void onSuccess()
+              {
+                if (instance == null) {
+                  instance = new OpenTasksView();  // your tool here
+                }
+                callback.onSuccess(instance);
+              }
+            }
+
+        );
+    }
+}
+
+</programlisting>
+
+                </para>
+            </sect2>
         </sect1>
 
     </chapter>
