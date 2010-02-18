@@ -934,10 +934,10 @@ errai.async.worker.timeout=5
                     Workspaces goes beyond simple API. It's not just another GWT module.
                     It was designed to get you started quickly,
                     without getting in your way. This includes the environment to build, deploy and test
-                    your tools. We've decided to use maven to achieve this achieve this goal.
+                    your tools. We've decided to use maven to provide these capabilities.
                     It allows you to quickly get started (see <link linkend="quickstart">Maven archetype</link>,
                     but more importantly, maven repositories are used to share tool implementations across workspace assemblies.
-                    This for instance allows you to combine 3rd party tools with you own on a cutom workspace compilation.                    
+                    This for instance allows you to combine 3rd party tools with you own as part of a custom workspace compilation.                    
                 </para>
             </sect2>
         </sect1>
@@ -988,7 +988,45 @@ public class UserManagement implements WidgetProvider
                     </orderedlist>
                 </para>
             </sect2>
+
+            <sect2>
+                <title>Authorization and access to tools</title>
+                <para>
+                    Workspaces relies on a authentication scheme similiar to
+                    JAAS. It ships with different authentication modules (i.e. Hibernate, JAAS)
+                    that allow for role based access to tool on the client side and service on the server side.
+<programlisting>
+@LoadTool(name = "Inventory", group = "Administration")                (1)
+@RequireRoles({"admin"})                                               (2)
+public class Inventory implements WidgetProvider
+{
+
+    public void provideWidget(final ProvisioningCallback callback)     (3)
+    {
+        [...]
+    }
+
+}
+
+</programlisting>
+                    <orderedlist>
+                        <listitem>
+                            <para>A tool declaration</para>
+                        </listitem>
+
+                        <listitem>
+                            <para>It restricts access to the role 'admin'</para>
+                        </listitem>
+
+                        <listitem>
+                            <para>Implements the default WidgetProvider interface which will only be invoked
+                            when the principal is authorized to access this tool.</para>
+                        </listitem>
+                    </orderedlist>
+                </para>
+            </sect2>
         </sect1>
+
     </chapter>
 
 
