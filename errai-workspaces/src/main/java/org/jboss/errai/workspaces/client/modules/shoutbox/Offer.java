@@ -187,7 +187,7 @@ class Offer {
         }
     }
 
-    @Override
+
     public String toString() {
         return "Offer{" +
                 "currentState=" + currentState +

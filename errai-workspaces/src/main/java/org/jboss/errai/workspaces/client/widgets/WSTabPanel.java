@@ -112,7 +112,7 @@ public class WSTabPanel extends Composite {
     public void pack() {  
     }
 
-    @Override
+
     public void setPixelSize(int width, int height) {
         super.setPixelSize(width, height);
 
@@ -125,7 +125,7 @@ public class WSTabPanel extends Composite {
 
     }
 
-    @Override
+
     protected void onAttach() {
         super.onAttach();
         layoutPanel.setCellHeight(tabBar, tabBar.getOffsetHeight() + "px");

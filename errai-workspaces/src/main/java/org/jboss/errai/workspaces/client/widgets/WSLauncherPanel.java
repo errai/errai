@@ -47,7 +47,7 @@ public class WSLauncherPanel extends VerticalPanel {
         ErraiCommon.disableTextSelection(getElement(), true);
     }
 
-    @Override
+
     public void onBrowserEvent(Event event) {
         if (!armed) return;
 

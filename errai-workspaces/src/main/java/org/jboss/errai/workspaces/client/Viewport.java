@@ -29,7 +29,7 @@ import org.jboss.errai.workspaces.client.util.LayoutUtil;
 
 public class Viewport extends org.gwt.mosaic.ui.client.Viewport
 {
-  @Override
+  
   public void onResize(ResizeEvent event) {
     super.onResize(event);
     DeferredCommand.addCommand(
@@ -45,7 +45,7 @@ public class Viewport extends org.gwt.mosaic.ui.client.Viewport
              */
 
             Timer layoutHintDelay = new Timer() {
-              @Override
+
               public void run() {
                 LayoutUtil.layoutHints(getLayoutPanel());
               }

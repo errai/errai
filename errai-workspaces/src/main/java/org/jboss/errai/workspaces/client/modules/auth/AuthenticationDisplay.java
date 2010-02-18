@@ -82,7 +82,7 @@ public class AuthenticationDisplay extends LayoutPanel
          * submits the login.
          */
         KeyDownHandler clickOnEnter = new KeyDownHandler() {
-            @Override
+            
             public void onKeyDown(KeyDownEvent event) {
                 if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
                     loginButton.click();
@@ -97,7 +97,7 @@ public class AuthenticationDisplay extends LayoutPanel
          * Close the window immediately upon submission.
          */
         loginButton.addClickHandler(new ClickHandler() {
-            @Override
+
             public void onClick(ClickEvent event) {
                 windowPanel.hide();
             }
@@ -114,7 +114,7 @@ public class AuthenticationDisplay extends LayoutPanel
         });
     }
 
-    @Override
+
     public void showLoginPanel() {
         if (null == windowPanel)
             createLayoutWindowPanel();
@@ -124,42 +124,42 @@ public class AuthenticationDisplay extends LayoutPanel
         windowPanel.center();
     }
 
-    @Override
+
     public void clearPanel() {
         userNameInput.setText("");
         passwordInput.setText("");
     }
 
-    @Override
+
     public void hideLoginPanel() {
         if (windowPanel != null)
             windowPanel.hide();
     }
 
-    @Override
+
     public HasText getUsernameInput() {
         return userNameInput;
     }
 
-    @Override
+
     public HasText getPasswordInput() {
         return passwordInput;
     }
 
-    @Override
+
     public HasClickHandlers getSubmitButton() {
         return loginButton;
     }
 
-    @Override
+
     public HasCloseHandlers getWindowPanel() {
         return windowPanel;
     }
 
-    @Override
+
     public void showWelcomeMessage(final String messageText) {
         Timer t = new Timer() {
-            @Override
+
             public void run() {
                 MessageBox.info("Welcome", messageText);
             }

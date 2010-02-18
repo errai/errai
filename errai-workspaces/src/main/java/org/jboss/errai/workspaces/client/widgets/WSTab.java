@@ -107,7 +107,7 @@ public class WSTab extends Composite {
         sinkEvents(Event.ONMOUSEOVER | Event.ONMOUSEOUT);
     }
 
-    @Override
+
     public String toString() {
         return "WSTab:" + label.getText();
     }

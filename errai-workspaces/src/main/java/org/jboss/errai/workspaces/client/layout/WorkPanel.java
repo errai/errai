@@ -53,7 +53,7 @@ public class
         getElement().getStyle().setProperty("overflow", "scroll");
     }
 
-    @Override
+
     public void setPixelSize(int width, int height) {
         h = (height - titleInternal.getOffsetHeight());
         w = width;
@@ -73,7 +73,7 @@ public class
         return mainPanel.iterator();
     }
 
-    @Override
+
     public boolean remove(Widget child) {
         return mainPanel.remove(child);
     }
@@ -91,17 +91,17 @@ public class
         return h == 0 ? super.getOffsetHeight() - titleInternal.getOffsetHeight() : h;
     }
 
-    @Override
+
     public int getOffsetWidth() {
         return getPanelWidth();
     }
 
-    @Override
+
     public int getOffsetHeight() {
         return getPanelHeight();
     }
 
-    @Override
+
     public void setTitle(String s) {
         titleLabel.setText(s);
     }

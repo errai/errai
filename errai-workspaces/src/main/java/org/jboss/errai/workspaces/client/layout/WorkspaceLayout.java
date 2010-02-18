@@ -148,7 +148,7 @@ public class WorkspaceLayout extends Composite {
         return mainLayoutPanel;
     }
 
-    @Override
+
     protected void onAttach() {
         super.onAttach();
         ErraiBus.get().subscribe(LayoutCommands.RegisterWorkspaceEnvironment.getSubject(),

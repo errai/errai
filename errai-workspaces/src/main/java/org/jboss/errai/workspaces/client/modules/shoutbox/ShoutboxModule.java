@@ -40,7 +40,7 @@ public class ShoutboxModule implements Module
   private List<Offer> offers = new ArrayList<Offer>();
 
 
-  @Override
+
   public void start()
   {
       // listen for control messages
@@ -96,7 +96,7 @@ public class ShoutboxModule implements Module
     );
   }
 
-  @Override
+
   public void stop()
   {
     
