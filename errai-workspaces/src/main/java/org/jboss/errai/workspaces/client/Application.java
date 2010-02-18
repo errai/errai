@@ -32,11 +32,11 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import org.gwt.mosaic.ui.client.layout.BorderLayout;
 import org.gwt.mosaic.ui.client.layout.BorderLayoutData;
-import org.jboss.errai.bus.client.*;
-import org.jboss.errai.bus.client.framework.ClientMessageBus;
+import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.security.SecurityService;
 import org.jboss.errai.workspaces.client.api.ToolSet;
@@ -70,6 +70,8 @@ public class Application implements EntryPoint {
   protected ClientMessageBus bus = (ClientMessageBus) ErraiBus.get();
 
   private static String deferredToken = null;
+
+  private boolean isInitialized = false;
 
   public Application()
   {
@@ -146,6 +148,13 @@ public class Application implements EntryPoint {
 
   private void initializeUI()
   {
+    if(isInitialized)
+    {
+      // TODO: https://jira.jboss.org/jira/browse/ERRAI-39
+      GWT.log("Workspace already initialized", new IllegalArgumentException("Received init call on already bootstrapped workspace"));
+      return;
+    }
+    
     viewport = new Viewport();
 
     mainLayout = new WSLayoutPanel(new BorderLayout());
@@ -189,8 +198,9 @@ public class Application implements EntryPoint {
             // init by preferences
             if(null==initialToolSet)
             {
-              String preferedTool = Preferences.has(Preferences.DEFAULT_TOOL) ?
-                  Workspace.encode(Preferences.get(Preferences.DEFAULT_TOOL)) : null;
+              Preferences prefs = GWT.create(Preferences.class);
+              String preferedTool = prefs.has(Preferences.DEFAULT_TOOL) ?
+                  Workspace.encode(prefs.get(Preferences.DEFAULT_TOOL)) : null;
 
               if(preferedTool!=null && workspace.hasToolSet(preferedTool))
               {
@@ -224,6 +234,8 @@ public class Application implements EntryPoint {
           }
         }
     );
+
+    isInitialized = true;
   }
 
   /**

@@ -53,7 +53,7 @@ public class Menu extends LayoutPanel
 
   public void addLauncher(Widget widget, String toolsetName)
   {
-    toolsetIndex.put(toolsetName, toolsetIndex.size());
+    toolsetIndex.put(Workspace.encode(toolsetName), toolsetIndex.size());
     stack.add(widget, toolsetName);
   }
 
@@ -64,11 +64,11 @@ public class Menu extends LayoutPanel
 
   /**
    * opens a specific menu section
-   * @param toolsetName
+   * @param id a toolset id
    */
-  public void toggle(String toolsetName)
+  public void toggle(String id)
   {
-    stack.showStack(toolsetIndex.get(toolsetName));
+    stack.showStack(toolsetIndex.get(id));
     stack.invalidate();
     stack.layout();
   }

@@ -21,21 +21,37 @@
  */
 package org.jboss.errai.workspaces.client.framework;
 
+import com.google.gwt.user.client.Cookies;
+
+import java.util.Date;
+
 /**
  * Cookie based workspace preferences
  */
-public interface Preferences
+public class CookiePreferences implements Preferences
 {
   // Tool that should be launched at startup
   public static final String DEFAULT_TOOL = "workspace.default.tool";
 
-  public boolean has(String key);
+  public boolean has(String key)
+  {
+    return get(key)!=null;
+  }
 
-  public String get(String key);
+  public String get(String key)
+  {
+    return Cookies.getCookie(key);
+  }
 
-  public void set(String key, String value);
+  public void set(String key, String value)
+  {
+    Date twoWeeks = new Date(System.currentTimeMillis()+(2*604800*1000));
+    Cookies.setCookie(key, value, twoWeeks);
+  }
 
-  public void clear(String key);
-  
+  public void clear(String key)
+  {
+    Cookies.removeCookie(key);
+  }
 }
 

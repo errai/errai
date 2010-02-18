@@ -40,7 +40,7 @@ public class SecurityService {
   public static final String SUBJECT = "AuthenticationListener";
 
   // deferr notification of LoginClient in case
-  // a workspace wants to override the authentication or authorizazion scheme
+  // a workspace wants to override the authentication or authorization scheme
   private boolean deferredNotification;
 
   public SecurityService() {

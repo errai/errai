@@ -17,12 +17,12 @@
 <!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 1.6//EN"
         "http://google-web-toolkit.googlecode.com/svn/releases/1.6/distro-source/core/src/gwt-module.dtd">
 <module>
-    
+
     <inherits name="org.jboss.errai.bus.ErraiBus"/>
     <inherits name="org.jboss.errai.widgets.ErraiWidgets" />
 
     <!-- Inherit Mosaic Web Toolkit stuff.                          -->
-    <inherits name='org.gwt.mosaic.Mosaic' />   
+    <inherits name='org.gwt.mosaic.Mosaic' />
 
     <!-- Includes the public resources used by the GWT Mosaic       -->
     <!-- themes. Those files do not inject a style sheet into the   -->
@@ -39,16 +39,20 @@
     <inherits name="org.gwt.mosaic.theme.chrome.Chrome" />
     <!-- <inherits name="org.gwt.mosaic.dark.Dark"/>                -->
     <!--inherits name='org.gwt.mosaic.theme.aegean.Aegean' /-->
-   
+
     <generate-with class="org.jboss.errai.workspaces.rebind.WorkspaceLoaderBootstrapGenerator">
         <when-type-assignable
                 class="org.jboss.errai.workspaces.client.framework.WorkspaceConfig"/>
     </generate-with>
 
-     <generate-with class="org.jboss.errai.workspaces.rebind.ResourceFactoryGenerator">
+    <generate-with class="org.jboss.errai.workspaces.rebind.ResourceFactoryGenerator">
         <when-type-assignable
                 class="org.jboss.errai.workspaces.client.api.ResourceFactory"/>
     </generate-with>
+
+    <replace-with class="org.jboss.errai.workspaces.client.framework.CookiePreferences">
+        <when-type-is class="org.jboss.errai.workspaces.client.framework.Preferences"/>
+    </replace-with>
 
     <!-- Specify the app entry point class.                   -->
     <stylesheet src="workspace.css"/>
