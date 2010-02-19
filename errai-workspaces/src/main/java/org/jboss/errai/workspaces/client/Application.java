@@ -81,6 +81,7 @@ public class Application implements EntryPoint {
     // global service registry
     Registry.set(SecurityService.class, securityService);
     Registry.set(AuthenticationModule.class, authenticationModule);
+    Registry.set(Preferences.class, GWT.create(Preferences.class));
   }
 
   public void onModuleLoad()
