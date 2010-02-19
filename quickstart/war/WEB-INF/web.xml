@@ -15,7 +15,7 @@
         <url-pattern>*.erraiBus</url-pattern>
     </servlet-mapping>
 
-    <context-param>
+     <context-param>
         <param-name>errai.properties</param-name>
         <param-value>/WEB-INF/errai.properties</param-value>
     </context-param>
@@ -29,5 +29,5 @@
         <param-name>users.properties</param-name>
         <param-value>/WEB-INF/users.properties</param-value>
     </context-param>
-
+    
 </web-app>
