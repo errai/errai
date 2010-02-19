@@ -6,9 +6,12 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.RootPanel;
 import org.jboss.errai.bus.client.ErraiBus;
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.framework.MessageBus;
 
 import static org.jboss.errai.bus.client.api.base.MessageBuilder.createMessage;
@@ -35,6 +38,11 @@ public class HelloWorld implements EntryPoint {
                 createMessage()
                         .toSubject("HelloWorld")
                         .signalling().noErrorHandling()
+                        .repliesTo(new MessageCallback() {
+                            public void callback(Message message) {
+                                Window.alert(message.get(String.class, "Text"));
+                            }
+                        })
                         .sendNowWith(bus);
 
                 numMesages++;
@@ -43,13 +51,7 @@ public class HelloWorld implements EntryPoint {
             }
         });
 
-        History.addValueChangeHandler(
-                new ValueChangeHandler<String>() {
-                    public void onValueChange(ValueChangeEvent<String> event) {
-                        System.out.println("-> " + event.getValue());
-                    }
-                }
-        );
+
         /**
          * Just add the button to the RootPanel in the DOM.
          */

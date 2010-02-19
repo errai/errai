@@ -13,6 +13,12 @@ public enum RoutingFlags {
         @Override
         public int flag() {
             return 1 << 1;
+        }},
+
+    Conversational {
+        @Override
+        public int flag() {
+            return 1 << 2;
         }}
     ;
 
