@@ -7,19 +7,8 @@ import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.server.annotations.Service;
 
-@Service("HelloWorld")
+@Service
 public class HelloWorld implements MessageCallback {
-    private MessageBus bus;
-
-    @Inject
-    public HelloWorld(MessageBus bus) {
-        this.bus = bus;
-    }
-
     public void callback(Message message) {
-        MessageBuilder.createConversation(message)
-                .subjectProvided().signalling()
-                .with("Text", "Hello, World")
-                .noErrorHandling().sendNowWith(bus);
     }
 }
