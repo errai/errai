@@ -120,7 +120,8 @@
               Apache Maven: <ulink url="http://maven.apache.org/download.html">http://maven.apache.org/download.html</ulink>
               </para>
           </listitem>
-        </itemizedlist> <blockquote>
+        </itemizedlist>
+        <note>
           <title>Launching maven the first time</title>
 
           <para>Please note, that when launching maven the first time on your
@@ -128,7 +129,8 @@
           This may take a while, because it includes downloading large
           binaries like GWT SDK. However subsequent builds are not required to
           go through this step and will be much faster.</para>
-        </blockquote></para>
+        </note>
+      </para>
     </section>
 
     <section id="thedistribution">
@@ -141,7 +143,7 @@
       <itemizedlist>
         <listitem>
             <para>
-          <filename>doc</filename>: User guide, javadocs and developers guide
+          <filename>doc</filename>: User guide and javadocs 
             </para>
         </listitem>
 
@@ -790,7 +792,7 @@ public class User implements java.io.Serializable {
 &lt;/web-app&gt;</programlisting>
       </sect2>
 
-      <sect2>
+      <sect2 id="bus-config">
         <title>ErraiService.properties</title>
 
         <para>The ErraiService.properties file contains basic configuration
@@ -1074,7 +1076,7 @@ public class OpenTasksModule implements WidgetProvider
         </sect1>
 
         <sect1>
-            <title>Building Blocks</title>
+            <title>Core features</title>
             <para>
                 The workspace itself doesn't require any attention apart from the
                 common API that is decribed in the chapter <link linkend="workspace-api">"Workspace API"</link>.
@@ -1087,8 +1089,12 @@ public class OpenTasksModule implements WidgetProvider
                 <title>Workspace Registry</title>
                 <para>
                     The workspace registry (org.jboss.errai.workspaces.client.framework.Registry)
-                    is a simple all purpose lookup for common workspace API that should be available
-                    to any workspace component. 
+                    is a simple all purpose lookup for common workspace API that is available
+                    to any workspace component:
+<programlisting>
+AuthenticationContext authenticationContext =
+    Registry.get(SecurityService.class).getAuthenticationContext();    
+</programlisting>
                 </para>
             </sect2>
             <sect2>
@@ -1148,22 +1154,163 @@ public class OpenTasksModule implements WidgetProvider
             <sect2>
                 <title>History management and perma links</title>
                 <para>
-                    History is build into the workspaces. It's wired to the main navigation and allows
+                    History is build into the workspace. It's wired to the main navigation and allows
                     to use the browser navigation to switch between previously selected tools.
                     In addition to that, the same mechanism can be used to perma link tools from external applications.
-                    I.e. when notifying users via email that contains a link back to a particular tool.
+                    I.e. when notifying users, using an email that contains a link back to a particular tool.
                 </para>
             </sect2>
 
             <sect2>
                 <title>Preferences</title>
                 <para>
-
+                    The workspace allows you to store simple key-value pairs as preferences.
+                    Like with other common API, you obtain the Preferences through the <link linkend="workspace-registry">workspace Registry</link>.
+                    The default implementation uses a cookie based approach, but it's easy to replace that one with a custom
+                    implementation in the module decriptor:
+<programlisting>
+    <![CDATA[
+   <module>
+    [...]
+    <replace-with class="org.jboss.errai.workspaces.client.framework.CookiePreferences">
+           <when-type-is class="org.jboss.errai.workspaces.client.framework.Preferences"/>
+       </replace-with>
+    </module>
+    ]]>
+</programlisting>
                 </para>
             </sect2>
                         
         </sect1>
 
+        <sect1 id="using-workspaces">
+            <title>Building a workspaces application</title>
+            <para>
+                In this section we go through the steps necessary to create
+                a workspace application. As mentioned before, workspaces is more then just another GWT library.
+                It's intended to get you started quickly. This includes GWT installation,
+                creating a build environment and prepapring your IDE.  
+            </para>
+
+            <sect2>
+                <title>Check the prerequisites</title>
+                <para>
+                    You need <ulink url="http://maven.apache.org">Apache Maven</ulink> and a <ulink url="http://java.sun.com/javase/downloads/index.jsp">JDK</ulink> to get started.
+                </para>
+            </sect2>
+
+            <sect2>
+                <title>Setup a build environent</title>
+                <para>
+                    The most simple (and least error prone) way to get started
+                    is using the maven archetype that we ship as part of errai.
+                    Simply follow the instructions in the <link linkend="quickstart">quickstart</link>
+                    section and return here when you are done.
+                </para>
+
+                <para>
+                   Once you've created a project using the maven archetype, make yourself familiar with
+                   the directory structure:
+<programlisting>
+Laika:gwt-app hbraun$ lstree
+| pom.xml    
+|-src
+|---main
+|-----java
+|-------foo
+|---------bar
+|-----------client
+|-----------server
+|-war
+|---WEB-INF
+</programlisting>
+                    It basically follows the default GWT guidelines for breaking up code between client and server.
+                    Simply put tools (@LoadToolSet) into the client subpackage and services (@Service) into the server subpackages.
+                    Make sure you are familiar with the <link linkend="workspace-api">Workspace API</link> before you continue.
+                </para>
+            </sect2>
+            <sect2>
+                <title>Verify the application configuration</title>
+                <para>
+                    Several configuration files drive a workspace build and the
+                    final application. Make sure to include all of them when porting
+                    the archetype example to a different GWT application:
+
+<programlisting>
+ ./src/main/java/ErraiApp.properties
+ ./src/main/java/ErraiService.properties
+ ./src/main/java/my/app/App.gwt.xml   
+</programlisting>
+                    <orderedlist>
+                        <listitem>
+                            <para>
+                              ErraiApp.properties is a simple marker, that is required
+                              for the annotation processing to discover your modules.
+                              This is especially important when you declare maven dependencies
+                              on tool or service implementations. Make sure that any classpath entry
+                              (i.e. dependency jar) contains an ErraiApp.properties file.
+                              Otherwise errai might not be able to discover your components.
+                            </para>
+                        </listitem>
+
+                        <listitem>
+                            <para>
+                              ErraiService.properties is the primary bus configuration.
+                              Details can be found in the chapter <link linkend="bus-config">bus configuration.</link>
+                            </para>
+                        </listitem>
+
+                        <listitem>
+                            <para>
+                              App.gwt.xml is your applications <ulink url="http://code.google.com/webtoolkit/doc/latest/DevGuideOrganizingProjects.html#DevGuideModules">module descriptor</ulink>.
+<programlisting>
+ <![CDATA[
+<module rename-to="app">
+ <inherits name='com.google.gwt.user.User'/>
+ <inherits name="com.google.gwt.uibinder.UiBinder"/>
+ <inherits name="com.google.gwt.resources.Resources" />
+
+ <inherits name="org.jboss.errai.common.ErraiCommon"/>
+ <inherits name="org.jboss.errai.bus.ErraiBus"/>
+ <inherits name="org.jboss.errai.workspaces.ErraiWorkspaces" />
+ 
+ <entry-point class='my.app.client.HelloWorldClient'/>
+
+</module>
+]]>    
+</programlisting>
+                                If you are building on workspaces make sure to include it's dependencies common and bus as well.
+                            </para>
+                        </listitem>
+                    </orderedlist>
+
+                </para>
+            </sect2>
+
+            <sect2>
+                <title>Launch the hosted mode and start developing</title>
+                <para>
+                    If you followed the steps above, and did build your application stub using
+                    the maven archetype, then you should be launch the <ulink url="http://code.google.com/webtoolkit/doc/latest/DevGuideCompilingAndDebugging.html#DevGuideDevMode">GWT hosted mode</ulink> with the following commands:
+<programlisting>
+  mvn gwt:run
+
+ (alternatively)   
+  mvn gwt:debug
+</programlisting>
+
+                    <note>
+                        <title>Launching maven the first time</title>
+
+                        <para>Please note, that when launching maven the first time on your
+                            machine, it will fetch all dependecies from a central repository.
+                            This may take a while, because it includes downloading large
+                            binaries like GWT SDK. However subsequent builds are not required to
+                            go through this step and will be much faster.</para>
+                    </note>
+                </para>
+            </sect2>
+        </sect1>
     </chapter>
 
 
