@@ -18,6 +18,8 @@ before reading any further:
 
 [Contents of this distribution]
 
+    |-doc
+    |---userguide
     |-examples
     |---clientservice
     |---helloworld
@@ -30,8 +32,7 @@ The examples document the core features that currently ship with Errai:
     - clientservice: a message broadcast example
     - helloworld: everyone has to have one
     - queryservice: using a request/response pattern across the bus
-    - serialization: sending pojo's over the bus
-
+    - serialization: sending pojo's over the bus 
 
 [Running the examples]
 
@@ -45,27 +46,6 @@ application using any web browser available on your system.
 
 Alternatively you can import the example in your IDE
 (simply import the maven structure) and launch them using your IDE GWT plugin.
-
-
-[Quickstart]
-
-In order to get you started quickly, we've included a mavena archetype
-that creates a project structure similar to the examples:
-
-    mvn archetype:generate \
-	-DarchetypeGroupId=org.jboss.errai \
-	-DarchetypeArtifactId=sandbox-archetype \
-	-DarchetypeVersion=1.0-SNAPSHOT \
-	-DarchetypeRepository=http://snapshots.jboss.org/maven2
-
-Run it in a directory of your choice and create a bare bone Errai project
-within minutes.
-
-
-[Documentation & Userguide]
-
-This is still work in progress. In the meantime you can find the most
-up to date documentation on the Errai website: http://jboss.org/errai
 
 [Troubleshooting]
 

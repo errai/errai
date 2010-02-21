@@ -25,9 +25,9 @@
                 <!-- Errai Libraries -->
                 <include>org.jboss.errai:errai-common</include>
                 <include>org.jboss.errai:errai-bus</include>
-                <!--include>org.jboss.errai:errai-workspaces</include>
+                <include>org.jboss.errai:errai-workspaces</include>
                 <include>org.jboss.errai:errai-widgets</include>
-                <include>org.jboss.errai:errai-persistence</include-->
+                <!--include>org.jboss.errai:errai-persistence</include-->
 
                 <!-- 3rd Party -->
                 <include>com.google.code.guice:guice</include>
@@ -52,13 +52,13 @@
             <directory>contents/</directory>
             <outputDirectory>/</outputDirectory>            
         </fileSet>
-        <!--<fileSet>-->
-            <!--<directory>../userguide/target/docbook/publish/en</directory>-->
-            <!--<outputDirectory>doc/userguide</outputDirectory>-->
-            <!--<excludes>-->
-                <!--<exclude>**/*.fo</exclude>-->
-            <!--</excludes>-->
-        <!--</fileSet>-->
+        <fileSet>
+            <directory>../userguide/target/docbook/publish/en</directory>
+            <outputDirectory>doc/userguide</outputDirectory>
+            <excludes>
+                <exclude>**/*.fo</exclude>
+            </excludes>
+        </fileSet>
         <fileSet>
             <directory>../errai-bus-demos/</directory>
             <outputDirectory>examples/</outputDirectory>
