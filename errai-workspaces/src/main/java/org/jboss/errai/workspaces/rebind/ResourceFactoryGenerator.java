@@ -115,7 +115,7 @@ public class ResourceFactoryGenerator extends Generator {
         new RebindVisitor()
         {
           public void visit(Class<?> clazz, GeneratorContext context, TreeLogger logger, SourceWriter writer)
-          {
+          {           
             if (clazz.isAnnotationPresent(DefaultBundle.class)) {
               bundleClass = clazz.getAnnotation(DefaultBundle.class).value();
             }
@@ -129,6 +129,8 @@ public class ResourceFactoryGenerator extends Generator {
         }
     );
 
+    if(null==bundleClass)
+        throw new IllegalArgumentException("@DefaultBundle not found. Make sure the EntryPoint refers to a valid default resource bundle.");
 
     // generator constructor source code
     generateFactoryClass(context, logger, sourceWriter);
