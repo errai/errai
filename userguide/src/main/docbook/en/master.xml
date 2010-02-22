@@ -13,7 +13,7 @@
 
   <toc></toc>
 
-     <!---
+  <!---
         =====================================================
         INTRODUCTION
         =====================================================
@@ -43,21 +43,16 @@
     <section>
       <title>Downloads</title>
 
-      <para>The distribution packages can be downloaded from jboss.org
-
-      <ulink url="http://jboss.org/errai/Downloads.html">http://jboss.org/errai/Downloads.html</ulink>
-        </para>
+      <para>The distribution packages can be downloaded from jboss.org <ulink
+      url="http://jboss.org/errai/Downloads.html">http://jboss.org/errai/Downloads.html</ulink></para>
     </section>
 
     <section>
       <title>Sources</title>
 
       <para>The source code for this component can be found in the Errai SVN
-      repository:
-
-      <ulink
-      url="http://anonsvn.jboss.org/repos/errai/trunk/">https://anonsvn.jboss.org/repos/errai/trunk/</ulink>
-        </para>
+      repository: <ulink
+      url="http://anonsvn.jboss.org/repos/errai/trunk/">https://anonsvn.jboss.org/repos/errai/trunk/</ulink></para>
     </section>
 
     <section>
@@ -66,35 +61,29 @@
       <para>If you run into trouble don't hesitate to get in touch with us:
       <itemizedlist>
           <listitem>
-            <para>JIRA Issue Tracking: <ulink url="https://jira.jboss.org/jira/browse/ERRAI">https://jira.jboss.org/jira/browse/ERRAI </ulink></para>
+            <para>JIRA Issue Tracking: <ulink
+            url="https://jira.jboss.org/jira/browse/ERRAI">https://jira.jboss.org/jira/browse/ERRAI
+            </ulink></para>
           </listitem>
 
           <listitem>
-              <para>
-              User Forum:
-
-            <ulink url="http://www.jboss.org/index.html?module=bb&amp;op=viewforum&amp;f=295">http://www.jboss.org/index.html?module=bb&amp;op=viewforum&amp;f=295</ulink>
-              </para>
+            <para>User Forum: <ulink
+            url="http://www.jboss.org/index.html?module=bb&amp;op=viewforum&amp;f=295">http://www.jboss.org/index.html?module=bb&amp;op=viewforum&amp;f=295</ulink></para>
           </listitem>
 
           <listitem>
-              <para>
-              Mailing List:
-
-            <ulink url="http://jboss.org/errai/MailingLists.html">http://jboss.org/errai/MailingLists.html</ulink>
-              </para>
+            <para>Mailing List: <ulink
+            url="http://jboss.org/errai/MailingLists.html">http://jboss.org/errai/MailingLists.html</ulink></para>
           </listitem>
 
           <listitem>
-              <para>
-              IRC: irc://irc.freenode.net/errai
-              </para>
+            <para>IRC: irc://irc.freenode.net/errai</para>
           </listitem>
         </itemizedlist></para>
     </section>
   </chapter>
 
-     <!---
+  <!---
         =====================================================
         INSTALLATION
         =====================================================
@@ -110,18 +99,15 @@
       Maven to build and run the examples, and for leverging the quickstart
       utilities. <itemizedlist>
           <listitem>
-              <para>
-              JDK 5: <ulink url="http://java.sun.com/javase/downloads/index.jsp">http://java.sun.com/javase/downloads/index.jsp</ulink>
-              </para>
+            <para>JDK 5: <ulink
+            url="http://java.sun.com/javase/downloads/index.jsp">http://java.sun.com/javase/downloads/index.jsp</ulink></para>
           </listitem>
 
           <listitem>
-              <para>
-              Apache Maven: <ulink url="http://maven.apache.org/download.html">http://maven.apache.org/download.html</ulink>
-              </para>
+            <para>Apache Maven: <ulink
+            url="http://maven.apache.org/download.html">http://maven.apache.org/download.html</ulink></para>
           </listitem>
-        </itemizedlist>
-        <note>
+        </itemizedlist> <note>
           <title>Launching maven the first time</title>
 
           <para>Please note, that when launching maven the first time on your
@@ -129,8 +115,7 @@
           This may take a while, because it includes downloading large
           binaries like GWT SDK. However subsequent builds are not required to
           go through this step and will be much faster.</para>
-        </note>
-      </para>
+        </note></para>
     </section>
 
     <section id="thedistribution">
@@ -142,27 +127,22 @@
 
       <itemizedlist>
         <listitem>
-            <para>
-          <filename>doc</filename>: User guide and javadocs 
-            </para>
+          <para><filename>doc</filename>: User guide and javadocs</para>
         </listitem>
 
         <listitem>
-            <para>
-          <filename>examples</filename>: Examples that are used in the user guide
-            </para>
+          <para><filename>examples</filename>: Examples that are used in the
+          user guide</para>
         </listitem>
 
         <listitem>
-            <para>
-          <filename>lib</filename>: Required libraries
-            </para>
+          <para><filename>lib</filename>: Required libraries</para>
         </listitem>
       </itemizedlist>
     </section>
   </chapter>
 
-     <!---
+  <!---
         =====================================================
         BUS
         =====================================================
@@ -199,15 +179,13 @@
         <para>The MessageBuilder is the heart of the messaging API in
         ErraiBus. It provides a fluent / builder API, that is used for
         constructing messages. All three major message patterns can be
-        constructed from the MessageBuilder.
-        </para>
+        constructed from the MessageBuilder.</para>
 
-          <para>
-              Components that want to receive messages need to implement
-              the MessageCallback interface.
-          </para>
+        <para>Components that want to receive messages need to implement the
+        MessageCallback interface.</para>
 
-          <para>But before we dive into the details, let look at some use cases first.</para>
+        <para>But before we dive into the details, let look at some use cases
+        first.</para>
       </sect2>
 
       <sect2>
@@ -218,7 +196,7 @@
         Implementing a receiver (also referred to as a service) is as simple
         as implementing our standard MessageCallback interface, which is used
         pervasively across, both client and server code. Let's begin with
-        server side component that receives messages: </para>
+        server side component that receives messages:</para>
 
         <programlisting>   @Service
     public class HelloWorldService implements MessageCallback {
@@ -293,12 +271,12 @@
         </orderedlist>
 
         <note>
-            <para>
-                On the client side a reference to the bus is obtained
-                through the singleton ErraiBus.get(). On the server side however
-                it's slightly different. Here the <ulink url="http://code.google.com/p/google-guice/">Guice dependency injection</ulink> provides us with
-                a bus reference, as we can see in the next example.
-            </para>
+          <para>On the client side a reference to the bus is obtained through
+          the singleton ErraiBus.get(). On the server side however it's
+          slightly different. Here the <ulink
+          url="http://code.google.com/p/google-guice/">Guice dependency
+          injection</ulink> provides us with a bus reference, as we can see in
+          the next example.</para>
         </note>
       </sect2>
 
@@ -307,8 +285,8 @@
 
         <para>In the following example we extend our server side component to
         reply with a message when the callback method is invoked. It will
-        create a message and address it to the subject 'HelloWorldClient':
-        </para>
+        create a message and address it to the subject
+        'HelloWorldClient':</para>
 
         <programlisting>    @Service
     public class HelloWorldService implements MessageCallback {
@@ -438,7 +416,34 @@
         <filename>createConversation() </filename>method with
         <filename>MessageBuilder</filename>.</para>
 
-        <para></para>
+        <sect3>
+          <title>Single-Response Conversations</title>
+
+          <para>It is possible to contruct a message and a default response
+          handler as part of the MessageBuilder API. It should be noted, that
+          multiple replies will not be possible and will result an exception
+          if attempted. Using this aspect of the API is very useful for doing
+          simple psuedo-synchronous conversive things.</para>
+
+          <para>You can do this by specifying a
+          <literal>MessageCallback</literal> using the
+          <literal>repliesTo()</literal> method in the
+          <literal>MessageBuilder</literal> API after specifying the error
+          handling of the message.</para>
+
+          <programlisting>MessageBuilder.createMessage()
+      .toSubject("ConversationalService").signalling()
+      .with("SomeField", someValue)
+      .noErrorHandling()
+      .repliesTo(new MessageCallback() {
+           public void callback(Message message) {
+               System.out.println("I received a response");
+           }
+      })</programlisting>
+
+          <para>See the next section on how to build conversational services
+          that can respond to such messages. </para>
+        </sect3>
 
         <sect3>
           <title>Sender Inferred Subjects</title>
@@ -720,11 +725,10 @@ public class User implements java.io.Serializable {
       </programlisting>
 
       <note>
-          <para>
-          All exposed entities must follow the <ulink url="http://en.wikipedia.org/wiki/JavaBean">java bean convention</ulink>              
-        </para>
+        <para>All exposed entities must follow the <ulink
+        url="http://en.wikipedia.org/wiki/JavaBean">java bean
+        convention</ulink></para>
       </note>
-        
     </sect1>
 
     <sect1 id="wiring">
@@ -853,7 +857,7 @@ errai.async.worker.timeout=5
 
           <para>Specifies the total number of worker threads in the worker
           pool for handling and delivering messages. Adjusting this value does
-          not have an effect if you are using the SimpleDispatcher.</para>
+          not have any effect if you are using the SimpleDispatcher.</para>
         </sect3>
 
         <sect3>
@@ -897,75 +901,73 @@ errai.async.worker.timeout=5
     </sect1>
   </chapter>
 
-     <!---
+  <!---
         =====================================================
         QUICKSTART
         =====================================================
     -->
-    <chapter id="workspaces">
-        <title>Errai Workspaces</title>
 
-        <sect1>
-            <title>What is workspaces?</title>
-            <para>
-                ErraiWorkspaces provides a fully managed working UI enviroment for which to deploy your console and tooling.
-                Put more succinctly: we provide you the places. All you need to do is put stuff there.
-            </para>
+  <chapter id="workspaces">
+    <title>Errai Workspaces</title>
 
-            <sect2>
-                <title>Basic concepts</title>
-                <para>
-                    It's good to start with an explanation of the basic workspace concepts and terminlogy that
-                    we chose for it.
-                </para>
-                <para>
-                    A workspace, in our term, is basically a collection of tools.
-                    Each tool serves a distinct purpose and can represent anything you like.
-                    The workspace manages the tools (or tool sets) and access to them.
-                    This includes loading and initialization, history, preferences
-                    and authorization amongst other things.
-                    Usually tools rely on the message bus for inter component communication as well as
-                    backend integration. But they are not tight to that. Workspaces makes no assumption
-                    about the implementation of your tool, it merely provides the glue to keep everything together.
-                </para>
-            </sect2>
+    <sect1>
+      <title>What is workspaces?</title>
 
-            <sect2>
-                <title>Sandbox</title>
-                <para>
-                    Workspaces goes beyond simple API. It's not just another GWT module.
-                    It was designed to get you started quickly,
-                    without getting in your way. This includes the environment to build, deploy and test
-                    your tools. We've decided to use maven to provide these capabilities.
-                    It allows you to quickly get started (see <link linkend="quickstart">Maven archetype</link>),
-                    but more importantly, maven repositories are used to share tool implementations across workspace assemblies.
-                    This way you can easily combine your own and 3rd party tools as part of a custom workspace compilation.
-                    <note>
-                        <para>
-                           The GWT SDK is already part of the sandbox bootstrap.
-                           You get everything to get going within minutes: GWT, Errai and 3rd party libraries. 
-                        </para>
-                    </note>
-                </para>
-            </sect2>
-        </sect1>
+      <para>ErraiWorkspaces provides a fully managed working UI enviroment for
+      which to deploy your console and tooling. Put more succinctly: we
+      provide you the places. All you need to do is put stuff there.</para>
 
+      <sect2>
+        <title>Basic concepts</title>
 
-        <sect1 id="workspace-api">
-            <title>Workspace API</title>
-            <para>
-                To begin with, we'll look at some examples how to declare tool sets
-                and launch them in a workspace. 
-            </para>
-            <sect2>
-                <title>Declaring and implementing tools</title>
-                <para>
-                    Tools are declared through the @LoadToolSet annotation.
-                    This instructs the workspace to generate all the boiler plate to
-                    wire your tools with the workspace. A tool needs to implement the WidgetProvider
-                    interface. It's used by the workspace to instruct the tool to create it's UI widget when needed.
-                    This widget will then be embedded in the workspace.
-  <programlisting>
+        <para>It's good to start with an explanation of the basic workspace
+        concepts and terminlogy that we chose for it.</para>
+
+        <para>A workspace, in our term, is basically a collection of tools.
+        Each tool serves a distinct purpose and can represent anything you
+        like. The workspace manages the tools (or tool sets) and access to
+        them. This includes loading and initialization, history, preferences
+        and authorization amongst other things. Usually tools rely on the
+        message bus for inter component communication as well as backend
+        integration. But they are not tight to that. Workspaces makes no
+        assumption about the implementation of your tool, it merely provides
+        the glue to keep everything together.</para>
+      </sect2>
+
+      <sect2>
+        <title>Sandbox</title>
+
+        <para>Workspaces goes beyond simple API. It's not just another GWT
+        module. It was designed to get you started quickly, without getting in
+        your way. This includes the environment to build, deploy and test your
+        tools. We've decided to use maven to provide these capabilities. It
+        allows you to quickly get started (see <link
+        linkend="quickstart">Maven archetype</link>), but more importantly,
+        maven repositories are used to share tool implementations across
+        workspace assemblies. This way you can easily combine your own and 3rd
+        party tools as part of a custom workspace compilation. <note>
+            <para>The GWT SDK is already part of the sandbox bootstrap. You
+            get everything to get going within minutes: GWT, Errai and 3rd
+            party libraries.</para>
+          </note></para>
+      </sect2>
+    </sect1>
+
+    <sect1 id="workspace-api">
+      <title>Workspace API</title>
+
+      <para>To begin with, we'll look at some examples how to declare tool
+      sets and launch them in a workspace.</para>
+
+      <sect2>
+        <title>Declaring and implementing tools</title>
+
+        <para>Tools are declared through the @LoadToolSet annotation. This
+        instructs the workspace to generate all the boiler plate to wire your
+        tools with the workspace. A tool needs to implement the WidgetProvider
+        interface. It's used by the workspace to instruct the tool to create
+        it's UI widget when needed. This widget will then be embedded in the
+        workspace. <programlisting>
 @LoadTool(name = "Users", group = "Administration")                          (1)
 public class UserManagement implements WidgetProvider
 {
@@ -979,31 +981,30 @@ public class UserManagement implements WidgetProvider
       [...]
   }
 }
-  </programlisting>
-                    <orderedlist>
-                        <listitem>
-                            <para>Toolset declaration including the name and group this tool belongs to</para>
-                        </listitem>
+  </programlisting> <orderedlist>
+            <listitem>
+              <para>Toolset declaration including the name and group this tool
+              belongs to</para>
+            </listitem>
 
-                        <listitem>
-                            <para>The WidgetProvider implementation is manadatory.</para>
-                        </listitem>
+            <listitem>
+              <para>The WidgetProvider implementation is manadatory.</para>
+            </listitem>
 
-                        <listitem>
-                            <para>In this example our widget is LayoutPanel with unknown contents.
-                            The implementation is up to you.</para>
-                        </listitem>                        
-                    </orderedlist>
-                </para>
-            </sect2>
+            <listitem>
+              <para>In this example our widget is LayoutPanel with unknown
+              contents. The implementation is up to you.</para>
+            </listitem>
+          </orderedlist></para>
+      </sect2>
 
-            <sect2 id="rolebased">
-                <title>Authorization and access to tools</title>
-                <para>
-                    Workspaces relies on a authentication scheme similiar to
-                    JAAS. It ships with different authentication modules (i.e. Hibernate, JAAS)
-                    that enable role based access to tools on the client side and services on the server side.
-<programlisting>
+      <sect2 id="rolebased">
+        <title>Authorization and access to tools</title>
+
+        <para>Workspaces relies on a authentication scheme similiar to JAAS.
+        It ships with different authentication modules (i.e. Hibernate, JAAS)
+        that enable role based access to tools on the client side and services
+        on the server side. <programlisting>
 @LoadTool(name = "Inventory", group = "Administration")                (1)
 @RequireRoles({"admin"})                                               (2)
 public class Inventory implements WidgetProvider
@@ -1016,31 +1017,31 @@ public class Inventory implements WidgetProvider
 
 }
 
-</programlisting>
-                    <orderedlist>
-                        <listitem>
-                            <para>A tool declaration</para>
-                        </listitem>
+</programlisting> <orderedlist>
+            <listitem>
+              <para>A tool declaration</para>
+            </listitem>
 
-                        <listitem>
-                            <para>It restricts access to the role 'admin'</para>
-                        </listitem>
+            <listitem>
+              <para>It restricts access to the role 'admin'</para>
+            </listitem>
 
-                        <listitem>
-                            <para>Implements the default WidgetProvider interface which will only be invoked
-                            when the principal is authorized to access this tool.</para>
-                        </listitem>
-                    </orderedlist>
-                </para>
-            </sect2>
+            <listitem>
+              <para>Implements the default WidgetProvider interface which will
+              only be invoked when the principal is authorized to access this
+              tool.</para>
+            </listitem>
+          </orderedlist></para>
+      </sect2>
 
-            <sect2>
-                <title>Common coding pattern</title>
-                <para>
-                    It's common to use the WidgetProvider API in a way that <ulink url="http://code.google.com/p/google-web-toolkit/wiki/CodeSplitting">GWT 2.0
-                    code splitting</ulink> can kick in. This allows true lazy loading of tools upon demand,
-                    including all .js and resources necessary to run your tools:
-<programlisting>
+      <sect2>
+        <title>Common coding pattern</title>
+
+        <para>It's common to use the WidgetProvider API in a way that <ulink
+        url="http://code.google.com/p/google-web-toolkit/wiki/CodeSplitting">GWT
+        2.0 code splitting</ulink> can kick in. This allows true lazy loading
+        of tools upon demand, including all .js and resources necessary to run
+        your tools: <programlisting>
 @LoadTool(name = "Group Tasks", group = "Tasks")
 public class OpenTasksModule implements WidgetProvider
 {
@@ -1069,149 +1070,142 @@ public class OpenTasksModule implements WidgetProvider
     }
 }
 
-</programlisting>
+</programlisting></para>
+      </sect2>
+    </sect1>
 
-                </para>
-            </sect2>
-        </sect1>
+    <sect1>
+      <title>Core features</title>
 
-        <sect1>
-            <title>Core features</title>
-            <para>
-                The workspace itself doesn't require any attention apart from the
-                common API that is decribed in the chapter <link linkend="workspace-api">"Workspace API"</link>.
-                Still, in some cases you may need to go beyond the out-of-the-box functionlity.
-                In this chapter we are going to explain the building blocks used in the workspace implementation
-                and how they can be used to replace or extend the default workspace behaviour.
-            </para>
+      <para>The workspace itself doesn't require any attention apart from the
+      common API that is decribed in the chapter <link
+      linkend="workspace-api">"Workspace API"</link>. Still, in some cases you
+      may need to go beyond the out-of-the-box functionlity. In this chapter
+      we are going to explain the building blocks used in the workspace
+      implementation and how they can be used to replace or extend the default
+      workspace behaviour.</para>
 
-            <sect2 id="workspace-registry">
-                <title>Workspace Registry</title>
-                <para>
-                    The workspace registry (org.jboss.errai.workspaces.client.framework.Registry)
-                    is a simple all purpose lookup for common workspace API that is available
-                    to any workspace component:
-<programlisting>
+      <sect2 id="workspace-registry">
+        <title>Workspace Registry</title>
+
+        <para>The workspace registry
+        (org.jboss.errai.workspaces.client.framework.Registry) is a simple all
+        purpose lookup for common workspace API that is available to any
+        workspace component: <programlisting>
 AuthenticationContext authenticationContext =
     Registry.get(SecurityService.class).getAuthenticationContext();    
-</programlisting>
-                </para>
-            </sect2>
-            <sect2>
-                <title>Authentication and Authorization</title>
-                <para>
-                    The workspace itself doesn't provide an authentication component.
-                    Instead it relies on the Authentication provided by errai bus.
-                    When the workspace is loaded two thing happen: The workspace checks if authentication
-                    is required and, after authentication if needed, loads the tool sets. 
-                </para>
-                <para>
-                    The bus component in charge is the SecurityService (org.jboss.errai.bus.client.security.SecurityService).
-                    It is available through <link linkend="workspace-registry">workspace Registry</link>.
-                    For people extending the workspace functionality it offers two intersting options:
-                    <itemizedlist>
-                        <listitem>
-                            <para>
-                                Obtain access to the authentication context (username, roles, etc)
-                            </para>
-                        </listitem>
-                        <listitem>
-                            <para>
-                                Deferred workspace assembly                                
-                            </para>
-                        </listitem>
-                    </itemizedlist>
-                   The later is important of you want to provide your own way of authenticating users,
-                   but still use the <link linkend="rolebased">role based authorization</link> build into workspaces.
+</programlisting></para>
+      </sect2>
 
-                    <note>
-                        <para>
-                            Don't mess with the authentication unless you now what you are doing.
-                            In many cases it might be better to extend the server side authentication adapters
-                            instead of overriding the client behaviour. However for the sake of completeness,
-                            this mechanism should be mentioned here.
-                        </para>
-                    </note>
-                </para>
+      <sect2>
+        <title>Authentication and Authorization</title>
 
-            </sect2>
+        <para>The workspace itself doesn't provide an authentication
+        component. Instead it relies on the Authentication provided by errai
+        bus. When the workspace is loaded two thing happen: The workspace
+        checks if authentication is required and, after authentication if
+        needed, loads the tool sets.</para>
 
-            <sect2>
-                <title>LoginClient</title>
-                <para>
-                  The LoginClient is the counter part of the SecurityService. It is instructed
-                  by the SecurityService to request the credentials upon demand. This typically happens
-                  when the workspace is initialized, but might also occur later on, when a particular service requires a different role set, then the one assigned initially. We call this elevation.
-                  Similiar to the operating system of your choice that demands administrator priviledges for certain
-                  operations.
-                </para>
-                <para>
-                    After the initial authentication (or lack of) the LoginClient instructs the actual workspace
-                    to assemble the tool sets.
-                </para>
-            </sect2>
+        <para>The bus component in charge is the SecurityService
+        (org.jboss.errai.bus.client.security.SecurityService). It is available
+        through <link linkend="workspace-registry">workspace Registry</link>.
+        For people extending the workspace functionality it offers two
+        intersting options: <itemizedlist>
+            <listitem>
+              <para>Obtain access to the authentication context (username,
+              roles, etc)</para>
+            </listitem>
 
-            <sect2>
-                <title>History management and perma links</title>
-                <para>
-                    History is build into the workspace. It's wired to the main navigation and allows
-                    to use the browser navigation to switch between previously selected tools.
-                    In addition to that, the same mechanism can be used to perma link tools from external applications.
-                    I.e. when notifying users, using an email that contains a link back to a particular tool.
-                </para>
-            </sect2>
+            <listitem>
+              <para>Deferred workspace assembly</para>
+            </listitem>
+          </itemizedlist> The later is important of you want to provide your
+        own way of authenticating users, but still use the <link
+        linkend="rolebased">role based authorization</link> build into
+        workspaces. <note>
+            <para>Don't mess with the authentication unless you now what you
+            are doing. In many cases it might be better to extend the server
+            side authentication adapters instead of overriding the client
+            behaviour. However for the sake of completeness, this mechanism
+            should be mentioned here.</para>
+          </note></para>
+      </sect2>
 
-            <sect2>
-                <title>Preferences</title>
-                <para>
-                    The workspace allows you to store simple key-value pairs as preferences.
-                    Like with other common API, you obtain the Preferences through the <link linkend="workspace-registry">workspace Registry</link>.
-                    The default implementation uses a cookie based approach, but it's easy to replace that one with a custom
-                    implementation in the module decriptor:
-<programlisting>
-    <![CDATA[
-   <module>
+      <sect2>
+        <title>LoginClient</title>
+
+        <para>The LoginClient is the counter part of the SecurityService. It
+        is instructed by the SecurityService to request the credentials upon
+        demand. This typically happens when the workspace is initialized, but
+        might also occur later on, when a particular service requires a
+        different role set, then the one assigned initially. We call this
+        elevation. Similiar to the operating system of your choice that
+        demands administrator priviledges for certain operations.</para>
+
+        <para>After the initial authentication (or lack of) the LoginClient
+        instructs the actual workspace to assemble the tool sets.</para>
+      </sect2>
+
+      <sect2>
+        <title>History management and perma links</title>
+
+        <para>History is build into the workspace. It's wired to the main
+        navigation and allows to use the browser navigation to switch between
+        previously selected tools. In addition to that, the same mechanism can
+        be used to perma link tools from external applications. I.e. when
+        notifying users, using an email that contains a link back to a
+        particular tool.</para>
+      </sect2>
+
+      <sect2>
+        <title>Preferences</title>
+
+        <para>The workspace allows you to store simple key-value pairs as
+        preferences. Like with other common API, you obtain the Preferences
+        through the <link linkend="workspace-registry">workspace
+        Registry</link>. The default implementation uses a cookie based
+        approach, but it's easy to replace that one with a custom
+        implementation in the module decriptor: <programlisting>
+    
+   &lt;module&gt;
     [...]
-    <replace-with class="org.jboss.errai.workspaces.client.framework.CookiePreferences">
-           <when-type-is class="org.jboss.errai.workspaces.client.framework.Preferences"/>
-       </replace-with>
-    </module>
-    ]]>
-</programlisting>
-                </para>
-            </sect2>
-                        
-        </sect1>
+    &lt;replace-with class="org.jboss.errai.workspaces.client.framework.CookiePreferences"&gt;
+           &lt;when-type-is class="org.jboss.errai.workspaces.client.framework.Preferences"/&gt;
+       &lt;/replace-with&gt;
+    &lt;/module&gt;
+    
+</programlisting></para>
+      </sect2>
+    </sect1>
 
-        <sect1 id="using-workspaces">
-            <title>Building a workspaces application</title>
-            <para>
-                In this section we go through the steps necessary to create
-                a workspace application. As mentioned before, workspaces is more then just another GWT library.
-                It's intended to get you started quickly. This includes GWT installation,
-                creating a build environment and prepapring your IDE.  
-            </para>
+    <sect1 id="using-workspaces">
+      <title>Building a workspaces application</title>
 
-            <sect2>
-                <title>Check the prerequisites</title>
-                <para>
-                    You need <ulink url="http://maven.apache.org">Apache Maven</ulink> and a <ulink url="http://java.sun.com/javase/downloads/index.jsp">JDK</ulink> to get started.
-                </para>
-            </sect2>
+      <para>In this section we go through the steps necessary to create a
+      workspace application. As mentioned before, workspaces is more then just
+      another GWT library. It's intended to get you started quickly. This
+      includes GWT installation, creating a build environment and prepapring
+      your IDE.</para>
 
-            <sect2>
-                <title>Setup a build environent</title>
-                <para>
-                    The most simple (and least error prone) way to get started
-                    is using the maven archetype that we ship as part of errai.
-                    Simply follow the instructions in the <link linkend="quickstart">quickstart</link>
-                    section and return here when you are done.
-                </para>
+      <sect2>
+        <title>Check the prerequisites</title>
 
-                <para>
-                   Once you've created a project using the maven archetype, make yourself familiar with
-                   the directory structure:
-<programlisting>
+        <para>You need <ulink url="http://maven.apache.org">Apache
+        Maven</ulink> and a <ulink
+        url="http://java.sun.com/javase/downloads/index.jsp">JDK</ulink> to
+        get started.</para>
+      </sect2>
+
+      <sect2>
+        <title>Setup a build environent</title>
+
+        <para>The most simple (and least error prone) way to get started is
+        using the maven archetype that we ship as part of errai. Simply follow
+        the instructions in the <link linkend="quickstart">quickstart</link>
+        section and return here when you are done.</para>
+
+        <para>Once you've created a project using the maven archetype, make
+        yourself familiar with the directory structure: <programlisting>
 Laika:gwt-app hbraun$ lstree
 | pom.xml    
 |-src
@@ -1223,102 +1217,94 @@ Laika:gwt-app hbraun$ lstree
 |-----------server
 |-war
 |---WEB-INF
-</programlisting>
-                    It basically follows the default GWT guidelines for breaking up code between client and server.
-                    Simply put tools (@LoadToolSet) into the client subpackage and services (@Service) into the server subpackages.
-                    Make sure you are familiar with the <link linkend="workspace-api">Workspace API</link> before you continue.
-                </para>
-            </sect2>
-            <sect2>
-                <title>Verify the application configuration</title>
-                <para>
-                    Several configuration files drive a workspace build and the
-                    final application. Make sure to include all of them when porting
-                    the archetype example to a different GWT application:
+</programlisting> It basically follows the default GWT guidelines for breaking
+        up code between client and server. Simply put tools (@LoadToolSet)
+        into the client subpackage and services (@Service) into the server
+        subpackages. Make sure you are familiar with the <link
+        linkend="workspace-api">Workspace API</link> before you
+        continue.</para>
+      </sect2>
 
-<programlisting>
+      <sect2>
+        <title>Verify the application configuration</title>
+
+        <para>Several configuration files drive a workspace build and the
+        final application. Make sure to include all of them when porting the
+        archetype example to a different GWT application: <programlisting>
  ./src/main/java/ErraiApp.properties
  ./src/main/java/ErraiService.properties
  ./src/main/java/my/app/App.gwt.xml   
-</programlisting>
-                    <orderedlist>
-                        <listitem>
-                            <para>
-                              ErraiApp.properties is a simple marker, that is required
-                              for the annotation processing to discover your modules.
-                              This is especially important when you declare maven dependencies
-                              on tool or service implementations. Make sure that any classpath entry
-                              (i.e. dependency jar) contains an ErraiApp.properties file.
-                              Otherwise errai might not be able to discover your components.
-                            </para>
-                        </listitem>
+</programlisting> <orderedlist>
+            <listitem>
+              <para>ErraiApp.properties is a simple marker, that is required
+              for the annotation processing to discover your modules. This is
+              especially important when you declare maven dependencies on tool
+              or service implementations. Make sure that any classpath entry
+              (i.e. dependency jar) contains an ErraiApp.properties file.
+              Otherwise errai might not be able to discover your
+              components.</para>
+            </listitem>
 
-                        <listitem>
-                            <para>
-                              ErraiService.properties is the primary bus configuration.
-                              Details can be found in the chapter <link linkend="bus-config">bus configuration.</link>
-                            </para>
-                        </listitem>
+            <listitem>
+              <para>ErraiService.properties is the primary bus configuration.
+              Details can be found in the chapter <link
+              linkend="bus-config">bus configuration.</link></para>
+            </listitem>
 
-                        <listitem>
-                            <para>
-                              App.gwt.xml is your applications <ulink url="http://code.google.com/webtoolkit/doc/latest/DevGuideOrganizingProjects.html#DevGuideModules">module descriptor</ulink>.
-<programlisting>
- <![CDATA[
-<module rename-to="app">
- <inherits name='com.google.gwt.user.User'/>
- <inherits name="com.google.gwt.uibinder.UiBinder"/>
- <inherits name="com.google.gwt.resources.Resources" />
-
- <inherits name="org.jboss.errai.common.ErraiCommon"/>
- <inherits name="org.jboss.errai.bus.ErraiBus"/>
- <inherits name="org.jboss.errai.workspaces.ErraiWorkspaces" />
+            <listitem>
+              <para>App.gwt.xml is your applications <ulink
+              url="http://code.google.com/webtoolkit/doc/latest/DevGuideOrganizingProjects.html#DevGuideModules">module
+              descriptor</ulink>. <programlisting>
  
- <entry-point class='my.app.client.HelloWorldClient'/>
+&lt;module rename-to="app"&gt;
+ &lt;inherits name='com.google.gwt.user.User'/&gt;
+ &lt;inherits name="com.google.gwt.uibinder.UiBinder"/&gt;
+ &lt;inherits name="com.google.gwt.resources.Resources" /&gt;
 
-</module>
-]]>    
-</programlisting>
-                                If you are building on workspaces make sure to include it's dependencies common and bus as well.
-                            </para>
-                        </listitem>
-                    </orderedlist>
+ &lt;inherits name="org.jboss.errai.common.ErraiCommon"/&gt;
+ &lt;inherits name="org.jboss.errai.bus.ErraiBus"/&gt;
+ &lt;inherits name="org.jboss.errai.workspaces.ErraiWorkspaces" /&gt;
+ 
+ &lt;entry-point class='my.app.client.HelloWorldClient'/&gt;
 
-                </para>
-            </sect2>
+&lt;/module&gt;
+    
+</programlisting> If you are building on workspaces make sure to include it's
+              dependencies common and bus as well.</para>
+            </listitem>
+          </orderedlist></para>
+      </sect2>
 
-            <sect2>
-                <title>Launch the hosted mode and start developing</title>
-                <para>
-                    If you followed the steps above, and did build your application stub using
-                    the maven archetype, then you should be launch the <ulink url="http://code.google.com/webtoolkit/doc/latest/DevGuideCompilingAndDebugging.html#DevGuideDevMode">GWT hosted mode</ulink> with the following commands:
-<programlisting>
+      <sect2>
+        <title>Launch the hosted mode and start developing</title>
+
+        <para>If you followed the steps above, and did build your application
+        stub using the maven archetype, then you should be launch the <ulink
+        url="http://code.google.com/webtoolkit/doc/latest/DevGuideCompilingAndDebugging.html#DevGuideDevMode">GWT
+        hosted mode</ulink> with the following commands: <programlisting>
   mvn gwt:run
 
  (alternatively)   
   mvn gwt:debug
-</programlisting>
+</programlisting> <note>
+            <title>Launching maven the first time</title>
 
-                    <note>
-                        <title>Launching maven the first time</title>
+            <para>Please note, that when launching maven the first time on
+            your machine, it will fetch all dependecies from a central
+            repository. This may take a while, because it includes downloading
+            large binaries like GWT SDK. However subsequent builds are not
+            required to go through this step and will be much faster.</para>
+          </note></para>
+      </sect2>
+    </sect1>
+  </chapter>
 
-                        <para>Please note, that when launching maven the first time on your
-                            machine, it will fetch all dependecies from a central repository.
-                            This may take a while, because it includes downloading large
-                            binaries like GWT SDK. However subsequent builds are not required to
-                            go through this step and will be much faster.</para>
-                    </note>
-                </para>
-            </sect2>
-        </sect1>
-    </chapter>
-
-
-    <!---
+  <!---
         =====================================================
         QUICKSTART
         =====================================================
     -->
+
   <chapter id="quickstart">
     <title>Appendix A: Quickstart</title>
 
@@ -1329,22 +1315,25 @@ Laika:gwt-app hbraun$ lstree
       distribution, you realized that we use maven to build them. The way it
       is setup, the maven build has several benefits: <itemizedlist>
           <listitem>
-             <para>It pulls the GWT from a central repository. No need for manual installation of the SDK</para>
+            <para>It pulls the GWT from a central repository. No need for
+            manual installation of the SDK</para>
           </listitem>
 
           <listitem>
-             <para>It provides us with the proper dependencies in order to run the examples</para>
+            <para>It provides us with the proper dependencies in order to run
+            the examples</para>
           </listitem>
 
           <listitem>
-             <para>IDE setup is greatly simplfied, since most modern IDE's can directly import the maven structure</para>
+            <para>IDE setup is greatly simplfied, since most modern IDE's can
+            directly import the maven structure</para>
           </listitem>
         </itemizedlist> In order to get you going quickly, we've provided a
       project archetype, that allows you to create a project skeleton similiar
       to the one we use for building the examples. It's based on the maven
-      archetype plugin <footnote><para>
-              http://maven.apache.org/plugins/maven-archetype-plugin/
-        </para></footnote> and needs to be invoked from the command line:
+      archetype plugin <footnote>
+          <para>http://maven.apache.org/plugins/maven-archetype-plugin/</para>
+        </footnote> and needs to be invoked from the command line:
       <programlisting>
     mvn archetype:generate \
         -DarchetypeGroupId=org.jboss.errai \
