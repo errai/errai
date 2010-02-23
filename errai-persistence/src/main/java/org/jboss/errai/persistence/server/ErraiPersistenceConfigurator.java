@@ -110,6 +110,7 @@ public class ErraiPersistenceConfigurator implements ErraiConfigExtension {
             resourceProviders.put("SessionProvider", sessionProvider);
         }
         catch (Throwable t) {
+            t.printStackTrace();
             throw new ErraiBootstrapFailure("could not load errai-persitence", t);
         }
     }
