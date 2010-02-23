@@ -168,13 +168,39 @@
     <sect1>
       <title>Messaging</title>
 
-      <para>This section will start off with some solid code examples and
-      describe the different messaging patterns that are employed by ErraiBus.
-      In later sections, we'll delve into the different percularities of the
-      API, implications, and more complex cases.</para>
+      <para>This section covers the core messaging concepts of the ErraiBus
+      messaging framework. </para>
 
       <sect2>
-        <title>MessageBuilder and MessageListener API</title>
+        <title>Messaging Overview</title>
+
+        <para>It's important to understand the concept of how messaging works
+        in ErraiBus. Service endpoints are given string-based names that are
+        referenced by message senders. There is no difference between sending
+        a message to a client-based service, or sending a message to a
+        server-based service. In fact, a service of the same name may co-exist
+        on both the client and the server and both will receive all messages
+        bound for that service name, whether they are sent from the client or
+        from the server. </para>
+
+        <para>Services are lightweight in ErraiBus, and can be declared
+        liberally and extensively within your application to provide a
+        message-based infrastructure for your web application. It can be
+        tempting to think of ErraiBus simply as a client-server communication
+        platform, but there is a plethora of possibilities for using ErraiBus
+        purely with the GWT client context, such as a way to advertise and
+        expose components dynamically, to get around the lack of reflection in
+        GWT. </para>
+
+        <para>In fact, ErraiBus was originally designed to run completely
+        within the client but quickly evolved into having the capabilities it
+        now has today. So keep that in mind when you run up against problems
+        in the client space that could benefit from runtime federation.
+        </para>
+      </sect2>
+
+      <sect2>
+        <title>MessageBuilder API</title>
 
         <para>The MessageBuilder is the heart of the messaging API in
         ErraiBus. It provides a fluent / builder API, that is used for
@@ -189,29 +215,7 @@
       </sect2>
 
       <sect2>
-        <title>Receiving messages on the server side</title>
-
-        <para>Every message has a sender and at least one receiver. A receiver
-        is as it sounds--it receives the message and does something with it.
-        Implementing a receiver (also referred to as a service) is as simple
-        as implementing our standard MessageCallback interface, which is used
-        pervasively across, both client and server code. Let's begin with
-        server side component that receives messages:</para>
-
-        <programlisting>   @Service
-    public class HelloWorldService implements MessageCallback {
-        public void callback(Message message) {
-            System.out.println("Hello, World!");
-        }
-    }</programlisting>
-
-        <para>He we declare an extremely simple service. The @Service
-        annotation provides a convenient, meta-data based way of having the
-        bus auto-discover and deploy the service.</para>
-      </sect2>
-
-      <sect2>
-        <title>Sending messages from a client</title>
+        <title>Sending Messages with the Client Bus</title>
 
         <para>In order to send a message from a client you need to create a
         <emphasis><emphasis><filename>Message</filename></emphasis></emphasis>
@@ -271,17 +275,42 @@
         </orderedlist>
 
         <note>
-          <para>On the client side a reference to the bus is obtained through
-          the singleton ErraiBus.get(). On the server side however it's
-          slightly different. Here the <ulink
-          url="http://code.google.com/p/google-guice/">Guice dependency
-          injection</ulink> provides us with a bus reference, as we can see in
-          the next example.</para>
+          <para>An astute observer will note that access to the
+          <literal>MessageBus</literal> differs within client code and server
+          code. Because the client code does not run within a container,
+          access to the <literal>MessageBus</literal> is statically accessed
+          using the <literal>ErraiBus.get()</literal> method. The server-side
+          code, conversely, runs inside a dependency container for managing
+          components. It currently uses Guice as the default container, but
+          will more generically support the JSR-330 specification in the
+          future. </para>
         </note>
       </sect2>
 
       <sect2>
-        <title>Sending messages to a client</title>
+        <title>Recieving Messages on the Server Bus / Server Services</title>
+
+        <para>Every message has a sender and at least one receiver. A receiver
+        is as it sounds--it receives the message and does something with it.
+        Implementing a receiver (also referred to as a service) is as simple
+        as implementing our standard MessageCallback interface, which is used
+        pervasively across, both client and server code. Let's begin with
+        server side component that receives messages:</para>
+
+        <programlisting>   @Service
+    public class HelloWorldService implements MessageCallback {
+        public void callback(Message message) {
+            System.out.println("Hello, World!");
+        }
+    }</programlisting>
+
+        <para>He we declare an extremely simple service. The @Service
+        annotation provides a convenient, meta-data based way of having the
+        bus auto-discover and deploy the service.</para>
+      </sect2>
+
+      <sect2>
+        <title>Sending Messages with the Server Bus</title>
 
         <para>In the following example we extend our server side component to
         reply with a message when the callback method is invoked. It will
@@ -345,12 +374,15 @@
       </sect2>
 
       <sect2>
-        <title>Receiving messages on the client side</title>
+        <title>Receiving Messages on the Client Bus/ Client Services</title>
 
-        <para>If a client needs to receive messages that are "pushed" from the
-        server side it needs to register a listener on a certain subject.
+        <para>Messages can be received asynchronously and arbitriraily by
+        declaring callback services within the client bus. As ErraiBus
+        maintains an open COMET channel at all times, these messages are
+        delivered in real time to the client as they are sent. This provides
+        built-in push messaging for all client services.</para>
+
         <programlisting>
-
     public class HelloWorld implements EntryPoint {
         private MessageBus bus = ErraiBus.get();
 
@@ -372,8 +404,13 @@
         });
 
         [...]
-    }
-               </programlisting></para>
+    }</programlisting>
+
+        <para>In the above example, we declare a new client service called
+        <literal>"BroadcastReceiver"</literal> which can now accept both local
+        messages and remote messages from the server bus. The service will be
+        available in the client to receive messages as long the client bus is
+        connected and the service is not explicitly de-registered.</para>
       </sect2>
 
       <sect2>
@@ -417,7 +454,8 @@
         <filename>MessageBuilder</filename>.</para>
 
         <sect3>
-          <title>Single-Response Conversations</title>
+          <title>Single-Response Conversations / Psuedo-Synchronous
+          Messaging</title>
 
           <para>It is possible to contruct a message and a default response
           handler as part of the MessageBuilder API. It should be noted, that
@@ -742,7 +780,8 @@ public class User implements java.io.Serializable {
       <filename>RequestDispatcher</filename>, the
       <filename>ErraiServiceConfigurator</filename>, and
       <filename>ErraiService</filename> by declaring them as injection
-      dependencies.</para>
+      dependencies in Service classes, extension components, and session
+      providers.</para>
     </sect1>
 
     <sect1>
