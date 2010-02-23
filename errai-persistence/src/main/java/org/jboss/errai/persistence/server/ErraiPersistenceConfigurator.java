@@ -21,6 +21,7 @@ import com.google.inject.Provider;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AnnotationConfiguration;
+import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.annotations.ExtensionComponent;
 import org.jboss.errai.bus.server.ext.ErraiConfigExtension;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
@@ -82,23 +83,35 @@ public class ErraiPersistenceConfigurator implements ErraiConfigExtension {
             }
         });
 
-        final SessionFactory sessionFactory = cfg.buildSessionFactory();
+        try {
+            final SessionFactory sessionFactory = cfg.buildSessionFactory();
+            logger.info("finished building hibernate session factory ... ");
 
-        Provider<Session> sessionProvider = new Provider<Session>() {
-            public Session get() {
-                return sessionFactory.openSession();
-            }
-        };
-        Provider<SessionFactory> sessionFactoryProvider = new Provider() {
-            public Object get() {
-                return sessionFactory;
-            }
-        };
+            Provider<Session> sessionProvider = new Provider<Session>() {
+                public Session get() {
+                    return sessionFactory.openSession();
+                }
+            };
+            Provider<SessionFactory> sessionFactoryProvider = new Provider() {
+                public Object get() {
+                    return sessionFactory;
+                }
+            };
 
-        bindings.put(Session.class, sessionProvider);
-        bindings.put(SessionFactory.class, sessionFactoryProvider);
 
-        resourceProviders.put("SessionProvider", sessionProvider);
+            logger.info("adding binding for: " + sessionProvider.getClass());
+            bindings.put(Session.class, sessionProvider);
+
+            logger.info("adding binding for: " + sessionFactoryProvider.getClass());
+            bindings.put(SessionFactory.class, sessionFactoryProvider);
+
+
+            logger.info("adding resource prvider for: " + sessionProvider.getClass());
+            resourceProviders.put("SessionProvider", sessionProvider);
+        }
+        catch (Throwable t) {
+            throw new ErraiBootstrapFailure("could not load errai-persitence", t);
+        }
     }
 
 

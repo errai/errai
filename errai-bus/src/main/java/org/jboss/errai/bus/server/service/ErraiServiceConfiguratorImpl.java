@@ -262,10 +262,10 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
 
 
             for (Class bindingType: extensionBindings.keySet()) {
-                log.info("Added extension binding: " + bindingType.getName());
+                log.info("added extension binding: " + bindingType.getName());
             }
 
-            log.info("Total extension binding: " + extensionBindings.keySet().size());
+            log.info("total extension binding: " + extensionBindings.keySet().size());
 
             visitAllTargets(configRootTargets,
                     new ConfigVisitor() {
