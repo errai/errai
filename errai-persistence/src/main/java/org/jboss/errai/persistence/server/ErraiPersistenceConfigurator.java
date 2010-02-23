@@ -74,7 +74,7 @@ public class ErraiPersistenceConfigurator implements ErraiConfigExtension {
 
         List<File> roots = config.getConfigurationRoots();
 
-        logger.info("Begin scan for annotated classes.");
+        logger.info("begin scan for annotated classes.");
         ConfigUtil.visitAllTargets(roots, new ConfigVisitor() {
             public void visit(Class<?> clazz) {
                 if (clazz.isAnnotationPresent(Entity.class)) {
@@ -106,10 +106,11 @@ public class ErraiPersistenceConfigurator implements ErraiConfigExtension {
             bindings.put(SessionFactory.class, sessionFactoryProvider);
 
 
-            logger.info("adding resource prvider for: " + sessionProvider.getClass());
+            logger.info("adding resource provider for: " + sessionProvider.getClass());
             resourceProviders.put("SessionProvider", sessionProvider);
         }
         catch (Throwable t) {
+            logger.info("session factory did not build: " + t.getClass());
             t.printStackTrace();
             throw new ErraiBootstrapFailure("could not load errai-persitence", t);
         }
