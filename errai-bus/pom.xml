@@ -39,7 +39,6 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-
     <dependencies>
         <dependency>
             <groupId>org.jboss.errai</groupId>
@@ -50,14 +49,14 @@
             <groupId>com.google.gwt</groupId>
             <artifactId>gwt-user</artifactId>
             <!-- This should not be packaged with the Errai Distro.  There are no runtime dependencies on it
-                 and it breaks deployment on JBoss AS and Tomcat -->
+   and it breaks deployment on JBoss AS and Tomcat -->
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.google.gwt</groupId>
             <artifactId>gwt-dev</artifactId>
             <!-- This should not be packaged with the Errai Distro.  There are no runtime dependencies on it
-                 and it breaks deployment on JBoss AS and Tomcat -->
+   and it breaks deployment on JBoss AS and Tomcat -->
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -119,6 +118,20 @@
         </dependency>
 
         <dependency>
+            <groupId>com.sun.grizzly</groupId>
+            <artifactId>grizzly-comet</artifactId>
+            <scope>provided</scope>
+            <version>1.9.19-beta1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.sun.grizzly</groupId>
+            <artifactId>grizzly-nio-framework</artifactId>
+            <scope>provided</scope>
+            <version>1.9.19-beta1</version>
+        </dependency>
+
+        <dependency>
             <groupId>jboss.web</groupId>
             <artifactId>jbossweb</artifactId>
             <scope>provided</scope>
@@ -128,8 +141,8 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.3.1</version>
             <scope>provided</scope>
+            <version>4.3.1</version>
         </dependency>
 
 
