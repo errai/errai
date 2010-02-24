@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.persistence.Entity;
 import java.io.File;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
 
@@ -110,7 +111,7 @@ public class ErraiPersistenceConfigurator implements ErraiConfigExtension {
             resourceProviders.put("SessionProvider", sessionProvider);
         }
         catch (Throwable t) {
-            logger.info("session factory did not build: " + t.getClass());
+            logger.info("session factory did not build: " + t.getClass());            
             t.printStackTrace();
             throw new ErraiBootstrapFailure("could not load errai-persitence", t);
         }
