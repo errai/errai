@@ -20,13 +20,17 @@ import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.user.rebind.SourceWriter;
 import org.jboss.errai.bus.server.annotations.ExposeEntity;
+import org.jboss.errai.bus.server.annotations.Remote;
+import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.util.RebindVisitor;
 import org.mvel2.templates.CompiledTemplate;
 
 import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.TypeVariable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +42,7 @@ import static org.mvel2.templates.TemplateRuntime.execute;
 public class BusClientConfigGenerator implements ExtensionGenerator {
     private CompiledTemplate demarshallerGenerator;
     private CompiledTemplate marshallerGenerator;
+    private CompiledTemplate rpcProxyGenerator;
 
     public BusClientConfigGenerator() {
         InputStream istream = this.getClass().getResourceAsStream("DemarshallerGenerator.mv");
@@ -45,6 +50,9 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
 
         istream = this.getClass().getResourceAsStream("MarshallerGenerator.mv");
         marshallerGenerator = compileTemplate(istream, null);
+
+        istream = this.getClass().getResourceAsStream("RPCProxyGenerator.mv");
+        rpcProxyGenerator = compileTemplate(istream, null);
     }
 
     public void generate(GeneratorContext context, TreeLogger logger, SourceWriter writer, List<File> roots) {
@@ -86,11 +94,15 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
 
                             logger.log(TreeLogger.Type.INFO, genStr);
                             logger.log(TreeLogger.Type.INFO, "Generated marshaller/demarshaller for: " + visit.getName());
+                        } else if (visit.isAnnotationPresent(Remote.class) && visit.isInterface()) {
+                            Map<String, Object> templateVars = new HashMap<String, Object>();
+                            templateVars.put("implementationClassName", visit.getName() + "Impl");
+                            templateVars.put("interfaceClass", visit);
+
+                            writer.print((String) execute(rpcProxyGenerator, templateVars));
                         }
                     }
                 }
         );
     }
-
- 
 }

@@ -2,6 +2,7 @@ package org.jboss.errai.bus.client.api.builder;
 
 import org.jboss.errai.bus.client.api.*;
 import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.framework.RemoteProxyFactory;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 
 /**
@@ -22,6 +23,11 @@ public class AbstractRemoteCallBuilder {
     public AbstractRemoteCallBuilder(Message message) {
         this.message = message;
     }
+
+    public <T> T call(final Class<T> remoteService) {
+        return RemoteProxyFactory.getRemoteProxy(remoteService);
+    }
+
 
     /**
      * Creates, implements and returns an instance of <tt>RemoteCallEndpointDef</tt> and all applicable arguments,

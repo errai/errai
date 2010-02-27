@@ -1,0 +1,43 @@
+class @{implementationClassName} implements @{interfaceClass.getName()} {
+    private org.jboss.errai.bus.client.ErraiBus bus = org.jboss.errai.bus.client.ErraiBus.get();
+
+    class ReturnHolder<T> {
+        public boolean returned;
+        public T val;
+    }
+
+    @code{count = 0;}
+    @foreach{method : interfaceClass.getMethods()}
+        public @{method.getReturnType() == Void.class ? "void" : method.getReturnType().getName()}
+               @{method.getName()}(@foreach{type : method.getParameterTypes()}@{type.getName()} _@{count++}@end{}) {
+
+               final ReturnHolder<@{method.getReturnType().getName()}> holder
+                            = new ReturnHolder<@{method.getReturnType().getName()}>();
+
+               org.jboss.errai.bus.client.api.base.MessageBuilder.create()
+                    .toSubject(interfaceClass.getName() + ":RPC")
+                    .signalling()
+                     @code{count = 0;}@foreach{type : method.getParameterTypes()}
+                    .with("_@{count}", _@{count++})
+                     @end{}
+                    .noErrorHandling()
+                    .repliesTo(new org.jboss.errai.bus.client.api.MessageCallback() {
+                        public void callback(org.jboss.errai.bus.client.api.Message message) {
+                              holder.returned = true;
+                              holder.val = (T) message.get(Object.class, "RPC:RetVal");
+                        }
+                     })
+                    .sendNowWith(bus);
+
+                while (!holder.returned) {
+                        // wait.
+                }
+
+                return holder.val;
+        }
+    @end{}
+}
+
+org.jboss.errai.bus.client.frameworkRemoteProxyFactory.addRemoteProxy(
+                          @{interfaceClass.getName()}.class, new @{implementationClassName}()
+                 );
