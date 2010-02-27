@@ -24,7 +24,6 @@ import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.bus.client.api.*;
-import org.jboss.errai.bus.client.api.base.JSONMessage;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.ext.ExtensionsLoader;
 import org.jboss.errai.bus.client.json.JSONUtilCli;
@@ -235,19 +234,33 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         message.commit();
         try {
             if (message.hasPart(MessageParts.ToSubject)) {
+
                 if (!initialized) {
                     postInitTasks.add(new Runnable() {
                         public void run() {
+                            if (!subscriptions.containsKey(message.getSubject())) {
+                                showError("No subscribers for: " + message.getSubject(), "Attempt to send message to subject for which there are no subscribers", null);
+                                return;
+                            }
+
+
                             _store(message.getSubject(), message instanceof HasEncoded
                                     ? ((HasEncoded) message).getEncoded() : encodeMap(message.getParts()));
                         }
                     });
-                } else {
+                }
+                else {
+                    if (!subscriptions.containsKey(message.getSubject())) {
+                        showError("No subscribers for: " + message.getSubject(), "Attempt to send message to subject for which there are no subscribers", null);
+                        return;
+                    }
+
                     _store(message.getSubject(), message instanceof HasEncoded
                             ? ((HasEncoded) message).getEncoded() : encodeMap(message.getParts()));
                 }
 
-            } else {
+            }
+            else {
                 throw new RuntimeException("Cannot send message using this method" +
                         " if the message does not contain a ToSubject field.");
             }
@@ -351,7 +364,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     private void sendAll() {
         if (!initialized) {
             return;
-        } else if (transmitting) {
+        }
+        else if (transmitting) {
             if (sendTimer == null) {
                 sendTimer = new Timer() {
                     int timeout = 0;
@@ -377,7 +391,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             }
 
             return;
-        } else if (sendTimer != null) {
+        }
+        else if (sendTimer != null) {
             sendTimer.cancel();
             sendTimer = null;
         }
@@ -677,7 +692,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                     enqueueForRemoteTransmit(MessageBuilder.createMessage().toSubject("ServerBus")
                             .command(BusCommands.Heartbeat).noErrorHandling().getMessage());
                     schedule(HEARTBEAT_DELAY);
-                } else {
+                }
+                else {
                     long win = System.currentTimeMillis() - lastTransmit;
                     int diff = HEARTBEAT_DELAY - (int) win;
                     schedule(diff);
@@ -696,7 +712,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     public void addPostInitTask(Runnable run) {
         if (isInitialized()) {
             run.run();
-        } else {
+        }
+        else {
             postInitTasks.add(run);
         }
     }

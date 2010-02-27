@@ -1,10 +1,9 @@
 package org.jboss.errai.bus.client.api.base;
 
-import org.jboss.errai.bus.client.api.builder.*;
-import org.jboss.errai.bus.client.api.base.CommandMessage;
-import org.jboss.errai.bus.client.api.base.JSONMessage;
 import org.jboss.errai.bus.client.api.HasEncoded;
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.RemoteCallback;
+import org.jboss.errai.bus.client.api.builder.*;
 import org.jboss.errai.bus.client.framework.MessageProvider;
 
 /**
@@ -51,6 +50,11 @@ public class MessageBuilder {
      */
     public static AbstractRemoteCallBuilder createCall() {
         return new AbstractRemoteCallBuilder(CommandMessage.create());
+    }
+
+
+    public static <T,R> T createCall(RemoteCallback<R> callback, Class<T> service) {
+        return new AbstractRemoteCallBuilder(CommandMessage.create()).call(callback, service);
     }
 
     /**

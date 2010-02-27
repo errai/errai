@@ -107,6 +107,7 @@ public class ExtensionProxyGenerator extends Generator {
         sourceWriter.outdent();
         sourceWriter.println("}");
 
+     
         // commit generated class
         context.commit(logger, printWriter);
     }
@@ -119,7 +120,7 @@ public class ExtensionProxyGenerator extends Generator {
         sourceWriter.outdent();
         sourceWriter.println("}");
 
-        sourceWriter.println("public void initExtensions(" + MessageBus.class.getName() + " bus) { ");
+        sourceWriter.println("public void initExtensions(final " + MessageBus.class.getName() + " bus) { ");
         sourceWriter.outdent();
 
         final List<File> targets = findAllConfigTargets();

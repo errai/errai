@@ -96,7 +96,7 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
                             logger.log(TreeLogger.Type.INFO, "Generated marshaller/demarshaller for: " + visit.getName());
                         } else if (visit.isAnnotationPresent(Remote.class) && visit.isInterface()) {
                             Map<String, Object> templateVars = new HashMap<String, Object>();
-                            templateVars.put("implementationClassName", visit.getName() + "Impl");
+                            templateVars.put("implementationClassName", visit.getSimpleName() + "Impl");
                             templateVars.put("interfaceClass", visit);
 
                             writer.print((String) execute(rpcProxyGenerator, templateVars));
@@ -105,4 +105,6 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
                 }
         );
     }
+
+
 }

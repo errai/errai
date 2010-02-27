@@ -2,6 +2,7 @@ package org.jboss.errai.bus.client.api.builder;
 
 import org.jboss.errai.bus.client.api.*;
 import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.framework.RPCStub;
 import org.jboss.errai.bus.client.framework.RemoteProxyFactory;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 
@@ -24,8 +25,10 @@ public class AbstractRemoteCallBuilder {
         this.message = message;
     }
 
-    public <T> T call(final Class<T> remoteService) {
-        return RemoteProxyFactory.getRemoteProxy(remoteService);
+    public <T,R> T call(final RemoteCallback<R> callback, final Class<T> remoteService) {
+        T svc = RemoteProxyFactory.getRemoteProxy(remoteService);
+        ((RPCStub)svc).setRemoteCallback(callback);
+        return svc;
     }
 
 

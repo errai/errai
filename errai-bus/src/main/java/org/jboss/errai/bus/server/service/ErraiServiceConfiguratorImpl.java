@@ -20,6 +20,7 @@ import com.google.inject.*;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
+import org.jboss.errai.bus.rebind.RebindUtils;
 import org.jboss.errai.bus.server.*;
 import org.jboss.errai.bus.server.Module;
 import org.jboss.errai.bus.server.annotations.*;
@@ -261,7 +262,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
             });
 
 
-            for (Class bindingType: extensionBindings.keySet()) {
+            for (Class bindingType : extensionBindings.keySet()) {
                 log.info("added extension binding: " + bindingType.getName());
             }
 
@@ -292,7 +293,12 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                             }
                             else if (loadClass.isAnnotationPresent(Service.class)) {
                                 Object svc = null;
-                                if (MessageCallback.class.isAssignableFrom(loadClass)) {
+
+                                Class remoteImpl = getRemoteImplementation(loadClass);
+                                if (remoteImpl != null) {
+                                    createRPCScaffolding(remoteImpl, loadClass, bus);
+                                }
+                                else if (MessageCallback.class.isAssignableFrom(loadClass)) {
                                     final Class<? extends MessageCallback> clazz = loadClass.asSubclass(MessageCallback.class);
 
                                     loadedComponents.add(loadClass.getName());
@@ -399,6 +405,43 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
 
         log.info("Errai bootstraping complete!");
     }
+
+    private static Class getRemoteImplementation(Class type) {
+        for (Class iface : type.getInterfaces()) {
+            if (iface.isAnnotationPresent(Remote.class)) {
+                return iface;
+            }
+            else if (iface.getInterfaces().length != 0 && ((iface = getRemoteImplementation(iface)) != null)) {
+                return iface;
+            }
+        }
+        return null;
+    }
+
+    private void createRPCScaffolding(final Class remoteIface, final Class type, final MessageBus bus) {
+        Object svc = Guice.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(MessageBus.class).toInstance(bus);
+                bind(RequestDispatcher.class).toInstance(dispatcher);
+
+                // Add any extension bindings.
+                for (Map.Entry<Class, Provider> entry : extensionBindings.entrySet()) {
+                    bind(entry.getKey()).toProvider(entry.getValue());
+                }
+            }
+        }).getInstance(type);
+
+        Map<String, MessageCallback> epts = new HashMap<String, MessageCallback>();
+        for (final Method method : type.getDeclaredMethods()) {
+            if (RebindUtils.isMethodInInterface(remoteIface, method)) {
+                epts.put(RebindUtils.createCallSignature(method), new ConversationalEndpointCallback(svc, method, bus));
+            }
+        }
+
+        bus.subscribe(remoteIface.getName() + ":RPC", new RemoteServiceCallback(epts));
+    }
+
 
     public static interface Creator {
         public void create(Inject injector);
