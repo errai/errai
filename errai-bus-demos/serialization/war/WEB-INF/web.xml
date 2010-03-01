@@ -20,17 +20,14 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
 		  http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
          version="2.5">
-    <filter>
-        <filter-name>guiceFilter</filter-name>
-        <filter-class>com.google.inject.servlet.GuiceFilter</filter-class>
-    </filter>
+   <servlet>
+         <servlet-name>ErraiServlet</servlet-name>
+         <servlet-class>org.jboss.errai.bus.server.servlet.DefaultBlockingServlet</servlet-class>
+         <load-on-startup>1</load-on-startup>
+     </servlet>
 
-    <filter-mapping>
-        <filter-name>guiceFilter</filter-name>
-        <url-pattern>/*</url-pattern>
-    </filter-mapping>
-
-    <listener>
-        <listener-class>org.jboss.errai.bus.server.ErraiServletConfig</listener-class>
-    </listener>
+     <servlet-mapping>
+         <servlet-name>ErraiServlet</servlet-name>
+         <url-pattern>*.erraiBus</url-pattern>
+     </servlet-mapping>
 </web-app>

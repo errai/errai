@@ -27,6 +27,7 @@ import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 
+import java.lang.reflect.Array;
 import java.util.List;
 
 public class Serialization implements EntryPoint {
@@ -82,4 +83,7 @@ public class Serialization implements EntryPoint {
     p.add(button);
     RootPanel.get().add(p);
   }
+
+    public static void main(String[] args) {
+    }
 }

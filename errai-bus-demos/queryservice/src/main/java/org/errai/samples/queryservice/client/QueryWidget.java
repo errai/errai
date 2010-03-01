@@ -35,27 +35,22 @@ public class QueryWidget extends Composite {
     @UiHandler("sendQuery")
     void doSubmit(ClickEvent event) {
 
-        MessageBuilder.createCall()
-                .call("QueryService")
-                .endpoint("getQuery", queryBox.getText())
-                .respondTo(String[].class, new RemoteCallback<String[]>() {
-                    public void callback(String[] resultsString) {
-                        if (resultsString == null) {
-                            resultsString = new String[]{"No results."};
-                        }
+        MessageBuilder.createCall(new RemoteCallback<String[]>() {
+            public void callback(String[] response) {
+                if (response == null) {
+                    response = new String[]{"No results."};
+                }
 
-                        /**
-                         * Build an HTML unordered list based on the results.
-                         */
-                        StringBuffer buf = new StringBuffer("<ul>");
-                        for (String result : resultsString) {
-                            buf.append("<li>").append(result).append("</li>");
-                        }
-                        results.setHTML(buf.append("</ul>").toString());
-                    }
-                })
-                .noErrorHandling()
-                .sendNowWith(bus);
+                /**
+                 * Build an HTML unordered list based on the results.
+                 */
+                StringBuffer buf = new StringBuffer("<ul>");
+                for (String result : response) {
+                    buf.append("<li>").append(result).append("</li>");
+                }
+                results.setHTML(buf.append("</ul>").toString());
+            }
+        }, QueryServiceRemote.class).query(queryBox.getText());
     }
 
     /**

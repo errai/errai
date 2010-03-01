@@ -89,7 +89,7 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
                             writer.print(genStr = (String) execute(demarshallerGenerator, templateVars));
 
                             logger.log(TreeLogger.Type.INFO, genStr);
-
+                                                                                                            
                             writer.print(genStr = (String) execute(marshallerGenerator, templateVars));
 
                             logger.log(TreeLogger.Type.INFO, genStr);

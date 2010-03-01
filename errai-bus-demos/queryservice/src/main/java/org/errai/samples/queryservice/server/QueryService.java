@@ -16,14 +16,14 @@
 
 package org.errai.samples.queryservice.server;
 
-import org.jboss.errai.bus.server.annotations.Endpoint;
+import org.errai.samples.queryservice.client.QueryServiceRemote;
 import org.jboss.errai.bus.server.annotations.Service;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class QueryService {
+public class QueryService implements QueryServiceRemote {
     private Map<String, String[]> dataMap;
 
     public QueryService() {
@@ -37,12 +37,8 @@ public class QueryService {
         dataMap.put("animals", new String[]{"Monkeys", "Giraffes", "Lions"});
     }
 
-    @Endpoint
-    public String[] getQuery(String queryString) {
-        return new String[] { System.currentTimeMillis() + "" };
-
-
-      //  return dataMap.get(queryString.toLowerCase());
+    public String[] query(String queryString) {
+        return dataMap.get(queryString);
     }
 }
 

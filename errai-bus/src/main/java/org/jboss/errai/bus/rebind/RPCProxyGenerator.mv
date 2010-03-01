@@ -1,5 +1,11 @@
-@code{ def box(cls) { org.mvel2.util.ParseTools.boxPrimitive(cls); } }
-class @{implementationClassName} implements @{interfaceClass.getName()}, org.jboss.errai.bus.client.framework.RPCStub {
+@code{
+def box(cls) { org.mvel2.util.ParseTools.boxPrimitive(cls); }
+
+def pretty(cls) {
+    return cls.getCanonicalName();
+}
+
+}class @{implementationClassName} implements @{interfaceClass.getName()}, org.jboss.errai.bus.client.framework.RPCStub {
 
     private org.jboss.errai.bus.client.api.RemoteCallback callback;
 
@@ -9,13 +15,13 @@ class @{implementationClassName} implements @{interfaceClass.getName()}, org.jbo
 
     @code{count = 0;}
     @foreach{method : interfaceClass.getMethods()}
-        public @{method.getReturnType() == Void.class ? "void" : method.getReturnType().getName()}
+        public @{method.getReturnType() == Void.class ? "void" : pretty(method.getReturnType())}
                @{method.getName()}(@foreach{type : method.getParameterTypes()}@{type.getName()} _@{count++}@end{", "}) {
 
                org.jboss.errai.bus.client.api.base.MessageBuilder.createCall()
                     .call("@{interfaceClass.getName()}")
                     .endpoint("@{org.jboss.errai.bus.rebind.RebindUtils.createCallSignature(method)}", new Object[] {@code{count = 0;}@foreach{type : method.getParameterTypes()}_@{count++}@end{","}})
-                    .respondTo(@{box(method.getReturnType()).getName()}.class, callback)
+                    .respondTo(@{pretty(box(method.getReturnType()))}.class, callback)
                     .noErrorHandling()
                     .sendNowWith(bus);
 
