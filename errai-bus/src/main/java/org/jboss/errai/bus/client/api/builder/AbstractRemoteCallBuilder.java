@@ -2,8 +2,9 @@ package org.jboss.errai.bus.client.api.builder;
 
 import org.jboss.errai.bus.client.api.*;
 import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.framework.ProxyProvider;
 import org.jboss.errai.bus.client.framework.RPCStub;
-import org.jboss.errai.bus.client.framework.RemoteProxyFactory;
+import org.jboss.errai.bus.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 
 /**
@@ -11,6 +12,7 @@ import org.jboss.errai.bus.client.protocols.MessageParts;
  * constructed properly
  */
 public class AbstractRemoteCallBuilder {
+    private static ProxyProvider proxyProvider = new RemoteServiceProxyFactory();
 
     /* Used to generate a unique number */
     private volatile static int callCounter = 0;
@@ -26,7 +28,7 @@ public class AbstractRemoteCallBuilder {
     }
 
     public <T,R> T call(final RemoteCallback<R> callback, final Class<T> remoteService) {
-        T svc = RemoteProxyFactory.getRemoteProxy(remoteService);
+        T svc = proxyProvider.getRemoteProxy(remoteService);
         ((RPCStub)svc).setRemoteCallback(callback);
         return svc;
     }
@@ -105,4 +107,9 @@ public class AbstractRemoteCallBuilder {
     private static int uniqueNumber() {
         return ++callCounter > 10000 ? callCounter = 0 : callCounter;
     }
+
+    public static void setProxyFactory(ProxyProvider provider) {
+        proxyProvider = provider;
+    }
+
 }

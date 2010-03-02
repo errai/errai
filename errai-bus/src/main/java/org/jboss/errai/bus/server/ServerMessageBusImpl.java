@@ -16,8 +16,7 @@
 
 package org.jboss.errai.bus.server;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import com.google.inject.*;
 import org.jboss.errai.bus.client.api.*;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.RuleDelegateMessageCallback;
@@ -698,7 +697,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     private final MessageProvider provider = new MessageProvider() {
         {
-            MessageBuilder.setProvider(this);
+            MessageBuilder.setMessageProvider(this);
         }
 
         public Message get() {
@@ -706,12 +705,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
     };
 
-    /**
-     * Gets the current message provider
-     *
-     * @return the message provider
-     */
-    public MessageProvider getMessageProvider() {
-        return provider;
-    }
+  
+
 }

@@ -53,7 +53,15 @@ public class MessageBuilder {
     }
 
 
-    public static <T,R> T createCall(RemoteCallback<R> callback, Class<T> service) {
+    /**
+     * Creates a RPC call.
+     * @param callback -
+     * @param service -
+     * @param <T> -
+     * @param <R> -
+     * @return -
+     */
+    public static <R, T> T createCall(RemoteCallback<R> callback, Class<T> service) {
         return new AbstractRemoteCallBuilder(CommandMessage.create()).call(callback, service);
     }
 
@@ -62,11 +70,11 @@ public class MessageBuilder {
      *
      * @param provider - to set this' provider to
      */
-    public static void setProvider(MessageProvider provider) {
+    public static void setMessageProvider(MessageProvider provider) {
         MessageBuilder.provider = provider;
     }
 
-    public static MessageProvider getProvider() {
+    public static MessageProvider getMessageProvider() {
         return provider;
     }
 }

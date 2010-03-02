@@ -36,6 +36,6 @@ def pretty(cls) {
     @end{}
 }
 
-org.jboss.errai.bus.client.framework.RemoteProxyFactory.addRemoteProxy(
+org.jboss.errai.bus.client.framework.RemoteServiceProxyFactory.addRemoteProxy(
                           @{interfaceClass.getName()}.class, new @{implementationClassName}()
                  );

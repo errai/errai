@@ -18,8 +18,9 @@ package org.jboss.errai.bus.server.service;
 
 import com.google.inject.*;
 import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.client.framework.RequestDispatcher;
+import org.jboss.errai.bus.client.api.RemoteCallback;
+import org.jboss.errai.bus.client.api.builder.AbstractRemoteCallBuilder;
+import org.jboss.errai.bus.client.framework.*;
 import org.jboss.errai.bus.rebind.RebindUtils;
 import org.jboss.errai.bus.server.*;
 import org.jboss.errai.bus.server.Module;
@@ -419,7 +420,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
     }
 
     private void createRPCScaffolding(final Class remoteIface, final Class type, final MessageBus bus) {
-        Object svc = Guice.createInjector(new AbstractModule() {
+        final Injector injector = Guice.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
                 bind(MessageBus.class).toInstance(bus);
@@ -430,7 +431,9 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                     bind(entry.getKey()).toProvider(entry.getValue());
                 }
             }
-        }).getInstance(type);
+        });
+        
+        Object svc = injector.getInstance(type);
 
         Map<String, MessageCallback> epts = new HashMap<String, MessageCallback>();
         for (final Method method : type.getDeclaredMethods()) {
@@ -440,6 +443,16 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
         }
 
         bus.subscribe(remoteIface.getName() + ":RPC", new RemoteServiceCallback(epts));
+
+        new ProxyProvider() {
+            {
+                AbstractRemoteCallBuilder.setProxyFactory(this);
+            }
+            public Object getRemoteProxy(Class proxyType) {
+                return new RuntimeException("This API is not supported in the server-side environment.");
+            }
+        };
+
     }
 
 

@@ -109,7 +109,6 @@ public class DefaultBlockingServlet extends AbstractErraiServlet {
     private void pollForMessages(HttpServletRequest httpServletRequest,
                                  HttpServletResponse httpServletResponse, boolean wait) throws IOException {
         try {
-
             final MessageQueue queue = service.getBus().getQueue(httpServletRequest.getSession().getId());
 
             if (queue == null) {

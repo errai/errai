@@ -242,8 +242,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                                 showError("No subscribers for: " + message.getSubject(), "Attempt to send message to subject for which there are no subscribers", null);
                                 return;
                             }
-
-
                             _store(message.getSubject(), message instanceof HasEncoded
                                     ? ((HasEncoded) message).getEncoded() : encodeMap(message.getParts()));
                         }
@@ -544,7 +542,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 }
 
 
-                MessageBuilder.getProvider().get().command(RemoteSubscribe)
+                MessageBuilder.getMessageProvider().get().command(RemoteSubscribe)
                         .toSubject("ServerBus")
                         .set(Subject, event.getSubject())
                         .set(PriorityProcessing, "1")
@@ -558,7 +556,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
         addUnsubscribeListener(new UnsubscribeListener() {
             public void onUnsubscribe(SubscriptionEvent event) {
-                MessageBuilder.getProvider().get().command(BusCommands.RemoteUnsubscribe)
+                MessageBuilder.getMessageProvider().get().command(BusCommands.RemoteUnsubscribe)
                         .toSubject("ServerBus")
                         .set(Subject, event.getSubject())
                         .set(PriorityProcessing, "1")

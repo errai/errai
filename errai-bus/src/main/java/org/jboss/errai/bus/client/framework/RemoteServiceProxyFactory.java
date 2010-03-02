@@ -3,11 +3,11 @@ package org.jboss.errai.bus.client.framework;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RemoteProxyFactory {
+public class RemoteServiceProxyFactory implements ProxyProvider {
     private static Map<Class, Object> remoteProxies = new HashMap<Class, Object>();
 
-    public static <T> T getRemoteProxy(Class<T> proxyType) {
-        return (T) remoteProxies.get(proxyType);
+    public Object getRemoteProxy(Class proxyType) {
+        return  remoteProxies.get(proxyType);
     }
 
     public static void addRemoteProxy(Class proxyType, Object proxy) {
