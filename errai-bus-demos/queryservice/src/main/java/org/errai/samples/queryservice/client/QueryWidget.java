@@ -32,6 +32,7 @@ import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.api.RemoteCallback;
 
 public class QueryWidget extends Composite {
+    @SuppressWarnings({"GwtUiHandlerErrors"})
     @UiHandler("sendQuery")
     void doSubmit(ClickEvent event) {
 
@@ -71,8 +72,6 @@ public class QueryWidget extends Composite {
 
     @UiField
     HTML results;
-
-    private MessageBus bus = ErraiBus.get();
 }
 
 

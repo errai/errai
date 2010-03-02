@@ -24,6 +24,7 @@ import org.jboss.errai.bus.server.annotations.Remote;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.util.RebindVisitor;
 import org.mvel2.templates.CompiledTemplate;
+import org.mvel2.util.Make;
 
 import java.io.File;
 import java.io.InputStream;
@@ -79,32 +80,29 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
                                 throw new GenerationException(errorMsg, e);
                             }
 
-                            Map<String, Object> templateVars = new HashMap<String, Object>();
-                            templateVars.put("className", visit.getName());
-                            templateVars.put("fields", types.keySet());
-                            templateVars.put("targetTypes", types);
+                            Map<String, Object> templateVars = Make.Map.s(HashMap.class, String.class, Object.class)
+                                    ._("className", visit.getName())
+                                    ._("fields", types.keySet())
+                                    ._("targetTypes", types).f();
 
                             String genStr;
 
                             writer.print(genStr = (String) execute(demarshallerGenerator, templateVars));
 
                             logger.log(TreeLogger.Type.INFO, genStr);
-                                                                                                            
+
                             writer.print(genStr = (String) execute(marshallerGenerator, templateVars));
 
                             logger.log(TreeLogger.Type.INFO, genStr);
                             logger.log(TreeLogger.Type.INFO, "Generated marshaller/demarshaller for: " + visit.getName());
                         } else if (visit.isAnnotationPresent(Remote.class) && visit.isInterface()) {
-                            Map<String, Object> templateVars = new HashMap<String, Object>();
-                            templateVars.put("implementationClassName", visit.getSimpleName() + "Impl");
-                            templateVars.put("interfaceClass", visit);
-
-                            writer.print((String) execute(rpcProxyGenerator, templateVars));
+                            writer.print((String) execute(rpcProxyGenerator,
+                                    Make.Map.s(HashMap.class, Object.class, Object.class)
+                                            ._("implementationClassName", visit.getSimpleName() + "Impl")
+                                            ._("interfaceClass", visit).f()));
                         }
                     }
                 }
         );
     }
-
-
 }
