@@ -39,7 +39,7 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
         System.out.println("init !!!!!!!!!!!!");
 
         ServletContext context = config.getServletContext();
-        contextPath = context.getContextPath();
+        contextPath = context.getContextPath() + "/in.erraiBus";
         CometEngine engine = CometEngine.getEngine();
         engine.register(contextPath);
     }

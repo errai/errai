@@ -29,10 +29,12 @@ public class AbstractRemoteCallBuilder {
 
     public <T,R> T call(final RemoteCallback<R> callback, final Class<T> remoteService) {
         T svc = proxyProvider.getRemoteProxy(remoteService);
+        if (svc == null) {
+            throw new RuntimeException("No service definition for: " + remoteService.getClass().getName());
+        }
         ((RPCStub)svc).setRemoteCallback(callback);
         return svc;
     }
-
 
     /**
      * Creates, implements and returns an instance of <tt>RemoteCallEndpointDef</tt> and all applicable arguments,
