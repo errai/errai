@@ -19,6 +19,7 @@ package org.jboss.errai.bus.rebind;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.user.rebind.SourceWriter;
+import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.annotations.ExposeEntity;
 import org.jboss.errai.bus.server.annotations.Remote;
 import org.jboss.errai.bus.server.annotations.Service;
@@ -96,10 +97,17 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
                             logger.log(TreeLogger.Type.INFO, genStr);
                             logger.log(TreeLogger.Type.INFO, "Generated marshaller/demarshaller for: " + visit.getName());
                         } else if (visit.isAnnotationPresent(Remote.class) && visit.isInterface()) {
-                            writer.print((String) execute(rpcProxyGenerator,
+                            String s;
+                           try {
+                            writer.print(s = (String) execute(rpcProxyGenerator,
                                     Make.Map.<String, Object>$()
                                             ._("implementationClassName", visit.getSimpleName() + "Impl")
                                             ._("interfaceClass", visit)._()));
+                           }
+                           catch (Throwable t) {
+                               throw new ErraiBootstrapFailure(t);
+                           }
+                            System.out.println(s);
                         }
                     }
                 }
