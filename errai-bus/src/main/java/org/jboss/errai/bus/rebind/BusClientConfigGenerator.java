@@ -80,10 +80,10 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
                                 throw new GenerationException(errorMsg, e);
                             }
 
-                            Map<String, Object> templateVars = Make.Map.s(HashMap.class, String.class, Object.class)
+                            Map<String, Object> templateVars = Make.Map.<String, Object>$()
                                     ._("className", visit.getName())
                                     ._("fields", types.keySet())
-                                    ._("targetTypes", types).f();
+                                    ._("targetTypes", types)._();
 
                             String genStr;
 
@@ -97,9 +97,9 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
                             logger.log(TreeLogger.Type.INFO, "Generated marshaller/demarshaller for: " + visit.getName());
                         } else if (visit.isAnnotationPresent(Remote.class) && visit.isInterface()) {
                             writer.print((String) execute(rpcProxyGenerator,
-                                    Make.Map.s(HashMap.class, Object.class, Object.class)
+                                    Make.Map.<String, Object>$()
                                             ._("implementationClassName", visit.getSimpleName() + "Impl")
-                                            ._("interfaceClass", visit).f()));
+                                            ._("interfaceClass", visit)._()));
                         }
                     }
                 }
