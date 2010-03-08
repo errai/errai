@@ -69,7 +69,6 @@ public class ErraiPersistenceConfigurator implements ErraiConfigExtension {
         cfg.setProperty("hibernate.cache.use_second_level_cache", "false");
         cfg.setProperty("hibernate.cache.provider_class", "org.hibernate.cache.NoCacheProvider");
 
-
         cfg.setProperty("hibernate.show_sql", "true");
         cfg.setProperty("hibernate.hbm2ddl.auto", "update");
 
@@ -98,7 +97,6 @@ public class ErraiPersistenceConfigurator implements ErraiConfigExtension {
                     return sessionFactory;
                 }
             };
-
 
             logger.info("adding binding for: " + sessionProvider.getClass());
             bindings.put(Session.class, sessionProvider);

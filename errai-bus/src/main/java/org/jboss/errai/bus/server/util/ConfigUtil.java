@@ -418,8 +418,10 @@ public class ConfigUtil {
                         // do nothing.
                     }
                     catch (Throwable t) {
-                        t.printStackTrace();
-                        throw new ErraiBootstrapFailure("unknown error while visiting: " + file.getName(), t);
+                        // do nothing.
+
+//                        t.printStackTrace();
+//                        throw new ErraiBootstrapFailure("unknown error while visiting: " + file.getName() + ": " + t.getClass().getName() + ":" + t.getMessage(), t);
                     }
                 }
             }

@@ -28,6 +28,5 @@ import java.util.List;
 @ExtensionComponent
 public class ErraiPersistenceExtension implements ExtensionGenerator {
     public void generate(GeneratorContext gcontext, TreeLogger logger, SourceWriter writer, List<File> targets) {
-
     }
 }

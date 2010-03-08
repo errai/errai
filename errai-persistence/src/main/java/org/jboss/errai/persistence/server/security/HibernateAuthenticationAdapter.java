@@ -48,6 +48,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversation;
+import static org.jboss.errai.bus.server.util.ConfigUtil.visitAllTargets;
 
 public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
     private ErraiServiceConfigurator configurator;
@@ -68,7 +69,8 @@ public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
         this.configurator = configurator;
         this.bus = bus;
 
-        ConfigUtil.visitAllTargets(configurator.getConfigurationRoots(),
+        try {
+        visitAllTargets(configurator.getConfigurationRoots(),
                 new ConfigVisitor() {
                     public void visit(Class<?> clazz) {
                         if (clazz.isAnnotationPresent(AuthUserEntity.class)) {
@@ -97,6 +99,10 @@ public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
                     }
                 });
 
+        }
+        catch (Throwable t) {
+            throw new ErraiBootstrapFailure("error configuring " + this.getClass().getSimpleName(), t);
+        }
 
         if (userEntity == null) {
             throw new RuntimeException("You have not specified a @AuthUserEntity for the hibernate security extension.");
@@ -117,7 +123,7 @@ public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
     }
 
     public void challenge(Message message) {
-        Session session = ((Provider<Session>) message.getResource(Provider.class, "SessionProvider")).get();
+        @SuppressWarnings({"unchecked"}) Session session = ((Provider<Session>) message.getResource(Provider.class, "SessionProvider")).get();
         final String name = message.get(String.class, SecurityParts.Name);
         final String password = message.get(String.class, SecurityParts.Password);
 
@@ -134,7 +140,6 @@ public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
              * add the authorization token.
              */
             addAuthenticationToken(message, authSubject);
-
 
             /**
              * Prepare to send a message back to the client, informing it that a successful login has
@@ -160,7 +165,6 @@ public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
 
             throw new AuthenticationFailedException();
         }
-
     }
 
     private void addAuthenticationToken(Message message, AuthSubject loginSubject) {
@@ -188,9 +192,5 @@ public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
             message.set(SecurityParts.Credentials, credentials = new HashSet());
         }
         return credentials;
-    }
-
-    public void process(Message message) {
-
     }
 }

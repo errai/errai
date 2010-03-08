@@ -140,10 +140,11 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                 try {
                     create.run();
                 }
-                catch (CreationException e) {
+                catch (Throwable e) {
                     log.info("authentication adapter " + authAdapterClass.getName() + " cannot be bound yet, deferring ...");
                     deferred.add(create);
                 }
+
             }
             catch (ErraiBootstrapFailure e) {
                 throw e;
