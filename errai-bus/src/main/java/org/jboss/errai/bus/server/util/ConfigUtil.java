@@ -417,6 +417,10 @@ public class ConfigUtil {
                     catch (UnsatisfiedLinkError e) {
                         // do nothing.
                     }
+                    catch (Throwable t) {
+                        t.printStackTrace();
+                        throw new ErraiBootstrapFailure("unknown error while visiting: " + file.getName(), t);
+                    }
                 }
             }
         }
