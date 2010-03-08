@@ -63,7 +63,6 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
 
         context.addCometHandler(handler);
 
-
         try {
             final MessageQueue queue = service.getBus().getQueue(httpServletRequest.getSession().getId());
 
@@ -114,7 +113,6 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
 
         context.notify(null);
 
-
         BufferedReader reader = httpServletRequest.getReader();
         StringAppender sb = new StringAppender(httpServletRequest.getContentLength());
         CharBuffer buffer = CharBuffer.allocate(10);
@@ -158,13 +156,10 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
         }
         stream.write(']');
         stream.flush();
-        // stream.close();
-
     }
 
 
     private class GrizzlyCometHandler implements CometHandler<HttpServletResponse> {
-
         private HttpServletResponse response;
 
         public void onInitialize(CometEvent event) throws IOException {
@@ -188,15 +183,15 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
         public void onEvent(CometEvent event) throws IOException {
             System.out.println("onEvent !!!!!!!!!!!!");
             /*
-if (CometEvent.NOTIFY == event.getType()) {
-int count = 5;
-PrintWriter writer = response.getWriter();
-writer.write("<script type='text/javascript'>" +
-"parent.counter.updateCount('" + count + "')" +
-"</script>\n");
-writer.flush();
-event.getCometContext().resumeCometHandler(this);
-}                                                     */
+       if (CometEvent.NOTIFY == event.getType()) {
+       int count = 5;
+       PrintWriter writer = response.getWriter();
+       writer.write("<script type='text/javascript'>" +
+       "parent.counter.updateCount('" + count + "')" +
+       "</script>\n");
+       writer.flush();
+       event.getCometContext().resumeCometHandler(this);
+       } */
         }
     }
 }

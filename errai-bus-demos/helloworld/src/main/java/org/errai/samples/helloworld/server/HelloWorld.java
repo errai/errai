@@ -9,6 +9,14 @@ import org.jboss.errai.bus.server.annotations.Service;
 
 @Service
 public class HelloWorld implements MessageCallback {
+    private MessageBus bus;
+
+    @Inject
+    public HelloWorld(MessageBus bus) {
+        this.bus = bus;
+    }
+
     public void callback(Message message) {
+
     }
 }
