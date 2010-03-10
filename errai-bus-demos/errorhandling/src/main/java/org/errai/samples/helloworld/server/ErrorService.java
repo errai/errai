@@ -8,11 +8,11 @@ import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.server.annotations.Service;
 
 @Service
-public class ErrorServlet implements MessageCallback {
+public class ErrorService implements MessageCallback {
     private MessageBus bus;
 
     @Inject
-    public ErrorServlet(MessageBus bus) {
+    public ErrorService(MessageBus bus) {
         this.bus = bus;
     }
 
