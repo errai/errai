@@ -27,7 +27,7 @@ import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
 
 /**
  * The <tt>GrizzlyCometServlet</tt> provides the HTTP-protocol gateway between the server bus and the client buses,
- * using Glassfish v2.
+ * using Glassfish.
  */
 @Singleton
 public class GrizzlyCometServlet extends AbstractErraiServlet {
@@ -35,19 +35,13 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
     private String contextPath = null;
 
     public void init(ServletConfig config) throws ServletException {
-        super.init(config);
         System.out.println("init !!!!!!!!!!!!");
 
         ServletContext context = config.getServletContext();
         contextPath = context.getContextPath() + "/in.erraiBus";
         CometEngine engine = CometEngine.getEngine();
-        engine.register(contextPath);
-    }
-
-    protected void service(HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException {
-        System.out.println("service !!!!!!!!!!!!!" + req.getMethod());
-        super.service(req, resp);
+        CometContext cometContext = engine.register(contextPath);
+        cometContext.setExpirationDelay(120 * 1000);
     }
 
     @Override
@@ -63,44 +57,44 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
 
         context.addCometHandler(handler);
 
-        try {
-            final MessageQueue queue = service.getBus().getQueue(httpServletRequest.getSession().getId());
-
-            if (queue == null)
-                sendDisconnectWithReason(httpServletResponse.getOutputStream(),
-                        "There is no queue associated with this session.");
-
-            synchronized (queue) {
-                pollQueue(queue, httpServletRequest, httpServletResponse);
-            }
-        }
-        catch (final Throwable t) {
-            t.printStackTrace();
-
-            httpServletResponse.setHeader("Cache-Control", "no-cache");
-            httpServletResponse.addHeader("Payload-Size", "1");
-            httpServletResponse.setContentType("application/json");
-            OutputStream stream = httpServletResponse.getOutputStream();
-
-            stream.write('[');
-
-            writeToOutputStream(stream, new MarshalledMessage() {
-                public String getSubject() {
-                    return "ClientBusErrors";
-                }
-
-                public Object getMessage() {
-                    StringBuilder b = new StringBuilder("{ErrorMessage:\"").append(t.getMessage()).append("\",AdditionalDetails:\"");
-                    for (StackTraceElement e : t.getStackTrace()) {
-                        b.append(e.toString()).append("<br/>");
-                    }
-
-                    return b.append("\"}").toString();
-                }
-            });
-
-            stream.write(']');
-        }
+//        try {
+//            final MessageQueue queue = service.getBus().getQueue(httpServletRequest.getSession().getId());
+//
+//            if (queue == null)
+//                sendDisconnectWithReason(httpServletResponse.getOutputStream(),
+//                        "There is no queue associated with this session.");
+//
+//            synchronized (queue) {
+//                pollQueue(queue, httpServletRequest, httpServletResponse);
+//            }
+//        }
+//        catch (final Throwable t) {
+//            t.printStackTrace();
+//
+//            httpServletResponse.setHeader("Cache-Control", "no-cache");
+//            httpServletResponse.addHeader("Payload-Size", "1");
+//            httpServletResponse.setContentType("application/json");
+//            OutputStream stream = httpServletResponse.getOutputStream();
+//
+//            stream.write('[');
+//
+//            writeToOutputStream(stream, new MarshalledMessage() {
+//                public String getSubject() {
+//                    return "ClientBusErrors";
+//                }
+//
+//                public Object getMessage() {
+//                    StringBuilder b = new StringBuilder("{ErrorMessage:\"").append(t.getMessage()).append("\",AdditionalDetails:\"");
+//                    for (StackTraceElement e : t.getStackTrace()) {
+//                        b.append(e.toString()).append("<br/>");
+//                    }
+//
+//                    return b.append("\"}").toString();
+//                }
+//            });
+//
+//            stream.write(']');
+//        }
     }
 
     @Override
@@ -113,49 +107,49 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
 
         context.notify(null);
 
-        BufferedReader reader = httpServletRequest.getReader();
-        StringAppender sb = new StringAppender(httpServletRequest.getContentLength());
-        CharBuffer buffer = CharBuffer.allocate(10);
-
-        int read;
-        while ((read = reader.read(buffer)) > 0) {
-            buffer.rewind();
-            for (; read > 0; read--) {
-                sb.append(buffer.get());
-            }
-            buffer.rewind();
-        }
-
-        for (Message msg : createCommandMessage(sessionProvider.getSession(httpServletRequest.getSession()), sb.toString())) {
-            service.store(msg);
-        }
-
-        pollQueue(service.getBus().getQueue(httpServletRequest.getSession().getId()), httpServletRequest, httpServletResponse);
+//        BufferedReader reader = httpServletRequest.getReader();
+//        StringAppender sb = new StringAppender(httpServletRequest.getContentLength());
+//        CharBuffer buffer = CharBuffer.allocate(10);
+//
+//        int read;
+//        while ((read = reader.read(buffer)) > 0) {
+//            buffer.rewind();
+//            for (; read > 0; read--) {
+//                sb.append(buffer.get());
+//            }
+//            buffer.rewind();
+//        }
+//
+//        for (Message msg : createCommandMessage(sessionProvider.getSession(httpServletRequest.getSession()), sb.toString())) {
+//            service.store(msg);
+//        }
+//
+//        pollQueue(service.getBus().getQueue(httpServletRequest.getSession().getId()), httpServletRequest, httpServletResponse);
     }
 
     private static void pollQueue(MessageQueue queue, HttpServletRequest httpServletRequest,
                                   HttpServletResponse httpServletResponse) throws IOException {
 
-        queue.heartBeat();
-
-        List<MarshalledMessage> messages = queue.poll(false).getMessages();
-
-        httpServletResponse.setHeader("Cache-Control", "no-cache");
-        //    httpServletResponse.addHeader("Payload-Size", String.valueOf(messages.size()));
-        httpServletResponse.setContentType("application/json");
-        OutputStream stream = httpServletResponse.getOutputStream();
-
-        Iterator<MarshalledMessage> iter = messages.iterator();
-
-        stream.write('[');
-        while (iter.hasNext()) {
-            writeToOutputStream(stream, iter.next());
-            if (iter.hasNext()) {
-                stream.write(',');
-            }
-        }
-        stream.write(']');
-        stream.flush();
+//        queue.heartBeat();
+//
+//        List<MarshalledMessage> messages = queue.poll(false).getMessages();
+//
+//        httpServletResponse.setHeader("Cache-Control", "no-cache");
+//        //    httpServletResponse.addHeader("Payload-Size", String.valueOf(messages.size()));
+//        httpServletResponse.setContentType("application/json");
+//        OutputStream stream = httpServletResponse.getOutputStream();
+//
+//        Iterator<MarshalledMessage> iter = messages.iterator();
+//
+//        stream.write('[');
+//        while (iter.hasNext()) {
+//            writeToOutputStream(stream, iter.next());
+//            if (iter.hasNext()) {
+//                stream.write(',');
+//            }
+//        }
+//        stream.write(']');
+//        stream.flush();
     }
 
 
@@ -182,16 +176,16 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
 
         public void onEvent(CometEvent event) throws IOException {
             System.out.println("onEvent !!!!!!!!!!!!");
-            /*
-       if (CometEvent.NOTIFY == event.getType()) {
-       int count = 5;
-       PrintWriter writer = response.getWriter();
-       writer.write("<script type='text/javascript'>" +
-       "parent.counter.updateCount('" + count + "')" +
-       "</script>\n");
-       writer.flush();
-       event.getCometContext().resumeCometHandler(this);
-       } */
+
+//            if (CometEvent.NOTIFY == event.getType()) {
+//                int count = 5;
+//                PrintWriter writer = response.getWriter();
+//                writer.write("<script type='text/javascript'>" +
+//                        "parent.counter.updateCount('" + count + "')" +
+//                        "</script>\n");
+//                writer.flush();
+//                event.getCometContext().resumeCometHandler(this);
+//            }
         }
     }
 }
