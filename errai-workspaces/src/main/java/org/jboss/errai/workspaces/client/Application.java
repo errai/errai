@@ -73,7 +73,6 @@ public class Application implements EntryPoint {
         new Runnable() {
 
           public void run() {
-
             // Declare the standard error client here.
             bus.subscribe("ClientErrorService",
                 new MessageCallback() {
