@@ -22,5 +22,5 @@
     <inherits name="org.jboss.errai.common.ErraiCommon"/>
     <inherits name="org.jboss.errai.bus.ErraiBus" />
 
-    <entry-point class='org.errai.samples.helloworld.client.HelloWorld'/>
+    <entry-point class='org.errai.samples.errorhandling.client.HelloWorld'/>
 </module>

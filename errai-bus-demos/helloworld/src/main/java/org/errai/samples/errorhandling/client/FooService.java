@@ -1,4 +1,4 @@
-package org.errai.samples.helloworld.client;
+package org.errai.samples.errorhandling.client;
 
 import org.jboss.errai.bus.server.annotations.Remote;
 

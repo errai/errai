@@ -5,5 +5,5 @@
     <inherits name="com.google.gwt.user.User"/>
     <inherits name="org.jboss.errai.bus.ErraiBus" />
 
-    <entry-point class='org.errai.samples.helloworld.client.ErrorHandling'/>
+    <entry-point class='org.errai.samples.errorhandling.client.HelloWorld'/>
 </module>

@@ -1,6 +1,6 @@
-package org.errai.samples.helloworld.server;
+package org.errai.samples.errorhandling.server;
 
-import org.errai.samples.helloworld.client.FooService;
+import org.errai.samples.errorhandling.client.FooService;
 import org.jboss.errai.bus.server.annotations.Service;
 
 @Service
