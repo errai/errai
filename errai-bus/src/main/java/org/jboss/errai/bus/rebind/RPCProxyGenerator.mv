@@ -12,11 +12,10 @@ def pretty(cls) {
     public void setRemoteCallback(org.jboss.errai.bus.client.api.RemoteCallback callback) {
         this.callback = callback;
     }
-
-    @code{count = 0;}
+    
     @foreach{method : interfaceClass.getMethods()}
         public @{method.getReturnType() == Void.class ? "void" : pretty(method.getReturnType())}
-               @{method.getName()}(@foreach{type : method.getParameterTypes()}@{type.getName()} _@{count++}@end{", "}) {
+               @{method.getName()}(@code{count = 0;}@foreach{type : method.getParameterTypes()}@{type.getName()} _@{count++}@end{", "}) {
 
                org.jboss.errai.bus.client.api.base.MessageBuilder.createCall()
                     .call("@{interfaceClass.getName()}")
