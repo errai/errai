@@ -128,10 +128,7 @@ public class ResourceFactoryGenerator extends Generator {
           }
         }
     );
-
-    if(null==bundleClass)
-        throw new IllegalArgumentException("@DefaultBundle not found. Make sure the EntryPoint refers to a valid default resource bundle.");
-
+    
     // generator constructor source code
     generateFactoryClass(context, logger, sourceWriter);
 
@@ -156,14 +153,23 @@ public class ResourceFactoryGenerator extends Generator {
     sourceWriter.indent();
     sourceWriter.println("super();");
 
-    sourceWriter.println(bundleClass.getName() + " bundle = ("+bundleClass.getName()+") GWT.create("+bundleClass.getName()+".class);");
-    for(String tool : tool2imageRes.keySet())
+    if(bundleClass!=null) // optional
+    
     {
-      sourceWriter.println("mapping.put(\""+tool+"\", bundle."+tool2imageRes.get(tool)+"() );");
+      sourceWriter.println(bundleClass.getName() + " bundle = ("+bundleClass.getName()+") GWT.create("+bundleClass.getName()+".class);");
+      for(String tool : tool2imageRes.keySet())
+      {
+        sourceWriter.println("mapping.put(\""+tool+"\", bundle."+tool2imageRes.get(tool)+"() );");
+      }
+      sourceWriter.outdent();
     }
-    sourceWriter.outdent();
-    sourceWriter.println("}");
+    else
+    {
+      logger.log(TreeLogger.Type.WARN, "\"@DefaultBundle not found. Make sure the EntryPoint refers to a valid default resource bundle.\"");
+    }
 
+    sourceWriter.println("}");
+    
     sourceWriter.println("public ImageResource createImage(String name) { ");
     sourceWriter.outdent();
     sourceWriter.println("    return mapping.get(name);");
