@@ -1,4 +1,4 @@
-package org.errai.samples.errorhandling.client;
+package org.errai.samples.rpcdemo.client;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.user.client.ui.Button;
@@ -8,7 +8,6 @@ import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.framework.MessageBus;
 
 public class RPCDemo implements EntryPoint {
-
     /**
      * Get an instance of the MessageBus
      */

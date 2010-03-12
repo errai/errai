@@ -21,6 +21,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.nio.CharBuffer;
 import java.util.Iterator;
 import java.util.List;
@@ -37,13 +39,32 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
     private String contextPath = null;
 
     public void init(ServletConfig config) throws ServletException {
-        super.init(config);
-        
+        //    super.init(config);
+
         System.out.println("init !!!!!!!!!!!!");
 
         ServletContext context = config.getServletContext();
         contextPath = context.getContextPath() + "/in.erraiBus";
         CometEngine engine = CometEngine.getEngine();
+
+        try {
+            Method m = CometEngine.class.getDeclaredMethod("isCometEnabled", new Class[0]);
+            m.setAccessible(true);
+            Boolean bool = (Boolean) m.invoke(CometEngine.getEngine());
+
+            if (!bool) {
+                Field f = CometEngine.class.getDeclaredField("isCometSupported");
+                f.setAccessible(true);
+                f.set(null, true);
+            }
+
+            System.out.println("Is enabled: " + bool);
+
+        }
+        catch (Throwable t) {
+            t.printStackTrace();
+        }
+
         CometContext cometContext = engine.register(contextPath);
         cometContext.setExpirationDelay(120 * 1000);
 
@@ -53,87 +74,97 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
-            throws ServletException, IOException {
-        System.out.println("doGet !!!!!!!!!!!!");
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         GrizzlyCometHandler handler = new GrizzlyCometHandler();
-        handler.attach(httpServletResponse);
+        handler.attach(resp);
 
         CometEngine engine = CometEngine.getEngine();
         CometContext context = engine.getCometContext(contextPath);
 
         context.addCometHandler(handler);
 
-//        try {
-//            final MessageQueue queue = service.getBus().getQueue(httpServletRequest.getSession().getId());
-//
-//            if (queue == null)
-//                sendDisconnectWithReason(httpServletResponse.getOutputStream(),
-//                        "There is no queue associated with this session.");
-//
-//            synchronized (queue) {
-//                pollQueue(queue, httpServletRequest, httpServletResponse);
-//            }
-//        }
-//        catch (final Throwable t) {
-//            t.printStackTrace();
-//
-//            httpServletResponse.setHeader("Cache-Control", "no-cache");
-//            httpServletResponse.addHeader("Payload-Size", "1");
-//            httpServletResponse.setContentType("application/json");
-//            OutputStream stream = httpServletResponse.getOutputStream();
-//
-//            stream.write('[');
-//
-//            writeToOutputStream(stream, new MarshalledMessage() {
-//                public String getSubject() {
-//                    return "ClientBusErrors";
-//                }
-//
-//                public Object getMessage() {
-//                    StringBuilder b = new StringBuilder("{ErrorMessage:\"").append(t.getMessage()).append("\",AdditionalDetails:\"");
-//                    for (StackTraceElement e : t.getStackTrace()) {
-//                        b.append(e.toString()).append("<br/>");
-//                    }
-//
-//                    return b.append("\"}").toString();
-//                }
-//            });
-//
-//            stream.write(']');
-//        }
+        if (req.getMethod().equals("POST")) {
+            System.out.println("POST");
+        } else {
+            System.out.println("GET");
+        }
     }
 
-    @Override
-    protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
-            throws ServletException, IOException {
-        System.out.println("doPost !!!!!!!!!!!!");
-
-        CometEngine engine = CometEngine.getEngine();
-        CometContext<?> context = engine.getCometContext(contextPath);
-
-        context.notify(null);
-
-//        BufferedReader reader = httpServletRequest.getReader();
-//        StringAppender sb = new StringAppender(httpServletRequest.getContentLength());
-//        CharBuffer buffer = CharBuffer.allocate(10);
+//    @Override
+//    protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
+//            throws ServletException, IOException {
+//        System.out.println("doGet !!!!!!!!!!!!");
 //
-//        int read;
-//        while ((read = reader.read(buffer)) > 0) {
-//            buffer.rewind();
-//            for (; read > 0; read--) {
-//                sb.append(buffer.get());
-//            }
-//            buffer.rewind();
-//        }
+////        try {
+////            final MessageQueue queue = service.getBus().getQueue(httpServletRequest.getSession().getId());
+////
+////            if (queue == null)
+////                sendDisconnectWithReason(httpServletResponse.getOutputStream(),
+////                        "There is no queue associated with this session.");
+////
+////            synchronized (queue) {
+////                pollQueue(queue, httpServletRequest, httpServletResponse);
+////            }
+////        }
+////        catch (final Throwable t) {
+////            t.printStackTrace();
+////
+////            httpServletResponse.setHeader("Cache-Control", "no-cache");
+////            httpServletResponse.addHeader("Payload-Size", "1");
+////            httpServletResponse.setContentType("application/json");
+////            OutputStream stream = httpServletResponse.getOutputStream();
+////
+////            stream.write('[');
+////
+////            writeToOutputStream(stream, new MarshalledMessage() {
+////                public String getSubject() {
+////                    return "ClientBusErrors";
+////                }
+////
+////                public Object getMessage() {
+////                    StringBuilder b = new StringBuilder("{ErrorMessage:\"").append(t.getMessage()).append("\",AdditionalDetails:\"");
+////                    for (StackTraceElement e : t.getStackTrace()) {
+////                        b.append(e.toString()).append("<br/>");
+////                    }
+////
+////                    return b.append("\"}").toString();
+////                }
+////            });
+////
+////            stream.write(']');
+////        }
+//    }
 //
-//        for (Message msg : createCommandMessage(sessionProvider.getSession(httpServletRequest.getSession()), sb.toString())) {
-//            service.store(msg);
-//        }
+//    @Override
+//    protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
+//            throws ServletException, IOException {
+//        System.out.println("doPost !!!!!!!!!!!!");
 //
-//        pollQueue(service.getBus().getQueue(httpServletRequest.getSession().getId()), httpServletRequest, httpServletResponse);
-    }
+//        CometEngine engine = CometEngine.getEngine();
+//        CometContext<?> context = engine.getCometContext(contextPath);
+//
+//        context.notify(null);
+//
+////        BufferedReader reader = httpServletRequest.getReader();
+////        StringAppender sb = new StringAppender(httpServletRequest.getContentLength());
+////        CharBuffer buffer = CharBuffer.allocate(10);
+////
+////        int read;
+////        while ((read = reader.read(buffer)) > 0) {
+////            buffer.rewind();
+////            for (; read > 0; read--) {
+////                sb.append(buffer.get());
+////            }
+////            buffer.rewind();
+////        }
+////
+////        for (Message msg : createCommandMessage(sessionProvider.getSession(httpServletRequest.getSession()), sb.toString())) {
+////            service.store(msg);
+////        }
+////
+////        pollQueue(service.getBus().getQueue(httpServletRequest.getSession().getId()), httpServletRequest, httpServletResponse);
+//    }
 
     private static void pollQueue(MessageQueue queue, HttpServletRequest httpServletRequest,
                                   HttpServletResponse httpServletResponse) throws IOException {

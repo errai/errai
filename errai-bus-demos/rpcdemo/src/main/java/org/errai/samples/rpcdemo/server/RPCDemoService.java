@@ -1,4 +1,4 @@
-package org.errai.samples.errorhandling.server;
+package org.errai.samples.rpcdemo.server;
 
 import com.google.inject.Inject;
 import org.jboss.errai.bus.client.api.Message;
@@ -7,11 +7,11 @@ import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.server.annotations.Service;
 
 @Service
-public class RPCService implements MessageCallback {
+public class RPCDemoService implements MessageCallback {
     private MessageBus bus;
 
     @Inject
-    public RPCService(MessageBus bus) {
+    public RPCDemoService(MessageBus bus) {
         this.bus = bus;
     }
 
