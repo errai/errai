@@ -2,10 +2,12 @@ package org.jboss.errai.bus.server.servlet;
 
 import com.google.inject.Singleton;
 
-import com.sun.grizzly.comet.CometContext;
-import com.sun.grizzly.comet.CometEngine;
-import com.sun.grizzly.comet.CometEvent;
-import com.sun.grizzly.comet.CometHandler;
+import com.sun.grizzly.arp.AsyncExecutor;
+import com.sun.grizzly.arp.AsyncFilter;
+import com.sun.grizzly.arp.AsyncHandler;
+import com.sun.grizzly.arp.AsyncTask;
+import com.sun.grizzly.comet.*;
+import com.sun.grizzly.http.ProcessorTask;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.server.MessageQueue;
@@ -35,6 +37,8 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
     private String contextPath = null;
 
     public void init(ServletConfig config) throws ServletException {
+        super.init(config);
+        
         System.out.println("init !!!!!!!!!!!!");
 
         ServletContext context = config.getServletContext();
@@ -42,6 +46,10 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
         CometEngine engine = CometEngine.getEngine();
         CometContext cometContext = engine.register(contextPath);
         cometContext.setExpirationDelay(120 * 1000);
+
+        // HACK
+        //CometAsyncFilter caf = new CometAsyncFilter();
+        //caf.doFilter(new AsyncExecutorHandler());
     }
 
     @Override
