@@ -1,13 +1,14 @@
 package org.errai.samples.rpcdemo.server;
 
 import com.google.inject.Inject;
+import org.errai.samples.rpcdemo.client.TestService;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.server.annotations.Service;
 
 @Service
-public class RPCDemoService implements MessageCallback {
+public class RPCDemoService implements TestService {
     private MessageBus bus;
 
     @Inject
@@ -15,7 +16,11 @@ public class RPCDemoService implements MessageCallback {
         this.bus = bus;
     }
 
-    public void callback(Message message) {
+    public long getMemoryFree() {
+         return Runtime.getRuntime().freeMemory();
+    }
 
+    public String append(String str, String str2) {
+        return str + str2;
     }
 }

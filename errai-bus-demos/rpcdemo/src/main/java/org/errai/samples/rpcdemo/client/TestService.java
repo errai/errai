@@ -20,5 +20,6 @@ import org.jboss.errai.bus.server.annotations.Remote;
 
 @Remote
 public interface TestService {
-
+    public long getMemoryFree();
+    public String append(String str, String str2);
 }
