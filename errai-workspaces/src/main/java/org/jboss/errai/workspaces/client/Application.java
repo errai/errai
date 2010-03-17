@@ -21,6 +21,7 @@ import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.ClientMessageBus;
+import org.jboss.errai.bus.client.framework.LogAdapter;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.security.SecurityService;
 import org.jboss.errai.workspaces.client.api.ToolSet;
@@ -48,6 +49,7 @@ public class Application implements EntryPoint {
   private Menu menu;
   private Header header;
   private Workspace workspace;
+  private CaptionLayoutPanel logPanel;
 
   private AuthenticationModule authenticationModule;
   private static SecurityService securityService;
@@ -58,8 +60,33 @@ public class Application implements EntryPoint {
 
   private boolean isInitialized = false;
 
+  private LogAdapter logAdapter = new LogAdapter()
+  {
+    public void warn(String message)
+    {
+      Log.warn(message);
+    }
+
+    public void info(String message)
+    {
+      Log.info(message);
+    }
+
+    public void debug(String message)
+    {
+      Log.debug(message);
+    }
+
+    public void error(String message, Throwable t)
+    {
+      Log.error(message, t);     
+    }
+  };
+  
   public Application()
   {
+    bus.setLogAdapter(logAdapter);
+    
     authenticationModule = new AuthenticationModule();
     securityService = new SecurityService();
 
@@ -80,7 +107,7 @@ public class Application implements EntryPoint {
   }
 
   private void onModuleLoad2()
-  {       
+  {
     final ClientMessageBus bus = (ClientMessageBus)ErraiBus.get();
 
     // Don't do any of this until the MessageBus is fully initialized.    
@@ -138,8 +165,8 @@ public class Application implements EntryPoint {
     header = new Header(); // stateful
 
     // initial history token
-    deferredToken = History.getToken();    
-  }  
+    deferredToken = History.getToken();
+  }
 
   private void initializeUI()
   {
@@ -149,7 +176,7 @@ public class Application implements EntryPoint {
       GWT.log("Workspace already initialized", new IllegalArgumentException("Received init call on already bootstrapped workspace"));
       return;
     }
-    
+
     viewport = new Viewport();
 
     mainLayout = new WSLayoutPanel(new BorderLayout());
@@ -161,8 +188,8 @@ public class Application implements EntryPoint {
     mainLayout.add(header, new BorderLayoutData(BorderLayout.Region.NORTH, "50 px"));
     mainLayout.add(workspace, new BorderLayoutData(BorderLayout.Region.CENTER, false));
 
-    CaptionLayoutPanel logPanel = createLogPanel(mainLayout);
-    mainLayout.add(logPanel, new BorderLayoutData(BorderLayout.Region.SOUTH, "210 px", true));
+    logPanel = createLogPanel(mainLayout);
+    mainLayout.add(logPanel, new BorderLayoutData(BorderLayout.Region.SOUTH, "210 px", "210 px", "600 px", true));
     mainLayout.setCollapsed(logPanel, true);
 
     WorkspaceBuilder builder = new WorkspaceBuilder();
@@ -211,7 +238,7 @@ public class Application implements EntryPoint {
                 List<ToolSet> toolSets = workspace.getToolsets();
                 if(toolSets.size()>0)
                 {
-                  initialToolSet = Workspace.encode(toolSets.get(0).getToolSetName());                   
+                  initialToolSet = Workspace.encode(toolSets.get(0).getToolSetName());
                 }
               }
             }
@@ -241,14 +268,28 @@ public class Application implements EntryPoint {
   {
     final CaptionLayoutPanel messagePanel = new CaptionLayoutPanel("Messages");
     //messagePanel.setPadding(0);
-    
+
     // log panel
     // manually, otherwise it will appear on the login screen
-    WorkspaceLogger divLogger = new WorkspaceLogger();
-    Widget widget = divLogger.getWidget();
+    WorkspaceLogger logger = new WorkspaceLogger(
+        new WorkspaceLogger.ThresholdNotification()
+        {
+          public void onLogLevel(int level)
+          {
+            // open the log panel on errors
+            if(level >= Log.LOG_LEVEL_ERROR)
+            {
+              parent.setCollapsed(messagePanel, false);
+              parent.invalidate();
+              parent.layout();
+            }
+          }
+        }
+    );
+    Widget widget = logger.getWidget();
     widget.setVisible(true);
-    Log.addLogger(divLogger);
-
+    Log.addLogger(logger);
+    
     messagePanel.add(widget);
 
     final ImageButton collapseBtn = new ImageButton(Caption.IMAGES.toolCollapseDown());

@@ -51,7 +51,9 @@
     <set-property name="log_FirebugLogger" value="DISABLED" />
     <set-property name="log_RemoteLogger" value="DISABLED" />
     <set-property name="log_WindowLogger" value="DISABLED" />
-        
+
+    <set-configuration-property name="log_pattern" value="%d [%-5p] %m%n" />
+    
     <generate-with class="org.jboss.errai.workspaces.rebind.WorkspaceLoaderBootstrapGenerator">
         <when-type-assignable
                 class="org.jboss.errai.workspaces.client.framework.WorkspaceConfig"/>

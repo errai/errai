@@ -83,7 +83,30 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     private long lastTransmit = 0;
 
+    private LogAdapter logAdapter = new LogAdapter()
+    {
+      public void warn(String message)
+      {
+        GWT.log("WARN: " + message, null);
+      }
 
+      public void info(String message)
+      {
+        GWT.log("INFO: " + message, null);
+      }
+
+      public void debug(String message)
+      {
+        GWT.log("DEBUG: " + message, null);
+      }
+
+      public void error(String message, Throwable t)
+      {
+        showError(message, t);
+      }
+    };
+
+    private BusErrorDialog errorDialog;
     /**
      * Constructor creates sendBuilder for HTTP POST requests, recvBuilder for HTTP GET requests and
      * initializes the message bus.
@@ -126,6 +149,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      * @param callback - function called when the message is dispatched
      */
     public void subscribe(final String subject, final MessageCallback callback) {
+      logAdapter.debug("New subscription: " + subject +" -> "+callback);
+
         fireAllSubscribeListeners(subject);
 
         MessageCallback dispatcher = new MessageCallback() {
@@ -134,7 +159,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                     callback.callback(message);
                 }
                 catch (Exception e) {
-                    showError("Receiver '" + subject + "' threw an exception", decodeCommandMessage(message), e);
+                    logError("Receiver '" + subject + "' threw an exception", decodeCommandMessage(message), e);
                 }
             }
         };
@@ -239,7 +264,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                     postInitTasks.add(new Runnable() {
                         public void run() {
                             if (!subscriptions.containsKey(message.getSubject())) {
-                                showError("No subscribers for: " + message.getSubject(), "Attempt to send message to subject for which there are no subscribers", null);
+                                logError("No subscribers for: " + message.getSubject(), "Attempt to send message to subject for which there are no subscribers", null);
                                 return;
                             }
                             _store(message.getSubject(), message instanceof HasEncoded
@@ -249,10 +274,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 }
                 else {
                     if (!subscriptions.containsKey(message.getSubject())) {
-                        showError("No subscribers for: " + message.getSubject(), "Attempt to send message to subject for which there are no subscribers", null);
+                        logError("No subscribers for: " + message.getSubject(), "Attempt to send message to subject for which there are no subscribers", null);
                         return;
                     }
-
+                    
                     _store(message.getSubject(), message instanceof HasEncoded
                             ? ((HasEncoded) message).getEncoded() : encodeMap(message.getParts()));
                 }
@@ -430,7 +455,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                         // Handle it gracefully
                         //noinspection ThrowableInstanceNeverThrown
 
-                        showError("Problem communicating with remote bus (Received HTTP 503 Error)", message, null);
+                        logError("Problem communicating with remote bus (Received HTTP 503 Error)", message, null);
                     }
 
                     /**
@@ -442,14 +467,14 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                     }
                     catch (Throwable e) {
                         e.printStackTrace();
-                        showError("Problem decoding incoming message:", response.getText(), e);
+                        logError("Problem decoding incoming message:", response.getText(), e);
                     }
 
                     sendAll();
                 }
 
                 public void onError(Request request, Throwable exception) {
-                    showError("Failed to communicate with remote bus", "", exception);
+                    logError("Failed to communicate with remote bus", "", exception);
                     transmitting = false;
                 }
             });
@@ -520,7 +545,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                         incomingTimer.cancel();
 
                         if (message.hasPart("Reason")) {
-                            showError("The bus was diconnected by the server", "Reason: "
+                            logError("The bus was disconnected by the server", "Reason: "
                                     + message.get(String.class, "Reason"), null);
                         }
                         break;
@@ -530,7 +555,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
         subscribe("ClientBusErrors", new MessageCallback() {
             public void callback(Message message) {
-                showError(message.get(String.class, "ErrorMessage"),
+                logError(message.get(String.class, "ErrorMessage"),
                         message.get(String.class, "AdditionalDetails"), null);
             }
         });
@@ -571,7 +596,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
          * Please.
          */
         if (!sendInitialMessage(callback)) {
-            showError("Could not connect to remote bus", "", null);
+            logError("Could not connect to remote bus", "", null);
         }
     }
 
@@ -594,13 +619,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                         initializeMessagingBus(callback);
                     }
                     catch (Exception e) {
-                        showError("Error attaching to bus", e.getMessage() + "<br/>Message Contents:<br/>"
+                        logError("Error attaching to bus", e.getMessage() + "<br/>Message Contents:<br/>"
                                 + response.getText(), e);
                     }
                 }
 
                 public void onError(Request request, Throwable exception) {
-                    showError("Could not connect to remote bus", "", exception);
+                    logError("Could not connect to remote bus", "", exception);
                 }
             });
         }
@@ -628,6 +653,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      */
     @SuppressWarnings({"UnusedDeclaration"})
     private void initializeMessagingBus(final HookCallback initCallback) {
+      logAdapter.debug("Initialize message bus");
+
         incomingTimer = new Timer() {
             boolean block = false;
 
@@ -644,7 +671,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                             new RequestCallback() {
                                 public void onError(Request request, Throwable throwable) {
                                     block = false;
-                                    showError("Communication Error", "None", throwable);
+                                    logError("Communication Error", "None", throwable);
                                     cancel();
                                 }
 
@@ -656,7 +683,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                                         schedule(1);
                                     }
                                     catch (Throwable e) {
-                                        showError("Errai MessageBus Disconnected Due to Fatal Error", response.getText(), e);
+                                        logError("Errai MessageBus Disconnected Due to Fatal Error", response.getText(), e);
                                         cancel();
                                     }
                                 }
@@ -708,6 +735,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      * @param run a {@link Runnable} task.
      */
     public void addPostInitTask(Runnable run) {
+      logAdapter.debug("Executing post init task: "+run);
+      
         if (isInitialized()) {
             run.run();
         }
@@ -828,13 +857,17 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         }
     }
 
-    BusErrorDialog errorDialog;
 
-    private void showError(String message, String additionalDetails, Throwable e) {
+
+  private void logError(String message, String additionalDetails, Throwable e) {
+    logAdapter.error(message+"<br/>Additional details:<br/>"+additionalDetails, e);    
+  }
+
+    private void showError(String message, Throwable e) {
         if (errorDialog == null) {
             errorDialog = new BusErrorDialog();
         }
-        errorDialog.addError(message, additionalDetails, e);
+        errorDialog.addError(message, "", e);
     }
 
     /**
@@ -850,9 +883,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             }
         }
         catch (RuntimeException e) {
-            showError("Error delivering message into bus", response.getText(), e);
+            logError("Error delivering message into bus", response.getText(), e);
             incomingTimer.cancel();
         }
     }
 
+  public void setLogAdapter(LogAdapter logAdapter)
+  {
+    this.logAdapter = logAdapter;
+  }
 }

@@ -35,6 +35,8 @@ public class AuthenticationDisplay extends LayoutPanel
         loginButton = new Button("Submit");
 
         createLayoutWindowPanel();
+
+      userNameInput.setFocus(true);
     }
 
   private void createLayoutWindowPanel() {

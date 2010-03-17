@@ -25,6 +25,7 @@ import com.allen_sauer.gwt.log.client.impl.LogClientBundle;
 import com.allen_sauer.gwt.log.client.util.DOMUtil;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.DeferredCommand;
@@ -63,10 +64,20 @@ public class WorkspaceLogger implements Logger
   private final ScrollLayoutPanel scrollPanel = new ScrollLayoutPanel();
   private final Timer timer;
 
+  public interface ThresholdNotification
+  {
+    void onLogLevel(int level);
+  }
+
+  private ThresholdNotification notification;
+
   /**
    * Default constructor.
    */
-  public WorkspaceLogger() {
+  public WorkspaceLogger(ThresholdNotification notification) {
+
+    this.notification = notification;
+    
     logDockPanel.addStyleName(LogClientBundle.INSTANCE.css().logPanel());
     logTextArea.addStyleName(LogClientBundle.INSTANCE.css().logTextArea());
     scrollPanel.addStyleName(LogClientBundle.INSTANCE.css().logScrollPanel());
@@ -75,7 +86,7 @@ public class WorkspaceLogger implements Logger
 
     final Widget headerPanel = makeHeader();
 
-    logDockPanel.add(headerPanel, new BorderLayoutData(BorderLayout.Region.NORTH, "15 px", "15 px", false));
+    logDockPanel.add(headerPanel, new BorderLayoutData(BorderLayout.Region.NORTH, "30 px", false));
     logDockPanel.add(scrollPanel, new BorderLayoutData(BorderLayout.Region.CENTER));
 
     scrollPanel.add(logTextArea);
@@ -98,7 +109,7 @@ public class WorkspaceLogger implements Logger
       }
     };
   }
-
+  
   public final void clear() {
     logTextArea.setHTML("");
   }
@@ -142,6 +153,9 @@ public class WorkspaceLogger implements Logger
         + "' onmouseover='className+=\" log-message-hover\"' "
         + "onmouseout='className=className.replace(/ log-message-hover/g,\"\")' style='color: "
         + getColor(record.getLevel()) + "' title='" + title + "'>" + text + "</div>");
+
+    // notify enclosing component about log level threshold
+    notification.onLogLevel(record.getLevel());
   }
 
   /*public final void moveTo(int x, int y) {
@@ -185,19 +199,19 @@ public class WorkspaceLogger implements Logger
       return "#000"; // black
     }
     if (logLevel >= Log.LOG_LEVEL_FATAL) {
-      return "#F00"; // bright red
+      return "#CC0000"; // bright red
     }
     if (logLevel >= Log.LOG_LEVEL_ERROR) {
-      return "#C11B17"; // dark red
+      return "#990000"; // dark red
     }
     if (logLevel >= Log.LOG_LEVEL_WARN) {
-      return "#E56717"; // dark orange
+      return "#CC9900"; // dark orange
     }
     if (logLevel >= Log.LOG_LEVEL_INFO) {
-      return "#2B60DE"; // blue
+      return "#336699"; // blue
     }
     if (logLevel >= Log.LOG_LEVEL_DEBUG) {
-      return "#20b000"; // green
+      return "#336633"; // green
     }
     return "#F0F"; // purple
   }

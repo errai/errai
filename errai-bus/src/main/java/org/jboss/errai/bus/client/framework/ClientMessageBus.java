@@ -64,4 +64,6 @@ public interface ClientMessageBus extends MessageBus {
      * @return boolean indicating if bus is initialized.
      */
     public boolean isInitialized();
+
+    public void setLogAdapter(LogAdapter logAdapter);
 }
