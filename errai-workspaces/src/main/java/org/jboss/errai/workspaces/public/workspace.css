@@ -882,3 +882,27 @@ WSLogin {
   height: 8px;
   overflow: hidden;
 }
+
+
+/* start - override gwt-log styles */
+.log-panel {
+  background-color: #ECF2FC;
+  border: 0px solid #ccc;
+  margin: 0px;
+  padding:2px;
+  
+}
+
+.log-panel .log-scroll-panel {
+  width: 100% !important;
+  height: 100px !important;
+}
+
+.log-panel .log-text-area,.log-panel BUTTON {
+  font-size: 8pt;
+  margin: 0em;
+}
+
+.log-resize-se {
+  visibility:hidden;
+}

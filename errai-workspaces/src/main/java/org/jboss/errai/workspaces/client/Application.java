@@ -1,15 +1,19 @@
 
 package org.jboss.errai.workspaces.client;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.*;
+import org.gwt.mosaic.ui.client.Caption;
+import org.gwt.mosaic.ui.client.CaptionLayoutPanel;
+import org.gwt.mosaic.ui.client.ImageButton;
 import org.gwt.mosaic.ui.client.layout.BorderLayout;
 import org.gwt.mosaic.ui.client.layout.BorderLayoutData;
 import org.jboss.errai.bus.client.ErraiBus;
@@ -28,6 +32,7 @@ import org.jboss.errai.workspaces.client.layout.WSLayoutPanel;
 import org.jboss.errai.workspaces.client.modules.auth.AuthenticationModule;
 import org.jboss.errai.workspaces.client.protocols.LayoutCommands;
 import org.jboss.errai.workspaces.client.protocols.LayoutParts;
+import org.jboss.errai.workspaces.client.util.WorkspaceLogger;
 
 import java.util.List;
 
@@ -64,8 +69,18 @@ public class Application implements EntryPoint {
     Registry.set(Preferences.class, GWT.create(Preferences.class));
   }
 
-  public void onModuleLoad()
-  {
+  public void onModuleLoad() {
+    Log.setUncaughtExceptionHandler();
+
+    DeferredCommand.addCommand(new Command() {
+      public void execute() {
+        onModuleLoad2();
+      }
+    });
+  }
+
+  private void onModuleLoad2()
+  {       
     final ClientMessageBus bus = (ClientMessageBus)ErraiBus.get();
 
     // Don't do any of this until the MessageBus is fully initialized.    
@@ -146,6 +161,10 @@ public class Application implements EntryPoint {
     mainLayout.add(header, new BorderLayoutData(BorderLayout.Region.NORTH, "50 px"));
     mainLayout.add(workspace, new BorderLayoutData(BorderLayout.Region.CENTER, false));
 
+    CaptionLayoutPanel logPanel = createLogPanel(mainLayout);
+    mainLayout.add(logPanel, new BorderLayoutData(BorderLayout.Region.SOUTH, "210 px", true));
+    mainLayout.setCollapsed(logPanel, true);
+
     WorkspaceBuilder builder = new WorkspaceBuilder();
     WorkspaceConfig config = create(WorkspaceConfig.class);
     config.configure(builder);
@@ -216,6 +235,34 @@ public class Application implements EntryPoint {
     );
 
     isInitialized = true;
+  }
+
+  private CaptionLayoutPanel createLogPanel(final WSLayoutPanel parent)
+  {
+    final CaptionLayoutPanel messagePanel = new CaptionLayoutPanel("Messages");
+    //messagePanel.setPadding(0);
+    
+    // log panel
+    // manually, otherwise it will appear on the login screen
+    WorkspaceLogger divLogger = new WorkspaceLogger();
+    Widget widget = divLogger.getWidget();
+    widget.setVisible(true);
+    Log.addLogger(divLogger);
+
+    messagePanel.add(widget);
+
+    final ImageButton collapseBtn = new ImageButton(Caption.IMAGES.toolCollapseDown());
+    messagePanel.getHeader().add(collapseBtn, Caption.CaptionRegion.RIGHT);
+
+    collapseBtn.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        parent.setCollapsed(messagePanel, true);
+        parent.invalidate();
+        parent.layout();
+      }
+    });
+
+    return messagePanel;
   }
 
   /**

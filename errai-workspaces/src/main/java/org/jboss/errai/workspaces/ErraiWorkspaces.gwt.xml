@@ -40,6 +40,18 @@
     <!-- <inherits name="org.gwt.mosaic.dark.Dark"/>                -->
     <!--inherits name='org.gwt.mosaic.theme.aegean.Aegean' /-->
 
+    <!-- Add gwt-log support, default level `DEBUG` -->
+    <inherits name="com.allen_sauer.gwt.log.gwt-log-DEBUG" />
+    <set-property name="log_ConsoleLogger" value="ENABLED" />
+    <set-property name="log_GWTLogger" value="ENABLED" />
+    <set-property name="log_SystemLogger" value="ENABLED" />
+
+    <!-- Loggers Disabled by default -->
+    <set-property name="log_DivLogger" value="DISABLED" />
+    <set-property name="log_FirebugLogger" value="DISABLED" />
+    <set-property name="log_RemoteLogger" value="DISABLED" />
+    <set-property name="log_WindowLogger" value="DISABLED" />
+        
     <generate-with class="org.jboss.errai.workspaces.rebind.WorkspaceLoaderBootstrapGenerator">
         <when-type-assignable
                 class="org.jboss.errai.workspaces.client.framework.WorkspaceConfig"/>

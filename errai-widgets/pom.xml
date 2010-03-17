@@ -70,13 +70,7 @@
             <groupId>com.googlecode.gwtmosaic</groupId>
             <artifactId>gwt-dnd</artifactId>
             <version>${mosaic.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.googlecode.gwtmosaic</groupId>
-            <artifactId>gwt-incubator</artifactId>
-            <version>${mosaic.version}</version>
-        </dependency>
+        </dependency>       
         <dependency>
             <groupId>com.googlecode.gwtmosaic</groupId>
             <artifactId>gwtx</artifactId>

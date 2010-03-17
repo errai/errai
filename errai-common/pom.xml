@@ -34,12 +34,7 @@
             <groupId>com.google.gwt</groupId>
             <artifactId>gwt-user</artifactId>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.googlecode.gwtmosaic</groupId>
-            <artifactId>gwt-mosaic-dnd</artifactId>
-            <version>0.2.0</version>
-        </dependency>
+        </dependency>      
         <dependency>
             <groupId>com.google.code.guice</groupId>
             <artifactId>guice</artifactId>
