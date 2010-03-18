@@ -267,7 +267,7 @@ public class Application implements EntryPoint {
   private CaptionLayoutPanel createLogPanel(final WSLayoutPanel parent)
   {
     final CaptionLayoutPanel messagePanel = new CaptionLayoutPanel("Messages");
-    //messagePanel.setPadding(0);
+    messagePanel.setPadding(0);
 
     // log panel
     // manually, otherwise it will appear on the login screen
@@ -279,9 +279,17 @@ public class Application implements EntryPoint {
             // open the log panel on errors
             if(level >= Log.LOG_LEVEL_ERROR)
             {
-              parent.setCollapsed(messagePanel, false);
-              parent.invalidate();
-              parent.layout();
+              DeferredCommand.addCommand(
+                  new Command()
+                  {
+                    public void execute()
+                    {
+                      parent.setCollapsed(messagePanel, false);
+                      parent.invalidate();
+                      parent.layout();
+                    }
+                  }
+              );
             }
           }
         }
