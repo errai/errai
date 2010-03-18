@@ -85,8 +85,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   class ProxySettings
   {
-    String url;
-    boolean hasProxy;
+    final String url = GWT.getModuleBaseURL() + "proxy";
+    boolean hasProxy = false;
   }
 
     private LogAdapter logAdapter = new LogAdapter()
@@ -124,8 +124,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
       if (!GWT.isScript())
       {
-        proxySettings.url = GWT.getModuleBaseURL() + "proxy";
-
         RequestBuilder bootstrap = new RequestBuilder(RequestBuilder.GET, proxySettings.url);
         try
         {
@@ -152,6 +150,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         {
           logError("Bootstrap proxy settings failed", proxySettings.url , e);
         }        
+      }
+      else
+      {
+        // default in web mode, ignore proxy
+        createRequestBuilders(proxySettings);
+        init();
       }
     }
 
