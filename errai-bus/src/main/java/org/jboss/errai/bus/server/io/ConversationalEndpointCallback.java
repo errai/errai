@@ -38,6 +38,7 @@ public class ConversationalEndpointCallback implements MessageCallback {
      *
      * @param message - the message to initiate the conversation
      */
+    @SuppressWarnings({"unchecked"})
     public void callback(Message message) {
         Object[] parms = message.get(Object[].class, "MethodParms");
 

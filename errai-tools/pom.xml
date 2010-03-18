@@ -1,28 +1,23 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <name>Errai::Bus::Demos::HelloWorld</name>
+    <name>Errai::Tools</name>
     <groupId>org.jboss.errai</groupId>
-    <artifactId>errai-bus-demos-helloworld</artifactId>
+    <artifactId>errai-tools</artifactId>
+    <version>1.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <!-- Parent -->
     <parent>
         <groupId>org.jboss.errai</groupId>
-        <artifactId>errai-bus-demos</artifactId>
+        <artifactId>errai-parent</artifactId>
         <version>1.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <dependencies>      
+    <dependencies>
         <dependency>
             <groupId>org.jboss.errai</groupId>
             <artifactId>errai-bus</artifactId>
-            <version>${version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jboss.errai</groupId>
-            <artifactId>errai-tools</artifactId>
             <version>${version}</version>
         </dependency>
     </dependencies>
@@ -38,7 +33,7 @@
                 <configuration>
                     <inplace>true</inplace>
                     <logLevel>DEBUG</logLevel>
-                    <runTarget>HelloWorld.html</runTarget>
+                    <runTarget>ClientService.html</runTarget>
                     <warSourceDirectory>war</warSourceDirectory>
                     <extraJvmArgs>-Xmx512m</extraJvmArgs>
                     <soyc>false</soyc>
@@ -51,6 +46,13 @@
                     </execution>
                 </executions>
             </plugin>
+
+                <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>ideauidesigner-maven-plugin</artifactId>
+                <version>1.0-beta-1</version>
+            </plugin>
+
             <plugin>
                 <artifactId>maven-war-plugin</artifactId>
                 <configuration>
@@ -65,6 +67,7 @@
                     <skip>true</skip>
                 </configuration>
             </plugin>
+
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -84,9 +87,8 @@
                                 -->
                                 <delete dir="war/WEB-INF/classes" />
                                 <delete dir="war/WEB-INF/lib" />
-                                <delete dir="war/HelloWorld" />
+                                <delete dir="war/ClientService" />
                                 <delete dir="target" />
-
                             </tasks>
                         </configuration>
                         <goals>
@@ -97,5 +99,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

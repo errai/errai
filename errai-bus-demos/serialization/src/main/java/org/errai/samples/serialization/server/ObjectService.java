@@ -17,6 +17,7 @@
 package org.errai.samples.serialization.server;
 
 import com.google.inject.Inject;
+import org.errai.samples.serialization.client.model.HistoryProcessInstanceRef;
 import org.errai.samples.serialization.client.model.Item;
 import org.errai.samples.serialization.client.model.Record;
 import org.jboss.errai.bus.client.api.Message;
@@ -49,6 +50,29 @@ public class ObjectService implements MessageCallback {
         records.add(new Record(3, "Heiko", 50.50f, getDate(2006, 5, 20), new Item[]{new Item(1, "iPhone3Gs"),
                 new Item(2, "MacBookPro13")}, new String[][] { {  "FavoriteColor", "Orange" }, {"Place", "Germany" }}));
 
+        HistoryProcessInstanceRef hpif = new HistoryProcessInstanceRef();
+        hpif.setDuration(1000);
+        hpif.setEndActivityName("EndActivityName");
+        hpif.setEndTime(new java.util.Date(System.currentTimeMillis()));
+        hpif.setKey("Key");
+        hpif.setStartTime(new java.util.Date(System.currentTimeMillis()));
+        hpif.setProcessDefinitionId("ProcessDefinitionId");
+        hpif.setProcessInstanceId("ProcessInstanceId");
+
+        List<HistoryProcessInstanceRef> list = new ArrayList<HistoryProcessInstanceRef>();
+        list.add(hpif);
+
+        hpif = new HistoryProcessInstanceRef();
+        hpif.setDuration(1200);
+        hpif.setEndActivityName("EndActivityName2");
+        hpif.setEndTime(new java.util.Date(System.currentTimeMillis()));
+        hpif.setKey("Ke2");
+        hpif.setStartTime(new java.util.Date(System.currentTimeMillis()));
+        hpif.setProcessDefinitionId("ProcessDefinitionId2");
+        hpif.setProcessInstanceId("ProcessInstanceId2");
+
+        list.add(hpif);
+
         if (message.hasPart("Recs")) {
             List<Record> recs = message.get(List.class, "Recs");
 
@@ -62,6 +86,7 @@ public class ObjectService implements MessageCallback {
         MessageBuilder.createConversation(message)
                 .subjectProvided().signalling()
                 .with("Records", records)
+                .with("hpif", list)
                 .noErrorHandling().sendNowWith(bus);
     }
 

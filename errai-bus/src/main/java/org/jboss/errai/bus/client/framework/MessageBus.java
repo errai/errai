@@ -154,4 +154,10 @@ public interface MessageBus {
      * @param listener
      */
     public void addUnsubscribeListener(UnsubscribeListener listener);
+
+    /**
+     * Attach a monitor to the bus.
+     * @param monitor
+     */
+    public void attachMonitor(BusMonitor monitor);
 }

@@ -20,69 +20,69 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.*;
+import org.errai.samples.serialization.client.model.HistoryProcessInstanceRef;
 import org.errai.samples.serialization.client.model.Record;
 import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.protocols.MessageParts;
 
-import java.lang.reflect.Array;
 import java.util.List;
 
 public class Serialization implements EntryPoint {
-  private MessageBus bus = ErraiBus.get();
+    private MessageBus bus = ErraiBus.get();
 
-  public void onModuleLoad() {
+    public void onModuleLoad() {
 
-    VerticalPanel p = new VerticalPanel();
+        VerticalPanel p = new VerticalPanel();
 
-    final FlexTable table = new FlexTable();
+        final FlexTable table = new FlexTable();
 
-    bus.subscribe("ClientEndpoint",
-        new MessageCallback() {
-          public void callback(Message message) {
-            List<Record> records = message.get(List.class, "Records");
+        bus.subscribe("ClientEndpoint",
+                new MessageCallback() {
+                    public void callback(Message message) {
+                        List<Record> records = message.get(List.class, "Records");
+                        List<HistoryProcessInstanceRef> hpr = message.get(List.class, "hpif");
 
-            int row = 0;
-            for (Record r : records)
-            {
-              table.setWidget(row, 0, new HTML(String.valueOf(r.getRecordId())));
-              table.setWidget(row, 1, new HTML(r.getName()));
-              table.setWidget(row, 2, new HTML(String.valueOf(r.getBalance())));
-              table.setWidget(row, 3, new HTML(r.getAccountOpened().toString()));
-              table.setWidget(row, 4, new HTML(String.valueOf(r.getStuff())));
-              row++;            
+                        int row = 0;
+                        for (Record r : records) {
+                            table.setWidget(row, 0, new HTML(String.valueOf(r.getRecordId())));
+                            table.setWidget(row, 1, new HTML(r.getName()));
+                            table.setWidget(row, 2, new HTML(String.valueOf(r.getBalance())));
+                            table.setWidget(row, 3, new HTML(r.getAccountOpened().toString()));
+                            table.setWidget(row, 4, new HTML(String.valueOf(r.getStuff())));
+                            row++;
+                        }
+
+                        try {
+                            MessageBuilder.createMessage().toSubject("ObjectService")
+                                    .signalling()
+                                    .with("Recs", records)
+                                    .noErrorHandling().sendNowWith(bus);
+                        }
+                        catch (Throwable e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+        );
+
+        Button button = new Button("Load Objects", new ClickHandler() {
+            public void onClick(ClickEvent clickEvent) {
+                MessageBuilder.createMessage()
+                        .toSubject("ObjectService")
+                        .signalling()
+                        .with(MessageParts.ReplyTo, "ClientEndpoint")
+                        .noErrorHandling().sendNowWith(bus);
             }
+        });
 
-            try {
-              MessageBuilder.createMessage().toSubject("ObjectService")
-                      .signalling()
-                      .with("Recs", records)
-                      .noErrorHandling().sendNowWith(bus);
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-            }
-
-          }
-        }
-    );
-
-    Button button = new Button("Load Objects", new ClickHandler()
-    {
-      public void onClick(ClickEvent clickEvent)
-      {
-        MessageBuilder.createMessage()
-                .toSubject("ObjectService")
-                .signalling().noErrorHandling().sendNowWith(bus);
-      }
-    });
-
-    p.add(table);
-    p.add(button);
-    RootPanel.get().add(p);
-  }
+        p.add(table);
+        p.add(button);
+        RootPanel.get().add(p);
+    }
 
     public static void main(String[] args) {
     }

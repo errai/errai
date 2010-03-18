@@ -5,7 +5,6 @@ import com.google.inject.Guice;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.protocols.BusCommands;
-import org.jboss.errai.bus.server.HttpSessionProvider;
 import org.jboss.errai.bus.server.ServerMessageBus;
 import org.jboss.errai.bus.server.ServerMessageBusImpl;
 import org.jboss.errai.bus.server.SessionProvider;
@@ -13,6 +12,8 @@ import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
 import org.jboss.errai.bus.server.service.ErraiServiceImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServlet;
 import java.io.IOException;
@@ -38,6 +39,8 @@ public abstract class AbstractErraiServlet extends HttpServlet {
     
     /* A default Http session provider */
     protected SessionProvider sessionProvider = service.getConfiguration().getConfiguredSessionProvider();
+
+    protected Logger log = LoggerFactory.getLogger(getClass());
 
 
     /**
@@ -81,9 +84,5 @@ public abstract class AbstractErraiServlet extends HttpServlet {
                         : "{CommandType:\"" + BusCommands.Disconnect + "\"}";
             }
         });
-    }
-
-    protected void sendDisconnect(OutputStream stream) throws IOException {
-        sendDisconnectWithReason(stream, null);
     }
 }

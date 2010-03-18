@@ -19,6 +19,12 @@ public enum RoutingFlags {
         @Override
         public int flag() {
             return 1 << 2;
+        }},
+
+    FromRemote {
+        @Override
+        public int flag() {
+            return 1 << 3;
         }}
     ;
 

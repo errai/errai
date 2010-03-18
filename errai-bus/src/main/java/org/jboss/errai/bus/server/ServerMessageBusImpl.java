@@ -25,6 +25,8 @@ import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.server.io.JSONMessageServer;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -62,6 +64,10 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     private final List<UnsubscribeListener> unsubscribeListeners = new LinkedList<UnsubscribeListener>();
 
     private final Scheduler houseKeeper = new Scheduler();
+
+    private Logger log = LoggerFactory.getLogger(getClass());
+
+    private BusMonitor busMonitor;
 
     /**
      * Sets up the <tt>ServerMessageBusImpl</tt> with the configuration supplied. Also, initializes the bus' callback
@@ -173,11 +179,13 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                         break;
 
                     case RemoteSubscribe:
+
                         remoteSubscribe(sessionId, messageQueues.get(sessionId),
                                 message.get(String.class, MessageParts.Subject));
                         break;
 
                     case RemoteUnsubscribe:
+
                         remoteUnsubscribe(sessionId, messageQueues.get(sessionId),
                                 message.get(String.class, MessageParts.Subject));
                         break;
@@ -190,6 +198,10 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
                         messageQueues.put(sessionId,
                                 queue = new MessageQueue(queueSize, busInst));
+
+                        if (isMonitor()) {
+                            busMonitor.notifyQueueAttached(sessionId, queue);
+                        }
 
                         remoteSubscribe(sessionId, queue, "ClientBus");
 
@@ -209,7 +221,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                                 .toSubject("ClientBus")
                                 .command(BusCommands.FinishStateSync)
                                 .noErrorHandling().sendNowWith(busInst, false);
-
 
                         /**
                          * Now the session is established, turn WindowPolling on.
@@ -291,6 +302,15 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             throw new NoSubscribersToDeliverTo("for: " + subject + " [commandType:" + message.getCommandType() + "]");
         }
 
+        if (isMonitor()) {
+            if (message.isFlagSet(RoutingFlags.FromRemote)) {
+                busMonitor.notifyIncomingMessageFromRemote(
+                        message.getResource(QueueSession.class, "Session").getSessionId(), message);
+            } else {
+                busMonitor.notifyInBusMessage(message);
+            }
+        }
+
         if (!fireGlobalMessageListeners(message)) {
             if (message.hasPart(ReplyTo) && message.hasResource("Session")) {
                 /**
@@ -301,9 +321,9 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 rawMsg.put(MessageParts.CommandType.name(), MessageNotDelivered.name());
 
                 try {
-                enqueueForDelivery(getSessionId(message),
-                        message.get(String.class, ReplyTo),
-                        encodeJSON(rawMsg));
+                    enqueueForDelivery(getSessionId(message),
+                            message.get(String.class, ReplyTo),
+                            encodeJSON(rawMsg));
                 }
                 catch (NoSubscribersToDeliverTo nstdt) {
                     handleMessageDeliveryFailure(this, message, nstdt.getMessage(), nstdt, false);
@@ -388,6 +408,10 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                             encodeJSON(rawMsg));
                 }
                 return;
+            }
+
+            if (isMonitor()) {
+                busMonitor.notifyOutgoingMessageToRemote(sessionid, message);
             }
 
             enqueueForDelivery(sessionid, message.getSubject(), message instanceof HasEncoded ?
@@ -619,6 +643,10 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
 
     private void fireSubscribeListeners(SubscriptionEvent event) {
+        if (isMonitor()) {
+            busMonitor.notifyNewSubscriptionEvent(event);
+        }
+
         Iterator<SubscribeListener> iter = subscribeListeners.iterator();
 
         event.setDisposeListener(false);
@@ -633,6 +661,10 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
 
     private void fireUnsubscribeListeners(SubscriptionEvent event) {
+        if (isMonitor()) {
+            busMonitor.notifyUnSubcriptionEvent(event);
+        }
+
         Iterator<UnsubscribeListener> iter = unsubscribeListeners.iterator();
 
         event.setDisposeListener(false);
@@ -705,6 +737,40 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
     };
 
-  
+    private boolean isMonitor() {
+        return this.busMonitor != null;
+    }
 
+    public void attachMonitor(BusMonitor monitor) {
+        if (this.busMonitor != null) {
+            log.warn("new monitor attached, but a monitor was already attached: old monitor has been deteached.");
+        }
+        this.busMonitor = monitor;
+
+        for (Map.Entry<Object, MessageQueue> entry : messageQueues.entrySet()) {
+            busMonitor.notifyQueueAttached(entry.getKey(), entry.getValue());
+        }
+
+        for (String subject : subscriptions.keySet()) {
+            busMonitor.notifyNewSubscriptionEvent(new SubscriptionEvent(false, "None", subject));
+        }
+        for (Map.Entry<String, Set<MessageQueue>> entry : remoteSubscriptions.entrySet()) {
+            for (MessageQueue queue : entry.getValue()) {
+                busMonitor.notifyNewSubscriptionEvent(new SubscriptionEvent(true, _reverseLookupQueue(queue), entry.getKey()));
+            }
+        }
+    }
+
+    /**
+     * A very inefficient and expensive scanning algorithm to reverse-lookup a queue.  It's only used when
+     * attaching debugging monitors, so it's crappiness isn't really a performance issue.
+     *
+     * @return
+     */
+    private Object _reverseLookupQueue(MessageQueue queue) {
+        for (Map.Entry<Object, MessageQueue> entry : messageQueues.entrySet()) {
+            if (entry.getValue() == queue) return entry.getKey();
+        }
+        return null;
+    }
 }

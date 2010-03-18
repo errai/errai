@@ -83,33 +83,27 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     private long lastTransmit = 0;
 
-  class ProxySettings
-  {
-    final String url = GWT.getModuleBaseURL() + "proxy";
-    boolean hasProxy = false;
-  }
+    class ProxySettings {
+        final String url = GWT.getModuleBaseURL() + "proxy";
+        boolean hasProxy = false;
+    }
 
-    private LogAdapter logAdapter = new LogAdapter()
-    {
-      public void warn(String message)
-      {
-        GWT.log("WARN: " + message, null);
-      }
+    private LogAdapter logAdapter = new LogAdapter() {
+        public void warn(String message) {
+            GWT.log("WARN: " + message, null);
+        }
 
-      public void info(String message)
-      {
-        GWT.log("INFO: " + message, null);
-      }
+        public void info(String message) {
+            GWT.log("INFO: " + message, null);
+        }
 
-      public void debug(String message)
-      {
-        GWT.log("DEBUG: " + message, null);
-      }
+        public void debug(String message) {
+            GWT.log("DEBUG: " + message, null);
+        }
 
-      public void error(String message, Throwable t)
-      {
-        showError(message, t);
-      }
+        public void error(String message, Throwable t) {
+            showError(message, t);
+        }
     };
 
     private BusErrorDialog errorDialog;
@@ -119,64 +113,55 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      * initializes the message bus.
      */
     public ClientMessageBusImpl() {
-      // proxy enabled?
-      final ProxySettings proxySettings = new ProxySettings();
+        // proxy enabled?
+        final ProxySettings proxySettings = new ProxySettings();
 
-      if (!GWT.isScript())
-      {
-        RequestBuilder bootstrap = new RequestBuilder(RequestBuilder.GET, proxySettings.url);
-        try
-        {
-          bootstrap.sendRequest(null, new RequestCallback()
-          {
-            public void onResponseReceived(Request request, Response response)
-            {
-              if(200==response.getStatusCode())
-              {
-                proxySettings.hasProxy = true;
-                logAdapter.debug("Identified proxy at " + proxySettings.url);
-              }
+        if (!GWT.isScript()) {
+            RequestBuilder bootstrap = new RequestBuilder(RequestBuilder.GET, proxySettings.url);
+            try {
+                bootstrap.sendRequest(null, new RequestCallback() {
+                    public void onResponseReceived(Request request, Response response) {
+                        if (200 == response.getStatusCode()) {
+                            proxySettings.hasProxy = true;
+                            logAdapter.debug("Identified proxy at " + proxySettings.url);
+                        }
 
-              createRequestBuilders(proxySettings);
-              init();
+                        createRequestBuilders(proxySettings);
+                        init();
+                    }
+
+                    public void onError(Request request, Throwable exception) {
+                        throw new RuntimeException("Bootstrap failed", exception);
+                    }
+                });
             }
-
-            public void onError(Request request, Throwable exception){
-              throw new RuntimeException("Bootstrap failed", exception);
+            catch (RequestException e) {
+                logError("Bootstrap proxy settings failed", proxySettings.url, e);
             }
-          });
+        } else {
+            // default in web mode, ignore proxy
+            createRequestBuilders(proxySettings);
+            init();
         }
-        catch (RequestException e)
-        {
-          logError("Bootstrap proxy settings failed", proxySettings.url , e);
-        }        
-      }
-      else
-      {
-        // default in web mode, ignore proxy
-        createRequestBuilders(proxySettings);
-        init();
-      }
     }
 
-  private void createRequestBuilders(ProxySettings settings)
-  {
-    String endpoint  = settings.hasProxy ? settings.url : SERVICE_ENTRY_POINT;
-    
-    (sendBuilder = new RequestBuilder(
-        RequestBuilder.POST,
-        URL.encode(endpoint)
-    )).setHeader("Connection", "Keep-Alive");
+    private void createRequestBuilders(ProxySettings settings) {
+        String endpoint = settings.hasProxy ? settings.url : SERVICE_ENTRY_POINT;
 
-    sendBuilder.setHeader("Content-Type", "application/json");
+        (sendBuilder = new RequestBuilder(
+                RequestBuilder.POST,
+                URL.encode(endpoint)
+        )).setHeader("Connection", "Keep-Alive");
 
-    (recvBuilder = new RequestBuilder(
-        RequestBuilder.GET,
-        URL.encode(endpoint)
-    )).setHeader("Connection", "Keep-Alive");
+        sendBuilder.setHeader("Content-Type", "application/json");
 
-    logAdapter.debug("Connecting Errai at URL "+sendBuilder.getUrl());
-  }
+        (recvBuilder = new RequestBuilder(
+                RequestBuilder.GET,
+                URL.encode(endpoint)
+        )).setHeader("Connection", "Keep-Alive");
+
+        logAdapter.debug("Connecting Errai at URL " + sendBuilder.getUrl());
+    }
 
     /**
      * Removes all subscriptions attached to the specified subject
@@ -200,7 +185,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      * @param callback - function called when the message is dispatched
      */
     public void subscribe(final String subject, final MessageCallback callback) {
-      logAdapter.debug("New subscription: " + subject +" -> "+callback);
+        logAdapter.debug("New subscription: " + subject + " -> " + callback);
 
         fireAllSubscribeListeners(subject);
 
@@ -322,19 +307,17 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                                     ? ((HasEncoded) message).getEncoded() : encodeMap(message.getParts()));
                         }
                     });
-                }
-                else {
+                } else {
                     if (!subscriptions.containsKey(message.getSubject())) {
                         logError("No subscribers for: " + message.getSubject(), "Attempt to send message to subject for which there are no subscribers", null);
                         return;
                     }
-                    
+
                     _store(message.getSubject(), message instanceof HasEncoded
                             ? ((HasEncoded) message).getEncoded() : encodeMap(message.getParts()));
                 }
 
-            }
-            else {
+            } else {
                 throw new RuntimeException("Cannot send message using this method" +
                         " if the message does not contain a ToSubject field.");
             }
@@ -438,8 +421,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     private void sendAll() {
         if (!initialized) {
             return;
-        }
-        else if (transmitting) {
+        } else if (transmitting) {
             if (sendTimer == null) {
                 sendTimer = new Timer() {
                     int timeout = 0;
@@ -465,8 +447,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             }
 
             return;
-        }
-        else if (sendTimer != null) {
+        } else if (sendTimer != null) {
             sendTimer.cancel();
             sendTimer = null;
         }
@@ -704,7 +685,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      */
     @SuppressWarnings({"UnusedDeclaration"})
     private void initializeMessagingBus(final HookCallback initCallback) {
-      logAdapter.debug("Initialize message bus");
+        logAdapter.debug("Initialize message bus");
 
         incomingTimer = new Timer() {
             boolean block = false;
@@ -768,8 +749,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                     enqueueForRemoteTransmit(MessageBuilder.createMessage().toSubject("ServerBus")
                             .command(BusCommands.Heartbeat).noErrorHandling().getMessage());
                     schedule(HEARTBEAT_DELAY);
-                }
-                else {
+                } else {
                     long win = System.currentTimeMillis() - lastTransmit;
                     int diff = HEARTBEAT_DELAY - (int) win;
                     schedule(diff);
@@ -786,12 +766,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      * @param run a {@link Runnable} task.
      */
     public void addPostInitTask(Runnable run) {
-      logAdapter.debug("Executing post init task: "+run);
-      
+        logAdapter.debug("Executing post init task: " + run);
+
         if (isInitialized()) {
             run.run();
-        }
-        else {
+        } else {
             postInitTasks.add(run);
         }
     }
@@ -909,10 +888,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
 
 
-
-  private void logError(String message, String additionalDetails, Throwable e) {
-    logAdapter.error(message+"<br/>Additional details:<br/>"+additionalDetails, e);    
-  }
+    private void logError(String message, String additionalDetails, Throwable e) {
+        logAdapter.error(message + "<br/>Additional details:<br/>" + additionalDetails, e);
+    }
 
     private void showError(String message, Throwable e) {
         if (errorDialog == null) {
@@ -939,8 +917,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         }
     }
 
-  public void setLogAdapter(LogAdapter logAdapter)
-  {
-    this.logAdapter = logAdapter;
-  }
+    public void attachMonitor(BusMonitor monitor) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public void setLogAdapter(LogAdapter logAdapter) {
+        this.logAdapter = logAdapter;
+    }
 }

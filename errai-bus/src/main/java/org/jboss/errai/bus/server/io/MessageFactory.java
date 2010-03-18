@@ -18,6 +18,7 @@ package org.jboss.errai.bus.server.io;
 
 import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.framework.RoutingFlags;
 import org.jboss.errai.bus.client.json.JSONUtilCli;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.server.QueueSession;
@@ -63,6 +64,8 @@ public class MessageFactory {
             if (parts.containsKey("__MarshalledTypes")) {
                 TypeDemarshallHelper.demarshallAll((String) parts.get("__MarshalledTypes"), msg);
             }
+
+            msg.setFlag(RoutingFlags.FromRemote);
 
             c[i] = msg;
         }

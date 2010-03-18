@@ -40,6 +40,7 @@
         <module>errai-widgets</module>
         <module>errai-bus</module>
         <module>errai-persistence</module>
+        <module>errai-tools</module>
     </modules>
 
     <dependencyManagement>
