@@ -57,7 +57,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     private RequestBuilder sendBuilder;
 
     /* Used to build the HTTP GET request */
-    private final RequestBuilder recvBuilder;
+    private RequestBuilder recvBuilder;
 
     /* Map of subjects to subscriptions  */
     private final Map<String, List<Object>> subscriptions = new HashMap<String, List<Object>>();
@@ -83,6 +83,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     private long lastTransmit = 0;
 
+  class ProxySettings
+  {
+    String url;
+    boolean hasProxy;
+  }
+
     private LogAdapter logAdapter = new LogAdapter()
     {
       public void warn(String message)
@@ -107,25 +113,66 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     };
 
     private BusErrorDialog errorDialog;
+
     /**
      * Constructor creates sendBuilder for HTTP POST requests, recvBuilder for HTTP GET requests and
      * initializes the message bus.
      */
     public ClientMessageBusImpl() {
-        (sendBuilder = new RequestBuilder(
-                RequestBuilder.POST,
-                URL.encode(SERVICE_ENTRY_POINT)
-        )).setHeader("Connection", "Keep-Alive");
+      // proxy enabled?
+      final ProxySettings proxySettings = new ProxySettings();
 
-        sendBuilder.setHeader("Content-Type", "application/json");
+      if (!GWT.isScript())
+      {
+        proxySettings.url = GWT.getModuleBaseURL() + "proxy";
 
-        (recvBuilder = new RequestBuilder(
-                RequestBuilder.GET,
-                URL.encode(SERVICE_ENTRY_POINT)
-        )).setHeader("Connection", "Keep-Alive");
+        RequestBuilder bootstrap = new RequestBuilder(RequestBuilder.GET, proxySettings.url);
+        try
+        {
+          bootstrap.sendRequest(null, new RequestCallback()
+          {
+            public void onResponseReceived(Request request, Response response)
+            {
+              if(200==response.getStatusCode())
+              {
+                proxySettings.hasProxy = true;
+                logAdapter.debug("Identified proxy at " + proxySettings.url);
+              }
 
-        init();
+              createRequestBuilders(proxySettings);
+              init();
+            }
+
+            public void onError(Request request, Throwable exception){
+              throw new RuntimeException("Bootstrap failed", exception);
+            }
+          });
+        }
+        catch (RequestException e)
+        {
+          logError("Bootstrap proxy settings failed", proxySettings.url , e);
+        }        
+      }
     }
+
+  private void createRequestBuilders(ProxySettings settings)
+  {
+    String endpoint  = settings.hasProxy ? settings.url : SERVICE_ENTRY_POINT;
+    
+    (sendBuilder = new RequestBuilder(
+        RequestBuilder.POST,
+        URL.encode(endpoint)
+    )).setHeader("Connection", "Keep-Alive");
+
+    sendBuilder.setHeader("Content-Type", "application/json");
+
+    (recvBuilder = new RequestBuilder(
+        RequestBuilder.GET,
+        URL.encode(endpoint)
+    )).setHeader("Connection", "Keep-Alive");
+
+    logAdapter.debug("Connecting Errai at URL "+sendBuilder.getUrl());
+  }
 
     /**
      * Removes all subscriptions attached to the specified subject
