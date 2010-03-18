@@ -22,6 +22,7 @@ import org.mvel2.MVEL;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.sql.Timestamp;
 import java.util.*;
 
 /**
@@ -160,6 +161,12 @@ public class JSONEncoder {
         });
         tHandlers.put(java.util.Date.class, new TypeHandler<java.util.Date, Long>() {
             public Long getConverted(java.util.Date in) {
+                return in.getTime();
+            }
+        });
+
+       tHandlers.put(Timestamp.class, new TypeHandler<Timestamp, Long>() {
+            public Long getConverted(Timestamp in) {
                 return in.getTime();
             }
         });
