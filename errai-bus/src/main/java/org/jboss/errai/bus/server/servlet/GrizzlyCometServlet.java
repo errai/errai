@@ -9,6 +9,7 @@ import org.jboss.errai.bus.server.MessageQueue;
 import org.mvel2.util.StringAppender;
 
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -29,19 +30,15 @@ import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
 public class GrizzlyCometServlet extends AbstractErraiServlet {
 
     private String contextPath = null;
-    private CometContext cometContext = null;
-    private GrizzlyCometHandler handler = null;
 
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
 
         System.out.println("init !!!!!!!!!!!!");
 
-        contextPath = config.getServletContext().getContextPath() + "/in.erraiBus";
-        cometContext = CometEngine.getEngine().register(contextPath);
-        handler = new GrizzlyCometHandler();
-        cometContext.addCometHandler(handler);
-        cometContext.setExpirationDelay(30 * 1000);
+        ServletContext context = config.getServletContext();
+        contextPath = context.getContextPath() + "/in.erraiBus";
+        CometEngine.getEngine().register(contextPath);
     }
 
     @Override
@@ -49,7 +46,13 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
             throws ServletException, IOException {
         System.out.println("doGet !!!!!!!!!!!!");
 
+        GrizzlyCometHandler handler = new GrizzlyCometHandler();
         handler.attach(httpServletResponse);
+
+        CometEngine engine = CometEngine.getEngine();
+        CometContext context = engine.getCometContext(contextPath);
+
+        context.addCometHandler(handler);
 
         try {
             final MessageQueue queue = service.getBus().getQueue(httpServletRequest.getSession().getId());
@@ -61,8 +64,6 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
             synchronized (queue) {
                 pollQueue(queue, httpServletRequest, httpServletResponse);
             }
-
-            cometContext.notify("doGet", CometEvent.NOTIFY);
         }
         catch (final Throwable t) {
             t.printStackTrace();
@@ -98,6 +99,11 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
             throws ServletException, IOException {
         System.out.println("doPost !!!!!!!!!!!!");
 
+        CometEngine engine = CometEngine.getEngine();
+        CometContext<?> context = engine.getCometContext(contextPath);
+
+        context.notify(null);
+
         BufferedReader reader = httpServletRequest.getReader();
         StringAppender sb = new StringAppender(httpServletRequest.getContentLength());
         CharBuffer buffer = CharBuffer.allocate(10);
@@ -115,52 +121,12 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
             service.store(msg);
         }
 
-        try {
-            final MessageQueue queue = service.getBus().getQueue(httpServletRequest.getSession().getId());
-
-            if (queue == null)
-                sendDisconnectWithReason(httpServletResponse.getOutputStream(),
-                        "There is no queue associated with this session.");
-
-            synchronized (queue) {
-                pollQueue(queue, httpServletRequest, httpServletResponse);
-            }
-
-            cometContext.notify("doPost", CometEvent.NOTIFY);
-        }
-        catch (final Throwable t) {
-            t.printStackTrace();
-
-            httpServletResponse.setHeader("Cache-Control", "no-cache");
-            httpServletResponse.addHeader("Payload-Size", "1");
-            httpServletResponse.setContentType("application/json");
-            OutputStream stream = httpServletResponse.getOutputStream();
-
-            stream.write('[');
-
-            writeToOutputStream(stream, new MarshalledMessage() {
-                public String getSubject() {
-                    return "ClientBusErrors";
-                }
-
-                public Object getMessage() {
-                    StringBuilder b = new StringBuilder("{ErrorMessage:\"").append(t.getMessage()).append("\",AdditionalDetails:\"");
-                    for (StackTraceElement e : t.getStackTrace()) {
-                        b.append(e.toString()).append("<br/>");
-                    }
-
-                    return b.append("\"}").toString();
-                }
-            });
-
-            stream.write(']');
-        }
+        pollQueue(service.getBus().getQueue(httpServletRequest.getSession().getId()), httpServletRequest, httpServletResponse);
     }
 
     private static void pollQueue(MessageQueue queue, HttpServletRequest httpServletRequest,
                                   HttpServletResponse httpServletResponse) throws IOException {
 
-        System.out.println("pollQueue !!!!!!!!!" + queue);
         queue.heartBeat();
 
         List<MarshalledMessage> messages = queue.poll(false).getMessages();
