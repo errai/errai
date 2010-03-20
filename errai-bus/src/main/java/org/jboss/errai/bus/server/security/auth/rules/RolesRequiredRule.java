@@ -106,7 +106,7 @@ public class RolesRequiredRule implements BooleanRoutingRule {
         }
     }
 
-    private String getRequiredRolesString() {
+    public String getRequiredRolesString() {
         StringBuilder builder = new StringBuilder();
         Iterator<Object> iter = requiredRoles.iterator();
 
@@ -116,6 +116,10 @@ public class RolesRequiredRule implements BooleanRoutingRule {
         }
 
         return builder.toString();
+    }
+
+    public Set<Object> getRoles() {
+        return requiredRoles;
     }
 
     private static QueueSession getSession(Message message) {

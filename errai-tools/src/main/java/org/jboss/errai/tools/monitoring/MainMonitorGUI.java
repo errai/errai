@@ -16,6 +16,8 @@
 
 package org.jboss.errai.tools.monitoring;
 
+import org.jboss.errai.bus.client.framework.MessageBus;
+
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -32,14 +34,16 @@ public class MainMonitorGUI extends JFrame {
     private JTabbedPane tabbedPane1;
     private ServerMonitorPanel serverMonitorPanel;
     private Map<Object, ServerMonitorPanel> remoteBuses;
+    private MessageBus serverBus;
 
-    public MainMonitorGUI() {
+    public MainMonitorGUI(MessageBus serverBus) {
+        this.serverBus = serverBus;
         System.setProperty("apple.laf.useScreenMenuBar", "true");
 
         setTitle(APPLICATION_NAME);
         getContentPane().add(tabbedPane1);
 
-        serverMonitorPanel = new ServerMonitorPanel(this);
+        serverMonitorPanel = new ServerMonitorPanel(this, serverBus);
         tabbedPane1.add("Server", serverMonitorPanel.getPanel());
 
         remoteBuses = new HashMap<Object, ServerMonitorPanel>();
@@ -59,17 +63,18 @@ public class MainMonitorGUI extends JFrame {
         if (remoteBuses.containsKey(id)) {
            return;
         }
-        ServerMonitorPanel newServerMonitor = new ServerMonitorPanel(this);
+        ServerMonitorPanel newServerMonitor = new ServerMonitorPanel(this, new ClientBusProxyImpl(serverBus));
         remoteBuses.put(id, newServerMonitor);
 
         tabbedPane1.add(String.valueOf(id), newServerMonitor.getPanel());
     }
-
+    
     public ServerMonitorPanel getRemoteBus(Object id) {
         return remoteBuses.get(id);
     }
 
     public static void main(String[] args) {
-        new MainMonitorGUI();
+        MainMonitorGUI monitor = new MainMonitorGUI(new ClientBusProxyImpl(null));
+        monitor.getServerMonitorPanel().addServiceName("Foo");
     }
 }

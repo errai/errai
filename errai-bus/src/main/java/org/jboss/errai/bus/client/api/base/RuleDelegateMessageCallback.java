@@ -52,4 +52,8 @@ public class RuleDelegateMessageCallback implements MessageCallback {
             this.delegate.callback(message);
         }
     }
+
+    public BooleanRoutingRule getRoutingRule() {
+        return routingRule;
+    }
 }

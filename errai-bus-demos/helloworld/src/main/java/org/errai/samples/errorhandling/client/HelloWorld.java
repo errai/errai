@@ -12,7 +12,6 @@ import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
 
 public class HelloWorld implements EntryPoint {
-
     /**
      * Get an instance of the MessageBus
      */
@@ -31,7 +30,6 @@ public class HelloWorld implements EntryPoint {
                 }, FooService.class).add(10, 5);
             }
         });
-
 
         RootPanel.get().add(button);
         RootPanel.get().add(label);

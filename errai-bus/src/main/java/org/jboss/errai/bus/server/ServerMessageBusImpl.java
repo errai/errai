@@ -737,6 +737,10 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
     };
 
+    public List<MessageCallback> getReceivers(String subject) {
+        return Collections.unmodifiableList(subscriptions.get(subject));
+    }
+
     private boolean isMonitor() {
         return this.busMonitor != null;
     }

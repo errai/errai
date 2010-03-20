@@ -16,10 +16,14 @@
 
 package org.jboss.errai.bus.server;
 
+import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.framework.BooleanRoutingRule;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.Payload;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
+
+import java.util.Enumeration;
+import java.util.List;
 
 /**
  * This interface, <tt>ServerMessageBus</tt>, extends the client's {@link org.jboss.errai.bus.client.framework.MessageBus},
@@ -82,4 +86,6 @@ public interface ServerMessageBus extends MessageBus {
      * @param service - the configuration to use
      */
     public void configure(ErraiServiceConfigurator service);
+
+    public List<MessageCallback> getReceivers(String subject);
 }

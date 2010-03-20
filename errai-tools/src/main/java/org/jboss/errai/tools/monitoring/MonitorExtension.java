@@ -47,7 +47,7 @@ public class MonitorExtension implements ErraiConfigExtension {
 
     public void configure(Map<Class, Provider> bindings, Map<String, Provider> resourceProviders) {
         if (Boolean.getBoolean("errai.tools.bus_monitor_attach")) {
-            monitorGUI = new MainMonitorGUI();
+            monitorGUI = new MainMonitorGUI(bus);
 
             workers = new ThreadPoolExecutor(2, 10, 1, TimeUnit.MINUTES, new ArrayBlockingQueue<Runnable>(10, false));
 
@@ -57,15 +57,17 @@ public class MonitorExtension implements ErraiConfigExtension {
                 MessageBus bus;
 
                 public void attach(MessageBus bus) {
-                    this.bus = bus;
+                    this.bus = bus;       
                 }
 
                 public void notifyNewSubscriptionEvent(final SubscriptionEvent event) {
-                    System.out.println("ADD:" + event.getSubject());
                     workers.execute(new Runnable() {
                         public void run() {
                             if (event.isRemote()) {
-                                monitorGUI.getRemoteBus(event.getSessionData()).addServiceName(event.getSubject());
+                                ServerMonitorPanel panel = monitorGUI.getRemoteBus(event.getSessionData());
+                                if (panel != null) {
+                                    panel.addServiceName(event.getSubject());
+                                }
 
                             } else {
                                 monitorGUI.getServerMonitorPanel().addServiceName(event.getSubject());
@@ -78,7 +80,10 @@ public class MonitorExtension implements ErraiConfigExtension {
                     workers.execute(new Runnable() {
                         public void run() {
                             if (event.isRemote()) {
-                                monitorGUI.getRemoteBus(event.getSessionData()).removeServiceName(event.getSubject());
+                                ServerMonitorPanel panel = monitorGUI.getRemoteBus(event.getSessionData());
+                                if (panel != null) {
+                                    panel.removeServiceName(event.getSubject());
+                                }
 
                             } else {
                                 monitorGUI.getServerMonitorPanel().removeServiceName(event.getSubject());
@@ -93,7 +98,6 @@ public class MonitorExtension implements ErraiConfigExtension {
                             monitorGUI.attachRemoteBus(queueId);
                         }
                     });
-
                 }
 
                 public void notifyIncomingMessageFromRemote(Object queue, Message message) {
