@@ -3,24 +3,17 @@ package org.jboss.errai.bus.server.servlet;
 import com.google.inject.Singleton;
 
 import com.sun.grizzly.comet.*;
-import org.jboss.errai.bus.client.api.Message;
+import com.sun.grizzly.comet.handlers.ReflectorCometHandler;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
-import org.jboss.errai.bus.server.MessageQueue;
-import org.mvel2.util.StringAppender;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedReader;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.CharBuffer;
-import java.util.Iterator;
-import java.util.List;
-
-import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
 
 /**
  * The <tt>GrizzlyCometServlet</tt> provides the HTTP-protocol gateway between the server bus and the client buses,
@@ -29,152 +22,81 @@ import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
 @Singleton
 public class GrizzlyCometServlet extends AbstractErraiServlet {
 
-    private String contextPath = null;
+    private ServletContext servletContext = null;
+    private CometContext context = null;
 
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
 
-        System.out.println("init !!!!!!!!!!!!");
+        servletContext = config.getServletContext();
+    }
 
-        ServletContext context = config.getServletContext();
-        contextPath = context.getContextPath() + "/in.erraiBus";
-        CometEngine.getEngine().register(contextPath);
+    private CometContext createCometContext(String id) {
+        CometEngine cometEngine = CometEngine.getEngine();
+        CometContext ctx = cometEngine.register(id);
+        ctx.setExpirationDelay(90 * 1000);
+        return ctx;
     }
 
     @Override
-    protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        System.out.println("doGet !!!!!!!!!!!!");
-
-        GrizzlyCometHandler handler = new GrizzlyCometHandler();
-        handler.attach(httpServletResponse);
-
-        CometEngine engine = CometEngine.getEngine();
-        CometContext context = engine.getCometContext(contextPath);
-
-        context.addCometHandler(handler);
-
-        try {
-            final MessageQueue queue = service.getBus().getQueue(httpServletRequest.getSession().getId());
-
-            if (queue == null)
-                sendDisconnectWithReason(httpServletResponse.getOutputStream(),
-                        "There is no queue associated with this session.");
-
-            synchronized (queue) {
-                pollQueue(queue, httpServletRequest, httpServletResponse);
-            }
-        }
-        catch (final Throwable t) {
-            t.printStackTrace();
-
-            httpServletResponse.setHeader("Cache-Control", "no-cache");
-            httpServletResponse.addHeader("Payload-Size", "1");
-            httpServletResponse.setContentType("application/json");
-            OutputStream stream = httpServletResponse.getOutputStream();
-
-            stream.write('[');
-
-            writeToOutputStream(stream, new MarshalledMessage() {
-                public String getSubject() {
-                    return "ClientBusErrors";
-                }
-
-                public Object getMessage() {
-                    StringBuilder b = new StringBuilder("{ErrorMessage:\"").append(t.getMessage()).append("\",AdditionalDetails:\"");
-                    for (StackTraceElement e : t.getStackTrace()) {
-                        b.append(e.toString()).append("<br/>");
-                    }
-
-                    return b.append("\"}").toString();
-                }
-            });
-
-            stream.write(']');
-        }
+        doPost(request, response);
     }
 
+
     @Override
-    protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         System.out.println("doPost !!!!!!!!!!!!");
 
-        CometEngine engine = CometEngine.getEngine();
-        CometContext<?> context = engine.getCometContext(contextPath);
+        String sessionId = request.getSession().getId();
+        HttpSession session = request.getSession();
 
-        context.notify(null);
+        if (context != null) {
+            context = (CometContext) session.getAttribute(sessionId);
+        } else {
+            context = createCometContext(sessionId);
 
-        BufferedReader reader = httpServletRequest.getReader();
-        StringAppender sb = new StringAppender(httpServletRequest.getContentLength());
-        CharBuffer buffer = CharBuffer.allocate(10);
+            GrizzlyCometHandler handler = new GrizzlyCometHandler();
 
-        int read;
-        while ((read = reader.read(buffer)) > 0) {
-            buffer.rewind();
-            for (; read > 0; read--) {
-                sb.append(buffer.get());
-            }
-            buffer.rewind();
+            handler.attach(response.getWriter());
+            context.addCometHandler(handler);
+
+            context.addAttribute("handler", handler);
+            session.setAttribute("handler", handler);
+            session.setAttribute(sessionId, context);
         }
 
-        for (Message msg : createCommandMessage(sessionProvider.getSession(httpServletRequest.getSession()), sb.toString())) {
-            service.store(msg);
-        }
+        System.out.println(request.getMethod() + "*********");
 
-        pollQueue(service.getBus().getQueue(httpServletRequest.getSession().getId()), httpServletRequest, httpServletResponse);
+        // do post, get, init, error/end
+
+        CometHandler ch = (CometHandler) session.getAttribute("handler");
+        context.notify("hello!", CometEvent.NOTIFY, ch);
     }
 
-    private static void pollQueue(MessageQueue queue, HttpServletRequest httpServletRequest,
-                                  HttpServletResponse httpServletResponse) throws IOException {
+    private class GrizzlyCometHandler extends ReflectorCometHandler {
 
-        queue.heartBeat();
+        @Override
+        public synchronized void onInitialize(CometEvent event) throws IOException {
+            System.out.println("onInit !!!!!!!!!!!");
 
-        List<MarshalledMessage> messages = queue.poll(false).getMessages();
-
-        httpServletResponse.setHeader("Cache-Control", "no-cache");
-        //    httpServletResponse.addHeader("Payload-Size", String.valueOf(messages.size()));
-        httpServletResponse.setContentType("application/json");
-        OutputStream stream = httpServletResponse.getOutputStream();
-
-        Iterator<MarshalledMessage> iter = messages.iterator();
-
-        stream.write('[');
-        while (iter.hasNext()) {
-            writeToOutputStream(stream, iter.next());
-            if (iter.hasNext()) {
-                stream.write(',');
-            }
-        }
-        stream.write(']');
-        stream.flush();
-    }
-
-
-    private class GrizzlyCometHandler implements CometHandler<HttpServletResponse> {
-        private HttpServletResponse response;
-
-        public void onInitialize(CometEvent event) throws IOException {
-            System.out.println("onInitialize !!!!!!!!!!!!");
+            // BEGIN
         }
 
-        public void onInterrupt(CometEvent event) throws IOException {
-            System.out.println("onInterr !!!!!!!!!!!!");
+        @Override
+        public synchronized void onEvent(CometEvent event) throws IOException {
+            System.out.println("onEvent !!!!!!!!!!!! " + event.getType());
+
+            // POST/GET
         }
 
-        public void onTerminate(CometEvent event) throws IOException {
-            System.out.println("onTerm !!!!!!!!!!!!");
+        @Override
+        public synchronized void onInterrupt(CometEvent cometEvent) throws IOException {
+            System.out.println("onInterr !!!!!!!!!!!");
 
-            onInterrupt(event);
-        }
-
-        public void attach(HttpServletResponse attachment) {
-            System.out.println("attach !!!!!!!!!!!!");
-
-            this.response = attachment;
-        }
-
-        public void onEvent(CometEvent event) throws IOException {
-            System.out.println("onEvent !!!!!!!!!!!!");
+            //END/ERROR
         }
     }
 }
