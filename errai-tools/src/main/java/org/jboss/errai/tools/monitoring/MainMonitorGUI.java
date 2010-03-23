@@ -19,32 +19,32 @@ package org.jboss.errai.tools.monitoring;
 import org.jboss.errai.bus.client.framework.MessageBus;
 
 import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-public class MainMonitorGUI extends JFrame {
+public class MainMonitorGUI extends JFrame implements Attachable {
     public static final String APPLICATION_NAME = "ErraiBus Monitor";
 
-    private JTabbedPane tabbedPane1;           
+    private JTabbedPane tabbedPane1;
     private ServerMonitorPanel serverMonitorPanel;
     private Map<Object, ServerMonitorPanel> remoteBuses;
     private MessageBus serverBus;
-    private DataStore dataStore;
 
-    public MainMonitorGUI(MessageBus serverBus) {
+    private Dataservice dataStore;
+
+    private ActivityProcessor processor;
+
+
+    public MainMonitorGUI(Dataservice service, MessageBus serverBus) {
         this.serverBus = serverBus;
-        System.setProperty("apple.laf.useScreenMenuBar", "true");
+        this.dataStore = service;
 
         setTitle(APPLICATION_NAME);
         getContentPane().add(tabbedPane1);
 
         serverMonitorPanel = new ServerMonitorPanel(this, serverBus, "Server");
+
         tabbedPane1.add("Server", serverMonitorPanel.getPanel());
 
         remoteBuses = new HashMap<Object, ServerMonitorPanel>();
@@ -52,10 +52,6 @@ public class MainMonitorGUI extends JFrame {
         setMinimumSize(new Dimension(600, 500));
         setSize(600, 500);
         setLocation(150, 150);
-
-        dataStore = new DataStore();
-
-        setVisible(true);
     }
 
     public ServerMonitorPanel getServerMonitorPanel() {
@@ -64,24 +60,46 @@ public class MainMonitorGUI extends JFrame {
 
     public void attachRemoteBus(Object id) {
         if (remoteBuses.containsKey(id)) {
-           return;
+            return;
         }
         ServerMonitorPanel newServerMonitor = new ServerMonitorPanel(this, new ClientBusProxyImpl(serverBus), String.valueOf(id));
+        newServerMonitor.attach(processor);
+
         remoteBuses.put(id, newServerMonitor);
 
         tabbedPane1.add(String.valueOf(id), newServerMonitor.getPanel());
     }
-    
-    public ServerMonitorPanel getRemoteBus(Object id) {
-        return remoteBuses.get(id);
+
+    public ServerMonitorPanel getBus(Object id) {
+        return "Server".equals(id) ? serverMonitorPanel : remoteBuses.get(id);
     }
 
-    public DataStore getDataStore() {
+    public Dataservice getDataStore() {
         return dataStore;
     }
 
-    public static void main(String[] args) {
-        MainMonitorGUI monitor = new MainMonitorGUI(new ClientBusProxyImpl(null));
-        monitor.getServerMonitorPanel().addServiceName("Foo");
+    public void attach(ActivityProcessor proc) {
+        this.processor = proc;
+
+        proc.registerEvent(EventType.BUS_EVENT, new MessageMonitor() {
+            public void monitorEvent(MessageEvent event) {
+                switch (event.getSubType()) {
+                    case REMOTE_ATTACHED:
+                        attachRemoteBus(event.getFromBus());
+                        break;
+                    case SERVER_SUBSCRIBE:
+                    case REMOTE_SUBSCRIBE:
+                        getBus(event.getFromBus()).addServiceName(event.getSubject());
+                        break;
+                    case SERVER_UNSUBSCRIBE:
+                    case REMOTE_UNSUBSCRIBE:
+                        getBus(event.getFromBus()).removeServiceName(event.getSubject());
+                        break;
+                }
+            }
+        });
+
+        serverMonitorPanel.attach(proc);
     }
+
 }

@@ -32,5 +32,5 @@ public interface BusMonitor {
     public void notifyOutgoingMessageToRemote(Object queue, Message message);
     public void notifyInBusMessage(Message message);
 
-    public void notifyMessageDeliveryFailure(Object queue, Message mesage);
+    public void notifyMessageDeliveryFailure(Object queue, Message mesage, Throwable error);
 }

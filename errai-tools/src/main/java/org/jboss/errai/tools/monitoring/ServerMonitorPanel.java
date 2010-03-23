@@ -39,7 +39,7 @@ import java.util.Map;
 
 import static javax.swing.SwingUtilities.invokeLater;
 
-public class ServerMonitorPanel {
+public class ServerMonitorPanel implements Attachable {
     private MainMonitorGUI mainMonitorGUI;
     private MessageBus messageBus;
     private String busId;
@@ -56,6 +56,8 @@ public class ServerMonitorPanel {
 
     private String currentlySelectedService;
 
+    private ActivityProcessor processor;
+
     private Map<String, ServiceActityMonitor> monitors = new HashMap<String, ServiceActityMonitor>();
 
     public ServerMonitorPanel(MainMonitorGUI gui, MessageBus bus, String busId) {
@@ -67,6 +69,7 @@ public class ServerMonitorPanel {
         busServices.setDoubleBuffered(true);
         busServices.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
         busServices.setModel(busServicesModel = new DefaultListModel());
+        busServices.setCellRenderer(new ServicesListCellRender());
 
         busServices.addListSelectionListener(new ListSelectionListener() {
             public void valueChanged(ListSelectionEvent e) {
@@ -109,6 +112,13 @@ public class ServerMonitorPanel {
             }
         });
 
+        activityConsoleButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                  openServerLog();
+            }
+        });
+
+
         DefaultTreeModel model = (DefaultTreeModel) serviceExplorer.getModel();
         ((DefaultMutableTreeNode) serviceExplorer.getModel().getRoot()).removeAllChildren();
         serviceExplorer.setRootVisible(false);
@@ -120,12 +130,22 @@ public class ServerMonitorPanel {
         model.reload();
     }
 
+    public void attach(ActivityProcessor proc) {
+       this.processor = proc;
+    }
+
     private void openActivityMonitor() {
         if (monitors.containsKey(getCurrentServiceSelection())) {
             monitors.get(currentlySelectedService).toFront();
         } else {
-            monitors.put(currentlySelectedService, new ServiceActityMonitor(this, busId, currentlySelectedService));
+            ServiceActityMonitor sam = new ServiceActityMonitor(this, busId, currentlySelectedService);
+            sam.attach(processor);
+            monitors.put(currentlySelectedService, sam);
         }
+    }
+
+    private void openServerLog() {
+       // new ServerLogPanel();
     }
 
     void stopMonitor(String service) {
@@ -145,7 +165,6 @@ public class ServerMonitorPanel {
                     busServicesModel.addElement(serviceName);
                 }
             });
-
         }
     }
 
@@ -203,7 +222,7 @@ public class ServerMonitorPanel {
                                 new DefaultMutableTreeNode(rule.getRoles().isEmpty() ? "Requires Authentication" : "Roles Required");
 
                         for (Object o : rule.getRoles()) {
-                            DefaultMutableTreeNode roleNode = new DefaultMutableTreeNode(String.valueOf(o));
+                       //     DefaultMutableTreeNode roleNode = new DefaultMutableTreeNode(String.valueOf(o));
 
                             rolesNode.add(createIconEntry("key.png", String.valueOf(o)));
                         }
@@ -231,5 +250,13 @@ public class ServerMonitorPanel {
 
     private MutableTreeNode createIconEntry(String icon, String name) {
         return new DefaultMutableTreeNode(new JLabel(name, getIcon(icon), SwingConstants.LEFT));
+    }
+
+    public class ServicesListCellRender extends DefaultListCellRenderer {
+        @Override
+        public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+            setToolTipText(String.valueOf(value));
+            return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+        }
     }
 }

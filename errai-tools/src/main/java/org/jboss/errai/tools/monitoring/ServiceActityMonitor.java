@@ -22,7 +22,6 @@ import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableColumnModel;
-import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
@@ -31,7 +30,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
-public class ServiceActityMonitor extends JFrame {
+public class ServiceActityMonitor extends JFrame implements Attachable {
 
     private ActivityMonitorTableModel tableModel;
 
@@ -44,7 +43,9 @@ public class ServiceActityMonitor extends JFrame {
     private String busId;
     private String service;
     private ServerMonitorPanel serverMonitor;
-    
+
+    ActivityProcessor.Handle handle;
+
     public ServiceActityMonitor(final ServerMonitorPanel serverMonitor, final String busId, final String service) {
         this.serverMonitor = serverMonitor;
         this.busId = busId;
@@ -60,13 +61,13 @@ public class ServiceActityMonitor extends JFrame {
         activityTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
 
         DefaultTableColumnModel defaultColumn = (DefaultTableColumnModel) activityTable.getColumnModel();
-     
+
         tableArea.add(activityTable);
         tableHeader.add(activityTable.getTableHeader());
 
         Point point = serverMonitor.getMainMonitorGUI().getLocation();
         setLocation(point.x + 20, point.y + 20);
-        setSize(500,300);
+        setSize(500, 300);
 
         getContentPane().add(rootPanel);
         defaultColumn.getColumn(0).setResizable(false);
@@ -85,6 +86,7 @@ public class ServiceActityMonitor extends JFrame {
             }
 
             public void windowClosed(WindowEvent e) {
+                handle.dispose();
                 serverMonitor.stopMonitor(service);
             }
 
@@ -100,13 +102,7 @@ public class ServiceActityMonitor extends JFrame {
             public void windowDeactivated(WindowEvent e) {
             }
         });
-        
-        java.util.List<DataStore.Record> r
-                = serverMonitor.getMainMonitorGUI().getDataStore().getAllMessages(busId, service);
 
-        for (DataStore.Record rec : r) {
-            notifyMessage(rec.getMessage());
-        }
     }
 
     public class AcvityLogEntry {
@@ -177,7 +173,7 @@ public class ServiceActityMonitor extends JFrame {
 
         public void addMessage(Message message) {
             messages.add(new AcvityLogEntry(System.currentTimeMillis(), message));
-            fireTableRowsInserted(messages.size() - 1, messages.size() -1);
+            fireTableRowsInserted(messages.size() - 1, messages.size() - 1);
         }
     }
 
@@ -185,10 +181,21 @@ public class ServiceActityMonitor extends JFrame {
         tableModel.addMessage(message);
     }
 
+    public void attach(ActivityProcessor proc) {
+        handle = proc.registerEvent(EventType.MESSAGE, new MessageMonitor() {
+            public void monitorEvent(MessageEvent event) {
+                if (service.equals(event.getSubject()))
+                    notifyMessage((Message) event.getContents());
+            }
+        });
+
+        proc.notifyEvent(EventType.REPLAY_MESSAGES, SubEventType.NONE, busId, busId, service, null, null, false);
+    }
+
     public class MessageCellRenderer extends DefaultTableCellRenderer {
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
             setToolTipText(String.valueOf(value));
-            return super.getTableCellRendererComponent(table,value,isSelected,hasFocus, row, column);
+            return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         }
     }
 }

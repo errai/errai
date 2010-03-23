@@ -26,17 +26,18 @@ import org.jboss.errai.bus.server.ServerMessageBusImpl;
 import org.jboss.errai.bus.server.annotations.ExtensionComponent;
 import org.jboss.errai.bus.server.ext.ErraiConfigExtension;
 
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import static java.lang.System.currentTimeMillis;
+
 @ExtensionComponent
 public class MonitorExtension implements ErraiConfigExtension {
     private MessageBus bus;
-    private MainMonitorGUI monitorGUI;
+    private ActivityProcessor proc;
+
 
     private ThreadPoolExecutor workers;
 
@@ -47,89 +48,62 @@ public class MonitorExtension implements ErraiConfigExtension {
 
     public void configure(Map<Class, Provider> bindings, Map<String, Provider> resourceProviders) {
         if (Boolean.getBoolean("errai.tools.bus_monitor_attach")) {
-            monitorGUI = new MainMonitorGUI(bus);
-
-            workers = new ThreadPoolExecutor(2, 10, 1, TimeUnit.MINUTES, new ArrayBlockingQueue<Runnable>(10, false));
-
             ServerMessageBusImpl sBus = (ServerMessageBusImpl) bus;
+
+            proc = new ActivityProcessor();
+
+            new Bootstrapper(proc, bus).init();
+            
 
             sBus.attachMonitor(new BusMonitor() {
                 MessageBus bus;
 
                 public void attach(MessageBus bus) {
-                    this.bus = bus;       
+                    this.bus = bus;
                 }
 
                 public void notifyNewSubscriptionEvent(final SubscriptionEvent event) {
-                    workers.execute(new Runnable() {
-                        public void run() {
-                            if (event.isRemote()) {
-                                ServerMonitorPanel panel = monitorGUI.getRemoteBus(event.getSessionData());
-                                if (panel != null) {
-                                    panel.addServiceName(event.getSubject());
-                                }
-
-                            } else {
-                                monitorGUI.getServerMonitorPanel().addServiceName(event.getSubject());
-                            }
-                        }
-                    });
+                    if (event.isRemote()) {
+                        proc.notifyEvent(EventType.BUS_EVENT, SubEventType.REMOTE_SUBSCRIBE,
+                                String.valueOf(event.getSessionData()), "Server", event.getSubject(), null, null, false);
+                    } else {
+                        proc.notifyEvent(EventType.BUS_EVENT, SubEventType.SERVER_SUBSCRIBE,
+                                "Server", "Server", event.getSubject(), null, null, false);
+                    }
                 }
 
                 public void notifyUnSubcriptionEvent(final SubscriptionEvent event) {
-                    workers.execute(new Runnable() {
-                        public void run() {
-                            if (event.isRemote()) {
-                                ServerMonitorPanel panel = monitorGUI.getRemoteBus(event.getSessionData());
-                                if (panel != null) {
-                                    panel.removeServiceName(event.getSubject());
-                                }
-
-                            } else {
-                                monitorGUI.getServerMonitorPanel().removeServiceName(event.getSubject());
-                            }
-                        }
-                    });
+                    if (event.isRemote()) {
+                        proc.notifyEvent(EventType.BUS_EVENT, SubEventType.REMOTE_UNSUBSCRIBE,
+                                String.valueOf(event.getSessionData()), "Server", event.getSubject(), null, null, false);
+                    } else {
+                        proc.notifyEvent(EventType.BUS_EVENT, SubEventType.SERVER_UNSUBSCRIBE,
+                                "Server", "Server", event.getSubject(), null, null, false);
+                    }
                 }
 
                 public void notifyQueueAttached(final Object queueId, Object queueInstance) {
-                    workers.execute(new Runnable() {
-                        public void run() {
-                            monitorGUI.attachRemoteBus(queueId);
-                        }
-                    });
+                    proc.notifyEvent(EventType.BUS_EVENT, SubEventType.REMOTE_ATTACHED, String.valueOf(queueId), "Server", null, null, null, false);
                 }
 
-                public void notifyIncomingMessageFromRemote(Object queue, Message message) {
-                    updateMonitor(message);
+                public void notifyIncomingMessageFromRemote(Object queue, final Message message) {
+                    proc.notifyEvent(EventType.MESSAGE, SubEventType.RX_REMOTE, String.valueOf(queue), "Server", message.getSubject(), message, null, false);
                 }
 
-                public void notifyOutgoingMessageToRemote(Object queue, Message message) {
-                    updateMonitor(message);
+                public void notifyOutgoingMessageToRemote(Object queue, final Message message) {
+                    proc.notifyEvent(EventType.MESSAGE, SubEventType.TX_REMOTE, "Server", String.valueOf(queue), message.getSubject(), message, null, false);
                 }
 
                 public void notifyInBusMessage(Message message) {
-                    updateMonitor(message);
+                    proc.notifyEvent(EventType.MESSAGE, SubEventType.INBUS, "Server", "Server", message.getSubject(), message, null, false);
+
                 }
 
-                public void notifyMessageDeliveryFailure(Object queue, Message mesage) {
-                }
-
-                private void updateMonitor(final Message m) {
-                    workers.execute(new Runnable() {
-                        public void run() {
-                            monitorGUI.getDataStore()
-                                    .storeRecord(System.currentTimeMillis(), "Server", m.getSubject(), m);
-                            
-                            ServiceActityMonitor s = monitorGUI.getServerMonitorPanel().getMonitor(m.getSubject());
-                            if (s != null) s.notifyMessage(m);
-                        }
-                    });
+                public void notifyMessageDeliveryFailure(Object queue, Message message, Throwable throwable) {
+                    proc.notifyEvent(EventType.ERROR, SubEventType.INBUS, String.valueOf(queue), "Server", message.getSubject(),message, throwable, false);
                 }
             });
 
-
-            monitorGUI.setVisible(true);
         }
     }
 }
