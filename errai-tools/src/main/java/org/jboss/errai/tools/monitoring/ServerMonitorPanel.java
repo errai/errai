@@ -58,7 +58,7 @@ public class ServerMonitorPanel implements Attachable {
 
     private ActivityProcessor processor;
 
-    private Map<String, ServiceActityMonitor> monitors = new HashMap<String, ServiceActityMonitor>();
+    private Map<String, ServiceActivityMonitor> monitors = new HashMap<String, ServiceActivityMonitor>();
 
     public ServerMonitorPanel(MainMonitorGUI gui, MessageBus bus, String busId) {
         this.mainMonitorGUI = gui;
@@ -145,7 +145,7 @@ public class ServerMonitorPanel implements Attachable {
         if (monitors.containsKey(getCurrentServiceSelection())) {
             monitors.get(currentlySelectedService).toFront();
         } else {
-            ServiceActityMonitor sam = new ServiceActityMonitor(this, busId, currentlySelectedService);
+            ServiceActivityMonitor sam = new ServiceActivityMonitor(this, busId, currentlySelectedService);
             sam.attach(processor);
             monitors.put(currentlySelectedService, sam);
         }
@@ -190,7 +190,7 @@ public class ServerMonitorPanel implements Attachable {
         }
     }
 
-    public ServiceActityMonitor getMonitor(String monitor) {
+    public ServiceActivityMonitor getMonitor(String monitor) {
         return monitors.get(monitor);
     }
 
