@@ -37,7 +37,6 @@ public class ServiceActityMonitor extends JFrame implements Attachable {
     private JPanel rootPanel;
     private JPanel tableArea;
     private JButton pauseButton;
-    private JScrollPane tableScroll;
     private JPanel tableHeader;
 
     private String busId;
@@ -56,13 +55,12 @@ public class ServiceActityMonitor extends JFrame implements Attachable {
         tableModel = new ActivityMonitorTableModel();
 
         JTable activityTable = new JTable(tableModel);
-        activityTable.setModel(tableModel);
         activityTable.setDefaultRenderer(Message.class, new MessageCellRenderer());
         activityTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
 
         DefaultTableColumnModel defaultColumn = (DefaultTableColumnModel) activityTable.getColumnModel();
 
-        tableArea.add(activityTable);
+        tableArea.add(new JScrollPane(activityTable));
         tableHeader.add(activityTable.getTableHeader());
 
         Point point = serverMonitor.getMainMonitorGUI().getLocation();

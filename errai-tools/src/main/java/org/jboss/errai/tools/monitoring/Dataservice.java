@@ -131,9 +131,9 @@ public class Dataservice implements Attachable {
         }
     }
 
-    public void storeBusEvent(long time, SubEventType subEventType, String fromBus, String toBus, String service, Message message) {
+    public void storeBusEvent(long time, SubEventType subEventType, String fromBus, String toBus, String service, Object message) {
         try {
-            PreparedStatement stmt = c.prepareStatement("INSERT INTO MONITORDB (EVENT_TYPE, SUBEVENT_TYPE, TM, BUS_ID, SERVICE_NAME, MESSAGE_OBJ) VALUES (?, ?, ?, ?, ?, ?)");
+            PreparedStatement stmt = c.prepareStatement("INSERT INTO MONITORDB (EVENT_TYPE, SUBEVENT_TYPE, TM, BUS_ID, TO_BUS_ID, SERVICE_NAME, MESSAGE_OBJ) VALUES (?, ?, ?, ?, ?, ?, ?)");
             stmt.setInt(1, EventType.BUS_EVENT.ordinal());
             stmt.setInt(2, subEventType.ordinal());
             stmt.setLong(3, time);
@@ -164,10 +164,10 @@ public class Dataservice implements Attachable {
     }
 
 
-    public List<Record> getAllMessages(String busId, String service) {
+    public List<Record> getAllMessages(EventType type, String busId, String service) {
         try {
             PreparedStatement stmt = c.prepareStatement("SELECT * FROM MONITORDB WHERE EVENT_TYPE=? AND TO_BUS_ID=? AND SERVICE_NAME=?");
-            stmt.setInt(1, EventType.MESSAGE.ordinal());
+            stmt.setInt(1, type.ordinal());
             stmt.setString(2, busId);
             stmt.setString(3, service);
             if (stmt.execute()) {
@@ -193,15 +193,32 @@ public class Dataservice implements Attachable {
         proc.registerEvent(EventType.MESSAGE, new MessageMonitor() {
             public void monitorEvent(MessageEvent event) {
                 if (!event.isReplay()) {
-                    storeRecord(System.currentTimeMillis(), event.getFromBus(), event.getToBus(), event.getSubject(), (Message) event.getContents());
+                    storeRecord(event.getTime(), event.getFromBus(), event.getToBus(), event.getSubject(), (Message) event.getContents());
                 }
             }
         });
 
+        proc.registerEvent(EventType.BUS_EVENT, new MessageMonitor() {
+            public void monitorEvent(MessageEvent event) {
+                if (!event.isReplay()) {
+                    storeBusEvent(event.getTime(), event.getSubType(), event.getFromBus(), event.getToBus(), event.getSubject(), event.getContents());
+                }
+            }
+        });
+
+
         proc.registerEvent(EventType.REPLAY_MESSAGES, new MessageMonitor() {
             public void monitorEvent(MessageEvent event) {
                 System.out.println("Replay Requested for:" + event.getSubject() + "@" + event.getFromBus());
-                for (Record r : getAllMessages(event.getFromBus(), event.getSubject())) {
+                for (Record r : getAllMessages(EventType.MESSAGE, event.getFromBus(), event.getSubject())) {
+                    proc.notifyEvent(EventType.values()[r.eventType], SubEventType.values()[r.subEventId], r.fromBus, r.toBus, r.service, (Message) r.message, null, true);
+                }
+            }
+        });
+
+        proc.registerEvent(EventType.REPLAY_BUS_EVENTS, new MessageMonitor() {
+            public void monitorEvent(MessageEvent event) {
+                for (Record r : getAllMessages(EventType.BUS_EVENT, event.getFromBus(), event.getSubject())) {
                     proc.notifyEvent(EventType.values()[r.eventType], SubEventType.values()[r.subEventId], r.fromBus, r.toBus, r.service, (Message) r.message, null, true);
                 }
             }

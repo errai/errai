@@ -62,6 +62,7 @@ public class MainMonitorGUI extends JFrame implements Attachable {
         if (remoteBuses.containsKey(id)) {
             return;
         }
+
         ServerMonitorPanel newServerMonitor = new ServerMonitorPanel(this, new ClientBusProxyImpl(serverBus), String.valueOf(id));
         newServerMonitor.attach(processor);
 

@@ -21,7 +21,6 @@ import org.jboss.errai.bus.client.api.base.RuleDelegateMessageCallback;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.server.ServerMessageBus;
 import org.jboss.errai.bus.server.security.auth.rules.RolesRequiredRule;
-import sun.swing.DefaultLookup;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -32,7 +31,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,6 +54,8 @@ public class ServerMonitorPanel implements Attachable {
 
     private String currentlySelectedService;
 
+    private ServerLogPanel logPanel;
+
     private ActivityProcessor processor;
 
     private Map<String, ServiceActityMonitor> monitors = new HashMap<String, ServiceActityMonitor>();
@@ -66,10 +66,16 @@ public class ServerMonitorPanel implements Attachable {
         this.busId = busId;
 
         serviceListScroll.setDoubleBuffered(true);
+        serviceListScroll.setMaximumSize(new Dimension(250, Integer.MAX_VALUE));
+
         busServices.setDoubleBuffered(true);
         busServices.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
         busServices.setModel(busServicesModel = new DefaultListModel());
         busServices.setCellRenderer(new ServicesListCellRender());
+
+
+        GridBagLayout layout = (GridBagLayout) rootPanel.getLayout();
+
 
         busServices.addListSelectionListener(new ListSelectionListener() {
             public void valueChanged(ListSelectionEvent e) {
@@ -80,13 +86,14 @@ public class ServerMonitorPanel implements Attachable {
 
         busServices.addMouseListener(new MouseListener() {
             long lastClick;
+
             public void mouseClicked(MouseEvent e) {
                 switch (e.getClickCount()) {
                     case 1:
                         lastClick = System.currentTimeMillis();
                         break;
                     case 2:
-                        if (!e.isConsumed() && (System.currentTimeMillis() - lastClick < 500))  {
+                        if (!e.isConsumed() && (System.currentTimeMillis() - lastClick < 500)) {
                             e.consume();
                             openActivityMonitor();
                         }
@@ -114,7 +121,7 @@ public class ServerMonitorPanel implements Attachable {
 
         activityConsoleButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                  openServerLog();
+                openServerLog();
             }
         });
 
@@ -131,7 +138,7 @@ public class ServerMonitorPanel implements Attachable {
     }
 
     public void attach(ActivityProcessor proc) {
-       this.processor = proc;
+        this.processor = proc;
     }
 
     private void openActivityMonitor() {
@@ -145,7 +152,10 @@ public class ServerMonitorPanel implements Attachable {
     }
 
     private void openServerLog() {
-       // new ServerLogPanel();
+        if (this.logPanel != null && this.logPanel.isVisible()) {
+            return;
+        }
+        this.logPanel = new ServerLogPanel(mainMonitorGUI);
     }
 
     void stopMonitor(String service) {
@@ -222,7 +232,7 @@ public class ServerMonitorPanel implements Attachable {
                                 new DefaultMutableTreeNode(rule.getRoles().isEmpty() ? "Requires Authentication" : "Roles Required");
 
                         for (Object o : rule.getRoles()) {
-                       //     DefaultMutableTreeNode roleNode = new DefaultMutableTreeNode(String.valueOf(o));
+                            //     DefaultMutableTreeNode roleNode = new DefaultMutableTreeNode(String.valueOf(o));
 
                             rolesNode.add(createIconEntry("key.png", String.valueOf(o)));
                         }

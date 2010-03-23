@@ -17,6 +17,7 @@
 package org.jboss.errai.tools.monitoring;
 
 public interface MessageEvent<T> {
+    public long getTime();
     public SubEventType getSubType();
     public String getSubject();
     public String getFromBus();

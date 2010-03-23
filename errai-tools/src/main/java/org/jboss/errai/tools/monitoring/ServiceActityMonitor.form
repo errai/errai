@@ -12,12 +12,6 @@
         <properties/>
         <border type="none"/>
         <children>
-          <scrollpane id="a9461" binding="tableScroll">
-            <constraints border-constraint="Center"/>
-            <properties/>
-            <border type="none"/>
-            <children/>
-          </scrollpane>
           <grid id="dfd8f" binding="tableHeader" layout-manager="BorderLayout" hgap="0" vgap="0">
             <constraints border-constraint="North"/>
             <properties/>
