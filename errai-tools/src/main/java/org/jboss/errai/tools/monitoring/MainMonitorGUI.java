@@ -43,6 +43,7 @@ public class MainMonitorGUI extends JFrame implements Attachable {
 
         setTitle(APPLICATION_NAME);
         getContentPane().add(tabbedPane1);
+        pack();
 
         serverMonitorPanel = new ServerMonitorPanel(this, serverBus, "Server");
 

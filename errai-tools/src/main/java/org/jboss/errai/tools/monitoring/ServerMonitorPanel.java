@@ -45,15 +45,12 @@ public class ServerMonitorPanel implements Attachable {
     private MessageBus messageBus;
     private String busId;
 
-    private JButton monitorButton;
     private JList busServices;
+    private JTree serviceExplorer;
+
     private final DefaultListModel busServicesModel;
 
-    private JButton activityConsoleButton;
     private JPanel rootPanel;
-    private JScrollPane serviceScrollPane;
-    private JTree serviceExplorer;
-    private JPanel serviceListArea;
 
     private String currentlySelectedService;
 
@@ -68,13 +65,30 @@ public class ServerMonitorPanel implements Attachable {
         this.messageBus = bus;
         this.busId = busId;
 
+        rootPanel = new JPanel();
+        rootPanel.setLayout(new BorderLayout());
+
+        JButton monitorButton = new JButton("Monitor...");
+        JButton activityConsoleButton = new JButton("Activity Console");
+
         busServices = new JList();
         busServices.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
         busServices.setModel(busServicesModel = new DefaultListModel());
         busServices.setCellRenderer(new ServicesListCellRender());
 
-        serviceListArea.add(new JScrollPane(busServices));
+        JScrollPane pane;
+        rootPanel.add(pane = new JScrollPane(busServices), BorderLayout.WEST);
+        pane.setPreferredSize(new Dimension(200 ,0));
 
+        serviceExplorer = new JTree();
+        rootPanel.add(new JScrollPane(serviceExplorer), BorderLayout.CENTER);
+
+        JPanel southPanel = new JPanel();
+        southPanel.setLayout(new BorderLayout());
+        rootPanel.add(southPanel, BorderLayout.SOUTH);
+
+        southPanel.add(activityConsoleButton, BorderLayout.WEST);
+        southPanel.add(monitorButton, BorderLayout.EAST);
 
         busServices.addListSelectionListener(new ListSelectionListener() {
             public void valueChanged(ListSelectionEvent e) {
