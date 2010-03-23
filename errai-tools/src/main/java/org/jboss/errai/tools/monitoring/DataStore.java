@@ -29,9 +29,6 @@ public class DataStore {
     public DataStore() {
         try {
             Class.forName("org.hsqldb.jdbcDriver").newInstance();
-
-            new File("monitordb").delete();
-
             c = DriverManager.getConnection("jdbc:hsqldb:file:monitordb", "sa", "");
             createDB();
         }
@@ -119,10 +116,7 @@ public class DataStore {
         catch (Throwable e) {
             throw new RuntimeException("error", e);
         }
-
     }
-
-   
 }
 
 

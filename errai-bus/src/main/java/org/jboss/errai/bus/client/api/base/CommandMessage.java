@@ -71,6 +71,7 @@ import java.util.Map;
  *
  * @see ConversationMessage
  */
+@SuppressWarnings({"GwtInconsistentSerializableClass"})
 public class CommandMessage implements Message {
     protected Map<String, Object> parts = new HashMap<String, Object>();
     protected Map<String, Object> resources;
@@ -471,6 +472,17 @@ public class CommandMessage implements Message {
      */
     @Override
     public String toString() {
-        return "CommandMessage(toSubject=" + getSubject() + ";CommandType=" + getCommandType() + ")";
+        return buildDescription();
+    }
+
+    private String buildDescription() {
+        StringBuilder append = new StringBuilder();
+        boolean f = false;
+        for (Map.Entry<String, Object> entry : parts.entrySet()) {
+            if (f) append.append(", ");
+            append.append(entry.getKey()).append("=").append(String.valueOf(entry.getValue()));
+            f = true;
+        }
+        return append.toString();
     }
 }

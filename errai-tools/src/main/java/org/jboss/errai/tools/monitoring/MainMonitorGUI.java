@@ -31,7 +31,7 @@ import java.util.Map;
 public class MainMonitorGUI extends JFrame {
     public static final String APPLICATION_NAME = "ErraiBus Monitor";
 
-    private JTabbedPane tabbedPane1;
+    private JTabbedPane tabbedPane1;           
     private ServerMonitorPanel serverMonitorPanel;
     private Map<Object, ServerMonitorPanel> remoteBuses;
     private MessageBus serverBus;

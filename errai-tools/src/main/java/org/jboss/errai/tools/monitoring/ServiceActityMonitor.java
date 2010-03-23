@@ -17,22 +17,19 @@
 package org.jboss.errai.tools.monitoring;
 
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.base.CommandMessage;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableColumnModel;
-import javax.swing.table.JTableHeader;
-import javax.swing.text.DateFormatter;
+import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.awt.event.WindowStateListener;
 import java.sql.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class ServiceActityMonitor extends JFrame {
 
@@ -47,8 +44,7 @@ public class ServiceActityMonitor extends JFrame {
     private String busId;
     private String service;
     private ServerMonitorPanel serverMonitor;
-
-
+    
     public ServiceActityMonitor(final ServerMonitorPanel serverMonitor, final String busId, final String service) {
         this.serverMonitor = serverMonitor;
         this.busId = busId;
@@ -60,8 +56,11 @@ public class ServiceActityMonitor extends JFrame {
 
         JTable activityTable = new JTable(tableModel);
         activityTable.setModel(tableModel);
-        DefaultTableColumnModel defaultColumn = (DefaultTableColumnModel) activityTable.getColumnModel();
+        activityTable.setDefaultRenderer(Message.class, new MessageCellRenderer());
+        activityTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
 
+        DefaultTableColumnModel defaultColumn = (DefaultTableColumnModel) activityTable.getColumnModel();
+     
         tableArea.add(activityTable);
         tableHeader.add(activityTable.getTableHeader());
 
@@ -70,9 +69,9 @@ public class ServiceActityMonitor extends JFrame {
         setSize(500,300);
 
         getContentPane().add(rootPanel);
-
-        defaultColumn.getColumn(0).setPreferredWidth(75);
-        defaultColumn.getColumn(1).setPreferredWidth(350);
+        defaultColumn.getColumn(0).setResizable(false);
+        defaultColumn.getColumn(0).setPreferredWidth(120);
+        defaultColumn.getColumn(0).setMaxWidth(120);
 
         setVisible(true);
 
@@ -101,7 +100,7 @@ public class ServiceActityMonitor extends JFrame {
             public void windowDeactivated(WindowEvent e) {
             }
         });
-
+        
         java.util.List<DataStore.Record> r
                 = serverMonitor.getMainMonitorGUI().getDataStore().getAllMessages(busId, service);
 
@@ -142,6 +141,9 @@ public class ServiceActityMonitor extends JFrame {
         private final String[] COLS
                 = {"Time", "Message Contents"};
 
+        private final Class[] TYPES
+                = {String.class, Message.class};
+
         private DateFormat formatter = new SimpleDateFormat("hh:mm:ss.SSS");
 
         @Override
@@ -162,12 +164,16 @@ public class ServiceActityMonitor extends JFrame {
                 case 0:
                     return formatter.format(new Date(messages.get(rowIndex).getTime()));
                 case 1:
-                    return messages.get(rowIndex).getMessage().toString();
+                    return messages.get(rowIndex).getMessage();
             }
 
             return null;
         }
-        
+
+        @Override
+        public Class<?> getColumnClass(int columnIndex) {
+            return TYPES[columnIndex];
+        }
 
         public void addMessage(Message message) {
             messages.add(new AcvityLogEntry(System.currentTimeMillis(), message));
@@ -177,5 +183,12 @@ public class ServiceActityMonitor extends JFrame {
 
     public void notifyMessage(Message message) {
         tableModel.addMessage(message);
+    }
+
+    public class MessageCellRenderer extends DefaultTableCellRenderer {
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            setToolTipText(String.valueOf(value));
+            return super.getTableCellRendererComponent(table,value,isSelected,hasFocus, row, column);
+        }
     }
 }
