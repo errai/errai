@@ -35,6 +35,7 @@ public class MainMonitorGUI extends JFrame {
     private ServerMonitorPanel serverMonitorPanel;
     private Map<Object, ServerMonitorPanel> remoteBuses;
     private MessageBus serverBus;
+    private DataStore dataStore;
 
     public MainMonitorGUI(MessageBus serverBus) {
         this.serverBus = serverBus;
@@ -43,7 +44,7 @@ public class MainMonitorGUI extends JFrame {
         setTitle(APPLICATION_NAME);
         getContentPane().add(tabbedPane1);
 
-        serverMonitorPanel = new ServerMonitorPanel(this, serverBus);
+        serverMonitorPanel = new ServerMonitorPanel(this, serverBus, "Server");
         tabbedPane1.add("Server", serverMonitorPanel.getPanel());
 
         remoteBuses = new HashMap<Object, ServerMonitorPanel>();
@@ -51,6 +52,8 @@ public class MainMonitorGUI extends JFrame {
         setMinimumSize(new Dimension(600, 500));
         setSize(600, 500);
         setLocation(150, 150);
+
+        dataStore = new DataStore();
 
         setVisible(true);
     }
@@ -63,7 +66,7 @@ public class MainMonitorGUI extends JFrame {
         if (remoteBuses.containsKey(id)) {
            return;
         }
-        ServerMonitorPanel newServerMonitor = new ServerMonitorPanel(this, new ClientBusProxyImpl(serverBus));
+        ServerMonitorPanel newServerMonitor = new ServerMonitorPanel(this, new ClientBusProxyImpl(serverBus), String.valueOf(id));
         remoteBuses.put(id, newServerMonitor);
 
         tabbedPane1.add(String.valueOf(id), newServerMonitor.getPanel());
@@ -71,6 +74,10 @@ public class MainMonitorGUI extends JFrame {
     
     public ServerMonitorPanel getRemoteBus(Object id) {
         return remoteBuses.get(id);
+    }
+
+    public DataStore getDataStore() {
+        return dataStore;
     }
 
     public static void main(String[] args) {

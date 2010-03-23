@@ -30,6 +30,8 @@ import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -40,6 +42,8 @@ import static javax.swing.SwingUtilities.invokeLater;
 public class ServerMonitorPanel {
     private MainMonitorGUI mainMonitorGUI;
     private MessageBus messageBus;
+    private String busId;
+
     private JButton monitorButton;
     private JScrollPane serviceListScroll;
     private JList busServices;
@@ -54,9 +58,10 @@ public class ServerMonitorPanel {
 
     private Map<String, ServiceActityMonitor> monitors = new HashMap<String, ServiceActityMonitor>();
 
-    public ServerMonitorPanel(MainMonitorGUI gui, MessageBus bus) {
+    public ServerMonitorPanel(MainMonitorGUI gui, MessageBus bus, String busId) {
         this.mainMonitorGUI = gui;
         this.messageBus = bus;
+        this.busId = busId;
 
         serviceListScroll.setDoubleBuffered(true);
         busServices.setDoubleBuffered(true);
@@ -70,13 +75,37 @@ public class ServerMonitorPanel {
             }
         });
 
+        busServices.addMouseListener(new MouseListener() {
+            long lastClick;
+            public void mouseClicked(MouseEvent e) {
+                switch (e.getClickCount()) {
+                    case 1:
+                        lastClick = System.currentTimeMillis();
+                        break;
+                    case 2:
+                        if (!e.isConsumed() && (System.currentTimeMillis() - lastClick < 500))  {
+                            e.consume();
+                            openActivityMonitor();
+                        }
+                }
+            }
+
+            public void mousePressed(MouseEvent e) {
+            }
+
+            public void mouseReleased(MouseEvent e) {
+            }
+
+            public void mouseEntered(MouseEvent e) {
+            }
+
+            public void mouseExited(MouseEvent e) {
+            }
+        });
+
         monitorButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                if (monitors.containsKey(getCurrentServiceSelection())) {
-                    monitors.get(currentlySelectedService).toFront();
-                } else {
-                    monitors.put(currentlySelectedService, new ServiceActityMonitor(mainMonitorGUI));
-                }
+                openActivityMonitor();
             }
         });
 
@@ -89,6 +118,18 @@ public class ServerMonitorPanel {
         serviceExplorer.getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
 
         model.reload();
+    }
+
+    private void openActivityMonitor() {
+        if (monitors.containsKey(getCurrentServiceSelection())) {
+            monitors.get(currentlySelectedService).toFront();
+        } else {
+            monitors.put(currentlySelectedService, new ServiceActityMonitor(this, busId, currentlySelectedService));
+        }
+    }
+
+    void stopMonitor(String service) {
+        monitors.remove(service);
     }
 
     private String getCurrentServiceSelection() {
@@ -163,7 +204,7 @@ public class ServerMonitorPanel {
 
                         for (Object o : rule.getRoles()) {
                             DefaultMutableTreeNode roleNode = new DefaultMutableTreeNode(String.valueOf(o));
-                          
+
                             rolesNode.add(createIconEntry("key.png", String.valueOf(o)));
                         }
 
@@ -178,6 +219,10 @@ public class ServerMonitorPanel {
         }
 
         model.reload();
+    }
+
+    public MainMonitorGUI getMainMonitorGUI() {
+        return mainMonitorGUI;
     }
 
     private Icon getIcon(String name) {

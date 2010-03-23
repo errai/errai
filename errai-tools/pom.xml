@@ -1,10 +1,13 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <name>Errai::Tools</name>
     <groupId>org.jboss.errai</groupId>
     <artifactId>errai-tools</artifactId>
     <version>1.1-SNAPSHOT</version>
     <packaging>jar</packaging>
+
+
 
     <!-- Parent -->
     <parent>
@@ -14,12 +17,22 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
+    <properties>
+        <hsqldb.version>1.8.0.7</hsqldb.version>        
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.jboss.errai</groupId>
             <artifactId>errai-bus</artifactId>
             <version>${version}</version>
         </dependency>
+        <dependency>
+            <groupId>hsqldb</groupId>
+            <artifactId>hsqldb</artifactId>
+            <version>${hsqldb.version}</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -47,7 +60,7 @@
                 </executions>
             </plugin>
 
-                <plugin>
+            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>ideauidesigner-maven-plugin</artifactId>
                 <version>1.0-beta-1</version>
@@ -85,10 +98,10 @@
                                     the plugin and remove all GWT related artifacts that are required
                                     to run the hosted mode.
                                 -->
-                                <delete dir="war/WEB-INF/classes" />
-                                <delete dir="war/WEB-INF/lib" />
-                                <delete dir="war/ClientService" />
-                                <delete dir="target" />
+                                <delete dir="war/WEB-INF/classes"/>
+                                <delete dir="war/WEB-INF/lib"/>
+                                <delete dir="war/ClientService"/>
+                                <delete dir="target"/>
                             </tasks>
                         </configuration>
                         <goals>

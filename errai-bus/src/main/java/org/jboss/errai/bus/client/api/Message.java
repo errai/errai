@@ -4,9 +4,10 @@ import org.jboss.errai.bus.client.framework.RoutingFlags;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 
+import java.io.Serializable;
 import java.util.Map;
 
-public interface Message {
+public interface Message extends Serializable {
 
     /**
      * Sets the subject of this message, which is the intended recipient, and returns the message

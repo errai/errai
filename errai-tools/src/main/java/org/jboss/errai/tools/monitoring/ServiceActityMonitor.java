@@ -21,7 +21,16 @@ import org.jboss.errai.bus.client.api.base.CommandMessage;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.JTableHeader;
+import javax.swing.text.DateFormatter;
+import java.awt.*;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+import java.awt.event.WindowStateListener;
+import java.sql.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -34,29 +43,71 @@ public class ServiceActityMonitor extends JFrame {
     private JButton pauseButton;
     private JScrollPane tableScroll;
     private JPanel tableHeader;
-    private MainMonitorGUI monitorGUI;
 
-    public static void main(String[] args) {
-        ServiceActityMonitor sam = new ServiceActityMonitor(null);
-        sam.notifyMessage(CommandMessage.createWithParts(new HashMap()));
-    }
+    private String busId;
+    private String service;
+    private ServerMonitorPanel serverMonitor;
 
-    public ServiceActityMonitor(MainMonitorGUI monitorGUI) {
-        this.monitorGUI = monitorGUI;
+
+    public ServiceActityMonitor(final ServerMonitorPanel serverMonitor, final String busId, final String service) {
+        this.serverMonitor = serverMonitor;
+        this.busId = busId;
+        this.service = service;
+
+        setTitle(service + "@" + busId);
 
         tableModel = new ActivityMonitorTableModel();
 
         JTable activityTable = new JTable(tableModel);
         activityTable.setModel(tableModel);
+        DefaultTableColumnModel defaultColumn = (DefaultTableColumnModel) activityTable.getColumnModel();
 
         tableArea.add(activityTable);
         tableHeader.add(activityTable.getTableHeader());
 
+        Point point = serverMonitor.getMainMonitorGUI().getLocation();
+        setLocation(point.x + 20, point.y + 20);
         setSize(500,300);
 
         getContentPane().add(rootPanel);
 
+        defaultColumn.getColumn(0).setPreferredWidth(75);
+        defaultColumn.getColumn(1).setPreferredWidth(350);
+
         setVisible(true);
+
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+
+        addWindowListener(new WindowListener() {
+            public void windowOpened(WindowEvent e) {
+            }
+
+            public void windowClosing(WindowEvent e) {
+            }
+
+            public void windowClosed(WindowEvent e) {
+                serverMonitor.stopMonitor(service);
+            }
+
+            public void windowIconified(WindowEvent e) {
+            }
+
+            public void windowDeiconified(WindowEvent e) {
+            }
+
+            public void windowActivated(WindowEvent e) {
+            }
+
+            public void windowDeactivated(WindowEvent e) {
+            }
+        });
+
+        java.util.List<DataStore.Record> r
+                = serverMonitor.getMainMonitorGUI().getDataStore().getAllMessages(busId, service);
+
+        for (DataStore.Record rec : r) {
+            notifyMessage(rec.getMessage());
+        }
     }
 
     public class AcvityLogEntry {
@@ -91,6 +142,8 @@ public class ServiceActityMonitor extends JFrame {
         private final String[] COLS
                 = {"Time", "Message Contents"};
 
+        private DateFormat formatter = new SimpleDateFormat("hh:mm:ss.SSS");
+
         @Override
         public String getColumnName(int column) {
             return COLS[column];
@@ -107,13 +160,14 @@ public class ServiceActityMonitor extends JFrame {
         public Object getValueAt(int rowIndex, int columnIndex) {
             switch (columnIndex) {
                 case 0:
-                    return messages.get(rowIndex).getTime();
+                    return formatter.format(new Date(messages.get(rowIndex).getTime()));
                 case 1:
                     return messages.get(rowIndex).getMessage().toString();
             }
 
             return null;
         }
+        
 
         public void addMessage(Message message) {
             messages.add(new AcvityLogEntry(System.currentTimeMillis(), message));

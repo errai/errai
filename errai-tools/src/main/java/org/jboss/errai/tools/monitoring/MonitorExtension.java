@@ -118,6 +118,9 @@ public class MonitorExtension implements ErraiConfigExtension {
                 private void updateMonitor(final Message m) {
                     workers.execute(new Runnable() {
                         public void run() {
+                            monitorGUI.getDataStore()
+                                    .storeRecord(System.currentTimeMillis(), "Server", m.getSubject(), m);
+                            
                             ServiceActityMonitor s = monitorGUI.getServerMonitorPanel().getMonitor(m.getSubject());
                             if (s != null) s.notifyMessage(m);
                         }
