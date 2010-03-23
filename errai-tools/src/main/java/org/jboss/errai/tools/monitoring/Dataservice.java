@@ -139,7 +139,7 @@ public class Dataservice implements Attachable {
             stmt.setLong(3, time);
             stmt.setString(4, fromBus);
             stmt.setString(5, toBus);
-            stmt.setString(6, service);
+            stmt.setString(6, service == null ? "N/A" : service);
             stmt.setObject(7, message);
             stmt.execute();
         }

@@ -29,21 +29,16 @@ import java.util.ArrayList;
 
 public class ServerLogPanel extends JFrame implements Attachable {
     private ServerLogModel serverLogModel;
-    private MainMonitorGUI mainMonitorGUI;
 
     private ActivityProcessor.Handle handle;
 
-//
     public ServerLogPanel(MainMonitorGUI mainMonitorGUI) {
 
         serverLogModel = new ServerLogModel();
         JTable activityTable = new JTable(serverLogModel);
-        activityTable.setModel(serverLogModel);
         activityTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
 
         getContentPane().add(new JScrollPane(activityTable));
-
-        //    tableHeader.add(activityTable.getTableHeader());
 
         Point point = mainMonitorGUI.getLocation();
         setLocation(point.x + 20, point.y + 20);
@@ -72,6 +67,8 @@ public class ServerLogPanel extends JFrame implements Attachable {
             public void windowDeactivated(WindowEvent e) {
             }
         });
+
+        setTitle("Monitoring Bus");
 
         setVisible(true);
     }
@@ -158,6 +155,7 @@ public class ServerLogPanel extends JFrame implements Attachable {
     public void attach(ActivityProcessor proc) {
         handle = proc.registerEvent(EventType.BUS_EVENT, new MessageMonitor() {
             public void monitorEvent(MessageEvent event) {
+                System.out.println("RECV_EVENT");
                 addMessage(event.getTime(), EventType.BUS_EVENT, event.getSubType(), event.getContents());
             }
         });

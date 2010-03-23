@@ -52,9 +52,12 @@ public class MonitorExtension implements ErraiConfigExtension {
 
             proc = new ActivityProcessor();
 
-            new Bootstrapper(proc, bus).init();
-            
-
+            try {
+                new Bootstrapper(proc, bus).init();
+            }
+            catch (Throwable t) {
+                t.printStackTrace();
+            }
             sBus.attachMonitor(new BusMonitor() {
                 MessageBus bus;
 
@@ -100,7 +103,7 @@ public class MonitorExtension implements ErraiConfigExtension {
                 }
 
                 public void notifyMessageDeliveryFailure(Object queue, Message message, Throwable throwable) {
-                    proc.notifyEvent(EventType.ERROR, SubEventType.INBUS, String.valueOf(queue), "Server", message.getSubject(),message, throwable, false);
+                    proc.notifyEvent(EventType.ERROR, SubEventType.INBUS, String.valueOf(queue), "Server", message.getSubject(), message, throwable, false);
                 }
             });
 

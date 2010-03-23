@@ -43,7 +43,6 @@ public class ServerMonitorPanel implements Attachable {
     private String busId;
 
     private JButton monitorButton;
-    private JScrollPane serviceListScroll;
     private JList busServices;
     private final DefaultListModel busServicesModel;
 
@@ -51,6 +50,7 @@ public class ServerMonitorPanel implements Attachable {
     private JPanel rootPanel;
     private JScrollPane serviceScrollPane;
     private JTree serviceExplorer;
+    private JPanel serviceListArea;
 
     private String currentlySelectedService;
 
@@ -65,17 +65,13 @@ public class ServerMonitorPanel implements Attachable {
         this.messageBus = bus;
         this.busId = busId;
 
-        serviceListScroll.setDoubleBuffered(true);
-        serviceListScroll.setMaximumSize(new Dimension(250, Integer.MAX_VALUE));
-
-        busServices.setDoubleBuffered(true);
+        busServices = new JList();
         busServices.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
         busServices.setModel(busServicesModel = new DefaultListModel());
         busServices.setCellRenderer(new ServicesListCellRender());
 
-
-        GridBagLayout layout = (GridBagLayout) rootPanel.getLayout();
-
+        serviceListArea.add(new JScrollPane(busServices));
+        
 
         busServices.addListSelectionListener(new ListSelectionListener() {
             public void valueChanged(ListSelectionEvent e) {
@@ -156,6 +152,7 @@ public class ServerMonitorPanel implements Attachable {
             return;
         }
         this.logPanel = new ServerLogPanel(mainMonitorGUI);
+        this.logPanel.attach(processor);
     }
 
     void stopMonitor(String service) {
