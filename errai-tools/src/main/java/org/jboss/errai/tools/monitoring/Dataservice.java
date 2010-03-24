@@ -166,10 +166,14 @@ public class Dataservice implements Attachable {
 
     public List<Record> getAllMessages(EventType type, String busId, String service) {
         try {
-            PreparedStatement stmt = c.prepareStatement("SELECT * FROM MONITORDB WHERE EVENT_TYPE=? AND TO_BUS_ID=? AND SERVICE_NAME=?");
+            PreparedStatement stmt = c.prepareStatement("SELECT * FROM MONITORDB WHERE EVENT_TYPE=?" + (busId != null ? " AND TO_BUS_ID=?" : "") + (service != null ? " AND SERVICE_NAME=?" : ""));
+
             stmt.setInt(1, type.ordinal());
-            stmt.setString(2, busId);
-            stmt.setString(3, service);
+
+            int x = 2;
+            if (busId != null) stmt.setString(x++, busId);
+            if (service != null) stmt.setString(x, service);
+            
             if (stmt.execute()) {
                 ResultSet results = stmt.getResultSet();
 
@@ -218,7 +222,7 @@ public class Dataservice implements Attachable {
 
         proc.registerEvent(EventType.REPLAY_BUS_EVENTS, new MessageMonitor() {
             public void monitorEvent(MessageEvent event) {
-                for (Record r : getAllMessages(EventType.BUS_EVENT, event.getFromBus(), event.getSubject())) {
+                for (Record r : getAllMessages(EventType.BUS_EVENT, "Server", event.getSubject())) {
                     proc.notifyEvent(EventType.values()[r.eventType], SubEventType.values()[r.subEventId], r.fromBus, r.toBus, r.service, (Message) r.message, null, true);
                 }
             }
