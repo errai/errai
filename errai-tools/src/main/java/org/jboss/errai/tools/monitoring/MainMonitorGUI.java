@@ -42,13 +42,12 @@ public class MainMonitorGUI extends JFrame implements Attachable {
         tabbedPane1 = new JTabbedPane();
 
         setTitle(APPLICATION_NAME);
+
         getContentPane().add(tabbedPane1);
         pack();
 
         serverMonitorPanel = new ServerMonitorPanel(this, serverBus, "Server");
-
         tabbedPane1.add("Server", serverMonitorPanel.getPanel());
-
         remoteBuses = new HashMap<Object, ServerMonitorPanel>();
 
         setMinimumSize(new Dimension(600, 500));
@@ -93,7 +92,7 @@ public class MainMonitorGUI extends JFrame implements Attachable {
                     case SERVER_SUBSCRIBE:
                     case REMOTE_SUBSCRIBE:
                         if (!"Server".equals(event.getFromBus()) && !remoteBuses.containsKey(event.getFromBus())) {
-                             return;
+                            return;
                         }
 
                         getBus(event.getFromBus()).addServiceName(event.getSubject());

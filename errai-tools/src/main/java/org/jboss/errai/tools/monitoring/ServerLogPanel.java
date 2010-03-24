@@ -33,7 +33,6 @@ public class ServerLogPanel extends JFrame implements Attachable {
     private ActivityProcessor.Handle handle;
 
     public ServerLogPanel(MainMonitorGUI mainMonitorGUI) {
-
         serverLogModel = new ServerLogModel();
         JTable activityTable = new JTable(serverLogModel);
         activityTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
@@ -69,7 +68,6 @@ public class ServerLogPanel extends JFrame implements Attachable {
         });
 
         setTitle("Monitoring Bus");
-
         setVisible(true);
     }
 

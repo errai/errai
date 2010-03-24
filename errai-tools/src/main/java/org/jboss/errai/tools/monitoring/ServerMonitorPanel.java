@@ -138,7 +138,6 @@ public class ServerMonitorPanel implements Attachable {
             }
         });
 
-
         DefaultTreeModel model = (DefaultTreeModel) serviceExplorer.getModel();
         ((DefaultMutableTreeNode) serviceExplorer.getModel().getRoot()).removeAllChildren();
         serviceExplorer.setRootVisible(false);

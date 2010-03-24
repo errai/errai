@@ -32,46 +32,36 @@ public class ClientBusProxyImpl implements MessageBus {
     }
 
     public void sendGlobal(org.jboss.errai.bus.client.api.Message message) {
-        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     public void send(org.jboss.errai.bus.client.api.Message message) {
-        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     public void send(org.jboss.errai.bus.client.api.Message message, boolean fireListeners) {
-        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     public void conversationWith(org.jboss.errai.bus.client.api.Message message, MessageCallback callback) {
-        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     public void subscribe(String subject, MessageCallback receiver) {
-        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     public void unsubscribeAll(String subject) {
-        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     public boolean isSubscribed(String subject) {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+        return false;
     }
 
     public void addGlobalListener(MessageListener listener) {
-        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     public void addSubscribeListener(SubscribeListener listener) {
-        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     public void addUnsubscribeListener(UnsubscribeListener listener) {
-        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     public void attachMonitor(BusMonitor monitor) {
-        //To change body of implemented methods use File | Settings | File Templates.
     }
 }

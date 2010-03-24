@@ -31,10 +31,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 public class ServiceActivityMonitor extends JFrame implements Attachable {
-
     private ActivityMonitorTableModel tableModel;
-
-
+    
     private String busId;
     private String service;
     private ServerMonitorPanel serverMonitor;
@@ -57,13 +55,11 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
         DefaultTableColumnModel defaultColumn = (DefaultTableColumnModel) activityTable.getColumnModel();
 
         getContentPane().add(new JScrollPane(activityTable));
-        //    tableHeader.add(activityTable.getTableHeader());
 
         Point point = serverMonitor.getMainMonitorGUI().getLocation();
         setLocation(point.x + 20, point.y + 20);
         setSize(500, 300);
 
-//        getContentPane().add(rootPanel);
         defaultColumn.getColumn(0).setResizable(false);
         defaultColumn.getColumn(0).setPreferredWidth(120);
         defaultColumn.getColumn(0).setMaxWidth(120);
@@ -96,7 +92,6 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
             public void windowDeactivated(WindowEvent e) {
             }
         });
-
     }
 
     public class AcvityLogEntry {
