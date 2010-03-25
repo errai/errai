@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.util.*;
 
 /**
@@ -24,7 +25,9 @@ import java.util.*;
  * using Glassfish.
  */
 @Singleton
-public class GrizzlyCometServlet extends AbstractErraiServlet {
+public class GrizzlyCometServlet extends AbstractErraiServlet implements Serializable {
+
+    private static final long serialVersionUID = -2919167206889576861L;
 
     private CometContext context = null;
     private final Map<MessageQueue, QueueSession> queueToSession = new HashMap<MessageQueue, QueueSession>();
