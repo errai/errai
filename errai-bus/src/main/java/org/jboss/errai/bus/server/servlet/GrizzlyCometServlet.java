@@ -5,7 +5,6 @@ import com.google.inject.Singleton;
 import com.sun.grizzly.comet.CometContext;
 import com.sun.grizzly.comet.CometEngine;
 import com.sun.grizzly.comet.CometEvent;
-import com.sun.grizzly.comet.CometHandler;
 import com.sun.grizzly.comet.handlers.ReflectorCometHandler;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.server.MessageQueue;
@@ -30,7 +29,7 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
     private CometContext context = null;
     private final Map<MessageQueue, QueueSession> queueToSession = new HashMap<MessageQueue, QueueSession>();
     private final Map<QueueSession, Set<HttpServletResponse>> activeEvents = new HashMap<QueueSession, Set<HttpServletResponse>>();
-    private static final long serialVersionUID = -2919167206889576860L;
+    private ReflectorCometHandler handler = null;
 
     public void init(ServletConfig config) throws ServletException {
         super.init(config);    
@@ -62,17 +61,11 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
 
             context = createCometContext(sessionId);
 
-            ReflectorCometHandler handler = new ReflectorCometHandler(true, buildStartingMessage(response), "");
+            handler = new ReflectorCometHandler(true, buildStartingMessage(response), "");
 
             handler.attach(attach);
             context.addCometHandler(handler);
-
-            context.addAttribute("handler", handler);
-            session.setAttribute("handler", handler);
-            session.setAttribute(sessionId, context);
         } else {
-
-            context = session.getAttribute(CometContext.class, sessionId);
 
             boolean post = "POST".equals(request.getMethod());
 
@@ -83,8 +76,7 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
                     Set<HttpServletResponse> responses = activeEvents.get(session);
 
                     if (!post && queue.messagesWaiting()) {
-                        CometHandler ch = session.getAttribute(CometHandler.class, "handler");
-                        context.notify(getMessages(response, queue), CometEvent.NOTIFY, ch);
+                        context.notify(getMessages(response, queue), CometEvent.NOTIFY, handler);
                     }
 
                     if (!queueToSession.containsKey(queue))
@@ -104,7 +96,6 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
     }
 
     private String getMessages(final HttpServletResponse httpServletResponse, MessageQueue queue) throws IOException {
-        //  log.info("Transmitting messages to client (Queue:" + queue.hashCode() + ")");
         httpServletResponse.setHeader("Cache-Control", "no-cache");
         //    httpServletResponse.addHeader("Payload-Size", String.valueOf(messages.size()));
         httpServletResponse.setContentType("application/json");
@@ -219,7 +210,6 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
                 public void activate(MessageQueue queue) {
                     System.out.println("getQueue !!!!!! activate");
 
-                    //      log.info("Resume...");
                     if (resumed) {
                         return;
                     }
@@ -236,7 +226,6 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
                         if (session == null) {
                             System.out.println("getQueue !!!!!! session is null");
 
-                            log.error("Could not resume: No session.");
                             queue.stopQueue();
                             return;
                         }
@@ -244,7 +233,6 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
                         activeSessEvents = activeEvents.get(queueToSession.get(queue));
 
                         if (activeSessEvents == null || activeSessEvents.isEmpty()) {
-                            //        log.error("Nothing active man");
                             return;
                         }
 
@@ -257,9 +245,7 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
                         try {
 
                             System.out.println("getQueue !!!!!! second try block");
-
-                            CometHandler ch = session.getAttribute(CometHandler.class, "handler");
-                            context.notify(getMessages(hsr, queue), CometEvent.NOTIFY, ch);
+                            context.notify(getMessages(hsr, queue), CometEvent.NOTIFY, handler);
                         }
                         catch (NullPointerException e) {
 
