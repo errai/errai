@@ -1821,7 +1821,8 @@ public class WSGrid extends Composite implements RequiresResize {
         super.onAttach();
 
         int titleHeight = titleBar.getOffsetHeight();
-        innerPanel.setCellHeight(titleBar, titleHeight + "px");
+        if(titleHeight>0) // workaround https://jira.jboss.org/jira/browse/ERRAI-52
+          innerPanel.setCellHeight(titleBar, titleHeight + "px");
 
         if (resizeOnAttach) {
             for (int i = 0; i < colSizes.size(); i++) {

@@ -21,7 +21,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.resources.client.ImageResource;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 import org.gwt.mosaic.ui.client.layout.BoxLayout;
 import org.gwt.mosaic.ui.client.layout.BoxLayoutData;
@@ -80,7 +79,7 @@ public class WSToolSetLauncher extends LayoutPanel
     ImageResource resource = resourceFactory.createImage(tool.getName()) != null ?
         resourceFactory.createImage(tool.getName()) : erraiImageBundle.application();
 
-    WSLaunchButton button = new WSLaunchButton(new Image(resource), name);
+    WSLaunchButton button = new WSLaunchButton(resource, name);
     button.addClickListener(
         new ClickHandler()
         {          

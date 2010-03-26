@@ -18,7 +18,12 @@
             <groupId>org.jboss.errai</groupId>
             <artifactId>errai-bus</artifactId>
             <version>${version}</version>
-        </dependency>     
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.errai</groupId>
+            <artifactId>errai-tools</artifactId>
+            <version>${version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -34,7 +39,7 @@
                     <logLevel>DEBUG</logLevel>
                     <runTarget>ClientService.html</runTarget>
                     <warSourceDirectory>war</warSourceDirectory>
-                    <extraJvmArgs>-Xmx512m</extraJvmArgs>
+                    <extraJvmArgs>-Xmx512m -Derrai.tools.bus_monitor_attach=true</extraJvmArgs>
                     <soyc>false</soyc>
                 </configuration>
                 <executions>
