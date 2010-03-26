@@ -16,17 +16,21 @@
 
 package org.jboss.errai.workspaces.client.widgets;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 import org.gwt.mosaic.ui.client.layout.BoxLayout;
+import org.gwt.mosaic.ui.client.layout.BoxLayoutData;
 import org.gwt.mosaic.ui.client.layout.LayoutPanel;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.widgets.client.WSLaunchButton;
 import org.jboss.errai.workspaces.client.Workspace;
+import org.jboss.errai.workspaces.client.api.ResourceFactory;
 import org.jboss.errai.workspaces.client.api.Tool;
 import org.jboss.errai.workspaces.client.api.ToolSet;
 import org.jboss.errai.workspaces.client.icons.ErraiImageBundle;
@@ -48,7 +52,8 @@ public class WSToolSetLauncher extends LayoutPanel
   {
     super(new BoxLayout(BoxLayout.Orientation.VERTICAL));
     setPadding(3);
-   
+
+
      // widget, if available
     Widget w = toolSet.getWidget();
     this.toolSetId = id;
@@ -56,7 +61,7 @@ public class WSToolSetLauncher extends LayoutPanel
     if (w != null)
     {
       w.getElement().setId(toolSetId);
-      this.add(w);
+      this.add(w, new BoxLayoutData(BoxLayoutData.FillStyle.BOTH));
     }
 
     // tool links
@@ -70,23 +75,18 @@ public class WSToolSetLauncher extends LayoutPanel
 
   public void addLink(final String name, final Tool tool)
   {
-    Image newIcon;
-    if (tool.getIcon() != null) {
-      newIcon = new Image(tool.getIcon().getUrl());
-    }
-    else {
-      newIcon = new Image(erraiImageBundle.application());
-    }
+    ResourceFactory resourceFactory = GWT.create(ResourceFactory.class);
+    ErraiImageBundle erraiImageBundle = GWT.create(ErraiImageBundle.class);
+    ImageResource resource = resourceFactory.createImage(tool.getName()) != null ?
+        resourceFactory.createImage(tool.getName()) : erraiImageBundle.application();
 
-    newIcon.setSize("16px", "16px");
-
-    WSLaunchButton button = new WSLaunchButton(newIcon, name);
+    WSLaunchButton button = new WSLaunchButton(new Image(resource), name);
     button.addClickListener(
         new ClickHandler()
         {          
           public void onClick(ClickEvent clickEvent)
           {
-            System.out.println("Click " + tool.getId());
+            Log.debug("ToolID: "+ tool.getId());
 
             MessageBuilder.createMessage()
                 .toSubject(Workspace.SUBJECT)
@@ -98,6 +98,6 @@ public class WSToolSetLauncher extends LayoutPanel
           }
         }
     );
-    this.add(button);
+    this.add(button, new BoxLayoutData(BoxLayoutData.FillStyle.HORIZONTAL));
   }
 }

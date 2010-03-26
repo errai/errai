@@ -500,106 +500,46 @@ WSLogin {
 	border-bottom:1px solid #ccc;
 }
 
-/* decorator panel */
+/*** Decorator Panel***/
 
 .gwt-DecoratorPanel {
 
 }
-.gwt-DecoratorPanel .topCenter {
-    background:#ffffff;
-    border-top:1px solid #c4c4c4;
-}
+.gwt-DecoratorPanel .topCenter,
 .gwt-DecoratorPanel .bottomCenter {
-    background:#ffffff;
-    border-bottom:1px solid #c4c4c4;
+  background: #c4c4c4;
 }
-.gwt-DecoratorPanel .middleLeft {
-   border-left:1px solid #c4c4c4;
-   background:#fff;
-   overflow:hidden;
-   *zoom:1;
-   *padding-bottom:0.5em
-}
+.gwt-DecoratorPanel .middleLeft,
 .gwt-DecoratorPanel .middleRight {
-   border-right:1px solid #c4c4c4;
-   background:#fff;
-   overflow:hidden;
-   *zoom:1;
-   *padding-bottom:0.5em
+  background: #c4c4c4;
 }
-
 .gwt-DecoratorPanel .topLeftInner,
 .gwt-DecoratorPanel .topRightInner,
 .gwt-DecoratorPanel .bottomLeftInner,
 .gwt-DecoratorPanel .bottomRightInner {
-  width: 0px;
-  height: 0px;
+  width: 1px;
+  height: 1px;
   zoom: 1;
 }
 .gwt-DecoratorPanel .topLeft {
-    background:#ffffff;
+  background: #c4c4c4;
 }
 .gwt-DecoratorPanel .topRight {
-    background:#ffffff;
+  background: #c4c4c4;
 }
 .gwt-DecoratorPanel .bottomLeft {
-    background:#ffffff;
+  background: #c4c4c4;
 }
 .gwt-DecoratorPanel .bottomRight {
-    background:#ffffff;
+  background: #c4c4c4;
 }
 * html .gwt-DecoratorPanel .topLeftInner,
 * html .gwt-DecoratorPanel .topRightInner,
 * html .gwt-DecoratorPanel .bottomLeftInner,
 * html .gwt-DecoratorPanel .bottomRightInner {
-  width: 0px;
-  height: 0px;
+  width: 1px;
+  height: 1px;
   overflow: hidden;
-}
-
-/* this way analytics does it*/
-
-.round_border{
-	display:block
-}
-
-.round_border * {
-	background:#fff;
-	display:block;
-	height:1px;
-	overflow:hidden
-}
-
-.round_border_layer3{
-	background:#c4c4c4;
-	border-left:1px solid #d3d4d5;
-	border-right:1px solid #d3d4d5;
-	margin:0 3px;padding:0 1px;
-}
-
-.round_border_layer2{
-	border-left:1px solid #d3d4d5;
-	border-right:1px solid #d3d4d5;
-	margin:0 2px;padding:0;
-}
-.round_border_layer1{
-	border-left:1px solid #c4c4c4;
-	border-right:1px solid #c4c4c4;
-	margin:0 1px;
-}
-
-.round_border_content{
-	border-left:1px solid #c4c4c4;
-	border-right:1px solid #c4c4c4;
-	background:#fff;
-	overflow:hidden;
-	/*padding:4px 10px;*/
-	*zoom:1;
-	*padding-bottom:0.5em;
-}
-
-.round_border_content.min_size{
-	min-height:450px
 }
 
 /*** ScrollTable ***/
@@ -885,7 +825,7 @@ WSLogin {
 
 
 /* start - override gwt-log styles */
-.log-panel {
+.mosaic-layoutpanel .log-panel {
   background-color: #ECF2FC;
   border: 0px solid #ccc;
   margin: 0px;

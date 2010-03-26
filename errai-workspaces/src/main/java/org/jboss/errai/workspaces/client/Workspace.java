@@ -47,11 +47,12 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
   private static List<ToolSet> toolSets = new ArrayList<ToolSet>();
 
   private static Workspace instance;
-
+  
   public static Workspace createInstance(Menu menu)
   {
     if(null==instance)
       instance = new Workspace(menu);
+        
     return instance;
   }
 
