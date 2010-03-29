@@ -213,7 +213,7 @@ public class Dataservice implements Attachable {
 
         proc.registerEvent(EventType.REPLAY_MESSAGES, new MessageMonitor() {
             public void monitorEvent(MessageEvent event) {
-                System.out.println("Replay Requested for:" + event.getSubject() + "@" + event.getFromBus());
+               // System.out.println("Replay Requested for:" + event.getSubject() + "@" + event.getFromBus());
                 for (Record r : getAllMessages(EventType.MESSAGE, event.getFromBus(), event.getSubject())) {
                     proc.notifyEvent(EventType.values()[r.eventType], SubEventType.values()[r.subEventId], r.fromBus, r.toBus, r.service, (Message) r.message, null, true);
                 }

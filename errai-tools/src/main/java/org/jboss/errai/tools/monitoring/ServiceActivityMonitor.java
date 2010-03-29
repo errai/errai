@@ -17,10 +17,14 @@
 package org.jboss.errai.tools.monitoring;
 
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.base.CommandMessage;
 
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableColumnModel;
 import java.awt.*;
 import java.awt.event.WindowEvent;
@@ -29,10 +33,13 @@ import java.sql.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ServiceActivityMonitor extends JFrame implements Attachable {
     private ActivityMonitorTableModel tableModel;
-    
+    private MessageDetailsTableModel detailsModel;
+
     private String busId;
     private String service;
     private ServerMonitorPanel serverMonitor;
@@ -48,21 +55,52 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
 
         tableModel = new ActivityMonitorTableModel();
 
-        JTable activityTable = new JTable(tableModel);
+        final JTable activityTable = new JTable(tableModel);
         activityTable.setDefaultRenderer(Message.class, new MessageCellRenderer());
         activityTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
 
-        DefaultTableColumnModel defaultColumn = (DefaultTableColumnModel) activityTable.getColumnModel();
+        detailsModel = new MessageDetailsTableModel();
 
-        getContentPane().add(new JScrollPane(activityTable));
+        JTable detailsTable = new JTable(detailsModel);
+        activityTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
+
+        activityTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            public void valueChanged(ListSelectionEvent e) {
+                detailsModel.clear();
+
+                Message m = (Message) tableModel.getValueAt(activityTable.getSelectedRow(), 1);
+
+                for (Map.Entry<String, Object> entry : m.getParts().entrySet()) {
+                    detailsModel.addPart(entry.getKey(), String.valueOf(entry.getValue()));
+                }
+
+
+                detailsModel.fireTableRowsUpdated(0, m.getParts().size() - 1);
+                detailsModel.fireTableDataChanged();
+            }
+        });
+
+        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+                new JScrollPane(activityTable), new JScrollPane(detailsTable));
+        splitPane.setDividerLocation(150);
+
+        getContentPane().add(splitPane);
 
         Point point = serverMonitor.getMainMonitorGUI().getLocation();
         setLocation(point.x + 20, point.y + 20);
         setSize(500, 300);
 
+        DefaultTableColumnModel defaultColumn = (DefaultTableColumnModel) activityTable.getColumnModel();
+
         defaultColumn.getColumn(0).setResizable(false);
         defaultColumn.getColumn(0).setPreferredWidth(120);
         defaultColumn.getColumn(0).setMaxWidth(120);
+
+        defaultColumn = (DefaultTableColumnModel) detailsTable.getColumnModel();
+        defaultColumn.getColumn(0).setPreferredWidth(120);
+        defaultColumn.getColumn(0).setMaxWidth(250);
+
+
 
         setVisible(true);
 
@@ -164,6 +202,54 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
             messages.add(new AcvityLogEntry(System.currentTimeMillis(), message));
             fireTableRowsInserted(messages.size() - 1, messages.size() - 1);
         }
+
+
+    }
+
+    public class MessageDetailsTableModel extends AbstractTableModel {
+        private ArrayList<String> fields = new ArrayList<String>();
+        private ArrayList<String> values = new ArrayList<String>();
+
+        private final String[] COLS = {"Message Part", "Value"};
+        private final Class[] TYPES = {String.class, String.class};
+
+        @Override
+        public String getColumnName(int column) {
+            return COLS[column];
+        }
+
+        @Override
+        public Class<?> getColumnClass(int columnIndex) {
+            return TYPES[columnIndex];
+        }
+
+        public int getRowCount() {
+            return fields.size();
+        }
+
+        public int getColumnCount() {
+            return COLS.length;
+        }
+
+        public Object getValueAt(int rowIndex, int columnIndex) {
+            switch (columnIndex) {
+                case 0:
+                    return fields.get(rowIndex);
+                case 1:
+                    return values.get(rowIndex);
+            }
+            return null;
+        }
+
+        public void addPart(String field, String value) {
+            fields.add(field);
+            values.add(value);
+        }
+
+        public void clear() {
+            fields.clear();
+            values.clear();
+        }
     }
 
     public void notifyMessage(Message message) {
@@ -181,10 +267,4 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
         proc.notifyEvent(EventType.REPLAY_MESSAGES, SubEventType.NONE, busId, busId, service, null, null, false);
     }
 
-    public class MessageCellRenderer extends DefaultTableCellRenderer {
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            setToolTipText(String.valueOf(value));
-            return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-        }
-    }
 }
