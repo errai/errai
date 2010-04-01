@@ -621,7 +621,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             }
         });
 
-
         /**
          * Send initial message to connect to the queue, to establish an HTTP session. Otherwise, concurrent
          * requests will result in multiple sessions being created.  Which is bad.  Avoid this at all costs.

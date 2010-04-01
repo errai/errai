@@ -34,9 +34,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 import static javax.swing.SwingUtilities.invokeLater;
 
@@ -78,7 +77,7 @@ public class ServerMonitorPanel implements Attachable {
 
         JScrollPane pane;
         rootPanel.add(pane = new JScrollPane(busServices), BorderLayout.WEST);
-        pane.setPreferredSize(new Dimension(200 ,0));
+        pane.setPreferredSize(new Dimension(200, 0));
 
         serviceExplorer = new JTree();
         rootPanel.add(new JScrollPane(serviceExplorer), BorderLayout.CENTER);
@@ -214,7 +213,7 @@ public class ServerMonitorPanel implements Attachable {
     private void generateServiceExplorer() {
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) serviceExplorer.getModel().getRoot();
 
-        node.setUserObject(new JLabel(currentlySelectedService, getIcon("service.png"), SwingConstants.LEFT));
+        node.setUserObject(new JLabel(currentlySelectedService, getSwIcon("service.png"), SwingConstants.LEFT));
         node.removeAllChildren();
 
         serviceExplorer.setRootVisible(true);
@@ -267,19 +266,38 @@ public class ServerMonitorPanel implements Attachable {
         return mainMonitorGUI;
     }
 
-    private Icon getIcon(String name) {
+    private Icon getSwIcon(String name) {
         return new ImageIcon(this.getClass().getClassLoader().getResource(name));
     }
 
     private MutableTreeNode createIconEntry(String icon, String name) {
-        return new DefaultMutableTreeNode(new JLabel(name, getIcon(icon), SwingConstants.LEFT));
+        return new DefaultMutableTreeNode(new JLabel(name, getSwIcon(icon), SwingConstants.LEFT));
+    }
+
+    private static Set<String> builtInServices = new HashSet<String>();
+
+    static {
+        builtInServices.add("ServerBus");
+        builtInServices.add("AuthorizationService");
+        builtInServices.add("AuthenticationService");
+        builtInServices.add("ServerEchoService");
+
+        builtInServices.add("ClientBus");
+        builtInServices.add("ClientBusErrors");
     }
 
     public class ServicesListCellRender extends DefaultListCellRenderer {
         @Override
         public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-            setToolTipText(String.valueOf(value));
-            return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            String v = String.valueOf(value);
+            if (v.endsWith(":RPC")) {
+                setIcon(getSwIcon("database_connect.png"));
+            } else {
+                setIcon(builtInServices.contains(v) ? getSwIcon("database_key.png") : getSwIcon("database.png"));
+            }
+            setToolTipText(v);
+            return this;
         }
     }
 }

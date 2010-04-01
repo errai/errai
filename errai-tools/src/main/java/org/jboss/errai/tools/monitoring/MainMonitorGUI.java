@@ -23,6 +23,8 @@ import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.lang.String.valueOf;
+
 public class MainMonitorGUI extends JFrame implements Attachable {
     public static final String APPLICATION_NAME = "ErraiBus Monitor";
 
@@ -64,12 +66,12 @@ public class MainMonitorGUI extends JFrame implements Attachable {
             return;
         }
 
-        ServerMonitorPanel newServerMonitor = new ServerMonitorPanel(this, new ClientBusProxyImpl(serverBus), String.valueOf(id));
+        ServerMonitorPanel newServerMonitor = new ServerMonitorPanel(this, new ClientBusProxyImpl(serverBus), valueOf(id));
         newServerMonitor.attach(processor);
 
         remoteBuses.put(id, newServerMonitor);
 
-        tabbedPane1.add(String.valueOf(id), newServerMonitor.getPanel());
+        tabbedPane1.add(valueOf(id), newServerMonitor.getPanel());
     }
 
     public ServerMonitorPanel getBus(Object id) {
