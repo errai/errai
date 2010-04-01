@@ -73,8 +73,7 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
                 for (Map.Entry<String, Object> entry : m.getParts().entrySet()) {
                     detailsModel.addPart(entry.getKey(), String.valueOf(entry.getValue()));
                 }
-
-
+                                                    
                 detailsModel.fireTableRowsUpdated(0, m.getParts().size() - 1);
                 detailsModel.fireTableDataChanged();
             }
@@ -99,8 +98,6 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
         defaultColumn = (DefaultTableColumnModel) detailsTable.getColumnModel();
         defaultColumn.getColumn(0).setPreferredWidth(120);
         defaultColumn.getColumn(0).setMaxWidth(250);
-
-
 
         setVisible(true);
 
