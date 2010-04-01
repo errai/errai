@@ -64,6 +64,7 @@ public class ServerMonitorPanel implements Attachable {
         this.messageBus = bus;
         this.busId = busId;
 
+
         rootPanel = new JPanel();
         rootPanel.setLayout(new BorderLayout());
 
@@ -76,11 +77,18 @@ public class ServerMonitorPanel implements Attachable {
         busServices.setCellRenderer(new ServicesListCellRender());
 
         JScrollPane pane;
-        rootPanel.add(pane = new JScrollPane(busServices), BorderLayout.WEST);
-        pane.setPreferredSize(new Dimension(200, 0));
+        //   rootPanel.add(pane = new JScrollPane(busServices), BorderLayout.WEST);
+     //   pane.setPreferredSize(new Dimension(200, 0));
 
         serviceExplorer = new JTree();
-        rootPanel.add(new JScrollPane(serviceExplorer), BorderLayout.CENTER);
+        //   rootPanel.add(new JScrollPane(serviceExplorer), BorderLayout.CENTER);
+
+
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+                new JScrollPane(busServices), new JScrollPane(serviceExplorer));
+        splitPane.setDividerLocation(150);
+
+        rootPanel.add(splitPane, BorderLayout.CENTER);
 
         JPanel southPanel = new JPanel();
         southPanel.setLayout(new BorderLayout());
