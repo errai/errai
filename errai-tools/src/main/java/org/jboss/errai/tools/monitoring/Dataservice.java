@@ -17,6 +17,7 @@
 package org.jboss.errai.tools.monitoring;
 
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.base.CommandMessage;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -123,7 +124,12 @@ public class Dataservice implements Attachable {
             stmt.setString(3, fromBus);
             stmt.setString(4, toBus);
             stmt.setString(5, service);
-            stmt.setObject(6, message);
+            try {
+                stmt.setObject(6, message);
+            }
+            catch (Throwable t) {
+                stmt.setObject(6, CommandMessage.createWithParts(message.getParts()));
+            }
             stmt.execute();
         }
         catch (Throwable e) {
@@ -173,7 +179,7 @@ public class Dataservice implements Attachable {
             int x = 2;
             if (busId != null) stmt.setString(x++, busId);
             if (service != null) stmt.setString(x, service);
-            
+
             if (stmt.execute()) {
                 ResultSet results = stmt.getResultSet();
 
@@ -213,7 +219,7 @@ public class Dataservice implements Attachable {
 
         proc.registerEvent(EventType.REPLAY_MESSAGES, new MessageMonitor() {
             public void monitorEvent(MessageEvent event) {
-               // System.out.println("Replay Requested for:" + event.getSubject() + "@" + event.getFromBus());
+                // System.out.println("Replay Requested for:" + event.getSubject() + "@" + event.getFromBus());
                 for (Record r : getAllMessages(EventType.MESSAGE, event.getFromBus(), event.getSubject())) {
                     proc.notifyEvent(EventType.values()[r.eventType], SubEventType.values()[r.subEventId], r.fromBus, r.toBus, r.service, (Message) r.message, null, true);
                 }
