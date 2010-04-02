@@ -12,4 +12,9 @@ public class HasEncodedConvMessageWrapper extends ConversationMessageWrapper imp
     public String getEncoded() {
         return ((HasEncoded) newMessage).getEncoded();
     }
+
+    @Override
+    public String toString() {
+        return newMessage.toString();
+    }
 }

@@ -30,7 +30,7 @@ public class ActivityProcessor {
 
     public ActivityProcessor() {
         messageMonitors = new ArrayList<List<MessageMonitor>>(20);
-        workers = new ThreadPoolExecutor(2, 500, 1, TimeUnit.MINUTES, new ArrayBlockingQueue<Runnable>(500, false));
+        workers = new ThreadPoolExecutor(2, 500, 30, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(500, false));
     }
 
     private void padList(int size) {
