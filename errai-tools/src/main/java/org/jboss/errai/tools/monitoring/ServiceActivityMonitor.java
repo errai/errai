@@ -27,8 +27,7 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableColumnModel;
 import java.awt.*;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
+import java.awt.event.*;
 import java.sql.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -43,6 +42,10 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
     private String busId;
     private String service;
     private ServerMonitorPanel serverMonitor;
+
+    private boolean lockable;
+    private boolean scrollLock = true;
+    private int lastScrollAmount;
 
     ActivityProcessor.Handle handle;
 
@@ -79,9 +82,52 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
             }
         });
 
+
+        final JScrollPane activityScroll;
+
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-                new JScrollPane(activityTable), new JScrollPane(detailsTable));
+               activityScroll = new JScrollPane(activityTable), new JScrollPane(detailsTable));
         splitPane.setDividerLocation(150);
+
+        final JScrollBar vertScroll = activityScroll.getVerticalScrollBar();
+        vertScroll.addMouseListener(new MouseListener() {
+            public void mouseClicked(MouseEvent e) {
+            }
+
+            public void mousePressed(MouseEvent e) {
+                lockable = true;
+            }
+
+            public void mouseReleased(MouseEvent e) {
+               lockable = false;
+            }
+
+            public void mouseEntered(MouseEvent e) {
+            }
+
+            public void mouseExited(MouseEvent e) {
+            }
+        });
+
+        vertScroll.addMouseWheelListener(new MouseWheelListener() {
+            public void mouseWheelMoved(MouseWheelEvent e) {
+                lastScrollAmount = e.getScrollAmount();
+            }
+        });
+
+
+        vertScroll.addAdjustmentListener(new AdjustmentListener() {
+            public void adjustmentValueChanged(AdjustmentEvent e) {
+                if (lockable || lastScrollAmount != 0) {
+                    scrollLock = (e.getValue() == e.getAdjustable().getMaximum() - e.getAdjustable().getVisibleAmount());
+                    return;
+                }
+
+                lastScrollAmount = 0;
+
+                if (scrollLock) e.getAdjustable().setValue(e.getAdjustable().getMaximum());
+            }
+        });
 
         getContentPane().add(splitPane);
 
@@ -166,6 +212,8 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
 
         private DateFormat formatter = new SimpleDateFormat("hh:mm:ss.SSS");
 
+        private boolean scrollLock;
+
         @Override
         public String getColumnName(int column) {
             return COLS[column];
@@ -199,7 +247,6 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
             messages.add(new AcvityLogEntry(System.currentTimeMillis(), message));
             fireTableRowsInserted(messages.size() - 1, messages.size() - 1);
         }
-
 
     }
 

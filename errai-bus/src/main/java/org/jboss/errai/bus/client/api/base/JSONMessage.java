@@ -170,10 +170,6 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
      * @return -
      */
     public Message set(Enum part, Object value) {
-//        if (parts.containsKey(part.name()))
-//            throw new IllegalArgumentException("cannot set a part more than once.");
-//
-//        _addObjectPart(part.name(), value);
         return set(part.name(), value);
     }
 
