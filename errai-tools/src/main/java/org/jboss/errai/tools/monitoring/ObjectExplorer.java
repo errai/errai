@@ -17,19 +17,18 @@
 package org.jboss.errai.tools.monitoring;
 
 import org.mvel2.util.ParseTools;
-import org.mvel2.util.PropertyTools;
-import org.mvel2.util.ReflectionUtil;
 import org.mvel2.util.StringAppender;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.MutableTreeNode;
-
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Stack;
 
 import static org.jboss.errai.tools.monitoring.UiHelper.createIconEntry;
 import static org.jboss.errai.tools.monitoring.UiHelper.getSwIcon;
@@ -84,7 +83,11 @@ public class ObjectExplorer extends JTree {
     }
 
     public void renderFields(DefaultMutableTreeNode node, Class clazz, Object v) {
+        if (clazz == null) return;
 
+        if (clazz.isPrimitive()) {
+            renderField(this, "val", PrimitiveMarker.class, v);
+        }
 
         if (clazz.getSuperclass() != Object.class) {
             renderFields(node, clazz.getSuperclass(), v);
@@ -105,23 +108,23 @@ public class ObjectExplorer extends JTree {
 
     public static void renderField(ObjectExplorer explorer, String field, Class clazz, Object v) {
         if (clazz.isArray()) {
-            clazz = Object[].class;
+            clazz = ArrayMarker.class;
         }
 
-        Class boxed = boxPrimitive(clazz);
-        if (!renderers.containsKey(boxed)) {
+        //    Class boxed = boxPrimitive(clazz);
+        if (!renderers.containsKey(clazz)) {
             _scanClassHeirarchy(clazz, clazz);
         }
 
-//        if (!renderers.containsKey(clazz)) {
-//            System.out.println("Error: " + clazz);
-//        }
-
-        renderers.get(boxed).render(explorer, field, v);
+        renderers.get(clazz).render(explorer, field, v);
     }
 
     public static boolean _scanClassHeirarchy(Class clazz, Class root) {
-        root = boxPrimitive(root);
+        if (clazz.isPrimitive()) {
+            renderers.put(clazz, renderers.get(Object.class));
+            return true;
+        }
+
         do {
             if (renderers.containsKey(root)) {
                 renderers.put(boxPrimitive(clazz), renderers.get(root));
@@ -142,16 +145,17 @@ public class ObjectExplorer extends JTree {
             }
         });
 
-        renderers.put(Object[].class, new ValRenderer() {
+        renderers.put(ArrayMarker.class, new ValRenderer() {
             public void render(ObjectExplorer explorer, String name, Object val) {
                 DefaultMutableTreeNode arr = createIconEntry("field.png", fieldLabel(name, val));
                 explorer.nestNode(arr);
 
                 int length = Array.getLength(val);
+                Class type = val.getClass().getComponentType();
                 Object o;
                 for (int i = 0; i < length; i++) {
                     o = Array.get(val, i);
-                    explorer.renderFields(arr, o != null ? o.getClass() : Object.class, o);
+                    explorer.renderFields(arr, type, o);
                 }
 
                 explorer.popNode();
@@ -176,6 +180,7 @@ public class ObjectExplorer extends JTree {
                 DefaultMutableTreeNode arr = createIconEntry("field.png", fieldLabel(name, val));
                 explorer.nestNode(arr);
 
+                //noinspection unchecked
                 for (Map.Entry<Object, Object> entry : ((Map<Object, Object>) val).entrySet()) {
                     explorer.renderFields(arr, entry.getClass(), entry);
                 }
@@ -189,6 +194,12 @@ public class ObjectExplorer extends JTree {
                 explorer.addNode(createIconEntry("field.png", fieldLabel(name, val)));
             }
         });
+
+        renderers.put(PrimitiveMarker.class, new ValRenderer() {
+            public void render(ObjectExplorer explorer, String name, Object val) {
+                explorer.addNode(createIconEntry("field.png", fieldLabelPrimitive(name, val)));
+            }
+        });
     }
 
 
@@ -196,16 +207,28 @@ public class ObjectExplorer extends JTree {
         if (v == null) {
             return name + " = null";
         }
-        return name + " (" + friendlyClassName(v) + ") = " + friendlyValue(v);
+        return name + " {" + friendlyClassName(v) + "@" + v.hashCode() + "} = " + friendlyValue(v);
+    }
+
+       static String fieldLabelPrimitive(String name, Object v) {
+        if (v == null) {
+            return name + " = null";
+        }
+
+        Class c = v.getClass();
+
+        return name + " {" + friendlyClassName(ParseTools.unboxPrimitive(c), v) +  "} = " + friendlyValue(v);
     }
 
     static String friendlyClassName(Object v) {
         if (v == null) return "null";
 
-        Class cls = v.getClass();
+        return friendlyClassName(v.getClass(), v);
+    }
 
+    static String friendlyClassName(Class cls, Object v) {
         if (cls.isPrimitive()) {
-            if (cls == char[].class)  return "char[" + Array.getLength(v) + "]";         
+            if (cls == char[].class) return "char[" + Array.getLength(v) + "]";
             else if (cls == int[].class) return "int[" + Array.getLength(v) + "]";
             else if (cls == long[].class) return "long[" + Array.getLength(v) + "]";
             else if (cls == double[].class) return "double[" + Array.getLength(v) + "]";
@@ -213,18 +236,16 @@ public class ObjectExplorer extends JTree {
             else if (cls == float[].class) return "float[" + Array.getLength(v) + "]";
             else if (cls == boolean[].class) return "boolean[" + Array.getLength(v) + "]";
             else if (cls == byte[].class) return "byte[" + Array.getLength(v) + "]";
-        }
-        else if (cls.isArray()) {
+        } else if (cls.isArray()) {
             return cls.getComponentType().getName() + "[" + Array.getLength(v) + "]";
-        }
-        else if (Collection.class.isAssignableFrom(cls)) {
+        } else if (Collection.class.isAssignableFrom(cls)) {
             return cls.getName() + " [" + ((Collection) v).size() + "]";
         }
         return cls.getName();
     }
 
     static String friendlyValue(Object v) {
-     if (v == null) return "null";
+        if (v == null) return "null";
 
         Class cls = v.getClass();
 
@@ -233,23 +254,34 @@ public class ObjectExplorer extends JTree {
 
             if (comp == char.class) {
                 return "\"" + (Array.getLength(v) < 50 ? new String((char[]) v) : new String((char[]) v, 0, 50) + "...") + "\"";
-            }
-            else {
+            } else {
                 StringAppender appender = new StringAppender();
 
                 int len = Array.getLength(v);
                 appender.append("[");
-                for (int i = 0; i < len && i < 25; ) {
+                for (int i = 0; i < len && i < 25;) {
                     appender.append(String.valueOf(Array.get(v, i)));
                     if (++i < len && i < 25) appender.append(", ");
                 }
                 return appender.append("]").toString();
             }
         }
+        else if (cls == Character.class) {
+            return "'" + String.valueOf(v) + "'";
+        }
 
 
         return "\"" + String.valueOf(v) + "\"";
-    };
+    }
 
+    static class ArrayMarker {
+    }
+
+    static class PrimitiveMarker {
+    }
+
+    public static void main(String[] args) {
+        System.out.println(char[].class.getComponentType());
+    }
 
 }

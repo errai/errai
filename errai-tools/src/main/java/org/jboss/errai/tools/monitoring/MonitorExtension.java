@@ -38,9 +38,6 @@ public class MonitorExtension implements ErraiConfigExtension {
     private MessageBus bus;
     private ActivityProcessor proc;
 
-
-    private ThreadPoolExecutor workers;
-
     @Inject
     public MonitorExtension(MessageBus bus) {
         this.bus = bus;
