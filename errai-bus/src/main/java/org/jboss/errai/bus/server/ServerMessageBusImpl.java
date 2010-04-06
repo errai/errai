@@ -20,6 +20,8 @@ import com.google.inject.*;
 import org.jboss.errai.bus.client.api.*;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.RuleDelegateMessageCallback;
+import org.jboss.errai.bus.client.api.builder.ConversationMessageWrapper;
+import org.jboss.errai.bus.client.api.builder.HasEncodedConvMessageWrapper;
 import org.jboss.errai.bus.client.framework.*;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;
@@ -115,11 +117,13 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                         messageQueues.put(sessionId,
                                 queue = new MessageQueue(queueSize, busInst));
 
+
+                        remoteSubscribe(sessionId, queue, "ClientBus");
+
                         if (isMonitor()) {
                             busMonitor.notifyQueueAttached(sessionId, queue);
                         }
 
-                        remoteSubscribe(sessionId, queue, "ClientBus");
 
                         for (String service : subscriptions.keySet()) {
                             if (service.startsWith("local:")) {
@@ -679,6 +683,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 busMonitor.notifyNewSubscriptionEvent(new SubscriptionEvent(true, _reverseLookupQueue(queue), entry.getKey()));
             }
         }
+
+        monitor.attach(this);
     }
 
     /**

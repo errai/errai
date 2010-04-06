@@ -82,6 +82,13 @@ public class ObjectExplorer extends JTree {
         stk.pop();
     }
 
+    public void nestObject(String field, Object v) {
+        if (v == null) return;
+        nestNode(createIconEntry("class.png", field + " {" + v.getClass().getName() + "} = " + v));
+        renderFields(stk.peek(), v != null ? v.getClass() : Object.class, v);
+        popNode();
+    }
+
     public void renderFields(DefaultMutableTreeNode node, Class clazz, Object v) {
         if (clazz == null) return;
 
@@ -104,6 +111,7 @@ public class ObjectExplorer extends JTree {
                 node.add(createIconEntry("field.png", fld.getName() + " = <UNKNOWN>"));
             }
         }
+
     }
 
     public static void renderField(ObjectExplorer explorer, String field, Class clazz, Object v) {
@@ -113,7 +121,9 @@ public class ObjectExplorer extends JTree {
 
         //    Class boxed = boxPrimitive(clazz);
         if (!renderers.containsKey(clazz)) {
-            _scanClassHeirarchy(clazz, clazz);
+            if (!_scanClassHeirarchy(clazz, clazz)) {
+                clazz = Object.class;
+            }
         }
 
         renderers.get(clazz).render(explorer, field, v);
@@ -121,7 +131,7 @@ public class ObjectExplorer extends JTree {
 
     public static boolean _scanClassHeirarchy(Class clazz, Class root) {
         if (clazz.isPrimitive()) {
-            renderers.put(clazz, renderers.get(Object.class));
+            renderers.put(clazz, renderers.get(PrimitiveMarker.class));
             return true;
         }
 
@@ -155,7 +165,7 @@ public class ObjectExplorer extends JTree {
                 Object o;
                 for (int i = 0; i < length; i++) {
                     o = Array.get(val, i);
-                    explorer.renderFields(arr, type, o);
+                    explorer.nestObject(String.valueOf(i), o);
                 }
 
                 explorer.popNode();
@@ -167,8 +177,10 @@ public class ObjectExplorer extends JTree {
                 DefaultMutableTreeNode arr = createIconEntry("field.png", fieldLabel(name, val));
                 explorer.nestNode(arr);
 
+                int i = 0;
                 for (Object o : (Collection) val) {
-                    explorer.renderFields(arr, o != null ? o.getClass() : Object.class, o);
+                    explorer.nestObject(String.valueOf(i++),o);
+                  //  explorer.renderFields(arr, o != null ? o.getClass() : Object.class, o);
                 }
 
                 explorer.popNode();
@@ -182,7 +194,8 @@ public class ObjectExplorer extends JTree {
 
                 //noinspection unchecked
                 for (Map.Entry<Object, Object> entry : ((Map<Object, Object>) val).entrySet()) {
-                    explorer.renderFields(arr, entry.getClass(), entry);
+                    explorer.nestObject(String.valueOf(entry.getKey()), entry);
+             //       explorer.renderFields(arr, entry.getClass(), entry);
                 }
 
                 explorer.popNode();
@@ -191,9 +204,24 @@ public class ObjectExplorer extends JTree {
 
         renderers.put(Object.class, new ValRenderer() {
             public void render(ObjectExplorer explorer, String name, Object val) {
-                explorer.addNode(createIconEntry("field.png", fieldLabel(name, val)));
+                explorer.nestObject(name, val);
             }
         });
+
+        ValRenderer boxedPrimRenderer = new ValRenderer() {
+            public void render(ObjectExplorer explorer, String name, Object val) {
+                explorer.addNode(createIconEntry("field.png", fieldLabel(name, val)));
+            }
+        };
+
+        renderers.put(Integer.class, boxedPrimRenderer);
+        renderers.put(Long.class, boxedPrimRenderer);
+        renderers.put(Character.class, boxedPrimRenderer);
+        renderers.put(Byte.class, boxedPrimRenderer);
+        renderers.put(Short.class, boxedPrimRenderer);
+        renderers.put(Double.class, boxedPrimRenderer);
+        renderers.put(Boolean.class, boxedPrimRenderer);
+        renderers.put(Float.class, boxedPrimRenderer);
 
         renderers.put(PrimitiveMarker.class, new ValRenderer() {
             public void render(ObjectExplorer explorer, String name, Object val) {
@@ -210,14 +238,14 @@ public class ObjectExplorer extends JTree {
         return name + " {" + friendlyClassName(v) + "@" + v.hashCode() + "} = " + friendlyValue(v);
     }
 
-       static String fieldLabelPrimitive(String name, Object v) {
+    static String fieldLabelPrimitive(String name, Object v) {
         if (v == null) {
             return name + " = null";
         }
 
         Class c = v.getClass();
 
-        return name + " {" + friendlyClassName(ParseTools.unboxPrimitive(c), v) +  "} = " + friendlyValue(v);
+        return name + " {" + friendlyClassName(ParseTools.unboxPrimitive(c), v) + "} = " + friendlyValue(v);
     }
 
     static String friendlyClassName(Object v) {
@@ -265,8 +293,7 @@ public class ObjectExplorer extends JTree {
                 }
                 return appender.append("]").toString();
             }
-        }
-        else if (cls == Character.class) {
+        } else if (cls == Character.class) {
             return "'" + String.valueOf(v) + "'";
         }
 

@@ -86,5 +86,9 @@ public enum BusCommands {
 
     Heartbeat,
 
-    Disconnect
+    Disconnect,
+
+    RemoteMonitorAttach,
+
+    RemoteMonitorDetach
 }

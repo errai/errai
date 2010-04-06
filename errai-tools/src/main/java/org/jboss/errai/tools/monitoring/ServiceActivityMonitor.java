@@ -91,8 +91,12 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
             public void valueChanged(ListSelectionEvent e) {
                 if (detailsTable.getSelectedRow() > detailsModel.getRowCount()) return;
 
-                explorer.setRoot(detailsModel.getValueAt(detailsTable.getSelectedRow(), 1));
-                explorer.buildTree();
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        explorer.setRoot(detailsModel.getValueAt(detailsTable.getSelectedRow(), 1));
+                        explorer.buildTree();
+                    }
+                });
             }
         });
 

@@ -19,6 +19,7 @@ package org.jboss.errai.bus.rebind;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.user.rebind.SourceWriter;
+import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.annotations.ExposeEntity;
 import org.jboss.errai.bus.server.annotations.Remote;
@@ -62,55 +63,61 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
                 new RebindVisitor() {
                     public void visit(Class<?> visit, GeneratorContext context, TreeLogger logger, SourceWriter writer) {
                         if (visit.isAnnotationPresent(ExposeEntity.class)) {
+                            generateMarshaller(visit, logger, writer);
 
-                            Map<String, Class> types = new HashMap<String, Class>();
-                            for (Field f : visit.getDeclaredFields()) {
-                                if ((f.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0 ||
-                                        f.isSynthetic()) {
-                                    continue;
-                                }
-                                types.put(f.getName(), f.getType());
-                            }
-
-                            try {
-                                visit.getConstructor(new Class[0]);
-                            }
-                            catch (NoSuchMethodException e) {
-                                String errorMsg = "Type annotated with @ExposeEntity does not expose a default constructor";
-                                logger.log(TreeLogger.Type.ERROR, errorMsg, e);
-                                throw new GenerationException(errorMsg, e);
-                            }
-
-                            Map<String, Object> templateVars = Make.Map.<String, Object>$()
-                                    ._("className", visit.getName())
-                                    ._("fields", types.keySet())
-                                    ._("targetTypes", types)._();
-
-                            String genStr;
-
-                            writer.print(genStr = (String) execute(demarshallerGenerator, templateVars));
-
-                            logger.log(TreeLogger.Type.INFO, genStr);
-
-                            writer.print(genStr = (String) execute(marshallerGenerator, templateVars));
-
-                            logger.log(TreeLogger.Type.INFO, genStr);
-                            logger.log(TreeLogger.Type.INFO, "Generated marshaller/demarshaller for: " + visit.getName());
                         } else if (visit.isAnnotationPresent(Remote.class) && visit.isInterface()) {
                             String s;
-                           try {
-                            writer.print(s = (String) execute(rpcProxyGenerator,
-                                    Make.Map.<String, Object>$()
-                                            ._("implementationClassName", visit.getSimpleName() + "Impl")
-                                            ._("interfaceClass", visit)._()));
-                           }
-                           catch (Throwable t) {
-                               throw new ErraiBootstrapFailure(t);
-                           }
+                            try {
+                                writer.print(s = (String) execute(rpcProxyGenerator,
+                                        Make.Map.<String, Object>$()
+                                                ._("implementationClassName", visit.getSimpleName() + "Impl")
+                                                ._("interfaceClass", visit)._()));
+                            }
+                            catch (Throwable t) {
+                                throw new ErraiBootstrapFailure(t);
+                            }
                             System.out.println(s);
                         }
                     }
                 }
         );
+
+        generateMarshaller(CommandMessage.class, logger, writer);
+    }
+
+    private void generateMarshaller(Class<?> visit, TreeLogger logger, SourceWriter writer) {
+        Map<String, Class> types = new HashMap<String, Class>();
+        for (Field f : visit.getDeclaredFields()) {
+            if ((f.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0 ||
+                    f.isSynthetic()) {
+                continue;
+            }
+            types.put(f.getName(), f.getType());
+        }
+
+        try {
+            visit.getConstructor(new Class[0]);
+        }
+        catch (NoSuchMethodException e) {
+            String errorMsg = "Type annotated with @ExposeEntity does not expose a default constructor";
+            logger.log(TreeLogger.Type.ERROR, errorMsg, e);
+            throw new GenerationException(errorMsg, e);
+        }
+
+        Map<String, Object> templateVars = Make.Map.<String, Object>$()
+                ._("className", visit.getName())
+                ._("fields", types.keySet())
+                ._("targetTypes", types)._();
+
+        String genStr;
+
+        writer.print(genStr = (String) execute(demarshallerGenerator, templateVars));
+
+        logger.log(TreeLogger.Type.INFO, genStr);
+
+        writer.print(genStr = (String) execute(marshallerGenerator, templateVars));
+
+        logger.log(TreeLogger.Type.INFO, genStr);
+        logger.log(TreeLogger.Type.INFO, "Generated marshaller/demarshaller for: " + visit.getName());
     }
 }

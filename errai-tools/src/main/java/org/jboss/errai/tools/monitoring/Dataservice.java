@@ -133,7 +133,8 @@ public class Dataservice implements Attachable {
             stmt.execute();
         }
         catch (Throwable e) {
-            throw new RuntimeException("error", e);
+            e.printStackTrace();
+//            throw new RuntimeException("error", e);
         }
     }
 

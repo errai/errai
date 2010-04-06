@@ -18,10 +18,11 @@ package org.errai.samples.serialization.client.model;
 
 import org.jboss.errai.bus.server.annotations.ExposeEntity;
 
+import java.io.Serializable;
 import java.util.Date;
 
 @ExposeEntity
-public class HistoryProcessInstanceRef {
+public class HistoryProcessInstanceRef implements Serializable {
 
     private String processInstanceId;
     private String processDefinitionId;
@@ -31,6 +32,9 @@ public class HistoryProcessInstanceRef {
     private Date startTime;
     private Date endTime;
     private long duration;
+
+    public HistoryProcessInstanceRef() {
+    }
 
     public String getProcessInstanceId() {
       return processInstanceId;

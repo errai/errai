@@ -21,6 +21,7 @@ import org.jboss.errai.bus.client.api.*;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.protocols.MessageParts;
+import org.jboss.errai.bus.server.annotations.ExposeEntity;
 import org.jboss.errai.common.client.types.TypeHandlerFactory;
 
 import java.util.HashMap;
@@ -120,7 +121,7 @@ public class CommandMessage implements Message {
         return new CommandMessage(parts);
     }
 
-    protected CommandMessage() {
+    public CommandMessage() {
     }
 
     private CommandMessage(Map<String, Object> parts) {
@@ -473,6 +474,31 @@ public class CommandMessage implements Message {
     @Override
     public String toString() {
         return buildDescription();
+    }
+
+    
+    public Map<String, Object> getResources() {
+        return resources;
+    }
+
+    public void setResources(Map<String, Object> resources) {
+        this.resources = resources;
+    }
+
+    public ErrorCallback getErrorsCall() {
+        return errorsCall;
+    }
+
+    public void setErrorsCall(ErrorCallback errorsCall) {
+        this.errorsCall = errorsCall;
+    }
+
+    public int getRoutingFlags() {
+        return routingFlags;
+    }
+
+    public void setRoutingFlags(int routingFlags) {
+        this.routingFlags = routingFlags;
     }
 
     private String buildDescription() {
