@@ -44,6 +44,17 @@ public class RPCDemo implements EntryPoint {
             }
         });
 
+      final Button voidReturn = new Button("void return type" , new ClickHandler()
+      {
+        public void onClick(ClickEvent clickEvent) {
+                MessageBuilder.createCall(new RemoteCallback<String>() {
+                    public void callback(String response) {
+                        appendResult.setText(response);
+                    }
+                }, TestService.class).update("Some status");
+            }
+      });
+
         VerticalPanel vPanel = new VerticalPanel();
         HorizontalPanel memoryFreeTest = new HorizontalPanel();
         memoryFreeTest.add(checkMemoryButton);
@@ -56,6 +67,8 @@ public class RPCDemo implements EntryPoint {
         appendTest.add(appendTwoStrings);
         appendTest.add(appendResult);
         vPanel.add(appendTest);
+
+        vPanel.add(voidReturn);
 
         RootPanel.get().add(vPanel);
     }

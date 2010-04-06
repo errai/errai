@@ -23,4 +23,9 @@ public class RPCDemoService implements TestService {
     public String append(String str, String str2) {
         return str + str2;
     }
+
+    public void update(String status)
+    {
+      // check void return type
+    }
 }

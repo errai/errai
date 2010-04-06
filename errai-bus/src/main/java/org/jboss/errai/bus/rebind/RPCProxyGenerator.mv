@@ -24,11 +24,14 @@ def pretty(cls) {
                     .noErrorHandling()
                     .sendNowWith(bus);
 
-                @if{java.lang.Number.isAssignableFrom(box(method.getReturnType()))}
+                @if{method.getReturnType().toString().equals("void")}
+                // nada
+                @elseif{java.lang.Number.isAssignableFrom(box(method.getReturnType()))}
                 return 0;
                 @elseif{Boolean.isAssignableFrom(box(method.getReturnType()))}
                 return false;
                 @else{}
+                // default
                 return null;
                 @end{}
         }
