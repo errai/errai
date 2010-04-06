@@ -38,6 +38,7 @@ import java.util.*;
 import java.util.List;
 
 import static javax.swing.SwingUtilities.invokeLater;
+import static org.jboss.errai.tools.monitoring.UiHelper.getSwIcon;
 
 public class ServerMonitorPanel implements Attachable {
     private MainMonitorGUI mainMonitorGUI;
@@ -76,13 +77,7 @@ public class ServerMonitorPanel implements Attachable {
         busServices.setModel(busServicesModel = new DefaultListModel());
         busServices.setCellRenderer(new ServicesListCellRender());
 
-        JScrollPane pane;
-        //   rootPanel.add(pane = new JScrollPane(busServices), BorderLayout.WEST);
-     //   pane.setPreferredSize(new Dimension(200, 0));
-
         serviceExplorer = new JTree();
-        //   rootPanel.add(new JScrollPane(serviceExplorer), BorderLayout.CENTER);
-
 
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
                 new JScrollPane(busServices), new JScrollPane(serviceExplorer));
@@ -254,7 +249,7 @@ public class ServerMonitorPanel implements Attachable {
                         for (Object o : rule.getRoles()) {
                             //     DefaultMutableTreeNode roleNode = new DefaultMutableTreeNode(String.valueOf(o));
 
-                            rolesNode.add(createIconEntry("key.png", String.valueOf(o)));
+                            rolesNode.add(UiHelper.createIconEntry("key.png", String.valueOf(o)));
                         }
 
                         securityNode.add(rolesNode);
@@ -274,13 +269,6 @@ public class ServerMonitorPanel implements Attachable {
         return mainMonitorGUI;
     }
 
-    private Icon getSwIcon(String name) {
-        return new ImageIcon(this.getClass().getClassLoader().getResource(name));
-    }
-
-    private MutableTreeNode createIconEntry(String icon, String name) {
-        return new DefaultMutableTreeNode(new JLabel(name, getSwIcon(icon), SwingConstants.LEFT));
-    }
 
     private static Set<String> builtInServices = new HashSet<String>();
 

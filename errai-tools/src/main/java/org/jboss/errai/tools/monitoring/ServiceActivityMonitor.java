@@ -26,6 +26,9 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableColumnModel;
+import javax.swing.text.TableView;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeNode;
 import java.awt.*;
 import java.awt.event.*;
 import java.sql.Date;
@@ -49,6 +52,8 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
 
     ActivityProcessor.Handle handle;
 
+    private ObjectExplorer explorer;
+
     public ServiceActivityMonitor(final ServerMonitorPanel serverMonitor, final String busId, final String service) {
         this.serverMonitor = serverMonitor;
         this.busId = busId;
@@ -64,7 +69,7 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
 
         detailsModel = new MessageDetailsTableModel();
 
-        JTable detailsTable = new JTable(detailsModel);
+        final JTable detailsTable = new JTable(detailsModel);
         activityTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
 
         activityTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
@@ -74,19 +79,31 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
                 Message m = (Message) tableModel.getValueAt(activityTable.getSelectedRow(), 1);
 
                 for (Map.Entry<String, Object> entry : m.getParts().entrySet()) {
-                    detailsModel.addPart(entry.getKey(), String.valueOf(entry.getValue()));
+                    detailsModel.addPart(entry.getKey(), entry.getValue());
                 }
-                                                    
+
                 detailsModel.fireTableRowsUpdated(0, m.getParts().size() - 1);
                 detailsModel.fireTableDataChanged();
             }
         });
 
+        detailsTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            public void valueChanged(ListSelectionEvent e) {
+                if (detailsTable.getSelectedRow() > detailsModel.getRowCount()) return;
+
+                explorer.setRoot(detailsModel.getValueAt(detailsTable.getSelectedRow(), 1));
+                explorer.buildTree();
+            }
+        });
+
 
         final JScrollPane activityScroll;
+        JSplitPane bottomSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+                new JScrollPane(detailsTable), new JScrollPane(explorer = new ObjectExplorer()));
+        bottomSplit.setDividerLocation(300);
 
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-               activityScroll = new JScrollPane(activityTable), new JScrollPane(detailsTable));
+                activityScroll = new JScrollPane(activityTable), bottomSplit);
         splitPane.setDividerLocation(150);
 
         final JScrollBar vertScroll = activityScroll.getVerticalScrollBar();
@@ -99,7 +116,7 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
             }
 
             public void mouseReleased(MouseEvent e) {
-               lockable = false;
+                lockable = false;
             }
 
             public void mouseEntered(MouseEvent e) {
@@ -114,7 +131,6 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
                 lastScrollAmount = e.getScrollAmount();
             }
         });
-
 
         vertScroll.addAdjustmentListener(new AdjustmentListener() {
             public void adjustmentValueChanged(AdjustmentEvent e) {
@@ -252,10 +268,10 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
 
     public class MessageDetailsTableModel extends AbstractTableModel {
         private ArrayList<String> fields = new ArrayList<String>();
-        private ArrayList<String> values = new ArrayList<String>();
+        private ArrayList<Object> values = new ArrayList<Object>();
 
         private final String[] COLS = {"Message Part", "Value"};
-        private final Class[] TYPES = {String.class, String.class};
+        private final Class[] TYPES = {String.class, Object.class};
 
         @Override
         public String getColumnName(int column) {
@@ -285,7 +301,7 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
             return null;
         }
 
-        public void addPart(String field, String value) {
+        public void addPart(String field, Object value) {
             fields.add(field);
             values.add(value);
         }
@@ -310,5 +326,6 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
 
         proc.notifyEvent(EventType.REPLAY_MESSAGES, SubEventType.NONE, busId, busId, service, null, null, false);
     }
+
 
 }

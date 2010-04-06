@@ -917,7 +917,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
 
     public void attachMonitor(BusMonitor monitor) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        
     }
 
     public void setLogAdapter(LogAdapter logAdapter) {

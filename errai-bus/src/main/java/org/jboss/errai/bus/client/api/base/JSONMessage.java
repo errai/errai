@@ -245,7 +245,7 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
      * Unset routing flags for message.
      *
      * @param flag - Routing flag to unset
-     */
+     */                                                                    
     public void unsetFlag(RoutingFlags flag) {
         if ((routingFlags & flag.flag()) != 0) {
             routingFlags ^= flag.flag();
