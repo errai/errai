@@ -66,9 +66,9 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
                             generateMarshaller(visit, logger, writer);
 
                         } else if (visit.isAnnotationPresent(Remote.class) && visit.isInterface()) {
-                            String s;
+                      //      String s;
                             try {
-                                writer.print(s = (String) execute(rpcProxyGenerator,
+                                writer.print((String) execute(rpcProxyGenerator,
                                         Make.Map.<String, Object>$()
                                                 ._("implementationClassName", visit.getSimpleName() + "Impl")
                                                 ._("interfaceClass", visit)._()));
@@ -76,7 +76,7 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
                             catch (Throwable t) {
                                 throw new ErraiBootstrapFailure(t);
                             }
-                            System.out.println(s);
+                       //     System.out.println(s);
                         }
                     }
                 }
