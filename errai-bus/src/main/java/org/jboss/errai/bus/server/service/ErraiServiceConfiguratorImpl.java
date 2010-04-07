@@ -437,13 +437,18 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
         Object svc = injector.getInstance(type);
 
         Map<String, MessageCallback> epts = new HashMap<String, MessageCallback>();
-        for (final Method method : type.getDeclaredMethods()) {
-            if (RebindUtils.isMethodInInterface(remoteIface, method)) {
-                epts.put(RebindUtils.createCallSignature(method), new ConversationalEndpointCallback(svc, method, bus));
-            }
-        }
 
-        bus.subscribe(remoteIface.getName() + ":RPC", new RemoteServiceCallback(epts));
+      // beware of classloading issues. better reflect on the actual instance
+      for(Class<?> intf : svc.getClass().getInterfaces())
+      {
+        for (final Method method : intf.getDeclaredMethods()) {
+          if (RebindUtils.isMethodInInterface(remoteIface, method)) {
+            epts.put(RebindUtils.createCallSignature(method), new ConversationalEndpointCallback(svc, method, bus));
+          }
+        }
+      }
+
+      bus.subscribe(remoteIface.getName() + ":RPC", new RemoteServiceCallback(epts));
 
         new ProxyProvider() {
             {
