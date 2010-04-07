@@ -44,14 +44,14 @@ public class RPCDemo implements EntryPoint {
             }
         });
 
-      final Button voidReturn = new Button("void return type" , new ClickHandler()
+      final Button voidReturn = new Button("Test Add" , new ClickHandler()
       {
         public void onClick(ClickEvent clickEvent) {
-                MessageBuilder.createCall(new RemoteCallback<String>() {
-                    public void callback(String response) {
-                        appendResult.setText(response);
+                MessageBuilder.createCall(new RemoteCallback<Long>() {
+                    public void callback(Long response) {
+                        appendResult.setText(String.valueOf(response));
                     }
-                }, TestService.class).update("Some status");
+                }, TestService.class).add(Long.parseLong(inputOne.getText()), Long.parseLong(inputTwo.getText()));
             }
       });
 

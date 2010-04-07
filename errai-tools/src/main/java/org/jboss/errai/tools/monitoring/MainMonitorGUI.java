@@ -101,7 +101,10 @@ public class MainMonitorGUI extends JFrame implements Attachable {
                         break;
                     case SERVER_UNSUBSCRIBE:
                     case REMOTE_UNSUBSCRIBE:
-                        getBus(event.getFromBus()).removeServiceName(event.getSubject());
+                        ServerMonitorPanel panel = getBus(event.getFromBus());
+                        if (panel != null) {
+                            panel.removeServiceName(event.getSubject());
+                        }
                         break;
                 }
             }

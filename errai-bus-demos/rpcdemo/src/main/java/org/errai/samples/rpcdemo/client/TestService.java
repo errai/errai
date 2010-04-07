@@ -23,4 +23,5 @@ public interface TestService {
   public long getMemoryFree();
   public String append(String str, String str2);
   public void update(String status);
+  public long add(long x, long y);
 }

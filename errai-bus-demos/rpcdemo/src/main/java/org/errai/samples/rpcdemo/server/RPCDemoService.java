@@ -24,6 +24,10 @@ public class RPCDemoService implements TestService {
         return str + str2;
     }
 
+    public long add(long x, long y) {
+        return x + y;
+    }
+
     public void update(String status)
     {
       // check void return type
