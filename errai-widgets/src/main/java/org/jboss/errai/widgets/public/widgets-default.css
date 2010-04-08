@@ -290,3 +290,23 @@
     width: 17px;
     background: url("images/ui/layout/dropshadow/eq-bottomright.png") no-repeat;
 }
+
+
+/* soa widgets styles*/
+
+.soa-prop-grid {
+  width:100%;
+  border:1px solid #cccccc;
+}
+
+.soa-prop-grid-even {
+  background: #F8F8F8;
+}
+
+.soa-prop-grid-odd {
+  background:#F0F0F0;
+}
+
+.soa-prop-grid-label {
+
+}
