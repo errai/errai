@@ -9,6 +9,7 @@ import com.sun.grizzly.comet.handlers.ReflectorCometHandler;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.server.MessageQueue;
+import org.jboss.errai.bus.server.QueueActivationCallback;
 import org.mvel2.util.StringAppender;
 
 import javax.servlet.ServletConfig;
@@ -37,7 +38,8 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
     private static CometContext createCometContext(String id) {
         CometEngine cometEngine = CometEngine.getEngine();
         CometContext ctx = cometEngine.register(id);
-        ctx.setExpirationDelay(-1);
+        ctx.setExpirationDelay(45 * 1000);
+        ctx.setBlockingNotification(false);
         return ctx;
     }
 
@@ -83,15 +85,35 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
             }
 
             synchronized (queue) {
-                pollQueue(queue, httpServletRequest, httpServletResponse);
 
                 if (context == null)
                     context = createCometContext(httpServletRequest.getSession().getId());
 
-                ReflectorCometHandler handler = new ReflectorCometHandler(true);
+                final ReflectorCometHandler handler = new ReflectorCometHandler(true);
                 context.addCometHandler(handler);
 
-                context.notify(null, CometEvent.NOTIFY, handler);
+                if (!queue.messagesWaiting()) {
+
+                    queue.setActivationCallback(new QueueActivationCallback() {
+                        public void activate(MessageQueue queue) {
+                            queue.setActivationCallback(null);
+                            context.resumeCometHandler(handler);
+                            try {
+                                context.notify(null, CometEvent.NOTIFY, handler);
+                            } catch (IOException e) {
+                                // Should never get here
+                            }
+                        }
+                    });
+
+                    if (!queue.messagesWaiting()) {
+                            context.setExpirationDelay(45 * 1000);
+                        }
+                } else {
+                    queue.setActivationCallback(null);
+                }
+
+                pollQueue(queue, httpServletRequest, httpServletResponse);
             }
         }
         catch (final Throwable t) {
