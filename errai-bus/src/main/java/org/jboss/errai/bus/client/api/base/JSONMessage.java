@@ -90,7 +90,7 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
      */
 
     static JSONMessage create() {
-        return new JSONMessage();
+        return new JSONMessage();                                                            
     }
 
     protected JSONMessage() {
@@ -276,7 +276,7 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
     public <T> T get(Class<T> type, Enum part) {
         //noinspection unchecked
         Object value = parts.get(part.toString());
-        return value == null ? null : (T) TypeHandlerFactory.convert(value.getClass(), type, value);
+        return value == null ? null : TypeHandlerFactory.convert(value.getClass(), type, value);
     }
 
     /**
@@ -292,7 +292,7 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
     public <T> T get(Class<T> type, String part) {
         //noinspection unchecked
         Object value = parts.get(part);
-        return value == null ? null : (T) TypeHandlerFactory.convert(value.getClass(), type, value);
+        return value == null ? null : TypeHandlerFactory.convert(value.getClass(), type, value);
     }
 
     /**

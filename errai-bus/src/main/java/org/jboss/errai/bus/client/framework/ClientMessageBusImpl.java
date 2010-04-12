@@ -29,8 +29,6 @@ import org.jboss.errai.bus.client.ext.ExtensionsLoader;
 import org.jboss.errai.bus.client.json.JSONUtilCli;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;
-import org.jboss.errai.bus.client.protocols.MonitorCommands;
-import org.jboss.errai.bus.client.protocols.MonitorParts;
 
 import java.util.*;
 
@@ -85,8 +83,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     private long lastTransmit = 0;
 
-    private BusMonitor monitor;
-
     class ProxySettings {
         final String url = GWT.getModuleBaseURL() + "proxy";
         boolean hasProxy = false;
@@ -116,7 +112,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      * Constructor creates sendBuilder for HTTP POST requests, recvBuilder for HTTP GET requests and
      * initializes the message bus.
      */
-    public ClientMessageBusImpl() {
+    public ClientMessageBusImpl() {        
         // proxy enabled?
         final ProxySettings proxySettings = new ProxySettings();
 
@@ -587,77 +583,77 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                         break;
 
                     case RemoteMonitorAttach:
-                        final String remoteMonitorSubject = message.get(String.class, MessageParts.Subject);
-                        monitor = new BusMonitor() {
-                            public void attach(MessageBus bus) {
-                                for (String subject : self.subscriptions.keySet()) {
-                                    MessageBuilder.createMessage()
-                                            .toSubject(remoteMonitorSubject)
-                                            .command(MonitorCommands.SubscribeEvent)
-                                            .with(MonitorParts.Time, System.currentTimeMillis())
-                                            .with(MonitorParts.MessageContent, subject)
-                                            .noErrorHandling().sendNowWith(self);
-                                }
-                            }
-
-                            public void notifyNewSubscriptionEvent(SubscriptionEvent event) {
-                                MessageBuilder.createMessage()
-                                        .toSubject(remoteMonitorSubject)
-                                        .command(MonitorCommands.SubscribeEvent)
-                                        .with(MonitorParts.Time, System.currentTimeMillis())
-                                        .with(MonitorParts.MessageContent, event.getSubject())
-                                        .noErrorHandling().sendNowWith(self);
-                            }
-
-                            public void notifyUnSubcriptionEvent(SubscriptionEvent event) {
-                                MessageBuilder.createMessage()
-                                        .toSubject(remoteMonitorSubject)
-                                        .command(MonitorCommands.UnsubcribeEvent)
-                                        .with(MonitorParts.Time, System.currentTimeMillis())
-                                        .with(MonitorParts.MessageContent, event.getSubject())
-                                        .noErrorHandling().sendNowWith(self);
-                            }
-
-                            public void notifyQueueAttached(Object queueId, Object queueInstance) {
-                                //To change body of implemented methods use File | Settings | File Templates.
-                            }
-
-                            public void notifyIncomingMessageFromRemote(Object queue, Message message) {
-                                MessageBuilder.createMessage()
-                                        .toSubject(remoteMonitorSubject)
-                                        .command(MonitorCommands.IncomingMessage)
-                                        .with(MonitorParts.Time, System.currentTimeMillis())
-                                        .with(MonitorParts.MessageContent, message)
-                                        .noErrorHandling().sendNowWith(self);
-                            }
-
-                            public void notifyOutgoingMessageToRemote(Object queue, Message message) {
-                                MessageBuilder.createMessage()
-                                        .toSubject(remoteMonitorSubject)
-                                        .command(MonitorCommands.OutgoingMessage)
-                                        .with(MonitorParts.Time, System.currentTimeMillis())
-                                        .with(MonitorParts.MessageContent, message)
-                                        .noErrorHandling().sendNowWith(self);
-                            }
-
-                            public void notifyInBusMessage(Message message) {
-                                MessageBuilder.createMessage()
-                                        .toSubject(remoteMonitorSubject)
-                                        .command(MonitorCommands.InBusMessage)
-                                        .with(MonitorParts.Time, System.currentTimeMillis())
-                                        .with(MonitorParts.MessageContent, message)
-                                        .noErrorHandling().sendNowWith(self);
-                            }
-
-                            public void notifyMessageDeliveryFailure(Object queue, Message mesage, Throwable error) {
-                                //To change body of implemented methods use File | Settings | File Templates.
-                            }
-                        };
-
-                        MessageBuilder.createMessage()
-                                .toSubject(remoteMonitorSubject)
-                                .command(MonitorCommands.SuccessfulAttach)
-                                .noErrorHandling().sendNowWith(self);
+//                        final String remoteMonitorSubject = message.get(String.class, MessageParts.Subject);
+//                        monitor = new BusMonitor() {
+//                            public void attach(MessageBus bus) {
+//                                for (String subject : self.subscriptions.keySet()) {
+//                                    MessageBuilder.createMessage()
+//                                            .toSubject(remoteMonitorSubject)
+//                                            .command(MonitorCommands.SubscribeEvent)
+//                                            .with(MonitorParts.Time, System.currentTimeMillis())
+//                                            .with(MonitorParts.MessageContent, subject)
+//                                            .noErrorHandling().sendNowWith(self);
+//                                }
+//                            }
+//
+//                            public void notifyNewSubscriptionEvent(SubscriptionEvent event) {
+//                                MessageBuilder.createMessage()
+//                                        .toSubject(remoteMonitorSubject)
+//                                        .command(MonitorCommands.SubscribeEvent)
+//                                        .with(MonitorParts.Time, System.currentTimeMillis())
+//                                        .with(MonitorParts.MessageContent, event.getSubject())
+//                                        .noErrorHandling().sendNowWith(self);
+//                            }
+//
+//                            public void notifyUnSubcriptionEvent(SubscriptionEvent event) {
+//                                MessageBuilder.createMessage()
+//                                        .toSubject(remoteMonitorSubject)
+//                                        .command(MonitorCommands.UnsubcribeEvent)
+//                                        .with(MonitorParts.Time, System.currentTimeMillis())
+//                                        .with(MonitorParts.MessageContent, event.getSubject())
+//                                        .noErrorHandling().sendNowWith(self);
+//                            }
+//
+//                            public void notifyQueueAttached(Object queueId, Object queueInstance) {
+//                                //To change body of implemented methods use File | Settings | File Templates.
+//                            }
+//
+//                            public void notifyIncomingMessageFromRemote(Object queue, Message message) {
+//                                MessageBuilder.createMessage()
+//                                        .toSubject(remoteMonitorSubject)
+//                                        .command(MonitorCommands.IncomingMessage)
+//                                        .with(MonitorParts.Time, System.currentTimeMillis())
+//                                        .with(MonitorParts.MessageContent, message)
+//                                        .noErrorHandling().sendNowWith(self);
+//                            }
+//
+//                            public void notifyOutgoingMessageToRemote(Object queue, Message message) {
+//                                MessageBuilder.createMessage()
+//                                        .toSubject(remoteMonitorSubject)
+//                                        .command(MonitorCommands.OutgoingMessage)
+//                                        .with(MonitorParts.Time, System.currentTimeMillis())
+//                                        .with(MonitorParts.MessageContent, message)
+//                                        .noErrorHandling().sendNowWith(self);
+//                            }
+//
+//                            public void notifyInBusMessage(Message message) {
+//                                MessageBuilder.createMessage()
+//                                        .toSubject(remoteMonitorSubject)
+//                                        .command(MonitorCommands.InBusMessage)
+//                                        .with(MonitorParts.Time, System.currentTimeMillis())
+//                                        .with(MonitorParts.MessageContent, message)
+//                                        .noErrorHandling().sendNowWith(self);
+//                            }
+//
+//                            public void notifyMessageDeliveryFailure(Object queue, Message mesage, Throwable error) {
+//                                //To change body of implemented methods use File | Settings | File Templates.
+//                            }
+//                        };
+//
+//                        MessageBuilder.createMessage()
+//                                .toSubject(remoteMonitorSubject)
+//                                .command(MonitorCommands.SuccessfulAttach)
+//                                .noErrorHandling().sendNowWith(self);
 
                 }
             }
@@ -984,15 +980,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      */
     private void procIncomingPayload(Response response) throws Exception {
         try {
-            if (monitor != null) {
-                for (MarshalledMessage m : decodePayload(response.getText())) {
-                    monitor.notifyIncomingMessageFromRemote(null, JSONUtilCli.decodeCommandMessage(m.getMessage()));
-                    _store(m.getSubject(), m.getMessage());
-                }
-            } else {
-                for (MarshalledMessage m : decodePayload(response.getText())) {
-                    _store(m.getSubject(), m.getMessage());
-                }
+
+            for (MarshalledMessage m : decodePayload(response.getText())) {
+                _store(m.getSubject(), m.getMessage());
             }
         }
         catch (RuntimeException e) {

@@ -111,7 +111,6 @@ public class ObjectExplorer extends JTree {
                 node.add(createIconEntry("field.png", fld.getName() + " = <UNKNOWN>"));
             }
         }
-
     }
 
     public static void renderField(ObjectExplorer explorer, String field, Class clazz, Object v) {
@@ -119,7 +118,6 @@ public class ObjectExplorer extends JTree {
             clazz = ArrayMarker.class;
         }
 
-        //    Class boxed = boxPrimitive(clazz);
         if (!renderers.containsKey(clazz)) {
             if (!_scanClassHeirarchy(clazz, clazz)) {
                 clazz = Object.class;
@@ -195,7 +193,6 @@ public class ObjectExplorer extends JTree {
                 //noinspection unchecked
                 for (Map.Entry<Object, Object> entry : ((Map<Object, Object>) val).entrySet()) {
                     explorer.nestObject(String.valueOf(entry.getKey()), entry);
-             //       explorer.renderFields(arr, entry.getClass(), entry);
                 }
 
                 explorer.popNode();
@@ -296,7 +293,6 @@ public class ObjectExplorer extends JTree {
         } else if (cls == Character.class) {
             return "'" + String.valueOf(v) + "'";
         }
-
 
         return "\"" + String.valueOf(v) + "\"";
     }

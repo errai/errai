@@ -16,7 +16,7 @@ public class ConversationHelper {
 
     public static void createConversationService(MessageBus bus, Message m) {
         if (m.isFlagSet(RoutingFlags.Conversational)) {
-            final String replyService = m.getSubject() + ":Reply:" + count();
+            final String replyService = m.getSubject() + ":RespondTo:" + count();
             bus.subscribe(replyService, m.getResource(MessageCallback.class, RES_NAME));
             bus.subscribe(replyService, new ServiceCanceller(replyService, bus));
             m.set(MessageParts.ReplyTo, replyService);

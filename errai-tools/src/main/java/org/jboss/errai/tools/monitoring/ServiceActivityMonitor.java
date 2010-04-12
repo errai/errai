@@ -17,42 +17,39 @@
 package org.jboss.errai.tools.monitoring;
 
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.base.CommandMessage;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableColumnModel;
-import javax.swing.text.TableView;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreeNode;
 import java.awt.*;
 import java.awt.event.*;
 import java.sql.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
+
+import static javax.swing.SwingUtilities.invokeLater;
 
 public class ServiceActivityMonitor extends JFrame implements Attachable {
     private ActivityMonitorTableModel tableModel;
     private MessageDetailsTableModel detailsModel;
 
-    private String busId;
-    private String service;
-    private ServerMonitorPanel serverMonitor;
+    protected String busId;
+    protected String service;
+    protected ServerMonitorPanel serverMonitor;
 
     private boolean lockable;
     private boolean scrollLock = true;
     private int lastScrollAmount;
 
-    ActivityProcessor.Handle handle;
+    protected ActivityProcessor.Handle handle;
 
     private ObjectExplorer explorer;
+
+    protected WindowListener defaultWindowListener;
 
     public ServiceActivityMonitor(final ServerMonitorPanel serverMonitor, final String busId, final String service) {
         this.serverMonitor = serverMonitor;
@@ -89,17 +86,16 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
 
         detailsTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             public void valueChanged(ListSelectionEvent e) {
-                if (detailsTable.getSelectedRow() > detailsModel.getRowCount()) return;
-
-                SwingUtilities.invokeLater(new Runnable() {
+                invokeLater(new Runnable() {
                     public void run() {
+                        if (detailsTable.getSelectedRow() == -1 &&
+                                detailsTable.getSelectedRow() > detailsModel.getRowCount()) return;
                         explorer.setRoot(detailsModel.getValueAt(detailsTable.getSelectedRow(), 1));
                         explorer.buildTree();
                     }
                 });
             }
         });
-
 
         final JScrollPane activityScroll;
         JSplitPane bottomSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
@@ -169,7 +165,7 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
 
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
-        addWindowListener(new WindowListener() {
+        addWindowListener(defaultWindowListener = new WindowListener() {
             public void windowOpened(WindowEvent e) {
             }
 
@@ -330,6 +326,4 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
 
         proc.notifyEvent(EventType.REPLAY_MESSAGES, SubEventType.NONE, busId, busId, service, null, null, false);
     }
-
-
 }

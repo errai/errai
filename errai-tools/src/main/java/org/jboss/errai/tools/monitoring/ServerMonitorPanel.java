@@ -65,12 +65,12 @@ public class ServerMonitorPanel implements Attachable {
         this.messageBus = bus;
         this.busId = busId;
 
-
         rootPanel = new JPanel();
         rootPanel.setLayout(new BorderLayout());
 
-        JButton monitorButton = new JButton("Monitor...");
         JButton activityConsoleButton = new JButton("Activity Console");
+        JButton monitorButton = new JButton("Monitor Service...");
+        JButton conversationsButton = new JButton("Conversations ...");
 
         busServices = new JList();
         busServices.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
@@ -90,7 +90,13 @@ public class ServerMonitorPanel implements Attachable {
         rootPanel.add(southPanel, BorderLayout.SOUTH);
 
         southPanel.add(activityConsoleButton, BorderLayout.WEST);
-        southPanel.add(monitorButton, BorderLayout.EAST);
+
+        JPanel southEastPanel = new JPanel();
+        southEastPanel.setLayout(new FlowLayout());
+        southEastPanel.add(conversationsButton);
+        southEastPanel.add(monitorButton);
+
+        southPanel.add(southEastPanel, BorderLayout.EAST);
 
         busServices.addListSelectionListener(new ListSelectionListener() {
             public void valueChanged(ListSelectionEvent e) {
@@ -134,6 +140,13 @@ public class ServerMonitorPanel implements Attachable {
             }
         });
 
+        conversationsButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                openConversationMonitor();
+            }
+        });
+
+
         activityConsoleButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 openServerLog();
@@ -162,6 +175,18 @@ public class ServerMonitorPanel implements Attachable {
             ServiceActivityMonitor sam = new ServiceActivityMonitor(this, busId, currentlySelectedService);
             sam.attach(processor);
             monitors.put(currentlySelectedService, sam);
+        }
+    }
+
+    public void openConversationMonitor() {
+        String key = currentlySelectedService + ":Conversations";
+
+        if (monitors.containsKey(key)) {
+            monitors.get(key).toFront();
+        } else {
+            ServiceActivityMonitor sam = new ConversationActivityMonitor(this, busId, currentlySelectedService);
+            sam.attach(processor);
+            monitors.put(key, sam);
         }
     }
 
@@ -268,7 +293,6 @@ public class ServerMonitorPanel implements Attachable {
     public MainMonitorGUI getMainMonitorGUI() {
         return mainMonitorGUI;
     }
-
 
     private static Set<String> builtInServices = new HashSet<String>();
 

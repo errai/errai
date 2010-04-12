@@ -19,25 +19,14 @@ package org.jboss.errai.tools.monitoring;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.BusMonitor;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.SubscriptionEvent;
-import org.jboss.errai.bus.client.protocols.BusCommands;
-import org.jboss.errai.bus.client.protocols.MessageParts;
-import org.jboss.errai.bus.client.protocols.MonitorCommands;
-import org.jboss.errai.bus.server.QueueSession;
 import org.jboss.errai.bus.server.ServerMessageBusImpl;
 import org.jboss.errai.bus.server.annotations.ExtensionComponent;
 import org.jboss.errai.bus.server.ext.ErraiConfigExtension;
 
 import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
-import static java.lang.System.currentTimeMillis;
 
 @ExtensionComponent
 public class MonitorExtension implements ErraiConfigExtension {

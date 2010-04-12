@@ -173,7 +173,7 @@ public class Dataservice implements Attachable {
 
     public List<Record> getAllMessages(EventType type, String busId, String service) {
         try {
-            PreparedStatement stmt = c.prepareStatement("SELECT * FROM MONITORDB WHERE EVENT_TYPE=?" + (busId != null ? " AND TO_BUS_ID=?" : "") + (service != null ? " AND SERVICE_NAME=?" : ""));
+            PreparedStatement stmt = c.prepareStatement("SELECT * FROM MONITORDB WHERE EVENT_TYPE=?" + (busId != null ? " AND TO_BUS_ID=?" : "") + (service != null ? " AND SERVICE_NAME LIKE ?" : ""));
 
             stmt.setInt(1, type.ordinal());
 
