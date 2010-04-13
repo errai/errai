@@ -20,8 +20,12 @@ import org.mvel2.util.ParseTools;
 import org.mvel2.util.StringAppender;
 
 import javax.swing.*;
+import javax.swing.event.TreeExpansionEvent;
+import javax.swing.event.TreeExpansionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import java.awt.event.HierarchyBoundsListener;
+import java.awt.event.HierarchyEvent;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -35,15 +39,27 @@ import static org.jboss.errai.tools.monitoring.UiHelper.getSwIcon;
 import static org.mvel2.util.ParseTools.boxPrimitive;
 
 public class ObjectExplorer extends JTree {
+    private DefaultMutableTreeNode rootNode;
     private Object root;
 
     private Stack<DefaultMutableTreeNode> stk = new Stack<DefaultMutableTreeNode>();
+    private Map<Object, Runnable> deferred = new HashMap<Object, Runnable>();
 
     private static Map<Class, ValRenderer> renderers = new HashMap<Class, ValRenderer>();
 
     public ObjectExplorer() {
         setCellRenderer(new MonitorTreeCellRenderer());
         buildTree();
+
+        addTreeExpansionListener(new TreeExpansionListener() {
+            public void treeExpanded(TreeExpansionEvent event) {
+                Runnable r = deferred.get(event.getPath().getLastPathComponent());
+                if (r != null) r.run();
+            }
+
+            public void treeCollapsed(TreeExpansionEvent event) {
+            }
+        });
     }
 
     public void setRoot(Object root) {
@@ -54,7 +70,8 @@ public class ObjectExplorer extends JTree {
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) getModel().getRoot();
         node.setUserObject(new JLabel("", getSwIcon("database.png"), SwingConstants.LEFT));
 
-        stk.push(node);
+        stk.clear();
+        stk.push(rootNode = node);
 
         node.removeAllChildren();
 
@@ -62,7 +79,7 @@ public class ObjectExplorer extends JTree {
 
         if (root != null) {
             node.setUserObject(new JLabel(root.getClass().getName() + " = " + root, getSwIcon("class.png"), SwingConstants.LEFT));
-            renderFields(node, root.getClass(), root);
+            renderFields(this, node, root.getClass(), root);
         } else {
 
         }
@@ -82,38 +99,63 @@ public class ObjectExplorer extends JTree {
         stk.pop();
     }
 
-    public void nestObject(String field, Object v) {
+    public static void nestObject(final ObjectExplorer explorer, DefaultMutableTreeNode node, String field, Object v) {
         if (v == null) return;
-        nestNode(createIconEntry("class.png", field + " {" + v.getClass().getName() + "} = " + v));
-        renderFields(stk.peek(), v != null ? v.getClass() : Object.class, v);
-        popNode();
+        DefaultMutableTreeNode nNode = createIconEntry("class.png", field + " {" + v.getClass().getName() + "} = " + v);
+        node.add(nNode);
+
+        renderFields(explorer, nNode, v != null ? v.getClass() : Object.class, v);
     }
 
-    public void renderFields(DefaultMutableTreeNode node, Class clazz, Object v) {
+    public static void renderFields(final ObjectExplorer explorer, final DefaultMutableTreeNode node, final Class clazz, final Object v) {
         if (clazz == null) return;
 
         if (clazz.isPrimitive()) {
-            renderField(this, "val", PrimitiveMarker.class, v);
+            renderField(explorer, node, "val", PrimitiveMarker.class, v);
+            return;
         }
 
-        if (clazz.getSuperclass() != Object.class) {
-            renderFields(node, clazz.getSuperclass(), v);
-        }
+        final DefaultMutableTreeNode placeholder = new DefaultMutableTreeNode("<Please Wait ...>");
+        node.add(placeholder);
 
-        for (Field fld : clazz.getDeclaredFields()) {
-            if ((fld.getModifiers() & Modifier.STATIC) != 0) continue;
-            fld.setAccessible(true);
-            try {
-                renderField(this, fld.getName(), fld.getType(), fld.get(v));
+        Runnable r = new Runnable() {
+            public void run() {
+                if (!node.isNodeChild(placeholder)) {
+                    return;
+                }
+
+                node.remove(placeholder);
+
+                if (clazz.getSuperclass() != Object.class) {
+                    renderFields(explorer, node, clazz.getSuperclass(), v);
+                }
+
+                for (Field fld : clazz.getDeclaredFields()) {
+                    if ((fld.getModifiers() & Modifier.STATIC) != 0) continue;
+                    fld.setAccessible(true);
+                    try {
+                        renderField(explorer, node, fld.getName(), fld.getType(), fld.get(v));
+                    }
+                    catch (Throwable t) {
+                        t.printStackTrace();
+                        node.add(createIconEntry("field.png", fld.getName() + " = <UNKNOWN>"));
+                    }
+                }
+
+                ((DefaultTreeModel) explorer.getModel()).reload(node);
+
+                explorer.deferred.remove(node);
             }
-            catch (Throwable t) {
-                t.printStackTrace();
-                node.add(createIconEntry("field.png", fld.getName() + " = <UNKNOWN>"));
-            }
+        };
+
+        if (node == explorer.rootNode) {
+            r.run();
+        } else {
+            explorer.deferred.put(node, r);
         }
     }
 
-    public static void renderField(ObjectExplorer explorer, String field, Class clazz, Object v) {
+    public static void renderField(ObjectExplorer explorer, DefaultMutableTreeNode node, String field, Class clazz, Object v) {
         if (clazz.isArray()) {
             clazz = ArrayMarker.class;
         }
@@ -124,8 +166,9 @@ public class ObjectExplorer extends JTree {
             }
         }
 
-        renderers.get(clazz).render(explorer, field, v);
+        renderers.get(clazz).render(explorer, node, field, v);
     }
+
 
     public static boolean _scanClassHeirarchy(Class clazz, Class root) {
         if (clazz.isPrimitive()) {
@@ -148,66 +191,61 @@ public class ObjectExplorer extends JTree {
 
     static {
         renderers.put(CharSequence.class, new ValRenderer() {
-            public void render(ObjectExplorer explorer, String name, Object val) {
-                explorer.addNode(createIconEntry("field.png", fieldLabel(name, val)));
+            public void render(ObjectExplorer explorer, DefaultMutableTreeNode node, String name, Object val) {
+                node.add(createIconEntry("field.png", fieldLabel(name, val)));
             }
         });
 
         renderers.put(ArrayMarker.class, new ValRenderer() {
-            public void render(ObjectExplorer explorer, String name, Object val) {
+            public void render(ObjectExplorer explorer, DefaultMutableTreeNode node, String name, Object val) {
                 DefaultMutableTreeNode arr = createIconEntry("field.png", fieldLabel(name, val));
-                explorer.nestNode(arr);
+                node.add(arr);
 
                 int length = Array.getLength(val);
-                Class type = val.getClass().getComponentType();
+                //  Class type = val.getClass().getComponentType();
                 Object o;
                 for (int i = 0; i < length; i++) {
                     o = Array.get(val, i);
-                    explorer.nestObject(String.valueOf(i), o);
+                    nestObject(explorer, arr, String.valueOf(i), o);
                 }
-
-                explorer.popNode();
             }
         });
 
         renderers.put(Collection.class, new ValRenderer() {
-            public void render(ObjectExplorer explorer, String name, Object val) {
+            public void render(ObjectExplorer explorer, DefaultMutableTreeNode node, String name, Object val) {
                 DefaultMutableTreeNode arr = createIconEntry("field.png", fieldLabel(name, val));
-                explorer.nestNode(arr);
+                node.add(arr);
 
                 int i = 0;
                 for (Object o : (Collection) val) {
-                    explorer.nestObject(String.valueOf(i++),o);
-                  //  explorer.renderFields(arr, o != null ? o.getClass() : Object.class, o);
+                    nestObject(explorer, arr, String.valueOf(i++), o);
+                    //  explorer.renderFields(arr, o != null ? o.getClass() : Object.class, o);
                 }
-
-                explorer.popNode();
             }
         });
 
         renderers.put(Map.class, new ValRenderer() {
-            public void render(ObjectExplorer explorer, String name, Object val) {
+            public void render(ObjectExplorer explorer, DefaultMutableTreeNode node, String name, Object val) {
                 DefaultMutableTreeNode arr = createIconEntry("field.png", fieldLabel(name, val));
-                explorer.nestNode(arr);
+                node.add(arr);
 
                 //noinspection unchecked
                 for (Map.Entry<Object, Object> entry : ((Map<Object, Object>) val).entrySet()) {
-                    explorer.nestObject(String.valueOf(entry.getKey()), entry);
+                    nestObject(explorer, arr, String.valueOf(entry.getKey()), entry);
                 }
-
-                explorer.popNode();
             }
         });
 
         renderers.put(Object.class, new ValRenderer() {
-            public void render(ObjectExplorer explorer, String name, Object val) {
-                explorer.nestObject(name, val);
+            public void render(ObjectExplorer explorer, DefaultMutableTreeNode node, String name, Object val) {
+                nestObject(explorer, node, name, val);
             }
         });
 
         ValRenderer boxedPrimRenderer = new ValRenderer() {
-            public void render(ObjectExplorer explorer, String name, Object val) {
-                explorer.addNode(createIconEntry("field.png", fieldLabel(name, val)));
+            public void render(ObjectExplorer explorer, DefaultMutableTreeNode node, String name, Object val) {
+
+                node.add(createIconEntry("field.png", fieldLabel(name, val)));
             }
         };
 
@@ -221,8 +259,8 @@ public class ObjectExplorer extends JTree {
         renderers.put(Float.class, boxedPrimRenderer);
 
         renderers.put(PrimitiveMarker.class, new ValRenderer() {
-            public void render(ObjectExplorer explorer, String name, Object val) {
-                explorer.addNode(createIconEntry("field.png", fieldLabelPrimitive(name, val)));
+            public void render(ObjectExplorer explorer, DefaultMutableTreeNode node, String name, Object val) {
+                node.add(createIconEntry("field.png", fieldLabelPrimitive(name, val)));
             }
         });
     }
