@@ -14,10 +14,26 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.tools.monitoring;
+package org.jboss.errai.tools.monitoring.test;
 
-import javax.swing.tree.DefaultMutableTreeNode;
+import java.util.ArrayList;
 
-public interface ValRenderer {
-    public boolean render(ObjectExplorer explorer, DefaultMutableTreeNode node, String name, Object val);
+
+public class TestEntity {
+    private String name;
+    private ArrayList listOfFun = new ArrayList();
+
+    public TestEntity(String name) {
+        this.name = name;
+        listOfFun.add(name.toUpperCase() + "1");
+        listOfFun.add(name.toUpperCase() + "2");
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }
