@@ -40,6 +40,8 @@ public class MessageQueue {
     private static final long DEFAULT_TRANSMISSION_WINDOW = 25;
     private static final long MAX_TRANSMISSION_WINDOW = 100;
 
+    private String queueId;
+
     private long transmissionWindow = 50;
     private long lastTransmission = currentTimeMillis();
     private long endWindow;
@@ -67,9 +69,10 @@ public class MessageQueue {
      * @param queueSize - the size of the queue
      * @param bus       - the bus that will send the messages
      */
-    public MessageQueue(int queueSize, ServerMessageBus bus) {
+    public MessageQueue(int queueSize, ServerMessageBus bus, String queueId) {
         this.queue = new LinkedBlockingQueue<MarshalledMessage>(queueSize);
         this.bus = bus;
+        this.queueId = queueId;
     }
 
     /**
@@ -299,6 +302,10 @@ public class MessageQueue {
      */
     public BlockingQueue<MarshalledMessage> getQueue() {
         return queue;
+    }
+
+    public String getQueueId() {
+        return queueId;
     }
 
     /**

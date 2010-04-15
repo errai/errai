@@ -18,10 +18,13 @@ package org.jboss.errai.tools.monitoring;
 
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
+import org.jboss.errai.bus.server.io.JSONDecoder;
+import org.jboss.errai.bus.server.io.JSONEncoder;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Dataservice implements Attachable {
     Connection c;
@@ -124,17 +127,11 @@ public class Dataservice implements Attachable {
             stmt.setString(3, fromBus);
             stmt.setString(4, toBus);
             stmt.setString(5, service);
-            try {
-                stmt.setObject(6, message);
-            }
-            catch (Throwable t) {
-                stmt.setObject(6, CommandMessage.createWithParts(message.getParts()));
-            }
+            stmt.setString(6, JSONEncoder.encode(message.getParts()));
             stmt.execute();
         }
         catch (Throwable e) {
-            e.printStackTrace();
-//            throw new RuntimeException("error", e);
+             e.printStackTrace();
         }
     }
 
@@ -188,7 +185,7 @@ public class Dataservice implements Attachable {
                 Record r;
                 while (results.next()) {
                     records.add(new Record(results.getLong(1), results.getInt(2), results.getInt(3), results.getInt(4),
-                            results.getString(5), results.getString(6), results.getString(7), results.getObject(8)));
+                            results.getString(5), results.getString(6), results.getString(7), CommandMessage.createWithParts((Map<String,Object>) new JSONDecoder(String.valueOf(results.getObject(8))).parse())));
                 }
                 return records;
 

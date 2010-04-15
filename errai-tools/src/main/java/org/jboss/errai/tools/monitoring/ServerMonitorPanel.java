@@ -27,7 +27,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -37,6 +36,7 @@ import java.awt.event.MouseListener;
 import java.util.*;
 import java.util.List;
 
+import static java.lang.String.valueOf;
 import static javax.swing.SwingUtilities.invokeLater;
 import static org.jboss.errai.tools.monitoring.UiHelper.getSwIcon;
 
@@ -203,7 +203,7 @@ public class ServerMonitorPanel implements Attachable {
     }
 
     private String getCurrentServiceSelection() {
-        return String.valueOf(busServicesModel.get(busServices.getSelectedIndex()));
+        return valueOf(busServicesModel.get(busServices.getSelectedIndex()));
     }
 
     public void addServiceName(final String serviceName) {
@@ -228,10 +228,6 @@ public class ServerMonitorPanel implements Attachable {
                 }
             });
         }
-    }
-
-    public ServiceActivityMonitor getMonitor(String monitor) {
-        return monitors.get(monitor);
     }
 
     public JPanel getPanel() {
@@ -274,7 +270,7 @@ public class ServerMonitorPanel implements Attachable {
                         for (Object o : rule.getRoles()) {
                             //     DefaultMutableTreeNode roleNode = new DefaultMutableTreeNode(String.valueOf(o));
 
-                            rolesNode.add(UiHelper.createIconEntry("key.png", String.valueOf(o)));
+                            rolesNode.add(UiHelper.createIconEntry("key.png", valueOf(o)));
                         }
 
                         securityNode.add(rolesNode);
@@ -310,7 +306,7 @@ public class ServerMonitorPanel implements Attachable {
         @Override
         public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
             super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-            String v = String.valueOf(value);
+            String v = valueOf(value);
             if (v.endsWith(":RPC")) {
                 setIcon(getSwIcon("database_connect.png"));
             } else {

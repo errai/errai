@@ -16,8 +16,6 @@
 
 package org.jboss.errai.tools.monitoring;
 
-import org.jboss.errai.bus.client.api.Message;
-
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -218,7 +216,5 @@ public class ServerLogPanel extends JFrame implements Attachable {
     public void addMessage(long time, EventType eventType, SubEventType subEventType, String subject, Object message) {
         serverLogModel.addMessage(time, eventType, subEventType, subject, message);
     }
-
-
 }
 

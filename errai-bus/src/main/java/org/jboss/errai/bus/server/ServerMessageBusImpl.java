@@ -115,7 +115,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                         }
 
                         messageQueues.put(sessionId,
-                                queue = new MessageQueue(queueSize, busInst));
+                                queue = new MessageQueue(queueSize, busInst, sessionId));
 
 
                         remoteSubscribe(sessionId, queue, "ClientBus");
@@ -222,14 +222,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             throw new NoSubscribersToDeliverTo("for: " + subject + " [commandType:" + message.getCommandType() + "]");
         }
 
-        if (isMonitor()) {
-            if (message.isFlagSet(RoutingFlags.FromRemote)) {
-                busMonitor.notifyIncomingMessageFromRemote(
-                        message.getResource(QueueSession.class, "Session").getSessionId(), message);
-            } else {
-                busMonitor.notifyInBusMessage(message);
-            }
-        }
 
         if (!fireGlobalMessageListeners(message)) {
             if (message.hasPart(ReplyTo) && message.hasResource("Session")) {
@@ -239,6 +231,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
                 Map<String, Object> rawMsg = new HashMap<String, Object>();
                 rawMsg.put(MessageParts.CommandType.name(), MessageNotDelivered.name());
+
 
                 try {
                     enqueueForDelivery(getSessionId(message),
@@ -256,6 +249,23 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         final String jsonMessage = message instanceof HasEncoded ? ((HasEncoded) message).getEncoded() :
                 encodeJSON(message.getParts());
 
+        if (isMonitor()) {
+            if (message.isFlagSet(RoutingFlags.FromRemote)) {
+                busMonitor.notifyIncomingMessageFromRemote(
+                        message.getResource(QueueSession.class, "Session").getSessionId(), message);
+            } else {
+                if (subscriptions.containsKey(subject)) {
+                    busMonitor.notifyInBusMessage(message);
+                }
+
+                if (remoteSubscriptions.containsKey(subject)) {
+                    for (Map.Entry<Object, MessageQueue> entry : messageQueues.entrySet()) {
+                        busMonitor.notifyOutgoingMessageToRemote(entry.getValue().getQueueId(), message);
+                    }
+                }
+            }
+        }
+
         if (subscriptions.containsKey(subject)) {
             for (MessageCallback c : subscriptions.get(subject)) {
                 c.callback(message);
@@ -263,19 +273,31 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
 
         if (remoteSubscriptions.containsKey(subject)) {
-            for (Map.Entry<Object, MessageQueue> entry : messageQueues.entrySet()) {
-                if (remoteSubscriptions.get(subject).contains(entry.getValue())) {
-                    messageQueues.get(entry.getKey()).offer(new MarshalledMessage() {
-                        public String getSubject() {
-                            return subject;
-                        }
+            for (MessageQueue queue : remoteSubscriptions.get(subject)) {
+                queue.offer(new MarshalledMessage() {
+                    public String getSubject() {
+                        return subject;
+                    }
 
-                        public Object getMessage() {
-                            return jsonMessage;
-                        }
-                    });
-                }
+                    public Object getMessage() {
+                        return jsonMessage;
+                    }
+                });
             }
+
+//            for (Map.Entry<Object, MessageQueue> entry : messageQueues.entrySet()) {
+//                if (remoteSubscriptions.get(subject).contains(entry.getValue())) {
+//                    messageQueues.get(entry.getKey()).offer(new MarshalledMessage() {
+//                        public String getSubject() {
+//                            return subject;
+//                        }
+//
+//                        public Object getMessage() {
+//                            return jsonMessage;
+//                        }
+//                    });
+//                }
+//            }
         }
     }
 

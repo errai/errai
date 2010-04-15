@@ -89,7 +89,7 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
                 invokeLater(new Runnable() {
                     public void run() {
                         if (detailsTable.getSelectedRow() == -1 &&
-                                detailsTable.getSelectedRow() > detailsModel.getRowCount()) return;
+                                detailsTable.getSelectedRow() >= detailsModel.getRowCount()) return;
                         explorer.setRoot(detailsModel.getValueAt(detailsTable.getSelectedRow(), 1));
                         explorer.buildTree();
                     }

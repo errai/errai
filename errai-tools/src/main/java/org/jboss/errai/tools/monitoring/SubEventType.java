@@ -19,5 +19,4 @@ package org.jboss.errai.tools.monitoring;
 
 public enum SubEventType {
     NONE, TX_REMOTE, RX_REMOTE, INBUS, REMOTE_ATTACHED, SERVER_SUBSCRIBE, SERVER_UNSUBSCRIBE, REMOTE_SUBSCRIBE, REMOTE_UNSUBSCRIBE
-
 }
