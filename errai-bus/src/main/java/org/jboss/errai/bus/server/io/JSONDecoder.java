@@ -33,6 +33,19 @@ public class JSONDecoder {
     private int length;
     private int cursor;
 
+    public static Object decode(String json) {
+        return new JSONDecoder(json).parse();
+    }
+
+    public static Object decode(char[] json) {
+        return new JSONDecoder(json).parse();
+    }
+
+    public static Object decode(char[] json, int length, int cursor) {
+        return new JSONDecoder(json, length, cursor).parse();
+    }
+
+
     public JSONDecoder(String json) {
         this.length = (this.json = json.toCharArray()).length;
     }

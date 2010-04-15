@@ -17,6 +17,9 @@
 package org.jboss.errai.tools.monitoring;
 
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.base.CommandMessage;
+import org.jboss.errai.bus.server.io.JSONDecoder;
+import org.jboss.errai.bus.server.io.JSONEncoder;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -32,6 +35,9 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import static javax.swing.SwingUtilities.invokeLater;
+import static org.jboss.errai.bus.client.api.base.CommandMessage.createWithParts;
+import static org.jboss.errai.bus.server.io.JSONDecoder.decode;
+import static org.jboss.errai.bus.server.io.JSONEncoder.encode;
 
 public class ServiceActivityMonitor extends JFrame implements Attachable {
     private ActivityMonitorTableModel tableModel;
@@ -311,9 +317,16 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
             values.clear();
         }
     }
+    
 
     public void notifyMessage(Message message) {
-        tableModel.addMessage(message);
+        /*
+         * This is a huge hack to get the display of the messages consistent with what the payload does when
+         * encoded. And no it's not particularly efficient.  But since inbus messages are not encoded by JSON and
+         * it would be wacky to make the monitoring API such that we had to scan for one or the other, this
+         * is much more consistent from an API point-of-view.
+         */
+        tableModel.addMessage(createWithParts((Map<String,Object>) decode(encode(message.getParts()))));
     }
 
     public void attach(ActivityProcessor proc) {

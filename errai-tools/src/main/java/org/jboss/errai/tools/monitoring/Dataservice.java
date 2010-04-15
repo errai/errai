@@ -19,21 +19,26 @@ package org.jboss.errai.tools.monitoring;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.server.io.JSONDecoder;
-import org.jboss.errai.bus.server.io.JSONEncoder;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static java.lang.Class.forName;
+import static java.sql.DriverManager.getConnection;
+import static org.jboss.errai.bus.server.io.JSONEncoder.encode;
+
 public class Dataservice implements Attachable {
     Connection c;
 
-
     public Dataservice() {
         try {
-            Class.forName("org.hsqldb.jdbcDriver").newInstance();
-            c = DriverManager.getConnection("jdbc:hsqldb:file:monitordb", "sa", "");
+            forName("org.hsqldb.jdbcDriver").newInstance();
+            c = getConnection("jdbc:hsqldb:file:monitordb", "sa", "");
             createDB();
         }
         catch (Throwable t) {
@@ -118,7 +123,6 @@ public class Dataservice implements Attachable {
         }
     }
 
-
     public void storeRecord(long time, String fromBus, String toBus, String service, Message message) {
         try {
             PreparedStatement stmt = c.prepareStatement("INSERT INTO MONITORDB (EVENT_TYPE, TM, BUS_ID, TO_BUS_ID, SERVICE_NAME, MESSAGE_OBJ) VALUES (?, ?, ?, ?, ?, ?)");
@@ -127,7 +131,7 @@ public class Dataservice implements Attachable {
             stmt.setString(3, fromBus);
             stmt.setString(4, toBus);
             stmt.setString(5, service);
-            stmt.setString(6, JSONEncoder.encode(message.getParts()));
+            stmt.setString(6, encode(message.getParts()));
             stmt.execute();
         }
         catch (Throwable e) {

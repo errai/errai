@@ -16,13 +16,41 @@
 
 package org.jboss.errai.tools.monitoring;
 
+import org.jboss.errai.bus.client.api.Message;
+import org.mvel2.util.StringAppender;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
+import java.util.Map;
 
 public class MessageCellRenderer extends DefaultTableCellRenderer {
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-        setToolTipText(String.valueOf(value));
-        return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+        String txt = renderMessage(value);
+        setToolTipText(txt);
+        return super.getTableCellRendererComponent(table, txt, isSelected, hasFocus, row, column);
+    }
+
+    public static String renderMessage(Object value) {
+
+        if (value instanceof Message) {
+            StringAppender appender = new StringAppender();
+            Map<String, Object> vars = ((Message) value).getParts();
+
+            boolean first = true;
+            for (Map.Entry<String, Object> entry : vars.entrySet()) {
+                if (first) {
+                    first = false;
+                }
+                else {
+                    appender.append(", ");
+                }
+
+                appender.append(entry.getKey()).append('=').append(entry.getValue());
+            }
+
+            return appender.toString();
+        }
+        return null;
     }
 }
