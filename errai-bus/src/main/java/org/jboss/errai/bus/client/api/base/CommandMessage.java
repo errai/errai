@@ -502,6 +502,7 @@ public class CommandMessage implements Message {
     }
 
     private String buildDescription() {
+      //  if (parts == null) return "";
         StringBuilder append = new StringBuilder();
         boolean f = false;
         for (Map.Entry<String, Object> entry : parts.entrySet()) {

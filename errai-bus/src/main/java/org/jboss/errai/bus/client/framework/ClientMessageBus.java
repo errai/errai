@@ -23,6 +23,8 @@ import java.util.Set;
  * An extended client-specific/in-browser interface of {@link MessageBus}, which defines client-specific functionalities.
  */
 public interface ClientMessageBus extends MessageBus {
+    public static final String REMOTE_QUEUE_ID_HEADER = "RemoteQueueID";
+
     /**
      * Retrieve all registrations that have occured during the current capture context.
      * <p/>

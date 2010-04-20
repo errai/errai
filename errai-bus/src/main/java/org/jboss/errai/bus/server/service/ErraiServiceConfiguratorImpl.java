@@ -102,7 +102,6 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
             throw new ErraiBootstrapFailure("Error reading from configuration. Did you include ErraiService.properties?", e);
         }
 
-
         // Create a Map to collect any extensions bindings to be bound to
         // services.
         extensionBindings = new HashMap<Class, Provider>();

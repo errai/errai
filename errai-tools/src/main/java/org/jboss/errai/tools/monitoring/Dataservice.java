@@ -61,7 +61,7 @@ public class Dataservice implements Attachable {
                 "MESSAGE_OBJ OBJECT)");
     }
 
-    public class Record {
+    public static class Record {
         private int eventId;
         private int eventType;
         private int subEventId;
@@ -184,12 +184,10 @@ public class Dataservice implements Attachable {
 
             if (stmt.execute()) {
                 ResultSet results = stmt.getResultSet();
-
                 ArrayList<Record> records = new ArrayList<Record>(100);
-                Record r;
                 while (results.next()) {
                     records.add(new Record(results.getLong(1), results.getInt(2), results.getInt(3), results.getInt(4),
-                            results.getString(5), results.getString(6), results.getString(7), CommandMessage.createWithParts((Map<String,Object>) new JSONDecoder(String.valueOf(results.getObject(8))).parse())));
+                            results.getString(5), results.getString(6), results.getString(7), UiHelper.decodeAndDemarshall(String.valueOf(results.getObject(8)))));
                 }
                 return records;
 
@@ -218,12 +216,10 @@ public class Dataservice implements Attachable {
             }
         });
 
-
         proc.registerEvent(EventType.REPLAY_MESSAGES, new MessageMonitor() {
             public void monitorEvent(MessageEvent event) {
-                // System.out.println("Replay Requested for:" + event.getSubject() + "@" + event.getFromBus());
                 for (Record r : getAllMessages(EventType.MESSAGE, event.getFromBus(), event.getSubject())) {
-                    proc.notifyEvent(EventType.values()[r.eventType], SubEventType.values()[r.subEventId], r.fromBus, r.toBus, r.service, (Message) r.message, null, true);
+                    proc.notifyEvent(r.time, EventType.values()[r.eventType], SubEventType.values()[r.subEventId], r.fromBus, r.toBus, r.service, (Message) r.message, null, true);
                 }
             }
         });
@@ -231,7 +227,7 @@ public class Dataservice implements Attachable {
         proc.registerEvent(EventType.REPLAY_BUS_EVENTS, new MessageMonitor() {
             public void monitorEvent(MessageEvent event) {
                 for (Record r : getAllMessages(EventType.BUS_EVENT, "Server", event.getSubject())) {
-                    proc.notifyEvent(EventType.values()[r.eventType], SubEventType.values()[r.subEventId], r.fromBus, r.toBus, r.service, (Message) r.message, null, true);
+                    proc.notifyEvent(r.time, EventType.values()[r.eventType], SubEventType.values()[r.subEventId], r.fromBus, r.toBus, r.service, (Message) r.message, null, true);
                 }
             }
         });

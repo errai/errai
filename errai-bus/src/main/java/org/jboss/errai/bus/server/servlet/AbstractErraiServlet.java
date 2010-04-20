@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -24,7 +25,6 @@ import java.io.OutputStream;
  * bus and the client buses.
  */
 public abstract class AbstractErraiServlet extends HttpServlet {
-
     /* New and configured errai service */
     protected ErraiService service =
             Guice.createInjector(new AbstractModule() {
@@ -38,10 +38,10 @@ public abstract class AbstractErraiServlet extends HttpServlet {
 
     
     /* A default Http session provider */
-    protected SessionProvider sessionProvider = service.getConfiguration().getConfiguredSessionProvider();
+    @SuppressWarnings({"unchecked"})
+    protected SessionProvider<HttpSession> sessionProvider = service.getConfiguration().getConfiguredSessionProvider();
 
     protected Logger log = LoggerFactory.getLogger(getClass());
-
 
     /**
      * Writes the message to the output stream

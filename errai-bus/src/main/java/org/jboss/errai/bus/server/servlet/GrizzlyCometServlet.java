@@ -7,9 +7,11 @@ import com.sun.grizzly.comet.CometEngine;
 import com.sun.grizzly.comet.CometEvent;
 import com.sun.grizzly.comet.handlers.ReflectorCometHandler;
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.server.MessageQueue;
 import org.jboss.errai.bus.server.QueueActivationCallback;
+import org.jboss.errai.bus.server.QueueSession;
 import org.mvel2.util.StringAppender;
 
 import javax.servlet.ServletConfig;
@@ -46,13 +48,17 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        pollForMessages(request, response);
+        pollForMessages(sessionProvider.getSession(request.getSession(),
+                request.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER)), request, response);
     }
 
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        final QueueSession session = sessionProvider.getSession(request.getSession(),
+                request.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
+
         BufferedReader reader = request.getReader();
         StringAppender sb = new StringAppender(request.getContentLength());
         CharBuffer buffer = CharBuffer.allocate(10);
@@ -66,18 +72,18 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
             buffer.rewind();
         }
 
-        for (Message msg : createCommandMessage(sessionProvider.getSession(request.getSession()), sb.toString())) {
+        for (Message msg : createCommandMessage(session, sb.toString())) {
             service.store(msg);
         }
 
-        pollQueue(service.getBus().getQueue(request.getSession().getId()), request, response);
+        pollQueue(service.getBus().getQueue(session), request, response);
     }
 
-    private void pollForMessages(HttpServletRequest httpServletRequest,
+    private void pollForMessages(QueueSession session, HttpServletRequest httpServletRequest,
                                  HttpServletResponse httpServletResponse) throws IOException {
 
         try {
-            final MessageQueue queue = service.getBus().getQueue(httpServletRequest.getSession().getId());
+            final MessageQueue queue = service.getBus().getQueue(session);
 
             if (queue == null) {
                 sendDisconnectWithReason(httpServletResponse.getOutputStream(),

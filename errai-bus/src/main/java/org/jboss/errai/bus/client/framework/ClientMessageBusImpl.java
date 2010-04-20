@@ -21,7 +21,9 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.*;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.bus.client.api.*;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
@@ -43,6 +45,9 @@ import static org.jboss.errai.bus.client.protocols.MessageParts.*;
  */
 public class ClientMessageBusImpl implements ClientMessageBus {
     private static final int HEARTBEAT_DELAY = 20000;
+
+    private String clientId = String.valueOf(com.google.gwt.user.client.Random.nextInt(1000))
+            + "-" + (System.currentTimeMillis() % 1000);
 
     /* The encoded URL to be used for the bus */
     private static final String SERVICE_ENTRY_POINT = "in.erraiBus";
@@ -112,7 +117,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      * Constructor creates sendBuilder for HTTP POST requests, recvBuilder for HTTP GET requests and
      * initializes the message bus.
      */
-    public ClientMessageBusImpl() {        
+    public ClientMessageBusImpl() {
         // proxy enabled?
         final ProxySettings proxySettings = new ProxySettings();
 
@@ -154,11 +159,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         )).setHeader("Connection", "Keep-Alive");
 
         sendBuilder.setHeader("Content-Type", "application/json");
+        sendBuilder.setHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER, clientId);
 
         (recvBuilder = new RequestBuilder(
                 RequestBuilder.GET,
                 URL.encode(endpoint)
         )).setHeader("Connection", "Keep-Alive");
+        recvBuilder.setHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER, clientId);
 
         logAdapter.debug("Connecting Errai at URL " + sendBuilder.getUrl());
     }
@@ -533,8 +540,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      * @param callback - callback function used for to send the initial message to connect to the queue.
      */
     public void init(final HookCallback callback) {
-        final ClientMessageBusImpl self = this;
-
         subscribe("ClientBus", new MessageCallback() {
             public void callback(final Message message) {
                 switch (BusCommands.valueOf(message.getCommandType())) {
@@ -559,7 +564,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                                     .command(RemoteSubscribe)
                                     .with(Subject, s)
                                     .noErrorHandling()
-                                    .sendNowWith(self);
+                                    .sendNowWith(ClientMessageBusImpl.this);
                         }
 
                         // Don't use an iterator here -- potential for concurrent
@@ -677,7 +682,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                         .toSubject("ServerBus")
                         .set(Subject, event.getSubject())
                         .set(PriorityProcessing, "1")
-                        .sendNowWith(self);
+                        .sendNowWith(ClientMessageBusImpl.this);
             }
         });
 
@@ -691,7 +696,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                         .toSubject("ServerBus")
                         .set(Subject, event.getSubject())
                         .set(PriorityProcessing, "1")
-                        .sendNowWith(self);
+                        .sendNowWith(ClientMessageBusImpl.this);
             }
         });
 

@@ -10,7 +10,7 @@ import java.util.Map;
  * function to obtain the current session.
  */
 public class HttpSessionProvider implements SessionProvider<HttpSession> {
-    private static final String HTTP_SESS = "org.jboss.errai.QueueSession";
+    private static final String HTTP_SESS = "org.jboss.errai.QueueSessions";
 
     /**
      * Gets an instance of <tt>QueueSession</tt> using the external session reference given. If there is no available
@@ -19,12 +19,31 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
      * @param externSessRef - the external session reference
      * @return an instance of <tt>QueueSession</tt>
      */
-    public QueueSession getSession(HttpSession externSessRef) {
-        QueueSession sess = (QueueSession) externSessRef.getAttribute(HTTP_SESS);
-        if (sess == null) {
-            externSessRef.setAttribute(HTTP_SESS, sess = new HttpSessionWrapper(externSessRef.getId()));
+    public QueueSession getSession(HttpSession externSessRef, String remoteQueueID) {
+        SessionsContainer sc = (SessionsContainer) externSessRef.getAttribute(HTTP_SESS);
+        if (sc == null) {
+            externSessRef.setAttribute(HTTP_SESS, sc = new SessionsContainer());
+
         }
-        return sess;
+
+        QueueSession qs = sc.getSession(remoteQueueID);
+        if (qs == null) {
+            sc.addSession(remoteQueueID, qs = new HttpSessionWrapper(externSessRef.getId(), remoteQueueID));
+        }
+
+        return qs;
+    }
+
+    public static class SessionsContainer {
+        private Map<String, QueueSession> queueSessions = new HashMap<String, QueueSession>();
+
+        public void addSession(String remoteQueueId, QueueSession session) {
+            queueSessions.put(remoteQueueId, session);
+        }
+
+        public QueueSession getSession(String remoteQueueId) {
+            return queueSessions.get(remoteQueueId);
+        }
     }
 
     /**
@@ -36,8 +55,8 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
         private String sessionId;
         private boolean valid;
 
-        public HttpSessionWrapper(String sessionId) {
-            this.sessionId = sessionId;
+        public HttpSessionWrapper(String sessionId, String remoteQueueID) {
+            this.sessionId = remoteQueueID + "@" + sessionId;
         }
 
         public String getSessionId() {

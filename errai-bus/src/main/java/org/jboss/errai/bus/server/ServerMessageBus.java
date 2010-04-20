@@ -40,15 +40,15 @@ public interface ServerMessageBus extends MessageBus {
      * @return the <tt>Payload</tt> instance containing all the messages that need to be transmitted
      */
     @Deprecated
-    public Payload nextMessage(Object sessionContext, boolean wait);
+    public Payload nextMessage(QueueSession sessionContext, boolean wait);
 
     /**
      * Gets the queue containing the messages that are waiting to be transmitted
      *
-     * @param sessionId - the session id of the queue
+     * @param session - the session of the queue
      * @return the message queue needed
      */
-    public MessageQueue getQueue(String sessionId);
+    public MessageQueue getQueue(QueueSession session);
 
     /**
      * Closes the queue associated with the <tt>sessionId</tt>

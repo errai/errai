@@ -24,8 +24,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import static java.lang.System.currentTimeMillis;
-
 /**
  * A message queue is keeps track of which messages need to be sent outbound. It keeps track of the amount of messages
  * that can be stored, transmitted and those which timeout. The <tt>MessageQueue</tt> is implemented using a
@@ -34,22 +32,21 @@ import static java.lang.System.currentTimeMillis;
  */
 public class MessageQueue {
     private static final long TIMEOUT = Boolean.getBoolean("org.jboss.errai.debugmode") ?
-            (1000 * 60 * 60) : (1000 * 25);
+            secs(60) : secs(25);
 
     private static final int MAXIMUM_PAYLOAD_SIZE = 10;
-    private static final long DEFAULT_TRANSMISSION_WINDOW = 25;
-    private static final long MAX_TRANSMISSION_WINDOW = 100;
+    private static final long DEFAULT_TRANSMISSION_WINDOW = millis(25);
+    private static final long MAX_TRANSMISSION_WINDOW = millis(100);
 
-    private String queueId;
+    private QueueSession session;
 
     private long transmissionWindow = 50;
-    private long lastTransmission = currentTimeMillis();
+    private long lastTransmission = System.nanoTime();
     private long endWindow;
 
     private int lastQueueSize = 0;
     private boolean throttleIncoming = false;
     private boolean queueRunning = true;
-    //private volatile boolean pollActive = false;
 
     private boolean _windowPolling = false;
     private boolean windowPolling = false;
@@ -68,11 +65,12 @@ public class MessageQueue {
      *
      * @param queueSize - the size of the queue
      * @param bus       - the bus that will send the messages
+     * @param session   - the session associated with the queue
      */
-    public MessageQueue(int queueSize, ServerMessageBus bus, String queueId) {
+    public MessageQueue(int queueSize, ServerMessageBus bus, QueueSession session) {
         this.queue = new LinkedBlockingQueue<MarshalledMessage>(queueSize);
         this.bus = bus;
-        this.queueId = queueId;
+        this.session = session;
     }
 
     /**
@@ -92,22 +90,15 @@ public class MessageQueue {
 
         if (lock.tryAcquire()) {
             try {
-                MarshalledMessage m = null;
+                MarshalledMessage m;
 
-//            if (lock.tryAcquire(0, TimeUnit.SECONDS)) {
-//                try {
                 if (wait) {
                     m = queue.poll(45, TimeUnit.SECONDS);
 
                 } else {
                     m = queue.poll();
                 }
-//                }
-//                finally {
-//                    lock.release();
-//                }
 
-//            }
 
                 int payLoadSize = 0;
 
@@ -117,9 +108,6 @@ public class MessageQueue {
                     windowPolling = true;
                     _windowPolling = false;
                 } else if (windowPolling) {
-
-                    //     try {
-                    //   if (lock.tryAcquire(0, TimeUnit.SECONDS)) {
                     while (!queue.isEmpty() && payLoadSize < MAXIMUM_PAYLOAD_SIZE
                             && !isWindowExceeded()) {
                         p.addMessage(queue.poll());
@@ -127,21 +115,16 @@ public class MessageQueue {
 
                         try {
                             if (queue.isEmpty())
-                                Thread.sleep(currentTimeMillis() - endWindow);
+                                Thread.sleep(System.nanoTime() - endWindow);
                         }
                         catch (Exception e) {
                             // just resume.
                         }
                     }
-                    //      }
-                    //    }
-                    //    finally {
-                    //        lock.release();
-                    //    }
 
                     if (!throttleIncoming && queue.size() > lastQueueSize) {
                         if (transmissionWindow < MAX_TRANSMISSION_WINDOW) {
-                            transmissionWindow += 5;
+                            transmissionWindow += millis(50);
                             System.err.println("[Congestion on queue -- New transmission window: "
                                     + transmissionWindow + "; Queue size: " + queue.size() + ")]");
                         } else {
@@ -157,7 +140,7 @@ public class MessageQueue {
                 }
 
                 lastQueueSize = queue.size();
-                endWindow = (lastTransmission = currentTimeMillis()) + transmissionWindow;
+                endWindow = (lastTransmission = System.nanoTime()) + transmissionWindow;
 
                 return p;
 
@@ -195,7 +178,6 @@ public class MessageQueue {
 
         if (!b) {
             queue.clear();
-     //       stopQueue();
             throw new QueueOverloadedException("too many undelievered messages in queue: cannot dispatch message.");
         } else if (activationCallback != null) {
             if (isWindowExceeded()) {
@@ -214,7 +196,6 @@ public class MessageQueue {
      * processed
      */
     public void scheduleActivation() {
-        final MessageQueue inst = this;
         bus.getScheduler().addTask(
                 task = new TimedTask() {
                     {
@@ -225,7 +206,7 @@ public class MessageQueue {
                     public void run() {
 
                         if (activationCallback != null)
-                            activationCallback.activate(inst);
+                            activationCallback.activate(MessageQueue.this);
 
                         task = null;
                     }
@@ -254,11 +235,11 @@ public class MessageQueue {
     }
 
     private boolean isWindowExceeded() {
-        return currentTimeMillis() > endWindow;
+        return System.nanoTime() > endWindow;
     }
 
     private long getEndOfWindow() {
-        return endWindow - currentTimeMillis();
+        return endWindow - System.nanoTime();
     }
 
     private void descheduleTask() {
@@ -304,8 +285,8 @@ public class MessageQueue {
         return queue;
     }
 
-    public String getQueueId() {
-        return queueId;
+    public QueueSession getSession() {
+        return session;
     }
 
     /**
@@ -314,7 +295,7 @@ public class MessageQueue {
      * @return true if the queue is stale
      */
     public boolean isStale() {
-        return !queueRunning || (!isActive() && (currentTimeMillis() - lastTransmission) > TIMEOUT);
+        return !queueRunning || (!isActive() && (System.nanoTime() - lastTransmission) > TIMEOUT);
     }
 
     /**
@@ -330,7 +311,7 @@ public class MessageQueue {
      * Fakes a transmission, shows life with a heartbeat
      */
     public void heartBeat() {
-        lastTransmission = System.currentTimeMillis();
+        lastTransmission = System.nanoTime();
     }
 
     /**
@@ -370,4 +351,12 @@ public class MessageQueue {
             return null;
         }
     };
+
+    private static long secs(long secs) {
+        return secs * 1000000000;
+    }
+
+    private static long millis(long millis) {
+        return millis * 1000000;
+    }
 }

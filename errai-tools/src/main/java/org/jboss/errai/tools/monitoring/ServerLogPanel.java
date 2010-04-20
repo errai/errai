@@ -119,7 +119,7 @@ public class ServerLogPanel extends JFrame implements Attachable {
         }
 
         public Object getMessage() {
-            return message;
+            return String.valueOf(message);
         }
     }
 
@@ -210,7 +210,7 @@ public class ServerLogPanel extends JFrame implements Attachable {
             }
         });
 
-        proc.notifyEvent(EventType.REPLAY_BUS_EVENTS, SubEventType.NONE, null, null, null, null, null, false);
+        proc.notifyEvent(System.currentTimeMillis(), EventType.REPLAY_BUS_EVENTS, SubEventType.NONE, null, null, null, null, null, false);
     }
 
     public void addMessage(long time, EventType eventType, SubEventType subEventType, String subject, Object message) {

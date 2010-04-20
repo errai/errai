@@ -25,12 +25,12 @@ package org.jboss.errai.bus.client.framework;
 public class SubscriptionEvent {
     private boolean disposeListener = false;
     private boolean remote = false;
-    private Object sessionData;
+    private String sessionId;
     private String subject;
 
-    public SubscriptionEvent(boolean remote, Object sessionData, String subject) {
+    public SubscriptionEvent(boolean remote, String sessionId, String subject) {
         this.remote = remote;
-        this.sessionData = sessionData;
+        this.sessionId = sessionId;
         this.subject = subject;
     }
 
@@ -53,19 +53,11 @@ public class SubscriptionEvent {
     }
 
     /**
-     * Return the associated session data with the subscription event.
+     * Return the associated sessionId with the subscription event.
      * @return - Session instance.
      */
-    public Object getSessionData() {
-        return sessionData;
-    }
-
-    /**
-     * Set the associated session data.
-     * @param sessionData
-     */
-    public void setSessionData(Object sessionData) {
-        this.sessionData = sessionData;
+    public String getSessionId() {
+        return sessionId;
     }
 
     /**
@@ -78,27 +70,10 @@ public class SubscriptionEvent {
     }
 
     /**
-     * Set whether or not the subscription even is remote.
-     * @see #isRemote()
-     * @param remote
-     */
-    public void setRemote(boolean remote) {
-        this.remote = remote;
-    }
-
-    /**
      * Get the subject being subscribed to.
      * @return
      */
     public String getSubject() {
         return subject;
-    }
-
-    /**
-     * Set the subject being subscribed to.
-     * @param subject
-     */
-    public void setSubject(String subject) {
-        this.subject = subject;
     }
 }

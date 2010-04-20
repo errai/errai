@@ -17,9 +17,11 @@
 package org.jboss.errai.bus.server.servlet;
 
 import com.google.inject.Singleton;
-import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.framework.ClientMessageBus;
+import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.server.MessageQueue;
+import org.jboss.errai.bus.server.QueueSession;
 import org.mvel2.util.StringAppender;
 
 import javax.servlet.ServletException;
@@ -60,7 +62,9 @@ public class DefaultBlockingServlet extends AbstractErraiServlet {
     @Override
     protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
             throws ServletException, IOException {
-        pollForMessages(httpServletRequest, httpServletResponse, true);
+        pollForMessages(sessionProvider.getSession(httpServletRequest.getSession(),
+                httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER)),
+                httpServletRequest, httpServletResponse, true);
     }
 
     /**
@@ -75,6 +79,10 @@ public class DefaultBlockingServlet extends AbstractErraiServlet {
     @Override
     protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
             throws ServletException, IOException {
+
+        final QueueSession session = sessionProvider.getSession(httpServletRequest.getSession(),
+                httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
+
         try {
             ServletInputStream inputStream = httpServletRequest.getInputStream();
             BufferedReader reader = new BufferedReader(
@@ -92,7 +100,7 @@ public class DefaultBlockingServlet extends AbstractErraiServlet {
                 buffer.rewind();
             }
 
-            for (Message msg : createCommandMessage(sessionProvider.getSession(httpServletRequest.getSession()), sb.toString())) {
+            for (Message msg : createCommandMessage(session, sb.toString())) {
                 service.store(msg);
             }
         }
@@ -103,13 +111,13 @@ public class DefaultBlockingServlet extends AbstractErraiServlet {
             httpServletResponse.setStatus(503); // Service Unavailable
         }
 
-        pollForMessages(httpServletRequest, httpServletResponse, false);
+        pollForMessages(session, httpServletRequest, httpServletResponse, false);
     }
 
-    private void pollForMessages(HttpServletRequest httpServletRequest,
+    private void pollForMessages(QueueSession session, HttpServletRequest httpServletRequest,
                                  HttpServletResponse httpServletResponse, boolean wait) throws IOException {
         try {
-            final MessageQueue queue = service.getBus().getQueue(httpServletRequest.getSession().getId());
+            final MessageQueue queue = service.getBus().getQueue(session);
 
             if (queue == null) {
                 sendDisconnectWithReason(httpServletResponse.getOutputStream(),

@@ -3,6 +3,7 @@ package org.jboss.errai.bus.server.servlet;
 import com.google.inject.Singleton;
 import org.apache.catalina.CometEvent;
 import org.apache.catalina.CometProcessor;
+import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.server.MessageQueue;
@@ -48,7 +49,7 @@ public class TomcatCometServlet extends AbstractErraiServlet implements CometPro
      */
     public void event(final CometEvent event) throws IOException, ServletException {
         final HttpServletRequest request = event.getHttpServletRequest();
-        final QueueSession session = sessionProvider.getSession(request.getSession());
+        final QueueSession session = sessionProvider.getSession(request.getSession(), request.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
 
         MessageQueue queue;
         switch (event.getEventType()) {
@@ -136,7 +137,7 @@ public class TomcatCometServlet extends AbstractErraiServlet implements CometPro
                 break;
 
             case READ:
-                readInRequest(request);
+                readInRequest(session, request);
                 event.close();
         }
     }
@@ -186,7 +187,7 @@ public class TomcatCometServlet extends AbstractErraiServlet implements CometPro
         stream.write(']');
     }
 
-    private int readInRequest(HttpServletRequest request) {
+    private int readInRequest(QueueSession session, HttpServletRequest request) {
         try {
 
             BufferedReader reader = request.getReader();
@@ -204,7 +205,8 @@ public class TomcatCometServlet extends AbstractErraiServlet implements CometPro
 
 
             int messagesSent = 0;
-            for (Message msg : createCommandMessage(sessionProvider.getSession(request.getSession()), sb.toString())) {
+            for (Message msg : createCommandMessage(sessionProvider.getSession(request.getSession(),
+                    request.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER)), sb.toString())) {
                 service.store(msg);
                 messagesSent++;
             }
@@ -212,7 +214,7 @@ public class TomcatCometServlet extends AbstractErraiServlet implements CometPro
             return messagesSent;
         }
         catch (IOException e) {
-            MessageQueue queue = service.getBus().getQueue(request.getSession().getId());
+            MessageQueue queue = service.getBus().getQueue(session);
             if (queue != null) {
                 queue.stopQueue();
             }
@@ -223,7 +225,7 @@ public class TomcatCometServlet extends AbstractErraiServlet implements CometPro
 
 
     private MessageQueue getQueue(QueueSession session, boolean pause) {
-        MessageQueue queue = service.getBus().getQueue(session.getSessionId());
+        MessageQueue queue = service.getBus().getQueue(session);
         if (pause && queue != null && queue.getActivationCallback() == null) {
             queue.setActivationCallback(new QueueActivationCallback() {
                 volatile boolean resumed = false;

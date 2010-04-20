@@ -34,10 +34,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Map;
 
+import static java.lang.System.currentTimeMillis;
 import static javax.swing.SwingUtilities.invokeLater;
 import static org.jboss.errai.bus.client.api.base.CommandMessage.createWithParts;
 import static org.jboss.errai.bus.server.io.JSONDecoder.decode;
 import static org.jboss.errai.bus.server.io.JSONEncoder.encode;
+import static org.jboss.errai.tools.monitoring.UiHelper.uglyReEncode;
 
 public class ServiceActivityMonitor extends JFrame implements Attachable {
     private ActivityMonitorTableModel tableModel;
@@ -265,8 +267,8 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
             return TYPES[columnIndex];
         }
 
-        public void addMessage(Message message) {
-            messages.add(new AcvityLogEntry(System.currentTimeMillis(), message));
+        public void addMessage(long time, Message message) {
+            messages.add(new AcvityLogEntry(time, message));
             fireTableRowsInserted(messages.size() - 1, messages.size() - 1);
         }
 
@@ -298,6 +300,7 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
         }
 
         public Object getValueAt(int rowIndex, int columnIndex) {
+            if (fields.size() <= rowIndex) return null;
             switch (columnIndex) {
                 case 0:
                     return fields.get(rowIndex);
@@ -319,24 +322,27 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
     }
     
 
-    public void notifyMessage(Message message) {
+    public void notifyMessage(long time, Message message) {
         /*
          * This is a huge hack to get the display of the messages consistent with what the payload does when
          * encoded. And no it's not particularly efficient.  But since inbus messages are not encoded by JSON and
          * it would be wacky to make the monitoring API such that we had to scan for one or the other, this
          * is much more consistent from an API point-of-view.
          */
-        tableModel.addMessage(createWithParts((Map<String,Object>) decode(encode(message.getParts()))));
+        tableModel.addMessage(time, uglyReEncode(message));
     }
 
     public void attach(ActivityProcessor proc) {
         handle = proc.registerEvent(EventType.MESSAGE, new MessageMonitor() {
             public void monitorEvent(MessageEvent event) {
                 if (service.equals(event.getSubject()))
-                    notifyMessage((Message) event.getContents());
+                    notifyMessage(event.getTime(), (Message) event.getContents());
             }
         });
 
-        proc.notifyEvent(EventType.REPLAY_MESSAGES, SubEventType.NONE, busId, busId, service, null, null, false);
+        /**
+         * When this monitor is attached send a request to replay the messages for this subject@bus.
+         */
+        proc.notifyEvent(currentTimeMillis(), EventType.REPLAY_MESSAGES, SubEventType.NONE, busId, busId, service, null, null, false);
     }
 }

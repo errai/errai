@@ -152,8 +152,6 @@ public class ErraiServiceImpl implements ErraiService {
         configurator.configure(this);
         dispatcher = configurator.getConfiguredDispatcher();
         bus.configure(configurator);
-
-        final ErraiService erraiSvc = this;
     }
 
     private boolean authenticationConfigured() {
@@ -166,7 +164,6 @@ public class ErraiServiceImpl implements ErraiService {
      * @param message - the message to store/deliver
      */
     public void store(Message message) {
-
         message.addResources(configurator.getResourceProviders());
 
         /**
@@ -182,11 +179,6 @@ public class ErraiServiceImpl implements ErraiService {
         }
     }
 
-
-//    public void storeAsync(final CommandMessage message) {
-//        message.addResources(configurator.getResourceProviders());
-//        bus.sendGlobalAsync(message);
-//    }
 
     /**
      * Gets the bus associated with this service

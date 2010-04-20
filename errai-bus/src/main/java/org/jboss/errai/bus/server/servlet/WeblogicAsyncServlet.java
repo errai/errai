@@ -1,8 +1,10 @@
 package org.jboss.errai.bus.server.servlet;
 
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.server.MessageQueue;
+import org.jboss.errai.bus.server.QueueSession;
 import org.mvel2.util.StringAppender;
 
 import javax.servlet.ServletException;
@@ -35,7 +37,9 @@ public class WeblogicAsyncServlet extends AbstractErraiServlet {
         @Override
         protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
                 throws ServletException, IOException {
-            pollForMessages(httpServletRequest, httpServletResponse);
+            pollForMessages(sessionProvider.getSession(httpServletRequest.getSession(),
+                    httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER)),
+                    httpServletRequest, httpServletResponse);
         }
 
         /**
@@ -50,6 +54,9 @@ public class WeblogicAsyncServlet extends AbstractErraiServlet {
         @Override
         protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
                 throws ServletException, IOException {
+            final QueueSession session = sessionProvider.getSession(httpServletRequest.getSession(),
+                    httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
+
             BufferedReader reader = httpServletRequest.getReader();
             StringAppender sb = new StringAppender(httpServletRequest.getContentLength());
             CharBuffer buffer = CharBuffer.allocate(10);
@@ -63,17 +70,17 @@ public class WeblogicAsyncServlet extends AbstractErraiServlet {
                 buffer.rewind();
             }
 
-            for (Message msg : createCommandMessage(sessionProvider.getSession(httpServletRequest.getSession()), sb.toString())) {
+            for (Message msg : createCommandMessage(session, sb.toString())) {
                 service.store(msg);
             }
 
-            pollQueue(service.getBus().getQueue(httpServletRequest.getSession().getId()), httpServletRequest, httpServletResponse);
+            pollQueue(service.getBus().getQueue(session), httpServletRequest, httpServletResponse);
         }
 
-        private void pollForMessages(HttpServletRequest httpServletRequest,
+        private void pollForMessages(QueueSession session, HttpServletRequest httpServletRequest,
                                      HttpServletResponse httpServletResponse) throws IOException {
             try {
-                final MessageQueue queue = service.getBus().getQueue(httpServletRequest.getSession().getId());
+                final MessageQueue queue = service.getBus().getQueue(session);
 
                 if (queue == null) {
                     sendDisconnectWithReason(httpServletResponse.getOutputStream(),
@@ -136,5 +143,9 @@ public class WeblogicAsyncServlet extends AbstractErraiServlet {
             stream.write(']');
             stream.flush();
         }
+
+    public static void main(String[] args) {
+        System.out.println(String.valueOf(System.nanoTime()).length() + ":" + String.valueOf(System.currentTimeMillis()).length());
+    }
 
 }

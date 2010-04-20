@@ -66,10 +66,10 @@ public class ConversationActivityMonitor extends ServiceActivityMonitor {
             public void monitorEvent(MessageEvent event) {
                 String incomingSubject= event.getSubject();
                 if (MATCHER.matcher(incomingSubject).matches())
-                    notifyMessage((Message) event.getContents());
+                    notifyMessage(event.getTime(), (Message) event.getContents());
             }
         });
 
-        proc.notifyEvent(EventType.REPLAY_MESSAGES, SubEventType.NONE, busId, busId, service + ":Reply:%", null, null, false);
+        proc.notifyEvent(System.currentTimeMillis(), EventType.REPLAY_MESSAGES, SubEventType.NONE, busId, busId, service + ":Reply:%", null, null, false);
     }
 }

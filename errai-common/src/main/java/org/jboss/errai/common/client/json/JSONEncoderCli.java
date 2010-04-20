@@ -45,7 +45,7 @@ public class JSONEncoderCli {
         } else if (v instanceof Collection) {
             return encodeCollection((Collection) v);
         } else if (v instanceof Map) {
-            return encodeMap((Map) v);
+            return encodeMap((Map<Object, Object>) v);
         } else if (v instanceof Object[]) {
             return encodeArray((Object[]) v);
         } else if (v instanceof Serializable) {

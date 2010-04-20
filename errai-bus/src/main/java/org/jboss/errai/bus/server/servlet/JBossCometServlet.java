@@ -1,9 +1,8 @@
 package org.jboss.errai.bus.server.servlet;
 
 import com.google.inject.Singleton;
-import org.apache.catalina.CometEvent;
-import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.server.MessageQueue;
 import org.jboss.errai.bus.server.QueueActivationCallback;
 import org.jboss.errai.bus.server.QueueSession;
@@ -16,13 +15,13 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.CharBuffer;
 import java.util.*;
 
+import static org.jboss.errai.bus.client.framework.ClientMessageBus.REMOTE_QUEUE_ID_HEADER;
 import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
 
 /**
@@ -47,7 +46,7 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
      */
     public void event(final HttpEvent event) throws IOException, ServletException {
         final HttpServletRequest request = event.getHttpServletRequest();
-        final QueueSession session = sessionProvider.getSession(request.getSession());
+        final QueueSession session = sessionProvider.getSession(request.getSession(), request.getHeader("RemoteQueueID"));
 
         MessageQueue queue;
         switch (event.getType()) {
@@ -200,7 +199,8 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
         }
 
         int messagesSent = 0;
-        for (Message msg : createCommandMessage(sessionProvider.getSession(request.getSession()), sb.toString())) {
+        for (Message msg : createCommandMessage(sessionProvider.getSession(request.getSession(),
+                request.getHeader(REMOTE_QUEUE_ID_HEADER)), sb.toString())) {
             service.store(msg);
             messagesSent++;
         }
@@ -210,7 +210,7 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
 
 
     private MessageQueue getQueue(QueueSession session, boolean post) {
-        MessageQueue queue = service.getBus().getQueue(session.getSessionId());
+        MessageQueue queue = service.getBus().getQueue(session);
 
         if (post && queue != null && queue.getActivationCallback() == null) {
             queue.setActivationCallback(new QueueActivationCallback() {
@@ -288,41 +288,6 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
         //   queue.heartBeat();
     }
 
-    private static final class PausedEvent {
-        private HttpServletResponse response;
-        private HttpSession session;
-        private CometEvent event;
-
-        private PausedEvent(HttpServletResponse response, HttpSession session, CometEvent event) {
-            this.response = response;
-            this.session = session;
-            this.event = event;
-        }
-
-        public HttpServletResponse getResponse() {
-            return response;
-        }
-
-        public void setResponse(HttpServletResponse response) {
-            this.response = response;
-        }
-
-        public HttpSession getSession() {
-            return session;
-        }
-
-        public void setSession(HttpSession session) {
-            this.session = session;
-        }
-
-        public CometEvent getEvent() {
-            return event;
-        }
-
-        public void setEvent(CometEvent event) {
-            this.event = event;
-        }
-    }
 
     private static final String CONFIG_PROBLEM_TEXT =
             "\n\n*************************************************************************************************\n"

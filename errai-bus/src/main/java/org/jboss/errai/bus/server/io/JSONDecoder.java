@@ -24,6 +24,7 @@ import java.util.Map;
 import static java.lang.Character.isDigit;
 import static java.lang.Character.isJavaIdentifierPart;
 import static java.lang.Double.parseDouble;
+import static java.lang.Long.parseLong;
 
 /**
  * Decodes a JSON string or character array, and provides a proper collection of elements
@@ -107,9 +108,16 @@ public class JSONDecoder {
                 default:
                     if (isDigit(json[cursor]) || (json[cursor] == '-' && isDigit(json[cursor + 1]))) {
                         int start = cursor++;
-                        while (cursor < length && (isDigit(json[cursor]) || json[cursor] == '.')) cursor++;
+                        boolean fp = false;
+                        while (cursor < length && (isDigit(json[cursor]) || json[cursor] == '.')) {
+                            if (json[cursor++] == '.') fp = true;
+                        }
 
-                        ctx.addValue(parseDouble(new String(json, start, cursor - start)));
+                        if (fp) {
+                            ctx.addValue(parseDouble(new String(json, start, cursor - start)));
+                        } else {
+                            ctx.addValue(parseLong(new String(json, start, cursor - start)));
+                        }
 
                         break;
                     } else if (isJavaIdentifierPart(json[cursor])) {

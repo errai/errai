@@ -1,10 +1,12 @@
 package org.jboss.errai.bus.server.servlet;
 
 import com.google.inject.Singleton;
+import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.server.MessageQueue;
 import org.jboss.errai.bus.server.QueueActivationCallback;
+import org.jboss.errai.bus.server.QueueSession;
 import org.mortbay.jetty.RetryRequest;
 import org.mortbay.util.ajax.Continuation;
 import org.mortbay.util.ajax.ContinuationSupport;
@@ -41,7 +43,9 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
     @Override
     protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
             throws ServletException, IOException {
-        pollForMessages(httpServletRequest, httpServletResponse, true);
+        pollForMessages(sessionProvider.getSession(httpServletRequest.getSession(),
+                httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER)),
+                httpServletRequest, httpServletResponse, true);
     }
 
     /**
@@ -69,17 +73,20 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
             buffer.rewind();
         }
 
-        for (Message msg : createCommandMessage(sessionProvider.getSession(httpServletRequest.getSession()), sb.toString())) {
+        final QueueSession session = sessionProvider.getSession(httpServletRequest.getSession(),
+                httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
+
+        for (Message msg : createCommandMessage(session, sb.toString())) {
             service.store(msg);
         }
 
-        pollQueue(service.getBus().getQueue(httpServletRequest.getSession().getId()), httpServletRequest, httpServletResponse);
+        pollQueue(service.getBus().getQueue(session), httpServletRequest, httpServletResponse);
     }
 
-    private void pollForMessages(HttpServletRequest httpServletRequest,
+    private void pollForMessages(QueueSession session, HttpServletRequest httpServletRequest,
                                  HttpServletResponse httpServletResponse, boolean wait) throws IOException {
         try {
-            final MessageQueue queue = service.getBus().getQueue(httpServletRequest.getSession().getId());
+            final MessageQueue queue = service.getBus().getQueue(session);
 
             if (queue == null) {
                 sendDisconnectWithReason(httpServletResponse.getOutputStream(),
@@ -87,7 +94,6 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
             }
 
             synchronized (queue) {
-
                 if (wait) {
                     final Continuation cont = ContinuationSupport.getContinuation(httpServletRequest, queue);
 
@@ -135,7 +141,8 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
                 }
 
                 public Object getMessage() {
-                    StringBuilder b = new StringBuilder("{ErrorMessage:\"").append(t.getMessage()).append("\",AdditionalDetails:\"");
+                    StringBuilder b = new StringBuilder("{Error" +
+                            "Message:\"").append(t.getMessage()).append("\",AdditionalDetails:\"");
                     for (StackTraceElement e : t.getStackTrace()) {
                         b.append(e.toString()).append("<br/>");
                     }
@@ -150,6 +157,8 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
 
     private static void pollQueue(MessageQueue queue, HttpServletRequest httpServletRequest,
                                   HttpServletResponse httpServletResponse) throws IOException {
+
+        if (queue == null) return;
 
         queue.heartBeat();
 

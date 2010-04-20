@@ -45,10 +45,9 @@ public class ActivityProcessor {
         return new Handle(this, type, monitor);
     }
 
-    public void notifyEvent(final EventType type, final SubEventType subType, final String fromBus, final String toBus, final String subject, final Message message, final Throwable error, final boolean replay) {
+    public void notifyEvent(final long time, final EventType type, final SubEventType subType, final String fromBus, final String toBus, final String subject, final Message message, final Throwable error, final boolean replay) {
         workers.execute(new Runnable() {
             public void run() {
-                final long time = System.currentTimeMillis();
                 MessageEvent evt = type == EventType.ERROR ? new MessageEvent() {
                     public long getTime() {
                         return time;

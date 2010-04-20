@@ -16,10 +16,18 @@
 
 package org.jboss.errai.tools.monitoring;
 
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.base.CommandMessage;
+import org.jboss.errai.bus.server.io.JSONDecoder;
+import org.jboss.errai.bus.server.io.JSONEncoder;
+import org.jboss.errai.bus.server.io.TypeDemarshallHelper;
+
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.MutableTreeNode;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 public class UiHelper {
     static {
@@ -38,5 +46,27 @@ public class UiHelper {
 
     public static DefaultMutableTreeNode createIconEntry(String icon, String name) {
         return new DefaultMutableTreeNode(new JLabel(name, getSwIcon(icon), SwingConstants.LEFT));
+    }
+
+    public static Message uglyReEncode(Message message) {
+        Map<String, Object> parts = (Map<String, Object>) JSONDecoder.decode(JSONEncoder.encode(message.getParts()));
+
+        Message newMessage = CommandMessage.createWithParts(parts);
+        if (parts.containsKey("__MarshalledTypes")) {
+            TypeDemarshallHelper.demarshallAll((String) parts.get("__MarshalledTypes"), newMessage);
+        }
+        return newMessage;
+    }
+
+    public static Message decodeAndDemarshall(String json) {
+        Map<String, Object> parts = (Map<String, Object>) JSONDecoder.decode(json);
+
+        if (parts == null) return CommandMessage.createWithParts(new HashMap());
+
+        Message newMessage = CommandMessage.createWithParts(parts);
+        if (parts.containsKey("__MarshalledTypes")) {
+            TypeDemarshallHelper.demarshallAll((String) parts.get("__MarshalledTypes"), newMessage);
+        }
+        return newMessage;
     }
 }

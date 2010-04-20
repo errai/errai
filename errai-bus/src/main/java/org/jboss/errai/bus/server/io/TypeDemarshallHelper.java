@@ -29,6 +29,8 @@ public class TypeDemarshallHelper {
     static {
         addConversionHandler(java.sql.Date.class, new ConversionHandler() {
             public Object convertFrom(Object o) {
+                if (o instanceof String) o = Long.parseLong((String) o);
+                
                 return new java.sql.Date(((Number) o).longValue());
             }
 
@@ -39,6 +41,7 @@ public class TypeDemarshallHelper {
 
         addConversionHandler(java.util.Date.class, new ConversionHandler() {
             public Object convertFrom(Object o) {
+                if (o instanceof String) o = Long.parseLong((String) o);
                 return new java.util.Date(((Number) o).longValue());
             }
 
