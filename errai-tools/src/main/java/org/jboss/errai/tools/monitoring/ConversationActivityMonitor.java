@@ -66,11 +66,7 @@ public class ConversationActivityMonitor extends ServiceActivityMonitor {
             public void monitorEvent(MessageEvent event) {
                 String incomingSubject = event.getSubject();
                 if (MATCHER.matcher(incomingSubject).matches()) {
-                    System.out.println("Matches! {" + incomingSubject + "}");
                     notifyMessage(event.getTime(), (Message) event.getContents());
-                }
-                else {
-                    System.out.println("No Match! {" + incomingSubject + "}");
                 }
             }
         });
