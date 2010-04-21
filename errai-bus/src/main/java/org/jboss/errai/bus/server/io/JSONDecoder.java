@@ -27,6 +27,8 @@ import static java.lang.Character.isDigit;
 import static java.lang.Character.isJavaIdentifierPart;
 import static java.lang.Double.parseDouble;
 import static java.lang.Long.parseLong;
+import static org.jboss.errai.bus.server.io.TypeDemarshallHelper._demarshallAll;
+import static org.jboss.errai.common.client.protocols.SerializationParts.ENCODED_TYPE;
 
 /**
  * Decodes a JSON string or character array, and provides a proper collection of elements
@@ -48,7 +50,6 @@ public class JSONDecoder {
         return new JSONDecoder(json, length, cursor).parse();
     }
 
-
     public JSONDecoder(String json) {
         this.length = (this.json = json.toCharArray()).length;
     }
@@ -68,7 +69,6 @@ public class JSONDecoder {
             return _parse(new Context(), null);
         }
         catch (Exception e) {
-            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
@@ -90,9 +90,9 @@ public class JSONDecoder {
                 case '}':
                     cursor++;
 
-                    if (collection instanceof Map && ((Map) collection).containsKey(SerializationParts.ENCODED_TYPE)) {
+                    if (collection instanceof Map && ((Map) collection).containsKey(ENCODED_TYPE)) {
                         try {
-                            return TypeDemarshallHelper._demarshallAll(collection);
+                            return _demarshallAll(collection);
                         }
                         catch (Exception e) {
                             throw new RuntimeException("Could not demarshall object", e);
@@ -100,6 +100,7 @@ public class JSONDecoder {
                     } else {
                         return ctx.record(collection);
                     }
+
                 case ',':
                     cursor++;
                     ctx.record(collection);
@@ -236,7 +237,6 @@ public class JSONDecoder {
         return cursor;
     }
 
-
     private class Context {
         Object lhs;
         Object rhs;
@@ -268,8 +268,7 @@ public class JSONDecoder {
                 return collection;
             }
             catch (ClassCastException e) {
-                e.printStackTrace();
-                return null;
+                throw new RuntimeException("error building collection", e);
             }
             finally {
                 lhs = rhs = null;

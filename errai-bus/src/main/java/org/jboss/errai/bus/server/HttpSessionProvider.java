@@ -23,22 +23,27 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
         SessionsContainer sc = (SessionsContainer) externSessRef.getAttribute(HTTP_SESS);
         if (sc == null) {
             externSessRef.setAttribute(HTTP_SESS, sc = new SessionsContainer());
-
         }
 
         QueueSession qs = sc.getSession(remoteQueueID);
         if (qs == null) {
-            sc.addSession(remoteQueueID, qs = new HttpSessionWrapper(externSessRef.getId(), remoteQueueID));
+            qs = sc.createSession(externSessRef.getId(), remoteQueueID);
         }
 
         return qs;
     }
 
     public static class SessionsContainer {
+        /**
+         * Share these attributes across all the sub-sessions
+         */
+        private Map<String, Object> sharedAttributes = new HashMap<String, Object>();
         private Map<String, QueueSession> queueSessions = new HashMap<String, QueueSession>();
 
-        public void addSession(String remoteQueueId, QueueSession session) {
-            queueSessions.put(remoteQueueId, session);
+        public QueueSession createSession(String externalSessionID, String remoteQueueId) {
+            QueueSession qs = new HttpSessionWrapper(sharedAttributes, externalSessionID, remoteQueueId);
+            queueSessions.put(remoteQueueId, qs);
+            return qs;
         }
 
         public QueueSession getSession(String remoteQueueId) {
@@ -51,11 +56,12 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
      * If the reference does not have an HttpSession already, a new session is created using this wrapper class
      */
     public static class HttpSessionWrapper implements QueueSession, Serializable {
-        private Map<String, Object> attributes = new HashMap<String, Object>();
+        private Map<String, Object> attributes;
         private String sessionId;
         private boolean valid;
 
-        public HttpSessionWrapper(String sessionId, String remoteQueueID) {
+        public HttpSessionWrapper(Map<String, Object> attributes, String sessionId, String remoteQueueID) {
+            this.attributes = attributes;
             this.sessionId = remoteQueueID + "@" + sessionId;
         }
 
