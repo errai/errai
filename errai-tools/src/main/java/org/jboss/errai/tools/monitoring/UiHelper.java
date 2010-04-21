@@ -21,6 +21,7 @@ import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.server.io.JSONDecoder;
 import org.jboss.errai.bus.server.io.JSONEncoder;
 import org.jboss.errai.bus.server.io.TypeDemarshallHelper;
+import org.jboss.errai.common.client.protocols.SerializationParts;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -52,8 +53,8 @@ public class UiHelper {
         Map<String, Object> parts = (Map<String, Object>) JSONDecoder.decode(JSONEncoder.encode(message.getParts()));
 
         Message newMessage = CommandMessage.createWithParts(parts);
-        if (parts.containsKey("__MarshalledTypes")) {
-            TypeDemarshallHelper.demarshallAll((String) parts.get("__MarshalledTypes"), newMessage);
+        if (parts.containsKey(SerializationParts.MARSHALLED_TYPES)) {
+            TypeDemarshallHelper.demarshallAll((String) parts.get(SerializationParts.MARSHALLED_TYPES), newMessage);
         }
         return newMessage;
     }
@@ -64,8 +65,8 @@ public class UiHelper {
         if (parts == null) return CommandMessage.createWithParts(new HashMap());
 
         Message newMessage = CommandMessage.createWithParts(parts);
-        if (parts.containsKey("__MarshalledTypes")) {
-            TypeDemarshallHelper.demarshallAll((String) parts.get("__MarshalledTypes"), newMessage);
+        if (parts.containsKey(SerializationParts.MARSHALLED_TYPES)) {
+            TypeDemarshallHelper.demarshallAll((String) parts.get(SerializationParts.MARSHALLED_TYPES), newMessage);
         }
         return newMessage;
     }

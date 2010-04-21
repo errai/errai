@@ -20,8 +20,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TypeMarshallers {
-    private static final Map<String, Marshaller> classMap = new HashMap<String, Marshaller>();
-    private static final Map<Class, Marshaller> marshallers = new HashMap<Class, Marshaller>();
+    private static final Map<String, Marshaller<Object>> classMap = new HashMap<String, Marshaller<Object>>();
+    private static final Map<Class, Marshaller<Object>> marshallers = new HashMap<Class, Marshaller<Object>>();
 
     static {
         addMarshaller(java.sql.Date.class, new Marshaller<java.sql.Date>() {
@@ -42,11 +42,12 @@ public class TypeMarshallers {
         marshallers.put(type, d);
     }
 
+    @SuppressWarnings({"unchecked"})
     public static <T> Marshaller<T> getMarshaller(Class<? extends T> type) {
-        return marshallers.get(type);
+        return (Marshaller<T>) marshallers.get(type);
     }
 
-    public static Marshaller getMarshaller(String type) {
+    public static Marshaller<Object> getMarshaller(String type) {
         return classMap.get(type);
     }
 

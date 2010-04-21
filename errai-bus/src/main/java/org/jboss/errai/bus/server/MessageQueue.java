@@ -24,6 +24,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
+import static java.lang.System.nanoTime;
+
 /**
  * A message queue is keeps track of which messages need to be sent outbound. It keeps track of the amount of messages
  * that can be stored, transmitted and those which timeout. The <tt>MessageQueue</tt> is implemented using a
@@ -41,7 +43,7 @@ public class MessageQueue {
     private QueueSession session;
 
     private long transmissionWindow = 50;
-    private long lastTransmission = System.nanoTime();
+    private long lastTransmission = nanoTime();
     private long endWindow;
 
     private int lastQueueSize = 0;
@@ -115,7 +117,7 @@ public class MessageQueue {
 
                         try {
                             if (queue.isEmpty())
-                                Thread.sleep(System.nanoTime() - endWindow);
+                                Thread.sleep(nanoTime() - endWindow);
                         }
                         catch (Exception e) {
                             // just resume.
@@ -140,7 +142,7 @@ public class MessageQueue {
                 }
 
                 lastQueueSize = queue.size();
-                endWindow = (lastTransmission = System.nanoTime()) + transmissionWindow;
+                endWindow = (lastTransmission = nanoTime()) + transmissionWindow;
 
                 return p;
 
@@ -235,11 +237,11 @@ public class MessageQueue {
     }
 
     private boolean isWindowExceeded() {
-        return System.nanoTime() > endWindow;
+        return nanoTime() > endWindow;
     }
 
     private long getEndOfWindow() {
-        return endWindow - System.nanoTime();
+        return endWindow - nanoTime();
     }
 
     private void descheduleTask() {
@@ -295,7 +297,7 @@ public class MessageQueue {
      * @return true if the queue is stale
      */
     public boolean isStale() {
-        return !queueRunning || (!isActive() && (System.nanoTime() - lastTransmission) > TIMEOUT);
+        return !queueRunning || (!isActive() && (nanoTime() - lastTransmission) > TIMEOUT);
     }
 
     /**
@@ -311,7 +313,7 @@ public class MessageQueue {
      * Fakes a transmission, shows life with a heartbeat
      */
     public void heartBeat() {
-        lastTransmission = System.nanoTime();
+        lastTransmission = nanoTime();
     }
 
     /**

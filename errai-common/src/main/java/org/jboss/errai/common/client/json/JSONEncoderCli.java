@@ -16,6 +16,8 @@
 
 package org.jboss.errai.common.client.json;
 
+import org.jboss.errai.common.client.protocols.SerializationParts;
+import org.jboss.errai.common.client.types.Marshaller;
 import org.jboss.errai.common.client.types.TypeMarshallers;
 
 import java.io.Serializable;
@@ -23,6 +25,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+
+import static org.jboss.errai.common.client.types.TypeMarshallers.getMarshaller;
 
 public class JSONEncoderCli {
     boolean defer;
@@ -34,6 +38,7 @@ public class JSONEncoderCli {
         return _encode(v);
     }
 
+    @SuppressWarnings({"unchecked"})
     public String _encode(Object v) {
         if (v == null) {
             return "null";
@@ -50,7 +55,8 @@ public class JSONEncoderCli {
             return encodeArray((Object[]) v);
         } else if (v instanceof Serializable) {
             if (TypeMarshallers.hasMarshaller(v.getClass().getName())) {
-                return TypeMarshallers.getMarshaller(marshall = v.getClass().getName()).marshall(v);
+                Marshaller<Object> m = getMarshaller(marshall = v.getClass().getName());
+                return m.marshall(v);
             } else {
                 throw new RuntimeException("Unable to marshal: no available marshaller: " + v.getClass().getName());
             }
@@ -86,7 +92,7 @@ public class JSONEncoderCli {
         }
 
         if (marshalledTypes != null) {
-            mapBuild.append(",__MarshalledTypes:\"");
+            mapBuild.append("," + SerializationParts.ENCODED_TYPE + ":\"");
             first = true;
             for (Map.Entry<String, String> m : marshalledTypes.entrySet()) {
                 if (!first) {

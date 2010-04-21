@@ -17,6 +17,7 @@
 package org.jboss.errai.bus.server.io;
 
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.mvel2.ConversionHandler;
 import org.mvel2.MVEL;
 
@@ -77,8 +78,8 @@ public class TypeDemarshallHelper {
                 return newList;
             } else if (o instanceof Map) {
                 Map<?, ?> oMap = (Map) o;
-                if (oMap.containsKey("__EncodedType")) {
-                    Object newInstance = Class.forName((String) oMap.get("__EncodedType")).newInstance();
+                if (oMap.containsKey(SerializationParts.ENCODED_TYPE)) {
+                    Object newInstance = Class.forName((String) oMap.get(SerializationParts.ENCODED_TYPE)).newInstance();
                     Map<String, Serializable> s = MVELDencodingCache.get(newInstance.getClass());
                     int i = 0;
                     if (s == null) {
@@ -87,7 +88,7 @@ public class TypeDemarshallHelper {
                             if (s == null) {
                                 s = new HashMap<String, Serializable>();
                                 for (String key : (Set<String>) oMap.keySet()) {
-                                    if ("__EncodedType".equals(key)) continue;
+                                    if (SerializationParts.ENCODED_TYPE.equals(key)) continue;
                                     s.put(key, MVEL.compileSetExpression(key));
                                 }
                             }
@@ -97,10 +98,8 @@ public class TypeDemarshallHelper {
 
 
                     for (Map.Entry<?, ?> entry : oMap.entrySet()) {
-                        if ("__EncodedType".equals(entry.getKey())) continue;
-                    //    Object value =;
+                        if (SerializationParts.ENCODED_TYPE.equals(entry.getKey())) continue;
                         MVEL.executeSetExpression(s.get(entry.getKey()), newInstance, _demarshallAll(entry.getValue()));
-                    //    MVEL.setProperty(newInstance, (String) entry.getKey(), value);
                     }
 
                     return newInstance;

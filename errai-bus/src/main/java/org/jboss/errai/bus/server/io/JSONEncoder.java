@@ -16,6 +16,7 @@
 
 package org.jboss.errai.bus.server.io;
 
+import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.common.client.types.TypeHandler;
 import org.mvel2.MVEL;
 
@@ -72,7 +73,7 @@ public class JSONEncoder {
             return _encode(convert(o));
         }
 
-        StringBuilder build = new StringBuilder("{__EncodedType:'" + cls.getName() + "',");
+        StringBuilder build = new StringBuilder("{" + SerializationParts.ENCODED_TYPE + ":'" + cls.getName() + "',");
         Field[] fields = cls.getDeclaredFields();
         int i = 0;
 
