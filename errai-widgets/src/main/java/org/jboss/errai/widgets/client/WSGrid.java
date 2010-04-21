@@ -1711,7 +1711,8 @@ public class WSGrid extends Composite implements RequiresResize {
         DeferredCommand.addCommand(new Command() {
            
             public void execute() {
-                 setPixelSize(getParent().getOffsetWidth() - 5, getParent().getOffsetHeight() - 15);
+              if(getParent().isVisible())
+                setPixelSize(getParent().getOffsetWidth() - 5, getParent().getOffsetHeight() - 15);
             }
         });
 
