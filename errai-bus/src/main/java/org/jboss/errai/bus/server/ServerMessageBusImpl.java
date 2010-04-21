@@ -342,10 +342,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             }
 
             if (isMonitor()) {
-                if (queue == null) {
-                    System.out.println("NULL");
-                }
-
                 busMonitor.notifyOutgoingMessageToRemote(queue.getSession().getSessionId(), message);
             }
 
@@ -414,11 +410,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
      * @param sessionId - the session context of the queue to close
      */
     public void closeQueue(String sessionId) {
-        MessageQueue q = getQueueBySession(sessionId);
-        for (Set<MessageQueue> sq : remoteSubscriptions.values()) {
-            sq.remove(q);
-        }
-        messageQueues.remove(getSessionById(sessionId));
+        closeQueue(getQueueBySession(sessionId));
     }
 
     /**
@@ -432,6 +424,10 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
 
         messageQueues.values().remove(queue);
+
+        if (isMonitor()) {
+            busMonitor.notifyQueueDetached(queue.getSession().getSessionId(), queue);
+        }
     }
 
     /**

@@ -57,31 +57,6 @@ public class MonitorExtension implements ErraiConfigExtension {
 
                 public void attach(MessageBus bus) {
                     this.bus = bus;
-
-//                    bus.subscribe(MONITOR_SVC, new MessageCallback() {
-//                        public void callback(Message message) {
-//                            String queueId = message.getResource(QueueSession.class, "Session").getSessionId();
-//                            switch (MonitorCommands.valueOf(message.getCommandType())) {
-//                                case SuccessfulAttach:
-//                                     proc.notifyEvent(EventType.BUS_EVENT, SubEventType.REMOTE_ATTACHED, String.valueOf(queueId),
-//                                            "Server", null, null, null, false);
-//                                    break;
-//                                case SubscribeEvent:
-//                                     proc.notifyEvent(EventType.BUS_EVENT, SubEventType.SERVER_SUBSCRIBE,
-//                                "Server", "Server", queueId, null, null, false);
-//                                    break;
-//                                case UnsubcribeEvent:
-//                                    proc.notifyEvent(EventType.BUS_EVENT, SubEventType.SERVER_UNSUBSCRIBE,
-//                                            "Server", "Server", queueId, null, null, false);
-//                                     break;
-//                                case IncomingMessage:
-//                                    proc.notifyEvent(EventType.MESSAGE, SubEventType.RX_REMOTE, queueId,
-//                                            "Server", message.getSubject(), message, null, false);
-//                                    break;
-//
-//                            }
-//                        }
-//                    });
                 }
 
                 public void notifyNewSubscriptionEvent(final SubscriptionEvent event) {
@@ -108,25 +83,19 @@ public class MonitorExtension implements ErraiConfigExtension {
                     }
                 }
 
-                 public void notifyQueueAttached(final String queueId, Object queueInstance) {
-//                    MessageBuilder.createMessage()
-//                            .toSubject("ClientBus")
-//                            .command(BusCommands.RemoteMonitorAttach)
-//                            .with(MessageParts.Subject, MONITOR_SVC)
-//                            .with(MessageParts.SessionID, String.valueOf(queueId))
-//                            .noErrorHandling().sendNowWith(bus);
+                public void notifyQueueAttached(final String queueId, Object queueInstance) {
+                    proc.notifyEvent(System.currentTimeMillis(), EventType.BUS_EVENT, SubEventType.REMOTE_ATTACHED, queueId, "Server", null, null, null, false);
+                }
 
-                    proc.notifyEvent(System.currentTimeMillis(), EventType.BUS_EVENT, SubEventType.REMOTE_ATTACHED, String.valueOf(queueId), "Server", null, null, null, false);
+                public void notifyQueueDetached(String queueId, Object queueInstance) {
+                    proc.notifyEvent(System.currentTimeMillis(), EventType.BUS_EVENT, SubEventType.REMOTE_DETATCHED, queueId, "Server", null, null, null, false);
                 }
 
                 public void notifyIncomingMessageFromRemote(String queue, final Message message) {
-                  //  if (MONITOR_SVC.equals(message.getSubject())) return;
-
                     proc.notifyEvent(System.currentTimeMillis(), EventType.MESSAGE, SubEventType.RX_REMOTE, String.valueOf(queue), "Server", message.getSubject(), message, null, false);
                 }
 
                 public void notifyOutgoingMessageToRemote(String queue, final Message message) {
-                //    if (MONITOR_SVC.equals(message.getSubject())) return;
                     proc.notifyEvent(System.currentTimeMillis(), EventType.MESSAGE, SubEventType.TX_REMOTE, "Server", String.valueOf(queue), message.getSubject(), message, null, false);
                 }
 

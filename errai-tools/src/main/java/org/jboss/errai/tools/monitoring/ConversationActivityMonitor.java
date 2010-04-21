@@ -64,12 +64,17 @@ public class ConversationActivityMonitor extends ServiceActivityMonitor {
     public void attach(ActivityProcessor proc) {
         handle = proc.registerEvent(EventType.MESSAGE, new MessageMonitor() {
             public void monitorEvent(MessageEvent event) {
-                String incomingSubject= event.getSubject();
-                if (MATCHER.matcher(incomingSubject).matches())
+                String incomingSubject = event.getSubject();
+                if (MATCHER.matcher(incomingSubject).matches()) {
+                    System.out.println("Matches! {" + incomingSubject + "}");
                     notifyMessage(event.getTime(), (Message) event.getContents());
+                }
+                else {
+                    System.out.println("No Match! {" + incomingSubject + "}");
+                }
             }
         });
 
-        proc.notifyEvent(System.currentTimeMillis(), EventType.REPLAY_MESSAGES, SubEventType.NONE, busId, busId, service + ":Reply:%", null, null, false);
+        proc.notifyEvent(System.currentTimeMillis(), EventType.REPLAY_MESSAGES, SubEventType.NONE, busId, busId, service + ":RespondTo:%", null, null, false);
     }
 }

@@ -26,6 +26,7 @@ public interface BusMonitor {
     public void notifyUnSubcriptionEvent(SubscriptionEvent event);
 
     public void notifyQueueAttached(String queueId, Object queueInstance);
+    public void notifyQueueDetached(String queueId, Object queueInstance);
 
     public void notifyIncomingMessageFromRemote(String queueId, Message message);
     public void notifyOutgoingMessageToRemote(String queueId, Message message);
