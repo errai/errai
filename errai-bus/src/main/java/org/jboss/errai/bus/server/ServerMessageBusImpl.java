@@ -175,7 +175,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                         ServerMessageBusImpl.this.remoteUnsubscribe(ref.getSession(), ref, subject);
                     }
 
-                    ServerMessageBusImpl.this.removeQueue(ref.getSession());
+                    ServerMessageBusImpl.this.closeQueue(ref);
+                    ref.getSession().endSession();
                 }
             }
 
@@ -194,10 +195,10 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         sessionLookup.put(session.getSessionId(), session);
     }
 
-    private void removeQueue(QueueSession session) {
-        messageQueues.remove(session);
-        sessionLookup.remove(session.getSessionId());
-    }
+//    private void removeQueue(QueueSession session) {
+//        messageQueues.remove(session);
+//        sessionLookup.remove(session.getSessionId());
+//    }
 
     /**
      * Configures the server message bus with the specified <tt>ErraiServiceConfigurator</tt>. It only takes the queue
@@ -424,6 +425,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
 
         messageQueues.values().remove(queue);
+        sessionLookup.values().remove(queue.getSession());
 
         if (isMonitor()) {
             busMonitor.notifyQueueDetached(queue.getSession().getSessionId(), queue);
