@@ -61,10 +61,10 @@ public class MessageFactory {
 
             Message msg = CommandMessage.createWithParts(parts)
                     .setResource("Session", session);
-
-            if (parts.containsKey(SerializationParts.MARSHALLED_TYPES)) {
-                TypeDemarshallHelper.demarshallAll((String) parts.get(SerializationParts.MARSHALLED_TYPES), msg);
-            }
+//
+//            if (parts.containsKey(SerializationParts.MARSHALLED_TYPES)) {
+//                TypeDemarshallHelper.demarshallAll((String) parts.get(SerializationParts.MARSHALLED_TYPES), msg);
+//            }
 
             msg.setFlag(RoutingFlags.FromRemote);
 

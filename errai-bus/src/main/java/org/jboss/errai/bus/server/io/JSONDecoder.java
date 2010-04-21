@@ -16,6 +16,8 @@
 
 package org.jboss.errai.bus.server.io;
 
+import org.jboss.errai.common.client.protocols.SerializationParts;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -86,16 +88,21 @@ public class JSONDecoder {
 
                 case ']':
                 case '}':
-                    ctx.exit();
-                    if (!ctx.isNest()) {
-                        cursor++;
+                    cursor++;
+
+                    if (collection instanceof Map && ((Map) collection).containsKey(SerializationParts.ENCODED_TYPE)) {
+                        try {
+                            return TypeDemarshallHelper._demarshallAll(collection);
+                        }
+                        catch (Exception e) {
+                            throw new RuntimeException("Could not demarshall object", e);
+                        }
+                    } else {
                         return ctx.record(collection);
                     }
                 case ',':
-
                     cursor++;
                     ctx.record(collection);
-
                     break;
 
                 case '"':
@@ -229,16 +236,12 @@ public class JSONDecoder {
         return cursor;
     }
 
+
     private class Context {
         Object lhs;
         Object rhs;
-        private int nest;
 
         private Context() {
-        }
-
-        private Context(int nest) {
-            this.nest = nest;
         }
 
         private void addValue(Object val) {
@@ -255,6 +258,7 @@ public class JSONDecoder {
                     if (collection instanceof Map) {
                         //noinspection unchecked
                         ((Map) collection).put(lhs, rhs);
+
                     } else {
                         if (collection == null) return lhs;
                         //noinspection unchecked
@@ -270,18 +274,6 @@ public class JSONDecoder {
             finally {
                 lhs = rhs = null;
             }
-        }
-
-        public void nest() {
-            nest++;
-        }
-
-        public void exit() {
-            nest--;
-        }
-
-        public boolean isNest() {
-            return nest >= 0;
         }
     }
 }

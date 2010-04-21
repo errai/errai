@@ -32,6 +32,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import static javax.swing.SwingUtilities.invokeLater;
 import static org.jboss.errai.tools.monitoring.UiHelper.createIconEntry;
 import static org.mvel2.util.ParseTools.boxPrimitive;
 
@@ -112,7 +113,6 @@ public class ObjectExplorer extends JTree {
     public static void renderFields(final ObjectExplorer explorer, final DefaultMutableTreeNode node, final Class clazz, final Object v) {
         if (clazz == null) return;
 
-
         if (clazz.isPrimitive()) {
             renderFieldByType(explorer, node, "val", PrimitiveMarker.class, v);
             return;
@@ -139,7 +139,7 @@ public class ObjectExplorer extends JTree {
                     renderField(explorer, node, fld, v);
                 }
 
-                SwingUtilities.invokeLater(new Runnable() {
+                invokeLater(new Runnable() {
                     public void run() {
                         ((DefaultTreeModel) explorer.getModel()).reload(node);
                     }
@@ -220,6 +220,11 @@ public class ObjectExplorer extends JTree {
 
         renderers.put(ArrayMarker.class, new ValRenderer() {
             public boolean render(ObjectExplorer explorer, DefaultMutableTreeNode node, String name, Object val) {
+                if (val == null) {
+                    node.add(createIconEntry("field.png", fieldLabel(name, "null")));
+                    return false;
+                }
+
                 int length = Array.getLength(val);
                 Object o;
                 for (int i = 0; i < length; i++) {
@@ -233,6 +238,11 @@ public class ObjectExplorer extends JTree {
 
         renderers.put(Collection.class, new ValRenderer() {
             public boolean render(ObjectExplorer explorer, DefaultMutableTreeNode node, String name, Object val) {
+                if (val == null) {
+                    node.add(createIconEntry("field.png", fieldLabel(name, "null")));
+                    return false;
+                }
+
                 int i = 0;
                 for (Object o : (Collection) val) {
                     nestObject(explorer, node, String.valueOf(i++), o);
@@ -244,12 +254,16 @@ public class ObjectExplorer extends JTree {
 
         renderers.put(Map.class, new ValRenderer() {
             public boolean render(ObjectExplorer explorer, DefaultMutableTreeNode node, String name, Object val) {
-                //noinspection unchecked
-                for (Map.Entry<Object, Object> entry : ((Map<Object, Object>) val).entrySet()) {
-                    nestObject(explorer, node, String.valueOf(entry.getKey()), entry);
+                if (val == null) {
+                    node.add(createIconEntry("field.png", fieldLabel(name, "null")));
+                    return false;
+                } else {
+                    for (Map.Entry<Object, Object> entry : ((Map<Object, Object>) val).entrySet()) {
+                        nestObject(explorer, node, String.valueOf(entry.getKey()), entry);
+                    }
+                    return true;
                 }
 
-                return true;
             }
         });
 

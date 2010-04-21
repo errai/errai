@@ -65,9 +65,14 @@ public class UiHelper {
         if (parts == null) return CommandMessage.createWithParts(new HashMap());
 
         Message newMessage = CommandMessage.createWithParts(parts);
-        if (parts.containsKey(SerializationParts.MARSHALLED_TYPES)) {
-            TypeDemarshallHelper.demarshallAll((String) parts.get(SerializationParts.MARSHALLED_TYPES), newMessage);
+
+        for (Map.Entry<String, Object> entry : parts.entrySet()) {
+
         }
+
+  //      if (parts.containsKey(SerializationParts.MARSHALLED_TYPES)) {
+   //         TypeDemarshallHelper.demarshallAll((String) parts.get(SerializationParts.MARSHALLED_TYPES), newMessage);
+    //    }
         return newMessage;
     }
 }

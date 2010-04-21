@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.lang.Class.forName;
+import static java.lang.String.valueOf;
 import static java.sql.DriverManager.getConnection;
 import static org.jboss.errai.bus.server.io.JSONEncoder.encode;
 
@@ -187,7 +188,7 @@ public class Dataservice implements Attachable {
                 ArrayList<Record> records = new ArrayList<Record>(100);
                 while (results.next()) {
                     records.add(new Record(results.getLong(1), results.getInt(2), results.getInt(3), results.getInt(4),
-                            results.getString(5), results.getString(6), results.getString(7), UiHelper.decodeAndDemarshall(String.valueOf(results.getObject(8)))));
+                            results.getString(5), results.getString(6), results.getString(7), UiHelper.decodeAndDemarshall(valueOf(results.getObject(8)))));
                 }
                 return records;
 
