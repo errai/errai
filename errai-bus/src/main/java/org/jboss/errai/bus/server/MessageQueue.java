@@ -34,7 +34,7 @@ import static java.lang.System.nanoTime;
  */
 public class MessageQueue {
     private static final long TIMEOUT = Boolean.getBoolean("org.jboss.errai.debugmode") ?
-            secs(60) : secs(1);
+            secs(60) : secs(30);
 
     private static final int MAXIMUM_PAYLOAD_SIZE = 10;
     private static final long DEFAULT_TRANSMISSION_WINDOW = millis(25);
