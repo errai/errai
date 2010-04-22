@@ -91,6 +91,7 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
             if (queue == null) {
                 sendDisconnectWithReason(httpServletResponse.getOutputStream(),
                         "There is no queue associated with this session.");
+                return;
             }
 
             synchronized (queue) {
@@ -160,7 +161,7 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
 
         if (queue == null) return;
 
-     //   queue.heartBeat();
+        queue.heartBeat();
 
         List<MarshalledMessage> messages = queue.poll(false).getMessages();
 
