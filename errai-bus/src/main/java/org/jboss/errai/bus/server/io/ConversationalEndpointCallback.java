@@ -5,7 +5,9 @@ import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.server.MessageDeliveryFailure;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
+import java.util.Collection;
 
 import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversation;
 import static org.mvel2.DataConversion.canConvert;
@@ -24,8 +26,8 @@ public class ConversationalEndpointCallback implements MessageCallback {
      * Initializes the service, method and bus
      *
      * @param genericSvc - the service the bus is subscribed to
-     * @param method - the endpoint function
-     * @param bus - the bus to send the messages on
+     * @param method     - the endpoint function
+     * @param bus        - the bus to send the messages on
      */
     public ConversationalEndpointCallback(Object genericSvc, Method method, MessageBus bus) {
         this.genericSvc = genericSvc;
@@ -50,6 +52,25 @@ public class ConversationalEndpointCallback implements MessageCallback {
             if (parms[i] != null && !targetTypes[i].isAssignableFrom(parms[i].getClass())) {
                 if (canConvert(targetTypes[i], parms[i].getClass())) {
                     parms[i] = convert(parms[i], targetTypes[i]);
+                } else if (targetTypes[i].isArray()) {
+                    if (parms[i] instanceof Collection) {
+                        Collection c = (Collection) parms[i];
+                        parms[i] = c.toArray((Object[]) Array.newInstance(targetTypes[i].getComponentType(), c.size()));
+
+                    } else if (parms[i].getClass().isArray()) {
+
+                        int length = Array.getLength(parms[i]);
+                        Class toComponentType = parms[i].getClass().getComponentType();
+                        Object parmValue = parms[i];
+                        Object newArray = Array.newInstance(targetTypes[i].getComponentType(), length);
+
+                        for (int x = 0; x < length; x++) {
+                            Array.set(newArray, x, convert(Array.get(parmValue, x), toComponentType));
+                        }
+
+                        parms[i] = newArray;
+                    }
+
                 } else {
                     throw new MessageDeliveryFailure("type mismatch in method parameters");
                 }
@@ -61,7 +82,7 @@ public class ConversationalEndpointCallback implements MessageCallback {
                     .subjectProvided().signalling()
                     .with("MethodReply", method.invoke(genericSvc, parms))
                     .noErrorHandling().sendNowWith(bus);
-       
+
         }
         catch (Exception e) {
             throw new MessageDeliveryFailure("error invoking endpoint", e);

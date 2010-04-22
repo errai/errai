@@ -106,18 +106,27 @@ public class ServerMonitorPanel implements Attachable {
         });
 
         busServices.addMouseListener(new MouseListener() {
+            Object lastComponent;
             long lastClick;
 
             public void mouseClicked(MouseEvent e) {
+                if (e.getButton() != MouseEvent.BUTTON1) return;
                 switch (e.getClickCount()) {
                     case 1:
                         lastClick = System.currentTimeMillis();
+                        lastComponent = e.getComponent();
                         break;
                     case 2:
-                        if (!e.isConsumed() && (System.currentTimeMillis() - lastClick < 500)) {
+                        if (!e.isConsumed() && e.getComponent() == lastComponent &&
+                                (System.currentTimeMillis() - lastClick < 1000)) {
                             e.consume();
                             openActivityMonitor();
+                            break;
                         }
+
+                    default:
+                        lastComponent = null;
+                        e.consume();
                 }
             }
 

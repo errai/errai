@@ -53,8 +53,6 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
         public void remoteSession(String remoteQueueId) {
             queueSessions.remove(remoteQueueId);
         }
-        
-
     }
 
     /**

@@ -835,7 +835,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             }
         };
 
-        heartBeatTimer.schedule(HEARTBEAT_DELAY);
+    //    heartBeatTimer.schedule(HEARTBEAT_DELAY);
     }
 
     /**

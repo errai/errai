@@ -241,7 +241,9 @@ public interface Message extends Serializable {
 
     /**
      * Commit the message in it's current structure.  After this method is called, there is no guarantee that
-     * any changes in the message will be communicated across the bus.
+     * any changes in the message will be communicated across the bus. In fact, modifying the message after
+     * calling commit() may create a corrupt payload.  In theory, you should never call this method.  It's
+     * called by the message bus immediately before transmission.
      */
     public void commit();
 

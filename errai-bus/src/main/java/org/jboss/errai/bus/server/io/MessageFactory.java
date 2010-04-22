@@ -26,6 +26,8 @@ import org.jboss.errai.common.client.protocols.SerializationParts;
 
 import java.util.Map;
 
+import static org.jboss.errai.bus.client.api.base.CommandMessage.createWithParts;
+
 /**
  * The <tt>MessageFactory</tt> facilitates the building of a command message using a JSON string
  */
@@ -59,13 +61,8 @@ public class MessageFactory {
             Map<String, Object> parts = decodeToMap(pkg[i]);
             parts.remove(MessageParts.SessionID.name());
 
-            Message msg = CommandMessage.createWithParts(parts)
+            Message msg = createWithParts(parts)
                     .setResource("Session", session);
-//
-//            if (parts.containsKey(SerializationParts.MARSHALLED_TYPES)) {
-//                TypeDemarshallHelper.demarshallAll((String) parts.get(SerializationParts.MARSHALLED_TYPES), msg);
-//            }
-
             msg.setFlag(RoutingFlags.FromRemote);
 
             c[i] = msg;

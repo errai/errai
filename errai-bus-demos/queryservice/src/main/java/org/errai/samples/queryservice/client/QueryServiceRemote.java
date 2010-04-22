@@ -7,4 +7,5 @@ import org.jboss.errai.bus.server.annotations.Remote;
 @Multi
 public interface QueryServiceRemote {
     public String[] query(String queryString);
+    public String append(String... arg);
 }

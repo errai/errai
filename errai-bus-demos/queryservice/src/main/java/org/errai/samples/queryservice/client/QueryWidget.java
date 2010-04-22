@@ -22,10 +22,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.uibinder.client.UiTemplate;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
@@ -36,22 +33,36 @@ public class QueryWidget extends Composite {
     @UiHandler("sendQuery")
     void doSubmit(ClickEvent event) {
 
-        MessageBuilder.createCall(new RemoteCallback<String[]>() {
-            public void callback(String[] response) {
+//        MessageBuilder.createCall(new RemoteCallback<String[]>() {
+//            public void callback(String[] response) {
+//                if (response == null) {
+//                    response = new String[]{"No results."};
+//                }
+//
+//                /**
+//                 * Build an HTML unordered list based on the results.
+//                 */
+//                StringBuffer buf = new StringBuffer("<ul>");
+//                for (String result : response) {
+//                    buf.append("<li>").append(result).append("</li>");
+//                }
+//                results.setHTML(buf.append("</ul>").toString());
+//            }
+//        }, QueryServiceRemote.class).query(queryBox.getText());
+
+
+        MessageBuilder.createCall(new RemoteCallback<String>() {
+            public void callback(String response) {
                 if (response == null) {
-                    response = new String[]{"No results."};
+                    response = "No Result";
                 }
 
                 /**
                  * Build an HTML unordered list based on the results.
                  */
-                StringBuffer buf = new StringBuffer("<ul>");
-                for (String result : response) {
-                    buf.append("<li>").append(result).append("</li>");
-                }
-                results.setHTML(buf.append("</ul>").toString());
+                results.setHTML(response);
             }
-        }, QueryServiceRemote.class).query(queryBox.getText());
+        }, QueryServiceRemote.class).append(queryBox.getText(), "foo", "bar");
     }
 
     /**
@@ -72,6 +83,8 @@ public class QueryWidget extends Composite {
 
     @UiField
     HTML results;
+    @UiField
+    Button sendQuery;
 }
 
 

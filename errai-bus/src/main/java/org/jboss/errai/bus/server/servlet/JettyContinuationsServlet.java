@@ -160,7 +160,7 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
 
         if (queue == null) return;
 
-        queue.heartBeat();
+     //   queue.heartBeat();
 
         List<MarshalledMessage> messages = queue.poll(false).getMessages();
 

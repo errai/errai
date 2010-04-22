@@ -40,5 +40,13 @@ public class QueryService implements QueryServiceRemote {
     public String[] query(String queryString) {
         return dataMap.get(queryString);
     }
+
+    public String append(String... arg) {
+        StringBuilder builder = new StringBuilder();
+        for (String s : arg) {
+            builder.append(s);
+        }
+        return builder.toString();
+    }
 }
 

@@ -15,7 +15,7 @@ def pretty(cls) {
     
     @foreach{method : interfaceClass.getMethods()}
         public @{method.getReturnType() == Void.class ? "void" : pretty(method.getReturnType())}
-               @{method.getName()}(@code{count = 0;}@foreach{type : method.getParameterTypes()}@{type.getName()} _@{count++}@end{", "}) {
+               @{method.getName()}(@code{count = 0;}@foreach{type : method.getParameterTypes()}@{type.getCanonicalName()} _@{count++}@end{", "}) {
 
                org.jboss.errai.bus.client.api.base.MessageBuilder.createCall()
                     .call("@{interfaceClass.getName()}")
