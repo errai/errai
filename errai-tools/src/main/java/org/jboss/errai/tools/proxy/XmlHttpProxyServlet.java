@@ -39,6 +39,18 @@ import java.util.logging.Logger;
  *       &lt;load-on-startup>1&lt;/load-on-startup>
  *   &lt;/servlet>
  *
+ *   &lt;servlet-mapping>
+ *       &lt;servlet-name>erraiProxy&lt;/servlet-name>
+ *       &lt;url-pattern>/app/proxy/*&lt;/url-pattern>
+ *   &lt;/servlet-mapping>
+ *
+ * </pre>
+ *
+ * <p/>
+ *
+ * errai-config.json:<br>
+ * <pre>
+ *
  * </pre>
  *
  * @author Greg Murray
@@ -60,7 +72,7 @@ public class XmlHttpProxyServlet extends HttpServlet
   private Logger logger = null;
   private XmlHttpProxy xhp = null;
   private ServletContext ctx;
-  private List<Map<String,String>> services = null;
+  private List<Map<String,Object>> services = null;
   private String resourcesDir = "/resources/";
   private String classpathResourcesDir = "/META-INF/resources/";
   private String headerToken = "jmaki-";
@@ -157,19 +169,21 @@ public class XmlHttpProxyServlet extends HttpServlet
     InputStream is = null;
     try
     {
-      URL url = ctx.getResource(resourcesDir + configResource);
+      /*URL url = ctx.getResource(configResource);
+      // use classpath if not found locally.      
+      if (url == null) url = XmlHttpProxyServlet.class.getResource(configResource);  // same package*/
+
       // use classpath if not found locally.
-      //if (url == null) url = XmlHttpProxyServlet.class.getResource(classpathResourcesDir + XHP_CONFIG);
-      if (url == null) url = XmlHttpProxyServlet.class.getResource(configResource);  // same package
+      URL url = XmlHttpProxyServlet.class.getResource("/"+configResource);  
       is = url.openStream();
     }
     catch (Exception ex)
     {
       try
       {
-        getLogger().severe("XmlHttpProxyServlet error loading xhp.json : " + ex);
+        getLogger().severe("XmlHttpProxyServlet error loading "+configResource+" : " + ex);
         PrintWriter writer = res.getWriter();
-        writer.write("XmlHttpProxyServlet Error: Error loading xhp.json. Make sure it is available in the /resources directory of your applicaton.");
+        writer.write("XmlHttpProxyServlet Error: Error loading "+configResource+". Make sure it is available on the classpath.");
         writer.flush();
       }
       catch (Exception iox) {}
@@ -286,7 +300,7 @@ public class XmlHttpProxyServlet extends HttpServlet
       try
       {
         String actualServiceKey = serviceKey != null ? serviceKey : "default";
-        Map<String,String> service = null;
+        Map<String,Object> service = null;
         for(Map svc : services)
         {
           if(svc.get(ProxyConfig.ID).equals(actualServiceKey))
@@ -298,20 +312,20 @@ public class XmlHttpProxyServlet extends HttpServlet
         if (service!=null)
         {
 
-          String serviceURL = service.get("url");
+          String serviceURL = (String)service.get(ProxyConfig.URL);
           if(null==serviceURL)
-            throw new IllegalArgumentException("xhp.json: service url is mising");
+            throw new IllegalArgumentException(configResource+": service url is mising");
 
-          if (service.containsKey("passthrough")) passthrough =
-              Boolean.valueOf(service.get("passthrough"));
+          if (service.containsKey(ProxyConfig.PASSTHROUGH))
+            passthrough = (Boolean)service.get(ProxyConfig.PASSTHROUGH);
 
-          if(service.containsKey("contentType")) contentType = service.get("contentType");
+          if(service.containsKey(ProxyConfig.CONTENT_TYPE)) contentType = (String)service.get(ProxyConfig.CONTENT_TYPE);
 
           if(null==testUser)
           {
             System.out.println("Ignore service configuration credentials");
-            if (service.containsKey("username")) userName = service.get("username");
-            if (service.containsKey("password")) password = service.get("password");
+            if (service.containsKey("username")) userName = (String)service.get("username");
+            if (service.containsKey("password")) password = (String)service.get("password");
           }
           else
           {
@@ -320,14 +334,14 @@ public class XmlHttpProxyServlet extends HttpServlet
           }
           
           String apikey = "";
-          if (service.containsKey("apikey")) apikey = service.get("apikey");
-          if (service.containsKey("xslStyleSheet")) xslURLString = service.get("xslStyleSheet");
+          if (service.containsKey("apikey")) apikey = (String)service.get("apikey");
+          if (service.containsKey("xslStyleSheet")) xslURLString = (String)service.get("xslStyleSheet");
 
           // default to the service default if no url parameters are specified
           if(!passthrough)
           {
             if (urlParams == null && service.containsKey("defaultURLParams")) {
-              urlParams = service.get("defaultURLParams");
+              urlParams = (String)service.get("defaultURLParams");
             }
 
             // build the URL

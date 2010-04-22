@@ -307,7 +307,7 @@ public class XmlHttpProxy {
    *
    * CLI to the XmlHttpProxy
    */
-  public static void main(String[] args)
+ /* public static void main(String[] args)
       throws IOException, MalformedURLException {
 
     getLogger().info("XmlHttpProxy 1.8");
@@ -359,7 +359,7 @@ public class XmlHttpProxy {
       index++;
     }
 
-    /* if (serviceKey != null) {
+    if (serviceKey != null) {
      try {
        InputStream is = (new URL(configURLString)).openStream();
        JSONObject services = loadServices(is);
@@ -390,7 +390,7 @@ public class XmlHttpProxy {
    } else if (urlString == null) {
      System.out.println(USAGE);
      System.exit(1);
-   } */
+   }
     // The parameters are feed to the XSL Stylsheet during transformation.
     // These parameters can provided data or conditional information.
     Map paramsMap = new HashMap();
@@ -410,11 +410,11 @@ public class XmlHttpProxy {
       }
     }
     xhp.processRequest(urlString, System.out, xslInputStream, paramsMap, null, method, username, password);
-  }
+  } */
 
   public static Logger getLogger() {
     if (logger == null) {
-      logger = Logger.getLogger("jmaki.xhp.Log");
+      logger = Logger.getLogger(XmlHttpProxy.class.getName());
     }
     return logger;
   }
