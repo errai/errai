@@ -77,9 +77,8 @@
                     <extraJvmArgs>-Xmx512m</extraJvmArgs>
                     <treeLogger>true</treeLogger>
                     <gen>${project.build.directory}/generated</gen>
-                    <generateDirectory>${project.build.directory}/generated</generateDirectory>
-                    <disableCastChecking>true</disableCastChecking>
-                    <disableClassMetadata>true</disableClassMetadata>
+                    <generateDirectory>${project.build.directory}/generated</generateDirectory>                    
+                    <soyc>false</soyc>
                 </configuration>
                 <executions>
                     <execution>

@@ -40,6 +40,7 @@
                     <runTarget>RPCDemo.html</runTarget>
                     <warSourceDirectory>war</warSourceDirectory>
                     <extraJvmArgs>-Xmx512m</extraJvmArgs>
+                    <soyc>false</soyc>
                 </configuration>
                 <executions>
                     <execution>
