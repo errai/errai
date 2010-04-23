@@ -19,7 +19,7 @@ package org.jboss.errai.tools.monitoring;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.RuleDelegateMessageCallback;
 import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.server.ServerMessageBus;
+import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.bus.server.security.auth.rules.RolesRequiredRule;
 
 import javax.swing.*;

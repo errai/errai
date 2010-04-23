@@ -1,9 +1,13 @@
 package org.jboss.errai.bus.server;
 
+import org.jboss.errai.bus.server.api.QueueSession;
+import org.jboss.errai.bus.server.api.SessionEndEvent;
+import org.jboss.errai.bus.server.api.SessionEndListener;
+import org.jboss.errai.bus.server.api.SessionProvider;
+
 import javax.servlet.http.HttpSession;
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * <tt>HttpSessionProvider</tt> implements <tt>SessionProvider</tt> as an <tt>HttpSession</tt>. It provides a getter
@@ -64,6 +68,7 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
         private String sessionId;
         private String remoteQueueID;
         private boolean valid;
+        private List<SessionEndListener> sessionEndListeners;
 
         public HttpSessionWrapper(SessionsContainer container, String sessionId, String remoteQueueID) {
             this.container = container;
@@ -81,6 +86,7 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
         public boolean endSession() {
             valid = false;
             container.remoteSession(remoteQueueID);
+            fireSessionEndListeners();
             return true;
         }
 
@@ -98,6 +104,23 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
 
         public void removeAttribute(String attribute) {
             container.sharedAttributes.remove(attribute);
+        }
+
+        public void addSessionEndListener(SessionEndListener listener) {
+            synchronized (this) {
+               if (sessionEndListeners == null) {
+                   sessionEndListeners =  new ArrayList<SessionEndListener>();
+               }
+               sessionEndListeners.add(listener);
+            }
+        }
+
+        private void fireSessionEndListeners() {
+            if (sessionEndListeners == null) return;
+            SessionEndEvent event = new SessionEndEvent(this);
+            for (Iterator<SessionEndListener> iter = sessionEndListeners.iterator(); iter.hasNext();) {
+                iter.next().onSessionEnd(event);
+            }
         }
     }
 }

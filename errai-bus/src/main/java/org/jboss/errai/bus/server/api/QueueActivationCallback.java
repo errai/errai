@@ -1,4 +1,4 @@
-package org.jboss.errai.bus.server;
+package org.jboss.errai.bus.server.api;
 
 /**
  * This interface, <tt>QueueActivationCallback</tt>, is a template for creating a callback function for a queue

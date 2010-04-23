@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.server.annotations.ExtensionComponent;
-import org.jboss.errai.bus.server.ext.ErraiConfigExtension;
+import org.jboss.errai.bus.server.api.ErraiConfigExtension;
 
 import java.util.Map;
 

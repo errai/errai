@@ -18,6 +18,7 @@ package org.jboss.errai.bus.server;
 
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.client.framework.Payload;
+import org.jboss.errai.bus.server.api.*;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -32,7 +33,7 @@ import static java.lang.System.nanoTime;
  * {@link java.util.concurrent.LinkedBlockingQueue} to store the messages, and a <tt>ServerMessageBus</tt> to send the
  * messages.
  */
-public class MessageQueue {
+public class MessageQueueImpl implements MessageQueue {
     private static final long TIMEOUT = Boolean.getBoolean("org.jboss.errai.debugmode") ?
             secs(60) : secs(30);
 
@@ -43,7 +44,7 @@ public class MessageQueue {
     private QueueSession session;
 
     private long transmissionWindow = 50;
-    private long lastTransmission = nanoTime();
+    private volatile long lastTransmission = nanoTime();
     private long endWindow;
 
     private int lastQueueSize = 0;
@@ -61,6 +62,7 @@ public class MessageQueue {
     private volatile TimedTask task;
 
     private final Semaphore lock = new Semaphore(1, true);
+    private final Object activationLock = new Object();
 
     /**
      * Initializes the message queue with an initial size and a specified bus
@@ -69,7 +71,7 @@ public class MessageQueue {
      * @param bus       - the bus that will send the messages
      * @param session   - the session associated with the queue
      */
-    public MessageQueue(int queueSize, ServerMessageBus bus, QueueSession session) {
+    public MessageQueueImpl(int queueSize, ServerMessageBus bus, QueueSession session) {
         this.queue = new LinkedBlockingQueue<MarshalledMessage>(queueSize);
         this.bus = bus;
         this.session = session;
@@ -83,7 +85,7 @@ public class MessageQueue {
      *             <tt>RuntimeException</tt> will be thrown if the polling is active already. Concurrent polling is not allowed.
      * @return The <tt>Payload</tt> instance which contains the messages that need to be sent
      */
-    public Payload poll(boolean wait) {
+    public Payload poll(final boolean wait) {
         if (!queueRunning) {
             throw new QueueUnavailableException("queue is not available");
         }
@@ -182,11 +184,13 @@ public class MessageQueue {
             queue.clear();
             throw new QueueOverloadedException("too many undelievered messages in queue: cannot dispatch message.");
         } else if (activationCallback != null) {
-            if (isWindowExceeded()) {
-                descheduleTask();
-                activationCallback.activate(this);
-            } else if (task == null) {
-                scheduleActivation();
+            synchronized (activationLock) {
+                if (isWindowExceeded()) {
+                    descheduleTask();
+                    activationCallback.activate(this);
+                } else if (task == null) {
+                    scheduleActivation();
+                }
             }
         }
 
@@ -198,27 +202,29 @@ public class MessageQueue {
      * processed
      */
     public void scheduleActivation() {
-        bus.getScheduler().addTask(
-                task = new TimedTask() {
-                    {
-                        period = -1; // only fire once.
-                        nextRuntime = getEndOfWindow();
+        synchronized (activationLock) {
+            bus.getScheduler().addTask(
+                    task = new TimedTask() {
+                        {
+                            period = -1; // only fire once.
+                            nextRuntime = getEndOfWindow();
+                        }
+
+                        public void run() {
+
+                            if (activationCallback != null)
+                                activationCallback.activate(MessageQueueImpl.this);
+
+                            task = null;
+                        }
+
+                        @Override
+                        public String toString() {
+                            return "MessageResumer";
+                        }
                     }
-
-                    public void run() {
-
-                        if (activationCallback != null)
-                            activationCallback.activate(MessageQueue.this);
-
-                        task = null;
-                    }
-
-                    @Override
-                    public String toString() {
-                        return "MessageResumer";
-                    }
-                }
-        );
+            );
+        }
     }
 
     private void checkSession() {
@@ -245,9 +251,11 @@ public class MessageQueue {
     }
 
     private void descheduleTask() {
-        if (task != null) {
-            task.disable();
-            task = null;
+        synchronized (activationLock) {
+            if (task != null) {
+                task.disable();
+                task = null;
+            }
         }
     }
 

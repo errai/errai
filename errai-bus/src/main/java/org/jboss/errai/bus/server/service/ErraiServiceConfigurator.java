@@ -18,7 +18,7 @@ package org.jboss.errai.bus.server.service;
 
 import com.google.inject.Provider;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
-import org.jboss.errai.bus.server.SessionProvider;
+import org.jboss.errai.bus.server.api.SessionProvider;
 
 import java.io.File;
 import java.util.List;

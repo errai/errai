@@ -14,9 +14,18 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.server;
+package org.jboss.errai.bus.server.api;
 
-@Deprecated
-public interface Module {
-    public void init();
+import org.jboss.errai.bus.client.framework.BusEvent;
+
+public class QueueCloseEvent extends BusEvent<QueueCloseEvent> {
+    private MessageQueue queue;
+
+    public QueueCloseEvent(MessageQueue queue) {
+        this.queue = queue;
+    }
+
+    public MessageQueue getQueue() {
+        return queue;
+    }
 }

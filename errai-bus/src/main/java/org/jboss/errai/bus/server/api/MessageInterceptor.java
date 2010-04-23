@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.server.ext;
+package org.jboss.errai.bus.server.api;
 
-import com.google.inject.Provider;
+import org.jboss.errai.bus.client.api.base.CommandMessage;
 
-import java.util.Map;
-
-public interface ErraiConfigExtension {
-    public void configure(Map<Class, Provider> bindings, Map<String, Provider> resourceProviders);
+public interface MessageInterceptor {
+    public void intercept(CommandMessage message);
 }

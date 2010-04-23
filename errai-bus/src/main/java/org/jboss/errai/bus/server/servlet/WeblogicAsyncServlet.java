@@ -3,8 +3,8 @@ package org.jboss.errai.bus.server.servlet;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
-import org.jboss.errai.bus.server.MessageQueue;
-import org.jboss.errai.bus.server.QueueSession;
+import org.jboss.errai.bus.server.api.MessageQueue;
+import org.jboss.errai.bus.server.api.QueueSession;
 import org.mvel2.util.StringAppender;
 
 import javax.servlet.ServletException;

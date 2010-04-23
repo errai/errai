@@ -24,12 +24,15 @@ import org.jboss.errai.bus.client.api.base.RuleDelegateMessageCallback;
 import org.jboss.errai.bus.client.framework.*;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;
+import org.jboss.errai.bus.server.api.*;
 import org.jboss.errai.bus.server.io.JSONMessageServer;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversation;
 import static org.jboss.errai.bus.client.protocols.MessageParts.ReplyTo;
@@ -40,6 +43,8 @@ import static org.jboss.errai.bus.server.util.ServerBusUtils.encodeJSON;
 /**
  * The <tt>ServerMessageBusImpl</tt> implements the <tt>ServerMessageBus</tt>, making it possible for the server to
  * send and receive messages
+ *
+ * @author Mike Brock
  */
 @Singleton
 public class ServerMessageBusImpl implements ServerMessageBus {
@@ -51,16 +56,18 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     private final List<MessageListener> listeners = new ArrayList<MessageListener>();
 
-    private final Map<String, List<MessageCallback>> subscriptions = new HashMap<String, List<MessageCallback>>();
-    private final Map<String, Set<MessageQueue>> remoteSubscriptions = new HashMap<String, Set<MessageQueue>>();
+    private final Map<String, List<MessageCallback>> subscriptions = new ConcurrentHashMap<String, List<MessageCallback>>();
+    private final Map<String, Set<MessageQueue>> remoteSubscriptions = new ConcurrentHashMap<String, Set<MessageQueue>>();
 
-    private final Map<QueueSession, MessageQueue> messageQueues = new HashMap<QueueSession, MessageQueue>();
+    private final Map<QueueSession, MessageQueue> messageQueues = new ConcurrentHashMap<QueueSession, MessageQueue>();
     private final Map<String, QueueSession> sessionLookup = new HashMap<String, QueueSession>();
 
     private final List<SubscribeListener> subscribeListeners = new LinkedList<SubscribeListener>();
     private final List<UnsubscribeListener> unsubscribeListeners = new LinkedList<UnsubscribeListener>();
+    private final List<QueueClosedListener> queueClosedListeners = new LinkedList<QueueClosedListener>();
 
-    private final Scheduler houseKeeper = new Scheduler();
+    private final SchedulerService houseKeeper = new SchedulerService();
+    private final Map<QueueSession, SchedulerService> sessionSchedulers = new HashMap<QueueSession, SchedulerService>();
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
@@ -80,7 +87,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         subscribe("ServerBus", new MessageCallback() {
             public void callback(Message message) {
                 QueueSession session = getSession(message);
-                MessageQueue queue;
+                MessageQueueImpl queue;
 
                 switch (BusCommands.valueOf(message.getCommandType())) {
                     case Heartbeat:
@@ -107,7 +114,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                             messageQueues.get(session).stopQueue();
                         }
 
-                        addQueue(session, queue = new MessageQueue(queueSize, ServerMessageBusImpl.this, session));
+                        addQueue(session, queue = new MessageQueueImpl(queueSize, ServerMessageBusImpl.this, session));
 
                         remoteSubscribe(session, queue, "ClientBus");
 
@@ -170,6 +177,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                     }
                 }
 
+
                 for (MessageQueue ref : endSessions) {
                     for (String subject : new HashSet<String>(ServerMessageBusImpl.this.remoteSubscriptions.keySet())) {
                         ServerMessageBusImpl.this.remoteUnsubscribe(ref.getSession(), ref, subject);
@@ -190,15 +198,10 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
 
 
-    private void addQueue(QueueSession session, MessageQueue queue) {
+    private void addQueue(QueueSession session, MessageQueueImpl queue) {
         messageQueues.put(session, queue);
         sessionLookup.put(session.getSessionId(), session);
     }
-
-//    private void removeQueue(QueueSession session) {
-//        messageQueues.remove(session);
-//        sessionLookup.remove(session.getSessionId());
-//    }
 
     /**
      * Configures the server message bus with the specified <tt>ErraiServiceConfigurator</tt>. It only takes the queue
@@ -221,10 +224,10 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     public void sendGlobal(final Message message) {
         message.commit();
         final String subject = message.getSubject();
+
         if (!subscriptions.containsKey(subject) && !remoteSubscriptions.containsKey(subject)) {
             throw new NoSubscribersToDeliverTo("for: " + subject + " [commandType:" + message.getCommandType() + "]");
         }
-
 
         if (!fireGlobalMessageListeners(message)) {
             if (message.hasPart(ReplyTo) && message.hasResource("Session")) {
@@ -287,6 +290,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                     }
                 });
             }
+
         }
     }
 
@@ -427,9 +431,21 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         messageQueues.values().remove(queue);
         sessionLookup.values().remove(queue.getSession());
 
-        if (isMonitor()) {
-            busMonitor.notifyQueueDetached(queue.getSession().getSessionId(), queue);
+        synchronized (sessionSchedulers) {
+            try {
+                SchedulerService scheduler = sessionSchedulers.get(queue.getSession());
+                if (scheduler != null) {
+                    scheduler.requestStop();
+                }
+            }
+            catch (Throwable t) {
+                log.error("Problem stopping scheduler on closing session: " + queue.getSession().getSessionId(), t);
+            }
         }
+
+        fireQueueCloseListeners(new QueueCloseEvent(queue));
+
+
     }
 
     /**
@@ -579,17 +595,18 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             busMonitor.notifyNewSubscriptionEvent(event);
         }
 
-        Iterator<SubscribeListener> iter = subscribeListeners.iterator();
+        synchronized (subscribeListeners) {
+            event.setDisposeListener(false);
 
-        event.setDisposeListener(false);
-
-        while (iter.hasNext()) {
-            iter.next().onSubscribe(event);
-            if (event.isDisposeListener()) {
-                iter.remove();
-                event.setDisposeListener(false);
+            for (Iterator<SubscribeListener> iter = subscribeListeners.iterator(); iter.hasNext();) {
+                iter.next().onSubscribe(event);
+                if (event.isDisposeListener()) {
+                    iter.remove();
+                    event.setDisposeListener(false);
+                }
             }
         }
+
     }
 
     private void fireUnsubscribeListeners(SubscriptionEvent event) {
@@ -597,18 +614,35 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             busMonitor.notifyUnSubcriptionEvent(event);
         }
 
-        Iterator<UnsubscribeListener> iter = unsubscribeListeners.iterator();
+        synchronized (unsubscribeListeners) {
+            event.setDisposeListener(false);
+
+            for (Iterator<UnsubscribeListener> iter = unsubscribeListeners.iterator(); iter.hasNext();) {
+                iter.next().onUnsubscribe(event);
+                if (event.isDisposeListener()) {
+                    iter.remove();
+                    event.setDisposeListener(false);
+                }
+            }
+        }
+    }
+
+    private void fireQueueCloseListeners(QueueCloseEvent event) {
+        if (isMonitor()) {
+            busMonitor.notifyQueueDetached(event.getQueue().getSession().getSessionId(), event.getQueue());
+        }
 
         event.setDisposeListener(false);
 
-        while (iter.hasNext()) {
-            iter.next().onUnsubscribe(event);
+        for (Iterator<QueueClosedListener> iter = queueClosedListeners.iterator(); iter.hasNext();) {
+            iter.next().onQueueClosed(event);
             if (event.isDisposeListener()) {
                 iter.remove();
                 event.setDisposeListener(false);
             }
         }
     }
+
 
     /**
      * Adds a global listener
@@ -667,9 +701,36 @@ public class ServerMessageBusImpl implements ServerMessageBus {
      *
      * @return the scheduler
      */
-    public Scheduler getScheduler() {
+    public SchedulerService getScheduler() {
         return houseKeeper;
     }
+
+    public void addQueueClosedListener(QueueClosedListener listener) {
+        queueClosedListeners.add(listener);
+    }
+
+//    public TimedTask scheduleForSession(final QueueSession session, final TimeUnit unit, final int time, final Runnable task) {
+//        synchronized (sessionSchedulers) {
+//            SchedulerService scheduler = sessionSchedulers.get(session);
+//            if (scheduler == null) {
+//                sessionSchedulers.put(session, scheduler = new SchedulerService());
+//                scheduler.run();
+//            }
+//
+//            TimedTask timedTask = new TimedTask() {
+//                {
+//                    period = unit.convert(time, TimeUnit.MILLISECONDS);
+//                }
+//
+//                public void run() {
+//                    task.run();
+//                }
+//            };
+//            scheduler.addTask(timedTask);
+//
+//            return timedTask;
+//        }
+//    }
 
     private final MessageProvider provider = new MessageProvider() {
         {

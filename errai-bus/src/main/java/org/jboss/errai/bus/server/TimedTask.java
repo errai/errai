@@ -50,7 +50,7 @@ public abstract class TimedTask implements Runnable, Comparable<TimedTask> {
      * @param time - the time in which the task should be run
      * @return true if the task was run
      */
-    public boolean runIfDue(long time) {
+     boolean runIfDue(long time) {
         if (nextRuntime < time) {
             if (nextRuntime == -1) {
             //    System.out.println("Do Not Fire:" + this);
@@ -74,7 +74,7 @@ public abstract class TimedTask implements Runnable, Comparable<TimedTask> {
      * @param o - the timed task to compare to this task
      * @return 0 if the tasks are to be run at the same time
      */
-    public int compareTo(TimedTask o) {
+     public int compareTo(TimedTask o) {
         if (nextRuntime > o.nextRuntime)
             return 1;
         else if (nextRuntime < o.nextRuntime)

@@ -17,7 +17,7 @@
 package org.jboss.errai.bus.server.service;
 
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.server.ServerMessageBus;
+import org.jboss.errai.bus.server.api.ServerMessageBus;
 
 /**
  * The <tt>ErraiService</tt> is a minimal template for what is needed. It facilitates the ability to store a message,

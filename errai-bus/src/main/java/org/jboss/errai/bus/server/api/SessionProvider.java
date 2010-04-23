@@ -1,4 +1,4 @@
-package org.jboss.errai.bus.server;
+package org.jboss.errai.bus.server.api;
 
 /**
  * This interface, <tt>SessionProvider</tt>, is a template for creating a session provider based on the type of

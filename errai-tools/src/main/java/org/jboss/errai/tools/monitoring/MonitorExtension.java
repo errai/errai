@@ -24,7 +24,7 @@ import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.SubscriptionEvent;
 import org.jboss.errai.bus.server.ServerMessageBusImpl;
 import org.jboss.errai.bus.server.annotations.ExtensionComponent;
-import org.jboss.errai.bus.server.ext.ErraiConfigExtension;
+import org.jboss.errai.bus.server.api.ErraiConfigExtension;
 
 import java.util.Map;
 
@@ -40,11 +40,11 @@ public class MonitorExtension implements ErraiConfigExtension {
         this.bus = bus;
     }
 
-    public void configure(Map<Class, Provider> bindings, Map<String, Provider> resourceProviders) {
+    public void configure(final Map<Class, Provider> bindings, final Map<String, Provider> resourceProviders) {
         if (Boolean.getBoolean("errai.tools.bus_monitor_attach")) {
-            ServerMessageBusImpl sBus = (ServerMessageBusImpl) bus;
 
             proc = new ActivityProcessor();
+            ServerMessageBusImpl sBus = (ServerMessageBusImpl) bus;
 
             try {
                 new Bootstrapper(proc, bus).init();
@@ -52,6 +52,7 @@ public class MonitorExtension implements ErraiConfigExtension {
             catch (Throwable t) {
                 t.printStackTrace();
             }
+
             sBus.attachMonitor(new BusMonitor() {
                 MessageBus bus;
 
@@ -107,6 +108,7 @@ public class MonitorExtension implements ErraiConfigExtension {
                     proc.notifyEvent(System.currentTimeMillis(), EventType.ERROR, SubEventType.INBUS, String.valueOf(queue), "Server", message.getSubject(), message, throwable, false);
                 }
             });
+
 
         }
     }

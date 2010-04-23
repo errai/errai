@@ -13,29 +13,63 @@ import static java.lang.System.currentTimeMillis;
  *
  * @author Mike Brock
  */
-public class Scheduler extends Thread {
-    private boolean running = true;
+public class SchedulerService implements Runnable {
+    private volatile boolean running = false;
     private long nextRunTime = 0;
     private final TreeSet<TimedTask> tasks = new TreeSet<TimedTask>();
+    private boolean autoStartStop = false;
+    private Thread currentThread;
 
-    public Scheduler() {
-        setPriority(Thread.MIN_PRIORITY);
-        setDaemon(true);
+    public SchedulerService() {
+        init();
     }
 
-    @Override
+    private void init() {
+        synchronized (this) {
+            if (!running) {
+                currentThread = new Thread(this);
+                currentThread.setPriority(Thread.MIN_PRIORITY);
+            }
+        }
+    }
+
+
     public void run() {
+        synchronized (this) {
+            running = true;
+        }
+
         long tm;
         while (running) {
             try {
                 if ((tm = nextRunTime - currentTimeMillis()) > 0) {
-                    sleep(tm);
+                    Thread.sleep(tm);
                 }
             }
             catch (InterruptedException e) {
                 if (!running) return;
             }
             runAllDue();
+        }
+
+        if (autoStartStop) init();
+    }
+
+    public void start() {
+        currentThread.start();
+    }
+
+    public void startIfTasks() {
+        synchronized (this) {
+            if (!tasks.isEmpty() && !running) currentThread.start();
+        }
+    }
+
+    public void stopIfNoTasks() {
+        synchronized (this) {
+            if (running && tasks.isEmpty()) {
+                requestStop();
+            }
         }
     }
 
@@ -73,6 +107,8 @@ public class Scheduler extends Thread {
 
             for (TimedTask t : toRemove)
                 tasks.remove(t);
+
+            if (autoStartStop) stopIfNoTasks();
         }
 
         if (n == 0) nextRunTime = currentTimeMillis() + 10000;
@@ -90,8 +126,22 @@ public class Scheduler extends Thread {
             tasks.add(task);
             if (nextRunTime == 0 || task.nextRuntime() < nextRunTime) {
                 nextRunTime = task.nextRuntime();
-                interrupt();
+                currentThread.interrupt();
             }
+
+            if (autoStartStop) startIfTasks();
+        }
+    }
+
+
+    public void setAutoStartStop(boolean autoStartStop) {
+        this.autoStartStop = autoStartStop;
+    }
+
+    public void requestStop() {
+        synchronized (this) {
+            currentThread.interrupt();
+            running = false;
         }
     }
 }

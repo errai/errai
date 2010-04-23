@@ -14,20 +14,24 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.server;
+package org.jboss.errai.bus.server.api;
 
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.framework.BooleanRoutingRule;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.Payload;
+import org.jboss.errai.bus.server.SchedulerService;
+import org.jboss.errai.bus.server.TimedTask;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 
-import java.util.Enumeration;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This interface, <tt>ServerMessageBus</tt>, extends the client's {@link org.jboss.errai.bus.client.framework.MessageBus},
  * and adds functionality so the server can transmit messages to a client and vice versa
+ *
+ * @author Mike Brock
  */
 public interface ServerMessageBus extends MessageBus {
 
@@ -78,7 +82,15 @@ public interface ServerMessageBus extends MessageBus {
      *
      * @return the <tt>Scheduler</tt> associated with this bus
      */
-    public Scheduler getScheduler();
+    public SchedulerService getScheduler();
+
+    /**
+     * Register a {@link org.jboss.errai.bus.server.api.QueueClosedListener} with the bus.
+     * @param listener a instance of the listener
+     */
+    public void addQueueClosedListener(QueueClosedListener listener);
+
+  //  public TimedTask scheduleForSession(QueueSession session, TimeUnit unit, int time, Runnable task);
 
     /**
      * Configures the bus using the configuration specified
@@ -87,5 +99,10 @@ public interface ServerMessageBus extends MessageBus {
      */
     public void configure(ErraiServiceConfigurator service);
 
+    /**
+     * Get a collection of all receivers registered for a specificed subject
+     * @param subject The subject.
+     * @return
+     */
     public List<MessageCallback> getReceivers(String subject);
 }

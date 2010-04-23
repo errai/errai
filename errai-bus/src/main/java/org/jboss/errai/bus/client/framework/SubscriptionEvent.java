@@ -22,8 +22,7 @@ package org.jboss.errai.bus.client.framework;
  * @see org.jboss.errai.bus.client.api.SubscribeListener
  * @see org.jboss.errai.bus.client.api.UnsubscribeListener
  */
-public class SubscriptionEvent {
-    private boolean disposeListener = false;
+public class SubscriptionEvent extends BusEvent<SubscriptionEvent> {
     private boolean remote = false;
     private String sessionId;
     private String subject;
@@ -32,24 +31,6 @@ public class SubscriptionEvent {
         this.remote = remote;
         this.sessionId = sessionId;
         this.subject = subject;
-    }
-
-    /**
-     * Returns true if the listener should be disposed after firing, meaning the listener will be de-registered
-     * and never fired again.
-     * @return -
-     */
-    public boolean isDisposeListener() {
-        return disposeListener;
-    }
-
-    /**
-     * Sets whether or not the listener should be disposed of.  If set to true, the listener will be disposed the
-     * next time it fires.
-     * @param disposeListener
-     */
-    public void setDisposeListener(boolean disposeListener) {
-        this.disposeListener = disposeListener;
     }
 
     /**

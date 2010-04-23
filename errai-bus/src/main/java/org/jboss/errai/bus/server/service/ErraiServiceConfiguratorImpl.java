@@ -18,16 +18,15 @@ package org.jboss.errai.bus.server.service;
 
 import com.google.inject.*;
 import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.builder.AbstractRemoteCallBuilder;
 import org.jboss.errai.bus.client.framework.*;
 import org.jboss.errai.bus.rebind.RebindUtils;
 import org.jboss.errai.bus.server.*;
-import org.jboss.errai.bus.server.Module;
+import org.jboss.errai.bus.server.api.*;
 import org.jboss.errai.bus.server.annotations.*;
 import org.jboss.errai.bus.server.annotations.security.RequireAuthentication;
 import org.jboss.errai.bus.server.annotations.security.RequireRoles;
-import org.jboss.errai.bus.server.ext.ErraiConfigExtension;
+import org.jboss.errai.bus.server.api.Module;
 import org.jboss.errai.bus.server.io.ConversationalEndpointCallback;
 import org.jboss.errai.bus.server.io.EndpointCallback;
 import org.jboss.errai.bus.server.io.JSONEncoder;
@@ -125,6 +124,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                                 bind(AuthenticationAdapter.class).to(authAdapterClass);
                                 bind(ErraiServiceConfigurator.class).toInstance(configInst);
                                 bind(MessageBus.class).toInstance(bus);
+                                bind(ServerMessageBus.class).toInstance(bus);
                             }
                         }).getInstance(AuthenticationAdapter.class);
 
@@ -305,6 +305,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                                     loadedComponents.add(loadClass.getName());
 
                                     log.info("discovered service: " + clazz.getName());
+                                    try {
                                     svc = Guice.createInjector(new AbstractModule() {
                                         @Override
                                         protected void configure() {
@@ -318,6 +319,11 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                                             }
                                         }
                                     }).getInstance(MessageCallback.class);
+                                    }
+                                    catch (Throwable t) {
+                                        t.printStackTrace();
+                                    }
+
 
                                     String svcName = clazz.getAnnotation(Service.class).value();
 

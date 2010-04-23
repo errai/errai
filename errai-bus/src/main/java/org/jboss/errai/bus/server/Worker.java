@@ -24,7 +24,7 @@ public class Worker extends Thread {
 
     private boolean active = true;
 
-    private long workExpiry;
+    private volatile long workExpiry;
     private Message message;
 
     private Logger log = getLogger(this.getClass());
@@ -32,12 +32,11 @@ public class Worker extends Thread {
     /**
      * Initializes the thread with the specified <tt>ThreadGroup</tt>, <tt>factory</tt> and service
      *
-     * @param threadGroup - the group this worker thread will belong to
      * @param factory - the factory this worker thread will belong to
      * @param svc - the service the thread is attached to
      */
-    public Worker(ThreadGroup threadGroup, WorkerFactory factory, ErraiService svc) {
-        super(threadGroup, "Dispatch Worker Thread");
+    public Worker(WorkerFactory factory, ErraiService svc) {
+        super("Dispatch Worker Thread");
         this.timeout = factory.getWorkerTimeout();
         this.messages = factory.getMessages();
         this.bus = svc.getBus();

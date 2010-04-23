@@ -14,10 +14,17 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.server.ext;
+package org.jboss.errai.bus.server.api;
 
-import org.jboss.errai.bus.client.api.base.CommandMessage;
+public class SessionEndEvent {
+    private QueueSession session;
 
-public interface MessageInterceptor {
-    public void intercept(CommandMessage message);
+    public SessionEndEvent(QueueSession session) {
+        this.session = session;
+    }
+
+    public QueueSession getSession() {
+        return session;
+    }
 }
+

@@ -1,4 +1,4 @@
-package org.jboss.errai.bus.server;
+package org.jboss.errai.bus.server.api;
 
 /**
  * This interface, <tt>QueueSession</tt>, is a template for creating a queue session with the bus. In practice, the
@@ -59,4 +59,10 @@ public interface QueueSession {
      * @param attribute - the attribute to remove
      */
     public void removeAttribute(String attribute);
+
+    /**
+     * Register a listener to be fired when the session ends.
+     * @param listener The listener to be registered
+     */
+    public void addSessionEndListener(SessionEndListener listener);
 }

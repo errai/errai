@@ -23,7 +23,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AnnotationConfiguration;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.annotations.ExtensionComponent;
-import org.jboss.errai.bus.server.ext.ErraiConfigExtension;
+import org.jboss.errai.bus.server.api.ErraiConfigExtension;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.bus.server.util.ConfigUtil;
 import org.jboss.errai.bus.server.util.ConfigVisitor;
@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.persistence.Entity;
 import java.io.File;
-import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
 

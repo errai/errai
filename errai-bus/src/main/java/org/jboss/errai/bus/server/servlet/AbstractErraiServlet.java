@@ -5,9 +5,9 @@ import com.google.inject.Guice;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.protocols.BusCommands;
-import org.jboss.errai.bus.server.ServerMessageBus;
+import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.bus.server.ServerMessageBusImpl;
-import org.jboss.errai.bus.server.SessionProvider;
+import org.jboss.errai.bus.server.api.SessionProvider;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
@@ -15,7 +15,6 @@ import org.jboss.errai.bus.server.service.ErraiServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpSession;
@@ -23,35 +22,38 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * The <tt>AbstractErraiServlet</tt> provides a starting point for creating Http-protocol
- * gateway between the server bus and the client buses.
+ * The <tt>AbstractErraiServlet</tt> provides a starting point for creating Http-protocol gateway between the server
+ * bus and the client buses.
  */
 public abstract class AbstractErraiServlet extends HttpServlet {
+    /* New and configured errai service */
+    protected ErraiService service;
 
-  protected final Logger log = LoggerFactory.getLogger(getClass());
-  protected ErraiService service;
+    /* A default Http session provider */
+    protected SessionProvider<HttpSession> sessionProvider;
 
-/* A default Http session provider */
-  @SuppressWarnings({"unchecked"})
-  protected SessionProvider<HttpSession> sessionProvider;
-  
-  @Override
-  public void init(ServletConfig config) throws ServletException
-  {
-    // TODO: only a single servlet instance allowed? 
-    this.service =
-        Guice.createInjector(new AbstractModule() {
-          public void configure() {
-            bind(MessageBus.class).to(ServerMessageBusImpl.class);
-            bind(ServerMessageBus.class).to(ServerMessageBusImpl.class);
-            bind(ErraiService.class).to(ErraiServiceImpl.class);
-            bind(ErraiServiceConfigurator.class).to(ErraiServiceConfiguratorImpl.class);
-          }
-        }).getInstance(ErraiService.class);
+    protected Logger log = LoggerFactory.getLogger(getClass());
 
-    this.sessionProvider = service.getConfiguration().getConfiguredSessionProvider();
-    
-  }  
+
+    @Override
+    @SuppressWarnings({"unchecked"})
+
+    public void init() throws ServletException {
+        super.init();
+        service =
+                Guice.createInjector(new AbstractModule() {
+                    public void configure() {
+                        bind(MessageBus.class).to(ServerMessageBusImpl.class);
+                        bind(ServerMessageBus.class).to(ServerMessageBusImpl.class);
+                        bind(ErraiService.class).to(ErraiServiceImpl.class);
+                        bind(ErraiServiceConfigurator.class).to(ErraiServiceConfiguratorImpl.class);
+                    }
+                }).getInstance(ErraiService.class);
+
+        sessionProvider = service.getConfiguration().getConfiguredSessionProvider();
+    }
+
+
     /**
      * Writes the message to the output stream
      *

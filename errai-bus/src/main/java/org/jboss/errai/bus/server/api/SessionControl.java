@@ -1,4 +1,4 @@
-package org.jboss.errai.bus.server;
+package org.jboss.errai.bus.server.api;
 
 /**
  * This interface, <tt>SessionControl</tt>, provides functions for checking up on a session
