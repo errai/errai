@@ -65,7 +65,10 @@ public class SimpleSchedulerService implements Runnable, SchedulerService {
 
     public void startIfTasks() {
         synchronized (this) {
-            if (!tasks.isEmpty() && !running) currentThread.start();
+            if (!tasks.isEmpty() && !running) {
+                init();
+                currentThread.start();
+            }
         }
     }
 

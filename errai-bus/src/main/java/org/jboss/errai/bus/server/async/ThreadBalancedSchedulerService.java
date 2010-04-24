@@ -38,7 +38,6 @@ public class ThreadBalancedSchedulerService implements SchedulerService {
             current.calculateLoad(task);
             if (current.isAtLoad()) {
                 newSchedulerInstance();
-                System.out.println("** NEW THREAD **");
             }
 
             _addTask(task);
@@ -54,7 +53,7 @@ public class ThreadBalancedSchedulerService implements SchedulerService {
 
     private static SchedulerInstance getSchedulerInstance() {
         int cursor = current.getCursor();
-        if (instances.size() - 1 < cursor) {
+        if (instances.isEmpty() || instances.size() < cursor) {
             newSchedulerInstance();
         }
         return instances.get(cursor);
@@ -62,7 +61,7 @@ public class ThreadBalancedSchedulerService implements SchedulerService {
 
     private static void newSchedulerInstance() {
         synchronized (current) {
-            if (!instances.isEmpty() && current.cursor < instances.size()) {
+            if (!instances.isEmpty() && current.cursor - 1 < instances.size()) {
                 SchedulerInstance inst;
                 for (int i = current.cursor; i < instances.size(); i++) {
                     inst = instances.get(i);
@@ -71,10 +70,9 @@ public class ThreadBalancedSchedulerService implements SchedulerService {
                     }
                 }
             } else {
-                current.mark();
                 SimpleSchedulerService svc = new SimpleSchedulerService();
                 svc.setAutoStartStop(true);
-                instances.add(new SchedulerInstance(current.cursor, svc));
+                current.newInstance(svc);
             }
         }
     }
@@ -136,11 +134,13 @@ public class ThreadBalancedSchedulerService implements SchedulerService {
         }
     }
 
+    // not thread-safe
     private static class CurrentInstance {
         private int cursor = -1;
 
         private int count;
         private double load;
+        private SchedulerInstance instance;
 
         public void calculateLoad(TimedTask task) {
             if (task.getPeriod() != -1) {
@@ -153,14 +153,19 @@ public class ThreadBalancedSchedulerService implements SchedulerService {
             return (count > 10 || load > 0.99d);
         }
 
-        public void mark() {
-            SchedulerInstance inst = getSchedulerInstance();
-            inst.setCountAndLoad(count, load);
-            inst.setClosed(true);
+        public void newInstance(SimpleSchedulerService svc) {
+            if (this.instance != null) {
+                this.instance.setCountAndLoad(count, load);
+                this.instance.setClosed(true);
+            }
 
-            cursor++;
+            SchedulerInstance instance = new SchedulerInstance(++cursor, svc);
+
+            this.instance = instance;
             count = 0;
             load = 0;
+
+            instances.add(instance);
         }
 
         public int getCursor() {
@@ -169,6 +174,10 @@ public class ThreadBalancedSchedulerService implements SchedulerService {
 
         public void setCursor(int cursor) {
             this.cursor = cursor;
+        }
+
+        public SchedulerInstance getCurrent() {
+           return instance;
         }
     }
 
