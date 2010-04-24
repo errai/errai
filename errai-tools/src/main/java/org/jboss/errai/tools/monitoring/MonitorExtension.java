@@ -40,7 +40,7 @@ public class MonitorExtension implements ErraiConfigExtension {
         this.bus = bus;
     }
 
-    public void configure(final Map<Class, Provider> bindings, final Map<String, Provider> resourceProviders) {
+    public void configure(final Map<Class<?>, Provider> bindings, final Map<String, Provider> resourceProviders) {
         if (Boolean.getBoolean("errai.tools.bus_monitor_attach")) {
 
             proc = new ActivityProcessor();

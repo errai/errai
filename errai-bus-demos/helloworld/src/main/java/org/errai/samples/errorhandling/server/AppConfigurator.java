@@ -22,7 +22,7 @@ public class AppConfigurator implements ErraiConfigExtension {
         this.bus = bus;
     }
 
-    public void configure(Map<Class, Provider> bindings, Map<String, Provider> resourceProviders) {
+    public void configure(Map<Class<?>, Provider> bindings, Map<String, Provider> resourceProviders) {
         // provide extension points here
     }
 }

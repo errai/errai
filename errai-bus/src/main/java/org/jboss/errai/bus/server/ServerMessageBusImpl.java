@@ -60,7 +60,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     private final Map<String, Set<MessageQueue>> remoteSubscriptions = new ConcurrentHashMap<String, Set<MessageQueue>>();
 
     private final Map<QueueSession, MessageQueue> messageQueues = new ConcurrentHashMap<QueueSession, MessageQueue>();
-    private final Map<String, QueueSession> sessionLookup = new HashMap<String, QueueSession>();
+    private final Map<String, QueueSession> sessionLookup = new ConcurrentHashMap<String, QueueSession>();
 
     private final List<SubscribeListener> subscribeListeners = new LinkedList<SubscribeListener>();
     private final List<UnsubscribeListener> unsubscribeListeners = new LinkedList<UnsubscribeListener>();
@@ -632,13 +632,15 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             busMonitor.notifyQueueDetached(event.getQueue().getSession().getSessionId(), event.getQueue());
         }
 
-        event.setDisposeListener(false);
+        synchronized (queueClosedListeners) {
+            event.setDisposeListener(false);
 
-        for (Iterator<QueueClosedListener> iter = queueClosedListeners.iterator(); iter.hasNext();) {
-            iter.next().onQueueClosed(event);
-            if (event.isDisposeListener()) {
-                iter.remove();
-                event.setDisposeListener(false);
+            for (Iterator<QueueClosedListener> iter = queueClosedListeners.iterator(); iter.hasNext();) {
+                iter.next().onQueueClosed(event);
+                if (event.isDisposeListener()) {
+                    iter.remove();
+                    event.setDisposeListener(false);
+                }
             }
         }
     }
@@ -650,7 +652,9 @@ public class ServerMessageBusImpl implements ServerMessageBus {
      * @param listener - global listener to add
      */
     public void addGlobalListener(MessageListener listener) {
-        listeners.add(listener);
+        synchronized (listeners) {
+            listeners.add(listener);
+        }
     }
 
     /**
@@ -659,7 +663,9 @@ public class ServerMessageBusImpl implements ServerMessageBus {
      * @param listener - subscription listener to add
      */
     public void addSubscribeListener(SubscribeListener listener) {
-        subscribeListeners.add(listener);
+        synchronized (subscribeListeners) {
+            subscribeListeners.add(listener);
+        }
     }
 
     /**
@@ -668,7 +674,9 @@ public class ServerMessageBusImpl implements ServerMessageBus {
      * @param listener - adds an unsubscription listener
      */
     public void addUnsubscribeListener(UnsubscribeListener listener) {
-        unsubscribeListeners.add(listener);
+        synchronized (unsubscribeListeners) {
+            unsubscribeListeners.add(listener);
+        }
     }
 
     private static QueueSession getSession(Message message) {
@@ -706,31 +714,10 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
 
     public void addQueueClosedListener(QueueClosedListener listener) {
-        queueClosedListeners.add(listener);
+        synchronized (queueClosedListeners) {
+            queueClosedListeners.add(listener);
+        }
     }
-
-//    public TimedTask scheduleForSession(final QueueSession session, final TimeUnit unit, final int time, final Runnable task) {
-//        synchronized (sessionSchedulers) {
-//            SchedulerService scheduler = sessionSchedulers.get(session);
-//            if (scheduler == null) {
-//                sessionSchedulers.put(session, scheduler = new SchedulerService());
-//                scheduler.run();
-//            }
-//
-//            TimedTask timedTask = new TimedTask() {
-//                {
-//                    period = unit.convert(time, TimeUnit.MILLISECONDS);
-//                }
-//
-//                public void run() {
-//                    task.run();
-//                }
-//            };
-//            scheduler.addTask(timedTask);
-//
-//            return timedTask;
-//        }
-//    }
 
     private final MessageProvider provider = new MessageProvider() {
         {

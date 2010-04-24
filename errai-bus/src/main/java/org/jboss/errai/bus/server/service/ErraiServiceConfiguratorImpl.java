@@ -19,14 +19,20 @@ package org.jboss.errai.bus.server.service;
 import com.google.inject.*;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.builder.AbstractRemoteCallBuilder;
-import org.jboss.errai.bus.client.framework.*;
+import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.framework.ProxyProvider;
+import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.rebind.RebindUtils;
-import org.jboss.errai.bus.server.*;
-import org.jboss.errai.bus.server.api.*;
+import org.jboss.errai.bus.server.ErraiBootstrapFailure;
+import org.jboss.errai.bus.server.HttpSessionProvider;
+import org.jboss.errai.bus.server.SimpleDispatcher;
 import org.jboss.errai.bus.server.annotations.*;
 import org.jboss.errai.bus.server.annotations.security.RequireAuthentication;
 import org.jboss.errai.bus.server.annotations.security.RequireRoles;
+import org.jboss.errai.bus.server.api.ErraiConfigExtension;
 import org.jboss.errai.bus.server.api.Module;
+import org.jboss.errai.bus.server.api.ServerMessageBus;
+import org.jboss.errai.bus.server.api.SessionProvider;
 import org.jboss.errai.bus.server.io.ConversationalEndpointCallback;
 import org.jboss.errai.bus.server.io.EndpointCallback;
 import org.jboss.errai.bus.server.io.JSONEncoder;
@@ -54,7 +60,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
     private List<File> configRootTargets;
     private Map<String, String> properties;
 
-    private Map<Class, Provider> extensionBindings;
+    private Map<Class<?>, Provider> extensionBindings;
     private Map<String, Provider> resourceProviders;
     private Set<Class> serializableTypes;
 
@@ -103,7 +109,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
 
         // Create a Map to collect any extensions bindings to be bound to
         // services.
-        extensionBindings = new HashMap<Class, Provider>();
+        extensionBindings = new HashMap<Class<?>, Provider>();
         resourceProviders = new HashMap<String, Provider>();
         serializableTypes = new HashSet<Class>();
         final Set<String> loadedComponents = new HashSet<String>();
@@ -235,7 +241,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                                             bind(MessageBus.class).toInstance(bus);
 
                                             // Add any extension bindings.
-                                            for (Map.Entry<Class, Provider> entry : extensionBindings.entrySet()) {
+                                            for (Map.Entry<Class<?>, Provider> entry : extensionBindings.entrySet()) {
                                                 bind(entry.getKey()).toProvider(entry.getValue());
                                             }
                                         }
@@ -269,6 +275,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
 
             log.info("total extension binding: " + extensionBindings.keySet().size());
 
+
             visitAllTargets(configRootTargets,
                     new ConfigVisitor() {
                         public void visit(final Class<?> loadClass) {
@@ -291,34 +298,32 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                                     }).getInstance(Module.class).init();
                                 }
 
-                            }
-                            else if (loadClass.isAnnotationPresent(Service.class)) {
+                            } else if (loadClass.isAnnotationPresent(Service.class)) {
                                 Object svc = null;
 
                                 Class remoteImpl = getRemoteImplementation(loadClass);
                                 if (remoteImpl != null) {
                                     createRPCScaffolding(remoteImpl, loadClass, bus);
-                                }
-                                else if (MessageCallback.class.isAssignableFrom(loadClass)) {
+                                } else if (MessageCallback.class.isAssignableFrom(loadClass)) {
                                     final Class<? extends MessageCallback> clazz = loadClass.asSubclass(MessageCallback.class);
 
                                     loadedComponents.add(loadClass.getName());
 
                                     log.info("discovered service: " + clazz.getName());
                                     try {
-                                    svc = Guice.createInjector(new AbstractModule() {
-                                        @Override
-                                        protected void configure() {
-                                            bind(MessageCallback.class).to(clazz);
-                                            bind(MessageBus.class).toInstance(bus);
-                                            bind(RequestDispatcher.class).toInstance(dispatcher);
+                                        svc = Guice.createInjector(new AbstractModule() {
+                                            @Override
+                                            protected void configure() {
+                                                bind(MessageCallback.class).to(clazz);
+                                                bind(MessageBus.class).toInstance(bus);
+                                                bind(RequestDispatcher.class).toInstance(dispatcher);
 
-                                            // Add any extension bindings.
-                                            for (Map.Entry<Class, Provider> entry : extensionBindings.entrySet()) {
-                                                bind(entry.getKey()).toProvider(entry.getValue());
+                                                // Add any extension bindings.
+                                                for (Map.Entry<Class<?>, Provider> entry : extensionBindings.entrySet()) {
+                                                    bind(entry.getKey()).toProvider(entry.getValue());
+                                                }
                                             }
-                                        }
-                                    }).getInstance(MessageCallback.class);
+                                        }).getInstance(MessageCallback.class);
                                     }
                                     catch (Throwable t) {
                                         t.printStackTrace();
@@ -339,8 +344,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                                     RolesRequiredRule rule = null;
                                     if (clazz.isAnnotationPresent(RequireRoles.class)) {
                                         rule = new RolesRequiredRule(clazz.getAnnotation(RequireRoles.class).value(), bus);
-                                    }
-                                    else if (clazz.isAnnotationPresent(RequireAuthentication.class)) {
+                                    } else if (clazz.isAnnotationPresent(RequireAuthentication.class)) {
                                         rule = new RolesRequiredRule(new HashSet<Object>(), bus);
                                     }
                                     if (rule != null) {
@@ -356,7 +360,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                                             bind(RequestDispatcher.class).toInstance(dispatcher);
 
                                             // Add any extension bindings.
-                                            for (Map.Entry<Class, Provider> entry : extensionBindings.entrySet()) {
+                                            for (Map.Entry<Class<?>, Provider> entry : extensionBindings.entrySet()) {
                                                 bind(entry.getKey()).toProvider(entry.getValue());
                                             }
                                         }
@@ -379,8 +383,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                                     bus.subscribe(loadClass.getSimpleName() + ":RPC", new RemoteServiceCallback(epts));
                                 }
 
-                            }
-                            else if (loadClass.isAnnotationPresent(ExposeEntity.class)) {
+                            } else if (loadClass.isAnnotationPresent(ExposeEntity.class)) {
                                 log.info("Marked " + loadClass + " as serializable.");
                                 loadedComponents.add(loadClass.getName());
                                 serializableTypes.add(loadClass);
@@ -388,8 +391,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                         }
                     }
             );
-        }
-        else {
+        } else {
             log.info("auto-scan disabled.");
         }
 
@@ -410,6 +412,13 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
         // configure the JSONEncoder...
         JSONEncoder.setSerializableTypes(serializableTypes);
 
+        // lockdown the configuration so it can't be modified.
+        configRootTargets = Collections.unmodifiableList(configRootTargets);
+        properties = Collections.unmodifiableMap(properties);
+        extensionBindings = Collections.unmodifiableMap(extensionBindings);
+        resourceProviders = Collections.unmodifiableMap(resourceProviders);
+        serializableTypes = Collections.unmodifiableSet(serializableTypes);
+
         log.info("Errai bootstraping complete!");
     }
 
@@ -417,15 +426,14 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
         for (Class iface : type.getInterfaces()) {
             if (iface.isAnnotationPresent(Remote.class)) {
                 return iface;
-            }
-            else if (iface.getInterfaces().length != 0 && ((iface = getRemoteImplementation(iface)) != null)) {
+            } else if (iface.getInterfaces().length != 0 && ((iface = getRemoteImplementation(iface)) != null)) {
                 return iface;
             }
         }
         return null;
     }
 
-    private void createRPCScaffolding(final Class remoteIface, final Class type, final MessageBus bus) {
+    private void createRPCScaffolding(final Class remoteIface, final Class<?> type, final MessageBus bus) {
         final Injector injector = Guice.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
@@ -433,42 +441,37 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                 bind(RequestDispatcher.class).toInstance(dispatcher);
 
                 // Add any extension bindings.
-                for (Map.Entry<Class, Provider> entry : extensionBindings.entrySet()) {
+                for (Map.Entry<Class<?>, Provider> entry : extensionBindings.entrySet()) {
                     bind(entry.getKey()).toProvider(entry.getValue());
                 }
             }
         });
-        
+
         Object svc = injector.getInstance(type);
 
         Map<String, MessageCallback> epts = new HashMap<String, MessageCallback>();
 
-      // beware of classloading issues. better reflect on the actual instance
-      for(Class<?> intf : svc.getClass().getInterfaces())
-      {
-        for (final Method method : intf.getDeclaredMethods()) {
-          if (RebindUtils.isMethodInInterface(remoteIface, method)) {
-            epts.put(RebindUtils.createCallSignature(method), new ConversationalEndpointCallback(svc, method, bus));
-          }
+        // beware of classloading issues. better reflect on the actual instance
+        for (Class<?> intf : svc.getClass().getInterfaces()) {
+            for (final Method method : intf.getDeclaredMethods()) {
+                if (RebindUtils.isMethodInInterface(remoteIface, method)) {
+                    epts.put(RebindUtils.createCallSignature(method), new ConversationalEndpointCallback(svc, method, bus));
+                }
+            }
         }
-      }
 
-      bus.subscribe(remoteIface.getName() + ":RPC", new RemoteServiceCallback(epts));
+        bus.subscribe(remoteIface.getName() + ":RPC", new RemoteServiceCallback(epts));
 
         new ProxyProvider() {
             {
                 AbstractRemoteCallBuilder.setProxyFactory(this);
             }
-            public Object getRemoteProxy(Class proxyType) {
-                return new RuntimeException("This API is not supported in the server-side environment.");
+
+            public <T> T getRemoteProxy(Class<T> proxyType) {
+                throw new RuntimeException("This API is not supported in the server-side environment.");
             }
         };
 
-    }
-
-
-    public static interface Creator {
-        public void create(Inject injector);
     }
 
     /**
@@ -516,11 +519,11 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
      * @param <T>           - the class type
      * @return the resource of type <tt>T</tt>
      */
+    @SuppressWarnings({"unchecked"})
     public <T> T getResource(Class<? extends T> resourceClass) {
         if (extensionBindings.containsKey(resourceClass)) {
             return (T) extensionBindings.get(resourceClass).get();
-        }
-        else {
+        } else {
             return null;
         }
     }

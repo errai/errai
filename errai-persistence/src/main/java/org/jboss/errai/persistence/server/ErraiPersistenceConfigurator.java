@@ -51,7 +51,7 @@ public class ErraiPersistenceConfigurator implements ErraiConfigExtension {
         logger.info("Configuring persistence extension.");
     }
 
-    public void configure(Map<Class, Provider> bindings, Map<String, Provider> resourceProviders) {
+    public void configure(Map<Class<?>, Provider> bindings, Map<String, Provider> resourceProviders) {
         final AnnotationConfiguration cfg = new AnnotationConfiguration();
         if (!config.hasProperty("errai.prototyping.persistence.connection.driver_class")) {
             return;

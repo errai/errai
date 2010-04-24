@@ -21,5 +21,5 @@ import com.google.inject.Provider;
 import java.util.Map;
 
 public interface ErraiConfigExtension {
-    public void configure(Map<Class, Provider> bindings, Map<String, Provider> resourceProviders);
+    public void configure(Map<Class<?>, Provider> bindings, Map<String, Provider> resourceProviders);
 }
