@@ -8,7 +8,7 @@ public class RebindUtils {
     public static String createCallSignature(Method m) {
         StringAppender append = new StringAppender(m.getName()).append(':');
         for (Class c : m.getParameterTypes()) {
-            append.append(c.getName()).append(':');
+            append.append(c.getCanonicalName()).append(':');
         }
         return append.toString();
     }

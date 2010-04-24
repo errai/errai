@@ -1,9 +1,6 @@
-package org.jboss.errai.bus.server;
+package org.jboss.errai.bus.server.async;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.TreeSet;
+import java.util.*;
 
 import static java.lang.System.currentTimeMillis;
 
@@ -13,14 +10,16 @@ import static java.lang.System.currentTimeMillis;
  *
  * @author Mike Brock
  */
-public class SchedulerService implements Runnable {
+public class SimpleSchedulerService implements Runnable, SchedulerService {
     private volatile boolean running = false;
+    private boolean finished = false;
+
     private long nextRunTime = 0;
     private final TreeSet<TimedTask> tasks = new TreeSet<TimedTask>();
     private boolean autoStartStop = false;
     private Thread currentThread;
 
-    public SchedulerService() {
+    public SimpleSchedulerService() {
         init();
     }
 
@@ -37,21 +36,26 @@ public class SchedulerService implements Runnable {
     public void run() {
         synchronized (this) {
             running = true;
+            finished = false;
         }
 
         long tm;
         while (running) {
             try {
-                if ((tm = nextRunTime - currentTimeMillis()) > 0) {
-                    Thread.sleep(tm);
+                while (running) {
+                    if ((tm = nextRunTime - currentTimeMillis()) > 0) {
+                        Thread.sleep(tm);
+                    }
+
+                    runAllDue();
                 }
             }
             catch (InterruptedException e) {
                 if (!running) return;
             }
-            runAllDue();
         }
 
+        finished = true;
         if (autoStartStop) init();
     }
 
@@ -77,15 +81,13 @@ public class SchedulerService implements Runnable {
         long n = 0;
 
         synchronized (this) {
-            Iterator<TimedTask> iter = tasks.iterator();
-            List<TimedTask> toRemove = new LinkedList<TimedTask>();
             TimedTask task;
-            while (iter.hasNext()) {
+            for (Iterator<TimedTask> iter = tasks.iterator(); iter.hasNext();) {
                 if ((task = iter.next()).runIfDue(n = currentTimeMillis())) {
                     if (task.nextRuntime() == -1) {
                         // if the next runtime is -1, that means this event
                         // is never scheduled to run again, so we remove it.
-                        toRemove.add(task);
+                        iter.remove();
                     } else {
                         // set the nextRuntime to the nextRuntim of this event
                         nextRunTime = task.nextRuntime();
@@ -104,9 +106,6 @@ public class SchedulerService implements Runnable {
                     return;
                 }
             }
-
-            for (TimedTask t : toRemove)
-                tasks.remove(t);
 
             if (autoStartStop) stopIfNoTasks();
         }
@@ -143,5 +142,20 @@ public class SchedulerService implements Runnable {
             currentThread.interrupt();
             running = false;
         }
+    }
+
+
+    public boolean isFinished() {
+        return finished;
+    }
+
+    public void visitAllTasks(TaskVisitor visitor) {
+        synchronized (this) {
+            for (TimedTask task : tasks) visitor.visit(task);
+        }
+    }
+
+    public static interface TaskVisitor {
+        public void visit(TimedTask task);
     }
 }

@@ -1,4 +1,4 @@
-package org.jboss.errai.bus.server;
+package org.jboss.errai.bus.server.async;
 
 import static java.lang.System.currentTimeMillis;
 
@@ -53,7 +53,6 @@ public abstract class TimedTask implements Runnable, Comparable<TimedTask> {
      boolean runIfDue(long time) {
         if (nextRuntime < time) {
             if (nextRuntime == -1) {
-            //    System.out.println("Do Not Fire:" + this);
                 return false;
             }
             run();

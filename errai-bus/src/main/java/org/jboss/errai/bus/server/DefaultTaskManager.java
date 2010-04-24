@@ -17,7 +17,13 @@
 package org.jboss.errai.bus.server;
 
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.server.api.*;
+import org.jboss.errai.bus.server.api.QueueSession;
+import org.jboss.errai.bus.server.api.SessionEndEvent;
+import org.jboss.errai.bus.server.api.SessionEndListener;
+import org.jboss.errai.bus.server.api.TaskManager;
+import org.jboss.errai.bus.server.async.SchedulerService;
+import org.jboss.errai.bus.server.async.ThreadBalancedSchedulerService;
+import org.jboss.errai.bus.server.async.TimedTask;
 
 import java.util.concurrent.TimeUnit;
 
@@ -41,8 +47,7 @@ public class DefaultTaskManager implements TaskManager {
     }
 
     private DefaultTaskManager(QueueSession session) {
-        scheduler = new SchedulerService();
-        scheduler.setAutoStartStop(true);
+        scheduler = new ThreadBalancedSchedulerService();
         this.session = session;
         init();
     }
@@ -57,10 +62,10 @@ public class DefaultTaskManager implements TaskManager {
         session.setAttribute(TaskManager.class.getName(), this);
     }
 
-    public TimedTask schedule(final TimeUnit unit, final int time, final Runnable task) {
-        TimedTask timedTask = new TimedTask() {
+    public TimedTask scheduleRepeating(final TimeUnit unit, final int interval, final Runnable task) {
+        final TimedTask timedTask = new TimedTask() {
             {
-                period = unit.convert(time, TimeUnit.MILLISECONDS);
+                period = unit.convert(interval, TimeUnit.MILLISECONDS);
             }
 
             public void run() {
@@ -71,4 +76,19 @@ public class DefaultTaskManager implements TaskManager {
         return timedTask;
     }
 
+
+    public TimedTask schedule(final TimeUnit unit, final int interval, final Runnable task) {
+        final TimedTask timedTask = new TimedTask() {
+            {
+                period = unit.convert(interval, TimeUnit.MILLISECONDS);
+            }
+
+            public void run() {
+                task.run();
+                nextRuntime = period = -1; // cancel after first run.
+            }
+        };
+        scheduler.addTask(timedTask);
+        return timedTask;
+    }
 }

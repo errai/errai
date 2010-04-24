@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.server.api;
+package org.jboss.errai.bus.server.async;
 
-import org.jboss.errai.bus.server.async.TimedTask;
-
-import java.util.concurrent.TimeUnit;
-
-public interface TaskManager {
-    public TimedTask scheduleRepeating(TimeUnit unit, int interval, Runnable task);
-    public TimedTask schedule(TimeUnit unit, int interval, Runnable task);
+public interface SchedulerService {
+    public void addTask(TimedTask task);
+    public void requestStop();
+    public void start();
 }

@@ -4,6 +4,7 @@ import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.server.MessageDeliveryFailure;
 
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -19,7 +20,7 @@ public class RemoteServiceCallback implements MessageCallback {
      * @param endpoints - Map of endpoints to their callback function
      */
     public RemoteServiceCallback(Map<String, MessageCallback> endpoints) {
-        this.endpoints = endpoints;
+        this.endpoints = Collections.unmodifiableMap(endpoints);
     }
 
     /**

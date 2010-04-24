@@ -20,12 +20,10 @@ import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.framework.BooleanRoutingRule;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.Payload;
-import org.jboss.errai.bus.server.SchedulerService;
-import org.jboss.errai.bus.server.TimedTask;
+import org.jboss.errai.bus.server.async.SchedulerService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * This interface, <tt>ServerMessageBus</tt>, extends the client's {@link org.jboss.errai.bus.client.framework.MessageBus},
