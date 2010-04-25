@@ -22,9 +22,10 @@ import org.jboss.errai.bus.server.api.SessionEndEvent;
 import org.jboss.errai.bus.server.api.SessionEndListener;
 import org.jboss.errai.bus.server.api.TaskManager;
 import org.jboss.errai.bus.server.async.SchedulerService;
-import org.jboss.errai.bus.server.async.ThreadBalancedSchedulerService;
+import org.jboss.errai.bus.server.async.PooledSchedulerService;
 import org.jboss.errai.bus.server.async.TimedTask;
 
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 public class DefaultTaskManager implements TaskManager {
@@ -47,7 +48,7 @@ public class DefaultTaskManager implements TaskManager {
     }
 
     private DefaultTaskManager(QueueSession session) {
-        scheduler = new ThreadBalancedSchedulerService();
+        scheduler = new PooledSchedulerService();
         this.session = session;
         init();
     }
@@ -62,7 +63,7 @@ public class DefaultTaskManager implements TaskManager {
         session.setAttribute(TaskManager.class.getName(), this);
     }
 
-    public TimedTask scheduleRepeating(final TimeUnit unit, final int interval, final Runnable task) {
+    public ScheduledFuture scheduleRepeating(final TimeUnit unit, final int interval, final Runnable task) {
         final TimedTask timedTask = new TimedTask() {
             {
                 period = unit.convert(interval, TimeUnit.MILLISECONDS);
@@ -72,12 +73,11 @@ public class DefaultTaskManager implements TaskManager {
                 task.run();
             }
         };
-        scheduler.addTask(timedTask);
-        return timedTask;
+        return scheduler.addTask(timedTask);
     }
 
 
-    public TimedTask schedule(final TimeUnit unit, final int interval, final Runnable task) {
+    public ScheduledFuture schedule(final TimeUnit unit, final int interval, final Runnable task) {
         final TimedTask timedTask = new TimedTask() {
             {
                 period = unit.convert(interval, TimeUnit.MILLISECONDS);
@@ -85,10 +85,9 @@ public class DefaultTaskManager implements TaskManager {
 
             public void run() {
                 task.run();
-                nextRuntime = period = -1; // cancel after first run.
+                nextRuntime = -1; // cancel after first run.
             }
         };
-        scheduler.addTask(timedTask);
-        return timedTask;
+        return scheduler.addTask(timedTask);
     }
 }

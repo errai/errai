@@ -1,6 +1,8 @@
 package org.jboss.errai.bus.server.async;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.TreeSet;
+import java.util.concurrent.*;
 
 import static java.lang.System.currentTimeMillis;
 
@@ -53,9 +55,15 @@ public class SimpleSchedulerService implements Runnable, SchedulerService {
             catch (InterruptedException e) {
                 if (!running) return;
             }
+            catch (Throwable t) {
+                requestStop();
+                throw new RuntimeException("scheduler interrupted by exception", t);
+            }
         }
 
-        finished = true;
+        synchronized (this) {
+            finished = true;
+        }
         if (autoStartStop) init();
     }
 
@@ -91,18 +99,22 @@ public class SimpleSchedulerService implements Runnable, SchedulerService {
                         // if the next runtime is -1, that means this event
                         // is never scheduled to run again, so we remove it.
                         iter.remove();
-                    } else {
+                    }
+                    else {
                         // set the nextRuntime to the nextRuntim of this event
                         nextRunTime = task.nextRuntime();
                     }
-                } else if (task.nextRuntime() == -1) {
+                }
+                else if (task.nextRuntime() == -1) {
                     // this event is not scheduled to run.
                     iter.remove();
-                } else if (nextRunTime == 0 || task.nextRuntime() < nextRunTime) {
+                }
+                else if (nextRunTime == 0 || task.nextRuntime() < nextRunTime) {
                     // this event occurs before the current nextRuntime,
                     // so we update nextRuntime.
                     nextRunTime = task.nextRuntime();
-                } else if (n > task.nextRuntime()) {
+                }
+                else if (n > task.nextRuntime()) {
                     // Since the scheduled events are in the order of soonest to
                     // latest, we now know that all further events are in the future
                     // and we can therefore stop iterating.
@@ -123,7 +135,7 @@ public class SimpleSchedulerService implements Runnable, SchedulerService {
      *
      * @param task
      */
-    public void addTask(TimedTask task) {
+    public ScheduledFuture addTask(final TimedTask task) {
         synchronized (this) {
             tasks.add(task);
             if (nextRunTime == 0 || task.nextRuntime() < nextRunTime) {
@@ -133,6 +145,37 @@ public class SimpleSchedulerService implements Runnable, SchedulerService {
 
             if (autoStartStop) startIfTasks();
         }
+
+        return new ScheduledFuture() {
+            public int compareTo(Delayed o) {
+                throw new UnsupportedOperationException();
+            }
+
+            public boolean cancel(boolean mayInterruptIfRunning) {
+                task.disable();
+                return true;
+            }
+
+            public long getDelay(TimeUnit unit) {
+                return TimeUnit.MILLISECONDS.convert(task.getPeriod(), unit);
+            }
+
+            public boolean isCancelled() {
+                return task.cancel;
+            }
+
+            public boolean isDone() {
+                return task.period == -1;
+            }
+
+            public Object get() throws InterruptedException, ExecutionException {
+                throw new UnsupportedOperationException();
+            }
+
+            public Object get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+                throw new UnsupportedOperationException();
+            }
+        };
     }
 
 
@@ -149,7 +192,9 @@ public class SimpleSchedulerService implements Runnable, SchedulerService {
 
 
     public boolean isFinished() {
-        return finished;
+        synchronized (this) {
+            return finished;
+        }
     }
 
     public void visitAllTasks(TaskVisitor visitor) {

@@ -16,8 +16,10 @@
 
 package org.jboss.errai.bus.server.async;
 
+import java.util.concurrent.ScheduledFuture;
+
 public interface SchedulerService {
-    public void addTask(TimedTask task);
+    public ScheduledFuture addTask(TimedTask task);
     public void requestStop();
     public void start();
 }

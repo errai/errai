@@ -18,9 +18,10 @@ package org.jboss.errai.bus.server.api;
 
 import org.jboss.errai.bus.server.async.TimedTask;
 
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 public interface TaskManager {
-    public TimedTask scheduleRepeating(TimeUnit unit, int interval, Runnable task);
-    public TimedTask schedule(TimeUnit unit, int interval, Runnable task);
+    public ScheduledFuture scheduleRepeating(TimeUnit unit, int interval, Runnable task);
+    public ScheduledFuture schedule(TimeUnit unit, int interval, Runnable task);
 }

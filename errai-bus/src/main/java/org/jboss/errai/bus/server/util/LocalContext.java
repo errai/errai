@@ -36,7 +36,7 @@ public class LocalContext {
         if (session == null) {
             throw new RuntimeException("no session");
         }
-        this.context = createContextString(context);
+        this.context = createContextString(session.getSessionId() + "//" +  context);
         this.session = session;
         this.ctx = getLocalContext();
     }

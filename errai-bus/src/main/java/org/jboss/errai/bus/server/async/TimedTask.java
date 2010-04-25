@@ -6,8 +6,9 @@ import static java.lang.System.currentTimeMillis;
  * A <tt>TimedTask</tt> is used for scheduling tasks, and making sure they are run at appropriate times and intervals  
  */
 public abstract class TimedTask implements Runnable, Comparable<TimedTask> {
-    protected long nextRuntime;
+    protected volatile long nextRuntime;
     protected long period;
+    protected volatile boolean cancel = false;
 
     /**
      * Gets the period of the task, and when it should be run next
@@ -40,7 +41,7 @@ public abstract class TimedTask implements Runnable, Comparable<TimedTask> {
      * Disables the task
      */
     public void disable() {
-        nextRuntime = -1;
+        cancel = true;
     }
 
     /**
@@ -51,7 +52,7 @@ public abstract class TimedTask implements Runnable, Comparable<TimedTask> {
      * @return true if the task was run
      */
      boolean runIfDue(long time) {
-        if (nextRuntime < time) {
+        if (!cancel && nextRuntime < time) {
             if (nextRuntime == -1) {
                 return false;
             }
