@@ -17,6 +17,8 @@
 package org.jboss.errai.bus.server.async;
 
 
+import org.jboss.errai.bus.client.api.base.AsyncTask;
+
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -31,13 +33,20 @@ public class PooledSchedulerService implements SchedulerService {
     public PooledSchedulerService() {
     }
 
-    public ScheduledFuture addTask(TimedTask task) {
+    public AsyncTask addTask(TimedTask task) {
+        final ScheduledFuture future;
         if (task.period == -1) {
-            return executor.schedule(task, task.nextRuntime() - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+            future = executor.schedule(task, task.nextRuntime() - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
         }
         else {
-            return executor.scheduleAtFixedRate(task, task.getPeriod(), task.getPeriod(), TimeUnit.MILLISECONDS);
+            future = executor.scheduleAtFixedRate(task, task.getPeriod(), task.getPeriod(), TimeUnit.MILLISECONDS);
         }
+
+        return new AsyncTask() {
+            public boolean cancel(boolean interrupt) {
+                return future.cancel(interrupt);
+            }
+        };
     }
 
     public void requestStop() {

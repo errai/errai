@@ -313,7 +313,7 @@
         <title>Sending Messages with the Server Bus</title>
 
         <para>In the following example we extend our server side component to
-        reply with a message when the callback method is invoked. It will
+        replyNow with a message when the callback method is invoked. It will
         create a message and address it to the subject
         'HelloWorldClient':</para>
 
@@ -488,7 +488,7 @@
 
           <para>It is possible for the sender to infer, to whatever
           conversational service it is calling, what subject it would like the
-          reply to go to. This is accomplished by utilizing the standard
+          replyNow to go to. This is accomplished by utilizing the standard
           <filename>MessageParts.ReplyTo</filename> message part. Using this
           methodology for building conversations is generally
           encouraged.</para>

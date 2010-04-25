@@ -150,6 +150,10 @@ public class ConversationMessageWrapper implements Message {
         viaThis.dispatch(this);
     }
 
+    public Message getIncomingMessage() {
+        return message;
+    }
+
     public void commit() {
         if (!hasPart(MessageParts.ToSubject)) {
             if (message.hasPart(MessageParts.ReplyTo)) {

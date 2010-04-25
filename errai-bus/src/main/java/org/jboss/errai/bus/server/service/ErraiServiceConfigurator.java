@@ -16,7 +16,7 @@
 
 package org.jboss.errai.bus.server.service;
 
-import com.google.inject.Provider;
+import org.jboss.errai.bus.client.api.base.ResourceProvider;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.server.api.SessionProvider;
 
@@ -50,7 +50,7 @@ public interface ErraiServiceConfigurator {
      *
      * @return the resource providers associated with this configurator
      */
-    public Map<String, Provider> getResourceProviders();
+    public Map<String, ResourceProvider> getResourceProviders();
 
     /**
      * Gets the resources attached to the specified resource class

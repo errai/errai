@@ -17,10 +17,10 @@
 package org.jboss.errai.persistence.server;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AnnotationConfiguration;
+import org.jboss.errai.bus.client.api.base.ResourceProvider;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.annotations.ExtensionComponent;
 import org.jboss.errai.bus.server.api.ErraiConfigExtension;
@@ -51,7 +51,7 @@ public class ErraiPersistenceConfigurator implements ErraiConfigExtension {
         logger.info("Configuring persistence extension.");
     }
 
-    public void configure(Map<Class<?>, Provider> bindings, Map<String, Provider> resourceProviders) {
+    public void configure(Map<Class<?>, ResourceProvider> bindings, Map<String, ResourceProvider> resourceProviders) {
         final AnnotationConfiguration cfg = new AnnotationConfiguration();
         if (!config.hasProperty("errai.prototyping.persistence.connection.driver_class")) {
             return;
@@ -86,12 +86,12 @@ public class ErraiPersistenceConfigurator implements ErraiConfigExtension {
             final SessionFactory sessionFactory = cfg.buildSessionFactory();
             logger.info("finished building hibernate session factory ... ");
 
-            Provider<Session> sessionProvider = new Provider<Session>() {
+            ResourceProvider<Session> sessionProvider = new ResourceProvider<Session>() {
                 public Session get() {
                     return sessionFactory.openSession();
                 }
             };
-            Provider<SessionFactory> sessionFactoryProvider = new Provider() {
+            ResourceProvider<SessionFactory> sessionFactoryProvider = new ResourceProvider() {
                 public Object get() {
                     return sessionFactory;
                 }

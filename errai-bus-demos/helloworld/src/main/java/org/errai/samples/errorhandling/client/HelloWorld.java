@@ -21,15 +21,6 @@ public class HelloWorld implements EntryPoint {
         Button button = new Button("Click Me");
         final Label label = new Label();
 
-        button.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                MessageBuilder.createCall(new RemoteCallback<Integer>() {
-                    public void callback(Integer response) {
-                        label.setText(response + "");
-                    }
-                }, FooService.class).add(10, 5);
-            }
-        });
 
         RootPanel.get().add(button);
         RootPanel.get().add(label);

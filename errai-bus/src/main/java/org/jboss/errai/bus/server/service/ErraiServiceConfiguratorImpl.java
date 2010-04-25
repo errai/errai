@@ -18,6 +18,7 @@ package org.jboss.errai.bus.server.service;
 
 import com.google.inject.*;
 import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.base.ResourceProvider;
 import org.jboss.errai.bus.client.api.builder.AbstractRemoteCallBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.ProxyProvider;
@@ -60,8 +61,8 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
     private List<File> configRootTargets;
     private Map<String, String> properties;
 
-    private Map<Class<?>, Provider> extensionBindings;
-    private Map<String, Provider> resourceProviders;
+    private Map<Class<?>, ResourceProvider> extensionBindings;
+    private Map<String, ResourceProvider> resourceProviders;
     private Set<Class> serializableTypes;
 
     private RequestDispatcher dispatcher;
@@ -109,8 +110,8 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
 
         // Create a Map to collect any extensions bindings to be bound to
         // services.
-        extensionBindings = new HashMap<Class<?>, Provider>();
-        resourceProviders = new HashMap<String, Provider>();
+        extensionBindings = new HashMap<Class<?>, ResourceProvider>();
+        resourceProviders = new HashMap<String, ResourceProvider>();
         serializableTypes = new HashSet<Class>();
         final Set<String> loadedComponents = new HashSet<String>();
         final List<Runnable> deferred = new LinkedList<Runnable>();
@@ -134,7 +135,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                             }
                         }).getInstance(AuthenticationAdapter.class);
 
-                        extensionBindings.put(AuthenticationAdapter.class, new Provider() {
+                        extensionBindings.put(AuthenticationAdapter.class, new ResourceProvider() {
                             public Object get() {
                                 return authAdapterInst;
                             }
@@ -241,8 +242,8 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                                             bind(MessageBus.class).toInstance(bus);
 
                                             // Add any extension bindings.
-                                            for (Map.Entry<Class<?>, Provider> entry : extensionBindings.entrySet()) {
-                                                bind(entry.getKey()).toProvider(entry.getValue());
+                                            for (Map.Entry<Class<?>, ResourceProvider> entry : extensionBindings.entrySet()) {
+                                                bind(entry.getKey()).toProvider(new GuiceProviderProxy(entry.getValue()));
                                             }
                                         }
                                     };
@@ -319,8 +320,8 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                                                 bind(RequestDispatcher.class).toInstance(dispatcher);
 
                                                 // Add any extension bindings.
-                                                for (Map.Entry<Class<?>, Provider> entry : extensionBindings.entrySet()) {
-                                                    bind(entry.getKey()).toProvider(entry.getValue());
+                                                for (Map.Entry<Class<?>, ResourceProvider> entry : extensionBindings.entrySet()) {
+                                                    bind(entry.getKey()).toProvider(new GuiceProviderProxy(entry.getValue()));
                                                 }
                                             }
                                         }).getInstance(MessageCallback.class);
@@ -360,8 +361,8 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                                             bind(RequestDispatcher.class).toInstance(dispatcher);
 
                                             // Add any extension bindings.
-                                            for (Map.Entry<Class<?>, Provider> entry : extensionBindings.entrySet()) {
-                                                bind(entry.getKey()).toProvider(entry.getValue());
+                                            for (Map.Entry<Class<?>, ResourceProvider> entry : extensionBindings.entrySet()) {
+                                                bind(entry.getKey()).toProvider(new GuiceProviderProxy(entry.getValue()));
                                             }
                                         }
                                     }).getInstance(loadClass);
@@ -409,6 +410,9 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
             r.run();
         }
 
+        resourceProviders.put(MessageBus.class.getName(), new BusProvider(bus));
+        resourceProviders.put(RequestDispatcher.class.getName(), new DispatcherProvider(dispatcher));
+
         // configure the JSONEncoder...
         JSONEncoder.setSerializableTypes(serializableTypes);
 
@@ -420,6 +424,42 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
         serializableTypes = Collections.unmodifiableSet(serializableTypes);
 
         log.info("Errai bootstraping complete!");
+    }
+
+    static class BusProvider implements ResourceProvider<MessageBus> {
+        private final MessageBus bus;
+
+        BusProvider(MessageBus bus) {
+            this.bus = bus;
+        }
+
+        public MessageBus get() {
+            return bus;
+        }
+    }
+
+    static class DispatcherProvider implements ResourceProvider<RequestDispatcher> {
+        private final RequestDispatcher dispatcher;
+
+        DispatcherProvider(RequestDispatcher dispatcher) {
+            this.dispatcher = dispatcher;
+        }
+
+        public RequestDispatcher get() {
+            return dispatcher;
+        }
+    }
+
+    static class GuiceProviderProxy implements Provider {
+        private final ResourceProvider provider;
+
+        GuiceProviderProxy(ResourceProvider provider) {
+            this.provider = provider;
+        }
+
+        public Object get() {
+            return provider.get();
+        }
     }
 
     private static Class getRemoteImplementation(Class type) {
@@ -441,8 +481,8 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                 bind(RequestDispatcher.class).toInstance(dispatcher);
 
                 // Add any extension bindings.
-                for (Map.Entry<Class<?>, Provider> entry : extensionBindings.entrySet()) {
-                    bind(entry.getKey()).toProvider(entry.getValue());
+                for (Map.Entry<Class<?>, ResourceProvider> entry : extensionBindings.entrySet()) {
+                    bind(entry.getKey()).toProvider(new GuiceProviderProxy(entry.getValue()));
                 }
             }
         });
@@ -479,7 +519,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
      *
      * @return the resource providers associated with this configurator
      */
-    public Map<String, Provider> getResourceProviders() {
+    public Map<String, ResourceProvider> getResourceProviders() {
         return this.resourceProviders;
     }
 

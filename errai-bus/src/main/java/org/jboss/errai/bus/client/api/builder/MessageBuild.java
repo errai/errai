@@ -27,7 +27,7 @@ import org.jboss.errai.bus.client.api.Message;
  * This interface, <tt>MessageBuild</tt> is the template for creating any message builders. The message builders
  * ensure that all messages are properly created with all appropriate fields
  */
-public interface MessageBuild {
+public interface MessageBuild extends Sendable {
 
     /**
      * Gets the message created

@@ -17,9 +17,10 @@
 package org.jboss.errai.bus.server.api;
 
 import com.google.inject.Provider;
+import org.jboss.errai.bus.client.api.base.ResourceProvider;
 
 import java.util.Map;
 
 public interface ErraiConfigExtension {
-    public void configure(Map<Class<?>, Provider> bindings, Map<String, Provider> resourceProviders);
+    public void configure(Map<Class<?>, ResourceProvider> bindings, Map<String, ResourceProvider> resourceProviders);
 }

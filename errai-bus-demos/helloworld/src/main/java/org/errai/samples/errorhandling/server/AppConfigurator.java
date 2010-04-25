@@ -2,6 +2,7 @@ package org.errai.samples.errorhandling.server;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import org.jboss.errai.bus.client.api.base.ResourceProvider;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.server.annotations.ExtensionComponent;
 import org.jboss.errai.bus.server.api.ErraiConfigExtension;
@@ -22,7 +23,7 @@ public class AppConfigurator implements ErraiConfigExtension {
         this.bus = bus;
     }
 
-    public void configure(Map<Class<?>, Provider> bindings, Map<String, Provider> resourceProviders) {
+    public void configure(Map<Class<?>, ResourceProvider> bindings, Map<String, ResourceProvider> resourceProviders) {
         // provide extension points here
     }
 }

@@ -17,8 +17,8 @@
 package org.jboss.errai.tools.monitoring;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.base.ResourceProvider;
 import org.jboss.errai.bus.client.framework.BusMonitor;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.SubscriptionEvent;
@@ -40,7 +40,7 @@ public class MonitorExtension implements ErraiConfigExtension {
         this.bus = bus;
     }
 
-    public void configure(final Map<Class<?>, Provider> bindings, final Map<String, Provider> resourceProviders) {
+    public void configure(final Map<Class<?>, ResourceProvider> bindings, final Map<String, ResourceProvider> resourceProviders) {
         if (Boolean.getBoolean("errai.tools.bus_monitor_attach")) {
 
             proc = new ActivityProcessor();

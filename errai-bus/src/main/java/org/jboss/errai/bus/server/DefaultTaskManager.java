@@ -17,16 +17,15 @@
 package org.jboss.errai.bus.server;
 
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.base.AsyncTask;
+import org.jboss.errai.bus.client.api.base.TaskManager;
+import org.jboss.errai.bus.client.api.base.TimeUnit;
 import org.jboss.errai.bus.server.api.QueueSession;
 import org.jboss.errai.bus.server.api.SessionEndEvent;
 import org.jboss.errai.bus.server.api.SessionEndListener;
-import org.jboss.errai.bus.server.api.TaskManager;
 import org.jboss.errai.bus.server.async.SchedulerService;
 import org.jboss.errai.bus.server.async.PooledSchedulerService;
 import org.jboss.errai.bus.server.async.TimedTask;
-
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 public class DefaultTaskManager implements TaskManager {
     private SchedulerService scheduler;
@@ -63,7 +62,7 @@ public class DefaultTaskManager implements TaskManager {
         session.setAttribute(TaskManager.class.getName(), this);
     }
 
-    public ScheduledFuture scheduleRepeating(final TimeUnit unit, final int interval, final Runnable task) {
+    public AsyncTask scheduleRepeating(final TimeUnit unit, final int interval, final Runnable task) {
         final TimedTask timedTask = new TimedTask() {
             {
                 period = unit.convert(interval, TimeUnit.MILLISECONDS);
@@ -77,7 +76,7 @@ public class DefaultTaskManager implements TaskManager {
     }
 
 
-    public ScheduledFuture schedule(final TimeUnit unit, final int interval, final Runnable task) {
+    public AsyncTask schedule(final TimeUnit unit, final int interval, final Runnable task) {
         final TimedTask timedTask = new TimedTask() {
             {
                 period = unit.convert(interval, TimeUnit.MILLISECONDS);

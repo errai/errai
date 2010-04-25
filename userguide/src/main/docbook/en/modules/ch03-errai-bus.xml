@@ -76,7 +76,7 @@ public class HelloWorld implements EntryPoint {
       <title>Sending messages to a client</title>
 
       <para>In the following example we extend our server side component to
-      reply with a message when the callback method is invoked. It will create
+      replyNow with a message when the callback method is invoked. It will create
       a message and address it to the subject 'HelloWorldClient':
       <programlisting>
 @Service

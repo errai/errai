@@ -14,12 +14,8 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.server.async;
+package org.jboss.errai.bus.client.api.builder;
 
-import org.jboss.errai.bus.client.api.base.AsyncTask;
-
-public interface SchedulerService {
-    public AsyncTask addTask(TimedTask task);
-    public void requestStop();
-    public void start();
+public interface MessageReplySendable extends MessageBuildSendableWithReply {
+    public void reply();
 }

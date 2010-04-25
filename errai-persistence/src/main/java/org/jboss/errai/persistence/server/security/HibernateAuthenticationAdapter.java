@@ -17,9 +17,9 @@
 package org.jboss.errai.persistence.server.security;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import org.hibernate.Session;
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.base.ResourceProvider;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
@@ -122,7 +122,7 @@ public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
     }
 
     public void challenge(Message message) {
-        @SuppressWarnings({"unchecked"}) Session session = ((Provider<Session>) message.getResource(Provider.class, "SessionProvider")).get();
+        @SuppressWarnings({"unchecked"}) Session session = ((ResourceProvider<Session>) message.getResource(ResourceProvider.class, "SessionProvider")).get();
         final String name = message.get(String.class, SecurityParts.Name);
         final String password = message.get(String.class, SecurityParts.Password);
 

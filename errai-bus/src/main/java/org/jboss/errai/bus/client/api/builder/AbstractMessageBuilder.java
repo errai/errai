@@ -3,7 +3,9 @@ package org.jboss.errai.bus.client.api.builder;
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.api.base.ConversationHelper;
+import org.jboss.errai.bus.client.api.base.AsyncTask;
+import org.jboss.errai.bus.client.api.base.ResourceProvider;
+import org.jboss.errai.bus.client.api.base.TimeUnit;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 
@@ -14,7 +16,8 @@ import static org.jboss.errai.bus.client.api.base.ConversationHelper.makeConvers
  * The <tt>AbstractMessageBuilder</tt> facilitates the building of a message, and ensures that it is created and used
  * properly.
  */
-public class AbstractMessageBuilder {
+@SuppressWarnings({"unchecked"})
+public class AbstractMessageBuilder<R extends Sendable> {
     private final Message message;
 
     public AbstractMessageBuilder(Message message) {
@@ -28,8 +31,9 @@ public class AbstractMessageBuilder {
      * @return the <tt>MessageBuildSubject</tt> with the appropriate fields and functions for the message builder
      */
     public MessageBuildSubject start() {
-        final MessageBuildSendableWithReply sendable = new MessageBuildSendableWithReply() {
+        final Sendable sendable = new MessageReplySendable() {
             boolean reply = false;
+
             public MessageBuildSendable repliesTo(MessageCallback callback) {
                 reply = true;
                 makeConversational(message, callback);
@@ -50,45 +54,66 @@ public class AbstractMessageBuilder {
                 message.sendNowWith(viaThis);
             }
 
+            public void reply() {
+                RequestDispatcher dispatcher = (RequestDispatcher)
+                        ((ConversationMessageWrapper)message).getIncomingMessage()
+                                .getResource(ResourceProvider.class, RequestDispatcher.class.getName()).get();
+
+                if (dispatcher == null) {
+                    throw new IllegalStateException("Cannot reply.  Cannot find RequestDispatcher resource.");
+                }
+
+                dispatcher.dispatch(message);
+            }
+
+
+            public AsyncTask sendRepeatingWith(RequestDispatcher viaThis, TimeUnit unit, int millis) {
+                return null;  //To change body of implemented methods use File | Settings | File Templates.
+            }
+
+            public AsyncTask sendDelayedWith(RequestDispatcher viaThis, TimeUnit unit, int millis) {
+                return null;  //To change body of implemented methods use File | Settings | File Templates.
+            }
+
             public Message getMessage() {
                 return message;
             }
         };
 
-        final MessageBuildParms parmBuilder = new MessageBuildParms() {
-            public MessageBuildParms with(String part, Object value) {
+        final MessageBuildParms<R> parmBuilder = new MessageBuildParms<R>() {
+            public MessageBuildParms<R> with(String part, Object value) {
                 message.set(part, value);
                 return this;
             }
 
-            public MessageBuildParms with(Enum part, Object value) {
+            public MessageBuildParms<R> with(Enum part, Object value) {
                 message.set(part, value);
                 return this;
             }
 
-            public MessageBuildParms copy(String part, Message m) {
+            public MessageBuildParms<R> copy(String part, Message m) {
                 message.copy(part, m);
                 return this;
             }
 
-            public MessageBuildParms copy(Enum part, Message m) {
+            public MessageBuildParms<R> copy(Enum part, Message m) {
                 message.copy(part, m);
                 return this;
             }
 
-            public MessageBuildParms copyResource(String part, Message m) {
+            public MessageBuildParms<R> copyResource(String part, Message m) {
                 message.copyResource(part, m);
                 return this;
             }
 
-            public MessageBuildSendableWithReply errorsHandledBy(ErrorCallback callback) {
+            public R errorsHandledBy(ErrorCallback callback) {
                 message.errorsCall(callback);
-                return sendable;
+                return (R) sendable;
 
             }
 
-            public MessageBuildSendableWithReply noErrorHandling() {
-                return sendable;
+            public R noErrorHandling() {
+                return (R) sendable;
             }
 
             public Message getMessage() {
@@ -96,18 +121,18 @@ public class AbstractMessageBuilder {
             }
         };
 
-        final MessageBuildCommand command = new MessageBuildCommand() {
-            public MessageBuildParms command(Enum command) {
+        final MessageBuildCommand<R> command = new MessageBuildCommand<R>() {
+            public MessageBuildParms<R> command(Enum command) {
                 message.command(command);
                 return parmBuilder;
             }
 
-            public MessageBuildParms command(String command) {
+            public MessageBuildParms<R> command(String command) {
                 message.command(command);
                 return parmBuilder;
             }
 
-            public MessageBuildParms signalling() {
+            public MessageBuildParms<R> signalling() {
                 return parmBuilder;
             }
 
@@ -117,13 +142,13 @@ public class AbstractMessageBuilder {
         };
 
         return new MessageBuildSubject() {
-            public MessageBuildCommand toSubject(String subject) {
+            public MessageBuildCommand<R> toSubject(String subject) {
                 message.toSubject(subject);
                 return command;
             }
 
-            public MessageBuildCommand subjectProvided() {
-               return command;
+            public MessageBuildCommand<R> subjectProvided() {
+                return command;
             }
 
             public Message getMessage() {

@@ -1,8 +1,9 @@
 package org.jboss.errai.bus.server.async;
 
+import org.jboss.errai.bus.client.api.base.AsyncTask;
+
 import java.util.Iterator;
 import java.util.TreeSet;
-import java.util.concurrent.*;
 
 import static java.lang.System.currentTimeMillis;
 
@@ -135,7 +136,7 @@ public class SimpleSchedulerService implements Runnable, SchedulerService {
      *
      * @param task
      */
-    public ScheduledFuture addTask(final TimedTask task) {
+    public AsyncTask addTask(final TimedTask task) {
         synchronized (this) {
             tasks.add(task);
             if (nextRunTime == 0 || task.nextRuntime() < nextRunTime) {
@@ -146,34 +147,10 @@ public class SimpleSchedulerService implements Runnable, SchedulerService {
             if (autoStartStop) startIfTasks();
         }
 
-        return new ScheduledFuture() {
-            public int compareTo(Delayed o) {
-                throw new UnsupportedOperationException();
-            }
-
+        return new AsyncTask() {
             public boolean cancel(boolean mayInterruptIfRunning) {
                 task.disable();
                 return true;
-            }
-
-            public long getDelay(TimeUnit unit) {
-                return TimeUnit.MILLISECONDS.convert(task.getPeriod(), unit);
-            }
-
-            public boolean isCancelled() {
-                return task.cancel;
-            }
-
-            public boolean isDone() {
-                return task.period == -1;
-            }
-
-            public Object get() throws InterruptedException, ExecutionException {
-                throw new UnsupportedOperationException();
-            }
-
-            public Object get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-                throw new UnsupportedOperationException();
             }
         };
     }

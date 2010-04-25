@@ -22,7 +22,8 @@ public class MessageBuilder {
      * @return a <tt>MessageBuildSubject</tt> which essentially is a <tt>Message</tt>, but ensures that the user
      *         constructs messages properly
      */
-    public static MessageBuildSubject createMessage() {
+    @SuppressWarnings({"unchecked"})
+    public static MessageBuildSubject<MessageBuildSendableWithReply> createMessage() {
         return new AbstractMessageBuilder(provider.get()).start();
     }
 
@@ -33,13 +34,14 @@ public class MessageBuilder {
      * @return a <tt>MessageBuildSubject</tt> which essentially is a <tt>Message</tt>, but ensures that the user
      *         constructs messages properly
      */
-    public static MessageBuildSubject createConversation(Message message) {
+    @SuppressWarnings({"unchecked"})
+    public static MessageBuildSubject<MessageReplySendable> createConversation(Message message) {
         Message newMessage = provider.get();
         if (newMessage instanceof HasEncoded) {
-            return new AbstractMessageBuilder(new HasEncodedConvMessageWrapper(message, newMessage)).start();
+            return new AbstractMessageBuilder<MessageReplySendable>(new HasEncodedConvMessageWrapper(message, newMessage)).start();
         }
         else {
-            return new AbstractMessageBuilder(new ConversationMessageWrapper(message, newMessage)).start();
+            return new AbstractMessageBuilder<MessageReplySendable>(new ConversationMessageWrapper(message, newMessage)).start();
         }
     }
 
