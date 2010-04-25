@@ -35,7 +35,6 @@ public class SimpleSchedulerService implements Runnable, SchedulerService {
         }
     }
 
-
     public void run() {
         synchronized (this) {
             running = true;
@@ -154,7 +153,6 @@ public class SimpleSchedulerService implements Runnable, SchedulerService {
             }
         };
     }
-
 
     public void setAutoStartStop(boolean autoStartStop) {
         this.autoStartStop = autoStartStop;
