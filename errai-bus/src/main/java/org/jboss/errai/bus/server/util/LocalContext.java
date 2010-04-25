@@ -26,7 +26,7 @@ import java.util.Map;
 public class LocalContext {
     private String context;
     private SubContext ctx;
-    private QueueSession session;
+    private QueueSession session;                         
 
     public static LocalContext get(Message message) {
         return new LocalContext(message.getSubject(), message.getResource(QueueSession.class, "Session"));
