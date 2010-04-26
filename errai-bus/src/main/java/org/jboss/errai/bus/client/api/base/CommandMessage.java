@@ -16,12 +16,13 @@
 
 package org.jboss.errai.bus.client.api.base;
 
-import org.jboss.errai.bus.client.framework.RoutingFlags;
-import org.jboss.errai.bus.client.api.*;
+import org.jboss.errai.bus.client.api.ErrorCallback;
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.ResourceProvider;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
+import org.jboss.errai.bus.client.framework.RoutingFlags;
 import org.jboss.errai.bus.client.protocols.MessageParts;
-import org.jboss.errai.bus.server.annotations.ExposeEntity;
 import org.jboss.errai.common.client.types.TypeHandlerFactory;
 
 import java.util.HashMap;
@@ -65,16 +66,17 @@ import java.util.Map;
  * </pre></tt>
  * Messages may contain serialized objects provided they meet the following criteria:
  * <ol>
- *  <li>The class is annotated with {@link org.jboss.errai.bus.server.annotations.ExposeEntity}</li>
- *  <li>The class implements {@link java.io.Serializable}.
- *  <li>The class contains a default, no-argument constructor.
+ * <li>The class is annotated with {@link org.jboss.errai.bus.server.annotations.ExposeEntity}</li>
+ * <li>The class implements {@link java.io.Serializable}.
+ * <li>The class contains a default, no-argument constructor.
  * </ol>
  *
  * @see ConversationMessage
  */
 @SuppressWarnings({"GwtInconsistentSerializableClass"})
 public class CommandMessage implements Message {
-    protected Map<String, Object> parts = new HashMap<String, Object>();
+    protected transient Map<String, ResourceProvider> providedParts;
+    protected Map<String, Object> parts;
     protected Map<String, Object> resources;
     protected ErrorCallback errorsCall;
     protected int routingFlags;
@@ -114,6 +116,7 @@ public class CommandMessage implements Message {
 
     /**
      * For internal use. This method should not be directly used.
+     *
      * @param parts
      * @return
      */
@@ -121,11 +124,23 @@ public class CommandMessage implements Message {
         return new CommandMessage(parts);
     }
 
+    public static CommandMessage createWithParts(Map<String, Object> parts, Map<String, ResourceProvider> provided) {
+        return new CommandMessage(parts, provided);
+    }
+
     public CommandMessage() {
+        this.parts = new HashMap<String, Object>();
+        this.providedParts = new HashMap<String, ResourceProvider>();
     }
 
     private CommandMessage(Map<String, Object> parts) {
         this.parts = parts;
+        this.providedParts = new HashMap<String, ResourceProvider>();
+    }
+
+    private CommandMessage(Map<String, Object> parts, Map<String, ResourceProvider> providers) {
+        this.parts = parts;
+        this.providedParts = providers;
     }
 
     private CommandMessage(String commandType) {
@@ -139,7 +154,6 @@ public class CommandMessage implements Message {
     private CommandMessage(String subject, String commandType) {
         toSubject(subject).command(commandType);
     }
-
 
 
     /**
@@ -216,6 +230,15 @@ public class CommandMessage implements Message {
         return this;
     }
 
+    public Message setProvidedPart(String part, ResourceProvider provider) {
+        providedParts.put(part, provider);
+        return this;
+    }
+
+    public Message setProvidedPart(Enum part, ResourceProvider provider) {
+        return setProvidedPart(part.name(), provider);
+    }
+
     public void remove(String part) {
         parts.remove(part);
     }
@@ -264,7 +287,7 @@ public class CommandMessage implements Message {
      */
     public void unsetFlag(RoutingFlags flag) {
         if ((routingFlags & flag.flag()) != 0) {
-           routingFlags ^= flag.flag();
+            routingFlags ^= flag.flag();
         }
     }
 
@@ -340,6 +363,10 @@ public class CommandMessage implements Message {
         return parts;
     }
 
+    public Map<String, ResourceProvider> getProvidedParts() {
+        return providedParts;
+    }
+
     /**
      * Set the message to contain the specified parts.  Note: This overwrites any existing message contents.
      *
@@ -359,6 +386,17 @@ public class CommandMessage implements Message {
      */
     public Message addAllParts(Map<String, Object> parts) {
         this.parts.putAll(parts);
+        return this;
+    }
+
+    /**
+     * Add the specified parts to the message.
+     *
+     * @param parts - Parts to be added to the message.
+     * @return -
+     */
+    public Message addAllProvidedParts(Map<String, ResourceProvider> parts) {
+        this.providedParts.putAll(parts);
         return this;
     }
 
@@ -417,7 +455,7 @@ public class CommandMessage implements Message {
 
     /**
      * Gets the error callback for this message
-     * 
+     *
      * @return the error callback
      */
     public ErrorCallback getErrorCallback() {
@@ -447,6 +485,10 @@ public class CommandMessage implements Message {
     }
 
     public void commit() {
+        if (!providedParts.isEmpty()) {
+            for (Map.Entry<String, ResourceProvider> entry : providedParts.entrySet())
+                set(entry.getKey(), entry.getValue().get());
+        }
     }
 
     /**
@@ -460,6 +502,7 @@ public class CommandMessage implements Message {
 
     /**
      * Transmit this message using the specified {@link org.jboss.errai.bus.client.framework.RequestDispatcher}.
+     *
      * @param viaThis
      */
     public void sendNowWith(RequestDispatcher viaThis) {
@@ -476,7 +519,7 @@ public class CommandMessage implements Message {
         return buildDescription();
     }
 
-    
+
     public Map<String, Object> getResources() {
         return resources;
     }
@@ -502,7 +545,7 @@ public class CommandMessage implements Message {
     }
 
     private String buildDescription() {
-      //  if (parts == null) return "";
+        //  if (parts == null) return "";
         StringBuilder append = new StringBuilder();
         boolean f = false;
         for (Map.Entry<String, Object> entry : parts.entrySet()) {

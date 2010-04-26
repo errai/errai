@@ -16,14 +16,18 @@
 
 package org.jboss.errai.bus.client.api.base;
 
-import org.jboss.errai.bus.client.framework.RoutingFlags;
-import org.jboss.errai.bus.client.api.*;
+import org.jboss.errai.bus.client.api.ErrorCallback;
+import org.jboss.errai.bus.client.api.HasEncoded;
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.ResourceProvider;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
+import org.jboss.errai.bus.client.framework.RoutingFlags;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.common.client.json.JSONEncoderCli;
 import org.jboss.errai.common.client.types.TypeHandlerFactory;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -90,7 +94,7 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
      */
 
     static JSONMessage create() {
-        return new JSONMessage();                                                            
+        return new JSONMessage();
     }
 
     protected JSONMessage() {
@@ -123,7 +127,7 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
      */
     public Message toSubject(String subject) {
         if (parts.containsKey(MessageParts.ToSubject.name()))
-                throw new IllegalArgumentException("cannot set subject more than once.");
+            throw new IllegalArgumentException("cannot set subject more than once.");
 
 
         _addStringPart(MessageParts.ToSubject.name(), subject);
@@ -139,7 +143,7 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
      */
     public Message command(Enum type) {
         if (parts.containsKey(MessageParts.CommandType.name()))
-                throw new IllegalArgumentException("cannot set command type more than once.");
+            throw new IllegalArgumentException("cannot set command type more than once.");
 
         _addStringPart(MessageParts.CommandType.name(), type.name());
         parts.put(MessageParts.CommandType.name(), type.name());
@@ -154,7 +158,7 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
      */
     public Message command(String type) {
         if (parts.containsKey(MessageParts.CommandType.name()))
-                throw new IllegalArgumentException("cannot set command type more than once.");
+            throw new IllegalArgumentException("cannot set command type more than once.");
 
 
         _addStringPart(MessageParts.CommandType.name(), type);
@@ -245,7 +249,7 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
      * Unset routing flags for message.
      *
      * @param flag - Routing flag to unset
-     */                                                                    
+     */
     public void unsetFlag(RoutingFlags flag) {
         if ((routingFlags & flag.flag()) != 0) {
             routingFlags ^= flag.flag();
@@ -318,10 +322,10 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
     /**
      * Return a Map of all the specified parts.
      *
-     * @return - A Map of parts.
+     * @return - An unmodifiable Map of parts.
      */
     public Map<String, Object> getParts() {
-        return parts;
+        return Collections.unmodifiableMap(parts);
     }
 
     /**
@@ -341,7 +345,17 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
      * @return -
      */
     public Message addAllParts(Map<String, Object> parts) {
-        throw new UnsupportedOperationException();
+        for (Map.Entry<String, Object> entry : parts.entrySet()) {
+            set(entry.getKey(), entry.getValue());
+        }
+        return this;
+    }
+
+    public Message addAllProvidedParts(Map<String, ResourceProvider> parts) {
+        for (Map.Entry<String, ResourceProvider> entry : parts.entrySet()) {
+            setProvidedPart(entry.getKey(), entry.getValue());
+        }
+        return this;
     }
 
     /**
@@ -428,8 +442,6 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
         }
     }
 
-    
-
     /**
      * Transmit this message to the specified {@link org.jboss.errai.bus.client.framework.MessageBus} instance.
      *
@@ -490,7 +502,8 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
     protected void _sep() {
         if (first) {
             first = false;
-        } else {
+        }
+        else {
             buf.append(',');
         }
     }

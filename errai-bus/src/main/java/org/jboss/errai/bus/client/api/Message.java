@@ -67,6 +67,11 @@ public interface Message extends Serializable {
      */
     public Message set(Enum part, Object value);
 
+
+    public Message setProvidedPart(String part, ResourceProvider provider);
+
+    public Message setProvidedPart(Enum part, ResourceProvider provider);
+
     /**
      * Check if message contains the specified part
      *
@@ -124,7 +129,7 @@ public interface Message extends Serializable {
     public Message setParts(Map<String,Object> parts);
 
     /**
-     * Add the specified parts to the message.
+     * Copy in a set of message parts from the provided map.
      *
      * @param parts - Parts to be added to the message.
      * @return this message
@@ -132,11 +137,24 @@ public interface Message extends Serializable {
     public Message addAllParts(Map<String, Object> parts);
 
     /**
+     * Copy in a set of provided message parts from the provided maps
+     * @param provided - provided parts to be added to the message
+     * @return this message
+     */
+    public Message addAllProvidedParts(Map<String, ResourceProvider> provided);
+
+    /**
      * Return a Map of all the specified parts.
      *
-     * @return - A Map of parts.
+     * @return - a Map of the message parts.
      */
     public Map<String, Object> getParts();
+
+    /**
+     * Return a Map of all provided pars.
+     * @return - a Map of the provided message parts.
+     */
+    public Map<String, ResourceProvider> getProvidedParts();
 
     /**
      * Add the Map of resources to the message.

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.api.base;
+package org.jboss.errai.bus.client.api;
 
 public interface ResourceProvider<T> {
     public T get();

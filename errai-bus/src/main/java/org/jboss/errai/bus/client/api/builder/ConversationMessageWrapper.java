@@ -1,6 +1,8 @@
 package org.jboss.errai.bus.client.api.builder;
 
-import org.jboss.errai.bus.client.api.*;
+import org.jboss.errai.bus.client.api.ErrorCallback;
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.ResourceProvider;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.framework.RoutingFlags;
@@ -51,6 +53,16 @@ public class ConversationMessageWrapper implements Message {
         return this;
     }
 
+    public Message setProvidedPart(String part, ResourceProvider provider) {
+        newMessage.setProvidedPart(part, provider);
+        return this;
+    }
+
+    public Message setProvidedPart(Enum part, ResourceProvider provider) {
+        newMessage.setProvidedPart(part, provider);
+        return this;
+    }
+
     public boolean hasPart(String part) {
         return newMessage.hasPart(part);
     }
@@ -85,6 +97,15 @@ public class ConversationMessageWrapper implements Message {
     public Message addAllParts(Map<String, Object> parts) {
         newMessage.addAllParts(parts);
         return this;
+    }
+
+    public Message addAllProvidedParts(Map<String, ResourceProvider> provided) {
+        newMessage.addAllProvidedParts(provided);
+        return this;
+    }
+
+    public Map<String, ResourceProvider> getProvidedParts() {
+        return newMessage.getProvidedParts();
     }
 
     public Map<String, Object> getParts() {
@@ -158,15 +179,17 @@ public class ConversationMessageWrapper implements Message {
         if (!hasPart(MessageParts.ToSubject)) {
             if (message.hasPart(MessageParts.ReplyTo)) {
                 toSubject(message.get(String.class, MessageParts.ReplyTo));
-            } else {
+            }
+            else {
                 throw new RuntimeException("cannot have a conversation.  the incoming message does not specify a recipient ReplyTo subject and you have not specified one.");
             }
         }
 
         if (message.hasResource("Session")) {
             newMessage.copyResource("Session", message);
-        } else {
+        }
+        else {
             throw new RuntimeException("cannot have a conversation.  the incoming message has not session data associated with it.");
         }
-    } 
+    }
 }

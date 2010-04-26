@@ -741,7 +741,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     public void attachMonitor(BusMonitor monitor) {
         if (this.busMonitor != null) {
-            log.warn("new monitor attached, but a monitor was already attached: old monitor has been deteached.");
+            log.warn("new monitor attached, but a monitor was already attached: old monitor has been detached.");
         }
         this.busMonitor = monitor;
 

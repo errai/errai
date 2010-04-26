@@ -16,22 +16,23 @@
 
 package org.jboss.errai.bus.server;
 
+import org.jboss.errai.bus.client.api.AsyncTask;
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.base.AsyncTask;
-import org.jboss.errai.bus.client.api.base.TaskManager;
+import org.jboss.errai.bus.client.api.TaskManager;
 import org.jboss.errai.bus.client.api.base.TimeUnit;
 import org.jboss.errai.bus.server.api.QueueSession;
 import org.jboss.errai.bus.server.api.SessionEndEvent;
 import org.jboss.errai.bus.server.api.SessionEndListener;
-import org.jboss.errai.bus.server.async.SchedulerService;
 import org.jboss.errai.bus.server.async.PooledSchedulerService;
+import org.jboss.errai.bus.server.async.SchedulerService;
 import org.jboss.errai.bus.server.async.TimedTask;
 
 public class DefaultTaskManager implements TaskManager {
     private SchedulerService scheduler;
     private QueueSession session;
+    private static final DefaultTaskManager globalInstance = new DefaultTaskManager(null);
 
-    public static DefaultTaskManager getForSession(final QueueSession session) {
+    static DefaultTaskManager getForSession(final QueueSession session) {
         //noinspection SynchronizationOnLocalVariableOrMethodParameter
         synchronized (session) {
             DefaultTaskManager manager = session.getAttribute(DefaultTaskManager.class, TaskManager.class.getName());
@@ -46,6 +47,10 @@ public class DefaultTaskManager implements TaskManager {
         return getForSession(message.getResource(QueueSession.class, "Session"));
     }
 
+    public static DefaultTaskManager getGlobal() {
+        return globalInstance;
+    }
+
     private DefaultTaskManager(QueueSession session) {
         scheduler = new PooledSchedulerService();
         this.session = session;
@@ -53,13 +58,15 @@ public class DefaultTaskManager implements TaskManager {
     }
 
     private void init() {
-        session.addSessionEndListener(new SessionEndListener() {
-            public void onSessionEnd(SessionEndEvent event) {
-                scheduler.requestStop();
-            }
-        });
+        if (session != null) {
+            session.addSessionEndListener(new SessionEndListener() {
+                public void onSessionEnd(SessionEndEvent event) {
+                    scheduler.requestStop();
+                }
+            });
 
-        session.setAttribute(TaskManager.class.getName(), this);
+            session.setAttribute(TaskManager.class.getName(), this);
+        }
     }
 
     public AsyncTask scheduleRepeating(final TimeUnit unit, final int interval, final Runnable task) {
@@ -74,7 +81,6 @@ public class DefaultTaskManager implements TaskManager {
         };
         return scheduler.addTask(timedTask);
     }
-
 
     public AsyncTask schedule(final TimeUnit unit, final int interval, final Runnable task) {
         final TimedTask timedTask = new TimedTask() {

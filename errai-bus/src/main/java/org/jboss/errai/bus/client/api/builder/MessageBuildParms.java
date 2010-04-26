@@ -2,6 +2,7 @@ package org.jboss.errai.bus.client.api.builder;
 
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.ResourceProvider;
 
 /**
  * This interface, <tt>MessageBuildParms</tt>, is a template for building the different parameters of a message. This
@@ -26,6 +27,11 @@ public interface MessageBuildParms<R> extends MessageBuild {
      * @return the updated instance of <tt>MessageBuildParms</tt>
      */
     public MessageBuildParms<R> with(Enum part, Object value);
+
+
+    public MessageBuildParms<R> withProvided(String part, ResourceProvider provider);
+
+    public MessageBuildParms<R> withProvided(Enum part, ResourceProvider provider);
 
     /**
      * Copies the message part to the specified message

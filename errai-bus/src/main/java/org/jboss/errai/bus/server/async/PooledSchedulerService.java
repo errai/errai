@@ -17,7 +17,7 @@
 package org.jboss.errai.bus.server.async;
 
 
-import org.jboss.errai.bus.client.api.base.AsyncTask;
+import org.jboss.errai.bus.client.api.AsyncTask;
 
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -50,7 +50,7 @@ public class PooledSchedulerService implements SchedulerService {
     }
 
     public void requestStop() {
-        // not supported
+        //
     }
 
     public void start() {

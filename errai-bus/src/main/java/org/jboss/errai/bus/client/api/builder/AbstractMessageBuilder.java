@@ -1,10 +1,8 @@
 package org.jboss.errai.bus.client.api.builder;
 
-import org.jboss.errai.bus.client.api.ErrorCallback;
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.api.base.AsyncTask;
-import org.jboss.errai.bus.client.api.base.ResourceProvider;
+import org.jboss.errai.bus.client.api.*;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.api.base.TaskManagerFactory;
 import org.jboss.errai.bus.client.api.base.TimeUnit;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
@@ -56,8 +54,7 @@ public class AbstractMessageBuilder<R extends Sendable> {
 
             public void reply() {
                 RequestDispatcher dispatcher = (RequestDispatcher)
-                        ((ConversationMessageWrapper)message).getIncomingMessage()
-                                .getResource(ResourceProvider.class, RequestDispatcher.class.getName()).get();
+                        getIncomingMessage().getResource(ResourceProvider.class, RequestDispatcher.class.getName()).get();
 
                 if (dispatcher == null) {
                     throw new IllegalStateException("Cannot reply.  Cannot find RequestDispatcher resource.");
@@ -66,13 +63,42 @@ public class AbstractMessageBuilder<R extends Sendable> {
                 dispatcher.dispatch(message);
             }
 
-
-            public AsyncTask sendRepeatingWith(RequestDispatcher viaThis, TimeUnit unit, int millis) {
-                return null;  //To change body of implemented methods use File | Settings | File Templates.
+            public AsyncTask replyRepeating(TimeUnit unit, int interval) {
+                Message msg = getIncomingMessage();
+                message.copyResource("Session", msg);
+                RequestDispatcher dispatcher = (RequestDispatcher) msg.getResource(ResourceProvider.class, RequestDispatcher.class.getName()).get();
+                return sendRepeatingWith(dispatcher, unit, interval);
             }
 
-            public AsyncTask sendDelayedWith(RequestDispatcher viaThis, TimeUnit unit, int millis) {
-                return null;  //To change body of implemented methods use File | Settings | File Templates.
+            public AsyncTask replyDelayed(TimeUnit unit, int interval) {
+                Message msg = getIncomingMessage();
+                message.copyResource("Session", msg);
+                RequestDispatcher dispatcher = (RequestDispatcher) msg.getResource(ResourceProvider.class, RequestDispatcher.class.getName()).get();
+                return sendDelayedWith(dispatcher, unit, interval);
+            }
+
+            private Message getIncomingMessage() {
+                return ((ConversationMessageWrapper) message).getIncomingMessage();
+            }
+
+            public AsyncTask sendRepeatingWith(final RequestDispatcher viaThis, TimeUnit unit, int interval) {
+                return TaskManagerFactory.get(null).scheduleRepeating(unit, interval, new Runnable() {
+                    public void run() {
+                        MessageBuilder.getMessageProvider().get()
+                                .copyResource("Session", message)
+                                .addAllParts(message.getParts())
+                                .addAllProvidedParts(message.getProvidedParts())
+                                .sendNowWith(viaThis);
+                    }
+                });
+            }
+
+            public AsyncTask sendDelayedWith(final RequestDispatcher viaThis, TimeUnit unit, int interval) {
+                return TaskManagerFactory.get(null).schedule(unit, interval, new Runnable() {
+                    public void run() {
+                        sendNowWith(viaThis);
+                    }
+                });
             }
 
             public Message getMessage() {
@@ -88,6 +114,16 @@ public class AbstractMessageBuilder<R extends Sendable> {
 
             public MessageBuildParms<R> with(Enum part, Object value) {
                 message.set(part, value);
+                return this;
+            }
+
+            public MessageBuildParms<R> withProvided(String part, ResourceProvider provider) {
+                message.setProvidedPart(part, provider);
+                return this;
+            }
+
+            public MessageBuildParms<R> withProvided(Enum part, ResourceProvider provider) {
+                message.setProvidedPart(part, provider);
                 return this;
             }
 

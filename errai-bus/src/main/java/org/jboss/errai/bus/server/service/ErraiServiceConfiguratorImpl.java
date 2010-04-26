@@ -17,13 +17,18 @@
 package org.jboss.errai.bus.server.service;
 
 import com.google.inject.*;
+import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.api.base.ResourceProvider;
+import org.jboss.errai.bus.client.api.ResourceProvider;
+import org.jboss.errai.bus.client.api.TaskManager;
+import org.jboss.errai.bus.client.api.base.TaskManagerFactory;
 import org.jboss.errai.bus.client.api.builder.AbstractRemoteCallBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.ProxyProvider;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
+import org.jboss.errai.bus.client.framework.TaskManagerProvider;
 import org.jboss.errai.bus.rebind.RebindUtils;
+import org.jboss.errai.bus.server.DefaultTaskManager;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.HttpSessionProvider;
 import org.jboss.errai.bus.server.SimpleDispatcher;
@@ -51,6 +56,8 @@ import java.util.*;
 
 import static com.google.inject.Guice.createInjector;
 import static java.util.ResourceBundle.getBundle;
+import static org.jboss.errai.bus.client.api.base.TaskManagerFactory.setTaskManagerProvider;
+import static org.jboss.errai.bus.server.io.JSONEncoder.setSerializableTypes;
 import static org.jboss.errai.bus.server.util.ConfigUtil.visitAllTargets;
 
 /**
@@ -414,7 +421,14 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
         resourceProviders.put(RequestDispatcher.class.getName(), new DispatcherProvider(dispatcher));
 
         // configure the JSONEncoder...
-        JSONEncoder.setSerializableTypes(serializableTypes);
+        setSerializableTypes(serializableTypes);
+
+        // configure the server-side taskmanager
+        setTaskManagerProvider(new TaskManagerProvider() {
+            public TaskManager get(Message message) {
+                return message != null ? DefaultTaskManager.getForSession(message) : DefaultTaskManager.getGlobal();
+            }
+        });
 
         // lockdown the configuration so it can't be modified.
         configRootTargets = Collections.unmodifiableList(configRootTargets);

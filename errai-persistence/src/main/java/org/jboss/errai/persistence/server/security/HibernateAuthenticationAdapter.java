@@ -19,7 +19,7 @@ package org.jboss.errai.persistence.server.security;
 import com.google.inject.Inject;
 import org.hibernate.Session;
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.base.ResourceProvider;
+import org.jboss.errai.bus.client.api.ResourceProvider;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;

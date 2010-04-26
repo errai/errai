@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.api.base;
+package org.jboss.errai.bus.client.api;
+
+import org.jboss.errai.bus.client.api.base.TimeUnit;
 
 public interface TaskManager {
     public AsyncTask scheduleRepeating(TimeUnit unit, int interval, Runnable task);

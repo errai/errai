@@ -1,8 +1,7 @@
 package org.errai.samples.errorhandling.server;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
-import org.jboss.errai.bus.client.api.base.ResourceProvider;
+import org.jboss.errai.bus.client.api.ResourceProvider;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.server.annotations.ExtensionComponent;
 import org.jboss.errai.bus.server.api.ErraiConfigExtension;

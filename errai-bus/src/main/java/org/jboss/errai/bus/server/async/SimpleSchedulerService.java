@@ -1,6 +1,6 @@
 package org.jboss.errai.bus.server.async;
 
-import org.jboss.errai.bus.client.api.base.AsyncTask;
+import org.jboss.errai.bus.client.api.AsyncTask;
 
 import java.util.Iterator;
 import java.util.TreeSet;

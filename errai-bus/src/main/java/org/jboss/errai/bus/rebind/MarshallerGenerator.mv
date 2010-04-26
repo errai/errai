@@ -11,9 +11,7 @@ org.jboss.errai.common.client.types.TypeMarshallers.addMarshaller(
             try {
                 StringBuilder json = new StringBuilder("{@{org.jboss.errai.common.client.protocols.SerializationParts.ENCODED_TYPE}:\"@{className}\",");
                 org.jboss.errai.common.client.json.JSONEncoderCli jsonEncoder = new org.jboss.errai.common.client.json.JSONEncoderCli();
-
                 json.append("@foreach{fieldName : fields}@code{isBool = Boolean.isAssignableFrom(org.mvel2.util.ParseTools.boxPrimitive(targetTypes.get(fieldName)));}@includeNamed{"extractor";fieldName=fieldName;targetType=targetTypes.get(fieldName);getter=isBool ? org.mvel2.util.ReflectionUtil.getIsGetter(fieldName) : org.mvel2.util.ReflectionUtil.getGetter(fieldName)}@end{","}}");
-
                 return json.toString();
             }
             catch (Exception e) {

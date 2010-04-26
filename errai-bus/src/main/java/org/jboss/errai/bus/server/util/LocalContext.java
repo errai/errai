@@ -26,7 +26,7 @@ import java.util.Map;
 public class LocalContext {
     private String context;
     private SubContext ctx;
-    private QueueSession session;                         
+    private QueueSession session;
 
     public static LocalContext get(Message message) {
         return new LocalContext(message.getSubject(), message.getResource(QueueSession.class, "Session"));
@@ -36,7 +36,7 @@ public class LocalContext {
         if (session == null) {
             throw new RuntimeException("no session");
         }
-        this.context = createContextString(session.getSessionId() + "/" +  context);
+        this.context = createContextString(session.getSessionId() + "/" + context);
         this.session = session;
         this.ctx = getLocalContext();
     }
@@ -60,7 +60,6 @@ public class LocalContext {
     public <T> T getAttribute(Class<T> type) {
         return getAttribute(type, type);
     }
-
 
     public void setAttribute(String param, Object value) {
         ctx.setAttribute(param, value);
@@ -88,7 +87,7 @@ public class LocalContext {
         }
     }
 
-     private static String createContextString(String context) {
+    private static String createContextString(String context) {
         return "LocalContext://" + context;
     }
 

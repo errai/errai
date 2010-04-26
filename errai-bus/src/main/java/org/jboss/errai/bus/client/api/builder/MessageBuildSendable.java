@@ -1,6 +1,6 @@
 package org.jboss.errai.bus.client.api.builder;
 
-import org.jboss.errai.bus.client.api.base.AsyncTask;
+import org.jboss.errai.bus.client.api.AsyncTask;
 import org.jboss.errai.bus.client.api.base.TimeUnit;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
@@ -35,8 +35,8 @@ public interface MessageBuildSendable extends Sendable {
     public void sendNowWith(RequestDispatcher viaThis);
 
 
-    public AsyncTask sendRepeatingWith(RequestDispatcher viaThis, TimeUnit unit, int millis);
+    public AsyncTask sendRepeatingWith(RequestDispatcher viaThis, TimeUnit unit, int interval);
 
-    public AsyncTask sendDelayedWith(RequestDispatcher viaThis, TimeUnit unit, int millis);
+    public AsyncTask sendDelayedWith(RequestDispatcher viaThis, TimeUnit unit, int interval);
 
 }

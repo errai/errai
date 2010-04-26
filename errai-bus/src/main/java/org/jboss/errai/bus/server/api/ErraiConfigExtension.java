@@ -16,8 +16,7 @@
 
 package org.jboss.errai.bus.server.api;
 
-import com.google.inject.Provider;
-import org.jboss.errai.bus.client.api.base.ResourceProvider;
+import org.jboss.errai.bus.client.api.ResourceProvider;
 
 import java.util.Map;
 
