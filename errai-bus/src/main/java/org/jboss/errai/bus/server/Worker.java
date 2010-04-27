@@ -10,8 +10,8 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.System.currentTimeMillis;
-import static org.jboss.errai.bus.server.util.ErrorHelper.handleMessageDeliveryFailure;
-import static org.jboss.errai.bus.server.util.ErrorHelper.sendClientError;
+import static org.jboss.errai.bus.client.util.ErrorHelper.handleMessageDeliveryFailure;
+import static org.jboss.errai.bus.client.util.ErrorHelper.sendClientError;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**

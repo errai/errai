@@ -64,14 +64,20 @@ public interface MessageBuildParms<R> extends MessageBuild {
      * Sets the error callback function for the message
      *
      * @param callback - the callback function called if an error occurs
-     * @return an instance of <tt>MessageBuildSendable</tt>
+     * @return -
      */
     public R errorsHandledBy(ErrorCallback callback);
 
     /**
      * Specifies that the message's errors will not be handled
      *
-     * @return an instance of <tt>MessageBuildSendable</tt>
+     * @return -
      */
     public R noErrorHandling();
+
+    /**
+     * Use the default error handler.
+     * @return -
+     */
+    public R defaultErrorHandling();
 }

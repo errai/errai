@@ -7,7 +7,7 @@ import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.server.service.ErraiService;
 
-import static org.jboss.errai.bus.server.util.ErrorHelper.handleMessageDeliveryFailure;
+import static org.jboss.errai.bus.client.util.ErrorHelper.handleMessageDeliveryFailure;
 
 /**
  * Simple request dispatcher implementation.

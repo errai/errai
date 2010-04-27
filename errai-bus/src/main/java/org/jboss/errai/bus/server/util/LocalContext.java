@@ -28,6 +28,10 @@ public class LocalContext {
     private SubContext ctx;
     private QueueSession session;
 
+    public static LocalContext get(QueueSession session) {
+        return new LocalContext("<NoSession>", session);
+    }
+
     public static LocalContext get(Message message) {
         return new LocalContext(message.getSubject(), message.getResource(QueueSession.class, "Session"));
     }

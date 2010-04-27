@@ -7,13 +7,13 @@ import org.jboss.errai.bus.client.framework.TaskManagerProvider;
 public class TaskManagerFactory {
     private static TaskManagerProvider provider = new TaskManagerProvider() {
         private ClientTaskManager taskManager = new ClientTaskManager();
-        public TaskManager get(Message message) {
+        public TaskManager get() {
             return taskManager;
         }
     };
 
-    public static TaskManager get(Message message) {
-        return provider.get(message);
+    public static TaskManager get() {
+        return provider.get();
     }
 
     public static void setTaskManagerProvider(TaskManagerProvider p) {

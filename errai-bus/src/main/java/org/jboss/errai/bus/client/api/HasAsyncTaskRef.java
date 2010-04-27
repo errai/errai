@@ -14,25 +14,13 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.server;
+package org.jboss.errai.bus.client.api;
 
 /**
- * <tt>MessageDeliveryFailure</tt> extends the <tt>RuntimeException</tt>. It is thrown when there is an error
- * delivering a message
+ * Market interface for use by scheduler to assign a reference to the AsyncTask of a Runnable task so it can be
+ * internally controlled.
  */
-public class MessageDeliveryFailure extends RuntimeException {
-    public MessageDeliveryFailure() {
-    }
-
-    public MessageDeliveryFailure(String message) {
-        super(message);
-    }
-
-    public MessageDeliveryFailure(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public MessageDeliveryFailure(Throwable cause) {
-        super(cause);
-    }
+public interface HasAsyncTaskRef extends Runnable {
+    public void setAsyncTask(AsyncTask task);
+    public AsyncTask getAsyncTask();
 }

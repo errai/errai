@@ -17,6 +17,7 @@
 package org.jboss.errai.bus.server;
 
 import org.jboss.errai.bus.client.api.AsyncTask;
+import org.jboss.errai.bus.client.api.HasAsyncTaskRef;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.TaskManager;
 import org.jboss.errai.bus.client.api.base.TimeUnit;
@@ -26,73 +27,60 @@ import org.jboss.errai.bus.server.api.SessionEndListener;
 import org.jboss.errai.bus.server.async.PooledSchedulerService;
 import org.jboss.errai.bus.server.async.SchedulerService;
 import org.jboss.errai.bus.server.async.TimedTask;
+import org.jboss.errai.bus.server.util.LocalContext;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.RunnableScheduledFuture;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+
+import static java.lang.System.currentTimeMillis;
 
 public class DefaultTaskManager implements TaskManager {
-    private SchedulerService scheduler;
     private QueueSession session;
-    private static final DefaultTaskManager globalInstance = new DefaultTaskManager(null);
+    private static final String ACTIVE_TASKS_KEY = DefaultTaskManager.class.getName() + "/ActiveAsyncTasks";
 
-    static DefaultTaskManager getForSession(final QueueSession session) {
-        //noinspection SynchronizationOnLocalVariableOrMethodParameter
-        synchronized (session) {
-            DefaultTaskManager manager = session.getAttribute(DefaultTaskManager.class, TaskManager.class.getName());
-            if (manager == null) {
-                session.setAttribute(TaskManager.class.getName(), manager = new DefaultTaskManager(session));
-            }
-            return manager;
-        }
+    private final static ScheduledThreadPoolExecutor executor;
+    private final static DefaultTaskManager taskManager = new DefaultTaskManager(null);
+
+    static {
+        executor = new ScheduledThreadPoolExecutor(30);
     }
 
-    public static DefaultTaskManager getForSession(Message message) {
-        return getForSession(message.getResource(QueueSession.class, "Session"));
+    public static DefaultTaskManager get() {
+        return taskManager;
     }
 
-    public static DefaultTaskManager getGlobal() {
-        return globalInstance;
-    }
 
     private DefaultTaskManager(QueueSession session) {
-        scheduler = new PooledSchedulerService();
         this.session = session;
-        init();
-    }
-
-    private void init() {
-        if (session != null) {
-            session.addSessionEndListener(new SessionEndListener() {
-                public void onSessionEnd(SessionEndEvent event) {
-                    scheduler.requestStop();
-                }
-            });
-
-            session.setAttribute(TaskManager.class.getName(), this);
-        }
     }
 
     public AsyncTask scheduleRepeating(final TimeUnit unit, final int interval, final Runnable task) {
-        final TimedTask timedTask = new TimedTask() {
-            {
-                period = unit.convert(interval, TimeUnit.MILLISECONDS);
+        long itv = unit.convert(interval, TimeUnit.MILLISECONDS);
+        return createAsyncTask(executor.scheduleAtFixedRate(task, itv, itv, java.util.concurrent.TimeUnit.MILLISECONDS), task);
             }
-
-            public void run() {
-                task.run();
-            }
-        };
-        return scheduler.addTask(timedTask);
-    }
 
     public AsyncTask schedule(final TimeUnit unit, final int interval, final Runnable task) {
-        final TimedTask timedTask = new TimedTask() {
-            {
-                period = unit.convert(interval, TimeUnit.MILLISECONDS);
-            }
+        long itv = unit.convert(interval, TimeUnit.MILLISECONDS);
+        return createAsyncTask(executor.schedule(task, itv - currentTimeMillis(), java.util.concurrent.TimeUnit.MILLISECONDS), task);
 
-            public void run() {
-                task.run();
-                nextRuntime = -1; // cancel after first run.
+    }
+
+    private AsyncTask createAsyncTask(final ScheduledFuture future, final Runnable task) {
+        final AsyncTask asyncTask = new AsyncTask() {
+            public boolean cancel(boolean interrupt) {
+                return future.cancel(interrupt);
             }
         };
-        return scheduler.addTask(timedTask);
+
+        if (task instanceof HasAsyncTaskRef) {
+            ((HasAsyncTaskRef) task).setAsyncTask(asyncTask);
+        }
+
+
+        return asyncTask;
     }
 }

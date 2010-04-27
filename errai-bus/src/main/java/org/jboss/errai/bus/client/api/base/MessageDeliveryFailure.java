@@ -14,29 +14,25 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.server;
-
-import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
+package org.jboss.errai.bus.client.api.base;
 
 /**
- * <tt>QueueOverloadedException</tt> extends the <tt>MessageDeliveryFailure</tt>. It is thrown when a queue is
- * completely maxed out with undelivered messages
+ * <tt>MessageDeliveryFailure</tt> extends the <tt>RuntimeException</tt>. It is thrown when there is an error
+ * delivering a message
  */
-public class QueueOverloadedException extends MessageDeliveryFailure {
-    private static final long serialVersionUID = 6014530858847384745L;
-
-    public QueueOverloadedException() {
+public class MessageDeliveryFailure extends RuntimeException {
+    public MessageDeliveryFailure() {
     }
 
-    public QueueOverloadedException(String message) {
+    public MessageDeliveryFailure(String message) {
         super(message);
     }
 
-    public QueueOverloadedException(String message, Throwable cause) {
+    public MessageDeliveryFailure(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public QueueOverloadedException(Throwable cause) {
+    public MessageDeliveryFailure(Throwable cause) {
         super(cause);
     }
 }

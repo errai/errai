@@ -22,6 +22,11 @@ import org.jboss.errai.bus.server.api.QueueSession;
 public class SessionContext {
     private QueueSession session;
 
+
+    public static SessionContext get(QueueSession session) {
+        return new SessionContext(session);
+    }
+
     public static SessionContext get(Message message) {
         return new SessionContext(message.getResource(QueueSession.class, "Session"));
     }

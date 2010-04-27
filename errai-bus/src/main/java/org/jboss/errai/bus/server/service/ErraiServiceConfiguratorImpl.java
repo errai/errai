@@ -425,8 +425,8 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
 
         // configure the server-side taskmanager
         setTaskManagerProvider(new TaskManagerProvider() {
-            public TaskManager get(Message message) {
-                return message != null ? DefaultTaskManager.getForSession(message) : DefaultTaskManager.getGlobal();
+            public TaskManager get() {
+                return DefaultTaskManager.get();
             }
         });
 

@@ -1,11 +1,10 @@
-package org.jboss.errai.bus.server.util;
+package org.jboss.errai.bus.client.util;
 
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.protocols.BusCommands;
-import org.jboss.errai.bus.server.MessageDeliveryFailure;
-import org.mvel2.util.StringAppender;
 
 /**
  * The <tt>ErrorHelper</tt> class facilitates handling and sending error messages to the correct place
@@ -24,7 +23,7 @@ public class ErrorHelper {
     public static void sendClientError(MessageBus bus, Message message, String errorMessage, Throwable e) {
 
         if (e != null) {
-            StringAppender a = new StringAppender("<br/>").append(e.getClass().getName() + ": " + e.getMessage()).append("<br/>");
+            StringBuilder a = new StringBuilder("<br/>").append(e.getClass().getName() + ": " + e.getMessage()).append("<br/>");
 
             // Let's build-up the stacktrace.
             boolean first = true;

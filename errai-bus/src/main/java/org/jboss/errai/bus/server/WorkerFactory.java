@@ -1,11 +1,12 @@
 package org.jboss.errai.bus.server;
 
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
 import org.jboss.errai.bus.client.framework.RoutingFlags;
+import org.jboss.errai.bus.client.util.ErrorHelper;
 import org.jboss.errai.bus.server.async.TimedTask;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
-import org.jboss.errai.bus.server.util.ErrorHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

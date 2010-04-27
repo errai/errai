@@ -39,7 +39,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversation;
 import static org.jboss.errai.bus.client.protocols.MessageParts.ReplyTo;
 import static org.jboss.errai.bus.client.protocols.SecurityCommands.MessageNotDelivered;
-import static org.jboss.errai.bus.server.util.ErrorHelper.handleMessageDeliveryFailure;
+import static org.jboss.errai.bus.client.util.ErrorHelper.handleMessageDeliveryFailure;
 import static org.jboss.errai.bus.server.util.ServerBusUtils.encodeJSON;
 
 /**

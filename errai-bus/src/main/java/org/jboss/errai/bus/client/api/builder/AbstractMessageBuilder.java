@@ -1,9 +1,7 @@
 package org.jboss.errai.bus.client.api.builder;
 
 import org.jboss.errai.bus.client.api.*;
-import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.api.base.TaskManagerFactory;
-import org.jboss.errai.bus.client.api.base.TimeUnit;
+import org.jboss.errai.bus.client.api.base.*;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 
@@ -67,14 +65,14 @@ public class AbstractMessageBuilder<R extends Sendable> {
                 Message msg = getIncomingMessage();
                 message.copyResource("Session", msg);
                 RequestDispatcher dispatcher = (RequestDispatcher) msg.getResource(ResourceProvider.class, RequestDispatcher.class.getName()).get();
-                return sendRepeatingWith(dispatcher, unit, interval);
+                return _sendRepeatingWith(message, dispatcher, unit, interval);
             }
 
             public AsyncTask replyDelayed(TimeUnit unit, int interval) {
                 Message msg = getIncomingMessage();
                 message.copyResource("Session", msg);
                 RequestDispatcher dispatcher = (RequestDispatcher) msg.getResource(ResourceProvider.class, RequestDispatcher.class.getName()).get();
-                return sendDelayedWith(dispatcher, unit, interval);
+                return _sendDelayedWith(message, dispatcher, unit, interval);
             }
 
             private Message getIncomingMessage() {
@@ -82,24 +80,72 @@ public class AbstractMessageBuilder<R extends Sendable> {
             }
 
             public AsyncTask sendRepeatingWith(final RequestDispatcher viaThis, TimeUnit unit, int interval) {
-                return TaskManagerFactory.get(null).scheduleRepeating(unit, interval, new Runnable() {
+                return _sendRepeatingWith(null, viaThis, unit, interval);
+            }
+
+            public AsyncTask sendDelayedWith(final RequestDispatcher viaThis, TimeUnit unit, int interval) {
+                return _sendDelayedWith(null, viaThis, unit, interval);
+            }
+
+            private AsyncTask _sendRepeatingWith(final Message message, final RequestDispatcher viaThis, TimeUnit unit, int interval) {
+                return TaskManagerFactory.get().scheduleRepeating(unit, interval, new HasAsyncTaskRef() {
+                    AsyncTask task;
+                    AsyncDelegateErrorCallback errorCallback
+                            = new AsyncDelegateErrorCallback(this, message.getErrorCallback());
+
+                    public void setAsyncTask(AsyncTask task) {
+                        synchronized (this) {
+                            this.task = task;
+                        }
+                    }
+
+
+                    public AsyncTask getAsyncTask() {
+                        synchronized (this) {
+                            return task;
+                        }
+                    }
+
                     public void run() {
                         MessageBuilder.getMessageProvider().get()
                                 .copyResource("Session", message)
                                 .addAllParts(message.getParts())
                                 .addAllProvidedParts(message.getProvidedParts())
-                                .sendNowWith(viaThis);
+                                .errorsCall(errorCallback).sendNowWith(viaThis);
                     }
                 });
             }
 
-            public AsyncTask sendDelayedWith(final RequestDispatcher viaThis, TimeUnit unit, int interval) {
-                return TaskManagerFactory.get(null).schedule(unit, interval, new Runnable() {
+
+            public AsyncTask _sendDelayedWith(final Message message, final RequestDispatcher viaThis, TimeUnit unit, int interval) {
+                return TaskManagerFactory.get().schedule(unit, interval, new HasAsyncTaskRef() {
+                    AsyncTask task;
+                    AsyncDelegateErrorCallback errorCallback
+                            = new AsyncDelegateErrorCallback(this, message.getErrorCallback());
+
+                    public void setAsyncTask(AsyncTask task) {
+                        synchronized (this) {
+                            this.task = task;
+                        }
+                    }
+
+
+                    public AsyncTask getAsyncTask() {
+                        synchronized (this) {
+                            return task;
+                        }
+                    }
+
                     public void run() {
-                        sendNowWith(viaThis);
+                        MessageBuilder.getMessageProvider().get()
+                                .copyResource("Session", message)
+                                .addAllParts(message.getParts())
+                                .addAllProvidedParts(message.getProvidedParts())
+                                .errorsCall(errorCallback).sendNowWith(viaThis);
                     }
                 });
             }
+
 
             public Message getMessage() {
                 return message;
@@ -149,6 +195,11 @@ public class AbstractMessageBuilder<R extends Sendable> {
             }
 
             public R noErrorHandling() {
+                return (R) sendable;
+            }
+
+            public R defaultErrorHandling() {
+                message.errorsCall(DefaultErrorCallback.INSTANCE);
                 return (R) sendable;
             }
 
