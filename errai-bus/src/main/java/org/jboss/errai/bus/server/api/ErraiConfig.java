@@ -18,8 +18,8 @@ package org.jboss.errai.bus.server.api;
 
 import org.jboss.errai.bus.client.api.ResourceProvider;
 
-import java.util.Map;
 
-public interface ErraiConfigExtension {
-    public void configure(ErraiConfig config);
+public interface ErraiConfig {
+    public void addBinding(Class<?> type, ResourceProvider provider);
+    public void addResourceProvider(String name, ResourceProvider provider);
 }

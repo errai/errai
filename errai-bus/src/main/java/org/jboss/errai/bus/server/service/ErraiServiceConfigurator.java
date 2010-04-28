@@ -31,6 +31,8 @@ import java.util.Set;
 public interface ErraiServiceConfigurator {
     public static final String ERRAI_DISPATCHER_IMPLEMENTATION = "errai.dispatcher_implementation";
     public static final String ERRAI_SESSION_PROVIDER_IMPLEMENTATION = "errai.session_provider_implementation";
+    public static final String CONFIG_ERRAI_SERIALIZABLE_TYPE = "errai.bus.serializableTypes";
+    
 
     /**
      * Configures the specified service

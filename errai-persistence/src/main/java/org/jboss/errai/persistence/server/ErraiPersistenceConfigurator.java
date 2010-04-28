@@ -23,6 +23,7 @@ import org.hibernate.cfg.AnnotationConfiguration;
 import org.jboss.errai.bus.client.api.ResourceProvider;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.annotations.ExtensionComponent;
+import org.jboss.errai.bus.server.api.ErraiConfig;
 import org.jboss.errai.bus.server.api.ErraiConfigExtension;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.bus.server.util.ConfigUtil;
@@ -33,7 +34,6 @@ import org.slf4j.LoggerFactory;
 import javax.persistence.Entity;
 import java.io.File;
 import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -41,29 +41,29 @@ import java.util.Map;
  */
 @ExtensionComponent
 public class ErraiPersistenceConfigurator implements ErraiConfigExtension {
-    private ErraiServiceConfigurator config;
+    private ErraiServiceConfigurator configurator;
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Inject
-    public ErraiPersistenceConfigurator(ErraiServiceConfigurator config) {
-        this.config = config;
+    public ErraiPersistenceConfigurator(ErraiServiceConfigurator configurator) {
+        this.configurator = configurator;
 
         logger.info("Configuring persistence extension.");
     }
 
-    public void configure(Map<Class<?>, ResourceProvider> bindings, Map<String, ResourceProvider> resourceProviders) {
+    public void configure(ErraiConfig config) {
         final AnnotationConfiguration cfg = new AnnotationConfiguration();
-        if (!config.hasProperty("errai.prototyping.persistence.connection.driver_class")) {
+        if (!configurator.hasProperty("errai.prototyping.persistence.connection.driver_class")) {
             return;
         }
 
-        cfg.setProperty("hibernate.connection.driver_class", config.getProperty("errai.prototyping.persistence.connection.driver_class"));
-        cfg.setProperty("hibernate.connection.url", config.getProperty("errai.prototyping.persistence.connection.url"));
-        cfg.setProperty("hibernate.connection.username", config.getProperty("errai.prototyping.persistence.connection.username"));
-        cfg.setProperty("hibernate.connection.password", config.getProperty("errai.prototyping.persistence.connection.password"));
-        cfg.setProperty("hibernate.connection.pool_size", config.getProperty("errai.prototyping.persistence.connection.pool_size"));
+        cfg.setProperty("hibernate.connection.driver_class", configurator.getProperty("errai.prototyping.persistence.connection.driver_class"));
+        cfg.setProperty("hibernate.connection.url", configurator.getProperty("errai.prototyping.persistence.connection.url"));
+        cfg.setProperty("hibernate.connection.username", configurator.getProperty("errai.prototyping.persistence.connection.username"));
+        cfg.setProperty("hibernate.connection.password", configurator.getProperty("errai.prototyping.persistence.connection.password"));
+        cfg.setProperty("hibernate.connection.pool_size", configurator.getProperty("errai.prototyping.persistence.connection.pool_size"));
 
-        cfg.setProperty("hibernate.dialect", config.getProperty("errai.prototyping.persistence.dialect"));
+        cfg.setProperty("hibernate.dialect", configurator.getProperty("errai.prototyping.persistence.dialect"));
         cfg.setProperty("hibernate.current_session_context_class", "thread");
         cfg.setProperty("hibernate.cache.use_second_level_cache", "false");
         cfg.setProperty("hibernate.cache.provider_class", "org.hibernate.cache.NoCacheProvider");
@@ -71,7 +71,7 @@ public class ErraiPersistenceConfigurator implements ErraiConfigExtension {
         cfg.setProperty("hibernate.show_sql", "true");
         cfg.setProperty("hibernate.hbm2ddl.auto", "update");
 
-        List<File> roots = config.getConfigurationRoots();
+        List<File> roots = configurator.getConfigurationRoots();
 
         logger.info("begin scan for annotated classes.");
         ConfigUtil.visitAllTargets(roots, new ConfigVisitor() {
@@ -98,14 +98,13 @@ public class ErraiPersistenceConfigurator implements ErraiConfigExtension {
             };
 
             logger.info("adding binding for: " + sessionProvider.getClass());
-            bindings.put(Session.class, sessionProvider);
+            config.addBinding(Session.class, sessionProvider);
 
             logger.info("adding binding for: " + sessionFactoryProvider.getClass());
-            bindings.put(SessionFactory.class, sessionFactoryProvider);
-
+            config.addBinding(SessionFactory.class, sessionFactoryProvider);
 
             logger.info("adding resource provider for: " + sessionProvider.getClass());
-            resourceProviders.put("SessionProvider", sessionProvider);
+            config.addResourceProvider("SessionProvider", sessionProvider);
         }
         catch (Throwable t) {
             logger.info("session factory did not build: " + t.getClass());            

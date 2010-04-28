@@ -16,6 +16,7 @@
 
 package org.jboss.errai.bus.server.service;
 
+import com.google.gwt.core.ext.TreeLogger;
 import com.google.inject.*;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
@@ -35,10 +36,8 @@ import org.jboss.errai.bus.server.SimpleDispatcher;
 import org.jboss.errai.bus.server.annotations.*;
 import org.jboss.errai.bus.server.annotations.security.RequireAuthentication;
 import org.jboss.errai.bus.server.annotations.security.RequireRoles;
-import org.jboss.errai.bus.server.api.ErraiConfigExtension;
+import org.jboss.errai.bus.server.api.*;
 import org.jboss.errai.bus.server.api.Module;
-import org.jboss.errai.bus.server.api.ServerMessageBus;
-import org.jboss.errai.bus.server.api.SessionProvider;
 import org.jboss.errai.bus.server.io.ConversationalEndpointCallback;
 import org.jboss.errai.bus.server.io.EndpointCallback;
 import org.jboss.errai.bus.server.io.JSONEncoder;
@@ -222,6 +221,22 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
         }
         if (autoScanModules) {
 
+            final ErraiConfig erraiConfig = new ErraiConfig() {
+                public void addBinding(Class<?> type, ResourceProvider provider) {
+                    extensionBindings.put(type, provider);
+                }
+
+                public void addResourceProvider(String name, ResourceProvider provider) {
+                    resourceProviders.put(name, provider);
+                }
+
+                public void addSerializableType(Class<?> type) {
+                    log.info("Marked " + type + " as serializable.");
+                    loadedComponents.add(type.getName());
+                    serializableTypes.add(type);
+                }
+            };
+
             // Search for Errai extensions.
             visitAllTargets(configRootTargets, new ConfigVisitor() {
                 public void visit(Class<?> loadClass) {
@@ -256,7 +271,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
                                     };
                                     Guice.createInjector(module)
                                             .getInstance(ErraiConfigExtension.class)
-                                            .configure(extensionBindings, resourceProviders);
+                                            .configure(erraiConfig);
                                 }
                             };
 
@@ -401,6 +416,31 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
             );
         } else {
             log.info("auto-scan disabled.");
+        }
+
+        try {
+            ResourceBundle bundle = ResourceBundle.getBundle("ErraiApp");
+            if (bundle != null) {
+                log.info("checking ErraiApp.properties for configured types ...");
+
+                if (bundle.containsKey(CONFIG_ERRAI_SERIALIZABLE_TYPE)){
+                    for (String s : bundle.getString(CONFIG_ERRAI_SERIALIZABLE_TYPE).split(" ")) {
+                        try {
+                            Class<?> cls = Class.forName(s.trim());
+                            log.info("Marked " + cls + " as serializable.");
+                            loadedComponents.add(cls.getName());
+                            serializableTypes.add(cls);
+                        }
+                        catch (Exception e) {
+                            throw new ErraiBootstrapFailure(e);
+                        }
+
+                    }
+                }
+            }
+        }
+        catch (MissingResourceException e) {
+            throw new ErraiBootstrapFailure("unable to find ErraiApp.properties in the classpath.");
         }
 
         String requireAuthenticationForAll = "errai.require_authentication_for_all";
