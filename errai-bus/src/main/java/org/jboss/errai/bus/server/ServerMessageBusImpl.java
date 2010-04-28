@@ -336,7 +336,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
 
     private void send(MessageQueue queue, Message message, boolean fireListeners) {
-
         try {
             if (fireListeners && !fireGlobalMessageListeners(message)) {
                 if (message.hasPart(ReplyTo)) {
@@ -686,7 +685,9 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
 
     private MessageQueue getQueueByMessage(Message message) {
-        return getQueue(getSession(message));
+        MessageQueue queue = getQueue(getSession(message));
+        if (queue == null) throw new QueueUnavailableException("no queue available to send. (queue or session may have expired)");
+        return queue;
     }
 
     private MessageQueue getQueueBySession(String sessionId) {
