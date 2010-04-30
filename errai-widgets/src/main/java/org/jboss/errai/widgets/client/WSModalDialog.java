@@ -147,6 +147,7 @@ public class WSModalDialog implements AcceptsCallback {
      * <p> Hides the Modal Window </p>
      */
     public void hide() {
+        RootPanel.get().remove( drapePanel );        
         window.hide();
     }
 }
