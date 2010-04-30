@@ -84,7 +84,10 @@ public class WSModalDialog implements AcceptsCallback {
 
     public void callback(Object message, Object data) {
         if (callbackTo != null) callbackTo.callback(message, data);
-        window.hide();
+        try
+        {
+          window.hide();
+        }catch(AssertionError ae) {}
     }
 
     public void ask(String message, final AcceptsCallback callbackTo) {
@@ -147,7 +150,12 @@ public class WSModalDialog implements AcceptsCallback {
      * <p> Hides the Modal Window </p>
      */
     public void hide() {
-        RootPanel.get().remove( drapePanel );        
+        int index =  RootPanel.get().getWidgetIndex( drapePanel );
+        try
+        {
+          if( index > -1 )
+           RootPanel.get().remove( index );        
+        } catch( java.lang.AssertionError ignore) {}
         window.hide();
     }
 }
