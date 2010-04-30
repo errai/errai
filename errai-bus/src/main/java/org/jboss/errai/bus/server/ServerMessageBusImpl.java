@@ -69,7 +69,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     private final List<QueueClosedListener> queueClosedListeners = new LinkedList<QueueClosedListener>();
 
     private final SchedulerService houseKeeper = new SimpleSchedulerService();
-    private final Map<QueueSession, SchedulerService> sessionSchedulers = new HashMap<QueueSession, SchedulerService>();
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
@@ -432,21 +431,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         messageQueues.values().remove(queue);
         sessionLookup.values().remove(queue.getSession());
 
-        synchronized (sessionSchedulers) {
-            try {
-                SchedulerService scheduler = sessionSchedulers.get(queue.getSession());
-                if (scheduler != null) {
-                    scheduler.requestStop();
-                }
-            }
-            catch (Throwable t) {
-                log.error("Problem stopping scheduler on closing session: " + queue.getSession().getSessionId(), t);
-            }
-        }
-
         fireQueueCloseListeners(new QueueCloseEvent(queue));
-
-
     }
 
     /**

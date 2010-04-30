@@ -304,7 +304,7 @@
         <repository>
             <id>snapshots.jboss.org</id>
             <name>JBoss Snapshot Repository</name>
-            <url>http://snapshots.jboss.org/maven2</url>
+            <url>https://repository.jboss.org/nexus/content/repositories/snapshots/</url>
             <releases>
                 <enabled>false</enabled>
             </releases>
@@ -360,7 +360,7 @@
         </pluginRepository>
         <pluginRepository>
             <id>snapshots.jboss.org</id>
-            <url>http://snapshots.jboss.org/maven2</url>
+            <url>https://repository.jboss.org/nexus/content/repositories/snapshots/</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>

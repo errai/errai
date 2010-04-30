@@ -37,7 +37,6 @@ public abstract class AbstractErraiServlet extends HttpServlet {
 
     @Override
     @SuppressWarnings({"unchecked"})
-
     public void init() throws ServletException {
         super.init();
         service =

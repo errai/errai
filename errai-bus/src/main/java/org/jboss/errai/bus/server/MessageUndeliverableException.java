@@ -17,8 +17,7 @@
 package org.jboss.errai.bus.server;
 
 public class MessageUndeliverableException extends RuntimeException {
-
     public MessageUndeliverableException(String message) {
-        super(message);    //To change body of overridden methods use File | Settings | File Templates.
+        super(message);
     }
 }
