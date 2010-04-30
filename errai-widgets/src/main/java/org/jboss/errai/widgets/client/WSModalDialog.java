@@ -143,4 +143,10 @@ public class WSModalDialog implements AcceptsCallback {
         window.show();
     }
 
+    /**
+     * <p> Hides the Modal Window </p>
+     */
+    public void hide() {
+        window.hide();
+    }
 }
