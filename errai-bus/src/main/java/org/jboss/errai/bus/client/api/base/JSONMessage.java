@@ -41,7 +41,7 @@ import java.util.Map;
  * <tt><pre>
  * CommandMessage msg = CommandMessage.create()
  *                          .toSubject("Foo")
- *                          .set("Text", "I like chocolate cake.");
+ *                          .with("Text", "I like chocolate cake.");
  * </pre></tt>
  * You can transmit a message using the the <tt>sendNowWith()</tt> method by providing an instance of
  * {@link org.jboss.errai.bus.client.framework.MessageBus}.
@@ -64,14 +64,14 @@ import java.util.Map;
  * <tt><pre>
  *  CommandMessage.create()
  *      .command(LoginCommands.Login)
- *      .set(LoginParts.Username, "foo")
- *      .set(LoginParts.Password, "bar )
+ *      .with(LoginParts.Username, "foo")
+ *      .with(LoginParts.Password, "bar )
+ *      .noErrorHandling()
  *      .sendNowWith(busInstance);
  * </pre></tt>
  * Messages may contain serialized objects provided they meet the following criteria:
  * <ol>
  * <li>The class is annotated with {@link org.jboss.errai.bus.server.annotations.ExposeEntity}</li>
- * <li>The class implements {@link java.io.Serializable}.
  * <li>The class contains a default, no-argument constructor.
  * </ol>
  *

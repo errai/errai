@@ -62,7 +62,7 @@ public class ErraiServiceImpl implements ErraiService {
     }
 
     private void init() {
-        //todo: this all needs sendNowWith be refactored at some point.
+        //todo: this all needs to be refactored at some point.
         bus.subscribe(AUTHORIZATION_SVC_SUBJECT, new MessageCallback() {
             public void callback(Message message) {
                 switch (SecurityCommands.valueOf(message.getCommandType())) {

@@ -374,16 +374,18 @@
 
     <!-- DistributionManagement -->
     <distributionManagement>
-        <repository>
-            <id>repository.jboss.org</id>
-            <name>JBoss Maven Repository</name>
-            <url>file://${jboss.maven.repository}</url>
-        </repository>
-        <snapshotRepository>
-            <id>snapshots.jboss.org</id>
-            <name>JBoss Snapshot Repository</name>
-            <url>dav:https://snapshots.jboss.org/maven2</url>
-        </snapshotRepository>
-    </distributionManagement>
+<repository>
+      <id>jboss-releases-repository</id>
+      <name>JBoss Releases Repository</name>
+      <url>https://repository.jboss.org/nexus/service/local/staging/deploy/maven2/</url>
+    </repository>
+
+ <snapshotRepository>
+      <id>jboss-snapshots-repository</id>
+      <name>JBoss Snapshots Repository</name>
+      <url>https://repository.jboss.org/nexus/content/repositories/snapshots/</url>
+    </snapshotRepository>
+    
+</distributionManagement>
 
 </project>
