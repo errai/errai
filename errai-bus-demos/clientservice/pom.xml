@@ -39,7 +39,7 @@
                     <logLevel>DEBUG</logLevel>
                     <runTarget>ClientService.html</runTarget>
                     <warSourceDirectory>war</warSourceDirectory>
-                    <extraJvmArgs>-Xmx512m -Derrai.tools.bus_monitor_attach=true</extraJvmArgs>
+                    <extraJvmArgs>-Xmx512m</extraJvmArgs>
                     <soyc>false</soyc>
                 </configuration>
                 <executions>
