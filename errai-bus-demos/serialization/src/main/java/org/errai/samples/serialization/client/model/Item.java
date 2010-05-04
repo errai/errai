@@ -21,7 +21,7 @@ import org.jboss.errai.bus.server.annotations.ExposeEntity;
 import java.io.Serializable;
 
 @ExposeEntity
-public class Item implements Serializable {
+public class Item {
     private String itemName;
     private int quantity;
 

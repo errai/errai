@@ -21,7 +21,7 @@ import org.jboss.errai.bus.server.annotations.ExposeEntity;
 import java.io.Serializable;
 
 @ExposeEntity
-public class Role implements Serializable {
+public class Role {
     private String roleName;
 
     public String getRoleName() {

@@ -22,7 +22,7 @@ import java.io.Serializable;
 import java.util.*;
 
 @ExposeEntity
-public class Record implements Serializable {
+public class Record {
     private int recordId;
     private String name;
     private float balance;

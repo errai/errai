@@ -20,7 +20,6 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.*;
-import org.errai.samples.serialization.client.model.HistoryProcessInstanceRef;
 import org.errai.samples.serialization.client.model.Record;
 import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.client.api.Message;
@@ -44,8 +43,7 @@ public class Serialization implements EntryPoint {
                 new MessageCallback() {
                     public void callback(Message message) {
                         List<Record> records = message.get(List.class, "Records");
-                        List<HistoryProcessInstanceRef> hpr = message.get(List.class, "hpif");
-
+                      
                         int row = 0;
                         for (Record r : records) {
                             table.setWidget(row, 0, new HTML(String.valueOf(r.getRecordId())));
