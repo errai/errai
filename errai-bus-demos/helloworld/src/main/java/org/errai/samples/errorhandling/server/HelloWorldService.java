@@ -7,7 +7,7 @@ import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.server.annotations.Service;
 
-@Service
+@Service("HelloWorldService")
 public class HelloWorldService implements MessageCallback {
     private MessageBus bus;
 
@@ -17,5 +17,6 @@ public class HelloWorldService implements MessageCallback {
     }
 
     public void callback(Message message) {
+      System.out.println("Received: "+message.get(String.class, "msg"));
     }
 }
