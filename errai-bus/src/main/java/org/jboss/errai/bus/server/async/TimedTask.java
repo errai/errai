@@ -8,12 +8,9 @@ import static java.lang.System.currentTimeMillis;
  * A <tt>TimedTask</tt> is used for scheduling tasks, and making sure they are run at appropriate times and intervals
  */
 public abstract class TimedTask implements Runnable, Comparable<TimedTask>, AsyncTask {
-
-    protected volatile long lastRuntime;
     protected volatile long nextRuntime;
     protected volatile long period;
     protected volatile boolean cancel = false;
-
 
     /**
      * Gets the period of the task, and when it should be run next
@@ -99,7 +96,6 @@ public abstract class TimedTask implements Runnable, Comparable<TimedTask>, Asyn
                 return;
             }
             run();
-            lastRuntime = System.currentTimeMillis();
         }
     }
 
@@ -120,9 +116,6 @@ public abstract class TimedTask implements Runnable, Comparable<TimedTask>, Asyn
         }
     }
 
-    public long getLastRuntime() {
-        return lastRuntime;
-    }
 
     public int compareTo(TimedTask o) {
         if (o == this) {
