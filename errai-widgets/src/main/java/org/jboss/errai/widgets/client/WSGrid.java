@@ -1683,7 +1683,19 @@ public class WSGrid extends Composite implements RequiresResize {
     public void setPreciseHeight(int height) {
         int offsetHeight = height - getTitlebarOffsetHeight() - 10;
         setHeight(height + "px");
-        dataGrid.getScrollPanel().setHeight((offsetHeight - 20) + "px");
+        if( offsetHeight > 20 )
+        {
+          dataGrid.getScrollPanel().setHeight((offsetHeight - 20) + "px");
+        }
+        //ERRAI-72
+        else if( offsetHeight < 0)
+        {
+          dataGrid.getScrollPanel().setHeight( 20 + "px");
+        }
+        else
+        {
+          dataGrid.getScrollPanel().setHeight( offsetHeight + "px");
+        }
     }
 
     /**
