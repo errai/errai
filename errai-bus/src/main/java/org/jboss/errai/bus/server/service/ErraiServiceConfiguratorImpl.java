@@ -44,6 +44,7 @@ import org.jboss.errai.bus.server.io.JSONEncoder;
 import org.jboss.errai.bus.server.io.RemoteServiceCallback;
 import org.jboss.errai.bus.server.security.auth.AuthenticationAdapter;
 import org.jboss.errai.bus.server.security.auth.rules.RolesRequiredRule;
+import org.jboss.errai.bus.server.util.BundleVisitor;
 import org.jboss.errai.bus.server.util.ConfigUtil;
 import org.jboss.errai.bus.server.util.ConfigVisitor;
 import org.slf4j.Logger;
@@ -418,12 +419,11 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
             log.info("auto-scan disabled.");
         }
 
-        try {
-            ResourceBundle bundle = ResourceBundle.getBundle("ErraiApp");
-            if (bundle != null) {
+        ConfigUtil.visitAllErraiAppProperties(configRootTargets, new BundleVisitor() {
+            public void visit(ResourceBundle bundle) {
                 log.info("checking ErraiApp.properties for configured types ...");
 
-                if (bundle.containsKey(CONFIG_ERRAI_SERIALIZABLE_TYPE)){
+                try {
                     for (String s : bundle.getString(CONFIG_ERRAI_SERIALIZABLE_TYPE).split(" ")) {
                         try {
                             Class<?> cls = Class.forName(s.trim());
@@ -437,11 +437,11 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
 
                     }
                 }
+                catch (MissingResourceException e) {
+                    // do nothing.
+                }
             }
-        }
-        catch (MissingResourceException e) {
-            throw new ErraiBootstrapFailure("unable to find ErraiApp.properties in the classpath.");
-        }
+        });
 
         String requireAuthenticationForAll = "errai.require_authentication_for_all";
 

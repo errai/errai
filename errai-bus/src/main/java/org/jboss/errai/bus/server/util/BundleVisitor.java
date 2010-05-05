@@ -16,19 +16,9 @@
 
 package org.jboss.errai.bus.server.util;
 
-/**
- * The <tt>VisitDelegate</tt> offers a template for searching and modifying classes. It delegates the work to other
- * visitor classes. This visitor class separation gives the ability to add new operations to existing object
- * structures without modifying those structures
- */
-public interface VisitDelegate<T> {
+import java.util.ResourceBundle;
 
-    /**
-     * A template function for visiting a class
-     *
-     * @param obj - the object to visit
-     */
-    public void visit(T obj);
 
-    public String getFileExtension();
+public interface BundleVisitor {
+    public void visit(ResourceBundle bundle);
 }

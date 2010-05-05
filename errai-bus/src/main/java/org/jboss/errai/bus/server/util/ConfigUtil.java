@@ -94,7 +94,7 @@ public class ConfigUtil {
 
     private static void recordCache(String context, Class cls) {
         if (scanCache == null) return;
-        
+
         List<Class> cache = scanCache.get(context);
 
         if (cache == null) {
@@ -110,7 +110,7 @@ public class ConfigUtil {
      */
     public static void cleanupStartupTempFiles() {
         if (scanAreas == null) return;
-        
+
         log.info("Cleaning up ...");
         for (File f : scanAreas.values()) {
             f.delete();
@@ -120,16 +120,45 @@ public class ConfigUtil {
         scanCache = null;
     }
 
+    public static void visitAllErraiAppProperties(final List<File> targets, final BundleVisitor visitor) {
+        for (File file : targets) {
+            File propertyFile = new File(file.getPath() + "/" + "ErraiApp.properties");
+
+            if (propertyFile.exists()) {
+                try {
+                    FileInputStream stream = new FileInputStream(propertyFile);
+                    try {
+                        visitor.visit(new PropertyResourceBundle(stream));
+                    }
+                    finally {
+                        stream.close();
+                    }
+                }
+                catch (FileNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+                catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+    }
+
+
     /**
      * Visits all targets that can be found under <tt>root</tt>, using the <tt>ConfigVisitor</tt> specified
      *
-     * @param root - the root file to start visiting from
+     * @param root    - the root file to start visiting from
      * @param visitor - the visitor delegate to use
      */
     public static void visitAll(File root, final ConfigVisitor visitor) {
-        _findLoadableModules(root, root, new HashSet<String>(), new VisitDelegate() {
+        _traverseFiles(root, root, new HashSet<String>(), new VisitDelegate<Class>() {
             public void visit(Class clazz) {
                 visitor.visit(clazz);
+            }
+
+            public String getFileExtension() {
+                return ".class";
             }
         });
 
@@ -151,17 +180,21 @@ public class ConfigUtil {
     /**
      * Visits all targets that can be found under <tt>root</tt>
      *
-     * @param root - the root file to start visiting from
+     * @param root    - the root file to start visiting from
      * @param context - provides metadata to deferred binding generators
-     * @param logger - log messages in deferred binding generators
-     * @param writer - supports the source file regeneration
+     * @param logger  - log messages in deferred binding generators
+     * @param writer  - supports the source file regeneration
      * @param visitor - the visitor delegate to use
      */
     public static void visitAll(File root, final GeneratorContext context, final TreeLogger logger,
                                 final SourceWriter writer, final RebindVisitor visitor) {
-        _findLoadableModules(root, root, new HashSet<String>(), new VisitDelegate() {
+        _traverseFiles(root, root, new HashSet<String>(), new VisitDelegate<Class>() {
             public void visit(Class clazz) {
                 visitor.visit(clazz, context, logger, writer);
+            }
+
+            public String getFileExtension() {
+                return ".class";
             }
         });
 
@@ -173,8 +206,8 @@ public class ConfigUtil {
      *
      * @param targets - the file targets to visit
      * @param context - provides metadata to deferred binding generators
-     * @param logger - log messages in deferred binding generators
-     * @param writer - supports the source file regeneration
+     * @param logger  - log messages in deferred binding generators
+     * @param writer  - supports the source file regeneration
      * @param visitor - the visitor delegate to use
      */
     public static void visitAllTargets(List<File> targets, final GeneratorContext context,
@@ -184,7 +217,7 @@ public class ConfigUtil {
         }
     }
 
-    private static void _findLoadableModules(File root, File start, Set<String> loadedTargets, VisitDelegate visitor) {
+    private static void _traverseFiles(File root, File start, Set<String> loadedTargets, VisitDelegate visitor) {
         if (start.isDirectory()) {
             loadFromDirectory(root, start, loadedTargets, visitor);
         } else if (start.isFile()) {
@@ -271,6 +304,8 @@ public class ConfigUtil {
 
         String ctx = zipName + (scanFilter == null ? ":*" : ":" + scanFilter);
 
+        boolean scanClass = ".class".equals(visitor.getFileExtension());
+
         if (activeCacheContexts != null && scanCache != null &&
                 activeCacheContexts.contains(ctx) && scanCache.containsKey(ctx)) {
             List<Class> cache = scanCache.get(ctx);
@@ -281,7 +316,7 @@ public class ConfigUtil {
             while ((zipEntry = zipFile.getNextEntry()) != null) {
                 if (scanFilter != null && !zipEntry.getName().startsWith(scanFilter)) continue;
 
-                if (zipEntry.getName().endsWith(".class")) {
+                if (scanClass && zipEntry.getName().endsWith(".class")) {
 
                     String classEntry;
                     String className = null;
@@ -339,6 +374,7 @@ public class ConfigUtil {
                         }
                     }
                 }
+
             }
 
             activeCacheContexts.add(zipName);
@@ -385,7 +421,7 @@ public class ConfigUtil {
             }
         } else {
             for (File file : start.listFiles()) {
-                if (file.isDirectory()) _findLoadableModules(root, file, loadedTargets, visitor);
+                if (file.isDirectory()) _traverseFiles(root, file, loadedTargets, visitor);
                 if (file.getName().endsWith(".class")) {
                     try {
                         String FQCN = getCandidateFQCN(root.getAbsolutePath(), file.getAbsolutePath());
@@ -445,10 +481,10 @@ public class ConfigUtil {
     /**
      * Returns true if the specified class, <tt>clazz</tt>, has annotations from the class <tt>annotation</tt>. Also,
      * checks that <tt>clazz</tt> is represented by <tt>ofType</tt>
-     * 
-     * @param clazz - the class to check for the annotations
+     *
+     * @param clazz      - the class to check for the annotations
      * @param annotation - the annotations to look for
-     * @param ofType - the class type we want to be sure to check, as <tt>clazz</tt> could be a visitor delegate.
+     * @param ofType     - the class type we want to be sure to check, as <tt>clazz</tt> could be a visitor delegate.
      * @return true if the <tt>clazz</tt> has those <tt>annotation</tt>s
      */
     public static boolean isAnnotated(Class clazz, Class<? extends Annotation> annotation, Class ofType) {
