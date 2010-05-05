@@ -1,10 +1,8 @@
 package com.foo.bar.app.server;
 
-import com.google.inject.Provider;
 import org.jboss.errai.bus.server.annotations.ExtensionComponent;
-import org.jboss.errai.bus.server.ext.ErraiConfigExtension;
-
-import java.util.Map;
+import org.jboss.errai.bus.server.api.ErraiConfig;
+import org.jboss.errai.bus.server.api.ErraiConfigExtension;
 
 /**
  * Create a config extension class so we can do things like setup the default tables
@@ -13,7 +11,7 @@ import java.util.Map;
 @ExtensionComponent
 public class AppConfigurator implements ErraiConfigExtension
 {
-  public void configure(Map<Class, Provider> bindings, Map<String, Provider> resourceProviders)
+  public void configure(ErraiConfig config)
   {
     // provide extension points here
   }
