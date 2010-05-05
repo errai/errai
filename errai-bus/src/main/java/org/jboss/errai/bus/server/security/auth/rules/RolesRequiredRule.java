@@ -60,12 +60,21 @@ public class RolesRequiredRule implements BooleanRoutingRule {
     public boolean decision(final Message message) {
         if (!message.hasResource("Session")) return false;
         else {
+
             AuthSubject subject = getSession(message).getAttribute(AuthSubject.class, ErraiService.SESSION_AUTH_DATA);
 
             if (subject == null) {
                 /**
                  * Inform the client they must login.
                  */
+
+                if ("LoginClient".equals(message.getSubject())) {
+                    /**
+                     * Make an exception for the LoginClient ...
+                     */
+                    return true;
+                }
+
 
                 // TODO: This reside with the "AuthenticationService" listener, no
                 // i.e. by forwarding to that subject. See ErraiServiceImpl
