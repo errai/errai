@@ -76,22 +76,15 @@ public class PooledExecutorService implements TaskProvider {
     }
 
     public AsyncTask schedule(final Runnable runnable, TimeUnit unit, long interval) {
-        synchronized (lock) {
-            TimedTask task;
-            scheduledTasks.add(task = new DelayedTask(runnable, unit.toMillis(interval)));
-
-            return task;
-        }
+        TimedTask task;
+        scheduledTasks.add(task = new DelayedTask(runnable, unit.toMillis(interval)));
+        return task;
     }
 
     public AsyncTask scheduleRepeating(final Runnable runnable, final TimeUnit unit, final long initial, final long interval) {
-        synchronized (lock) {
-            TimedTask task;
-            boolean bool = scheduledTasks.add(task = new RepeatingTimedTask(runnable, unit.toMillis(initial), unit.toMillis(interval)));
-            if (!bool) System.out.println("WTF!!!");
-
-            return task;
-        }
+        TimedTask task;
+        scheduledTasks.add(task = new RepeatingTimedTask(runnable, unit.toMillis(initial), unit.toMillis(interval)));
+        return task;
     }
 
     public void start() {
@@ -117,44 +110,41 @@ public class PooledExecutorService implements TaskProvider {
     }
 
     private long runAllDue() {
-        long n;
         long nextRunTime = 0;
 
-        synchronized (lock) {
-            for (TimedTask task : scheduledTasks) {
-                if (task.isDue(currentTimeMillis())) {
-                    /**
-                     * Sechedule the task for execution.
-                     */
-                    task.calculateNextRuntime();
-                    if (!queue.offer(task)) {
-                        throw new QueueOverloadedException("could not schedule task");
-                    }
+        for (TimedTask task : scheduledTasks) {
+            if (task.isDue(currentTimeMillis())) {
+                /**
+                 * Sechedule the task for execution.
+                 */
+                task.calculateNextRuntime();
+                if (!queue.offer(task)) {
+                    throw new QueueOverloadedException("could not schedule task");
+                }
 
-                    if (task.nextRuntime() == -1) {
-                        if (task.isCancelled()) continue;
-                        // if the next runtime is -1, that means this event
-                        // is never scheduled to run again, so we remove it.
-                        task.disable();
-                        garbageCount++;
-                    } else if (nextRunTime == 0 || task.nextRuntime() < nextRunTime) {
-                        // set the nextRuntime to the nextRuntim of this event
-                        nextRunTime = task.nextRuntime();
-                    }
-                } else if (task.nextRuntime() == -1) {
+                if (task.nextRuntime() == -1) {
                     if (task.isCancelled()) continue;
-                    // this event is not scheduled to run.
+                    // if the next runtime is -1, that means this event
+                    // is never scheduled to run again, so we remove it.
                     task.disable();
                     garbageCount++;
                 } else if (nextRunTime == 0 || task.nextRuntime() < nextRunTime) {
-                    // this event occurs before the current nextRuntime,
-                    // so we update nextRuntime.
+                    // set the nextRuntime to the nextRuntim of this event
                     nextRunTime = task.nextRuntime();
                 }
+            } else if (task.nextRuntime() == -1) {
+                if (task.isCancelled()) continue;
+                // this event is not scheduled to run.
+                task.disable();
+                garbageCount++;
+            } else if (nextRunTime == 0 || task.nextRuntime() < nextRunTime) {
+                // this event occurs before the current nextRuntime,
+                // so we update nextRuntime.
+                nextRunTime = task.nextRuntime();
             }
-
-            return nextRunTime;
         }
+
+        return nextRunTime;
     }
 
     /**
