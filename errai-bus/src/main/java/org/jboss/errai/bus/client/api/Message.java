@@ -278,5 +278,4 @@ public interface Message extends Serializable {
      * @param viaThis - <tt>RequestDispatcher</tt> instance to send message to
      */
     public void sendNowWith(RequestDispatcher viaThis);
-
 }

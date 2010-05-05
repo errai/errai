@@ -18,21 +18,11 @@ package org.jboss.errai.bus.server;
 
 import org.jboss.errai.bus.client.api.AsyncTask;
 import org.jboss.errai.bus.client.api.HasAsyncTaskRef;
-import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.TaskManager;
 import org.jboss.errai.bus.client.api.base.TimeUnit;
 import org.jboss.errai.bus.server.api.QueueSession;
-import org.jboss.errai.bus.server.api.SessionEndEvent;
-import org.jboss.errai.bus.server.api.SessionEndListener;
-import org.jboss.errai.bus.server.async.PooledSchedulerService;
-import org.jboss.errai.bus.server.async.SchedulerService;
-import org.jboss.errai.bus.server.async.TimedTask;
-import org.jboss.errai.bus.server.util.LocalContext;
+import org.jboss.errai.bus.server.async.scheduling.PooledExecutorService;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.RunnableScheduledFuture;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
@@ -42,45 +32,70 @@ public class DefaultTaskManager implements TaskManager {
     private QueueSession session;
     private static final String ACTIVE_TASKS_KEY = DefaultTaskManager.class.getName() + "/ActiveAsyncTasks";
 
-    private final static ScheduledThreadPoolExecutor executor;
     private final static DefaultTaskManager taskManager = new DefaultTaskManager(null);
+    private final static PooledExecutorService service = new PooledExecutorService(50);
+
 
     static {
-        executor = new ScheduledThreadPoolExecutor(30);
+        service.start();
     }
 
     public static DefaultTaskManager get() {
         return taskManager;
     }
 
-
     private DefaultTaskManager(QueueSession session) {
         this.session = session;
     }
 
-    public AsyncTask scheduleRepeating(final TimeUnit unit, final int interval, final Runnable task) {
-        long itv = unit.convert(interval, TimeUnit.MILLISECONDS);
-        return createAsyncTask(executor.scheduleAtFixedRate(task, itv, itv, java.util.concurrent.TimeUnit.MILLISECONDS), task);
-            }
-
-    public AsyncTask schedule(final TimeUnit unit, final int interval, final Runnable task) {
-        long itv = unit.convert(interval, TimeUnit.MILLISECONDS);
-        return createAsyncTask(executor.schedule(task, itv - currentTimeMillis(), java.util.concurrent.TimeUnit.MILLISECONDS), task);
-
-    }
-
-    private AsyncTask createAsyncTask(final ScheduledFuture future, final Runnable task) {
-        final AsyncTask asyncTask = new AsyncTask() {
-            public boolean cancel(boolean interrupt) {
-                return future.cancel(interrupt);
-            }
-        };
+    public AsyncTask scheduleRepeating(TimeUnit unit, int interval, Runnable task) {
+        AsyncTask t = service.scheduleRepeating(task, unit, 0, interval);
 
         if (task instanceof HasAsyncTaskRef) {
-            ((HasAsyncTaskRef) task).setAsyncTask(asyncTask);
+            ((HasAsyncTaskRef) task).setAsyncTask(t);
         }
 
+        return t;
+    }
 
-        return asyncTask;
+    public AsyncTask schedule(TimeUnit unit, int interval, Runnable task) {
+        AsyncTask t = service.schedule(task, unit, interval);
+
+        if (task instanceof HasAsyncTaskRef) {
+            ((HasAsyncTaskRef) task).setAsyncTask(t);
+        }
+
+        return t;
+    }
+
+
+    public static void main(String[] args) {
+        taskManager.scheduleRepeating(TimeUnit.MILLISECONDS, 1, new Runnable() {
+            public void run() {
+                try {
+                    Thread.sleep(1);
+                }
+                catch (Exception e) {
+                }
+            }
+        });
+
+        taskManager.scheduleRepeating(TimeUnit.SECONDS, 1, new Runnable() {
+            public void run() {
+                System.out.println("One Second.");
+            }
+        });
+
+        taskManager.scheduleRepeating(TimeUnit.SECONDS, 2, new Runnable() {
+            public void run() {
+                System.out.println("Two Seconds.");
+            }
+        });
+
+        taskManager.schedule(TimeUnit.SECONDS, 5, new Runnable() {
+            public void run() {
+                System.out.println("FIVE SECONDS!");
+            }
+        });
     }
 }

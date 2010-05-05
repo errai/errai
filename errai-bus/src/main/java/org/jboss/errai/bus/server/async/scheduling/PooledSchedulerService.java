@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.server.async;
+package org.jboss.errai.bus.server.async.scheduling;
 
 
 import org.jboss.errai.bus.client.api.AsyncTask;
+import org.jboss.errai.bus.server.async.SchedulerService;
+import org.jboss.errai.bus.server.async.TimedTask;
 
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -35,7 +37,7 @@ public class PooledSchedulerService implements SchedulerService {
 
     public AsyncTask addTask(TimedTask task) {
         final ScheduledFuture future;
-        if (task.period == -1) {
+        if (task.getPeriod() == -1) {
             future = executor.schedule(task, task.nextRuntime() - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
         }
         else {
@@ -56,4 +58,6 @@ public class PooledSchedulerService implements SchedulerService {
     public void start() {
         //
     }
+
+
 }

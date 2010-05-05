@@ -22,7 +22,7 @@ public class Worker extends Thread {
     private ArrayBlockingQueue<Message> messages;
     private long timeout;
 
-    private boolean active = true;
+    private volatile boolean active = true;
 
     private volatile long workExpiry;
     private Message message;

@@ -19,7 +19,6 @@ package org.jboss.errai.bus.rebind;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.user.rebind.SourceWriter;
-import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.annotations.ExposeEntity;
 import org.jboss.errai.bus.server.annotations.Remote;

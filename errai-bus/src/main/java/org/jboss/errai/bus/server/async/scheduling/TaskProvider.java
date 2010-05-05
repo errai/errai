@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.server.api;
+package org.jboss.errai.bus.server.async.scheduling;
 
-public interface ErraiConfigExtension {
-    public void configure(ErraiConfig config);
+import org.jboss.errai.bus.server.async.TimedTask;
+
+public interface TaskProvider {
+    public TimedTask getNextTask() throws InterruptedException;
 }

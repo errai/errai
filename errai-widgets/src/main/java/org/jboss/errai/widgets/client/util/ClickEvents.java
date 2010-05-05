@@ -14,8 +14,15 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.server.api;
+package org.jboss.errai.widgets.client.util;
 
-public interface ErraiConfigExtension {
-    public void configure(ErraiConfig config);
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FocusWidget;
+import org.jboss.errai.bus.client.api.Message;
+
+public class ClickEvents {
+    private ClickEvents() {}
+
+    public static void messageOnClick(final FocusWidget widget, final Message message)  {
+    }
 }

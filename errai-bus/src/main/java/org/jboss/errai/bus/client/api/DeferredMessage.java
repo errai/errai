@@ -14,8 +14,15 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.server.api;
+package org.jboss.errai.bus.client.api;
 
-public interface ErraiConfigExtension {
-    public void configure(ErraiConfig config);
+import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.framework.RequestDispatcher;
+
+/**
+ * A deferred message is a message that is held for sending at a future time, for either one or more times.
+ */
+public interface DeferredMessage extends Message {
+    public void sendsWith(RequestDispatcher dispatcher);
+    public void send();
 }
