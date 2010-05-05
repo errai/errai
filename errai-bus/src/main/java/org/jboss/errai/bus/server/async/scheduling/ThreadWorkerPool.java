@@ -60,7 +60,7 @@ public class ThreadWorkerPool {
     public void checkLoad() {
         double load = getApparentLoad();
 
-        System.out.println("[ThreadWorkerPool; Load:" + load + "; TotalThreads:" + workers.size() + "]");
+     //   System.out.println("[ThreadWorkerPool; Load:" + load + "; TotalThreads:" + workers.size() + "]");
 
         if (load > maximumLoad)
             addWorker();

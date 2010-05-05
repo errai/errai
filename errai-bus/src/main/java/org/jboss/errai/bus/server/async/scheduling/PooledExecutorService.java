@@ -21,10 +21,10 @@ import org.jboss.errai.bus.client.api.base.TimeUnit;
 import org.jboss.errai.bus.server.QueueOverloadedException;
 import org.jboss.errai.bus.server.async.TimedTask;
 
-import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static java.lang.System.currentTimeMillis;
 
@@ -36,7 +36,6 @@ public class PooledExecutorService implements TaskProvider {
      * Collections.synchronizedSet();
      */
     private final BlockingQueue<TimedTask> scheduledTasks;
-    //   private final List<TimedTask> fastTaskSchedule;
 
     private final ThreadWorkerPool pool;
 
@@ -45,9 +44,9 @@ public class PooledExecutorService implements TaskProvider {
     private boolean stopped = false;
 
     private final SchedulerThread schedulerThread;
-    private final GarabageCollectorThread garbageCollectorThread;
+    private final MonitorThread garbageCollectorThread;
 
-    private final Object lock = new Object();
+    private final ReentrantLock mutex = new ReentrantLock(true);
 
     /**
      * Constructs a new DelayedWorkQueue with the specified queue size.
@@ -61,7 +60,7 @@ public class PooledExecutorService implements TaskProvider {
         scheduledTasks = new PriorityBlockingQueue<TimedTask>();
 
         schedulerThread = new SchedulerThread();
-        garbageCollectorThread = new GarabageCollectorThread();
+        garbageCollectorThread = new MonitorThread();
     }
 
     /**
@@ -76,19 +75,34 @@ public class PooledExecutorService implements TaskProvider {
     }
 
     public AsyncTask schedule(final Runnable runnable, TimeUnit unit, long interval) {
-        TimedTask task;
-        scheduledTasks.add(task = new DelayedTask(runnable, unit.toMillis(interval)));
-        return task;
+        mutex.lock();
+        try {
+            TimedTask task;
+            scheduledTasks.offer(task = new DelayedTask(runnable, unit.toMillis(interval)));
+
+            return task;
+        }
+        finally {
+            mutex.unlock();
+        }
     }
 
     public AsyncTask scheduleRepeating(final Runnable runnable, final TimeUnit unit, final long initial, final long interval) {
-        TimedTask task;
-        scheduledTasks.add(task = new RepeatingTimedTask(runnable, unit.toMillis(initial), unit.toMillis(interval)));
-        return task;
+        mutex.lock();
+        try {
+            TimedTask task;
+            scheduledTasks.offer(task = new RepeatingTimedTask(runnable, unit.toMillis(initial), unit.toMillis(interval)));
+
+            return task;
+        }
+        finally {
+            mutex.unlock();
+        }
     }
 
     public void start() {
-        synchronized (lock) {
+        mutex.lock();
+        try {
             if (stopped) {
                 throw new IllegalStateException("work queue cannot be started after it's been stopped");
             }
@@ -98,54 +112,51 @@ public class PooledExecutorService implements TaskProvider {
 
             pool.startPool();
         }
+        finally {
+            mutex.unlock();
+        }
     }
 
     public void shutdown() {
-        synchronized (lock) {
+        mutex.lock();
+        try {
             schedulerThread.requestStop();
             garbageCollectorThread.requestStop();
             queue.clear();
             stopped = true;
         }
+        finally {
+            mutex.unlock();
+        }
     }
 
-    private long runAllDue() {
+    private long runAllDue() throws InterruptedException {
         long nextRunTime = 0;
 
-        for (TimedTask task : scheduledTasks) {
-            if (task.isDue(currentTimeMillis())) {
-                /**
-                 * Sechedule the task for execution.
-                 */
-                if (!queue.offer(task)) {
-                    throw new QueueOverloadedException("could not schedule task");
-                }
+        TimedTask task;
 
-                task.calculateNextRuntime();
-
-                if (task.nextRuntime() == -1) {
-                    if (task.isCancelled()) continue;
-                    // if the next runtime is -1, that means this event
-                    // is never scheduled to run again, so we remove it.
-                    task.disable();
-                    garbageCount++;
-                } else if (nextRunTime == 0 || task.nextRuntime() < nextRunTime) {
-                    // set the nextRuntime to the nextRuntim of this event
-                    nextRunTime = task.nextRuntime();
+        while ((task = scheduledTasks.poll(1, java.util.concurrent.TimeUnit.MINUTES)) != null) {
+            if (!task.isDue(currentTimeMillis())) {
+                long wait = task.nextRuntime() - currentTimeMillis();
+                if (wait > 0) {
+                    Thread.sleep(wait);
                 }
-            } else if (task.nextRuntime() == -1) {
-                if (task.isCancelled()) continue;
-                // this event is not scheduled to run.
-                task.disable();
-                garbageCount++;
-            } else if (nextRunTime == 0 || task.nextRuntime() < nextRunTime) {
-                // this event occurs before the current nextRuntime,
-                // so we update nextRuntime.
-                nextRunTime = task.nextRuntime();
+            }
+
+            /**
+             * Sechedule the task for execution.
+             */
+            if (!queue.offer(task)) {
+                throw new QueueOverloadedException("could not schedule task");
+            }
+
+            if (task.calculateNextRuntime()) {
+                scheduledTasks.offer(task);
             }
         }
 
         return nextRunTime;
+
     }
 
     /**
@@ -189,6 +200,7 @@ public class PooledExecutorService implements TaskProvider {
 
         private DelayedTask(Runnable runnable, long delayMillis) {
             this.runnable = runnable;
+            this.period = -1;
             this.nextRuntime = System.currentTimeMillis() + delayMillis;
         }
 
@@ -235,8 +247,7 @@ public class PooledExecutorService implements TaskProvider {
                 try {
                     long tm;
                     while (running) {
-                        if ((tm = runAllDue() - System.currentTimeMillis()) > 0)
-                            sleep(tm);
+                        runAllDue();
                     }
                 }
                 catch (InterruptedException e) {
@@ -256,7 +267,7 @@ public class PooledExecutorService implements TaskProvider {
         }
     }
 
-    private class GarabageCollectorThread extends Thread {
+    private class MonitorThread extends Thread {
         private volatile boolean running = false;
 
         @Override
@@ -264,21 +275,8 @@ public class PooledExecutorService implements TaskProvider {
             int counter = 0;
             while (running) {
                 try {
-                    sleep(1000);
-                    if (garbageCount != 0) {
-                        synchronized (lock) {
-                            for (Iterator<TimedTask> iter = scheduledTasks.iterator(); iter.hasNext();) {
-                                if (iter.next().isCancelled()) {
-                                    iter.remove();
-                                    garbageCount--;
-                                }
-                            }
-                        }
-                    }
-                    if (++counter == 5) {
-                        pool.checkLoad();
-                        counter = 1;
-                    }
+                    sleep(2000);
+                    pool.checkLoad();
                 }
                 catch (InterruptedException e) {
                     // fall through

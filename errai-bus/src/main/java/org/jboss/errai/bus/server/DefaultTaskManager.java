@@ -67,4 +67,51 @@ public class DefaultTaskManager implements TaskManager {
 
         return t;
     }
+
+
+    public static void main(String[] args) {
+//        taskManager.scheduleRepeating(TimeUnit.MILLISECONDS, 1, new Runnable() {
+//            public void run() {
+//                try {
+//                    Thread.sleep(1);
+//                }
+//                catch (Exception e) {
+//                }
+//            }
+//        });
+
+        taskManager.scheduleRepeating(TimeUnit.SECONDS, 1, new Runnable() {
+            public void run() {
+                System.out.println("One Second.");
+            }
+
+            @Override
+            public String toString() {
+                return "One Second";
+            }
+        });
+
+        taskManager.scheduleRepeating(TimeUnit.SECONDS, 2, new Runnable() {
+            public void run() {
+                System.out.println("Two Seconds.");
+            }
+
+                @Override
+            public String toString() {
+                return "Two Seconds";
+            }
+
+        });
+
+        taskManager.schedule(TimeUnit.SECONDS, 5, new Runnable() {
+            public void run() {
+                System.out.println("FIVE SECONDS!");
+            }
+
+                @Override
+            public String toString() {
+                return "Five Second";
+            }
+        });
+    }
 }

@@ -90,12 +90,14 @@ public abstract class TimedTask implements Runnable, Comparable<TimedTask>, Asyn
         }
     }
 
-    public void calculateNextRuntime() {
+    public boolean calculateNextRuntime() {
         synchronized (this) {
-            if (period != -1) {
+            if (!cancel && period != -1) {
                 nextRuntime = currentTimeMillis() + period;
+                return true;
             } else {
                 nextRuntime = -1;
+                return false;
             }
         }
     }
@@ -103,7 +105,7 @@ public abstract class TimedTask implements Runnable, Comparable<TimedTask>, Asyn
 
     public boolean isDue(long time) {
         synchronized (this) {
-            return !cancel && nextRuntime < time && nextRuntime != -1;
+            return !cancel && nextRuntime <= time && nextRuntime != -1;
         }
     }
 
