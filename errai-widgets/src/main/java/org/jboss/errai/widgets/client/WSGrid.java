@@ -588,11 +588,18 @@ public class WSGrid extends Composite implements RequiresResize {
 
             WSCell c;
             for (int cX = 0; cX < dataGrid.tableIndex.size(); cX++) {
-                if( cX == 0 && cX == dataGrid.tableIndex.size() )
+                if( dataGrid.tableIndex.size()  == 0 )
                 {
                   //Classic problem in the hosted mode
                   break;
                 }
+
+                if( dataGrid.tableIndex.get(cX).size() == 0 )
+                {
+                  //Classic problem in the hosted mode
+                  break;
+                }
+
                 c = dataGrid.tableIndex.get(cX).get(column);
 
                 /**
