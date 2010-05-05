@@ -135,7 +135,7 @@ public class PooledExecutorService implements TaskProvider {
 
         TimedTask task;
 
-        while ((task = scheduledTasks.poll(1, java.util.concurrent.TimeUnit.MINUTES)) != null) {
+        while ((task = scheduledTasks.poll(60, java.util.concurrent.TimeUnit.SECONDS)) != null) {
             if (!task.isDue(currentTimeMillis())) {
                 long wait = task.nextRuntime() - currentTimeMillis();
                 if (wait > 0) {
@@ -166,7 +166,7 @@ public class PooledExecutorService implements TaskProvider {
      * @throws InterruptedException thrown if the thread waiting on a ready task is interrupted.
      */
     public TimedTask getNextTask() throws InterruptedException {
-        return queue.poll(1, java.util.concurrent.TimeUnit.MINUTES);
+        return queue.poll(60, java.util.concurrent.TimeUnit.SECONDS);
     }
 
     private static class SingleFireTask extends TimedTask {
