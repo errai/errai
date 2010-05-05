@@ -1378,7 +1378,7 @@ Laika:gwt-app hbraun$ lstree
         -DarchetypeGroupId=org.jboss.errai \
         -DarchetypeArtifactId=sandbox-archetype \
         -DarchetypeVersion=1.1-SNAPSHOT \
-        -DarchetypeRepository=http://snapshots.jboss.org/maven2
+        -DarchetypeRepository=https://repository.jboss.org/nexus/content/groups/public/
             </programlisting> When invoking the archetype build it ask you
       about the maven groupId, artifactId and package name your GWT
       application should use: <programlisting>
