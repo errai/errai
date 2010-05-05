@@ -90,15 +90,6 @@ public abstract class TimedTask implements Runnable, Comparable<TimedTask>, Asyn
         }
     }
 
-    public void runNow() {
-        synchronized (this) {
-            if (nextRuntime == -1) {
-                return;
-            }
-            run();
-        }
-    }
-
     public void calculateNextRuntime() {
         synchronized (this) {
             if (period != -1) {

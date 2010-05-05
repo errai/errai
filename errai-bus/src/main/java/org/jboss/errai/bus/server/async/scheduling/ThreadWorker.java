@@ -27,7 +27,6 @@ public class ThreadWorker implements Runnable {
     private final TaskProvider pool;
     private final ErrorCallback errorCallback;
 
-
     private volatile double timeSampleStart = 0d;
     private volatile double cpuTime = 0;
     private volatile double avgLoad = 0;
@@ -68,16 +67,15 @@ public class ThreadWorker implements Runnable {
         TimedTask task = null;
         while (active) {
             try {
+                long tm;
                 while (active) {
                     timeSampleStart = nanoTime();
-                    task = pool.getNextTask();
-
-                    if (task == null) {
+                    if ((task = pool.getNextTask()) == null) {
                         continue;
                     }
 
-                    long tm = nanoTime();
-                    task.runNow();
+                    tm = nanoTime();
+                    task.run();
                     cpuTime = (nanoTime() - tm);
 
                     calculateLoad();

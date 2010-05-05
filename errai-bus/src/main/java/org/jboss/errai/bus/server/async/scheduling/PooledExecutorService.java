@@ -117,10 +117,11 @@ public class PooledExecutorService implements TaskProvider {
                 /**
                  * Sechedule the task for execution.
                  */
-                task.calculateNextRuntime();
                 if (!queue.offer(task)) {
                     throw new QueueOverloadedException("could not schedule task");
                 }
+
+                task.calculateNextRuntime();
 
                 if (task.nextRuntime() == -1) {
                     if (task.isCancelled()) continue;
@@ -232,10 +233,10 @@ public class PooledExecutorService implements TaskProvider {
         public void run() {
             while (running) {
                 try {
+                    long tm;
                     while (running) {
-                        long tm = runAllDue() - System.currentTimeMillis();
-                        if (tm <= 0) tm = 1;
-                        sleep(tm <= 0 ? 1 : tm);
+                        if ((tm = runAllDue() - System.currentTimeMillis()) > 0)
+                            sleep(tm);
                     }
                 }
                 catch (InterruptedException e) {
@@ -274,14 +275,7 @@ public class PooledExecutorService implements TaskProvider {
                             }
                         }
                     }
-                    if (++counter == 2) {
-                        TimedTask task;
-
-                        int i = 0;
-                        for (Iterator<TimedTask> iter = scheduledTasks.iterator(); iter.hasNext();) {
-                            task = iter.next();
-                        }
-
+                    if (++counter == 5) {
                         pool.checkLoad();
                         counter = 1;
                     }

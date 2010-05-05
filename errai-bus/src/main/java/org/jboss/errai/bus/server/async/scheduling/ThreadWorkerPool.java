@@ -32,7 +32,6 @@ public class ThreadWorkerPool {
 
     private volatile boolean stop = false;
 
-
     public ThreadWorkerPool(TaskProvider provider) {
         this.workers = new CopyOnWriteArrayList<ThreadWorker>();
         this.provider = provider;
