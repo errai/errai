@@ -65,11 +65,12 @@ public class ThreadWorker implements Runnable {
     }
 
     public void run() {
+        TimedTask task = null;
         while (active) {
             try {
                 while (active) {
                     timeSampleStart = nanoTime();
-                    TimedTask task = pool.getNextTask();
+                    task = pool.getNextTask();
 
                     if (task == null) {
                         continue;
@@ -83,7 +84,6 @@ public class ThreadWorker implements Runnable {
                 }
             }
             catch (InterruptedException e) {
-                e.printStackTrace();
                 if (!active) {
                     /**
                      * If the thread has been marked inactive, terminate now.  Otherwise continue along
@@ -93,7 +93,10 @@ public class ThreadWorker implements Runnable {
                 }
             }
             catch (Throwable t) {
-                t.printStackTrace();
+                if (task != null) {
+                    task.cancel(true);
+                }
+
                 if (errorCallback != null) {
                     /**
                      * If the errorCallback is defined for this ThreadWorker, we report the exception we

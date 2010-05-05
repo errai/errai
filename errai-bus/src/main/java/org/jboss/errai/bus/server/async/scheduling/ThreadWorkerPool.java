@@ -19,38 +19,39 @@ package org.jboss.errai.bus.server.async.scheduling;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class WorkerPool {
+public class ThreadWorkerPool {
     /**
      * The worker pool.
      */
     private final List<ThreadWorker> workers;
     private final TaskProvider provider;
 
+    private double lastLoad;
     private double maximumLoad = 0.40d;
     private int maximumPoolSize = 100;
 
     private volatile boolean stop = false;
 
 
-    public WorkerPool(TaskProvider provider) {
+    public ThreadWorkerPool(TaskProvider provider) {
         this.workers = new CopyOnWriteArrayList<ThreadWorker>();
         this.provider = provider;
     }
 
-    public WorkerPool(TaskProvider provider, int maximumPoolSize) {
+    public ThreadWorkerPool(TaskProvider provider, int maximumPoolSize) {
         this.workers = new CopyOnWriteArrayList<ThreadWorker>();
         this.provider = provider;
         this.maximumPoolSize = maximumPoolSize;
     }
 
 
-    public WorkerPool(TaskProvider provider, double maximumLoad) {
+    public ThreadWorkerPool(TaskProvider provider, double maximumLoad) {
         this.workers = new CopyOnWriteArrayList<ThreadWorker>();
         this.provider = provider;
         this.maximumLoad = maximumLoad;
     }
 
-    public WorkerPool(TaskProvider provider, double maximumLoad, int maximumPoolSize) {
+    public ThreadWorkerPool(TaskProvider provider, double maximumLoad, int maximumPoolSize) {
         this.workers = new CopyOnWriteArrayList<ThreadWorker>();
         this.provider = provider;
         this.maximumLoad = maximumLoad;
@@ -60,10 +61,15 @@ public class WorkerPool {
     public void checkLoad() {
         double load = getApparentLoad();
 
-     //   System.out.println("[[[  LOAD: " + load + "  ]]]");
+        System.out.println("[ThreadWorkerPool; Load:" + load + "; TotalThreads:" + workers.size() + "]");
 
         if (load > maximumLoad)
             addWorker();
+
+        if (lastLoad != 0 && (lastLoad - load) > 0.1d)
+            removeWorker();
+
+        lastLoad = load;
     }
 
     public double getApparentLoad() {
@@ -79,7 +85,6 @@ public class WorkerPool {
     }
 
     public void addWorker() {
-        System.out.println("<<ADD WORKER>>");
         synchronized (this) {
             if (workers.size() == maximumPoolSize) return;
 
@@ -93,8 +98,22 @@ public class WorkerPool {
         }
     }
 
+    public void removeWorker() {
+        synchronized (this) {
+            if (workers.size() <= 1) return;
+
+            if (stop) {
+                return;
+            }
+
+            ThreadWorker worker = workers.get(workers.size() - 1);
+            worker.requestStop();
+            workers.remove(worker);
+        }
+    }
+
     public void startPool() {
-        addWorker(); 
+        addWorker();
     }
 
     public void requestStopAll() {

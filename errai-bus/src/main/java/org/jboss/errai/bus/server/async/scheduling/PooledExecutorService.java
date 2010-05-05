@@ -38,7 +38,7 @@ public class PooledExecutorService implements TaskProvider {
     private final BlockingQueue<TimedTask> scheduledTasks;
     //   private final List<TimedTask> fastTaskSchedule;
 
-    private final WorkerPool pool;
+    private final ThreadWorkerPool pool;
 
     private volatile int garbageCount = 0;
 
@@ -56,7 +56,7 @@ public class PooledExecutorService implements TaskProvider {
      */
     public PooledExecutorService(int queueSize) {
         queue = new ArrayBlockingQueue<TimedTask>(queueSize);
-        pool = new WorkerPool(this);
+        pool = new ThreadWorkerPool(this);
 
         scheduledTasks = new PriorityBlockingQueue<TimedTask>();
 
