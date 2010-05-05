@@ -23,6 +23,7 @@ import org.mvel2.MVEL;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static org.mvel2.DataConversion.addConversionHandler;
 
@@ -31,7 +32,7 @@ public class TypeDemarshallHelper {
         addConversionHandler(java.sql.Date.class, new ConversionHandler() {
             public Object convertFrom(Object o) {
                 if (o instanceof String) o = Long.parseLong((String) o);
-                
+
                 return new java.sql.Date(((Number) o).longValue());
             }
 
@@ -63,7 +64,7 @@ public class TypeDemarshallHelper {
         }
     }
 
-    private static final Map<Class, Map<String, Serializable>> MVELDencodingCache = new HashMap<Class, Map<String, Serializable>>();
+    private static final Map<Class, Map<String, Serializable>> MVELDencodingCache = new ConcurrentHashMap<Class, Map<String, Serializable>>();
 
     public static Object _demarshallAll(Object o) throws Exception {
         try {
@@ -80,8 +81,8 @@ public class TypeDemarshallHelper {
                 Map<?, ?> oMap = (Map) o;
                 if (oMap.containsKey(SerializationParts.ENCODED_TYPE)) {
                     //Object newInstance = Class.forName((String) oMap.get(SerializationParts.ENCODED_TYPE)).newInstance();
-                   ClassLoader loader = Thread.currentThread().getContextClassLoader();
-                   Object newInstance = loader.loadClass( (String) oMap.get(SerializationParts.ENCODED_TYPE)  ).newInstance();
+                    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+                    Object newInstance = loader.loadClass((String) oMap.get(SerializationParts.ENCODED_TYPE)).newInstance();
                     Map<String, Serializable> s = MVELDencodingCache.get(newInstance.getClass());
                     int i = 0;
                     if (s == null) {
@@ -98,10 +99,15 @@ public class TypeDemarshallHelper {
                         }
                     }
 
-
                     for (Map.Entry<?, ?> entry : oMap.entrySet()) {
                         if (SerializationParts.ENCODED_TYPE.equals(entry.getKey())) continue;
-                        MVEL.executeSetExpression(s.get(entry.getKey()), newInstance, _demarshallAll(entry.getValue()));
+                        final Serializable cachedSetExpr = s.get(entry.getKey());
+                        if (cachedSetExpr != null) {
+                            MVEL.executeSetExpression(cachedSetExpr, newInstance, _demarshallAll(entry.getValue()));
+                        }
+                        else {
+                            MVEL.setProperty(newInstance, String.valueOf(entry.getKey()), _demarshallAll(entry.getValue()));
+                        }
                     }
 
                     return newInstance;
