@@ -92,7 +92,7 @@ public class JSONEncoderCli {
         }
 
         if (marshalledTypes != null) {
-            mapBuild.append("," + SerializationParts.ENCODED_TYPE + ":\"");
+            mapBuild.append("," + SerializationParts.MARSHALLED_TYPES + ":\"");
             first = true;
             for (Map.Entry<String, String> m : marshalledTypes.entrySet()) {
                 if (!first) {

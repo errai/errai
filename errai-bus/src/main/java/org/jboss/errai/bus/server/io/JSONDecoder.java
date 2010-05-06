@@ -92,6 +92,7 @@ public class JSONDecoder {
 
                     if (collection instanceof Map && ((Map) collection).containsKey(ENCODED_TYPE)) {
                         try {
+                            ctx.record(collection);
                             return _demarshallAll(collection);
                         }
                         catch (Exception e) {
@@ -112,6 +113,10 @@ public class JSONDecoder {
                     ctx.addValue(new String(json, cursor + 1, end - cursor - 1));
                     cursor = end + 1;
                     break;
+
+                case ':':
+                    cursor++;
+                    continue;
 
                 default:
                     if (isDigit(json[cursor]) || (json[cursor] == '-' && isDigit(json[cursor + 1]))) {
@@ -275,4 +280,5 @@ public class JSONDecoder {
             }
         }
     }
+
 }
