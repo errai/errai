@@ -81,18 +81,24 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
             ResourceBundle bundle = ResourceBundle.getBundle("ErraiApp");
             if (bundle != null) {
                 logger.log(TreeLogger.Type.INFO, "checking ErraiApp.properties for configured types ...");
-                if (bundle.keySet().contains(ErraiServiceConfigurator.CONFIG_ERRAI_SERIALIZABLE_TYPE)) {
-                    for (String s : bundle.getString(ErraiServiceConfigurator.CONFIG_ERRAI_SERIALIZABLE_TYPE).split(" ")) {
-                        try {
-                            Class<?> cls = Class.forName(s.trim());
-                            generateMarshaller(cls, logger, writer);
-                        }
-                        catch (Exception e) {
-                            throw new ErraiBootstrapFailure(e);
-                        }
 
+              Enumeration<String> keys = bundle.getKeys();
+
+              while(keys.hasMoreElements()) {
+                String key = keys.nextElement();
+                if(ErraiServiceConfigurator.CONFIG_ERRAI_SERIALIZABLE_TYPE.equals(key))
+                {
+                  for (String s : bundle.getString(key).split(" ")) {
+                    try {
+                      Class<?> cls = Class.forName(s.trim());
+                      generateMarshaller(cls, logger, writer);
                     }
+                    catch (Exception e) {
+                      throw new ErraiBootstrapFailure(e);
+                    }
+                  }
                 }
+              }
             }
         }
         catch (MissingResourceException exception) {
