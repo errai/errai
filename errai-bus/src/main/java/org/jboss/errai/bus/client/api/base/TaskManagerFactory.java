@@ -4,7 +4,6 @@ import org.jboss.errai.bus.client.api.TaskManager;
 import org.jboss.errai.bus.client.framework.TaskManagerProvider;
 
 public class TaskManagerFactory {
-
     private static final Object lock = new Object();
     private static volatile TaskManagerProvider provider;
 
