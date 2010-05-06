@@ -27,7 +27,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <gwt.version>2.0.0</gwt.version>
-        <gwt.maven>1.2.0-11137</gwt.maven>
+        <gwt.maven>1.2</gwt.maven>
         <gwt-log.version>3.0.1</gwt-log.version>
         <guice.version>2.0</guice.version>
         <mvel.version>2.0.18-SNAPSHOT</mvel.version>
