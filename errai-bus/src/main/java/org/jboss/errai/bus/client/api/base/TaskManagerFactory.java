@@ -6,7 +6,7 @@ import org.jboss.errai.bus.client.framework.TaskManagerProvider;
 public class TaskManagerFactory {
 
     private static final Object lock = new Object();
-    private static TaskManagerProvider provider;
+    private static volatile TaskManagerProvider provider;
 
     public static TaskManager get() {
         synchronized (lock) {
@@ -29,6 +29,8 @@ public class TaskManagerFactory {
     }
 
     public static void setTaskManagerProvider(TaskManagerProvider p) {
-        provider = p;
+        synchronized (lock) {
+            provider = p;
+        }
     }
 }
