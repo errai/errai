@@ -1221,6 +1221,25 @@ prefs.set("default_sort_order", "ASC");
 
 </programlisting></para>
       </sect2>
+
+         <sect2>
+        <title>Logging</title>
+        <para>
+            Workspaces inherits <ulink url="http://code.google.com/p/gwt-log/">GWT Log</ulink>.
+            It ships with an embedded log message console that records log output, besides the default logging
+            to the browser error console and the GWT hosted mode window. To use the internal logging mechanism,
+            simply write messages to the Logger:            
+            <programlisting>
+import com.allen_sauer.gwt.log.client.Log;
+ [...]
+
+Log.warn("some log message");
+Log.error("message", throwable);
+                
+            </programlisting>
+
+        </para>
+      </sect2>
     </sect1>
 
     <sect1 id="using-workspaces">
