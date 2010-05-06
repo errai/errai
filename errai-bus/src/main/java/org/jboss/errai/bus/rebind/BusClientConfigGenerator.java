@@ -81,7 +81,7 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
             ResourceBundle bundle = ResourceBundle.getBundle("ErraiApp");
             if (bundle != null) {
                 logger.log(TreeLogger.Type.INFO, "checking ErraiApp.properties for configured types ...");
-                if (bundle.containsKey(ErraiServiceConfigurator.CONFIG_ERRAI_SERIALIZABLE_TYPE)) {
+                if (bundle.keySet().contains(ErraiServiceConfigurator.CONFIG_ERRAI_SERIALIZABLE_TYPE)) {
                     for (String s : bundle.getString(ErraiServiceConfigurator.CONFIG_ERRAI_SERIALIZABLE_TYPE).split(" ")) {
                         try {
                             Class<?> cls = Class.forName(s.trim());
