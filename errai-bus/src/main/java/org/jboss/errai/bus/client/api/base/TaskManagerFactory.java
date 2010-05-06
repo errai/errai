@@ -1,19 +1,31 @@
 package org.jboss.errai.bus.client.api.base;
 
-import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.TaskManager;
 import org.jboss.errai.bus.client.framework.TaskManagerProvider;
 
 public class TaskManagerFactory {
-    private static TaskManagerProvider provider = new TaskManagerProvider() {
-        private ClientTaskManager taskManager = new ClientTaskManager();
-        public TaskManager get() {
-            return taskManager;
-        }
-    };
+
+    private static final Object lock = new Object();
+    private static TaskManagerProvider provider;
 
     public static TaskManager get() {
-        return provider.get();
+        synchronized (lock) {
+            if (provider == null) {
+                _initForClient();
+            }
+            return provider.get();
+        }
+
+    }
+
+    private static void _initForClient() {
+        provider = new TaskManagerProvider() {
+            private ClientTaskManager taskManager = new ClientTaskManager();
+
+            public TaskManager get() {
+                return taskManager;
+            }
+        };
     }
 
     public static void setTaskManagerProvider(TaskManagerProvider p) {
