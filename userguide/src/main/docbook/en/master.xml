@@ -1137,7 +1137,7 @@ AuthenticationContext authenticationContext =
       </sect2>
 
       <sect2>
-        <title>Authentication and Authorization</title>
+        <title>Security</title>
 
         <para>The workspace itself doesn't provide an authentication
         component. Instead it relies on the Authentication provided by errai
@@ -1171,7 +1171,7 @@ AuthenticationContext authenticationContext =
       </sect2>
 
       <sect2>
-        <title>LoginClient</title>
+        <title>Authentication and Authorization</title>
 
         <para>The LoginClient is the counter part of the SecurityService. It
         is instructed by the SecurityService to request the credentials upon
