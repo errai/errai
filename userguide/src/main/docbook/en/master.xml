@@ -322,7 +322,7 @@
 
         private MessageBus bus;
 
-        @Inject                                         
+        @Inject
         public HelloWorldService(MessageBus bus) {
             this.bus = bus;
         }
@@ -1132,7 +1132,7 @@ public class OpenTasksModule implements WidgetProvider
         purpose lookup for common workspace API that is available to any
         workspace component: <programlisting>
 AuthenticationContext authenticationContext =
-    Registry.get(SecurityService.class).getAuthenticationContext();    
+    Registry.get(SecurityService.class).getAuthenticationContext();
 </programlisting></para>
       </sect2>
 
@@ -1202,17 +1202,23 @@ AuthenticationContext authenticationContext =
         <para>The workspace allows you to store simple key-value pairs as
         preferences. Like with other common API, you obtain the Preferences
         through the <link linkend="workspace-registry">workspace
-        Registry</link>. The default implementation uses a cookie based
+        Registry</link>:
+            <programlisting>
+Preferences prefs = Registry.get(Preferences.class);
+prefs.set("default_sort_order", "ASC");
+            </programlisting>
+
+            The default implementation uses a cookie based
         approach, but it's easy to replace that one with a custom
         implementation in the module decriptor: <programlisting>
-    
+
    &lt;module&gt;
     [...]
     &lt;replace-with class="org.jboss.errai.workspaces.client.framework.CookiePreferences"&gt;
            &lt;when-type-is class="org.jboss.errai.workspaces.client.framework.Preferences"/&gt;
        &lt;/replace-with&gt;
     &lt;/module&gt;
-    
+
 </programlisting></para>
       </sect2>
     </sect1>
@@ -1246,7 +1252,7 @@ AuthenticationContext authenticationContext =
         <para>Once you've created a project using the maven archetype, make
         yourself familiar with the directory structure: <programlisting>
 Laika:gwt-app hbraun$ lstree
-| pom.xml    
+| pom.xml
 |-src
 |---main
 |-----java
@@ -1272,7 +1278,7 @@ Laika:gwt-app hbraun$ lstree
         archetype example to a different GWT application: <programlisting>
  ./src/main/java/ErraiApp.properties
  ./src/main/java/ErraiService.properties
- ./src/main/java/my/app/App.gwt.xml   
+ ./src/main/java/my/app/App.gwt.xml
 </programlisting> <orderedlist>
             <listitem>
               <para>ErraiApp.properties is a simple marker, that is required
@@ -1294,7 +1300,7 @@ Laika:gwt-app hbraun$ lstree
               <para>App.gwt.xml is your applications <ulink
               url="http://code.google.com/webtoolkit/doc/latest/DevGuideOrganizingProjects.html#DevGuideModules">module
               descriptor</ulink>. <programlisting>
- 
+
 &lt;module rename-to="app"&gt;
  &lt;inherits name='com.google.gwt.user.User'/&gt;
  &lt;inherits name="com.google.gwt.uibinder.UiBinder"/&gt;
@@ -1303,11 +1309,11 @@ Laika:gwt-app hbraun$ lstree
  &lt;inherits name="org.jboss.errai.common.ErraiCommon"/&gt;
  &lt;inherits name="org.jboss.errai.bus.ErraiBus"/&gt;
  &lt;inherits name="org.jboss.errai.workspaces.ErraiWorkspaces" /&gt;
- 
+
  &lt;entry-point class='my.app.client.HelloWorldClient'/&gt;
 
 &lt;/module&gt;
-    
+
 </programlisting> If you are building on workspaces make sure to include it's
               dependencies common and bus as well.</para>
             </listitem>
@@ -1323,7 +1329,7 @@ Laika:gwt-app hbraun$ lstree
         hosted mode</ulink> with the following commands: <programlisting>
   mvn gwt:run
 
- (alternatively)   
+ (alternatively)
   mvn gwt:debug
 </programlisting> <note>
             <title>Launching maven the first time</title>
@@ -1338,7 +1344,77 @@ Laika:gwt-app hbraun$ lstree
     </sect1>
   </chapter>
 
-  <!---
+    <!---
+        =====================================================
+        WORKING WITH ERRAI
+        =====================================================
+    -->
+
+
+    <chapter id="working_with_errai">
+        <title>Working with Errai</title>
+
+        <sect1>
+            <title>Debug facilities</title>
+            <para>
+                Debugging message oriented systems can easily become a complex task.
+                Messages are being published and consumed all across your application components
+                and the choreography (exchange pattern) is not obvious at a first glance.
+                You cannot simply step through an IDE, following typed references that explain how the code flows
+                and in which order components are invoked.
+            </para>
+
+            <para>
+                We are constantly trying to improve the facilities that assist you with these task.
+                The most important ones are described in the next sections.
+            </para>
+
+            <sect2>
+                <title>Visual Bus Monitor</title>
+                <para>
+                    Errai ships with Swing-based ErraiBus Monitor application. It's really straight-forward to get up and running.
+                    You simply add it as a runtime dependency, and bootstrap GWT Development Mode with the
+<programlisting>
+    -Derrai.tools.bus_monitor_attach=true
+</programlisting>
+                    VM flag, and this magical UI should automatically appear as ErraiBus bootstraps.
+                    When the monitor is activated, it attaches probes in into the bus and records all activity accordingly.
+                    You can drill down into individual services and examine individual messages that have been received to debug any mysterious problems that arise.                     
+
+                </para>
+
+                <para>
+                    <figure id="bus_monitor">
+                        <title>Bus Monitor</title>
+                        <mediaobject>
+                            <imageobject>
+                                <imagedata align="center" fileref="images/monitor.png"/>
+                            </imageobject>
+                        </mediaobject>
+                    </figure>
+
+                </para>
+                <para>                    
+                    The monitor allows you to inspect the endpoints (aka 'subjects') registred on any client connected
+                    to the system and the server side services as well. This should already give an idea how the messaging
+                    landscape is layed out. However, be aware that some endpoints may be registered lazily, i.e. when
+                    a UI component is loaded. This is especially true for <link linkend="workspaces">Errai Workspaces</link>, which
+                    tends load complete toolsets lazily (<ulink url="http://code.google.com/p/google-web-toolkit/wiki/CodeSplitting">GWT code splitting</ulink>).
+                </para>
+            </sect2>
+
+        </sect1>
+
+        <sect1>
+            <title>Hosted mode and external containers</title>
+            <para>
+
+            </para>
+        </sect1>
+
+    </chapter>
+
+    <!---
         =====================================================
         QUICKSTART
         =====================================================
