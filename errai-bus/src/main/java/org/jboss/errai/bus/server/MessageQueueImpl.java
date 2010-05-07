@@ -21,10 +21,9 @@ import org.jboss.errai.bus.client.framework.Payload;
 import org.jboss.errai.bus.server.api.*;
 import org.jboss.errai.bus.server.async.TimedTask;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
+import java.util.Queue;
+import java.util.concurrent.*;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static java.lang.System.nanoTime;
 
@@ -58,11 +57,16 @@ public class MessageQueueImpl implements MessageQueue {
     private SessionControl sessionControl;
     private QueueActivationCallback activationCallback;
     private BlockingQueue<MarshalledMessage> queue;
+    private Queue<MarshalledMessage> deferredQueue;
 
     private ServerMessageBus bus;
     private volatile TimedTask task;
 
     private final Semaphore lock = new Semaphore(1, true);
+
+    private volatile boolean initLock = true;
+    private final CountDownLatch offerLock = new CountDownLatch(1);
+
     private final Object activationLock = new Object();
 
     /**
@@ -172,6 +176,7 @@ public class MessageQueueImpl implements MessageQueue {
             throw new QueueUnavailableException("queue is not available");
         }
 
+
         boolean b = false;
         activity();
         try {
@@ -197,6 +202,7 @@ public class MessageQueueImpl implements MessageQueue {
 
         return b;
     }
+
 
     /**
      * Schedules the activation, by sending off the queue. All message should be processed and sent once the task is
@@ -318,6 +324,11 @@ public class MessageQueueImpl implements MessageQueue {
         return lock.availablePermits() == 0;
     }
 
+
+    public boolean isInitialized() {
+        return !initLock;
+    }
+
     /**
      * Fakes a transmission, shows life with a heartbeat
      */
@@ -343,6 +354,18 @@ public class MessageQueueImpl implements MessageQueue {
         this._windowPolling = windowPolling;
     }
 
+    public void lock() throws InterruptedException {
+        if (initLock) offerLock.await();
+    }
+
+    public void unlock() {
+        //     if (initLock) offerLock.unlock();
+    }
+
+    public void finishInit() {
+        initLock = false;
+        offerLock.countDown();
+    }
 
     /**
      * Stops the queue, closes it on the bus and clears it completely

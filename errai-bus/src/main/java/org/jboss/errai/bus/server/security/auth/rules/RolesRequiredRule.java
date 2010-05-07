@@ -87,7 +87,7 @@ public class RolesRequiredRule implements BooleanRoutingRule {
                         .copyResource("Session", message)
                         .errorsHandledBy(new ErrorCallback() {
                             public boolean error(Message message, Throwable throwable) {
-                                ErrorHelper.sendClientError(bus, message, "Could not contact LoginClient to handle access denial, due to insufficient privileges for: " + message.getSubject(), throwable);
+                                ErrorHelper.sendClientError(bus, message, throwable.getMessage(), throwable);
                                 return false;
                             }
                         })
@@ -110,8 +110,6 @@ public class RolesRequiredRule implements BooleanRoutingRule {
             } else {
                 return true;
             }
-
-
         }
     }
 

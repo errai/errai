@@ -43,9 +43,13 @@ public interface MessageQueue {
 
     QueueSession getSession();
 
+    void finishInit();
+
     boolean isStale();
 
     boolean isActive();
+
+    boolean isInitialized();
 
     void heartBeat();
 

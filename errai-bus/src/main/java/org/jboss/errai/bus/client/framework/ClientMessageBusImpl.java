@@ -574,6 +574,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                             postInitTasks.get(i).run();
                         }
 
+                        MessageBuilder.createMessage()
+                                .toSubject("ServerBus")
+                                .command(BusCommands.FinishStateSync)
+                                .noErrorHandling().sendNowWith(ClientMessageBusImpl.this);
+
                         initialized = true;
 
                         break;

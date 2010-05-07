@@ -20,6 +20,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.jboss.errai.bus.client.api.*;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
 import org.jboss.errai.bus.client.api.base.RuleDelegateMessageCallback;
 import org.jboss.errai.bus.client.framework.*;
 import org.jboss.errai.bus.client.protocols.BusCommands;
@@ -62,6 +63,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     private final Map<String, Set<MessageQueue>> remoteSubscriptions = new ConcurrentHashMap<String, Set<MessageQueue>>();
 
     private final Map<QueueSession, MessageQueue> messageQueues = new ConcurrentHashMap<QueueSession, MessageQueue>();
+    private final Map<MessageQueue, List<MarshalledMessage>> deferredQueue = new ConcurrentHashMap<MessageQueue, List<MarshalledMessage>>();
     private final Map<String, QueueSession> sessionLookup = new ConcurrentHashMap<String, QueueSession>();
 
     private final List<SubscribeListener> subscribeListeners = new LinkedList<SubscribeListener>();
@@ -109,6 +111,12 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                                 message.get(String.class, MessageParts.Subject));
                         break;
 
+                    case FinishStateSync:
+                        queue = (MessageQueueImpl) messageQueues.get(session);
+                        queue.finishInit();
+                        drainDeferredDeliveryQueue(queue);
+                        break;
+
                     case ConnectToQueue:
 
                         if (messageQueues.containsKey(session)) {
@@ -116,6 +124,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                         }
 
                         addQueue(session, queue = new MessageQueueImpl(queueSize, ServerMessageBusImpl.this, session));
+
 
                         remoteSubscribe(session, queue, "ClientBus");
 
@@ -140,6 +149,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                                 .toSubject("ClientBus")
                                 .command(BusCommands.FinishStateSync)
                                 .noErrorHandling().sendNowWith(ServerMessageBusImpl.this, false);
+
 
                         /**
                          * Now the session is established, turn WindowPolling on.
@@ -186,6 +196,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
                     ServerMessageBusImpl.this.closeQueue(ref);
                     ref.getSession().endSession();
+                    deferredQueue.remove(ref);
                 }
             }
 
@@ -291,7 +302,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                     }
                 });
             }
-
         }
     }
 
@@ -372,7 +382,38 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 }
             });
         } else {
-            throw new NoSubscribersToDeliverTo("for: " + subject);
+            if (!queue.isInitialized()) {
+                deferDelivery(queue, new MarshalledMessage() {
+                    public String getSubject() {
+                        return subject;
+                    }
+
+                    public Object getMessage() {
+                        return message;
+                    }
+                });
+            } else
+                throw new NoSubscribersToDeliverTo("for: " + subject + ":" + isAnyoneListening(queue, subject) + ":" + queue.isInitialized());
+        }
+
+    }
+
+    private void deferDelivery(MessageQueue queue, MarshalledMessage message) {
+        synchronized (deferredQueue) {
+            if (!deferredQueue.containsKey(queue)) deferredQueue.put(queue, new ArrayList<MarshalledMessage>());
+            deferredQueue.get(queue).add(message);
+        }
+    }
+
+    private void drainDeferredDeliveryQueue(MessageQueue queue) {
+        synchronized (deferredQueue) {
+            if (deferredQueue.containsKey(queue)) {
+                for (MarshalledMessage message : deferredQueue.get(queue)) {
+                    queue.offer(message);
+                }
+
+                deferredQueue.remove(queue);
+            }
         }
     }
 
@@ -671,7 +712,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     private MessageQueue getQueueByMessage(Message message) {
         MessageQueue queue = getQueue(getSession(message));
-        if (queue == null) throw new QueueUnavailableException("no queue available to send. (queue or session may have expired)");
+        if (queue == null)
+            throw new QueueUnavailableException("no queue available to send. (queue or session may have expired)");
         return queue;
     }
 
