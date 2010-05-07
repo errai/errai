@@ -57,16 +57,13 @@ public class MessageQueueImpl implements MessageQueue {
     private SessionControl sessionControl;
     private QueueActivationCallback activationCallback;
     private BlockingQueue<MarshalledMessage> queue;
-    private Queue<MarshalledMessage> deferredQueue;
+
 
     private ServerMessageBus bus;
     private volatile TimedTask task;
 
     private final Semaphore lock = new Semaphore(1, true);
-
     private volatile boolean initLock = true;
-    private final CountDownLatch offerLock = new CountDownLatch(1);
-
     private final Object activationLock = new Object();
 
     /**
@@ -354,17 +351,8 @@ public class MessageQueueImpl implements MessageQueue {
         this._windowPolling = windowPolling;
     }
 
-    public void lock() throws InterruptedException {
-        if (initLock) offerLock.await();
-    }
-
-    public void unlock() {
-        //     if (initLock) offerLock.unlock();
-    }
-
     public void finishInit() {
         initLock = false;
-        offerLock.countDown();
     }
 
     /**
