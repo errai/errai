@@ -13,12 +13,6 @@
 
   <toc></toc>
 
-  <!---
-        =====================================================
-        INTRODUCTION
-        =====================================================
-    -->
-
   <chapter id="introduction">
     <title>Introduction</title>
 
@@ -83,11 +77,7 @@
     </section>
   </chapter>
 
-  <!---
-        =====================================================
-        INSTALLATION
-        =====================================================
-    -->
+  <!---->
 
   <chapter id="installation">
     <title>Installation</title>
@@ -142,12 +132,6 @@
     </section>
   </chapter>
 
-  <!---
-        =====================================================
-        BUS
-        =====================================================
-    -->
-
   <chapter id="bus">
     <title>Errai Bus</title>
 
@@ -169,7 +153,7 @@
       <title>Messaging</title>
 
       <para>This section covers the core messaging concepts of the ErraiBus
-      messaging framework. </para>
+      messaging framework.</para>
 
       <sect2>
         <title>Messaging Overview</title>
@@ -181,7 +165,7 @@
         server-based service. In fact, a service of the same name may co-exist
         on both the client and the server and both will receive all messages
         bound for that service name, whether they are sent from the client or
-        from the server. </para>
+        from the server.</para>
 
         <para>Services are lightweight in ErraiBus, and can be declared
         liberally and extensively within your application to provide a
@@ -190,13 +174,12 @@
         platform, but there is a plethora of possibilities for using ErraiBus
         purely with the GWT client context, such as a way to advertise and
         expose components dynamically, to get around the lack of reflection in
-        GWT. </para>
+        GWT.</para>
 
         <para>In fact, ErraiBus was originally designed to run completely
         within the client but quickly evolved into having the capabilities it
         now has today. So keep that in mind when you run up against problems
-        in the client space that could benefit from runtime federation.
-        </para>
+        in the client space that could benefit from runtime federation.</para>
       </sect2>
 
       <sect2>
@@ -283,7 +266,7 @@
           code, conversely, runs inside a dependency container for managing
           components. It currently uses Guice as the default container, but
           will more generically support the JSR-330 specification in the
-          future. </para>
+          future.</para>
         </note>
       </sect2>
 
@@ -322,7 +305,7 @@
 
         private MessageBus bus;
 
-        @Inject
+        @Inject                                         
         public HelloWorldService(MessageBus bus) {
             this.bus = bus;
         }
@@ -427,14 +410,6 @@
 
         <programlisting>   @Service
     public class HelloWorldService implements MessageCallback {
-
-        private MessageBus bus;
-
-        @Inject
-        public HelloWorldService(MessageBus bus) {
-            this.bus = bus;
-        }
-
         public void callback(CommandMessage message) {
                 // Send a message to the 'HelloWorldClient' on the client that sent us the
                 // the message.
@@ -442,8 +417,7 @@
                     .toSubject("HelloWorldClient")
                     .signalling()
                     .with("text", "Hi There! We're having a conversation!")
-                    .noErrorHandling()
-                    .sendNowWith(bus);
+                    .noErrorHandling().reply();
             });
         }
     }</programlisting>
@@ -480,7 +454,7 @@
       })</programlisting>
 
           <para>See the next section on how to build conversational services
-          that can respond to such messages. </para>
+          that can respond to such messages.</para>
         </sect3>
 
         <sect3>
@@ -506,7 +480,7 @@
           <programlisting>MessageBuilder.createConversation(message)
                 .subjectProvided().signalling()
                 .with("Records", records)
-                .noErrorHandling().sendNowWith(bus);</programlisting>
+                .noErrorHandling().reply();</programlisting>
 
           <para>In the above examples, assuming that the latter example is
           inside a service called "ObjectService" and is referencing the
@@ -627,107 +601,80 @@ public void callback(Message message) {
       client-server RPC communication easy on top of the bus. While it is
       possible to use ErraiBus without ever using this API, you may find it to
       be a more useful and concise approach to exposing services to the
-      clients.</para>
+      clients. </para>
+
+      <remark>Please Note that this API has changed since version 1.0</remark>
 
       <sect2>
-        <title>Creating callable endpoints</title>
+        <title>Creating RPC services</title>
 
-        <para>ErraiBus provides facility to making asynchronous RPC calls
-        on-top of the bus archhitecture without the need to explicitly declare
-        services or any specific mapping or boilerplate code. This method of
-        communicating with the server is straight-forward and utilizes the
-        simple <filename>RemoteCall</filename> API.</para>
+        <para>RPC services provide a way of creating type-safe mechanisms to
+        make client-to-server calls. Currently, this mechanism only support
+        client-to-server calls, and not vice-versa. </para>
 
-        <para>Remote procedure calls can be be performed against against
-        service class which has been annoted with the
-        <filename>@Service</filename> annotation and the accompanying method
-        which is being called has been annotated with the
-        <filename>@Endpoint</filename> annotation, and the method has public
-        access.</para>
+        <para>Creating a service is straight forward. It requires the
+        definition of a remote interface, and a service class which implements
+        it. See the following: </para>
+
+        <programlisting>@Remote
+public interface MyRemoteService {
+    public boolean isEveryoneHappy();
+}
+</programlisting>
+
+        <para>The <varname>@Remote</varname> annotation tells Errai that we'd
+        like to use this interface as a remote interface. The remote interface
+        must be part of of the GWT client code. It cannot be part of the
+        server-side code, since the interface will need to be referenced from
+        both the client and server side code. That said, the implementation of
+        a service is relatively to the point:</para>
 
         <programlisting>@Service
-public class QueryService {
-   private Map&lt;String, String[]&gt; dataMap;
+public class MyRemoteServiceImpl implements MyRemoteService {
+ 
+    public boolean isEveryoneHappy() {
+       // blatently lie and say everyone's happy.
+       return true;
+    }
+}
+</programlisting>
 
-   public QueryService() {
-      setupMap();
-   }
-
-   private void setupMap() {
-      dataMap = new HashMap&lt;String, String[]&gt;();
-      dataMap.put("beer", new String[]{"Heineken", "Budweiser", "Hoogaarden"});
-      dataMap.put("fruit", new String[]{"Apples", "Oranges", "Grapes"});
-      dataMap.put("animals", new String[]{"Monkeys", "Giraffes", "Lions"});
-   }
-
-   @Endpoint
-   public String[] getQuery(String queryString) {
-      return dataMap.get(queryString.toLowerCase());
-   }
-}</programlisting>
-
-        <para>Notice the <filename>@Endpoint </filename>annotation on the
-        <filename>getQuery()</filename> method in the above figure. In this
-        example, the method simply accepts a single String parameter and
-        returns an array of Strings. The method can accept and return any
-        serializable types that have been exposed to the bus within the rules
-        of serializability as laid out in the section on <emphasis>Object
-        Serialization</emphasis>.</para>
-
-        <para>Also note that in this example, the service class is not
-        required to implement the <filename>MessageCallback</filename>
-        interface and is a simple POJO class.</para>
+        <para>That's all there is to it. You use the same
+        <varname>@Service</varname> annotation as described in Section 2.4.
+        The presence of the remote interface tips Errai off as to what you
+        want to do with the class. </para>
       </sect2>
 
       <sect2>
         <title>Making calls</title>
 
-        <para>Calls to RPC endpoints are made using the RemoteCall API which
-        is very similar to the MessageBuilder API, with a few key differences.
-        Here is some code for calling the RPC endpoint we defined in section
-        3.1.</para>
+        <para>Calling a remote service involves use of the MessageBuilder API.
+        Since all messages are asynchronous, the actual code for calling the
+        remote service involves the use of a callback, which we use to receive
+        the response from the remote method. Let's see how it works:</para>
 
-        <programlisting>MessageBuilder.createCall()
-           .call("QueryService")                                         // (1)
-           .endpoint("getQuery", queryBox.getText())                     // (2)
-           .respondTo(String[].class, new RemoteCallback&lt;String[]&gt;() {   // (3)
-               public void callback(String[] resultsString) {
-                   if (resultsString == null) {
-                       resultsString = new String[]{"No results."};
-                   }
+        <programlisting>MessageBuilder.createCall(new RemoteCallback&lt;Boolean&gt;() {      
+    public void callback(Boolean isHappy) {                   
+         if (isHappy) Window.alert("Everyone is happy!");         
+    }                                                           
+}, MyRemoteService.class).isEveryoneHappy();        </programlisting>
 
-                   /**
-                    * Build an HTML unordered list based on the results.
-                    */
-                   StringBuffer buf = new StringBuffer("&lt;ul&gt;");
-                   for (String result : resultsString) {
-                       buf.append("&lt;li&gt;").append(result).append("&lt;/li&gt;");
-                   }
-                   results.setHTML(buf.append("&lt;/ul&gt;").toString());
-               }
-           })
-           .noErrorHandling()
-           .sendNowWith(bus);                                           // (4)</programlisting>
+        <para>In the above example, we declare a remote callback that receives
+        a Boolean, to correpond to the return value of the method on the
+        server. We also reference the remote interface we are calling, and
+        directly call the method. However, <emphasis role="bold">don't be
+        tempted to write code like this</emphasis>:</para>
 
-        <para>In this example we <emphasis role="bold"><emphasis
-        role="bold">(1)</emphasis></emphasis> send a call to the
-        <filename>"QueryService"</filename> class with <emphasis
-        role="bold">(2)</emphasis> the endpoint
-        <filename>"getQuery"</filename>, which is the name of the method which
-        we annotated, along with the parameter we which to pass to the method.
-        Note that you can send as many parameters as you want as the
-        <filename>endpoint()</filename> method accepts varargs
-        parameter.</para>
+        <programlisting>boolean bool = MessageBuilder.createCall(..., MyRemoteService.class).isEveryoneHappy();</programlisting>
 
-        <para>Then <emphasis role="bold">(3)</emphasis> we declare a
-        <filename>RemoteCallback</filename> to handle the response back from
-        the server. We declare the response type to be that of
-        <filename>String[]</filename> to correlate with the return type of the
-        endpoint on the server and fill in handling code for the response. In
-        this case we output an HTML unordered list manually.</para>
-
-        <para>Finally <emphasis role="bold">(4)</emphasis> we send the
-        call.</para>
+        <para>The above code will never return a valid result. In fact, it
+        will always return null, false, or 0 depending on the type. This is
+        due to the fact that the method is dispatched asynchronously, as in,
+        it does not wait for a server response before returning control. The
+        reason we chose to do this, as opposed to emulate the native
+        GWT-approach, which requires the implementation of remote and async
+        interfaces, was purely a function of a tradeoff for simplicity.
+        </para>
       </sect2>
     </sect1>
 
@@ -763,10 +710,28 @@ public class User implements java.io.Serializable {
       </programlisting>
 
       <note>
-        <para>All exposed entities must follow the <ulink
-        url="http://en.wikipedia.org/wiki/JavaBean">java bean
-        convention</ulink></para>
+        <para>All exposed entities must follow Java Bean convensions, and must
+        be in the classpath both at compile-time and at runtime. Compile-time
+        access to the entities is required since the creation of the
+        marshalling/demarshalling proxies involves code generation.</para>
       </note>
+
+      <para>.</para>
+
+      <sect2>
+        <title>Serialization of external types</title>
+
+        <para>It may not be possible to annotate certain types you wish to
+        expose to the bus for serialization if the entities are located in a
+        third-party library that you do not maintain. As such, you can
+        explicitly indicate in the configuration that you would like to have
+        this entities made available by declaring them in the
+        <varname>ErraiApp.properties</varname> of any module.</para>
+
+        <programlisting>errai.bus.serializableTypes=org.foo.Foo \
+                            org.bar.Bar \
+                            org.foobie.Foobie</programlisting>
+      </sect2>
     </sect1>
 
     <sect1 id="wiring">
@@ -787,9 +752,8 @@ public class User implements java.io.Serializable {
     <sect1>
       <title>Bus configuration</title>
 
-      <para><emphasis>Note: The details in this section are currently subject
-      to change. Please consult this section if you are working off
-      pre-release versions of ErraiBus.</emphasis></para>
+      <para>This section contains information on configuring the server-side
+      bus.</para>
 
       <sect2>
         <title>web.xml and app server configuration</title>
@@ -926,25 +890,147 @@ errai.async.worker.timeout=5
           must be authenticated before the bus will deliver any messages from
           the client to any service.</para>
         </sect3>
+
+        <sect3>
+          <title>errai.auto_scan_modules</title>
+
+          <para>A boolean indicating whether or not the Errai bootstrapper
+          should automatically scan for modules.</para>
+        </sect3>
       </sect2>
 
       <sect2>
         <title>ErraiApp.properties</title>
 
-        <para>The ErraiApp.properties is a marker file. It does not contain
-        any configuration, but it is required that it be present in any module
-        you wish Errai to scan for deployable extensions and services. It
-        should be located as the top-level directory of any JAR or
-        Directory-based module.</para>
+        <para>The ErraiApp.properties acts as a marker file. When it is
+        detected inside a JAR or at the top of any classpath, the
+        subdirectories are scanned for deployable components. As such, all
+        Errai application modules in a project should contain an
+        ErraiApp.properties at the root of all classpaths that you wish to be
+        scanned. </para>
+
+        <para>The file can also include explicitly declared serializable types
+        (such as those from third-party code) that cannot be annotated for
+        serialization. (See the section on serialization for more
+        details)</para>
+
+        <sect3>
+          <title>errai.bus.serializableTypes</title>
+
+          <para>Defines a list of serializable types to expose to the
+          bus.</para>
+
+          <programlisting>errai.bus.serializableTypes=org.foo.Foo \
+                            org.bar.Bar \
+                            org.foobie.Foobie
+
+</programlisting>
+        </sect3>
+      </sect2>
+
+      <sect2>
+        <title>Dispatchers</title>
+
+        <para>Dispatchers encapsulate the strategy for taking messages that
+        need to be delivered somewhere and seeing that they are delivered to
+        where they need to go. There are two primary implementations that are
+        provided with Errai, depending on your needs. </para>
+
+        <sect3>
+          <title>SimpleDispatcher</title>
+
+          <para>SimpleDispatcher is basic implementation that provides no
+          asychronous delivery mechanism. Rather, when you configure the Errai
+          to use this implementation, messages are delivered to their
+          endpoints synchronously. The incoming HTTP thread will be held open
+          until the messages are delivered. </para>
+
+          <para>While this sounds like it has almost no advantages, especially
+          in terms of scalablity. Using the SimpleDispatcher can be far
+          preferable when you're developing your application, as any errors
+          and stack traces will be far more easily traced and some cloud
+          services may not permit the use of threads in any case.</para>
+        </sect3>
+
+        <sect3>
+          <title>AsyncDispatcher</title>
+
+          <para>The AsyncDispatcher provides full asynchronous delivery of
+          messages. When this dispatcher is used, HTTP threads will have
+          control immediately returned upon dispatch of the message. This
+          dispatcher provides far more efficient use of resources in high-load
+          applications, and will significantly decrease memory and thread
+          usage overall. </para>
+        </sect3>
+      </sect2>
+
+      <sect2>
+        <title>Servlet Implementations</title>
+
+        <para>Errai has many several different implementations for HTTP
+        traffic to and from the bus. We provide a universally-compatible
+        blocking implementation that provides fully synchronous communication
+        to/from the server-side bus. Where this introduces scalability
+        problems, we have implemented many webserver-specific implementations
+        that take advantage of the various proprietary APIs to provide true
+        asynchrony. </para>
+
+        <para>These inlcuded implementations are packaged at:
+        <varname>org.jboss.errai.bus.server.servlet</varname></para>
+
+        <sect3>
+          <title>DefaultBlockingServlet</title>
+
+          <para>This is a universal, completely servlet spec compliant,
+          Servlet implementation. It provides purely synchronous request
+          handling and should work in virtually any servlet container, unless
+          there are restrictions on putting threads into sleep states.</para>
+        </sect3>
+
+        <sect3>
+          <title>TomcatCometServlet</title>
+
+          <para>The Tomcat AIO implementation of our servlet allows Errai to
+          take advantage of Tomcat's event-based AIO APIs to improve
+          scalability and reduce thread usage. The use of this implementation
+          is dependant on the Tomcat container being configured to support AIO
+          using either it's NIO or APR connectors. This servlet will NOT work
+          with the regular HTTP and AJP connectors. </para>
+        </sect3>
+
+        <sect3>
+          <title>JettyContinuationsServlet</title>
+
+          <para>The Jetty implementation leverages Jetty's continuations
+          support, which allows for threadless pausing of port connections.
+          This servlet implementation should work without any special
+          configuration of Jetty.</para>
+        </sect3>
+
+        <sect3>
+          <title>JBossCometServlet</title>
+
+          <para>The JBoss Comet support utilizes the JBoss Web AIO APIs to
+          improve scalability and reduce thread usage. The HTTP, NIO, and AJP
+          connectors are not supported. Use of this implementation requires
+          use of the APR (Apache Portable Runtime).</para>
+        </sect3>
+
+        <sect3>
+          <title>GrizzlyCometServlet</title>
+
+          <para>Support for the comet API in the Grizzy HTTP server (used in
+          Glassfish). </para>
+        </sect3>
+
+        <sect3>
+          <title>WeblogicAsyncServlet</title>
+
+          <para>Support for the Weblogic asynchronous APIs.</para>
+        </sect3>
       </sect2>
     </sect1>
   </chapter>
-
-  <!---
-        =====================================================
-        QUICKSTART
-        =====================================================
-    -->
 
   <chapter id="workspaces">
     <title>Errai Workspaces</title>
@@ -1132,12 +1218,12 @@ public class OpenTasksModule implements WidgetProvider
         purpose lookup for common workspace API that is available to any
         workspace component: <programlisting>
 AuthenticationContext authenticationContext =
-    Registry.get(SecurityService.class).getAuthenticationContext();
+    Registry.get(SecurityService.class).getAuthenticationContext();    
 </programlisting></para>
       </sect2>
 
       <sect2>
-        <title>Security</title>
+        <title>Authentication and Authorization</title>
 
         <para>The workspace itself doesn't provide an authentication
         component. Instead it relies on the Authentication provided by errai
@@ -1171,7 +1257,7 @@ AuthenticationContext authenticationContext =
       </sect2>
 
       <sect2>
-        <title>Authentication and Authorization</title>
+        <title>LoginClient</title>
 
         <para>The LoginClient is the counter part of the SecurityService. It
         is instructed by the SecurityService to request the credentials upon
@@ -1202,43 +1288,18 @@ AuthenticationContext authenticationContext =
         <para>The workspace allows you to store simple key-value pairs as
         preferences. Like with other common API, you obtain the Preferences
         through the <link linkend="workspace-registry">workspace
-        Registry</link>:
-            <programlisting>
-Preferences prefs = Registry.get(Preferences.class);
-prefs.set("default_sort_order", "ASC");
-            </programlisting>
-
-            The default implementation uses a cookie based
+        Registry</link>. The default implementation uses a cookie based
         approach, but it's easy to replace that one with a custom
         implementation in the module decriptor: <programlisting>
-
+    
    &lt;module&gt;
     [...]
     &lt;replace-with class="org.jboss.errai.workspaces.client.framework.CookiePreferences"&gt;
            &lt;when-type-is class="org.jboss.errai.workspaces.client.framework.Preferences"/&gt;
        &lt;/replace-with&gt;
     &lt;/module&gt;
-
+    
 </programlisting></para>
-      </sect2>
-
-         <sect2>
-        <title>Logging</title>
-        <para>
-            Workspaces inherits <ulink url="http://code.google.com/p/gwt-log/">GWT Log</ulink>.
-            It ships with an embedded log message console that records log output, besides the default logging
-            to the browser error console and the GWT hosted mode window. To use the internal logging mechanism,
-            simply write messages to the Logger:            
-            <programlisting>
-import com.allen_sauer.gwt.log.client.Log;
- [...]
-
-Log.warn("some log message");
-Log.error("message", throwable);
-                
-            </programlisting>
-
-        </para>
       </sect2>
     </sect1>
 
@@ -1271,7 +1332,7 @@ Log.error("message", throwable);
         <para>Once you've created a project using the maven archetype, make
         yourself familiar with the directory structure: <programlisting>
 Laika:gwt-app hbraun$ lstree
-| pom.xml
+| pom.xml    
 |-src
 |---main
 |-----java
@@ -1297,7 +1358,7 @@ Laika:gwt-app hbraun$ lstree
         archetype example to a different GWT application: <programlisting>
  ./src/main/java/ErraiApp.properties
  ./src/main/java/ErraiService.properties
- ./src/main/java/my/app/App.gwt.xml
+ ./src/main/java/my/app/App.gwt.xml   
 </programlisting> <orderedlist>
             <listitem>
               <para>ErraiApp.properties is a simple marker, that is required
@@ -1319,7 +1380,7 @@ Laika:gwt-app hbraun$ lstree
               <para>App.gwt.xml is your applications <ulink
               url="http://code.google.com/webtoolkit/doc/latest/DevGuideOrganizingProjects.html#DevGuideModules">module
               descriptor</ulink>. <programlisting>
-
+ 
 &lt;module rename-to="app"&gt;
  &lt;inherits name='com.google.gwt.user.User'/&gt;
  &lt;inherits name="com.google.gwt.uibinder.UiBinder"/&gt;
@@ -1328,11 +1389,11 @@ Laika:gwt-app hbraun$ lstree
  &lt;inherits name="org.jboss.errai.common.ErraiCommon"/&gt;
  &lt;inherits name="org.jboss.errai.bus.ErraiBus"/&gt;
  &lt;inherits name="org.jboss.errai.workspaces.ErraiWorkspaces" /&gt;
-
+ 
  &lt;entry-point class='my.app.client.HelloWorldClient'/&gt;
 
 &lt;/module&gt;
-
+    
 </programlisting> If you are building on workspaces make sure to include it's
               dependencies common and bus as well.</para>
             </listitem>
@@ -1348,7 +1409,7 @@ Laika:gwt-app hbraun$ lstree
         hosted mode</ulink> with the following commands: <programlisting>
   mvn gwt:run
 
- (alternatively)
+ (alternatively)   
   mvn gwt:debug
 </programlisting> <note>
             <title>Launching maven the first time</title>
@@ -1363,153 +1424,7 @@ Laika:gwt-app hbraun$ lstree
     </sect1>
   </chapter>
 
-    <!---
-        =====================================================
-        WORKING WITH ERRAI
-        =====================================================
-    -->
-
-
-    <chapter id="working_with_errai">
-        <title>Working with Errai</title>
-
-        <sect1>
-            <title>Debug facilities</title>
-            <para>
-                Debugging message oriented systems can easily become a complex task.
-                Messages are being published and consumed all across your application components
-                and the choreography (exchange pattern) is not obvious at a first glance.
-                You cannot simply step through an IDE, following typed references that explain how the code flows
-                and in which order components are invoked.
-            </para>
-
-            <para>
-                We are constantly trying to improve the facilities that assist you with these task.
-                The most important ones are described in the next sections.
-            </para>
-
-            <sect2>
-                <title>Visual Bus Monitor</title>
-                <para>
-                    Errai ships with Swing-based ErraiBus Monitor application. It's really straight-forward to get up and running.
-                    You simply add it as a runtime dependency, and bootstrap GWT Development Mode with the
-<programlisting>
-    -Derrai.tools.bus_monitor_attach=true
-</programlisting>
-                    VM flag, and this magical UI should automatically appear as ErraiBus bootstraps.
-                    When the monitor is activated, it attaches probes in into the bus and records all activity accordingly.
-                    You can drill down into individual services and examine individual messages that have been received to debug any mysterious problems that arise.                     
-
-                </para>
-
-                <para>
-                    <figure id="bus_monitor">
-                        <title>Bus Monitor</title>
-                        <mediaobject>
-                            <imageobject>
-                                <imagedata align="center" fileref="images/monitor.png"/>
-                            </imageobject>
-                        </mediaobject>
-                    </figure>
-
-                </para>
-                <para>                    
-                    The monitor allows you to inspect the endpoints (aka 'subjects') registred on any client connected
-                    to the system and the server side services as well. This should already give an idea how the messaging
-                    landscape is layed out. However, be aware that some endpoints may be registered lazily, i.e. when
-                    a UI component is loaded. This is especially true for <link linkend="workspaces">Errai Workspaces</link>, which
-                    tends load complete toolsets lazily (<ulink url="http://code.google.com/p/google-web-toolkit/wiki/CodeSplitting">GWT code splitting</ulink>).
-                </para>
-            </sect2>
-
-        </sect1>
-
-        <sect1>
-            <title>Proxied access to external containers</title>
-            <para>
-            Usually GWT developement happens in hosted mode and then, later on, the GWT app
-            is turned into a webapp (*.war) that can be deployed on a target container (app server, servlet engine).
-            This works quiet well for closed systems that don't depend on additional resources the target container
-            provides. A typical resource would be a DataSource for access to a relational database. 
-            </para>
-
-            <para>
-                Instead of pulling these resources into the hosted mode servlet engine (jetty, read-only JNDI)
-                or creating mock objects for any resources that cannot be run in hosted mode, we offer you a much more simple
-                way to develop with errai: Simply proxy all requests that occur in hosted mode to an external target container:
-                <figure id="proxy">
-                    <title>Development Proxy</title>
-                    <mediaobject>
-                        <imageobject>
-                            <imagedata align="center" fileref="images/proxy.png"/>
-                        </imageobject>
-                    </mediaobject>
-                </figure>
-
-            </para>
-
-            <para>
-               The proxy is implemented a yet another servlet that you need to add to the web.xml
-               that's being sed in hosted mode:
-<programlisting>
-&lt;servlet>
-    &lt;servlet-name>erraiProxy&lt;/servlet-name>
-    &lt;description>Errai Proxy&lt;/description>
-    &lt;servlet-class>org.jboss.errai.tools.proxy.XmlHttpProxyServlet&lt;/servlet-class>
-        &lt;init-param>
-            &lt;param-name>config.name&lt;/param-name>
-            &lt;param-value>errai-proxy.json&lt;/param-value>      (1)
-        &lt;/init-param>
-        &lt;load-on-startup>1&lt;/load-on-startup>
-&lt;/servlet>
-               
-&lt;servlet-mapping>
-    &lt;servlet-name>erraiProxy&lt;/servlet-name>
-    &lt;url-pattern>/app/proxy/*&lt;/url-pattern>                  (2)
-&lt;/servlet-mapping>
-           
-</programlisting>
-            <orderedlist>
-            <listitem>
-              <para>Proxy configuration. See details below.</para>
-            </listitem>
-
-            <listitem>
-              <para>The proxy url pattern convetion. The bus bootstraps on this URL.</para>
-            </listitem>
-          </orderedlist>
-            </para>
-
-            <para>
-                The web.xml proxy declaration contains two notable elements: A reference to
-                the proxy configuration file and a URL pattern, where the proxy can found.
-                While the later shouldn't be changed (the bus bootstraps on this URL),
-                you need to change the proxy config according to your needs:
-<programlisting>
- {"xhp": {
-    "version": "1.1",
-    "services": [
-        {"id": "default",
-         "url":"http://127.0.0.1:8080/my-gwt-app/in.erraiBus",
-         "passthrough":true
-        },
-    ]
-  }
-}
-</programlisting>
-                You would need to <emphasis>change the host, port and webcontext</emphasis> ('my-gwt-app' in this case)
-                to reflect the location of the external container. 'passthrough' simply means that any
-                request to 'proxy/in.erraiBus' will go to 'container/my-gwt-app/in.erraiBus'.
-
-                This already indicates that you need to have the server side part of your GWT application,
-                already running on the target container. The most simple way to achieve this, is to build a
-                the complete webapp, deploy it and ignore the UI parts that may be available on the server.               
-            </para>
-        </sect1>
-
-    </chapter>
-
-    <!---
+  <!---
         =====================================================
         QUICKSTART
         =====================================================
