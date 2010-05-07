@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Stack;
 
 /**
- * Provides a shared context tp the bootrsap execution.
+ * Provides a shared context to the bootstrap execution.
  * 
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: May 3, 2010
