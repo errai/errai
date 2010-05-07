@@ -77,8 +77,6 @@
     </section>
   </chapter>
 
-  <!---->
-
   <chapter id="installation">
     <title>Installation</title>
 
@@ -1423,12 +1421,6 @@ Laika:gwt-app hbraun$ lstree
       </sect2>
     </sect1>
   </chapter>
-
-  <!---
-        =====================================================
-        QUICKSTART
-        =====================================================
-    -->
 
   <chapter id="quickstart">
     <title>Appendix A: Quickstart</title>
