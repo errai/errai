@@ -79,7 +79,7 @@ public class LoadExtensions implements BootstrapExecution
       };
 
       // Search for Errai extensions.
-      List<File> configRootTargets = ConfigUtil.findAllConfigTargets();
+      List<File> configRootTargets = context.getConfigTargets();
       visitAllTargets(configRootTargets, new ConfigVisitor() {
         public void visit(Class<?> loadClass) {
           if (ErraiConfigExtension.class.isAssignableFrom(loadClass)
@@ -122,7 +122,7 @@ public class LoadExtensions implements BootstrapExecution
               }
               catch (CreationException e) {
                 log.info("extension " + clazz.getName() + " cannot be bound yet, deferring ...");
-                context.deferr(create);
+                context.defer(create);
               }
 
             }

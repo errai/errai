@@ -83,7 +83,7 @@ class DefaultComponents implements BootstrapExecution
         }
         catch (Throwable e) {
           log.info("authentication adapter " + authAdapterClass.getName() + " cannot be bound yet, deferring ...");
-          context.deferr(create);
+          context.defer(create);
         }
 
       }

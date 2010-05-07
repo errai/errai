@@ -72,9 +72,7 @@ class DiscoverServices implements BootstrapExecution
     }
     if (autoScanModules) {
 
-      List<File> configRootTargets = ConfigUtil.findAllConfigTargets();
-
-      visitAllTargets(configRootTargets,
+      visitAllTargets(context.getConfigTargets(),
           new ConfigVisitor() {
             public void visit(final Class<?> loadClass) {
               if (loadedComponents.contains(loadClass.getName())) return;
