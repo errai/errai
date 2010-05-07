@@ -40,7 +40,8 @@ public class OrderedBootstrap implements BootstrapExecution
   {
     bootstrap.add(new DefaultComponents());
     bootstrap.add(new DefaultServices());
-    bootstrap.add(new ScanModules());
+    bootstrap.add(new LoadExtensions());
+    bootstrap.add(new DiscoverServices());
     bootstrap.add(new AuthenticationRules());
     bootstrap.add(new DefaultResources());
     bootstrap.add(new CleanupStartupFiles());
