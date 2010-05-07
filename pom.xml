@@ -8,9 +8,9 @@
     <packaging>pom</packaging>
 
     <scm>
-        <connection>scm:svn:https://svn.jboss.org/repos/jbossworkspace/trunk</connection>
-        <developerConnection>scm:svn:https://svn.jboss.org/repos/jbossworkspace/trunk</developerConnection>
-        <url>https://svn.jboss.org/repos/jbossworkspace/trunk</url>
+        <connection>scm:svn:https://svn.jboss.org/repos/errai/trunk</connection>
+        <developerConnection>scm:svn:https://svn.jboss.org/repos/errai/trunk</developerConnection>
+        <url>https://svn.jboss.org/repos/errai/trunk</url>
     </scm>
 
     <organization>
