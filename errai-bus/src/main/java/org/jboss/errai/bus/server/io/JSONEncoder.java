@@ -55,10 +55,18 @@ public class JSONEncoder {
             return encodeMap((Map) v);
         } else if (v instanceof Object[]) {
             return encodeArray((Object[]) v);
-        } else if (serializableTypes.contains(v.getClass()) || tHandlers.containsKey(v.getClass())) {
+
+        // CDI Integration: Loading entities after the service was initialized
+        // This may cause the client to throw an exception if the entity is not known
+        // TODO: Improve exception handling for these cases
+          
+        }/* else if (serializableTypes.contains(v.getClass()) || tHandlers.containsKey(v.getClass())) {
             return encodeObject(v);
         } else {
             throw new RuntimeException("cannot serialize type: " + v.getClass().getName());
+        }  */
+        else {
+          return encodeObject(v);          
         }
     }
 
