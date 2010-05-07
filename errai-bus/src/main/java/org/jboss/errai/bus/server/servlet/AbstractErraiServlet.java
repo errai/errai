@@ -35,22 +35,22 @@ public abstract class AbstractErraiServlet extends HttpServlet {
     protected Logger log = LoggerFactory.getLogger(getClass());
 
 
-    @Override
-    @SuppressWarnings({"unchecked"})
-    public void init() throws ServletException {
-        super.init();
-        service =
-                Guice.createInjector(new AbstractModule() {
-                    public void configure() {
-                        bind(MessageBus.class).to(ServerMessageBusImpl.class);
-                        bind(ServerMessageBus.class).to(ServerMessageBusImpl.class);
-                        bind(ErraiService.class).to(ErraiServiceImpl.class);
-                        bind(ErraiServiceConfigurator.class).to(ErraiServiceConfiguratorImpl.class);
-                    }
-                }).getInstance(ErraiService.class);
+  @Override
+  @SuppressWarnings({"unchecked"})
+  public void init() throws ServletException {
+    super.init();
+    service =
+        Guice.createInjector(new AbstractModule() {
+          public void configure() {
+            bind(MessageBus.class).to(ServerMessageBusImpl.class);
+            bind(ServerMessageBus.class).to(ServerMessageBusImpl.class);
+            bind(ErraiService.class).to(ErraiServiceImpl.class);
+            bind(ErraiServiceConfigurator.class).to(ErraiServiceConfiguratorImpl.class);
+          }
+        }).getInstance(ErraiService.class);
 
-        sessionProvider = service.getConfiguration().getConfiguredSessionProvider();
-    }
+    sessionProvider = service.getSessionProvider();
+  }
 
 
     /**

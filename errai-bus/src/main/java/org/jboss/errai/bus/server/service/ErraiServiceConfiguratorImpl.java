@@ -16,631 +16,150 @@
 
 package org.jboss.errai.bus.server.service;
 
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.inject.*;
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
+import com.google.inject.Inject;
 import org.jboss.errai.bus.client.api.ResourceProvider;
-import org.jboss.errai.bus.client.api.TaskManager;
-import org.jboss.errai.bus.client.api.base.TaskManagerFactory;
-import org.jboss.errai.bus.client.api.builder.AbstractRemoteCallBuilder;
-import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.client.framework.ProxyProvider;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
-import org.jboss.errai.bus.client.framework.TaskManagerProvider;
-import org.jboss.errai.bus.rebind.RebindUtils;
-import org.jboss.errai.bus.server.DefaultTaskManager;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
-import org.jboss.errai.bus.server.HttpSessionProvider;
-import org.jboss.errai.bus.server.SimpleDispatcher;
-import org.jboss.errai.bus.server.annotations.*;
-import org.jboss.errai.bus.server.annotations.security.RequireAuthentication;
-import org.jboss.errai.bus.server.annotations.security.RequireRoles;
-import org.jboss.errai.bus.server.api.*;
-import org.jboss.errai.bus.server.api.Module;
-import org.jboss.errai.bus.server.io.ConversationalEndpointCallback;
-import org.jboss.errai.bus.server.io.EndpointCallback;
-import org.jboss.errai.bus.server.io.JSONEncoder;
-import org.jboss.errai.bus.server.io.RemoteServiceCallback;
-import org.jboss.errai.bus.server.security.auth.AuthenticationAdapter;
-import org.jboss.errai.bus.server.security.auth.rules.RolesRequiredRule;
-import org.jboss.errai.bus.server.util.BundleVisitor;
+import org.jboss.errai.bus.server.api.ServerMessageBus;
+import org.jboss.errai.bus.server.api.SessionProvider;
 import org.jboss.errai.bus.server.util.ConfigUtil;
-import org.jboss.errai.bus.server.util.ConfigVisitor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.lang.reflect.Method;
 import java.util.*;
 
-import static com.google.inject.Guice.createInjector;
 import static java.util.ResourceBundle.getBundle;
-import static org.jboss.errai.bus.client.api.base.TaskManagerFactory.setTaskManagerProvider;
-import static org.jboss.errai.bus.server.io.JSONEncoder.setSerializableTypes;
-import static org.jboss.errai.bus.server.util.ConfigUtil.visitAllTargets;
 
 /**
  * Default implementation of the ErraiBus server-side configurator.
  */
 public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
-    private ServerMessageBus bus;
-    private List<File> configRootTargets;
-    private Map<String, String> properties;
+  
+  private ServerMessageBus bus;
+  private List<File> configRootTargets;
+  private Map<String, String> properties;
 
-    private Map<Class<?>, ResourceProvider> extensionBindings;
-    private Map<String, ResourceProvider> resourceProviders;
-    private Set<Class> serializableTypes;
+  private Map<Class<?>, ResourceProvider> extensionBindings;
+  private Map<String, ResourceProvider> resourceProviders;
+  private Set<Class> serializableTypes;
 
-    private RequestDispatcher dispatcher;
-    private SessionProvider sessionProvider;
+  private RequestDispatcher dispatcher;
+  private SessionProvider sessionProvider;
 
-    private ErraiServiceConfigurator configInst = this;
+  /**
+   * Initializes the <tt>ErraiServiceConfigurator</tt> with a specified <tt>ServerMessageBus</tt>
+   *
+   * @param bus - the server message bus in charge of transmitting messages
+   */
+  @Inject
+  public ErraiServiceConfiguratorImpl(ServerMessageBus bus) {
+    this.bus = bus;
+    this.extensionBindings = new HashMap<Class<?>, ResourceProvider>();
+    this.resourceProviders = new HashMap<String, ResourceProvider>();
+    this.serializableTypes = new HashSet<Class>();
 
-    private boolean autoScanModules = true;
+    loadServiceProperties();
+  }
 
-    private Logger log = LoggerFactory.getLogger(ErraiServiceConfigurator.class);
+  public void lockdown()
+  {
+    // lockdown the configuration so it can't be modified.
+    configRootTargets = Collections.unmodifiableList(configRootTargets);
+    properties = Collections.unmodifiableMap(properties);
+    extensionBindings = Collections.unmodifiableMap(extensionBindings);
+    resourceProviders = Collections.unmodifiableMap(resourceProviders);
+    serializableTypes = Collections.unmodifiableSet(serializableTypes);
+  }
 
-    /**
-     * Initializes the <tt>ErraiServiceConfigurator</tt> with a specified <tt>ServerMessageBus</tt>
-     *
-     * @param bus - the server message bus in charge of transmitting messages
-     */
-    @Inject
-    public ErraiServiceConfiguratorImpl(ServerMessageBus bus) {
-        this.bus = bus;
+  private void loadServiceProperties()
+  {
+    properties = new HashMap<String, String>();
+    configRootTargets = ConfigUtil.findAllConfigTargets();
+
+    try {
+      String bundlePath = System.getProperty("errai.service_config_prefix_path");
+      ResourceBundle erraiServiceConfig = getBundle(bundlePath == null ? "ErraiService" : bundlePath + ".ErraiService");
+      Enumeration<String> keys = erraiServiceConfig.getKeys();
+      String key;
+      while (keys.hasMoreElements()) {
+        key = keys.nextElement();
+        properties.put(key, erraiServiceConfig.getString(key));
+      }
     }
-
-    /**
-     * Configures the specified service and the bus. All components and extensions are loaded, also anything that
-     * needs to be done during the initialization stage. The configuration is read in and everything is set up
-     *
-     * @param erraiService - the service associated with the bus
-     */
-    public void configure(final ErraiService erraiService) {
-        properties = new HashMap<String, String>();
-        configRootTargets = ConfigUtil.findAllConfigTargets();
-
-        try {
-            String bundlePath = System.getProperty("errai.service_config_prefix_path");
-            ResourceBundle erraiServiceConfig = getBundle(bundlePath == null ? "ErraiService" : bundlePath + ".ErraiService");
-            Enumeration<String> keys = erraiServiceConfig.getKeys();
-            String key;
-            while (keys.hasMoreElements()) {
-                key = keys.nextElement();
-                properties.put(key, erraiServiceConfig.getString(key));
-            }
-        }
-        catch (Exception e) {
-            throw new ErraiBootstrapFailure("Error reading from configuration. Did you include ErraiService.properties?", e);
-        }
-
-        // Create a Map to collect any extensions bindings to be bound to
-        // services.
-        extensionBindings = new HashMap<Class<?>, ResourceProvider>();
-        resourceProviders = new HashMap<String, ResourceProvider>();
-        serializableTypes = new HashSet<Class>();
-        final Set<String> loadedComponents = new HashSet<String>();
-        final List<Runnable> deferred = new LinkedList<Runnable>();
-
-        if (properties.containsKey("errai.authentication_adapter")) {
-            try {
-                final Class<? extends AuthenticationAdapter> authAdapterClass = Class.forName(properties.get("errai.authentication_adapter"))
-                        .asSubclass(AuthenticationAdapter.class);
-
-                log.info("authentication adapter configured: " + authAdapterClass.getName());
-
-                final Runnable create = new Runnable() {
-                    public void run() {
-                        final AuthenticationAdapter authAdapterInst = Guice.createInjector(new AbstractModule() {
-                            @Override
-                            protected void configure() {
-                                bind(AuthenticationAdapter.class).to(authAdapterClass);
-                                bind(ErraiServiceConfigurator.class).toInstance(configInst);
-                                bind(MessageBus.class).toInstance(bus);
-                                bind(ServerMessageBus.class).toInstance(bus);
-                            }
-                        }).getInstance(AuthenticationAdapter.class);
-
-                        extensionBindings.put(AuthenticationAdapter.class, new ResourceProvider() {
-                            public Object get() {
-                                return authAdapterInst;
-                            }
-                        });
-                    }
-                };
-
-                try {
-                    create.run();
-                }
-                catch (Throwable e) {
-                    log.info("authentication adapter " + authAdapterClass.getName() + " cannot be bound yet, deferring ...");
-                    deferred.add(create);
-                }
-
-            }
-            catch (ErraiBootstrapFailure e) {
-                throw e;
-            }
-            catch (Exception e) {
-                throw new ErraiBootstrapFailure("cannot configure authentication adapter", e);
-            }
-        }
-
-        this.dispatcher = createInjector(new AbstractModule() {
-            @Override
-            protected void configure() {
-                Class<? extends RequestDispatcher> dispatcherImplementation = SimpleDispatcher.class;
-
-                if (configInst.hasProperty(ERRAI_DISPATCHER_IMPLEMENTATION)) {
-                    try {
-                        dispatcherImplementation = Class.forName(configInst.getProperty(ERRAI_DISPATCHER_IMPLEMENTATION))
-                                .asSubclass(RequestDispatcher.class);
-                    }
-                    catch (Exception e) {
-                        throw new ErraiBootstrapFailure("could not load request dispatcher implementation class", e);
-                    }
-                }
-
-                log.info("using dispatcher implementation: " + dispatcherImplementation.getName());
-
-                bind(RequestDispatcher.class).to(dispatcherImplementation);
-                bind(ErraiService.class).toInstance(erraiService);
-                bind(MessageBus.class).toInstance(bus);
-                bind(ErraiServiceConfigurator.class).toInstance(configInst);
-            }
-        }).getInstance(RequestDispatcher.class);
-
-        this.sessionProvider = createInjector(new AbstractModule() {
-            @Override
-            protected void configure() {
-                Class<? extends SessionProvider> sessionProviderImplementation = HttpSessionProvider.class;
-
-                if (configInst.hasProperty(ERRAI_SESSION_PROVIDER_IMPLEMENTATION)) {
-                    try {
-                        sessionProviderImplementation = Class.forName(configInst.getProperty(ERRAI_SESSION_PROVIDER_IMPLEMENTATION))
-                                .asSubclass(SessionProvider.class);
-                    }
-                    catch (Exception e) {
-                        throw new ErraiBootstrapFailure("could not load session provider implementation class", e);
-                    }
-                }
-
-                log.info("using session provider implementation: " + sessionProviderImplementation.getName());
-
-                bind(SessionProvider.class).to(sessionProviderImplementation);
-                bind(ErraiService.class).toInstance(erraiService);
-                bind(MessageBus.class).toInstance(bus);
-                bind(ErraiServiceConfigurator.class).toInstance(configInst);
-            }
-        }).getInstance(SessionProvider.class);
-
-        log.info("beging searching for Errai extensions ...");
-
-        if (properties.containsKey("errai.auto_scan_modules")) {
-            autoScanModules = Boolean.parseBoolean(properties.get("errai.auto_scan_modules"));
-        }
-        if (autoScanModules) {
-
-            final ErraiConfig erraiConfig = new ErraiConfig() {
-                public void addBinding(Class<?> type, ResourceProvider provider) {
-                    extensionBindings.put(type, provider);
-                }
-
-                public void addResourceProvider(String name, ResourceProvider provider) {
-                    resourceProviders.put(name, provider);
-                }
-
-                public void addSerializableType(Class<?> type) {
-                    log.info("Marked " + type + " as serializable.");
-                    loadedComponents.add(type.getName());
-                    serializableTypes.add(type);
-                }
-            };
-
-            // Search for Errai extensions.
-            visitAllTargets(configRootTargets, new ConfigVisitor() {
-                public void visit(Class<?> loadClass) {
-                    if (ErraiConfigExtension.class.isAssignableFrom(loadClass)
-                            && loadClass.isAnnotationPresent(ExtensionComponent.class) && !loadedComponents.contains(loadClass.getName())) {
-
-                        loadedComponents.add(loadClass.getName());
-
-                        // We have an annotated ErraiConfigExtension.  So let's configure it.
-                        final Class<? extends ErraiConfigExtension> clazz =
-                                loadClass.asSubclass(ErraiConfigExtension.class);
-
-
-                        log.info("found extension " + clazz.getName());
-
-                        try {
-
-                            final Runnable create = new Runnable() {
-                                public void run() {
-                                    AbstractModule module = new AbstractModule() {
-                                        @Override
-                                        protected void configure() {
-                                            bind(ErraiConfigExtension.class).to(clazz);
-                                            bind(ErraiServiceConfigurator.class).toInstance(configInst);
-                                            bind(MessageBus.class).toInstance(bus);
-
-                                            // Add any extension bindings.
-                                            for (Map.Entry<Class<?>, ResourceProvider> entry : extensionBindings.entrySet()) {
-                                                bind(entry.getKey()).toProvider(new GuiceProviderProxy(entry.getValue()));
-                                            }
-                                        }
-                                    };
-                                    Guice.createInjector(module)
-                                            .getInstance(ErraiConfigExtension.class)
-                                            .configure(erraiConfig);
-                                }
-                            };
-
-                            try {
-                                create.run();
-                            }
-                            catch (CreationException e) {
-                                log.info("extension " + clazz.getName() + " cannot be bound yet, deferring ...");
-                                deferred.add(create);
-                            }
-
-                        }
-                        catch (Throwable e) {
-                            throw new ErraiBootstrapFailure("could not initialize extension: " + loadClass.getName(), e);
-                        }
-                    }
-                }
-            });
-
-
-            for (Class bindingType : extensionBindings.keySet()) {
-                log.info("added extension binding: " + bindingType.getName());
-            }
-
-            log.info("total extension binding: " + extensionBindings.keySet().size());
-
-
-            visitAllTargets(configRootTargets,
-                    new ConfigVisitor() {
-                        public void visit(final Class<?> loadClass) {
-                            if (loadedComponents.contains(loadClass.getName())) return;
-
-
-                            if (Module.class.isAssignableFrom(loadClass)) {
-                                final Class<? extends Module> clazz = loadClass.asSubclass(Module.class);
-
-                                loadedComponents.add(loadClass.getName());
-
-                                if (clazz.isAnnotationPresent(LoadModule.class)) {
-                                    log.info("discovered module : " + clazz.getName() + " -- don't use Modules! Use @Service and MessageCallback!");
-                                    Guice.createInjector(new AbstractModule() {
-                                        @Override
-                                        protected void configure() {
-                                            bind(Module.class).to(clazz);
-                                            bind(MessageBus.class).toInstance(bus);
-                                        }
-                                    }).getInstance(Module.class).init();
-                                }
-
-                            } else if (loadClass.isAnnotationPresent(Service.class)) {
-                                Object svc = null;
-
-                                Class remoteImpl = getRemoteImplementation(loadClass);
-                                if (remoteImpl != null) {
-                                    createRPCScaffolding(remoteImpl, loadClass, bus);
-                                } else if (MessageCallback.class.isAssignableFrom(loadClass)) {
-                                    final Class<? extends MessageCallback> clazz = loadClass.asSubclass(MessageCallback.class);
-
-                                    loadedComponents.add(loadClass.getName());
-
-                                    log.info("discovered service: " + clazz.getName());
-                                    try {
-                                        svc = Guice.createInjector(new AbstractModule() {
-                                            @Override
-                                            protected void configure() {
-                                                bind(MessageCallback.class).to(clazz);
-                                                bind(MessageBus.class).toInstance(bus);
-                                                bind(RequestDispatcher.class).toInstance(dispatcher);
-
-                                                // Add any extension bindings.
-                                                for (Map.Entry<Class<?>, ResourceProvider> entry : extensionBindings.entrySet()) {
-                                                    bind(entry.getKey()).toProvider(new GuiceProviderProxy(entry.getValue()));
-                                                }
-                                            }
-                                        }).getInstance(MessageCallback.class);
-                                    }
-                                    catch (Throwable t) {
-                                        t.printStackTrace();
-                                    }
-
-
-                                    String svcName = clazz.getAnnotation(Service.class).value();
-
-                                    // If no name is specified, just use the class name as the service
-                                    // by default.
-                                    if ("".equals(svcName)) {
-                                        svcName = clazz.getSimpleName();
-                                    }
-
-                                    // Subscribe the service to the bus.
-                                    bus.subscribe(svcName, (MessageCallback) svc);
-
-                                    RolesRequiredRule rule = null;
-                                    if (clazz.isAnnotationPresent(RequireRoles.class)) {
-                                        rule = new RolesRequiredRule(clazz.getAnnotation(RequireRoles.class).value(), bus);
-                                    } else if (clazz.isAnnotationPresent(RequireAuthentication.class)) {
-                                        rule = new RolesRequiredRule(new HashSet<Object>(), bus);
-                                    }
-                                    if (rule != null) {
-                                        bus.addRule(svcName, rule);
-                                    }
-                                }
-
-                                if (svc == null) {
-                                    svc = Guice.createInjector(new AbstractModule() {
-                                        @Override
-                                        protected void configure() {
-                                            bind(MessageBus.class).toInstance(bus);
-                                            bind(RequestDispatcher.class).toInstance(dispatcher);
-
-                                            // Add any extension bindings.
-                                            for (Map.Entry<Class<?>, ResourceProvider> entry : extensionBindings.entrySet()) {
-                                                bind(entry.getKey()).toProvider(new GuiceProviderProxy(entry.getValue()));
-                                            }
-                                        }
-                                    }).getInstance(loadClass);
-                                }
-
-                                Map<String, MessageCallback> epts = new HashMap<String, MessageCallback>();
-
-
-                                // we scan for endpoints
-                                for (final Method method : loadClass.getDeclaredMethods()) {
-                                    if (method.isAnnotationPresent(Endpoint.class)) {
-                                        epts.put(method.getName(), method.getReturnType() == Void.class ?
-                                                new EndpointCallback(svc, method) :
-                                                new ConversationalEndpointCallback(svc, method, bus));
-                                    }
-                                }
-
-                                if (!epts.isEmpty()) {
-                                    bus.subscribe(loadClass.getSimpleName() + ":RPC", new RemoteServiceCallback(epts));
-                                }
-
-                            } else if (loadClass.isAnnotationPresent(ExposeEntity.class)) {
-                                log.info("Marked " + loadClass + " as serializable.");
-                                loadedComponents.add(loadClass.getName());
-                                serializableTypes.add(loadClass);
-                            }
-                        }
-                    }
-            );
-        } else {
-            log.info("auto-scan disabled.");
-        }
-
-        ConfigUtil.visitAllErraiAppProperties(configRootTargets, new BundleVisitor() {
-            public void visit(ResourceBundle bundle) {
-                log.info("checking ErraiApp.properties for configured types ...");
-
-                try {
-                    for (String s : bundle.getString(CONFIG_ERRAI_SERIALIZABLE_TYPE).split(" ")) {
-                        try {
-                            Class<?> cls = Class.forName(s.trim());
-                            log.info("Marked " + cls + " as serializable.");
-                            loadedComponents.add(cls.getName());
-                            serializableTypes.add(cls);
-                        }
-                        catch (Exception e) {
-                            throw new ErraiBootstrapFailure(e);
-                        }
-
-                    }
-                }
-                catch (MissingResourceException e) {
-                    // do nothing.
-                }
-            }
-        });
-
-        String requireAuthenticationForAll = "errai.require_authentication_for_all";
-
-        if (hasProperty(requireAuthenticationForAll) && "true".equals(getProperty(requireAuthenticationForAll))) {
-            log.info("authentication for all requests required, adding rule ... ");
-            bus.addRule("AuthorizationService", new RolesRequiredRule(new HashSet<Object>(), bus));
-        }
-
-        ConfigUtil.cleanupStartupTempFiles();
-
-        log.info("running deferred configuration tasks ...");
-        for (Runnable r : deferred) {
-            r.run();
-        }
-
-        resourceProviders.put(MessageBus.class.getName(), new BusProvider(bus));
-        resourceProviders.put(RequestDispatcher.class.getName(), new DispatcherProvider(dispatcher));
-
-        // configure the JSONEncoder...
-        setSerializableTypes(serializableTypes);
-
-        // configure the server-side taskmanager
-        setTaskManagerProvider(new TaskManagerProvider() {
-            public TaskManager get() {
-                return DefaultTaskManager.get();
-            }
-        });
-
-        // lockdown the configuration so it can't be modified.
-        configRootTargets = Collections.unmodifiableList(configRootTargets);
-        properties = Collections.unmodifiableMap(properties);
-        extensionBindings = Collections.unmodifiableMap(extensionBindings);
-        resourceProviders = Collections.unmodifiableMap(resourceProviders);
-        serializableTypes = Collections.unmodifiableSet(serializableTypes);
-
-        log.info("Errai bootstraping complete!");
+    catch (Exception e) {
+      throw new ErraiBootstrapFailure("Error reading from configuration. Did you include ErraiService.properties?", e);
     }
+  }
 
-    static class BusProvider implements ResourceProvider<MessageBus> {
-        private final MessageBus bus;
+  /**
+   * Gets the resource providers associated with this configurator
+   *
+   * @return the resource providers associated with this configurator
+   */
+  public Map<String, ResourceProvider> getResourceProviders() {
+    return this.resourceProviders;
+  }
 
-        BusProvider(MessageBus bus) {
-            this.bus = bus;
-        }
+  /**
+   * Gets a list of all configuration targets
+   *
+   * @return list of all configuration targets
+   */
+  public List<File> getConfigurationRoots() {
+    return this.configRootTargets;
+  }
 
-        public MessageBus get() {
-            return bus;
-        }
+  /**
+   * Returns true if the configuration has this <tt>key</tt> property
+   *
+   * @param key - the property too search for
+   * @return false if the property does not exist
+   */
+  public boolean hasProperty(String key) {
+    return properties.containsKey(key);
+  }
+
+  /**
+   * Gets the property associated with the key
+   *
+   * @param key - the key to search for
+   * @return the property, if it exists, null otherwise
+   */
+  public String getProperty(String key) {
+    return properties.get(key);
+  }
+
+  /**
+   * Gets the resources attached to the specified resource class
+   *
+   * @param resourceClass - the class to search the resources for
+   * @param <T>           - the class type
+   * @return the resource of type <tt>T</tt>
+   */
+  @SuppressWarnings({"unchecked"})
+  public <T> T getResource(Class<? extends T> resourceClass) {
+    if (extensionBindings.containsKey(resourceClass)) {
+      return (T) extensionBindings.get(resourceClass).get();
+    } else {
+      return null;
     }
+  }
 
-    static class DispatcherProvider implements ResourceProvider<RequestDispatcher> {
-        private final RequestDispatcher dispatcher;
+  /**
+   * Gets all serializable types
+   *
+   * @return all serializable types
+   */
+  public Set<Class> getAllSerializableTypes() {
+    return serializableTypes;
+  }
+  
+  public Map<Class<?>, ResourceProvider> getExtensionBindings()
+  {
+    return extensionBindings;
+  }
 
-        DispatcherProvider(RequestDispatcher dispatcher) {
-            this.dispatcher = dispatcher;
-        }
-
-        public RequestDispatcher get() {
-            return dispatcher;
-        }
-    }
-
-    static class GuiceProviderProxy implements Provider {
-        private final ResourceProvider provider;
-
-        GuiceProviderProxy(ResourceProvider provider) {
-            this.provider = provider;
-        }
-
-        public Object get() {
-            return provider.get();
-        }
-    }
-
-    private static Class getRemoteImplementation(Class type) {
-        for (Class iface : type.getInterfaces()) {
-            if (iface.isAnnotationPresent(Remote.class)) {
-                return iface;
-            } else if (iface.getInterfaces().length != 0 && ((iface = getRemoteImplementation(iface)) != null)) {
-                return iface;
-            }
-        }
-        return null;
-    }
-
-    private void createRPCScaffolding(final Class remoteIface, final Class<?> type, final MessageBus bus) {
-        final Injector injector = Guice.createInjector(new AbstractModule() {
-            @Override
-            protected void configure() {
-                bind(MessageBus.class).toInstance(bus);
-                bind(RequestDispatcher.class).toInstance(dispatcher);
-
-                // Add any extension bindings.
-                for (Map.Entry<Class<?>, ResourceProvider> entry : extensionBindings.entrySet()) {
-                    bind(entry.getKey()).toProvider(new GuiceProviderProxy(entry.getValue()));
-                }
-            }
-        });
-
-        Object svc = injector.getInstance(type);
-
-        Map<String, MessageCallback> epts = new HashMap<String, MessageCallback>();
-
-        // beware of classloading issues. better reflect on the actual instance
-        for (Class<?> intf : svc.getClass().getInterfaces()) {
-            for (final Method method : intf.getDeclaredMethods()) {
-                if (RebindUtils.isMethodInInterface(remoteIface, method)) {
-                    epts.put(RebindUtils.createCallSignature(method), new ConversationalEndpointCallback(svc, method, bus));
-                }
-            }
-        }
-
-        bus.subscribe(remoteIface.getName() + ":RPC", new RemoteServiceCallback(epts));
-
-        new ProxyProvider() {
-            {
-                AbstractRemoteCallBuilder.setProxyFactory(this);
-            }
-
-            public <T> T getRemoteProxy(Class<T> proxyType) {
-                throw new RuntimeException("This API is not supported in the server-side environment.");
-            }
-        };
-
-    }
-
-    /**
-     * Gets the resource providers associated with this configurator
-     *
-     * @return the resource providers associated with this configurator
-     */
-    public Map<String, ResourceProvider> getResourceProviders() {
-        return this.resourceProviders;
-    }
-
-    /**
-     * Gets a list of all configuration targets
-     *
-     * @return list of all configuration targets
-     */
-    public List<File> getConfigurationRoots() {
-        return this.configRootTargets;
-    }
-
-    /**
-     * Returns true if the configuration has this <tt>key</tt> property
-     *
-     * @param key - the property too search for
-     * @return false if the property does not exist
-     */
-    public boolean hasProperty(String key) {
-        return properties.containsKey(key);
-    }
-
-    /**
-     * Gets the property associated with the key
-     *
-     * @param key - the key to search for
-     * @return the property, if it exists, null otherwise
-     */
-    public String getProperty(String key) {
-        return properties.get(key);
-    }
-
-    /**
-     * Gets the resources attached to the specified resource class
-     *
-     * @param resourceClass - the class to search the resources for
-     * @param <T>           - the class type
-     * @return the resource of type <tt>T</tt>
-     */
-    @SuppressWarnings({"unchecked"})
-    public <T> T getResource(Class<? extends T> resourceClass) {
-        if (extensionBindings.containsKey(resourceClass)) {
-            return (T) extensionBindings.get(resourceClass).get();
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Gets all serializable types
-     *
-     * @return all serializable types
-     */
-    public Set<Class> getAllSerializableTypes() {
-        return serializableTypes;
-    }
-
-    /**
-     * Gets the configured dispatcher, which is used to deliver the messages
-     *
-     * @return the configured dispatcher
-     */
-    public RequestDispatcher getConfiguredDispatcher() {
-        return dispatcher;
-    }
-
-    public SessionProvider getConfiguredSessionProvider() {
-        return sessionProvider;
-    }
+  public Set<Class> getSerializableTypes()
+  {
+    return serializableTypes;
+  }  
 }
