@@ -8,21 +8,35 @@ def pretty(cls) {
 }class @{implementationClassName} implements @{interfaceClass.getName()}, org.jboss.errai.bus.client.framework.RPCStub {
 
     private org.jboss.errai.bus.client.api.RemoteCallback callback;
+    private org.jboss.errai.bus.client.api.ErrorCallback errorCallback;
 
     public void setRemoteCallback(org.jboss.errai.bus.client.api.RemoteCallback callback) {
         this.callback = callback;
+    }
+
+    public void setErrorCallback(org.jboss.errai.bus.client.api.ErrorCallback callback) {
+        this.errorCallback = callback;
     }
     
     @foreach{method : interfaceClass.getMethods()}
         public @{method.getReturnType() == Void.class ? "void" : pretty(method.getReturnType())}
                @{method.getName()}(@code{count = 0;}@foreach{type : method.getParameterTypes()}@{type.getCanonicalName()} _@{count++}@end{", "}) {
 
-               org.jboss.errai.bus.client.api.base.MessageBuilder.createCall()
+                if (errorCallback == null) {
+                 org.jboss.errai.bus.client.api.base.MessageBuilder.createCall()
                     .call("@{interfaceClass.getName()}")
                     .endpoint("@{org.jboss.errai.bus.rebind.RebindUtils.createCallSignature(method)}", new Object[] {@code{count = 0;}@foreach{type : method.getParameterTypes()}_@{count++}@end{","}})
                     .respondTo(@{pretty(box(method.getReturnType()))}.class, callback)
                     .noErrorHandling()
                     .sendNowWith(bus);
+                } else {
+                 org.jboss.errai.bus.client.api.base.MessageBuilder.createCall()
+                    .call("@{interfaceClass.getName()}")
+                    .endpoint("@{org.jboss.errai.bus.rebind.RebindUtils.createCallSignature(method)}", new Object[] {@code{count = 0;}@foreach{type : method.getParameterTypes()}_@{count++}@end{","}})
+                    .respondTo(@{pretty(box(method.getReturnType()))}.class, callback)
+                    .errorsHandledBy(errorCallback)
+                    .sendNowWith(bus);
+                }
 
                 @if{method.getReturnType().toString().equals("void")}
                 // nada

@@ -7,31 +7,36 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.api.RemoteCallback;
+import org.jboss.errai.bus.client.api.ErrorCallback;
+import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
 
 public class HelloWorld implements EntryPoint {
-  /**
-   * Get an instance of the MessageBus
-   */
-  private MessageBus bus = ErraiBus.get();
+    /**
+     * Get an instance of the MessageBus
+     */
+    private MessageBus bus = ErraiBus.get();
 
-  public void onModuleLoad() {
-    Button button = new Button("Click Me", new ClickHandler()
-    {
-      public void onClick(ClickEvent clickEvent)
-      {
-        MessageBuilder.createMessage()
-            .toSubject("HelloWorldService")
-            .signalling()
-            .with("msg", "Hi there!")
-            .noErrorHandling().sendNowWith(bus);
-      }
-    });
-    final Label label = new Label();
+    public void onModuleLoad() {
+        Button button = new Button("Click Me", new ClickHandler() {
+            public void onClick(ClickEvent clickEvent) {
+                MessageBuilder.createMessage()
+                        .toSubject("HelloWorldService")
+                        .signalling()
+                        .with("msg", "Hi there!")
+                        .errorsHandledBy(new ErrorCallback() {
+                            public boolean error(Message message, Throwable throwable) {
+                                throwable.printStackTrace();
+                                return false;
+                            }
+                        })
+                        .sendNowWith(bus);
+            }
+        });
+        final Label label = new Label();
 
-    RootPanel.get().add(button);
-    RootPanel.get().add(label);
-  }
+        RootPanel.get().add(button);
+        RootPanel.get().add(label);
+    }
 }

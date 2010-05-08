@@ -186,10 +186,10 @@
         <para>The MessageBuilder is the heart of the messaging API in
         ErraiBus. It provides a fluent / builder API, that is used for
         constructing messages. All three major message patterns can be
-        constructed from the MessageBuilder.</para>
+        constructed from the <varname>MessageBuilder</varname>.</para>
 
         <para>Components that want to receive messages need to implement the
-        MessageCallback interface.</para>
+        <varname>MessageCallback</varname> interface.</para>
 
         <para>But before we dive into the details, let look at some use cases
         first.</para>
@@ -234,7 +234,7 @@
         <orderedlist>
           <listitem>
             <para>We specify the subject we wish to send a message to. In this
-            case, "HelloWorldService".</para>
+            case, "<varname>HelloWorldService</varname>".</para>
           </listitem>
 
           <listitem>
@@ -245,8 +245,9 @@
           </listitem>
 
           <listitem>
-            <para>We indicate that we do not want to provide an ErrorCallback
-            to deal with errors for this message.</para>
+            <para>We indicate that we do not want to provide an
+            <varname>ErrorCallback</varname> to deal with errors for this
+            message.</para>
           </listitem>
 
           <listitem>
@@ -285,18 +286,19 @@
         }
     }</programlisting>
 
-        <para>He we declare an extremely simple service. The @Service
-        annotation provides a convenient, meta-data based way of having the
-        bus auto-discover and deploy the service.</para>
+        <para>He we declare an extremely simple service. The
+        <varname>@Service</varname> annotation provides a convenient,
+        meta-data based way of having the bus auto-discover and deploy the
+        service.</para>
       </sect2>
 
       <sect2>
         <title>Sending Messages with the Server Bus</title>
 
         <para>In the following example we extend our server side component to
-        replyNow with a message when the callback method is invoked. It will
+        reply with a message when the callback method is invoked. It will
         create a message and address it to the subject
-        'HelloWorldClient':</para>
+        '<varname>HelloWorldClient</varname>':</para>
 
         <programlisting>    @Service
     public class HelloWorldService implements MessageCallback {
@@ -326,9 +328,10 @@
         <orderedlist>
           <listitem>
             <para>We specify the subject we wish to send a message to. In this
-            case, "HelloWorldClient". We are sending this message to all
-            clients which are listening in on this subject. For information on
-            how to communicate with a single client, see Section 2.6.</para>
+            case, "<varname>HelloWorldClient</varname>". We are sending this
+            message to all clients which are listening in on this subject. For
+            information on how to communicate with a single client, see
+            Section 2.6.</para>
           </listitem>
 
           <listitem>
@@ -343,8 +346,9 @@
           </listitem>
 
           <listitem>
-            <para>We indicate that we do not want to provide an ErrorCallback
-            to deal with errors for this message.</para>
+            <para>We indicate that we do not want to provide an
+            <varname>ErrorCallback</varname> to deal with errors for this
+            message.</para>
           </listitem>
 
           <listitem>
@@ -430,10 +434,11 @@
           Messaging</title>
 
           <para>It is possible to contruct a message and a default response
-          handler as part of the MessageBuilder API. It should be noted, that
-          multiple replies will not be possible and will result an exception
-          if attempted. Using this aspect of the API is very useful for doing
-          simple psuedo-synchronous conversive things.</para>
+          handler as part of the <varname>MessageBuilder</varname> API. It
+          should be noted, that multiple replies will not be possible and will
+          result an exception if attempted. Using this aspect of the API is
+          very useful for doing simple psuedo-synchronous conversive
+          things.</para>
 
           <para>You can do this by specifying a
           <literal>MessageCallback</literal> using the
@@ -460,7 +465,7 @@
 
           <para>It is possible for the sender to infer, to whatever
           conversational service it is calling, what subject it would like the
-          replyNow to go to. This is accomplished by utilizing the standard
+          reply to go to. This is accomplished by utilizing the standard
           <filename>MessageParts.ReplyTo</filename> message part. Using this
           methodology for building conversations is generally
           encouraged.</para>
@@ -481,9 +486,9 @@
                 .noErrorHandling().reply();</programlisting>
 
           <para>In the above examples, assuming that the latter example is
-          inside a service called "ObjectService" and is referencing the
-          incoming message that was send in the former example, the message
-          created will automatically reference the
+          inside a service called "<varname>ObjectService</varname>" and is
+          referencing the incoming message that was sent in the former
+          example, the message created will automatically reference the
           <filename>ReplyTo</filename> subject that was provided by the
           sender, and send the message back to the subject desired by the
           client on the client that sent the message.</para>
@@ -544,18 +549,18 @@
 
           <para>Every message that is sent between a local and remote (or
           server and client) buses contain session routing information. This
-          information is used by the bus to determine what outbound queue's to
-          use to deliver the message to their intended recipients. It is
-          possible to manually specify this information to indicate to the
-          bus, where you want a specific message to go.</para>
+          information is used by the bus to determine what outbound queues to
+          use to deliver the message to, so they will reach their intended
+          recipients. It is possible to manually specify this information to
+          indicate to the bus, where you want a specific message to go.</para>
 
           <para>The utility class
           <filename>org.jboss.errai.bus.server.util.ServerBusUtils</filename>
           contains a utility method for extracting the String-based SessionID
           which is used to identify the message queue associated with any
-          particular client. You may use this method to extract the SessionID
-          from a message so that you may use it for routing. For
-          example:</para>
+          particular client. You may use this method to extract the
+          <varname>SessionID</varname> from a message so that you may use it
+          for routing. For example:</para>
 
           <programlisting>...
 public void callback(Message message) {
@@ -568,11 +573,12 @@ public void callback(Message message) {
 
 </programlisting>
 
-          <para>The SessionID can then be stored in a medium, say a Map, to
-          cross-reference specific users or whatever identifier you wish to
-          allow one client to obtain a reference to the specific ClientId of
-          another client. In which case, you can then provide the SessionID as
-          a MessagePart to indicate to the bus where you want the message to
+          <para>The <varname>SessionID</varname> can then be stored in a
+          medium, say a Map, to cross-reference specific users or whatever
+          identifier you wish to allow one client to obtain a reference to the
+          specific <varname>SessionID</varname> of another client. In which
+          case, you can then provide the <varname>SessionID</varname> as a
+          MessagePart to indicate to the bus where you want the message to
           go.</para>
 
           <programlisting>MessageBuilder.createMessage()
@@ -583,12 +589,84 @@ public void callback(Message message) {
     .noErrorHandling().sendNowWith(bus);
 </programlisting>
 
-          <para>By providing the SessionID part in the message, the bus will
-          see this and use it for routing the message to the relevant
-          queue.</para>
+          <para>By providing the <varname>SessionID</varname> part in the
+          message, the bus will see this and use it for routing the message to
+          the relevant queue.</para>
 
           <para>Now you're routing from client-to-client!</para>
+
+          <para>It may be tempting however, to try and include destination
+          <varname>SessionID</varname>s at the client level, assuming that
+          this will make the infrastructure simpler. But this will not achieve
+          the desired results, as the bus treates
+          <varname>SessionID</varname>s as transient. Meaning, the
+          <varname>SessionID</varname> information is not ever transmitted
+          from bus-to-bus, and therefore is only directly relevant to the
+          proximate bus. </para>
         </sect3>
+      </sect2>
+
+      <sect2>
+        <title>Handling Errors</title>
+
+        <para>Asynchronous messaging necessitates the need for asynchronous
+        error handling. Luckily, support for handling errors is built directly
+        into the <varname>MessageBuilder</varname> API, utilizing the
+        <varname>ErrorCallback</varname> interface. In the examples shown in
+        previous exceptions, error-handing has been glossed over with a
+        ubiquitous usage of the <varname>noErrorHandling()</varname> method
+        while building messaging. We chose to require the explicit use of such
+        a method to remind developers of the fact that they are responsible
+        for their own error handling, requiring you to explicitly make the
+        decision to forego handling potential errors.</para>
+
+        <para>As a general rule, you should<emphasis role="bold"> always
+        handle your errors</emphasis>. It will lead to faster and quicker
+        identification of problems with your applications if you have error
+        handlers, and generally help you build more robust code.</para>
+
+        <programlisting>MessageBuilder.createMessage()                                                   
+        .toSubject("HelloWorldService")                                          
+        .signalling()                                                            
+        .with("msg", "Hi there!")                                                
+        .errorsHandledBy(new ErrorCallback() {                                   
+            public boolean error(Message message, Throwable throwable) {         
+                throwable.printStackTrace();                                     
+                return true;                                                    
+            }                                                                    
+        })                                                                       
+        .sendNowWith(bus);                                                       </programlisting>
+
+        <para>The addition of error-handling at first may put off developers
+        as it makes code more verbose and less-readable. This is nothing that
+        some good practice can't fix. In fact, you may find cases where the
+        same error-handler can appropriately be shared between multiple
+        different calls.</para>
+
+        <programlisting>ErrorCallback error = new ErrorCallback() {
+    public boolean error(Message message, Throwable throwable) {         
+        throwable.printStackTrace();                                     
+        return true;                                                    
+    } 
+}
+
+MessageBuilder.createMessage()                                                   
+        .toSubject("HelloWorldService")                                          
+        .signalling()                                                            
+        .with("msg", "Hi there!")                                                
+        .errorsHandledBy(error)                                                                       
+        .sendNowWith(bus);   </programlisting>
+
+        <para>A little nicer. </para>
+
+        <para>The error handler requires that return a
+        <varname>boolean</varname> value. This is to indicate whether or not
+        Errai should perform the defautl error handling actions it would
+        normally take during a failure. You will almost always want to return
+        <varname>true</varname> here, unless you are trying to expicitly
+        supress some undesirably activity by Errai, such as automatic
+        subject-termination in conversations. But this is almost never the
+        case. </para>
       </sect2>
     </sect1>
 
@@ -599,7 +677,7 @@ public void callback(Message message) {
       client-server RPC communication easy on top of the bus. While it is
       possible to use ErraiBus without ever using this API, you may find it to
       be a more useful and concise approach to exposing services to the
-      clients. </para>
+      clients.</para>
 
       <remark>Please Note that this API has changed since version 1.0</remark>
 
@@ -608,11 +686,11 @@ public void callback(Message message) {
 
         <para>RPC services provide a way of creating type-safe mechanisms to
         make client-to-server calls. Currently, this mechanism only support
-        client-to-server calls, and not vice-versa. </para>
+        client-to-server calls, and not vice-versa.</para>
 
         <para>Creating a service is straight forward. It requires the
         definition of a remote interface, and a service class which implements
-        it. See the following: </para>
+        it. See the following:</para>
 
         <programlisting>@Remote
 public interface MyRemoteService {
@@ -640,16 +718,17 @@ public class MyRemoteServiceImpl implements MyRemoteService {
         <para>That's all there is to it. You use the same
         <varname>@Service</varname> annotation as described in Section 2.4.
         The presence of the remote interface tips Errai off as to what you
-        want to do with the class. </para>
+        want to do with the class.</para>
       </sect2>
 
       <sect2>
         <title>Making calls</title>
 
-        <para>Calling a remote service involves use of the MessageBuilder API.
-        Since all messages are asynchronous, the actual code for calling the
-        remote service involves the use of a callback, which we use to receive
-        the response from the remote method. Let's see how it works:</para>
+        <para>Calling a remote service involves use of the
+        <varname>MessageBuilder</varname> API. Since all messages are
+        asynchronous, the actual code for calling the remote service involves
+        the use of a callback, which we use to receive the response from the
+        remote method. Let's see how it works:</para>
 
         <programlisting>MessageBuilder.createCall(new RemoteCallback&lt;Boolean&gt;() {      
     public void callback(Boolean isHappy) {                   
@@ -671,8 +750,7 @@ public class MyRemoteServiceImpl implements MyRemoteService {
         it does not wait for a server response before returning control. The
         reason we chose to do this, as opposed to emulate the native
         GWT-approach, which requires the implementation of remote and async
-        interfaces, was purely a function of a tradeoff for simplicity.
-        </para>
+        interfaces, was purely a function of a tradeoff for simplicity.</para>
       </sect2>
     </sect1>
 
@@ -758,7 +836,9 @@ public class User implements java.io.Serializable {
 
         <para>Depending on what application server you are deploying on, you
         must provide an appropriate servlet implementation if you wish to use
-        true, asynchronous I/O.</para>
+        true, asynchronous I/O. See <emphasis role="bold">section
+        6.5</emphasis> for information on the available servlet
+        implementations.</para>
 
         <para>Here's a sample web.xml file:</para>
 
@@ -905,7 +985,7 @@ errai.async.worker.timeout=5
         subdirectories are scanned for deployable components. As such, all
         Errai application modules in a project should contain an
         ErraiApp.properties at the root of all classpaths that you wish to be
-        scanned. </para>
+        scanned.</para>
 
         <para>The file can also include explicitly declared serializable types
         (such as those from third-party code) that cannot be annotated for
@@ -932,7 +1012,7 @@ errai.async.worker.timeout=5
         <para>Dispatchers encapsulate the strategy for taking messages that
         need to be delivered somewhere and seeing that they are delivered to
         where they need to go. There are two primary implementations that are
-        provided with Errai, depending on your needs. </para>
+        provided with Errai, depending on your needs.</para>
 
         <sect3>
           <title>SimpleDispatcher</title>
@@ -941,7 +1021,7 @@ errai.async.worker.timeout=5
           asychronous delivery mechanism. Rather, when you configure the Errai
           to use this implementation, messages are delivered to their
           endpoints synchronously. The incoming HTTP thread will be held open
-          until the messages are delivered. </para>
+          until the messages are delivered.</para>
 
           <para>While this sounds like it has almost no advantages, especially
           in terms of scalablity. Using the SimpleDispatcher can be far
@@ -958,7 +1038,7 @@ errai.async.worker.timeout=5
           control immediately returned upon dispatch of the message. This
           dispatcher provides far more efficient use of resources in high-load
           applications, and will significantly decrease memory and thread
-          usage overall. </para>
+          usage overall.</para>
         </sect3>
       </sect2>
 
@@ -971,7 +1051,7 @@ errai.async.worker.timeout=5
         to/from the server-side bus. Where this introduces scalability
         problems, we have implemented many webserver-specific implementations
         that take advantage of the various proprietary APIs to provide true
-        asynchrony. </para>
+        asynchrony.</para>
 
         <para>These inlcuded implementations are packaged at:
         <varname>org.jboss.errai.bus.server.servlet</varname></para>
@@ -993,7 +1073,7 @@ errai.async.worker.timeout=5
           scalability and reduce thread usage. The use of this implementation
           is dependant on the Tomcat container being configured to support AIO
           using either it's NIO or APR connectors. This servlet will NOT work
-          with the regular HTTP and AJP connectors. </para>
+          with the regular HTTP and AJP connectors.</para>
         </sect3>
 
         <sect3>
@@ -1018,7 +1098,7 @@ errai.async.worker.timeout=5
           <title>GrizzlyCometServlet</title>
 
           <para>Support for the comet API in the Grizzy HTTP server (used in
-          Glassfish). </para>
+          Glassfish).</para>
         </sect3>
 
         <sect3>
@@ -1027,6 +1107,75 @@ errai.async.worker.timeout=5
           <para>Support for the Weblogic asynchronous APIs.</para>
         </sect3>
       </sect2>
+    </sect1>
+
+    <sect1>
+      <title>Debugging Errai Applications</title>
+
+      <para>Errai includes a bus monitoring application, which allows you to
+      monitor all of the message exchange activity on the bus in order to help
+      track down any potential problems It allows you to inspect individual
+      messages to examine their state and structure.</para>
+
+      <para>To utilize the bus monitor, you'll need to include the <emphasis
+      role="bold">errai-tools</emphasis> package as part of your application's
+      dependencies. When you run your application in development mode, you
+      will simply need to add the following JVM options to your run
+      configuration in order to launch the monitor:
+      <varname>-Derrai.tools.bus_monitor_attach=true </varname></para>
+
+      <figure>
+        <title>Bus Monitor</title>
+
+        <screenshot>
+          <screeninfo>The main monitor application window</screeninfo>
+
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="images/MonitorOverview.png" />
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </figure>
+
+      <para>The monitor provides you a real-time perspective on what's going
+      on inside the bus. The left side of the main screen lists the services
+      that are currently available, and the right side is the
+      service-explorer, which will show details about the service.</para>
+
+      <para>To see what's going on with a specific service, simply
+      double-click on the service or highlight the service, then click
+      "Monitor Service...". This will bring up the service activity
+      monitor.</para>
+
+      <para></para>
+
+      <figure>
+        <title>Service Activity Monitor</title>
+
+        <screenshot>
+          <screeninfo></screeninfo>
+
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="images/MonitorOverview2.png" />
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </figure>
+
+      <para>The service activity monitor will display a list of all the
+      messages that were transmitted on the bus since the monitor became
+      active. You do not need to actually have each specific monitor window
+      open in order to actively monitor the bus activity. All activity on the
+      bus is recorded.</para>
+
+      <para>The monitor allows you select individual messages, an view their
+      individual parts. Clicking on a message part will bring up the object
+      inspector, which will allow you to explore the state of any objects
+      contained within the message, not unlike the object inspectors provided
+      by debuggers in your favorite IDE. This can be a powerful tool for
+      looking under the covers of your application.</para>
     </sect1>
   </chapter>
 

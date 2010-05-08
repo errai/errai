@@ -27,12 +27,22 @@ public class AbstractRemoteCallBuilder {
         this.message = message;
     }
 
-    public <T,R> T call(final RemoteCallback<R> callback, final Class<T> remoteService) {
+    public <T, R> T call(final RemoteCallback<R> callback, final Class<T> remoteService) {
         T svc = proxyProvider.getRemoteProxy(remoteService);
         if (svc == null) {
             throw new RuntimeException("No service definition for: " + remoteService.getClass().getName());
         }
-        ((RPCStub)svc).setRemoteCallback(callback);
+        ((RPCStub) svc).setRemoteCallback(callback);
+        return svc;
+    }
+
+    public <T, R> T call(final RemoteCallback<R> callback, final ErrorCallback errorCallback, final Class<T> remoteService) {
+        T svc = proxyProvider.getRemoteProxy(remoteService);
+        if (svc == null) {
+            throw new RuntimeException("No service definition for: " + remoteService.getClass().getName());
+        }
+        ((RPCStub) svc).setRemoteCallback(callback);
+        ((RPCStub) svc).setErrorCallback(errorCallback);
         return svc;
     }
 
@@ -44,6 +54,7 @@ public class AbstractRemoteCallBuilder {
      * @param serviceName - the service to call, and create a remote call endpoint for
      * @return the remote call endpoint created
      */
+    @Deprecated
     public RemoteCallEndpointDef call(final String serviceName) {
         message.toSubject(serviceName + ":RPC");
 
@@ -105,7 +116,7 @@ public class AbstractRemoteCallBuilder {
         };
 
     }
-    
+
     private static int uniqueNumber() {
         return ++callCounter > 10000 ? callCounter = 0 : callCounter;
     }
