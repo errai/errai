@@ -11,12 +11,13 @@ import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.framework.RequestDispatcher;
 
 public class HelloWorld implements EntryPoint {
     /**
-     * Get an instance of the MessageBus
+     * Get an instance of the RequestDispatcher
      */
-    private MessageBus bus = ErraiBus.get();
+    private RequestDispatcher dispatcher = ErraiBus.getDispatcher();
 
     public void onModuleLoad() {
         Button button = new Button("Click Me", new ClickHandler() {
@@ -31,7 +32,7 @@ public class HelloWorld implements EntryPoint {
                                 return false;
                             }
                         })
-                        .sendNowWith(bus);
+                        .sendNowWith(dispatcher);
             }
         });
         final Label label = new Label();

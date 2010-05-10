@@ -206,8 +206,8 @@
 
         <programlisting>    public class HelloWorld implements EntryPoint {
 
-        // Get an instance of the MessageBus
-        private MessageBus bus = ErraiBus.get();
+        // Get an instance of the RequestDispatcher
+        private RequestDispatcher dispatcher = ErraiBus.getDispatcher();
 
         public void onModuleLoad() {
             Button button = new Button("Send message");
@@ -220,7 +220,7 @@
                     .toSubject("HelloWorldService")             // (1)
                     .signalling()                               // (2)
                     .noErrorHandling()                          // (3)
-                    .sendNowWith(bus);                          // (4)
+                    .sendNowWith(dispatcher);                   // (4)
             });
 
             [...]
@@ -251,17 +251,19 @@
           </listitem>
 
           <listitem>
-            <para>We transmit the message by providing an instance of the
-            MessageBus</para>
+            <para>We transmit the message by providing an instance to the
+            EquestDispatcher</para>
           </listitem>
         </orderedlist>
 
         <note>
           <para>An astute observer will note that access to the
-          <literal>MessageBus</literal> differs within client code and server
-          code. Because the client code does not run within a container,
-          access to the <literal>MessageBus</literal> is statically accessed
-          using the <literal>ErraiBus.get()</literal> method. The server-side
+          <literal>RequestDispatcher</literal> differs within client code and
+          server code. Because the client code does not run within a
+          container, access to the <literal>RequestDispatcher</literal> and
+          <varname>MessageBus</varname> is statically accessed using the
+          <literal>ErraiBus.get()</literal> and
+          <varname>ErraiBus.getDispatcher() </varname>methods. The server-side
           code, conversely, runs inside a dependency container for managing
           components. It currently uses Guice as the default container, but
           will more generically support the JSR-330 specification in the
@@ -303,11 +305,11 @@
         <programlisting>    @Service
     public class HelloWorldService implements MessageCallback {
 
-        private MessageBus bus;
+        private RequestDispatcher dispatcher;
 
         @Inject                                         
-        public HelloWorldService(MessageBus bus) {
-            this.bus = bus;
+        public HelloWorldService(RequestDispatcher disaptcher) {
+            dispatcher = dispatcher;
         }
 
         public void callback(CommandMessage message) {
@@ -317,7 +319,7 @@
                     .signalling()                               // (2)
                     .with("text", "Hi There")                   // (3)
                     .noErrorHandling()                          // (4)
-                    .sendNowWith(bus);                          // (5)
+                    .sendNowWith(dispatcher);                   // (5)
             });
         }
     }   </programlisting>
@@ -353,7 +355,7 @@
 
           <listitem>
             <para>We transmit the message by providing an instance of the
-            MessageBus.</para>
+            <varname>RequestDispatcher</varname>.</para>
           </listitem>
         </orderedlist>
       </sect2>
@@ -475,7 +477,7 @@
           <programlisting>MessageBuilder.createMessage()
        .toSubject("ObjectService").signalling()
        .with(MessageParts.ReplyTo, "ClientEndpoint")
-       .noErrorHandling().sendNowWith(bus);</programlisting>
+       .noErrorHandling().sendNowWith(dispatcher);</programlisting>
 
           <para>And the conversational code on the server (for service
           <emphasis>ObjectService</emphasis>):</para>
@@ -505,7 +507,7 @@
         <programlisting>MessageBuilder.createMessage().
                  .toSubject("MessageListener")
                  .with("Text", "Hello, from your overlords in the cloud")
-                 .noErrorHandling().sendNowWith(bus);</programlisting>
+                 .noErrorHandling().sendGlobalWith(dispatcher);</programlisting>
 
         <para>If sent from the server, all clients currently connected, who
         are listening to the subject <filename>"MessageListener"</filename>
@@ -586,7 +588,7 @@ public void callback(Message message) {
     .signalling()
     .with(MessageParts.SessionID, sessionId)
     .with("Message", "We're relaying a message!")
-    .noErrorHandling().sendNowWith(bus);
+    .noErrorHandling().sendNowWith(dispatcher);
 </programlisting>
 
           <para>By providing the <varname>SessionID</varname> part in the
@@ -602,7 +604,7 @@ public void callback(Message message) {
           <varname>SessionID</varname>s as transient. Meaning, the
           <varname>SessionID</varname> information is not ever transmitted
           from bus-to-bus, and therefore is only directly relevant to the
-          proximate bus. </para>
+          proximate bus.</para>
         </sect3>
       </sect2>
 
@@ -635,7 +637,7 @@ public void callback(Message message) {
                 return true;                                                    
             }                                                                    
         })                                                                       
-        .sendNowWith(bus);                                                       </programlisting>
+        .sendNowWith(dispatcher);                                                       </programlisting>
 
         <para>The addition of error-handling at first may put off developers
         as it makes code more verbose and less-readable. This is nothing that
@@ -655,9 +657,9 @@ MessageBuilder.createMessage()
         .signalling()                                                            
         .with("msg", "Hi there!")                                                
         .errorsHandledBy(error)                                                                       
-        .sendNowWith(bus);   </programlisting>
+        .sendNowWith(dispatcher);   </programlisting>
 
-        <para>A little nicer. </para>
+        <para>A little nicer.</para>
 
         <para>The error handler requires that return a
         <varname>boolean</varname> value. This is to indicate whether or not
@@ -666,7 +668,96 @@ MessageBuilder.createMessage()
         <varname>true</varname> here, unless you are trying to expicitly
         supress some undesirably activity by Errai, such as automatic
         subject-termination in conversations. But this is almost never the
-        case. </para>
+        case.</para>
+      </sect2>
+
+      <sect2>
+        <title>Asynchronous Message Tasks</title>
+
+        <para>In some applications, it may be necessary or desirable to delay
+        transmission of, or continually stream data to a remote client or
+        group of clients (or from a client to the server). In cases like this,
+        you can utilize the <varname>replyRepeating()</varname>,
+        <varname>replyDelayed()</varname>, <varname>sendRepeating()</varname>
+        and <varname>sendDelayed()</varname> methods in the
+        <varname>MessageBuilder</varname>.</para>
+
+        <sect3>
+          <title>Delayed Tasks</title>
+
+          <para>Sending a task with a delay is straight forward. Simply
+          utilize the appropriate method (either
+          <varname>replyDelayed()</varname> or
+          <varname>sendDelayed()</varname>). </para>
+
+          <programlisting>MessageBuilder.createConversation(msg)
+   .toSubject("FunSubject")
+   .signalling()
+   .noErrorHandling()
+   .replyDelayed(TimeUnit.SECONDS, 5); // sends the message after 5 seconds.
+
+</programlisting>
+
+          <para>or </para>
+
+          <programlisting>MessageBuilder.createMessage()
+   .toSubject("FunSubject")
+   .signalling()
+   .noErrorHandling()
+   .sendDelayed(requestDispatcher, TimeUnit.SECONDS, 5); // sends the message after 5 seconds.</programlisting>
+        </sect3>
+
+        <sect3>
+          <title>Repeating Tasks</title>
+
+          <para>A repeating task is sent using one of the MessageBuilder's
+          <varname>repeatXXX() </varname>methods. The task will repeat
+          indefinitely until cancelled (see next section). </para>
+
+          <programlisting>MessageBuilder.createMessage()
+   .toSubject("FunSubject")
+   .signalling()
+   .withProvided("time", new ResourceProvider&lt;String&gt;() {
+          SimpleDateFormat fmt = new SimpleDateFormat("hh:mm:ss");
+          public String get() {
+               return fmt.format(new Date(System.currentTimeMillis());
+          }
+    }
+   .noErrorHandling()
+   .sendRepeatingWith(requestDispatcher, TimeUnit.SECONDS, 1); //sends a message every 1 second</programlisting>
+
+          <para>The above example sends a message very 1 second with a message
+          part called <varname>"time"</varname>, containing a formatted time
+          string. Note the use of the <varname>withProvided()
+          </varname>method; a provided message part is calculated at the time
+          of transmission as opposed to when the message is
+          constructed.</para>
+        </sect3>
+
+        <sect3>
+          <title>Cancelling an Asynchronous Task</title>
+
+          <para>A delayed or repeating task can be cancelled by calledin the
+          <varname>cancel() </varname>method of the
+          <varname>AsyncTask</varname> instance which is returned when
+          creating a task. Reference to the AsyncTask object can be retained
+          and cancelled by any other thread.</para>
+
+          <programlisting>AsyncTask task = MessageBuilder.createConversation(message)                        
+        .toSubject("TimeChannel").signalling()                                     
+        .withProvided(TimeServerParts.TimeString, new ResourceProvider&lt;String&gt;() { 
+            public String get() {                                                  
+                return String.valueOf(System.currentTimeMillis());                 
+            }                                                                      
+        }).defaultErrorHandling().replyRepeating(TimeUnit.MILLISECONDS, 100);      
+
+...
+
+// cancel the task and interrupt it's thread if necessary.
+task.cancel(true);
+
+</programlisting>
+        </sect3>
       </sect2>
     </sect1>
 
@@ -751,6 +842,78 @@ public class MyRemoteServiceImpl implements MyRemoteService {
         reason we chose to do this, as opposed to emulate the native
         GWT-approach, which requires the implementation of remote and async
         interfaces, was purely a function of a tradeoff for simplicity.</para>
+      </sect2>
+    </sect1>
+
+    <sect1>
+      <title>Queue Sessions</title>
+
+      <para>The ErraiBus maintains it's own seperate session management on-top
+      of the regular HTTP session management. While the queue sessions are
+      tied to, and dependant on HTTP sessions for the most part (meaning they
+      die when HTTP sessions die), they provide extra layers of session
+      tracking to make dealing with complex applications built on Errai
+      easier. </para>
+
+      <sect2>
+        <title>Session Scopes</title>
+
+        <para>One of the things Errai offers is the concept of session and
+        local scopes. </para>
+
+        <sect3>
+          <title>Local Scope</title>
+
+          <para>A local scope is scoped to a single browser instance. But not
+          to a single session. </para>
+
+          <para>In a browser a local scope would be confined to a tab or a
+          window within a browser. You can store parameters inside a local
+          scope just like with a session by using the
+          <varname>LocalContext</varname> helper class.</para>
+
+          <programlisting>public class TestService implements MessageCallback {           
+    public void callback(final Message message) { 
+        // obtain a reference to the local context by referencing the incoming message.
+        LocalContext ctx = LocalContext.get(message); 
+
+        // set an attribute.
+        ctx.setAttribute("MyAttribute", "Foo");
+    }
+}              </programlisting>
+        </sect3>
+
+        <sect3>
+          <title>Session Scope</title>
+
+          <para>A session scope is scoped across all instances of the same
+          session. When a session scope is used, any parameters stored will be
+          accessible and visible by all browser instances and tabs. </para>
+
+          <para>The SessionContext helper class is used for accessing the
+          session scope.</para>
+
+          <programlisting>public class TestService implements MessageCallback {           
+    public void callback(final Message message) { 
+        // obtain a reference to the session context by referencing the incoming message.
+        SessionContext ctx = SessionContext.get(message); 
+
+        // set an attribute.
+        ctx.setAttribute("MyAttribute", "Foo");
+    }
+}   </programlisting>
+        </sect3>
+      </sect2>
+
+      <sect2>
+        <title>Lifecycle</title>
+
+        <para>The lifescyle of a session is bound by the underlying HTTP
+        session. It is also bound by activity thresholds. Clients are required
+        to send heartbeat messages every once in a while to maintain their
+        sessions with the server. If a heartbeat message is not received after
+        a certain period of time, the session is terminated and any resources
+        are deallocated.</para>
       </sect2>
     </sect1>
 

@@ -49,7 +49,7 @@ public class PooledExecutorService implements TaskProvider {
     private final ReentrantLock mutex = new ReentrantLock(true);
 
     /**
-     * Constructs a new DelayedWorkQueue with the specified queue size.
+     * Constructs a new PooledExecutorService with the specified queue size.
      *
      * @param queueSize The size of the underlying worker queue.
      */

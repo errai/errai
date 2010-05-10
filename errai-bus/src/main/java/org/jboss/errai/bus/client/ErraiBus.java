@@ -18,7 +18,9 @@ package org.jboss.errai.bus.client;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.framework.RequestDispatcher;
 
 /**
  * The main GWT <tt>EntryPoint</tt> class for ErraiBus.  This class also contains a static global reference to the
@@ -34,6 +36,19 @@ public class ErraiBus implements EntryPoint {
     public static MessageBus get() {                          
         return bus;
     }
+
+    public static RequestDispatcher getDispatcher() {
+        return new RequestDispatcher() {
+            public void dispatchGlobal(Message message) {
+                get().sendGlobal(message);
+            }
+
+            public void dispatch(Message message) {
+                get().send(message);
+            }
+        };
+    }
+
 
     public void onModuleLoad() {
     }
