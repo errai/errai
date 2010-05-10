@@ -160,7 +160,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             public void onSubscribe(SubscriptionEvent event) {
                 if (event.isRemote()) return;
                 synchronized (messageQueues) {
-                    if (messageQueues.isEmpty()) return;
+                    if (messageQueues.isEmpty() || event.getSubject().startsWith("local:")) return;
 
                     MessageBuilder.createMessage()
                             .toSubject("ClientBus")
@@ -173,7 +173,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
         addUnsubscribeListener(new UnsubscribeListener() {
             public void onUnsubscribe(SubscriptionEvent event) {
-                if (event.isRemote()) return;
+                if (event.isRemote() || event.getSubject().startsWith("local:")) return;
                 synchronized (messageQueues) {
                     if (messageQueues.isEmpty()) return;
 
