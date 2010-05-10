@@ -27,6 +27,9 @@ import org.jboss.errai.bus.server.api.SessionProvider;
  */
 public interface ErraiService extends ServiceComposite{
   public static final String AUTHORIZATION_SVC_SUBJECT = "AuthenticationService";
+  public static final String SERVER_ECHO_SERVICE = "ServerEchoService";
+  public static final String AUTHORIZATION_SERVICE = "AuthorizationService";
+
   public static final String SESSION_AUTH_DATA = "ErraiAuthData";
 
   /**

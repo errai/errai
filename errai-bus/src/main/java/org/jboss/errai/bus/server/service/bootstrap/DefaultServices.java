@@ -38,6 +38,7 @@ import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversat
  */
 class DefaultServices implements BootstrapExecution
 {
+
   public void execute(final BootstrapContext context)
   {
     final ServerMessageBus bus = context.getBus();
@@ -106,7 +107,7 @@ class DefaultServices implements BootstrapExecution
     /**
      * The standard ServerEchoService.
      */
-    bus.subscribe("ServerEchoService", new MessageCallback() {
+    bus.subscribe(ErraiService.SERVER_ECHO_SERVICE, new MessageCallback() {
       public void callback(Message c) {
         MessageBuilder.createConversation(c)
             .subjectProvided().signalling().noErrorHandling()
@@ -114,7 +115,7 @@ class DefaultServices implements BootstrapExecution
       }
     });
 
-    bus.subscribe("AuthorizationService", new MessageCallback() {
+    bus.subscribe(ErraiService.AUTHORIZATION_SERVICE, new MessageCallback() {
       public void callback(Message message) {
         AuthSubject subject = message.getResource(QueueSession.class, "Session")
             .getAttribute(AuthSubject.class, ErraiService.SESSION_AUTH_DATA);

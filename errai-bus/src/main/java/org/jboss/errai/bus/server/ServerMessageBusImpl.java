@@ -76,6 +76,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     private BusMonitor busMonitor;
 
+    private Set<String> lockDownServices = new HashSet<String>();  
+
     /**
      * Sets up the <tt>ServerMessageBusImpl</tt> with the configuration supplied. Also, initializes the bus' callback
      * functions, scheduler, and monitor
@@ -503,6 +505,10 @@ public class ServerMessageBusImpl implements ServerMessageBus {
      * @param receiver - the callback function called when a message is dispatched
      */
     public void subscribe(String subject, MessageCallback receiver) {
+
+        if(lockDownServices.contains(subject))
+          throw new IllegalArgumentException("Attempt to modify lockdown service: "+subject);
+      
         if (!subscriptions.containsKey(subject)) {
             subscriptions.put(subject, new ArrayList<MessageCallback>());
         }
@@ -577,7 +583,11 @@ public class ServerMessageBusImpl implements ServerMessageBus {
      * @param subject - the subject to unsubscribe from
      */
     public void unsubscribeAll(String subject) {
-        throw new RuntimeException("unsubscribeAll not yet implemented.");
+
+      if(lockDownServices.contains(subject))
+        throw new IllegalArgumentException("Attempt to modify lockdown service: "+subject);
+
+      throw new RuntimeException("Not implemented yet");
     }
 
     /**
@@ -767,26 +777,30 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         return this.busMonitor != null;
     }
 
-    public void attachMonitor(BusMonitor monitor) {
-        if (this.busMonitor != null) {
-            log.warn("new monitor attached, but a monitor was already attached: old monitor has been detached.");
-        }
-        this.busMonitor = monitor;
+  public void attachMonitor(BusMonitor monitor) {
+    if (this.busMonitor != null) {
+      log.warn("new monitor attached, but a monitor was already attached: old monitor has been detached.");
+    }
+    this.busMonitor = monitor;
 
-        for (Map.Entry<QueueSession, MessageQueue> entry : messageQueues.entrySet()) {
-            busMonitor.notifyQueueAttached(entry.getKey().getSessionId(), entry.getValue());
-        }
-
-        for (String subject : subscriptions.keySet()) {
-            busMonitor.notifyNewSubscriptionEvent(new SubscriptionEvent(false, "None", subject));
-        }
-        for (Map.Entry<String, Set<MessageQueue>> entry : remoteSubscriptions.entrySet()) {
-            for (MessageQueue queue : entry.getValue()) {
-                busMonitor.notifyNewSubscriptionEvent(new SubscriptionEvent(true, queue.getSession().getSessionId(), entry.getKey()));
-            }
-        }
-
-        monitor.attach(this);
+    for (Map.Entry<QueueSession, MessageQueue> entry : messageQueues.entrySet()) {
+      busMonitor.notifyQueueAttached(entry.getKey().getSessionId(), entry.getValue());
     }
 
+    for (String subject : subscriptions.keySet()) {
+      busMonitor.notifyNewSubscriptionEvent(new SubscriptionEvent(false, "None", subject));
+    }
+    for (Map.Entry<String, Set<MessageQueue>> entry : remoteSubscriptions.entrySet()) {
+      for (MessageQueue queue : entry.getValue()) {
+        busMonitor.notifyNewSubscriptionEvent(new SubscriptionEvent(true, queue.getSession().getSessionId(), entry.getKey()));
+      }
+    }
+
+    monitor.attach(this);
+  }
+
+  public void lockdown()
+  {
+    lockDownServices = Collections.unmodifiableSet(subscriptions.keySet());
+  }
 }
