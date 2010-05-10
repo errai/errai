@@ -20,7 +20,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.jboss.errai.bus.client.api.*;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
 import org.jboss.errai.bus.client.api.base.RuleDelegateMessageCallback;
 import org.jboss.errai.bus.client.framework.*;
 import org.jboss.errai.bus.client.protocols.BusCommands;
@@ -76,7 +75,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     private BusMonitor busMonitor;
 
-    private Set<String> lockDownServices = new HashSet<String>();  
+    private Set<String> lockDownServices = new HashSet<String>();
 
     /**
      * Sets up the <tt>ServerMessageBusImpl</tt> with the configuration supplied. Also, initializes the bus' callback
@@ -102,13 +101,11 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                         break;
 
                     case RemoteSubscribe:
-
                         remoteSubscribe(session, messageQueues.get(session),
                                 message.get(String.class, MessageParts.Subject));
                         break;
 
                     case RemoteUnsubscribe:
-
                         remoteUnsubscribe(session, messageQueues.get(session),
                                 message.get(String.class, MessageParts.Subject));
                         break;
@@ -120,20 +117,18 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                         break;
 
                     case ConnectToQueue:
-
                         if (messageQueues.containsKey(session)) {
                             messageQueues.get(session).stopQueue();
                         }
 
-                        addQueue(session, queue = new MessageQueueImpl(queueSize, ServerMessageBusImpl.this, session));
-
-
-                        remoteSubscribe(session, queue, "ClientBus");
+                        synchronized (messageQueues) {
+                            addQueue(session, queue = new MessageQueueImpl(queueSize, ServerMessageBusImpl.this, session));
+                            remoteSubscribe(session, queue, "ClientBus");
+                        }
 
                         if (isMonitor()) {
                             busMonitor.notifyQueueAttached(session.getSessionId(), queue);
                         }
-
 
                         for (String service : subscriptions.keySet()) {
                             if (service.startsWith("local:")) {
@@ -151,14 +146,42 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                                 .toSubject("ClientBus")
                                 .command(BusCommands.FinishStateSync)
                                 .noErrorHandling().sendNowWith(ServerMessageBusImpl.this, false);
-
-
                         /**
                          * Now the session is established, turn WindowPolling on.
                          */
                         getQueue(session).setWindowPolling(true);
 
                         break;
+                }
+            }
+        });
+
+        addSubscribeListener(new SubscribeListener() {
+            public void onSubscribe(SubscriptionEvent event) {
+                if (event.isRemote()) return;
+                synchronized (messageQueues) {
+                    if (messageQueues.isEmpty()) return;
+
+                    MessageBuilder.createMessage()
+                            .toSubject("ClientBus")
+                            .command(BusCommands.RemoteSubscribe)
+                            .with(MessageParts.Subject, event.getSubject())
+                            .noErrorHandling().sendNowWith(ServerMessageBusImpl.this, false);
+                }
+            }
+        });
+
+        addUnsubscribeListener(new UnsubscribeListener() {
+            public void onUnsubscribe(SubscriptionEvent event) {
+                if (event.isRemote()) return;
+                synchronized (messageQueues) {
+                    if (messageQueues.isEmpty()) return;
+
+                    MessageBuilder.createMessage()
+                            .toSubject("ClientBus")
+                            .command(BusCommands.RemoteUnsubscribe)
+                            .with(MessageParts.Subject, event.getSubject())
+                            .noErrorHandling().sendNowWith(ServerMessageBusImpl.this, false);
                 }
             }
         });
@@ -384,7 +407,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 }
             });
         } else {
-            if (!queue.isInitialized()) {
+            if (queue != null && !queue.isInitialized()) {
                 deferDelivery(queue, new MarshalledMessage() {
                     public String getSubject() {
                         return subject;
@@ -506,9 +529,9 @@ public class ServerMessageBusImpl implements ServerMessageBus {
      */
     public void subscribe(String subject, MessageCallback receiver) {
 
-        if(lockDownServices.contains(subject))
-          throw new IllegalArgumentException("Attempt to modify lockdown service: "+subject);
-      
+        if (lockDownServices.contains(subject))
+            throw new IllegalArgumentException("Attempt to modify lockdown service: " + subject);
+
         if (!subscriptions.containsKey(subject)) {
             subscriptions.put(subject, new ArrayList<MessageCallback>());
         }
@@ -583,11 +606,12 @@ public class ServerMessageBusImpl implements ServerMessageBus {
      * @param subject - the subject to unsubscribe from
      */
     public void unsubscribeAll(String subject) {
+        if (lockDownServices.contains(subject))
+            throw new IllegalArgumentException("Attempt to modify lockdown service: " + subject);
 
-      if(lockDownServices.contains(subject))
-        throw new IllegalArgumentException("Attempt to modify lockdown service: "+subject);
+        subscriptions.remove(subject);
 
-      throw new RuntimeException("Not implemented yet");
+        fireUnsubscribeListeners(new SubscriptionEvent(false, null, subject));
     }
 
     /**
@@ -777,30 +801,29 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         return this.busMonitor != null;
     }
 
-  public void attachMonitor(BusMonitor monitor) {
-    if (this.busMonitor != null) {
-      log.warn("new monitor attached, but a monitor was already attached: old monitor has been detached.");
-    }
-    this.busMonitor = monitor;
+    public void attachMonitor(BusMonitor monitor) {
+        if (this.busMonitor != null) {
+            log.warn("new monitor attached, but a monitor was already attached: old monitor has been detached.");
+        }
+        this.busMonitor = monitor;
 
-    for (Map.Entry<QueueSession, MessageQueue> entry : messageQueues.entrySet()) {
-      busMonitor.notifyQueueAttached(entry.getKey().getSessionId(), entry.getValue());
+        for (Map.Entry<QueueSession, MessageQueue> entry : messageQueues.entrySet()) {
+            busMonitor.notifyQueueAttached(entry.getKey().getSessionId(), entry.getValue());
+        }
+
+        for (String subject : subscriptions.keySet()) {
+            busMonitor.notifyNewSubscriptionEvent(new SubscriptionEvent(false, "None", subject));
+        }
+        for (Map.Entry<String, Set<MessageQueue>> entry : remoteSubscriptions.entrySet()) {
+            for (MessageQueue queue : entry.getValue()) {
+                busMonitor.notifyNewSubscriptionEvent(new SubscriptionEvent(true, queue.getSession().getSessionId(), entry.getKey()));
+            }
+        }
+
+        monitor.attach(this);
     }
 
-    for (String subject : subscriptions.keySet()) {
-      busMonitor.notifyNewSubscriptionEvent(new SubscriptionEvent(false, "None", subject));
+    public void lockdown() {
+        lockDownServices = Collections.unmodifiableSet(subscriptions.keySet());
     }
-    for (Map.Entry<String, Set<MessageQueue>> entry : remoteSubscriptions.entrySet()) {
-      for (MessageQueue queue : entry.getValue()) {
-        busMonitor.notifyNewSubscriptionEvent(new SubscriptionEvent(true, queue.getSession().getSessionId(), entry.getKey()));
-      }
-    }
-
-    monitor.attach(this);
-  }
-
-  public void lockdown()
-  {
-    lockDownServices = Collections.unmodifiableSet(subscriptions.keySet());
-  }
 }
