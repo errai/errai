@@ -824,6 +824,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
 
     public void lockdown() {
-        lockDownServices = Collections.unmodifiableSet(subscriptions.keySet());
+        lockDownServices.addAll(subscriptions.keySet());
     }
 }

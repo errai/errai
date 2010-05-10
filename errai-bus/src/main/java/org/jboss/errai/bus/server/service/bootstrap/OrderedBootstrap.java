@@ -15,7 +15,6 @@
  */
 package org.jboss.errai.bus.server.service.bootstrap;
 
-import org.jboss.errai.bus.server.ServerMessageBusImpl;
 import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,13 +40,13 @@ public class OrderedBootstrap implements BootstrapExecution
   {
     bootstrap.add(new DefaultComponents());
     bootstrap.add(new DefaultServices());
+    bootstrap.add(new LockDownServices());
     bootstrap.add(new LoadExtensions());
     bootstrap.add(new AuthenticationRules());
     bootstrap.add(new DefaultResources());
     bootstrap.add(new CleanupStartupFiles());
     bootstrap.add(new RegisterTypes());
     bootstrap.add(new BusConfiguration());
-    bootstrap.add(new LockDownServices());
     bootstrap.add(new DiscoverServices());
   }
 
