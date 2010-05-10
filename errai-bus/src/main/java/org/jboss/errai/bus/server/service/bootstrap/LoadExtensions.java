@@ -26,7 +26,6 @@ import org.jboss.errai.bus.server.api.ErraiConfig;
 import org.jboss.errai.bus.server.api.ErraiConfigExtension;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
-import org.jboss.errai.bus.server.util.ConfigUtil;
 import org.jboss.errai.bus.server.util.ConfigVisitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +50,6 @@ public class LoadExtensions implements BootstrapExecution
   {
     final ErraiServiceConfiguratorImpl config = (ErraiServiceConfiguratorImpl)context.getConfig();
 
-    log.info("beging searching for Errai extensions ...");
     boolean autoScanModules = true;
 
     final Set<String> loadedComponents = new HashSet<String>();
@@ -62,6 +60,8 @@ public class LoadExtensions implements BootstrapExecution
     }
     if (autoScanModules) {
 
+      log.info("beging searching for Errai extensions ...");
+      
       final ErraiConfig erraiConfig = new ErraiConfig() {
         public void addBinding(Class<?> type, ResourceProvider provider) {
           config.getExtensionBindings().put(type, provider);
