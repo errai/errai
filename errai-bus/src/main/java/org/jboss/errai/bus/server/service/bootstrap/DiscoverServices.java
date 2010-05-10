@@ -49,7 +49,7 @@ import static org.jboss.errai.bus.server.util.ConfigUtil.visitAllTargets;
 
 /**
  * Parses the annotation meta data and configures both services and extensions.
- * 
+ *
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: May 3, 2010
  */
@@ -61,9 +61,8 @@ class DiscoverServices implements BootstrapExecution
   {
     final ErraiServiceConfiguratorImpl config = (ErraiServiceConfiguratorImpl)context.getConfig();
 
-    log.info("beging searching for services ...");    
     boolean autoScanModules = true;
-    
+
     final Set<String> loadedComponents = new HashSet<String>();
 
     /*** Extensions  ***/
@@ -72,7 +71,11 @@ class DiscoverServices implements BootstrapExecution
     }
     if (autoScanModules) {
 
-      visitAllTargets(context.getConfigTargets(),
+      log.info("beging searching for services ...");
+
+      List<File> configRootTargets = ConfigUtil.findAllConfigTargets();
+
+      visitAllTargets(configRootTargets,
           new ConfigVisitor() {
             public void visit(final Class<?> loadClass) {
               if (loadedComponents.contains(loadClass.getName())) return;
@@ -191,23 +194,31 @@ class DiscoverServices implements BootstrapExecution
       log.info("auto-discovery of services disabled.");
     }
 
-     try {
+    try {
       ResourceBundle bundle = ResourceBundle.getBundle("ErraiApp");
       if (bundle != null) {
         log.info("checking ErraiApp.properties for configured types ...");
 
-        if (bundle.containsKey(ErraiServiceConfigurator.CONFIG_ERRAI_SERIALIZABLE_TYPE)){
-          for (String s : bundle.getString(ErraiServiceConfigurator.CONFIG_ERRAI_SERIALIZABLE_TYPE).split(" ")) {
-            try {
-              Class<?> cls = Class.forName(s.trim());
-              log.info("Marked " + cls + " as serializable.");
-              loadedComponents.add(cls.getName());
-              config.getSerializableTypes().add(cls);
-            }
-            catch (Exception e) {
-              throw new ErraiBootstrapFailure(e);
+        Enumeration<String> keys = bundle.getKeys();
+        while(keys.hasMoreElements())
+        {
+          String key = keys.nextElement();
+          if(key.equals(ErraiServiceConfigurator.CONFIG_ERRAI_SERIALIZABLE_TYPE))
+          {
+            for (String s : key.split(" ")) {
+              try {
+                Class<?> cls = Class.forName(s.trim());
+                log.info("Marked " + cls + " as serializable.");
+                loadedComponents.add(cls.getName());
+                config.getSerializableTypes().add(cls);
+              }
+              catch (Exception e) {
+                throw new ErraiBootstrapFailure(e);
+              }
+
             }
 
+            break;
           }
         }
       }
@@ -268,7 +279,7 @@ class DiscoverServices implements BootstrapExecution
         throw new RuntimeException("This API is not supported in the server-side environment.");
       }
     };
- 
+
   }
 
 }
