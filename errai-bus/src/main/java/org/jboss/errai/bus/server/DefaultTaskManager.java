@@ -30,7 +30,6 @@ public class DefaultTaskManager implements TaskManager {
     private final static DefaultTaskManager taskManager = new DefaultTaskManager(null);
     private final static PooledExecutorService service = new PooledExecutorService(50);
 
-
     static {
         service.start();
     }
@@ -41,6 +40,15 @@ public class DefaultTaskManager implements TaskManager {
 
     private DefaultTaskManager(QueueSession session) {
         this.session = session;
+    }
+
+    public void execute(Runnable task) {
+        try {
+            service.execute(task);
+        }
+        catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public AsyncTask scheduleRepeating(TimeUnit unit, int interval, Runnable task) {

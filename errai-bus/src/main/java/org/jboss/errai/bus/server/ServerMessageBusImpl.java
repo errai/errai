@@ -21,6 +21,7 @@ import com.google.inject.Singleton;
 import org.jboss.errai.bus.client.api.*;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.RuleDelegateMessageCallback;
+import org.jboss.errai.bus.client.api.base.TaskManagerFactory;
 import org.jboss.errai.bus.client.framework.*;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;
@@ -158,30 +159,30 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
         addSubscribeListener(new SubscribeListener() {
             public void onSubscribe(SubscriptionEvent event) {
-                if (event.isRemote()) return;
+                if (event.isRemote()  || event.getSubject().startsWith("local:")) return;
                 synchronized (messageQueues) {
-                    if (messageQueues.isEmpty() || event.getSubject().startsWith("local:")) return;
+                    if (messageQueues.isEmpty()) return;
 
                     MessageBuilder.createMessage()
                             .toSubject("ClientBus")
                             .command(BusCommands.RemoteSubscribe)
                             .with(MessageParts.Subject, event.getSubject())
-                            .noErrorHandling().sendNowWith(ServerMessageBusImpl.this, false);
+                            .noErrorHandling().sendGlobalWith(ServerMessageBusImpl.this);
                 }
             }
         });
 
         addUnsubscribeListener(new UnsubscribeListener() {
             public void onUnsubscribe(SubscriptionEvent event) {
-                if (event.isRemote() || event.getSubject().startsWith("local:")) return;
+                if (event.isRemote()  || event.getSubject().startsWith("local:")) return;
                 synchronized (messageQueues) {
-                    if (messageQueues.isEmpty()) return;
+                    if (messageQueues.isEmpty() ) return;
 
                     MessageBuilder.createMessage()
                             .toSubject("ClientBus")
                             .command(BusCommands.RemoteUnsubscribe)
                             .with(MessageParts.Subject, event.getSubject())
-                            .noErrorHandling().sendNowWith(ServerMessageBusImpl.this, false);
+                            .noErrorHandling().sendGlobalWith(ServerMessageBusImpl.this);
                 }
             }
         });
@@ -275,7 +276,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 Map<String, Object> rawMsg = new HashMap<String, Object>();
                 rawMsg.put(MessageParts.CommandType.name(), MessageNotDelivered.name());
 
-
                 try {
                     enqueueForDelivery(getQueueByMessage(message),
                             message.get(String.class, ReplyTo),
@@ -316,17 +316,21 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
 
         if (remoteSubscriptions.containsKey(subject)) {
-            for (MessageQueue queue : remoteSubscriptions.get(subject)) {
-                queue.offer(new MarshalledMessage() {
-                    public String getSubject() {
-                        return subject;
-                    }
+            TaskManagerFactory.get().execute(new Runnable() {
+                public void run() {
+                    for (MessageQueue queue : remoteSubscriptions.get(subject)) {
+                        queue.offer(new MarshalledMessage() {
+                            public String getSubject() {
+                                return subject;
+                            }
 
-                    public Object getMessage() {
-                        return jsonMessage;
+                            public Object getMessage() {
+                                return jsonMessage;
+                            }
+                        });
                     }
-                });
-            }
+                }
+            });
         }
     }
 

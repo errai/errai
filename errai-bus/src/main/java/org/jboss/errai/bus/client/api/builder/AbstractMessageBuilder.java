@@ -50,6 +50,14 @@ public class AbstractMessageBuilder<R extends Sendable> {
                 message.sendNowWith(viaThis);
             }
 
+            public void sendGlobalWith(MessageBus viaThis) {
+                viaThis.sendGlobal(message);
+            }
+
+            public void sendGlobalWith(RequestDispatcher viaThis) {
+                viaThis.dispatchGlobal(message);
+            }
+
             public void reply() {
                 RequestDispatcher dispatcher = (RequestDispatcher)
                         getIncomingMessage().getResource(ResourceProvider.class, RequestDispatcher.class.getName()).get();
