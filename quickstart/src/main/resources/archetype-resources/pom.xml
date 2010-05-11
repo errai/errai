@@ -8,9 +8,9 @@
     <version>${version}</version>
 
     <properties>
-        <errai.version>1.1-SNAPSHOT</errai.version>
-        <gwt.version>2.0.0</gwt.version>
-        <gwt.maven.version>1.2.0-11137</gwt.maven.version>
+        <errai.version>1.1-M1</errai.version>
+        <gwt.version>2.0.3</gwt.version>
+        <gwt.maven.version>1.2</gwt.maven.version>
     </properties>
 
 
