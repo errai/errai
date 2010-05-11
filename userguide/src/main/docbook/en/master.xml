@@ -1132,12 +1132,19 @@ errai.async.worker.timeout=5
           the client to any service.</para>
         </sect3>
 
-        <sect3>
-          <title>errai.auto_scan_modules</title>
+          <sect3>
+              <title>errai.auto_discover_services</title>
 
-          <para>A boolean indicating whether or not the Errai bootstrapper
-          should automatically scan for modules.</para>
-        </sect3>
+              <para>A boolean indicating whether or not the Errai bootstrapper
+                  should automatically scan for services.</para>
+          </sect3>
+
+          <sect3>
+              <title>errai.auto_load_extensions</title>
+
+              <para>A boolean indicating whether or not the Errai bootstrapper
+                  should automatically scan for extensions.</para>
+          </sect3>
       </sect2>
 
       <sect2>
