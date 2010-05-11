@@ -1370,7 +1370,7 @@ AuthenticationContext authenticationContext =
       </sect2>
 
       <sect2>
-        <title>Authentication and Authorization</title>
+        <title>Security</title>
 
         <para>The workspace itself doesn't provide an authentication
         component. Instead it relies on the Authentication provided by errai
@@ -1404,7 +1404,7 @@ AuthenticationContext authenticationContext =
       </sect2>
 
       <sect2>
-        <title>LoginClient</title>
+        <title>Authentication and Authorization</title>
 
         <para>The LoginClient is the counter part of the SecurityService. It
         is instructed by the SecurityService to request the credentials upon
@@ -1429,25 +1429,50 @@ AuthenticationContext authenticationContext =
         particular tool.</para>
       </sect2>
 
-      <sect2>
+ <sect2>
         <title>Preferences</title>
 
         <para>The workspace allows you to store simple key-value pairs as
         preferences. Like with other common API, you obtain the Preferences
         through the <link linkend="workspace-registry">workspace
-        Registry</link>. The default implementation uses a cookie based
+        Registry</link>:
+            <programlisting>
+Preferences prefs = Registry.get(Preferences.class);
+prefs.set("default_sort_order", "ASC");
+            </programlisting>
+
+            The default implementation uses a cookie based
         approach, but it's easy to replace that one with a custom
         implementation in the module decriptor: <programlisting>
-    
+
    &lt;module&gt;
     [...]
     &lt;replace-with class="org.jboss.errai.workspaces.client.framework.CookiePreferences"&gt;
            &lt;when-type-is class="org.jboss.errai.workspaces.client.framework.Preferences"/&gt;
        &lt;/replace-with&gt;
     &lt;/module&gt;
-    
+
 </programlisting></para>
       </sect2>
+      <sect2>
+        <title>Logging</title>
+        <para>
+            Workspaces inherits <ulink url="http://code.google.com/p/gwt-log/">GWT Log</ulink>.
+            It ships with an embedded log message console that records log output, besides the default logging
+            to the browser error console and the GWT hosted mode window. To use the internal logging mechanism,
+            simply write messages to the Logger:            
+            <programlisting>
+import com.allen_sauer.gwt.log.client.Log;
+ [...]
+
+Log.warn("some log message");
+Log.error("message", throwable);
+                
+            </programlisting>
+
+        </para>
+      </sect2>
+
     </sect1>
 
     <sect1 id="using-workspaces">
@@ -1570,8 +1595,8 @@ Laika:gwt-app hbraun$ lstree
       </sect2>
     </sect1>
   </chapter>
-
-  <chapter id="quickstart">
+ 
+    <chapter id="quickstart">
     <title>Appendix A: Quickstart</title>
 
     <section id="quickstart-intro">
@@ -1640,4 +1665,91 @@ Laika:gwt-app hbraun$ lstree
       client (GWT), and a HelloWorld service.</para>
     </section>
   </chapter>
+  
+  <chapter id="proxy">
+<title>Appendix B: Development Proxy</title>
+  <sect1>
+            <title>Proxied access to external containers</title>
+            <para>
+            Usually GWT developement happens in hosted mode and then, later on, the GWT app
+            is turned into a webapp (*.war) that can be deployed on a target container (app server, servlet engine).
+            This works quiet well for closed systems that don't depend on additional resources the target container
+            provides. A typical resource would be a DataSource for access to a relational database. 
+            </para>
+
+            <para>
+                Instead of pulling these resources into the hosted mode servlet engine (jetty, read-only JNDI)
+                or creating mock objects for any resources that cannot be run in hosted mode, we offer you a much more simple
+                way to work with external resources: Simply proxy all requests that occur in hosted mode to an external target container:
+                <figure id="proxy">
+                    <title>Development Proxy</title>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata align="center" fileref="images/proxy.png"/>
+                        </imageobject>
+                    </mediaobject>
+                </figure>
+
+            </para>
+
+            <para>
+               The proxy is implemented a yet another servlet that you need to add to the web.xml
+               that's being sed in hosted mode:
+<programlisting>
+&lt;servlet>
+    &lt;servlet-name>erraiProxy&lt;/servlet-name>
+    &lt;description>Errai Proxy&lt;/description>
+    &lt;servlet-class>org.jboss.errai.tools.proxy.XmlHttpProxyServlet&lt;/servlet-class>
+        &lt;init-param>
+            &lt;param-name>config.name&lt;/param-name>
+            &lt;param-value>errai-proxy.json&lt;/param-value>      (1)
+        &lt;/init-param>
+        &lt;load-on-startup>1&lt;/load-on-startup>
+&lt;/servlet>
+               
+&lt;servlet-mapping>
+    &lt;servlet-name>erraiProxy&lt;/servlet-name>
+    &lt;url-pattern>/app/proxy/*&lt;/url-pattern>                  (2)
+&lt;/servlet-mapping>
+           
+</programlisting>
+            <orderedlist>
+            <listitem>
+              <para>Proxy configuration. See details below.</para>
+            </listitem>
+
+            <listitem>
+              <para>The proxy url pattern convetion. The bus bootstraps on this URL.</para>
+            </listitem>
+          </orderedlist>
+            </para>
+
+            <para>
+                The web.xml proxy declaration contains two notable elements: A reference to
+                the proxy configuration file and a URL pattern, where the proxy can found.
+                While the later shouldn't be changed (the bus bootstraps on this URL),
+                you need to change the proxy config according to your needs:
+<programlisting>
+ {"xhp": {
+    "version": "1.1",
+    "services": [
+        {"id": "default",
+         "url":"http://127.0.0.1:8080/my-gwt-app/in.erraiBus",
+         "passthrough":true
+        },
+    ]
+  }
+}
+</programlisting>
+                You would need to <emphasis>change the host, port and webcontext</emphasis> ('my-gwt-app' in this case)
+                to reflect the location of the external container. 'passthrough' simply means that any
+                request to 'proxy/in.erraiBus' will go to 'container/my-gwt-app/in.erraiBus'.
+
+                This already indicates that you need to have the server side part of your GWT application,
+                already running on the target container. The most simple way to achieve this, is to build a
+                the complete webapp, deploy it and ignore the UI parts that may be available on the server.               
+            </para>
+        </sect1>
+</chapter>
+
 </book>
