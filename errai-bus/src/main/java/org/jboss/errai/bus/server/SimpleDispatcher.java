@@ -16,12 +16,10 @@ import static org.jboss.errai.bus.client.util.ErrorHelper.handleMessageDeliveryF
  */
 @Singleton
 public class SimpleDispatcher implements RequestDispatcher {
-    private ErraiService svc;
     private MessageBus bus;
 
     @Inject
     public SimpleDispatcher(ErraiService svc) {
-        this.svc = svc;
         this.bus = svc.getBus();
     }
 
