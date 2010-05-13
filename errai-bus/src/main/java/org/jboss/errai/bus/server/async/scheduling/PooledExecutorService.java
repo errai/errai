@@ -36,15 +36,12 @@ public class PooledExecutorService implements TaskProvider {
      * Collections.synchronizedSet();
      */
     private final BlockingQueue<TimedTask> scheduledTasks;
-
     private final ThreadWorkerPool pool;
-
-    private volatile int garbageCount = 0;
 
     private boolean stopped = false;
 
     private final SchedulerThread schedulerThread;
-    private final MonitorThread garbageCollectorThread;
+    private final MonitorThread monitorThread;
 
     private final ReentrantLock mutex = new ReentrantLock(true);
 
@@ -60,7 +57,7 @@ public class PooledExecutorService implements TaskProvider {
         scheduledTasks = new PriorityBlockingQueue<TimedTask>();
 
         schedulerThread = new SchedulerThread();
-        garbageCollectorThread = new MonitorThread();
+        monitorThread = new MonitorThread();
     }
 
     /**
@@ -108,7 +105,7 @@ public class PooledExecutorService implements TaskProvider {
             }
 
             schedulerThread.start();
-            garbageCollectorThread.start();
+            monitorThread.start();
 
             pool.startPool();
         }
@@ -121,7 +118,7 @@ public class PooledExecutorService implements TaskProvider {
         mutex.lock();
         try {
             schedulerThread.requestStop();
-            garbageCollectorThread.requestStop();
+            monitorThread.requestStop();
             queue.clear();
             stopped = true;
         }
@@ -132,7 +129,6 @@ public class PooledExecutorService implements TaskProvider {
 
     private long runAllDue() throws InterruptedException {
         long nextRunTime = 0;
-
         TimedTask task;
 
         while ((task = scheduledTasks.poll(60, java.util.concurrent.TimeUnit.SECONDS)) != null) {
@@ -147,7 +143,7 @@ public class PooledExecutorService implements TaskProvider {
              * Sechedule the task for execution.
              */
             if (!queue.offer(task)) {
-                throw new QueueOverloadedException("could not schedule task");
+                throw new QueueOverloadedException("could not schedule task: queue is saturated");
             }
 
             if (task.calculateNextRuntime()) {
