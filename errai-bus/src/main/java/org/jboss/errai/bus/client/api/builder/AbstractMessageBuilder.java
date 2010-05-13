@@ -4,6 +4,7 @@ import org.jboss.errai.bus.client.api.*;
 import org.jboss.errai.bus.client.api.base.*;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
+import org.jboss.errai.bus.client.protocols.MessageParts;
 
 import static org.jboss.errai.bus.client.api.base.ConversationHelper.createConversationService;
 import static org.jboss.errai.bus.client.api.base.ConversationHelper.makeConversational;
@@ -100,6 +101,37 @@ public class AbstractMessageBuilder<R extends Sendable> {
                     AsyncTask task;
                     AsyncDelegateErrorCallback errorCallback
                             = new AsyncDelegateErrorCallback(this, message.getErrorCallback());
+                    final Runnable sender;
+
+                    {
+                        if (message instanceof ConversationMessageWrapper && (((ConversationMessageWrapper) message)
+                                .getIncomingMessage()).hasPart(MessageParts.ReplyTo)) {
+
+                            sender = new Runnable() {
+                                final String replyTo = ((ConversationMessageWrapper) message).getIncomingMessage()
+                                        .get(String.class, MessageParts.ReplyTo);
+
+                                public void run() {
+                                    MessageBuilder.getMessageProvider().get()
+                                            .toSubject(replyTo)
+                                            .copyResource("Session", message)
+                                            .addAllParts(message.getParts())
+                                            .addAllProvidedParts(message.getProvidedParts())
+                                            .errorsCall(errorCallback).sendNowWith(viaThis);
+                                }
+                            };
+                        } else {
+                            sender = new Runnable() {
+                                public void run() {
+                                    MessageBuilder.getMessageProvider().get()
+                                            .copyResource("Session", message)
+                                            .addAllParts(message.getParts())
+                                            .addAllProvidedParts(message.getProvidedParts())
+                                            .errorsCall(errorCallback).sendNowWith(viaThis);
+                                }
+                            };
+                        }
+                    }
 
                     public void setAsyncTask(AsyncTask task) {
                         synchronized (this) {
@@ -115,11 +147,7 @@ public class AbstractMessageBuilder<R extends Sendable> {
                     }
 
                     public void run() {
-                        MessageBuilder.getMessageProvider().get()
-                                .copyResource("Session", message)
-                                .addAllParts(message.getParts())
-                                .addAllProvidedParts(message.getProvidedParts())
-                                .errorsCall(errorCallback).sendNowWith(viaThis);
+                        sender.run();
                     }
                 });
             }

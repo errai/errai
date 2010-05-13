@@ -19,9 +19,8 @@ package org.jboss.errai.bus.server.util;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.server.api.QueueSession;
 
-public class SessionContext {
+public class SessionContext implements Context {
     private QueueSession session;
-
 
     public static SessionContext get(QueueSession session) {
         return new SessionContext(session);
@@ -47,6 +46,10 @@ public class SessionContext {
     }
 
     public void setAttribute(Class typeIndexed, Object value) {
+        if (session.hasAttribute(typeIndexed.getName())) {
+            throw new IllegalStateException("The type-indexed property already exists: " + typeIndexed.getName());
+        }
+
         session.setAttribute(typeIndexed.getName(), value);
     }
 
@@ -64,6 +67,18 @@ public class SessionContext {
 
     public <T> T getAttribute(Class<T> type, String param) {
         return session.getAttribute(type, param);
+    }
+
+    public boolean removeAttribute(Enum key) {
+        return session.removeAttribute(key.toString());
+    }
+
+    public boolean removeAttribute(Class typeIndexed) {
+        return session.removeAttribute(typeIndexed.getName());
+    }
+
+    public boolean removeAttribute(String param) {
+        return session.removeAttribute(param);
     }
 
     public QueueSession getSession() {

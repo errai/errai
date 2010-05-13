@@ -58,7 +58,7 @@ public interface QueueSession {
      *
      * @param attribute - the attribute to remove
      */
-    public void removeAttribute(String attribute);
+    public boolean removeAttribute(String attribute);
 
     /**
      * Register a listener to be fired when the session ends.

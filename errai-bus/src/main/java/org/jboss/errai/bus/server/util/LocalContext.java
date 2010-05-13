@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class LocalContext {
+public class LocalContext implements Context {
     private String context;
     private SubContext ctx;
     private QueueSession session;
@@ -49,12 +49,20 @@ public class LocalContext {
         ctx.setAttribute(key.toString(), value);
     }
 
-    public <T> T getAttribute(Class<T> type, Enum key) {
-        return ctx.getAttribute(type, key.toString());
+    public void setAttribute(Class typeIndexed, Object value) {
+        if (ctx.hasAttribute(typeIndexed.getName())) {
+            throw new IllegalStateException("The type-indexed property already exists: " + typeIndexed.getName());
+        }
+
+        ctx.setAttribute(typeIndexed.getName(), value);
     }
 
-    public void setAttribute(Class typeIndexed, Object value) {
-        ctx.setAttribute(typeIndexed.getName(), value);
+    public void setAttribute(String param, Object value) {
+        ctx.setAttribute(param, value);
+    }
+
+    public <T> T getAttribute(Class<T> type, Enum key) {
+        return ctx.getAttribute(type, key.toString());
     }
 
     public <T> T getAttribute(Class<T> type, Class typeIndexed) {
@@ -65,12 +73,20 @@ public class LocalContext {
         return getAttribute(type, type);
     }
 
-    public void setAttribute(String param, Object value) {
-        ctx.setAttribute(param, value);
-    }
-
     public <T> T getAttribute(Class<T> type, String param) {
         return ctx.getAttribute(type, param);
+    }
+
+    public boolean removeAttribute(Enum key) {
+        return ctx.removeAttribute(key.toString());
+    }
+
+    public boolean removeAttribute(Class typeIndexed) {
+        return ctx.removeAttribute(typeIndexed.getName());
+    }
+
+    public boolean removeAttribute(String param) {
+        return ctx.removeAttribute(param);
     }
 
     public QueueSession getSession() {
@@ -110,8 +126,8 @@ public class LocalContext {
             return contextAttributes.containsKey(attribute);
         }
 
-        public void removeAttribute(String attribute) {
-            contextAttributes.remove(attribute);
+        public boolean removeAttribute(String attribute) {
+            return contextAttributes.remove(attribute) != null;
         }
     }
 }

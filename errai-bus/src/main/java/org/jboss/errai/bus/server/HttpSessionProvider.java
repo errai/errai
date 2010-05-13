@@ -102,8 +102,8 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
             return container.sharedAttributes.containsKey(attribute);
         }
 
-        public void removeAttribute(String attribute) {
-            container.sharedAttributes.remove(attribute);
+        public boolean removeAttribute(String attribute) {
+            return container.sharedAttributes.remove(attribute) != null;
         }
 
         public void addSessionEndListener(SessionEndListener listener) {
