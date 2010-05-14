@@ -190,7 +190,7 @@ public class MessageQueueImpl implements MessageQueue {
             synchronized (activationLock) {
                 if (isWindowExceeded()) {
                     descheduleTask();
-                    activationCallback.activate(this);
+                    if (activationCallback != null) activationCallback.activate(this);
                 } else if (task == null) {
                     scheduleActivation();
                 }

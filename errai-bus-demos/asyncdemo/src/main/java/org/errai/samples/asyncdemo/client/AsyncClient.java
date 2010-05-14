@@ -26,7 +26,7 @@ public class AsyncClient implements EntryPoint {
 
         final Counter counter = new Counter();
 
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 7; i++) {
             final VerticalPanel panel = new VerticalPanel();
 
             final Button startStopButton = new Button("Start" + i);

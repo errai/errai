@@ -17,7 +17,7 @@ import java.util.concurrent.ArrayBlockingQueue;
  */
 public class WorkerFactory {
     private static final int DEFAULT_DELIVERY_QUEUE_SIZE = 250;
-    private static final int DEFAULT_THREAD_POOL_SIZE = 4;
+    private static final int DEFAULT_THREAD_POOL_SIZE = 3;
 
     private static final String CONFIG_ASYNC_THREAD_POOL_SIZE = "errai.async.thread_pool_size";
     private static final String CONFIG_ASYNC_WORKER_TIMEOUT = "errai.async.worker.timeout";
