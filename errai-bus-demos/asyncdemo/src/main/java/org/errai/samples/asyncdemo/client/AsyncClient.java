@@ -3,10 +3,7 @@ package org.errai.samples.asyncdemo.client;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
@@ -15,49 +12,59 @@ import org.jboss.errai.bus.client.protocols.MessageParts;
 
 public class AsyncClient implements EntryPoint {
     public void onModuleLoad() {
-        final Button startStopButton = new Button("Start");
-        final TextBox resultBox = new TextBox();
-        resultBox.setEnabled(false);
+        final HorizontalPanel hPanel = new HorizontalPanel();
 
-        final String receiverName = "RandomNumberReceiver";
+        for (int i = 0; i < 5; i++) {
+            final VerticalPanel panel = new VerticalPanel();
 
-        /**
-         * Create a callback receiver to receive the data from the server.
-         */
-        final MessageCallback receiver = new MessageCallback() {
-            public void callback(Message message) {
-                Double value = message.get(Double.class, "Data");
-                resultBox.setText(String.valueOf(value));
-            }
-        };
+            final Button startStopButton = new Button("Start" + i);
+            final TextBox resultBox = new TextBox();
+            resultBox.setEnabled(false);
 
-        /**
-         * Subscribe to the receiver using the recevierName.
-         */
-        ErraiBus.get().subscribe(receiverName, receiver);
+            final String receiverName = "RandomNumberReceiver" + i;
 
-        startStopButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent clickEvent) {
-                /**
-                 * Send a message to Start/Stop the task on the server.
-                 */
-                MessageBuilder.createMessage()
-                        .toSubject("AsyncService")
-                        .command(startStopButton.getText())
-                        .with(MessageParts.ReplyTo, receiverName)
-                        .noErrorHandling().sendNowWith(ErraiBus.get());
+            /**
+             * Create a callback receiver to receive the data from the server.
+             */
+            final MessageCallback receiver = new MessageCallback() {
+                public void callback(Message message) {
+                    Double value = message.get(Double.class, "Data");
+                    resultBox.setText(String.valueOf(value));
+                }
+            };
 
-                /**
-                 * Flip-flop the value of the button every time it's pushed between 'Start' and 'Stop'
-                 */
-                startStopButton.setText("Start".equals(startStopButton.getText()) ? "Stop" : "Start");
-            }
-        });
+            /**
+             * Subscribe to the receiver using the recevierName.
+             */
+            ErraiBus.get().subscribe(receiverName, receiver);
 
-        VerticalPanel panel = new VerticalPanel();
-        panel.add(startStopButton);
-        panel.add(resultBox);
-        
-        RootPanel.get().add(panel);
+            final int num = i;
+
+            startStopButton.addClickHandler(new ClickHandler() {
+                public void onClick(ClickEvent clickEvent) {
+                    /**
+                     * Send a message to Start/Stop the task on the server.
+                     */
+                    MessageBuilder.createMessage()
+                            .toSubject("AsyncService")
+                            .command(startStopButton.getText())
+                            .with(MessageParts.ReplyTo, receiverName)
+                            .noErrorHandling().sendNowWith(ErraiBus.get());
+
+                    /**
+                     * Flip-flop the value of the button every time it's pushed between 'Start' and 'Stop'
+                     */
+                    startStopButton.setText(("Start"+num).equals(startStopButton.getText()) ? "Stop" + num : "Start" + num);
+                }
+            });
+
+            panel.add(startStopButton);
+            panel.add(resultBox);
+
+            hPanel.add(panel);
+        }
+
+
+        RootPanel.get().add(hPanel);
     }
 }

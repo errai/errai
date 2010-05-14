@@ -241,7 +241,6 @@ public class PooledExecutorService implements TaskProvider {
         public void run() {
             while (running) {
                 try {
-                    long tm;
                     while (running) {
                         runAllDue();
                     }
@@ -277,7 +276,6 @@ public class PooledExecutorService implements TaskProvider {
                 catch (InterruptedException e) {
                     // fall through
                 }
-
             }
         }
 

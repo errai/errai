@@ -9,15 +9,24 @@ import org.jboss.errai.bus.client.api.base.TimeUnit;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.util.LocalContext;
 
+import java.util.regex.Pattern;
+
 
 @Service
 public class AsyncService implements MessageCallback {
+
+    private final static Pattern StartMatcher = Pattern.compile("^Start[0-9]{1}$");
+    private final static Pattern StopMatcher = Pattern.compile("^Stop[0-9]{1}$");
+
     public void callback(Message message) {
         LocalContext ctx = LocalContext.get(message);
 
-        AsyncTask task = ctx.getAttribute(AsyncTask.class);
+        String commandType = message.getCommandType();
+        String taskName = getTaskName(commandType);
 
-        if ("Start".equals(message.getCommandType())) {
+        if (StartMatcher.matcher(commandType).matches()) {
+            AsyncTask task = ctx.getAttribute(AsyncTask.class, taskName);
+
             // there's no task running in this context.
             if (task == null) {
                 ResourceProvider<Double> randomNumberProvider = new ResourceProvider<Double>() {
@@ -25,27 +34,38 @@ public class AsyncService implements MessageCallback {
                         return Math.random();
                     }
                 };
-                
+
                 task = MessageBuilder.createConversation(message)
                         .subjectProvided().signalling()
                         .withProvided("Data", randomNumberProvider)
                         .noErrorHandling()
-                        .replyRepeating(TimeUnit.MILLISECONDS, 100);
+                        .replyRepeating(TimeUnit.MILLISECONDS, 50);
 
-                ctx.setAttribute(AsyncTask.class, task);
+                System.out.println("New task started: " + taskName);
+                ctx.setAttribute(taskName, task);
+            } else {
+                System.out.println("Task already started: " + taskName);
             }
-            else {
-                System.out.println("Task already started!");
-            }
-        }
-        else if ("Stop".equals(message.getCommandType())) {
+        } else if (StopMatcher.matcher(commandType).matches()) {
+            AsyncTask task = ctx.getAttribute(AsyncTask.class, taskName);
+
             if (task == null) {
-                System.out.println("Nothing to stop!");
-            }
-            else {
+                System.out.println("Nothing to stop: " + taskName);
+            } else {
+                System.out.println("Stopping: " + taskName);
                 task.cancel(true);
-                ctx.removeAttribute(AsyncTask.class);
+                ctx.removeAttribute(taskName);
             }
         }
     }
+
+    public String getTaskName(String name) {
+        return "Task" + getLastChar(name);
+    }
+
+    public char getLastChar(String str) {
+        return str.charAt(str.length() - 1);
+    }
+
+
 }

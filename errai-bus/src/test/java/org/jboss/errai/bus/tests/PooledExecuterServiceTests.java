@@ -110,9 +110,6 @@ public class PooledExecuterServiceTests extends TestCase {
             });
 
             for (int i = 0; i < 10000; i++) {
-//                if ((i % 1000) == 1) {
-//                    System.out.println("(A) Scheduled " + i + " of 10,000");
-//                }
                 svc.execute(new Runnable() {
                     public void run() {
                         synchronized (test) {
@@ -143,9 +140,6 @@ public class PooledExecuterServiceTests extends TestCase {
             });
 
             for (int i = 0; i < 10000; i++) {
-//                if ((i % 1000) == 1) {
-//                    System.out.println("(B) Scheduled " + i + " of 10,000");
-//                }
                 executor.execute(new Runnable() {
                     public void run() {
                         synchronized (test2) {
