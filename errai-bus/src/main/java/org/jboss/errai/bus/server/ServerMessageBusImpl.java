@@ -53,7 +53,7 @@ import static org.jboss.errai.bus.server.util.ServerBusUtils.encodeJSON;
 public class ServerMessageBusImpl implements ServerMessageBus {
     private static final String ERRAI_BUS_QUEUESIZE = "errai.bus.queuesize";
 
-    private final static int DEFAULT_QUEUE_SIZE = 25;
+    private final static int DEFAULT_QUEUE_SIZE = 50;
 
     private int queueSize = DEFAULT_QUEUE_SIZE;
 

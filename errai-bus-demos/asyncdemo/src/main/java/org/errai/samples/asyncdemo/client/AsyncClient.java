@@ -13,6 +13,18 @@ import org.jboss.errai.bus.client.protocols.MessageParts;
 public class AsyncClient implements EntryPoint {
     public void onModuleLoad() {
         final HorizontalPanel hPanel = new HorizontalPanel();
+        final Label messagesReceived = new Label("Messaged Received: ");
+        final Label messagesReceivedVal = new Label();
+
+        class Counter {
+            int count = 0;
+
+            public void increment() {
+                messagesReceivedVal.setText(String.valueOf(++count));
+            }
+        }
+
+        final Counter counter = new Counter();
 
         for (int i = 0; i < 5; i++) {
             final VerticalPanel panel = new VerticalPanel();
@@ -28,6 +40,7 @@ public class AsyncClient implements EntryPoint {
              */
             final MessageCallback receiver = new MessageCallback() {
                 public void callback(Message message) {
+                    counter.increment();
                     Double value = message.get(Double.class, "Data");
                     resultBox.setText(String.valueOf(value));
                 }
@@ -64,7 +77,15 @@ public class AsyncClient implements EntryPoint {
             hPanel.add(panel);
         }
 
+        final VerticalPanel outerPanel = new VerticalPanel();
+        outerPanel.add(hPanel);
 
-        RootPanel.get().add(hPanel);
+        final HorizontalPanel messageCounter = new HorizontalPanel();
+        messageCounter.add(messagesReceived);
+        messageCounter.add(messagesReceivedVal);
+
+        outerPanel.add(messageCounter);
+
+        RootPanel.get().add(outerPanel);
     }
 }

@@ -131,8 +131,8 @@ public class MessageQueueImpl implements MessageQueue {
                     if (!throttleIncoming && queue.size() > lastQueueSize) {
                         if (transmissionWindow < MAX_TRANSMISSION_WINDOW) {
                             transmissionWindow += millis(50);
-                            System.err.println("[Congestion on queue -- New transmission window: "
-                                    + transmissionWindow + "; Queue size: " + queue.size() + ")]");
+//                            System.err.println("[Congestion on queue -- New transmission window: "
+//                                    + transmissionWindow + "; Queue size: " + queue.size() + ")]");
                         } else {
                             throttleIncoming = true;
                             System.err.println("[Warning: A queue has become saturated and " +

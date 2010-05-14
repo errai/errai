@@ -26,7 +26,7 @@ public class AsyncService implements MessageCallback {
 
         if (StartMatcher.matcher(commandType).matches()) {
             AsyncTask task = ctx.getAttribute(AsyncTask.class, taskName);
-
+                                                                                    
             // there's no task running in this context.
             if (task == null) {
                 ResourceProvider<Double> randomNumberProvider = new ResourceProvider<Double>() {
