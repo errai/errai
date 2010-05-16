@@ -25,6 +25,7 @@ import org.jboss.errai.bus.client.api.base.TaskManagerFactory;
 import org.jboss.errai.bus.client.framework.*;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;
+import org.jboss.errai.bus.client.util.ErrorHelper;
 import org.jboss.errai.bus.server.api.*;
 import org.jboss.errai.bus.server.async.SchedulerService;
 import org.jboss.errai.bus.server.async.SimpleSchedulerService;
@@ -159,7 +160,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
         addSubscribeListener(new SubscribeListener() {
             public void onSubscribe(SubscriptionEvent event) {
-                if (event.isRemote()  || event.getSubject().startsWith("local:")) return;
+                if (event.isRemote() || event.getSubject().startsWith("local:")) return;
                 synchronized (messageQueues) {
                     if (messageQueues.isEmpty()) return;
 
@@ -174,9 +175,9 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
         addUnsubscribeListener(new UnsubscribeListener() {
             public void onUnsubscribe(SubscriptionEvent event) {
-                if (event.isRemote()  || event.getSubject().startsWith("local:")) return;
+                if (event.isRemote() || event.getSubject().startsWith("local:")) return;
                 synchronized (messageQueues) {
-                    if (messageQueues.isEmpty() ) return;
+                    if (messageQueues.isEmpty()) return;
 
                     MessageBuilder.createMessage()
                             .toSubject("ClientBus")
@@ -389,9 +390,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 busMonitor.notifyOutgoingMessageToRemote(queue.getSession().getSessionId(), message);
             }
 
-            enqueueForDelivery(queue, message.getSubject(), message instanceof HasEncoded ?
-                    ((HasEncoded) message).getEncoded() :
-                    encodeJSON(message.getParts()));
+            asyncEnqueue(queue, message);
         }
         catch (NoSubscribersToDeliverTo nstdt) {
             // catch this so we can get a full trace
@@ -399,8 +398,25 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
     }
 
+    private void asyncEnqueue(final MessageQueue queue, final Message message) {
+        TaskManagerFactory.get().execute(new Runnable() {
+            public void run() {
+                try {
+                    enqueueForDelivery(queue, message.getSubject(), message instanceof HasEncoded ?
+                            ((HasEncoded) message).getEncoded() :
+                            encodeJSON(message.getParts()));
+                }
+                catch (QueueOverloadedException e) {
+                    handleMessageDeliveryFailure(ServerMessageBusImpl.this, message, e.getMessage(), e, false);
+               //     ErrorHelper.sendClientError(ServerMessageBusImpl.this, message, e.getMessage(), e);
+                }
+            }
+        });
+    }
+
     private void enqueueForDelivery(final MessageQueue queue, final String subject, final Object message) {
         if (queue != null && isAnyoneListening(queue, subject)) {
+
             queue.offer(new MarshalledMessage() {
                 public String getSubject() {
                     return subject;
@@ -410,6 +426,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                     return message;
                 }
             });
+
         } else {
             if (queue != null && !queue.isInitialized()) {
                 deferDelivery(queue, new MarshalledMessage() {

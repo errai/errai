@@ -23,9 +23,8 @@ public class Worker extends Thread {
     private long timeout;
 
     private volatile boolean active = true;
-
     private volatile long workExpiry;
-    private Message message;
+    private volatile Message message;
 
     private Logger log = getLogger(this.getClass());
 
@@ -110,7 +109,8 @@ public class Worker extends Thread {
                 handleMessageDeliveryFailure(bus, message, "Queue has become saturated/overloaded", e, true);
             }
             catch (QueueUnavailableException e) {
-                handleMessageDeliveryFailure(bus, message, "Queue is not available", e, true);
+                e.printStackTrace();
+              //  handleMessageDeliveryFailure(bus, message, "Queue is not available", e, true);
             }
             catch (Throwable e) {
                 handleMessageDeliveryFailure(bus, message, "Error calling remote service: " + message.getSubject(), e, false);

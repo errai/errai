@@ -142,8 +142,8 @@ public class PooledExecutorService implements TaskProvider {
             /**
              * Sechedule the task for execution.
              */
-            if (!queue.offer(task)) {
-                throw new QueueOverloadedException("could not schedule task: queue is saturated");
+            if (!queue.offer(task, 5, java.util.concurrent.TimeUnit.SECONDS)) {
+                throw new RuntimeException("could not schedule task: queue is saturated");
             }
 
             if (task.calculateNextRuntime()) {

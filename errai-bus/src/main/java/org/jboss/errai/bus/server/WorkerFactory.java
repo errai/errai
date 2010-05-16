@@ -17,8 +17,8 @@ import java.util.concurrent.ArrayBlockingQueue;
  * The <tt>WorkerFactory</tt> maintains a pool of <tt>Worker</tt>s, and takes care of running and terminating them
  */
 public class WorkerFactory {
-    private static final int DEFAULT_DELIVERY_QUEUE_SIZE = 250;
-    private static final int DEFAULT_THREAD_POOL_SIZE = 5;
+    private static final int DEFAULT_DELIVERY_QUEUE_SIZE = 1000;
+    private static final int DEFAULT_THREAD_POOL_SIZE = 10;
 
     private static final String CONFIG_ASYNC_THREAD_POOL_SIZE = "errai.async.thread_pool_size";
     private static final String CONFIG_ASYNC_WORKER_TIMEOUT = "errai.async.worker.timeout";
@@ -101,8 +101,8 @@ public class WorkerFactory {
      *
      * @param m - message to be delivered
      */
-    public void deliverGlobal(Message m) {
-        if (messages.offer(m)) {
+    public void deliverGlobal(Message m) throws InterruptedException {
+        if (messages.offer(m, 30, java.util.concurrent.TimeUnit.SECONDS)) {
             return;
         } else {
             sendDeliveryFailure(m);
@@ -117,7 +117,7 @@ public class WorkerFactory {
      */
     public void deliver(Message m) throws InterruptedException {
         m.setFlag(RoutingFlags.NonGlobalRouting);
-        if (messages.offer(m, 20, java.util.concurrent.TimeUnit.SECONDS)) {
+        if (messages.offer(m, 30, java.util.concurrent.TimeUnit.SECONDS)) {
             return;
         } else {
             sendDeliveryFailure(m);

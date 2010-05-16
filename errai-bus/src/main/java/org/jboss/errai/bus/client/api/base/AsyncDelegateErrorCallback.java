@@ -31,14 +31,14 @@ public class AsyncDelegateErrorCallback implements ErrorCallback {
 
     public boolean error(Message message, Throwable throwable) {
         if (asyncTaskRef.getAsyncTask() == null) {
-            System.err.println("Unable to access async tas reference! Cannot safely cancel task.");
+            System.err.println("Unable to access async task reference! Cannot safely cancel task.");
         } else {
             asyncTaskRef.getAsyncTask().cancel(true);
         }
 
         if (delegate == null) {
             throwable.printStackTrace();
-            return false;
+            return true;
         } else {
             return delegate.error(message, throwable);
         }

@@ -5,6 +5,7 @@ import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.protocols.BusCommands;
+import org.jboss.errai.bus.client.protocols.MessageParts;
 
 /**
  * The <tt>ErrorHelper</tt> class facilitates handling and sending error messages to the correct place
@@ -89,6 +90,16 @@ public class ErrorHelper {
 
     }
 
+    public static void sendClientError(MessageBus bus, String queueId, String errorMessage, String additionalDetails) {
+        MessageBuilder.createMessage()
+                .toSubject("ClientBusErrors").signalling()
+                .with("ErrorMessage", errorMessage)
+                .with("AdditionalDetails", additionalDetails)
+                .with(MessageParts.SessionID, queueId)
+                .noErrorHandling().sendNowWith(bus);
+    }
+
+
     /**
      * Sends a disconnect command message to the client bus
      *
@@ -100,6 +111,10 @@ public class ErrorHelper {
                 .toSubject("ClientBus")
                 .command(BusCommands.Disconnect)
                 .noErrorHandling().sendNowWith(bus);
+    }
+
+    public static void handleMessageDeliveryFailure(MessageBus bus, String queueId, String errorMessage, Throwable e, boolean disconnect) {
+
     }
 
     /**

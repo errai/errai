@@ -39,7 +39,7 @@ public class AsyncDispatcher implements RequestDispatcher {
      *
      * @param message - a message to dispatch globally
      */
-    public void dispatchGlobal(Message message) {
+    public void dispatchGlobal(Message message) throws InterruptedException {
         if (message.hasPart(MessageParts.PriorityProcessing)) {
             try {
             service.getBus().sendGlobal(message);

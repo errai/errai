@@ -5,6 +5,7 @@ package org.jboss.errai.bus.server;
  * send or be added to the queue, because the queue is not currently active
  */
 public class QueueUnavailableException extends RuntimeException {
+    
     public QueueUnavailableException(String message) {
         super(message);
     }

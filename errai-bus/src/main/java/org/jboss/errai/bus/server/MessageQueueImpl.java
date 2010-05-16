@@ -16,10 +16,13 @@
 
 package org.jboss.errai.bus.server;
 
+import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.client.framework.Payload;
+import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.server.api.*;
 import org.jboss.errai.bus.server.async.TimedTask;
+import org.jboss.errai.bus.server.util.ServerBusUtils;
 
 import java.util.Queue;
 import java.util.concurrent.*;
@@ -43,7 +46,7 @@ public class MessageQueueImpl implements MessageQueue {
 
     private QueueSession session;
 
-    private long transmissionWindow = 50;
+    private long transmissionWindow = 40;
     private volatile long lastTransmission = nanoTime();
     private long endWindow;
 
@@ -105,7 +108,6 @@ public class MessageQueueImpl implements MessageQueue {
                     m = queue.poll();
                 }
 
-
                 int payLoadSize = 0;
 
                 Payload p = new Payload(m == null ? heartBeat : m);
@@ -131,8 +133,6 @@ public class MessageQueueImpl implements MessageQueue {
                     if (!throttleIncoming && queue.size() > lastQueueSize) {
                         if (transmissionWindow < MAX_TRANSMISSION_WINDOW) {
                             transmissionWindow += millis(50);
-//                            System.err.println("[Congestion on queue -- New transmission window: "
-//                                    + transmissionWindow + "; Queue size: " + queue.size() + ")]");
                         } else {
                             throttleIncoming = true;
                             System.err.println("[Warning: A queue has become saturated and " +
@@ -173,7 +173,6 @@ public class MessageQueueImpl implements MessageQueue {
             throw new QueueUnavailableException("queue is not available");
         }
 
-
         boolean b = false;
         activity();
         try {
@@ -185,7 +184,7 @@ public class MessageQueueImpl implements MessageQueue {
 
         if (!b) {
             queue.clear();
-            throw new QueueOverloadedException("too many undelievered messages in queue: cannot dispatch message.");
+            throw new QueueOverloadedException(null, "too many undelievered messages in queue: cannot dispatch message.");
         } else if (activationCallback != null) {
             synchronized (activationLock) {
                 if (isWindowExceeded()) {
