@@ -28,7 +28,7 @@ public class DefaultTaskManager implements TaskManager {
     private static final String ACTIVE_TASKS_KEY = DefaultTaskManager.class.getName() + "/ActiveAsyncTasks";
 
     private final static DefaultTaskManager taskManager = new DefaultTaskManager(null);
-    private final static PooledExecutorService service = new PooledExecutorService(50);
+    private final static PooledExecutorService service = new PooledExecutorService(2000);
 
     static {
         service.start();

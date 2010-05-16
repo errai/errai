@@ -27,12 +27,6 @@ public class ThreadWorker implements Runnable {
     private final TaskProvider pool;
     private final ErrorCallback errorCallback;
 
-    private volatile double timeSampleStart = 0d;
-    private volatile double cpuTime = 0;
-    private volatile double avgLoad = 0;
-
-    private static final long SEC10 = TimeUnit.NANOSECONDS.convert(10, TimeUnit.SECONDS);
-
     private volatile boolean active = false;
 
     public ThreadWorker(TaskProvider pool) {
@@ -49,7 +43,6 @@ public class ThreadWorker implements Runnable {
 
     public void start() {
         // Start sampling the load in the past, to simplify calculations.
-        timeSampleStart = nanoTime() - SEC10;
         active = true;
         thread.start();
     }
@@ -67,18 +60,11 @@ public class ThreadWorker implements Runnable {
         TimedTask task = null;
         while (active) {
             try {
-                long tm;
                 while (active) {
-                    timeSampleStart = nanoTime();
                     if ((task = pool.getNextTask()) == null) {
                         continue;
                     }
-
-                    tm = nanoTime();
                     task.run();
-                    cpuTime = (nanoTime() - tm);
-
-                    calculateLoad();
                 }
             }
             catch (InterruptedException e) {
@@ -106,12 +92,7 @@ public class ThreadWorker implements Runnable {
         }
     }
 
-
-    private void calculateLoad() {
-       avgLoad = cpuTime / (nanoTime() - timeSampleStart);
-    }
-
-    public double getApparentLoad() {
-        return avgLoad;
+    public Thread.State getThreadState() {
+        return thread.getState();
     }
 }

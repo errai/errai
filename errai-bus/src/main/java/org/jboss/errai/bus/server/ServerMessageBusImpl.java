@@ -408,7 +408,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 }
                 catch (QueueOverloadedException e) {
                     handleMessageDeliveryFailure(ServerMessageBusImpl.this, message, e.getMessage(), e, false);
-               //     ErrorHelper.sendClientError(ServerMessageBusImpl.this, message, e.getMessage(), e);
+                    //     ErrorHelper.sendClientError(ServerMessageBusImpl.this, message, e.getMessage(), e);
                 }
             }
         });
@@ -438,8 +438,9 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                         return message;
                     }
                 });
-            } else
+            } else {
                 throw new NoSubscribersToDeliverTo("for: " + subject + ":" + isAnyoneListening(queue, subject) + ":" + queue.isInitialized());
+            }
         }
 
     }

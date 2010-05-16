@@ -18,7 +18,9 @@ package org.jboss.errai.bus.tests;
 
 import junit.framework.TestCase;
 import org.jboss.errai.bus.server.async.scheduling.PooledExecutorService;
+import org.mvel2.MVEL;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -56,7 +58,7 @@ public class PooledExecuterServiceTests extends TestCase {
     private ConcurrentTestObj generateBaseLine() {
         ConcurrentTestObj baseline = new ConcurrentTestObj();
 
-        for (int i = 0; i < 10000; i++) {
+        for (int i = 0; i < 1000; i++) {
             baseline.add(baseline.getLast() + 2);
         }
 
@@ -85,8 +87,12 @@ public class PooledExecuterServiceTests extends TestCase {
         }
     }
 
+
+    double average1 = 0;
+    double average2 = 0;
+
     public void testHighLoad() throws InterruptedException {
-        PooledExecutorService svc = new PooledExecutorService(100);
+        PooledExecutorService svc = new PooledExecutorService(2000);
         svc.start();
 
         ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(100);
@@ -94,11 +100,8 @@ public class PooledExecuterServiceTests extends TestCase {
         final ConcurrentTestObj baseline = generateBaseLine();
         System.out.println("Generated baseline ...");
 
-        double average1 = 0;
-        double average2 = 0;
 
-
-        for (int x = 0; x < 100; x++) {
+        for (int x = 0; x < 30; x++) {
             final ConcurrentTestObj test = new ConcurrentTestObj();
 
             long tm = System.nanoTime();
@@ -109,12 +112,24 @@ public class PooledExecuterServiceTests extends TestCase {
                 }
             });
 
-            for (int i = 0; i < 10000; i++) {
+            for (int i = 0; i < 1000; i++) {
                 svc.execute(new Runnable() {
                     public void run() {
                         synchronized (test) {
                             test.add(test.getLast() + 2);
                         }
+
+           //             MVEL.eval("for (int i = 0; i < 10000; i++) { }");
+
+
+                        //      System.out.println("x=" + x);
+
+
+//                        try {
+//                            Thread.sleep(10);
+//                        }
+//                        catch (InterruptedException e) {
+//                        }
                     }
                 });
             }
@@ -139,14 +154,23 @@ public class PooledExecuterServiceTests extends TestCase {
                 }
             });
 
-            for (int i = 0; i < 10000; i++) {
+            for (int i = 0; i < 1000; i++) {
                 executor.execute(new Runnable() {
                     public void run() {
                         synchronized (test2) {
-                            long tm = System.nanoTime();
                             test2.add(test2.getLast() + 2);
-                            incrementTimer2(System.nanoTime() - tm);
                         }
+
+
+                  //      MVEL.eval("for (int i = 0; i < 10000; i++) { }");
+
+                        //      System.out.println("x=" + x);
+//                        try {
+//                            Thread.sleep(10);
+//                        }
+//                        catch (InterruptedException e) {
+//                        }
+
                     }
                 });
             }
@@ -164,29 +188,48 @@ public class PooledExecuterServiceTests extends TestCase {
             svc.execute(new Runnable() {
                 public void run() {
                     try {
+                        System.out.println("CHECK");
                         assertEquals(baseline.getSum(), test.getSum());
+                        System.out.println("(A) GOOD!");
                     }
-                    catch (Exception e) {
+                    catch (Throwable e) {
+                        System.out.println("(A) ERR");
                         e.printStackTrace();
                     }
+
                 }
             });
 
             executor.execute(new Runnable() {
                 public void run() {
                     try {
+                        System.out.println("CHECK2");
                         assertEquals(baseline.getSum(), test2.getSum());
+                        System.out.println("(B) GOOD!");
                     }
-                    catch (Exception e) {
+                    catch (Throwable e) {
+                        System.out.println("(B) ERR");
                         e.printStackTrace();
                     }
                 }
             });
         }
 
-        System.out.println("Average Scheduling Perf (A):" + (average1 / 100));
-        System.out.println("Average Scheduling Perf (B):" + (average2 / 100));
-        System.out.println("Average Run Perf (A):" + timer1);
-        System.out.println("Average Run Perf (B):" + timer2);
+        System.out.println("Schedule");
+        svc.execute(new Runnable() {
+            public void run() {
+                System.out.println("Average Scheduling Perf (A):" + (average1 / 100));
+                System.out.println("Average Run Perf (A):" + timer1);
+            }
+        });
+
+        System.out.println("Schedule2");
+        executor.execute(new Runnable() {
+            public void run() {
+                System.out.println("Average Scheduling Perf (B):" + (average2 / 100));
+                System.out.println("Average Run Perf (B):" + timer2);
+            }
+        });
+
     }
 }

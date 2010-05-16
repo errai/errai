@@ -26,9 +26,7 @@ public class ThreadWorkerPool {
     private final List<ThreadWorker> workers;
     private final TaskProvider provider;
 
-    private double lastLoad;
-    private double maximumLoad = 0.40d;
-    private int maximumPoolSize = 100;
+    private int maximumPoolSize = 10;
 
     private volatile boolean stop = false;
 
@@ -41,46 +39,6 @@ public class ThreadWorkerPool {
         this.workers = new CopyOnWriteArrayList<ThreadWorker>();
         this.provider = provider;
         this.maximumPoolSize = maximumPoolSize;
-    }
-
-
-    public ThreadWorkerPool(TaskProvider provider, double maximumLoad) {
-        this.workers = new CopyOnWriteArrayList<ThreadWorker>();
-        this.provider = provider;
-        this.maximumLoad = maximumLoad;
-    }
-
-    public ThreadWorkerPool(TaskProvider provider, double maximumLoad, int maximumPoolSize) {
-        this.workers = new CopyOnWriteArrayList<ThreadWorker>();
-        this.provider = provider;
-        this.maximumLoad = maximumLoad;
-        this.maximumPoolSize = maximumPoolSize;
-    }
-
-    public void checkLoad() {
-        double load = getApparentLoad();
-
-     //   System.out.println("[ThreadWorkerPool; Load:" + load + "; TotalThreads:" + workers.size() + "]");
-
-        if (load > maximumLoad)
-            addWorker();
-
-        if (lastLoad != 0 && (lastLoad - load) > 0.1d)
-            removeWorker();
-
-        lastLoad = load;
-    }
-
-    public double getApparentLoad() {
-        double load = 0;
-
-        // we count how many we iterate as workers.size() will be unrealiable.
-        int count = 0;
-        for (ThreadWorker worker : workers) {
-            count++;
-            load += worker.getApparentLoad();
-        }
-        return load / count;
     }
 
     public void addWorker() {

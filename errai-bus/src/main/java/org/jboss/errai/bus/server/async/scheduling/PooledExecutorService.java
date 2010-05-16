@@ -18,7 +18,6 @@ package org.jboss.errai.bus.server.async.scheduling;
 
 import org.jboss.errai.bus.client.api.AsyncTask;
 import org.jboss.errai.bus.client.api.base.TimeUnit;
-import org.jboss.errai.bus.server.QueueOverloadedException;
 import org.jboss.errai.bus.server.async.TimedTask;
 
 import java.util.concurrent.ArrayBlockingQueue;
@@ -29,7 +28,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import static java.lang.System.currentTimeMillis;
 
 public class PooledExecutorService implements TaskProvider {
-    private final ArrayBlockingQueue<TimedTask> queue;
+    private final BlockingQueue<TimedTask> queue;
 
     /**
      * this *must* be an ordered Set. The narrower type is to accomodate wrapping with
@@ -41,9 +40,9 @@ public class PooledExecutorService implements TaskProvider {
     private boolean stopped = false;
 
     private final SchedulerThread schedulerThread;
-    private final MonitorThread monitorThread;
 
     private final ReentrantLock mutex = new ReentrantLock(true);
+    private final int maxQueueSize;
 
     /**
      * Constructs a new PooledExecutorService with the specified queue size.
@@ -51,13 +50,12 @@ public class PooledExecutorService implements TaskProvider {
      * @param queueSize The size of the underlying worker queue.
      */
     public PooledExecutorService(int queueSize) {
+        maxQueueSize = queueSize;
         queue = new ArrayBlockingQueue<TimedTask>(queueSize);
         pool = new ThreadWorkerPool(this);
 
         scheduledTasks = new PriorityBlockingQueue<TimedTask>();
-
         schedulerThread = new SchedulerThread();
-        monitorThread = new MonitorThread();
     }
 
     /**
@@ -68,7 +66,7 @@ public class PooledExecutorService implements TaskProvider {
      *                              interrupted.
      */
     public void execute(final Runnable runnable) throws InterruptedException {
-        queue.put(new SingleFireTask(runnable));
+        queue.add(new SingleFireTask(runnable));
     }
 
     public AsyncTask schedule(final Runnable runnable, TimeUnit unit, long interval) {
@@ -105,7 +103,6 @@ public class PooledExecutorService implements TaskProvider {
             }
 
             schedulerThread.start();
-            monitorThread.start();
 
             pool.startPool();
         }
@@ -118,7 +115,6 @@ public class PooledExecutorService implements TaskProvider {
         mutex.lock();
         try {
             schedulerThread.requestStop();
-            monitorThread.requestStop();
             queue.clear();
             stopped = true;
         }
@@ -135,7 +131,12 @@ public class PooledExecutorService implements TaskProvider {
             if (!task.isDue(currentTimeMillis())) {
                 long wait = task.nextRuntime() - currentTimeMillis();
                 if (wait > 0) {
-                    Thread.sleep(wait);
+                    try {
+                        Thread.sleep(wait);
+                    }
+                    catch (InterruptedException e) {
+                        if (stopped) return 0;
+                    }
                 }
             }
 
@@ -155,6 +156,27 @@ public class PooledExecutorService implements TaskProvider {
 
     }
 
+    private volatile int idleCount = 0;
+  //  private final Object loadLock = new Object();
+
+    private void checkLoad() {
+  //      synchronized (loadLock) {
+            int queueSize = queue.size();
+
+            if (queueSize == 0) return;
+            else if (queueSize > (0.80d * maxQueueSize)) {
+                pool.addWorker();
+            } else if (queueSize == 0) {
+                idleCount++;
+            }
+
+            if (idleCount > 100) {
+                idleCount = 0;
+                pool.removeWorker();
+            }
+    //    }
+    }
+
     /**
      * Returns the next Runnable task that is currently due to run.  This method will block until a task is available.
      *
@@ -162,7 +184,8 @@ public class PooledExecutorService implements TaskProvider {
      * @throws InterruptedException thrown if the thread waiting on a ready task is interrupted.
      */
     public TimedTask getNextTask() throws InterruptedException {
-        return queue.poll(60, java.util.concurrent.TimeUnit.SECONDS);
+        checkLoad();
+        return queue.poll(1, java.util.concurrent.TimeUnit.SECONDS);
     }
 
     private static class SingleFireTask extends TimedTask {
@@ -234,11 +257,14 @@ public class PooledExecutorService implements TaskProvider {
         //private volatile long sleepInterval;
         private volatile boolean running = false;
 
+
         private SchedulerThread() {
         }
 
         @Override
         public void run() {
+
+
             while (running) {
                 try {
                     while (running) {
@@ -262,31 +288,4 @@ public class PooledExecutorService implements TaskProvider {
         }
     }
 
-    private class MonitorThread extends Thread {
-        private volatile boolean running = false;
-
-        @Override
-        public void run() {
-            int counter = 0;
-            while (running) {
-                try {
-                    sleep(2000);
-                    pool.checkLoad();
-                }
-                catch (InterruptedException e) {
-                    // fall through
-                }
-            }
-        }
-
-        public void start() {
-            running = true;
-            super.start();
-        }
-
-        public void requestStop() {
-            running = false;
-            interrupt();
-        }
-    }
 }
