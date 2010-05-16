@@ -443,24 +443,6 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
     }
 
     /**
-     * Transmit this message to the specified {@link org.jboss.errai.bus.client.framework.MessageBus} instance.
-     *
-     * @param viaThis
-     */
-    public void sendNowWith(MessageBus viaThis) {
-        viaThis.send(this);
-    }
-
-    /**
-     * Transmit this message using the specified {@link RequestDispatcher}.
-     *
-     * @param viaThis
-     */
-    public void sendNowWith(RequestDispatcher viaThis) {
-        viaThis.dispatch(this);
-    }
-
-    /**
      * Returns an encoded string representation of this message in the buffer
      *
      * @return an encoded string of the buffer

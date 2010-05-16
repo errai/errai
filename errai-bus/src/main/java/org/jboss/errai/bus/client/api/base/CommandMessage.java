@@ -506,7 +506,12 @@ public class CommandMessage implements Message {
      * @param viaThis
      */
     public void sendNowWith(RequestDispatcher viaThis) {
-        viaThis.dispatch(this);
+        try {
+            viaThis.dispatch(this);
+        }
+        catch (Exception e) {
+            throw new MessageDeliveryFailure("could not deliver message: " + e.getMessage(), e);
+        }
     }
 
     /**

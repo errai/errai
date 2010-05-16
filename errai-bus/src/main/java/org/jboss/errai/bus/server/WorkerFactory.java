@@ -2,6 +2,7 @@ package org.jboss.errai.bus.server;
 
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
+import org.jboss.errai.bus.client.api.base.TimeUnit;
 import org.jboss.errai.bus.client.framework.RoutingFlags;
 import org.jboss.errai.bus.client.util.ErrorHelper;
 import org.jboss.errai.bus.server.async.TimedTask;
@@ -17,7 +18,7 @@ import java.util.concurrent.ArrayBlockingQueue;
  */
 public class WorkerFactory {
     private static final int DEFAULT_DELIVERY_QUEUE_SIZE = 250;
-    private static final int DEFAULT_THREAD_POOL_SIZE = 3;
+    private static final int DEFAULT_THREAD_POOL_SIZE = 5;
 
     private static final String CONFIG_ASYNC_THREAD_POOL_SIZE = "errai.async.thread_pool_size";
     private static final String CONFIG_ASYNC_WORKER_TIMEOUT = "errai.async.worker.timeout";
@@ -114,9 +115,9 @@ public class WorkerFactory {
      *
      * @param m - message to be sent
      */
-    public void deliver(Message m) {
+    public void deliver(Message m) throws InterruptedException {
         m.setFlag(RoutingFlags.NonGlobalRouting);
-        if (messages.offer(m)) {
+        if (messages.offer(m, 20, java.util.concurrent.TimeUnit.SECONDS)) {
             return;
         } else {
             sendDeliveryFailure(m);

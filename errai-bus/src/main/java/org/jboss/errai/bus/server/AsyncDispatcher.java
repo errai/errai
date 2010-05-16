@@ -63,7 +63,7 @@ public class AsyncDispatcher implements RequestDispatcher {
      *
      * @param message - a message to dispatch
      */
-    public void dispatch(Message message) {
+    public void dispatch(Message message) throws InterruptedException {
          workerFactory.deliver(message);
     }
 }

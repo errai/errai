@@ -3,6 +3,7 @@ package org.jboss.errai.bus.client.api.builder;
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.ResourceProvider;
+import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.framework.RoutingFlags;
@@ -168,7 +169,12 @@ public class ConversationMessageWrapper implements Message {
     }
 
     public void sendNowWith(RequestDispatcher viaThis) {
-        viaThis.dispatch(this);
+        try {
+            viaThis.dispatch(this);
+        }
+        catch (Exception e) {
+            throw new MessageDeliveryFailure("unable to deliver message: " + e.getMessage(), e);
+        }
     }
 
     public Message getIncomingMessage() {
@@ -179,16 +185,14 @@ public class ConversationMessageWrapper implements Message {
         if (!hasPart(MessageParts.ToSubject)) {
             if (message.hasPart(MessageParts.ReplyTo)) {
                 toSubject(message.get(String.class, MessageParts.ReplyTo));
-            }
-            else {
+            } else {
                 throw new RuntimeException("cannot have a conversation.  the incoming message does not specify a recipient ReplyTo subject and you have not specified one.");
             }
         }
 
         if (message.hasResource("Session")) {
             newMessage.copyResource("Session", message);
-        }
-        else {
+        } else {
             throw new RuntimeException("cannot have a conversation.  the incoming message has not session data associated with it.");
         }
     }

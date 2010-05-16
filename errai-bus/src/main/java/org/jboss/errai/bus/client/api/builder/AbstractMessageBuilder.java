@@ -56,7 +56,12 @@ public class AbstractMessageBuilder<R extends Sendable> {
             }
 
             public void sendGlobalWith(RequestDispatcher viaThis) {
-                viaThis.dispatchGlobal(message);
+                try {
+                    viaThis.dispatchGlobal(message);
+                }
+                catch (Exception e) {
+                    throw new MessageDeliveryFailure("unable to deliver message: " + e.getMessage(), e);
+                }
             }
 
             public void reply() {
@@ -67,7 +72,12 @@ public class AbstractMessageBuilder<R extends Sendable> {
                     throw new IllegalStateException("Cannot reply.  Cannot find RequestDispatcher resource.");
                 }
 
-                dispatcher.dispatch(message);
+                try {
+                    dispatcher.dispatch(message);
+                }
+                catch (Exception e) {
+                    throw new MessageDeliveryFailure("unable to deliver message: " + e.getMessage(), e);
+                }
             }
 
             public AsyncTask replyRepeating(TimeUnit unit, int interval) {
