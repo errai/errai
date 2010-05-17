@@ -12,6 +12,9 @@ public abstract class TimedTask implements Runnable, Comparable<TimedTask>, Asyn
     protected volatile long period;
     protected volatile boolean cancel = false;
 
+    protected volatile InterruptHandle interruptHook;
+    protected volatile Runnable exitHandler;
+
     /**
      * Gets the period of the task, and when it should be run next
      *
@@ -51,12 +54,15 @@ public abstract class TimedTask implements Runnable, Comparable<TimedTask>, Asyn
     /**
      * Disables the task
      */
-    public void disable() {
+    private void disable(boolean interruptIfActive) {
+        if (interruptIfActive && interruptHook != null)
+            interruptHook.sendInterrupt();
+
         cancel = true;
     }
 
     public boolean cancel(boolean interrupt) {
-        disable();
+        disable(interrupt);
         return true;
     }
 
@@ -84,6 +90,8 @@ public abstract class TimedTask implements Runnable, Comparable<TimedTask>, Asyn
                 }
                 calculateNextRuntime();
                 run();
+
+                if (exitHandler != null) exitHandler.run();
                 return true;
             }
             return false;
@@ -109,6 +117,9 @@ public abstract class TimedTask implements Runnable, Comparable<TimedTask>, Asyn
         }
     }
 
+    public void setExitHandler(Runnable runnable) {
+        this.exitHandler = runnable;
+    }
 
     public int compareTo(TimedTask o) {
         if (o == this) {

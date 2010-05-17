@@ -29,6 +29,9 @@ public class TaskManagerFactory {
 
     public static void setTaskManagerProvider(TaskManagerProvider p) {
         synchronized (lock) {
+            if (provider != null)
+                throw new IllegalStateException("can not modify the task manager once it's been initialized");
+
             provider = p;
         }
     }

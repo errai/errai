@@ -18,9 +18,7 @@ package org.jboss.errai.bus.tests;
 
 import junit.framework.TestCase;
 import org.jboss.errai.bus.server.async.scheduling.PooledExecutorService;
-import org.mvel2.MVEL;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

@@ -107,7 +107,7 @@ public class AbstractMessageBuilder<R extends Sendable> {
             }
 
             private AsyncTask _sendRepeatingWith(final Message message, final RequestDispatcher viaThis, TimeUnit unit, int interval) {
-                return TaskManagerFactory.get().scheduleRepeating(unit, interval, new HasAsyncTaskRef() {
+                final AsyncTask task = TaskManagerFactory.get().scheduleRepeating(unit, interval, new HasAsyncTaskRef() {
                     AsyncTask task;
                     AsyncDelegateErrorCallback errorCallback
                             = new AsyncDelegateErrorCallback(this, message.getErrorCallback());
@@ -160,6 +160,21 @@ public class AbstractMessageBuilder<R extends Sendable> {
                         sender.run();
                     }
                 });
+
+                final LaundryReclaim reclaim = LaundryListProviderFactory.get().getLaundryList(message.getResource(Object.class, "Session"))
+                        .addToHamper(new Laundry() {
+                            public void clean() {
+                                task.cancel(true);
+                            }
+                        });
+
+                task.setExitHandler(new Runnable() {
+                    public void run() {
+                        reclaim.reclaim();
+                    }
+                });
+
+                return task;
             }
 
 

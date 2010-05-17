@@ -148,8 +148,12 @@ public class SimpleSchedulerService implements Runnable, SchedulerService {
 
         return new AsyncTask() {
             public boolean cancel(boolean mayInterruptIfRunning) {
-                task.disable();
+                task.cancel(mayInterruptIfRunning);
                 return true;
+            }
+
+            public void setExitHandler(Runnable runnable) {
+
             }
         };
     }

@@ -86,6 +86,10 @@ public class WorkerFactory {
                     }
                 }
 
+                public void setExitHandler(Runnable runnable) {
+                    //To change body of implemented methods use File | Settings | File Templates.
+                }
+
                 @Override
                 public String toString() {
                     return "WorkerTimeout";

@@ -18,6 +18,7 @@ package org.jboss.errai.bus.server.async.scheduling;
 
 import org.jboss.errai.bus.client.api.AsyncTask;
 import org.jboss.errai.bus.client.api.base.TimeUnit;
+import org.jboss.errai.bus.server.async.InterruptHandle;
 import org.jboss.errai.bus.server.async.TimedTask;
 
 import java.util.concurrent.ArrayBlockingQueue;
@@ -157,24 +158,21 @@ public class PooledExecutorService implements TaskProvider {
     }
 
     private volatile int idleCount = 0;
-  //  private final Object loadLock = new Object();
 
     private void checkLoad() {
-  //      synchronized (loadLock) {
-            int queueSize = queue.size();
+        int queueSize = queue.size();
 
-            if (queueSize == 0) return;
-            else if (queueSize > (0.80d * maxQueueSize)) {
-                pool.addWorker();
-            } else if (queueSize == 0) {
-                idleCount++;
-            }
+        if (queueSize == 0) return;
+        else if (queueSize > (0.80d * maxQueueSize)) {
+            pool.addWorker();
+        } else if (queueSize == 0) {
+            idleCount++;
+        }
 
-            if (idleCount > 100) {
-                idleCount = 0;
-                pool.removeWorker();
-            }
-    //    }
+        if (idleCount > 100) {
+            idleCount = 0;
+            pool.removeWorker();
+        }
     }
 
     /**
@@ -216,12 +214,26 @@ public class PooledExecutorService implements TaskProvider {
     private static class DelayedTask extends TimedTask {
         private final Runnable runnable;
         private boolean fired = false;
+        private volatile Thread runningOn;
 
         private DelayedTask(Runnable runnable, long delayMillis) {
+            this.interruptHook = new InterruptHandle() {
+                public void sendInterrupt() {
+                    try {
+                        if (runningOn != null)
+                            runningOn.interrupt();
+                    }
+                    catch (NullPointerException e) {
+                        // if runningOn is de-referenced, it means the task has completed
+                        // and no interrupt is necessary, so we ignore this exception.
+                    }
+                }
+            };
             this.runnable = runnable;
             this.period = -1;
             this.nextRuntime = System.currentTimeMillis() + delayMillis;
         }
+
 
         @Override
         public boolean isDue(long time) {
@@ -234,22 +246,51 @@ public class PooledExecutorService implements TaskProvider {
             synchronized (this) {
                 fired = true;
                 nextRuntime = -1;
-                runnable.run();
+                try {
+                    runningOn = Thread.currentThread();
+                    runnable.run();
+                }
+                finally {
+                    runningOn = null;
+                    if (exitHandler != null)
+                        exitHandler.run();
+                }
             }
         }
     }
 
     private static class RepeatingTimedTask extends TimedTask {
         private final Runnable runnable;
+        private volatile Thread runningOn;
 
         private RepeatingTimedTask(Runnable runnable, long initialMillis, long intervalMillis) {
+            this.interruptHook = new InterruptHandle() {
+                public void sendInterrupt() {
+                    try {
+                        if (runningOn != null)
+                            runningOn.interrupt();
+                    }
+                    catch (NullPointerException e) {
+                        // if runningOn is de-referenced, it means the task has completed
+                        // and no interrupt is necessary, so we ignore this exception.
+                    }
+                }
+            };
             this.runnable = runnable;
             nextRuntime = System.currentTimeMillis() + initialMillis;
             period = intervalMillis;
         }
 
         public void run() {
-            runnable.run();
+            try {
+                runningOn = Thread.currentThread();
+                runnable.run();
+            }
+            finally {
+                runningOn = null;
+                if ((cancel || nextRuntime == -1) && exitHandler != null)
+                    exitHandler.run();
+            }
         }
     }
 
@@ -257,14 +298,11 @@ public class PooledExecutorService implements TaskProvider {
         //private volatile long sleepInterval;
         private volatile boolean running = false;
 
-
         private SchedulerThread() {
         }
 
         @Override
         public void run() {
-
-
             while (running) {
                 try {
                     while (running) {

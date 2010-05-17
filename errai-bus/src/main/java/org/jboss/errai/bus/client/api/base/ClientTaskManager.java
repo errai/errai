@@ -52,6 +52,10 @@ public class ClientTaskManager implements TaskManager {
                 timer.cancel();
                 return true;
             }
+
+            public void setExitHandler(Runnable runnable) {
+                throw new RuntimeException("not implemented");
+            }
         };
 
         if (task instanceof HasAsyncTaskRef) {

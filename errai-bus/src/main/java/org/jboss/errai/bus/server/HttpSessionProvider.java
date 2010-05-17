@@ -1,5 +1,6 @@
 package org.jboss.errai.bus.server;
 
+import org.jboss.errai.bus.client.api.base.LaundryListProviderFactory;
 import org.jboss.errai.bus.server.api.QueueSession;
 import org.jboss.errai.bus.server.api.SessionEndEvent;
 import org.jboss.errai.bus.server.api.SessionEndListener;
@@ -118,6 +119,10 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
         private void fireSessionEndListeners() {
             if (sessionEndListeners == null) return;
             SessionEndEvent event = new SessionEndEvent(this);
+
+            LaundryListProviderFactory.get().getLaundryList(this)
+                    .cleanAll();
+
             for (Iterator<SessionEndListener> iter = sessionEndListeners.iterator(); iter.hasNext();) {
                 iter.next().onSessionEnd(event);
             }

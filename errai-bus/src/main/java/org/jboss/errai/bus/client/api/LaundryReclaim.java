@@ -16,7 +16,6 @@
 
 package org.jboss.errai.bus.client.api;
 
-public interface AsyncTask {
-    public boolean cancel(boolean interrupt);
-    public void setExitHandler(Runnable runnable);
+public interface LaundryReclaim {
+    public boolean reclaim();
 }

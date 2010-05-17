@@ -15,13 +15,18 @@
  */
 package org.jboss.errai.bus.server.service.bootstrap;
 
+import org.jboss.errai.bus.client.api.LaundryList;
+import org.jboss.errai.bus.client.api.LaundryListProvider;
 import org.jboss.errai.bus.client.api.TaskManager;
+import org.jboss.errai.bus.client.api.base.LaundryListProviderFactory;
 import org.jboss.errai.bus.client.api.base.TaskManagerFactory;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.framework.TaskManagerProvider;
 import org.jboss.errai.bus.server.DefaultTaskManager;
+import org.jboss.errai.bus.server.api.QueueSession;
 import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
+import org.jboss.errai.bus.server.util.ServerLaundryList;
 
 /**
  * Setup the default resource providers.
@@ -47,5 +52,11 @@ class DefaultResources implements BootstrapExecution
         return DefaultTaskManager.get();
       }
     });
+
+   LaundryListProviderFactory.setLaundryListProvider(new LaundryListProvider() {
+       public LaundryList getLaundryList(Object ref) {
+            return ServerLaundryList.get((QueueSession) ref);
+       }
+   });
   }
 }

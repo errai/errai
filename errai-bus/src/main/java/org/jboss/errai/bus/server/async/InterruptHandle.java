@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.api;
+package org.jboss.errai.bus.server.async;
 
-public interface AsyncTask {
-    public boolean cancel(boolean interrupt);
-    public void setExitHandler(Runnable runnable);
+public interface InterruptHandle {
+    public void sendInterrupt();
 }

@@ -193,6 +193,9 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 this.period = (1000 * 10);
             }
 
+            public void setExitHandler(Runnable runnable) {
+            }
+
             public void run() {
                 boolean houseKeepingPerformed = false;
                 List<MessageQueue> endSessions = new LinkedList<MessageQueue>();

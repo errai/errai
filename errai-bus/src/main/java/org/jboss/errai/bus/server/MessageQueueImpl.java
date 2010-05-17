@@ -256,7 +256,7 @@ public class MessageQueueImpl implements MessageQueue {
     private void descheduleTask() {
         synchronized (activationLock) {
             if (task != null) {
-                task.disable();
+                task.cancel(true);
                 task = null;
             }
         }
