@@ -2,22 +2,23 @@ package org.jboss.errai.bus.server;
 
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
-import org.jboss.errai.bus.client.api.base.TimeUnit;
 import org.jboss.errai.bus.client.framework.RoutingFlags;
 import org.jboss.errai.bus.client.util.ErrorHelper;
 import org.jboss.errai.bus.server.async.TimedTask;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
+import org.jboss.errai.bus.server.util.UnboundedArrayBlockingQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 /**
  * The <tt>WorkerFactory</tt> maintains a pool of <tt>Worker</tt>s, and takes care of running and terminating them
  */
 public class WorkerFactory {
-    private static final int DEFAULT_DELIVERY_QUEUE_SIZE = 1000;
+    private static final int DEFAULT_DELIVERY_QUEUE_SIZE = 100;
     private static final int DEFAULT_THREAD_POOL_SIZE = 10;
 
     private static final String CONFIG_ASYNC_THREAD_POOL_SIZE = "errai.async.thread_pool_size";
@@ -28,7 +29,7 @@ public class WorkerFactory {
 
     private ErraiService svc;
 
-    private ArrayBlockingQueue<Message> messages;
+    private BlockingQueue<Message> messages;
 
     private int poolSize = DEFAULT_THREAD_POOL_SIZE;
     private int deliveryQueueSize = DEFAULT_DELIVERY_QUEUE_SIZE;
@@ -58,14 +59,14 @@ public class WorkerFactory {
             workerTimeout = seconds(Integer.parseInt(cfg.getProperty(CONFIG_ASYNC_WORKER_TIMEOUT)));
         }
 
-        this.messages = new ArrayBlockingQueue<Message>(deliveryQueueSize);
+        this.messages = new UnboundedArrayBlockingQueue<Message>(deliveryQueueSize);
 
         log.info("initializing async worker pools (poolSize: " + poolSize + "; workerTimeout: " + workerTimeout + ")");
 
         this.workerPool = new Worker[poolSize];
 
         for (int i = 0; i < poolSize; i++) {
-            workerPool[i] = new Worker( this, svc);
+            workerPool[i] = new Worker(this, svc);
         }
 
         if (svc.getBus() instanceof ServerMessageBusImpl) {
@@ -77,6 +78,7 @@ public class WorkerFactory {
                 {
                     period = 1000;
                 }
+
                 public void run() {
                     for (Worker w : workerPool) {
                         if (!w.isValid()) {
@@ -144,7 +146,7 @@ public class WorkerFactory {
      *
      * @return the messages in the queue
      */
-    protected ArrayBlockingQueue<Message> getMessages() {
+    protected BlockingQueue<Message> getMessages() {
         return messages;
     }
 

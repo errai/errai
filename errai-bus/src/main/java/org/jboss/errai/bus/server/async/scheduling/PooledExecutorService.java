@@ -20,6 +20,7 @@ import org.jboss.errai.bus.client.api.AsyncTask;
 import org.jboss.errai.bus.client.api.base.TimeUnit;
 import org.jboss.errai.bus.server.async.InterruptHandle;
 import org.jboss.errai.bus.server.async.TimedTask;
+import org.jboss.errai.bus.server.util.UnboundedArrayBlockingQueue;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -52,7 +53,7 @@ public class PooledExecutorService implements TaskProvider {
      */
     public PooledExecutorService(int queueSize) {
         maxQueueSize = queueSize;
-        queue = new ArrayBlockingQueue<TimedTask>(queueSize);
+        queue = new UnboundedArrayBlockingQueue<TimedTask>(queueSize);
         pool = new ThreadWorkerPool(this);
 
         scheduledTasks = new PriorityBlockingQueue<TimedTask>();

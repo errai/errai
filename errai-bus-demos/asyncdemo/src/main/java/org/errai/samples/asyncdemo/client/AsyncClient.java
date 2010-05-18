@@ -1,6 +1,7 @@
 package org.errai.samples.asyncdemo.client;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.*;
@@ -35,6 +36,8 @@ public class AsyncClient implements EntryPoint {
 
             final String receiverName = "RandomNumberReceiver" + i;
 
+            final Style resultStyle = resultBox.getElement().getStyle();
+
             /**
              * Create a callback receiver to receive the data from the server.
              */
@@ -43,6 +46,13 @@ public class AsyncClient implements EntryPoint {
                     counter.increment();
                     Double value = message.get(Double.class, "Data");
                     resultBox.setText(String.valueOf(value));
+
+                    if (value > 0.5d) {
+                       resultStyle.setProperty("backgroundColor", "green");
+                    }
+                    else {
+                       resultStyle.setProperty("backgroundColor", "red");
+                    }
                 }
             };
 

@@ -6,7 +6,7 @@ import org.jboss.errai.bus.client.framework.RoutingFlags;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.slf4j.Logger;
 
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.System.currentTimeMillis;
@@ -19,7 +19,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 public class Worker extends Thread {
     private MessageBus bus;
-    private ArrayBlockingQueue<Message> messages;
+    private BlockingQueue<Message> messages;
     private long timeout;
 
     private volatile boolean active = true;

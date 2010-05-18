@@ -176,7 +176,7 @@ public class MessageQueueImpl implements MessageQueue {
         boolean b = false;
         activity();
         try {
-            b = (throttleIncoming ? queue.offer(message, 250, TimeUnit.MILLISECONDS) : queue.offer(message));
+            b = (throttleIncoming ? queue.offer(message, 1, TimeUnit.SECONDS) : queue.offer(message));
         }
         catch (InterruptedException e) {
             // fall-through.
