@@ -93,6 +93,11 @@ public class StockClient implements EntryPoint {
         addEquity("GWTC");
         addEquity("FGC");
         addEquity("XXX");
+        addEquity("XX");
+        addEquity("XY");
+        addEquity("UXBR");
+        addEquity("RD");
+        addEquity("JFN");
     }
 
 

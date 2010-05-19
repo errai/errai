@@ -78,9 +78,9 @@ public class StockService implements MessageCallback {
         if (Math.random() > 0.5d) {
             double price = stock.getLastTrade();
 
-            if (Math.random() > 0.9d) {
+            if (Math.random() > 0.85d) {
                 price += Math.random() * 0.05;
-            } else if (Math.random() < 0.1d) {
+            } else if (Math.random() < 0.15d) {
                 price -= Math.random() * 0.05;
             }
 
@@ -101,6 +101,11 @@ public class StockService implements MessageCallback {
         addEquity("GWTC", "The GWT Company", 5.2);
         addEquity("FGC", "Fun Gaming Corporation", 19.3);
         addEquity("XXX", "Triple X", 40.2);
+        addEquity("XY", "Manco", 78.10);
+        addEquity("XX", "Womanco", 90.10);
+        addEquity("UXBR", "Ultimate X-Ray Bridgeco", 25.1);
+        addEquity("RD", "Red Dog Inc.", 9.10);
+        addEquity("JFN", "Java Financial Ltd", 90.2);
     }
 
 }
