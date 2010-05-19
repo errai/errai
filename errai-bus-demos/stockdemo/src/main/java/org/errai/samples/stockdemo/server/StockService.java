@@ -2,16 +2,13 @@ package org.errai.samples.stockdemo.server;
 
 import com.google.inject.Inject;
 import org.errai.samples.stockdemo.client.Stock;
-import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.api.AsyncTask;
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.api.ResourceProvider;
+import org.jboss.errai.bus.client.api.*;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.TimeUnit;
+import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
+import org.jboss.errai.bus.client.framework.SubscriptionEvent;
 import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.bus.server.util.LocalContext;
 
 import java.util.HashMap;
 import java.util.List;
@@ -24,16 +21,34 @@ public class StockService implements MessageCallback {
 
     private Map<String, Stock> stocks = new HashMap<String, Stock>();
     private List<String> tickerList = new CopyOnWriteArrayList<String>();
+    private volatile AsyncTask task;
 
-    public StockService() {
+    @Inject
+    public StockService(final RequestDispatcher dispatcher, final MessageBus bus) {
         loadDefault();
+
+        bus.addSubscribeListener(new SubscribeListener() {
+            public void onSubscribe(SubscriptionEvent event) {
+                if (event.getSubject().equals("StockClient")) {
+                    if (task == null) {
+                        task = MessageBuilder.createMessage()
+                                .toSubject("StockClient")
+                                .command("PriceChange")
+                                .withProvided("Data", new ResourceProvider<String>() {
+                                    public String get() {
+                                        return simulateRandomChange();
+                                    }
+                                })
+                                .noErrorHandling()
+                                .sendRepeatingWith(dispatcher, TimeUnit.MILLISECONDS, 100);
+                    }
+                }
+            }
+        });
     }
 
     public void callback(Message message) {
-        LocalContext ctx = LocalContext.get(message);
-
         if ("Start".equals(message.getCommandType())) {
-            AsyncTask task = ctx.getAttribute(AsyncTask.class);
 
             for (Stock stock : stocks.values()) {
                 MessageBuilder.createConversation(message)
@@ -43,21 +58,6 @@ public class StockService implements MessageCallback {
                         .noErrorHandling().reply();
             }
 
-            if (task == null) {
-                task = MessageBuilder.createConversation(message)
-                        .toSubject("StockClient")
-                        .command("PriceChange")
-                        .withProvided("Data", new ResourceProvider<String>() {
-                            public String get() {
-                                return simulateRandomChange();
-                            }
-                        })
-                        .noErrorHandling()
-                        .replyRepeating(TimeUnit.MILLISECONDS, 1000);
-
-
-                ctx.setAttribute(AsyncTask.class, task);
-            }
         } else if ("GetStockInfo".equals(message.getCommandType())) {
             Stock stock = stocks.get(message.get(String.class, "Ticker"));
 
@@ -78,9 +78,9 @@ public class StockService implements MessageCallback {
         if (Math.random() > 0.5d) {
             double price = stock.getLastTrade();
 
-            if (Math.random() > 0.8d) {
+            if (Math.random() > 0.9d) {
                 price += Math.random() * 0.05;
-            } else if (Math.random() < 0.2d) {
+            } else if (Math.random() < 0.1d) {
                 price -= Math.random() * 0.05;
             }
 

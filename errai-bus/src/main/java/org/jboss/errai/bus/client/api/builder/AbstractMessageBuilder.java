@@ -99,45 +99,67 @@ public class AbstractMessageBuilder<R extends Sendable> {
             }
 
             public AsyncTask sendRepeatingWith(final RequestDispatcher viaThis, TimeUnit unit, int interval) {
-                return _sendRepeatingWith(null, viaThis, unit, interval);
+                return _sendRepeatingWith(message, viaThis, unit, interval);
             }
 
             public AsyncTask sendDelayedWith(final RequestDispatcher viaThis, TimeUnit unit, int interval) {
-                return _sendDelayedWith(null, viaThis, unit, interval);
+                return _sendDelayedWith(message, viaThis, unit, interval);
             }
 
             private AsyncTask _sendRepeatingWith(final Message message, final RequestDispatcher viaThis, TimeUnit unit, int interval) {
+                final boolean isConversational = message instanceof ConversationMessageWrapper;
+
                 final AsyncTask task = TaskManagerFactory.get().scheduleRepeating(unit, interval, new HasAsyncTaskRef() {
                     AsyncTask task;
-                    AsyncDelegateErrorCallback errorCallback
-                            = new AsyncDelegateErrorCallback(this, message.getErrorCallback());
+                    AsyncDelegateErrorCallback errorCallback;
+
                     final Runnable sender;
 
                     {
-                        if (message instanceof ConversationMessageWrapper && (((ConversationMessageWrapper) message)
-                                .getIncomingMessage()).hasPart(MessageParts.ReplyTo)) {
+                        errorCallback = new AsyncDelegateErrorCallback(this, message.getErrorCallback());
 
-                            sender = new Runnable() {
-                                final String replyTo = ((ConversationMessageWrapper) message).getIncomingMessage()
-                                        .get(String.class, MessageParts.ReplyTo);
+                        if (isConversational) {
+                            if ((((ConversationMessageWrapper) message)
+                                    .getIncomingMessage()).hasPart(MessageParts.ReplyTo)) {
 
-                                public void run() {
-                                    MessageBuilder.getMessageProvider().get()
-                                            .toSubject(replyTo)
-                                            .copyResource("Session", message)
-                                            .addAllParts(message.getParts())
-                                            .addAllProvidedParts(message.getProvidedParts())
-                                            .errorsCall(errorCallback).sendNowWith(viaThis);
-                                }
-                            };
+                                sender = new Runnable() {
+                                    final String replyTo = ((ConversationMessageWrapper) message).getIncomingMessage()
+                                            .get(String.class, MessageParts.ReplyTo);
+
+                                    public void run() {
+                                        MessageBuilder.getMessageProvider().get()
+                                                .toSubject(replyTo)
+                                                .copyResource("Session", message)
+                                                .addAllParts(message.getParts())
+                                                .addAllProvidedParts(message.getProvidedParts())
+                                                .errorsCall(errorCallback).sendNowWith(viaThis);
+                                    }
+                                };
+                            } else {
+                                sender = new Runnable() {
+                                    public void run() {
+                                        MessageBuilder.getMessageProvider().get()
+                                                .toSubject(message.getSubject())
+                                                .copyResource("Session", message)
+                                                .addAllParts(message.getParts())
+                                                .addAllProvidedParts(message.getProvidedParts())
+                                                .errorsCall(errorCallback).sendNowWith(viaThis);
+                                    }
+                                };
+                            }
                         } else {
                             sender = new Runnable() {
                                 public void run() {
-                                    MessageBuilder.getMessageProvider().get()
-                                            .copyResource("Session", message)
-                                            .addAllParts(message.getParts())
-                                            .addAllProvidedParts(message.getProvidedParts())
-                                            .errorsCall(errorCallback).sendNowWith(viaThis);
+                                    try {
+                                        viaThis.dispatchGlobal(MessageBuilder.getMessageProvider().get()
+                                                .addAllParts(message.getParts())
+                                                .addAllProvidedParts(message.getProvidedParts())
+                                                .errorsCall(errorCallback));
+                                    }
+                                    catch (Throwable t) {
+                                        t.printStackTrace();
+                                        getAsyncTask().cancel(true);
+                                    }
                                 }
                             };
                         }
@@ -161,18 +183,20 @@ public class AbstractMessageBuilder<R extends Sendable> {
                     }
                 });
 
-                final LaundryReclaim reclaim = LaundryListProviderFactory.get().getLaundryList(message.getResource(Object.class, "Session"))
-                        .addToHamper(new Laundry() {
-                            public void clean() {
-                                task.cancel(true);
-                            }
-                        });
+                if (isConversational) {
+                    final LaundryReclaim reclaim = LaundryListProviderFactory.get().getLaundryList(message.getResource(Object.class, "Session"))
+                            .addToHamper(new Laundry() {
+                                public void clean() {
+                                    task.cancel(true);
+                                }
+                            });
 
-                task.setExitHandler(new Runnable() {
-                    public void run() {
-                        reclaim.reclaim();
-                    }
-                });
+                    task.setExitHandler(new Runnable() {
+                        public void run() {
+                            reclaim.reclaim();
+                        }
+                    });
+                }
 
                 return task;
             }

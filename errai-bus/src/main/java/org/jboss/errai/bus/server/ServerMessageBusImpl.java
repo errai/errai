@@ -434,9 +434,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     private void enqueueForDelivery(final MessageQueue queue, final String subject, final Object message) {
         if (queue != null && isAnyoneListening(queue, subject)) {
 
-            if (String.valueOf(message).contains("UpdateStockInfo")) {
-                System.out.println("offer: " + message);
-            }
             queue.offer(new MarshalledMessage() {
                 public String getSubject() {
                     return subject;
@@ -460,10 +457,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                     }
                 });
             } else {
-                if (String.valueOf(message).contains("UpdateStockInfo")) {
-                    System.out.println("no offer: " + message);
-                }
-
                 throw new NoSubscribersToDeliverTo("for: " + subject + ":" + isAnyoneListening(queue, subject) + ":" + queue.isInitialized());
             }
         }
@@ -480,9 +473,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     private void drainDeferredDeliveryQueue(final MessageQueue queue) {
         synchronized (queue) {
             if (deferredQueue.containsKey(queue)) {
-                System.out.println("draining ...");
                 for (MarshalledMessage message : deferredQueue.get(queue)) {
-                    System.out.println("D:" + message);
                     queue.offer(message);
                 }
 
