@@ -100,8 +100,6 @@ public class UnboundedArrayBlockingQueue<E> implements BlockingQueue<E> {
             ArrayBlockingQueue<E> newQueue = new ArrayBlockingQueue<E>(size *= 2);
             blockingQueue.drainTo(newQueue);
             blockingQueue = newQueue;
-
-            System.out.println("grew to : " + size);
         }
         finally {
             resizing = false;

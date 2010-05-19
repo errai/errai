@@ -24,9 +24,7 @@ import org.jboss.errai.bus.server.api.QueueSession;
 
 import java.util.Iterator;
 import java.util.Queue;
-import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ConcurrentSkipListSet;
 
 public class ServerLaundryList implements LaundryList {
     private Queue<Laundry> listOfLaundry;

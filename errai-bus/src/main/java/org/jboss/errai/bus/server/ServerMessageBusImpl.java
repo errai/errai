@@ -115,16 +115,30 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                     case FinishStateSync:
                         queue = (MessageQueueImpl) messageQueues.get(session);
                         queue.finishInit();
+
                         drainDeferredDeliveryQueue(queue);
                         break;
 
                     case ConnectToQueue:
-                        if (messageQueues.containsKey(session)) {
-                            messageQueues.get(session).stopQueue();
-                        }
-
+                        List<MarshalledMessage> deferred = null;
                         synchronized (messageQueues) {
+                            if (messageQueues.containsKey(session)) {
+                                MessageQueue q = messageQueues.get(session);
+                                synchronized (q) {
+                                    if (deferredQueue.containsKey(q)) {
+                                        deferred = deferredQueue.remove(q);
+                                    }
+                                }
+
+                                messageQueues.get(session).stopQueue();
+                            }
+
                             addQueue(session, queue = new MessageQueueImpl(queueSize, ServerMessageBusImpl.this, session));
+
+                            if (deferred != null) {
+                                deferredQueue.put(queue, deferred);
+                            }
+
                             remoteSubscribe(session, queue, "ClientBus");
                         }
 
@@ -420,6 +434,9 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     private void enqueueForDelivery(final MessageQueue queue, final String subject, final Object message) {
         if (queue != null && isAnyoneListening(queue, subject)) {
 
+            if (String.valueOf(message).contains("UpdateStockInfo")) {
+                System.out.println("offer: " + message);
+            }
             queue.offer(new MarshalledMessage() {
                 public String getSubject() {
                     return subject;
@@ -431,6 +448,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             });
 
         } else {
+
             if (queue != null && !queue.isInitialized()) {
                 deferDelivery(queue, new MarshalledMessage() {
                     public String getSubject() {
@@ -442,23 +460,29 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                     }
                 });
             } else {
+                if (String.valueOf(message).contains("UpdateStockInfo")) {
+                    System.out.println("no offer: " + message);
+                }
+
                 throw new NoSubscribersToDeliverTo("for: " + subject + ":" + isAnyoneListening(queue, subject) + ":" + queue.isInitialized());
             }
         }
 
     }
 
-    private void deferDelivery(MessageQueue queue, MarshalledMessage message) {
-        synchronized (deferredQueue) {
+    private void deferDelivery(final MessageQueue queue, MarshalledMessage message) {
+        synchronized (queue) {
             if (!deferredQueue.containsKey(queue)) deferredQueue.put(queue, new ArrayList<MarshalledMessage>());
             deferredQueue.get(queue).add(message);
         }
     }
 
-    private void drainDeferredDeliveryQueue(MessageQueue queue) {
-        synchronized (deferredQueue) {
+    private void drainDeferredDeliveryQueue(final MessageQueue queue) {
+        synchronized (queue) {
             if (deferredQueue.containsKey(queue)) {
+                System.out.println("draining ...");
                 for (MarshalledMessage message : deferredQueue.get(queue)) {
+                    System.out.println("D:" + message);
                     queue.offer(message);
                 }
 
