@@ -137,13 +137,19 @@ public class AbstractMessageBuilder<R extends Sendable> {
                                 };
                             } else {
                                 sender = new Runnable() {
+
                                     public void run() {
+                                        try {
                                         MessageBuilder.getMessageProvider().get()
-                                                .toSubject(message.getSubject())
                                                 .copyResource("Session", message)
                                                 .addAllParts(message.getParts())
                                                 .addAllProvidedParts(message.getProvidedParts())
                                                 .errorsCall(errorCallback).sendNowWith(viaThis);
+                                        }
+                                        catch (Throwable t) {
+                                            t.printStackTrace();
+                                        }
+
                                     }
                                 };
                             }

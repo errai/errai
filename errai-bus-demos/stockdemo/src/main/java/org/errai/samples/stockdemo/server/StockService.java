@@ -40,7 +40,7 @@ public class StockService implements MessageCallback {
                                     }
                                 })
                                 .noErrorHandling()
-                                .sendRepeatingWith(dispatcher, TimeUnit.MILLISECONDS, 100);
+                                .sendRepeatingWith(dispatcher, TimeUnit.MILLISECONDS, 50);
                     }
                 }
             }
@@ -49,7 +49,6 @@ public class StockService implements MessageCallback {
 
     public void callback(Message message) {
         if ("Start".equals(message.getCommandType())) {
-
             for (Stock stock : stocks.values()) {
                 MessageBuilder.createConversation(message)
                         .toSubject("StockClient")
@@ -84,10 +83,22 @@ public class StockService implements MessageCallback {
                 price -= Math.random() * 0.05;
             }
 
+            // bias Errai to grow
+            if ("ERR".equals(ticker)) {
+                if (Math.random() > 0.5d) {
+                    price += 0.01;
+                }
+            }
+
             stock.setLastTrade(price);
         }
 
-        return stock.getTicker() + ":" + stock.getLastTrade();
+        double volume = stock.getVolume();
+        volume += Math.random() * stock.getVolumeWeighting();
+        stock.setVolume(volume);
+
+
+        return stock.getTicker() + ":" + stock.getLastTrade() + ":" + stock.getVolume();
     }
 
     public void addEquity(String ticker, String company, double lastTrade) {
@@ -96,6 +107,7 @@ public class StockService implements MessageCallback {
     }
 
     public void loadDefault() {
+        addEquity("ERR", "Errai", 130);
         addEquity("FUN", "FunCo", 10.28);
         addEquity("FOO", "Foobar Worldco", 8.3);
         addEquity("GWTC", "The GWT Company", 5.2);

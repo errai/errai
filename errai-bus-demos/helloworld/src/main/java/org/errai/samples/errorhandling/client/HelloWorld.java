@@ -9,6 +9,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
@@ -20,24 +21,25 @@ public class HelloWorld implements EntryPoint {
     private RequestDispatcher dispatcher = ErraiBus.getDispatcher();
 
     public void onModuleLoad() {
-        Button button = new Button("Click Me", new ClickHandler() {
-            public void onClick(ClickEvent clickEvent) {
+        final Label label = new Label();
+        final Button button = new Button("Start");
+
+        ErraiBus.get().subscribe("Timestream", new MessageCallback() {
+            public void callback(Message message) {
+                label.setText(message.get(String.class, "Data"));
+            }
+        });
+
+        button.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
                 MessageBuilder.createMessage()
                         .toSubject("HelloWorldService")
                         .signalling()
-                        .with("msg", "Hi there!")
-                        .errorsHandledBy(new ErrorCallback() {
-                            public boolean error(Message message, Throwable throwable) {
-                                throwable.printStackTrace();
-                                return false;
-                            }
-                        })
-                        .sendNowWith(dispatcher);
+                        .noErrorHandling().sendNowWith(dispatcher);
             }
         });
-        final Label label = new Label();
 
-        RootPanel.get().add(button);
         RootPanel.get().add(label);
+        RootPanel.get().add(button);
     }
 }

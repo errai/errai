@@ -60,9 +60,10 @@ public class EquityRenderer {
     private void renderOut() {
         table.setWidget(row, 0, tickerLabel);
         table.setWidget(row, 1, companyNameLabel);
-        table.setWidget(row, 2, openingPriceLabel);
-        table.setWidget(row, 3, lastTradeLabel);
-        table.setWidget(row, 4, changeLabel);
+        table.setWidget(row, 2, volumeLabel);
+        table.setWidget(row, 3, openingPriceLabel);
+        table.setWidget(row, 4, lastTradeLabel);
+        table.setWidget(row, 5, changeLabel);
     }
 
     public static EquityRenderer newEquity(FlexTable table, int row, String ticker) {
@@ -83,8 +84,7 @@ public class EquityRenderer {
     }
 
     public void setCompanyName(String companyName) {
-        System.out.println("->" + companyName);
-        
+
         this.companyName = companyName;
         companyNameLabel.setText(companyName);
     }
@@ -105,16 +105,15 @@ public class EquityRenderer {
     public void setLastTrade(double lastTrade) {
         if (lastTrade < this.lastTrade) {
             lastTradeLabel.getElement().getStyle().setProperty("backgroundColor", "red");
-            lastTradeLabel.getElement().getStyle().setProperty("color", "white");
+      //      lastTradeLabel.getElement().getStyle().setProperty("color", "white");
         }
         else if (lastTrade == this.lastTrade) {
             lastTradeLabel.getElement().getStyle().setProperty("backgroundColor", "transparent");
-            lastTradeLabel.getElement().getStyle().setProperty("color", "black");
+        //    lastTradeLabel.getElement().getStyle().setProperty("color", "black");
         }
         else {
             lastTradeLabel.getElement().getStyle().setProperty("backgroundColor", "green");
-            lastTradeLabel.getElement().getStyle().setProperty("color", "white");
-
+          //  lastTradeLabel.getElement().getStyle().setProperty("color", "white");
         }
 
         this.lastTrade = lastTrade;

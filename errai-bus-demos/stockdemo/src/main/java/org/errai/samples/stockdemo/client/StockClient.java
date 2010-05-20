@@ -30,6 +30,7 @@ public class StockClient implements EntryPoint {
 
                             if (renderer != null) {
                                 renderer.setLastTrade(Double.parseDouble(data[1]));
+                                renderer.setVolume(Double.parseDouble(data[2]));
                             }
                         } else if ("UpdateStockInfo".equals(message.getCommandType())) {
                             Stock stock = message.get(Stock.class, "Stock");
@@ -63,7 +64,7 @@ public class StockClient implements EntryPoint {
     private void addTableRow() {
         table.insertRow(rows);
 
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 6; i++)
             table.addCell(rows);
 
         rows++;
@@ -74,9 +75,10 @@ public class StockClient implements EntryPoint {
 
         table.setWidget(0, 0, boldedLabel("Ticker"));
         table.setWidget(0, 1, boldedLabel("Company"));
-        table.setWidget(0, 2, boldedLabel("Open"));
-        table.setWidget(0, 3, boldedLabel("Last"));
-        table.setWidget(0, 4, boldedLabel("Chg"));
+        table.setWidget(0, 2, boldedLabel("Vol."));
+        table.setWidget(0, 3, boldedLabel("Open"));
+        table.setWidget(0, 4, boldedLabel("Last"));
+        table.setWidget(0, 5, boldedLabel("Chg"));
 
         table.setWidth("100%");
         table.getCellFormatter().setWidth(0, 0, "100px");
@@ -84,10 +86,12 @@ public class StockClient implements EntryPoint {
         table.getCellFormatter().setWidth(0, 2, "80px");
         table.getCellFormatter().setWidth(0, 3, "80px");
         table.getCellFormatter().setWidth(0, 4, "80px");
+        table.getCellFormatter().setWidth(0, 5, "80px");
     }
 
 
     private void loadDefault() {
+        addEquity("ERR");
         addEquity("FUN");
         addEquity("FOO");
         addEquity("GWTC");

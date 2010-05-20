@@ -186,7 +186,7 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
      */
     public Message set(String part, Object value) {
         if (parts.containsKey(part))
-            throw new IllegalArgumentException("cannot set a part more than once.");
+            throw new IllegalArgumentException("cannot set a part more than once: " + part);
 
         _addObjectPart(part, value);
         parts.put(part, value);

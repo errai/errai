@@ -25,6 +25,7 @@ public class Stock {
     private double openingPrice;
     private double lastTrade;
     private double volume;
+    private double volumeWeighting;
 
     public Stock() {
     }
@@ -33,6 +34,7 @@ public class Stock {
         this.ticker = ticker;
         this.companyName = companyName;
         this.openingPrice = this.lastTrade = lastTrade;
+        volumeWeighting = openingPrice / 300;
     }
 
     public String getTicker() {
@@ -73,5 +75,13 @@ public class Stock {
 
     public void setVolume(double volume) {
         this.volume = volume;
+    }
+
+    public void setVolumeWeighting(double volumeWeighting) {
+        this.volumeWeighting = volumeWeighting;
+    }
+
+    public double getVolumeWeighting() {
+        return volumeWeighting;
     }
 }
