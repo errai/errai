@@ -580,9 +580,12 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             subscriptions.put(subject, new ArrayList<MessageCallback>());
         }
 
-        fireSubscribeListeners(new SubscriptionEvent(false, null, subject));
 
-        subscriptions.get(subject).add(receiver);
+        List<MessageCallback> receivers = subscriptions.get(subject);
+        receivers.add(receiver);
+
+
+        fireSubscribeListeners(new SubscriptionEvent(false, null, receivers.size(), subject));
     }
 
     /**
@@ -595,12 +598,15 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     public void remoteSubscribe(QueueSession sessionContext, MessageQueue queue, String subject) {
         if (subscriptions.containsKey(subject) || subject == null) return;
 
-        fireSubscribeListeners(new SubscriptionEvent(true, sessionContext.getSessionId(), subject));
 
         if (!remoteSubscriptions.containsKey(subject)) {
             remoteSubscriptions.put(subject, new HashSet<MessageQueue>());
         }
-        remoteSubscriptions.get(subject).add(queue);
+
+        Set<MessageQueue> remotes = remoteSubscriptions.get(subject);
+        remotes.add(queue);
+
+        fireSubscribeListeners(new SubscriptionEvent(true, sessionContext.getSessionId(), remotes.size(), subject));
     }
 
     /**
@@ -625,7 +631,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
 
         try {
-            fireUnsubscribeListeners(new SubscriptionEvent(true, !remoteSubscriptions.containsKey(subject), sessionContext.getSessionId(), subject));
+            fireUnsubscribeListeners(new SubscriptionEvent(true, sessionsToSubject.isEmpty(), sessionsToSubject.size(),
+                    sessionContext.getSessionId(), subject));
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -657,7 +664,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
         subscriptions.remove(subject);
 
-        fireUnsubscribeListeners(new SubscriptionEvent(false, null, subject));
+        fireUnsubscribeListeners(new SubscriptionEvent(false, null, 0, subject));
     }
 
     /**
@@ -862,11 +869,11 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
 
         for (String subject : subscriptions.keySet()) {
-            busMonitor.notifyNewSubscriptionEvent(new SubscriptionEvent(false, "None", subject));
+            busMonitor.notifyNewSubscriptionEvent(new SubscriptionEvent(false, "None", 1, subject));
         }
         for (Map.Entry<String, Set<MessageQueue>> entry : remoteSubscriptions.entrySet()) {
             for (MessageQueue queue : entry.getValue()) {
-                busMonitor.notifyNewSubscriptionEvent(new SubscriptionEvent(true, queue.getSession().getSessionId(), entry.getKey()));
+                busMonitor.notifyNewSubscriptionEvent(new SubscriptionEvent(true, queue.getSession().getSessionId(), 1, entry.getKey()));
             }
         }
 

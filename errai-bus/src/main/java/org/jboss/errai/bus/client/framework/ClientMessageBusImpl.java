@@ -215,7 +215,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      */
     private void fireAllSubscribeListeners(String subject) {
         Iterator<SubscribeListener> iter = onSubscribeHooks.iterator();
-        SubscriptionEvent evt = new SubscriptionEvent(false, "InBrowser", subject);
+        SubscriptionEvent evt = new SubscriptionEvent(false, "InBrowser", 1, subject);
 
         while (iter.hasNext()) {
             iter.next().onSubscribe(evt);
@@ -233,7 +233,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      */
     private void fireAllUnSubscribeListeners(String subject) {
         Iterator<UnsubscribeListener> iter = onUnsubscribeHooks.iterator();
-        SubscriptionEvent evt = new SubscriptionEvent(false, "InBrowser", subject);
+        SubscriptionEvent evt = new SubscriptionEvent(false, "InBrowser", 0, subject);
 
         while (iter.hasNext()) {
             iter.next().onUnsubscribe(evt);
