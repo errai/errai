@@ -221,6 +221,10 @@ public class MessageQueueImpl implements MessageQueue {
                             task = null;
                         }
 
+                        public boolean isFinished() {
+                            return false;
+                        }
+
                         @Override
                         public String toString() {
                             return "MessageResumer";

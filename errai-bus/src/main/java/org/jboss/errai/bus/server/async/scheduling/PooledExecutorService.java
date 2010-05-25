@@ -236,6 +236,10 @@ public class PooledExecutorService implements TaskProvider {
         }
 
 
+        public boolean isFinished() {
+            return nextRuntime == -1;
+        }
+
         @Override
         public boolean isDue(long time) {
             synchronized (this) {
@@ -281,6 +285,8 @@ public class PooledExecutorService implements TaskProvider {
             nextRuntime = System.currentTimeMillis() + initialMillis;
             period = intervalMillis;
         }
+
+
 
         public void run() {
             try {

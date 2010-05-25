@@ -14,10 +14,19 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.api;
+package org.errai.samples.errorhandling.client;
 
-public interface AsyncTask {
-    public boolean cancel(boolean interrupt);
-    public void setExitHandler(Runnable runnable);
-    public boolean isCancelled();
+import org.jboss.errai.bus.server.annotations.ExposeEntity;
+
+@ExposeEntity
+public class ValueHolder {
+    private long time;
+
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
+    }
 }

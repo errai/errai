@@ -19,7 +19,7 @@
     <inherits name='com.google.gwt.user.User'/>
     <inherits name="com.google.gwt.uibinder.UiBinder"/>
     <inherits name="org.jboss.errai.bus.ErraiBus"/>
-    
+
     <entry-point class="org.errai.samples.stockdemo.client.StockClient" />
 
     <source path="client" />

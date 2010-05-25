@@ -92,6 +92,10 @@ public class WorkerFactory {
                     //To change body of implemented methods use File | Settings | File Templates.
                 }
 
+                public boolean isFinished() {
+                    return false;  //To change body of implemented methods use File | Settings | File Templates.
+                }
+
                 @Override
                 public String toString() {
                     return "WorkerTimeout";

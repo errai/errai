@@ -70,9 +70,12 @@ public class StockService implements MessageCallback {
     }
 
     public String simulateRandomChange() {
-        String ticker = tickerList.get((int) (Math.random() * 1000) % tickerList.size());
+        /**
+         * Randomly choose a stock to update.
+         */
+        final String ticker = tickerList.get((int) (Math.random() * 1000) % tickerList.size());
 
-        Stock stock = stocks.get(ticker);
+        final Stock stock = stocks.get(ticker);
 
         if (Math.random() > 0.5d) {
             double price = stock.getLastTrade();
@@ -83,7 +86,7 @@ public class StockService implements MessageCallback {
                 price -= Math.random() * 0.05;
             }
 
-            // bias Errai to grow
+            // bias Errai to grow, unfairly. 
             if ("ERR".equals(ticker)) {
                 if (Math.random() > 0.5d) {
                     price += 0.01;
@@ -98,7 +101,7 @@ public class StockService implements MessageCallback {
         stock.setVolume(volume);
 
 
-        return stock.getTicker() + ":" + stock.getLastTrade() + ":" + stock.getVolume();
+        return ticker + ":" + stock.getLastTrade() + ":" + stock.getVolume();
     }
 
     public void addEquity(String ticker, String company, double lastTrade) {

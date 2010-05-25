@@ -24,11 +24,19 @@ package org.jboss.errai.bus.client.framework;
  */
 public class SubscriptionEvent extends BusEvent<SubscriptionEvent> {
     private boolean remote = false;
+    private boolean lastRemoteSubject = false;
     private String sessionId;
     private String subject;
 
     public SubscriptionEvent(boolean remote, String sessionId, String subject) {
         this.remote = remote;
+        this.sessionId = sessionId;
+        this.subject = subject;
+    }
+
+    public SubscriptionEvent(boolean remote, boolean lastRemoteSubject, String sessionId, String subject) {
+        this.remote = remote;
+        this.lastRemoteSubject = lastRemoteSubject;
         this.sessionId = sessionId;
         this.subject = subject;
     }
@@ -48,6 +56,11 @@ public class SubscriptionEvent extends BusEvent<SubscriptionEvent> {
      */
     public boolean isRemote() {
         return remote;
+    }
+
+
+    public boolean isLastRemoteSubject() {
+        return lastRemoteSubject;
     }
 
     /**

@@ -7,11 +7,9 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 
 public class HelloWorld implements EntryPoint {
@@ -22,11 +20,11 @@ public class HelloWorld implements EntryPoint {
 
     public void onModuleLoad() {
         final Label label = new Label();
-        final Button button = new Button("Start");
+        final Button button = new Button("Click");
 
-        ErraiBus.get().subscribe("Timestream", new MessageCallback() {
+        ErraiBus.get().subscribe("ClientListener", new MessageCallback() {
             public void callback(Message message) {
-                label.setText(message.get(String.class, "Data"));
+                label.setText(message.get(String.class, "Text"));
             }
         });
 
@@ -39,7 +37,9 @@ public class HelloWorld implements EntryPoint {
             }
         });
 
+
         RootPanel.get().add(label);
         RootPanel.get().add(button);
+
     }
 }

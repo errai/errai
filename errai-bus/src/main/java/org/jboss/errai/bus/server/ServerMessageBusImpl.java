@@ -244,6 +244,10 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 }
             }
 
+            public boolean isFinished() {
+                return false;
+            }
+
             @Override
             public String toString() {
                 return "Bus Housekeeper";
@@ -611,14 +615,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             return;
         }
 
-        try {
-            fireUnsubscribeListeners(new SubscriptionEvent(true, sessionContext.getSessionId(), subject));
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("Exception running listeners");
-            return;
-        }
 
         Set<MessageQueue> sessionsToSubject = remoteSubscriptions.get(subject);
 
@@ -627,6 +623,16 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         if (sessionsToSubject.isEmpty()) {
             remoteSubscriptions.remove(subject);
         }
+
+        try {
+            fireUnsubscribeListeners(new SubscriptionEvent(true, !remoteSubscriptions.containsKey(subject), sessionContext.getSessionId(), subject));
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Exception running listeners");
+            return;
+        }
+
 
         /**
          * Any messages still in the queue for this subject, will now never be delivered.  So we must purge them,
@@ -677,6 +683,10 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     private boolean isAnyoneListening(MessageQueue queue, String subject) {
         return subscriptions.containsKey(subject) ||
                 (remoteSubscriptions.containsKey(subject) && remoteSubscriptions.get(subject).contains(queue));
+    }
+
+    public boolean hasRemoteSubscriptions(String subject) {
+        return remoteSubscriptions.containsKey(subject);
     }
 
     private boolean fireGlobalMessageListeners(Message message) {
