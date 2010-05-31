@@ -30,7 +30,7 @@ public class ThreadWorker implements Runnable {
     private volatile boolean active = false;
 
     public ThreadWorker(TaskProvider pool) {
-        this.thread = new Thread(this);
+        this.thread = new Thread(this, "ExecutorPoolWorker");
         this.pool = pool;
         this.errorCallback = null;
     }

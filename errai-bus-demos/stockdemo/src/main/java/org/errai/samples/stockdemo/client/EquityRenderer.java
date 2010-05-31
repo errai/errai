@@ -84,7 +84,6 @@ public class EquityRenderer {
     }
 
     public void setCompanyName(String companyName) {
-
         this.companyName = companyName;
         companyNameLabel.setText(companyName);
     }
@@ -105,15 +104,12 @@ public class EquityRenderer {
     public void setLastTrade(double lastTrade) {
         if (lastTrade < this.lastTrade) {
             lastTradeLabel.getElement().getStyle().setProperty("backgroundColor", "red");
-      //      lastTradeLabel.getElement().getStyle().setProperty("color", "white");
         }
         else if (lastTrade == this.lastTrade) {
             lastTradeLabel.getElement().getStyle().setProperty("backgroundColor", "transparent");
-        //    lastTradeLabel.getElement().getStyle().setProperty("color", "black");
         }
         else {
             lastTradeLabel.getElement().getStyle().setProperty("backgroundColor", "green");
-          //  lastTradeLabel.getElement().getStyle().setProperty("color", "white");
         }
 
         this.lastTrade = lastTrade;

@@ -70,7 +70,7 @@ public class ConversationMessage extends CommandMessage {
      * @param inReplyTo - incoming message
      * @return newly created <tt>ConversationMessage</tt>
      */
-    static ConversationMessage create(Message inReplyTo) {
+    public static ConversationMessage create(Message inReplyTo) {
         return new ConversationMessage(inReplyTo);
     }
 

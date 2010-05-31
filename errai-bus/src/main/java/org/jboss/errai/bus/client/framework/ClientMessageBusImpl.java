@@ -544,11 +544,21 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             public void callback(final Message message) {
                 switch (BusCommands.valueOf(message.getCommandType())) {
                     case RemoteSubscribe:
-                        subscribe(message.get(String.class, Subject), new MessageCallback() {
-                            public void callback(Message message) {
-                                enqueueForRemoteTransmit(message);
+                        if (message.hasPart("SubjectsList")) {
+                            for (String subject : (List<String>) message.get(List.class, "SubjectsList")) {
+                                subscribe(subject, new MessageCallback() {
+                                    public void callback(Message message) {
+                                        enqueueForRemoteTransmit(message);
+                                    }
+                                });
                             }
-                        });
+                        } else {
+                            subscribe(message.get(String.class, Subject), new MessageCallback() {
+                                public void callback(Message message) {
+                                    enqueueForRemoteTransmit(message);
+                                }
+                            });
+                        }
                         break;
 
                     case RemoteUnsubscribe:
@@ -556,16 +566,19 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                         break;
 
                     case FinishStateSync:
+                        List<String> subjects = new ArrayList<String>();
                         for (String s : subscriptions.keySet()) {
                             if (s.startsWith("local:")) continue;
+                            subjects.add(s);
 
-                            MessageBuilder.createMessage()
-                                    .toSubject("ServerBus")
-                                    .command(RemoteSubscribe)
-                                    .with(Subject, s)
-                                    .noErrorHandling()
-                                    .sendNowWith(ClientMessageBusImpl.this);
                         }
+
+                        MessageBuilder.createMessage()
+                                .toSubject("ServerBus")
+                                .command(RemoteSubscribe)
+                                .with("SubjectsList", subjects)
+                                .noErrorHandling()
+                                .sendNowWith(ClientMessageBusImpl.this);
 
                         // Don't use an iterator here -- potential for concurrent
                         // modifications!
@@ -580,7 +593,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                                 .toSubject("ServerBus")
                                 .command(BusCommands.FinishStateSync)
                                 .noErrorHandling().sendNowWith(ClientMessageBusImpl.this);
-
 
 
                         break;

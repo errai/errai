@@ -19,13 +19,14 @@ package org.jboss.errai.bus.server;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.jboss.errai.bus.client.api.*;
+import org.jboss.errai.bus.client.api.base.ConversationMessage;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.RuleDelegateMessageCallback;
 import org.jboss.errai.bus.client.api.base.TaskManagerFactory;
+import org.jboss.errai.bus.client.api.builder.ConversationMessageWrapper;
 import org.jboss.errai.bus.client.framework.*;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;
-import org.jboss.errai.bus.client.util.ErrorHelper;
 import org.jboss.errai.bus.server.api.*;
 import org.jboss.errai.bus.server.async.SchedulerService;
 import org.jboss.errai.bus.server.async.SimpleSchedulerService;
@@ -90,6 +91,10 @@ public class ServerMessageBusImpl implements ServerMessageBus {
      */
     @Inject
     public ServerMessageBusImpl(ErraiServiceConfigurator config) {
+
+        /**
+         * Define the default ServerBus service used for intrabus communication.
+         */
         subscribe("ServerBus", new MessageCallback() {
             public void callback(Message message) {
                 QueueSession session = getSession(message);
@@ -103,8 +108,15 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                         break;
 
                     case RemoteSubscribe:
-                        remoteSubscribe(session, messageQueues.get(session),
-                                message.get(String.class, MessageParts.Subject));
+                        if (message.hasPart("SubjectsList")) {
+                            queue = (MessageQueueImpl) messageQueues.get(session);
+                            for (String subject : (List<String>) message.get(List.class, "SubjectsList")) {
+                                remoteSubscribe(session, queue, subject);
+                            }
+                        } else {
+                            remoteSubscribe(session, messageQueues.get(session),
+                                    message.get(String.class, MessageParts.Subject));
+                        }
                         break;
 
                     case RemoteUnsubscribe:
@@ -146,17 +158,25 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                             busMonitor.notifyQueueAttached(session.getSessionId(), queue);
                         }
 
-                        for (String service : subscriptions.keySet()) {
-                            if (service.startsWith("local:")) {
-                                continue;
+                        List<String> subjects = new LinkedList<String>();
+                        try {
+                            for (String service : subscriptions.keySet()) {
+                                if (service.startsWith("local:")) {
+                                    continue;
+                                } else {
+                                    subjects.add(service);
+                                }
                             }
-
-                            createConversation(message)
-                                    .toSubject("ClientBus")
-                                    .command(BusCommands.RemoteSubscribe)
-                                    .with(MessageParts.Subject, service)
-                                    .noErrorHandling().sendNowWith(ServerMessageBusImpl.this, false);
                         }
+                        catch (Throwable t) {
+                            t.printStackTrace();
+                        }
+
+                        createConversation(message)
+                                .toSubject("ClientBus")
+                                .command(BusCommands.RemoteSubscribe)
+                                .with("SubjectsList", subjects)
+                                .noErrorHandling().sendNowWith(ServerMessageBusImpl.this, false);
 
                         createConversation(message)
                                 .toSubject("ClientBus")

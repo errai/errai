@@ -36,7 +36,7 @@ public class StockClient implements EntryPoint {
                             Stock stock = message.get(Stock.class, "Stock");
 
                             if (stock != null) {
-                                EquityRenderer renderer = equities.get(stock.getTicker());
+                                EquityRenderer renderer = equities.get(stock.getTicker()); 
 
                                 renderer.setCompanyName(stock.getCompanyName());
                                 renderer.setOpeningPrice(stock.getOpeningPrice());
@@ -51,7 +51,6 @@ public class StockClient implements EntryPoint {
                 .toSubject("StockService")
                 .command("Start")
                 .noErrorHandling().sendNowWith(ErraiBus.getDispatcher());
-
 
         RootPanel.get().add(table);
     }
@@ -87,6 +86,8 @@ public class StockClient implements EntryPoint {
         table.getCellFormatter().setWidth(0, 3, "80px");
         table.getCellFormatter().setWidth(0, 4, "80px");
         table.getCellFormatter().setWidth(0, 5, "80px");
+
+             
     }
 
 
@@ -110,4 +111,6 @@ public class StockClient implements EntryPoint {
         label.getElement().getStyle().setProperty("fontWeight", "bold");
         return label;
     }
+
+
 }
