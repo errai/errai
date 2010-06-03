@@ -19,11 +19,9 @@ package org.jboss.errai.bus.server;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.jboss.errai.bus.client.api.*;
-import org.jboss.errai.bus.client.api.base.ConversationMessage;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.RuleDelegateMessageCallback;
 import org.jboss.errai.bus.client.api.base.TaskManagerFactory;
-import org.jboss.errai.bus.client.api.builder.ConversationMessageWrapper;
 import org.jboss.errai.bus.client.framework.*;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;
@@ -96,6 +94,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
          * Define the default ServerBus service used for intrabus communication.
          */
         subscribe("ServerBus", new MessageCallback() {
+            @SuppressWarnings({"unchecked"})
             public void callback(Message message) {
                 QueueSession session = getSession(message);
                 MessageQueueImpl queue;
@@ -449,7 +448,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 }
                 catch (QueueOverloadedException e) {
                     handleMessageDeliveryFailure(ServerMessageBusImpl.this, message, e.getMessage(), e, false);
-                    //     ErrorHelper.sendClientError(ServerMessageBusImpl.this, message, e.getMessage(), e);
                 }
             }
         });
@@ -469,7 +467,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             });
 
         } else {
-
             if (queue != null && !queue.isInitialized()) {
                 deferDelivery(queue, new MarshalledMessage() {
                     public String getSubject() {
@@ -592,7 +589,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
      * @param receiver - the callback function called when a message is dispatched
      */
     public void subscribe(String subject, MessageCallback receiver) {
-
         if (lockDownServices.contains(subject))
             throw new IllegalArgumentException("Attempt to modify lockdown service: " + subject);
 
@@ -600,10 +596,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             subscriptions.put(subject, new ArrayList<MessageCallback>());
         }
 
-
         List<MessageCallback> receivers = subscriptions.get(subject);
         receivers.add(receiver);
-
 
         fireSubscribeListeners(new SubscriptionEvent(false, null, receivers.size(), subject));
     }
@@ -860,15 +854,17 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
     }
 
-    private final MessageProvider provider = new MessageProvider() {
-        {
-            MessageBuilder.setMessageProvider(this);
-        }
+    {
+        new MessageProvider() {
+            {
+                MessageBuilder.setMessageProvider(this);
+            }
 
-        public Message get() {
-            return JSONMessageServer.create();
-        }
-    };
+            public Message get() {
+                return JSONMessageServer.create();
+            }
+        };
+    }
 
     public List<MessageCallback> getReceivers(String subject) {
         return Collections.unmodifiableList(subscriptions.get(subject));

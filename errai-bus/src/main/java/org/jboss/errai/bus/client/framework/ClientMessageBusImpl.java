@@ -25,6 +25,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.bus.client.api.*;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.api.base.TransportIOException;
 import org.jboss.errai.bus.client.ext.ExtensionsLoader;
 import org.jboss.errai.bus.client.json.JSONUtilCli;
 import org.jboss.errai.bus.client.protocols.BusCommands;
@@ -66,7 +67,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     private final Map<String, List<Object>> subscriptions = new HashMap<String, List<Object>>();
 
     /* Outgoing queue of messages to be transmitted */
-    private final Queue<String> outgoingQueue = new LinkedList<String>();
+    private final Queue<Message> outgoingQueue = new LinkedList<Message>();
 
     /* True if transmitting is in process */
     private boolean transmitting = false;
@@ -346,8 +347,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      * @param message -
      */
     public void enqueueForRemoteTransmit(Message message) {
-        outgoingQueue.add(message instanceof HasEncoded ?
-                ((HasEncoded) message).getEncoded() : encodeMap(message.getParts()));
+        outgoingQueue.add(message);
+//
+//        outgoingQueue.add(message instanceof HasEncoded ?
+//                ((HasEncoded) message).getEncoded() : encodeMap(message.getParts()));
         sendAll();
     }
 
@@ -461,15 +464,20 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
         int transmissionSize = outgoingQueue.size();
         StringBuffer outgoing = new StringBuffer();
+        List<Message> txMessage = new LinkedList<Message>();
+        Message m;
+
         for (int i = 0; i < transmissionSize; i++) {
-            outgoing.append(outgoingQueue.poll());
+            txMessage.add(m = outgoingQueue.poll());
+
+            outgoing.append(m instanceof HasEncoded ? ((HasEncoded) m).getEncoded() : encodeMap(m.getParts()));
 
             if ((i + 1) < transmissionSize) {
                 outgoing.append(JSONUtilCli.MULTI_PAYLOAD_SEPER);
             }
         }
 
-        if (transmissionSize != 0) transmitRemote(outgoing.toString());
+        if (transmissionSize != 0) transmitRemote(outgoing.toString(), txMessage);
     }
 
     /**
@@ -477,7 +485,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      *
      * @param message - JSON string representation of message
      */
-    private void transmitRemote(final String message) {
+    private void transmitRemote(final String message, final List<Message> txMessages) {
         if (message == null) return;
 
         try {
@@ -494,7 +502,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                         // Handle it gracefully
                         //noinspection ThrowableInstanceNeverThrown
 
-                        logError("Problem communicating with remote bus (Received HTTP 503 Error)", message, null);
+                        TransportIOException tioe = new TransportIOException(response.getText(), response.getStatusCode(), "Failure communicating with server");
+                        for (Message txm : txMessages) {
+                            if (txm.getErrorCallback() == null || txm.getErrorCallback().error(txm, tioe)) {
+                                logError("Problem communicating with remote bus (Received HTTP 503 Error)", message, tioe);
+                            }
+                        }
                     }
 
                     /**
@@ -513,7 +526,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 }
 
                 public void onError(Request request, Throwable exception) {
-                    logError("Failed to communicate with remote bus", "", exception);
+                    for (Message txm : txMessages) {
+                        if (txm.getErrorCallback() == null || txm.getErrorCallback().error(txm, exception)) {
+                            logError("Failed to communicate with remote bus", "", exception);
+                        }
+                    }
+
                     transmitting = false;
                 }
             });
