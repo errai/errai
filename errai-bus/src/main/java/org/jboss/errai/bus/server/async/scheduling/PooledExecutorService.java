@@ -46,18 +46,29 @@ public class PooledExecutorService implements TaskProvider {
     private final ReentrantLock mutex = new ReentrantLock(true);
     private final int maxQueueSize;
 
+    private final SaturationPolicy saturationPolicy;
+
+    public enum SaturationPolicy {
+        CallerRuns, Fail
+    }
+
     /**
      * Constructs a new PooledExecutorService with the specified queue size.
      *
      * @param queueSize The size of the underlying worker queue.
      */
     public PooledExecutorService(int queueSize) {
+        this(queueSize, SaturationPolicy.CallerRuns);
+    }
+
+    public PooledExecutorService(int queueSize, SaturationPolicy saturationPolicy) {
         maxQueueSize = queueSize;
         queue = new UnboundedArrayBlockingQueue<TimedTask>(queueSize);
         pool = new ThreadWorkerPool(this);
 
         scheduledTasks = new PriorityBlockingQueue<TimedTask>();
         schedulerThread = new SchedulerThread();
+        this.saturationPolicy = saturationPolicy;
     }
 
     /**
@@ -146,7 +157,13 @@ public class PooledExecutorService implements TaskProvider {
              * Sechedule the task for execution.
              */
             if (!queue.offer(task, 5, java.util.concurrent.TimeUnit.SECONDS)) {
-                throw new RuntimeException("could not schedule task: queue is saturated");
+                switch (saturationPolicy) {
+                    case CallerRuns:
+                        task.run();
+                        break;
+                    case Fail:
+                        throw new RuntimeException("could not schedule task: queue is saturated");
+                }
             }
 
             if (task.calculateNextRuntime()) {
@@ -285,7 +302,6 @@ public class PooledExecutorService implements TaskProvider {
             nextRuntime = System.currentTimeMillis() + initialMillis;
             period = intervalMillis;
         }
-
 
 
         public void run() {

@@ -32,7 +32,7 @@ public class Worker extends Thread {
      * Initializes the thread with the specified <tt>ThreadGroup</tt>, <tt>factory</tt> and service
      *
      * @param factory - the factory this worker thread will belong to
-     * @param svc - the service the thread is attached to
+     * @param svc     - the service the thread is attached to
      */
     public Worker(WorkerFactory factory, ErraiService svc) {
         super("Dispatch Worker Thread");
@@ -63,7 +63,7 @@ public class Worker extends Thread {
 
     /**
      * Interrupts this worker thread, and expire it due to a timeout.
-     * Creates an error message if they could not be interrupted  
+     * Creates an error message if they could not be interrupted
      */
     public void timeoutInterrupt() {
         interrupt();
@@ -79,7 +79,7 @@ public class Worker extends Thread {
     }
 
     /**
-     * Runs the thread, setting the expiry time, and sends the messages associated with this thread 
+     * Runs the thread, setting the expiry time, and sends the messages associated with this thread
      */
     @Override
     public void run() {
@@ -90,11 +90,7 @@ public class Worker extends Thread {
                 while (true) {
                     if ((message = messages.poll(60, TimeUnit.SECONDS)) != null) {
                         workExpiry = currentTimeMillis() + timeout;
-                        if (message.isFlagSet(RoutingFlags.NonGlobalRouting)) {
-                            bus.send(message);
-                        } else {
-                            bus.sendGlobal(message);
-                        }
+                        deliverToBus(bus, message);
                         workExpiry = 0;
                     }
                     if (!active) {
@@ -110,7 +106,7 @@ public class Worker extends Thread {
             }
             catch (QueueUnavailableException e) {
                 e.printStackTrace();
-              //  handleMessageDeliveryFailure(bus, message, "Queue is not available", e, true);
+                //  handleMessageDeliveryFailure(bus, message, "Queue is not available", e, true);
             }
             catch (Throwable e) {
                 handleMessageDeliveryFailure(bus, message, "Error calling remote service: " + message.getSubject(), e, false);
@@ -118,6 +114,15 @@ public class Worker extends Thread {
             finally {
                 workExpiry = 0;
             }
+        }
+    }
+
+
+    public static final void deliverToBus(MessageBus bus, Message message) {
+        if (message.isFlagSet(RoutingFlags.NonGlobalRouting)) {
+            bus.send(message);
+        } else {
+            bus.sendGlobal(message);
         }
     }
 }

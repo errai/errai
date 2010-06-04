@@ -29,6 +29,8 @@ public class WorkerFactory {
 
     private ErraiService svc;
 
+    private SaturationPolicy saturationPolicy = SaturationPolicy.CallerRuns;
+
     private BlockingQueue<Message> messages;
 
     private int poolSize = DEFAULT_THREAD_POOL_SIZE;
@@ -59,7 +61,7 @@ public class WorkerFactory {
             workerTimeout = seconds(Integer.parseInt(cfg.getProperty(CONFIG_ASYNC_WORKER_TIMEOUT)));
         }
 
-        this.messages = new UnboundedArrayBlockingQueue<Message>(deliveryQueueSize);
+        this.messages = new ArrayBlockingQueue<Message>(deliveryQueueSize);
 
         log.info("initializing async worker pools (poolSize: " + poolSize + "; workerTimeout: " + workerTimeout + ")");
 
@@ -115,8 +117,14 @@ public class WorkerFactory {
         if (messages.offer(m, 30, java.util.concurrent.TimeUnit.SECONDS)) {
             return;
         } else {
-            sendDeliveryFailure(m);
-            throw new RuntimeException("delivery queue is overloaded!");
+            switch (saturationPolicy) {
+                case CallerRuns:
+                    svc.getBus().sendGlobal(m);
+                    break;
+                case Fail:
+                    sendDeliveryFailure(m);
+                    throw new RuntimeException("delivery queue is overloaded!");
+            }
         }
     }
 
@@ -130,8 +138,14 @@ public class WorkerFactory {
         if (messages.offer(m, 30, java.util.concurrent.TimeUnit.SECONDS)) {
             return;
         } else {
-            sendDeliveryFailure(m);
-            throw new RuntimeException("delivery queue is overloaded!");
+            switch (saturationPolicy) {
+                case CallerRuns:
+                    svc.getBus().send(m);
+                    break;
+                case Fail:
+                    sendDeliveryFailure(m);
+                    throw new RuntimeException("delivery queue is overloaded!");
+            }
         }
     }
 
@@ -175,5 +189,9 @@ public class WorkerFactory {
 
     private long seconds(int seconds) {
         return seconds * 1000;
+    }
+
+    enum SaturationPolicy {
+        Fail, CallerRuns
     }
 }

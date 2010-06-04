@@ -76,7 +76,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     private BusMonitor busMonitor;
 
-    private Set<String> lockDownServices = new HashSet<String>();
+    private Set<String> reservedNames = new HashSet<String>();
 
     /**
      * Sets up the <tt>ServerMessageBusImpl</tt> with the configuration supplied. Also, initializes the bus' callback
@@ -589,7 +589,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
      * @param receiver - the callback function called when a message is dispatched
      */
     public void subscribe(String subject, MessageCallback receiver) {
-        if (lockDownServices.contains(subject))
+        if (reservedNames.contains(subject))
             throw new IllegalArgumentException("Attempt to modify lockdown service: " + subject);
 
         if (!subscriptions.containsKey(subject)) {
@@ -673,7 +673,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
      * @param subject - the subject to unsubscribe from
      */
     public void unsubscribeAll(String subject) {
-        if (lockDownServices.contains(subject))
+        if (reservedNames.contains(subject))
             throw new IllegalArgumentException("Attempt to modify lockdown service: " + subject);
 
         subscriptions.remove(subject);
@@ -896,7 +896,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         monitor.attach(this);
     }
 
-    public void lockdown() {
-        lockDownServices.addAll(subscriptions.keySet());
+    public void finishInit() {
+        reservedNames.addAll(subscriptions.keySet());
     }
 }

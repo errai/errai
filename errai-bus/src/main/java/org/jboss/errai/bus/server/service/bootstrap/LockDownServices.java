@@ -26,6 +26,6 @@ public class LockDownServices implements BootstrapExecution
   public void execute(BootstrapContext context)
   {
     // freeze unmodifiable services
-    ((ServerMessageBusImpl)context.getBus()).lockdown();
+    ((ServerMessageBusImpl)context.getBus()).finishInit();
   }
 }
