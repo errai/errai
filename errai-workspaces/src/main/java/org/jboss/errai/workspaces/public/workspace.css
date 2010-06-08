@@ -734,7 +734,16 @@ WSLogin {
 
 /** popup panel **/
 
-.gwt-DecoratedPopupPanel .popupContent {  
+/*** gwt-PopupPanel **/
+.gwt-PopupPanel, .gwt-DecoratedPopupPanel {
+    -moz-box-shadow: 8px 8px 8px #666;
+    -webkit-box-shadow: 8px 8px 8px #666;
+    box-shadow:8px 8px 8px #666;
+	z-index: 2147483647; /* Integer.MAX_VALUE */
+}
+
+.gwt-DecoratedPopupPanel .popupContent {
+
 }
 .gwt-DecoratedPopupPanel .popupMiddleCenter {
   padding: 0px;
