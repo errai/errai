@@ -11,7 +11,6 @@ import org.jboss.errai.bus.client.protocols.MessageParts;
 
 import java.util.Map;
 
-
 public class ConversationMessageWrapper implements Message {
     protected Message message;
     protected Message newMessage;

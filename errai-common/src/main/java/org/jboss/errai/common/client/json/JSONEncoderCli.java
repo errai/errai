@@ -53,13 +53,11 @@ public class JSONEncoderCli {
             return encodeMap((Map<Object, Object>) v);
         } else if (v instanceof Object[]) {
             return encodeArray((Object[]) v);
-        } else if (v instanceof Serializable) {
-            if (TypeMarshallers.hasMarshaller(v.getClass().getName())) {
-                Marshaller<Object> m = getMarshaller(marshall = v.getClass().getName());
-                return m.marshall(v);
-            } else {
-                throw new RuntimeException("Unable to marshal: no available marshaller: " + v.getClass().getName());
-            }
+        } else if (TypeMarshallers.hasMarshaller(v.getClass().getName())) {
+            Marshaller<Object> m = getMarshaller(marshall = v.getClass().getName());
+            return m.marshall(v);
+        } else if (v instanceof Enum) {
+            return "\"" + v.toString() + "\"";
         } else {
             defer = true;
             return null;

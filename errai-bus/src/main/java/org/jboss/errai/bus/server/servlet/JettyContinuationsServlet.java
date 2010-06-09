@@ -21,6 +21,7 @@ import java.io.OutputStream;
 import java.nio.CharBuffer;
 import java.util.Iterator;
 import java.util.List;
+import java.util.zip.GZIPOutputStream;
 
 import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
 
@@ -80,11 +81,15 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
             service.store(msg);
         }
 
-        pollQueue(service.getBus().getQueue(session), httpServletRequest, httpServletResponse);
+        pollQueue(service.getBus().getQueue(session), httpServletResponse.getOutputStream(), httpServletResponse);
     }
 
     private void pollForMessages(QueueSession session, HttpServletRequest httpServletRequest,
                                  HttpServletResponse httpServletResponse, boolean wait) throws IOException {
+
+        httpServletResponse.setHeader("Content-Encoding", "gzip");
+        final GZIPOutputStream stream = new GZIPOutputStream(httpServletResponse.getOutputStream());
+
         try {
             final MessageQueue queue = service.getBus().getQueue(session);
 
@@ -116,7 +121,7 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
 
                 }
 
-                pollQueue(queue, httpServletRequest, httpServletResponse);
+                pollQueue(queue, stream, httpServletResponse);
             }
         }
         catch (RetryRequest r) {
@@ -132,7 +137,6 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
             httpServletResponse.setHeader("Cache-Control", "no-cache");
             httpServletResponse.addHeader("Payload-Size", "1");
             httpServletResponse.setContentType("application/json");
-            OutputStream stream = httpServletResponse.getOutputStream();
 
             stream.write('[');
 
@@ -154,9 +158,12 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
 
             stream.write(']');
         }
+        finally {
+            stream.close();
+        }
     }
 
-    private static void pollQueue(MessageQueue queue, HttpServletRequest httpServletRequest,
+    private static void pollQueue(MessageQueue queue, OutputStream stream,
                                   HttpServletResponse httpServletResponse) throws IOException {
 
         if (queue == null) return;
@@ -166,9 +173,7 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
         List<MarshalledMessage> messages = queue.poll(false).getMessages();
 
         httpServletResponse.setHeader("Cache-Control", "no-cache");
-        //    httpServletResponse.addHeader("Payload-Size", String.valueOf(messages.size()));
         httpServletResponse.setContentType("application/json");
-        OutputStream stream = httpServletResponse.getOutputStream();
 
         Iterator<MarshalledMessage> iter = messages.iterator();
 
@@ -181,9 +186,5 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
         }
         stream.write(']');
         stream.flush();
-        // stream.close();
-
     }
-
-
 }

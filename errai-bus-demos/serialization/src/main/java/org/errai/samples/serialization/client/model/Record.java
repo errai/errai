@@ -27,13 +27,15 @@ public class Record {
     private String name;
     private float balance;
     private Date accountOpened;
+    private RecordType type;
+
     private Set<Item> stuff;
     private Map<String, String> properties;
 
     public Record() {
     }
 
-    public Record(int recordId, String name, float balance, Date accountOpened, Item[] stuff, String[][] properties) {
+    public Record(int recordId, String name, float balance, Date accountOpened, RecordType type,  Item[] stuff, String[][] properties) {
         this.recordId = recordId;
         this.name = name;
         this.balance = balance;
@@ -41,6 +43,8 @@ public class Record {
 
         this.stuff = new HashSet<Item>();
         this.stuff.addAll(Arrays.asList(stuff));
+
+        this.type = type;
 
         this.properties = new HashMap<String, String>();
         for (String[] s : properties) {
@@ -78,6 +82,14 @@ public class Record {
 
     public void setAccountOpened(Date accountOpened) {
         this.accountOpened = accountOpened;
+    }
+
+    public RecordType getType() {
+        return type;
+    }
+
+    public void setType(RecordType type) {
+        this.type = type;
     }
 
     public Set<Item> getStuff() {

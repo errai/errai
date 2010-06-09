@@ -80,12 +80,10 @@ public class TypeDemarshallHelper {
             } else if (o instanceof Map) {
                 Map<?, ?> oMap = (Map) o;
                 if (oMap.containsKey(SerializationParts.ENCODED_TYPE)) {
-                    //Object newInstance = Class.forName((String) oMap.get(SerializationParts.ENCODED_TYPE)).newInstance();
-                 //   ClassLoader loader = Thread.currentThread().getContextClassLoader();
                     Object newInstance =  Thread.currentThread().getContextClassLoader()
                             .loadClass((String) oMap.get(SerializationParts.ENCODED_TYPE)).newInstance();
                     Map<String, Serializable> s = MVELDencodingCache.get(newInstance.getClass());
-                    int i = 0;
+
                     if (s == null) {
                         synchronized (MVELDencodingCache) {
                             s = MVELDencodingCache.get(newInstance.getClass());

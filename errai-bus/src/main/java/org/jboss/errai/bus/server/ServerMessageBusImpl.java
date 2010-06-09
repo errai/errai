@@ -85,11 +85,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
      * When deploying services on the server-side, it is possible to obtain references to the
      * <tt>ErraiServiceConfigurator</tt> by declaring it as injection dependencies
      *
-     * @param config - the configuration used to initialize the server message bus
      */
-    @Inject
-    public ServerMessageBusImpl(ErraiServiceConfigurator config) {
-
+    public ServerMessageBusImpl() {
         /**
          * Define the default ServerBus service used for intrabus communication.
          */

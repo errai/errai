@@ -90,10 +90,26 @@ public class TypeHandlerFactory {
         return toHandlers;
     }
 
-    public static <T> T convert(Class from, Class<? extends T> to, Object value) {
-        if (value.getClass() == to) return (T)value;
+    public static <T> T convert(final Class from, final Class<? extends T> to, final Object value) {
+        if (value.getClass() == to) return (T) value;
         Map<Class, TypeHandler> toHandlers = getHandler(from);
-        if (toHandlers == null) return (T) value;
+        if (toHandlers == null) {
+            if (value instanceof String) {
+                TypeHandler<String, T> th = new TypeHandler<String, T>() {
+                    public T getConverted(String in) {
+                        return (T) Enum.valueOf((Class<? extends Enum>) to, in);
+                    }
+                };
+                try {
+                    return th.getConverted(String.valueOf(value));
+                }
+                catch (Exception e) {
+                    throw new RuntimeException("could not convert type");   
+                }
+            }
+
+            return (T) value;
+        }
         TypeHandler handler = toHandlers.get(to);
         if (handler == null) {
             return (T) value;
@@ -101,10 +117,45 @@ public class TypeHandlerFactory {
         return (T) handler.getConverted(value);
     }
 
+    private static final Map<Class, Map<Class, Boolean>> assignableCache = new HashMap<Class, Map<Class, Boolean>>();
+
+    public static Boolean checkCache(Class from, Class to) {
+        synchronized (assignableCache) {
+            Map<Class, Boolean> assignableTable = assignableCache.get(from);
+            if (assignableTable != null) {
+                return assignableTable.get(to);
+            } else {
+                return null;
+            }
+        }
+    }
+
+    public static boolean recordCache(Class from, Class to, boolean result) {
+        synchronized (assignableCache) {
+            Map<Class, Boolean> assignableTable = assignableCache.get(from);
+            if (assignableTable == null) {
+                assignableCache.put(from, assignableTable = new HashMap<Class, Boolean>());
+            }
+            assignableTable.put(to, result);
+            return result;
+        }
+    }
+
+    public static boolean gwtSafe_IsAssignableFrom(Class from, Class to) {
+        Boolean cache = checkCache(from, to);
+        if (cache != null) return cache;
+
+        do {
+            if (from == to) return recordCache(from, to, true);
+        } while ((from = from.getSuperclass()) != null);
+
+        return recordCache(from, to, false);
+    }
+
     public static void addHandler(Class from, Class to, TypeHandler handler) {
-         if (!handlers.containsKey(from)) {
-             handlers.put(from, new HashMap<Class, TypeHandler>());
-         }
+        if (!handlers.containsKey(from)) {
+            handlers.put(from, new HashMap<Class, TypeHandler>());
+        }
         handlers.get(from).put(to, handler);
     }
 }

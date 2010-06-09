@@ -17,9 +17,6 @@
 package org.jboss.errai.tools.monitoring;
 
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.base.CommandMessage;
-import org.jboss.errai.bus.server.io.JSONDecoder;
-import org.jboss.errai.bus.server.io.JSONEncoder;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -36,9 +33,6 @@ import java.util.Map;
 
 import static java.lang.System.currentTimeMillis;
 import static javax.swing.SwingUtilities.invokeLater;
-import static org.jboss.errai.bus.client.api.base.CommandMessage.createWithParts;
-import static org.jboss.errai.bus.server.io.JSONDecoder.decode;
-import static org.jboss.errai.bus.server.io.JSONEncoder.encode;
 import static org.jboss.errai.tools.monitoring.UiHelper.uglyReEncode;
 
 public class ServiceActivityMonitor extends JFrame implements Attachable {

@@ -26,7 +26,7 @@ public class ThreadWorkerPool {
     private final List<ThreadWorker> workers;
     private final TaskProvider provider;
 
-    private int maximumPoolSize = 10;
+    private int maximumPoolSize = Runtime.getRuntime().availableProcessors();
 
     private volatile boolean stop = false;
 

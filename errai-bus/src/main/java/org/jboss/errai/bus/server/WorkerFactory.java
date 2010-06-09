@@ -7,7 +7,6 @@ import org.jboss.errai.bus.client.util.ErrorHelper;
 import org.jboss.errai.bus.server.async.TimedTask;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
-import org.jboss.errai.bus.server.util.UnboundedArrayBlockingQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +18,7 @@ import java.util.concurrent.BlockingQueue;
  */
 public class WorkerFactory {
     private static final int DEFAULT_DELIVERY_QUEUE_SIZE = 100;
-    private static final int DEFAULT_THREAD_POOL_SIZE = 10;
+    private static final int DEFAULT_THREAD_POOL_SIZE = Runtime.getRuntime().availableProcessors();
 
     private static final String CONFIG_ASYNC_THREAD_POOL_SIZE = "errai.async.thread_pool_size";
     private static final String CONFIG_ASYNC_WORKER_TIMEOUT = "errai.async.worker.timeout";

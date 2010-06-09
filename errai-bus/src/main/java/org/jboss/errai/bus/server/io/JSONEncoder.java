@@ -19,8 +19,10 @@ package org.jboss.errai.bus.server.io;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.common.client.types.TypeHandler;
 import org.mvel2.MVEL;
+import org.mvel2.util.StringAppender;
 
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.sql.Timestamp;
@@ -53,8 +55,8 @@ public class JSONEncoder {
         } else if (v instanceof Map) {
             //noinspection unchecked
             return encodeMap((Map) v);
-        } else if (v instanceof Object[]) {
-            return encodeArray((Object[]) v);
+        } else if (v.getClass().isArray()) {
+            return encodeArray(v);
 
         // CDI Integration: Loading entities after the service was initialized
         // This may cause the client to throw an exception if the entity is not known
@@ -65,6 +67,9 @@ public class JSONEncoder {
         } else {
             throw new RuntimeException("cannot serialize type: " + v.getClass().getName());
         }  */
+        else if (v instanceof Enum) {
+            return encodeEnum((Enum) v);
+        }
         else {
           return encodeObject(v);          
         }
@@ -81,7 +86,7 @@ public class JSONEncoder {
             return _encode(convert(o));
         }
 
-        StringBuilder build = new StringBuilder("{" + SerializationParts.ENCODED_TYPE + ":'" + cls.getName() + "',");
+        StringAppender build = new StringAppender("{" + SerializationParts.ENCODED_TYPE + ":'" + cls.getName() + "',");
         Field[] fields = cls.getDeclaredFields();
         int i = 0;
 
@@ -124,7 +129,7 @@ public class JSONEncoder {
     }
 
     private static String encodeMap(Map<Object, Object> map) {
-        StringBuilder mapBuild = new StringBuilder("{");
+        StringAppender mapBuild = new StringAppender("{");
         boolean first = true;
 
         for (Map.Entry<Object, Object> entry : map.entrySet()) {
@@ -142,7 +147,7 @@ public class JSONEncoder {
     }
 
     private static String encodeCollection(Collection col) {
-        StringBuilder buildCol = new StringBuilder("[");
+        StringAppender buildCol = new StringAppender("[");
         Iterator iter = col.iterator();
         while (iter.hasNext()) {
             buildCol.append(_encode(iter.next()));
@@ -151,13 +156,20 @@ public class JSONEncoder {
         return buildCol.append(']').toString();
     }
 
-    private static String encodeArray(Object[] array) {
-        StringBuilder buildCol = new StringBuilder("[");
-        for (int i = 0; i < array.length; i++) {
-            buildCol.append(_encode(array[i]));
-            if ((i + 1) < array.length) buildCol.append(',');
+    private static String encodeArray(Object array) {
+        StringAppender buildCol = new StringAppender("[");
+
+        int len = Array.getLength(array);
+        for (int i = 0; i < len; i++) {
+            buildCol.append(_encode(Array.get(array, i)));
+            if ((i + 1) < len) buildCol.append(',');
         }
+
         return buildCol.append(']').toString();
+    }
+
+    private static String encodeEnum(Enum enumer) {
+        return "\"" + enumer.name() + "\"";
     }
 
     private static final Map<Class, TypeHandler> tHandlers = new HashMap<Class, TypeHandler>();

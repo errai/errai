@@ -66,9 +66,9 @@ public class UiHelper {
 
         Message newMessage = CommandMessage.createWithParts(parts);
 
-        for (Map.Entry<String, Object> entry : parts.entrySet()) {
-
-        }
+//        for (Map.Entry<String, Object> entry : parts.entrySet()) {
+//
+//        }
 
   //      if (parts.containsKey(SerializationParts.MARSHALLED_TYPES)) {
    //         TypeDemarshallHelper.demarshallAll((String) parts.get(SerializationParts.MARSHALLED_TYPES), newMessage);
