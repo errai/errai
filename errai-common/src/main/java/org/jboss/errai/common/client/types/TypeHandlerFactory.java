@@ -101,10 +101,12 @@ public class TypeHandlerFactory {
                     }
                 };
                 try {
-                    return th.getConverted(String.valueOf(value));
+                    T val = th.getConverted(String.valueOf(value));
+                    addHandler(from, to, th);
+                    return val;
                 }
                 catch (Exception e) {
-                    throw new RuntimeException("could not convert type");   
+                    return (T) value;
                 }
             }
 
