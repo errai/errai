@@ -25,9 +25,11 @@ import org.jboss.errai.bus.server.util.UnboundedArrayBlockingQueue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.locks.LockSupport;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static java.lang.System.currentTimeMillis;
+import static java.util.concurrent.locks.LockSupport.parkUntil;
 
 public class PooledExecutorService implements TaskProvider {
     private final BlockingQueue<TimedTask> queue;
@@ -142,15 +144,7 @@ public class PooledExecutorService implements TaskProvider {
 
         while ((task = scheduledTasks.poll(60, java.util.concurrent.TimeUnit.SECONDS)) != null) {
             if (!task.isDue(currentTimeMillis())) {
-                long wait = task.nextRuntime() - currentTimeMillis();
-                if (wait > 0) {
-                    try {
-                        Thread.sleep(wait);
-                    }
-                    catch (InterruptedException e) {
-                        if (stopped) return 0;
-                    }
-                }
+                parkUntil(task.nextRuntime());
             }
 
             /**
@@ -318,7 +312,6 @@ public class PooledExecutorService implements TaskProvider {
     }
 
     private class SchedulerThread extends Thread {
-        //private volatile long sleepInterval;
         private volatile boolean running = false;
 
         private SchedulerThread() {
