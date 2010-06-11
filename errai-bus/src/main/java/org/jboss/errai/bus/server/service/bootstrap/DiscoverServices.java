@@ -186,21 +186,7 @@ class DiscoverServices implements BootstrapExecution {
                                 log.info("Marked " + loadClass + " as serializable.");
                                 loadedComponents.add(loadClass.getName());
                                 config.getSerializableTypes().add(loadClass);
-
-                                if (Enum.class.isAssignableFrom(loadClass)) {
-                                    DataConversion.addConversionHandler(loadClass, new ConversionHandler() {
-                                        public Object convertFrom(Object in) {
-                                            //noinspection unchecked
-                                            return Enum.valueOf((Class<? extends Enum>) loadClass, String.valueOf(in));
-                                        }
-
-                                        public boolean canConvertFrom(Class cls) {
-                                            return cls == String.class;
-                                        }
-                                    });
-                                }
-
-
+                                markIfEnumType(loadClass);
                             }
 
                         }
@@ -225,6 +211,8 @@ class DiscoverServices implements BootstrapExecution {
                                 log.info("Marked " + cls + " as serializable.");
                                 loadedComponents.add(cls.getName());
                                 config.getSerializableTypes().add(cls);
+                                markIfEnumType(cls);
+
                             }
                             catch (Exception e) {
                                 throw new ErraiBootstrapFailure(e);
@@ -239,6 +227,21 @@ class DiscoverServices implements BootstrapExecution {
         }
         catch (MissingResourceException e) {
             throw new ErraiBootstrapFailure("unable to find ErraiApp.properties in the classpath.");
+        }
+    }
+
+    private void markIfEnumType(final Class loadClass) {
+        if (Enum.class.isAssignableFrom(loadClass)) {
+            DataConversion.addConversionHandler(loadClass, new ConversionHandler() {
+                public Object convertFrom(Object in) {
+                    //noinspection unchecked
+                    return Enum.valueOf((Class<? extends Enum>) loadClass, String.valueOf(in));
+                }
+
+                public boolean canConvertFrom(Class cls) {
+                    return cls == String.class;
+                }
+            });
         }
     }
 

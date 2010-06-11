@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+                                                                          
 package org.errai.samples.serialization.client.model;
 
 import org.jboss.errai.bus.server.annotations.ExposeEntity;
 
-import java.io.Serializable;
 import java.util.*;
 
 @ExposeEntity
