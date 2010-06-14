@@ -19,8 +19,11 @@ package org.jboss.errai.tools.monitoring;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.RuleDelegateMessageCallback;
 import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.util.BusTools;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
+import org.jboss.errai.bus.server.io.RemoteServiceCallback;
 import org.jboss.errai.bus.server.security.auth.rules.RolesRequiredRule;
+import org.mvel2.util.StringAppender;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -246,7 +249,7 @@ public class ServerMonitorPanel implements Attachable {
     private void generateServiceExplorer() {
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) serviceExplorer.getModel().getRoot();
 
-        node.setUserObject(new JLabel(currentlySelectedService, getSwIcon("service.png"), SwingConstants.LEFT));
+        node.setUserObject(new JLabel(currentlySelectedService + (BusTools.isReservedName(currentlySelectedService) ? " (Built-in)" : ""), getSwIcon("service.png"), SwingConstants.LEFT));
         node.removeAllChildren();
 
         serviceExplorer.setRootVisible(true);
@@ -287,28 +290,42 @@ public class ServerMonitorPanel implements Attachable {
 
                     node.add(securityNode);
                 }
+                else if (mc instanceof RemoteServiceCallback) {
+                    RemoteServiceCallback remCB = (RemoteServiceCallback) mc;
+
+                    Set<String> endpoints = remCB.getEndpoints();
+
+                    DefaultMutableTreeNode remoteCPs =
+                            new DefaultMutableTreeNode("Callpoints (" + endpoints.size() + ")");
+
+                    for (String endpoint : endpoints) {
+                        String[] epParts = endpoint.split(":");
+
+                        StringAppender appender = new StringAppender(epParts[0]).append('(');
+                        for (int i = 1; i < epParts.length; i++) {
+                            appender.append(epParts[i]);
+                            if ((i + 1) < epParts.length) appender.append(", ");
+                        }
+
+                        remoteCPs.add(UiHelper.createIconEntry("database_connect.png", appender.append(')').toString()));
+                    }
+
+                    node.add(remoteCPs);
+                }
             }
 
             node.add(receiversNode);
         }
 
         model.reload();
+
+        for (int i = 0; i < serviceExplorer.getRowCount(); i++) {
+            serviceExplorer.expandRow(i);
+        }
     }
 
     public MainMonitorGUI getMainMonitorGUI() {
         return mainMonitorGUI;
-    }
-
-    private static Set<String> builtInServices = new HashSet<String>();
-
-    static {
-        builtInServices.add("ServerBus");
-        builtInServices.add("AuthorizationService");
-        builtInServices.add("AuthenticationService");
-        builtInServices.add("ServerEchoService");
-
-        builtInServices.add("ClientBus");
-        builtInServices.add("ClientBusErrors");
     }
 
     public class ServicesListCellRender extends DefaultListCellRenderer {
@@ -319,7 +336,7 @@ public class ServerMonitorPanel implements Attachable {
             if (v.endsWith(":RPC")) {
                 setIcon(getSwIcon("database_connect.png"));
             } else {
-                setIcon(builtInServices.contains(v) ? getSwIcon("database_key.png") : getSwIcon("database.png"));
+                setIcon(BusTools.isReservedName(v) ? getSwIcon("database_key.png") : getSwIcon("database.png"));
             }
             setToolTipText(v);
             return this;

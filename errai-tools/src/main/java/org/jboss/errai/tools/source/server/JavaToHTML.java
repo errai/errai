@@ -15,10 +15,6 @@
  */
 package org.jboss.errai.tools.source.server;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.HashSet;
 import java.util.Set;
 

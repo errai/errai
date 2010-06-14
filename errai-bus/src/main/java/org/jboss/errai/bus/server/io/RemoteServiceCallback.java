@@ -6,6 +6,7 @@ import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * <tt>RemoteServiceCallback</tt> implements callback functionality for a remote service. It invokes the callback
@@ -33,5 +34,9 @@ public class RemoteServiceCallback implements MessageCallback {
             throw new MessageDeliveryFailure("no such endpoint '" + message.getCommandType() + "' in service: " + message.getSubject());
         }
         endpoints.get(message.getCommandType()).callback(message);
+    }
+
+    public Set<String> getEndpoints() {
+        return Collections.unmodifiableSet(endpoints.keySet());
     }
 }
