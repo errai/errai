@@ -81,10 +81,12 @@ public class PooledExecutorService implements TaskProvider {
      *                              interrupted.
      */
     public void execute(final Runnable runnable) throws InterruptedException {
+        checkLoad();
         queue.add(new SingleFireTask(runnable));
     }
 
     public AsyncTask schedule(final Runnable runnable, TimeUnit unit, long interval) {
+        checkLoad();
         mutex.lock();
         try {
             TimedTask task;
@@ -98,6 +100,7 @@ public class PooledExecutorService implements TaskProvider {
     }
 
     public AsyncTask scheduleRepeating(final Runnable runnable, final TimeUnit unit, final long initial, final long interval) {
+        checkLoad();
         mutex.lock();
         try {
             TimedTask task;
@@ -194,7 +197,6 @@ public class PooledExecutorService implements TaskProvider {
      * @throws InterruptedException thrown if the thread waiting on a ready task is interrupted.
      */
     public TimedTask getNextTask() throws InterruptedException {
-        checkLoad();
         return queue.poll(1, java.util.concurrent.TimeUnit.SECONDS);
     }
 

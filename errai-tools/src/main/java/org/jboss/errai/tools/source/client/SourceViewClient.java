@@ -15,22 +15,8 @@
  */
 package org.jboss.errai.tools.source.client;
 
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.TextBox;
-import org.gwt.mosaic.ui.client.layout.BoxLayout;
-import org.gwt.mosaic.ui.client.layout.BoxLayoutData;
-import org.gwt.mosaic.ui.client.layout.LayoutPanel;
 import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.workspaces.client.api.ProvisioningCallback;
 import org.jboss.errai.workspaces.client.api.WidgetProvider;
 import org.jboss.errai.workspaces.client.api.annotations.LoadTool;
@@ -39,17 +25,15 @@ import org.jboss.errai.workspaces.client.api.annotations.LoadTool;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: May 18, 2010
  */
-@LoadTool(name="SourceView", group = "Tools")
-public class SourceViewClient implements WidgetProvider
-{
-  private MessageBus bus = ErraiBus.get();
- 
-  public void provideWidget(ProvisioningCallback callback)
-  {
-    SourceViewWidget viewWidget = new SourceViewWidget(
-        new String[] {"org/jboss/errai/demo/thestore/client/modules/domain/User.java"}
-    );
+@LoadTool(name = "SourceView", group = "Tools")
+public class SourceViewClient implements WidgetProvider {
+    private MessageBus bus = ErraiBus.get();
 
-    callback.onSuccess(viewWidget);
-  }
+    public void provideWidget(ProvisioningCallback callback) {
+        SourceViewWidget viewWidget = new SourceViewWidget(
+                new String[]{"org/jboss/errai/demo/thestore/client/modules/domain/User.java"}
+        );
+
+        callback.onSuccess(viewWidget);
+    }
 }

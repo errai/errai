@@ -95,6 +95,10 @@ public class TypeHandlerFactory {
         Map<Class, TypeHandler> toHandlers = getHandler(from);
         if (toHandlers == null) {
             if (value instanceof String) {
+                /**
+                 * We assume that this may be an enum type.  It may not be, but we try to decode it
+                 * as such.
+                 */
                 TypeHandler<String, T> th = new TypeHandler<String, T>() {
                     public T getConverted(String in) {
                         return (T) Enum.valueOf((Class<? extends Enum>) to, in);
@@ -102,10 +106,18 @@ public class TypeHandlerFactory {
                 };
                 try {
                     T val = th.getConverted(String.valueOf(value));
+
+                    /**
+                     * If we successfully decoded an enum, then we cache this handler for future
+                     * use.
+                     */
                     addHandler(from, to, th);
                     return val;
                 }
                 catch (Exception e) {
+                    /**
+                     * Definitely not an enum, so do nothing.
+                     */
                     return (T) value;
                 }
             }
