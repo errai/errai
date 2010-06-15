@@ -294,12 +294,13 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
         }
 
         public Object getValueAt(int rowIndex, int columnIndex) {
-            if (fields.size() <= rowIndex) return null;
             switch (columnIndex) {
                 case 0:
-                    return fields.get(rowIndex);
+                    if (fields.size() > rowIndex)
+                        return fields.get(rowIndex);
                 case 1:
-                    return values.get(rowIndex);
+                    if (values.size() > rowIndex)
+                        return values.get(rowIndex);
             }
             return null;
         }
@@ -314,7 +315,7 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
             values.clear();
         }
     }
-    
+
 
     public void notifyMessage(long time, Message message) {
         /*

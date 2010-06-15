@@ -37,6 +37,7 @@ public class JSONUtilCli {
         if (value == null || value.trim().length() == 0) return new ArrayList<MarshalledMessage>(0);
 
         ArrayList<MarshalledMessage> list = new ArrayList<MarshalledMessage>();
+
         JSONValue a = JSONParser.parse(value);
         
         if (a instanceof JSONArray) {

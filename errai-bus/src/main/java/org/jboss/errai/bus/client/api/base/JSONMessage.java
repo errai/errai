@@ -84,8 +84,8 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
     /* First is true if the <tt>buf</tt> is empty */
     protected boolean first = true;
 
-    /* true if the message has been completely pushed into the <tt>buf</tt> */
-    protected boolean committed;
+    protected boolean ended = false;
+
 
     /**
      * Create a new JSONMessage.
@@ -474,8 +474,10 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
      * Appends the closing brace to the end of the buffer denoting the end of the message
      */
     protected void _end() {
-        committed = true;
-        buf.append("}");
+        if (!ended) {
+            ended = true;
+            buf.append("}");
+        }
     }
 
     /**
@@ -484,8 +486,7 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
     protected void _sep() {
         if (first) {
             first = false;
-        }
-        else {
+        } else {
             buf.append(',');
         }
     }

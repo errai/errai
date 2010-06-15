@@ -19,6 +19,7 @@ package org.jboss.errai.bus.client.api.base;
 import org.jboss.errai.bus.client.framework.BooleanRoutingRule;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.framework.DeliveryPlan;
 
 
 /**
@@ -27,8 +28,8 @@ import org.jboss.errai.bus.client.api.MessageCallback;
  *
  * @see org.jboss.errai.bus.client.framework.BooleanRoutingRule
  */
-public class RuleDelegateMessageCallback implements MessageCallback {
-    private MessageCallback delegate;
+public class RuleDelegateMessageCallback extends DeliveryPlan {
+    private DeliveryPlan delegate;
     private BooleanRoutingRule routingRule;
 
     /**
@@ -37,7 +38,7 @@ public class RuleDelegateMessageCallback implements MessageCallback {
      * @param delegate - Message callback function
      * @param rule - indicates whether or not the message should be routed.
      */
-    public RuleDelegateMessageCallback(MessageCallback delegate, BooleanRoutingRule rule) {
+    public RuleDelegateMessageCallback(DeliveryPlan delegate, BooleanRoutingRule rule) {
         this.delegate = delegate;
         this.routingRule = rule;
     }
@@ -47,9 +48,9 @@ public class RuleDelegateMessageCallback implements MessageCallback {
      *
      * @param message - message to pass to the delegate callback, if called
      */
-    public void callback(Message message) {
+    public void deliver(Message message) {
         if (routingRule.decision(message)) {
-            this.delegate.callback(message);
+            this.delegate.deliver(message);
         }
     }
 

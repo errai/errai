@@ -16,7 +16,6 @@
 
 package org.jboss.errai.bus.server;
 
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.jboss.errai.bus.client.api.*;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
@@ -25,6 +24,7 @@ import org.jboss.errai.bus.client.api.base.TaskManagerFactory;
 import org.jboss.errai.bus.client.framework.*;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;
+import org.jboss.errai.bus.client.util.BusTools;
 import org.jboss.errai.bus.server.api.*;
 import org.jboss.errai.bus.server.async.SchedulerService;
 import org.jboss.errai.bus.server.async.SimpleSchedulerService;
@@ -36,6 +36,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversation;
 import static org.jboss.errai.bus.client.protocols.MessageParts.ReplyTo;
@@ -59,8 +61,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     private final List<MessageListener> listeners = new ArrayList<MessageListener>();
 
-    private final Map<String, List<MessageCallback>> subscriptions = new ConcurrentHashMap<String, List<MessageCallback>>();
-    private final Map<String, Set<MessageQueue>> remoteSubscriptions = new ConcurrentHashMap<String, Set<MessageQueue>>();
+    private final Map<String, DeliveryPlan> subscriptions = new ConcurrentHashMap<String, DeliveryPlan>();
+    private final Map<String, RemoteMessageCallback> remoteSubscriptions = new ConcurrentHashMap<String, RemoteMessageCallback>();
 
     private final Map<QueueSession, MessageQueue> messageQueues = new ConcurrentHashMap<QueueSession, MessageQueue>();
     private final Map<MessageQueue, List<MarshalledMessage>> deferredQueue = new ConcurrentHashMap<MessageQueue, List<MarshalledMessage>>();
@@ -84,7 +86,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
      * <p/>
      * When deploying services on the server-side, it is possible to obtain references to the
      * <tt>ErraiServiceConfigurator</tt> by declaring it as injection dependencies
-     *
      */
     public ServerMessageBusImpl() {
         /**
@@ -93,98 +94,100 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         subscribe("ServerBus", new MessageCallback() {
             @SuppressWarnings({"unchecked"})
             public void callback(Message message) {
-                QueueSession session = getSession(message);
-                MessageQueueImpl queue;
+                try {
+                    QueueSession session = getSession(message);
+                    MessageQueueImpl queue;
 
-                switch (BusCommands.valueOf(message.getCommandType())) {
-                    case Heartbeat:
-                        if (messageQueues.containsKey(session)) {
-                            messageQueues.get(session).heartBeat();
-                        }
-                        break;
-
-                    case RemoteSubscribe:
-                        if (message.hasPart("SubjectsList")) {
-                            queue = (MessageQueueImpl) messageQueues.get(session);
-                            for (String subject : (List<String>) message.get(List.class, "SubjectsList")) {
-                                remoteSubscribe(session, queue, subject);
-                            }
-                        } else {
-                            remoteSubscribe(session, messageQueues.get(session),
-                                    message.get(String.class, MessageParts.Subject));
-                        }
-                        break;
-
-                    case RemoteUnsubscribe:
-                        remoteUnsubscribe(session, messageQueues.get(session),
-                                message.get(String.class, MessageParts.Subject));
-                        break;
-
-                    case FinishStateSync:
-                        queue = (MessageQueueImpl) messageQueues.get(session);
-                        queue.finishInit();
-
-                        drainDeferredDeliveryQueue(queue);
-                        break;
-
-                    case ConnectToQueue:
-                        List<MarshalledMessage> deferred = null;
-                        synchronized (messageQueues) {
+                    switch (BusCommands.valueOf(message.getCommandType())) {
+                        case Heartbeat:
                             if (messageQueues.containsKey(session)) {
-                                MessageQueue q = messageQueues.get(session);
-                                synchronized (q) {
-                                    if (deferredQueue.containsKey(q)) {
-                                        deferred = deferredQueue.remove(q);
+                                messageQueues.get(session).heartBeat();
+                            }
+                            break;
+
+                        case RemoteSubscribe:
+                            if (message.hasPart("SubjectsList")) {
+                                queue = (MessageQueueImpl) messageQueues.get(session);
+                                for (String subject : (List<String>) message.get(List.class, "SubjectsList")) {
+                                    remoteSubscribe(session, queue, subject);
+                                }
+                            } else {
+                                remoteSubscribe(session, messageQueues.get(session),
+                                        message.get(String.class, MessageParts.Subject));
+                            }
+
+                            break;
+
+                        case RemoteUnsubscribe:
+                            remoteUnsubscribe(session, messageQueues.get(session),
+                                    message.get(String.class, MessageParts.Subject));
+                            break;
+
+                        case FinishStateSync:
+                            queue = (MessageQueueImpl) messageQueues.get(session);
+                            queue.finishInit();
+
+                            drainDeferredDeliveryQueue(queue);
+                            break;
+
+                        case ConnectToQueue:
+                            List<MarshalledMessage> deferred = null;
+                            synchronized (messageQueues) {
+                                if (messageQueues.containsKey(session)) {
+                                    MessageQueue q = messageQueues.get(session);
+                                    synchronized (q) {
+                                        if (deferredQueue.containsKey(q)) {
+                                            deferred = deferredQueue.remove(q);
+                                        }
                                     }
+
+                                    messageQueues.get(session).stopQueue();
                                 }
 
-                                messageQueues.get(session).stopQueue();
+                                addQueue(session, queue = new MessageQueueImpl(queueSize, ServerMessageBusImpl.this, session));
+
+                                if (deferred != null) {
+                                    deferredQueue.put(queue, deferred);
+                                }
+
+                                remoteSubscribe(session, queue, "ClientBus");
                             }
 
-                            addQueue(session, queue = new MessageQueueImpl(queueSize, ServerMessageBusImpl.this, session));
-
-                            if (deferred != null) {
-                                deferredQueue.put(queue, deferred);
+                            if (isMonitor()) {
+                                busMonitor.notifyQueueAttached(session.getSessionId(), queue);
                             }
 
-                            remoteSubscribe(session, queue, "ClientBus");
-                        }
-
-                        if (isMonitor()) {
-                            busMonitor.notifyQueueAttached(session.getSessionId(), queue);
-                        }
-
-                        List<String> subjects = new LinkedList<String>();
-                        try {
+                            List<String> subjects = new LinkedList<String>();
                             for (String service : subscriptions.keySet()) {
                                 if (service.startsWith("local:")) {
                                     continue;
-                                } else {
+                                } else if (!remoteSubscriptions.containsKey(service)) {
                                     subjects.add(service);
                                 }
                             }
-                        }
-                        catch (Throwable t) {
-                            t.printStackTrace();
-                        }
 
-                        createConversation(message)
-                                .toSubject("ClientBus")
-                                .command(BusCommands.RemoteSubscribe)
-                                .with("SubjectsList", subjects)
-                                .noErrorHandling().sendNowWith(ServerMessageBusImpl.this, false);
+                            createConversation(message)
+                                    .toSubject("ClientBus")
+                                    .command(BusCommands.RemoteSubscribe)
+                                    .with("SubjectsList", subjects)
+                                    .noErrorHandling().sendNowWith(ServerMessageBusImpl.this, false);
 
-                        createConversation(message)
-                                .toSubject("ClientBus")
-                                .command(BusCommands.FinishStateSync)
-                                .noErrorHandling().sendNowWith(ServerMessageBusImpl.this, false);
-                        /**
-                         * Now the session is established, turn WindowPolling on.
-                         */
-                        getQueue(session).setWindowPolling(true);
+                            createConversation(message)
+                                    .toSubject("ClientBus")
+                                    .command(BusCommands.FinishStateSync)
+                                    .noErrorHandling().sendNowWith(ServerMessageBusImpl.this, false);
+                            /**
+                             * Now the session is established, turn WindowPolling on.
+                             */
+                            getQueue(session).setWindowPolling(true);
 
-                        break;
+                            break;
+                    }
+
+                } catch (Throwable t) {
+                    t.printStackTrace();
                 }
+
             }
         });
 
@@ -327,9 +330,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             return;
         }
 
-        final String jsonMessage = message instanceof HasEncoded ? ((HasEncoded) message).getEncoded() :
-                encodeJSON(message.getParts());
-
         if (isMonitor()) {
             if (message.isFlagSet(RoutingFlags.FromRemote)) {
                 busMonitor.notifyIncomingMessageFromRemote(
@@ -348,27 +348,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
 
         if (subscriptions.containsKey(subject)) {
-            for (MessageCallback c : subscriptions.get(subject)) {
-                c.callback(message);
-            }
-        }
-
-        if (remoteSubscriptions.containsKey(subject)) {
-            TaskManagerFactory.get().execute(new Runnable() {
-                public void run() {
-                    for (MessageQueue queue : remoteSubscriptions.get(subject)) {
-                        queue.offer(new MarshalledMessage() {
-                            public String getSubject() {
-                                return subject;
-                            }
-
-                            public Object getMessage() {
-                                return jsonMessage;
-                            }
-                        });
-                    }
-                }
-            });
+            subscriptions.get(subject).deliver(message);
         }
     }
 
@@ -439,9 +419,10 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         TaskManagerFactory.get().execute(new Runnable() {
             public void run() {
                 try {
-                    enqueueForDelivery(queue, message.getSubject(), message instanceof HasEncoded ?
-                            ((HasEncoded) message).getEncoded() :
-                            encodeJSON(message.getParts()));
+                    enqueueForDelivery(queue, message.getSubject(),
+                            message instanceof HasEncoded ?
+                                    ((HasEncoded) message).getEncoded() :
+                                    encodeJSON(message.getParts()));
                 }
                 catch (QueueOverloadedException e) {
                     handleMessageDeliveryFailure(ServerMessageBusImpl.this, message, e.getMessage(), e, false);
@@ -451,6 +432,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
 
     private void enqueueForDelivery(final MessageQueue queue, final String subject, final Object message) {
+
         if (queue != null && isAnyoneListening(queue, subject)) {
 
             queue.offer(new MarshalledMessage() {
@@ -548,8 +530,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
      * @param queue - the message queue to close
      */
     public void closeQueue(MessageQueue queue) {
-        for (Set<MessageQueue> sq : remoteSubscriptions.values()) {
-            sq.remove(queue);
+        for (RemoteMessageCallback cb : remoteSubscriptions.values()) {
+            cb.removeQueue(queue);
         }
 
         messageQueues.values().remove(queue);
@@ -566,17 +548,12 @@ public class ServerMessageBusImpl implements ServerMessageBus {
      * @param rule    - the <tt>BooleanRoutingRule</tt> instance specifying the routing rules
      */
     public void addRule(String subject, BooleanRoutingRule rule) {
-        List<MessageCallback> newCallbacks = new LinkedList<MessageCallback>();
-        Iterator<MessageCallback> iter = subscriptions.get(subject).iterator();
-        while (iter.hasNext()) {
-            newCallbacks.add(new RuleDelegateMessageCallback(iter.next(), rule));
-            iter.remove();
+        DeliveryPlan plan = subscriptions.get(subject);
+        if (plan == null) {
+            throw new RuntimeException("no such subject: " + subject);
         }
 
-        List<MessageCallback> slist = subscriptions.get(subject);
-        for (MessageCallback mc : newCallbacks) {
-            slist.add(mc);
-        }
+        subscriptions.put(subject, new RuleDelegateMessageCallback(plan, rule));
     }
 
     /**
@@ -589,14 +566,23 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         if (reservedNames.contains(subject))
             throw new IllegalArgumentException("Attempt to modify lockdown service: " + subject);
 
-        if (!subscriptions.containsKey(subject)) {
-            subscriptions.put(subject, new ArrayList<MessageCallback>());
+        DeliveryPlan plan = createOrAddDeliveryPlan(subject, receiver);
+
+        fireSubscribeListeners(new SubscriptionEvent(false, null, plan.getTotalReceivers(), subject));
+    }
+
+    private DeliveryPlan createOrAddDeliveryPlan(final String subject, final MessageCallback receiver) {
+        synchronized (subscriptions) {
+            DeliveryPlan plan = subscriptions.get(subject);
+
+            if (plan == null) {
+                subscriptions.put(subject, plan = new DeliveryPlan(new MessageCallback[]{receiver}));
+            } else {
+                subscriptions.put(subject, plan.newDeliveryPlanWith(receiver));
+            }
+
+            return plan;
         }
-
-        List<MessageCallback> receivers = subscriptions.get(subject);
-        receivers.add(receiver);
-
-        fireSubscribeListeners(new SubscriptionEvent(false, null, receivers.size(), subject));
     }
 
     /**
@@ -607,17 +593,55 @@ public class ServerMessageBusImpl implements ServerMessageBus {
      * @param subject        - the subject to subscribe to
      */
     public void remoteSubscribe(QueueSession sessionContext, MessageQueue queue, String subject) {
-        if (subscriptions.containsKey(subject) || subject == null) return;
+        if (subject == null) return;
 
+        RemoteMessageCallback rmc;
+        synchronized (remoteSubscriptions) {
+            rmc = remoteSubscriptions.get(subject);
+            if (rmc == null) {
+                rmc = new RemoteMessageCallback();
+                rmc.addQueue(queue);
 
-        if (!remoteSubscriptions.containsKey(subject)) {
-            remoteSubscriptions.put(subject, new HashSet<MessageQueue>());
+                remoteSubscriptions.put(subject, rmc);
+                createOrAddDeliveryPlan(subject, rmc);
+
+            } else if (!rmc.contains(queue)) {
+                rmc.addQueue(queue);
+            }
         }
 
-        Set<MessageQueue> remotes = remoteSubscriptions.get(subject);
-        remotes.add(queue);
+        fireSubscribeListeners(new SubscriptionEvent(true, sessionContext.getSessionId(), rmc.getQueueCount(), subject));
+    }
 
-        fireSubscribeListeners(new SubscriptionEvent(true, sessionContext.getSessionId(), remotes.size(), subject));
+    public class RemoteMessageCallback implements MessageCallback {
+        private final Queue<MessageQueue> queues = new ConcurrentLinkedQueue<MessageQueue>();
+
+        public void callback(Message message) {
+//            message.commit();
+            for (MessageQueue q : queues) {
+                send(q, message, true);
+            }
+        }
+
+        public void addQueue(MessageQueue queue) {
+            queues.add(queue);
+        }
+
+        public void removeQueue(MessageQueue queue) {
+            queues.remove(queue);
+        }
+
+        public Collection<MessageQueue> getQueues() {
+            return queues;
+        }
+
+        public int getQueueCount() {
+            return queues.size();
+        }
+
+        public boolean contains(MessageQueue queue) {
+            return queues.contains(queue);
+        }
     }
 
     /**
@@ -632,17 +656,11 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             return;
         }
 
-
-        Set<MessageQueue> sessionsToSubject = remoteSubscriptions.get(subject);
-
-        sessionsToSubject.remove(queue);
-
-        if (sessionsToSubject.isEmpty()) {
-            remoteSubscriptions.remove(subject);
-        }
+        RemoteMessageCallback rmc = remoteSubscriptions.get(subject);
+        rmc.removeQueue(queue);
 
         try {
-            fireUnsubscribeListeners(new SubscriptionEvent(true, sessionsToSubject.isEmpty(), sessionsToSubject.size(),
+            fireUnsubscribeListeners(new SubscriptionEvent(true, rmc.getQueueCount() == 0, rmc.getQueueCount(),
                     sessionContext.getSessionId(), subject));
         }
         catch (Exception e) {
@@ -864,7 +882,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
 
     public List<MessageCallback> getReceivers(String subject) {
-        return Collections.unmodifiableList(subscriptions.get(subject));
+        return Collections.unmodifiableList(Arrays.asList(subscriptions.get(subject).getDeliverTo()));
     }
 
     private boolean isMonitor() {
@@ -884,8 +902,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         for (String subject : subscriptions.keySet()) {
             busMonitor.notifyNewSubscriptionEvent(new SubscriptionEvent(false, "None", 1, subject));
         }
-        for (Map.Entry<String, Set<MessageQueue>> entry : remoteSubscriptions.entrySet()) {
-            for (MessageQueue queue : entry.getValue()) {
+        for (Map.Entry<String, RemoteMessageCallback> entry : remoteSubscriptions.entrySet()) {
+            for (MessageQueue queue : entry.getValue().getQueues()) {
                 busMonitor.notifyNewSubscriptionEvent(new SubscriptionEvent(true, queue.getSession().getSessionId(), 1, entry.getKey()));
             }
         }

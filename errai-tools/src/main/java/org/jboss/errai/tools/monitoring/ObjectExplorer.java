@@ -31,6 +31,7 @@ import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static javax.swing.SwingUtilities.invokeLater;
 import static org.jboss.errai.tools.monitoring.UiHelper.createIconEntry;
@@ -40,7 +41,7 @@ public class ObjectExplorer extends JTree {
     private DefaultMutableTreeNode rootNode;
     private Object root;
 
-    private Map<Object, Runnable> deferred = new HashMap<Object, Runnable>();
+    private Map<Object, Runnable> deferred = new ConcurrentHashMap<Object, Runnable>();
 
     private static Map<Class, ValRenderer> renderers = new HashMap<Class, ValRenderer>();
 

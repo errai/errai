@@ -489,6 +489,13 @@ public class CommandMessage implements Message {
             for (Map.Entry<String, ResourceProvider> entry : providedParts.entrySet())
                 set(entry.getKey(), entry.getValue().get());
         }
+
+        setFlag(RoutingFlags.Committed);
+    }
+
+
+    public boolean isCommited() {
+        return isFlagSet(RoutingFlags.Committed);
     }
 
     /**

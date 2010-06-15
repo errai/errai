@@ -265,6 +265,8 @@ public interface Message extends Serializable {
      */
     public void commit();
 
+    public boolean isCommited();
+
     /**
      * Transmit this message to the specified {@link MessageBus} instance.
      *

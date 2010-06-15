@@ -66,6 +66,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     /* Map of subjects to subscriptions  */
     private final Map<String, List<Object>> subscriptions = new HashMap<String, List<Object>>();
 
+    private final Set<String> remote = new HashSet<String>();
+
     /* Outgoing queue of messages to be transmitted */
     private final Queue<Message> outgoingQueue = new LinkedList<Message>();
 
@@ -348,9 +350,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      */
     public void enqueueForRemoteTransmit(Message message) {
         outgoingQueue.add(message);
-//
-//        outgoingQueue.add(message instanceof HasEncoded ?
-//                ((HasEncoded) message).getEncoded() : encodeMap(message.getParts()));
         sendAll();
     }
 
@@ -551,6 +550,14 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         init(null);
     }
 
+    public class RemoteMessageCallback implements MessageCallback {
+        public void callback(Message message) {
+            enqueueForRemoteTransmit(message);
+        }
+    }
+
+    public final MessageCallback REMOTE_CALLBACK = new RemoteMessageCallback();
+
     /**
      * Initializes the message bus, by subscribing to the ClientBus (to receive subscription messages) and the
      * ClientErrorBus to dispatch errors when called.
@@ -564,18 +571,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                     case RemoteSubscribe:
                         if (message.hasPart("SubjectsList")) {
                             for (String subject : (List<String>) message.get(List.class, "SubjectsList")) {
-                                subscribe(subject, new MessageCallback() {
-                                    public void callback(Message message) {
-                                        enqueueForRemoteTransmit(message);
-                                    }
-                                });
+                                subscribe(subject, REMOTE_CALLBACK);
+                                remote.add(subject);
                             }
                         } else {
-                            subscribe(message.get(String.class, Subject), new MessageCallback() {
-                                public void callback(Message message) {
-                                    enqueueForRemoteTransmit(message);
-                                }
-                            });
+                            String subject = message.get(String.class, Subject);
+                            subscribe(subject, REMOTE_CALLBACK);
+                            remote.add(subject);
                         }
                         break;
 
@@ -587,8 +589,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                         List<String> subjects = new ArrayList<String>();
                         for (String s : subscriptions.keySet()) {
                             if (s.startsWith("local:")) continue;
-                            subjects.add(s);
-
+                            if (!remote.contains(s)) subjects.add(s);
                         }
 
                         MessageBuilder.createMessage()
@@ -598,6 +599,47 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                                 .noErrorHandling()
                                 .sendNowWith(ClientMessageBusImpl.this);
 
+
+                        MessageBuilder.createMessage()
+                                .toSubject("ServerBus")
+                                .command(BusCommands.FinishStateSync)
+                                .noErrorHandling().sendNowWith(ClientMessageBusImpl.this);
+
+                        /**
+                         * ... also send RemoteUnsubscribe signals.
+                         */
+
+                        addSubscribeListener(new SubscribeListener() {
+                            public void onSubscribe(SubscriptionEvent event) {
+                                if (event.getSubject().startsWith("local:") || remote.contains(event.getSubject())) {
+                                    return;
+                                }
+
+                                MessageBuilder.getMessageProvider().get().command(RemoteSubscribe)
+                                        .toSubject("ServerBus")
+                                        .set(Subject, event.getSubject())
+                                        .set(PriorityProcessing, "1")
+                                        .sendNowWith(ClientMessageBusImpl.this);
+                            }
+                        });
+
+                        addUnsubscribeListener(new UnsubscribeListener() {
+                            public void onUnsubscribe(SubscriptionEvent event) {
+                                MessageBuilder.getMessageProvider().get().command(BusCommands.RemoteUnsubscribe)
+                                        .toSubject("ServerBus")
+                                        .set(Subject, event.getSubject())
+                                        .set(PriorityProcessing, "1")
+                                        .sendNowWith(ClientMessageBusImpl.this);
+                            }
+                        });
+
+                        subscribe("ClientBusErrors", new MessageCallback() {
+                            public void callback(Message message) {
+                                logError(message.get(String.class, "ErrorMessage"),
+                                        message.get(String.class, "AdditionalDetails"), null);
+                            }
+                        });
+
                         // Don't use an iterator here -- potential for concurrent
                         // modifications!
                         //noinspection ForLoopReplaceableByForEach
@@ -606,12 +648,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                         }
 
                         initialized = true;
-
-                        MessageBuilder.createMessage()
-                                .toSubject("ServerBus")
-                                .command(BusCommands.FinishStateSync)
-                                .noErrorHandling().sendNowWith(ClientMessageBusImpl.this);
-
 
                         break;
 
@@ -628,41 +664,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             }
         });
 
-        subscribe("ClientBusErrors", new MessageCallback() {
-            public void callback(Message message) {
-                logError(message.get(String.class, "ErrorMessage"),
-                        message.get(String.class, "AdditionalDetails"), null);
-            }
-        });
-
-        addSubscribeListener(new SubscribeListener() {
-            public void onSubscribe(SubscriptionEvent event) {
-                if (event.getSubject().startsWith("local:")) {
-                    return;
-                }
-
-
-                MessageBuilder.getMessageProvider().get().command(RemoteSubscribe)
-                        .toSubject("ServerBus")
-                        .set(Subject, event.getSubject())
-                        .set(PriorityProcessing, "1")
-                        .sendNowWith(ClientMessageBusImpl.this);
-            }
-        });
-
-        /**
-         * ... also send RemoteUnsubscribe signals.
-         */
-
-        addUnsubscribeListener(new UnsubscribeListener() {
-            public void onUnsubscribe(SubscriptionEvent event) {
-                MessageBuilder.getMessageProvider().get().command(BusCommands.RemoteUnsubscribe)
-                        .toSubject("ServerBus")
-                        .set(Subject, event.getSubject())
-                        .set(PriorityProcessing, "1")
-                        .sendNowWith(ClientMessageBusImpl.this);
-            }
-        });
 
         /**
          * Send initial message to connect to the queue, to establish an HTTP session. Otherwise, concurrent
@@ -932,7 +933,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
 
     private void logError(String message, String additionalDetails, Throwable e) {
-        logAdapter.error(message + "<br/>Additional details:<br/>" + additionalDetails, e);
+        logAdapter.error(message + "<br/>Additional details:<br/> " + additionalDetails, e);
     }
 
     private void showError(String message, Throwable e) {
