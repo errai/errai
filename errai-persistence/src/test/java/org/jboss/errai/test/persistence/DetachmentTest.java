@@ -15,7 +15,6 @@
  */
 package org.jboss.errai.test.persistence;
 
-import net.sf.gilead.core.hibernate.HibernateUtil;
 import org.hibernate.classic.Session;
 import org.junit.Test;
 
@@ -31,7 +30,7 @@ import static org.junit.Assert.assertNull;
 public class DetachmentTest extends CommonTestSetup
 {
   /**
-   * Exporting an entity wihtin persitent context
+   * Exporting an entity within persitent context
    * shouldn't have any impact besides turning hibernate proxies
    * into their regular counterparts.
    */
@@ -52,8 +51,8 @@ public class DetachmentTest extends CommonTestSetup
   }
 
   /**
-   * Exporting a detached object with lazy relations should
-   * turn these relations into null.
+   * Exporting entities with lazy relations outside a persistent context
+   * should turn hibernate proxies into null.
    */
   @Test
   public void exportOutsidePersistenceContext()

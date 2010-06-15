@@ -15,7 +15,6 @@
  */
 package org.jboss.errai.test.persistence;
 
-import org.hibernate.annotations.CollectionOfElements;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;

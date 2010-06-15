@@ -15,9 +15,6 @@
  */
 package org.jboss.errai.test.persistence;
 
-import net.sf.gilead.core.PersistentBeanManager;
-import net.sf.gilead.core.hibernate.HibernateUtil;
-import net.sf.gilead.core.store.stateful.InMemoryProxyStore;
 import org.hibernate.Transaction;
 import org.hibernate.classic.Session;
 import org.junit.Test;
