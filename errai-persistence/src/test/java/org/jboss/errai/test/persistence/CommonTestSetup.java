@@ -41,7 +41,11 @@ public abstract class CommonTestSetup
   public CommonTestSetup()
   {
     sessionFactory = new Configuration().getSessionFactory();
+    beanManager = createBeanManager(sessionFactory);
+  }
 
+  protected PersistentBeanManager createBeanManager(SessionFactory sessionFactory)
+  {
     // configure gilead
     HibernateUtil persistenceUtil = new HibernateUtil();
     persistenceUtil.setSessionFactory(sessionFactory);
@@ -49,9 +53,11 @@ public abstract class CommonTestSetup
     InMemoryProxyStore proxyStore = new InMemoryProxyStore();
     proxyStore.setPersistenceUtil(persistenceUtil);
 
-    beanManager = new PersistentBeanManager();
+    PersistentBeanManager beanManager = new PersistentBeanManager();
     beanManager.setPersistenceUtil(persistenceUtil);
     beanManager.setProxyStore(proxyStore);
+
+    return beanManager;
   }
 
   protected User loadUser(Session session, String userId)
