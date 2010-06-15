@@ -71,6 +71,6 @@ public class ConversationActivityMonitor extends ServiceActivityMonitor {
             }
         });
 
-        proc.notifyEvent(System.currentTimeMillis(), EventType.REPLAY_MESSAGES, SubEventType.NONE, busId, busId, service + "%:RespondTo:%", null, null, false);
+        proc.notifyEvent(System.currentTimeMillis(), EventType.REPLAY_MESSAGES, SubEventType.NONE, "Server", "Server", service + "%:RespondTo:%", null, null, false);
     }
 }

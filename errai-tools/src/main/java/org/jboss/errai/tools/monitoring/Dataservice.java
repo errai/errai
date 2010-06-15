@@ -125,6 +125,7 @@ public class Dataservice implements Attachable {
     }
 
     public void storeRecord(long time, String fromBus, String toBus, String service, Message message) {
+        System.out.println("Storing " + service + "@" + toBus + " (from:" + fromBus + ")");
         try {
             PreparedStatement stmt = c.prepareStatement("INSERT INTO MONITORDB (EVENT_TYPE, TM, BUS_ID, TO_BUS_ID, SERVICE_NAME, MESSAGE_OBJ) VALUES (?, ?, ?, ?, ?, ?)");
             stmt.setInt(1, EventType.MESSAGE.ordinal());
@@ -175,6 +176,8 @@ public class Dataservice implements Attachable {
 
     public List<Record> getAllMessages(EventType type, String busId, String service) {
         try {
+            System.out.println("getAll " + service + "@" + busId);
+
             PreparedStatement stmt = c.prepareStatement("SELECT * FROM MONITORDB WHERE EVENT_TYPE=?" + (busId != null ? " AND TO_BUS_ID=?" : "") + (service != null ? " AND SERVICE_NAME LIKE ?" : ""));
 
             stmt.setInt(1, type.ordinal());
