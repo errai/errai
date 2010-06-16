@@ -23,11 +23,11 @@ import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.classic.Session;
+import org.jboss.errai.test.persistence.dto.ItemDTO;
+import org.jboss.errai.test.persistence.dto.OrderDTO;
+import org.jboss.errai.test.persistence.dto.UserDTO;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author: Heiko Braun <hbraun@redhat.com>
@@ -73,7 +73,7 @@ public class CommonTestSetup
     // cleanup first
     cleanTables(session);
 
-    User user = createUserDTO();
+    User user = createUserEntity();
 
     // read-write test
     Transaction tx = session.beginTransaction();
@@ -91,7 +91,7 @@ public class CommonTestSetup
     return user.getUserId();
   }
 
-  public User createUserDTO()
+  public User createUserEntity()
   {
     User user = new User();
     user.setName("Heiko");
@@ -109,6 +109,28 @@ public class CommonTestSetup
     orders.add(order);
     return user;
   }
+
+  public UserDTO createUserDTO()
+   {
+     UserDTO user = new UserDTO();
+     user.setUserId(UUID.randomUUID().toString());
+     user.setName("Heiko");
+
+     Set<OrderDTO> orders = new HashSet<OrderDTO>();
+     user.setOrders(orders);
+
+     List<ItemDTO> items = new ArrayList<ItemDTO>();
+     items.add(new ItemDTO("TV", 12.99));
+     items.add(new ItemDTO("Radio", 15.99));
+     items.add(new ItemDTO("Laptop", 1.99));
+
+     OrderDTO order = new OrderDTO();
+     order.setOrderNum(UUID.randomUUID().toString());
+     order.setItems(items);
+     orders.add(order);
+     return user;
+   }
+
 
   private void cleanTables(Session session)
   {

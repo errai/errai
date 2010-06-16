@@ -70,5 +70,5 @@ public class DetachmentTest extends CommonTestSetup
 
     assertEquals(user.getUserId(), exportedUser.getUserId());
     assertNull("relation should be null", exportedUser.getOrders()); // not exported (null)   
-  }
+  }  
 }

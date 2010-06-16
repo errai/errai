@@ -13,35 +13,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.test.persistence;
+package org.jboss.errai.test.persistence.dto;
 
-import com.sun.japex.JapexDriverBase;
-import com.sun.japex.TestCase;
-import org.jboss.errai.test.persistence.dto.UserDTO;
+import java.util.List;
 
 /**
- * Verify the performance optimization when DTO's
- * (not known to the hibernate session context)
- * are used.
- * 
  * @author: Heiko Braun <hbraun@redhat.com>
- * @date: Jun 16, 2010
+ * @date: Jun 11, 2010
  */
-public class PerformanceDTO extends JapexDriverBase
+public class OrderDTO
 {
-  private CommonTestSetup testEnv;
-  private UserDTO dto;
+  String orderNum;
 
-  @Override
-  public void initializeDriver()
+  List<ItemDTO> items;
+
+  public OrderDTO()
   {
-    testEnv = new CommonTestSetup();
-    dto = testEnv.createUserDTO();
   }
 
-  @Override
-  public void run(TestCase testCase)
+  public String getOrderNum()
   {
-    UserDTO clone = (UserDTO)testEnv.getBeanManager().clone(dto);   
+    return orderNum;
+  }
+
+  public void setOrderNum(String orderNum)
+  {
+    this.orderNum = orderNum;
+  }
+
+  public List<ItemDTO> getItems()
+  {
+    return items;
+  }
+
+  public void setItems(List<ItemDTO> items)
+  {
+    this.items = items;
   }
 }

@@ -17,31 +17,25 @@ package org.jboss.errai.test.persistence;
 
 import com.sun.japex.JapexDriverBase;
 import com.sun.japex.TestCase;
-import org.jboss.errai.test.persistence.dto.UserDTO;
 
 /**
- * Verify the performance optimization when DTO's
- * (not known to the hibernate session context)
- * are used.
- * 
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Jun 16, 2010
  */
-public class PerformanceDTO extends JapexDriverBase
+public class PerformanceSimpleType extends JapexDriverBase
 {
   private CommonTestSetup testEnv;
-  private UserDTO dto;
+  private String payload;
 
   @Override
   public void initializeDriver()
   {
     testEnv = new CommonTestSetup();
-    dto = testEnv.createUserDTO();
   }
 
   @Override
   public void run(TestCase testCase)
   {
-    UserDTO clone = (UserDTO)testEnv.getBeanManager().clone(dto);   
+    String clone = (String)testEnv.getBeanManager().clone(payload);
   }
 }

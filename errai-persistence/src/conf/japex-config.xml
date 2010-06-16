@@ -20,6 +20,11 @@
         <param name="description" value="Performance of DTO cloning"/>
     </driver>
 
+    <driver name="PerformanceSimpleType">
+        <param name="japex.driverClass" value="org.jboss.errai.test.persistence.PerformanceSimpleType"/>
+        <param name="description" value="Performance of simple type cloning"/>
+    </driver>
+
     <testCase name="test1"/>
     <testCase name="test2"/>
     <testCase name="test3"/>
