@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testSuite name="StringPerformance" xmlns="http://www.sun.com/japex/testSuite">
+<testSuite name="Entity Adapter Performance" xmlns="http://www.sun.com/japex/testSuite">
     <param name="japex.reportsDirectory" value="target/japex" />
     <param name="japex.classPath" value="target/classes" />
     <param name="japex.classPath" value="target/test-classes" />
