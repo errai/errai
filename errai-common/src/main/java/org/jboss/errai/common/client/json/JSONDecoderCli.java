@@ -70,7 +70,7 @@ public class JSONDecoderCli {
                         return null;
                     }
                 } else {
-                    GWT.log("Could not demartial class. There is no available demarshaller. " +
+                    GWT.log("Could not demartial class: " + className + "; There is no available demarshaller. " +
                             "Ensure you have exposed the class with @ExposeEntity.", null);
                     throw new RuntimeException("no available demarshaller: " + className);
                 }

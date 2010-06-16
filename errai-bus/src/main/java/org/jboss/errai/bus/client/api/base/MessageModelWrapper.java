@@ -71,7 +71,7 @@ public class MessageModelWrapper implements Message {
     }
 
     public Message setProvidedPart(String part, ResourceProvider provider) {
-        delegate.set(part, provider);
+        delegate.setProvidedPart(part, provider);
         return this;
     }
 
