@@ -25,38 +25,34 @@ import org.jboss.errai.bus.client.framework.ModelAdapter;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Jun 16, 2010
  */
-public class HibernateAdapter implements ModelAdapter
-{  
-  private PersistentBeanManager beanManager;
+public class HibernateAdapter implements ModelAdapter {
+    private PersistentBeanManager beanManager;
 
-  public HibernateAdapter(final SessionFactory sessionFactory)
-  {
-    // configure gilead
-    final HibernateUtil persistenceUtil = new HibernateUtil();
-    persistenceUtil.setSessionFactory(sessionFactory);
+    public HibernateAdapter(final SessionFactory sessionFactory) {
+        // configure gilead
+        final HibernateUtil persistenceUtil = new HibernateUtil();
+        persistenceUtil.setSessionFactory(sessionFactory);
 
-    // TODO: This should actually be a sesion bound proxy store instead of a global one
-    final InMemoryProxyStore proxyStore = new InMemoryProxyStore();
-    proxyStore.setPersistenceUtil(persistenceUtil);
+        // TODO: This should actually be a sesion bound proxy store instead of a global one
+        final InMemoryProxyStore proxyStore = new InMemoryProxyStore();
+        proxyStore.setPersistenceUtil(persistenceUtil);
 
-    beanManager = new PersistentBeanManager();
-    beanManager.setPersistenceUtil(persistenceUtil);
-    beanManager.setProxyStore(proxyStore);
-  }
+        beanManager = new PersistentBeanManager();
+        beanManager.setPersistenceUtil(persistenceUtil);
+        beanManager.setProxyStore(proxyStore);
+    }
 
-  public Object clone(Object entity)
-  {
-    if(entity==null)
-      return null;
+    public Object clone(Object entity) {
+        if (entity == null)
+            return null;
 
-    return beanManager.clone(entity);
-  }
+        return beanManager.clone(entity);
+    }
 
-  public Object merge(Object dto)
-  {
-    if(dto==null)
-      return null;
-    
-    return beanManager.merge(dto);
-  }
+    public Object merge(Object dto) {
+        if (dto == null)
+            return null;
+
+        return beanManager.merge(dto);
+    }
 }

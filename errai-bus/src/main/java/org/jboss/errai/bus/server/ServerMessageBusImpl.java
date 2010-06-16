@@ -80,8 +80,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     private Set<String> reservedNames = new HashSet<String>();
 
-    private ModelAdapter modelAdapter = null;
-  
+//    private ModelAdapter modelAdapter = null;
+
     /**
      * Sets up the <tt>ServerMessageBusImpl</tt> with the configuration supplied. Also, initializes the bus' callback
      * functions, scheduler, and monitor
@@ -296,7 +296,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             queueSize = Integer.parseInt(config.getProperty(ERRAI_BUS_QUEUESIZE));
         }
 
-        this.modelAdapter = config.getResource(ModelAdapter.class);
+     //   this.modelAdapter = config.getResource(ModelAdapter.class);
     }
 
     /**
@@ -305,7 +305,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
      * @param message - The message to be sent.
      */
     public void sendGlobal(final Message message) {
-        message.setResource(ModelAdapter.class.getSimpleName(), modelAdapter);
         message.commit();
         final String subject = message.getSubject();
 
@@ -363,7 +362,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
      * @param message - the message to send
      */
     public void send(Message message) {
-        message.setResource(ModelAdapter.class.getSimpleName(), modelAdapter);
         message.commit();
         if (message.hasResource("Session")) {
             send(getQueueByMessage(message), message, true);
@@ -381,7 +379,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
      * @param fireListeners - true if all listeners attached should be notified of delivery
      */
     public void send(Message message, boolean fireListeners) {
-        message.setResource(ModelAdapter.class.getSimpleName(), modelAdapter);
         message.commit();
         if (!message.hasResource("Session")) {
             handleMessageDeliveryFailure(this, message, "cannot automatically route message. no session contained in message.", null, false);
@@ -876,23 +873,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
     }
 
-    {
-        new MessageProvider() {
-            {
-                MessageBuilder.setMessageProvider(this);
-            }
-
-            public Message get() {
-                return JSONMessageServer.create();
-            }
-
-          public ModelAdapter getAdapter()
-          {
-            return modelAdapter;
-          }
-        };
-    }
-
     public List<MessageCallback> getReceivers(String subject) {
         return Collections.unmodifiableList(Arrays.asList(subscriptions.get(subject).getDeliverTo()));
     }
@@ -926,9 +906,4 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     public void finishInit() {
         reservedNames.addAll(subscriptions.keySet());
     }
-
-  public void setModelAdapter(ModelAdapter modelAdapter)
-  {
-    this.modelAdapter = modelAdapter;
-  }
 }

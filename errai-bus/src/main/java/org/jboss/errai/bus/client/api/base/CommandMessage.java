@@ -227,10 +227,7 @@ public class CommandMessage implements Message {
      * @return -
      */
     public Message set(String part, Object value) {
-        if(hasResource("ModelAdapter"))
-          parts.put(part, getResource(ModelAdapter.class, "ModelAdapter").clone(value));
-        else
-          parts.put(part, value);
+        parts.put(part, value);
         return this;
     }
 
@@ -331,10 +328,7 @@ public class CommandMessage implements Message {
      */
     @SuppressWarnings({"UnusedDeclaration"})
     public <T> T get(Class<T> type, String part) {
-
         Object value = parts.get(part);
-        if(hasResource("ModelAdapter"))
-          value = getResource(ModelAdapter.class, "ModelAdapter").merge(value);  
         return value == null ? null : (T) TypeHandlerFactory.convert(value.getClass(), type, value);
     }
 
@@ -492,13 +486,13 @@ public class CommandMessage implements Message {
         if (!providedParts.isEmpty()) {
             for (Map.Entry<String, ResourceProvider> entry : providedParts.entrySet())
                 set(entry.getKey(), entry.getValue().get());
-        }   
+        }
     }
 
-  public boolean isCommited() {
-    return isFlagSet(RoutingFlags.Committed);
-  }
-  
+    public boolean isCommited() {
+        return isFlagSet(RoutingFlags.Committed);
+    }
+
     /**
      * Transmit this message to the specified {@link org.jboss.errai.bus.client.framework.MessageBus} instance.
      *

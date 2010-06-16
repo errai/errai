@@ -17,16 +17,17 @@ package org.jboss.errai.bus.server.service.bootstrap;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
+import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.ResourceProvider;
-import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.client.framework.ModelAdapter;
-import org.jboss.errai.bus.client.framework.NoopModelAdapter;
-import org.jboss.errai.bus.client.framework.RequestDispatcher;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.api.base.MessageModelWrapper;
+import org.jboss.errai.bus.client.framework.*;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.HttpSessionProvider;
 import org.jboss.errai.bus.server.SimpleDispatcher;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.bus.server.api.SessionProvider;
+import org.jboss.errai.bus.server.io.JSONMessageServer;
 import org.jboss.errai.bus.server.security.auth.AuthenticationAdapter;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
@@ -38,129 +39,138 @@ import static com.google.inject.Guice.createInjector;
 
 /**
  * Load the default components configured through ErraiService.properties.
- * 
+ *
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: May 3, 2010
  */
-class DefaultComponents implements BootstrapExecution
-{
-  private Logger log = LoggerFactory.getLogger(DefaultComponents.class);
+class DefaultComponents implements BootstrapExecution {
+    private Logger log = LoggerFactory.getLogger(DefaultComponents.class);
 
-  public void execute(final BootstrapContext context)
-  {
+    public void execute(final BootstrapContext context) {
 
-    final ErraiServiceConfiguratorImpl config = (ErraiServiceConfiguratorImpl)context.getConfig();
+        final ErraiServiceConfiguratorImpl config = (ErraiServiceConfiguratorImpl) context.getConfig();
+        final NoopModelAdapter adapter = new NoopModelAdapter();
 
-    /*** ModelAdapter ***/
-    config.getExtensionBindings().put(ModelAdapter.class, new ResourceProvider() {
-      public Object get() {
-        return new NoopModelAdapter();
-      }
-    });
-
-    /*** Authentication Adapter ***/
-
-    if (config.hasProperty("errai.authentication_adapter")) {
-      try {
-        final Class<? extends AuthenticationAdapter> authAdapterClass = Class.forName(config.getProperty("errai.authentication_adapter"))
-            .asSubclass(AuthenticationAdapter.class);
-
-        log.info("authentication adapter configured: " + authAdapterClass.getName());
-
-        final Runnable create = new Runnable() {
-          public void run() {
-            final AuthenticationAdapter authAdapterInst = Guice.createInjector(new AbstractModule() {
-              @Override
-              protected void configure() {
-                bind(AuthenticationAdapter.class).to(authAdapterClass);
-                bind(ErraiServiceConfigurator.class).toInstance(context.getConfig());
-                bind(MessageBus.class).toInstance(context.getBus());
-                bind(ServerMessageBus.class).toInstance(context.getBus());
-              }
-            }).getInstance(AuthenticationAdapter.class);
-
-            config.getExtensionBindings().put(AuthenticationAdapter.class, new ResourceProvider() {
-              public Object get() {
-                return authAdapterInst;
-              }
-            });
-          }
+        final ResourceProvider<ModelAdapter> modelAdapterProvider = new ResourceProvider<ModelAdapter>() {
+            public ModelAdapter get() {
+                return adapter;
+            }
         };
 
-        try {
-          create.run();
-        }
-        catch (Throwable e) {
-          log.info("authentication adapter " + authAdapterClass.getName() + " cannot be bound yet, deferring ...");
-          context.defer(create);
+        /*** ModelAdapter ***/
+        config.getExtensionBindings().put(ModelAdapter.class, modelAdapterProvider);
+
+        new MessageProvider() {
+            {
+                MessageBuilder.setMessageProvider(this);
+            }
+
+            public Message get() {
+                return new MessageModelWrapper(JSONMessageServer.create(), modelAdapterProvider.get());
+            }
+        };
+
+        /*** Authentication Adapter ***/
+
+        if (config.hasProperty("errai.authentication_adapter")) {
+            try {
+                final Class<? extends AuthenticationAdapter> authAdapterClass = Class.forName(config.getProperty("errai.authentication_adapter"))
+                        .asSubclass(AuthenticationAdapter.class);
+
+                log.info("authentication adapter configured: " + authAdapterClass.getName());
+
+                final Runnable create = new Runnable() {
+                    public void run() {
+                        final AuthenticationAdapter authAdapterInst = Guice.createInjector(new AbstractModule() {
+                            @Override
+                            protected void configure() {
+                                bind(AuthenticationAdapter.class).to(authAdapterClass);
+                                bind(ErraiServiceConfigurator.class).toInstance(context.getConfig());
+                                bind(MessageBus.class).toInstance(context.getBus());
+                                bind(ServerMessageBus.class).toInstance(context.getBus());
+                            }
+                        }).getInstance(AuthenticationAdapter.class);
+
+                        config.getExtensionBindings().put(AuthenticationAdapter.class, new ResourceProvider() {
+                            public Object get() {
+                                return authAdapterInst;
+                            }
+                        });
+                    }
+                };
+
+                try {
+                    create.run();
+                }
+                catch (Throwable e) {
+                    log.info("authentication adapter " + authAdapterClass.getName() + " cannot be bound yet, deferring ...");
+                    context.defer(create);
+                }
+
+            }
+            catch (ErraiBootstrapFailure e) {
+                throw e;
+            }
+            catch (Exception e) {
+                throw new ErraiBootstrapFailure("cannot configure authentication adapter", e);
+            }
         }
 
-      }
-      catch (ErraiBootstrapFailure e) {
-        throw e;
-      }
-      catch (Exception e) {
-        throw new ErraiBootstrapFailure("cannot configure authentication adapter", e);
-      }
+
+        /*** Dispatcher ***/
+
+        RequestDispatcher dispatcher = createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                Class<? extends RequestDispatcher> dispatcherImplementation = SimpleDispatcher.class;
+
+                if (config.hasProperty(ErraiServiceConfigurator.ERRAI_DISPATCHER_IMPLEMENTATION)) {
+                    try {
+                        dispatcherImplementation = Class.forName(config.getProperty(ErraiServiceConfigurator.ERRAI_DISPATCHER_IMPLEMENTATION))
+                                .asSubclass(RequestDispatcher.class);
+                    }
+                    catch (Exception e) {
+                        throw new ErraiBootstrapFailure("could not load request dispatcher implementation class", e);
+                    }
+                }
+
+                log.info("using dispatcher implementation: " + dispatcherImplementation.getName());
+
+                bind(RequestDispatcher.class).to(dispatcherImplementation);
+                bind(ErraiService.class).toInstance(context.getService());
+                bind(MessageBus.class).toInstance(context.getBus());
+                bind(ErraiServiceConfigurator.class).toInstance(config);
+            }
+        }).getInstance(RequestDispatcher.class);
+
+        context.getService().setDispatcher(dispatcher);
+
+        /*** Session Provider ***/
+
+        SessionProvider sessionProvider = createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                Class<? extends SessionProvider> sessionProviderImplementation = HttpSessionProvider.class;
+
+                if (config.hasProperty(ErraiServiceConfigurator.ERRAI_SESSION_PROVIDER_IMPLEMENTATION)) {
+                    try {
+                        sessionProviderImplementation = Class.forName(config.getProperty(ErraiServiceConfigurator.ERRAI_SESSION_PROVIDER_IMPLEMENTATION))
+                                .asSubclass(SessionProvider.class);
+                    }
+                    catch (Exception e) {
+                        throw new ErraiBootstrapFailure("could not load session provider implementation class", e);
+                    }
+                }
+
+                log.info("using session provider implementation: " + sessionProviderImplementation.getName());
+
+                bind(SessionProvider.class).to(sessionProviderImplementation);
+                bind(ErraiService.class).toInstance(context.getService());
+                bind(MessageBus.class).toInstance(context.getBus());
+                bind(ErraiServiceConfigurator.class).toInstance(config);
+            }
+        }).getInstance(SessionProvider.class);
+
+        context.getService().setSessionProvider(sessionProvider);
     }
-
-
-    /*** Dispatcher ***/
-
-    RequestDispatcher dispatcher = createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        Class<? extends RequestDispatcher> dispatcherImplementation = SimpleDispatcher.class;
-
-        if (config.hasProperty(ErraiServiceConfigurator.ERRAI_DISPATCHER_IMPLEMENTATION)) {
-          try {
-            dispatcherImplementation = Class.forName(config.getProperty(ErraiServiceConfigurator.ERRAI_DISPATCHER_IMPLEMENTATION))
-                .asSubclass(RequestDispatcher.class);
-          }
-          catch (Exception e) {
-            throw new ErraiBootstrapFailure("could not load request dispatcher implementation class", e);
-          }
-        }
-
-        log.info("using dispatcher implementation: " + dispatcherImplementation.getName());
-
-        bind(RequestDispatcher.class).to(dispatcherImplementation);
-        bind(ErraiService.class).toInstance(context.getService());
-        bind(MessageBus.class).toInstance(context.getBus());
-        bind(ErraiServiceConfigurator.class).toInstance(config);
-      }
-    }).getInstance(RequestDispatcher.class);
-
-    context.getService().setDispatcher(dispatcher);
-
-    /*** Session Provider ***/
-
-    SessionProvider sessionProvider = createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        Class<? extends SessionProvider> sessionProviderImplementation = HttpSessionProvider.class;
-
-        if (config.hasProperty(ErraiServiceConfigurator.ERRAI_SESSION_PROVIDER_IMPLEMENTATION)) {
-          try {
-            sessionProviderImplementation = Class.forName(config.getProperty(ErraiServiceConfigurator.ERRAI_SESSION_PROVIDER_IMPLEMENTATION))
-                .asSubclass(SessionProvider.class);
-          }
-          catch (Exception e) {
-            throw new ErraiBootstrapFailure("could not load session provider implementation class", e);
-          }
-        }
-
-        log.info("using session provider implementation: " + sessionProviderImplementation.getName());
-
-        bind(SessionProvider.class).to(sessionProviderImplementation);
-        bind(ErraiService.class).toInstance(context.getService());
-        bind(MessageBus.class).toInstance(context.getBus());
-        bind(ErraiServiceConfigurator.class).toInstance(config);
-      }
-    }).getInstance(SessionProvider.class);
-
-    context.getService().setSessionProvider(sessionProvider);
-    
-
-  }
 }

@@ -18,12 +18,12 @@ package org.jboss.errai.bus.client.framework;
 /**
  * Clean up entities (Hibernate/JPA) before they get dispatched
  * and merge them back in when received from a GWT application.
- * 
+ *
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Jun 16, 2010
  */
-public interface ModelAdapter
-{  
-  Object clone(Object entity);
-  Object merge(Object dto);
+public interface ModelAdapter {
+    Object clone(Object entity);
+
+    Object merge(Object dto);
 }

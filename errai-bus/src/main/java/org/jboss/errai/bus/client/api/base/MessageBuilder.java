@@ -5,7 +5,6 @@ import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.builder.*;
 import org.jboss.errai.bus.client.framework.MessageProvider;
-import org.jboss.errai.bus.client.framework.ModelAdapter;
 
 /**
  * The MessageBuilder API provides a fluent method of building Messages.
@@ -15,11 +14,6 @@ public class MessageBuilder {
         public Message get() {
             return JSONMessage.create();
         }
-
-      public ModelAdapter getAdapter()
-      {
-        return null;
-      }
     };
 
     /**
@@ -31,9 +25,6 @@ public class MessageBuilder {
     @SuppressWarnings({"unchecked"})
     public static MessageBuildSubject<MessageBuildSendableWithReply> createMessage() {
       Message message = provider.get();
-      ModelAdapter adapter = provider.getAdapter();
-      if(adapter!=null)
-        message.setResource("ModelAdapter", adapter);
       return new AbstractMessageBuilder(message).start();
     }
 
@@ -46,12 +37,7 @@ public class MessageBuilder {
      */
     @SuppressWarnings({"unchecked"})
     public static MessageBuildSubject<MessageReplySendable> createConversation(Message message) {
-        Message newMessage = provider.get();
-      
-        ModelAdapter adapter = provider.getAdapter();
-        if(adapter!=null)
-          newMessage.setResource("ModelAdapter", adapter);
-      
+        Message newMessage = provider.get();      
         if (newMessage instanceof HasEncoded) {
             return new AbstractMessageBuilder<MessageReplySendable>(new HasEncodedConvMessageWrapper(message, newMessage)).start();
         }

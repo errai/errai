@@ -19,14 +19,12 @@ package org.jboss.errai.tools.monitoring;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.server.io.JSONDecoder;
-import org.jboss.errai.bus.server.io.JSONEncoder;
 import org.jboss.errai.bus.server.io.TypeDemarshallHelper;
 import org.jboss.errai.bus.server.util.ServerBusUtils;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.MutableTreeNode;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -62,18 +60,7 @@ public class UiHelper {
 
     public static Message decodeAndDemarshall(String json) {
         Map<String, Object> parts = (Map<String, Object>) JSONDecoder.decode(json);
-
         if (parts == null) return CommandMessage.createWithParts(new HashMap());
-
-        Message newMessage = CommandMessage.createWithParts(parts);
-
-//        for (Map.Entry<String, Object> entry : parts.entrySet()) {
-//
-//        }
-
-  //      if (parts.containsKey(SerializationParts.MARSHALLED_TYPES)) {
-   //         TypeDemarshallHelper.demarshallAll((String) parts.get(SerializationParts.MARSHALLED_TYPES), newMessage);
-    //    }
-        return newMessage;
+        return CommandMessage.createWithParts(parts);
     }
 }

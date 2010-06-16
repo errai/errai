@@ -31,6 +31,12 @@ public enum RoutingFlags {
         @Override
         public int flag() {
             return 1 << 4;
+        }},
+
+    HasModelAdapter {
+        @Override
+        public int flag() {
+            return 1 << 5;
         }}
     ;
 

@@ -1117,7 +1117,7 @@ errai.async.worker.timeout=5
         <sect3>
           <title>errai.authentication_adapter</title>
 
-          <para>Specifies the authentication adapter the bus should use for
+          <para>Specifies the authentication modelAdapter the bus should use for
           determining whether calls should be serviced based on authentication
           and security principles.</para>
         </sect3>
@@ -1127,7 +1127,7 @@ errai.async.worker.timeout=5
 
           <para>Indicates whether or not the bus should always require the use
           of authentication for all requests inbound for the bus. If this is
-          turned on, an authentication adapter must be defined, and any user
+          turned on, an authentication modelAdapter must be defined, and any user
           must be authenticated before the bus will deliver any messages from
           the client to any service.</para>
         </sect3>
