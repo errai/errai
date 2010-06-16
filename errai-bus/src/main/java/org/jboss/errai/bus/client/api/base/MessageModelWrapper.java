@@ -26,7 +26,6 @@ import org.jboss.errai.bus.client.framework.RoutingFlags;
 
 import java.util.Map;
 
-
 public class MessageModelWrapper implements Message {
     private Message delegate;
     private transient final ModelAdapter modelAdapter;
