@@ -143,16 +143,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
       return null;
     }
   }
-
-  /**
-   * Gets all serializable types
-   *
-   * @return all serializable types
-   */
-  public Set<Class> getAllSerializableTypes() {
-    return serializableTypes;
-  }
-  
+ 
   public Map<Class<?>, ResourceProvider> getExtensionBindings()
   {
     return extensionBindings;

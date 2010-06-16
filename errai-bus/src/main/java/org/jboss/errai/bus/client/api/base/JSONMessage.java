@@ -21,6 +21,7 @@ import org.jboss.errai.bus.client.api.HasEncoded;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.ResourceProvider;
 import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.framework.ModelAdapter;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.framework.RoutingFlags;
 import org.jboss.errai.bus.client.protocols.MessageParts;
@@ -185,12 +186,22 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
      * @return -
      */
     public Message set(String part, Object value) {
-        if (parts.containsKey(part))
-            throw new IllegalArgumentException("cannot set a part more than once: " + part);
+      if (parts.containsKey(part))
+        throw new IllegalArgumentException("cannot set a part more than once: " + part);
 
+      if(hasResource("ModelAdapter"))
+      {
+        Object clone = getResource(ModelAdapter.class, "ModelAdapter").clone(value);
+        _addObjectPart(part, clone);
+        parts.put(part, clone);
+      }
+      else
+      {
         _addObjectPart(part, value);
         parts.put(part, value);
-        return this;
+      }
+
+      return this;
     }
 
     /**

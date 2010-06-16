@@ -16,7 +16,9 @@
 
 package org.jboss.errai.bus.server;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.internal.Nullable;
 import org.jboss.errai.bus.client.api.*;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.RuleDelegateMessageCallback;
@@ -24,7 +26,6 @@ import org.jboss.errai.bus.client.api.base.TaskManagerFactory;
 import org.jboss.errai.bus.client.framework.*;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;
-import org.jboss.errai.bus.client.util.BusTools;
 import org.jboss.errai.bus.server.api.*;
 import org.jboss.errai.bus.server.async.SchedulerService;
 import org.jboss.errai.bus.server.async.SimpleSchedulerService;
@@ -37,7 +38,6 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ConcurrentSkipListSet;
 
 import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversation;
 import static org.jboss.errai.bus.client.protocols.MessageParts.ReplyTo;
@@ -80,6 +80,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     private Set<String> reservedNames = new HashSet<String>();
 
+    private ModelAdapter modelAdapter = null;
+  
     /**
      * Sets up the <tt>ServerMessageBusImpl</tt> with the configuration supplied. Also, initializes the bus' callback
      * functions, scheduler, and monitor
@@ -293,6 +295,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         if (config.hasProperty(ERRAI_BUS_QUEUESIZE)) {
             queueSize = Integer.parseInt(config.getProperty(ERRAI_BUS_QUEUESIZE));
         }
+
+        this.modelAdapter = config.getResource(ModelAdapter.class);
     }
 
     /**
@@ -301,6 +305,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
      * @param message - The message to be sent.
      */
     public void sendGlobal(final Message message) {
+        message.setResource(ModelAdapter.class.getSimpleName(), modelAdapter);
         message.commit();
         final String subject = message.getSubject();
 
@@ -358,6 +363,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
      * @param message - the message to send
      */
     public void send(Message message) {
+        message.setResource(ModelAdapter.class.getSimpleName(), modelAdapter);
         message.commit();
         if (message.hasResource("Session")) {
             send(getQueueByMessage(message), message, true);
@@ -375,6 +381,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
      * @param fireListeners - true if all listeners attached should be notified of delivery
      */
     public void send(Message message, boolean fireListeners) {
+        message.setResource(ModelAdapter.class.getSimpleName(), modelAdapter);
         message.commit();
         if (!message.hasResource("Session")) {
             handleMessageDeliveryFailure(this, message, "cannot automatically route message. no session contained in message.", null, false);
@@ -878,6 +885,11 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             public Message get() {
                 return JSONMessageServer.create();
             }
+
+          public ModelAdapter getAdapter()
+          {
+            return modelAdapter;
+          }
         };
     }
 
@@ -914,4 +926,9 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     public void finishInit() {
         reservedNames.addAll(subscriptions.keySet());
     }
+
+  public void setModelAdapter(ModelAdapter modelAdapter)
+  {
+    this.modelAdapter = modelAdapter;
+  }
 }

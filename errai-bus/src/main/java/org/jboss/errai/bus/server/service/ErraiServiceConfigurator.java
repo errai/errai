@@ -54,13 +54,6 @@ public interface ErraiServiceConfigurator {
     public <T> T getResource(Class<? extends T> resourceClass);
 
     /**
-     * Gets all serializable types
-     *
-     * @return all serializable types
-     */
-    public Set<Class> getAllSerializableTypes();
-
-    /**
      * Returns true if the configuration has this <tt>key</tt> property
      *
      * @param key - the property too search for

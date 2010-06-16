@@ -13,20 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jboss.errai.bus.client.framework;
 
-package org.jboss.errai.persistence.ext;
-
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.user.rebind.SourceWriter;
-import org.jboss.errai.bus.rebind.ExtensionGenerator;
-import org.jboss.errai.bus.server.annotations.ExtensionComponent;
-
-import java.io.File;
-import java.util.List;
-
-@ExtensionComponent
-public class ErraiPersistenceExtension implements ExtensionGenerator {
-    public void generate(GeneratorContext gcontext, TreeLogger logger, SourceWriter writer, List<File> targets) {
-    }
+/**
+ * Clean up entities (Hibernate/JPA) before they get dispatched
+ * and merge them back in when received from a GWT application.
+ * 
+ * @author: Heiko Braun <hbraun@redhat.com>
+ * @date: Jun 16, 2010
+ */
+public interface ModelAdapter
+{  
+  Object clone(Object entity);
+  Object merge(Object dto);
 }

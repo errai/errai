@@ -19,6 +19,8 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import org.jboss.errai.bus.client.api.ResourceProvider;
 import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.framework.ModelAdapter;
+import org.jboss.errai.bus.client.framework.NoopModelAdapter;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.HttpSessionProvider;
@@ -47,9 +49,16 @@ class DefaultComponents implements BootstrapExecution
   public void execute(final BootstrapContext context)
   {
 
-    /*** Authentication Adapter ***/
-
     final ErraiServiceConfiguratorImpl config = (ErraiServiceConfiguratorImpl)context.getConfig();
+
+    /*** ModelAdapter ***/
+    config.getExtensionBindings().put(ModelAdapter.class, new ResourceProvider() {
+      public Object get() {
+        return new NoopModelAdapter();
+      }
+    });
+
+    /*** Authentication Adapter ***/
 
     if (config.hasProperty("errai.authentication_adapter")) {
       try {

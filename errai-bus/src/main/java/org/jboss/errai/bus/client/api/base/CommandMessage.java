@@ -20,6 +20,7 @@ import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.ResourceProvider;
 import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.framework.ModelAdapter;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.framework.RoutingFlags;
 import org.jboss.errai.bus.client.protocols.MessageParts;
@@ -226,7 +227,10 @@ public class CommandMessage implements Message {
      * @return -
      */
     public Message set(String part, Object value) {
-        parts.put(part, value);
+        if(hasResource("ModelAdapter"))
+          parts.put(part, getResource(ModelAdapter.class, "ModelAdapter").clone(value));
+        else
+          parts.put(part, value);
         return this;
     }
 
@@ -313,9 +317,7 @@ public class CommandMessage implements Message {
      */
     @SuppressWarnings({"UnusedDeclaration"})
     public <T> T get(Class<T> type, Enum part) {
-        //noinspection unchecked
-        Object value = parts.get(part.toString());
-        return value == null ? null : (T) TypeHandlerFactory.convert(value.getClass(), type, value);
+        return get(type, part.toString());
     }
 
     /**
@@ -329,8 +331,10 @@ public class CommandMessage implements Message {
      */
     @SuppressWarnings({"UnusedDeclaration"})
     public <T> T get(Class<T> type, String part) {
-        //noinspection unchecked
+
         Object value = parts.get(part);
+        if(hasResource("ModelAdapter"))
+          value = getResource(ModelAdapter.class, "ModelAdapter").merge(value);  
         return value == null ? null : (T) TypeHandlerFactory.convert(value.getClass(), type, value);
     }
 
@@ -488,16 +492,13 @@ public class CommandMessage implements Message {
         if (!providedParts.isEmpty()) {
             for (Map.Entry<String, ResourceProvider> entry : providedParts.entrySet())
                 set(entry.getKey(), entry.getValue().get());
-        }
-
-        setFlag(RoutingFlags.Committed);
+        }   
     }
 
-
-    public boolean isCommited() {
-        return isFlagSet(RoutingFlags.Committed);
-    }
-
+  public boolean isCommited() {
+    return isFlagSet(RoutingFlags.Committed);
+  }
+  
     /**
      * Transmit this message to the specified {@link org.jboss.errai.bus.client.framework.MessageBus} instance.
      *

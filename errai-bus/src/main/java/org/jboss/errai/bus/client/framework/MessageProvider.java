@@ -14,4 +14,7 @@ public interface MessageProvider {
      * @return the appropriate message
      */
     public Message get();
+
+  
+  public ModelAdapter getAdapter();
 }

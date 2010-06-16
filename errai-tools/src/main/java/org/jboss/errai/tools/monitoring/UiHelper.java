@@ -21,6 +21,7 @@ import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.server.io.JSONDecoder;
 import org.jboss.errai.bus.server.io.JSONEncoder;
 import org.jboss.errai.bus.server.io.TypeDemarshallHelper;
+import org.jboss.errai.bus.server.util.ServerBusUtils;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 
 import javax.swing.*;
@@ -50,7 +51,7 @@ public class UiHelper {
     }
 
     public static Message uglyReEncode(Message message) {
-        Map<String, Object> parts = (Map<String, Object>) JSONDecoder.decode(JSONEncoder.encode(message.getParts()));
+        Map<String, Object> parts = (Map<String, Object>) JSONDecoder.decode(ServerBusUtils.encodeJSON(message.getParts()));
 
         Message newMessage = CommandMessage.createWithParts(parts);
         if (parts.containsKey(SerializationParts.MARSHALLED_TYPES)) {

@@ -10,22 +10,23 @@ import static org.jboss.errai.bus.client.api.base.ConversationHelper.createConve
 import static org.jboss.errai.bus.client.api.base.ConversationHelper.makeConversational;
 
 /**
- * The <tt>AbstractMessageBuilder</tt> facilitates the building of a message, and ensures that it is created and used
- * properly.
+ * The <tt>AbstractMessageBuilder</tt> facilitates the building of a message, 
+ * and ensures that it is created and used properly.
  */
 @SuppressWarnings({"unchecked"})
 public class AbstractMessageBuilder<R extends Sendable> {
     private final Message message;
 
     public AbstractMessageBuilder(Message message) {
-        this.message = message;
+        this.message = message;      
     }
 
     /**
-     * Implements, creates and returns an instance of <tt>MessageBuildSubject</tt>. This is called initially when a
-     * new message is created
+     * Implements, creates and returns an instance of <tt>MessageBuildSubject</tt>. 
+     * This is called initially when a new message is created
      *
-     * @return the <tt>MessageBuildSubject</tt> with the appropriate fields and functions for the message builder
+     * @return the <tt>MessageBuildSubject</tt> with the appropriate fields 
+     * and functions for the message builder
      */
     public MessageBuildSubject start() {
         final Sendable sendable = new MessageReplySendable() {

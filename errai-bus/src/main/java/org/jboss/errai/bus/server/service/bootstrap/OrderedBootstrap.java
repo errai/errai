@@ -46,8 +46,8 @@ public class OrderedBootstrap implements BootstrapExecution
     bootstrap.add(new DefaultResources());
     bootstrap.add(new CleanupStartupFiles());
     bootstrap.add(new RegisterTypes());
-    bootstrap.add(new BusConfiguration());
     bootstrap.add(new DiscoverServices());
+    bootstrap.add(new BusConfiguration());
   }
 
   public void execute(final BootstrapContext context)

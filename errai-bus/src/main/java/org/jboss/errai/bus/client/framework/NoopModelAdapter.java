@@ -13,9 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jboss.errai.bus.client.framework;
 
-package org.jboss.errai.persistence.client;
+/**
+ * A noop domain model adapter implementation that's used by default
+ *
+ * @author: Heiko Braun <hbraun@redhat.com>
+ * @date: Jun 16, 2010
+ */
+public class NoopModelAdapter implements ModelAdapter
+{
+  public Object clone(Object entity)
+  {
+    return entity;
+  }
 
-public enum PersistenceCommands {
-    Find
+  public Object merge(Object dto)
+  {
+    return dto;
+  }
 }
