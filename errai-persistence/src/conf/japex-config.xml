@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testSuite name="StringPerformance" xmlns="http://www.sun.com/japex/testSuite">
+    <param name="japex.reportsDirectory" value="target/japex" />
+    <param name="japex.classPath" value="target/classes" />
+    <param name="japex.classPath" value="target/test-classes" />
+    <param name="japex.classPath" value="target/dependency/*.jar" />
+    <param name="japex.resultUnit" value="ms" />
+    <param name="japex.plotGroupSize" value="20" />
+    <param name="japex.warmupTime" value="2" />
+    <param name="japex.runIterations" value="10000" />
+    <param name="japex.chartType" value="barchart" />
+
+    <driver name="PerformanceEntity">
+        <param name="japex.driverClass" value="org.jboss.errai.test.persistence.PerformanceEntity"/>
+        <param name="description" value="Performance of entity cloning"/>
+    </driver>
+
+    <driver name="PerformanceDTO">
+        <param name="japex.driverClass" value="org.jboss.errai.test.persistence.PerformanceDTO"/>
+        <param name="description" value="Performance of DTO cloning"/>
+    </driver>
+
+    <testCase name="test1"/>
+    <testCase name="test2"/>
+    <testCase name="test3"/>
+    
+</testSuite>

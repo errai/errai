@@ -32,6 +32,10 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
+    <properties>
+        <japexVersion>1.0.25</japexVersion>
+        <japexConfig>src/conf/japex-config.xml</japexConfig>
+    </properties>
 
     <dependencies>
         <dependency>
@@ -54,7 +58,7 @@
             </exclusions>
             <scope>provided</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-entitymanager</artifactId>
@@ -114,9 +118,13 @@
                     <groupId>com.thoughtworks.xstream</groupId>
                     <artifactId>xstream</artifactId>
                 </exclusion>
-                  <exclusion>
+                <exclusion>
                     <groupId>commons-lang</groupId>
                     <artifactId>commons-lang</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>dom4j</groupId>
+                    <artifactId>dom4j</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -136,7 +144,7 @@
                 <exclusion>
                     <groupId>org.jboss.jpa</groupId>
                     <artifactId>jboss-jpa-deployers</artifactId>
-                </exclusion>                
+                </exclusion>
             </exclusions>
         </dependency>
 
@@ -160,6 +168,85 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- benchmark -->
+        <dependency>
+            <groupId>com.sun.japex</groupId>
+            <artifactId>japex</artifactId>
+            <version>${japexVersion}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.xml.bind</groupId>
+                    <artifactId>jaxb-api</artifactId>
+                </exclusion>
+            </exclusions>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.sun.japex.jdsl</groupId>
+            <artifactId>jdsl</artifactId>
+            <version>${japexVersion}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>jfree</groupId>
+            <artifactId>jfreechart</artifactId>
+            <version>1.0.7</version>
+            <scope>test</scope>
+        </dependency>        
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <!-- japex needs a classpath in it's configuration,
+                so we copy all dependencies into a directory
+                beneath target and create a classpath from a GLOB.
+                assembly:assembly does not work because of MANIFEST.MF issues.
+                -->
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <!-- copy-dependencies takes scope test -->
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>integration-test</phase>
+                        <configuration>
+                            <tasks>
+                                <!-- Trick: Japex (but not the test itself)
+                                    needs ant.jar and that's part of antrun-Plugin:-).
+                                    So we just pass maven.plugin.classpath.
+                                -->
+                                <property name="maven.plugin.classpath"
+                                          refid="maven.plugin.classpath" />
+                                <property name="japexConfig"
+                                          location="${japexConfig}" />
+
+                                <!-- important -->
+                                <delete file="target/dependency/gwt-dev-2.0.3.jar"/>
+
+                                <ant antfile="${basedir}/build.xml">
+                                    <target name="run" />
+                                </ant>
+                            </tasks>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

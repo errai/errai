@@ -33,7 +33,7 @@ import java.util.Set;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Jun 11, 2010
  */
-public abstract class CommonTestSetup
+public class CommonTestSetup
 {
   protected static SessionFactory sessionFactory;
   protected static PersistentBeanManager beanManager;
@@ -73,20 +73,7 @@ public abstract class CommonTestSetup
     // cleanup first
     cleanTables(session);
 
-    User user = new User();
-    user.setName("Heiko");
-
-    Set<Order> orders = new HashSet<Order>();
-    user.setOrders(orders);
-
-    List<Item> items = new ArrayList<Item>();
-    items.add(new Item("TV", 12.99));
-    items.add(new Item("Radio", 15.99));
-    items.add(new Item("Laptop", 1.99));
-
-    Order order = new Order();
-    order.setItems(items);
-    orders.add(order);
+    User user = createUserDTO();
 
     // read-write test
     Transaction tx = session.beginTransaction();
@@ -102,6 +89,25 @@ public abstract class CommonTestSetup
     }
 
     return user.getUserId();
+  }
+
+  public User createUserDTO()
+  {
+    User user = new User();
+    user.setName("Heiko");
+
+    Set<Order> orders = new HashSet<Order>();
+    user.setOrders(orders);
+
+    List<Item> items = new ArrayList<Item>();
+    items.add(new Item("TV", 12.99));
+    items.add(new Item("Radio", 15.99));
+    items.add(new Item("Laptop", 1.99));
+
+    Order order = new Order();
+    order.setItems(items);
+    orders.add(order);
+    return user;
   }
 
   private void cleanTables(Session session)
@@ -127,4 +133,13 @@ public abstract class CommonTestSetup
     }
   }
 
+  public static SessionFactory getSessionFactory()
+  {
+    return sessionFactory;
+  }
+
+  public static PersistentBeanManager getBeanManager()
+  {
+    return beanManager;
+  }
 }

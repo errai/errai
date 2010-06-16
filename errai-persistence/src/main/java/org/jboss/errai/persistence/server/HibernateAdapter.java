@@ -33,7 +33,7 @@ public class HibernateAdapter implements ModelAdapter {
         final HibernateUtil persistenceUtil = new HibernateUtil();
         persistenceUtil.setSessionFactory(sessionFactory);
 
-        // TODO: This should actually be a sesion bound proxy store instead of a global one
+        // TODO: This should actually be a session bound proxy store instead of a global one
         final InMemoryProxyStore proxyStore = new InMemoryProxyStore();
         proxyStore.setPersistenceUtil(persistenceUtil);
 
