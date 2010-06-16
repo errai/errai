@@ -39,7 +39,7 @@ import java.util.List;
 
 /**
  * Configures the hibernate SessionFactory and make it available
- * as an injection point in guice {@link ResourceProvider}.
+ * as an injection point in guice ( see {@link ResourceProvider} ).
  *
  *
  */
