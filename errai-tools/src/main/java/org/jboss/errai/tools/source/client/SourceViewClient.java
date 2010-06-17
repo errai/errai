@@ -25,7 +25,7 @@ import org.jboss.errai.workspaces.client.api.annotations.LoadTool;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: May 18, 2010
  */
-@LoadTool(name = "SourceView", group = "Tools")
+//@LoadTool(name = "SourceView", group = "Tools")
 public class SourceViewClient implements WidgetProvider {
     private MessageBus bus = ErraiBus.get();
 
