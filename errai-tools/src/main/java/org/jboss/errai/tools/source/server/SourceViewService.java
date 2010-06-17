@@ -35,50 +35,51 @@ import java.io.InputStreamReader;
 @Service
 public class SourceViewService implements MessageCallback {
 
-    @Inject
-    RequestDispatcher dispatcher;
+  @Inject
+  RequestDispatcher dispatcher;
 
-    public void callback(Message message) {
-        String sourceClassName = message.get(String.class, "className");
-        System.out.println("source view :" + sourceClassName);
+  public void callback(Message message) {
+    String sourceClassName = message.get(String.class, "className");
 
-        String rawSource = sourceAsString(sourceClassName);
-        MessageBuilder.createConversation(message)
-                .subjectProvided()
-                .signalling()
-                .with("source", JavaToHTML.format(rawSource))
-                .noErrorHandling().sendNowWith(dispatcher);
-    }
+    String rawSource = sourceAsString(sourceClassName);
+    String html = rawSource != null ? JavaToHTML.format(rawSource) : "<h2>Source not available</h2>";
 
-    private String sourceAsString(String sourceClassName) {
-        String source = null;
+    MessageBuilder.createConversation(message)
+        .subjectProvided()
+        .signalling()
+        .with("source", html)
+        .noErrorHandling().sendNowWith(dispatcher);
+  }
 
-        ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        InputStream in = cl.getResourceAsStream(sourceClassName);
-        if (in != null)
-            source = convertStreamToString(in);
+  private String sourceAsString(String sourceClassName) {
+    String source = null;
 
-        return source;
-    }
+    ClassLoader cl = Thread.currentThread().getContextClassLoader();
+    InputStream in = cl.getResourceAsStream(sourceClassName);
+    if (in != null)
+      source = convertStreamToString(in);
 
-    public String convertStreamToString(InputStream is) {
-        try {
-            StringBuilder sb = new StringBuilder();
-            String line;
+    return source;
+  }
 
-            try {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line).append("\n");
-                }
-            } finally {
-                is.close();
-            }
-            return sb.toString();
+  public String convertStreamToString(InputStream is) {
+    try {
+      StringBuilder sb = new StringBuilder();
+      String line;
+
+      try {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+        while ((line = reader.readLine()) != null) {
+          sb.append(line).append("\n");
         }
-        catch (IOException e) {
-            throw new RuntimeException("Failed to read stream", e);
-        }
-
+      } finally {
+        is.close();
+      }
+      return sb.toString();
     }
+    catch (IOException e) {
+      throw new RuntimeException("Failed to read stream", e);
+    }
+
+  }
 }
