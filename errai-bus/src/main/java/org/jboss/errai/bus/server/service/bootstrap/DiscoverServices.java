@@ -256,7 +256,7 @@ class DiscoverServices implements BootstrapExecution {
         return null;
     }
 
-    private void createRPCScaffolding(final Class remoteIface, final Class<?> type, final BootstrapContext context) {
+    private static void createRPCScaffolding(final Class remoteIface, final Class<?> type, final BootstrapContext context) {
 
         final ErraiServiceConfiguratorImpl config = (ErraiServiceConfiguratorImpl) context.getConfig();
         final Injector injector = Guice.createInjector(new AbstractModule() {
@@ -272,9 +272,9 @@ class DiscoverServices implements BootstrapExecution {
             }
         });
 
-        Object svc = injector.getInstance(type);
+        final Object svc = injector.getInstance(type);
 
-        Map<String, MessageCallback> epts = new HashMap<String, MessageCallback>();
+        final Map<String, MessageCallback> epts = new HashMap<String, MessageCallback>();
 
         // beware of classloading issues. better reflect on the actual instance
         for (Class<?> intf : svc.getClass().getInterfaces()) {

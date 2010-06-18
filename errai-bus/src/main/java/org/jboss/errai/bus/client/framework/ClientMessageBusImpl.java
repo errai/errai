@@ -22,6 +22,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.bus.client.api.*;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
@@ -882,6 +883,16 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             setText("Message Bus Error");
 
             VerticalPanel panel = new VerticalPanel();
+            HorizontalPanel buttonPanel = new HorizontalPanel();
+            buttonPanel.getElement().getStyle().setProperty("backgroundColor", "darkgrey");
+
+            Button clearErrors = new Button("Clear");
+            clearErrors.addClickHandler(new ClickHandler() {
+                public void onClick(ClickEvent event) {
+                    contentPanel.clear();
+                }
+            });
+
             Button closeButton = new Button("Dismiss");
             closeButton.addClickHandler(new ClickHandler() {
                 public void onClick(ClickEvent event) {
@@ -889,8 +900,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 }
             });
 
-            panel.add(closeButton);
-            panel.setCellHorizontalAlignment(closeButton, HasHorizontalAlignment.ALIGN_RIGHT);
+            buttonPanel.add(clearErrors);
+            buttonPanel.add(closeButton);
+
+            panel.add(buttonPanel);
+            panel.setCellHorizontalAlignment(buttonPanel, HasHorizontalAlignment.ALIGN_RIGHT);
 
             Style s = panel.getElement().getStyle();
 
@@ -901,11 +915,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
 
             scrollPanel = new ScrollPanel();
+            scrollPanel.setWidth(Window.getClientWidth() * 0.80 + "px");
             scrollPanel.setHeight("500px");
             scrollPanel.setAlwaysShowScrollBars(true);
             panel.add(scrollPanel);
             scrollPanel.add(contentPanel);
-
             add(panel);
         }
 

@@ -84,6 +84,9 @@ public class ConversationalEndpointCallback implements MessageCallback {
                     .noErrorHandling().sendNowWith(bus);
 
         }
+        catch (MessageDeliveryFailure e) {
+            throw e;
+        }
         catch (Exception e) {
             throw new MessageDeliveryFailure("error invoking endpoint", e);
         }

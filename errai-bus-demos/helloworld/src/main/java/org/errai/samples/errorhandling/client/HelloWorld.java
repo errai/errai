@@ -11,6 +11,7 @@ import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
+import org.jboss.errai.bus.client.protocols.MessageParts;
 
 public class HelloWorld implements EntryPoint {
     /**
@@ -20,11 +21,11 @@ public class HelloWorld implements EntryPoint {
 
     public void onModuleLoad() {
         final Label label = new Label();
-        final Button button = new Button("Click");
-
-        ErraiBus.get().subscribe("ClientListener", new MessageCallback() {
+        final Button button = new Button("Start/Stop");
+        
+        ErraiBus.get().subscribe("DataChannel", new MessageCallback() {
             public void callback(Message message) {
-                label.setText(message.get(String.class, "Text"));
+               label.setText(message.get(String.class, "Data"));
             }
         });
 
@@ -32,14 +33,12 @@ public class HelloWorld implements EntryPoint {
             public void onClick(ClickEvent event) {
                 MessageBuilder.createMessage()
                         .toSubject("HelloWorldService")
-                        .signalling()
+                        .signalling().with(MessageParts.ReplyTo, "DataChannel")
                         .noErrorHandling().sendNowWith(dispatcher);
             }
         });
 
-
         RootPanel.get().add(label);
         RootPanel.get().add(button);
-
     }
 }

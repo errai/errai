@@ -17,7 +17,7 @@ public class RPCDemoService implements TestService {
     }
 
     public long getMemoryFree() {
-         return Runtime.getRuntime().freeMemory();
+        return Runtime.getRuntime().freeMemory();
     }
 
     public String append(String str, String str2) {
@@ -28,8 +28,7 @@ public class RPCDemoService implements TestService {
         return x + y;
     }
 
-    public void update(String status)
-    {
-      // check void return type
+    public void update(String status) {
+        // check void return type
     }
 }

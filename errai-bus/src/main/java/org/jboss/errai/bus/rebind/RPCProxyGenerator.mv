@@ -10,6 +10,15 @@ def pretty(cls) {
     private org.jboss.errai.bus.client.api.RemoteCallback callback;
     private org.jboss.errai.bus.client.api.ErrorCallback errorCallback;
 
+    private org.jboss.errai.bus.client.api.ErrorCallback DEFAULT_ERROR_CALLBACK =
+    new org.jboss.errai.bus.client.api.ErrorCallback() {
+                         public boolean error(org.jboss.errai.bus.client.api.Message message, Throwable throwable) {
+                                org.jboss.errai.bus.client.util.ErrorHelper.handleMessageDeliveryFailure(org.jboss.errai.bus.client.ErraiBus.get(), message,
+                                "Error calling remote RPC endpoint: " + message.getSubject(), throwable, false);
+                                return true;
+                         }
+                   };
+
     public void setRemoteCallback(org.jboss.errai.bus.client.api.RemoteCallback callback) {
         this.callback = callback;
     }
@@ -27,8 +36,7 @@ def pretty(cls) {
                     .call("@{interfaceClass.getName()}")
                     .endpoint("@{org.jboss.errai.bus.rebind.RebindUtils.createCallSignature(method)}", new Object[] {@code{count = 0;}@foreach{type : method.getParameterTypes()}_@{count++}@end{","}})
                     .respondTo(@{pretty(box(method.getReturnType()))}.class, callback)
-                    .noErrorHandling()
-                    .sendNowWith(bus);
+                    .errorsHandledBy(null).sendNowWith(bus);
                 } else {
                  org.jboss.errai.bus.client.api.base.MessageBuilder.createCall()
                     .call("@{interfaceClass.getName()}")

@@ -1,5 +1,6 @@
 package org.jboss.errai.bus.client.util;
 
+import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
@@ -30,30 +31,34 @@ public class ErrorHelper {
             System.err.println("*** An error occured that could not be delivered to the client.");
             System.err.println("Error Message: " + message.get(String.class, "ErrorMessage"));
             System.err.println("Details      : " + message.get(String.class, "AdditionalDetails").replaceAll("<br/>", "\n").replaceAll("&nbsp;", " "));
-          //  System.err.println("---");
-          //  e.printStackTrace(System.err);
+            //  System.err.println("---");
+            //  e.printStackTrace(System.err);
         } else {
 
             if (e != null) {
-                StringBuilder a = new StringBuilder("<br/>").append(e.getClass().getName() + ": " + e.getMessage()).append("<br/>");
+                StringBuilder a = new StringBuilder("<tt><br/>").append(e.getClass().getName()).append(": ").append(e.getMessage()).append("<br/>");
 
+                String str;
                 // Let's build-up the stacktrace.
-                boolean first = true;
                 for (StackTraceElement sel : e.getStackTrace()) {
-                    a.append(first ? "" : "&nbsp;&nbsp;").append(sel.toString()).append("<br/>");
-                    first = false;
+                    str = sel.toString();
+                    if (str != null && str.trim().length() != 0)
+                        a.append("&nbsp;&nbsp;&nbsp;&nbsp;at ").append(str).append("<br/>");
                 }
 
                 // And add the entire causal chain.
                 while ((e = e.getCause()) != null) {
-                    first = true;
-                    a.append("Caused by:<br/>");
+                    String msg = e.getMessage();
+                    if (msg == null) msg = "<No Message>";
+
+                    a.append("Caused by: ").append(e.getClass().getName()).append(": ").append(msg.trim()).append("<br/>");
                     for (StackTraceElement sel : e.getStackTrace()) {
-                        a.append(first ? "" : "&nbsp;&nbsp;").append(sel.toString()).append("<br/>");
-                        first = false;
+                        str = sel.toString();
+                        if (str != null && str.trim().length() != 0)
+                            a.append("&nbsp;&nbsp;&nbsp;&nbsp;at ").append(str).append("<br/>");
                     }
                 }
-                sendClientError(bus, message, errorMessage, a.toString());
+                sendClientError(bus, message, errorMessage, a.append("</tt>").toString());
 
             } else {
                 sendClientError(bus, message, errorMessage, "No additional details.");
