@@ -92,6 +92,7 @@ public class WSGrid extends Composite implements RequiresResize {
 
     public WSGrid(boolean scrollable, boolean editable) {
         innerPanel = new VerticalPanel();
+
         innerPanel.setSpacing(0);
 
         focusPanel = new FocusPanel(innerPanel);
@@ -469,7 +470,7 @@ public class WSGrid extends Composite implements RequiresResize {
                             /**
                              * Wipe the whole column.
                              */
-                            for (int i = 0; i < dataGrid.tableIndex.size(); i++) {
+                            for (int i = 0; i < dataGrid.tableIndex.size(); i++) {                           
                                 dataGrid.tableIndex.get(i).get(currentFocus.getCol()).setValue("");
                             }
                         }
@@ -497,6 +498,8 @@ public class WSGrid extends Composite implements RequiresResize {
                 _rangeSelect = false;
             }
         });
+
+        disableTextSelection(this.getElement(), true);
     }
 
     public void setScrollable(boolean scrollable) {
