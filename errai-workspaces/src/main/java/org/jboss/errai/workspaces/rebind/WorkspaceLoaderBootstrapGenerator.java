@@ -24,6 +24,7 @@ import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
 import org.jboss.errai.bus.server.annotations.security.RequireRoles;
@@ -31,6 +32,8 @@ import org.jboss.errai.bus.server.util.ConfigUtil;
 import org.jboss.errai.bus.server.util.RebindVisitor;
 import org.jboss.errai.ioc.rebind.IOCFactory;
 import org.jboss.errai.ioc.rebind.IOCGenerator;
+import org.jboss.errai.workspaces.client.api.ProvisioningCallback;
+import org.jboss.errai.workspaces.client.api.WidgetProvider;
 import org.jboss.errai.workspaces.client.api.annotations.GroupOrder;
 import org.jboss.errai.workspaces.client.api.annotations.LoadTool;
 import org.jboss.errai.workspaces.client.api.annotations.LoadToolSet;
@@ -57,6 +60,8 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
 
     private TypeOracle typeOracle;
     private IOCGenerator iocGenerator;
+
+    private volatile int counter = 0;
 
     // inherited generator method
 
@@ -121,7 +126,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
         context.commit(logger, printWriter);
     }
 
-    private void generateBootstrapClass(GeneratorContext context, TreeLogger logger, SourceWriter sourceWriter) {
+    private void generateBootstrapClass(final GeneratorContext context, final TreeLogger logger, final SourceWriter sourceWriter) {
 
         // init resource bundle
 
@@ -195,86 +200,20 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
                 sourceWriter,
                 new RebindVisitor() {
                     public void visit(Class<?> clazz, GeneratorContext context, TreeLogger logger, SourceWriter writer) {
-
-                        if (clazz.isAnnotationPresent(LoadToolSet.class)
-                                && (!applyFilter || enabledTools.contains(clazz.getName()))) {
-                            writer.println("workspace.addToolSet(new " + clazz.getName() + "());");
-                            logger.log(TreeLogger.Type.INFO, "Adding Errai Toolset: " + clazz.getName());
-                        } else if (clazz.isAnnotationPresent(LoadTool.class)
-                                && (!applyFilter || enabledTools.contains(clazz.getName()))) {
-                            LoadTool loadTool = clazz.getAnnotation(LoadTool.class);
-
-                            if (clazz.isAnnotationPresent(RequireRoles.class)) {
-                                RequireRoles requireRoles = clazz.getAnnotation(RequireRoles.class);
-
-                                StringBuilder rolesBuilder = new StringBuilder("new String[] {");
-                                String[] roles = requireRoles.value();
-
-                                for (int i = 0; i < roles.length; i++) {
-                                    rolesBuilder.append("\"").append(roles[i].trim()).append("\"");
-                                    if ((i + 1) < roles.length) rolesBuilder.append(", ");
-                                }
-                                rolesBuilder.append("}");
-
-                                JClassType type;
-                                try {
-                                    type = typeOracle.getType(clazz.getName());
-                                }
-                                catch (NotFoundException e) {
-                                    throw new RuntimeException("error bootstrapping", e);
-                                }
-
-                                String widgetName = iocGenerator
-                                        .generateInjectors(context, logger, writer, factory, clazz.getName(), type);
-
-                                writer.println("workspace.addTool(\"" + loadTool.group() + "\"," +
-                                        " \"" + loadTool.name() + "\", \"" + loadTool.icon() + "\", " + loadTool.multipleAllowed()
-                                        + ", " + loadTool.priority() + ",  " + widgetName + ", " + rolesBuilder.toString() + ");");
-                            } else {
-
-                                JClassType type;
-                                try {
-                                    type = typeOracle.getType(clazz.getName());
-                                }
-                                catch (NotFoundException e) {
-                                    throw new RuntimeException("error bootstrapping", e);
-                                }
-
-                                String widgetName = iocGenerator
-                                        .generateInjectors(context, logger, writer, factory, clazz.getName(), type);
-
-                                writer.println("workspace.addTool(\"" + loadTool.group() + "\"," +
-                                        " \"" + loadTool.name() + "\", \"" + loadTool.icon() + "\", " + loadTool.multipleAllowed()
-                                        + ", " + loadTool.priority() + ",  " + widgetName + ");");
-                            }
-                        } else if (clazz.isAnnotationPresent(LoginComponent.class)) {
-                            writer.println("workspace.setLoginComponent(new " + clazz.getName() + "());");
+                        try {
+                            visitTool(typeOracle.getType(clazz.getName()), context, writer, logger, applyFilter, factory, enabledTools);
                         }
-
-                        if (clazz.isAnnotationPresent(GroupOrder.class)) {
-                            GroupOrder groupOrder = clazz.getAnnotation(GroupOrder.class);
-
-                            if ("".equals(groupOrder.value().trim())) return;
-
-                            String[] order = groupOrder.value().split(",");
-
-                            writer.print("workspace.setPreferredGroupOrdering(new String[] {");
-
-                            for (int i = 0; i < order.length; i++) {
-                                writer.print("\"");
-                                writer.print(order[i].trim());
-                                writer.print("\"");
-
-                                if (i + 1 < order.length) {
-                                    writer.print(",");
-                                }
-                            }
-
-                            writer.println("});");
+                        catch (NotFoundException e) {
                         }
                     }
 
                     public void visitError(String className, Throwable t) {
+                        try {
+                            visitTool(typeOracle.getType(className), context, sourceWriter, logger, applyFilter, factory, enabledTools);
+                        }
+                        catch (NotFoundException e) {
+
+                        }
                     }
                 });
 
@@ -283,7 +222,104 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
         sourceWriter.println("}");
     }
 
+    public void visitTool(JClassType clazz, GeneratorContext context, SourceWriter writer, TreeLogger logger, boolean applyFilter, IOCFactory factory, List<String> enabledTools) {
+        if (clazz.isAnnotationPresent(LoadToolSet.class)
+                && (!applyFilter || enabledTools.contains(clazz.getQualifiedSourceName()))) {
+            writer.println("workspace.addToolSet(new " + clazz.getQualifiedSourceName() + "());");
+            logger.log(TreeLogger.Type.INFO, "Adding Errai Toolset: " + clazz.getQualifiedSourceName());
+        } else if (clazz.isAnnotationPresent(LoadTool.class)
+                && (!applyFilter || enabledTools.contains(clazz.getQualifiedSourceName()))) {
+            LoadTool loadTool = clazz.getAnnotation(LoadTool.class);
 
+            if (clazz.isAnnotationPresent(RequireRoles.class)) {
+                RequireRoles requireRoles = clazz.getAnnotation(RequireRoles.class);
+
+                StringBuilder rolesBuilder = new StringBuilder("new String[] {");
+                String[] roles = requireRoles.value();
+
+                for (int i = 0; i < roles.length; i++) {
+                    rolesBuilder.append("\"").append(roles[i].trim()).append("\"");
+                    if ((i + 1) < roles.length) rolesBuilder.append(", ");
+                }
+                rolesBuilder.append("}");
+
+                generateWidgetProvisioning(context, clazz.getQualifiedSourceName(), loadTool, rolesBuilder, factory, logger, writer);
+
+            } else {
+                generateWidgetProvisioning(context, clazz.getQualifiedSourceName(), loadTool, null, factory, logger, writer);
+
+            }
+        } else if (clazz.isAnnotationPresent(LoginComponent.class)) {
+            writer.println("workspace.setLoginComponent(new " + clazz.getQualifiedSourceName() + "());");
+        }
+
+        if (clazz.isAnnotationPresent(GroupOrder.class)) {
+            GroupOrder groupOrder = clazz.getAnnotation(GroupOrder.class);
+
+            if ("".equals(groupOrder.value().trim())) return;
+
+            String[] order = groupOrder.value().split(",");
+
+            writer.print("workspace.setPreferredGroupOrdering(new String[] {");
+
+            for (int i = 0; i < order.length; i++) {
+                writer.print("\"");
+                writer.print(order[i].trim());
+                writer.print("\"");
+
+                if (i + 1 < order.length) {
+                    writer.print(",");
+                }
+            }
+
+            writer.println("});");
+        }
+    }
+
+    public void generateWidgetProvisioning(final GeneratorContext context, String className, final LoadTool loadTool, final StringBuilder rolesBuilder, final IOCFactory factory, final TreeLogger logger, final SourceWriter writer) {
+        JClassType type;
+        JClassType widgetType;
+        try {
+            type = typeOracle.getType(className);
+            widgetType = typeOracle.getType(Widget.class.getName());
+        }
+        catch (NotFoundException e) {
+            throw new RuntimeException("error bootstrapping: " + className, e);
+        }
+
+        String providerName;
+
+        if (widgetType.isAssignableFrom(type)) {
+            writer.println(WidgetProvider.class.getName() + " widgetProvider" + (++counter) + " = new " + WidgetProvider.class.getName() + "() {");
+            writer.outdent();
+            writer.println("public void provideWidget(" + ProvisioningCallback.class.getName() + " callback) {");
+            writer.outdent();
+
+            String widgetName = iocGenerator
+                    .generateInjectors(context, logger, writer, factory, className, type);
+
+            writer.println("callback.onSuccess(" + widgetName + ");");
+            writer.outdent();
+            writer.println("}");
+            writer.outdent();
+            writer.println("};");
+
+            providerName = "widgetProvider" + counter;
+        } else {
+            providerName = iocGenerator
+                    .generateInjectors(context, logger, writer, factory, className, type);
+        }
+
+        writer.print("workspace.addTool(\"" + loadTool.group() + "\"," +
+                " \"" + loadTool.name() + "\", \"" + loadTool.icon() + "\", " + loadTool.multipleAllowed()
+                + ", " + loadTool.priority() + ",  " + providerName);
+
+        if (rolesBuilder == null) {
+            writer.println(");");
+        } else {
+            writer.println(", " + rolesBuilder.toString() + ");");
+        }
+    }
 }
 
 

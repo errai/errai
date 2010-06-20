@@ -54,7 +54,6 @@ package org.jboss.errai.workspaces.client.api;
  * }
  * </pre>
  */
-public interface WidgetProvider
-{
-  public void provideWidget(ProvisioningCallback callback);
+public interface WidgetProvider {
+    public void provideWidget(ProvisioningCallback callback);
 }

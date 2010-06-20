@@ -175,7 +175,8 @@ public class IOCGenerator extends Generator {
                     public void visitError(String className, Throwable t) {
                         try {
                             JClassType visit = typeOracle.getType(className);
-                            if (visit.isAssignableTo(typeOracle.getType(Widget.class.getName())) && visit.isAnnotationPresent(ToRootPanel.class)) {
+                            JClassType widgetType = typeOracle.getType(Widget.class.getName());
+                            if (visit.isAssignableTo(widgetType) && visit.isAnnotationPresent(ToRootPanel.class)) {
                                 String widgetName =  generateInjectors(context, logger, sourceWriter, iocFactory, className, visit);
                                 sourceWriter.println("widgets.add(" + widgetName + ")");
                             }
@@ -233,7 +234,7 @@ public class IOCGenerator extends Generator {
                     }
                 }
             }
-            
+
 
             String s = (String) TemplateRuntime.execute(widgetBuild, Make.Map.<String, Object>$()
                     ._("widgetClassName", className)

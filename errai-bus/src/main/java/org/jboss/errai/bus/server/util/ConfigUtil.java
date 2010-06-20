@@ -88,12 +88,13 @@ public class ConfigUtil {
 
     private static Map<String, File> scanAreas = new HashMap<String, File>();
     private static Map<String, List<Class>> scanCache = new HashMap<String, List<Class>>();
+    private static Set<String> cacheBlackList = new HashSet<String>();
     private static Set<String> activeCacheContexts = new HashSet<String>();
 
     private static String tmpUUID = "erraiBootstrap_" + UUID.randomUUID().toString().replaceAll("\\-", "_");
 
     private static void recordCache(String context, Class cls) {
-        if (scanCache == null) return;
+        if (scanCache == null || cacheBlackList.contains(context)) return;
 
         List<Class> cache = scanCache.get(context);
 
@@ -225,6 +226,7 @@ public class ConfigUtil {
     }
 
     private static void _traverseFiles(File root, File start, Set<String> loadedTargets, VisitDelegate visitor) {
+        if (start.getPath().endsWith(".svn")) return;
         if (start.isDirectory()) {
             loadFromDirectory(root, start, loadedTargets, visitor);
         } else if (start.isFile()) {
@@ -446,7 +448,14 @@ public class ConfigUtil {
                     }
 
                     catch (Throwable t) {
-                        visitor.visitError(FQCN, t);
+                    //    try {
+                            cacheBlackList.add(root.getPath());
+                            if (scanCache != null) scanCache.remove(root.getPath());
+                            visitor.visitError(FQCN, t);
+//                        }
+//                        catch (Throwable t2) {
+//                            t2.printStackTrace();
+//                        }
                     }
                 }
             }

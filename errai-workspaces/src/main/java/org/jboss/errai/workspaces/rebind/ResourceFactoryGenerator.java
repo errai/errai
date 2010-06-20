@@ -22,6 +22,7 @@ import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
@@ -50,12 +51,14 @@ public class ResourceFactoryGenerator extends Generator {
     private Class bundleClass = null;
     private Map<String, String> tool2imageRes = new HashMap<String, String>();
 
+    private TypeOracle typeOracle;
+
     // inherited generator method
 
     public String generate(TreeLogger logger, GeneratorContext context,
                            String typeName) throws UnableToCompleteException {
 
-        TypeOracle typeOracle = context.getTypeOracle();
+        typeOracle = context.getTypeOracle();
 
         try {
             // get classType and save instance variables
@@ -114,16 +117,11 @@ public class ResourceFactoryGenerator extends Generator {
                 sourceWriter,
                 new RebindVisitor() {
                     public void visit(Class<?> clazz, GeneratorContext context, TreeLogger logger, SourceWriter writer) {
-                        if (clazz.isAnnotationPresent(DefaultBundle.class)) {
-                            bundleClass = clazz.getAnnotation(DefaultBundle.class).value();
-                        } else if (clazz.isAnnotationPresent(LoadTool.class)) {
-                            LoadTool lt = clazz.getAnnotation(LoadTool.class);
-                            if (!"".equals(lt.icon()))
-                                tool2imageRes.put(lt.name(), lt.icon());
-                        }
+                        handleImageToToolMapping(clazz.getName());
                     }
 
                     public void visitError(String className, Throwable t) {
+                        handleImageToToolMapping(className);
                     }
                 }
         );
@@ -137,6 +135,23 @@ public class ResourceFactoryGenerator extends Generator {
 
         // commit generated class
         context.commit(logger, printWriter);
+    }
+
+    private void handleImageToToolMapping(String className) {
+        try {
+            JClassType clazz = typeOracle.getType(className);
+            if (clazz.isAnnotationPresent(DefaultBundle.class)) {
+                bundleClass = clazz.getAnnotation(DefaultBundle.class).value();
+            } else if (clazz.isAnnotationPresent(LoadTool.class)) {
+                LoadTool lt = clazz.getAnnotation(LoadTool.class);
+                if (!"".equals(lt.icon()))
+                    tool2imageRes.put(lt.name(), lt.icon());
+            }
+        }
+        catch (NotFoundException e) {
+
+        }
+
     }
 
     private void generateFactoryClass(
