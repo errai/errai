@@ -45,6 +45,11 @@
             <version>${version}</version>
         </dependency>
         <dependency>
+            <groupId>org.jboss.errai</groupId>
+            <artifactId>errai-ioc</artifactId>
+            <version>${version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.google.gwt</groupId>
             <artifactId>gwt-user</artifactId>
             <!-- This should not be packaged with the Errai Distro.  There are no runtime dependencies on it
@@ -75,7 +80,7 @@
             <artifactId>gwt-dnd</artifactId>
             <version>${mosaic.version}</version>
         </dependency>
-       
+
         <dependency>
             <groupId>com.googlecode.gwtmosaic</groupId>
             <artifactId>gwtx</artifactId>
@@ -87,5 +92,5 @@
             <version>${gwt-log.version}</version>
         </dependency>
     </dependencies>
-   
+
 </project>

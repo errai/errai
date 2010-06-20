@@ -22,12 +22,15 @@ import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
 import org.jboss.errai.bus.server.annotations.security.RequireRoles;
 import org.jboss.errai.bus.server.util.ConfigUtil;
 import org.jboss.errai.bus.server.util.RebindVisitor;
+import org.jboss.errai.ioc.rebind.IOCFactory;
+import org.jboss.errai.ioc.rebind.IOCGenerator;
 import org.jboss.errai.workspaces.client.api.annotations.GroupOrder;
 import org.jboss.errai.workspaces.client.api.annotations.LoadTool;
 import org.jboss.errai.workspaces.client.api.annotations.LoadToolSet;
@@ -52,12 +55,16 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
 
     private final static String TOOLSET_PROFILE = "toolset-profile.properties";
 
+    private TypeOracle typeOracle;
+    private IOCGenerator iocGenerator;
+
     // inherited generator method
 
     public String generate(TreeLogger logger, GeneratorContext context,
                            String typeName) throws UnableToCompleteException {
 
-        TypeOracle typeOracle = context.getTypeOracle();
+        typeOracle = context.getTypeOracle();
+        iocGenerator = new IOCGenerator(typeOracle);
 
         try {
             // get classType and save instance variables
@@ -139,7 +146,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
         sourceWriter.println("public void configure(org.jboss.errai.workspaces.client.framework.ToolContainer workspace) { ");
         sourceWriter.outdent();
 
-                // toolset profile (acts as whitelist). Used with BPM console atm
+        // toolset profile (acts as whitelist). Used with BPM console atm
         final List<String> enabledTools = new ArrayList<String>();
 
         InputStream in = getClass().getClassLoader().getResourceAsStream(TOOLSET_PROFILE);
@@ -181,6 +188,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
         List<File> targets = ConfigUtil.findAllConfigTargets();
 
         final boolean applyFilter = in != null;
+        final IOCFactory factory = new IOCFactory(typeOracle);
 
         ConfigUtil.visitAllTargets(
                 targets, context, logger,
@@ -208,13 +216,36 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
                                 }
                                 rolesBuilder.append("}");
 
+                                JClassType type;
+                                try {
+                                    type = typeOracle.getType(clazz.getName());
+                                }
+                                catch (NotFoundException e) {
+                                    throw new RuntimeException("error bootstrapping", e);
+                                }
+
+                                String widgetName = iocGenerator
+                                        .generateInjectors(context, logger, writer, factory, clazz.getName(), type);
+
                                 writer.println("workspace.addTool(\"" + loadTool.group() + "\"," +
                                         " \"" + loadTool.name() + "\", \"" + loadTool.icon() + "\", " + loadTool.multipleAllowed()
-                                        + ", " + loadTool.priority() + ", new " + clazz.getName() + "(), " + rolesBuilder.toString() + ");");
+                                        + ", " + loadTool.priority() + ",  " + widgetName + ", " + rolesBuilder.toString() + ");");
                             } else {
+
+                                JClassType type;
+                                try {
+                                    type = typeOracle.getType(clazz.getName());
+                                }
+                                catch (NotFoundException e) {
+                                    throw new RuntimeException("error bootstrapping", e);
+                                }
+
+                                String widgetName = iocGenerator
+                                        .generateInjectors(context, logger, writer, factory, clazz.getName(), type);
+
                                 writer.println("workspace.addTool(\"" + loadTool.group() + "\"," +
                                         " \"" + loadTool.name() + "\", \"" + loadTool.icon() + "\", " + loadTool.multipleAllowed()
-                                        + ", " + loadTool.priority() + ", new " + clazz.getName() + "());");
+                                        + ", " + loadTool.priority() + ",  " + widgetName + ");");
                             }
                         } else if (clazz.isAnnotationPresent(LoginComponent.class)) {
                             writer.println("workspace.setLoginComponent(new " + clazz.getName() + "());");

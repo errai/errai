@@ -70,10 +70,10 @@ public class IOCGenerator extends Generator {
         widgetBuild = TemplateCompiler.compileTemplate(istream);
     }
 
-    public static void main(String[] args) {
-        System.out.println("" + Widget.class.isAssignableFrom(Composite.class));
+    public IOCGenerator(TypeOracle typeOracle) {
+        this();
+        this.typeOracle = typeOracle;
     }
-
 
     @Override
     public String generate(TreeLogger logger, GeneratorContext context, String typeName)
@@ -163,16 +163,22 @@ public class IOCGenerator extends Generator {
                     public void visit(Class<?> visit, GeneratorContext context, TreeLogger logger, SourceWriter writer) {
                         try {
                             JClassType visitC = typeOracle.getType(visit.getName());
-                            generateInjectors(context, logger, sourceWriter, iocFactory, visitC);
+                            if (visitC.isAssignableTo(typeOracle.getType(Widget.class.getName())) && visit.isAnnotationPresent(ToRootPanel.class)) {
+                                String widgetName = generateInjectors(context, logger, sourceWriter, iocFactory, className, visitC);
+                                sourceWriter.println("widgets.add(" + widgetName + ")");
+                            }
                         }
-                        catch (NotFoundException e) {   
+                        catch (NotFoundException e) {
                         }
                     }
 
                     public void visitError(String className, Throwable t) {
                         try {
                             JClassType visit = typeOracle.getType(className);
-                            generateInjectors(context, logger, sourceWriter, iocFactory, visit);
+                            if (visit.isAssignableTo(typeOracle.getType(Widget.class.getName())) && visit.isAnnotationPresent(ToRootPanel.class)) {
+                                String widgetName =  generateInjectors(context, logger, sourceWriter, iocFactory, className, visit);
+                                sourceWriter.println("widgets.add(" + widgetName + ")");
+                            }
                         }
                         catch (NotFoundException e) {
                         }
@@ -186,68 +192,63 @@ public class IOCGenerator extends Generator {
         sourceWriter.println("}");
     }
 
-    private void generateInjectors(final GeneratorContext context, final TreeLogger logger,
+    public String generateInjectors(final GeneratorContext context, final TreeLogger logger,
                                    final SourceWriter sourceWriter,
                                    final IOCFactory iocFactory,
+                                   final String className,
                                    final JClassType visit) {
 
         try {
-            if (visit.isAssignableTo(typeOracle.getType(Widget.class.getName())) && visit.isAnnotationPresent(ToRootPanel.class)) {
-                try {
-                    for (JConstructor c : visit.getConstructors()) {
-                        if (c.isAnnotationPresent(Inject.class)) {
-                            JParameter[] parameterTypes = c.getParameters();
-                            List<String> constructorExpr = new ArrayList<String>(parameterTypes.length);
+            for (JConstructor c : visit.getConstructors()) {
+                if (c.isAnnotationPresent(Inject.class)) {
+                    JParameter[] parameterTypes = c.getParameters();
+                    List<String> constructorExpr = new ArrayList<String>(parameterTypes.length);
 
-                            for (JParameter pType : parameterTypes) {
-                                constructorExpr.add(iocFactory.getInjectorExpression(pType.getType().isClassOrInterface()));
-                            }
-
-                            String s = (String) TemplateRuntime.execute(widgetBuild, Make.Map.<String, Object>$()
-                                    ._("widgetClassName", className)
-                                    ._("varName", "widget" + (++varCount))
-                                    ._("constructorInjection", true)
-                                    ._("constructorExpressions", constructorExpr)._());
-
-                            sourceWriter.println(s);
-                            sourceWriter.println("widgets.add(widget" + varCount + ");");
-
-                            return;
-                        }
+                    for (JParameter pType : parameterTypes) {
+                        constructorExpr.add(iocFactory.getInjectorExpression(pType.getType().isClassOrInterface()));
                     }
 
-                    List<SetterPair> setterPairs = new LinkedList<SetterPair>();
-
-                    for (JField f : visit.getFields()) {
-                        if (f.isAnnotationPresent(Inject.class)) {
-                            try {
-                                visit.getMethod(ReflectionUtil.getSetter(f.getName()), new JType[0]);
-                                setterPairs.add(new SetterPair(true, f.getName(), iocFactory.getInjectorExpression(f.getType().isClassOrInterface())));
-                            }
-                            catch (NotFoundException e) {
-                                setterPairs.add(new SetterPair(false, ReflectionUtil.getSetter(f.getName()), iocFactory.getInjectorExpression(f.getType().isClassOrInterface())));
-                            }
-                        }
-                    }
                     String s = (String) TemplateRuntime.execute(widgetBuild, Make.Map.<String, Object>$()
                             ._("widgetClassName", className)
                             ._("varName", "widget" + (++varCount))
-                            ._("constructorInjection", false)
-                            ._("setterPairs", setterPairs)._());
+                            ._("constructorInjection", true)
+                            ._("constructorExpressions", constructorExpr)._());
 
                     sourceWriter.println(s);
 
-                    sourceWriter.println("widgets.add(widget" + varCount + ");");
-                }
-                catch (Exception e) {
-                    throw new RuntimeException("Could  ot create type: " + visit.getName(), e);
+                    return "widget" + varCount;
                 }
             }
-        }
-        catch (NotFoundException e) {
-            e.printStackTrace();
-        }
 
+            List<SetterPair> setterPairs = new LinkedList<SetterPair>();
+
+            for (JField f : visit.getFields()) {
+                if (f.isAnnotationPresent(Inject.class)) {
+                    try {
+                        visit.getMethod(ReflectionUtil.getSetter(f.getName()), new JType[0]);
+                        setterPairs.add(new SetterPair(true, f.getName(), iocFactory.getInjectorExpression(f.getType().isClassOrInterface())));
+                    }
+                    catch (NotFoundException e) {
+                        setterPairs.add(new SetterPair(false, ReflectionUtil.getSetter(f.getName()), iocFactory.getInjectorExpression(f.getType().isClassOrInterface())));
+                    }
+                }
+            }
+            
+
+            String s = (String) TemplateRuntime.execute(widgetBuild, Make.Map.<String, Object>$()
+                    ._("widgetClassName", className)
+                    ._("varName", "widget" + (++varCount))
+                    ._("constructorInjection", false)
+                    ._("setterPairs", setterPairs)._());
+
+            sourceWriter.println(s);
+
+            return "widget" + varCount;
+        }
+        catch (Exception e) {
+            throw new RuntimeException("Could  ot create type: " + visit.getName(), e);
+        }
     }
+
 
 }
