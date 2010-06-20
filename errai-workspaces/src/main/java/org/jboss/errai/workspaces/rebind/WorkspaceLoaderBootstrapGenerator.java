@@ -242,6 +242,9 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
                             writer.println("});");
                         }
                     }
+
+                    public void visitError(String className, Throwable t) {
+                    }
                 });
 
 

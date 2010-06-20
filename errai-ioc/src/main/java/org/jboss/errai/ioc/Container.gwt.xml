@@ -14,13 +14,16 @@
   ~ limitations under the License.
   -->
 
-<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 1.6//EN"
-        "http://google-web-toolkit.googlecode.com/svn/releases/1.6/distro-source/core/src/gwt-module.dtd">
-<module rename-to="helloworld">
-
+<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.0//EN"
+        "http://google-web-toolkit.googlecode.com/svn/releases/2.0/distro-source/core/src/gwt-module.dtd">
+<module>
     <inherits name='com.google.gwt.user.User'/>
-    <inherits name="org.jboss.errai.common.ErraiCommon"/>
-    <inherits name="org.jboss.errai.bus.ErraiBus" />
+    <inherits name='org.jboss.errai.bus.ErraiBus' />
 
-    <entry-point class='org.errai.samples.helloworld.client.HelloWorld'/>
+    <entry-point class='org.jboss.errai.ioc.client.Container'/>
+
+        <generate-with class="org.jboss.errai.ioc.rebind.IOCGenerator">
+        <when-type-assignable
+                class="org.jboss.errai.ioc.client.api.Bootstrapper"/>
+    </generate-with>
 </module>

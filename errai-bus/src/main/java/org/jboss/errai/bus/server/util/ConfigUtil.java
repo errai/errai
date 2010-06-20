@@ -157,6 +157,9 @@ public class ConfigUtil {
                 visitor.visit(clazz);
             }
 
+            public void visitError(String className, Throwable t) {
+            }
+
             public String getFileExtension() {
                 return ".class";
             }
@@ -191,6 +194,10 @@ public class ConfigUtil {
         _traverseFiles(root, root, new HashSet<String>(), new VisitDelegate<Class>() {
             public void visit(Class clazz) {
                 visitor.visit(clazz, context, logger, writer);
+            }
+
+            public void visitError(String className, Throwable t) {
+                visitor.visitError(className, t);
             }
 
             public String getFileExtension() {
@@ -423,9 +430,8 @@ public class ConfigUtil {
             for (File file : start.listFiles()) {
                 if (file.isDirectory()) _traverseFiles(root, file, loadedTargets, visitor);
                 if (file.getName().endsWith(".class")) {
+                    String FQCN = getCandidateFQCN(root.getAbsolutePath(), file.getAbsolutePath());
                     try {
-                        String FQCN = getCandidateFQCN(root.getAbsolutePath(), file.getAbsolutePath());
-
                         if (loadedTargets.contains(FQCN)) {
                             return;
                         } else {
@@ -438,26 +444,9 @@ public class ConfigUtil {
 
                         visitor.visit(loadClass);
                     }
-                    catch (NoClassDefFoundError e) {
-                        // do nothing.
-                    }
-                    catch (ExceptionInInitializerError e) {
-                        // do nothing.
-                    }
-                    catch (UnsupportedOperationException e) {
-                        // do nothing.
-                    }
-                    catch (ClassNotFoundException e) {
-                        // do nothing.
-                    }
-                    catch (UnsatisfiedLinkError e) {
-                        // do nothing.
-                    }
-                    catch (Throwable t) {
-                        // do nothing.
 
-//                        t.printStackTrace();
-//                        throw new ErraiBootstrapFailure("unknown error while visiting: " + file.getName() + ": " + t.getClass().getName() + ":" + t.getMessage(), t);
+                    catch (Throwable t) {
+                        visitor.visitError(FQCN, t);
                     }
                 }
             }

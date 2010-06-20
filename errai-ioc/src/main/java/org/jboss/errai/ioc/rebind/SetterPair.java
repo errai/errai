@@ -14,23 +14,28 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.server.util;
+package org.jboss.errai.ioc.rebind;
 
-/**
- * The <tt>VisitDelegate</tt> offers a template for searching and modifying classes. It delegates the work to other
- * visitor classes. This visitor class separation gives the ability to add new operations to existing object
- * structures without modifying those structures
- */
-public interface VisitDelegate<T> {
+public class SetterPair {
+    private boolean fieldInjection;
+    private String setter;
+    private String expression;
 
-    /**
-     * A template function for visiting a class
-     *
-     * @param obj - the object to visit
-     */
-    public void visit(T obj);
+    public SetterPair(boolean fieldInjection, String setter, String expression) {
+        this.fieldInjection = fieldInjection;
+        this.setter = setter;
+        this.expression = expression;
+    }
 
-    public void visitError(String className, Throwable t);
+    public boolean isFieldInjection() {
+        return fieldInjection;
+    }
 
-    public String getFileExtension();
+    public String getSetter() {
+        return setter;
+    }
+
+    public String getExpression() {
+        return expression;
+    }
 }

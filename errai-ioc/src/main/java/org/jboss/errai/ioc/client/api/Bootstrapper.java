@@ -14,23 +14,12 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.server.util;
+package org.jboss.errai.ioc.client.api;
 
-/**
- * The <tt>VisitDelegate</tt> offers a template for searching and modifying classes. It delegates the work to other
- * visitor classes. This visitor class separation gives the ability to add new operations to existing object
- * structures without modifying those structures
- */
-public interface VisitDelegate<T> {
+import com.google.gwt.user.client.ui.Widget;
 
-    /**
-     * A template function for visiting a class
-     *
-     * @param obj - the object to visit
-     */
-    public void visit(T obj);
+import java.util.List;
 
-    public void visitError(String className, Throwable t);
-
-    public String getFileExtension();
+public interface Bootstrapper {
+    public List<Widget> bootstrapContainer();
 }

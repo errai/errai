@@ -36,4 +36,6 @@ public interface RebindVisitor {
      * @param writer - supports the source file regeneration
      */
     public void visit(Class<?> visit, GeneratorContext context, TreeLogger logger, SourceWriter writer);
+
+    public void visitError(String className, Throwable t);
 }

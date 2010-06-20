@@ -16,6 +16,7 @@
 
 package org.jboss.errai.bus.rebind;
 
+import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.user.rebind.SourceWriter;
@@ -74,6 +75,9 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
                             }
                         }
                     }
+
+                    public void visitError(String className, Throwable t) {
+                    }
                 }
         );
 
@@ -82,23 +86,22 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
             if (bundle != null) {
                 logger.log(TreeLogger.Type.INFO, "checking ErraiApp.properties for configured types ...");
 
-              Enumeration<String> keys = bundle.getKeys();
+                Enumeration<String> keys = bundle.getKeys();
 
-              while(keys.hasMoreElements()) {
-                String key = keys.nextElement();
-                if(ErraiServiceConfigurator.CONFIG_ERRAI_SERIALIZABLE_TYPE.equals(key))
-                {
-                  for (String s : bundle.getString(key).split(" ")) {
-                    try {
-                      Class<?> cls = Class.forName(s.trim());
-                      generateMarshaller(cls, logger, writer);
+                while (keys.hasMoreElements()) {
+                    String key = keys.nextElement();
+                    if (ErraiServiceConfigurator.CONFIG_ERRAI_SERIALIZABLE_TYPE.equals(key)) {
+                        for (String s : bundle.getString(key).split(" ")) {
+                            try {
+                                Class<?> cls = Class.forName(s.trim());
+                                generateMarshaller(cls, logger, writer);
+                            }
+                            catch (Exception e) {
+                                throw new ErraiBootstrapFailure(e);
+                            }
+                        }
                     }
-                    catch (Exception e) {
-                      throw new ErraiBootstrapFailure(e);
-                    }
-                  }
                 }
-              }
             }
         }
         catch (MissingResourceException exception) {

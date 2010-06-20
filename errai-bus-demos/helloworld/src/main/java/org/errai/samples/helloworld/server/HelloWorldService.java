@@ -1,4 +1,4 @@
-package org.errai.samples.errorhandling.server;
+package org.errai.samples.helloworld.server;
 
 import org.jboss.errai.bus.client.api.AsyncTask;
 import org.jboss.errai.bus.client.api.Message;

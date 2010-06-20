@@ -25,6 +25,11 @@
             <artifactId>errai-tools</artifactId>
             <version>${version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.jboss.errai</groupId>
+            <artifactId>errai-ioc</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

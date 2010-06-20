@@ -37,146 +37,141 @@ import java.util.List;
 import java.util.Map;
 
 public class ResourceFactoryGenerator extends Generator {
-  /**
-   * Simple name of class to be generated
-   */
-  private String className = null;
+    /**
+     * Simple name of class to be generated
+     */
+    private String className = null;
 
-  /**
-   * Package name of class to be generated
-   */
-  private String packageName = null;
+    /**
+     * Package name of class to be generated
+     */
+    private String packageName = null;
 
-  private Class bundleClass = null;
-  private Map<String, String> tool2imageRes = new HashMap<String,String>();
+    private Class bundleClass = null;
+    private Map<String, String> tool2imageRes = new HashMap<String, String>();
 
-  // inherited generator method
-  public String generate(TreeLogger logger, GeneratorContext context,
-                         String typeName) throws UnableToCompleteException {
+    // inherited generator method
 
-    TypeOracle typeOracle = context.getTypeOracle();
+    public String generate(TreeLogger logger, GeneratorContext context,
+                           String typeName) throws UnableToCompleteException {
 
-    try {
-      // get classType and save instance variables
+        TypeOracle typeOracle = context.getTypeOracle();
 
-      JClassType classType = typeOracle.getType(typeName);
-      packageName = classType.getPackage().getName();
-      className = classType.getSimpleSourceName() + "Impl";
+        try {
+            // get classType and save instance variables
 
-      // Generate class source code
-      generateClass(logger, context);
+            JClassType classType = typeOracle.getType(typeName);
+            packageName = classType.getPackage().getName();
+            className = classType.getSimpleSourceName() + "Impl";
 
-    }
-    catch (Exception e) {
-
-      // record sendNowWith logger that Map generation threw an exception
-      logger.log(TreeLogger.ERROR, "Error generating icon factory", e);
-
-    }
-
-    // return the fully qualifed name of the class generated
-    return packageName + "." + className;
-  }
-
-  /**
-   * Generate source code for new class. Class extends
-   * <code>HashMap</code>.
-   *
-   * @param logger  Logger object
-   * @param context Generator context
-   */
-  private void generateClass(TreeLogger logger, GeneratorContext context) {
-
-    // get print writer that receives the source code
-    PrintWriter printWriter = context.tryCreate(logger, packageName, className);
-    // print writer if null, source code has ALREADY been generated,
-
-    if (printWriter == null) return;
-
-    // init composer, set class properties, create source writer
-    ClassSourceFileComposerFactory composer = new ClassSourceFileComposerFactory(packageName,
-        className);
-
-    composer.addImport("java.util.HashMap");
-    composer.addImport("java.util.Map");
-    composer.addImport("org.jboss.errai.workspaces.client.api.ResourceFactory");
-    composer.addImport("com.google.gwt.core.client.GWT");
-    composer.addImport("com.google.gwt.resources.client.ImageResource");
-
-    composer.addImplementedInterface("org.jboss.errai.workspaces.client.api.ResourceFactory");
-
-    SourceWriter sourceWriter = composer.createSourceWriter(context, printWriter);
-
-    // parse classes
-    List<File> targets = ConfigUtil.findAllConfigTargets();
-    ConfigUtil.visitAllTargets(
-        targets, context, logger,
-        sourceWriter,
-        new RebindVisitor()
-        {
-          public void visit(Class<?> clazz, GeneratorContext context, TreeLogger logger, SourceWriter writer)
-          {           
-            if (clazz.isAnnotationPresent(DefaultBundle.class)) {
-              bundleClass = clazz.getAnnotation(DefaultBundle.class).value();
-            }
-            else if(clazz.isAnnotationPresent(LoadTool.class))
-            {
-              LoadTool lt = clazz.getAnnotation(LoadTool.class);
-              if(!"".equals(lt.icon()))
-                tool2imageRes.put(lt.name(), lt.icon());
-            }
-          }
+            // Generate class source code
+            generateClass(logger, context);
         }
-    );
-    
-    // generator constructor source code
-    generateFactoryClass(context, logger, sourceWriter);
+        catch (Exception e) {
 
-    // close generated class
-    sourceWriter.outdent();
-    sourceWriter.println("}");
+            // record sendNowWith logger that Map generation threw an exception
+            logger.log(TreeLogger.ERROR, "Error generating icon factory", e);
 
-    // commit generated class
-    context.commit(logger, printWriter);
-  }
+        }
 
-  private void generateFactoryClass(
-      GeneratorContext context,
-      TreeLogger logger,
-      SourceWriter sourceWriter)
-  {
-
-    sourceWriter.println("private Map<String,ImageResource> mapping = new HashMap<String,ImageResource>();");
-    
-    // start constructor source generation
-    sourceWriter.println("public " + className + "() { ");
-    sourceWriter.indent();
-    sourceWriter.println("super();");
-
-    if(bundleClass!=null) // optional
-    
-    {
-      sourceWriter.println(bundleClass.getName() + " bundle = ("+bundleClass.getName()+") GWT.create("+bundleClass.getName()+".class);");
-      for(String tool : tool2imageRes.keySet())
-      {
-        sourceWriter.println("mapping.put(\""+tool+"\", bundle."+tool2imageRes.get(tool)+"() );");
-      }
-      sourceWriter.outdent();
-    }
-    else
-    {
-      logger.log(TreeLogger.Type.WARN, "\"@DefaultBundle not found. Make sure the EntryPoint refers to a valid default resource bundle.\"");
+        // return the fully qualifed name of the class generated
+        return packageName + "." + className;
     }
 
-    sourceWriter.println("}");
-    
-    sourceWriter.println("public ImageResource createImage(String name) { ");
-    sourceWriter.outdent();
-    sourceWriter.println("    return mapping.get(name);");
-    sourceWriter.outdent();
-    sourceWriter.println("}");
-        
-  }
+    /**
+     * Generate source code for new class. Class extends
+     * <code>HashMap</code>.
+     *
+     * @param logger  Logger object
+     * @param context Generator context
+     */
+    private void generateClass(TreeLogger logger, GeneratorContext context) {
+
+        // get print writer that receives the source code
+        PrintWriter printWriter = context.tryCreate(logger, packageName, className);
+        // print writer if null, source code has ALREADY been generated,
+
+        if (printWriter == null) return;
+
+        // init composer, set class properties, create source writer
+        ClassSourceFileComposerFactory composer = new ClassSourceFileComposerFactory(packageName,
+                className);
+
+        composer.addImport("java.util.HashMap");
+        composer.addImport("java.util.Map");
+        composer.addImport("org.jboss.errai.workspaces.client.api.ResourceFactory");
+        composer.addImport("com.google.gwt.core.client.GWT");
+        composer.addImport("com.google.gwt.resources.client.ImageResource");
+
+        composer.addImplementedInterface("org.jboss.errai.workspaces.client.api.ResourceFactory");
+
+        SourceWriter sourceWriter = composer.createSourceWriter(context, printWriter);
+
+        // parse classes
+        List<File> targets = ConfigUtil.findAllConfigTargets();
+        ConfigUtil.visitAllTargets(
+                targets, context, logger,
+                sourceWriter,
+                new RebindVisitor() {
+                    public void visit(Class<?> clazz, GeneratorContext context, TreeLogger logger, SourceWriter writer) {
+                        if (clazz.isAnnotationPresent(DefaultBundle.class)) {
+                            bundleClass = clazz.getAnnotation(DefaultBundle.class).value();
+                        } else if (clazz.isAnnotationPresent(LoadTool.class)) {
+                            LoadTool lt = clazz.getAnnotation(LoadTool.class);
+                            if (!"".equals(lt.icon()))
+                                tool2imageRes.put(lt.name(), lt.icon());
+                        }
+                    }
+
+                    public void visitError(String className, Throwable t) {
+                    }
+                }
+        );
+
+        // generator constructor source code
+        generateFactoryClass(context, logger, sourceWriter);
+
+        // close generated class
+        sourceWriter.outdent();
+        sourceWriter.println("}");
+
+        // commit generated class
+        context.commit(logger, printWriter);
+    }
+
+    private void generateFactoryClass(
+            GeneratorContext context,
+            TreeLogger logger,
+            SourceWriter sourceWriter) {
+
+        sourceWriter.println("private Map<String,ImageResource> mapping = new HashMap<String,ImageResource>();");
+
+        // start constructor source generation
+        sourceWriter.println("public " + className + "() { ");
+        sourceWriter.indent();
+        sourceWriter.println("super();");
+
+        if (bundleClass != null) // optional
+
+        {
+            sourceWriter.println(bundleClass.getName() + " bundle = (" + bundleClass.getName() + ") GWT.create(" + bundleClass.getName() + ".class);");
+            for (String tool : tool2imageRes.keySet()) {
+                sourceWriter.println("mapping.put(\"" + tool + "\", bundle." + tool2imageRes.get(tool) + "() );");
+            }
+            sourceWriter.outdent();
+        } else {
+            logger.log(TreeLogger.Type.WARN, "\"@DefaultBundle not found. Make sure the EntryPoint refers to a valid default resource bundle.\"");
+        }
+
+        sourceWriter.println("}");
+
+        sourceWriter.println("public ImageResource createImage(String name) { ");
+        sourceWriter.outdent();
+        sourceWriter.println("    return mapping.get(name);");
+        sourceWriter.outdent();
+        sourceWriter.println("}");
+
+    }
 
 
 }

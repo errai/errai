@@ -142,6 +142,9 @@ public class ExtensionProxyGenerator extends Generator {
                             }
                         }
                     }
+
+                    public void visitError(String className, Throwable t) {
+                    }
                 });
 
         // end constructor source generation
