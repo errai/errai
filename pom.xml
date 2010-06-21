@@ -36,6 +36,7 @@
 
     <modules>
         <module>errai-common</module>
+        <module>errai-ioc</module>
         <module>errai-workspaces</module>
         <module>errai-widgets</module>
         <module>errai-bus</module>
