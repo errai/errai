@@ -165,7 +165,7 @@ public class IOCGenerator extends Generator {
                             JClassType visitC = typeOracle.getType(visit.getName());
                             if (visitC.isAssignableTo(typeOracle.getType(Widget.class.getName())) && visit.isAnnotationPresent(ToRootPanel.class)) {
                                 String widgetName = generateInjectors(context, logger, sourceWriter, iocFactory, className, visitC);
-                                sourceWriter.println("widgets.add(" + widgetName + ")");
+                                sourceWriter.println("widgets.add(" + widgetName + ");");
                             }
                         }
                         catch (NotFoundException e) {
@@ -178,7 +178,7 @@ public class IOCGenerator extends Generator {
                             JClassType widgetType = typeOracle.getType(Widget.class.getName());
                             if (visit.isAssignableTo(widgetType) && visit.isAnnotationPresent(ToRootPanel.class)) {
                                 String widgetName =  generateInjectors(context, logger, sourceWriter, iocFactory, className, visit);
-                                sourceWriter.println("widgets.add(" + widgetName + ")");
+                                sourceWriter.println("widgets.add(" + widgetName + ");");
                             }
                         }
                         catch (NotFoundException e) {
