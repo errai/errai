@@ -29,6 +29,7 @@
         <dependency>
             <groupId>org.jboss.errai</groupId>
             <artifactId>errai-ioc</artifactId>
+            <version>${version}</version>
         </dependency>
     </dependencies>
 

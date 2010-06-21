@@ -10,7 +10,7 @@ import static org.jboss.errai.bus.client.api.base.ConversationHelper.createConve
 import static org.jboss.errai.bus.client.api.base.ConversationHelper.makeConversational;
 
 /**
- * The <tt>AbstractMessageBuilder</tt> facilitates the building of a message, 
+ * The <tt>AbstractMessageBuilder</tt> facilitates the building of a message,
  * and ensures that it is created and used properly.
  */
 @SuppressWarnings({"unchecked"})
@@ -18,15 +18,15 @@ public class AbstractMessageBuilder<R extends Sendable> {
     private final Message message;
 
     public AbstractMessageBuilder(Message message) {
-        this.message = message;      
+        this.message = message;
     }
 
     /**
-     * Implements, creates and returns an instance of <tt>MessageBuildSubject</tt>. 
+     * Implements, creates and returns an instance of <tt>MessageBuildSubject</tt>.
      * This is called initially when a new message is created
      *
-     * @return the <tt>MessageBuildSubject</tt> with the appropriate fields 
-     * and functions for the message builder
+     * @return the <tt>MessageBuildSubject</tt> with the appropriate fields
+     *         and functions for the message builder
      */
     public MessageBuildSubject start() {
         final Sendable sendable = new MessageReplySendable() {
@@ -120,17 +120,18 @@ public class AbstractMessageBuilder<R extends Sendable> {
                         errorCallback = new AsyncDelegateErrorCallback(this, message.getErrorCallback());
 
                         if (isConversational) {
-                            if ((((ConversationMessageWrapper) message)
-                                    .getIncomingMessage()).hasPart(MessageParts.ReplyTo)) {
+                            final Message incomingMsg = ((ConversationMessageWrapper)message).getIncomingMessage();
+
+                            if (incomingMsg.hasPart(MessageParts.ReplyTo)) {
 
                                 sender = new Runnable() {
-                                    final String replyTo = ((ConversationMessageWrapper) message).getIncomingMessage()
+                                    final String replyTo = incomingMsg
                                             .get(String.class, MessageParts.ReplyTo);
 
                                     public void run() {
                                         MessageBuilder.getMessageProvider().get()
                                                 .toSubject(replyTo)
-                                                .copyResource("Session", message)
+                                                .copyResource("Session", incomingMsg)
                                                 .addAllParts(message.getParts())
                                                 .addAllProvidedParts(message.getProvidedParts())
                                                 .errorsCall(errorCallback).sendNowWith(viaThis);
@@ -141,11 +142,11 @@ public class AbstractMessageBuilder<R extends Sendable> {
 
                                     public void run() {
                                         try {
-                                        MessageBuilder.getMessageProvider().get()
-                                                .copyResource("Session", message)
-                                                .addAllParts(message.getParts())
-                                                .addAllProvidedParts(message.getProvidedParts())
-                                                .errorsCall(errorCallback).sendNowWith(viaThis);
+                                            MessageBuilder.getMessageProvider().get()
+                                                    .copyResource("Session", incomingMsg)
+                                                    .addAllParts(message.getParts())
+                                                    .addAllProvidedParts(message.getProvidedParts())
+                                                    .errorsCall(errorCallback).sendNowWith(viaThis);
                                         }
                                         catch (Throwable t) {
                                             t.printStackTrace();
@@ -191,7 +192,7 @@ public class AbstractMessageBuilder<R extends Sendable> {
                 });
 
                 if (isConversational) {
-                    final LaundryReclaim reclaim = LaundryListProviderFactory.get().getLaundryList(message.getResource(Object.class, "Session"))
+                    final LaundryReclaim reclaim = LaundryListProviderFactory.get().getLaundryList(((ConversationMessageWrapper) message).getIncomingMessage().getResource(Object.class, "Session"))
                             .addToHamper(new Laundry() {
                                 public void clean() {
                                     task.cancel(true);
