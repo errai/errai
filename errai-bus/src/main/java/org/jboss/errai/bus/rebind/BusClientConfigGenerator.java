@@ -19,6 +19,10 @@ package org.jboss.errai.bus.rebind;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.JField;
+import com.google.gwt.core.ext.typeinfo.NotFoundException;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.user.rebind.SourceWriter;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.annotations.ExposeEntity;
@@ -55,19 +59,22 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
         rpcProxyGenerator = compileTemplate(istream, null);
     }
 
-    public void generate(GeneratorContext context, TreeLogger logger, SourceWriter writer, List<File> roots) {
-        visitAllTargets(roots, context, logger, writer,
+    public void generate(GeneratorContext context, TreeLogger logger, SourceWriter writer, List<File> roots, final TypeOracle oracle) {
+        visitAllTargets(roots, context, logger, writer, oracle,
                 new RebindVisitor() {
-                    public void visit(Class<?> visit, GeneratorContext context, TreeLogger logger, SourceWriter writer) {
+                    public void visit(JClassType visit, GeneratorContext context,
+                                      TreeLogger logger, SourceWriter writer) {
+
+
                         if (visit.isAnnotationPresent(ExposeEntity.class)) {
                             generateMarshaller(visit, logger, writer);
 
-                        } else if (visit.isAnnotationPresent(Remote.class) && visit.isInterface()) {
+                        } else if (visit.isAnnotationPresent(Remote.class) && visit.isInterface() != null) {
                             try {
                                 writer.print((String) execute(rpcProxyGenerator,
                                         Make.Map.<String, Object>$()
-                                                ._("implementationClassName", visit.getSimpleName() + "Impl")
-                                                ._("interfaceClass", visit)
+                                                ._("implementationClassName", visit.getName() + "Impl")
+                                                ._("interfaceClass", Class.forName(visit.getQualifiedSourceName()))
                                                 ._()));
                             }
                             catch (Throwable t) {
@@ -93,8 +100,7 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
                     if (ErraiServiceConfigurator.CONFIG_ERRAI_SERIALIZABLE_TYPE.equals(key)) {
                         for (String s : bundle.getString(key).split(" ")) {
                             try {
-                                Class<?> cls = Class.forName(s.trim());
-                                generateMarshaller(cls, logger, writer);
+                                generateMarshaller(oracle.getType(s.trim()), logger, writer);
                             }
                             catch (Exception e) {
                                 throw new ErraiBootstrapFailure(e);
@@ -112,27 +118,35 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
         //  generateMarshaller(CommandMessage.class, logger, writer);
     }
 
-    private void generateMarshaller(Class<?> visit, TreeLogger logger, SourceWriter writer) {
+    private void generateMarshaller(JClassType visit, TreeLogger logger, SourceWriter writer) {
         Map<String, Class> types = new HashMap<String, Class>();
-        for (Field f : visit.getDeclaredFields()) {
-            if ((f.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0 ||
-                    f.isSynthetic()) {
-                continue;
-            }
-            types.put(f.getName(), f.getType());
+        try {
+        for (JField f : visit.getFields()) {
+            if (f.isTransient() || f.isStatic() || f.isEnumConstant() != null) continue;
+
+            JClassType type = f.getType().isClassOrInterface();
+
+            if (type == null) continue;
+
+            types.put(f.getName(), Class.forName(type.getQualifiedSourceName()));
+        }
+
+        }
+        catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
         }
 
         try {
-            visit.getConstructor(new Class[0]);
+            visit.getConstructor(new JClassType[0]);
         }
-        catch (NoSuchMethodException e) {
+        catch (NotFoundException e) {
             String errorMsg = "Type annotated with @ExposeEntity does not expose a default constructor";
             logger.log(TreeLogger.Type.ERROR, errorMsg, e);
             throw new GenerationException(errorMsg, e);
         }
 
         Map<String, Object> templateVars = Make.Map.<String, Object>$()
-                ._("className", visit.getName())
+                ._("className", visit.getQualifiedSourceName())
                 ._("fields", types.keySet())
                 ._("targetTypes", types)._();
 

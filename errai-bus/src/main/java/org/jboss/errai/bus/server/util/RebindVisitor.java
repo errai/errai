@@ -18,6 +18,8 @@ package org.jboss.errai.bus.server.util;
 
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.user.rebind.SourceWriter;
 
 /**
@@ -35,7 +37,7 @@ public interface RebindVisitor {
      * @param logger - log messages in deferred binding generators
      * @param writer - supports the source file regeneration
      */
-    public void visit(Class<?> visit, GeneratorContext context, TreeLogger logger, SourceWriter writer);
+    public void visit(JClassType visit, GeneratorContext context, TreeLogger logger, SourceWriter writer);
 
     public void visitError(String className, Throwable t);
 }

@@ -197,23 +197,20 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
 
         ConfigUtil.visitAllTargets(
                 targets, context, logger,
-                sourceWriter,
+                sourceWriter, typeOracle,
                 new RebindVisitor() {
-                    public void visit(Class<?> clazz, GeneratorContext context, TreeLogger logger, SourceWriter writer) {
-                        try {
-                            visitTool(typeOracle.getType(clazz.getName()), context, writer, logger, applyFilter, factory, enabledTools);
-                        }
-                        catch (NotFoundException e) {
-                        }
+                    public void visit(JClassType clazz, GeneratorContext context, TreeLogger logger,
+                                      SourceWriter writer) {
+                        visitTool(clazz, context, writer, logger, applyFilter, factory, enabledTools);
                     }
 
                     public void visitError(String className, Throwable t) {
-                        try {
-                            visitTool(typeOracle.getType(className), context, sourceWriter, logger, applyFilter, factory, enabledTools);
-                        }
-                        catch (NotFoundException e) {
-
-                        }
+//                        try {
+//                            visitTool(typeOracle.getType(className), context, sourceWriter, logger, applyFilter, factory, enabledTools);
+//                        }
+//                        catch (NotFoundException e) {
+//
+//                        }
                     }
                 });
 

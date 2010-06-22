@@ -21,6 +21,7 @@ import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
@@ -69,8 +70,8 @@ public class ExtensionProxyGenerator extends Generator {
         catch (Throwable e) {
 
             // record sendNowWith logger that Map generation threw an exception
-          e.printStackTrace();
-          logger.log(TreeLogger.ERROR, "Error generating extensions", e);
+            e.printStackTrace();
+            logger.log(TreeLogger.ERROR, "Error generating extensions", e);
 
         }
 
@@ -107,7 +108,7 @@ public class ExtensionProxyGenerator extends Generator {
         sourceWriter.outdent();
         sourceWriter.println("}");
 
-     
+
         // commit generated class
         context.commit(logger, printWriter);
     }
@@ -125,22 +126,28 @@ public class ExtensionProxyGenerator extends Generator {
 
         final List<File> targets = findAllConfigTargets();
 
-        new BusClientConfigGenerator().generate(context, logger, sourceWriter, targets);
-        
-        visitAllTargets(targets, context, logger, sourceWriter,
-                new RebindVisitor() {
-                    public void visit(Class<?> visit, GeneratorContext context, TreeLogger logger, SourceWriter writer) {
-                      //  System.out.println("Searching:" + visit);
+        new BusClientConfigGenerator().generate(context, logger, sourceWriter, targets, typeOracle);
 
-                        if (isAnnotated(visit, ExtensionComponent.class, ExtensionGenerator.class)) {
+        visitAllTargets(targets, context, logger, sourceWriter, typeOracle,
+                new RebindVisitor() {
+
+                    public void visit(JClassType visit, GeneratorContext context, TreeLogger logger,
+                                      SourceWriter writer) {
+                        Class<?> cls = loadIgnoreFail(visit.getQualifiedSourceName());
+                        if (cls == null) return;
+
+                        if (visit.isAnnotationPresent(ExtensionComponent.class)
+                                && ExtensionGenerator.class.isAssignableFrom(cls)) {
                             try {
-                                ExtensionGenerator generator = visit.asSubclass(ExtensionGenerator.class).newInstance();
-                                generator.generate(context, logger, writer, targets);
+
+                                ExtensionGenerator generator = cls.asSubclass(ExtensionGenerator.class).newInstance();
+                                generator.generate(context, logger, writer, targets, typeOracle);
                             }
                             catch (Exception e) {
                                 throw new RuntimeException("Could not load extension generator: " + visit.getName(), e);
                             }
                         }
+                           
                     }
 
                     public void visitError(String className, Throwable t) {
@@ -150,5 +157,14 @@ public class ExtensionProxyGenerator extends Generator {
         // end constructor source generation
         sourceWriter.outdent();
         sourceWriter.println("}");
+    }
+
+    public Class loadIgnoreFail(String FQCN) {
+        try {
+            return Class.forName(FQCN);
+        }
+        catch (Throwable e) {
+            return null;
+        }
     }
 }

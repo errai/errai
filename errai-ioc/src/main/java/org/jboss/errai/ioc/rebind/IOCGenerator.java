@@ -91,14 +91,11 @@ public class IOCGenerator extends Generator {
 
             // Generate class source code
             generateClass(logger, context);
-
         }
         catch (Throwable e) {
-
             // record sendNowWith logger that Map generation threw an exception
             e.printStackTrace();
             logger.log(TreeLogger.ERROR, "Error generating extensions", e);
-
         }
 
         // return the fully qualified name of the class generated
@@ -158,12 +155,11 @@ public class IOCGenerator extends Generator {
 
         final IOCFactory iocFactory = new IOCFactory(typeOracle);
 
-        visitAllTargets(targets, context, logger, sourceWriter,
+        visitAllTargets(targets, context, logger, sourceWriter, typeOracle,
                 new RebindVisitor() {
-                    public void visit(Class<?> visit, GeneratorContext context, TreeLogger logger, SourceWriter writer) {
+                    public void visit(JClassType visitC, GeneratorContext context, TreeLogger logger, SourceWriter writer) {
                         try {
-                            JClassType visitC = typeOracle.getType(visit.getName());
-                            if (visitC.isAssignableTo(typeOracle.getType(Widget.class.getName())) && visit.isAnnotationPresent(ToRootPanel.class)) {
+                            if (visitC.isAssignableTo(typeOracle.getType(Widget.class.getName())) && visitC.isAnnotationPresent(ToRootPanel.class)) {
                                 String widgetName = generateInjectors(context, logger, sourceWriter, iocFactory, className, visitC);
                                 sourceWriter.println("widgets.add(" + widgetName + ");");
                             }
@@ -201,7 +197,7 @@ public class IOCGenerator extends Generator {
 
         try {
             for (JConstructor c : visit.getConstructors()) {
-                if (c.isAnnotationPresent(Inject.class)) {
+                if (c.isAnnotationPresent(Inject.class) || c.isAnnotationPresent(javax.inject.Inject.class)) {
                     JParameter[] parameterTypes = c.getParameters();
                     List<String> constructorExpr = new ArrayList<String>(parameterTypes.length);
 
@@ -224,7 +220,7 @@ public class IOCGenerator extends Generator {
             List<SetterPair> setterPairs = new LinkedList<SetterPair>();
 
             for (JField f : visit.getFields()) {
-                if (f.isAnnotationPresent(Inject.class)) {
+                if (f.isAnnotationPresent(Inject.class) || f.isAnnotationPresent(javax.inject.Inject.class)) {
                     try {
                         visit.getMethod(ReflectionUtil.getSetter(f.getName()), new JType[0]);
                         setterPairs.add(new SetterPair(true, f.getName(), iocFactory.getInjectorExpression(f.getType().isClassOrInterface())));
@@ -234,7 +230,6 @@ public class IOCGenerator extends Generator {
                     }
                 }
             }
-
 
             String s = (String) TemplateRuntime.execute(widgetBuild, Make.Map.<String, Object>$()
                     ._("widgetClassName", className)
@@ -250,6 +245,4 @@ public class IOCGenerator extends Generator {
             throw new RuntimeException("Could  ot create type: " + visit.getName(), e);
         }
     }
-
-
 }

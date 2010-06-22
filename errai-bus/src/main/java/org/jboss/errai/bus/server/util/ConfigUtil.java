@@ -18,6 +18,9 @@ package org.jboss.errai.bus.server.util;
 
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.NotFoundException;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.user.rebind.SourceWriter;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.slf4j.Logger;
@@ -87,20 +90,20 @@ public class ConfigUtil {
     }
 
     private static Map<String, File> scanAreas = new HashMap<String, File>();
-    private static Map<String, List<Class>> scanCache = new HashMap<String, List<Class>>();
+    private static Map<String, List<String>> scanCache = new HashMap<String, List<String>>();
     private static Set<String> cacheBlackList = new HashSet<String>();
     private static Set<String> activeCacheContexts = new HashSet<String>();
 
     private static String tmpUUID = "erraiBootstrap_" + UUID.randomUUID().toString().replaceAll("\\-", "_");
 
-    private static void recordCache(String context, Class cls) {
+    private static void recordCache(String context, String cls) {
         if (scanCache == null || cacheBlackList.contains(context)) return;
 
-        List<Class> cache = scanCache.get(context);
+        List<String> cache = scanCache.get(context);
 
         if (cache == null) {
             log.info("caching context '" + context + "'");
-            scanCache.put(context, cache = new LinkedList<Class>());
+            scanCache.put(context, cache = new LinkedList<String>());
         }
 
         cache.add(cls);
@@ -154,8 +157,12 @@ public class ConfigUtil {
      */
     public static void visitAll(File root, final ConfigVisitor visitor) {
         _traverseFiles(root, root, new HashSet<String>(), new VisitDelegate<Class>() {
-            public void visit(Class clazz) {
-                visitor.visit(clazz);
+            public void visit(String clazz) {
+                try {
+                    visitor.visit(Class.forName(clazz));
+                }
+                catch (ClassNotFoundException e) {
+                }
             }
 
             public void visitError(String className, Throwable t) {
@@ -168,6 +175,7 @@ public class ConfigUtil {
 
         if (activeCacheContexts != null) activeCacheContexts.add(root.getPath());
     }
+
 
     /**
      * Visits all the targets listed in the file, using the <tt>ConfigVisitor</tt> specified
@@ -190,11 +198,16 @@ public class ConfigUtil {
      * @param writer  - supports the source file regeneration
      * @param visitor - the visitor delegate to use
      */
-    public static void visitAll(File root, final GeneratorContext context, final TreeLogger logger,
-                                final SourceWriter writer, final RebindVisitor visitor) {
-        _traverseFiles(root, root, new HashSet<String>(), new VisitDelegate<Class>() {
-            public void visit(Class clazz) {
-                visitor.visit(clazz, context, logger, writer);
+    private static void visitAll(File root, final GeneratorContext context, final TreeLogger logger,
+                                final SourceWriter writer, final RebindVisitor visitor, final TypeOracle oracle) {
+        _traverseFiles(root, root, new HashSet<String>(), new VisitDelegate<String>() {
+            public void visit(String fqcn) {
+                try {
+                    visitor.visit(oracle.getType(fqcn), context, logger, writer);
+                }
+                catch (NotFoundException e) {
+                    visitor.visitError(fqcn, e);
+                }
             }
 
             public void visitError(String className, Throwable t) {
@@ -218,10 +231,17 @@ public class ConfigUtil {
      * @param writer  - supports the source file regeneration
      * @param visitor - the visitor delegate to use
      */
+//    public static void visitAllTargets(List<File> targets, final GeneratorContext context,
+//                                       final TreeLogger logger, final SourceWriter writer, RebindVisitor visitor) {
+//        for (File file : targets) {
+//            visitAll(file, context, logger, writer, visitor);
+//        }
+//    }
     public static void visitAllTargets(List<File> targets, final GeneratorContext context,
-                                       final TreeLogger logger, final SourceWriter writer, RebindVisitor visitor) {
+                                       final TreeLogger logger, final SourceWriter writer,
+                                       final TypeOracle typeOracle, final RebindVisitor visitor) {
         for (File file : targets) {
-            visitAll(file, context, logger, writer, visitor);
+            visitAll(file, context, logger, writer, visitor, typeOracle);
         }
     }
 
@@ -317,8 +337,8 @@ public class ConfigUtil {
 
         if (activeCacheContexts != null && scanCache != null &&
                 activeCacheContexts.contains(ctx) && scanCache.containsKey(ctx)) {
-            List<Class> cache = scanCache.get(ctx);
-            for (Class loadClass : cache) {
+            List<String> cache = scanCache.get(ctx);
+            for (String loadClass : cache) {
                 visitor.visit(loadClass);
             }
         } else {
@@ -340,13 +360,10 @@ public class ConfigUtil {
                         }
 
                         className = classEntry.substring(beginIdx, classEntry.lastIndexOf(".class"));
-                        Class<?> loadClass = Class.forName(className);
 
-                        recordCache(ctx, loadClass);
-
+                        visitor.visit(className);
+                        recordCache(ctx, className);
                         cached = true;
-
-                        visitor.visit(loadClass);
                     }
                     catch (Throwable e) {
                         if (!cached) {
@@ -425,7 +442,7 @@ public class ConfigUtil {
     private static void loadFromDirectory(File root, File start, Set<String> loadedTargets, VisitDelegate visitor) {
         if (scanCache != null && activeCacheContexts != null && activeCacheContexts.contains(root.getPath())
                 && scanCache.containsKey(root.getPath())) {
-            for (Class loadClass : scanCache.get(root.getPath())) {
+            for (String loadClass : scanCache.get(root.getPath())) {
                 visitor.visit(loadClass);
             }
         } else {
@@ -440,22 +457,18 @@ public class ConfigUtil {
                             loadedTargets.add(FQCN);
                         }
 
-                        Class<?> loadClass = Class.forName(FQCN);
+                   //     Class<?> loadClass = Class.forName(FQCN);
 
-                        recordCache(root.getPath(), loadClass);
 
-                        visitor.visit(loadClass);
+                        visitor.visit(FQCN);
+                        recordCache(root.getPath(), FQCN);
+
                     }
 
                     catch (Throwable t) {
-                    //    try {
-                            cacheBlackList.add(root.getPath());
-                            if (scanCache != null) scanCache.remove(root.getPath());
-                            visitor.visitError(FQCN, t);
-//                        }
-//                        catch (Throwable t2) {
-//                            t2.printStackTrace();
-//                        }
+                        cacheBlackList.add(root.getPath());
+                        if (scanCache != null) scanCache.remove(root.getPath());
+                        visitor.visitError(FQCN, t);
                     }
                 }
             }

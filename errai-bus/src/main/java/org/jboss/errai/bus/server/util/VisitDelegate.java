@@ -28,7 +28,7 @@ public interface VisitDelegate<T> {
      *
      * @param obj - the object to visit
      */
-    public void visit(T obj);
+    public void visit(String fqnc);
 
     public void visitError(String className, Throwable t);
 

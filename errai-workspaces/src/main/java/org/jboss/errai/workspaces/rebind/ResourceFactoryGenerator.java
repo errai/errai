@@ -114,10 +114,11 @@ public class ResourceFactoryGenerator extends Generator {
         List<File> targets = ConfigUtil.findAllConfigTargets();
         ConfigUtil.visitAllTargets(
                 targets, context, logger,
-                sourceWriter,
+                sourceWriter, typeOracle,
                 new RebindVisitor() {
-                    public void visit(Class<?> clazz, GeneratorContext context, TreeLogger logger, SourceWriter writer) {
-                        handleImageToToolMapping(clazz.getName());
+                    public void visit(JClassType clazz, GeneratorContext context, TreeLogger logger,
+                                      SourceWriter writer) {
+                        handleImageToToolMapping(clazz.getQualifiedSourceName());
                     }
 
                     public void visitError(String className, Throwable t) {
