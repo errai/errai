@@ -160,7 +160,7 @@ public class IOCGenerator extends Generator {
                     public void visit(JClassType visitC, GeneratorContext context, TreeLogger logger, SourceWriter writer) {
                         try {
                             if (visitC.isAssignableTo(typeOracle.getType(Widget.class.getName())) && visitC.isAnnotationPresent(ToRootPanel.class)) {
-                                String widgetName = generateInjectors(context, logger, sourceWriter, iocFactory, className, visitC);
+                                String widgetName = generateInjectors(context, logger, sourceWriter, iocFactory, visitC.getQualifiedSourceName(), visitC);
                                 sourceWriter.println("widgets.add(" + widgetName + ");");
                             }
                         }
@@ -223,10 +223,10 @@ public class IOCGenerator extends Generator {
                 if (f.isAnnotationPresent(Inject.class) || f.isAnnotationPresent(javax.inject.Inject.class)) {
                     try {
                         visit.getMethod(ReflectionUtil.getSetter(f.getName()), new JType[0]);
-                        setterPairs.add(new SetterPair(true, f.getName(), iocFactory.getInjectorExpression(f.getType().isClassOrInterface())));
+                        setterPairs.add(new SetterPair(false, ReflectionUtil.getSetter(f.getName()), iocFactory.getInjectorExpression(f.getType().isClassOrInterface())));
                     }
                     catch (NotFoundException e) {
-                        setterPairs.add(new SetterPair(false, ReflectionUtil.getSetter(f.getName()), iocFactory.getInjectorExpression(f.getType().isClassOrInterface())));
+                        setterPairs.add(new SetterPair(true, f.getName(), iocFactory.getInjectorExpression(f.getType().isClassOrInterface())));
                     }
                 }
             }

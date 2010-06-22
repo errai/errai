@@ -17,8 +17,11 @@ import org.jboss.errai.ioc.client.api.ToRootPanel;
 
 @ToRootPanel
 public class HelloWorld extends Composite {
+
     @Inject
-    public HelloWorld(final RequestDispatcher dispatcher) {
+    public RequestDispatcher dispatcher;
+    
+    public HelloWorld() {
         final VerticalPanel panel = new VerticalPanel();
 
         final Label label = new Label();
