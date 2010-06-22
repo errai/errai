@@ -27,6 +27,7 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
+import org.jboss.errai.bus.rebind.ProcessingContext;
 import org.jboss.errai.bus.server.annotations.security.RequireRoles;
 import org.jboss.errai.bus.server.util.ConfigUtil;
 import org.jboss.errai.bus.server.util.RebindVisitor;
@@ -285,6 +286,8 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
         }
 
         String providerName;
+        
+        final ProcessingContext pCtx = new ProcessingContext(logger, context, writer, typeOracle);
 
         if (widgetType.isAssignableFrom(type)) {
             writer.println(WidgetProvider.class.getName() + " widgetProvider" + (++counter) + " = new " + WidgetProvider.class.getName() + "() {");
@@ -293,7 +296,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
             writer.outdent();
 
             String widgetName = iocGenerator
-                    .generateInjectors(context, logger, writer, factory, className, type);
+                    .generateInjectors(pCtx, factory, type);
 
             writer.println("callback.onSuccess(" + widgetName + ");");
             writer.outdent();
@@ -304,7 +307,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
             providerName = "widgetProvider" + counter;
         } else {
             providerName = iocGenerator
-                    .generateInjectors(context, logger, writer, factory, className, type);
+                    .generateInjectors(pCtx, factory, type);
         }
 
         writer.print("workspace.addTool(\"" + loadTool.group() + "\"," +

@@ -21,11 +21,11 @@ import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.core.ext.typeinfo.*;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
 import com.google.inject.Inject;
+import org.jboss.errai.bus.rebind.ProcessingContext;
 import org.jboss.errai.bus.server.util.RebindVisitor;
 import org.jboss.errai.ioc.client.api.Bootstrapper;
 import org.jboss.errai.ioc.client.api.ToRootPanel;
@@ -33,15 +33,12 @@ import org.mvel2.templates.CompiledTemplate;
 import org.mvel2.templates.TemplateCompiler;
 import org.mvel2.templates.TemplateRuntime;
 import org.mvel2.util.Make;
-import org.mvel2.util.PropertyTools;
 import org.mvel2.util.ReflectionUtil;
 
 import java.io.File;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Member;
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -60,14 +57,18 @@ public class IOCGenerator extends Generator {
     private String packageName = null;
 
     private TypeOracle typeOracle;
-
     private final CompiledTemplate widgetBuild;
 
     private int varCount = 0;
 
+    private IOCFactory iocFactory;
+    private ProcessorFactory procFactory = new ProcessorFactory();
+
+
     public IOCGenerator() {
         InputStream istream = this.getClass().getResourceAsStream("WidgetBuild.mv");
         widgetBuild = TemplateCompiler.compileTemplate(istream);
+
     }
 
     public IOCGenerator(TypeOracle typeOracle) {
@@ -79,6 +80,19 @@ public class IOCGenerator extends Generator {
     public String generate(TreeLogger logger, GeneratorContext context, String typeName)
             throws UnableToCompleteException {
         typeOracle = context.getTypeOracle();
+
+        iocFactory = new IOCFactory(typeOracle);
+        final JClassType widgetType = getJClassType(Widget.class);
+
+        procFactory.registerHandler(ToRootPanel.class, new AnnotationHandler<ToRootPanel>() {
+            public void handle(JClassType type, ToRootPanel annotation, ProcessingContext context) {
+                if (widgetType.isAssignableFrom(type)) {
+                    context.getWriter().println("widgets.add(" + generateInjectors(context, iocFactory, type) + ");");
+                } else {
+                    throw new RuntimeException("Type declares @ToRootPanel but does not extend type Widget: " + type.getQualifiedSourceName());
+                }
+            }
+        });
 
         try {
             // get classType and save instance variables
@@ -153,32 +167,17 @@ public class IOCGenerator extends Generator {
 
         final List<File> targets = findAllConfigTargets();
 
-        final IOCFactory iocFactory = new IOCFactory(typeOracle);
+
+        final ProcessingContext procContext = new ProcessingContext(logger, context, sourceWriter, typeOracle);
+
 
         visitAllTargets(targets, context, logger, sourceWriter, typeOracle,
                 new RebindVisitor() {
                     public void visit(JClassType visitC, GeneratorContext context, TreeLogger logger, SourceWriter writer) {
-                        try {
-                            if (visitC.isAssignableTo(typeOracle.getType(Widget.class.getName())) && visitC.isAnnotationPresent(ToRootPanel.class)) {
-                                String widgetName = generateInjectors(context, logger, sourceWriter, iocFactory, visitC.getQualifiedSourceName(), visitC);
-                                sourceWriter.println("widgets.add(" + widgetName + ");");
-                            }
-                        }
-                        catch (NotFoundException e) {
-                        }
+                        procFactory.process(visitC, procContext);
                     }
 
                     public void visitError(String className, Throwable t) {
-                        try {
-                            JClassType visit = typeOracle.getType(className);
-                            JClassType widgetType = typeOracle.getType(Widget.class.getName());
-                            if (visit.isAssignableTo(widgetType) && visit.isAnnotationPresent(ToRootPanel.class)) {
-                                String widgetName =  generateInjectors(context, logger, sourceWriter, iocFactory, className, visit);
-                                sourceWriter.println("widgets.add(" + widgetName + ");");
-                            }
-                        }
-                        catch (NotFoundException e) {
-                        }
                     }
                 }
 
@@ -189,11 +188,9 @@ public class IOCGenerator extends Generator {
         sourceWriter.println("}");
     }
 
-    public String generateInjectors(final GeneratorContext context, final TreeLogger logger,
-                                   final SourceWriter sourceWriter,
-                                   final IOCFactory iocFactory,
-                                   final String className,
-                                   final JClassType visit) {
+    public String generateInjectors(final ProcessingContext context,
+                                    final IOCFactory iocFactory,
+                                    final JClassType visit) {
 
         try {
             for (JConstructor c : visit.getConstructors()) {
@@ -206,12 +203,12 @@ public class IOCGenerator extends Generator {
                     }
 
                     String s = (String) TemplateRuntime.execute(widgetBuild, Make.Map.<String, Object>$()
-                            ._("widgetClassName", className)
+                            ._("widgetClassName", visit.getQualifiedSourceName())
                             ._("varName", "widget" + (++varCount))
                             ._("constructorInjection", true)
                             ._("constructorExpressions", constructorExpr)._());
 
-                    sourceWriter.println(s);
+                    context.getWriter().println(s);
 
                     return "widget" + varCount;
                 }
@@ -232,17 +229,26 @@ public class IOCGenerator extends Generator {
             }
 
             String s = (String) TemplateRuntime.execute(widgetBuild, Make.Map.<String, Object>$()
-                    ._("widgetClassName", className)
+                    ._("widgetClassName", visit.getQualifiedSourceName())
                     ._("varName", "widget" + (++varCount))
                     ._("constructorInjection", false)
                     ._("setterPairs", setterPairs)._());
 
-            sourceWriter.println(s);
+            context.getWriter().println(s);
 
             return "widget" + varCount;
         }
         catch (Exception e) {
             throw new RuntimeException("Could  ot create type: " + visit.getName(), e);
+        }
+    }
+
+    public JClassType getJClassType(Class cls) {
+        try {
+            return typeOracle.getType(cls.getName());
+        }
+        catch (NotFoundException e) {
+            return null;
         }
     }
 }

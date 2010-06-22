@@ -501,4 +501,17 @@ public class ConfigUtil {
     public static boolean isAnnotated(Class clazz, Class<? extends Annotation> annotation, Class ofType) {
         return ofType.isAssignableFrom(clazz) && clazz.isAnnotationPresent(annotation);
     }
+
+    public static boolean isAnnotated(JClassType clazz, Class<? extends Annotation> annotation, JClassType ofType) {
+        return ofType.isAssignableFrom(clazz) && clazz.isAnnotationPresent(annotation);
+    }
+
+    public static boolean isAnnotated(JClassType clazz, Class<? extends Annotation> annotation, Class ofType, TypeOracle oracle) {
+        try {
+            return isAnnotated(clazz, annotation, oracle.getType(ofType.getName()));
+        }
+        catch (NotFoundException e) {
+            return false;
+        }
+    }
 }
