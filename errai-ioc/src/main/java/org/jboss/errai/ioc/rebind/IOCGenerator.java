@@ -26,8 +26,12 @@ import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
 import com.google.inject.Inject;
 import org.jboss.errai.bus.rebind.ProcessingContext;
+import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.util.RebindVisitor;
+import org.jboss.errai.ioc.client.InterfaceInjectionContext;
 import org.jboss.errai.ioc.client.api.Bootstrapper;
+import org.jboss.errai.ioc.client.api.CreatePanel;
+import org.jboss.errai.ioc.client.api.ToPanel;
 import org.jboss.errai.ioc.client.api.ToRootPanel;
 import org.mvel2.templates.CompiledTemplate;
 import org.mvel2.templates.TemplateCompiler;
@@ -38,10 +42,7 @@ import org.mvel2.util.ReflectionUtil;
 import java.io.File;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import static org.jboss.errai.bus.server.util.ConfigUtil.*;
 
@@ -87,12 +88,38 @@ public class IOCGenerator extends Generator {
         procFactory.registerHandler(ToRootPanel.class, new AnnotationHandler<ToRootPanel>() {
             public void handle(JClassType type, ToRootPanel annotation, ProcessingContext context) {
                 if (widgetType.isAssignableFrom(type)) {
-                    context.getWriter().println("widgets.add(" + generateInjectors(context, iocFactory, type) + ");");
+                    context.getWriter().println("ctx.addToRootPanel(" + generateInjectors(context, iocFactory, type) + ");");
                 } else {
-                    throw new RuntimeException("Type declares @ToRootPanel but does not extend type Widget: " + type.getQualifiedSourceName());
+                    throw new RuntimeException("Type declares @" + annotation.getClass().getSimpleName()
+                            + "  but does not extend type Widget: " + type.getQualifiedSourceName());
                 }
             }
         });
+
+        procFactory.registerHandler(CreatePanel.class, new AnnotationHandler<CreatePanel>() {
+            public void handle(JClassType type, CreatePanel annotation, ProcessingContext context) {
+                if (widgetType.isAssignableFrom(type)) {
+                    SourceWriter writer = context.getWriter();
+                    writer.println("ctx.registerPanel(\"" + annotation.value() + "\", " + generateInjectors(context, iocFactory, type) + ");");
+                } else {
+                    throw new RuntimeException("Type declares @" + annotation.getClass().getSimpleName()
+                            + "  but does not extend type Widget: " + type.getQualifiedSourceName());
+                }
+            }
+        });
+
+        procFactory.registerHandler(ToPanel.class, new AnnotationHandler<ToPanel>() {
+            public void handle(JClassType type, ToPanel annotation, ProcessingContext context) {
+                if (widgetType.isAssignableFrom(type)) {
+                    SourceWriter writer = context.getWriter();
+                    writer.println("ctx.widgetToPanel(" + generateInjectors(context, iocFactory, type) + ", \"" + annotation.value() + "\");");
+                } else {
+                    throw new RuntimeException("Type declares @" + annotation.getClass().getSimpleName()
+                            + "  but does not extend type Widget: " + type.getQualifiedSourceName());
+                }
+            }
+        });
+
 
         try {
             // get classType and save instance variables
@@ -136,9 +163,13 @@ public class IOCGenerator extends Generator {
                 className);
 
         composer.addImplementedInterface(Bootstrapper.class.getName());
+        composer.addImport(InterfaceInjectionContext.class.getName());
         composer.addImport(Widget.class.getName());
         composer.addImport(List.class.getName());
         composer.addImport(ArrayList.class.getName());
+        composer.addImport(Map.class.getName());
+        composer.addImport(HashMap.class.getName());
+        composer.addImport(com.google.gwt.user.client.ui.Panel.class.getName());
 
         SourceWriter sourceWriter = composer.createSourceWriter(context, printWriter);
 
@@ -161,9 +192,10 @@ public class IOCGenerator extends Generator {
         sourceWriter.outdent();
         sourceWriter.println("}");
 
-        sourceWriter.println("public List<Widget> bootstrapContainer() { ");
+        sourceWriter.println("public InterfaceInjectionContext bootstrapContainer() { ");
         sourceWriter.outdent();
-        sourceWriter.println("List<Widget> widgets = new ArrayList<Widget>();");
+        sourceWriter.println("InterfaceInjectionContext ctx = new InterfaceInjectionContext();");
+
 
         final List<File> targets = findAllConfigTargets();
 
@@ -183,7 +215,7 @@ public class IOCGenerator extends Generator {
 
         );
 
-        sourceWriter.println(" return widgets;");
+        sourceWriter.println(" return ctx;");
         sourceWriter.outdent();
         sourceWriter.println("}");
     }
@@ -216,6 +248,8 @@ public class IOCGenerator extends Generator {
 
             List<SetterPair> setterPairs = new LinkedList<SetterPair>();
 
+            Map<String, String> fieldToServices = new HashMap<String, String>();
+
             for (JField f : visit.getFields()) {
                 if (f.isAnnotationPresent(Inject.class) || f.isAnnotationPresent(javax.inject.Inject.class)) {
                     try {
@@ -225,14 +259,36 @@ public class IOCGenerator extends Generator {
                     catch (NotFoundException e) {
                         setterPairs.add(new SetterPair(true, f.getName(), iocFactory.getInjectorExpression(f.getType().isClassOrInterface())));
                     }
+                } else if (f.isAnnotationPresent(Service.class)) {
+                    Service svc = f.getAnnotation(Service.class);
+                    String name;
+                    if (svc.value() == null) {
+                         name = f.getName();
+                    }
+                    else {
+                        name = svc.value();
+                    }
+
+             //       fieldToServices.put(f.getName(), )
                 }
             }
+
+            String postConstruct = null;
+
+            for (JMethod m : visit.getMethods()) {
+                if (m.isAnnotationPresent(javax.annotation.PostConstruct.class)) {
+                    postConstruct = m.getName();
+                }
+            }
+
 
             String s = (String) TemplateRuntime.execute(widgetBuild, Make.Map.<String, Object>$()
                     ._("widgetClassName", visit.getQualifiedSourceName())
                     ._("varName", "widget" + (++varCount))
                     ._("constructorInjection", false)
-                    ._("setterPairs", setterPairs)._());
+                    ._("setterPairs", setterPairs)
+                    ._("postConstruct", postConstruct)
+                    ._());
 
             context.getWriter().println(s);
 

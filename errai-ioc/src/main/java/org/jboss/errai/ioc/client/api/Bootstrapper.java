@@ -17,9 +17,10 @@
 package org.jboss.errai.ioc.client.api;
 
 import com.google.gwt.user.client.ui.Widget;
+import org.jboss.errai.ioc.client.InterfaceInjectionContext;
 
 import java.util.List;
 
 public interface Bootstrapper {
-    public List<Widget> bootstrapContainer();
+    public InterfaceInjectionContext bootstrapContainer();
 }
