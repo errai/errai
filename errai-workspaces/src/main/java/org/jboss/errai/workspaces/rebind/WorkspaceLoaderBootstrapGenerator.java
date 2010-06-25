@@ -296,7 +296,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
             writer.outdent();
 
             String widgetName = iocGenerator
-                    .generateInjectors(pCtx, factory, type);
+                    .generateInjectors(loadTool, pCtx, factory, type);
 
             writer.println("callback.onSuccess(" + widgetName + ");");
             writer.outdent();
@@ -307,7 +307,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
             providerName = "widgetProvider" + counter;
         } else {
             providerName = iocGenerator
-                    .generateInjectors(pCtx, factory, type);
+                    .generateInjectors(loadTool, pCtx, factory, type);
         }
 
         writer.print("workspace.addTool(\"" + loadTool.group() + "\"," +

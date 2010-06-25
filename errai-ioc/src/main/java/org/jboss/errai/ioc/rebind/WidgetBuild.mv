@@ -1,20 +1,14 @@
-
-@if{constructorInjection}
-    final @{widgetClassName} @{varName} = new @{widgetClassName}(
-        @foreach{expr : constructorExpressions}@{expr}@end{","}
-    );
+@if{constructorInjection}final @{widgetClassName} @{varName} = new @{widgetClassName}(@foreach{expr : constructorExpressions}@{expr}@end{","});
 @else{}
     final @{widgetClassName} @{varName} = new @{widgetClassName} ();
     @foreach{setterPair : setterPairs}
-        @if{setterPair.fieldInjection}
-            @{varName}.@{setterPair.setter} = @{setterPair.expression};
-        @else{}
-            @{varName}.@{setterPair.setter}(@{setterPair.expression});
-        @end{}
+            @{varName}.@{setterPair.toString()};
+
     @end{}
 @end{}
-
 @if{postConstruct != null}
     @{varName}.@{postConstruct}();
 @end{}
-
+@foreach{fieldName : fieldToServices.keySet()}
+    ErraiBus.get().subscribe("@{fieldToServices.get(fieldName)}", @{varName}.@{fieldName});
+@end{}

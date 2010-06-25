@@ -16,30 +16,36 @@
 
 package org.jboss.errai.ioc.rebind;
 
+import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
+import org.jboss.errai.bus.rebind.ProcessingContext;
 
+import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Map;
 
 public class IOCFactory {
-    private Map<Object, String> codeInjectors;
+    private Map<JClassType, String> codeInjectors;
+    private Map<Class<? extends Annotation>, FieldGenerator> fieldGenerators;
 
     public IOCFactory(TypeOracle oracle) {
-        codeInjectors = new HashMap<Object, String>();
+        codeInjectors = new HashMap<JClassType, String>();
+        fieldGenerators = new HashMap<Class<? extends Annotation>, FieldGenerator>() {
+        };
         try {
             codeInjectors.put(oracle.getType(MessageBus.class.getName()), ErraiBus.class.getName() + ".get()");
             codeInjectors.put(oracle.getType(RequestDispatcher.class.getName()), ErraiBus.class.getName() + ".getDispatcher()");
-        }
+                    }
         catch (NotFoundException e) {
             throw new RuntimeException("error", e);
         }
     }
 
-    public void addInjectorExpression(Class type, String expression) {
+    public void addInjectorExpression(JClassType type, String expression) {
         if (codeInjectors.containsKey(type)) {
             throw new RuntimeException("cannot have more than one injector per type: " + type.getClass());
         }
@@ -47,10 +53,31 @@ public class IOCFactory {
         codeInjectors.put(type, expression);
     }
 
-    public String getInjectorExpression(Object type) {
+    public String getInjectorExpression(JClassType type) {
         if (!codeInjectors.containsKey(type))
             throw new RuntimeException("unresolved dependency: " + type.getClass());
 
         return codeInjectors.get(type);
     }
+
+    public void handleInjection(final Annotation annotation,
+                                final ProcessingContext context,
+                                final IOCFactory iocFactory,
+                                final JClassType visit) {
+
+        for (Class<? extends Annotation> aType : fieldGenerators.keySet()) {
+            if (visit.isAnnotationPresent(aType)) {
+                fieldGenerators.get(aType).generate(annotation, context, iocFactory, visit);
+            }
+        }
+    }
+
+    public static interface FieldGenerator {
+        public Expression generate(final Annotation annotation,
+                                   final ProcessingContext context,
+                                   final IOCFactory iocFactory,
+                                   final JClassType visit);
+    }
+
 }
+

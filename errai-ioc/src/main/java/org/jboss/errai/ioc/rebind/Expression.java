@@ -16,12 +16,12 @@
 
 package org.jboss.errai.ioc.rebind;
 
-public class SetterPair {
+public class Expression {
     private boolean fieldInjection;
     private String setter;
     private String expression;
 
-    public SetterPair(boolean fieldInjection, String setter, String expression) {
+    public Expression(boolean fieldInjection, String setter, String expression) {
         this.fieldInjection = fieldInjection;
         this.setter = setter;
         this.expression = expression;
@@ -37,5 +37,9 @@ public class SetterPair {
 
     public String getExpression() {
         return expression;
+    }
+
+    public String toString() {
+        return fieldInjection ? (setter + " = " + expression) : (setter + "(" + expression + ")");     
     }
 }
