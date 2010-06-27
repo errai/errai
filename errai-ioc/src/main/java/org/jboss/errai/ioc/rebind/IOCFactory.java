@@ -23,6 +23,7 @@ import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.rebind.ProcessingContext;
+import org.jboss.errai.ioc.client.api.TypeProvider;
 
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
@@ -30,10 +31,12 @@ import java.util.Map;
 
 public class IOCFactory {
     private Map<JClassType, String> codeInjectors;
+    private Map<JClassType, JClassType> typeProviders;
     private Map<Class<? extends Annotation>, FieldGenerator> fieldGenerators;
 
     public IOCFactory(TypeOracle oracle) {
         codeInjectors = new HashMap<JClassType, String>();
+        typeProviders = new HashMap<JClassType, JClassType>();
         fieldGenerators = new HashMap<Class<? extends Annotation>, FieldGenerator>() {
         };
         try {
@@ -43,6 +46,14 @@ public class IOCFactory {
         catch (NotFoundException e) {
             throw new RuntimeException("error", e);
         }
+    }
+
+    public void registerTypeProvider(JClassType type, JClassType provider) {
+        typeProviders.put(type, provider);
+    }
+    
+    public JClassType getTypeProvider(JClassType type) {
+        return typeProviders.get(type);
     }
 
     public void addInjectorExpression(JClassType type, String expression) {

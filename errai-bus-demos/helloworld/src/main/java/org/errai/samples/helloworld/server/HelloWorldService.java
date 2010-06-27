@@ -11,25 +11,34 @@ import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.util.LocalContext;
 
+
 @Service
 public class HelloWorldService implements MessageCallback {
 
-    private RequestDispatcher dispatcher;
-
     @Inject
-    public HelloWorldService(RequestDispatcher dispatcher) {
-        this.dispatcher = dispatcher;
-    }
+    public RequestDispatcher dispatcher;
 
     public void callback(Message message) {
-        MessageBuilder.createConversation(message)
-                .subjectProvided().signalling()
-                .withProvided("Data", new ResourceProvider<String>() {
-                    public String get() {
-                        return System.currentTimeMillis() + "";
-                    }
-                })
-                .noErrorHandling().sendRepeatingWith(dispatcher, TimeUnit.MILLISECONDS, 50);
 
+        LocalContext ctx = LocalContext.get(message);
+
+        AsyncTask task = ctx.getAttribute(AsyncTask.class);
+        if (task != null) {
+            task.cancel(false);
+            ctx.removeAttribute(AsyncTask.class);
+        } else {
+
+            task = MessageBuilder.createConversation(message)
+                    .toSubject("DataThing").signalling()
+                    .withProvided("Data", new ResourceProvider<String>() {
+                        public String get() {
+                            return System.currentTimeMillis() + "";
+                        }
+                    })
+                    .noErrorHandling().sendRepeatingWith(dispatcher, TimeUnit.MILLISECONDS, 50);
+
+            ctx.setAttribute(AsyncTask.class, task);
+
+        }
     }
 }

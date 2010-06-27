@@ -202,6 +202,46 @@ public class IOCGenerator extends Generator {
 
         final ProcessingContext procContext = new ProcessingContext(logger, context, sourceWriter, typeOracle);
 
+        final JClassType typeProviderCls;
+
+        try {
+            typeProviderCls = typeOracle.getType(TypeProvider.class.getName());
+        }
+        catch (NotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        visitAllTargets(targets, context, logger, sourceWriter, typeOracle, new RebindVisitor() {
+            public void visit(JClassType visit, GeneratorContext context, TreeLogger logger, SourceWriter writer) {
+                if (visit.isAnnotationPresent(Provider.class)) {
+                    JClassType bindType = null;
+
+                    for (JClassType iface : visit.getImplementedInterfaces()) {
+                        if (!typeProviderCls.isAssignableFrom(iface)) {
+                            continue;
+                        }
+
+                        JParameterizedType pType = iface.isParameterized();
+
+                        if (pType == null) {
+                            throw new RuntimeException("could not determine the bind type for the Provider class: " + visit.getQualifiedSourceName());
+                        }
+
+                        bindType = pType.getTypeArgs()[0];
+                    }
+
+                    if (bindType == null) {
+                        throw new RuntimeException("the annotated provider class does not appear to implement " + TypeProvider.class.getName() + ": " + visit.getQualifiedSourceName());
+                    }
+
+                    iocFactory.registerTypeProvider(bindType, visit);
+                }
+            }
+
+            public void visitError(String className, Throwable t) {
+            }
+        });
+
         visitAllTargets(targets, context, logger, sourceWriter, typeOracle,
                 new RebindVisitor() {
                     public void visit(JClassType visitC, GeneratorContext context, TreeLogger logger, SourceWriter writer) {
@@ -280,12 +320,23 @@ public class IOCGenerator extends Generator {
 
             for (final JField f : visit.getFields()) {
                 if (f.isAnnotationPresent(Inject.class) || f.isAnnotationPresent(javax.inject.Inject.class)) {
+                    JClassType fieldType = f.getType().isClassOrInterface();
+
+                    JClassType providerType = iocFactory.getTypeProvider(fieldType);
+
+                    if (providerType == null) {
+                        throw new RuntimeException("no available provider for type: " + fieldType.getQualifiedSourceName());
+                    }
+
+                    final String expr = "new " + providerType.getQualifiedSourceName() + "().provide()";
+
                     try {
                         visit.getMethod(ReflectionUtil.getSetter(f.getName()), new JType[0]);
-                        setterPairs.add(new Expression(false, ReflectionUtil.getSetter(f.getName()), iocFactory.getInjectorExpression(f.getType().isClassOrInterface())));
+
+                        setterPairs.add(new Expression(false, ReflectionUtil.getSetter(f.getName()), expr));
                     }
                     catch (NotFoundException e) {
-                        setterPairs.add(new Expression(true, f.getName(), iocFactory.getInjectorExpression(f.getType().isClassOrInterface())));
+                        setterPairs.add(new Expression(true, f.getName(), expr));
                     }
                 } else if (f.isAnnotationPresent(Service.class)) {
                     Service svc = f.getAnnotation(Service.class);
@@ -317,9 +368,9 @@ public class IOCGenerator extends Generator {
                         if (postConstruct != null) {
                             addDeferred(t, new Runnable() {
                                 public void run() {
-                                     addDeferredExpression(varName, new Expression(false, postConstructMeth, ""));
+                                    addDeferredExpression(varName, new Expression(false, postConstructMeth, ""));
                                 }
-                            }); 
+                            });
                         }
 
                         context.addProcessed(varName, visit, postConstructAnnotation);
