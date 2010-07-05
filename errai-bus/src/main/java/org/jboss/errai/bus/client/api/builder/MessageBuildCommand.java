@@ -4,7 +4,7 @@ package org.jboss.errai.bus.client.api.builder;
  * This interface, <tt>MessageBuildCommand</tt>, is a template for building the command part of a message.
  * This ensures that the call is constructed properly
  */
-public interface MessageBuildCommand<R> extends MessageBuild {
+public interface MessageBuildCommand<R> extends MessageBuildParms<R> {
 
     /**
      * Sets the command for the message, and returns an instance of <tt>MessageBuildParms</tt>, which needs to be
@@ -31,4 +31,7 @@ public interface MessageBuildCommand<R> extends MessageBuild {
      * @return an instance of <tt>MessageBuildParms</tt>
      */
     public MessageBuildParms<R> signalling();
+
+
+
 }

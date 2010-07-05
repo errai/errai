@@ -50,7 +50,6 @@ public class HelloWorld extends SimplePanel {
             public void onClick(ClickEvent event) {
                 MessageBuilder.createMessage()
                         .toSubject("HelloWorldService")
-                        .signalling()
                         .with(MessageParts.ReplyTo, "DataConsumer")
                         .noErrorHandling().sendNowWith(dispatcher);
             }

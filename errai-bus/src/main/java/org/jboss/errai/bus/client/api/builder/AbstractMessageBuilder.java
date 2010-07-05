@@ -120,7 +120,7 @@ public class AbstractMessageBuilder<R extends Sendable> {
                         errorCallback = new AsyncDelegateErrorCallback(this, message.getErrorCallback());
 
                         if (isConversational) {
-                            final Message incomingMsg = ((ConversationMessageWrapper)message).getIncomingMessage();
+                            final Message incomingMsg = ((ConversationMessageWrapper) message).getIncomingMessage();
 
                             if (incomingMsg.hasPart(MessageParts.ReplyTo)) {
 
@@ -245,7 +245,22 @@ public class AbstractMessageBuilder<R extends Sendable> {
             }
         };
 
-        final MessageBuildParms<R> parmBuilder = new MessageBuildParms<R>() {
+        final MessageBuildCommand<R> parmBuilder = new MessageBuildCommand<R>() {
+            public MessageBuildParms<R> command(Enum command) {
+                message.command(command);
+                return this;
+            }
+
+            public MessageBuildParms<R> command(String command) {
+                message.command(command);
+                return this;
+            }
+
+            public MessageBuildParms<R> signalling() {
+                return this;
+            }
+
+
             public MessageBuildParms<R> with(String part, Object value) {
                 message.set(part, value);
                 return this;
@@ -301,34 +316,16 @@ public class AbstractMessageBuilder<R extends Sendable> {
             }
         };
 
-        final MessageBuildCommand<R> command = new MessageBuildCommand<R>() {
-            public MessageBuildParms<R> command(Enum command) {
-                message.command(command);
-                return parmBuilder;
-            }
 
-            public MessageBuildParms<R> command(String command) {
-                message.command(command);
-                return parmBuilder;
-            }
-
-            public MessageBuildParms<R> signalling() {
-                return parmBuilder;
-            }
-
-            public Message getMessage() {
-                return message;
-            }
-        };
 
         return new MessageBuildSubject() {
             public MessageBuildCommand<R> toSubject(String subject) {
                 message.toSubject(subject);
-                return command;
+                return parmBuilder;
             }
 
             public MessageBuildCommand<R> subjectProvided() {
-                return command;
+                return parmBuilder;
             }
 
             public Message getMessage() {
