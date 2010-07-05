@@ -20,7 +20,7 @@ import org.jboss.errai.bus.client.api.*;
 
 /**
  * A message bus is capable of transmitting and receiving messages using the publisher/subscriber
- * mode. All implementations of the bus should implement this interface for both the client-side and the server-side.
+ * model. All implementations of the bus should implement this interface for both the client-side and the server-side.
  * <p/>
  * The MessageBus architecture uses a flat topology with automatic bus-to-bus routing which is accomplished through
  * automatic cross-subscription between federated buses.  However, each bus-to-bus federated relationship has only
@@ -37,8 +37,8 @@ import org.jboss.errai.bus.client.api.*;
  * \_____________________/
  *       (Context A)
  * </pre></tt>
- * The diagram shows two clients federated within the messaging topology.  The context's indicate the scope by which
- * direct communication is possible.  In order to facilitate client-to-client communication, users mus implement
+ * The diagram shows two clients federated within the messaging topology.  The contexts indicate the scope by which
+ * direct communication is possible.  In order to facilitate client-to-client communication, users must implement
  * relay services in the server manually.
  * <p/>
  * Services always live on the bus with which they a registered.  When a new registration occurs, the service
@@ -87,7 +87,7 @@ public interface MessageBus {
     /**
      * Transmits a message.
      *
-     * @param message
+     * @param message 
      */
     public void send(Message message);
 

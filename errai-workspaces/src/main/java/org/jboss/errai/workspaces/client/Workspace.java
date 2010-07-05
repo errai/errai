@@ -39,9 +39,7 @@ import java.util.List;
  * @author Heiko.Braun <heiko.braun@jboss.com>
  */
 public class Workspace extends DeckLayoutPanel implements RequiresResize {
-
     public static final String SUBJECT = "Workspace";
-
     private Menu menu;
 
     private static List<ToolSet> toolSets = new ArrayList<ToolSet>();
@@ -62,7 +60,6 @@ public class Workspace extends DeckLayoutPanel implements RequiresResize {
     private Workspace(Menu menu) {
         super();
 
-        
         this.menu = menu;
         this.setPadding(5);
 

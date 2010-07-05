@@ -280,31 +280,6 @@ public class IOCGenerator extends Generator {
 
 
         try {
-            for (JConstructor c : visit.getConstructors()) {
-                if (c.isAnnotationPresent(Inject.class) || c.isAnnotationPresent(javax.inject.Inject.class)) {
-                    JParameter[] parameterTypes = c.getParameters();
-                    List<String> constructorExpr = new ArrayList<String>(parameterTypes.length);
-
-                    for (JParameter pType : parameterTypes) {
-                        constructorExpr.add(iocFactory.getInjectorExpression(pType.getType().isClassOrInterface()));
-                    }
-
-                    String s = (String) TemplateRuntime.execute(widgetBuild, Make.Map.<String, Object>$()
-                            ._("widgetClassName", visit.getQualifiedSourceName())
-                            ._("varName", varName)
-                            ._("constructorInjection", true)
-                            ._("constructorExpressions", constructorExpr)._());
-
-                    context.getWriter().println(s);
-
-                    context.addProcessed(varName, visit, annotation);
-
-                    fireLoaded(visit);
-
-                    return varName;
-                }
-            }
-
             List<Expression> setterPairs = new LinkedList<Expression>();
 
             Map<String, String> fieldToServices = new HashMap<String, String>();
@@ -314,6 +289,46 @@ public class IOCGenerator extends Generator {
                 if (m.isAnnotationPresent(javax.annotation.PostConstruct.class)) {
                     postConstruct = m.getName();
                     postConstructAnnotation = m.getAnnotation(javax.annotation.PostConstruct.class);
+                }
+            }
+
+            if (postConstruct != null && context.hasProcessed(visit)
+                    && context.getProcessed(visit).hasAnnotation(postConstructAnnotation)) {
+                postConstruct = null;
+            }
+
+            if (postConstruct != null) {
+                addDeferredExpression(varName, new Expression(false, postConstruct, ""));
+                context.addProcessed(varName, visit, postConstructAnnotation);
+            }
+
+            for (JConstructor c : visit.getConstructors()) {
+                if (c.isAnnotationPresent(Inject.class) || c.isAnnotationPresent(javax.inject.Inject.class)) {
+                    JParameter[] parameterTypes = c.getParameters();
+                    List<String> constructorExpr = new ArrayList<String>(parameterTypes.length);
+
+                    for (JParameter pType : parameterTypes) {
+                        constructorExpr.add(iocFactory.getInjectorExpression(pType.getType().isClassOrInterface()));
+                    }
+
+
+                    String s = (String) TemplateRuntime.execute(widgetBuild, Make.Map.<String, Object>$()
+                            ._("widgetClassName", visit.getQualifiedSourceName())
+                            ._("varName", varName)
+                            ._("postConstruct", null)
+                            ._("constructorInjection", true)
+                            ._("fieldToServices", fieldToServices)
+                            ._("setterPairs", setterPairs)
+                            ._("constructorExpressions", constructorExpr)._());
+
+
+                    context.getWriter().println(s);
+
+                    context.addProcessed(varName, visit, annotation);
+
+                    fireLoaded(visit);
+
+                    return varName;
                 }
             }
 
@@ -356,25 +371,13 @@ public class IOCGenerator extends Generator {
                             public void run() {
                                 try {
                                     visit.getMethod(ReflectionUtil.getSetter(f.getName()), new JType[0]);
-                                    addDeferredExpression(varName, new Expression(false, ReflectionUtil.getSetter(f.getName()), context.getProcessed(t).getVarName()));
+                                    addFirstOrderDeferredExpression(varName, new Expression(false, ReflectionUtil.getSetter(f.getName()), context.getProcessed(t).getVarName()));
                                 }
                                 catch (NotFoundException e) {
-                                    addDeferredExpression(varName, new Expression(true, f.getName(), context.getProcessed(t).getVarName()));
+                                    addFirstOrderDeferredExpression(varName, new Expression(true, f.getName(), context.getProcessed(t).getVarName()));
                                 }
                             }
                         });
-
-                        final String postConstructMeth = postConstruct;
-                        if (postConstruct != null) {
-                            addDeferred(t, new Runnable() {
-                                public void run() {
-                                    addDeferredExpression(varName, new Expression(false, postConstructMeth, ""));
-                                }
-                            });
-                        }
-
-                        context.addProcessed(varName, visit, postConstructAnnotation);
-
 
                     } else {
                         try {
@@ -390,17 +393,17 @@ public class IOCGenerator extends Generator {
             }
 
 
-            if (postConstruct != null && context.hasProcessed(visit)
-                    && context.getProcessed(visit).hasAnnotation(postConstructAnnotation)) {
-                postConstruct = null;
-            }
+//            if (postConstruct != null && context.hasProcessed(visit)
+//                    && context.getProcessed(visit).hasAnnotation(postConstructAnnotation)) {
+//                postConstruct = null;
+//            }
 
             String s = (String) TemplateRuntime.execute(widgetBuild, Make.Map.<String, Object>$()
                     ._("widgetClassName", visit.getQualifiedSourceName())
                     ._("varName", varName)
                     ._("constructorInjection", false)
                     ._("setterPairs", setterPairs)
-                    ._("postConstruct", postConstruct)
+                    ._("postConstruct", null)
                     ._("fieldToServices", fieldToServices)
                     ._());
 
@@ -413,7 +416,7 @@ public class IOCGenerator extends Generator {
             return varName;
         }
         catch (Exception e) {
-            throw new RuntimeException("Could  ot create type: " + visit.getName(), e);
+            throw new RuntimeException("Could not create type: " + visit.getName(), e);
         }
     }
 
@@ -422,6 +425,14 @@ public class IOCGenerator extends Generator {
             deferredTasks.put(type, new LinkedList<Runnable>());
 
         deferredTasks.get(type).add(task);
+    }
+
+    public void addFirstOrderDeferredExpression(String name, Expression pair) {
+        if (!deferredExpressions.containsKey(name))
+            deferredExpressions.put(name, new LinkedList<Expression>());
+
+        deferredExpressions.get(name).add(0, pair);
+
     }
 
     public void addDeferredExpression(String name, Expression pair) {
