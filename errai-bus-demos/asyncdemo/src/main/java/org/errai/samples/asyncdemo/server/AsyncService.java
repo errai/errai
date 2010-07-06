@@ -52,7 +52,7 @@ public class AsyncService implements MessageCallback {
                 };
 
                 task = MessageBuilder.createConversation(message)
-                        .subjectProvided().signalling()
+                        .subjectProvided()
                         .withProvided("Data", randomNumberProvider)
                         .noErrorHandling()
                         .replyRepeating(TimeUnit.MILLISECONDS, 50);

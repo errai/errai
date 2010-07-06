@@ -34,7 +34,7 @@ public class BroadcastService implements MessageCallback {
 
     public void callback(Message message) {
         MessageBuilder.createMessage()
-                .toSubject("BroadcastReceiver").signalling()
+                .toSubject("BroadcastReceiver")
                 .copy("BroadcastText", message)
                 .noErrorHandling().sendNowWith(bus);
     }

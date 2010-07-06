@@ -46,7 +46,6 @@ public class SourceViewService implements MessageCallback {
 
     MessageBuilder.createConversation(message)
         .subjectProvided()
-        .signalling()
         .with("source", html)
         .noErrorHandling().sendNowWith(dispatcher);
   }

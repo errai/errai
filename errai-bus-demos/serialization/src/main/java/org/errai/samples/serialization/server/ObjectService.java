@@ -62,7 +62,7 @@ public class ObjectService implements MessageCallback {
         }
 
         MessageBuilder.createConversation(message)
-                .subjectProvided().signalling()
+                .subjectProvided()
                 .with("Records", records)                
                 .noErrorHandling().sendNowWith(bus);
     }

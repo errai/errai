@@ -70,7 +70,7 @@ public class WSTabSelectorDialog extends WSModalDialog {
                         public void onClick(ClickEvent event) {
                             createMessage()
                                     .toSubject((String) instanceProperties.get(LayoutParts.Subject.name()))
-                                    .signalling().noErrorHandling().sendNowWith(ErraiBus.get());
+                                    .noErrorHandling().sendNowWith(ErraiBus.get());
 
                             window.hide();
                         }

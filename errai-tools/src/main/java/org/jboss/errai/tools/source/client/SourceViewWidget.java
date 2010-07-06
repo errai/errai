@@ -85,7 +85,6 @@ class SourceViewWidget extends LayoutPanel {
     public void requestSource(String className) {
         MessageBuilder.createMessage()
                 .toSubject("SourceViewService")
-                .signalling()
                 .with(MessageParts.ReplyTo, "SourceViewClient")
                 .with("className", className)
                 .noErrorHandling()

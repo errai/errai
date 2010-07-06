@@ -99,7 +99,6 @@ public class RolesRequiredRule implements BooleanRoutingRule {
             if (!subject.getRoles().containsAll(requiredRoles)) {
                 createConversation(message)
                         .toSubject("ClientErrorService")
-                        .signalling()
                         .with(MessageParts.ErrorMessage, "Access denied to service: "
                                 + message.get(String.class, MessageParts.ToSubject) +
                                 " (Required Roles: [" + getRequiredRolesString() + "])")

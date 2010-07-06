@@ -87,7 +87,7 @@ public class ErrorHelper {
         } else {
 
             MessageBuilder.createConversation(message)
-                    .toSubject("ClientBusErrors").signalling()
+                    .toSubject("ClientBusErrors")
                     .with("ErrorMessage", errorMessage)
                     .with("AdditionalDetails", additionalDetails)
                     .noErrorHandling().sendNowWith(bus);
@@ -97,7 +97,7 @@ public class ErrorHelper {
 
     public static void sendClientError(MessageBus bus, String queueId, String errorMessage, String additionalDetails) {
         MessageBuilder.createMessage()
-                .toSubject("ClientBusErrors").signalling()
+                .toSubject("ClientBusErrors")
                 .with("ErrorMessage", errorMessage)
                 .with("AdditionalDetails", additionalDetails)
                 .with(MessageParts.SessionID, queueId)

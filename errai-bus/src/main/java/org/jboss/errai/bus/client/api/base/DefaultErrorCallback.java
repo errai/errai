@@ -48,7 +48,7 @@ public class DefaultErrorCallback implements ErrorCallback {
             }
 
             createConversation(message)
-                    .toSubject("ClientBusErrors").signalling()
+                    .toSubject("ClientBusErrors")
                     .with("ErrorMessage", e.getMessage())
                     .with("AdditionalDetails", a.toString())
                     .noErrorHandling().reply();
@@ -56,7 +56,7 @@ public class DefaultErrorCallback implements ErrorCallback {
 
         } else {
             createConversation(message)
-                    .toSubject("ClientBusErrors").signalling()
+                    .toSubject("ClientBusErrors")
                     .with("ErrorMessage", e.getMessage())
                     .with("AdditionalDetails", "No additional details")
                     .noErrorHandling().reply();

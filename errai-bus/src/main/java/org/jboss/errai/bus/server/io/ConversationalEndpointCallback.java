@@ -79,7 +79,7 @@ public class ConversationalEndpointCallback implements MessageCallback {
 
         try {
             createConversation(message)
-                    .subjectProvided().signalling()
+                    .subjectProvided()
                     .with("MethodReply", method.invoke(genericSvc, parms))
                     .noErrorHandling().sendNowWith(bus);
 

@@ -56,7 +56,6 @@ public class Serialization implements EntryPoint {
 
                         try {
                             MessageBuilder.createMessage().toSubject("ObjectService")
-                                    .signalling()
                                     .with("Recs", records)
                                     .noErrorHandling().sendNowWith(bus);
                         }
@@ -71,7 +70,6 @@ public class Serialization implements EntryPoint {
             public void onClick(ClickEvent clickEvent) {
                 MessageBuilder.createMessage()
                         .toSubject("ObjectService")
-                        .signalling()
                         .with(MessageParts.ReplyTo, "ClientEndpoint")
                         .noErrorHandling().sendNowWith(bus);
             }

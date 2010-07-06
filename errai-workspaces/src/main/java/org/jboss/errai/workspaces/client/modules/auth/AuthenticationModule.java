@@ -63,7 +63,6 @@ public class AuthenticationModule implements Module, MessageCallback
     public void run() {
       createMessage()
           .toSubject("AuthorizationService")
-          .signalling()
           .with(MessageParts.ReplyTo, "AuthorizationListener")
           .noErrorHandling().sendNowWith(ErraiBus.get());
     }
@@ -212,7 +211,6 @@ public class AuthenticationModule implements Module, MessageCallback
 
     MessageBuilder.createMessage()
         .toSubject("appContext.login")
-        .signalling()
         .with("username", userName)
         .noErrorHandling()
         .sendNowWith(ErraiBus.get());

@@ -110,7 +110,7 @@ class DefaultServices implements BootstrapExecution
     bus.subscribe(ErraiService.SERVER_ECHO_SERVICE, new MessageCallback() {
       public void callback(Message c) {
         MessageBuilder.createConversation(c)
-            .subjectProvided().signalling().noErrorHandling()
+            .subjectProvided().noErrorHandling()
             .sendNowWith(bus);
       }
     });

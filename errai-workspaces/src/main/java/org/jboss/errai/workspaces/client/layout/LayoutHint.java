@@ -60,7 +60,7 @@ public class LayoutHint {
         for (String s : MANAGED_SUBJECTS.keySet()) {
             if ((p = findProvider(s)) != null && p.getWidthHint() > 0 && p.getHeightHint() > 0) {
                 MessageBuilder.createMessage()
-                        .toSubject(s).signalling()
+                        .toSubject(s)
                         .with(LayoutParts.Width, p.getWidthHint())
                         .with(LayoutParts.Height, p.getHeightHint())
                         .noErrorHandling().sendNowWith(ErraiBus.get());

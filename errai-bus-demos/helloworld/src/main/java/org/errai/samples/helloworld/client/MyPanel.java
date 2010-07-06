@@ -46,7 +46,7 @@ public class MyPanel extends VerticalPanel {
             public void onClick(ClickEvent event) {
                 MessageBuilder.createMessage()
                         .toSubject("HelloWorldService")
-                        .signalling().noErrorHandling()
+                        .noErrorHandling()
                         .sendNowWith(dispatcher);
             }
         });

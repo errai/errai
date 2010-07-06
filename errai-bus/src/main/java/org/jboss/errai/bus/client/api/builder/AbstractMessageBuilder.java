@@ -123,7 +123,6 @@ public class AbstractMessageBuilder<R extends Sendable> {
                             final Message incomingMsg = ((ConversationMessageWrapper) message).getIncomingMessage();
 
                             if (incomingMsg.hasPart(MessageParts.ReplyTo)) {
-
                                 sender = new Runnable() {
                                     final String replyTo = incomingMsg
                                             .get(String.class, MessageParts.ReplyTo);

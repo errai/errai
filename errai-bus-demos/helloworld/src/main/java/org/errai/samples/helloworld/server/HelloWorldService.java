@@ -29,7 +29,7 @@ public class HelloWorldService implements MessageCallback {
         } else {
 
             task = MessageBuilder.createConversation(message)
-                    .toSubject("DataThing").signalling()
+                    .toSubject("DataThing")
                     .withProvided("Data", new ResourceProvider<String>() {
                         public String get() {
                             return System.currentTimeMillis() + "";
