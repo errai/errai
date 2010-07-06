@@ -321,6 +321,7 @@ public class IOCGenerator extends Generator {
                             ._("setterPairs", setterPairs)
                             ._("constructorExpressions", constructorExpr)._());
 
+                    s = s.replaceAll("\n", "").replaceAll(";", ";\n");
 
                     context.getWriter().println(s);
 
@@ -392,12 +393,6 @@ public class IOCGenerator extends Generator {
 
             }
 
-
-//            if (postConstruct != null && context.hasProcessed(visit)
-//                    && context.getProcessed(visit).hasAnnotation(postConstructAnnotation)) {
-//                postConstruct = null;
-//            }
-
             String s = (String) TemplateRuntime.execute(widgetBuild, Make.Map.<String, Object>$()
                     ._("widgetClassName", visit.getQualifiedSourceName())
                     ._("varName", varName)
@@ -406,6 +401,8 @@ public class IOCGenerator extends Generator {
                     ._("postConstruct", null)
                     ._("fieldToServices", fieldToServices)
                     ._());
+
+            s = s.replaceAll("\n", "").replaceAll(";", ";\n");
 
             context.getWriter().println(s);
 
