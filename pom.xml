@@ -32,6 +32,7 @@
         <guice.version>2.0</guice.version>
         <mvel.version>2.0.18</mvel.version>
         <mosaic.version>0.4.0-rc4</mosaic.version>
+        <appengine.version>1.3.5</appengine.version>
     </properties>
 
     <modules>
@@ -41,7 +42,7 @@
         <module>errai-widgets</module>
         <module>errai-bus</module>
         <module>errai-persistence</module>
-        <module>errai-tools</module>
+        <module>errai-tools</module>        
     </modules>
 
     <dependencyManagement>
@@ -102,6 +103,21 @@
             <!--<artifactId>hibernate-core</artifactId>-->
             <!--<version>3.3.1.GA</version>-->
             <!--</dependency>-->
+            
+            <dependency>
+            <groupId>com.google.appengine</groupId>
+            <artifactId>appengine-api</artifactId>
+            <version>${appengine.version}</version>
+            <scope>provided</scope>
+            </dependency>
+            
+            <dependency>
+            <groupId>com.google.appengine</groupId>
+            <artifactId>appengine-api-labs</artifactId>
+            <version>${appengine.version}</version>
+            <scope>provided</scope>
+            </dependency>
+            
         </dependencies>
     </dependencyManagement>
 
