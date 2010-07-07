@@ -23,6 +23,10 @@ public class InjectorFactory {
             @Override
             public String generateDecorator(Service annotation, TaskType taskType, JMethod method, JField field,
                                             JClassType type, Injector injector, InjectionContext ctx) {
+
+                /**
+                 * Get an instance of the message bus.
+                 */
                 String inj = ctx.getInjector(ctx.getProcessingContext().loadClassType(MessageBus.class)).getType(ctx);
                 String expr = null;
                 String svcName = annotation.value();
@@ -32,6 +36,7 @@ public class InjectorFactory {
                             svcName = field.getName();
                         }
 
+                        // generate the expression to get access to the MessageCallback field.
                         expr = injector.getVarName() + "." + field.getName();
 
                         break;
@@ -40,6 +45,8 @@ public class InjectorFactory {
                         if ("".equals(svcName)) {
                             svcName = field.getName();
                         }
+
+                        // generate the expression to get access to the getter which returns a MessageCallback
                         expr = injector.getVarName() + "." + method.getName() + "()";
                         break;
 
@@ -47,6 +54,8 @@ public class InjectorFactory {
                         if ("".equals(svcName)) {
                             svcName = type.getName();
                         }
+
+                        // generate an expression with the variable of the injected type.
                         expr = injector.getVarName();
 
                         break;
