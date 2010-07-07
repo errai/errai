@@ -28,10 +28,14 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
 import org.jboss.errai.bus.client.ErraiBus;
+import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.rebind.ProcessingContext;
+import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.util.RebindVisitor;
 import org.jboss.errai.ioc.client.InterfaceInjectionContext;
 import org.jboss.errai.ioc.client.api.*;
+import org.jboss.errai.ioc.rebind.ioc.InjectionFailure;
 import org.jboss.errai.ioc.rebind.ioc.InjectorFactory;
 import org.jboss.errai.ioc.rebind.ioc.ProviderInjector;
 
@@ -57,7 +61,7 @@ public class IOCGenerator extends Generator {
 
     private ProcessingContext procContext;
     private InjectorFactory injectFactory;
-    private ProcessorFactory procFactory = new ProcessorFactory();
+    private ProcessorFactory procFactory;
 
     private List<Runnable> deferredTasks = new LinkedList<Runnable>();
 
@@ -69,6 +73,8 @@ public class IOCGenerator extends Generator {
         this.procContext = processingContext;
         this.typeOracle = processingContext.getOracle();
         this.injectFactory = new InjectorFactory(processingContext);
+        this.procFactory = new ProcessorFactory(injectFactory);
+        defaultConfigureProcessor();
     }
 
     @Override
@@ -78,63 +84,6 @@ public class IOCGenerator extends Generator {
 
 
         //   iocFactory = new IOCFactory(typeOracle);
-        final JClassType widgetType = getJClassType(Widget.class);
-
-        procFactory.registerHandler(ToRootPanel.class, new AnnotationHandler<ToRootPanel>() {
-            public void handle(final JClassType type, final ToRootPanel annotation, final ProcessingContext context) {
-                if (widgetType.isAssignableFrom(type)) {
-                    injectFactory.addType(type);
-
-                    addDeferred(new Runnable() {
-                        public void run() {
-                            context.getWriter().println("ctx.addToRootPanel(" + generateInjectors(type) + ");");
-                        }
-                    });
-
-
-                } else {
-                    throw new RuntimeException("Type declares @" + annotation.getClass().getSimpleName()
-                            + "  but does not extend type Widget: " + type.getQualifiedSourceName());
-                }
-            }
-        });
-
-        procFactory.registerHandler(CreatePanel.class, new AnnotationHandler<CreatePanel>() {
-            public void handle(final JClassType type, final CreatePanel annotation, final ProcessingContext context) {
-                if (widgetType.isAssignableFrom(type)) {
-                    injectFactory.addType(type);
-
-                    addDeferred(new Runnable() {
-                        public void run() {
-                            SourceWriter writer = context.getWriter();
-                            writer.println("ctx.registerPanel(\"" + (annotation.value().equals("")
-                                    ? type.getName() : annotation.value()) + "\", " + generateInjectors(type) + ");");
-                        }
-                    });
-                } else {
-                    throw new RuntimeException("Type declares @" + annotation.getClass().getSimpleName()
-                            + "  but does not extend type Widget: " + type.getQualifiedSourceName());
-                }
-            }
-        });
-
-        procFactory.registerHandler(ToPanel.class, new AnnotationHandler<ToPanel>() {
-            public void handle(final JClassType type, final ToPanel annotation, final ProcessingContext context) {
-                if (widgetType.isAssignableFrom(type)) {
-                    injectFactory.addType(type);
-
-                    addDeferred(new Runnable() {
-                        public void run() {
-                            SourceWriter writer = context.getWriter();
-                            writer.println("ctx.widgetToPanel(" + generateInjectors(type) + ", \"" + annotation.value() + "\");");
-                        }
-                    });
-                } else {
-                    throw new RuntimeException("Type declares @" + annotation.getClass().getSimpleName()
-                            + "  but does not extend type Widget: " + type.getQualifiedSourceName());
-                }
-            }
-        });
 
 
         try {
@@ -192,6 +141,8 @@ public class IOCGenerator extends Generator {
 
         procContext = new ProcessingContext(logger, context, sourceWriter, typeOracle);
         injectFactory = new InjectorFactory(procContext);
+        procFactory = new ProcessorFactory(injectFactory);
+        defaultConfigureProcessor();
 
         // generator constructor source code
         initializeProviders(context, logger, sourceWriter);
@@ -312,5 +263,85 @@ public class IOCGenerator extends Generator {
         catch (NotFoundException e) {
             return null;
         }
+    }
+
+    private void defaultConfigureProcessor() {
+        final JClassType widgetType = getJClassType(Widget.class);
+        final JClassType messageCallbackType = getJClassType(MessageCallback.class);
+        final JClassType messageBusType = getJClassType(MessageBus.class);
+
+        procFactory.registerHandler(ToRootPanel.class, new AnnotationHandler<ToRootPanel>() {
+            public void handle(final JClassType type, final ToRootPanel annotation, final ProcessingContext context) {
+                if (widgetType.isAssignableFrom(type)) {
+
+                    addDeferred(new Runnable() {
+                        public void run() {
+                            context.getWriter().println("ctx.addToRootPanel(" + generateInjectors(type) + ");");
+                        }
+                    });
+
+
+                } else {
+                    throw new InjectionFailure("type declares @" + annotation.getClass().getSimpleName()
+                            + "  but does not extend type Widget: " + type.getQualifiedSourceName());
+                }
+            }
+        });
+
+        procFactory.registerHandler(CreatePanel.class, new AnnotationHandler<CreatePanel>() {
+            public void handle(final JClassType type, final CreatePanel annotation, final ProcessingContext context) {
+                if (widgetType.isAssignableFrom(type)) {
+
+                    addDeferred(new Runnable() {
+                        public void run() {
+                            context.getWriter().println("ctx.registerPanel(\"" + (annotation.value().equals("")
+                                    ? type.getName() : annotation.value()) + "\", " + generateInjectors(type) + ");");
+                        }
+                    });
+                } else {
+                    throw new InjectionFailure("type declares @" + annotation.getClass().getSimpleName()
+                            + "  but does not extend type Widget: " + type.getQualifiedSourceName());
+                }
+            }
+        });
+
+        procFactory.registerHandler(ToPanel.class, new AnnotationHandler<ToPanel>() {
+            public void handle(final JClassType type, final ToPanel annotation, final ProcessingContext context) {
+                if (widgetType.isAssignableFrom(type)) {
+
+                    addDeferred(new Runnable() {
+                        public void run() {
+                            context.getWriter()
+                                    .println("ctx.widgetToPanel(" + generateInjectors(type) + ", \"" + annotation.value() + "\");");
+                        }
+                    });
+                } else {
+                    throw new InjectionFailure("type declares @" + annotation.getClass().getSimpleName()
+                            + "  but does not extend type Widget: " + type.getQualifiedSourceName());
+                }
+            }
+        });
+
+        procFactory.registerHandler(Service.class, new AnnotationHandler<Service>() {
+            public void handle(final JClassType type, final Service annotation, final ProcessingContext context) {
+                if (messageCallbackType.isAssignableFrom(type)) {
+                    addDeferred(new Runnable() {
+                        public void run() {
+                            String svcName = annotation.value().equals("") ? type.getName() : annotation.value();
+
+                            String busInstance = generateInjectors(messageBusType);
+                            String svcInstance = generateInjectors(type);
+
+                            context.getWriter()
+                                    .println(busInstance + ".subscribe(\"" + svcName + "\", " + svcInstance + ");");
+                        }
+                    });
+                } else {
+                    throw new InjectionFailure("@Servie annotated class does not implement MessageCallaback: "
+                            + type.getQualifiedSourceName());
+                }
+            }
+        });
+
     }
 }

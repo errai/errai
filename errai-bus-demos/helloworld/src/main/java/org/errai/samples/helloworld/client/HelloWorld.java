@@ -17,7 +17,8 @@ import org.jboss.errai.ioc.client.api.ToPanel;
 import javax.annotation.PostConstruct;
 
 @ToPanel("MyPanel")
-public class HelloWorld extends SimplePanel {
+@Service("DataConsumer")
+public class HelloWorld extends SimplePanel implements MessageCallback {
     @Inject
     public RequestDispatcher dispatcher;
 
@@ -27,12 +28,9 @@ public class HelloWorld extends SimplePanel {
     final Button sayHello;
     final Label data;
 
-    @Service("DataConsumer")
-    public MessageCallback callback = new MessageCallback() {
-        public void callback(Message message) {
-            data.setText(message.get(String.class, "Data"));
-        }
-    };
+    public void callback(Message message) {
+        data.setText(message.get(String.class, "Data"));
+    }
 
     public HelloWorld() {
         sayHello = new Button("Say Hello!");

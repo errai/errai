@@ -7,9 +7,6 @@ import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.rebind.ProcessingContext;
 import org.jboss.errai.bus.server.annotations.Service;
 
-import java.lang.annotation.Annotation;
-
-
 public class InjectorFactory {
     private final InjectionContext ctx;
 
