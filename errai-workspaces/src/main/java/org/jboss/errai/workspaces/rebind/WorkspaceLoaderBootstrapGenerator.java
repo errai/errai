@@ -31,7 +31,6 @@ import org.jboss.errai.bus.rebind.ProcessingContext;
 import org.jboss.errai.bus.server.annotations.security.RequireRoles;
 import org.jboss.errai.bus.server.util.ConfigUtil;
 import org.jboss.errai.bus.server.util.RebindVisitor;
-import org.jboss.errai.ioc.rebind.IOCFactory;
 import org.jboss.errai.ioc.rebind.IOCGenerator;
 import org.jboss.errai.workspaces.client.api.ProvisioningCallback;
 import org.jboss.errai.workspaces.client.api.WidgetProvider;
@@ -70,7 +69,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
                            String typeName) throws UnableToCompleteException {
 
         typeOracle = context.getTypeOracle();
-        iocGenerator = new IOCGenerator(typeOracle);
+
 
         try {
             // get classType and save instance variables
@@ -116,6 +115,8 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
         composer.addImplementedInterface("org.jboss.errai.workspaces.client.framework.WorkspaceConfig");
 
         SourceWriter sourceWriter = composer.createSourceWriter(context, printWriter);
+
+        iocGenerator = new IOCGenerator(new ProcessingContext(logger, context, sourceWriter, typeOracle));
 
         // generator constructor source code
         generateBootstrapClass(context, logger, sourceWriter);
@@ -194,7 +195,6 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
         List<File> targets = ConfigUtil.findAllConfigTargets();
 
         final boolean applyFilter = in != null;
-        final IOCFactory factory = new IOCFactory(typeOracle);
 
         ConfigUtil.visitAllTargets(
                 targets, context, logger,
@@ -202,7 +202,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
                 new RebindVisitor() {
                     public void visit(JClassType clazz, GeneratorContext context, TreeLogger logger,
                                       SourceWriter writer) {
-                        visitTool(clazz, context, writer, logger, applyFilter, factory, enabledTools);
+                        visitTool(clazz, context, writer, logger, applyFilter, enabledTools);
                     }
 
                     public void visitError(String className, Throwable t) {
@@ -220,7 +220,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
         sourceWriter.println("}");
     }
 
-    public void visitTool(JClassType clazz, GeneratorContext context, SourceWriter writer, TreeLogger logger, boolean applyFilter, IOCFactory factory, List<String> enabledTools) {
+    public void visitTool(JClassType clazz, GeneratorContext context, SourceWriter writer, TreeLogger logger, boolean applyFilter, List<String> enabledTools) {
         if (clazz.isAnnotationPresent(LoadToolSet.class)
                 && (!applyFilter || enabledTools.contains(clazz.getQualifiedSourceName()))) {
             writer.println("workspace.addToolSet(new " + clazz.getQualifiedSourceName() + "());");
@@ -241,10 +241,10 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
                 }
                 rolesBuilder.append("}");
 
-                generateWidgetProvisioning(context, clazz.getQualifiedSourceName(), loadTool, rolesBuilder, factory, logger, writer);
+                generateWidgetProvisioning(context, clazz.getQualifiedSourceName(), loadTool, rolesBuilder, logger, writer);
 
             } else {
-                generateWidgetProvisioning(context, clazz.getQualifiedSourceName(), loadTool, null, factory, logger, writer);
+                generateWidgetProvisioning(context, clazz.getQualifiedSourceName(), loadTool, null, logger, writer);
 
             }
         } else if (clazz.isAnnotationPresent(LoginComponent.class)) {
@@ -274,7 +274,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
         }
     }
 
-    public void generateWidgetProvisioning(final GeneratorContext context, String className, final LoadTool loadTool, final StringBuilder rolesBuilder, final IOCFactory factory, final TreeLogger logger, final SourceWriter writer) {
+    public void generateWidgetProvisioning(final GeneratorContext context, String className, final LoadTool loadTool, final StringBuilder rolesBuilder, final TreeLogger logger, final SourceWriter writer) {
         JClassType type;
         JClassType widgetType;
         try {
@@ -286,7 +286,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
         }
 
         String providerName;
-        
+
         final ProcessingContext pCtx = new ProcessingContext(logger, context, writer, typeOracle);
 
         if (widgetType.isAssignableFrom(type)) {
@@ -296,7 +296,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
             writer.outdent();
 
             String widgetName = iocGenerator
-                    .generateInjectors(loadTool, pCtx, factory, type);
+                    .generateInjectors(type);
 
             writer.println("callback.onSuccess(" + widgetName + ");");
             writer.outdent();
@@ -307,7 +307,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
             providerName = "widgetProvider" + counter;
         } else {
             providerName = iocGenerator
-                    .generateInjectors(loadTool, pCtx, factory, type);
+                    .generateInjectors(type);
         }
 
         writer.print("workspace.addTool(\"" + loadTool.group() + "\"," +

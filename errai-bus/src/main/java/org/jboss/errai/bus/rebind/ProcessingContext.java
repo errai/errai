@@ -3,6 +3,7 @@ package org.jboss.errai.bus.rebind;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.user.rebind.SourceWriter;
 
@@ -57,6 +58,15 @@ public class ProcessingContext {
 
     public Generated getProcessed(JClassType type) {
         return processedAnnotations.get(type);
+    }
+
+    public JClassType loadClassType(Class clazz) {
+        try {
+            return getOracle().getType(clazz.getName());
+        }
+        catch (NotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static class Generated {

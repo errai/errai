@@ -21,7 +21,7 @@ public class HelloWorld extends SimplePanel {
     @Inject
     public RequestDispatcher dispatcher;
 
-    @InjectPanel
+    @Inject
     public MyPanel panel;
 
     final Button sayHello;

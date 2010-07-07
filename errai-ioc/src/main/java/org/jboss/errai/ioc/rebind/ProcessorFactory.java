@@ -10,8 +10,6 @@ import java.util.Map;
 public class ProcessorFactory {
     private Map<Class<? extends Annotation>, AnnotationHandler> annotationHandlers;
 
-
-
     public ProcessorFactory() {
         this.annotationHandlers = new HashMap<Class<? extends Annotation>, AnnotationHandler>();
     }
