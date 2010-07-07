@@ -20,32 +20,27 @@ import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.core.ext.typeinfo.*;
+import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.JParameterizedType;
+import com.google.gwt.core.ext.typeinfo.NotFoundException;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
-import com.google.inject.Inject;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.rebind.ProcessingContext;
-import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.util.RebindVisitor;
 import org.jboss.errai.ioc.client.InterfaceInjectionContext;
 import org.jboss.errai.ioc.client.api.*;
-import org.jboss.errai.ioc.rebind.ioc.*;
-import org.mvel2.templates.CompiledTemplate;
-import org.mvel2.templates.TemplateCompiler;
-import org.mvel2.templates.TemplateRuntime;
-import org.mvel2.util.Make;
-import org.mvel2.util.ReflectionUtil;
+import org.jboss.errai.ioc.rebind.ioc.InjectorFactory;
+import org.jboss.errai.ioc.rebind.ioc.ProviderInjector;
 
-import javax.annotation.PostConstruct;
 import java.io.File;
-import java.io.InputStream;
 import java.io.PrintWriter;
-import java.lang.annotation.Annotation;
 import java.util.*;
 
-import static org.jboss.errai.bus.server.util.ConfigUtil.*;
+import static org.jboss.errai.bus.server.util.ConfigUtil.findAllConfigTargets;
+import static org.jboss.errai.bus.server.util.ConfigUtil.visitAllTargets;
 
 public class IOCGenerator extends Generator {
     /**
@@ -59,11 +54,7 @@ public class IOCGenerator extends Generator {
     private String packageName = null;
 
     private TypeOracle typeOracle;
-    private final CompiledTemplate widgetBuild;
 
-    private int varCount = 0;
-
-    //  private IOCFactory iocFactory;
     private ProcessingContext procContext;
     private InjectorFactory injectFactory;
     private ProcessorFactory procFactory = new ProcessorFactory();
@@ -71,13 +62,13 @@ public class IOCGenerator extends Generator {
     private List<Runnable> deferredTasks = new LinkedList<Runnable>();
 
     public IOCGenerator() {
-        InputStream istream = this.getClass().getResourceAsStream("WidgetBuild.mv");
-        widgetBuild = TemplateCompiler.compileTemplate(istream);
     }
 
     public IOCGenerator(ProcessingContext processingContext) {
         this();
         this.procContext = processingContext;
+        this.typeOracle = processingContext.getOracle();
+        this.injectFactory = new InjectorFactory(processingContext);
     }
 
     @Override
@@ -156,7 +147,7 @@ public class IOCGenerator extends Generator {
             logger.log(TreeLogger.INFO, "Generating Extensions Bootstrapper...");
 
             // Generate class source code
-            generateClass(logger, context);
+            generateIOCBootstrapClass(logger, context);
         }
         catch (Throwable e) {
             // record sendNowWith logger that Map generation threw an exception
@@ -175,7 +166,7 @@ public class IOCGenerator extends Generator {
      * @param logger  Logger object
      * @param context Generator context
      */
-    private void generateClass(TreeLogger logger, GeneratorContext context) {
+    private void generateIOCBootstrapClass(TreeLogger logger, GeneratorContext context) {
 
         // get print writer that receives the source code
         PrintWriter printWriter = context.tryCreate(logger, packageName, className);
@@ -203,6 +194,7 @@ public class IOCGenerator extends Generator {
         injectFactory = new InjectorFactory(procContext);
 
         // generator constructor source code
+        initializeProviders(context, logger, sourceWriter);
         generateExtensions(context, logger, sourceWriter);
         // close generated class
         sourceWriter.outdent();
@@ -213,22 +205,8 @@ public class IOCGenerator extends Generator {
         context.commit(logger, printWriter);
     }
 
-    private void generateExtensions(final GeneratorContext context, final TreeLogger logger, final SourceWriter sourceWriter) {
-        // start constructor source generation
-        sourceWriter.println("public " + className + "() { ");
-        sourceWriter.indent();
-        sourceWriter.println("super();");
-        sourceWriter.outdent();
-        sourceWriter.println("}");
-
-        sourceWriter.println("public InterfaceInjectionContext bootstrapContainer() { ");
-        sourceWriter.outdent();
-        sourceWriter.println("InterfaceInjectionContext ctx = new InterfaceInjectionContext();");
-
+    public void initializeProviders(final GeneratorContext context, final TreeLogger logger, final SourceWriter sourceWriter) {
         final List<File> targets = findAllConfigTargets();
-
-        // final ProcessingContext procContext = new ProcessingContext(logger, context, sourceWriter, typeOracle);
-
 
         final JClassType typeProviderCls;
 
@@ -272,6 +250,24 @@ public class IOCGenerator extends Generator {
             public void visitError(String className, Throwable t) {
             }
         });
+    }
+
+    private void generateExtensions(final GeneratorContext context, final TreeLogger logger, final SourceWriter sourceWriter) {
+        // start constructor source generation
+        sourceWriter.println("public " + className + "() { ");
+        sourceWriter.indent();
+        sourceWriter.println("super();");
+        sourceWriter.outdent();
+        sourceWriter.println("}");
+
+        sourceWriter.println("public InterfaceInjectionContext bootstrapContainer() { ");
+        sourceWriter.outdent();
+        sourceWriter.println("InterfaceInjectionContext ctx = new InterfaceInjectionContext();");
+
+        final List<File> targets = findAllConfigTargets();
+
+        // final ProcessingContext procContext = new ProcessingContext(logger, context, sourceWriter, typeOracle);
+
 
         visitAllTargets(targets, context, logger, sourceWriter, typeOracle,
                 new RebindVisitor() {
@@ -292,6 +288,9 @@ public class IOCGenerator extends Generator {
         sourceWriter.println("}");
     }
 
+    public void addType(final JClassType type) {
+        injectFactory.addType(type);
+    }
 
     public String generateInjectors(final JClassType visit) {
         return injectFactory.generate(visit);

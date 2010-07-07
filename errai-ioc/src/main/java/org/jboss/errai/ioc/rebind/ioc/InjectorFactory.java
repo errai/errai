@@ -52,7 +52,7 @@ public class InjectorFactory {
                         break;
                 }
 
-                return inj + ".subscribe(\"" + svcName + "\", " + expr + ");";
+                return inj + ".subscribe(\"" + svcName + "\", " + expr + ");\n";
             }
         });
     }

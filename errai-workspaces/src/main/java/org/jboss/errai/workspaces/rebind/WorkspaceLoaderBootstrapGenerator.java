@@ -117,6 +117,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
         SourceWriter sourceWriter = composer.createSourceWriter(context, printWriter);
 
         iocGenerator = new IOCGenerator(new ProcessingContext(logger, context, sourceWriter, typeOracle));
+        iocGenerator.initializeProviders(context, logger, sourceWriter);
 
         // generator constructor source code
         generateBootstrapClass(context, logger, sourceWriter);
@@ -228,6 +229,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
         } else if (clazz.isAnnotationPresent(LoadTool.class)
                 && (!applyFilter || enabledTools.contains(clazz.getQualifiedSourceName()))) {
             LoadTool loadTool = clazz.getAnnotation(LoadTool.class);
+            iocGenerator.addType(clazz);
 
             if (clazz.isAnnotationPresent(RequireRoles.class)) {
                 RequireRoles requireRoles = clazz.getAnnotation(RequireRoles.class);
