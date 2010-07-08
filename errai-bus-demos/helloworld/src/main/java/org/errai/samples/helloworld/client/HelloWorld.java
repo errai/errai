@@ -19,8 +19,8 @@ import javax.inject.Singleton;
 
 @ToPanel("MyPanel") @Service("DataConsumer") @Singleton
 public class HelloWorld extends SimplePanel implements MessageCallback {
-    @Inject private RequestDispatcher dispatcher;
-    @Inject private MyPanel panel;
+    private RequestDispatcher dispatcher;
+    private MyPanel panel;
 
     final Button sayHello;
     final Label data;
@@ -51,10 +51,12 @@ public class HelloWorld extends SimplePanel implements MessageCallback {
         });
     }
 
+    @Inject
     public void setDispatcher(RequestDispatcher dispatcher) {
         this.dispatcher = dispatcher;
     }
 
+    @Inject
     public void setPanel(MyPanel panel) {
         this.panel = panel;
     }

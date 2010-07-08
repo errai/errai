@@ -124,8 +124,10 @@ public class InjectUtil {
             if (isInjectionPoint(field)) {
                 if (!field.isPublic()) {
                     try {
-                        JMethod meth = type.getMethod(ReflectionUtil.getSetter(field.getName()), new JType[] { field.getType() });
-                        accumulator.add(new InjectionTask(injector, meth));
+                        JMethod meth = type.getMethod(ReflectionUtil.getSetter(field.getName()), new JType[]{field.getType()});
+                        InjectionTask task = new InjectionTask(injector, meth);
+                        task.setField(field);
+                        accumulator.add(task);
                     }
                     catch (NotFoundException e) {
                         throw new InjectionFailure("attempt to inject on a non-public field: "
@@ -140,11 +142,13 @@ public class InjectUtil {
                 if (field.isAnnotationPresent(a)) {
                     if (!field.isPublic()) {
                         try {
-                            JMethod meth = type.getMethod(ReflectionUtil.getSetter(field.getName()), new JType[] { field.getType() });
-                            accumulator.add(new DecoratorTask(injector, meth, ctx.getDecorator(a)));
+                            JMethod meth = type.getMethod(ReflectionUtil.getGetter(field.getName()), new JType[0]);
+                            DecoratorTask task = new DecoratorTask(injector, meth, ctx.getDecorator(a));
+                            task.setField(field);
+                            accumulator.add(task);
                         }
                         catch (NotFoundException e) {
-                            throw new InjectionFailure("attempt to inject on a non-public field: "
+                            throw new InjectionFailure("attempt to decorate a non-public field: "
                                     + type.getQualifiedSourceName() + "." + field.getName());
                         }
                     } else {

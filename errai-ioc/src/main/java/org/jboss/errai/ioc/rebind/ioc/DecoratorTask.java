@@ -26,6 +26,7 @@ public class DecoratorTask extends InjectionTask {
         this.decorators = decs;
     }
 
+
     @Override
     public String doTask(InjectionContext ctx) {
         StringAppender appender = new StringAppender();
@@ -38,6 +39,9 @@ public class DecoratorTask extends InjectionTask {
                        break;
                    case Method:
                        anno = method.getAnnotation(dec.decoratesWith());
+                       if (anno == null && field != null) {
+                           anno = field.getAnnotation(dec.decoratesWith());
+                       }
                        break;
                    case Type:
                        anno = type.getAnnotation(dec.decoratesWith());

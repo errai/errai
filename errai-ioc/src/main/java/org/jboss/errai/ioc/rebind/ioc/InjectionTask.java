@@ -68,4 +68,14 @@ public class InjectionTask {
     public JMethod getMethod() {
         return method;
     }
+
+    public void setMethod(JMethod method) {
+        if (this.method == null)
+            this.method = method;
+    }
+
+    public void setField(JField field) {
+        if (this.field == null)
+            this.field = field;
+    }
 }

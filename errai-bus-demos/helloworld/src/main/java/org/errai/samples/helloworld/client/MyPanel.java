@@ -29,7 +29,7 @@ public class MyPanel extends VerticalPanel {
     @Inject public RequestDispatcher dispatcher;
 
     @Service("DataThing")
-    public MessageCallback callback = new MessageCallback() {
+    private MessageCallback dataThing = new MessageCallback() {
         public void callback(Message message) {
             String msg = message.get(String.class, "Data");
 
@@ -72,7 +72,9 @@ public class MyPanel extends VerticalPanel {
         add(numX);
         add(numY);
         add(addButton);
+    }
 
-
+    public MessageCallback getDataThing() {
+        return dataThing;
     }
 }
