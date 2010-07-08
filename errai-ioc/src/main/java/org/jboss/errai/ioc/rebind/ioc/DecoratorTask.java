@@ -7,7 +7,6 @@ import org.mvel2.util.StringAppender;
 
 import java.lang.annotation.Annotation;
 
-
 public class DecoratorTask extends InjectionTask {
     private final Decorator[] decorators;
 

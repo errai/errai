@@ -18,10 +18,12 @@ import org.jboss.errai.ioc.client.api.ToRootPanel;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 
 @CreatePanel
 @ToRootPanel
+@Singleton
 public class MyPanel extends VerticalPanel {
 
     private Label label;
