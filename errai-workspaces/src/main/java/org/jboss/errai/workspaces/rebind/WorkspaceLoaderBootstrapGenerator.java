@@ -224,7 +224,9 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
     public void visitTool(JClassType clazz, GeneratorContext context, SourceWriter writer, TreeLogger logger, boolean applyFilter, List<String> enabledTools) {
         if (clazz.isAnnotationPresent(LoadToolSet.class)
                 && (!applyFilter || enabledTools.contains(clazz.getQualifiedSourceName()))) {
-            writer.println("workspace.addToolSet(new " + clazz.getQualifiedSourceName() + "());");
+            iocGenerator.addType(clazz);
+            String instance = iocGenerator.generateInjectors(clazz);
+            writer.println("workspace.addToolSet(" + instance + ");");
             logger.log(TreeLogger.Type.INFO, "Adding Errai Toolset: " + clazz.getQualifiedSourceName());
         } else if (clazz.isAnnotationPresent(LoadTool.class)
                 && (!applyFilter || enabledTools.contains(clazz.getQualifiedSourceName()))) {
@@ -288,8 +290,6 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
         }
 
         String providerName;
-
-        final ProcessingContext pCtx = new ProcessingContext(logger, context, writer, typeOracle);
 
         if (widgetType.isAssignableFrom(type)) {
             writer.println(WidgetProvider.class.getName() + " widgetProvider" + (++counter) + " = new " + WidgetProvider.class.getName() + "() {");

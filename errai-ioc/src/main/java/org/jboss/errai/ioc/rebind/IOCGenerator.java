@@ -46,6 +46,9 @@ import java.util.*;
 import static org.jboss.errai.bus.server.util.ConfigUtil.findAllConfigTargets;
 import static org.jboss.errai.bus.server.util.ConfigUtil.visitAllTargets;
 
+/**
+ * The main generator class for the errai-ioc framework.
+ */
 public class IOCGenerator extends Generator {
     /**
      * Simple name of class to be generated
@@ -112,7 +115,6 @@ public class IOCGenerator extends Generator {
      * @param context Generator context
      */
     private void generateIOCBootstrapClass(TreeLogger logger, GeneratorContext context) {
-
         // get print writer that receives the source code
         PrintWriter printWriter = context.tryCreate(logger, packageName, className);
         // print writer if null, source code has ALREADY been generated,
@@ -147,7 +149,6 @@ public class IOCGenerator extends Generator {
         sourceWriter.outdent();
         sourceWriter.println("}");
 
-
         // commit generated class
         context.commit(logger, printWriter);
     }
@@ -178,14 +179,14 @@ public class IOCGenerator extends Generator {
                         JParameterizedType pType = iface.isParameterized();
 
                         if (pType == null) {
-                            throw new RuntimeException("could not determine the bind type for the Provider class: " + visit.getQualifiedSourceName());
+                            throw new InjectionFailure("could not determine the bind type for the Provider class: " + visit.getQualifiedSourceName());
                         }
 
                         bindType = pType.getTypeArgs()[0];
                     }
 
                     if (bindType == null) {
-                        throw new RuntimeException("the annotated provider class does not appear to implement " + TypeProvider.class.getName() + ": " + visit.getQualifiedSourceName());
+                        throw new InjectionFailure("the annotated provider class does not appear to implement " + TypeProvider.class.getName() + ": " + visit.getQualifiedSourceName());
                     }
 
                     final JClassType finalBindType = bindType;
@@ -211,9 +212,7 @@ public class IOCGenerator extends Generator {
         sourceWriter.outdent();
         sourceWriter.println("InterfaceInjectionContext ctx = new InterfaceInjectionContext();");
 
-        final List<File> targets = findAllConfigTargets();
-
-        visitAllTargets(targets, context, logger, sourceWriter, typeOracle,
+        visitAllTargets(findAllConfigTargets(), context, logger, sourceWriter, typeOracle,
                 new RebindVisitor() {
                     public void visit(JClassType visitC, GeneratorContext context, TreeLogger logger, SourceWriter writer) {
                         procFactory.process(visitC, procContext);
@@ -227,7 +226,7 @@ public class IOCGenerator extends Generator {
 
         runAllDeferred();
 
-        sourceWriter.println(" return ctx;");
+        sourceWriter.println("return ctx;");
         sourceWriter.outdent();
         sourceWriter.println("}");
     }
@@ -330,7 +329,7 @@ public class IOCGenerator extends Generator {
                         }
                     });
                 } else {
-                    throw new InjectionFailure("@Servie annotated class does not implement MessageCallaback: "
+                    throw new InjectionFailure("@Service annotated class does not implement MessageCallaback: "
                             + type.getQualifiedSourceName());
                 }
             }

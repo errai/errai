@@ -39,7 +39,7 @@ public class InjectUtil {
                 public String generateConstructor() {
                     String[] vars = resolveInjectionDependencies(constructor.getParameters(), ctx);
 
-                    StringAppender appender = new StringAppender(type.getQualifiedSourceName())
+                    StringAppender appender = new StringAppender("final ").append(type.getQualifiedSourceName())
                             .append(' ').append(injector.getVarName()).append(" = new ")
                             .append(type.getQualifiedSourceName())
                             .append('(').append(commaDelimitedList(vars)).append(");\n");
@@ -60,7 +60,7 @@ public class InjectUtil {
 
             return new ConstructionStrategy() {
                 public String generateConstructor() {
-                    StringAppender appender = new StringAppender(type.getQualifiedSourceName())
+                    StringAppender appender = new StringAppender("final ").append(type.getQualifiedSourceName())
                             .append(' ').append(injector.getVarName()).append(" = new ")
                             .append(type.getQualifiedSourceName()).append("();\n");
 
