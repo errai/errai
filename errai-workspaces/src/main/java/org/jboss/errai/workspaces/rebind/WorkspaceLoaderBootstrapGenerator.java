@@ -72,7 +72,6 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
 
         typeOracle = context.getTypeOracle();
 
-
         try {
             // get classType and save instance variables
 
@@ -133,9 +132,6 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
     }
 
     private void generateBootstrapClass(final GeneratorContext context, final TreeLogger logger, final SourceWriter sourceWriter) {
-
-        // init resource bundle
-
         ResourceBundle bundle;
 
         try {
@@ -187,7 +183,6 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
             }
         }
 
-
         for (Enumeration<String> keys = bundle.getKeys();
              keys.hasMoreElements();) {
             String key = keys.nextElement();
@@ -195,12 +190,11 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
             sourceWriter.println("new " + bundle.getString(key) + "().initModule(errai);");
         }
 
-
         List<File> targets = ConfigUtil.findAllConfigTargets();
 
         final boolean applyFilter = in != null;
 
-        sourceWriter.println(iocGenerator.generateAllProviders());
+        iocGenerator.generateAllProviders();
 
         ConfigUtil.visitAllTargets(
                 targets, context, logger,
