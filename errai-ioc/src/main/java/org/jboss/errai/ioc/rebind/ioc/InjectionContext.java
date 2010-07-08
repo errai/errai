@@ -22,6 +22,16 @@ public class InjectionContext {
         return injectors.get(type);
     }
 
+    public List<Injector> getInjectorsByType(Class<? extends Injector> injectorType) {
+        List<Injector> injs = new LinkedList<Injector>();
+        for (Injector i : injectors.values()) {
+            if (injectorType.isAssignableFrom(i.getClass())) {
+                injs.add(i);
+            }
+        }
+        return injs;
+    }
+
     public void registerInjector(Injector injector) {
         if (!injectors.containsKey(injector.getInjectedType()))
             injectors.put(injector.getInjectedType(), injector);

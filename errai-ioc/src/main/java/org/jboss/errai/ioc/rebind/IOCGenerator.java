@@ -239,6 +239,10 @@ public class IOCGenerator extends Generator {
         return injectFactory.generate(visit);
     }
 
+    public String generateAllProviders() {
+        return injectFactory.generateAllProviders();
+    }
+
     public void addDeferred(Runnable task) {
         deferredTasks.add(task);
     }

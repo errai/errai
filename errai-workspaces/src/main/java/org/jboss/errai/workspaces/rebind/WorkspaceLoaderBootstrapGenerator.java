@@ -27,6 +27,7 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
+import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.rebind.ProcessingContext;
 import org.jboss.errai.bus.server.annotations.security.RequireRoles;
 import org.jboss.errai.bus.server.util.ConfigUtil;
@@ -59,6 +60,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
     private final static String TOOLSET_PROFILE = "toolset-profile.properties";
 
     private TypeOracle typeOracle;
+    private ProcessingContext ctx;
     private IOCGenerator iocGenerator;
 
     private volatile int counter = 0;
@@ -116,7 +118,8 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
 
         SourceWriter sourceWriter = composer.createSourceWriter(context, printWriter);
 
-        iocGenerator = new IOCGenerator(new ProcessingContext(logger, context, sourceWriter, typeOracle));
+        ctx = new ProcessingContext(logger, context, sourceWriter, typeOracle);
+        iocGenerator = new IOCGenerator(ctx);
         iocGenerator.initializeProviders(context, logger, sourceWriter);
 
         // generator constructor source code
@@ -197,6 +200,8 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
 
         final boolean applyFilter = in != null;
 
+        sourceWriter.println(iocGenerator.generateAllProviders());
+
         ConfigUtil.visitAllTargets(
                 targets, context, logger,
                 sourceWriter, typeOracle,
@@ -207,12 +212,6 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
                     }
 
                     public void visitError(String className, Throwable t) {
-//                        try {
-//                            visitTool(typeOracle.getType(className), context, sourceWriter, logger, applyFilter, factory, enabledTools);
-//                        }
-//                        catch (NotFoundException e) {
-//
-//                        }
                     }
                 });
 
@@ -292,11 +291,12 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
         String providerName;
 
         if (widgetType.isAssignableFrom(type)) {
+
+
             writer.println(WidgetProvider.class.getName() + " widgetProvider" + (++counter) + " = new " + WidgetProvider.class.getName() + "() {");
             writer.outdent();
             writer.println("public void provideWidget(" + ProvisioningCallback.class.getName() + " callback) {");
             writer.outdent();
-
             String widgetName = iocGenerator
                     .generateInjectors(type);
 

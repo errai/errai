@@ -44,6 +44,11 @@ public class TypeInjector extends Injector {
     }
 
     @Override
+    public String intantiateOnly(InjectionContext injectContext) {
+        return getType(injectContext);
+    }
+
+    @Override
     public boolean isInjected() {
         return injected;
     }
