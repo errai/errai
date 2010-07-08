@@ -82,10 +82,6 @@ public class IOCGenerator extends Generator {
             throws UnableToCompleteException {
         typeOracle = context.getTypeOracle();
 
-
-        //   iocFactory = new IOCFactory(typeOracle);
-
-
         try {
             // get classType and save instance variables
 
@@ -216,9 +212,6 @@ public class IOCGenerator extends Generator {
         sourceWriter.println("InterfaceInjectionContext ctx = new InterfaceInjectionContext();");
 
         final List<File> targets = findAllConfigTargets();
-
-        // final ProcessingContext procContext = new ProcessingContext(logger, context, sourceWriter, typeOracle);
-
 
         visitAllTargets(targets, context, logger, sourceWriter, typeOracle,
                 new RebindVisitor() {
