@@ -21,15 +21,12 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 
-@CreatePanel
-@ToRootPanel
-@Singleton
+@CreatePanel @ToRootPanel @Singleton
 public class MyPanel extends VerticalPanel {
 
     private Label label;
 
-    @Inject
-    public RequestDispatcher dispatcher;
+    @Inject public RequestDispatcher dispatcher;
 
     @Service("DataThing")
     public MessageCallback callback = new MessageCallback() {

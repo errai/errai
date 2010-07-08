@@ -17,15 +17,10 @@ import org.jboss.errai.ioc.client.api.ToPanel;
 import javax.annotation.PostConstruct;
 import javax.inject.Singleton;
 
-@ToPanel("MyPanel")
-@Service("DataConsumer")
-@Singleton
+@ToPanel("MyPanel") @Service("DataConsumer") @Singleton
 public class HelloWorld extends SimplePanel implements MessageCallback {
-    @Inject
-    private RequestDispatcher dispatcher;
-
-    @Inject
-    private MyPanel panel;
+    @Inject private RequestDispatcher dispatcher;
+    @Inject private MyPanel panel;
 
     final Button sayHello;
     final Label data;
