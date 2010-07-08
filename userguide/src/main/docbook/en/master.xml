@@ -875,10 +875,10 @@ public class MyRemoteServiceImpl implements MyRemoteService {
           <programlisting>public class TestService implements MessageCallback {           
     public void callback(final Message message) { 
         // obtain a reference to the local context by referencing the incoming message.
-        LocalContext ctx = LocalContext.get(message); 
+        LocalContext injectionContext = LocalContext.get(message);
 
         // set an attribute.
-        ctx.setAttribute("MyAttribute", "Foo");
+        injectionContext.setAttribute("MyAttribute", "Foo");
     }
 }              </programlisting>
         </sect3>
@@ -896,10 +896,10 @@ public class MyRemoteServiceImpl implements MyRemoteService {
           <programlisting>public class TestService implements MessageCallback {           
     public void callback(final Message message) { 
         // obtain a reference to the session context by referencing the incoming message.
-        SessionContext ctx = SessionContext.get(message); 
+        SessionContext injectionContext = SessionContext.get(message);
 
         // set an attribute.
-        ctx.setAttribute("MyAttribute", "Foo");
+        injectionContext.setAttribute("MyAttribute", "Foo");
     }
 }   </programlisting>
         </sect3>

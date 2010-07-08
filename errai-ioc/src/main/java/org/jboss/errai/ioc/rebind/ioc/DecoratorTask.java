@@ -48,7 +48,7 @@ public class DecoratorTask extends InjectionTask {
                        break;
                }
 
-           appender.append(dec.generateDecorator(anno, injectType, method, field, type, injector, ctx));
+           appender.append(dec.generateDecorator(new DecoratorContext(anno, injectType, method, field, type, injector, ctx)));
         }
         return appender.toString();
     }

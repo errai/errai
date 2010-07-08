@@ -1,8 +1,6 @@
 package org.jboss.errai.ioc.rebind.ioc;
 
 import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.JField;
-import com.google.gwt.core.ext.typeinfo.JMethod;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.rebind.ProcessingContext;
 import org.jboss.errai.bus.server.annotations.Service;
@@ -18,47 +16,22 @@ public class InjectorFactory {
          */
         this.ctx.registerDecorator(new Decorator<Service>(Service.class) {
             @Override
-            public String generateDecorator(Service annotation, TaskType taskType, JMethod method, JField field,
-                                            JClassType type, Injector injector, InjectionContext ctx) {
+            public String generateDecorator(DecoratorContext<Service> decContext) {
+                final InjectionContext ctx = decContext.getInjectionContext();
 
                 /**
                  * Get an instance of the message bus.
                  */
-                String inj = ctx.getInjector(ctx.getProcessingContext().loadClassType(MessageBus.class)).getType(ctx);
-                String expr = null;
-                String svcName = annotation.value();
-                switch (taskType) {
-                    case Field:
-                        if ("".equals(svcName)) {
-                            svcName = field.getName();
-                        }
+                final String inj = ctx.getInjector(decContext.getInjectionContext()
+                        .getProcessingContext().loadClassType(MessageBus.class)).getType(ctx);
 
-                        // generate the expression to get access to the MessageCallback field.
-                        expr = injector.getVarName() + "." + field.getName();
+                /**
+                 * Figure out the service name;
+                 */
+                final String svcName = decContext.getAnnotation().value().equals("")
+                        ? decContext.getMemberName() : decContext.getAnnotation().value();
 
-                        break;
-
-                    case Method:
-                        if ("".equals(svcName)) {
-                            svcName = field.getName();
-                        }
-
-                        // generate the expression to get access to the getter which returns a MessageCallback
-                        expr = injector.getVarName() + "." + method.getName() + "()";
-                        break;
-
-                    case Type:
-                        if ("".equals(svcName)) {
-                            svcName = type.getName();
-                        }
-
-                        // generate an expression with the variable of the injected type.
-                        expr = injector.getVarName();
-
-                        break;
-                }
-
-                return inj + ".subscribe(\"" + svcName + "\", " + expr + ");\n";
+                return inj + ".subscribe(\"" + svcName + "\", " + decContext.getValueExpression() + ");\n";
             }
         });
     }

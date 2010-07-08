@@ -17,6 +17,5 @@ public abstract class Decorator<T extends Annotation> {
         return decoratesWith;
     }
 
-    public abstract String generateDecorator(T annotation, TaskType taskType, JMethod method, JField field, JClassType type,
-                                             Injector injector, InjectionContext ctx);
+    public abstract String generateDecorator(DecoratorContext<T> ctx);
 }
