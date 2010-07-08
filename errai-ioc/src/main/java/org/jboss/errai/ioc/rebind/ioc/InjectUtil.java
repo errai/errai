@@ -124,7 +124,7 @@ public class InjectUtil {
             if (isInjectionPoint(field)) {
                 if (!field.isPublic()) {
                     try {
-                        JMethod meth = type.getMethod(ReflectionUtil.getGetter(field.getName()), new JType[0]);
+                        JMethod meth = type.getMethod(ReflectionUtil.getSetter(field.getName()), new JType[] { field.getType() });
                         accumulator.add(new InjectionTask(injector, meth));
                     }
                     catch (NotFoundException e) {
@@ -140,7 +140,7 @@ public class InjectUtil {
                 if (field.isAnnotationPresent(a)) {
                     if (!field.isPublic()) {
                         try {
-                            JMethod meth = type.getMethod(ReflectionUtil.getGetter(field.getName()), new JType[0]);
+                            JMethod meth = type.getMethod(ReflectionUtil.getSetter(field.getName()), new JType[] { field.getType() });
                             accumulator.add(new DecoratorTask(injector, meth, ctx.getDecorator(a)));
                         }
                         catch (NotFoundException e) {

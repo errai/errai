@@ -20,10 +20,10 @@ import javax.annotation.PostConstruct;
 @Service("DataConsumer")
 public class HelloWorld extends SimplePanel implements MessageCallback {
     @Inject
-    public RequestDispatcher dispatcher;
+    private RequestDispatcher dispatcher;
 
     @Inject
-    public MyPanel panel;
+    private MyPanel panel;
 
     final Button sayHello;
     final Label data;
@@ -52,5 +52,13 @@ public class HelloWorld extends SimplePanel implements MessageCallback {
                         .noErrorHandling().sendNowWith(dispatcher);
             }
         });
+    }
+
+    public void setDispatcher(RequestDispatcher dispatcher) {
+        this.dispatcher = dispatcher;
+    }
+
+    public void setPanel(MyPanel panel) {
+        this.panel = panel;
     }
 }
