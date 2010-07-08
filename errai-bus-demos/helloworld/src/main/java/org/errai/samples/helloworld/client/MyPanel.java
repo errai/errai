@@ -11,6 +11,7 @@ import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
+import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.ioc.client.api.CreatePanel;
 import org.jboss.errai.ioc.client.api.ToRootPanel;
@@ -46,6 +47,7 @@ public class MyPanel extends VerticalPanel {
             public void onClick(ClickEvent event) {
                 MessageBuilder.createMessage()
                         .toSubject("HelloWorldService")
+                        .with(MessageParts.ReplyTo, "DataThing")
                         .noErrorHandling()
                         .sendNowWith(dispatcher);
             }
