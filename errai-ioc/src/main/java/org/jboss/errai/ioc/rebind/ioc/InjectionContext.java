@@ -37,7 +37,7 @@ public class InjectionContext {
             injectors.put(injector.getInjectedType(), injector);
     }
 
-    public void registerDecorator(Decorator decorator) {
+    public void registerDecorator(Decorator<?> decorator) {
         if (!decorators.containsKey(decorator.decoratesWith()))
             decorators.put(decorator.decoratesWith(), new LinkedList<Decorator>());
 

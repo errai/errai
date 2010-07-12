@@ -21,6 +21,7 @@ public class ProcessorFactory {
         annotationHandlers.put(annotation, handler);
     }
 
+    @SuppressWarnings({"unchecked"})
     public void process(JClassType type, ProcessingContext context) {
         for (Class<? extends Annotation> aClass : annotationHandlers.keySet()) {
             if (type.isAnnotationPresent(aClass)) {

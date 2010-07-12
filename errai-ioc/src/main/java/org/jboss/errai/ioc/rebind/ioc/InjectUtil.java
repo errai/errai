@@ -46,7 +46,7 @@ public class InjectUtil {
 
                     handleInjectionTasks(appender, ctx, injectionTasks);
 
-                    doPostConstruct(appender, injector, ctx, postConstructTasks);
+                    doPostConstruct(appender, injector, postConstructTasks);
 
                     return appender.toString();
                 }
@@ -66,7 +66,7 @@ public class InjectUtil {
 
                     handleInjectionTasks(appender, ctx, injectionTasks);
 
-                    doPostConstruct(appender, injector, ctx, postConstructTasks);
+                    doPostConstruct(appender, injector, postConstructTasks);
 
                     return appender.toString();
                 }
@@ -76,34 +76,12 @@ public class InjectUtil {
 
     private static void handleInjectionTasks(StringAppender appender, InjectionContext ctx,
                                              List<InjectionTask> tasks) {
-
         for (InjectionTask task : tasks) {
             appender.append(task.doTask(ctx));
         }
-
     }
 
-    private static void generateFieldAndSetterInjectionPoints(StringAppender appender,
-                                                              Injector injector, InjectionContext ctx,
-                                                              List<JField> fieldInjectionPoints,
-                                                              List<JMethod> setterInjectionPoints) {
-        for (JField fld : fieldInjectionPoints) {
-            appender.append(injector.getVarName()).append('.').append(fld.getName()).append(" = ")
-                    .append(ctx.getInjector(fld.getType().isClassOrInterface()).getType(ctx))
-                    .append(";\n");
-        }
-
-        for (JMethod meth : setterInjectionPoints) {
-            appender.append(injector.getVarName()).append('.')
-                    .append(meth.getName()).append('(');
-
-            String[] vars = resolveInjectionDependencies(meth.getParameters(), ctx);
-
-            appender.append(commaDelimitedList(vars)).append(");\n");
-        }
-    }
-
-    private static void doPostConstruct(StringAppender appender, Injector injector, InjectionContext ctx,
+    private static void doPostConstruct(StringAppender appender, Injector injector,
                                         List<JMethod> postConstructTasks) {
         for (JMethod meth : postConstructTasks) {
             if (!meth.isPublic() || meth.getParameters().length != 0) {
@@ -200,6 +178,7 @@ public class InjectUtil {
     }
 
 
+    @SuppressWarnings({"unchecked"})
     private static boolean isInjectionPoint(JField field) {
         for (Class<? extends Annotation> ann : injectionAnnotations) {
             if (field.isAnnotationPresent(ann)) return true;
@@ -207,6 +186,7 @@ public class InjectUtil {
         return false;
     }
 
+    @SuppressWarnings({"unchecked"})
     private static boolean isInjectionPoint(JMethod meth) {
         for (Class<? extends Annotation> ann : injectionAnnotations) {
             if (meth.isAnnotationPresent(ann)) return true;
@@ -215,6 +195,7 @@ public class InjectUtil {
     }
 
 
+    @SuppressWarnings({"unchecked"})
     private static boolean isInjectionPoint(JConstructor constructor) {
         for (Class<? extends Annotation> ann : injectionAnnotations) {
             if (constructor.isAnnotationPresent(ann)) return true;

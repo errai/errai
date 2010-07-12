@@ -4,7 +4,6 @@ import com.google.gwt.core.ext.typeinfo.JClassType;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.rebind.ProcessingContext;
 import org.jboss.errai.bus.server.annotations.Service;
-import org.mvel2.util.StringAppender;
 
 import java.util.List;
 

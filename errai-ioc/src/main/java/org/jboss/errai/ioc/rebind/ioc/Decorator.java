@@ -1,9 +1,5 @@
 package org.jboss.errai.ioc.rebind.ioc;
 
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.JField;
-import com.google.gwt.core.ext.typeinfo.JMethod;
-
 import java.lang.annotation.Annotation;
 
 public abstract class Decorator<T extends Annotation> {
