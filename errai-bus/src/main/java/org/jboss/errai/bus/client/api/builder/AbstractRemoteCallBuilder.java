@@ -66,6 +66,7 @@ public class AbstractRemoteCallBuilder {
                     if (remoteCallback != null) {
                         bus.subscribe(replyTo,
                                 new MessageCallback() {
+                                    @SuppressWarnings({"unchecked"})
                                     public void callback(Message message) {
                                         bus.unsubscribeAll(replyTo);
                                         remoteCallback.callback(message.get(responseType, "MethodReply"));

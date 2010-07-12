@@ -6,8 +6,9 @@ import java.util.Map;
 public class RemoteServiceProxyFactory implements ProxyProvider {
     private static Map<Class, Object> remoteProxies = new HashMap<Class, Object>();
 
-    public Object getRemoteProxy(Class proxyType) {
-        return remoteProxies.get(proxyType);
+    @SuppressWarnings({"unchecked"})
+    public <T> T getRemoteProxy(Class<T> proxyType) {
+        return (T) remoteProxies.get(proxyType);
     }
 
     public static void addRemoteProxy(Class proxyType, Object proxy) {

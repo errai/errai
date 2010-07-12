@@ -18,8 +18,7 @@ package org.jboss.errai.bus.client.framework;
 /**
  * A noop domain model adapter implementation that's used by default
  *
- * @author: Heiko Braun <hbraun@redhat.com>
- * @date: Jun 16, 2010
+ * @author Heiko Braun <hbraun@redhat.com>
  */
 public class NoopModelAdapter implements ModelAdapter
 {

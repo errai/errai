@@ -16,8 +16,6 @@
 
 package org.jboss.errai.bus.client.framework;
 
-import org.jboss.errai.bus.client.framework.MarshalledMessage;
-
 import java.util.LinkedList;
 import java.util.List;
 
@@ -42,7 +40,7 @@ public class Payload {
 
     /**
      * Adds a new message to the <tt>Payload</tt>.
-     * @param m
+     * @param m a marshalled message.
      */
     public void addMessage(MarshalledMessage m) {
         messages.add(m);
