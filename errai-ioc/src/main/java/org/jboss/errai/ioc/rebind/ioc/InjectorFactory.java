@@ -53,7 +53,7 @@ public class InjectorFactory {
     public String generateAllProviders() {
         List<Injector> injs = ctx.getInjectorsByType(ProviderInjector.class);
         for (Injector i : injs) {
-            i.intantiateOnly(ctx);
+            i.instantiateOnly(ctx);
         }
         return "";
     }

@@ -17,7 +17,7 @@ public class ProviderInjector extends TypeInjector {
     }
 
     @Override
-    public String intantiateOnly(InjectionContext injectContext) {
+    public String instantiateOnly(InjectionContext injectContext) {
         injected = true;
         return providerInjector.getType(injectContext);
     }
