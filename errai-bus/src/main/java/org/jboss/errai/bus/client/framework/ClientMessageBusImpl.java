@@ -80,7 +80,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     /* A list of {@link Runnable} initialization tasks to be executed after the bus has successfully finished it's
      * initialization and is now communicating with the remote bus. */
-    private ArrayList<Runnable> postInitTasks = new ArrayList<Runnable>();
+    private List<Runnable> postInitTasks = new ArrayList<Runnable>();
 
     /* The timer constantly ensures the client's polling with the server is active */
     private Timer incomingTimer;
@@ -484,6 +484,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      * Transmits JSON string containing message, using the <tt>sendBuilder</tt>
      *
      * @param message - JSON string representation of message
+     * @param txMessages -
      */
     private void transmitRemote(final String message, final List<Message> txMessages) {
         if (message == null) return;
@@ -567,6 +568,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      */
     public void init(final HookCallback callback) {
         subscribe("ClientBus", new MessageCallback() {
+            @SuppressWarnings({"unchecked"})
             public void callback(final Message message) {
                 switch (BusCommands.valueOf(message.getCommandType())) {
                     case RemoteSubscribe:

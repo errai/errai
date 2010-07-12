@@ -16,9 +16,7 @@
 
 package org.jboss.errai.bus.server;
 
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.internal.Nullable;
 import org.jboss.errai.bus.client.api.*;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.RuleDelegateMessageCallback;
@@ -30,8 +28,6 @@ import org.jboss.errai.bus.server.api.*;
 import org.jboss.errai.bus.server.async.SchedulerService;
 import org.jboss.errai.bus.server.async.SimpleSchedulerService;
 import org.jboss.errai.bus.server.async.TimedTask;
-import org.jboss.errai.bus.server.gae.GAESchedulerService;
-import org.jboss.errai.bus.server.io.JSONMessageServer;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,7 +91,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
          * Define the default ServerBus service used for intrabus communication.
          */
         subscribe("ServerBus", new MessageCallback() {
-            @SuppressWarnings({"unchecked"})
+            @SuppressWarnings({"unchecked", "SynchronizationOnLocalVariableOrMethodParameter"})
             public void callback(Message message) {
                 try {
                     QueueSession session = getSession(message);
@@ -163,7 +159,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                             List<String> subjects = new LinkedList<String>();
                             for (String service : subscriptions.keySet()) {
                                 if (service.startsWith("local:")) {
-                                    continue;
                                 } else if (!remoteSubscriptions.containsKey(service)) {
                                     subjects.add(service);
                                 }
@@ -462,12 +457,13 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                     }
                 });
             } else {
-                throw new NoSubscribersToDeliverTo("for: " + subject + ":" + isAnyoneListening(queue, subject) + ":" + queue.isInitialized());
+                throw new NoSubscribersToDeliverTo("for: " + subject + ":" + isAnyoneListening(queue, subject));
             }
         }
 
     }
 
+    @SuppressWarnings({"SynchronizationOnLocalVariableOrMethodParameter"})
     private void deferDelivery(final MessageQueue queue, MarshalledMessage message) {
         synchronized (queue) {
             if (!deferredQueue.containsKey(queue)) deferredQueue.put(queue, new ArrayList<MarshalledMessage>());
@@ -475,6 +471,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
     }
 
+    @SuppressWarnings({"SynchronizationOnLocalVariableOrMethodParameter"})
     private void drainDeferredDeliveryQueue(final MessageQueue queue) {
         synchronized (queue) {
             if (deferredQueue.containsKey(queue)) {
@@ -844,10 +841,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     private MessageQueue getQueueBySession(String sessionId) {
         return getQueue(sessionLookup.get(sessionId));
-    }
-
-    private QueueSession getSessionById(String sessionId) {
-        return sessionLookup.get(sessionId);
     }
 
     /**

@@ -38,10 +38,12 @@ public class DeliveryPlan {
 
     public MessageCallback[] getDeliverTo() {
         MessageCallback[] newArray = new MessageCallback[deliverTo.length];
+
+        //noinspection ManualArrayCopy
         for (int i = 0; i < deliverTo.length; i++) {
             newArray[i] = deliverTo[i];
         }
-        return deliverTo;
+        return newArray;
     }
 
     public int getTotalReceivers() {
@@ -50,6 +52,8 @@ public class DeliveryPlan {
 
     public DeliveryPlan newDeliveryPlanWith(MessageCallback callback) {
         MessageCallback[] newPlan = new MessageCallback[deliverTo.length + 1];
+
+        //noinspection ManualArrayCopy
         for (int i = 0; i < deliverTo.length; i++) {
             newPlan[i] = deliverTo[i];
         }
