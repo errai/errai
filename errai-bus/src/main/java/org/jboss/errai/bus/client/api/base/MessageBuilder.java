@@ -24,8 +24,8 @@ public class MessageBuilder {
      */
     @SuppressWarnings({"unchecked"})
     public static MessageBuildSubject<MessageBuildSendableWithReply> createMessage() {
-      Message message = provider.get();
-      return new AbstractMessageBuilder(message).start();
+  //    Message message = provider.get();
+      return new AbstractMessageBuilder(provider.get()).start();
     }
 
     /**

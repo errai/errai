@@ -7,11 +7,9 @@ import com.google.inject.Inject;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.ioc.client.api.InjectPanel;
 import org.jboss.errai.ioc.client.api.ToPanel;
 
 import javax.annotation.PostConstruct;
@@ -46,7 +44,7 @@ public class HelloWorld extends SimplePanel implements MessageCallback {
                 MessageBuilder.createMessage()
                         .toSubject("HelloWorldService")
                         .with(MessageParts.ReplyTo, "DataConsumer")
-                        .noErrorHandling().sendNowWith(dispatcher);
+                        .done().sendNowWith(dispatcher);
             }
         });
     }

@@ -80,4 +80,6 @@ public interface MessageBuildParms<R> extends MessageBuild {
      * @return -
      */
     public R defaultErrorHandling();
+
+    public R done();
 }

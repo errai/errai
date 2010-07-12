@@ -47,8 +47,7 @@ public class MyPanel extends VerticalPanel {
                 MessageBuilder.createMessage()
                         .toSubject("HelloWorldService")
                         .with(MessageParts.ReplyTo, "DataThing")
-                        .noErrorHandling()
-                        .sendNowWith(dispatcher);
+                        .done().sendNowWith(dispatcher);
             }
         });
 

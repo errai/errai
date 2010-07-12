@@ -12,6 +12,5 @@ public abstract class Injector {
 
     public abstract String getVarName();
     public abstract JClassType getInjectedType();
-
 }
 

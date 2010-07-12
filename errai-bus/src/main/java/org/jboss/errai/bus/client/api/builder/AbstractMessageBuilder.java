@@ -13,7 +13,7 @@ import static org.jboss.errai.bus.client.api.base.ConversationHelper.makeConvers
  * The <tt>AbstractMessageBuilder</tt> facilitates the building of a message,
  * and ensures that it is created and used properly.
  */
-@SuppressWarnings({"unchecked"})
+@SuppressWarnings({"unchecked", "ConstantConditions"})
 public class AbstractMessageBuilder<R extends Sendable> {
     private final Message message;
 
@@ -307,6 +307,10 @@ public class AbstractMessageBuilder<R extends Sendable> {
 
             public R defaultErrorHandling() {
                 message.errorsCall(DefaultErrorCallback.INSTANCE);
+                return (R) sendable;
+            }
+
+            public R done() {
                 return (R) sendable;
             }
 
