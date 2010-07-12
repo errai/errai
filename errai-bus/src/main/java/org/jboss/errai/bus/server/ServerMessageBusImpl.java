@@ -30,6 +30,7 @@ import org.jboss.errai.bus.server.api.*;
 import org.jboss.errai.bus.server.async.SchedulerService;
 import org.jboss.errai.bus.server.async.SimpleSchedulerService;
 import org.jboss.errai.bus.server.async.TimedTask;
+import org.jboss.errai.bus.server.gae.GAESchedulerService;
 import org.jboss.errai.bus.server.io.JSONMessageServer;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.slf4j.Logger;
@@ -72,7 +73,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     private final List<UnsubscribeListener> unsubscribeListeners = new LinkedList<UnsubscribeListener>();
     private final List<QueueClosedListener> queueClosedListeners = new LinkedList<QueueClosedListener>();
 
-    private final SchedulerService houseKeeper = new SimpleSchedulerService();
+    private final SchedulerService houseKeeper = new SimpleSchedulerService(); // GAESchedulerService.INSTANCE;
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
