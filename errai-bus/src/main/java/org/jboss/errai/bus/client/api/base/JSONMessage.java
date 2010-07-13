@@ -81,9 +81,7 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
 
     /* First is true if the <tt>buf</tt> is empty */
     protected boolean first = true;
-
     protected boolean ended = false;
-
 
     /**
      * Create a new JSONMessage.
@@ -276,7 +274,7 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
      * @return - Value in the specified type.
      */
     @SuppressWarnings({"UnusedDeclaration"})
-    public <T> T get(Class<T> type, Enum part) {
+    public <T> T get(Class<T> type, Enum<?> part) {
         //noinspection unchecked
         Object value = parts.get(part.toString());
         return value == null ? null : TypeHandlerFactory.convert(value.getClass(), type, value);

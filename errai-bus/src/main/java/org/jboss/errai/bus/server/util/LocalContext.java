@@ -45,11 +45,11 @@ public class LocalContext implements Context {
         this.ctx = getLocalContext();
     }
 
-    public void setAttribute(Enum key, Object value) {
+    public void setAttribute(Enum<?> key, Object value) {
         ctx.setAttribute(key.toString(), value);
     }
 
-    public void setAttribute(Class typeIndexed, Object value) {
+    public void setAttribute(Class<?> typeIndexed, Object value) {
         if (ctx.hasAttribute(typeIndexed.getName())) {
             throw new IllegalStateException("The type-indexed property already exists: " + typeIndexed.getName());
         }
@@ -61,11 +61,11 @@ public class LocalContext implements Context {
         ctx.setAttribute(param, value);
     }
 
-    public <T> T getAttribute(Class<T> type, Enum key) {
+    public <T> T getAttribute(Class<T> type, Enum<?> key) {
         return ctx.getAttribute(type, key.toString());
     }
 
-    public <T> T getAttribute(Class<T> type, Class typeIndexed) {
+    public <T> T getAttribute(Class<T> type, Class<?> typeIndexed) {
         return ctx.getAttribute(type, typeIndexed.getName());
     }
 
@@ -77,11 +77,11 @@ public class LocalContext implements Context {
         return ctx.getAttribute(type, param);
     }
 
-    public boolean removeAttribute(Enum key) {
+    public boolean removeAttribute(Enum<?> key) {
         return ctx.removeAttribute(key.toString());
     }
 
-    public boolean removeAttribute(Class typeIndexed) {
+    public boolean removeAttribute(Class<?> typeIndexed) {
         return ctx.removeAttribute(typeIndexed.getName());
     }
 

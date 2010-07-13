@@ -164,7 +164,7 @@ public class MessageModelWrapper implements Message {
         return (T) modelAdapter.merge(delegate.get(type, part));
     }
 
-    public <T> T get(Class<T> type, Enum part) {
+    public <T> T get(Class<T> type, Enum<?> part) {
         return (T) modelAdapter.merge(delegate.get(type, part));
     }
 

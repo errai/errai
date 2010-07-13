@@ -37,15 +37,15 @@ public class SessionContext implements Context {
         this.session = session;
     }
 
-    public void setAttribute(Enum key, Object value) {
+    public void setAttribute(Enum<?> key, Object value) {
         session.setAttribute(key.toString(), value);
     }
 
-    public <T> T getAttribute(Class<T> type, Enum key) {
+    public <T> T getAttribute(Class<T> type, Enum<?> key) {
         return session.getAttribute(type, key.toString());
     }
 
-    public void setAttribute(Class typeIndexed, Object value) {
+    public void setAttribute(Class<?> typeIndexed, Object value) {
         if (session.hasAttribute(typeIndexed.getName())) {
             throw new IllegalStateException("The type-indexed property already exists: " + typeIndexed.getName());
         }
@@ -53,7 +53,7 @@ public class SessionContext implements Context {
         session.setAttribute(typeIndexed.getName(), value);
     }
 
-    public <T> T getAttribute(Class<T> type, Class typeIndexed) {
+    public <T> T getAttribute(Class<T> type, Class<?> typeIndexed) {
         return session.getAttribute(type, typeIndexed.getName());
     }
 
@@ -73,7 +73,7 @@ public class SessionContext implements Context {
         return session.removeAttribute(key.toString());
     }
 
-    public boolean removeAttribute(Class typeIndexed) {
+    public boolean removeAttribute(Class<?> typeIndexed) {
         return session.removeAttribute(typeIndexed.getName());
     }
 

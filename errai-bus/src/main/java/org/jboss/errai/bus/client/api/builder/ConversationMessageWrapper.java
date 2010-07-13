@@ -147,7 +147,7 @@ public class ConversationMessageWrapper implements Message {
         return newMessage.get(type, part);
     }
 
-    public <T> T get(Class<T> type, Enum part) {
+    public <T> T get(Class<T> type, Enum<?> part) {
         return newMessage.get(type, part);
     }
 

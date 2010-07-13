@@ -85,8 +85,8 @@ public class CommandMessage implements Message {
     public static final int PRIORITY_ROUTING = 2;
 
     /**
-     * @param commandType
-     * @return
+     * @param commandType -
+     * @return -
      * @deprecated Please use the MessageBuilder class.
      */
     @Deprecated
@@ -95,8 +95,8 @@ public class CommandMessage implements Message {
     }
 
     /**
-     * @param commandType
-     * @return
+     * @param commandType -
+     * @return -
      * @deprecated Please use the MessageBuilder class.
      */
     @Deprecated
@@ -117,8 +117,8 @@ public class CommandMessage implements Message {
     /**
      * For internal use. This method should not be directly used.
      *
-     * @param parts
-     * @return
+     * @param parts -
+     * @return -
      */
     public static CommandMessage createWithParts(Map<String, Object> parts) {
         return new CommandMessage(parts);
@@ -312,7 +312,7 @@ public class CommandMessage implements Message {
      * @return - Value in the specified type.
      */
     @SuppressWarnings({"UnusedDeclaration"})
-    public <T> T get(Class<T> type, Enum part) {
+    public <T> T get(Class<T> type, Enum<?> part) {
         return get(type, part.toString());
     }
 
@@ -524,7 +524,6 @@ public class CommandMessage implements Message {
     public String toString() {
         return buildDescription();
     }
-
 
     public Map<String, Object> getResources() {
         return resources;

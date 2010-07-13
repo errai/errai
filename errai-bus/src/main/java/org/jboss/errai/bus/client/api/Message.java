@@ -40,7 +40,7 @@ public interface Message extends Serializable {
      * @param type - <tt>Enum</tt> representation of a command type
      * @return the updated message
      */
-    public Message command(Enum type);
+    public Message command(Enum<?> type);
 
     /**
      * Returns the command type for this message as a <tt>String</tt>
@@ -65,12 +65,12 @@ public interface Message extends Serializable {
      * @param value - the value to set the part to
      * @return the updated message
      */
-    public Message set(Enum part, Object value);
+    public Message set(Enum<?> part, Object value);
 
 
     public Message setProvidedPart(String part, ResourceProvider provider);
 
-    public Message setProvidedPart(Enum part, ResourceProvider provider);
+    public Message setProvidedPart(Enum<?> part, ResourceProvider provider);
 
     /**
      * Check if message contains the specified part
@@ -86,7 +86,7 @@ public interface Message extends Serializable {
      * @param part - <tt>Enum</tt> part to check for
      * @return true if message contains part
      */
-    public boolean hasPart(Enum part);
+    public boolean hasPart(Enum<?> part);
 
     /**
      * Removes specified part from the message
@@ -100,7 +100,7 @@ public interface Message extends Serializable {
      *
      * @param part - part to remove
      */
-    public void remove(Enum part);
+    public void remove(Enum<?> part);
 
     /**
      * Copy a part of this message to another message
@@ -118,7 +118,7 @@ public interface Message extends Serializable {
      * @param m    - the message to copy the part to
      * @return this message
      */
-    public Message copy(Enum part, Message m);
+    public Message copy(Enum<?> part, Message m);
 
     /**
      * Set the message to contain the specified parts.  Note: This overwrites any existing message contents.
@@ -235,7 +235,7 @@ public interface Message extends Serializable {
      * @param <T>  - Type to be returned.
      * @return - Value in the specified type.
      */
-    public <T> T get(Class<T> type, Enum part);
+    public <T> T get(Class<T> type, Enum<?> part);
 
     /**
      * Set flags for this message
