@@ -22,6 +22,7 @@ package org.jboss.errai.bus.client.api;
 public interface MessageCallback {
     /**
      * This method is called to handle the message.
+     *
      * @param message -
      */
     public void callback(Message message);

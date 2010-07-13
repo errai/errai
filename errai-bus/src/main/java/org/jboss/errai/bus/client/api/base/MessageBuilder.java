@@ -24,8 +24,8 @@ public class MessageBuilder {
      */
     @SuppressWarnings({"unchecked"})
     public static MessageBuildSubject<MessageBuildSendableWithReply> createMessage() {
-  //    Message message = provider.get();
-      return new AbstractMessageBuilder(provider.get()).start();
+        //    Message message = provider.get();
+        return new AbstractMessageBuilder(provider.get()).start();
     }
 
     /**
@@ -37,11 +37,10 @@ public class MessageBuilder {
      */
     @SuppressWarnings({"unchecked"})
     public static MessageBuildSubject<MessageReplySendable> createConversation(Message message) {
-        Message newMessage = provider.get();      
+        Message newMessage = provider.get();
         if (newMessage instanceof HasEncoded) {
             return new AbstractMessageBuilder<MessageReplySendable>(new HasEncodedConvMessageWrapper(message, newMessage)).start();
-        }
-        else {
+        } else {
             return new AbstractMessageBuilder<MessageReplySendable>(new ConversationMessageWrapper(message, newMessage)).start();
         }
     }
@@ -58,10 +57,11 @@ public class MessageBuilder {
 
     /**
      * Creates a RPC call.
+     *
      * @param callback -
-     * @param service -
-     * @param <T> -
-     * @param <R> -
+     * @param service  -
+     * @param <T>      -
+     * @param <R>      -
      * @return -
      */
     public static <R, T> T createCall(RemoteCallback<R> callback, Class<T> service) {

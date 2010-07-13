@@ -24,6 +24,7 @@ public class ConversationHelper {
     }
 
     static int counter = 0;
+
     static int count() {
         if (++counter > 1000) {
             return counter = 0;

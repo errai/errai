@@ -31,16 +31,16 @@ public interface QueueSession {
      * Sets the attribute with the specified value.
      *
      * @param attribute - new or old attribute to set
-     * @param value - new value for attribute
+     * @param value     - new value for attribute
      */
     public void setAttribute(String attribute, Object value);
 
     /**
      * Gets an attribute, if it exists.
      *
-     * @param type - the type of to cast the attribute's value to
+     * @param type      - the type of to cast the attribute's value to
      * @param attribute - the attribute's name
-     * @param <T> - the type
+     * @param <T>       - the type
      * @return the value of the attribute as the specified <tt>type</tt>
      */
     public <T> T getAttribute(Class<T> type, String attribute);
@@ -62,6 +62,7 @@ public interface QueueSession {
 
     /**
      * Register a listener to be fired when the session ends.
+     *
      * @param listener The listener to be registered
      */
     public void addSessionEndListener(SessionEndListener listener);

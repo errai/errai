@@ -49,6 +49,7 @@ public class ClientTaskManager implements TaskManager {
     private static AsyncTask createAsyncTask(final Runnable task, final Timer timer) {
         AsyncTask asyncTask = new AsyncTask() {
             boolean cancelled = false;
+
             public boolean cancel(boolean interrupt) {
                 timer.cancel();
                 return cancelled = true;

@@ -1,9 +1,9 @@
 package org.jboss.errai.bus.server.io;
 
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
+import org.jboss.errai.bus.client.framework.MessageBus;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;

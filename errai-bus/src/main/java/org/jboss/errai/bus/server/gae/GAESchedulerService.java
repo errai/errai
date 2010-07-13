@@ -1,58 +1,56 @@
 package org.jboss.errai.bus.server.gae;
 
-import static java.lang.System.currentTimeMillis;
-
-import java.util.Iterator;
-import java.util.TreeSet;
-
+import com.google.appengine.api.labs.taskqueue.Queue;
+import com.google.appengine.api.labs.taskqueue.QueueFactory;
 import org.jboss.errai.bus.client.api.AsyncTask;
 import org.jboss.errai.bus.server.async.SchedulerService;
 import org.jboss.errai.bus.server.async.TimedTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.appengine.api.labs.taskqueue.Queue;
-import com.google.appengine.api.labs.taskqueue.QueueFactory;
-import static com.google.appengine.api.labs.taskqueue.TaskOptions.Builder.*;
+import java.util.Iterator;
+import java.util.TreeSet;
+
+import static com.google.appengine.api.labs.taskqueue.TaskOptions.Builder.url;
+import static java.lang.System.currentTimeMillis;
 
 /**
  * GAE compatible scheduler implementation.
- * 
- * @author hbraun
  *
+ * @author hbraun
  */
 public class GAESchedulerService implements SchedulerService {
 
-	private Logger log = LoggerFactory.getLogger(GAESchedulerService.class);
-	
-	private final TreeSet<TimedTask> tasks = new TreeSet<TimedTask>();
-	
-	private volatile boolean running = false;
+    private Logger log = LoggerFactory.getLogger(GAESchedulerService.class);
+
+    private final TreeSet<TimedTask> tasks = new TreeSet<TimedTask>();
+
+    private volatile boolean running = false;
     private boolean finished = false;
-    private long nextRunTime = 0;    
+    private long nextRunTime = 0;
     private boolean autoStartStop = false;
-    
+
     public final static GAESchedulerService INSTANCE = new GAESchedulerService();
-    
+
     public void init() {
-    	scheduleGAETask();
+        scheduleGAETask();
     }
-    
-    private void scheduleGAETask()
-    {
-    	Queue queue = QueueFactory.getDefaultQueue();
-    	queue.add(url("/scheduler"));
+
+    private void scheduleGAETask() {
+        Queue queue = QueueFactory.getDefaultQueue();
+        queue.add(url("/scheduler"));
     }
-    
+
     public void setAutoStartStop(boolean autoStartStop) {
         this.autoStartStop = autoStartStop;
     }
-    
-	public AsyncTask addTask(final TimedTask task) {
-		tasks.add(task);
-		
-		return new AsyncTask() {
+
+    public AsyncTask addTask(final TimedTask task) {
+        tasks.add(task);
+
+        return new AsyncTask() {
             private boolean finished = false;
+
             public boolean cancel(boolean mayInterruptIfRunning) {
                 task.cancel(mayInterruptIfRunning);
                 return finished = true;
@@ -66,18 +64,18 @@ public class GAESchedulerService implements SchedulerService {
                 return finished;
             }
         };
-	}	
+    }
 
-	public void runAllDue() {
+    public void runAllDue() {
         long n = 0;
 
         if ((nextRunTime - currentTimeMillis()) > 0) {
-        	log.debug("skip execution. next runtime " + nextRunTime);
+            log.debug("skip execution. next runtime " + nextRunTime);
             return;
         }
-        
+
         synchronized (this) {
-        	log.debug("executing scheduler");
+            log.debug("executing scheduler");
             TimedTask task;
             for (Iterator<TimedTask> iter = tasks.iterator(); iter.hasNext();) {
                 if ((task = iter.next()).runIfDue(n = currentTimeMillis())) {
@@ -85,22 +83,18 @@ public class GAESchedulerService implements SchedulerService {
                         // if the next runtime is -1, that means this event
                         // is never scheduled to run again, so we remove it.
                         iter.remove();
-                    }
-                    else {
+                    } else {
                         // set the nextRuntime to the nextRuntim of this event
                         nextRunTime = task.nextRuntime();
                     }
-                }
-                else if (task.nextRuntime() == -1) {
+                } else if (task.nextRuntime() == -1) {
                     // this event is not scheduled to run.
                     iter.remove();
-                }
-                else if (nextRunTime == 0 || task.nextRuntime() < nextRunTime) {
+                } else if (nextRunTime == 0 || task.nextRuntime() < nextRunTime) {
                     // this event occurs before the current nextRuntime,
                     // so we update nextRuntime.
                     nextRunTime = task.nextRuntime();
-                }
-                else if (n > task.nextRuntime()) {
+                } else if (n > task.nextRuntime()) {
                     // Since the scheduled events are in the order of soonest to
                     // latest, we now know that all further events are in the future
                     // and we can therefore stop iterating.
@@ -113,11 +107,11 @@ public class GAESchedulerService implements SchedulerService {
 
         if (n == 0) nextRunTime = currentTimeMillis() + 10000;
     }
-	
-	public void startIfTasks() {
+
+    public void startIfTasks() {
         synchronized (this) {
             if (!tasks.isEmpty() && !running) {
-                init();                
+                init();
             }
         }
     }
@@ -129,14 +123,14 @@ public class GAESchedulerService implements SchedulerService {
             }
         }
     }
-    
-	public void requestStop() {
-		
 
-	}
+    public void requestStop() {
 
-	public void start() {		
 
-	}
+    }
+
+    public void start() {
+
+    }
 
 }

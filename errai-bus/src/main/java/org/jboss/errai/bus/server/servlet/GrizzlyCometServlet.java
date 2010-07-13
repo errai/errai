@@ -1,7 +1,6 @@
 package org.jboss.errai.bus.server.servlet;
 
 import com.google.inject.Singleton;
-
 import com.sun.grizzly.comet.CometContext;
 import com.sun.grizzly.comet.CometEngine;
 import com.sun.grizzly.comet.CometEvent;
@@ -18,9 +17,12 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.CharBuffer;
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
 
 import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
 
@@ -113,8 +115,8 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
                     });
 
                     if (!queue.messagesWaiting()) {
-                            context.setExpirationDelay(45 * 1000);
-                        }
+                        context.setExpirationDelay(45 * 1000);
+                    }
                 } else {
                     queue.setActivationCallback(null);
                 }

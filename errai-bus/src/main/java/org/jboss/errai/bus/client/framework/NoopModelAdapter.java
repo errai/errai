@@ -19,16 +19,14 @@ package org.jboss.errai.bus.client.framework;
  * A noop domain model adapter implementation that's used by default
  *
  * @author Heiko Braun <hbraun@redhat.com>
+ *         l
  */
-public class NoopModelAdapter implements ModelAdapter
-{
-  public Object clone(Object entity)
-  {
-    return entity;
-  }
+public class NoopModelAdapter implements ModelAdapter {
+    public Object clone(Object entity) {
+        return entity;
+    }
 
-  public Object merge(Object dto)
-  {
-    return dto;
-  }
+    public Object merge(Object dto) {
+        return dto;
+    }
 }

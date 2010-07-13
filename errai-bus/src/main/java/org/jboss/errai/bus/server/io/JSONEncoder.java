@@ -58,10 +58,10 @@ public class JSONEncoder {
         } else if (v.getClass().isArray()) {
             return encodeArray(v);
 
-        // CDI Integration: Loading entities after the service was initialized
-        // This may cause the client to throw an exception if the entity is not known
-        // TODO: Improve exception handling for these cases
-          
+            // CDI Integration: Loading entities after the service was initialized
+            // This may cause the client to throw an exception if the entity is not known
+            // TODO: Improve exception handling for these cases
+
         }/* else if (serializableTypes.contains(v.getClass()) || tHandlers.containsKey(v.getClass())) {
             return encodeObject(v);
         } else {
@@ -69,9 +69,8 @@ public class JSONEncoder {
         }  */
         else if (v instanceof Enum) {
             return encodeEnum((Enum) v);
-        }
-        else {
-          return encodeObject(v);          
+        } else {
+            return encodeObject(v);
         }
     }
 
@@ -186,7 +185,7 @@ public class JSONEncoder {
             }
         });
 
-       tHandlers.put(Timestamp.class, new TypeHandler<Timestamp, Long>() {
+        tHandlers.put(Timestamp.class, new TypeHandler<Timestamp, Long>() {
             public Long getConverted(Timestamp in) {
                 return in.getTime();
             }

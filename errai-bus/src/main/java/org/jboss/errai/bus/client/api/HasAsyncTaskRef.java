@@ -22,5 +22,6 @@ package org.jboss.errai.bus.client.api;
  */
 public interface HasAsyncTaskRef extends Runnable {
     public void setAsyncTask(AsyncTask task);
+
     public AsyncTask getAsyncTask();
 }

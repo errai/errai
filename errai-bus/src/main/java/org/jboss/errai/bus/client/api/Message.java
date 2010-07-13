@@ -1,8 +1,8 @@
 package org.jboss.errai.bus.client.api;
 
-import org.jboss.errai.bus.client.framework.RoutingFlags;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
+import org.jboss.errai.bus.client.framework.RoutingFlags;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -52,7 +52,7 @@ public interface Message extends Serializable {
     /**
      * Sets a Message part to the specified value.
      *
-     * @param part - The <tt>String</tt> name of the message part
+     * @param part  - The <tt>String</tt> name of the message part
      * @param value - the value to set the part to
      * @return the updated message
      */
@@ -61,7 +61,7 @@ public interface Message extends Serializable {
     /**
      * Sets a Message part to the specified value.
      *
-     * @param part - The <tt>Enum</tt> representation of the message part
+     * @param part  - The <tt>Enum</tt> representation of the message part
      * @param value - the value to set the part to
      * @return the updated message
      */
@@ -106,7 +106,7 @@ public interface Message extends Serializable {
      * Copy a part of this message to another message
      *
      * @param part - the part of this message to copy
-     * @param m - the message to copy the part to
+     * @param m    - the message to copy the part to
      * @return this message
      */
     public Message copy(String part, Message m);
@@ -115,7 +115,7 @@ public interface Message extends Serializable {
      * Copy a part of this message to another message
      *
      * @param part - the part of this message to copy
-     * @param m - the message to copy the part to
+     * @param m    - the message to copy the part to
      * @return this message
      */
     public Message copy(Enum part, Message m);
@@ -126,7 +126,7 @@ public interface Message extends Serializable {
      * @param parts - Parts to be used in the message.
      * @return this message
      */
-    public Message setParts(Map<String,Object> parts);
+    public Message setParts(Map<String, Object> parts);
 
     /**
      * Copy in a set of message parts from the provided map.
@@ -138,6 +138,7 @@ public interface Message extends Serializable {
 
     /**
      * Copy in a set of provided message parts from the provided maps
+     *
      * @param provided - provided parts to be added to the message
      * @return this message
      */
@@ -152,6 +153,7 @@ public interface Message extends Serializable {
 
     /**
      * Return a Map of all provided pars.
+     *
      * @return - a Map of the provided message parts.
      */
     public Map<String, ResourceProvider> getProvidedParts();
@@ -192,8 +194,8 @@ public interface Message extends Serializable {
     /**
      * Copy a transient resource to this mesage from the specified message.
      *
-     * @param key      - Name of resource.
-     * @param m - Message to copy from.
+     * @param key - Name of resource.
+     * @param m   - Message to copy from.
      * @return
      */
     public Message copyResource(String key, Message m);

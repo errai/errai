@@ -38,7 +38,7 @@ public interface ServerMessageBus extends MessageBus {
      * The payload contains all the messages that need to be transmitted.
      *
      * @param sessionContext - key of messages. Only want to obtain messages that have the same <tt>sessionContext</tt>
-     * @param wait - set to true if the bus will wait for the next message
+     * @param wait           - set to true if the bus will wait for the next message
      * @return the <tt>Payload</tt> instance containing all the messages that need to be transmitted
      */
     @Deprecated
@@ -71,7 +71,7 @@ public interface ServerMessageBus extends MessageBus {
      * be routed based on the already specified rules or not.
      *
      * @param subject - the subject of the subscription
-     * @param rule - the <tt>BooleanRoutingRule</tt> instance specifying the routing rules
+     * @param rule    - the <tt>BooleanRoutingRule</tt> instance specifying the routing rules
      */
     public void addRule(String subject, BooleanRoutingRule rule);
 
@@ -84,11 +84,12 @@ public interface ServerMessageBus extends MessageBus {
 
     /**
      * Register a {@link org.jboss.errai.bus.server.api.QueueClosedListener} with the bus.
+     *
      * @param listener a instance of the listener
      */
     public void addQueueClosedListener(QueueClosedListener listener);
 
-  //  public TimedTask scheduleForSession(QueueSession session, TimeUnit unit, int time, Runnable task);
+    //  public TimedTask scheduleForSession(QueueSession session, TimeUnit unit, int time, Runnable task);
 
     /**
      * Configures the bus using the configuration specified
@@ -99,6 +100,7 @@ public interface ServerMessageBus extends MessageBus {
 
     /**
      * Get a collection of all receivers registered for a specificed subject
+     *
      * @param subject The subject.
      * @return
      */

@@ -20,7 +20,7 @@ public class EndpointCallback implements MessageCallback {
      * Initializes the service and endpoint method
      *
      * @param genericSvc - the service that delivers the message
-     * @param method - the endpoint function
+     * @param method     - the endpoint function
      */
     public EndpointCallback(Object genericSvc, Method method) {
         this.genericSvc = genericSvc;
@@ -29,8 +29,8 @@ public class EndpointCallback implements MessageCallback {
 
     /**
      * Invokes the endpoint function based on the details of the message
-     * 
-     * @param message - the message 
+     *
+     * @param message - the message
      */
     public void callback(Message message) {
         Object[] parms = message.get(Object[].class, "MethodParms");

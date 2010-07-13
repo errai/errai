@@ -14,6 +14,6 @@ public class ServiceCanceller implements MessageCallback {
     }
 
     public void callback(Message message) {
-         bus.unsubscribeAll(serviceName);
+        bus.unsubscribeAll(serviceName);
     }
 }

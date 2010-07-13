@@ -22,16 +22,15 @@ import org.jboss.errai.bus.client.framework.MessageBus;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: May 3, 2010
  */
-class BusProvider implements ResourceProvider<MessageBus>
-{
+class BusProvider implements ResourceProvider<MessageBus> {
     private final MessageBus bus;
 
     BusProvider(MessageBus bus) {
-      this.bus = bus;
+        this.bus = bus;
     }
 
     public MessageBus get() {
-      return bus;
+        return bus;
     }
-  }
+}
 

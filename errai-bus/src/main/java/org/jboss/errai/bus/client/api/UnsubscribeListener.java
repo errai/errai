@@ -26,7 +26,7 @@ public interface UnsubscribeListener {
     /**
      * Function is called when a subscription is deregistered from the bus
      *
-     * @param event - the subscription event that occurred 
+     * @param event - the subscription event that occurred
      */
     public void onUnsubscribe(SubscriptionEvent event);
 }

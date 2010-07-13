@@ -16,8 +16,8 @@
 
 package org.jboss.errai.bus.server.io;
 
-import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.framework.RoutingFlags;
 import org.jboss.errai.bus.client.json.JSONUtilCli;
 import org.jboss.errai.bus.client.protocols.MessageParts;
@@ -48,7 +48,7 @@ public class MessageFactory {
      * parts depending on the string
      *
      * @param session - the queue session in which the message exists
-     * @param json - the string representing the parts of the message
+     * @param json    - the string representing the parts of the message
      * @return the message array constructed using the JSON string
      */
     public static Message[] createCommandMessage(QueueSession session, String json) {

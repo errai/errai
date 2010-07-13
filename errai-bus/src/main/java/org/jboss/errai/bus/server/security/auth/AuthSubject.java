@@ -33,7 +33,7 @@ public class AuthSubject {
      *
      * @param username - the user name of the subject
      * @param fullname - the full name of the subject
-     * @param roles - a collection of roles pertaining to this subject
+     * @param roles    - a collection of roles pertaining to this subject
      */
     public AuthSubject(String username, String fullname, Collection<Object> roles) {
         this.username = username;

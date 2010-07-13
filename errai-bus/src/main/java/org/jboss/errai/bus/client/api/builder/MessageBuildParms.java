@@ -13,7 +13,7 @@ public interface MessageBuildParms<R> extends MessageBuild {
     /**
      * Sets the message part to the specified value
      *
-     * @param part - the message part
+     * @param part  - the message part
      * @param value - the value of the message part
      * @return the updated instance of <tt>MessageBuildParms</tt>
      */
@@ -22,7 +22,7 @@ public interface MessageBuildParms<R> extends MessageBuild {
     /**
      * Sets the message part to the specified value
      *
-     * @param part - the message part
+     * @param part  - the message part
      * @param value - the value of the message part
      * @return the updated instance of <tt>MessageBuildParms</tt>
      */
@@ -37,7 +37,7 @@ public interface MessageBuildParms<R> extends MessageBuild {
      * Copies the message part to the specified message
      *
      * @param part - the message part
-     * @param m - the message
+     * @param m    - the message
      * @return the updated instance of <tt>MessageBuildParms</tt>
      */
     public MessageBuildParms<R> copy(String part, Message m);
@@ -46,7 +46,7 @@ public interface MessageBuildParms<R> extends MessageBuild {
      * Copies the message part to the specified message
      *
      * @param part - the message part
-     * @param m - the message
+     * @param m    - the message
      * @return the updated instance of <tt>MessageBuildParms</tt>
      */
     public MessageBuildParms<R> copy(Enum part, Message m);
@@ -55,7 +55,7 @@ public interface MessageBuildParms<R> extends MessageBuild {
      * Copies the message resource to the specified message
      *
      * @param part - the message resource
-     * @param m - the message
+     * @param m    - the message
      * @return the updated instance of <tt>MessageBuildParms</tt>
      */
     public MessageBuildParms<R> copyResource(String part, Message m);
@@ -77,6 +77,7 @@ public interface MessageBuildParms<R> extends MessageBuild {
 
     /**
      * Use the default error handler.
+     *
      * @return -
      */
     public R defaultErrorHandling();

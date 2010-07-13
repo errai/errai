@@ -37,8 +37,7 @@ public enum RoutingFlags {
         @Override
         public int flag() {
             return 1 << 5;
-        }}
-    ;
+        }};
 
     /**
      * Returns the integer representing the flag

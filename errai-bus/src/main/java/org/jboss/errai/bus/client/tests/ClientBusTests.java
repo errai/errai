@@ -7,6 +7,6 @@ public class ClientBusTests {
     }
 
     public void testBus() {
-       
+
     }
 }

@@ -26,7 +26,7 @@ public class DefaultErrorCallback implements ErrorCallback {
 
     public boolean error(Message message, Throwable e) {
         e.printStackTrace();
-         
+
         if (e != null) {
             StringBuilder a = new StringBuilder("<br/>").append(e.getClass().getName()).append(": ").append(e.getMessage()).append("<br/>");
 

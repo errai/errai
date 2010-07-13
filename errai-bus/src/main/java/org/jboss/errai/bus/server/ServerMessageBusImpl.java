@@ -292,7 +292,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             queueSize = Integer.parseInt(config.getProperty(ERRAI_BUS_QUEUESIZE));
         }
 
-     //   this.modelAdapter = config.getResource(ModelAdapter.class);
+        //   this.modelAdapter = config.getResource(ModelAdapter.class);
     }
 
     /**

@@ -16,8 +16,6 @@
 
 package org.jboss.errai.bus.server.io;
 
-import org.jboss.errai.common.client.protocols.SerializationParts;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -248,7 +246,7 @@ public class JSONDecoder {
 
         private Context() {
         }
-                                             
+
         private void addValue(Object val) {
             if (lhs == null) {
                 lhs = val;

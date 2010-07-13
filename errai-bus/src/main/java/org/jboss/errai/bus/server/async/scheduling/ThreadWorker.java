@@ -17,10 +17,7 @@
 package org.jboss.errai.bus.server.async.scheduling;
 
 import org.jboss.errai.bus.client.api.ErrorCallback;
-import org.jboss.errai.bus.client.api.base.TimeUnit;
 import org.jboss.errai.bus.server.async.TimedTask;
-
-import static java.lang.System.nanoTime;
 
 public class ThreadWorker implements Runnable {
     private final Thread thread;

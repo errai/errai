@@ -32,6 +32,7 @@ public class Payload {
 
     /**
      * Creates a new <tt>Payload</tt> with a single initial {@link MarshalledMessage}.
+     *
      * @param m a message
      */
     public Payload(MarshalledMessage m) {
@@ -40,6 +41,7 @@ public class Payload {
 
     /**
      * Adds a new message to the <tt>Payload</tt>.
+     *
      * @param m a marshalled message.
      */
     public void addMessage(MarshalledMessage m) {
@@ -48,6 +50,7 @@ public class Payload {
 
     /**
      * Return all messages within the <tt>Payload</tt>
+     *
      * @return a list of all messages in the payload.
      */
     public List<MarshalledMessage> getMessages() {
@@ -60,6 +63,6 @@ public class Payload {
      * @return true if there are messages waiting
      */
     public boolean waitingMessages() {
-        return messages.size() > 1 ||! messages.get(0).getSubject().equals("HeartBeat");
+        return messages.size() > 1 || !messages.get(0).getSubject().equals("HeartBeat");
     }
 }

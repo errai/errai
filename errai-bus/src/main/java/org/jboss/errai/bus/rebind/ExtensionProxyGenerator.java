@@ -21,12 +21,11 @@ import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
-import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.ext.ExtensionsLoader;
+import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.server.annotations.ExtensionComponent;
 import org.jboss.errai.bus.server.util.RebindUtil;
 import org.jboss.errai.bus.server.util.RebindVisitor;
@@ -35,7 +34,7 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.util.List;
 
-import static org.jboss.errai.bus.server.util.ConfigUtil.*;
+import static org.jboss.errai.bus.server.util.ConfigUtil.findAllConfigTargets;
 
 public class ExtensionProxyGenerator extends Generator {
     /**
@@ -148,7 +147,7 @@ public class ExtensionProxyGenerator extends Generator {
                                 throw new RuntimeException("Could not load extension generator: " + visit.getName(), e);
                             }
                         }
-                           
+
                     }
 
                     public void visitError(String className, Throwable t) {

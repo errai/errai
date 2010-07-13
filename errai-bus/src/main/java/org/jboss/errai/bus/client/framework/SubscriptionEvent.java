@@ -46,9 +46,9 @@ public class SubscriptionEvent extends BusEvent<SubscriptionEvent> {
     }
 
 
-
     /**
      * Return the associated sessionId with the subscription event.
+     *
      * @return - Session instance.
      */
     public String getSessionId() {
@@ -58,6 +58,7 @@ public class SubscriptionEvent extends BusEvent<SubscriptionEvent> {
     /**
      * Indicates whether or not this is a remote subscription event, meaning that the subscription is to a foreign-bus,
      * rather than to the current bus.
+     *
      * @return
      */
     public boolean isRemote() {
@@ -75,6 +76,7 @@ public class SubscriptionEvent extends BusEvent<SubscriptionEvent> {
 
     /**
      * Get the subject being subscribed to.
+     *
      * @return
      */
     public String getSubject() {

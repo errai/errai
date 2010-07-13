@@ -17,19 +17,22 @@
 package org.jboss.errai.bus.client.framework;
 
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.framework.MessageBus;
 
 public interface BusMonitor {
     public void attach(MessageBus bus);
 
     public void notifyNewSubscriptionEvent(SubscriptionEvent event);
+
     public void notifyUnSubcriptionEvent(SubscriptionEvent event);
 
     public void notifyQueueAttached(String queueId, Object queueInstance);
+
     public void notifyQueueDetached(String queueId, Object queueInstance);
 
     public void notifyIncomingMessageFromRemote(String queueId, Message message);
+
     public void notifyOutgoingMessageToRemote(String queueId, Message message);
+
     public void notifyInBusMessage(Message message);
 
     public void notifyMessageDeliveryFailure(String queueId, Message mesage, Throwable error);

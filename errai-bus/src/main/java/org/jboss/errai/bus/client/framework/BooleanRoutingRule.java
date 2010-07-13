@@ -26,6 +26,7 @@ public interface BooleanRoutingRule {
      * This method is called in order determine whether or not a message should continue to be routed based on
      * whatever rules have been implemented in the <tt>decision()</tt> method.  If the method returns <tt>false</tt>,
      * the message will not be routed.  If it returns <tt>true</tt>, routing continues normally.
+     *
      * @param message - the command message to be inspected.
      * @return boolean - indicating whether or not the message should be routed.
      */

@@ -80,7 +80,7 @@ public class TypeDemarshallHelper {
             } else if (o instanceof Map) {
                 Map<?, ?> oMap = (Map) o;
                 if (oMap.containsKey(SerializationParts.ENCODED_TYPE)) {
-                    Object newInstance =  Thread.currentThread().getContextClassLoader()
+                    Object newInstance = Thread.currentThread().getContextClassLoader()
                             .loadClass((String) oMap.get(SerializationParts.ENCODED_TYPE)).newInstance();
                     Map<String, Serializable> s = MVELDencodingCache.get(newInstance.getClass());
 
@@ -103,8 +103,7 @@ public class TypeDemarshallHelper {
                         final Serializable cachedSetExpr = s.get(entry.getKey());
                         if (cachedSetExpr != null) {
                             MVEL.executeSetExpression(cachedSetExpr, newInstance, _demarshallAll(entry.getValue()));
-                        }
-                        else {
+                        } else {
                             MVEL.setProperty(newInstance, String.valueOf(entry.getKey()), _demarshallAll(entry.getValue()));
                         }
                     }

@@ -45,8 +45,7 @@ import java.util.ResourceBundle;
  * mary=users,humanResources
  * </pre></tt>
  * The left-hand value is the <em>user name</em> corresponding with the user defined in the <tt>user.properties</tt> file, and
- * the right-hand value are the roles assigned to each user.  
- *
+ * the right-hand value are the roles assigned to each user.
  */
 public class PropertyFileLoginModule implements LoginModule {
     private String login;

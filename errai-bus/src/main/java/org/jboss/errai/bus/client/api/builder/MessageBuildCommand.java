@@ -11,7 +11,7 @@ public interface MessageBuildCommand<R> extends MessageBuildParms<R> {
      * constructed following setting the command
      *
      * @param command - the command to set for this message.
-     * Could be one of {@link org.jboss.errai.bus.client.protocols.BusCommands}
+     *                Could be one of {@link org.jboss.errai.bus.client.protocols.BusCommands}
      * @return an instance of <tt>MessageBuildParms</tt>
      */
     public MessageBuildParms<R> command(Enum command);
@@ -31,7 +31,6 @@ public interface MessageBuildCommand<R> extends MessageBuildParms<R> {
      * @return an instance of <tt>MessageBuildParms</tt>
      */
     public MessageBuildParms<R> signalling();
-
 
 
 }

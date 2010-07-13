@@ -18,11 +18,11 @@ package org.jboss.errai.bus.server.util;
 
 /**
  * The <tt>ConfigVisitor</tt> offers a template for searching and configuring classes.
- * This visitor class separation gives the ability to add new operations to existing object structures without 
+ * This visitor class separation gives the ability to add new operations to existing object structures without
  * modifying those structures
  */
 public interface ConfigVisitor {
-    
+
     /**
      * Visits the specified class and configures it accordingly
      *

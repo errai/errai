@@ -18,7 +18,7 @@ package org.jboss.errai.bus.server.security.auth;
 
 /**
  * <tt>AuthenticationFailedException</tt> extends the <tt>RuntimeException</tt>. It is thrown when a security
- * challenge against any existing credentials (or lack of) fails 
+ * challenge against any existing credentials (or lack of) fails
  */
 public class AuthenticationFailedException extends RuntimeException {
     public AuthenticationFailedException() {

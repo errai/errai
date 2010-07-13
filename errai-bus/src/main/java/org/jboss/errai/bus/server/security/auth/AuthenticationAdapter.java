@@ -25,12 +25,14 @@ public interface AuthenticationAdapter {
     /**
      * Performs a security challenge against any existing credentials (or lack thereof) in the current
      * <tt>CommandMessage</tt>
+     *
      * @param message -
      */
     public void challenge(Message message);
 
     /**
      * Returns true if the current <tt>CommandMessage</tt> has an authentication sessino.
+     *
      * @param message
      * @return
      */
@@ -38,6 +40,7 @@ public interface AuthenticationAdapter {
 
     /**
      * Terminates any session associated with the specified <tt>CommandMessage</tt>
+     *
      * @param message
      * @return
      */

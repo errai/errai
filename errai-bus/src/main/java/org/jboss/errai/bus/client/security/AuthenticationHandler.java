@@ -23,6 +23,7 @@ package org.jboss.errai.bus.client.security;
 public interface AuthenticationHandler {
     /**
      * Called to request filling of the credentials.
+     *
      * @param credentials - Array of required credentials.
      */
     public void doLogin(Credential[] credentials);

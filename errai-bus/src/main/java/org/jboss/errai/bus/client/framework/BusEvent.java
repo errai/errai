@@ -22,6 +22,7 @@ public abstract class BusEvent<T> {
     /**
      * Returns true if the listener should be disposed after firing, meaning the listener will be de-registered
      * and never fired again.
+     *
      * @return -
      */
     public boolean isDisposeListener() {
@@ -31,6 +32,7 @@ public abstract class BusEvent<T> {
     /**
      * Sets whether or not the listener should be disposed of.  If set to true, the listener will be disposed the
      * next time it fires.
+     *
      * @param disposeListener
      */
     public void setDisposeListener(boolean disposeListener) {

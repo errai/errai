@@ -31,6 +31,7 @@ public interface MessageBuild extends Sendable {
 
     /**
      * Gets the message created
+     *
      * @return the message in question
      */
     Message getMessage();

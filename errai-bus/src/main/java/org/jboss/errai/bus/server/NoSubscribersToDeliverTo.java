@@ -34,7 +34,7 @@ public class NoSubscribersToDeliverTo extends MessageDeliveryFailure {
     }
 
     public NoSubscribersToDeliverTo(String message, Throwable cause) {
-        super(message, cause);    
+        super(message, cause);
     }
 
     public NoSubscribersToDeliverTo(Throwable cause) {

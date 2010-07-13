@@ -31,91 +31,87 @@ import org.jboss.errai.bus.server.service.bootstrap.OrderedBootstrap;
 @Singleton
 public class ErraiServiceImpl implements ErraiService {
 
-  private ServerMessageBus bus;
-  private ErraiServiceConfigurator config;
+    private ServerMessageBus bus;
+    private ErraiServiceConfigurator config;
 
-  private SessionProvider sessionProvider;
-  private RequestDispatcher dispatcher;
-
-  /**
-   * Initializes the errai service with a bus and configurator
-   *
-   * @param bus - the bus to be associated with this service
-   * @param configurator - the configurator to take care of the configuration for the service
-   */
-  @Inject
-  public ErraiServiceImpl(final ServerMessageBus bus,
-                          final ErraiServiceConfigurator configurator) {
-    this.bus = bus;
-    this.config = configurator;
-
-    boostrap();
-  }
-
-  private void boostrap() {
-
-    BootstrapContext context = new BootstrapContext(this, bus, config);
-    new OrderedBootstrap().execute(context);
-    
-  }
-
-  /**
-   * Passes off the message to the bus for handling
-   *
-   * @param message - the message to store/deliver
-   */
-  public void store(Message message) {
-    message.addResources(config.getResourceProviders());
+    private SessionProvider sessionProvider;
+    private RequestDispatcher dispatcher;
 
     /**
-     * Pass the message off to the messaging bus for handling.
+     * Initializes the errai service with a bus and configurator
+     *
+     * @param bus          - the bus to be associated with this service
+     * @param configurator - the configurator to take care of the configuration for the service
      */
-    try {
-      getDispatcher().dispatchGlobal(message);
-      // bus.sendGlobal(message);
+    @Inject
+    public ErraiServiceImpl(final ServerMessageBus bus,
+                            final ErraiServiceConfigurator configurator) {
+        this.bus = bus;
+        this.config = configurator;
+
+        boostrap();
     }
-    catch (Throwable t) {
-      System.err.println("Message was not delivered.");
-      t.printStackTrace();
+
+    private void boostrap() {
+
+        BootstrapContext context = new BootstrapContext(this, bus, config);
+        new OrderedBootstrap().execute(context);
+
     }
-  }
+
+    /**
+     * Passes off the message to the bus for handling
+     *
+     * @param message - the message to store/deliver
+     */
+    public void store(Message message) {
+        message.addResources(config.getResourceProviders());
+
+        /**
+         * Pass the message off to the messaging bus for handling.
+         */
+        try {
+            getDispatcher().dispatchGlobal(message);
+            // bus.sendGlobal(message);
+        }
+        catch (Throwable t) {
+            System.err.println("Message was not delivered.");
+            t.printStackTrace();
+        }
+    }
 
 
-  /**
-   * Gets the bus associated with this service
-   *
-   * @return the bus associated with this service
-   */
-  public ServerMessageBus getBus() {
-    return bus;
-  }
+    /**
+     * Gets the bus associated with this service
+     *
+     * @return the bus associated with this service
+     */
+    public ServerMessageBus getBus() {
+        return bus;
+    }
 
-  /**
-   * Gets the configuration used to initalize the service
-   *
-   * @return the errai service configurator
-   */
-  public ErraiServiceConfigurator getConfiguration() {
-    return config;
-  }
+    /**
+     * Gets the configuration used to initalize the service
+     *
+     * @return the errai service configurator
+     */
+    public ErraiServiceConfigurator getConfiguration() {
+        return config;
+    }
 
-  public SessionProvider getSessionProvider()
-  {
-    return sessionProvider;
-  }
+    public SessionProvider getSessionProvider() {
+        return sessionProvider;
+    }
 
-  public void setSessionProvider(SessionProvider sessionProvider)
-  {
-    this.sessionProvider = sessionProvider;
-  }
+    public void setSessionProvider(SessionProvider sessionProvider) {
+        this.sessionProvider = sessionProvider;
+    }
 
-  public RequestDispatcher getDispatcher()
-  {
-    return dispatcher;
-  }
+    public RequestDispatcher getDispatcher() {
+        return dispatcher;
+    }
 
-  public void setDispatcher(RequestDispatcher dispatcher)
-  {
-    this.dispatcher = dispatcher;
-  }
+    public void setDispatcher(RequestDispatcher dispatcher) {
+        this.dispatcher = dispatcher;
+    }
 }

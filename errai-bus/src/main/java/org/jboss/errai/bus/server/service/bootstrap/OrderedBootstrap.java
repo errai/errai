@@ -25,54 +25,47 @@ import java.util.List;
 /**
  * Bootstrap Errai in an ordered fashion.
  *
- * @see org.jboss.errai.bus.server.service.bootstrap.BootstrapExecution
- * 
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: May 3, 2010
+ * @see org.jboss.errai.bus.server.service.bootstrap.BootstrapExecution
  */
-public class OrderedBootstrap implements BootstrapExecution
-{
-  private Logger log = LoggerFactory.getLogger(OrderedBootstrap.class);
-  
-  private List<BootstrapExecution> bootstrap = new LinkedList<BootstrapExecution>();
+public class OrderedBootstrap implements BootstrapExecution {
+    private Logger log = LoggerFactory.getLogger(OrderedBootstrap.class);
 
-  public OrderedBootstrap()
-  {
-    bootstrap.add(new DefaultComponents());
-    bootstrap.add(new DefaultServices());
-    bootstrap.add(new LockDownServices());
-    bootstrap.add(new LoadExtensions());
-    bootstrap.add(new AuthenticationRules());
-    bootstrap.add(new DefaultResources());
-    bootstrap.add(new CleanupStartupFiles());
-    bootstrap.add(new RegisterTypes());
-    bootstrap.add(new DiscoverServices());
-    bootstrap.add(new BusConfiguration());
-  }
+    private List<BootstrapExecution> bootstrap = new LinkedList<BootstrapExecution>();
 
-  public void execute(final BootstrapContext context)
-  {
-    log.info("Bootstrap Errai");
-        
-    try
-    {
-      for(BootstrapExecution execution : bootstrap)
-      {
-        execution.execute(context);
-      }
-
-      // any deferred tasks?
-      context.executeDeferred();
-
-      // freeze config
-      ((ErraiServiceConfiguratorImpl)context.getConfig()).lockdown();
-
-      log.info("Bootstrap complete. Ready to rumble!");
-      
+    public OrderedBootstrap() {
+        bootstrap.add(new DefaultComponents());
+        bootstrap.add(new DefaultServices());
+        bootstrap.add(new LockDownServices());
+        bootstrap.add(new LoadExtensions());
+        bootstrap.add(new AuthenticationRules());
+        bootstrap.add(new DefaultResources());
+        bootstrap.add(new CleanupStartupFiles());
+        bootstrap.add(new RegisterTypes());
+        bootstrap.add(new DiscoverServices());
+        bootstrap.add(new BusConfiguration());
     }
-    catch (Exception e)
-    {      
-      throw new RuntimeException("Bootstrap failed", e);
+
+    public void execute(final BootstrapContext context) {
+        log.info("Bootstrap Errai");
+
+        try {
+            for (BootstrapExecution execution : bootstrap) {
+                execution.execute(context);
+            }
+
+            // any deferred tasks?
+            context.executeDeferred();
+
+            // freeze config
+            ((ErraiServiceConfiguratorImpl) context.getConfig()).lockdown();
+
+            log.info("Bootstrap complete. Ready to rumble!");
+
+        }
+        catch (Exception e) {
+            throw new RuntimeException("Bootstrap failed", e);
+        }
     }
-  }
 }

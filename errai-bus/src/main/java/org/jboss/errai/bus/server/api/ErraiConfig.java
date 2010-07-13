@@ -21,5 +21,6 @@ import org.jboss.errai.bus.client.api.ResourceProvider;
 
 public interface ErraiConfig {
     public void addBinding(Class<?> type, ResourceProvider provider);
+
     public void addResourceProvider(String name, ResourceProvider provider);
 }

@@ -16,8 +16,8 @@
 
 package org.jboss.errai.bus.server.util;
 
-import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.server.api.QueueSession;
 import org.jboss.errai.bus.server.io.JSONEncoder;
 import org.jboss.errai.bus.server.io.MessageFactory;
@@ -30,7 +30,7 @@ import java.util.Map;
  */
 public class ServerBusUtils {
     public static void main(String[] args) {
-        System.out.println("\"".replaceAll("\"", "\\\\\""));                                                       
+        System.out.println("\"".replaceAll("\"", "\\\\\""));
     }
 
     /**
@@ -67,7 +67,7 @@ public class ServerBusUtils {
     /**
      * Extracts the String-based SessionID which is used to identify the message queue associated with any particular
      * client. You may use this method to extract the SessionID from a message so that you may use it for routing.
-     * 
+     *
      * @param message - the message to get the session id of
      * @return the string representation of the session id
      */

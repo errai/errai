@@ -32,7 +32,7 @@ import java.util.*;
  */
 public class ConfigUtil extends AbstractConfigBase {
 
-  /**
+    /**
      * Gets a list of all the configuration targets in the form of <tt>File</tt>s
      *
      * @return a <tt>File</tt> list of all the configuration targets
@@ -172,5 +172,5 @@ public class ConfigUtil extends AbstractConfigBase {
      */
     public static boolean isAnnotated(Class clazz, Class<? extends Annotation> annotation, Class ofType) {
         return ofType.isAssignableFrom(clazz) && clazz.isAnnotationPresent(annotation);
-    }   
+    }
 }

@@ -10,6 +10,6 @@ public class MessageQueueExpired extends RuntimeException {
     }
 
     public MessageQueueExpired(String message, Throwable cause) {
-        super(message, cause);   
+        super(message, cause);
     }
 }

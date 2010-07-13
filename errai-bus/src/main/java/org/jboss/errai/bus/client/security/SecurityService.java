@@ -20,8 +20,8 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
@@ -35,167 +35,160 @@ import static org.jboss.errai.bus.client.api.base.MessageBuilder.createMessage;
 import static org.jboss.errai.bus.client.protocols.SecurityParts.CredentialsRequired;
 
 public class SecurityService {
-  private AuthenticationContext authenticationContext;
-  private AuthenticationHandler authHandler;
-  public static final String SUBJECT = "AuthenticationListener";
+    private AuthenticationContext authenticationContext;
+    private AuthenticationHandler authHandler;
+    public static final String SUBJECT = "AuthenticationListener";
 
-  // deferr notification of LoginClient in case
-  // a workspace wants to override the authentication or authorization scheme
-  private boolean deferredNotification;
+    // deferr notification of LoginClient in case
+    // a workspace wants to override the authentication or authorization scheme
+    private boolean deferredNotification;
 
-  public SecurityService() {
-    ErraiBus.get().subscribe(SUBJECT, new MessageCallback()
-    {
-      public void callback(Message msg) {
+    public SecurityService() {
+        ErraiBus.get().subscribe(SUBJECT, new MessageCallback() {
+            public void callback(Message msg) {
 
-        switch (SecurityCommands.valueOf(msg.getCommandType()))
-        {
-          case AuthenticationScheme:
-            if (authHandler == null) {
-              //               msg.toSubject("LoginClient").sendNowWith(ErraiBus.get());
-              return;
+                switch (SecurityCommands.valueOf(msg.getCommandType())) {
+                    case AuthenticationScheme:
+                        if (authHandler == null) {
+                            //               msg.toSubject("LoginClient").sendNowWith(ErraiBus.get());
+                            return;
+                        }
+
+                        String credentialsRequired = msg.get(String.class, CredentialsRequired);
+                        String[] credentialNames = credentialsRequired.split(",");
+                        Credential[] credentials = new Credential[credentialNames.length];
+
+                        for (int i = 0; i < credentialNames.length; i++) {
+                            switch (CredentialTypes.valueOf(credentialNames[i])) {
+                                case Name:
+                                    credentials[i] = new NameCredential();
+                                    break;
+                                case Password:
+                                    credentials[i] = new PasswordCredential();
+                                    break;
+
+                                default:
+                                    //todo: throw a massive error here.
+                            }
+                        }
+
+                        // callback on externally provided login form
+                        // asking for the required credentials specified on the server side.
+                        authHandler.doLogin(credentials);
+
+                        // Create an authentication request and send the credentials
+                        Message challenge = createMessage()
+                                .toSubject("AuthenticationService")
+                                .command(SecurityCommands.AuthRequest)
+                                .with(MessageParts.ReplyTo, SUBJECT)
+                                .getMessage();
+
+                        for (int i = 0; i < credentialNames.length; i++) {
+                            switch (CredentialTypes.valueOf(credentialNames[i])) {
+                                case Name:
+                                    challenge.set(CredentialTypes.Name, credentials[i].getValue());
+                                    break;
+                                case Password:
+                                    challenge.set(CredentialTypes.Password, credentials[i].getValue());
+                                    break;
+                            }
+                        }
+
+                        challenge.sendNowWith(ErraiBus.get());
+
+                        break;
+                    case AuthenticationNotRequired:
+                        notifyLoginClient(msg);
+                        break;
+
+                    case FailedAuth:
+                        notifyLoginClient(msg);
+                        break;
+                    case SuccessfulAuth:
+                        if (authenticationContext != null && authenticationContext.isValid()) return;
+                        authenticationContext = createAuthContext(msg);
+                        notifyLoginClient(msg);
+
+                        break;
+                }
             }
-
-            String credentialsRequired = msg.get(String.class, CredentialsRequired);
-            String[] credentialNames = credentialsRequired.split(",");
-            Credential[] credentials = new Credential[credentialNames.length];
-
-            for (int i = 0; i < credentialNames.length; i++) {
-              switch (CredentialTypes.valueOf(credentialNames[i])) {
-                case Name:
-                  credentials[i] = new NameCredential();
-                  break;
-                case Password:
-                  credentials[i] = new PasswordCredential();
-                  break;
-
-                default:
-                  //todo: throw a massive error here.
-              }
-            }
-
-            // callback on externally provided login form
-            // asking for the required credentials specified on the server side.
-            authHandler.doLogin(credentials);
-
-            // Create an authentication request and send the credentials
-            Message challenge = createMessage()
-                .toSubject("AuthenticationService")
-                .command(SecurityCommands.AuthRequest)
-                .with(MessageParts.ReplyTo, SUBJECT)
-                .getMessage();
-
-            for (int i = 0; i < credentialNames.length; i++) {
-              switch (CredentialTypes.valueOf(credentialNames[i])) {
-                case Name:
-                  challenge.set(CredentialTypes.Name, credentials[i].getValue());
-                  break;
-                case Password:
-                  challenge.set(CredentialTypes.Password, credentials[i].getValue());
-                  break;
-              }
-            }
-
-            challenge.sendNowWith(ErraiBus.get());
-
-            break;
-          case AuthenticationNotRequired:           
-            notifyLoginClient(msg);
-            break;
-
-          case FailedAuth:
-            notifyLoginClient(msg);
-            break;
-          case SuccessfulAuth:
-            if (authenticationContext != null && authenticationContext.isValid()) return;
-            authenticationContext = createAuthContext(msg);
-            notifyLoginClient(msg);
-
-            break;
-        }
-      }
-    });
-
-
-    // listener for the authorization assignment
-    ErraiBus.get().subscribe("AuthorizationListener",
-        new MessageCallback() {
-          public void callback(Message message) {
-
-            authenticationContext = createAuthContext(message);
-
-            if(!deferredNotification)
-            {
-              MessageBuilder.createMessage()
-                  .toSubject("LoginClient")
-                  .command(SecurityCommands.HandshakeComplete)
-                  .noErrorHandling()
-                  .sendNowWith(ErraiBus.get());
-            }
-          }
         });
-  }
-
-  private void notifyLoginClient(Message msg)
-  {
-    // forward this message on to the login client.
-    msg.toSubject("LoginClient").sendNowWith(ErraiBus.get());
-  }
-
-  private static AuthenticationContext createAuthContext(Message msg)
-  {
-    String username = "";
-    HashSet<Role> assingnedRoles = new HashSet<Role>();
-
-    if(msg.hasPart(SecurityParts.Roles))
-    {
-      username = msg.get(String.class, SecurityParts.Name);
-      String rolesString = msg.get(String.class, SecurityParts.Roles);
 
 
-      String[] roles = rolesString.split(",");
+        // listener for the authorization assignment
+        ErraiBus.get().subscribe("AuthorizationListener",
+                new MessageCallback() {
+                    public void callback(Message message) {
 
-      for (final String role : roles) {
-        assingnedRoles.add(new Role() {
-          public String getRoleName() {
-            return role;
-          }
-        });
-      }
+                        authenticationContext = createAuthContext(message);
+
+                        if (!deferredNotification) {
+                            MessageBuilder.createMessage()
+                                    .toSubject("LoginClient")
+                                    .command(SecurityCommands.HandshakeComplete)
+                                    .noErrorHandling()
+                                    .sendNowWith(ErraiBus.get());
+                        }
+                    }
+                });
     }
 
-    return new BasicAuthenticationContext(assingnedRoles, username);
-  }
+    private void notifyLoginClient(Message msg) {
+        // forward this message on to the login client.
+        msg.toSubject("LoginClient").sendNowWith(ErraiBus.get());
+    }
 
-  /**
-   * Send a
-   * @param handler
-   */
-  public void doAuthentication(final AuthenticationHandler handler)
-  {
-    authHandler = handler;
+    private static AuthenticationContext createAuthContext(Message msg) {
+        String username = "";
+        HashSet<Role> assingnedRoles = new HashSet<Role>();
 
-    DeferredCommand.addCommand(new Command() {
-      public void execute() {
-        MessageBuilder.createMessage()
-            .toSubject("AuthenticationService")
-            .command(SecurityCommands.AuthenticationScheme)
-            .with(MessageParts.ReplyTo, SUBJECT)
-            .noErrorHandling().sendNowWith(ErraiBus.get());
-      }
-    });
-  }
+        if (msg.hasPart(SecurityParts.Roles)) {
+            username = msg.get(String.class, SecurityParts.Name);
+            String rolesString = msg.get(String.class, SecurityParts.Roles);
 
-  public AuthenticationContext getAuthenticationContext() {
-    return authenticationContext;
-  }
 
-  public void setAuthenticationContext(AuthenticationContext authenticationContext) {
-    this.authenticationContext = authenticationContext;
-  }
+            String[] roles = rolesString.split(",");
 
-  public void setDeferredNotification(boolean deferredNotification)
-  {
-    this.deferredNotification = deferredNotification;
-  }
+            for (final String role : roles) {
+                assingnedRoles.add(new Role() {
+                    public String getRoleName() {
+                        return role;
+                    }
+                });
+            }
+        }
+
+        return new BasicAuthenticationContext(assingnedRoles, username);
+    }
+
+    /**
+     * Send a
+     *
+     * @param handler
+     */
+    public void doAuthentication(final AuthenticationHandler handler) {
+        authHandler = handler;
+
+        DeferredCommand.addCommand(new Command() {
+            public void execute() {
+                MessageBuilder.createMessage()
+                        .toSubject("AuthenticationService")
+                        .command(SecurityCommands.AuthenticationScheme)
+                        .with(MessageParts.ReplyTo, SUBJECT)
+                        .noErrorHandling().sendNowWith(ErraiBus.get());
+            }
+        });
+    }
+
+    public AuthenticationContext getAuthenticationContext() {
+        return authenticationContext;
+    }
+
+    public void setAuthenticationContext(AuthenticationContext authenticationContext) {
+        this.authenticationContext = authenticationContext;
+    }
+
+    public void setDeferredNotification(boolean deferredNotification) {
+        this.deferredNotification = deferredNotification;
+    }
 }

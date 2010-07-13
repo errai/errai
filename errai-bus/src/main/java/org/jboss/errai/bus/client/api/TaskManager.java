@@ -20,6 +20,8 @@ import org.jboss.errai.bus.client.api.base.TimeUnit;
 
 public interface TaskManager {
     public void execute(Runnable task);
+
     public AsyncTask scheduleRepeating(TimeUnit unit, int interval, Runnable task);
+
     public AsyncTask schedule(TimeUnit unit, int interval, Runnable task);
 }

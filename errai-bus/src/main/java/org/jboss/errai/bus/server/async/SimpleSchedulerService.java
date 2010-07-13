@@ -99,22 +99,18 @@ public class SimpleSchedulerService implements Runnable, SchedulerService {
                         // if the next runtime is -1, that means this event
                         // is never scheduled to run again, so we remove it.
                         iter.remove();
-                    }
-                    else {
+                    } else {
                         // set the nextRuntime to the nextRuntim of this event
                         nextRunTime = task.nextRuntime();
                     }
-                }
-                else if (task.nextRuntime() == -1) {
+                } else if (task.nextRuntime() == -1) {
                     // this event is not scheduled to run.
                     iter.remove();
-                }
-                else if (nextRunTime == 0 || task.nextRuntime() < nextRunTime) {
+                } else if (nextRunTime == 0 || task.nextRuntime() < nextRunTime) {
                     // this event occurs before the current nextRuntime,
                     // so we update nextRuntime.
                     nextRunTime = task.nextRuntime();
-                }
-                else if (n > task.nextRuntime()) {
+                } else if (n > task.nextRuntime()) {
                     // Since the scheduled events are in the order of soonest to
                     // latest, we now know that all further events are in the future
                     // and we can therefore stop iterating.
@@ -148,6 +144,7 @@ public class SimpleSchedulerService implements Runnable, SchedulerService {
 
         return new AsyncTask() {
             private boolean finished = false;
+
             public boolean cancel(boolean mayInterruptIfRunning) {
                 task.cancel(mayInterruptIfRunning);
                 return finished = true;

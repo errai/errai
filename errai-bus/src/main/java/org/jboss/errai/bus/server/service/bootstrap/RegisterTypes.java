@@ -21,16 +21,13 @@ import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
 /**
  * Register serializeable types. This configures the JSONEncoder.
  *
- * @see org.jboss.errai.bus.server.io.JSONEncoder
- * 
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: May 3, 2010
+ * @see org.jboss.errai.bus.server.io.JSONEncoder
  */
-class RegisterTypes implements BootstrapExecution
-{
-  public void execute(BootstrapContext context)
-  {
-    final ErraiServiceConfiguratorImpl config = (ErraiServiceConfiguratorImpl)context.getConfig();
-    JSONEncoder.setSerializableTypes(config.getSerializableTypes());
-  }
+class RegisterTypes implements BootstrapExecution {
+    public void execute(BootstrapContext context) {
+        final ErraiServiceConfiguratorImpl config = (ErraiServiceConfiguratorImpl) context.getConfig();
+        JSONEncoder.setSerializableTypes(config.getSerializableTypes());
+    }
 }

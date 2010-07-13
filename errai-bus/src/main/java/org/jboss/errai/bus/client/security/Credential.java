@@ -22,6 +22,7 @@ package org.jboss.errai.bus.client.security;
 public interface Credential {
     /**
      * The value of the credential.
+     *
      * @return - Value instance of the credential.
      */
     public Object getValue();

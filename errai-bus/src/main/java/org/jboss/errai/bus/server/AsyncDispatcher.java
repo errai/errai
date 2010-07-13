@@ -42,15 +42,14 @@ public class AsyncDispatcher implements RequestDispatcher {
     public void dispatchGlobal(Message message) throws InterruptedException {
         if (message.hasPart(MessageParts.PriorityProcessing)) {
             try {
-            service.getBus().sendGlobal(message);
+                service.getBus().sendGlobal(message);
             }
             catch (Throwable t) {
                 if (message.getErrorCallback() != null) {
                     if (!message.getErrorCallback().error(message, t)) {
                         return;
                     }
-                }
-                else {
+                } else {
                     t.printStackTrace();
                 }
             }
@@ -60,10 +59,9 @@ public class AsyncDispatcher implements RequestDispatcher {
     }
 
     /**
-     *
      * @param message - a message to dispatch
      */
     public void dispatch(Message message) throws InterruptedException {
-         workerFactory.deliver(message);
+        workerFactory.deliver(message);
     }
 }

@@ -94,7 +94,7 @@ public class ConversationMessage extends CommandMessage {
      * Constructs a <tt>ConversationMessage</tt> using a specified type and reference message.
      *
      * @param commandType - <tt>Enum</tt> command type
-     * @param inReplyTo - message to reference
+     * @param inReplyTo   - message to reference
      */
     public ConversationMessage(Enum commandType, Message inReplyTo) {
         this(inReplyTo);
@@ -105,7 +105,7 @@ public class ConversationMessage extends CommandMessage {
      * Constructs a <tt>ConversationMessage</tt> using a specified type and reference message.
      *
      * @param commandType - <tt>String</tt> command type
-     * @param inReplyTo - message to reference
+     * @param inReplyTo   - message to reference
      */
     public ConversationMessage(String commandType, Message inReplyTo) {
         this(inReplyTo);

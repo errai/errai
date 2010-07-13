@@ -320,7 +320,6 @@ public class AbstractMessageBuilder<R extends Sendable> {
         };
 
 
-
         return new MessageBuildSubject() {
             public MessageBuildCommand<R> toSubject(String subject) {
                 message.toSubject(subject);

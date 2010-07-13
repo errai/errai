@@ -17,11 +17,10 @@ package org.jboss.errai.bus.server.service.bootstrap;
 
 /**
  * A single step of the overall bootstrap.
- * 
+ *
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: May 3, 2010
  */
-public interface BootstrapExecution
-{
-  public void execute(final BootstrapContext context);  
+public interface BootstrapExecution {
+    public void execute(final BootstrapContext context);
 }

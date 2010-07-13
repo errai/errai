@@ -21,20 +21,18 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Cleanup monitoring and other startup files.
- * 
+ *
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: May 3, 2010
  */
-class CleanupStartupFiles implements BootstrapExecution
-{
-	public static final Logger log = LoggerFactory.getLogger(CleanupStartupFiles.class);
-	
-  public void execute(BootstrapContext context)
-  {
-		try {
-			ConfigUtil.cleanupStartupTempFiles();
-		} catch (Exception e) {
-			log.error("Failed to clean startup files, ignore...");
-		}
-  }
+class CleanupStartupFiles implements BootstrapExecution {
+    public static final Logger log = LoggerFactory.getLogger(CleanupStartupFiles.class);
+
+    public void execute(BootstrapContext context) {
+        try {
+            ConfigUtil.cleanupStartupTempFiles();
+        } catch (Exception e) {
+            log.error("Failed to clean startup files, ignore...");
+        }
+    }
 }

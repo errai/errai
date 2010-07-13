@@ -31,6 +31,7 @@ public interface ClientMessageBus extends MessageBus {
      * The Map returned has the subject of the registrations as the key, and Sets of registration objects as the
      * value of the Map.  The implementation of the registration objects is subject to the underlying bus
      * implementation.
+     *
      * @return A map of registrations captured in the current capture context.
      */
     public Map<String, Set<Object>> getCapturedRegistrations();
@@ -38,6 +39,7 @@ public interface ClientMessageBus extends MessageBus {
     /**
      * Unregister all registrations in the specified Map.<p/>  It accepts a Map format returned from
      * {@link #getCapturedRegistrations()}.  See the documentation for that method for more information.
+     *
      * @param all A map of registrations to deregister.
      */
     public void unregisterAll(Map<String, Set<Object>> all);
@@ -56,6 +58,7 @@ public interface ClientMessageBus extends MessageBus {
     /**
      * And a {@link Runnable} initialization task to be executed after the bus has successfuly finished it's
      * initialization and is now communicating with the remote bus.
+     *
      * @param run a {@link Runnable} task.
      */
     public void addPostInitTask(Runnable run);
@@ -63,6 +66,7 @@ public interface ClientMessageBus extends MessageBus {
 
     /**
      * Returns true if the bus has successfully initialized and can relay messages.
+     *
      * @return boolean indicating if bus is initialized.
      */
     public boolean isInitialized();

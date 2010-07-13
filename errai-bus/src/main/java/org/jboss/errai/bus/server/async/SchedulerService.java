@@ -20,6 +20,8 @@ import org.jboss.errai.bus.client.api.AsyncTask;
 
 public interface SchedulerService {
     public AsyncTask addTask(TimedTask task);
+
     public void requestStop();
+
     public void start();
 }

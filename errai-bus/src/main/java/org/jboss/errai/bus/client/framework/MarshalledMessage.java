@@ -22,12 +22,14 @@ package org.jboss.errai.bus.client.framework;
 public interface MarshalledMessage {
     /**
      * The target subject
+     *
      * @return -
      */
     public String getSubject();
 
     /**
      * The message data.
+     *
      * @return -
      */
     public Object getMessage();

@@ -15,6 +15,6 @@ public interface MessageProvider {
      */
     public Message get();
 
-  
- // public ModelAdapter getAdapter();
+
+    // public ModelAdapter getAdapter();
 }

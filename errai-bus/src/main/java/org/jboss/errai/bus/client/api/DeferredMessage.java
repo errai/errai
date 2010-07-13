@@ -16,7 +16,6 @@
 
 package org.jboss.errai.bus.client.api;
 
-import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 
 /**
@@ -24,5 +23,6 @@ import org.jboss.errai.bus.client.framework.RequestDispatcher;
  */
 public interface DeferredMessage extends Message {
     public void sendsWith(RequestDispatcher dispatcher);
+
     public void send();
 }

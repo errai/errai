@@ -3,10 +3,10 @@
 <module>
 
     <inherits name='com.google.gwt.user.User'/>
-    <inherits name="org.jboss.errai.bus.ErraiBus" />
+    <inherits name="org.jboss.errai.bus.ErraiBus"/>
 
-    <servlet path="/in.erraiBus" class="org.jboss.errai.bus.server.servlet.DefaultBlockingServlet" />
-    
+    <servlet path="/in.erraiBus" class="org.jboss.errai.bus.server.servlet.DefaultBlockingServlet"/>
+
     <entry-point class='org.jboss.errai.bus.client.tests.client.BusTests'/>
-   
+
 </module>

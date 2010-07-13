@@ -17,7 +17,6 @@ package org.jboss.errai.bus.server.service.bootstrap;
 
 import org.jboss.errai.bus.server.security.auth.rules.RolesRequiredRule;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
-import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,19 +26,17 @@ import java.util.HashSet;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: May 3, 2010
  */
-class AuthenticationRules implements BootstrapExecution
-{
-  private Logger log = LoggerFactory.getLogger(AuthenticationRules.class);
+class AuthenticationRules implements BootstrapExecution {
+    private Logger log = LoggerFactory.getLogger(AuthenticationRules.class);
 
-  public void execute(BootstrapContext context)
-  {
-    String requireAuthenticationForAll = "errai.require_authentication_for_all";
+    public void execute(BootstrapContext context) {
+        String requireAuthenticationForAll = "errai.require_authentication_for_all";
 
-    final ErraiServiceConfigurator config = context.getConfig();
+        final ErraiServiceConfigurator config = context.getConfig();
 
-    if (config.hasProperty(requireAuthenticationForAll) && "true".equals(config.getProperty(requireAuthenticationForAll))) {
-      log.info("authentication for all requests required, adding rule ... ");
-      context.getBus().addRule("AuthorizationService", new RolesRequiredRule(new HashSet<Object>(), context.getBus()));
+        if (config.hasProperty(requireAuthenticationForAll) && "true".equals(config.getProperty(requireAuthenticationForAll))) {
+            log.info("authentication for all requests required, adding rule ... ");
+            context.getBus().addRule("AuthorizationService", new RolesRequiredRule(new HashSet<Object>(), context.getBus()));
+        }
     }
-  }
 }

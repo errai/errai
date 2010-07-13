@@ -33,7 +33,7 @@ public class BasicAuthenticationContext implements AuthenticationContext {
      * Sets the roles corresponding to the name
      *
      * @param roles - the roles that correspond to <tt>name</tt>
-     * @param name - the name of the person
+     * @param name  - the name of the person
      */
     public BasicAuthenticationContext(Set<Role> roles, String name) {
         this.roles = roles;

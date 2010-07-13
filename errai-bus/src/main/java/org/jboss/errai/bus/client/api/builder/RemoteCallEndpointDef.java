@@ -18,7 +18,7 @@ public interface RemoteCallEndpointDef {
      * Sets the endpoint for a message using the specified name
      *
      * @param endPointName - name of endpoint
-     * @param args - the parameters for the endpoint function 
+     * @param args         - the parameters for the endpoint function
      * @return an instance of <tt>RemoteCallResponseDef</tt>
      */
     public RemoteCallResponseDef endpoint(String endPointName, Object... args);

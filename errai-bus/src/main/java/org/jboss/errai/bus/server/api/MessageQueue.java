@@ -18,8 +18,6 @@ package org.jboss.errai.bus.server.api;
 
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.client.framework.Payload;
-import org.jboss.errai.bus.server.api.QueueActivationCallback;
-import org.jboss.errai.bus.server.api.QueueSession;
 
 import java.util.concurrent.BlockingQueue;
 

@@ -16,7 +16,6 @@
 
 package org.jboss.errai.bus.rebind;
 
-import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.typeinfo.JClassType;
@@ -35,11 +34,8 @@ import org.mvel2.util.Make;
 
 import java.io.File;
 import java.io.InputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.*;
 
-import static org.jboss.errai.bus.server.util.ConfigUtil.visitAllTargets;
 import static org.mvel2.templates.TemplateCompiler.compileTemplate;
 import static org.mvel2.templates.TemplateRuntime.execute;
 
@@ -122,15 +118,15 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
     private void generateMarshaller(JClassType visit, TreeLogger logger, SourceWriter writer) {
         Map<String, Class> types = new HashMap<String, Class>();
         try {
-        for (JField f : visit.getFields()) {
-            if (f.isTransient() || f.isStatic() || f.isEnumConstant() != null) continue;
+            for (JField f : visit.getFields()) {
+                if (f.isTransient() || f.isStatic() || f.isEnumConstant() != null) continue;
 
-            JClassType type = f.getType().isClassOrInterface();
+                JClassType type = f.getType().isClassOrInterface();
 
-            if (type == null) continue;
+                if (type == null) continue;
 
-            types.put(f.getName(), Class.forName(type.getQualifiedSourceName()));
-        }
+                types.put(f.getName(), Class.forName(type.getQualifiedSourceName()));
+            }
 
         }
         catch (ClassNotFoundException e) {

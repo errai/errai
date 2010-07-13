@@ -1,9 +1,9 @@
 package org.jboss.errai.bus.server.servlet;
 
 import com.google.inject.Singleton;
+import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
-import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.QueueActivationCallback;
 import org.jboss.errai.bus.server.api.QueueSession;

@@ -483,7 +483,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     /**
      * Transmits JSON string containing message, using the <tt>sendBuilder</tt>
      *
-     * @param message - JSON string representation of message
+     * @param message    - JSON string representation of message
      * @param txMessages -
      */
     private void transmitRemote(final String message, final List<Message> txMessages) {

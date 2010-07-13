@@ -22,15 +22,14 @@ import org.jboss.errai.bus.client.framework.RequestDispatcher;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: May 3, 2010
  */
-class DispatcherProvider implements ResourceProvider<RequestDispatcher>
-{
+class DispatcherProvider implements ResourceProvider<RequestDispatcher> {
     private final RequestDispatcher dispatcher;
 
     DispatcherProvider(RequestDispatcher dispatcher) {
-      this.dispatcher = dispatcher;
+        this.dispatcher = dispatcher;
     }
 
     public RequestDispatcher get() {
-      return dispatcher;
+        return dispatcher;
     }
-  }
+}

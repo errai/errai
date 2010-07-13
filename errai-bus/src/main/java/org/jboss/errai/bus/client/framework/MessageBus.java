@@ -62,19 +62,17 @@ import org.jboss.errai.bus.client.api.*;
  * and by default, is provided by the container using dependency injection in the server code.  For example:
  * <p/>
  * <pre><code>
- * @Service
- * public class MyService {
- *      private MessageBus bus;
  *
- *      @Inject
- *      public MyService(MessageBus bus) {
- *          this.bus = bus;
- *      }
- *
- *      ...
+ * @Service public class MyService {
+ * private MessageBus bus;
+ * <p/>
+ * @Inject public MyService(MessageBus bus) {
+ * this.bus = bus;
+ * }
+ * <p/>
+ * ...
  * }
  * </code></pre>
- *
  */
 public interface MessageBus {
     /**
@@ -87,7 +85,7 @@ public interface MessageBus {
     /**
      * Transmits a message.
      *
-     * @param message 
+     * @param message
      */
     public void send(Message message);
 
@@ -100,7 +98,6 @@ public interface MessageBus {
      * @param fireListeners
      */
     public void send(Message message, boolean fireListeners);
-
 
 
     /**

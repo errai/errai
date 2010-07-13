@@ -109,10 +109,10 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
 
         public void addSessionEndListener(SessionEndListener listener) {
             synchronized (this) {
-               if (sessionEndListeners == null) {
-                   sessionEndListeners =  new ArrayList<SessionEndListener>();
-               }
-               sessionEndListeners.add(listener);
+                if (sessionEndListeners == null) {
+                    sessionEndListeners = new ArrayList<SessionEndListener>();
+                }
+                sessionEndListeners.add(listener);
             }
         }
 

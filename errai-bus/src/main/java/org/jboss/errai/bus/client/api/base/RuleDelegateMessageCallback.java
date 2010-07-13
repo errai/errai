@@ -16,9 +16,8 @@
 
 package org.jboss.errai.bus.client.api.base;
 
-import org.jboss.errai.bus.client.framework.BooleanRoutingRule;
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.framework.BooleanRoutingRule;
 import org.jboss.errai.bus.client.framework.DeliveryPlan;
 
 
@@ -36,7 +35,7 @@ public class RuleDelegateMessageCallback extends DeliveryPlan {
      * Creates the <tt>RuleDelegateMessageCallback</tt> instance using a given delegate and a routing rule
      *
      * @param delegate - Message callback function
-     * @param rule - indicates whether or not the message should be routed.
+     * @param rule     - indicates whether or not the message should be routed.
      */
     public RuleDelegateMessageCallback(DeliveryPlan delegate, BooleanRoutingRule rule) {
         this.delegate = delegate;
