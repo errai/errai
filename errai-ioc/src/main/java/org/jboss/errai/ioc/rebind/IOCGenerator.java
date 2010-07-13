@@ -32,6 +32,7 @@ import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.rebind.ProcessingContext;
 import org.jboss.errai.bus.server.annotations.Service;
+import org.jboss.errai.bus.server.util.RebindUtil;
 import org.jboss.errai.bus.server.util.RebindVisitor;
 import org.jboss.errai.ioc.client.InterfaceInjectionContext;
 import org.jboss.errai.ioc.client.api.*;
@@ -165,7 +166,7 @@ public class IOCGenerator extends Generator {
             throw new RuntimeException(e);
         }
 
-        visitAllTargets(targets, context, logger, sourceWriter, typeOracle, new RebindVisitor() {
+        RebindUtil.visitAllTargets(targets, context, logger, sourceWriter, typeOracle, new RebindVisitor() {
             public void visit(JClassType visit, GeneratorContext context, TreeLogger logger, SourceWriter writer) {
                 if (visit.isAnnotationPresent(Provider.class)) {
 
@@ -212,7 +213,7 @@ public class IOCGenerator extends Generator {
         sourceWriter.outdent();
         sourceWriter.println("InterfaceInjectionContext ctx = new InterfaceInjectionContext();");
 
-        visitAllTargets(findAllConfigTargets(), context, logger, sourceWriter, typeOracle,
+        RebindUtil.visitAllTargets(findAllConfigTargets(), context, logger, sourceWriter, typeOracle,
                 new RebindVisitor() {
                     public void visit(JClassType visitC, GeneratorContext context, TreeLogger logger, SourceWriter writer) {
                         procFactory.process(visitC, procContext);

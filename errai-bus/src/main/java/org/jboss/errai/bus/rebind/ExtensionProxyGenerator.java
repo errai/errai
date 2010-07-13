@@ -28,6 +28,7 @@ import com.google.gwt.user.rebind.SourceWriter;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.ext.ExtensionsLoader;
 import org.jboss.errai.bus.server.annotations.ExtensionComponent;
+import org.jboss.errai.bus.server.util.RebindUtil;
 import org.jboss.errai.bus.server.util.RebindVisitor;
 
 import java.io.File;
@@ -128,7 +129,7 @@ public class ExtensionProxyGenerator extends Generator {
 
         new BusClientConfigGenerator().generate(context, logger, sourceWriter, targets, typeOracle);
 
-        visitAllTargets(targets, context, logger, sourceWriter, typeOracle,
+        RebindUtil.visitAllTargets(targets, context, logger, sourceWriter, typeOracle,
                 new RebindVisitor() {
 
                     public void visit(JClassType visit, GeneratorContext context, TreeLogger logger,

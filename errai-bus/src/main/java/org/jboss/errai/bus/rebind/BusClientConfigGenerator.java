@@ -28,6 +28,7 @@ import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.annotations.ExposeEntity;
 import org.jboss.errai.bus.server.annotations.Remote;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
+import org.jboss.errai.bus.server.util.RebindUtil;
 import org.jboss.errai.bus.server.util.RebindVisitor;
 import org.mvel2.templates.CompiledTemplate;
 import org.mvel2.util.Make;
@@ -60,7 +61,7 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
     }
 
     public void generate(GeneratorContext context, TreeLogger logger, SourceWriter writer, List<File> roots, final TypeOracle oracle) {
-        visitAllTargets(roots, context, logger, writer, oracle,
+        RebindUtil.visitAllTargets(roots, context, logger, writer, oracle,
                 new RebindVisitor() {
                     public void visit(JClassType visit, GeneratorContext context,
                                       TreeLogger logger, SourceWriter writer) {

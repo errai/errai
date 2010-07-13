@@ -27,6 +27,7 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
 import org.jboss.errai.bus.server.util.ConfigUtil;
+import org.jboss.errai.bus.server.util.RebindUtil;
 import org.jboss.errai.bus.server.util.RebindVisitor;
 import org.jboss.errai.workspaces.client.api.annotations.DefaultBundle;
 import org.jboss.errai.workspaces.client.api.annotations.LoadTool;
@@ -112,7 +113,7 @@ public class ResourceFactoryGenerator extends Generator {
 
         // parse classes
         List<File> targets = ConfigUtil.findAllConfigTargets();
-        ConfigUtil.visitAllTargets(
+        RebindUtil.visitAllTargets(
                 targets, context, logger,
                 sourceWriter, typeOracle,
                 new RebindVisitor() {

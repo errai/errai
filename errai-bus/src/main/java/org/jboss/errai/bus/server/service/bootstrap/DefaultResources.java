@@ -76,7 +76,9 @@ class DefaultResources implements BootstrapExecution {
 			result = (TaskManager) tm.newInstance();
 			}
 			catch(Exception e)
-			{}
+			{
+        throw new RuntimeException("Failed to load task manager", e);
+      }
 		} else {
 			result = DefaultTaskManager.get();
 		}

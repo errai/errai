@@ -31,6 +31,7 @@ import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.rebind.ProcessingContext;
 import org.jboss.errai.bus.server.annotations.security.RequireRoles;
 import org.jboss.errai.bus.server.util.ConfigUtil;
+import org.jboss.errai.bus.server.util.RebindUtil;
 import org.jboss.errai.bus.server.util.RebindVisitor;
 import org.jboss.errai.ioc.rebind.IOCGenerator;
 import org.jboss.errai.workspaces.client.api.ProvisioningCallback;
@@ -196,7 +197,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
 
         iocGenerator.generateAllProviders();
 
-        ConfigUtil.visitAllTargets(
+        RebindUtil.visitAllTargets(
                 targets, context, logger,
                 sourceWriter, typeOracle,
                 new RebindVisitor() {
