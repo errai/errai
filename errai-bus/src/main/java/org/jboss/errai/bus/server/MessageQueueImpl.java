@@ -42,7 +42,7 @@ public class MessageQueueImpl implements MessageQueue {
     private static final long DEFAULT_TRANSMISSION_WINDOW = millis(25);
     private static final long MAX_TRANSMISSION_WINDOW = millis(100);
 
-    private QueueSession session;
+    private final QueueSession session;
 
     private long transmissionWindow = 40;
     private volatile long lastTransmission = nanoTime();
@@ -60,7 +60,7 @@ public class MessageQueueImpl implements MessageQueue {
     private BlockingQueue<MarshalledMessage> queue;
 
 
-    private ServerMessageBus bus;
+    private final ServerMessageBus bus;
     private volatile TimedTask task;
 
     private final Semaphore lock = new Semaphore(1, true);
@@ -74,7 +74,7 @@ public class MessageQueueImpl implements MessageQueue {
      * @param bus       - the bus that will send the messages
      * @param session   - the session associated with the queue
      */
-    public MessageQueueImpl(int queueSize, ServerMessageBus bus, QueueSession session) {
+    public MessageQueueImpl(final int queueSize, final ServerMessageBus bus, final QueueSession session) {
         this.queue = new LinkedBlockingQueue<MarshalledMessage>(queueSize);
         this.bus = bus;
         this.session = session;
@@ -197,7 +197,6 @@ public class MessageQueueImpl implements MessageQueue {
         return b;
     }
 
-
     /**
      * Schedules the activation, by sending off the queue. All message should be processed and sent once the task is
      * processed
@@ -237,6 +236,10 @@ public class MessageQueueImpl implements MessageQueue {
             System.out.println("SessionExpired");
             throw new MessageQueueExpired("session has expired");
         }
+    }
+
+    public void setSessionControl(SessionControl sessionControl) {
+        this.sessionControl = sessionControl;
     }
 
     /**

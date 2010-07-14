@@ -35,6 +35,8 @@ public interface MessageQueue {
 
     void setActivationCallback(QueueActivationCallback activationCallback);
 
+    void setSessionControl(SessionControl sessionControl);
+
     QueueActivationCallback getActivationCallback();
 
     BlockingQueue<MarshalledMessage> getQueue();

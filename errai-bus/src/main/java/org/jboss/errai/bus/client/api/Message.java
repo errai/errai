@@ -67,9 +67,20 @@ public interface Message extends Serializable {
      */
     public Message set(Enum<?> part, Object value);
 
-
+    /**
+     *
+     * @param part
+     * @param provider
+     * @return
+     */
     public Message setProvidedPart(String part, ResourceProvider provider);
 
+    /**
+     *
+     * @param part
+     * @param provider
+     * @return
+     */
     public Message setProvidedPart(Enum<?> part, ResourceProvider provider);
 
     /**
@@ -178,7 +189,8 @@ public interface Message extends Serializable {
     /**
      * Obtain a transient resource based on the specified key.
      *
-     * @param key - Name of resource.
+     * @param type - type of resource.
+     * @param key - the name of the resource
      * @return - Instancee of resource.
      */
     public <T> T getResource(Class<T> type, String key);
@@ -196,7 +208,7 @@ public interface Message extends Serializable {
      *
      * @param key - Name of resource.
      * @param m   - Message to copy from.
-     * @return
+     * @return -
      */
     public Message copyResource(String key, Message m);
 
@@ -267,6 +279,11 @@ public interface Message extends Serializable {
      */
     public void commit();
 
+    /**
+     * Returns true if the message has been committed.  Any changes made to a mesage after it's been committed
+     * may not be transmitted.
+     * @return returns true if committed.
+     */
     public boolean isCommited();
 
     /**
