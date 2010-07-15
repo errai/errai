@@ -31,6 +31,8 @@ import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
  */
 @Singleton
 public class TomcatCometServlet extends AbstractErraiServlet implements CometProcessor {
+    private volatile ClassLoader contextClassLoader;
+
     public TomcatCometServlet() {
     }
 
@@ -50,6 +52,10 @@ public class TomcatCometServlet extends AbstractErraiServlet implements CometPro
     public void event(final CometEvent event) throws IOException, ServletException {
         final HttpServletRequest request = event.getHttpServletRequest();
         final QueueSession session = sessionProvider.getSession(request.getSession(), request.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
+
+        if (contextClassLoader == null) {
+            contextClassLoader = Thread.currentThread().getContextClassLoader();
+        }
 
         MessageQueue queue;
         switch (event.getEventType()) {
@@ -206,7 +212,7 @@ public class TomcatCometServlet extends AbstractErraiServlet implements CometPro
 
             int messagesSent = 0;
             for (Message msg : createCommandMessage(sessionProvider.getSession(request.getSession(),
-                    request.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER)), sb.toString())) {
+                    request.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER)), sb.toString(), contextClassLoader)) {
                 service.store(msg);
                 messagesSent++;
             }

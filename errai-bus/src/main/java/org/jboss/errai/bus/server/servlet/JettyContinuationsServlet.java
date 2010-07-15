@@ -61,6 +61,9 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
     @Override
     protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
             throws ServletException, IOException {
+        if (contextClassLoader == null)
+            contextClassLoader = Thread.currentThread().getContextClassLoader();
+
         BufferedReader reader = httpServletRequest.getReader();
         StringAppender sb = new StringAppender(httpServletRequest.getContentLength());
         CharBuffer buffer = CharBuffer.allocate(10);
@@ -77,7 +80,7 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
         final QueueSession session = sessionProvider.getSession(httpServletRequest.getSession(),
                 httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
 
-        for (Message msg : createCommandMessage(session, sb.toString())) {
+        for (Message msg : createCommandMessage(session, sb.toString(), contextClassLoader)) {
             service.store(msg);
         }
 

@@ -43,7 +43,6 @@ import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
  */
 @Singleton
 public class DefaultBlockingServlet extends AbstractErraiServlet {
-
     /**
      * Creates an instance of the <tt>DefaultBlockingServlet</tt>. Does nothing else
      */
@@ -62,6 +61,7 @@ public class DefaultBlockingServlet extends AbstractErraiServlet {
     @Override
     protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
             throws ServletException, IOException {
+
         pollForMessages(sessionProvider.getSession(httpServletRequest.getSession(),
                 httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER)),
                 httpServletRequest, httpServletResponse, true);
@@ -79,6 +79,7 @@ public class DefaultBlockingServlet extends AbstractErraiServlet {
     @Override
     protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
             throws ServletException, IOException {
+        if (contextClassLoader == null) contextClassLoader = Thread.currentThread().getContextClassLoader();
 
         final QueueSession session = sessionProvider.getSession(httpServletRequest.getSession(),
                 httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
@@ -100,7 +101,7 @@ public class DefaultBlockingServlet extends AbstractErraiServlet {
                 buffer.rewind();
             }
 
-            for (Message msg : createCommandMessage(session, sb.toString())) {
+            for (Message msg : createCommandMessage(session, sb.toString(), contextClassLoader)) {
                 service.store(msg);
             }
         }

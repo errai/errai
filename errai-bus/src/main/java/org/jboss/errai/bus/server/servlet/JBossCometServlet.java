@@ -185,6 +185,9 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
     }
 
     private int readInRequest(HttpServletRequest request) throws IOException {
+        if (contextClassLoader == null)
+            contextClassLoader = Thread.currentThread().getContextClassLoader();
+
         BufferedReader reader = request.getReader();
         if (!reader.ready()) return 0;
         StringAppender sb = new StringAppender(request.getContentLength());
@@ -200,7 +203,7 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
 
         int messagesSent = 0;
         for (Message msg : createCommandMessage(sessionProvider.getSession(request.getSession(),
-                request.getHeader(REMOTE_QUEUE_ID_HEADER)), sb.toString())) {
+                request.getHeader(REMOTE_QUEUE_ID_HEADER)), sb.toString(), contextClassLoader)) {
             service.store(msg);
             messagesSent++;
         }

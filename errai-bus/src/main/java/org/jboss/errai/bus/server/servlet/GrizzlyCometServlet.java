@@ -58,6 +58,8 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        if (contextClassLoader == null) contextClassLoader = Thread.currentThread().getContextClassLoader();
+
         final QueueSession session = sessionProvider.getSession(request.getSession(),
                 request.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
 
@@ -74,7 +76,7 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
             buffer.rewind();
         }
 
-        for (Message msg : createCommandMessage(session, sb.toString())) {
+        for (Message msg : createCommandMessage(session, sb.toString(), contextClassLoader)) {
             service.store(msg);
         }
 

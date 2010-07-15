@@ -32,6 +32,8 @@ public abstract class AbstractErraiServlet extends HttpServlet {
     /* A default Http session provider */
     protected SessionProvider<HttpSession> sessionProvider;
 
+    protected volatile ClassLoader contextClassLoader;
+
     protected Logger log = LoggerFactory.getLogger(getClass());
 
 

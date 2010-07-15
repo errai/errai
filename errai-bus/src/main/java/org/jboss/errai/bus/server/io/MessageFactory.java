@@ -49,9 +49,10 @@ public class MessageFactory {
      *
      * @param session - the queue session in which the message exists
      * @param json    - the string representing the parts of the message
+     * @param classLoader - the context classloader for the calling thread.
      * @return the message array constructed using the JSON string
      */
-    public static Message[] createCommandMessage(QueueSession session, String json) {
+    public static Message[] createCommandMessage(QueueSession session, String json, ClassLoader classLoader) {
         if (json.length() == 0) return new CommandMessage[0];
         String[] pkg = json.split(JSONUtilCli.MULTI_PAYLOAD_SEPER_REGEX);
         Message[] c = new Message[pkg.length];
@@ -65,7 +66,7 @@ public class MessageFactory {
 
             // experimental feature. does this need to be cleaned?
             // any chance this leaks the CL?
-            msg.setResource("errai.experimental.classLoader", Thread.currentThread().getContextClassLoader());
+            msg.setResource("errai.experimental.classLoader", classLoader);
           
             msg.setFlag(RoutingFlags.FromRemote);
 
