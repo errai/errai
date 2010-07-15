@@ -62,6 +62,11 @@ public class MessageFactory {
 
             Message msg = createWithParts(parts)
                     .setResource("Session", session);
+
+            // experimental feature. does this need to be cleaned?
+            // any chance this leaks the CL?
+            msg.setResource("errai.experimental.classLoader", Thread.currentThread().getContextClassLoader());
+          
             msg.setFlag(RoutingFlags.FromRemote);
 
             c[i] = msg;

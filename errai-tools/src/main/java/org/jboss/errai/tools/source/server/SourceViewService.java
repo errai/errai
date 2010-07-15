@@ -21,7 +21,6 @@ import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.tools.source.server.JavaToHTML;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -41,7 +40,11 @@ public class SourceViewService implements MessageCallback {
   public void callback(Message message) {
     String sourceClassName = message.get(String.class, "className");
 
-    String rawSource = sourceAsString(sourceClassName);
+    ClassLoader loader = message.getResource(ClassLoader.class, "errai.experimental.classLoader");
+    if(loader==null)
+      loader = Thread.currentThread().getContextClassLoader();
+
+    String rawSource = sourceAsString(sourceClassName, loader);
     String html = rawSource != null ? JavaToHTML.format(rawSource) : "<h2>Source not available</h2>";
 
     MessageBuilder.createConversation(message)
@@ -50,11 +53,10 @@ public class SourceViewService implements MessageCallback {
         .noErrorHandling().sendNowWith(dispatcher);
   }
 
-  private String sourceAsString(String sourceClassName) {
+  private String sourceAsString(String sourceClassName, ClassLoader loader) {
     String source = null;
 
-    ClassLoader cl = Thread.currentThread().getContextClassLoader();
-    InputStream in = cl.getResourceAsStream(sourceClassName);
+    InputStream in = loader.getResourceAsStream(sourceClassName);
     if (in != null)
       source = convertStreamToString(in);
 
