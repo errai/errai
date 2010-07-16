@@ -62,10 +62,8 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
                     public void visit(JClassType visit, GeneratorContext context,
                                       TreeLogger logger, SourceWriter writer) {
 
-
                         if (visit.isAnnotationPresent(ExposeEntity.class)) {
                             generateMarshaller(visit, logger, writer);
-
                         } else if (visit.isAnnotationPresent(Remote.class) && visit.isInterface() != null) {
                             try {
                                 writer.print((String) execute(rpcProxyGenerator,

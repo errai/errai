@@ -30,6 +30,7 @@ import org.jboss.errai.bus.server.annotations.*;
 import org.jboss.errai.bus.server.annotations.security.RequireAuthentication;
 import org.jboss.errai.bus.server.annotations.security.RequireRoles;
 import org.jboss.errai.bus.server.api.Module;
+import org.jboss.errai.bus.server.io.CommandBindingsCallback;
 import org.jboss.errai.bus.server.io.ConversationalEndpointCallback;
 import org.jboss.errai.bus.server.io.EndpointCallback;
 import org.jboss.errai.bus.server.io.RemoteServiceCallback;
@@ -52,8 +53,7 @@ import static org.jboss.errai.bus.server.util.ConfigUtil.visitAllTargets;
 /**
  * Parses the annotation meta data and configures both services and extensions.
  *
- * @author: Heiko Braun <hbraun@redhat.com>
- * @date: May 3, 2010
+ * @author Heiko Braun <hbraun@redhat.com>
  */
 class DiscoverServices implements BootstrapExecution {
     private Logger log = LoggerFactory.getLogger(DiscoverServices.class);
@@ -70,7 +70,6 @@ class DiscoverServices implements BootstrapExecution {
             autoScanModules = Boolean.parseBoolean(config.getProperty("errai.auto_discover_services"));
         }
         if (autoScanModules) {
-
             log.info("beging searching for services ...");
 
             List<File> configRootTargets = ConfigUtil.findAllConfigTargets();
@@ -80,14 +79,14 @@ class DiscoverServices implements BootstrapExecution {
                         public void visit(final Class<?> loadClass) {
                             if (loadedComponents.contains(loadClass.getName())) return;
 
-
                             if (Module.class.isAssignableFrom(loadClass)) {
                                 final Class<? extends Module> clazz = loadClass.asSubclass(Module.class);
 
                                 loadedComponents.add(loadClass.getName());
 
                                 if (clazz.isAnnotationPresent(LoadModule.class)) {
-                                    log.info("discovered module : " + clazz.getName() + " -- don't use Modules! Use @Service and MessageCallback!");
+                                    log.info("discovered module : " + clazz.getName()
+                                            + " -- don't use Modules! Use @Service and MessageCallback!");
                                     Guice.createInjector(new AbstractModule() {
                                         @Override
                                         protected void configure() {
@@ -99,6 +98,12 @@ class DiscoverServices implements BootstrapExecution {
 
                             } else if (loadClass.isAnnotationPresent(Service.class)) {
                                 Object svc = null;
+                                String svcName = loadClass.getAnnotation(Service.class).value();
+                                // If no name is specified, just use the class name as the service
+                                // by default.
+                                if ("".equals(svcName)) {
+                                    svcName = loadClass.getSimpleName();
+                                }
 
                                 Class remoteImpl = getRemoteImplementation(loadClass);
                                 if (remoteImpl != null) {
@@ -107,6 +112,7 @@ class DiscoverServices implements BootstrapExecution {
                                     final Class<? extends MessageCallback> clazz = loadClass.asSubclass(MessageCallback.class);
 
                                     loadedComponents.add(loadClass.getName());
+
 
                                     log.info("discovered service: " + clazz.getName());
                                     try {
@@ -129,14 +135,6 @@ class DiscoverServices implements BootstrapExecution {
                                     }
 
 
-                                    String svcName = clazz.getAnnotation(Service.class).value();
-
-                                    // If no name is specified, just use the class name as the service
-                                    // by default.
-                                    if ("".equals(svcName)) {
-                                        svcName = clazz.getSimpleName();
-                                    }
-
                                     // Subscribe the service to the bus.
                                     context.getBus().subscribe(svcName, (MessageCallback) svc);
 
@@ -149,6 +147,8 @@ class DiscoverServices implements BootstrapExecution {
                                     if (rule != null) {
                                         context.getBus().addRule(svcName, rule);
                                     }
+
+
                                 }
 
                                 if (svc == null) {
@@ -168,7 +168,6 @@ class DiscoverServices implements BootstrapExecution {
 
                                 Map<String, MessageCallback> epts = new HashMap<String, MessageCallback>();
 
-
                                 // we scan for endpoints
                                 for (final Method method : loadClass.getDeclaredMethods()) {
                                     if (method.isAnnotationPresent(Endpoint.class)) {
@@ -182,13 +181,28 @@ class DiscoverServices implements BootstrapExecution {
                                     context.getBus().subscribe(loadClass.getSimpleName() + ":RPC", new RemoteServiceCallback(epts));
                                 }
 
+                                Map<String, Method> commandPoints = new HashMap<String, Method>();
+                                for (final Method method : loadClass.getDeclaredMethods()) {
+                                    if (method.isAnnotationPresent(Command.class)) {
+                                        Command command = method.getAnnotation(Command.class);
+                                        String cmdName = command.value().equals("")
+                                                ? method.getName() : command.value();
+
+                                        commandPoints.put(cmdName, method);
+                                    }
+                                }
+
+                                if (!commandPoints.isEmpty()) {
+                                    context.getBus().subscribe(svcName, new CommandBindingsCallback(commandPoints, svc));
+                                }
+
+
                             } else if (loadClass.isAnnotationPresent(ExposeEntity.class)) {
                                 log.info("Marked " + loadClass + " as serializable.");
                                 loadedComponents.add(loadClass.getName());
                                 config.getSerializableTypes().add(loadClass);
                                 markIfEnumType(loadClass);
                             }
-
                         }
                     }
             );
@@ -217,7 +231,6 @@ class DiscoverServices implements BootstrapExecution {
                             catch (Exception e) {
                                 throw new ErraiBootstrapFailure(e);
                             }
-
                         }
 
                         break;
@@ -296,7 +309,5 @@ class DiscoverServices implements BootstrapExecution {
                 throw new RuntimeException("This API is not supported in the server-side environment.");
             }
         };
-
     }
-
 }

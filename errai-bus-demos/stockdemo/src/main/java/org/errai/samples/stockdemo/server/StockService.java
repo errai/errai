@@ -8,6 +8,7 @@ import org.jboss.errai.bus.client.api.base.TimeUnit;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.framework.SubscriptionEvent;
+import org.jboss.errai.bus.server.annotations.Command;
 import org.jboss.errai.bus.server.annotations.Service;
 
 import java.util.HashMap;
@@ -45,6 +46,29 @@ public class StockService implements MessageCallback {
                 }
             }
         });
+    }
+
+    @Command("Start")
+    public void start(Message message) {
+        for (Stock stock : stocks.values()) {
+            MessageBuilder.createConversation(message)
+                    .toSubject("StockClient")
+                    .command("UpdateStockInfo")
+                    .with("Stock", stock)
+                    .noErrorHandling().reply();
+        }
+    }
+
+
+    @Command("GetStockInfo")
+    public void getStockInfo(Message message) {
+        Stock stock = stocks.get(message.get(String.class, "Ticker"));
+
+        MessageBuilder.createConversation(message)
+                .toSubject("StockClient")
+                .command("UpdateStockInfo")
+                .with("Stock", stock)
+                .noErrorHandling().reply();
     }
 
     public void callback(Message message) {

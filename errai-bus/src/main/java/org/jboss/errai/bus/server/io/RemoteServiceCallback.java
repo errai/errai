@@ -8,6 +8,8 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
+import static java.util.Collections.unmodifiableSet;
+
 /**
  * <tt>RemoteServiceCallback</tt> implements callback functionality for a remote service. It invokes the callback
  * functions for all endpoints specified
@@ -37,6 +39,6 @@ public class RemoteServiceCallback implements MessageCallback {
     }
 
     public Set<String> getEndpoints() {
-        return Collections.unmodifiableSet(endpoints.keySet());
+        return unmodifiableSet(endpoints.keySet());
     }
 }
