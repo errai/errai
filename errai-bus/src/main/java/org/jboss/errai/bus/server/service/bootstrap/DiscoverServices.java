@@ -185,10 +185,10 @@ class DiscoverServices implements BootstrapExecution {
                                 for (final Method method : loadClass.getDeclaredMethods()) {
                                     if (method.isAnnotationPresent(Command.class)) {
                                         Command command = method.getAnnotation(Command.class);
-                                        String cmdName = command.value().equals("")
-                                                ? method.getName() : command.value();
-
-                                        commandPoints.put(cmdName, method);
+                                        for (String cmdName : command.value()) {
+                                            if (cmdName.equals("")) cmdName = method.getName();
+                                            commandPoints.put(cmdName, method);
+                                        }
                                     }
                                 }
 
