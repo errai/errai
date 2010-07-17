@@ -18,7 +18,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 
 @Service
-public class StockService implements MessageCallback {
+public class StockService {
 
     private Map<String, Stock> stocks = new HashMap<String, Stock>();
     private List<String> tickerList = new CopyOnWriteArrayList<String>();
@@ -71,29 +71,7 @@ public class StockService implements MessageCallback {
                 .noErrorHandling().reply();
     }
 
-    public void callback(Message message) {
-        if ("Start".equals(message.getCommandType())) {
-            for (Stock stock : stocks.values()) {
-                MessageBuilder.createConversation(message)
-                        .toSubject("StockClient")
-                        .command("UpdateStockInfo")
-                        .with("Stock", stock)
-                        .noErrorHandling().reply();
-            }
-
-        } else if ("GetStockInfo".equals(message.getCommandType())) {
-            Stock stock = stocks.get(message.get(String.class, "Ticker"));
-
-            MessageBuilder.createConversation(message)
-                    .toSubject("StockClient")
-                    .command("UpdateStockInfo")
-                    .with("Stock", stock)
-                    .noErrorHandling().reply();
-        }
-
-    }
-
-    public String simulateRandomChange() {
+   public String simulateRandomChange() {
         /**
          * Randomly choose a stock to update.
          */
