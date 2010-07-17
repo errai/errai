@@ -195,8 +195,7 @@ class DiscoverServices implements BootstrapExecution {
                                 if (!commandPoints.isEmpty()) {
                                     context.getBus().subscribe(svcName, new CommandBindingsCallback(commandPoints, svc));
                                 }
-
-
+                                
                             } else if (loadClass.isAnnotationPresent(ExposeEntity.class)) {
                                 log.info("Marked " + loadClass + " as serializable.");
                                 loadedComponents.add(loadClass.getName());
