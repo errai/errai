@@ -105,6 +105,17 @@ class DiscoverServices implements BootstrapExecution {
                                     svcName = loadClass.getSimpleName();
                                 }
 
+                                Map<String, Method> commandPoints = new HashMap<String, Method>();
+                                for (final Method method : loadClass.getDeclaredMethods()) {
+                                    if (method.isAnnotationPresent(Command.class)) {
+                                        Command command = method.getAnnotation(Command.class);
+                                        for (String cmdName : command.value()) {
+                                            if (cmdName.equals("")) cmdName = method.getName();
+                                            commandPoints.put(cmdName, method);
+                                        }
+                                    }
+                                }
+
                                 Class remoteImpl = getRemoteImplementation(loadClass);
                                 if (remoteImpl != null) {
                                     createRPCScaffolding(remoteImpl, loadClass, context);
@@ -135,8 +146,10 @@ class DiscoverServices implements BootstrapExecution {
                                     }
 
 
-                                    // Subscribe the service to the bus.
-                                    context.getBus().subscribe(svcName, (MessageCallback) svc);
+                                    if (commandPoints.isEmpty()) {
+                                        // Subscribe the service to the bus.
+                                        context.getBus().subscribe(svcName, (MessageCallback) svc);
+                                    }
 
                                     RolesRequiredRule rule = null;
                                     if (clazz.isAnnotationPresent(RequireRoles.class)) {
@@ -147,8 +160,6 @@ class DiscoverServices implements BootstrapExecution {
                                     if (rule != null) {
                                         context.getBus().addRule(svcName, rule);
                                     }
-
-
                                 }
 
                                 if (svc == null) {
@@ -179,17 +190,6 @@ class DiscoverServices implements BootstrapExecution {
 
                                 if (!epts.isEmpty()) {
                                     context.getBus().subscribe(loadClass.getSimpleName() + ":RPC", new RemoteServiceCallback(epts));
-                                }
-
-                                Map<String, Method> commandPoints = new HashMap<String, Method>();
-                                for (final Method method : loadClass.getDeclaredMethods()) {
-                                    if (method.isAnnotationPresent(Command.class)) {
-                                        Command command = method.getAnnotation(Command.class);
-                                        for (String cmdName : command.value()) {
-                                            if (cmdName.equals("")) cmdName = method.getName();
-                                            commandPoints.put(cmdName, method);
-                                        }
-                                    }
                                 }
 
                                 if (!commandPoints.isEmpty()) {

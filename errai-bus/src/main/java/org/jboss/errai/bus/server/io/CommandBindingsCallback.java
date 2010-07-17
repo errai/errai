@@ -10,10 +10,13 @@ import java.util.Map;
 
 public class CommandBindingsCallback implements MessageCallback {
     private final Map<String, MethodDispatcher> methodDispatchers;
+    private final MessageCallback defaultCallback;
+    private final boolean defaultAction;
 
-    public CommandBindingsCallback(Map<String, Method> commandBindings, Object delegate) {
+    public CommandBindingsCallback(final Map<String, Method> commandBindings, final Object delegate) {
         this.methodDispatchers = new HashMap<String, MethodDispatcher>(commandBindings.size() * 2);
-
+        this.defaultAction = delegate instanceof MessageCallback;
+        this.defaultCallback = defaultAction ? (MessageCallback) delegate : null;
 
         for (Map.Entry<String, Method> entry : commandBindings.entrySet()) {
             Class[] parmTypes = entry.getValue().getParameterTypes();
@@ -35,7 +38,11 @@ public class CommandBindingsCallback implements MessageCallback {
     public void callback(Message message) {
         MethodDispatcher method = methodDispatchers.get(message.getCommandType());
         if (method == null) {
-            throw new RuntimeException("no such command: " + message.getCommandType());
+            if (defaultAction) {
+                defaultCallback.callback(message);
+            } else {
+                throw new RuntimeException("no such command: " + message.getCommandType());
+            }
         } else {
             try {
                 method.dispatch(message);
@@ -79,4 +86,5 @@ public class CommandBindingsCallback implements MessageCallback {
             method.invoke(delegate, m);
         }
     }
+
 }
