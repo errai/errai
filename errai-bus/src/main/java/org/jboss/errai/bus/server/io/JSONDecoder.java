@@ -29,6 +29,8 @@ import static java.lang.Double.parseDouble;
 import static java.lang.Long.parseLong;
 import static org.jboss.errai.bus.server.io.TypeDemarshallHelper._demarshallAll;
 import static org.jboss.errai.common.client.protocols.SerializationParts.ENCODED_TYPE;
+import static org.mvel2.util.ParseTools.handleStringEscapes;
+import static org.mvel2.util.ParseTools.subArray;
 
 /**
  * Decodes a JSON string or character array, and provides a proper collection of elements
@@ -88,10 +90,9 @@ public class JSONDecoder {
 
                 case ']':
                 case '}':
-
                     cursor++;
-
-                    if (collection instanceof Map && ((Map) collection).containsKey(ENCODED_TYPE)) {
+                    if (collection instanceof Map && ctx.encodedType) {
+                        ctx.encodedType = false;
                         try {
                             ctx.record(collection);
                             return _demarshallAll(collection);
@@ -110,9 +111,9 @@ public class JSONDecoder {
 
                 case '"':
                 case '\'':
-                    int end = captureStringLiteral(json[cursor], json, cursor, length);
-                    ctx.addValue(ParseTools.handleStringEscapes(ParseTools.subArray(json, cursor + 1, end)));
-                    cursor = end + 1;
+                    ctx.addValue(handleStringEscapes(subArray(json, cursor + 1,
+                            cursor = (captureStringLiteral(json[cursor], json, cursor, length)))));
+                    cursor++;
                     break;
 
                 case ':':
@@ -170,6 +171,7 @@ public class JSONDecoder {
     private class Context {
         Object lhs;
         Object rhs;
+        boolean encodedType = false;
 
         private Context() {
         }
@@ -187,6 +189,8 @@ public class JSONDecoder {
                 if (lhs != null) {
                     if (collection instanceof Map) {
                         //noinspection unchecked
+                        if (!encodedType) encodedType = ENCODED_TYPE.equals(lhs);
+
                         ((Map) collection).put(lhs, rhs);
 
                     } else {
