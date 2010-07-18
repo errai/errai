@@ -22,7 +22,7 @@ public class JSONTests extends TestCase {
         Map<String, Object> inputParts = new HashMap<String, Object>();
         inputParts.put("ToSubject", "Foo");
         inputParts.put("Message", "\"Hello, World\"");
-        inputParts.put("Sentence", "He said he was \"okay\"!");                                                                                       
+        inputParts.put("Sentence", "He said he was \"okay\"!");
         inputParts.put("TestUnterminatedThings", "\" { [ ( ");
 
         Message msg = MessageBuilder.createMessage().getMessage();
@@ -30,7 +30,7 @@ public class JSONTests extends TestCase {
         for (Map.Entry<String, Object> entry : inputParts.entrySet()) {
             msg.set(entry.getKey(), entry.getValue());
         }
-        
+
         String encodedJSON = JSONEncoder.encode(msg.getParts());
         Map<String, Object> decoded = (Map<String, Object>) JSONDecoder.decode(encodedJSON);
         assertEquals(inputParts, decoded);

@@ -8,6 +8,7 @@ import org.jboss.errai.bus.client.api.ResourceProvider;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.TimeUnit;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
+import org.jboss.errai.bus.client.util.SimpleMessage;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.util.LocalContext;
 
@@ -19,26 +20,6 @@ public class HelloWorldService implements MessageCallback {
     public RequestDispatcher dispatcher;
 
     public void callback(Message message) {
-
-        LocalContext ctx = LocalContext.get(message);
-
-        AsyncTask task = ctx.getAttribute(AsyncTask.class);
-        if (task != null) {
-            task.cancel(false);
-            ctx.removeAttribute(AsyncTask.class);
-        } else {
-
-            task = MessageBuilder.createConversation(message)
-                    .subjectProvided()
-                    .withProvided("Data", new ResourceProvider<String>() {
-                        public String get() {
-                            return System.currentTimeMillis() + "";
-                        }
-                    })
-                    .noErrorHandling().sendRepeatingWith(dispatcher, TimeUnit.MILLISECONDS, 50);
-
-            ctx.setAttribute(AsyncTask.class, task);
-
-        }
+        SimpleMessage.send(message, "Hello, World");
     }
 }

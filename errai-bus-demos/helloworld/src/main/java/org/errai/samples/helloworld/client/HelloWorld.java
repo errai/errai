@@ -2,60 +2,60 @@ package org.errai.samples.helloworld.client;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.*;
-import com.google.inject.Inject;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.framework.RequestDispatcher;
+import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.protocols.MessageParts;
+import org.jboss.errai.bus.client.util.SimpleMessage;
 import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.ioc.client.api.ToPanel;
+import org.jboss.errai.ioc.client.api.EntryPoint;
 
 import javax.annotation.PostConstruct;
-import javax.inject.Singleton;
+import javax.inject.Inject;
 
-@ToPanel("MyPanel") @Service("DataConsumer") @Singleton
-public class HelloWorld extends SimplePanel implements MessageCallback {
-    private RequestDispatcher dispatcher;
-    private MyPanel panel;
+@EntryPoint @Service
+public class HelloWorld extends VerticalPanel implements MessageCallback
+{
+    private Button sayHello;
+    private Label label;
 
-    final Button sayHello;
-    final Label data;
+    private MessageBus bus;
 
-    public void callback(Message message) {
-        data.setText(message.get(String.class, "Data"));
+    @Inject
+    public HelloWorld(MessageBus bus) {
+        this.bus = bus;
     }
 
-    public HelloWorld() {
-        sayHello = new Button("Say Hello!");
-        data = new Label();
+    public void callback(Message message) {
+        label.setText(SimpleMessage.get(message));
     }
 
     @PostConstruct
     public void init() {
-        panel.add(sayHello);
-        panel.add(data);
+        sayHello = new Button("Say Hello!");
 
-        add(panel);
-
+        /**
+         * Register click handler.
+         */
         sayHello.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 MessageBuilder.createMessage()
                         .toSubject("HelloWorldService")
-                        .with(MessageParts.ReplyTo, "DataConsumer")
-                        .done().sendNowWith(dispatcher);
+                        .with(MessageParts.ReplyTo, "HelloWorld")
+                        .done().sendNowWith(bus);
             }
         });
-    }
 
-    @Inject
-    public void setDispatcher(RequestDispatcher dispatcher) {
-        this.dispatcher = dispatcher;
-    }
+        label = new Label();
 
-    @Inject
-    public void setPanel(MyPanel panel) {
-        this.panel = panel;
+        add(sayHello);
+        add(label);
+
+        RootPanel.get().add(this);
     }
 }

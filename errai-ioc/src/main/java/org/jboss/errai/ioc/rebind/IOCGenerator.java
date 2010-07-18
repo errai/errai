@@ -45,7 +45,6 @@ import java.io.PrintWriter;
 import java.util.*;
 
 import static org.jboss.errai.bus.server.util.ConfigUtil.findAllConfigTargets;
-import static org.jboss.errai.bus.server.util.ConfigUtil.visitAllTargets;
 
 /**
  * The main generator class for the errai-ioc framework.
@@ -236,6 +235,10 @@ public class IOCGenerator extends Generator {
         injectFactory.addType(type);
     }
 
+    public String generateWithSingletonSemantics(final JClassType visit) {
+        return injectFactory.generateSingleton(visit);
+    }
+
     public String generateInjectors(final JClassType visit) {
         return injectFactory.generate(visit);
     }
@@ -267,13 +270,23 @@ public class IOCGenerator extends Generator {
         final JClassType messageCallbackType = getJClassType(MessageCallback.class);
         final JClassType messageBusType = getJClassType(MessageBus.class);
 
+        procFactory.registerHandler(EntryPoint.class, new AnnotationHandler<EntryPoint>() {
+            public void handle(final JClassType type, EntryPoint annotation, ProcessingContext context) {
+                addDeferred(new Runnable() {
+                    public void run() {
+                        generateWithSingletonSemantics(type);
+                    }
+                });
+            }
+        });
+
         procFactory.registerHandler(ToRootPanel.class, new AnnotationHandler<ToRootPanel>() {
             public void handle(final JClassType type, final ToRootPanel annotation, final ProcessingContext context) {
                 if (widgetType.isAssignableFrom(type)) {
 
                     addDeferred(new Runnable() {
                         public void run() {
-                            context.getWriter().println("ctx.addToRootPanel(" + generateInjectors(type) + ");");
+                            context.getWriter().println("ctx.addToRootPanel(" + generateWithSingletonSemantics(type) + ");");
                         }
                     });
 
@@ -309,7 +322,7 @@ public class IOCGenerator extends Generator {
                     addDeferred(new Runnable() {
                         public void run() {
                             context.getWriter()
-                                    .println("ctx.widgetToPanel(" + generateInjectors(type) + ", \"" + annotation.value() + "\");");
+                                    .println("ctx.widgetToPanel(" + generateWithSingletonSemantics(type) + ", \"" + annotation.value() + "\");");
                         }
                     });
                 } else {
@@ -327,7 +340,7 @@ public class IOCGenerator extends Generator {
                             String svcName = annotation.value().equals("") ? type.getName() : annotation.value();
 
                             String busInstance = generateInjectors(messageBusType);
-                            String svcInstance = generateInjectors(type);
+                            String svcInstance = generateWithSingletonSemantics(type);
 
                             context.getWriter()
                                     .println(busInstance + ".subscribe(\"" + svcName + "\", " + svcInstance + ");");

@@ -77,7 +77,7 @@ import java.util.Map;
 public class CommandMessage implements Message {
     protected transient Map<String, ResourceProvider> providedParts;
     protected Map<String, Object> parts;
-    protected Map<String, Object> resources;
+    protected transient Map<String, Object> resources;
     protected ErrorCallback errorsCall;
     protected int routingFlags;
 
