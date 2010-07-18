@@ -16,6 +16,8 @@
 
 package org.jboss.errai.bus.server.io;
 
+import org.mvel2.util.ParseTools;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -86,6 +88,7 @@ public class JSONDecoder {
 
                 case ']':
                 case '}':
+
                     cursor++;
 
                     if (collection instanceof Map && ((Map) collection).containsKey(ENCODED_TYPE)) {
@@ -107,8 +110,8 @@ public class JSONDecoder {
 
                 case '"':
                 case '\'':
-                    int end = balancedCapture(json, cursor, json[cursor]);
-                    ctx.addValue(new String(json, cursor + 1, end - cursor - 1));
+                    int end = captureStringLiteral(json[cursor], json, cursor, length);
+                    ctx.addValue(ParseTools.handleStringEscapes(ParseTools.subArray(json, cursor + 1, end)));
                     cursor = end + 1;
                     break;
 

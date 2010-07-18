@@ -20,6 +20,7 @@ import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.HasEncoded;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.ResourceProvider;
+import org.jboss.errai.bus.client.framework.MessageProvider;
 import org.jboss.errai.bus.client.framework.RoutingFlags;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.common.client.json.JSONEncoderCli;
@@ -82,6 +83,13 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
     /* First is true if the <tt>buf</tt> is empty */
     protected boolean first = true;
     protected boolean ended = false;
+
+
+    public static final MessageProvider PROVIDER = new MessageProvider() {
+        public Message get() {
+            return create();
+        }
+    };
 
     /**
      * Create a new JSONMessage.

@@ -1,9 +1,17 @@
 package org.jboss.errai.bus.server.io;
 
+import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.base.JSONMessage;
+import org.jboss.errai.bus.client.framework.MessageProvider;
 
 public class JSONMessageServer extends JSONMessage {
-    public static JSONMessage create() {
+    public static final MessageProvider PROVIDER = new MessageProvider() {
+        public Message get() {
+            return create();
+        }
+    };
+
+    static JSONMessage create() {
         return new JSONMessageServer();
     }
 

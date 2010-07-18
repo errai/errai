@@ -10,11 +10,7 @@ import org.jboss.errai.bus.client.framework.MessageProvider;
  * The MessageBuilder API provides a fluent method of building Messages.
  */
 public class MessageBuilder {
-    private static MessageProvider provider = new MessageProvider() {
-        public Message get() {
-            return JSONMessage.create();
-        }
-    };
+    private static MessageProvider provider = JSONMessage.PROVIDER;
 
     /**
      * Create a new message.

@@ -60,16 +60,8 @@ class DefaultComponents implements BootstrapExecution {
         /*** ModelAdapter ***/
         config.getExtensionBindings().put(ModelAdapter.class, modelAdapterProvider);
 
-        new MessageProvider() {
-            {
-                MessageBuilder.setMessageProvider(this);
-            }
-
-            public Message get() {
-                return new MessageModelWrapper(JSONMessageServer.create(), modelAdapterProvider.get());
-            }
-        };
-
+        MessageBuilder.setMessageProvider(JSONMessageServer.PROVIDER);
+        
         /*** Authentication Adapter ***/
 
         if (config.hasProperty("errai.authentication_adapter")) {
