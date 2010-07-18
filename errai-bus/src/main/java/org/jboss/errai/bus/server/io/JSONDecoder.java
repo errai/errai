@@ -16,8 +16,6 @@
 
 package org.jboss.errai.bus.server.io;
 
-import org.mvel2.util.ParseTools;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -68,34 +66,33 @@ public class JSONDecoder {
 
     public Object parse() {
         try {
-            return _parse(new Context(), null);
+            return _parse(new Context(), null, false);
         }
         catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private Object _parse(Context ctx, Object collection) {
-        while (cursor < length) {
+    private Object _parse(Context ctx, Object collection, boolean map) {
+        while (cursor != length) {
             switch (json[cursor]) {
                 case '[':
                     cursor++;
-                    ctx.addValue(_parse(new Context(), new ArrayList()));
+                    ctx.addValue(_parse(new Context(), new ArrayList(), false));
                     break;
 
                 case '{':
                     cursor++;
-                    ctx.addValue(_parse(new Context(), new HashMap()));
+                    ctx.addValue(_parse(new Context(), new HashMap(), true));
                     break;
 
                 case ']':
                 case '}':
                     cursor++;
-                    if (collection instanceof Map && ctx.encodedType) {
+                    if (map && ctx.encodedType) {
                         ctx.encodedType = false;
                         try {
-                            ctx.record(collection);
-                            return _demarshallAll(collection);
+                            return _demarshallAll(ctx.record(collection));
                         }
                         catch (Exception e) {
                             throw new RuntimeException("Could not demarshall object", e);
@@ -124,7 +121,7 @@ public class JSONDecoder {
                     if (isDigit(json[cursor]) || (json[cursor] == '-' && isDigit(json[cursor + 1]))) {
                         int start = cursor++;
                         boolean fp = false;
-                        while (cursor < length && (isDigit(json[cursor]) || json[cursor] == '.')) {
+                        while (cursor != length && (isDigit(json[cursor]) || json[cursor] == '.')) {
                             if (json[cursor++] == '.') fp = true;
                         }
 
@@ -137,7 +134,7 @@ public class JSONDecoder {
                         break;
                     } else if (isJavaIdentifierPart(json[cursor])) {
                         int start = cursor++;
-                        while ((cursor < length) && isJavaIdentifierPart(json[cursor])) cursor++;
+                        while ((cursor != length) && isJavaIdentifierPart(json[cursor])) cursor++;
 
                         String s = new String(json, start, cursor - start);
                         if ("true".equals(s) || "false".equals(s)) {
@@ -188,9 +185,9 @@ public class JSONDecoder {
             try {
                 if (lhs != null) {
                     if (collection instanceof Map) {
-                        //noinspection unchecked
                         if (!encodedType) encodedType = ENCODED_TYPE.equals(lhs);
 
+                        //noinspection unchecked
                         ((Map) collection).put(lhs, rhs);
 
                     } else {
