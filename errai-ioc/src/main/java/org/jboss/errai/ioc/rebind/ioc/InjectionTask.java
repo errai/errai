@@ -3,6 +3,7 @@ package org.jboss.errai.ioc.rebind.ioc;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.JField;
 import com.google.gwt.core.ext.typeinfo.JMethod;
+import com.google.gwt.core.ext.typeinfo.JParameter;
 import org.mvel2.util.StringAppender;
 
 public class InjectionTask {
@@ -12,6 +13,7 @@ public class InjectionTask {
     protected JField field;
     protected JMethod method;
     protected JClassType type;
+    protected JParameter parm;
 
     public InjectionTask(Injector injector, JField field) {
         this.injectType = TaskType.Field;
@@ -23,6 +25,12 @@ public class InjectionTask {
         this.injectType = TaskType.Method;
         this.injector = injector;
         this.method = method;
+    }
+
+    public InjectionTask(Injector injector, JParameter parm) {
+        this.injectType = TaskType.Method;
+        this.injector = injector;
+        this.parm = parm;
     }
 
     public InjectionTask(Injector injector, JClassType type) {

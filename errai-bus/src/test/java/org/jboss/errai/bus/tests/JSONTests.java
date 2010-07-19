@@ -7,6 +7,9 @@ import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.server.io.JSONDecoder;
 import org.jboss.errai.bus.server.io.JSONEncoder;
 
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,6 +37,46 @@ public class JSONTests extends TestCase {
         String encodedJSON = JSONEncoder.encode(msg.getParts());
         Map<String, Object> decoded = (Map<String, Object>) JSONDecoder.decode(encodedJSON);
         assertEquals(inputParts, decoded);
+    }
+
+    public static class SimpleWriter extends Writer {
+        final StringBuilder builder = new StringBuilder();
+
+        @Override
+        public void write(char[] cbuf, int off, int len) throws IOException {
+            builder.append(cbuf, off, len);
+        }
+
+        @Override
+        public void flush() throws IOException {
+        }
+
+        @Override
+        public void close() throws IOException {
+            //To change body of implemented methods use File | Settings | File Templates
+        }
+    }
+
+    public static class SimpleReader extends Reader {
+        final StringBuilder builder;
+        int cursor = 0;
+
+        public SimpleReader(StringBuilder builder) {
+            this.builder = builder;
+        }
+
+        @Override
+        public int read(char[] cbuf, int off, int len) throws IOException {
+            int read = len > builder.length() ? builder.length() : len;
+            builder.getChars(cursor, read, cbuf, off);
+            cursor += read;
+            return read;
+        }
+
+        @Override
+        public void close() throws IOException {
+            //To change body of implemented methods use File | Settings | File Templates.
+        }
     }
 
 

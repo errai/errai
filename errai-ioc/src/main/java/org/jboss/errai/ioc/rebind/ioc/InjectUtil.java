@@ -7,6 +7,8 @@ import org.mvel2.util.StringAppender;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.lang.annotation.Annotation;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Target;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -116,21 +118,31 @@ public class InjectUtil {
                 }
             }
 
+            ElementType[] elTypes;
             for (Class<? extends Annotation> a : decorators) {
-                if (field.isAnnotationPresent(a)) {
-                    if (!field.isPublic()) {
-                        try {
-                            JMethod meth = type.getMethod(ReflectionUtil.getGetter(field.getName()), new JType[0]);
-                            DecoratorTask task = new DecoratorTask(injector, meth, ctx.getDecorator(a));
-                            task.setField(field);
-                            accumulator.add(task);
-                        }
-                        catch (NotFoundException e) {
-                            throw new InjectionFailure("attempt to decorate a non-public field: "
-                                    + type.getQualifiedSourceName() + "." + field.getName());
-                        }
-                    } else {
-                        accumulator.add(new DecoratorTask(injector, field, ctx.getDecorator(a)));
+                elTypes = a.isAnnotationPresent(Target.class) ? a.getAnnotation(Target.class).value()
+                        : new ElementType[]{ElementType.FIELD};
+
+                for (ElementType elType : elTypes) {
+                    switch (elType) {
+                        case FIELD:
+                            if (field.isAnnotationPresent(a)) {
+                                if (!field.isPublic()) {
+                                    try {
+                                        JMethod meth = type.getMethod(ReflectionUtil.getGetter(field.getName()), new JType[0]);
+                                        DecoratorTask task = new DecoratorTask(injector, meth, ctx.getDecorator(a));
+                                        task.setField(field);
+                                        accumulator.add(task);
+                                    }
+                                    catch (NotFoundException e) {
+                                        throw new InjectionFailure("attempt to decorate a non-public field: "
+                                                + type.getQualifiedSourceName() + "." + field.getName());
+                                    }
+                                } else {
+                                    accumulator.add(new DecoratorTask(injector, field, ctx.getDecorator(a)));
+                                }
+                            }
+                            break;
                     }
                 }
             }
@@ -141,9 +153,25 @@ public class InjectUtil {
                 accumulator.add(new InjectionTask(injector, meth));
             }
 
+            ElementType[] elTypes;
             for (Class<? extends Annotation> a : decorators) {
-                if (meth.isAnnotationPresent(a)) {
-                    accumulator.add(new DecoratorTask(injector, meth, ctx.getDecorator(a)));
+                elTypes = a.isAnnotationPresent(Target.class) ? a.getAnnotation(Target.class).value()
+                        : new ElementType[]{ElementType.FIELD};
+
+                for (ElementType elType : elTypes) {
+                    switch (elType) {
+                        case METHOD:
+                            if (meth.isAnnotationPresent(a)) {
+                                accumulator.add(new DecoratorTask(injector, meth, ctx.getDecorator(a)));
+                            }
+                            break;
+                        case PARAMETER:
+                            for (JParameter parameter : meth.getParameters()) {
+                                if (parameter.isAnnotationPresent(a)) {
+                                    accumulator.add(new DecoratorTask(injector, parameter, ctx.getDecorator(a)));
+                                }
+                            }
+                    }
                 }
             }
         }

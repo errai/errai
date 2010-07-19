@@ -2,6 +2,7 @@ package org.jboss.errai.ioc.rebind.ioc;
 
 import com.google.gwt.core.ext.typeinfo.JField;
 import com.google.gwt.core.ext.typeinfo.JMethod;
+import com.google.gwt.core.ext.typeinfo.JParameter;
 import org.mvel2.util.StringAppender;
 
 import java.lang.annotation.Annotation;
@@ -16,6 +17,11 @@ public class DecoratorTask extends InjectionTask {
 
     public DecoratorTask(Injector injector, JMethod method, Decorator[] decs) {
         super(injector, method);
+        this.decorators = decs;
+    }
+
+    public DecoratorTask(Injector injector, JParameter parm, Decorator[] decs) {
+        super(injector, parm);
         this.decorators = decs;
     }
 
@@ -41,7 +47,7 @@ public class DecoratorTask extends InjectionTask {
                     break;
             }
 
-            appender.append(dec.generateDecorator(new DecoratorContext(anno, injectType, method, field, type, injector, ctx)));
+            appender.append(dec.generateDecorator(new DecoratorContext(anno, injectType, method, field, type, parm, injector, ctx)));
         }
         return appender.toString();
     }

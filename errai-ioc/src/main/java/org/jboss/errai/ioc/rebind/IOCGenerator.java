@@ -31,11 +31,13 @@ import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.rebind.ProcessingContext;
+import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.util.RebindUtil;
 import org.jboss.errai.bus.server.util.RebindVisitor;
 import org.jboss.errai.ioc.client.InterfaceInjectionContext;
 import org.jboss.errai.ioc.client.api.*;
+import org.jboss.errai.ioc.rebind.ioc.IOCExtensionConfigurator;
 import org.jboss.errai.ioc.rebind.ioc.InjectionFailure;
 import org.jboss.errai.ioc.rebind.ioc.InjectorFactory;
 import org.jboss.errai.ioc.rebind.ioc.ProviderInjector;
@@ -192,6 +194,17 @@ public class IOCGenerator extends Generator {
                     final JClassType finalBindType = bindType;
 
                     injectFactory.addInjector(new ProviderInjector(finalBindType, visit));
+                }
+                else if (visit.isAnnotationPresent(IOCExtension.class)) {
+                     try {
+                         Class<? extends IOCExtensionConfigurator> configuratorClass = Class.forName(visit.getQualifiedSourceName())
+                                 .asSubclass(IOCExtensionConfigurator.class);
+
+                         configuratorClass.newInstance().configure(procContext, injectFactory, procFactory);
+                     }
+                     catch (Exception e) {
+                         throw new ErraiBootstrapFailure("unable to load IOC Extension Configurator: " + e.getMessage(), e);
+                     }
                 }
             }
 

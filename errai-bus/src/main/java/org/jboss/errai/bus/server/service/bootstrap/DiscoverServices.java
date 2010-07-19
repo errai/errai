@@ -18,6 +18,7 @@ package org.jboss.errai.bus.server.service.bootstrap;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.ResourceProvider;
 import org.jboss.errai.bus.client.api.builder.AbstractRemoteCallBuilder;
@@ -30,10 +31,7 @@ import org.jboss.errai.bus.server.annotations.*;
 import org.jboss.errai.bus.server.annotations.security.RequireAuthentication;
 import org.jboss.errai.bus.server.annotations.security.RequireRoles;
 import org.jboss.errai.bus.server.api.Module;
-import org.jboss.errai.bus.server.io.CommandBindingsCallback;
-import org.jboss.errai.bus.server.io.ConversationalEndpointCallback;
-import org.jboss.errai.bus.server.io.EndpointCallback;
-import org.jboss.errai.bus.server.io.RemoteServiceCallback;
+import org.jboss.errai.bus.server.io.*;
 import org.jboss.errai.bus.server.security.auth.rules.RolesRequiredRule;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
@@ -45,6 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
 
@@ -195,12 +194,58 @@ class DiscoverServices implements BootstrapExecution {
                                 if (!commandPoints.isEmpty()) {
                                     context.getBus().subscribe(svcName, new CommandBindingsCallback(commandPoints, svc));
                                 }
-                                
+
                             } else if (loadClass.isAnnotationPresent(ExposeEntity.class)) {
                                 log.info("Marked " + loadClass + " as serializable.");
                                 loadedComponents.add(loadClass.getName());
                                 config.getSerializableTypes().add(loadClass);
                                 markIfEnumType(loadClass);
+                            } else if (loadClass.isAnnotationPresent(ApplicationComponent.class)) {
+                                log.info("discovered component: " + loadClass.getName());
+
+                                try {
+                                    Object inst = Guice.createInjector(new AbstractModule() {
+                                        @Override
+                                        protected void configure() {
+                                            bind(MessageBus.class).toInstance(context.getBus());
+                                            bind(RequestDispatcher.class).toInstance(context.getService().getDispatcher());
+
+                                            // Add any extension bindings.
+                                            for (Map.Entry<Class<?>, ResourceProvider> entry : config.getExtensionBindings().entrySet()) {
+                                                bind(entry.getKey()).toProvider(new GuiceProviderProxy(entry.getValue()));
+                                            }
+                                        }
+                                    }).getInstance(loadClass);
+
+
+                                    for (Method m : loadClass.getMethods()) {
+                                        int i = 0;
+                                        Class[] parmTypes = m.getParameterTypes();
+                                        for (Annotation[] annotations : m.getParameterAnnotations()) {
+                                            Class parmType = parmTypes[i++];
+
+                                            for (Annotation annotation : annotations) {
+                                                if (annotation instanceof Service) {
+                                                    if (!Message.class.isAssignableFrom(parmType))
+                                                        throw new ErraiBootstrapFailure("attempt to declare service handler on illegal type: " + parmType.getName());
+
+                                                    if (parmTypes.length != 1)
+                                                        throw new ErraiBootstrapFailure("wrong number of method arguments for service endpoint: " + m.getName() + ": " + parmTypes.length);
+
+                                                    String svcName = ((Service) annotation).value().equals("") ? m.getName() : ((Service) annotation).value();
+
+                                                    context.getBus().subscribe(svcName, new MethodEndpointCallback(inst, m));
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                }
+                                catch (Throwable t) {
+                                    t.printStackTrace();
+                                }
+
+
                             }
                         }
                     }

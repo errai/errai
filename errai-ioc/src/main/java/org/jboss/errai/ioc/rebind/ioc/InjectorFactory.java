@@ -38,6 +38,10 @@ public class InjectorFactory {
         });
     }
 
+    public InjectionContext getInjectionContext() {
+        return ctx;
+    }
+
     public String generate(JClassType type) {
         return ctx.getInjector(type).getType(ctx);
     }
