@@ -22,10 +22,10 @@ import org.jboss.errai.bus.server.api.SessionProvider;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: May 4, 2010
  */
-public interface ServiceComposite {
-    public SessionProvider getSessionProvider();
+public interface ServiceComposite<S> {
+    public SessionProvider<S> getSessionProvider();
 
-    public void setSessionProvider(SessionProvider sessionProvider);
+    public void setSessionProvider(SessionProvider<S> sessionProvider);
 
     public RequestDispatcher getDispatcher();
 

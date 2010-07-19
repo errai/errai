@@ -19,7 +19,6 @@ package org.jboss.errai.bus.server.service;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Jul 19, 2010
  */
-public interface ServiceLocator
-{
-  ErraiService locateService();
+public interface ServiceLocator<S> {
+    ErraiService<S> locateService();
 }

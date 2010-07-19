@@ -17,59 +17,50 @@ package org.jboss.errai.bus.server.service;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.servlet.http.HttpSession;
 
 /**
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Jul 19, 2010
  */
-public class JNDIServiceLocator implements ServiceLocator
-{  
-  public static final String DEFAULT_JNDI_NAME = "java:/Errai";
+public class JNDIServiceLocator implements ServiceLocator<HttpSession> {
+    public static final String DEFAULT_JNDI_NAME = "java:/Errai";
 
-  private String jndiName = null;
+    private String jndiName = null;
 
-  public JNDIServiceLocator()
-  {
-  }
-
-  public JNDIServiceLocator(String jndiName)
-  {
-    this.jndiName = jndiName;
-  }
-
-  public ErraiService locateService()
-  {
-    return lookupService(jndiName != null ? jndiName : DEFAULT_JNDI_NAME );
-  }
-
-  private ErraiService lookupService(String jndiName)
-  {
-    InitialContext ctx = null;
-    ErraiService errai = null;
-
-    try
-    {
-      ctx = new InitialContext();
-      errai = (ErraiService)ctx.lookup(jndiName);
-    }
-    catch (NamingException e)
-    {
-      if(ctx!=null)
-      {
-        try
-        {
-          // fallback in development mode
-          errai = (ErraiService)ctx.lookup("java:comp/env/Errai");
-        }
-        catch (NamingException e1)
-        {
-        }
-      }
-
-      if(null==errai)
-        throw new RuntimeException("Failed to lookup Errai service instance from JNDI", e);
+    public JNDIServiceLocator() {
     }
 
-    return errai;
-  }
+    public JNDIServiceLocator(String jndiName) {
+        this.jndiName = jndiName;
+    }
+
+    public ErraiService<HttpSession> locateService() {
+        return lookupService(jndiName != null ? jndiName : DEFAULT_JNDI_NAME);
+    }
+
+    private ErraiService<HttpSession> lookupService(String jndiName) {
+        InitialContext ctx = null;
+        ErraiService errai = null;
+
+        try {
+            ctx = new InitialContext();
+            errai = (ErraiService) ctx.lookup(jndiName);
+        }
+        catch (NamingException e) {
+            if (ctx != null) {
+                try {
+                    // fallback in development mode
+                    errai = (ErraiService) ctx.lookup("java:comp/env/Errai");
+                }
+                catch (NamingException e1) {
+                }
+            }
+
+            if (null == errai)
+                throw new RuntimeException("Failed to lookup Errai service instance from JNDI", e);
+        }
+
+        return errai;
+    }
 }
