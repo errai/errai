@@ -218,7 +218,7 @@ class DiscoverServices implements BootstrapExecution {
                 while (keys.hasMoreElements()) {
                     String key = keys.nextElement();
                     if (key.equals(ErraiServiceConfigurator.CONFIG_ERRAI_SERIALIZABLE_TYPE)) {
-                        for (String s : key.split(" ")) {
+                        for (String s : bundle.getString(key).split(" ")) {
                             try {
                                 Class<?> cls = Class.forName(s.trim());
                                 log.info("Marked " + cls + " as serializable.");
