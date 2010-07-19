@@ -29,12 +29,12 @@ import org.jboss.errai.bus.server.service.bootstrap.OrderedBootstrap;
  * Default implementation of the ErraiBus server-side service.
  */
 @Singleton
-public class ErraiServiceImpl implements ErraiService {
+public class ErraiServiceImpl<S> implements ErraiService<S> {
 
     private ServerMessageBus bus;
     private ErraiServiceConfigurator config;
 
-    private SessionProvider sessionProvider;
+    private SessionProvider<S> sessionProvider;
     private RequestDispatcher dispatcher;
 
     /**
@@ -99,11 +99,11 @@ public class ErraiServiceImpl implements ErraiService {
         return config;
     }
 
-    public SessionProvider getSessionProvider() {
+    public SessionProvider<S> getSessionProvider() {
         return sessionProvider;
     }
 
-    public void setSessionProvider(SessionProvider sessionProvider) {
+    public void setSessionProvider(SessionProvider<S> sessionProvider) {
         this.sessionProvider = sessionProvider;
     }
 

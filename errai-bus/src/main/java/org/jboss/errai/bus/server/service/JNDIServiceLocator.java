@@ -39,19 +39,20 @@ public class JNDIServiceLocator implements ServiceLocator<HttpSession> {
         return lookupService(jndiName != null ? jndiName : DEFAULT_JNDI_NAME);
     }
 
+    @SuppressWarnings({"unchecked"})
     private ErraiService<HttpSession> lookupService(String jndiName) {
         InitialContext ctx = null;
-        ErraiService errai = null;
+        ErraiService<HttpSession> errai = null;
 
         try {
             ctx = new InitialContext();
-            errai = (ErraiService) ctx.lookup(jndiName);
+            errai = (ErraiService<HttpSession>) ctx.lookup(jndiName);
         }
         catch (NamingException e) {
             if (ctx != null) {
                 try {
                     // fallback in development mode
-                    errai = (ErraiService) ctx.lookup("java:comp/env/Errai");
+                    errai = (ErraiService<HttpSession>) ctx.lookup("java:comp/env/Errai");
                 }
                 catch (NamingException e1) {
                 }
