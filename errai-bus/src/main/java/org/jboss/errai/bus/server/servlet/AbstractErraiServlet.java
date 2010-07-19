@@ -8,13 +8,11 @@ import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.server.ServerMessageBusImpl;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.bus.server.api.SessionProvider;
-import org.jboss.errai.bus.server.service.ErraiService;
-import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
-import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
-import org.jboss.errai.bus.server.service.ErraiServiceImpl;
+import org.jboss.errai.bus.server.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpSession;
@@ -37,25 +35,31 @@ public abstract class AbstractErraiServlet extends HttpServlet {
     protected Logger log = LoggerFactory.getLogger(getClass());
 
 
-    @Override
-    @SuppressWarnings({"unchecked"})
-    public void init() throws ServletException {
-        super.init();
-        service =
-                Guice.createInjector(new AbstractModule() {
-                    public void configure() {
-                        bind(MessageBus.class).to(ServerMessageBusImpl.class);
-                        bind(ServerMessageBus.class).to(ServerMessageBusImpl.class);
-                        bind(ErraiService.class).to(ErraiServiceImpl.class);
-                        bind(ErraiServiceConfigurator.class).to(ErraiServiceConfiguratorImpl.class);
-                    }
-                }).getInstance(ErraiService.class);
+  @Override
+  public void init(ServletConfig config) throws ServletException
+  {
+    // Build or lookup service 
+    String jndiNameProperty = config.getInitParameter("jndiName");
+    service = jndiNameProperty!=null ?
+        new JNDIServiceLocator(jndiNameProperty).locateService() : buildService();
+    
+    sessionProvider = service.getSessionProvider();
+  }
 
-        sessionProvider = service.getSessionProvider();
-    }
+  protected ErraiService buildService()
+  {
+    return Guice.createInjector(new AbstractModule() {
+        public void configure() {
+            bind(MessageBus.class).to(ServerMessageBusImpl.class);
+            bind(ServerMessageBus.class).to(ServerMessageBusImpl.class);
+            bind(ErraiService.class).to(ErraiServiceImpl.class);
+            bind(ErraiServiceConfigurator.class).to(ErraiServiceConfiguratorImpl.class);
+        }
+    }).getInstance(ErraiService.class);
+  }
 
 
-    /**
+  /**
      * Writes the message to the output stream
      *
      * @param stream - the stream to write to
