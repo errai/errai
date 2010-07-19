@@ -8,7 +8,8 @@ import org.jboss.errai.bus.server.annotations.Service;
 
 @ApplicationComponent
 public class HelloWorldService {
-    public void helloWorld(@Service("HelloWorldService") Message message) {
+    @Service("HelloWorldService")
+    public void helloWorld(Message message) {
         SimpleMessage.send(message, "Hello, World");
     }
 }

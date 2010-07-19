@@ -219,22 +219,37 @@ class DiscoverServices implements BootstrapExecution {
 
 
                                     for (Method m : loadClass.getMethods()) {
-                                        int i = 0;
                                         Class[] parmTypes = m.getParameterTypes();
-                                        for (Annotation[] annotations : m.getParameterAnnotations()) {
-                                            Class parmType = parmTypes[i++];
 
-                                            for (Annotation annotation : annotations) {
-                                                if (annotation instanceof Service) {
-                                                    if (!Message.class.isAssignableFrom(parmType))
-                                                        throw new ErraiBootstrapFailure("attempt to declare service handler on illegal type: " + parmType.getName());
+                                        if (m.isAnnotationPresent(Service.class)) {
+                                            if (parmTypes.length != 1)
+                                                throw new ErraiBootstrapFailure("wrong number of method arguments for service endpoint: " + m.getName() + ": " + parmTypes.length);
 
-                                                    if (parmTypes.length != 1)
-                                                        throw new ErraiBootstrapFailure("wrong number of method arguments for service endpoint: " + m.getName() + ": " + parmTypes.length);
+                                            if (!Message.class.isAssignableFrom(parmTypes[0]))
+                                                throw new ErraiBootstrapFailure("attempt to declare service handler on illegal type: " + parmTypes[0].getName());
 
-                                                    String svcName = ((Service) annotation).value().equals("") ? m.getName() : ((Service) annotation).value();
+                                            Annotation annotation = m.getAnnotation(Service.class);
 
-                                                    context.getBus().subscribe(svcName, new MethodEndpointCallback(inst, m));
+                                            String svcName = ((Service) annotation).value().equals("") ? m.getName() : ((Service) annotation).value();
+
+                                            context.getBus().subscribe(svcName, new MethodEndpointCallback(inst, m));
+                                        } else {
+                                            int i = 0;
+                                            for (Annotation[] annotations : m.getParameterAnnotations()) {
+                                                Class parmType = parmTypes[i++];
+
+                                                for (Annotation annotation : annotations) {
+                                                    if (annotation instanceof Service) {
+                                                        if (!Message.class.isAssignableFrom(parmType))
+                                                            throw new ErraiBootstrapFailure("attempt to declare service handler on illegal type: " + parmType.getName());
+
+                                                        if (parmTypes.length != 1)
+                                                            throw new ErraiBootstrapFailure("wrong number of method arguments for service endpoint: " + m.getName() + ": " + parmTypes.length);
+
+                                                        String svcName = ((Service) annotation).value().equals("") ? m.getName() : ((Service) annotation).value();
+
+                                                        context.getBus().subscribe(svcName, new MethodEndpointCallback(inst, m));
+                                                    }
                                                 }
                                             }
                                         }
