@@ -28,13 +28,9 @@ org.jboss.errai.common.client.types.TypeDemarshallers.addDemarshaller(
     new org.jboss.errai.common.client.types.Demarshaller<@{className}>() {
         public @{className} demarshall(com.google.gwt.json.client.JSONObject o) {
             try {
-            @if{enumType}
-            @{className} n = @{className}.valueOf(o.get("EnumStringValue").isString().stringValue());
-            @else{}
+            @if{enumType}@{className} n = @{className}.valueOf(o.get("EnumStringValue").isString().stringValue());@else{}
             @{className} n = new @{className}();
-            @foreach{fieldName : fields}
-                @includeNamed{'binding'; setter=org.mvel2.util.ReflectionUtil.getSetter(fieldName); targetType=targetTypes.get(fieldName); fieldName=fieldName}
-            @end{}
+            @foreach{fieldName : fields}@includeNamed{'binding'; setter=org.mvel2.util.ReflectionUtil.getSetter(fieldName); targetType=targetTypes.get(fieldName); fieldName=fieldName}@end{}
             @end{}
             return n;
             }

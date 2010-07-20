@@ -61,7 +61,6 @@ public class DefaultBlockingServlet extends AbstractErraiServlet {
     @Override
     protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
             throws ServletException, IOException {
-
         pollForMessages(sessionProvider.getSession(httpServletRequest.getSession(),
                 httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER)),
                 httpServletRequest, httpServletResponse, true);

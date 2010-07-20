@@ -723,6 +723,81 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         return initialized;
     }
 
+    int maxRetries = 5;
+    int retries = 0;
+    int timeout = 2000;
+    int statusCode = 0;
+    DialogBox timeoutDB;
+    Label timeoutMessage;
+
+    private void createConnectAttemptGUI() {
+        timeoutDB = new DialogBox();
+        timeoutMessage = new Label();
+        timeoutDB.add(timeoutMessage);
+        RootPanel.get().add(timeoutDB);
+        timeoutDB.show();
+        timeoutDB.center();
+    }
+
+    private void clearConnectAttemptGUI() {
+        timeoutDB.hide();
+        RootPanel.get().remove(timeoutDB);
+        timeoutDB = null;
+        timeoutMessage = null;
+        retries = 0;
+    }
+
+    boolean block = false;
+    private final RequestCallback COMM_CALLBACK = new RequestCallback() {
+        public void onError(Request request, Throwable throwable) {
+            block = false;
+            switch (statusCode) {
+                case 1:
+                case 408:
+                case 502:
+                case 504:
+                    if (retries != maxRetries) {
+                        if (timeoutDB == null) {
+                            createConnectAttemptGUI();
+                        }
+
+                        timeoutMessage.setText("Connection Interrupted -- Retries: " + (maxRetries - retries));
+                        retries++;
+                        incomingTimer.scheduleRepeating(timeout);
+                        statusCode = 0;
+                        return;
+                    } else {
+                        timeoutMessage.setText("Connection re-attempt failed!");
+                    }
+            }
+
+            logError("Communication Error", "None", throwable);
+            incomingTimer.cancel();
+        }
+
+        public void onResponseReceived(Request request, Response response) {
+            block = false;
+            if (response.getStatusCode() != 200) {
+                statusCode = response.getStatusCode();
+                onError(request, new Throwable());
+                return;
+            }
+            if (retries != 0) {
+                clearConnectAttemptGUI();
+            }
+
+            try {
+                procIncomingPayload(response);
+                incomingTimer.schedule(1);
+            }
+            catch (Throwable e) {
+                logError("Errai MessageBus Disconnected Due to Fatal Error",
+                        response.getText(), e);
+                incomingTimer.cancel();
+            }
+        }
+    };
+
     /**
      * Initializes the message bus by setting up the <tt>recvBuilder</tt> to accept responses. Also, initializes the
      * incoming timer to ensure the client's polling with the server is active.
@@ -734,43 +809,22 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         logAdapter.debug("Initialize message bus");
 
         incomingTimer = new Timer() {
-            boolean block = false;
-
             @Override
             public void run() {
                 if (block) {
                     scheduleRepeating(25);
                     return;
                 }
-
                 block = true;
                 try {
-                    recvBuilder.sendRequest(null,
-                            new RequestCallback() {
-                                public void onError(Request request, Throwable throwable) {
-                                    block = false;
-                                    logError("Communication Error", "None", throwable);
-                                    cancel();
-                                }
-
-                                public void onResponseReceived(Request request, Response response) {
-                                    block = false;
-
-                                    try {
-                                        procIncomingPayload(response);
-                                        schedule(1);
-                                    }
-                                    catch (Throwable e) {
-                                        logError("Errai MessageBus Disconnected Due to Fatal Error",
-                                                response.getText(), e);
-                                        cancel();
-                                    }
-                                }
-                            }
-                    );
+                    recvBuilder.sendRequest(null, COMM_CALLBACK);
                 }
-                catch (Exception e) {
-                    e.printStackTrace();
+                catch (RequestTimeoutException e) {
+                    statusCode = 1;
+                    COMM_CALLBACK.onError(null, e);
+                }
+                catch (RequestException e) {
+                    logError(e.getMessage(), "", e);
                 }
                 block = false;
             }
