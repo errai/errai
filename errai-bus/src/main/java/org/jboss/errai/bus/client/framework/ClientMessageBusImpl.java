@@ -309,6 +309,20 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                     postInitTasks.add(new Runnable() {
                         public void run() {
                             if (!subscriptions.containsKey(message.getSubject())) {
+
+                                // deal with an issue that sometimes occurs in hosted mode.
+                                if ("ServerBus".equals(message.getSubject())) {
+                                    addSubscribeListener(new SubscribeListener() {
+                                        public void onSubscribe(SubscriptionEvent event) {
+                                            if ("ServerBus".equals(event.getSubject())) {
+                                                onSubscribeHooks.remove(this);
+                                                send(message);
+                                            }
+                                        }
+                                    });
+                                    return;
+                                }
+
                                 logError("No subscribers for: " + message.getSubject(),
                                         "Attempt to send message to subject for which there are no subscribers", null);
                                 return;
@@ -910,7 +924,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     private native static Object _subscribe(String subject, MessageCallback callback,
                                             Object subscriberData) /*-{
           return $wnd.PageBus.subscribe(subject, null,
-                  function (subject, message, subcriberData) {
+                  function (subject, message) {
                      callback.@org.jboss.errai.bus.client.api.MessageCallback::callback(Lorg/jboss/errai/bus/client/api/Message;)(@org.jboss.errai.bus.client.json.JSONUtilCli::decodeCommandMessage(Ljava/lang/Object;)(message))
                   },
                   null);
