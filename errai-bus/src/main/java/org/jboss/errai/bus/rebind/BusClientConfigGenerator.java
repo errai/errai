@@ -18,10 +18,7 @@ package org.jboss.errai.bus.rebind;
 
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.JField;
-import com.google.gwt.core.ext.typeinfo.NotFoundException;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import com.google.gwt.core.ext.typeinfo.*;
 import com.google.gwt.user.rebind.SourceWriter;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.annotations.ExposeEntity;
@@ -31,8 +28,13 @@ import org.jboss.errai.bus.server.util.RebindUtil;
 import org.jboss.errai.bus.server.util.RebindVisitor;
 import org.mvel2.templates.CompiledTemplate;
 import org.mvel2.util.Make;
+import org.mvel2.util.ParseTools;
+import org.mvel2.util.PropertyTools;
+import org.mvel2.util.ReflectionUtil;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
@@ -84,25 +86,43 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
         );
 
         try {
-            ResourceBundle bundle = ResourceBundle.getBundle("ErraiApp");
-            if (bundle != null) {
-                logger.log(TreeLogger.Type.INFO, "checking ErraiApp.properties for configured types ...");
+            for (File root : roots) {
 
-                Enumeration<String> keys = bundle.getKeys();
+                InputStream inputStream = null;
+                try {
+                    try {
+                        inputStream = new FileInputStream(root.getAbsolutePath() + "/ErraiApp.properties");
 
-                while (keys.hasMoreElements()) {
-                    String key = keys.nextElement();
-                    if (ErraiServiceConfigurator.CONFIG_ERRAI_SERIALIZABLE_TYPE.equals(key)) {
-                        for (String s : bundle.getString(key).split(" ")) {
-                            try {
-                                generateMarshaller(oracle.getType(s.trim()), logger, writer);
-                            }
-                            catch (Exception e) {
-                                throw new ErraiBootstrapFailure(e);
+                        ResourceBundle bundle = new PropertyResourceBundle(inputStream);
+                        if (bundle != null) {
+                            logger.log(TreeLogger.Type.INFO, "checking ErraiApp.properties for configured types ...");
+
+                            Enumeration<String> keys = bundle.getKeys();
+
+                            while (keys.hasMoreElements()) {
+                                String key = keys.nextElement();
+                                if (ErraiServiceConfigurator.CONFIG_ERRAI_SERIALIZABLE_TYPE.equals(key)) {
+                                    for (String s : bundle.getString(key).split(" ")) {
+                                        try {
+                                            generateMarshaller(oracle.getType(s.trim()), logger, writer);
+                                        }
+                                        catch (Exception e) {
+                                            throw new ErraiBootstrapFailure(e);
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
+                    finally {
+                        if (inputStream != null) inputStream.close();
+                    }
                 }
+                catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+
             }
         }
         catch (MissingResourceException exception) {
@@ -114,6 +134,7 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
     }
 
     private void generateMarshaller(JClassType visit, TreeLogger logger, SourceWriter writer) {
+        Boolean enumType = visit.isEnum() != null;
         Map<String, Class> types = new HashMap<String, Class>();
         try {
             for (JField f : visit.getFields()) {
@@ -121,7 +142,13 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
 
                 JClassType type = f.getType().isClassOrInterface();
 
-                if (type == null) continue;
+                if (type == null) {
+                    JPrimitiveType pType = f.getType().isPrimitive();
+                    if (pType == null) continue;
+
+                    types.put(f.getName(), ParseTools.unboxPrimitive(Class.forName(pType.getQualifiedBoxedSourceName())));
+                    continue;
+                }
 
                 types.put(f.getName(), Class.forName(type.getQualifiedSourceName()));
             }
@@ -132,10 +159,10 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
         }
 
         try {
-            visit.getConstructor(new JClassType[0]);
+            if (!enumType) visit.getConstructor(new JClassType[0]);
         }
         catch (NotFoundException e) {
-            String errorMsg = "Type annotated with @ExposeEntity does not expose a default constructor";
+            String errorMsg = "Type marked for serialization does not expose a default constructor: " + visit.getQualifiedSourceName();
             logger.log(TreeLogger.Type.ERROR, errorMsg, e);
             throw new GenerationException(errorMsg, e);
         }
@@ -143,7 +170,8 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
         Map<String, Object> templateVars = Make.Map.<String, Object>$()
                 ._("className", visit.getQualifiedSourceName())
                 ._("fields", types.keySet())
-                ._("targetTypes", types)._();
+                ._("targetTypes", types)
+                ._("enumType", enumType)._();
 
         String genStr;
 
@@ -156,4 +184,7 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
         logger.log(TreeLogger.Type.INFO, genStr);
         logger.log(TreeLogger.Type.INFO, "Generated marshaller/demarshaller for: " + visit.getName());
     }
+
+
+
 }

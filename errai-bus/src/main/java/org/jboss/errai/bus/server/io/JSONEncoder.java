@@ -168,7 +168,7 @@ public class JSONEncoder {
     }
 
     private static String encodeEnum(Enum enumer) {
-        return "\"" + enumer.name() + "\"";
+        return "{" + SerializationParts.ENCODED_TYPE + ":\"" + enumer.getClass().getName() + "\", EnumStringValue:\"" + enumer.name() + "\"}";
     }
 
     private static final Map<Class, TypeHandler> tHandlers = new HashMap<Class, TypeHandler>();
