@@ -3,7 +3,7 @@
     <name>Errai::Bus::Demos::RPCDemo</name>
     <groupId>org.jboss.errai</groupId>
     <artifactId>errai-bus-demos-rpcdemo</artifactId>
-    <packaging>jar</packaging>
+    <packaging>war</packaging>
 
     <!-- Parent -->
     <parent>

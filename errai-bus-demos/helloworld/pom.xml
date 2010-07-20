@@ -3,7 +3,7 @@
     <name>Errai::Bus::Demos::HelloWorld</name>
     <groupId>org.jboss.errai</groupId>
     <artifactId>errai-bus-demos-helloworld</artifactId>
-    <packaging>jar</packaging>
+    <packaging>war</packaging>
 
     <!-- Parent -->
     <parent>
@@ -59,6 +59,7 @@
                 <executions>
                     <execution>
                         <goals>
+                            <goal>resources</goal>
                             <goal>compile</goal>
                         </goals>
                     </execution>

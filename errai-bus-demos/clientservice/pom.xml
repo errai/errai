@@ -3,7 +3,7 @@
     <name>Errai::Bus::Demos::ClientService</name>
     <groupId>org.jboss.errai</groupId>
     <artifactId>errai-bus-demos-clientservice</artifactId>
-    <packaging>jar</packaging>
+    <packaging>war</packaging>
 
     <!-- Parent -->
     <parent>
