@@ -267,7 +267,7 @@
                     <extraJvmArgs>-Xmx512m -DDEBUG</extraJvmArgs>
                     <soyc>false</soyc>
                     <webXml>src/jetty/web.xml</webXml>
-                    <server>org.jboss.errai.cdi.server.gwt.MyJettyLauncher</server>
+                    <server>org.jboss.errai.cdi.server.gwt.JettyLauncher</server>
                 </configuration>
                 <executions>
                     <execution>
