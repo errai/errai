@@ -102,8 +102,8 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
                         while ((entry = jarInputStream.getNextJarEntry()) != null) {
                             if (entry.getName().endsWith("ErraiApp.properties")) {
                                 bundle = new PropertyResourceBundle(inputStream);
+                                break;
                             }
-                            break;
                         }
                     } else {
                         inputStream = new FileInputStream(root.getAbsolutePath() + "/ErraiApp.properties");
