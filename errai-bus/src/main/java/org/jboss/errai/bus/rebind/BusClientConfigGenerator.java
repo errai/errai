@@ -29,14 +29,11 @@ import org.jboss.errai.bus.server.util.RebindVisitor;
 import org.mvel2.templates.CompiledTemplate;
 import org.mvel2.util.Make;
 import org.mvel2.util.ParseTools;
-import org.mvel2.util.PropertyTools;
-import org.mvel2.util.ReflectionUtil;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarInputStream;
 
 import static org.mvel2.templates.TemplateCompiler.compileTemplate;
 import static org.mvel2.templates.TemplateRuntime.execute;
@@ -85,52 +82,74 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
                 }
         );
 
-        try {
-            for (File root : roots) {
+        boolean found = false;
+        String path;
+        for (File root : roots) {
+            path = root.getAbsolutePath();
 
-                InputStream inputStream = null;
+            FileInputStream jarStream = null;
+            InputStream inputStream = null;
+            ResourceBundle bundle = null;
+            try {
                 try {
-                    try {
+
+                    if (path.endsWith(".jar")) {
+                        jarStream = new FileInputStream(root.getAbsolutePath());
+                        JarInputStream jarInputStream = new JarInputStream(jarStream);
+                        inputStream = jarInputStream;
+
+                        JarEntry entry;
+                        while ((entry = jarInputStream.getNextJarEntry()) != null) {
+                            if (entry.getName().endsWith("ErraiApp.properties")) {
+                                bundle = new PropertyResourceBundle(inputStream);
+                            }
+                            break;
+                        }
+                    } else {
                         inputStream = new FileInputStream(root.getAbsolutePath() + "/ErraiApp.properties");
+                        bundle = new PropertyResourceBundle(inputStream);
+                    }
 
-                        ResourceBundle bundle = new PropertyResourceBundle(inputStream);
-                        if (bundle != null) {
-                            logger.log(TreeLogger.Type.INFO, "checking ErraiApp.properties for configured types ...");
 
-                            Enumeration<String> keys = bundle.getKeys();
+                    if (bundle != null) {
+                        found = true;
+                        logger.log(TreeLogger.Type.INFO, "checking ErraiApp.properties for configured types ...");
 
-                            while (keys.hasMoreElements()) {
-                                String key = keys.nextElement();
-                                if (ErraiServiceConfigurator.CONFIG_ERRAI_SERIALIZABLE_TYPE.equals(key)) {
-                                    for (String s : bundle.getString(key).split(" ")) {
-                                        try {
-                                            generateMarshaller(oracle.getType(s.trim()), logger, writer);
-                                        }
-                                        catch (Exception e) {
-                                            throw new ErraiBootstrapFailure(e);
-                                        }
+                        Enumeration<String> keys = bundle.getKeys();
+
+                        while (keys.hasMoreElements()) {
+                            String key = keys.nextElement();
+                            if (ErraiServiceConfigurator.CONFIG_ERRAI_SERIALIZABLE_TYPE.equals(key)) {
+                                for (String s : bundle.getString(key).split(" ")) {
+                                    try {
+                                        generateMarshaller(oracle.getType(s.trim()), logger, writer);
+                                    }
+                                    catch (Exception e) {
+                                        throw new ErraiBootstrapFailure(e);
                                     }
                                 }
                             }
                         }
                     }
-                    finally {
-                        if (inputStream != null) inputStream.close();
-                    }
                 }
-                catch (IOException e) {
-                    e.printStackTrace();
+                catch (FileNotFoundException e) {
+                    // ignore.  we don't expect to find this file in all paths.
                 }
-
-
+                finally {
+                    if (inputStream != null) inputStream.close();
+                    if (jarStream != null) jarStream.close();
+                }
             }
+            catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
         }
-        catch (MissingResourceException exception) {
+        if (!found) {
             throw new ErraiBootstrapFailure("Unable to find ErraiApp.properties in the classpath");
         }
 
-
-        //  generateMarshaller(CommandMessage.class, logger, writer);
     }
 
     private void generateMarshaller(JClassType visit, TreeLogger logger, SourceWriter writer) {
@@ -184,7 +203,6 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
         logger.log(TreeLogger.Type.INFO, genStr);
         logger.log(TreeLogger.Type.INFO, "Generated marshaller/demarshaller for: " + visit.getName());
     }
-
 
 
 }

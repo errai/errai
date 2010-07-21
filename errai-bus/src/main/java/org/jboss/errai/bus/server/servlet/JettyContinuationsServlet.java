@@ -68,7 +68,7 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
     /**
      * Called by the server (via the <code>service</code> method) to allow a servlet to handle a POST request, by
      * sending the request
-     *
+     *                                                                                            xxxxxxx
      * @param httpServletRequest  - object that contains the request the client has made of the servlet
      * @param httpServletResponse - object that contains the response the servlet sends to the client
      * @throws IOException      - if an input or output error is detected when the servlet handles the request
@@ -80,23 +80,10 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
         if (contextClassLoader == null)
             contextClassLoader = Thread.currentThread().getContextClassLoader();
 
-        BufferedReader reader = httpServletRequest.getReader();
-        StringAppender sb = new StringAppender(httpServletRequest.getContentLength());
-        CharBuffer buffer = CharBuffer.allocate(10);
-
-        int read;
-        while ((read = reader.read(buffer)) > 0) {
-            buffer.rewind();
-            for (; read > 0; read--) {
-                sb.append(buffer.get());
-            }
-            buffer.rewind();
-        }
-
         final QueueSession session = sessionProvider.getSession(httpServletRequest.getSession(),
                 httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
 
-        Message msg = createCommandMessage(session, sb.toString(), contextClassLoader);
+        Message msg = createCommandMessage(session, httpServletRequest.getInputStream(), contextClassLoader);
         if (msg != null) {
             service.store(msg);          
         }

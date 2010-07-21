@@ -36,8 +36,8 @@ import static org.jboss.errai.common.client.protocols.SerializationParts.ENCODED
  * including serializable types.  This parser always assumes the outer payload is a Map. So it probably shouldn't
  * be used as a general parser.
  *
- * @since 1.1
  * @author Mike Brock
+ * @since 1.1
  */
 public class JSONStreamDecoder {
     private CharBuffer buffer;
@@ -58,12 +58,7 @@ public class JSONStreamDecoder {
     }
 
     public static Object decode(InputStream instream) throws IOException {
-        try {
-            return new JSONStreamDecoder(instream).parse();
-        }
-        finally {
-            instream.close();
-        }
+        return new JSONStreamDecoder(instream).parse();
     }
 
     public char read() throws IOException {
@@ -171,7 +166,7 @@ public class JSONStreamDecoder {
                             }
 
                             if (c != 0) {
-                              reloop = true;
+                                reloop = true;
                             }
 
                             break;
