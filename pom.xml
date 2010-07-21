@@ -315,7 +315,7 @@
                 <module>userguide</module>
                 <module>dist</module>
                 <module>errai-bus-demos</module>
-                <module>quickstart</module>
+                <module>archetypes/quickstart</module>
             </modules>
         </profile>
     </profiles>
