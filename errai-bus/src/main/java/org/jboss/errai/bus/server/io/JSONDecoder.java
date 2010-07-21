@@ -165,7 +165,7 @@ public class JSONDecoder {
         return cursor;
     }
 
-    private class Context {
+    private static class Context {
         Object lhs;
         Object rhs;
         boolean encodedType = false;

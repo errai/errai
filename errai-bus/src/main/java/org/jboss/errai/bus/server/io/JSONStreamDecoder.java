@@ -178,7 +178,6 @@ public class JSONStreamDecoder {
     }
 
     public int handleEscapeSequence() throws IOException {
-        // escapeStr[pos - 1] = 0;
         char c;
         switch (c = buffer.get()) {
             case '\\':
@@ -197,55 +196,13 @@ public class JSONStreamDecoder {
                 return '\'';
             case '"':
                 return '\"';
-//            case 'u':
-//                //unicode
-//
-//                char[] uSeq = new char[4];
-//
-//                for (int i = 0; i != 3; i++) {
-//                    uSeq[i] = (c = read());
-//                    if ((c > ('0' - 1) && c < ('9' + 1)) ||
-//                            (c > ('A' - 1) && c < ('F' + 1))) {
-//                    } else {
-//                        throw new CompileException("illegal unicode escape sequence");
-//                    }
-//                }
-//
-//                return (char) Integer.decode("0x" + new String(uSeq)).intValue();
-
-
             default:
-                //octal
-//                s = pos;
-//                while (escapeStr[pos] >= '0' && escapeStr[pos] < '8') {
-//                    if (pos != s && escapeStr[s] > '3') {
-//                        escapeStr[s - 1] = (char) Integer.decode("0" + new String(escapeStr, s, pos - s + 1)).intValue();
-//                        escapeStr[s] = 0;
-//                        escapeStr[s + 1] = 0;
-//                        return 2;
-//                    } else if ((pos - s) == 2) {
-//                        escapeStr[s - 1] = (char) Integer.decode("0" + new String(escapeStr, s, pos - s + 1)).intValue();
-//                        escapeStr[s] = 0;
-//                        escapeStr[s + 1] = 0;
-//                        escapeStr[s + 2] = 0;
-//                        return 3;
-//                    }
-//
-//                    if (pos + 1 == escapeStr.length || (escapeStr[pos] < '0' || escapeStr[pos] > '7')) {
-//                        escapeStr[s - 1] = (char) Integer.decode("0" + new String(escapeStr, s, pos - s + 1)).intValue();
-//                        escapeStr[s] = 0;
-//                        return 1;
-//                    }
-//
-//                    pos++;
-//                }
                 throw new CompileException("illegal escape sequence: " + c);
         }
-
     }
 
 
-    private class Context {
+    private static class Context {
         Object lhs;
         Object rhs;
         boolean encodedType = false;
