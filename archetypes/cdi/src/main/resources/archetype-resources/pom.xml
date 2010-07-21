@@ -11,7 +11,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <errai.version>1.1-SNAPSHOT</errai.version>
-        <errai-cdi.version>1.1-SNAPSHOT</errai-cdi.version>        
+        <errai-cdi.version>1.1-SNAPSHOT</errai-cdi.version>
         <gwt.version>2.0.3</gwt.version>
         <hsqldb.version>1.8.0.7</hsqldb.version>
         <weld.version>1.0.1-Final</weld.version>
@@ -35,14 +35,24 @@
             <groupId>org.jboss.errai</groupId>
             <artifactId>errai-ioc</artifactId>
             <version>${errai.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.inject</groupId>
+                    <artifactId>javax.inject</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax.annotation</groupId>
+                    <artifactId>jsr250-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
-        
+
         <dependency>
             <groupId>org.mvel</groupId>
             <artifactId>mvel2</artifactId>
             <version>${mvel.version}</version>
         </dependency>
-        
+
         <!-- CDI Integration Modules-->
 
         <dependency>
@@ -50,7 +60,7 @@
             <artifactId>errai-cdi</artifactId>
             <version>${errai-cdi.version}</version>
         </dependency>
-   
+
         <!-- CDI Development Utils-->
         <dependency>
             <groupId>org.jboss.errai</groupId>
@@ -129,7 +139,22 @@
                     <version>${errai.version}</version>
                     <scope>provided</scope>
                 </dependency>
-              
+
+                <dependency>
+                    <groupId>org.jboss.errai</groupId>
+                    <artifactId>errai-ioc</artifactId>
+                    <version>${errai.version}</version>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>javax.inject</groupId>
+                            <artifactId>javax.inject</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>javax.annotation</groupId>
+                            <artifactId>jsr250-api</artifactId>
+                        </exclusion>
+                    </exclusions>
+                </dependency>
                 <dependency>
                     <groupId>org.jboss.errai</groupId>
                     <artifactId>errai-cdi</artifactId>
@@ -150,7 +175,7 @@
                     <version>${errai-cdi.version}</version>
                     <scope>provided</scope>
                 </dependency>
-                
+
                 <dependency>
                     <groupId>org.mvel</groupId>
                     <artifactId>mvel2</artifactId>
