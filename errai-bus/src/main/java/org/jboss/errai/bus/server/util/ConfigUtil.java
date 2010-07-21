@@ -68,9 +68,9 @@ public class ConfigUtil extends AbstractConfigBase {
                 targets.add(trimIdx == -1 ? file.getParentFile() : file);
             }
 
-            log.info("configuration scan targets");
+            log.debug("configuration scan targets");
             for (File tg : targets) {
-                log.info(" -> " + tg.getPath());
+                log.debug(" -> " + tg.getPath());
             }
 
             return targets;

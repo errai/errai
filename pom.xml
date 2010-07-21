@@ -58,7 +58,7 @@
         <module>errai-widgets</module>
         <module>errai-bus</module>
         <module>errai-persistence</module>
-        <module>errai-tools</module>        
+        <module>errai-tools</module>
     </modules>
 
     <dependencyManagement>
@@ -119,21 +119,21 @@
             <!--<artifactId>hibernate-core</artifactId>-->
             <!--<version>3.3.1.GA</version>-->
             <!--</dependency>-->
-            
+
             <dependency>
-            <groupId>com.google.appengine</groupId>
-            <artifactId>appengine-api</artifactId>
-            <version>${appengine.version}</version>
-            <scope>provided</scope>
+                <groupId>com.google.appengine</groupId>
+                <artifactId>appengine-api</artifactId>
+                <version>${appengine.version}</version>
+                <scope>provided</scope>
             </dependency>
-            
+
             <dependency>
-            <groupId>com.google.appengine</groupId>
-            <artifactId>appengine-api-labs</artifactId>
-            <version>${appengine.version}</version>
-            <scope>provided</scope>
+                <groupId>com.google.appengine</groupId>
+                <artifactId>appengine-api-labs</artifactId>
+                <version>${appengine.version}</version>
+                <scope>provided</scope>
             </dependency>
-            
+
         </dependencies>
     </dependencyManagement>
 
@@ -271,7 +271,9 @@
                             <packages>org.jboss.errai.workspaces.*</packages>
                         </group>
                     </groups>
-                    <subpackages>org.jboss.errai.bus.client.api:org.jboss.errai.bus.client.framework:org.jboss.errai.workspaces.client.api:org.jboss.errai.workspaces.client.framework</subpackages>
+                    <subpackages>
+                        org.jboss.errai.bus.client.api:org.jboss.errai.bus.client.framework:org.jboss.errai.workspaces.client.api:org.jboss.errai.workspaces.client.framework
+                    </subpackages>
                 </configuration>
             </plugin>
         </plugins>
@@ -316,7 +318,7 @@
                 <module>dist</module>
                 <module>errai-bus-demos</module>
                 <module>archetypes/quickstart</module>
-  		<module>archetypes/cdi</module>	
+                <module>archetypes/cdi</module>
             </modules>
         </profile>
     </profiles>
@@ -334,6 +336,21 @@
             </releases>
             <snapshots>
                 <updatePolicy>never</updatePolicy>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>gilead-repo</id>
+            <name>Gilead Maven Repo</name>
+            <url>http://gilead.svn.sourceforge.net/svnroot/gilead/gilead/maven-repo/</url>
+            <layout>default</layout>
+        </repository>
+        <repository>
+            <id>gilead-snapshots-repo</id>
+            <name>Gilean Maven Snapshots Repo</name>
+            <url>http://gilead.svn.sourceforge.net/svnroot/gilead/gilead/maven-snapshots-repo/</url>
+            <layout>default</layout>
+            <snapshots>
+               <enabled>true</enabled>
             </snapshots>
         </repository>
     </repositories>
