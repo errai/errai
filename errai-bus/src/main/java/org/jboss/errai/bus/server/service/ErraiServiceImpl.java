@@ -20,6 +20,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
+import org.jboss.errai.bus.client.util.ErrorHelper;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.bus.server.api.SessionProvider;
 import org.jboss.errai.bus.server.service.bootstrap.BootstrapContext;
@@ -36,7 +37,7 @@ public class ErraiServiceImpl<S> implements ErraiService<S> {
 
     private SessionProvider<S> sessionProvider;
     private RequestDispatcher dispatcher;
-
+    
     /**
      * Initializes the errai service with a bus and configurator
      *
@@ -48,6 +49,8 @@ public class ErraiServiceImpl<S> implements ErraiService<S> {
                             final ErraiServiceConfigurator configurator) {
         this.bus = bus;
         this.config = configurator;
+
+
 
         boostrap();
     }
@@ -65,6 +68,8 @@ public class ErraiServiceImpl<S> implements ErraiService<S> {
      * @param message - the message to store/deliver
      */
     public void store(Message message) {
+        if (message == null) return;
+        
         message.addResources(config.getResourceProviders());
 
         /**
@@ -72,11 +77,10 @@ public class ErraiServiceImpl<S> implements ErraiService<S> {
          */
         try {
             getDispatcher().dispatchGlobal(message);
-            // bus.sendGlobal(message);
         }
         catch (Throwable t) {
-            System.err.println("Message was not delivered.");
             t.printStackTrace();
+            ErrorHelper.sendClientError(bus, message, t.getMessage(), t);
         }
     }
 

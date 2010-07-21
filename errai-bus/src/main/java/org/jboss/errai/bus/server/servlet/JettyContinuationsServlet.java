@@ -17,7 +17,6 @@
 package org.jboss.errai.bus.server.servlet;
 
 import com.google.inject.Singleton;
-import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.server.api.MessageQueue;
@@ -26,15 +25,12 @@ import org.jboss.errai.bus.server.api.QueueSession;
 import org.mortbay.jetty.RetryRequest;
 import org.mortbay.util.ajax.Continuation;
 import org.mortbay.util.ajax.ContinuationSupport;
-import org.mvel2.util.StringAppender;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.CharBuffer;
 import java.util.Iterator;
 import java.util.List;
 import java.util.zip.GZIPOutputStream;
@@ -68,7 +64,8 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
     /**
      * Called by the server (via the <code>service</code> method) to allow a servlet to handle a POST request, by
      * sending the request
-     *                                                                                            xxxxxxx
+     * xxxxxxx
+     *
      * @param httpServletRequest  - object that contains the request the client has made of the servlet
      * @param httpServletResponse - object that contains the response the servlet sends to the client
      * @throws IOException      - if an input or output error is detected when the servlet handles the request
@@ -77,16 +74,11 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
     @Override
     protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
             throws ServletException, IOException {
-        if (contextClassLoader == null)
-            contextClassLoader = Thread.currentThread().getContextClassLoader();
 
         final QueueSession session = sessionProvider.getSession(httpServletRequest.getSession(),
                 httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
 
-        Message msg = createCommandMessage(session, httpServletRequest.getInputStream(), contextClassLoader);
-        if (msg != null) {
-            service.store(msg);          
-        }
+        service.store(createCommandMessage(session, httpServletRequest.getInputStream()));
 
         pollQueue(service.getBus().getQueue(session), httpServletResponse.getOutputStream(), httpServletResponse);
     }

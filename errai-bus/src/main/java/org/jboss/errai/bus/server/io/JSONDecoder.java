@@ -23,8 +23,6 @@ import java.util.Map;
 
 import static java.lang.Character.isDigit;
 import static java.lang.Character.isJavaIdentifierPart;
-import static java.lang.Double.parseDouble;
-import static java.lang.Long.parseLong;
 import static org.jboss.errai.bus.server.io.TypeDemarshallHelper._demarshallAll;
 import static org.jboss.errai.common.client.protocols.SerializationParts.ENCODED_TYPE;
 import static org.mvel2.util.ParseTools.handleStringEscapes;
@@ -126,9 +124,9 @@ public class JSONDecoder {
                         }
 
                         if (fp) {
-                            ctx.addValue(parseDouble(new String(json, start, cursor - start)));
+                            ctx.addValue(_parseDouble(json, start, cursor - start));
                         } else {
-                            ctx.addValue(parseLong(new String(json, start, cursor - start)));
+                            ctx.addValue(_parseLong(json, start, cursor - start));
                         }
 
                         break;
@@ -207,4 +205,100 @@ public class JSONDecoder {
         }
     }
 
+
+    public static long _parseLong(char[] s, int start, int length) {
+        long val = 0;
+        int factor = 1;
+        for (int i = start-- + length - 1; i != start; i--) {
+            switch (s[i]) {
+                case '-':
+                    if (i != start + 1) {
+                        throw new NumberFormatException(new String(s));
+                    }
+                    val = -val;
+                    break;
+                case '1':
+                    val += factor;
+                    break;
+                case '2':
+                    val += 2 * factor;
+                    break;
+                case '3':
+                    val += 3 * factor;
+                    break;
+                case '4':
+                    val += 4 * factor;
+                    break;
+                case '5':
+                    val += 5 * factor;
+                    break;
+                case '6':
+                    val += 6 * factor;
+                    break;
+                case '7':
+                    val += 7 * factor;
+                    break;
+                case '8':
+                    val += 8 * factor;
+                    break;
+                case '9':
+                    val += 9 * factor;
+                    break;
+            }
+
+            factor *= 10;
+        }
+
+        return val;
+    }
+
+    public static double _parseDouble(char[] s, int start, int length) {
+        double val = 0;
+        int factor = 1;
+        for (int i = start-- + length - 1; i != start; i--) {
+            switch (s[i]) {
+                case '.':
+                    val /= factor;
+                    factor = 1;
+                    continue;
+                case '-':
+                    if (i != start + 1) {
+                        throw new NumberFormatException(new String(s));
+                    }
+                    val = -val;
+                    break;
+                case '1':
+                    val += factor;
+                    break;
+                case '2':
+                    val += 2 * factor;
+                    break;
+                case '3':
+                    val += 3 * factor;
+                    break;
+                case '4':
+                    val += 4 * factor;
+                    break;
+                case '5':
+                    val += 5 * factor;
+                    break;
+                case '6':
+                    val += 6 * factor;
+                    break;
+                case '7':
+                    val += 7 * factor;
+                    break;
+                case '8':
+                    val += 8 * factor;
+                    break;
+                case '9':
+                    val += 9 * factor;
+                    break;
+            }
+
+            factor *= 10;
+        }
+
+        return val;
+    }
 }

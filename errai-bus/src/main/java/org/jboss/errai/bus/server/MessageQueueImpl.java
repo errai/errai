@@ -211,7 +211,6 @@ public class MessageQueueImpl implements MessageQueue {
                         }
 
                         public void run() {
-
                             if (activationCallback != null)
                                 activationCallback.activate(MessageQueueImpl.this);
 

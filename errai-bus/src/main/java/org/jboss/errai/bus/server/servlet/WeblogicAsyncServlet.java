@@ -70,8 +70,6 @@ public class WeblogicAsyncServlet extends AbstractErraiServlet {
     @Override
     protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
             throws ServletException, IOException {
-        if (contextClassLoader == null)
-            contextClassLoader = Thread.currentThread().getContextClassLoader();
 
         final QueueSession session = sessionProvider.getSession(httpServletRequest.getSession(),
                 httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
@@ -89,7 +87,7 @@ public class WeblogicAsyncServlet extends AbstractErraiServlet {
             buffer.rewind();
         }
 
-        Message m = createCommandMessage(session, sb.toString(), contextClassLoader);
+        Message m = createCommandMessage(session, sb.toString());
         if (m != null) {
             service.store(m);
         }

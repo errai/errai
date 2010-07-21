@@ -27,7 +27,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import static java.lang.Character.isDigit;
 import static org.jboss.errai.bus.server.io.TypeDemarshallHelper._demarshallAll;
 import static org.jboss.errai.common.client.protocols.SerializationParts.ENCODED_TYPE;
 
@@ -42,6 +41,9 @@ import static org.jboss.errai.common.client.protocols.SerializationParts.ENCODED
 public class JSONStreamDecoder {
     private CharBuffer buffer;
     private BufferedReader reader;
+
+    private char carry1;
+    private char carry2;
 
     private int read;
     private boolean initial = true;
@@ -62,6 +64,15 @@ public class JSONStreamDecoder {
     }
 
     public char read() throws IOException {
+        if (carry1 != 0) {
+            char c = carry1;
+            if (carry2 != 0) {
+                carry1 = carry2;
+                carry2 = 0;
+            }
+            carry1 = 0;
+            return c;
+        }
         if (read <= 0) {
             if (!initial) buffer.rewind();
             initial = false;
@@ -84,122 +95,117 @@ public class JSONStreamDecoder {
     }
 
     private Object _parse(Context ctx, Object collection, boolean map) throws IOException {
-        boolean reloop = false;
         char c;
         StringAppender appender;
         while ((c = read()) != 0) {
-            do {
-                reloop = false;
-                switch (c) {
-                    case '[':
-                        ctx.addValue(_parse(new Context(), new ArrayList(), false));
-                        break;
+            switch (c) {
+                case '[':
+                    ctx.addValue(_parse(new Context(), new ArrayList(), false));
+                    break;
 
-                    case '{':
-                        ctx.addValue(_parse(new Context(), new HashMap(), true));
-                        break;
+                case '{':
+                    ctx.addValue(_parse(new Context(), new HashMap(), true));
+                    break;
 
-                    case ']':
-                    case '}':
-                        if (map && ctx.encodedType) {
-                            ctx.encodedType = false;
-                            try {
-                                return _demarshallAll(ctx.record(collection));
+                case ']':
+                case '}':
+                    if (map && ctx.encodedType) {
+                        ctx.encodedType = false;
+                        try {
+                            return _demarshallAll(ctx.record(collection));
+                        }
+                        catch (Exception e) {
+                            throw new RuntimeException("Could not demarshall object", e);
+                        }
+                    } else {
+                        return ctx.record(collection);
+                    }
+
+                case ',':
+                    ctx.record(collection);
+                    break;
+
+                case '"':
+                case '\'':
+                    char term = c;
+                    appender = new StringAppender();
+                    StrCapture:
+                    while ((c = read()) != 0) {
+                        switch (c) {
+                            case '\\':
+                                appender.append(handleEscapeSequence());
+                                break;
+                            case '"':
+                            case '\'':
+                                if (c == term) {
+                                    ctx.addValue(appender.toString());
+                                    term = 0;
+                                    break StrCapture;
+                                }
+                                break;
+                            default:
+                                appender.append(c);
+                        }
+                    }
+
+                    if (term != 0) {
+                        throw new RuntimeException("unterminated string literal");
+                    }
+
+                    break;
+
+                case ':':
+                    continue;
+
+                default:
+                    if (isValidNumberPart(c)) {
+                        char c1 = read();
+                        if (isValidNumberPart(c1)) {
+                            Number n = parseNumber(c, c1);
+
+                            if (n == null) {
+                                carry1 = c;
+                                carry2 = c1;
+                                break;
                             }
-                            catch (Exception e) {
-                                throw new RuntimeException("Could not demarshall object", e);
-                            }
+
+                            ctx.addValue(n);
                         } else {
-                            return ctx.record(collection);
+                            carry1 = c;
+                            carry2 = c1;
                         }
-
-                    case ',':
-                        ctx.record(collection);
                         break;
+                    } else if (Character.isJavaIdentifierPart(c)) {
+                        appender = new StringAppender().append(c);
 
-                    case '"':
-                    case '\'':
-                        char term = c;
-                        appender = new StringAppender();
-                        StrCapture:
-                        while ((c = read()) != 0) {
-                            switch (c) {
-                                case '\\':
-                                    appender.append(handleEscapeSequence());
-                                    break;
-                                case '"':
-                                case '\'':
-                                    if (c == term) {
-                                        ctx.addValue(appender.toString());
-                                        term = 0;
-                                        break StrCapture;
-                                    }
-                                    break;
-                                default:
-                                    appender.append(c);
-                            }
+                        while (((c = read()) != 0) && Character.isJavaIdentifierPart(c)) {
+                            appender.append(c);
                         }
 
-                        if (term != 0) {
-                            throw new RuntimeException("unterminated string literal");
+                        String s = appender.toString();
+                        if ("true".equals(s) || "false".equals(s)) {
+                            ctx.addValue("true".equals(s) ? Boolean.TRUE : Boolean.FALSE);
+                        } else if ("null".equals(s)) {
+                            ctx.addValue(null);
+                        } else {
+                            ctx.addValue(s);
                         }
 
-                        break;
-
-                    case ':':
-                        continue;
-
-                    default:
-                        if (isDigit(c) || (c == '-' && isDigit(c))) {
-                            appender = new StringAppender().append(c);
-                            boolean fp = false;
-                            while ((c = read()) != 0 && (isDigit(c) || c == '.')) {
-                                appender.append(c);
-                                if (c == '.') fp = true;
-                            }
-
-
-                            if (fp) {
-                                ctx.addValue(Double.parseDouble(appender.toString()));
-                            } else {
-                                ctx.addValue(Long.parseLong(appender.toString()));
-                            }
-
-                            if (c != 0) {
-                                reloop = true;
-                            }
-
-                            break;
-                        } else if (Character.isJavaIdentifierPart(c)) {
-                            appender = new StringAppender().append(c);
-                            while (((c = read()) != 0) && Character.isJavaIdentifierPart(c)) {
-                                appender.append(c);
-                            }
-
-                            String s = appender.toString();
-                            if ("true".equals(s) || "false".equals(s)) {
-                                ctx.addValue("true".equals(s) ? Boolean.TRUE : Boolean.FALSE);
-                            } else if ("null".equals(s)) {
-                                ctx.addValue(null);
-                            } else {
-                                ctx.addValue(s);
-                            }
-
-                            if (c != 0) {
-                                reloop = true;
-                            }
+                        if (c != 0) {
+                            carry1 = c;
                         }
-                }
-            } while (reloop);
+                    }
+            }
+
 
         }
 
         return ctx.record(collection);
     }
 
-    public int handleEscapeSequence() throws IOException {
+    public char handleEscapeSequence() throws IOException {
         char c;
-        switch (c = buffer.get()) {
+        switch (c = read()) {
             case '\\':
                 return '\\';
             case 'b':
@@ -218,6 +224,100 @@ public class JSONStreamDecoder {
                 return '\"';
             default:
                 throw new CompileException("illegal escape sequence: " + c);
+        }
+    }
+
+
+    public Number parseNumber(char cI, char c) throws IOException {
+        long val = 0;
+        double dVal = 0;
+
+        int factor = 1;
+        boolean dbl = false;
+
+        char[] buf = new char[21];
+        buf[0] = cI;
+        int len = 1;
+        do {
+            buf[len++] = c;
+        } while ((c = read()) != 0 && isValidNumberPart(c));
+
+        if (c != 0) {
+            carry1 = c;
+        }
+
+        if (len == 1 && buf[0] == '-') return null;
+
+        for (int i = len - 1; i != -1; i--) {
+            switch (buf[i]) {
+                case '.':
+                    dVal = ((double) val) / factor;
+                    val = 0;
+                    factor = 1;
+                    dbl = true;
+                    continue;
+                case '-':
+                    if (i != 0) {
+                        throw new NumberFormatException(new String(buf));
+                    }
+                    val = -val;
+                    break;
+                case '1':
+                    val += factor;
+                    break;
+                case '2':
+                    val += 2 * factor;
+                    break;
+                case '3':
+                    val += 3 * factor;
+                    break;
+                case '4':
+                    val += 4 * factor;
+                    break;
+                case '5':
+                    val += 5 * factor;
+                    break;
+                case '6':
+                    val += 6 * factor;
+                    break;
+                case '7':
+                    val += 7 * factor;
+                    break;
+                case '8':
+                    val += 8 * factor;
+                    break;
+                case '9':
+                    val += 9 * factor;
+                    break;
+            }
+
+            factor *= 10;
+        }
+        if (dbl) {
+            return new Double(dVal + val);
+        }
+        else {
+            return new Long(val);
+        }
+    }
+
+    private static boolean isValidNumberPart(char c) {
+        switch (c) {
+            case '.':
+            case '-':
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                return true;
+            default:
+                return false;
         }
     }
 

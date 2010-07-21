@@ -6,7 +6,9 @@ import org.jboss.errai.bus.client.api.base.JSONMessage;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.server.io.JSONDecoder;
 import org.jboss.errai.bus.server.io.JSONEncoder;
+import org.jboss.errai.bus.server.io.JSONStreamDecoder;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -27,6 +29,7 @@ public class JSONTests extends TestCase {
         inputParts.put("Message", "\"Hello, World\"");
         inputParts.put("Sentence", "He said he was \"okay\"!");
         inputParts.put("TestUnterminatedThings", "\" { [ ( ");
+        inputParts.put("Num", 123);
 
         Message msg = MessageBuilder.createMessage().getMessage();
 
@@ -38,6 +41,38 @@ public class JSONTests extends TestCase {
         Map<String, Object> decoded = (Map<String, Object>) JSONDecoder.decode(encodedJSON);
         assertEquals(inputParts, decoded);
     }
+
+    public void testStreamDecoder() {
+        MessageBuilder.setMessageProvider(JSONMessage.PROVIDER);
+
+        Map<String, Object> inputParts = new HashMap<String, Object>();
+        inputParts.put("ToSubject", "Foo");
+        inputParts.put("Message", "\"Hello, World\"");
+        inputParts.put("Sentence", "He said he was \"okay\"!");
+        inputParts.put("TestUnterminatedThings", "\" { [ ( ");
+        inputParts.put("Num", 123l);
+
+        Message msg = MessageBuilder.createMessage().getMessage();
+
+        for (Map.Entry<String, Object> entry : inputParts.entrySet()) {
+            msg.set(entry.getKey(), entry.getValue());
+        }
+
+        try {
+            String encodedJSON = JSONEncoder.encode(msg.getParts());
+            System.out.println(">" + encodedJSON);
+
+            ByteArrayInputStream instream = new ByteArrayInputStream(encodedJSON.getBytes());
+
+            Map<String, Object> decoded = (Map<String, Object>) JSONStreamDecoder.decode(instream);
+            assertEquals(inputParts, decoded);
+
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public static class SimpleWriter extends Writer {
         final StringBuilder builder = new StringBuilder();

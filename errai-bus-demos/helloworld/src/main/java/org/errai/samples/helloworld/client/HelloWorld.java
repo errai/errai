@@ -47,6 +47,8 @@ public class HelloWorld extends VerticalPanel implements MessageCallback
                 MessageBuilder.createMessage()
                         .toSubject("HelloWorldService")
                         .with(MessageParts.ReplyTo, "HelloWorld")
+                        .with("TestLong", 1000l)
+                        .with("TestDouble", 1500.55d)
                         .done().sendNowWith(bus);
             }
         });

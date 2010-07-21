@@ -20,6 +20,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
+import org.jboss.errai.bus.client.api.ResourceProvider;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.protocols.BusCommands;
@@ -61,6 +62,15 @@ public abstract class AbstractErraiServlet extends HttpServlet {
                 new JNDIServiceLocator(jndiNameProperty).locateService() : buildService();
 
         sessionProvider = service.getSessionProvider();
+
+        contextClassLoader = Thread.currentThread().getContextClassLoader();
+
+        service.getConfiguration().getResourceProviders()
+                .put("errai.experimental.classLoader", new ResourceProvider<ClassLoader>() {
+                    public ClassLoader get() {
+                        return contextClassLoader;
+                    }
+                });
     }
 
     protected ErraiService<HttpSession> buildService() {
@@ -70,8 +80,9 @@ public abstract class AbstractErraiServlet extends HttpServlet {
                 bind(MessageBus.class).to(ServerMessageBusImpl.class);
                 bind(ServerMessageBus.class).to(ServerMessageBusImpl.class);
                 bind(new TypeLiteral<ErraiService<HttpSession>>() {
-                }).to(new TypeLiteral<ErraiServiceImpl<HttpSession>>() {});
-                
+                }).to(new TypeLiteral<ErraiServiceImpl<HttpSession>>() {
+                });
+
                 bind(ErraiServiceConfigurator.class).to(ErraiServiceConfiguratorImpl.class);
             }
         }).getInstance(new Key<ErraiService<HttpSession>>() {

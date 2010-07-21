@@ -65,7 +65,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
         configRootTargets = Collections.unmodifiableList(configRootTargets);
         properties = Collections.unmodifiableMap(properties);
         extensionBindings = Collections.unmodifiableMap(extensionBindings);
-        resourceProviders = Collections.unmodifiableMap(resourceProviders);
+      //  resourceProviders = Collections.unmodifiableMap(resourceProviders);
         serializableTypes = Collections.unmodifiableSet(serializableTypes);
     }
 
