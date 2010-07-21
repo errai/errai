@@ -34,8 +34,8 @@ import static org.mvel2.util.ParseTools.subArray;
  * Decodes a JSON string or character array, and provides a proper collection of elements
  */
 public class JSONDecoder {
-    private char[] json;
-    private int length;
+    private final char[] json;
+    private final int length;
     private int cursor;
 
     public static Object decode(String json) {

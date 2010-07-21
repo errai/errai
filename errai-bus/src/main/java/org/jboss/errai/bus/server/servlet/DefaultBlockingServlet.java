@@ -80,29 +80,30 @@ public class DefaultBlockingServlet extends AbstractErraiServlet {
             throws ServletException, IOException {
         if (contextClassLoader == null) contextClassLoader = Thread.currentThread().getContextClassLoader();
 
+
         final QueueSession session = sessionProvider.getSession(httpServletRequest.getSession(),
                 httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
 
         try {
-            ServletInputStream inputStream = httpServletRequest.getInputStream();
-            BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(inputStream, "UTF-8")
-            );
-            StringAppender sb = new StringAppender(httpServletRequest.getContentLength());
-            CharBuffer buffer = CharBuffer.allocate(10);
+//            ServletInputStream inputStream = httpServletRequest.getInputStream();
+//            BufferedReader reader = new BufferedReader(
+//                    new InputStreamReader(inputStream, "UTF-8")
+//            );
+//            StringAppender sb = new StringAppender(httpServletRequest.getContentLength());
+//            CharBuffer buffer = CharBuffer.allocate(10);
+//
+//            int read;
+//            while ((read = reader.read(buffer)) > 0) {
+//                buffer.rewind();
+//                for (; read > 0; read--) {
+//                    sb.append(buffer.get());
+//                }
+//                buffer.rewind();
+//            }
 
-            int read;
-            while ((read = reader.read(buffer)) > 0) {
-                buffer.rewind();
-                for (; read > 0; read--) {
-                    sb.append(buffer.get());
-                }
-                buffer.rewind();
-            }
+            Message m = createCommandMessage(session, httpServletRequest.getInputStream(), contextClassLoader);
+            if (m != null) service.store(m);
 
-            for (Message msg : createCommandMessage(session, sb.toString(), contextClassLoader)) {
-                service.store(msg);
-            }
         }
         catch (Throwable e) {
             // handle gracefully

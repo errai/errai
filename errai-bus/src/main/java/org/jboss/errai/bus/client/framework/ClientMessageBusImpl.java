@@ -28,7 +28,6 @@ import org.jboss.errai.bus.client.api.*;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.TransportIOException;
 import org.jboss.errai.bus.client.ext.ExtensionsLoader;
-import org.jboss.errai.bus.client.json.JSONUtilCli;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 
@@ -476,31 +475,19 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             sendTimer = null;
         }
 
-        int transmissionSize = outgoingQueue.size();
-        StringBuffer outgoing = new StringBuffer();
-        List<Message> txMessage = new LinkedList<Message>();
-        Message m;
-
-        for (int i = 0; i < transmissionSize; i++) {
-            txMessage.add(m = outgoingQueue.poll());
-
-            outgoing.append(m instanceof HasEncoded ? ((HasEncoded) m).getEncoded() : encodeMap(m.getParts()));
-
-            if ((i + 1) < transmissionSize) {
-                outgoing.append(JSONUtilCli.MULTI_PAYLOAD_SEPER);
-            }
+        if (!outgoingQueue.isEmpty()) {
+            Message txMessage = outgoingQueue.poll();
+            transmitRemote(txMessage instanceof HasEncoded ?
+                    ((HasEncoded) txMessage).getEncoded() : encodeMap(txMessage.getParts()), txMessage);
         }
-
-        if (transmissionSize != 0) transmitRemote(outgoing.toString(), txMessage);
     }
 
     /**
      * Transmits JSON string containing message, using the <tt>sendBuilder</tt>
      *
-     * @param message    - JSON string representation of message
-     * @param txMessages -
+     * @param message - JSON string representation of message
      */
-    private void transmitRemote(final String message, final List<Message> txMessages) {
+    private void transmitRemote(final String message, final Message txMessage) {
         if (message == null) return;
 
         try {
@@ -518,11 +505,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                         //noinspection ThrowableInstanceNeverThrown
 
                         TransportIOException tioe = new TransportIOException(response.getText(), response.getStatusCode(), "Failure communicating with server");
-                        for (Message txm : txMessages) {
-                            if (txm.getErrorCallback() == null || txm.getErrorCallback().error(txm, tioe)) {
-                                logError("Problem communicating with remote bus (Received HTTP 503 Error)", message, tioe);
-                            }
+                        //    for (Message txm : txMessages) {
+                        if (txMessage.getErrorCallback() == null || txMessage.getErrorCallback().error(txMessage, tioe)) {
+                            logError("Problem communicating with remote bus (Received HTTP 503 Error)", message, tioe);
                         }
+                        //  }
                     }
 
                     /**
@@ -541,10 +528,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 }
 
                 public void onError(Request request, Throwable exception) {
-                    for (Message txm : txMessages) {
-                        if (txm.getErrorCallback() == null || txm.getErrorCallback().error(txm, exception)) {
-                            logError("Failed to communicate with remote bus", "", exception);
-                        }
+                    if (txMessage.getErrorCallback() == null || txMessage.getErrorCallback().error(txMessage, exception)) {
+                        logError("Failed to communicate with remote bus", "", exception);
                     }
 
                     transmitting = false;

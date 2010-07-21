@@ -73,8 +73,9 @@ public class WeblogicAsyncServlet extends AbstractErraiServlet {
             buffer.rewind();
         }
 
-        for (Message msg : createCommandMessage(session, sb.toString(), contextClassLoader)) {
-            service.store(msg);
+        Message m = createCommandMessage(session, sb.toString(), contextClassLoader);
+        if (m != null) {
+            service.store(m);
         }
 
         pollQueue(service.getBus().getQueue(session), httpServletRequest, httpServletResponse);

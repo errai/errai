@@ -201,14 +201,14 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
             buffer.rewind();
         }
 
-        int messagesSent = 0;
-        for (Message msg : createCommandMessage(sessionProvider.getSession(request.getSession(),
-                request.getHeader(REMOTE_QUEUE_ID_HEADER)), sb.toString(), contextClassLoader)) {
+        Message msg = createCommandMessage(sessionProvider.getSession(request.getSession(),
+                request.getHeader(REMOTE_QUEUE_ID_HEADER)), sb.toString(), contextClassLoader);
+        if (msg != null) {
             service.store(msg);
-            messagesSent++;
+            return 1;
+        } else {
+            return 0;
         }
-
-        return messagesSent;
     }
 
 

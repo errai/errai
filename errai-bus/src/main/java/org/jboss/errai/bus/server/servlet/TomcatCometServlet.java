@@ -210,14 +210,15 @@ public class TomcatCometServlet extends AbstractErraiServlet implements CometPro
             }
 
 
-            int messagesSent = 0;
-            for (Message msg : createCommandMessage(sessionProvider.getSession(request.getSession(),
-                    request.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER)), sb.toString(), contextClassLoader)) {
+            Message msg = createCommandMessage(sessionProvider.getSession(request.getSession(),
+                    request.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER)), sb.toString(), contextClassLoader);
+            if (msg != null) {
                 service.store(msg);
-                messagesSent++;
+                return 1;
             }
-
-            return messagesSent;
+            else {
+                return 0;
+            }
         }
         catch (IOException e) {
             MessageQueue queue = service.getBus().getQueue(session);

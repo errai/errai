@@ -80,8 +80,9 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
         final QueueSession session = sessionProvider.getSession(httpServletRequest.getSession(),
                 httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
 
-        for (Message msg : createCommandMessage(session, sb.toString(), contextClassLoader)) {
-            service.store(msg);
+        Message msg = createCommandMessage(session, sb.toString(), contextClassLoader);
+        if (msg != null) {
+            service.store(msg);          
         }
 
         pollQueue(service.getBus().getQueue(session), httpServletResponse.getOutputStream(), httpServletResponse);

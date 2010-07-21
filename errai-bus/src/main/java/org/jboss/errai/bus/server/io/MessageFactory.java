@@ -17,12 +17,12 @@
 package org.jboss.errai.bus.server.io;
 
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.framework.RoutingFlags;
-import org.jboss.errai.bus.client.json.JSONUtilCli;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.server.api.QueueSession;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 
 import static org.jboss.errai.bus.client.api.base.CommandMessage.createWithParts;
@@ -47,32 +47,45 @@ public class MessageFactory {
      * Creates the command message from the given JSON string and session. The message is constructed in
      * parts depending on the string
      *
-     * @param session - the queue session in which the message exists
-     * @param json    - the string representing the parts of the message
+     * @param session     - the queue session in which the message exists
+     * @param json        - the string representing the parts of the message
      * @param classLoader - the context classloader for the calling thread.
      * @return the message array constructed using the JSON string
      */
-    public static Message[] createCommandMessage(QueueSession session, String json, ClassLoader classLoader) {
-        if (json.length() == 0) return new CommandMessage[0];
-        String[] pkg = json.split(JSONUtilCli.MULTI_PAYLOAD_SEPER_REGEX);
-        Message[] c = new Message[pkg.length];
+    public static Message createCommandMessage(QueueSession session, String json, ClassLoader classLoader) {
+        if (json.length() == 0) return null;
 
-        for (int i = 0; i < pkg.length; i++) {
-            Map<String, Object> parts = decodeToMap(pkg[i]);
-            parts.remove(MessageParts.SessionID.name());
+        Map<String, Object> parts = decodeToMap(json);
+        parts.remove(MessageParts.SessionID.name());
 
-            Message msg = createWithParts(parts)
-                    .setResource("Session", session);
+        Message msg = createWithParts(parts)
+                .setResource("Session", session);
 
-            // experimental feature. does this need to be cleaned?
-            // any chance this leaks the CL?
-            msg.setResource("errai.experimental.classLoader", classLoader);
-          
-            msg.setFlag(RoutingFlags.FromRemote);
+        // experimental feature. does this need to be cleaned?
+        // any chance this leaks the CL?
+        msg.setResource("errai.experimental.classLoader", classLoader);
 
-            c[i] = msg;
-        }
+        msg.setFlag(RoutingFlags.FromRemote);
 
-        return c;
+        return msg;
+
+    }
+
+    public static Message createCommandMessage(QueueSession session, InputStream stream, ClassLoader classLoader) throws IOException {
+        if (stream.available() == 0) return null;
+
+        Map<String, Object> parts = (Map<String, Object>) JSONStreamDecoder.decode(stream);
+        parts.remove(MessageParts.SessionID.name());
+
+        Message msg = createWithParts(parts)
+                .setResource("Session", session);
+
+        // experimental feature. does this need to be cleaned?
+        // any chance this leaks the CL?
+        msg.setResource("errai.experimental.classLoader", classLoader);
+
+        msg.setFlag(RoutingFlags.FromRemote);
+
+        return msg;
     }
 }
