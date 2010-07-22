@@ -121,15 +121,13 @@ public class MessageQueueImpl implements MessageQueue {
                     JSONStreamEncoder.encode(m.getParts(), outstream);
                 }
 
-
-
                 if (_windowPolling) {
                     windowPolling = true;
                     _windowPolling = false;
                 } else if (windowPolling) {
                     while (!queue.isEmpty() && payLoadSize < MAXIMUM_PAYLOAD_SIZE
                             && !isWindowExceeded()) {
-                        if (payLoadSize != 0) outstream.write(',');
+                        outstream.write(',');
                         m = queue.poll();
 
                         if (m instanceof HasEncoded) {
@@ -147,7 +145,6 @@ public class MessageQueueImpl implements MessageQueue {
                             // just resume.
                         }
                     }
-
 
                     if (!throttleIncoming && queue.size() > lastQueueSize) {
                         if (transmissionWindow < MAX_TRANSMISSION_WINDOW) {

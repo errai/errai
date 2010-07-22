@@ -37,16 +37,14 @@ public class JSONUtilCli {
         if (value == null || value.trim().length() == 0) return new ArrayList<MarshalledMessage>(0);
 
         ArrayList<MarshalledMessage> list = new ArrayList<MarshalledMessage>();
-
+        try {
         JSONValue a = JSONParser.parse(value);
 
         if (a instanceof JSONArray) {
             JSONArray arr = (JSONArray) a;
-
             for (int i = 0; i < arr.size(); i++) {
                 if ((a = arr.get(i)) instanceof JSONObject) {
                     final JSONObject eMap = (JSONObject) a;
-
                     list.add(new MarshalledMessage() {
                         public String getSubject() {
                             return eMap.get("ToSubject").isString().stringValue();
@@ -58,6 +56,11 @@ public class JSONUtilCli {
                     });
                 }
             }
+        }
+        }
+        catch (Throwable t) {
+            System.out.println("<<" + value + ">>");
+            t.printStackTrace();
         }
 
         return list;

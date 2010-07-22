@@ -85,7 +85,7 @@ public class JSONEncoder {
             return _encode(convert(o));
         }
 
-        StringAppender build = new StringAppender("{" + SerializationParts.ENCODED_TYPE + ":'" + cls.getName() + "',");
+        StringAppender build = new StringAppender("{" + SerializationParts.ENCODED_TYPE + ":\"" + cls.getName() + "\",");
         Field[] fields = cls.getDeclaredFields();
         int i = 0;
 
