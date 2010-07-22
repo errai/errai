@@ -46,15 +46,14 @@ public class JSONUtilCli {
             for (int i = 0; i < arr.size(); i++) {
                 if ((a = arr.get(i)) instanceof JSONObject) {
                     final JSONObject eMap = (JSONObject) a;
-                    final String subject = eMap.keySet().iterator().next();
 
                     list.add(new MarshalledMessage() {
                         public String getSubject() {
-                            return subject;
+                            return eMap.get("ToSubject").isString().stringValue();
                         }
 
                         public Object getMessage() {
-                            return eMap.get(subject);
+                            return eMap;
                         }
                     });
                 }

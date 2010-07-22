@@ -33,16 +33,7 @@ import java.util.List;
  */
 public interface ServerMessageBus extends MessageBus {
 
-    /**
-     * Gets the next message identifiable by the specified <tt>sessionContext</tt>, in the form of a <tt>Payload</tt>.
-     * The payload contains all the messages that need to be transmitted.
-     *
-     * @param sessionContext - key of messages. Only want to obtain messages that have the same <tt>sessionContext</tt>
-     * @param wait           - set to true if the bus will wait for the next message
-     * @return the <tt>Payload</tt> instance containing all the messages that need to be transmitted
-     */
-    @Deprecated
-    public Payload nextMessage(QueueSession sessionContext, boolean wait);
+
 
     /**
      * Gets the queue containing the messages that are waiting to be transmitted

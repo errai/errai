@@ -1020,7 +1020,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      */
     private void procIncomingPayload(Response response) throws Exception {
         try {
-
             for (MarshalledMessage m : decodePayload(response.getText())) {
                 _store(m.getSubject(), m.getMessage());
             }

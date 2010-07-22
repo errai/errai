@@ -169,21 +169,8 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
 
         queue.heartBeat();
 
-        List<MarshalledMessage> messages = queue.poll(false).getMessages();
-
         httpServletResponse.setHeader("Cache-Control", "no-cache");
         httpServletResponse.setContentType("application/json");
-
-        Iterator<MarshalledMessage> iter = messages.iterator();
-
-        stream.write('[');
-        while (iter.hasNext()) {
-            writeToOutputStream(stream, iter.next());
-            if (iter.hasNext()) {
-                stream.write(',');
-            }
-        }
-        stream.write(']');
-        stream.flush();
+        queue.poll(false, stream);
     }
 }

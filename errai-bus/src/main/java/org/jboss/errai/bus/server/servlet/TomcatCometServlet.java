@@ -319,21 +319,7 @@ public class TomcatCometServlet extends AbstractErraiServlet implements CometPro
         httpServletResponse.setHeader("Cache-Control", "no-cache");
         //    httpServletResponse.addHeader("Payload-Size", String.valueOf(messages.size()));
         httpServletResponse.setContentType("application/json");
-        OutputStream stream = httpServletResponse.getOutputStream();
-
-        List<MarshalledMessage> messages = queue.poll(false).getMessages();
-        Iterator<MarshalledMessage> iter = messages.iterator();
-
-        stream.write('[');
-        while (iter.hasNext()) {
-            writeToOutputStream(stream, iter.next());
-            if (iter.hasNext()) {
-                stream.write(',');
-            }
-        }
-        stream.write(']');
-        stream.flush();
-
+        queue.poll(false, httpServletResponse.getOutputStream());
         queue.heartBeat();
     }
 

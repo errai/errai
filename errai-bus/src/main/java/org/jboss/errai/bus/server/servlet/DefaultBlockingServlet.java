@@ -27,8 +27,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Iterator;
-import java.util.List;
 
 import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
 
@@ -94,25 +92,26 @@ public class DefaultBlockingServlet extends AbstractErraiServlet {
 
             queue.heartBeat();
 
-            List<MarshalledMessage> messages = queue.poll(wait).getMessages();
+//            List<MarshalledMessage> messages = queue.poll(wait, stream).getMessages();
 
             httpServletResponse.setHeader("Cache-Control", "no-cache");
-            httpServletResponse.addHeader("Payload-Size", String.valueOf(messages.size()));
+            //     httpServletResponse.addHeader("Payload-Size", String.valueOf(messages.size()));
             httpServletResponse.setContentType("application/json");
-            OutputStream stream = httpServletResponse.getOutputStream();
 
-            Iterator<MarshalledMessage> iter = messages.iterator();
+            queue.poll(wait, httpServletResponse.getOutputStream());
 
-            stream.write('[');
-            while (iter.hasNext()) {
-                writeToOutputStream(stream, iter.next());
-                if (iter.hasNext()) {
-                    stream.write(',');
-                }
-            }
-            stream.write(']');
+//            Iterator<MarshalledMessage> iter = messages.iterator();
+//
+//            stream.write('[');
+//            while (iter.hasNext()) {
+//                writeToOutputStream(stream, iter.next());
+//                if (iter.hasNext()) {
+//                    stream.write(',');
+//                }
+//            }
+//            stream.write(']');
 
-            stream.close();
+            httpServletResponse.getOutputStream().close();
 
 
         }

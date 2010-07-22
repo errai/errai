@@ -30,8 +30,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.CharBuffer;
-import java.util.Iterator;
-import java.util.List;
 
 import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
 
@@ -143,23 +141,24 @@ public class WeblogicAsyncServlet extends AbstractErraiServlet {
 
         queue.heartBeat();
 
-        List<MarshalledMessage> messages = queue.poll(false).getMessages();
+//        List<MarshalledMessage> messages = queue.poll(false).getMessages();
 
         httpServletResponse.setHeader("Cache-Control", "no-cache");
         httpServletResponse.setContentType("application/json");
-        OutputStream stream = httpServletResponse.getOutputStream();
-
-        Iterator<MarshalledMessage> iter = messages.iterator();
-
-        stream.write('[');
-        while (iter.hasNext()) {
-            writeToOutputStream(stream, iter.next());
-            if (iter.hasNext()) {
-                stream.write(',');
-            }
-        }
-        stream.write(']');
-        stream.flush();
+        queue.poll(false, httpServletResponse.getOutputStream());
+//        OutputStream stream = httpServletResponse.getOutputStream();
+//
+//        Iterator<MarshalledMessage> iter = messages.iterator();
+//
+//        stream.write('[');
+//        while (iter.hasNext()) {
+//            writeToOutputStream(stream, iter.next());
+//            if (iter.hasNext()) {
+//                stream.write(',');
+//            }
+//        }
+//        stream.write(']');
+//        stream.flush();
     }
 
     public static void main(String[] args) {

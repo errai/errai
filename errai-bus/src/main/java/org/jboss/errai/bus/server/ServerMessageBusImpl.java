@@ -18,6 +18,7 @@ package org.jboss.errai.bus.server;
 
 import com.google.inject.Singleton;
 import org.jboss.errai.bus.client.api.*;
+import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.RuleDelegateMessageCallback;
 import org.jboss.errai.bus.client.api.base.TaskManagerFactory;
@@ -40,7 +41,6 @@ import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversat
 import static org.jboss.errai.bus.client.protocols.MessageParts.ReplyTo;
 import static org.jboss.errai.bus.client.protocols.SecurityCommands.MessageNotDelivered;
 import static org.jboss.errai.bus.client.util.ErrorHelper.handleMessageDeliveryFailure;
-import static org.jboss.errai.bus.server.util.ServerBusUtils.encodeJSON;
 
 /**
  * The <tt>ServerMessageBusImpl</tt> implements the <tt>ServerMessageBus</tt>, making it possible for the server to
@@ -62,7 +62,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     private final Map<String, RemoteMessageCallback> remoteSubscriptions = new ConcurrentHashMap<String, RemoteMessageCallback>();
 
     private final Map<QueueSession, MessageQueue> messageQueues = new ConcurrentHashMap<QueueSession, MessageQueue>();
-    private final Map<MessageQueue, List<MarshalledMessage>> deferredQueue = new ConcurrentHashMap<MessageQueue, List<MarshalledMessage>>();
+    private final Map<MessageQueue, List<Message>> deferredQueue = new ConcurrentHashMap<MessageQueue, List<Message>>();
     private final Map<String, QueueSession> sessionLookup = new ConcurrentHashMap<String, QueueSession>();
 
     private final List<SubscribeListener> subscribeListeners = new LinkedList<SubscribeListener>();
@@ -130,7 +130,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                             break;
 
                         case ConnectToQueue:
-                            List<MarshalledMessage> deferred = null;
+                            List<Message> deferred = null;
                             synchronized (messageQueues) {
                                 if (messageQueues.containsKey(session)) {
                                     MessageQueue q = messageQueues.get(session);
@@ -318,9 +318,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 rawMsg.put(MessageParts.CommandType.name(), MessageNotDelivered.name());
 
                 try {
-                    enqueueForDelivery(getQueueByMessage(message),
-                            message.get(String.class, ReplyTo),
-                            encodeJSON(rawMsg));
+                    enqueueForDelivery(getQueueByMessage(message), CommandMessage.createWithParts(rawMsg));
                 }
                 catch (NoSubscribersToDeliverTo nstdt) {
                     handleMessageDeliveryFailure(this, message, nstdt.getMessage(), nstdt, false);
@@ -384,7 +382,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
         if (queue == null) {
             handleMessageDeliveryFailure(this, message, "cannot automatically route message. no session contained in message.", null, false);
-
         }
 
         send(message.hasPart(MessageParts.SessionID) ? getQueueBySession(message.get(String.class, MessageParts.SessionID)) :
@@ -397,8 +394,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 if (message.hasPart(ReplyTo)) {
                     Map<String, Object> rawMsg = new HashMap<String, Object>();
                     rawMsg.put(MessageParts.CommandType.name(), MessageNotDelivered.name());
-                    enqueueForDelivery(queue, message.get(String.class, ReplyTo),
-                            encodeJSON(rawMsg));
+                    enqueueForDelivery(queue, CommandMessage.createWithParts(rawMsg));
                 }
                 return;
             }
@@ -419,10 +415,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         TaskManagerFactory.get().execute(new Runnable() {
             public void run() {
                 try {
-                    enqueueForDelivery(queue, message.getSubject(),
-                            message instanceof HasEncoded ?
-                                    ((HasEncoded) message).getEncoded() :
-                                    encodeJSON(message.getParts()));
+                    enqueueForDelivery(queue, message);
                 }
                 catch (QueueOverloadedException e) {
                     handleMessageDeliveryFailure(ServerMessageBusImpl.this, message, e.getMessage(), e, false);
@@ -431,42 +424,25 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         });
     }
 
-    private void enqueueForDelivery(final MessageQueue queue, final String subject, final Object message) {
+    private void enqueueForDelivery(final MessageQueue queue, final Message message) {
 
-        if (queue != null && isAnyoneListening(queue, subject)) {
-
-            queue.offer(new MarshalledMessage() {
-                public String getSubject() {
-                    return subject;
-                }
-
-                public Object getMessage() {
-                    return message;
-                }
-            });
-
+        if (queue != null && isAnyoneListening(queue, message.getSubject())) {
+            queue.offer(message);
         } else {
             if (queue != null && !queue.isInitialized()) {
-                deferDelivery(queue, new MarshalledMessage() {
-                    public String getSubject() {
-                        return subject;
-                    }
+                deferDelivery(queue, message);
 
-                    public Object getMessage() {
-                        return message;
-                    }
-                });
             } else {
-                throw new NoSubscribersToDeliverTo("for: " + subject + ":" + isAnyoneListening(queue, subject));
+                throw new NoSubscribersToDeliverTo("for: " + message.getSubject() + ":" + isAnyoneListening(queue, message.getSubject()));
             }
         }
 
     }
 
     @SuppressWarnings({"SynchronizationOnLocalVariableOrMethodParameter"})
-    private void deferDelivery(final MessageQueue queue, MarshalledMessage message) {
+    private void deferDelivery(final MessageQueue queue, Message message) {
         synchronized (queue) {
-            if (!deferredQueue.containsKey(queue)) deferredQueue.put(queue, new ArrayList<MarshalledMessage>());
+            if (!deferredQueue.containsKey(queue)) deferredQueue.put(queue, new ArrayList<Message>());
             deferredQueue.get(queue).add(message);
         }
     }
@@ -475,35 +451,12 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     private void drainDeferredDeliveryQueue(final MessageQueue queue) {
         synchronized (queue) {
             if (deferredQueue.containsKey(queue)) {
-                for (MarshalledMessage message : deferredQueue.get(queue)) {
+                for (Message message : deferredQueue.get(queue)) {
                     queue.offer(message);
                 }
 
                 deferredQueue.remove(queue);
             }
-        }
-    }
-
-    /**
-     * Gets the next message in the form of a <tt>Payload</tt>, which contains one-or-more messages that need to be
-     * sent.
-     *
-     * @param sessionContext - key of messages. Only want to obtain messages that have the same <tt>sessionContext</tt>
-     * @param wait           - set to true if the bus will wait for the next message
-     * @return the <tt>Payload</tt> containing the next messages to be sent
-     */
-    public Payload nextMessage(QueueSession sessionContext, boolean wait) {
-        try {
-            return messageQueues.get(sessionContext).poll(wait);
-        }
-        catch (MessageQueueExpired e) {
-            MessageQueue mq = messageQueues.get(sessionContext);
-
-            if (mq != null) {
-                // terminate the queue
-                messageQueues.remove(sessionContext);
-            }
-            throw e;
         }
     }
 
@@ -676,7 +629,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
          * Any messages still in the queue for this subject, will now never be delivered.  So we must purge them,
          * like the unwanted and forsaken messages they are.
          */
-        Iterator<MarshalledMessage> iter = queue.getQueue().iterator();
+        Iterator<Message> iter = queue.getQueue().iterator();
         while (iter.hasNext()) {
             if (subject.equals(iter.next().getSubject())) {
                 iter.remove();

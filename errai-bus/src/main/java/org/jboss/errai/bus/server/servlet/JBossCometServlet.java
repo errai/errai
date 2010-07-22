@@ -284,23 +284,10 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
     public void transmitMessages(final HttpServletResponse httpServletResponse, MessageQueue queue) throws IOException {
 
 //          log.info("Transmitting messages to client (Queue:" + queue.hashCode() + ")");
-        List<MarshalledMessage> messages = queue.poll(false).getMessages();
         httpServletResponse.setHeader("Cache-Control", "no-cache");
-        httpServletResponse.addHeader("Payload-Size", String.valueOf(messages.size()));
         httpServletResponse.setContentType("application/json");
-        OutputStream stream = httpServletResponse.getOutputStream();
+        queue.poll(false, httpServletResponse.getOutputStream());
 
-        Iterator<MarshalledMessage> iter = messages.iterator();
-
-        stream.write('[');
-        while (iter.hasNext()) {
-            writeToOutputStream(stream, iter.next());
-            if (iter.hasNext()) {
-                stream.write(',');
-            }
-        }
-        stream.write(']');
-        stream.flush();
         //   queue.heartBeat();
     }
 

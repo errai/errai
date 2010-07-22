@@ -37,8 +37,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.CharBuffer;
-import java.util.Iterator;
-import java.util.List;
 
 import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
 
@@ -111,7 +109,6 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
             }
 
             synchronized (queue) {
-
                 if (context == null)
                     context = createCometContext(httpServletRequest.getSession().getId());
 
@@ -119,7 +116,6 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
                 context.addCometHandler(handler);
 
                 if (!queue.messagesWaiting()) {
-
                     queue.setActivationCallback(new QueueActivationCallback() {
                         public void activate(MessageQueue queue) {
                             queue.setActivationCallback(null);
@@ -176,22 +172,23 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
 
         queue.heartBeat();
 
-        List<MarshalledMessage> messages = queue.poll(false).getMessages();
-
         httpServletResponse.setHeader("Cache-Control", "no-cache");
         httpServletResponse.setContentType("application/json");
-        OutputStream stream = httpServletResponse.getOutputStream();
 
-        Iterator<MarshalledMessage> iter = messages.iterator();
+        queue.poll(false, httpServletResponse.getOutputStream());
 
-        stream.write('[');
-        while (iter.hasNext()) {
-            writeToOutputStream(stream, iter.next());
-            if (iter.hasNext()) {
-                stream.write(',');
-            }
-        }
-        stream.write(']');
-        stream.flush();
+//        OutputStream stream = httpServletResponse.getOutputStream();
+//
+//        Iterator<MarshalledMessage> iter = messages.iterator();
+//
+//        stream.write('[');
+//        while (iter.hasNext()) {
+//            writeToOutputStream(stream, iter.next());
+//            if (iter.hasNext()) {
+//                stream.write(',');
+//            }
+//        }
+//        stream.write(']');
+//        stream.flush();
     }
 }

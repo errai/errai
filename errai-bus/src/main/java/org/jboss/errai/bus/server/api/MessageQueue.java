@@ -16,16 +16,19 @@
 
 package org.jboss.errai.bus.server.api;
 
+import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.client.framework.Payload;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.concurrent.BlockingQueue;
 
 
 public interface MessageQueue {
-    Payload poll(boolean wait);
+    void poll(boolean wait, OutputStream stream) throws IOException;
 
-    boolean offer(MarshalledMessage message);
+    boolean offer(Message message);
 
     void scheduleActivation();
 
@@ -39,7 +42,7 @@ public interface MessageQueue {
 
     QueueActivationCallback getActivationCallback();
 
-    BlockingQueue<MarshalledMessage> getQueue();
+    BlockingQueue<Message> getQueue();
 
     QueueSession getSession();
 

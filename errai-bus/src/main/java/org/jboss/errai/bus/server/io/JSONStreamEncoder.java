@@ -21,6 +21,8 @@ import org.jboss.errai.common.client.types.TypeHandler;
 import org.mvel2.MVEL;
 import org.mvel2.util.StringAppender;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -29,34 +31,41 @@ import java.sql.Timestamp;
 import java.util.*;
 
 /**
- * Encodes an object into a JSON string
+ * User: christopherbrock
+ * Date: 21-Jul-2010
+ * Time: 10:30:12 PM
  */
-public class JSONEncoder {
-    protected static Set<Class> serializableTypes;
+public class JSONStreamEncoder {
+    private static Set<Class> serializableTypes;
+    private static final byte[] NULL_BYTES = {'n', 'u', 'l', 'l'};
 
     public static void setSerializableTypes(Set<Class> serializableTypes) {
         JSONEncoder.serializableTypes = serializableTypes;
     }
 
-    public static String encode(Object v) {
-        return _encode(v);
+    public static void encode(Object v, OutputStream outstream) throws IOException {
+        _encode(v, outstream);
     }
 
-    private static String _encode(Object v) {
+    private static void _encode(Object v, OutputStream outstream) throws IOException {
         if (v == null) {
-            return "null";
+            outstream.write(NULL_BYTES);
+            return;
         } else if (v instanceof String) {
-            return "\"" + ((String) v).replaceAll("\"", "\\\\\"") + "\"";
+            outstream.write('\"');
+            outstream.write(((String) v).replaceAll("\"", "\\\\\"").getBytes());
+            outstream.write('\"');
+            return;
         }
         if (v instanceof Number || v instanceof Boolean) {
-            return String.valueOf(v);
+            outstream.write(String.valueOf(v).getBytes());
         } else if (v instanceof Collection) {
-            return encodeCollection((Collection) v);
+            encodeCollection((Collection) v, outstream);
         } else if (v instanceof Map) {
             //noinspection unchecked
-            return encodeMap((Map) v);
+            encodeMap((Map) v, outstream);
         } else if (v.getClass().isArray()) {
-            return encodeArray(v);
+            encodeArray(v, outstream);
 
             // CDI Integration: Loading entities after the service was initialized
             // This may cause the client to throw an exception if the entity is not known
@@ -68,24 +77,32 @@ public class JSONEncoder {
             throw new RuntimeException("cannot serialize type: " + v.getClass().getName());
         }  */
         else if (v instanceof Enum) {
-            return encodeEnum((Enum) v);
+            encodeEnum((Enum) v, outstream);
         } else {
-            return encodeObject(v);
+            encodeObject(v, outstream);
         }
     }
 
     private static final Map<Class, Serializable[]> MVELEncodingCache = new HashMap<Class, Serializable[]>();
 
-    private static String encodeObject(Object o) {
-        if (o == null) return "null";
+    private static void encodeObject(Object o, OutputStream outstream) throws IOException {
+        if (o == null) {
+            outstream.write(NULL_BYTES);
+            return;
+        }
 
         Class cls = o.getClass();
 
         if (tHandlers.containsKey(cls)) {
-            return _encode(convert(o));
+            _encode(convert(o), outstream);
+            return;
         }
+        outstream.write('{');
+        outstream.write(SerializationParts.ENCODED_TYPE.getBytes());
+        outstream.write(':');
+        outstream.write(cls.getName().getBytes());
+        outstream.write(',');
 
-        StringAppender build = new StringAppender("{" + SerializationParts.ENCODED_TYPE + ":'" + cls.getName() + "',");
         Field[] fields = cls.getDeclaredFields();
         int i = 0;
 
@@ -116,59 +133,72 @@ public class JSONEncoder {
                     || field.isSynthetic()) {
                 continue;
             } else if (!first) {
-                build.append(',');
+                outstream.write(',');
             }
 
             Object v = MVEL.executeExpression(s[i++], o);
-            build.append(field.getName()).append(':').append(_encode(v));
+            outstream.write(field.getName().getBytes());
+            outstream.write(':');
+            _encode(v, outstream);
             first = false;
         }
 
-        return build.append('}').toString();
+        outstream.write('}');
     }
 
-    private static String encodeMap(Map<Object, Object> map) {
+    private static void encodeMap(Map<Object, Object> map, OutputStream outstream) throws IOException {
         StringAppender mapBuild = new StringAppender("{");
+        outstream.write('{');
         boolean first = true;
 
         for (Map.Entry<Object, Object> entry : map.entrySet()) {
-            String val = _encode(entry.getValue());
             if (!first) {
-                mapBuild.append(',');
+                outstream.write('{');
             }
-            mapBuild.append(_encode(entry.getKey()))
-                    .append(':').append(val);
+            _encode(entry.getKey(), outstream);
+            outstream.write(':');
+            _encode(entry.getValue(), outstream);
 
             first = false;
         }
-
-        return mapBuild.append('}').toString();
+        outstream.write('}');
     }
 
-    private static String encodeCollection(Collection col) {
+    private static void encodeCollection(Collection col, OutputStream outstream) throws IOException {
+        outstream.write('[');
+
         StringAppender buildCol = new StringAppender("[");
         Iterator iter = col.iterator();
         while (iter.hasNext()) {
-            buildCol.append(_encode(iter.next()));
-            if (iter.hasNext()) buildCol.append(',');
+            _encode(iter.next(), outstream);
+            if (iter.hasNext()) outstream.write(',');
         }
-        return buildCol.append(']').toString();
+
+        outstream.write(']');
     }
 
-    private static String encodeArray(Object array) {
+    private static void encodeArray(Object array, OutputStream outstream) throws IOException {
         StringAppender buildCol = new StringAppender("[");
 
         int len = Array.getLength(array);
         for (int i = 0; i < len; i++) {
-            buildCol.append(_encode(Array.get(array, i)));
-            if ((i + 1) < len) buildCol.append(',');
+            _encode(Array.get(array, 1), outstream);
+            if ((i + 1) < len) outstream.write(',');
         }
 
-        return buildCol.append(']').toString();
+        outstream.write(']');
     }
 
-    private static String encodeEnum(Enum enumer) {
-        return "{" + SerializationParts.ENCODED_TYPE + ":\"" + enumer.getClass().getName() + "\", EnumStringValue:\"" + enumer.name() + "\"}";
+    private static void encodeEnum(Enum enumer, OutputStream outstream) throws IOException {
+        outstream.write('{');
+        outstream.write(SerializationParts.ENCODED_TYPE.getBytes());
+        outstream.write(':');
+        outstream.write('\"');
+        outstream.write(enumer.getClass().getName().getBytes());
+        outstream.write('\"');
+        outstream.write(", EnumStringValue:\"".getBytes());
+        outstream.write(enumer.name().getBytes());
+        outstream.write("\"}".getBytes());
     }
 
     private static final Map<Class, TypeHandler> tHandlers = new HashMap<Class, TypeHandler>();

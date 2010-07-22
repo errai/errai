@@ -16,11 +16,15 @@
 
 package org.jboss.errai.bus.server;
 
+import org.jboss.errai.bus.client.api.HasEncoded;
+import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
-import org.jboss.errai.bus.client.framework.Payload;
 import org.jboss.errai.bus.server.api.*;
 import org.jboss.errai.bus.server.async.TimedTask;
+import org.jboss.errai.bus.server.io.JSONStreamEncoder;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
@@ -57,7 +61,7 @@ public class MessageQueueImpl implements MessageQueue {
 
     private SessionControl sessionControl;
     private QueueActivationCallback activationCallback;
-    private BlockingQueue<MarshalledMessage> queue;
+    private BlockingQueue<Message> queue;
 
 
     private final ServerMessageBus bus;
@@ -75,7 +79,7 @@ public class MessageQueueImpl implements MessageQueue {
      * @param session   - the session associated with the queue
      */
     public MessageQueueImpl(final int queueSize, final ServerMessageBus bus, final QueueSession session) {
-        this.queue = new LinkedBlockingQueue<MarshalledMessage>(queueSize);
+        this.queue = new LinkedBlockingQueue<Message>(queueSize);
         this.bus = bus;
         this.session = session;
     }
@@ -88,16 +92,20 @@ public class MessageQueueImpl implements MessageQueue {
      *             <tt>RuntimeException</tt> will be thrown if the polling is active already. Concurrent polling is not allowed.
      * @return The <tt>Payload</tt> instance which contains the messages that need to be sent
      */
-    public Payload poll(final boolean wait) {
+    public void poll(final boolean wait, final OutputStream outstream) throws IOException {
         if (!queueRunning) {
             throw new QueueUnavailableException("queue is not available");
         }
 
+        Message m = null;
+
         checkSession();
 
+        outstream.write('[');
+
         if (lock.tryAcquire()) {
+            int payLoadSize = 0;
             try {
-                MarshalledMessage m;
 
                 if (wait) {
                     m = queue.poll(45, TimeUnit.SECONDS);
@@ -106,9 +114,14 @@ public class MessageQueueImpl implements MessageQueue {
                     m = queue.poll();
                 }
 
-                int payLoadSize = 0;
 
-                Payload p = new Payload(m == null ? heartBeat : m);
+                if (m instanceof HasEncoded) {
+                    outstream.write(((HasEncoded) m).getEncoded().getBytes());
+                } else if (m != null) {
+                    JSONStreamEncoder.encode(m.getParts(), outstream);
+                }
+
+
 
                 if (_windowPolling) {
                     windowPolling = true;
@@ -116,7 +129,14 @@ public class MessageQueueImpl implements MessageQueue {
                 } else if (windowPolling) {
                     while (!queue.isEmpty() && payLoadSize < MAXIMUM_PAYLOAD_SIZE
                             && !isWindowExceeded()) {
-                        p.addMessage(queue.poll());
+                        if (payLoadSize != 0) outstream.write(',');
+                        m = queue.poll();
+
+                        if (m instanceof HasEncoded) {
+                            outstream.write(((HasEncoded) m).getEncoded().getBytes());
+                        } else {
+                            JSONStreamEncoder.encode(m.getParts(), outstream);
+                        }
                         payLoadSize++;
 
                         try {
@@ -127,6 +147,7 @@ public class MessageQueueImpl implements MessageQueue {
                             // just resume.
                         }
                     }
+
 
                     if (!throttleIncoming && queue.size() > lastQueueSize) {
                         if (transmissionWindow < MAX_TRANSMISSION_WINDOW) {
@@ -146,7 +167,10 @@ public class MessageQueueImpl implements MessageQueue {
                 lastQueueSize = queue.size();
                 endWindow = (lastTransmission = nanoTime()) + transmissionWindow;
 
-                return p;
+                if (m == null) outstream.write(heartBeatBytes);
+
+                outstream.write(']');
+                return;
 
             }
             catch (InterruptedException e) {
@@ -157,7 +181,34 @@ public class MessageQueueImpl implements MessageQueue {
             }
 
         }
-        return new Payload(heartBeat);
+
+        if (m == null) outstream.write(heartBeatBytes);
+        outstream.write(']');
+    }
+
+    private static final byte[] heartBeatBytes = "{ToSubject:\"ClientBus\", CommandType:\"Heartbeat\"}".getBytes();
+
+    public static void writeToOutputStream(OutputStream stream, MarshalledMessage m) throws IOException {
+        stream.write('{');
+        stream.write('"');
+        for (byte b : (m.getSubject()).getBytes()) {
+            stream.write(b);
+        }
+        stream.write('"');
+        stream.write(':');
+
+        if (m.getMessage() == null) {
+            stream.write('n');
+            stream.write('u');
+            stream.write('l');
+            stream.write('l');
+        } else {
+            for (byte b : ((String) m.getMessage()).getBytes()) {
+                stream.write(b);
+            }
+        }
+        stream.write('}');
+
     }
 
     /**
@@ -166,7 +217,7 @@ public class MessageQueueImpl implements MessageQueue {
      * @param message - the message to insert into the queue
      * @return true if insertion was successful
      */
-    public boolean offer(final MarshalledMessage message) {
+    public boolean offer(final Message message) {
         if (!queueRunning) {
             throw new QueueUnavailableException("queue is not available");
         }
@@ -298,7 +349,7 @@ public class MessageQueueImpl implements MessageQueue {
      *
      * @return the queue containing the messages to be sent
      */
-    public BlockingQueue<MarshalledMessage> getQueue() {
+    public BlockingQueue<Message> getQueue() {
         return queue;
     }
 
@@ -369,7 +420,7 @@ public class MessageQueueImpl implements MessageQueue {
 
     private static final MarshalledMessage heartBeat = new MarshalledMessage() {
         public String getSubject() {
-            return "HeartBeat";
+            return "ClientBus";
         }
 
         public Object getMessage() {

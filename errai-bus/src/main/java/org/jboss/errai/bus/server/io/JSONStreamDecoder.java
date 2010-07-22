@@ -196,8 +196,6 @@ public class JSONStreamDecoder {
                         }
                     }
             }
-
-
         }
 
         return ctx.record(collection);
@@ -226,7 +224,6 @@ public class JSONStreamDecoder {
                 throw new CompileException("illegal escape sequence: " + c);
         }
     }
-
 
     public Number parseNumber(char cI, char c) throws IOException {
         long val = 0;
@@ -294,10 +291,10 @@ public class JSONStreamDecoder {
             factor *= 10;
         }
         if (dbl) {
-            return new Double(dVal + val);
+            return dVal + val;
         }
         else {
-            return new Long(val);
+            return val;
         }
     }
 
@@ -342,7 +339,6 @@ public class JSONStreamDecoder {
                 if (lhs != null) {
                     if (collection instanceof Map) {
                         if (!encodedType) encodedType = ENCODED_TYPE.equals(lhs);
-
                         //noinspection unchecked
                         ((Map) collection).put(lhs, rhs);
 
