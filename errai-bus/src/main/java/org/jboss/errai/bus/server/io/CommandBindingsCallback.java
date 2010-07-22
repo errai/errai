@@ -48,7 +48,6 @@ public class CommandBindingsCallback implements MessageCallback {
                             new NoParamMethodDispatcher(delegate, entry.getValue()) :
                             new DefaultMethodDispatcher(delegate, entry.getValue()));
         }
-
     }
 
     public void callback(Message message) {

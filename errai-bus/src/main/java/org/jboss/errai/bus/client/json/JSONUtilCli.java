@@ -19,7 +19,6 @@ package org.jboss.errai.bus.client.json;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
@@ -30,40 +29,37 @@ import java.util.ArrayList;
 import java.util.Map;
 
 public class JSONUtilCli {
-    public static String MULTI_PAYLOAD_SEPER = "||";
-    public static String MULTI_PAYLOAD_SEPER_REGEX = "\\|\\|";
-
     public static ArrayList<MarshalledMessage> decodePayload(String value) {
         if (value == null || value.trim().length() == 0) return new ArrayList<MarshalledMessage>(0);
-
         ArrayList<MarshalledMessage> list = new ArrayList<MarshalledMessage>();
-        try {
-        JSONValue a = JSONParser.parse(value);
 
-        if (a instanceof JSONArray) {
-            JSONArray arr = (JSONArray) a;
-            for (int i = 0; i < arr.size(); i++) {
-                if ((a = arr.get(i)) instanceof JSONObject) {
-                    final JSONObject eMap = (JSONObject) a;
-                    list.add(new MarshalledMessage() {
-                        public String getSubject() {
-                            return eMap.get("ToSubject").isString().stringValue();
-                        }
-
-                        public Object getMessage() {
-                            return eMap;
-                        }
-                    });
-                }
-            }
-        }
-        }
-        catch (Throwable t) {
-            System.out.println("<<" + value + ">>");
-            t.printStackTrace();
+        /**
+         * We have to do a two-stage decoding of the message.  We cannot fully decode the message here, as we
+         * cannot be sure the destination endpoint exists within this Errai bundle.  So we extract the ToSubject
+         * field and send the unparsed JSON object onwards.
+         */
+        JSONArray arr = (JSONArray) JSONParser.parse(value);
+        for (int i = 0; i < arr.size(); i++) {
+            list.add(new MarshalledMessageImpl((JSONObject) arr.get(i)));
         }
 
         return list;
+    }
+
+    public static class MarshalledMessageImpl implements MarshalledMessage {
+        public JSONObject o;
+
+        public MarshalledMessageImpl(JSONObject o) {
+            this.o = o;
+        }
+
+        public Object getMessage() {
+            return o;
+        }
+
+        public String getSubject() {
+            return o.get("ToSubject").isString().stringValue();
+        }
     }
 
     public static Map<String, Object> decodeMap(Object value) {

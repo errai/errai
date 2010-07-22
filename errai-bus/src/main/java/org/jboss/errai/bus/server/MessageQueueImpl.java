@@ -18,7 +18,6 @@ package org.jboss.errai.bus.server;
 
 import org.jboss.errai.bus.client.api.HasEncoded;
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.server.api.*;
 import org.jboss.errai.bus.server.async.TimedTask;
 import org.jboss.errai.bus.server.io.JSONStreamEncoder;
@@ -90,7 +89,7 @@ public class MessageQueueImpl implements MessageQueue {
      *
      * @param wait - boolean is true if we should wait until the queue is ready. In this case, a
      *             <tt>RuntimeException</tt> will be thrown if the polling is active already. Concurrent polling is not allowed.
-     * @return The <tt>Payload</tt> instance which contains the messages that need to be sent
+     * @param outstream - output stream to write the polling results to.
      */
     public void poll(final boolean wait, final OutputStream outstream) throws IOException {
         if (!queueRunning) {
@@ -113,7 +112,6 @@ public class MessageQueueImpl implements MessageQueue {
                 } else {
                     m = queue.poll();
                 }
-
 
                 if (m instanceof HasEncoded) {
                     outstream.write(((HasEncoded) m).getEncoded().getBytes());
@@ -184,29 +182,6 @@ public class MessageQueueImpl implements MessageQueue {
     }
 
     private static final byte[] heartBeatBytes = "{ToSubject:\"ClientBus\", CommandType:\"Heartbeat\"}".getBytes();
-
-    public static void writeToOutputStream(OutputStream stream, MarshalledMessage m) throws IOException {
-        stream.write('{');
-        stream.write('"');
-        for (byte b : (m.getSubject()).getBytes()) {
-            stream.write(b);
-        }
-        stream.write('"');
-        stream.write(':');
-
-        if (m.getMessage() == null) {
-            stream.write('n');
-            stream.write('u');
-            stream.write('l');
-            stream.write('l');
-        } else {
-            for (byte b : ((String) m.getMessage()).getBytes()) {
-                stream.write(b);
-            }
-        }
-        stream.write('}');
-
-    }
 
     /**
      * Inserts the specified message into the queue, and returns true if it was successful
@@ -415,15 +390,6 @@ public class MessageQueueImpl implements MessageQueue {
         bus.closeQueue(this);
     }
 
-    private static final MarshalledMessage heartBeat = new MarshalledMessage() {
-        public String getSubject() {
-            return "ClientBus";
-        }
-
-        public Object getMessage() {
-            return null;
-        }
-    };
 
     private static long secs(long secs) {
         return secs * 1000000000;
