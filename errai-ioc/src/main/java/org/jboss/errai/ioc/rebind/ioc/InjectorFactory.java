@@ -28,30 +28,6 @@ public class InjectorFactory {
 
     public InjectorFactory(ProcessingContext ctx) {
         this.ctx = new InjectionContext(ctx);
-
-        /**
-         * Create a decorator that is capable of registering services on injected classes.
-         */
-        this.ctx.registerDecorator(new Decorator<Service>(Service.class) {
-            @Override
-            public String generateDecorator(InjectionPoint<Service> decContext) {
-                final InjectionContext ctx = decContext.getInjectionContext();
-
-                /**
-                 * Get an instance of the message bus.
-                 */
-                final String inj = ctx.getInjector(decContext.getInjectionContext()
-                        .getProcessingContext().loadClassType(MessageBus.class)).getType(ctx, decContext);
-
-                /**
-                 * Figure out the service name;
-                 */
-                final String svcName = decContext.getAnnotation().value().equals("")
-                        ? decContext.getMemberName() : decContext.getAnnotation().value();
-
-                return inj + ".subscribe(\"" + svcName + "\", " + decContext.getValueExpression() + ");\n";
-            }
-        });
     }
 
     public InjectionContext getInjectionContext() {

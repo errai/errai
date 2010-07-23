@@ -32,7 +32,7 @@ import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.rebind.ProcessingContext;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
-import org.jboss.errai.bus.server.annotations.Service;
+import org.jboss.errai.bus.server.util.ConfigUtil;
 import org.jboss.errai.bus.server.util.RebindUtil;
 import org.jboss.errai.bus.server.util.RebindVisitor;
 import org.jboss.errai.ioc.client.InterfaceInjectionContext;
@@ -41,6 +41,9 @@ import org.jboss.errai.ioc.rebind.ioc.*;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.*;
 
 import static org.jboss.errai.bus.server.util.ConfigUtil.findAllConfigTargets;
@@ -67,7 +70,6 @@ public class IOCGenerator extends Generator {
 
     private List<Runnable> deferredTasks = new LinkedList<Runnable>();
 
-    final List<File> targets = findAllConfigTargets();
 
     public IOCGenerator() {
     }
@@ -155,7 +157,7 @@ public class IOCGenerator extends Generator {
     }
 
     public void initializeProviders(final GeneratorContext context, final TreeLogger logger, final SourceWriter sourceWriter) {
-
+        final List<File> targets = findAllConfigTargets();
 
         final JClassType typeProviderCls;
 
@@ -166,11 +168,11 @@ public class IOCGenerator extends Generator {
             throw new RuntimeException(e);
         }
 
-        RebindUtil.visitAllTargets(targets, context, logger, sourceWriter, typeOracle, new RebindVisitor() {
-            public void visit(JClassType visit, GeneratorContext context, TreeLogger logger, SourceWriter writer) {
+        ConfigUtil.visitAllTargets(targets, new org.jboss.errai.bus.server.util.ConfigVisitor() {
+            public void visit(Class<?> visit) {
                 if (visit.isAnnotationPresent(IOCExtension.class)) {
                     try {
-                        Class<? extends IOCExtensionConfigurator> configuratorClass = Class.forName(visit.getQualifiedSourceName())
+                        Class<? extends IOCExtensionConfigurator> configuratorClass = visit
                                 .asSubclass(IOCExtensionConfigurator.class);
 
                         configuratorClass.newInstance().configure(procContext, injectFactory, procFactory);
@@ -178,10 +180,32 @@ public class IOCGenerator extends Generator {
                     catch (Exception e) {
                         throw new ErraiBootstrapFailure("unable to load IOC Extension Configurator: " + e.getMessage(), e);
                     }
-                }
-            }
+                } else if (visit.isAnnotationPresent(CodeDecorator.class)) {
+                    try {
+                        Class<? extends Decorator> decoratorClass = visit
+                                .asSubclass(Decorator.class);
 
-            public void visitError(String className, Throwable t) {
+                        Class<? extends Annotation> annoType = null;
+                        Type t = decoratorClass.getGenericSuperclass();
+                        if (!(t instanceof ParameterizedType)) {
+                            throw new ErraiBootstrapFailure("code decorator must extend Decorator<@AnnotationType>");
+                        }
+
+                        ParameterizedType pType = (ParameterizedType) t;
+                        if (Decorator.class.equals(pType.getRawType())) {
+                            if (pType.getActualTypeArguments().length == 0 || !Annotation.class.isAssignableFrom((Class) pType.getActualTypeArguments()[0])) {
+                                throw new ErraiBootstrapFailure("code decorator must extend Decorator<@AnnotationType>");
+                            }
+
+                            annoType = ((Class) pType.getActualTypeArguments()[0]).asSubclass(Annotation.class);
+                        }
+
+                        injectFactory.getInjectionContext().registerDecorator(decoratorClass.getConstructor(new Class[]{Class.class}).newInstance(annoType));
+                    }
+                    catch (Exception e) {
+                        throw new ErraiBootstrapFailure("unable to load code decorator: " + e.getMessage(), e);
+                    }
+                }
             }
         });
 
@@ -213,7 +237,7 @@ public class IOCGenerator extends Generator {
                     final JClassType finalBindType = bindType;
 
                     injectFactory.addInjector(new ProviderInjector(finalBindType, visit));
-                } 
+                }
             }
 
             public void visitError(String className, Throwable t) {
