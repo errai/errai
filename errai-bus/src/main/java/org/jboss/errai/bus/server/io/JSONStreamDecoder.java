@@ -164,16 +164,16 @@ public class JSONStreamDecoder {
                         }
 
                         String s = appender.toString();
-                        if ("true".equals(s) || "false".equals(s)) {
-                            ctx.addValue("true".equals(s) ? Boolean.TRUE : Boolean.FALSE);
-                        } else if ("null".equals(s)) {
-                            ctx.addValue(null);
-                        } else {
-                            ctx.addValue(s);
-                        }
 
-                        if (c != 0) {
-                            //       carry1 = c;
+                        if (s.length() > 4) ctx.addValue(s);
+                        else if ("null".equals(s)) {
+                            ctx.addValue(null);
+                        } else if ("true".equals(s)) {
+                            ctx.addValue(Boolean.TRUE);
+                        } else if ("false".equals(s)) {
+                            ctx.addValue(Boolean.FALSE);
+                        } else  {
+                            ctx.addValue(s);
                         }
                     }
             }

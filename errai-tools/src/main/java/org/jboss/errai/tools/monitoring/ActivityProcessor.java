@@ -21,6 +21,7 @@ import org.jboss.errai.bus.client.api.Message;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -31,6 +32,12 @@ public class ActivityProcessor {
     public ActivityProcessor() {
         messageMonitors = new ArrayList<List<MessageMonitor>>(20);
         workers = new ThreadPoolExecutor(2, Runtime.getRuntime().availableProcessors(), 30, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(500, false));
+        workers.setRejectedExecutionHandler(new RejectedExecutionHandler() {
+            public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+                // just run on calling thread.
+                r.run();
+            }
+        });
     }
 
     private void padList(int size) {
