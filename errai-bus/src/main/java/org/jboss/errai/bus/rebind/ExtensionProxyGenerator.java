@@ -22,6 +22,7 @@ import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import com.google.gwt.json.client.*;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
 import org.jboss.errai.bus.client.ext.ExtensionsLoader;
@@ -99,6 +100,11 @@ public class ExtensionProxyGenerator extends Generator {
                 className);
 
         composer.addImplementedInterface(ExtensionsLoader.class.getName());
+        composer.addImport(JSONValue.class.getName());
+        composer.addImport(JSONString.class.getName());
+        composer.addImport(JSONNumber.class.getName());
+        composer.addImport(JSONBoolean.class.getName());
+        composer.addImport(JSONObject.class.getName());
 
         SourceWriter sourceWriter = composer.createSourceWriter(context, printWriter);
 

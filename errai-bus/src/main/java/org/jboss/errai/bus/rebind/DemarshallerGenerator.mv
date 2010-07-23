@@ -26,25 +26,21 @@ limitations under the License.
 @else{Float.isAssignableFrom(targetType)}n.@{setter}(new Double(o.get("@{fieldName}").isNumber().doubleValue()).floatValue());
 @else{Double.isAssignableFrom(targetType)}n.@{setter}(o.get("@{fieldName}").isNumber().doubleValue());
 @else{Boolean.isAssignableFrom(targetType)}n.@{setter}(o.get("@{fieldName}").isBoolean().booleanValue());
-@end{}@else{String.isAssignableFrom(targetType)}n.@{setter}(o.get("@{fieldName}").isString().stringValue());
-@else{Boolean.isAssignableFrom(targetType)}n.@{setter}(o.get("@{fieldName}").isBoolean().booleanValue());
-@else{Double.isAssignableFrom(targetType)}n.@{setter}(o.get("@{fieldName}").isNumber().doubleValue());
-@else{Integer.isAssignableFrom(targetType)}n.@{setter}(new Double(o.get("@{fieldName}").isNumber().doubleValue()).intValue());
-@else{Long.isAssignableFrom(targetType)}n.@{setter}(new Double(o.get("@{fieldName}").isNumber().doubleValue()).longValue());
-@else{Short.isAssignableFrom(targetType)}n.@{setter}(new Double(o.get("@{fieldName}").isNumber().doubleValue()).shortValue());
-@else{Float.isAssignableFrom(targetType)}n.@{setter}(new Double(o.get("@{fieldName}").isNumber().doubleValue()).floatValue())
+@end{}@else{String.isAssignableFrom(targetType)}JSONString @{fieldName} = o.get("@{fieldName}").isString(); if (@{fieldName} != null) { n.@{setter}(${fieldName}.stringValue());}
+@else{Boolean.isAssignableFrom(targetType)}JSONBoolean @{fieldName} = o.get("@{fieldName}").isBoolean(); if (@{fieldName} != null) { n.@{setter}(${fieldName}.booleanValue());}
+@else{Double.isAssignableFrom(targetType)}JSONNumber @{fieldName} = o.get("@{fieldName}").isNumber(); if (@{fieldName} != null) { n.@{setter}(${fieldName}.doubleValue());}
+@else{Integer.isAssignableFrom(targetType)}JSONNumber @{fieldName} = o.get("@{fieldName}").isNumber(); if (@{fieldName} != null) { n.@{setter}(new Double(${fieldName}.doubleValue()).intValue());}
+@else{Long.isAssignableFrom(targetType)}JSONNumber @{fieldName} = o.get("@{fieldName}").isNumber(); if (@{fieldName} != null) { n.@{setter}(new Double(${fieldName}.doubleValue()).longValue());}
+@else{Short.isAssignableFrom(targetType)}JSONNumber @{fieldName} = o.get("@{fieldName}").isNumber(); if (@{fieldName} != null) { n.@{setter}(new Double(${fieldName}.doubleValue()).shortValue());}
+@else{Float.isAssignableFrom(targetType)}JSONNumber @{fieldName} = o.get("@{fieldName}").isNumber(); if (@{fieldName} != null) { n.@{setter}(new Double(${fieldName}.doubleValue()).floatValue());}
 @else{}n.@{org.mvel2.util.ReflectionUtil.getSetter(fieldName)}(org.jboss.errai.common.client.types.JSONTypeHelper.convert(o.get("@{fieldName}"), ${targetType.getName()}.class));
-@end{}
-@end{}
+@end{}@end{}
 org.jboss.errai.common.client.types.TypeDemarshallers.addDemarshaller(
     @{className}.class,
     new org.jboss.errai.common.client.types.Demarshaller<@{className}>() {
         public @{className} demarshall(com.google.gwt.json.client.JSONObject o) {
             try {
-@if{enumType}@{className} n = @{className}.valueOf(o.get("EnumStringValue").isString().stringValue());
-@else{}@{className} n = new @{className}();
-@foreach{fieldName : fields}@includeNamed{'binding'; setter=org.mvel2.util.ReflectionUtil.getSetter(fieldName); targetType=targetTypes.get(fieldName); fieldName=fieldName}@end{}
-@end{}
+@if{enumType}@{className} n = @{className}.valueOf(o.get("EnumStringValue").isString().stringValue());@else{}@{className} n = new @{className}();@foreach{fieldName : fields}@includeNamed{'binding'; setter=org.mvel2.util.ReflectionUtil.getSetter(fieldName); targetType=targetTypes.get(fieldName); fieldName=fieldName}@end{}@end{}
 return n;
             }
             catch (Exception e) {
