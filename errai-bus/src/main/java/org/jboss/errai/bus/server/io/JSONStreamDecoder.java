@@ -42,8 +42,7 @@ public class JSONStreamDecoder {
     private CharBuffer buffer;
     private BufferedReader reader;
 
-    private char carry1;
-    private char carry2;
+    private char carry;
 
     private int read;
     private boolean initial = true;
@@ -64,13 +63,9 @@ public class JSONStreamDecoder {
     }
 
     public char read() throws IOException {
-        if (carry1 != 0) {
-            char c = carry1;
-            if (carry2 != 0) {
-                carry1 = carry2;
-                carry2 = 0;
-            }
-            carry1 = 0;
+        if (carry != 0) {
+            char c = carry;
+            carry = 0;
             return c;
         }
         if (read <= 0) {
@@ -159,21 +154,7 @@ public class JSONStreamDecoder {
 
                 default:
                     if (isValidNumberPart(c)) {
-                        char c1 = read();
-                        if (isValidNumberPart(c1)) {
-                            Number n = parseNumber(c, c1);
-
-                            if (n == null) {
-                                carry1 = c;
-                                carry2 = c1;
-                                break;
-                            }
-
-                            ctx.addValue(n);
-                        } else {
-                            carry1 = c;
-                            carry2 = c1;
-                        }
+                        ctx.addValue(parseNumber(c));
                         break;
                     } else if (Character.isJavaIdentifierPart(c)) {
                         appender = new StringAppender().append(c);
@@ -192,7 +173,7 @@ public class JSONStreamDecoder {
                         }
 
                         if (c != 0) {
-                            carry1 = c;
+                            //       carry1 = c;
                         }
                     }
             }
@@ -225,7 +206,7 @@ public class JSONStreamDecoder {
         }
     }
 
-    public Number parseNumber(char cI, char c) throws IOException {
+    public Number parseNumber(char c) throws IOException {
         long val = 0;
         double dVal = 0;
 
@@ -233,14 +214,13 @@ public class JSONStreamDecoder {
         boolean dbl = false;
 
         char[] buf = new char[21];
-        buf[0] = cI;
-        int len = 1;
+        int len = 0;
         do {
             buf[len++] = c;
         } while ((c = read()) != 0 && isValidNumberPart(c));
 
         if (c != 0) {
-            carry1 = c;
+            carry = c;
         }
 
         if (len == 1 && buf[0] == '-') return null;
@@ -292,8 +272,7 @@ public class JSONStreamDecoder {
         }
         if (dbl) {
             return dVal + val;
-        }
-        else {
+        } else {
             return val;
         }
     }

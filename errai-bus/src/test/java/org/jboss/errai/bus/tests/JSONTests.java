@@ -73,6 +73,18 @@ public class JSONTests extends TestCase {
         }
     }
 
+//    public void testStreamDecoder2() {
+//        String json = "{\"ReplyTo\":\"ClientEndpoint\",\"ToSubject\":\"ObjectService\"}:>[{Records:[{__EncodedType:\"org.errai.samples.serialization.client.model.Record\",recordId:1,name:\"Mike\",balance:-40.23,accountOpened:1086223206050,type:{__EncodedType:\"org.errai.samples.serialization.client.model.RecordType\", EnumStringValue:\"Savings\"},stuff:[{__EncodedType:\"org.errai.samples.serialization.client.model.Item\",itemName:\"MacBookPro15\",quantity:2},{__EncodedType:\"org.errai.samples.serialization.client.model.Item\",itemName:\"iPhone3G\",quantity:2}],properties:{\"Place\":\"Toronto\",\"FavoriteColor\":\"Blue\"}},{__EncodedType:\"org.errai.samples.serialization.client.model.Record\",recordId:2,name:\"Lillian\",balance:30.1,accountOpened:1108086006050,type:{__EncodedType:\"org.errai.samples.serialization.client.model.RecordType\", EnumStringValue:\"Savings\"},stuff:[{__EncodedType:\"org.errai.samples.serialization.client.model.Item\",itemName:\"MacBookPro15\",quantity:1},{__EncodedType:\"org.errai.samples.serialization.client.model.Item\",itemName:\"iPhone3G\",quantity:1}],properties:{\"Place\":\"Toronto\",\"FavoriteColor\":\"Green\"}},{__EncodedType:\"org.errai.samples.serialization.client.model.Record\",recordId:3,name:\"Heiko\",balance:50.5,accountOpened:1150850406050,type:{__EncodedType:\"org.errai.samples.serialization.client.model.RecordType\", EnumStringValue:\"Checking\"},stuff:[{__EncodedType:\"org.errai.samples.serialization.client.model.Item\",itemName:\"iPhone3Gs\",quantity:1},{__EncodedType:\"org.errai.samples.serialization.client.model.Item\",itemName:\"MacBookPro13\",quantity:2}],properties:{\"Place\":\"Germany\",\"FavoriteColor\":\"Orange\"}}],ToSubject:\"ClientEndpoint\"}]";
+//        try {
+//            System.out.println(json);
+//            ByteArrayInputStream instream = new ByteArrayInputStream(json.getBytes());
+//            Map<String, Object> decoded = (Map<String, Object>) JSONStreamDecoder.decode(instream);
+//
+//        }
+//        catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     public static class SimpleWriter extends Writer {
         final StringBuilder builder = new StringBuilder();

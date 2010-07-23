@@ -18,35 +18,34 @@ limitations under the License.
      # serialization engine.
 
 }@declare{'binding'}
-    @if{targetType.isPrimitive()}
-        @code{targetType = org.mvel2.util.ParseTools.boxPrimitive(targetType);}
-        @if{Integer.isAssignableFrom(targetType)}
-          n.@{setter}(org.jboss.errai.common.client.types.JSONTypeHelper.convert(o.get("@{fieldName}"), Integer.class).intValue());
-        @else{Long.isAssignableFrom(targetType)}
-          n.@{setter}(org.jboss.errai.common.client.types.JSONTypeHelper.convert(o.get("@{fieldName}"), Long.class).longValue());
-        @else{Short.isAssignableFrom(targetType)}
-          n.@{setter}(org.jboss.errai.common.client.types.JSONTypeHelper.convert(o.get("@{fieldName}"), Short.class).shortValue());
-        @else{Float.isAssignableFrom(targetType)}
-          n.@{setter}(org.jboss.errai.common.client.types.JSONTypeHelper.convert(o.get("@{fieldName}"), Float.class).floatValue());
-        @else{Double.isAssignableFrom(targetType)}
-          n.@{setter}(org.jboss.errai.common.client.types.JSONTypeHelper.convert(o.get("@{fieldName}"), Double.class).doubleValue());
-        @else{Boolean.isAssignableFrom(targetType)}
-          n.@{setter}(org.jboss.errai.common.client.types.JSONTypeHelper.convert(o.get("@{fieldName}"), Boolean.class).booleanValue());
-        @end{}
-    @else{}
-        n.@{org.mvel2.util.ReflectionUtil.getSetter(fieldName)}(org.jboss.errai.common.client.types.JSONTypeHelper.convert(o.get("@{fieldName}"), ${targetType.getName()}.class));
-    @end{}
+@if{targetType.isPrimitive()}
+@code{targetType = org.mvel2.util.ParseTools.boxPrimitive(targetType);}
+@if{Integer.isAssignableFrom(targetType)}n.@{setter}(new Double(o.get("@{fieldName}").isNumber().doubleValue()).intValue());
+@else{Long.isAssignableFrom(targetType)}n.@{setter}(new Double(o.get("@{fieldName}").isNumber().doubleValue()).longValue());
+@else{Short.isAssignableFrom(targetType)}n.@{setter}(new Double(o.get("@{fieldName}").isNumber().doubleValue()).shortValue());
+@else{Float.isAssignableFrom(targetType)}n.@{setter}(new Double(o.get("@{fieldName}").isNumber().doubleValue()).floatValue());
+@else{Double.isAssignableFrom(targetType)}n.@{setter}(o.get("@{fieldName}").isNumber().doubleValue());
+@else{Boolean.isAssignableFrom(targetType)}n.@{setter}(o.get("@{fieldName}").isBoolean().booleanValue());
+@end{}@else{String.isAssignableFrom(targetType)}n.@{setter}(o.get("@{fieldName}").isString().stringValue());
+@else{Boolean.isAssignableFrom(targetType)}n.@{setter}(o.get("@{fieldName}").isBoolean().booleanValue());
+@else{Double.isAssignableFrom(targetType)}n.@{setter}(o.get("@{fieldName}").isNumber().doubleValue());
+@else{Integer.isAssignableFrom(targetType)}n.@{setter}(new Double(o.get("@{fieldName}").isNumber().doubleValue()).intValue());
+@else{Long.isAssignableFrom(targetType)}n.@{setter}(new Double(o.get("@{fieldName}").isNumber().doubleValue()).longValue());
+@else{Short.isAssignableFrom(targetType)}n.@{setter}(new Double(o.get("@{fieldName}").isNumber().doubleValue()).shortValue());
+@else{Float.isAssignableFrom(targetType)}n.@{setter}(new Double(o.get("@{fieldName}").isNumber().doubleValue()).floatValue())
+@else{}n.@{org.mvel2.util.ReflectionUtil.getSetter(fieldName)}(org.jboss.errai.common.client.types.JSONTypeHelper.convert(o.get("@{fieldName}"), ${targetType.getName()}.class));
+@end{}
 @end{}
 org.jboss.errai.common.client.types.TypeDemarshallers.addDemarshaller(
     @{className}.class,
     new org.jboss.errai.common.client.types.Demarshaller<@{className}>() {
         public @{className} demarshall(com.google.gwt.json.client.JSONObject o) {
             try {
-            @if{enumType}@{className} n = @{className}.valueOf(o.get("EnumStringValue").isString().stringValue());@else{}
-            @{className} n = new @{className}();
-            @foreach{fieldName : fields}@includeNamed{'binding'; setter=org.mvel2.util.ReflectionUtil.getSetter(fieldName); targetType=targetTypes.get(fieldName); fieldName=fieldName}@end{}
-            @end{}
-            return n;
+@if{enumType}@{className} n = @{className}.valueOf(o.get("EnumStringValue").isString().stringValue());
+@else{}@{className} n = new @{className}();
+@foreach{fieldName : fields}@includeNamed{'binding'; setter=org.mvel2.util.ReflectionUtil.getSetter(fieldName); targetType=targetTypes.get(fieldName); fieldName=fieldName}@end{}
+@end{}
+return n;
             }
             catch (Exception e) {
                 throw new RuntimeException("could not demarshall type: @{className}", e);
