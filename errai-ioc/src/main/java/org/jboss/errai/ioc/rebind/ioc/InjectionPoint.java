@@ -16,17 +16,16 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.JField;
-import com.google.gwt.core.ext.typeinfo.JMethod;
-import com.google.gwt.core.ext.typeinfo.JParameter;
+import com.google.gwt.core.ext.typeinfo.*;
 import org.mvel2.ast.WithNode;
 
 import java.lang.annotation.Annotation;
 
-public class DecoratorContext<T extends Annotation> {
+public class InjectionPoint<T extends Annotation> {
     private T annotation;
     private TaskType taskType;
+
+    private JConstructor constructor;
     private JMethod method;
     private JField field;
     private JClassType type;
@@ -34,10 +33,11 @@ public class DecoratorContext<T extends Annotation> {
     private Injector injector;
     private InjectionContext injectionContext;
 
-    public DecoratorContext(T annotation, TaskType taskType, JMethod method,
+    public InjectionPoint(T annotation, TaskType taskType, JConstructor constructor, JMethod method,
                             JField field, JClassType type, JParameter parm, Injector injector, InjectionContext injectionContext) {
         this.annotation = annotation;
         this.taskType = taskType;
+        this.constructor = constructor;
         this.method = method;
         this.field = field;
         this.type = type;
@@ -48,6 +48,10 @@ public class DecoratorContext<T extends Annotation> {
 
     public T getAnnotation() {
         return annotation;
+    }
+
+    public JConstructor getConstructor() {
+        return constructor;
     }
 
     public TaskType getTaskType() {
@@ -89,7 +93,7 @@ public class DecoratorContext<T extends Annotation> {
             case Parameter:
             case Type:
                 return injector.getVarName();
-
+            
             default:
                 return null;
         }

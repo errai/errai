@@ -16,20 +16,22 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.JField;
-import com.google.gwt.core.ext.typeinfo.JMethod;
-import com.google.gwt.core.ext.typeinfo.JParameter;
+import com.google.gwt.core.ext.typeinfo.*;
 import org.mvel2.util.StringAppender;
+
+import javax.inject.Inject;
 
 public class InjectionTask {
     protected final TaskType injectType;
     protected final Injector injector;
 
+    protected JConstructor constructor;
     protected JField field;
     protected JMethod method;
     protected JClassType type;
     protected JParameter parm;
+
+
 
     public InjectionTask(Injector injector, JField field) {
         this.injectType = TaskType.Field;
@@ -57,10 +59,13 @@ public class InjectionTask {
 
     public String doTask(InjectionContext ctx) {
         StringAppender appender = new StringAppender();
+              InjectionPoint injectionPoint
+                        = new InjectionPoint(null, injectType, constructor, method, field, type, parm, injector, ctx);
         switch (injectType) {
             case Field:
+
                 appender.append(injector.getVarName()).append('.').append(field.getName()).append(" = ")
-                        .append(ctx.getInjector(field.getType().isClassOrInterface()).getType(ctx))
+                        .append(ctx.getInjector(field.getType().isClassOrInterface()).getType(ctx, injectionPoint))
                         .append(";\n");
                 break;
 
@@ -68,7 +73,7 @@ public class InjectionTask {
                 appender.append(injector.getVarName()).append('.')
                         .append(method.getName()).append('(');
 
-                String[] vars = InjectUtil.resolveInjectionDependencies(method.getParameters(), ctx);
+                String[] vars = InjectUtil.resolveInjectionDependencies(method.getParameters(), ctx, injectionPoint);
 
                 appender.append(InjectUtil.commaDelimitedList(vars)).append(");\n");
                 break;

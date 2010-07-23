@@ -27,14 +27,14 @@ public class ProviderInjector extends TypeInjector {
     }
 
     @Override
-    public String getType(InjectionContext injectContext) {
+    public String getType(InjectionContext injectContext, InjectionPoint injectionPoint) {
         injected = true;
-        return providerInjector.getType(injectContext) + ".provide()";
+        return providerInjector.getType(injectContext, injectionPoint) + ".provide()";
     }
 
     @Override
-    public String instantiateOnly(InjectionContext injectContext) {
+    public String instantiateOnly(InjectionContext injectContext, InjectionPoint injectionPoint) {
         injected = true;
-        return providerInjector.getType(injectContext);
+        return providerInjector.getType(injectContext, injectionPoint);
     }
 }

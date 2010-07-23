@@ -37,10 +37,7 @@ import org.jboss.errai.bus.server.util.RebindUtil;
 import org.jboss.errai.bus.server.util.RebindVisitor;
 import org.jboss.errai.ioc.client.InterfaceInjectionContext;
 import org.jboss.errai.ioc.client.api.*;
-import org.jboss.errai.ioc.rebind.ioc.IOCExtensionConfigurator;
-import org.jboss.errai.ioc.rebind.ioc.InjectionFailure;
-import org.jboss.errai.ioc.rebind.ioc.InjectorFactory;
-import org.jboss.errai.ioc.rebind.ioc.ProviderInjector;
+import org.jboss.errai.ioc.rebind.ioc.*;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -69,6 +66,8 @@ public class IOCGenerator extends Generator {
     private ProcessorFactory procFactory;
 
     private List<Runnable> deferredTasks = new LinkedList<Runnable>();
+
+    final List<File> targets = findAllConfigTargets();
 
     public IOCGenerator() {
     }
@@ -156,7 +155,7 @@ public class IOCGenerator extends Generator {
     }
 
     public void initializeProviders(final GeneratorContext context, final TreeLogger logger, final SourceWriter sourceWriter) {
-        final List<File> targets = findAllConfigTargets();
+
 
         final JClassType typeProviderCls;
 
@@ -166,6 +165,26 @@ public class IOCGenerator extends Generator {
         catch (NotFoundException e) {
             throw new RuntimeException(e);
         }
+
+        RebindUtil.visitAllTargets(targets, context, logger, sourceWriter, typeOracle, new RebindVisitor() {
+            public void visit(JClassType visit, GeneratorContext context, TreeLogger logger, SourceWriter writer) {
+                if (visit.isAnnotationPresent(IOCExtension.class)) {
+                    try {
+                        Class<? extends IOCExtensionConfigurator> configuratorClass = Class.forName(visit.getQualifiedSourceName())
+                                .asSubclass(IOCExtensionConfigurator.class);
+
+                        configuratorClass.newInstance().configure(procContext, injectFactory, procFactory);
+                    }
+                    catch (Exception e) {
+                        throw new ErraiBootstrapFailure("unable to load IOC Extension Configurator: " + e.getMessage(), e);
+                    }
+                }
+            }
+
+            public void visitError(String className, Throwable t) {
+            }
+        });
+
 
         RebindUtil.visitAllTargets(targets, context, logger, sourceWriter, typeOracle, new RebindVisitor() {
             public void visit(JClassType visit, GeneratorContext context, TreeLogger logger, SourceWriter writer) {
@@ -194,18 +213,7 @@ public class IOCGenerator extends Generator {
                     final JClassType finalBindType = bindType;
 
                     injectFactory.addInjector(new ProviderInjector(finalBindType, visit));
-                }
-                else if (visit.isAnnotationPresent(IOCExtension.class)) {
-                     try {
-                         Class<? extends IOCExtensionConfigurator> configuratorClass = Class.forName(visit.getQualifiedSourceName())
-                                 .asSubclass(IOCExtensionConfigurator.class);
-
-                         configuratorClass.newInstance().configure(procContext, injectFactory, procFactory);
-                     }
-                     catch (Exception e) {
-                         throw new ErraiBootstrapFailure("unable to load IOC Extension Configurator: " + e.getMessage(), e);
-                     }
-                }
+                } 
             }
 
             public void visitError(String className, Throwable t) {
@@ -345,26 +353,26 @@ public class IOCGenerator extends Generator {
             }
         });
 
-        procFactory.registerHandler(Service.class, new AnnotationHandler<Service>() {
-            public void handle(final JClassType type, final Service annotation, final ProcessingContext context) {
-                if (messageCallbackType.isAssignableFrom(type)) {
-                    addDeferred(new Runnable() {
-                        public void run() {
-                            String svcName = annotation.value().equals("") ? type.getName() : annotation.value();
-
-                            String busInstance = generateInjectors(messageBusType);
-                            String svcInstance = generateWithSingletonSemantics(type);
-
-                            context.getWriter()
-                                    .println(busInstance + ".subscribe(\"" + svcName + "\", " + svcInstance + ");");
-                        }
-                    });
-                } else {
-                    throw new InjectionFailure("@Service annotated class does not implement MessageCallaback: "
-                            + type.getQualifiedSourceName());
-                }
-            }
-        });
+//        procFactory.registerHandler(Service.class, new AnnotationHandler<Service>() {
+//            public void handle(final JClassType type, final Service annotation, final ProcessingContext context) {
+//                if (messageCallbackType.isAssignableFrom(type)) {
+//                    addDeferred(new Runnable() {
+//                        public void run() {
+//                            String svcName = annotation.value().equals("") ? type.getName() : annotation.value();
+//
+//                            String busInstance = generateInjectors(messageBusType);
+//                            String svcInstance = generateWithSingletonSemantics(type);
+//
+//                            context.getWriter()
+//                                    .println(busInstance + ".subscribe(\"" + svcName + "\", " + svcInstance + ");");
+//                        }
+//                    });
+//                } else {
+//                    throw new InjectionFailure("@Service annotated class does not implement MessageCallaback: "
+//                            + type.getQualifiedSourceName());
+//                }
+//            }
+//        });
 
     }
 }

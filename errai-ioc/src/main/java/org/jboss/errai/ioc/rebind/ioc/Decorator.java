@@ -29,5 +29,5 @@ public abstract class Decorator<T extends Annotation> {
         return decoratesWith;
     }
 
-    public abstract String generateDecorator(DecoratorContext<T> ctx);
+    public abstract String generateDecorator(InjectionPoint<T> ctx);
 }

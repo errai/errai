@@ -53,9 +53,16 @@ public class InjectUtil {
 
             final JConstructor constructor = constructorInjectionPoints.get(0);
 
+            for (Class<? extends Annotation> a : ctx.getDecoratorAnnotationsBy(ElementType.TYPE)) {
+                if (type.isAnnotationPresent(a)) {
+                    DecoratorTask task = new DecoratorTask(injector, type, ctx.getDecorator(a));
+                    injectionTasks.add(task);
+                }
+            }
+
             return new ConstructionStrategy() {
                 public String generateConstructor() {
-                    String[] vars = resolveInjectionDependencies(constructor.getParameters(), ctx);
+                    String[] vars = resolveInjectionDependencies(constructor.getParameters(), ctx, constructor);
 
                     StringAppender appender = new StringAppender("final ").append(type.getQualifiedSourceName())
                             .append(' ').append(injector.getVarName()).append(" = new ")
@@ -266,12 +273,27 @@ public class InjectUtil {
         return newArray;
     }
 
-    public static String[] resolveInjectionDependencies(JParameter[] parms, InjectionContext ctx) {
+    public static String[] resolveInjectionDependencies(JParameter[] parms, InjectionContext ctx, JConstructor constructor) {
         JClassType[] parmTypes = parametersToClassTypeArray(parms);
         String[] varNames = new String[parmTypes.length];
 
         for (int i = 0; i < parmTypes.length; i++) {
-            varNames[i] = ctx.getInjector(parmTypes[i]).getType(ctx);
+            Injector injector = ctx.getInjector(parmTypes[i]);
+            InjectionPoint injectionPoint
+                    = new InjectionPoint(null, TaskType.Type, constructor, null, null, null, null, injector, ctx);
+            varNames[i] = injector.getType(ctx, injectionPoint);
+        }
+
+        return varNames;
+    }
+
+
+    public static String[] resolveInjectionDependencies(JParameter[] parms, InjectionContext ctx, InjectionPoint injectionPoint) {
+        JClassType[] parmTypes = parametersToClassTypeArray(parms);
+        String[] varNames = new String[parmTypes.length];
+
+        for (int i = 0; i < parmTypes.length; i++) {
+            varNames[i] = ctx.getInjector(parmTypes[i]).getType(ctx, injectionPoint);
         }
 
         return varNames;

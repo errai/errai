@@ -40,7 +40,7 @@ public class TypeInjector extends Injector {
     }
 
     @Override
-    public String getType(InjectionContext injectContext) {
+    public String getType(InjectionContext injectContext, InjectionPoint injectionPoint) {
         if (isInjected()) {
             if (isSingleton()) {
                 return varName;
@@ -60,8 +60,8 @@ public class TypeInjector extends Injector {
     }
 
     @Override
-    public String instantiateOnly(InjectionContext injectContext) {
-        return getType(injectContext);
+    public String instantiateOnly(InjectionContext injectContext, InjectionPoint injectionPoint) {
+        return getType(injectContext, injectionPoint);
     }
 
     @Override

@@ -34,14 +34,14 @@ public class InjectorFactory {
          */
         this.ctx.registerDecorator(new Decorator<Service>(Service.class) {
             @Override
-            public String generateDecorator(DecoratorContext<Service> decContext) {
+            public String generateDecorator(InjectionPoint<Service> decContext) {
                 final InjectionContext ctx = decContext.getInjectionContext();
 
                 /**
                  * Get an instance of the message bus.
                  */
                 final String inj = ctx.getInjector(decContext.getInjectionContext()
-                        .getProcessingContext().loadClassType(MessageBus.class)).getType(ctx);
+                        .getProcessingContext().loadClassType(MessageBus.class)).getType(ctx, decContext);
 
                 /**
                  * Figure out the service name;
@@ -59,7 +59,7 @@ public class InjectorFactory {
     }
 
     public String generate(JClassType type) {
-        return ctx.getInjector(type).getType(ctx);
+        return ctx.getInjector(type).getType(ctx, null);
     }
 
     public String generateSingleton(JClassType type) {
@@ -68,7 +68,7 @@ public class InjectorFactory {
             return i.getVarName();
         }
         else {
-            return i.getType(ctx);
+            return i.getType(ctx, null);
         }
     }
 
@@ -83,7 +83,7 @@ public class InjectorFactory {
     public String generateAllProviders() {
         List<Injector> injs = ctx.getInjectorsByType(ProviderInjector.class);
         for (Injector i : injs) {
-            i.instantiateOnly(ctx);
+            i.instantiateOnly(ctx, null);
         }
         return "";
     }
