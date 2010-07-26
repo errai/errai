@@ -43,7 +43,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <gwt.version>2.0.3</gwt.version>
-        <gwt.maven>1.3-SNAPSHOT</gwt.maven>
+        <gwt.maven>1.3-12393</gwt.maven>
         <gwt-log.version>3.0.1</gwt-log.version>
         <guice.version>2.0</guice.version>
         <mvel.version>2.0.18</mvel.version>
