@@ -72,4 +72,5 @@ public interface ClientMessageBus extends MessageBus {
     public boolean isInitialized();
 
     public void setLogAdapter(LogAdapter logAdapter);
+    public LogAdapter getLogAdapter();
 }

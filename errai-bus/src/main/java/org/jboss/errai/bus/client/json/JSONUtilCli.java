@@ -19,6 +19,7 @@ package org.jboss.errai.bus.client.json;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
@@ -29,8 +30,10 @@ import java.util.ArrayList;
 import java.util.Map;
 
 public class JSONUtilCli {
+    private static final ArrayList<MarshalledMessage> EMPTYLIST = new ArrayList<MarshalledMessage>(0);
+
     public static ArrayList<MarshalledMessage> decodePayload(String value) {
-        if (value == null || value.trim().length() == 0) return new ArrayList<MarshalledMessage>(0);
+        if (value == null || value.trim().length() == 0) return EMPTYLIST;
         ArrayList<MarshalledMessage> list = new ArrayList<MarshalledMessage>();
 
         /**
@@ -38,7 +41,15 @@ public class JSONUtilCli {
          * cannot be sure the destination endpoint exists within this Errai bundle.  So we extract the ToSubject
          * field and send the unparsed JSON object onwards.
          */
-        JSONArray arr = (JSONArray) JSONParser.parse(value);
+        JSONValue val = JSONParser.parse(value);
+        if (val == null) {
+            return EMPTYLIST;
+        }
+        JSONArray arr = val.isArray();
+        if (arr == null) {
+            throw new RuntimeException("unrecognized payload" + val.toString());
+        } 
+
         for (int i = 0; i < arr.size(); i++) {
             list.add(new MarshalledMessageImpl((JSONObject) arr.get(i)));
         }
@@ -62,6 +73,7 @@ public class JSONUtilCli {
         }
     }
 
+    @SuppressWarnings({"unchecked"})
     public static Map<String, Object> decodeMap(Object value) {
         return (Map<String, Object>) new JSONDecoderCli().decode(value);
     }

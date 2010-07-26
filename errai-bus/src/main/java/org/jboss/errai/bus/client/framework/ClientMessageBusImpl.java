@@ -1037,4 +1037,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     public void setLogAdapter(LogAdapter logAdapter) {
         this.logAdapter = logAdapter;
     }
+
+    public LogAdapter getLogAdapter() {
+        return logAdapter;
+    }
 }
