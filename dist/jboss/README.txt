@@ -2,14 +2,14 @@
 About the CDI extension
 =======================
 
-This module contains the CDI extension and an installer thagt allows
+This module contains the CDI extension and an installer that allows
 you to deploy it as shared service to the JBoss Application Server (requires 6.0.0-M2 or later).
 
 
 [How to use the installer]
 
 In order to install the service archive you need to modify the 'deployment.properties'
-file, and reflect your local settings. After that simply run 'ant', which will copy all
+file to reflect your local settings. After that, simply run 'ant', which will copy all
 required files (jar files, configuration, etc) to the correct location.
 
 
