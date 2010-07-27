@@ -168,6 +168,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                                     .toSubject("ClientBus")
                                     .command(BusCommands.RemoteSubscribe)
                                     .with("SubjectsList", subjects)
+                                    .with(MessageParts.PriorityProcessing, "1")
                                     .noErrorHandling().sendNowWith(ServerMessageBusImpl.this, false);
 
                             createConversation(message)

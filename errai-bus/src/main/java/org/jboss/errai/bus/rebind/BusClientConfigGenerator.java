@@ -29,6 +29,9 @@ import org.jboss.errai.bus.server.util.RebindVisitor;
 import org.mvel2.templates.CompiledTemplate;
 import org.mvel2.util.Make;
 import org.mvel2.util.ParseTools;
+import org.mvel2.util.ReflectionUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.*;
@@ -43,6 +46,8 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
     private CompiledTemplate demarshallerGenerator;
     private CompiledTemplate marshallerGenerator;
     private CompiledTemplate rpcProxyGenerator;
+
+    private Logger log = LoggerFactory.getLogger(BusClientConfigGenerator.class);
 
     public BusClientConfigGenerator() {
         InputStream istream = this.getClass().getResourceAsStream("DemarshallerGenerator.mv");
@@ -147,29 +152,56 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
 
         }
         if (!found) {
-            throw new ErraiBootstrapFailure("Unable to find ErraiApp.properties in the classpath");
+            log.warn("No modules found ot load. Unable to find ErraiApp.properties in the classpath");
         }
-
     }
 
     private void generateMarshaller(JClassType visit, TreeLogger logger, SourceWriter writer) {
         Boolean enumType = visit.isEnum() != null;
         Map<String, Class> types = new HashMap<String, Class>();
+        Map<String, ValueExtractor> getters = new HashMap<String, ValueExtractor>();
+        Map<String, ValueBinder> setters = new HashMap<String, ValueBinder>();
         try {
             for (JField f : visit.getFields()) {
                 if (f.isTransient() || f.isStatic() || f.isEnumConstant() != null) continue;
 
                 JClassType type = f.getType().isClassOrInterface();
-
+                JMethod m = null;
                 if (type == null) {
                     JPrimitiveType pType = f.getType().isPrimitive();
                     if (pType == null) continue;
 
-                    types.put(f.getName(), ParseTools.unboxPrimitive(Class.forName(pType.getQualifiedBoxedSourceName())));
-                    continue;
+                    Class c;
+                    types.put(f.getName(), ParseTools.unboxPrimitive(c = Class.forName(pType.getQualifiedBoxedSourceName())));
+
+                    if (boolean.class.equals(c)) {
+                        if ((m = getAccessorMethod(visit, ReflectionUtil.getIsGetter(f.getName()))) == null) {
+                            m = getAccessorMethod(visit, ReflectionUtil.getGetter(f.getName()));
+                        }
+                    } else {
+                        m = getAccessorMethod(visit, ReflectionUtil.getGetter(f.getName()));
+                    }
+
+                } else {
+                    if ("java.lang.Boolean".equals(f.getType().getQualifiedSourceName())) {
+                        if ((m = getAccessorMethod(visit, ReflectionUtil.getIsGetter(f.getName()))) == null) {
+                            m = getAccessorMethod(visit, ReflectionUtil.getGetter(f.getName()));
+                        }
+                    } else {
+                        m = getAccessorMethod(visit, ReflectionUtil.getGetter(f.getName()));
+                    }
+
+                    types.put(f.getName(), Class.forName(type.getQualifiedSourceName()));
                 }
 
-                types.put(f.getName(), Class.forName(type.getQualifiedSourceName()));
+                if (m == null) {
+                    if (f.isPublic()) {
+                        getters.put(f.getName(), new ValueExtractor(f));
+                    } else {
+                        throw new GenerationException("could not find an accessor in class: " + visit.getQualifiedSourceName() + "; for field: " + f.getName());
+                    }
+                }
+                getters.put(f.getName(), new ValueExtractor(m));
             }
 
         }
@@ -190,18 +222,73 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
                 ._("className", visit.getQualifiedSourceName())
                 ._("fields", types.keySet())
                 ._("targetTypes", types)
+                ._("getters", getters)
+                ._("setters", setters)
                 ._("enumType", enumType)._();
 
         String genStr;
 
         writer.print(genStr = (String) execute(demarshallerGenerator, templateVars));
 
+        System.out.println(genStr);
+
         logger.log(TreeLogger.Type.INFO, genStr);
 
         writer.print(genStr = (String) execute(marshallerGenerator, templateVars));
 
+        System.out.println(genStr);
+
         logger.log(TreeLogger.Type.INFO, genStr);
         logger.log(TreeLogger.Type.INFO, "Generated marshaller/demarshaller for: " + visit.getName());
+    }
+
+    public static class ValueExtractor {
+        private boolean accessor;
+        private String name;
+
+        public ValueExtractor(JMethod m) {
+            accessor = true;
+            name = m.getName();
+        }
+
+        public ValueExtractor(JField f) {
+            accessor = false;
+            name = f.getName();
+        }
+
+        @Override
+        public String toString() {
+            return accessor ? name + "()" : name;
+        }
+    }
+
+    public static class ValueBinder {
+        private boolean accessor;
+        private String name;
+
+        public ValueBinder(JMethod m) {
+            accessor = true;
+            name = m.getName();
+        }
+
+        public ValueBinder(JField f) {
+            accessor = false;
+            name = f.getName();
+        }
+
+        public String bindValue(String expr) {
+            return accessor ? name + "(" + expr + ")" : "name = " + expr;
+        }
+    }
+
+
+    private static JMethod getAccessorMethod(JClassType type, String name) {
+        try {
+            return type.getMethod(name, new JType[0]);
+        }
+        catch (NotFoundException e) {
+            return null;
+        }
     }
 
 

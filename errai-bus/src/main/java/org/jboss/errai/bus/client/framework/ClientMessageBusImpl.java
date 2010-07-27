@@ -69,10 +69,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     private final Set<String> remote = new HashSet<String>();
 
     /* Outgoing queue of messages to be transmitted */
-    private final Queue<Message> outgoingQueue = new LinkedList<Message>();
-
-    /* True if transmitting is in process */
-    private boolean transmitting = false;
+    // private final Queue<Message> outgoingQueue = new LinkedList<Message>();
 
     /* Map of subjects to references registered in this session */
     private Map<String, Set<Object>> registeredInThisSession = new HashMap<String, Set<Object>>();
@@ -80,6 +77,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     /* A list of {@link Runnable} initialization tasks to be executed after the bus has successfully finished it's
      * initialization and is now communicating with the remote bus. */
     private List<Runnable> postInitTasks = new ArrayList<Runnable>();
+    private List<Message> deferredMessages = new ArrayList<Message>();
 
     /* The timer constantly ensures the client's polling with the server is active */
     private Timer incomingTimer;
@@ -88,6 +86,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     private boolean initialized = false;
 
     private long lastTransmit = 0;
+
+    private boolean disconnected = false;
 
     class ProxySettings {
         final String url = GWT.getModuleBaseURL() + "proxy";
@@ -305,31 +305,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             if (message.hasPart(MessageParts.ToSubject)) {
 
                 if (!initialized) {
-                    postInitTasks.add(new Runnable() {
-                        public void run() {
-                            if (!subscriptions.containsKey(message.getSubject())) {
-
-                                // deal with an issue that sometimes occurs in hosted mode.
-                                if ("ServerBus".equals(message.getSubject())) {
-                                    addSubscribeListener(new SubscribeListener() {
-                                        public void onSubscribe(SubscriptionEvent event) {
-                                            if ("ServerBus".equals(event.getSubject())) {
-                                                onSubscribeHooks.remove(this);
-                                                send(message);
-                                            }
-                                        }
-                                    });
-                                    return;
-                                }
-
-                                logError("No subscribers for: " + message.getSubject(),
-                                        "Attempt to send message to subject for which there are no subscribers", null);
-                                return;
-                            }
-                            _store(message.getSubject(), message instanceof HasEncoded
-                                    ? ((HasEncoded) message).getEncoded() : encodeMap(message.getParts()));
-                        }
-                    });
+                    deferredMessages.add(message);
                 } else {
                     if (!subscriptions.containsKey(message.getSubject())) {
                         logError("No subscribers for: " + message.getSubject(),
@@ -362,9 +338,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      *
      * @param message -
      */
-    public void enqueueForRemoteTransmit(Message message) {
-        outgoingQueue.add(message);
-        sendAll();
+    private void encodeAndTransmit(Message message) {
+        //outgoingQueue.add(message);
+        transmitRemote(message instanceof HasEncoded ?
+                ((HasEncoded) message).getEncoded() : encodeMap(message.getParts()), message);
     }
 
     private void addSubscription(String subject, Object reference) {
@@ -436,67 +413,20 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         }
     }
 
-    private Timer sendTimer;
-
-    /**
-     * Appends all messages in the queue to as a JSON-like string, and remotely transmits them all.
-     */
-    private void sendAll() {
-        if (!initialized) {
-            return;
-        } else if (transmitting) {
-            if (sendTimer == null) {
-                sendTimer = new Timer() {
-                    int timeout = 0;
-
-                    @Override
-                    public void run() {
-                        if (outgoingQueue.isEmpty()) {
-                            cancel();
-                        }
-
-                        sendAll();
-
-                        /**
-                         * If this fails 20 times then we stop blocking
-                         * progress and allow more messages to flow.
-                         */
-                        if (++timeout > 20) {
-                            transmitting = false;
-                        }
-                    }
-                };
-                sendTimer.scheduleRepeating(75);
-            }
-
-            return;
-        } else if (sendTimer != null) {
-            sendTimer.cancel();
-            sendTimer = null;
-        }
-
-        if (!outgoingQueue.isEmpty()) {
-            Message txMessage = outgoingQueue.poll();
-            transmitRemote(txMessage instanceof HasEncoded ?
-                    ((HasEncoded) txMessage).getEncoded() : encodeMap(txMessage.getParts()), txMessage);
-        }
-    }
-
     /**
      * Transmits JSON string containing message, using the <tt>sendBuilder</tt>
      *
-     * @param message - JSON string representation of message
+     * @param message   - JSON string representation of message
+     * @param txMessage - Message reference.
      */
     private void transmitRemote(final String message, final Message txMessage) {
         if (message == null) return;
 
-        try {
-            transmitting = true;
+        System.out.println("CLIENT_TX: " + message);
 
+        try {
             sendBuilder.sendRequest(message, new RequestCallback() {
                 public void onResponseReceived(Request request, Response response) {
-                    transmitting = false;
-
                     if (503 == response.getStatusCode()) // Service Unavailable
                     {
                         // Sending the message failed.
@@ -505,11 +435,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                         //noinspection ThrowableInstanceNeverThrown
 
                         TransportIOException tioe = new TransportIOException(response.getText(), response.getStatusCode(), "Failure communicating with server");
-                        //    for (Message txm : txMessages) {
                         if (txMessage.getErrorCallback() == null || txMessage.getErrorCallback().error(txMessage, tioe)) {
                             logError("Problem communicating with remote bus (Received HTTP 503 Error)", message, tioe);
                         }
-                        //  }
                     }
 
                     /**
@@ -524,20 +452,16 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                         logError("Problem decoding incoming message:", response.getText(), e);
                     }
 
-                    sendAll();
                 }
 
                 public void onError(Request request, Throwable exception) {
                     if (txMessage.getErrorCallback() == null || txMessage.getErrorCallback().error(txMessage, exception)) {
                         logError("Failed to communicate with remote bus", "", exception);
                     }
-
-                    transmitting = false;
                 }
             });
         }
         catch (Exception e) {
-            transmitting = false;
             e.printStackTrace();
         }
 
@@ -553,7 +477,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     public class RemoteMessageCallback implements MessageCallback {
         public void callback(Message message) {
-            enqueueForRemoteTransmit(message);
+            encodeAndTransmit(message);
         }
     }
 
@@ -598,6 +522,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                                 .toSubject("ServerBus")
                                 .command(RemoteSubscribe)
                                 .with("SubjectsList", subjects)
+                                .with(PriorityProcessing, "1")
                                 .noErrorHandling()
                                 .sendNowWith(ClientMessageBusImpl.this);
 
@@ -605,6 +530,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                         MessageBuilder.createMessage()
                                 .toSubject("ServerBus")
                                 .command(BusCommands.FinishStateSync)
+                                .with(PriorityProcessing, "1")
                                 .noErrorHandling().sendNowWith(ClientMessageBusImpl.this);
 
                         /**
@@ -642,30 +568,29 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                             }
                         });
 
-                        // Don't use an iterator here -- potential for concurrent
-                        // modifications!
-                        //noinspection ForLoopReplaceableByForEach
+
                         for (int i = 0; i < postInitTasks.size(); i++) {
                             postInitTasks.get(i).run();
                         }
 
                         initialized = true;
 
+                        sendAllDeferred();
+
                         break;
 
                     case Disconnect:
-                        incomingTimer.cancel();
+                        if (incomingTimer != null) incomingTimer.cancel();
+                        disconnected = true;
 
                         if (message.hasPart("Reason")) {
                             logError("The bus was disconnected by the server", "Reason: "
                                     + message.get(String.class, "Reason"), null);
                         }
                         break;
-
                 }
             }
         });
-
 
         /**
          * Send initial message to connect to the queue, to establish an HTTP session. Otherwise, concurrent
@@ -674,6 +599,21 @@ public class ClientMessageBusImpl implements ClientMessageBus {
          */
         if (!sendInitialMessage(callback)) {
             logError("Could not connect to remote bus", "", null);
+        }
+    }
+
+    private void sendAllDeferred() {
+        for (Iterator<Message> iter = deferredMessages.iterator(); iter.hasNext();) {
+            Message m = iter.next();
+            if (m.hasPart(MessageParts.PriorityProcessing)) {
+                send(m);
+                iter.remove();
+            }
+        }
+
+        for (Iterator<Message> iter = deferredMessages.iterator(); iter.hasNext();) {
+            send(iter.next());
+            iter.remove();
         }
     }
 
@@ -696,6 +636,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                         initializeMessagingBus(callback);
                     }
                     catch (Exception e) {
+                        e.printStackTrace();
+                        System.out.println("**DID NOT ATTACH**");
                         logError("Error attaching to bus", e.getMessage() + "<br/>Message Contents:<br/>"
                                 + response.getText(), e);
                     }
@@ -746,10 +688,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         retries = 0;
     }
 
-    boolean block = false;
     private final RequestCallback COMM_CALLBACK = new RequestCallback() {
         public void onError(Request request, Throwable throwable) {
-            block = false;
             switch (statusCode) {
                 case 1:
                 case 408:
@@ -760,6 +700,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                             createConnectAttemptGUI();
                         }
 
+                        logAdapter.warn("Attempting reconnection -- Retries: " + (maxRetries - retries));
                         timeoutMessage.setText("Connection Interrupted -- Retries: " + (maxRetries - retries));
                         retries++;
                         incomingTimer.scheduleRepeating(timeout);
@@ -775,7 +716,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         }
 
         public void onResponseReceived(Request request, Response response) {
-            block = false;
             if (response.getStatusCode() != 200) {
                 statusCode = response.getStatusCode();
                 onError(request, new Throwable());
@@ -805,16 +745,15 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      */
     @SuppressWarnings({"UnusedDeclaration"})
     private void initializeMessagingBus(final HookCallback initCallback) {
+        if (disconnected) {
+            return;
+        }
+
         logAdapter.debug("Initialize message bus");
 
         incomingTimer = new Timer() {
             @Override
             public void run() {
-                if (block) {
-                    scheduleRepeating(25);
-                    return;
-                }
-                block = true;
                 try {
                     recvBuilder.sendRequest(null, COMM_CALLBACK);
                 }
@@ -825,28 +764,23 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 catch (RequestException e) {
                     logError(e.getMessage(), "", e);
                 }
-                block = false;
             }
         };
 
-        final MessageBus bus = this;
-
-        final Timer outerTimer = new Timer() {
+        new Timer() {
             @Override
             public void run() {
                 incomingTimer.scheduleRepeating(500);
                 ExtensionsLoader loader = GWT.create(ExtensionsLoader.class);
-                loader.initExtensions(bus);
+                loader.initExtensions(ClientMessageBusImpl.this);
             }
-        };
+        }.schedule(10);
 
-        outerTimer.schedule(10);
-
-        Timer heartBeatTimer = new Timer() {
+        new Timer() {
             @Override
             public void run() {
                 if (System.currentTimeMillis() - lastTransmit >= HEARTBEAT_DELAY) {
-                    enqueueForRemoteTransmit(MessageBuilder.createMessage().toSubject("ServerBus")
+                    encodeAndTransmit(MessageBuilder.createMessage().toSubject("ServerBus")
                             .command(BusCommands.Heartbeat).noErrorHandling().getMessage());
                     schedule(HEARTBEAT_DELAY);
                 } else {
@@ -855,9 +789,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                     schedule(diff);
                 }
             }
-        };
+        }.scheduleRepeating(HEARTBEAT_DELAY);
 
-        heartBeatTimer.schedule(HEARTBEAT_DELAY);
     }
 
     /**
@@ -1026,12 +959,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         }
         catch (RuntimeException e) {
             logError("Error delivering message into bus", response.getText(), e);
-            incomingTimer.cancel();
+            if (incomingTimer != null) incomingTimer.cancel();
         }
     }
 
     public void attachMonitor(BusMonitor monitor) {
-
     }
 
     public void setLogAdapter(LogAdapter logAdapter) {

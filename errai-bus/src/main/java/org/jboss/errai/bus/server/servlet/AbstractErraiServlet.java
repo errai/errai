@@ -98,13 +98,7 @@ public abstract class AbstractErraiServlet extends HttpServlet {
      * @throws java.io.IOException - is thrown if any input/output errors occur while writing to the stream
      */
     public static void writeToOutputStream(OutputStream stream, MarshalledMessage m) throws IOException {
-        stream.write('{');
-        stream.write('"');
-        for (byte b : (m.getSubject()).getBytes()) {
-            stream.write(b);
-        }
-        stream.write('"');
-        stream.write(':');
+        stream.write('[');
 
         if (m.getMessage() == null) {
             stream.write('n');
@@ -116,7 +110,7 @@ public abstract class AbstractErraiServlet extends HttpServlet {
                 stream.write(b);
             }
         }
-        stream.write('}');
+        stream.write(']');
 
     }
 
@@ -127,7 +121,7 @@ public abstract class AbstractErraiServlet extends HttpServlet {
             }
 
             public Object getMessage() {
-                return reason != null ? "{CommandType:\"" + BusCommands.Disconnect + "\",Reason:\"" + reason + "\"}"
+                return reason != null ? "{ToSubject:\"ClientBus\", CommandType:\"" + BusCommands.Disconnect + "\",Reason:\"" + reason + "\"}"
                         : "{CommandType:\"" + BusCommands.Disconnect + "\"}";
             }
         });

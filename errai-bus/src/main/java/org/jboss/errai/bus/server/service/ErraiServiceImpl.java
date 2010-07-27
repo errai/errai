@@ -50,8 +50,6 @@ public class ErraiServiceImpl<S> implements ErraiService<S> {
         this.bus = bus;
         this.config = configurator;
 
-
-
         boostrap();
     }
 

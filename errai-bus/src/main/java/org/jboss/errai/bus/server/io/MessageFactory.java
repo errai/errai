@@ -71,8 +71,6 @@ public class MessageFactory {
     }
 
     public static Message createCommandMessage(QueueSession session, InputStream stream) throws IOException {
-        //if (stream.available() == 0) return null;
-
         Map<String, Object> parts = (Map<String, Object>) JSONStreamDecoder.decode(stream);
         parts.remove(MessageParts.SessionID.name());
 

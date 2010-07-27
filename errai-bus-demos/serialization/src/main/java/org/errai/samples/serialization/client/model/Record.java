@@ -16,6 +16,7 @@
                                                                           
 package org.errai.samples.serialization.client.model;
 
+import com.google.gwt.user.client.rpc.IsSerializable;
 import org.jboss.errai.bus.server.annotations.ExposeEntity;
 
 import java.util.*;
@@ -27,6 +28,8 @@ public class Record {
     private float balance;
     private Date accountOpened;
     private RecordType type;
+
+    
 
     private Set<Item> stuff;
     private Map<String, String> properties;

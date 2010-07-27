@@ -25,6 +25,7 @@ import org.jboss.errai.bus.server.api.QueueSession;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -35,12 +36,7 @@ import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
  */
 @Singleton
 public class DefaultBlockingServlet extends AbstractErraiServlet {
-    /**
-     * Creates an instance of the <tt>DefaultBlockingServlet</tt>. Does nothing else
-     */
-    public DefaultBlockingServlet() {
 
-    }
 
     /**
      * Called by the server (via the <tt>service</tt> method) to allow a servlet to handle a GET request by supplying
@@ -92,28 +88,13 @@ public class DefaultBlockingServlet extends AbstractErraiServlet {
 
             queue.heartBeat();
 
-//            List<MarshalledMessage> messages = queue.poll(wait, stream).getMessages();
 
             httpServletResponse.setHeader("Cache-Control", "no-cache");
-            //     httpServletResponse.addHeader("Payload-Size", String.valueOf(messages.size()));
             httpServletResponse.setContentType("application/json");
 
             queue.poll(wait, httpServletResponse.getOutputStream());
 
-//            Iterator<MarshalledMessage> iter = messages.iterator();
-//
-//            stream.write('[');
-//            while (iter.hasNext()) {
-//                writeToOutputStream(stream, iter.next());
-//                if (iter.hasNext()) {
-//                    stream.write(',');
-//                }
-//            }
-//            stream.write(']');
-
             httpServletResponse.getOutputStream().close();
-
-
         }
         catch (final Throwable t) {
             t.printStackTrace();

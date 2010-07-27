@@ -14,11 +14,17 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.tests.client;
+package org.jboss.errai.bus.client;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.user.client.ui.*;
 
-public class BusTests implements EntryPoint {
+/**
+ * User: christopherbrock
+ * Date: 26-Jul-2010
+ * Time: 3:41:20 PM
+ */
+public class ErraiBusTests implements EntryPoint {
     public void onModuleLoad() {
     }
 }

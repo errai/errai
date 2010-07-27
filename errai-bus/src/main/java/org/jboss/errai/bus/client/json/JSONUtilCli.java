@@ -34,13 +34,13 @@ public class JSONUtilCli {
 
     public static ArrayList<MarshalledMessage> decodePayload(String value) {
         if (value == null || value.trim().length() == 0) return EMPTYLIST;
-        ArrayList<MarshalledMessage> list = new ArrayList<MarshalledMessage>();
-
         /**
          * We have to do a two-stage decoding of the message.  We cannot fully decode the message here, as we
          * cannot be sure the destination endpoint exists within this Errai bundle.  So we extract the ToSubject
          * field and send the unparsed JSON object onwards.
+         *
          */
+
         JSONValue val = JSONParser.parse(value);
         if (val == null) {
             return EMPTYLIST;
@@ -48,13 +48,14 @@ public class JSONUtilCli {
         JSONArray arr = val.isArray();
         if (arr == null) {
             throw new RuntimeException("unrecognized payload" + val.toString());
-        } 
-
+        }
+        ArrayList<MarshalledMessage> list = new ArrayList<MarshalledMessage>(arr.size());
         for (int i = 0; i < arr.size(); i++) {
             list.add(new MarshalledMessageImpl((JSONObject) arr.get(i)));
         }
 
         return list;
+
     }
 
     public static class MarshalledMessageImpl implements MarshalledMessage {

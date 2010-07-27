@@ -17,7 +17,7 @@ limitations under the License.
      # This class is used to generate the marshaller code used by the ErraiBus
      # serialization engine.
 
-}@declare{'extractor'}@{fieldName}:").append(jsonEncoder.encode(o.@{getter}())).append("@end{}
+}@declare{'extractor'}@{fieldName}:").append(jsonEncoder.encode(o.@{getter})).append("@end{}
 org.jboss.errai.common.client.types.TypeMarshallers.addMarshaller(
     @{className}.class,
     new org.jboss.errai.common.client.types.Marshaller<@{className}>() {
@@ -27,7 +27,8 @@ org.jboss.errai.common.client.types.TypeMarshallers.addMarshaller(
                 json.append(o.toString()).append("\"}");@else{}
                 StringBuilder json = new StringBuilder("{@{org.jboss.errai.common.client.protocols.SerializationParts.ENCODED_TYPE}:\"@{className}\",");
                 org.jboss.errai.common.client.json.JSONEncoderCli jsonEncoder = new org.jboss.errai.common.client.json.JSONEncoderCli();
-                json.append("@foreach{fieldName : fields}@code{isBool = Boolean.isAssignableFrom(org.mvel2.util.ParseTools.boxPrimitive(targetTypes.get(fieldName)));}@includeNamed{"extractor";fieldName=fieldName;targetType=targetTypes.get(fieldName);getter=isBool ? org.mvel2.util.ReflectionUtil.getIsGetter(fieldName) : org.mvel2.util.ReflectionUtil.getGetter(fieldName)}@end{","}}");@end{}
+                json.append("@foreach{fieldName : fields}@includeNamed{"extractor";fieldName=fieldName;targetType=targetTypes.get(fieldName);getter=getters.get(fieldName)}@end{","}}");@end{}
+
                 return json.toString();
             }
             catch (Exception e) {

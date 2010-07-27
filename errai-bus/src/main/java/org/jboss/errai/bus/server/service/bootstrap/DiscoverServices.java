@@ -298,7 +298,7 @@ class DiscoverServices implements BootstrapExecution {
             }
         }
         catch (MissingResourceException e) {
-            throw new ErraiBootstrapFailure("unable to find ErraiApp.properties in the classpath.");
+            log.warn("didn't find any modules to load. (not ErraiApp.properties bundles visible in classpath)");
         }
     }
 
