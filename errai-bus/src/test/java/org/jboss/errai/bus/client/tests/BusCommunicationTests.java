@@ -91,16 +91,23 @@ public class BusCommunicationTests extends GWTTestCase {
                 final SType sType1 = new SType();
                 sType1.setActive(true);
                 sType1.setEndDate(new Date(System.currentTimeMillis()));
-                sType1.setStartDate(new Date(System.currentTimeMillis() - 1000000));
+                sType1.setStartDate(new Date(System.currentTimeMillis() - 10000));
                 sType1.setFieldOne("One!");
                 sType1.setFieldTwo("Two!!");
+
                 bus.subscribe("ClientReceiver", new MessageCallback() {
                     public void callback(Message message) {
                         SType type = message.get(SType.class, "SType");
 
-                        assertNotNull(type);
-                        assertEquals(sType1.toString(), type.toString());
-                        System.out.println("CLIENT: " + type.toString());
+                        try {
+                            assertNotNull(type);
+                            assertTrue(sType1.equals(type));
+                            System.out.println("CLIENT: " + type.toString());
+                        }
+                        catch (Exception e) {
+                            e.printStackTrace();
+                            fail();
+                        }
                         finishTest();
                     }
                 });
@@ -116,5 +123,9 @@ public class BusCommunicationTests extends GWTTestCase {
         delayTestFinish(5000);
     }
 
+
+    public static void main(String[] args) {
+        System.out.println(new Date(1280252822185l));
+    }
 
 }

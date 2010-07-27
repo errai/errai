@@ -175,6 +175,8 @@ public class JSONStreamDecoder {
                         } else  {
                             ctx.addValue(s);
                         }
+
+                        if (c != 0) carry = c;
                     }
             }
         }
@@ -210,7 +212,7 @@ public class JSONStreamDecoder {
         long val = 0;
         double dVal = 0;
 
-        int factor = 1;
+        long factor = 1;
         boolean dbl = false;
 
         char[] buf = new char[21];
