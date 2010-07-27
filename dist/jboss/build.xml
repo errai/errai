@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="errai-cdi-jboss" default="all">
+
+    <property file="deployment.properties"/>
+    <property environment="env"/>
+    
+    <target name="service-archive" description="Deploy the service archive">
+
+        <delete dir="${jboss.deploy.full}/${errai.jboss.sar}"/>
+
+        <mkdir dir="${jboss.deploy.full}/${errai.jboss.sar}"/>
+        <mkdir dir="${jboss.deploy.full}/${errai.jboss.sar}/lib"/>
+        <mkdir dir="${jboss.deploy.full}/${errai.jboss.sar}/META-INF"/>
+        
+        <copy todir="${jboss.deploy.full}/${errai.jboss.sar}/lib">
+            <!-- CDI libs -->
+            <fileset dir="lib">
+                <include name="*.jar"/>
+            </fileset>
+
+            <!-- global libs -->
+            <fileset dir="../../lib">
+                <include name="*.jar"/>
+            </fileset>
+        </copy>
+
+        <copy todir="${jboss.deploy.full}/${errai.jboss.sar}">
+            <fileset dir="resources">
+                <include name="**/*"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="all" depends="service-archive">
+        <echo>Errai CDI integration module has been successfully deployed to '${jboss.home}'</echo>        
+    </target>
+</project>

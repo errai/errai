@@ -40,6 +40,18 @@
         </dependencySet>
 
         <dependencySet>
+            <outputFileNameMapping>${artifact.artifactId}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <unpack>false</unpack>
+            <scope>test</scope>
+            <includes>
+                <!-- CDI Extension Libraries -->
+                <include>org.jboss.errai:errai-cdi</include>
+            </includes>
+            <outputDirectory>ext/cdi/lib</outputDirectory>
+        </dependencySet>
+
+
+        <dependencySet>
             <unpack>false</unpack>
             <scope>test</scope>
             <includes>
@@ -69,6 +81,11 @@
                 <exclude>**/*.iml</exclude>
                 <exclude>**/target/**</exclude>
             </excludes>
-        </fileSet>        
+        </fileSet>
+
+        <fileSet>
+            <directory>jboss/</directory>
+            <outputDirectory>/ext/cdi</outputDirectory>            
+        </fileSet>
     </fileSets>
 </assembly>

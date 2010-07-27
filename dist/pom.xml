@@ -42,6 +42,11 @@
             <version>${version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.jboss.errai</groupId>
+            <artifactId>errai-ioc</artifactId>
+            <version>${version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.jboss.errai</groupId>
@@ -59,6 +64,19 @@
             <groupId>org.jboss.errai</groupId>
             <artifactId>errai-persistence</artifactId>
             <version>${version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.errai</groupId>
+            <artifactId>errai-tools</artifactId>
+            <version>${version}</version>
+        </dependency>
+
+        <!-- CDI Extension -->
+        <dependency>
+            <groupId>org.jboss.errai</groupId>
+            <artifactId>errai-cdi</artifactId>
+            <version>${errai.cdi-version}</version>
         </dependency>
                 
     </dependencies>
