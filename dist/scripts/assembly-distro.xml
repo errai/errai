@@ -27,6 +27,8 @@
                 <include>org.jboss.errai:errai-bus</include>
                 <include>org.jboss.errai:errai-workspaces</include>
                 <include>org.jboss.errai:errai-widgets</include>
+                <include>org.jboss.errai:errai-ioc</include>
+                <include>org.jboss.errai:errai-tools</include>
                 <!--include>org.jboss.errai:errai-persistence</include-->
 
                 <!-- 3rd Party -->
