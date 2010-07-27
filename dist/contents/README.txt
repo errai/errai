@@ -25,7 +25,10 @@ before reading any further:
     |---helloworld
     |---queryservice
     |---serialization
-    |-lib    
+    |-ext
+    |---cdi
+    |-lib
+    
 
 The examples document the core features that currently ship with Errai:
 
@@ -33,6 +36,10 @@ The examples document the core features that currently ship with Errai:
     - helloworld: everyone has to have one
     - queryservice: using a request/response pattern across the bus
     - serialization: sending pojo's over the bus 
+
+The extension directory contains optional functionality that you maybe interested in.
+Please check each extension subdirectory and the userguide for further details.
+
 
 [Running the examples]
 
@@ -46,6 +53,7 @@ application using any web browser available on your system.
 
 Alternatively you can import the example in your IDE
 (simply import the maven structure) and launch them using your IDE GWT plugin.
+
 
 [Troubleshooting]
 
