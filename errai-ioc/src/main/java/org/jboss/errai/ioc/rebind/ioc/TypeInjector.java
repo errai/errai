@@ -49,7 +49,7 @@ public class TypeInjector extends Injector {
             }
         }
 
-        ConstructionStrategy cs = InjectUtil.getConstructionStrategy(this, injectContext);
+        ConstructionStrategy cs = InjectUtil.getConstructionStrategy(this, injectContext, injectionPoint);
 
         String generated = cs.generateConstructor();
         injectContext.getProcessingContext().getWriter().print(generated);
@@ -83,6 +83,4 @@ public class TypeInjector extends Injector {
     public JClassType getInjectedType() {
         return type;
     }
-
-
 }

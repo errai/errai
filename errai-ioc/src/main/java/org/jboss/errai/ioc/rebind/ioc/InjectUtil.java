@@ -36,12 +36,13 @@ public class InjectUtil {
 
     private static final AtomicInteger counter = new AtomicInteger(0);
 
-    public static ConstructionStrategy getConstructionStrategy(final Injector injector, final InjectionContext ctx) {
+    public static ConstructionStrategy getConstructionStrategy(final Injector injector, final InjectionContext ctx, final InjectionPoint injectionPoint) {
         final JClassType type = injector.getInjectedType();
 
         final List<JConstructor> constructorInjectionPoints = scanForConstructorInjectionPoints(type);
         final List<InjectionTask> injectionTasks = scanForTasks(injector, ctx, type);
         final List<JMethod> postConstructTasks = scanForPostConstruct(type);
+
 
         if (!constructorInjectionPoints.isEmpty()) {
             // constructor injection
@@ -98,6 +99,7 @@ public class InjectUtil {
             };
         }
     }
+
 
     private static void handleInjectionTasks(StringAppender appender, InjectionContext ctx,
                                              List<InjectionTask> tasks) {
@@ -187,13 +189,13 @@ public class InjectUtil {
                             if (meth.isAnnotationPresent(a)) {
                                 accumulator.add(new DecoratorTask(injector, meth, ctx.getDecorator(a)));
                             }
-                            break;                            
+                            break;
                         case PARAMETER:
                             for (JParameter parameter : meth.getParameters()) {
                                 if (parameter.isAnnotationPresent(a)) {
-                                  DecoratorTask task = new DecoratorTask(injector, parameter, ctx.getDecorator(a));
-                                  task.setMethod(meth);
-                                  accumulator.add(task);
+                                    DecoratorTask task = new DecoratorTask(injector, parameter, ctx.getDecorator(a));
+                                    task.setMethod(meth);
+                                    accumulator.add(task);
                                 }
                             }
                     }

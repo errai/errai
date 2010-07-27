@@ -123,9 +123,4 @@ public class BusCommunicationTests extends GWTTestCase {
         delayTestFinish(5000);
     }
 
-
-    public static void main(String[] args) {
-        System.out.println(new Date(1280252822185l));
-    }
-
 }

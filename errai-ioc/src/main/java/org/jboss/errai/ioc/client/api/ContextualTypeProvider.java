@@ -16,6 +16,11 @@
 
 package org.jboss.errai.ioc.client.api;
 
-public interface TypeProvider<T> {
-    public T provide();
+/**
+ * User: christopherbrock
+ * Date: 27-Jul-2010
+ * Time: 3:44:27 PM
+ */
+public interface ContextualTypeProvider<T> {
+    public T provide(Class[] typeargs);
 }

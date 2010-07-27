@@ -36,10 +36,11 @@ public class InjectionContext {
     }
 
     public Injector getInjector(JClassType type) {
-        if (!injectors.containsKey(type)) {
-            throw new InjectionFailure("could not resolve type for injection: " + type.getQualifiedSourceName());
+        JClassType erased = type.getErasedType();
+        if (!injectors.containsKey(erased)) {
+            throw new InjectionFailure("could not resolve type for injection: " + erased.getQualifiedSourceName());
         }
-        return injectors.get(type);
+        return injectors.get(erased);
     }
 
     public List<Injector> getInjectorsByType(Class<? extends Injector> injectorType) {
@@ -54,7 +55,7 @@ public class InjectionContext {
 
     public void registerInjector(Injector injector) {
         if (!injectors.containsKey(injector.getInjectedType()))
-            injectors.put(injector.getInjectedType(), injector);
+            injectors.put(injector.getInjectedType().getErasedType(), injector);
     }
 
     public void registerDecorator(Decorator<?> decorator) {

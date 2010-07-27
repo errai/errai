@@ -14,8 +14,23 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.client.api;
+package org.errai.samples.helloworld.client;
 
-public interface TypeProvider<T> {
-    public T provide();
+import com.google.gwt.user.client.Window;
+import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
+
+/**
+ * User: christopherbrock
+ * Date: 27-Jul-2010
+ * Time: 3:26:55 PM
+ */
+
+public class ThingProvider implements ContextualTypeProvider<Thing> {
+    public Thing provide(final Class... typeargs) {
+        return new Thing() {
+            public void doThing(Object o) {
+                Window.alert("Weeee! " + typeargs[0]);
+            }
+        };
+    }
 }

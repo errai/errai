@@ -14,8 +14,17 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.client.api;
+package org.errai.samples.helloworld.client;
 
-public interface TypeProvider<T> {
-    public T provide();
+import org.jboss.errai.ioc.client.api.GeneratedBy;
+
+/**
+ * User: christopherbrock
+ * Date: 27-Jul-2010
+ * Time: 2:57:04 PM
+ */
+
+@GeneratedBy(ThingProvider.class)
+public interface Thing<T> {
+    public void doThing(T t);
 }

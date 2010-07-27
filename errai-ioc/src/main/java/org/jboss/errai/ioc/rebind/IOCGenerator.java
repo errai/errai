@@ -237,6 +237,16 @@ public class IOCGenerator extends Generator {
                     final JClassType finalBindType = bindType;
 
                     injectFactory.addInjector(new ProviderInjector(finalBindType, visit));
+                } else if (visit.isAnnotationPresent(GeneratedBy.class)) {
+                    GeneratedBy anno = visit.getAnnotation(GeneratedBy.class);
+                    Class<? extends ContextualTypeProvider> injectorClass = anno.value();
+
+                    try {
+                        injectFactory.addInjector(new ContextualProviderInjector(visit, getJClassType(injectorClass)));
+                    }
+                    catch (Exception e) {
+                        throw new ErraiBootstrapFailure("could not load injector: " + e.getMessage(), e);
+                    }
                 }
             }
 
@@ -376,6 +386,7 @@ public class IOCGenerator extends Generator {
                 }
             }
         });
+
 
 //        procFactory.registerHandler(Service.class, new AnnotationHandler<Service>() {
 //            public void handle(final JClassType type, final Service annotation, final ProcessingContext context) {
