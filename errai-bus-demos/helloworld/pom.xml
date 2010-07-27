@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <name>Errai::Bus::Demos::HelloWorld</name>
     <groupId>org.jboss.errai</groupId>
@@ -13,7 +14,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <dependencies>      
+    <dependencies>
         <dependency>
             <groupId>org.jboss.errai</groupId>
             <artifactId>errai-bus</artifactId>
@@ -31,6 +32,14 @@
             <artifactId>errai-ioc</artifactId>
             <version>${version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>client.javax.enterprise</groupId>
+            <artifactId>gwtclient-javax-enterprise</artifactId>
+            <version>1.0</version>
+        </dependency>
+
+
     </dependencies>
 
     <build>
@@ -41,7 +50,7 @@
                 <directory>src/main/java</directory>
             </resource>
         </resources>
-        
+
         <plugins>
 
             <plugin>
@@ -96,10 +105,10 @@
                                     the plugin and remove all GWT related artifacts that are required
                                     to run the hosted mode.
                                 -->
-                                <delete dir="war/WEB-INF/classes" />
-                                <delete dir="war/WEB-INF/lib" />
-                                <delete dir="war/HelloWorld" />
-                                <delete dir="target" />
+                                <delete dir="war/WEB-INF/classes"/>
+                                <delete dir="war/WEB-INF/lib"/>
+                                <delete dir="war/HelloWorld"/>
+                                <delete dir="target"/>
 
                             </tasks>
                         </configuration>

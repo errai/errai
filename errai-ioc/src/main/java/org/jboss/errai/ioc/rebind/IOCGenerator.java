@@ -236,7 +236,20 @@ public class IOCGenerator extends Generator {
 
                     final JClassType finalBindType = bindType;
 
-                    injectFactory.addInjector(new ProviderInjector(finalBindType, visit));
+                    boolean contextual = false;
+                    for (JClassType iface : visit.getImplementedInterfaces()) {
+                        if (iface.getQualifiedSourceName().equals(ContextualProviderInjector.class.getName())) {
+                            contextual = true;
+                            break;
+                        }
+                    }
+
+                    if (contextual) {
+                        injectFactory.addInjector(new ContextualProviderInjector(finalBindType, visit));
+                        
+                    } else {
+                        injectFactory.addInjector(new ProviderInjector(finalBindType, visit));
+                    }
                 } else if (visit.isAnnotationPresent(GeneratedBy.class)) {
                     GeneratedBy anno = visit.getAnnotation(GeneratedBy.class);
                     Class<? extends ContextualTypeProvider> injectorClass = anno.value();
