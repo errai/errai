@@ -187,11 +187,13 @@ public class InjectUtil {
                             if (meth.isAnnotationPresent(a)) {
                                 accumulator.add(new DecoratorTask(injector, meth, ctx.getDecorator(a)));
                             }
-                            break;
+                            break;                            
                         case PARAMETER:
                             for (JParameter parameter : meth.getParameters()) {
                                 if (parameter.isAnnotationPresent(a)) {
-                                    accumulator.add(new DecoratorTask(injector, parameter, ctx.getDecorator(a)));
+                                  DecoratorTask task = new DecoratorTask(injector, parameter, ctx.getDecorator(a));
+                                  task.setMethod(meth);
+                                  accumulator.add(task);
                                 }
                             }
                     }

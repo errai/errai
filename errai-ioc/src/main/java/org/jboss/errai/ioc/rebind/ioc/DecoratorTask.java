@@ -60,6 +60,9 @@ public class DecoratorTask extends InjectionTask {
                     if (anno == null && field != null) {
                         anno = field.getAnnotation(dec.decoratesWith());
                     }
+                    else if (anno == null && parm != null) {
+                        anno = parm.getAnnotation(dec.decoratesWith());
+                    }
                     break;
                 case Type:
                     anno = type.getAnnotation(dec.decoratesWith());
