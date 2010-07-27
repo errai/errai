@@ -103,7 +103,7 @@
         <dependency>
             <groupId>com.google.gwt</groupId>
             <artifactId>gwt-user</artifactId>
-            <scope>compile</scope>
+            <scope>provided</scope>
             <version>${gwt.version}</version>
         </dependency>
 
