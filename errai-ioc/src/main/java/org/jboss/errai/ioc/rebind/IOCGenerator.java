@@ -220,22 +220,32 @@ public class IOCGenerator extends Generator {
                     for (JClassType iface : visit.getImplementedInterfaces()) {
                         if (iface.getQualifiedSourceName().equals(ContextualTypeProvider.class.getName())) {
                             contextual = true;
+
+                            JParameterizedType pType = iface.isParameterized();
+
+                            if (pType == null) {
+                                throw new InjectionFailure("could not determine the bind type for the Provider class: " + visit.getQualifiedSourceName());
+                            }
+
+                            bindType = pType.getTypeArgs()[0];
                             break;
                         }
                     }
 
-                    for (JClassType iface : visit.getImplementedInterfaces()) {
-                        if (!contextual && !typeProviderCls.isAssignableFrom(iface)) {
-                            continue;
+                    if (bindType == null) {
+                        for (JClassType iface : visit.getImplementedInterfaces()) {
+                            if (!typeProviderCls.isAssignableFrom(iface)) {
+                                continue;
+                            }
+
+                            JParameterizedType pType = iface.isParameterized();
+
+                            if (pType == null) {
+                                throw new InjectionFailure("could not determine the bind type for the Provider class: " + visit.getQualifiedSourceName());
+                            }
+
+                            bindType = pType.getTypeArgs()[0];
                         }
-
-                        JParameterizedType pType = iface.isParameterized();
-
-                        if (pType == null) {
-                            throw new InjectionFailure("could not determine the bind type for the Provider class: " + visit.getQualifiedSourceName());
-                        }
-
-                        bindType = pType.getTypeArgs()[0];
                     }
 
                     if (bindType == null) {
