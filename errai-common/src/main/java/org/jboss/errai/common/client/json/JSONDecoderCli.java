@@ -36,9 +36,14 @@ public class JSONDecoderCli {
         if (value instanceof String) {
             return _decode(JSONParser.parse((String) value));
         }
-        else {
+        else if (value instanceof JSONObject) {
             return _decode((JSONObject) value);
         }
+        else if (value != null) {
+            throw new RuntimeException("could not decode type: " + value.getClass());
+        }
+        
+        return null;
     }
 
     private Object _decode(JSONValue v) {

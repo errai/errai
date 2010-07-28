@@ -289,8 +289,6 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
 
         private DateFormat formatter = new SimpleDateFormat("hh:mm:ss.SSS");
 
-        private boolean scrollLock;
-
         @Override
         public String getColumnName(int column) {
             return COLS[column];
