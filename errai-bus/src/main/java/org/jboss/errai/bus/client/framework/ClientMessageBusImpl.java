@@ -422,8 +422,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     private void transmitRemote(final String message, final Message txMessage) {
         if (message == null) return;
 
-        System.out.println("CLIENT_TX: " + message);
-
         try {
             sendBuilder.sendRequest(message, new RequestCallback() {
                 public void onResponseReceived(Request request, Response response) {

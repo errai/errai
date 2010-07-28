@@ -33,7 +33,12 @@ import static org.jboss.errai.common.client.types.TypeDemarshallers.hasDemarshal
 
 public class JSONDecoderCli {
     public Object decode(Object value) {
-        return _decode(JSONParser.parse(String.valueOf(value)));
+        if (value instanceof String) {
+            return _decode(JSONParser.parse((String) value));
+        }
+        else {
+            return _decode((JSONObject) value);
+        }
     }
 
     private Object _decode(JSONValue v) {
@@ -61,8 +66,7 @@ public class JSONDecoderCli {
                 String className = eMap.get(key).isString().stringValue();
                 if (hasDemarshaller(className)) {
                     try {
-                        Object o = getDemarshaller(className).demarshall(eMap);
-                        return o;
+                        return getDemarshaller(className).demarshall(eMap);
                     }
                     catch (Throwable t) {
                         t.printStackTrace();
