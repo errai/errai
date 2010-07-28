@@ -57,9 +57,6 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
 
     protected WindowListener defaultWindowListener;
 
-    private String currentSearchFilter;
-
-
     public ServiceActivityMonitor(final ServerMonitorPanel serverMonitor, final String busId, final String service) {
         this.serverMonitor = serverMonitor;
         this.busId = busId;
@@ -145,7 +142,7 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
         getLayeredPane().getActionMap().put("esc-pressed", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
                 if (tableModel.isFiltered()) {
-                    SwingUtilities.invokeLater(new Runnable() {
+                   invokeLater(new Runnable() {
                         public void run() {
                             activityTable.clearSelection();
                             tableModel.setFilterTerm(null);
@@ -453,7 +450,7 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
                         final String val = searchField.getText();
                         searchField.setText("");
 
-                        SwingUtilities.invokeLater(new Runnable() {
+                        invokeLater(new Runnable() {
                             public void run() {
                                 setVisible(false);
                                 activityTable.clearSelection();
