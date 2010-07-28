@@ -17,6 +17,7 @@
 package org.jboss.errai.tools.monitoring;
 
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.server.util.ServerBusUtils;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -30,12 +31,15 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import static java.lang.System.currentTimeMillis;
 import static javax.swing.SwingUtilities.invokeLater;
-import static org.jboss.errai.tools.monitoring.UiHelper.uglyReEncode;
 
 public class ServiceActivityMonitor extends JFrame implements Attachable {
+    private JTable activityTable;
+    private JTable detailsTable;
     private ActivityMonitorTableModel tableModel;
     private MessageDetailsTableModel detailsModel;
 
@@ -53,29 +57,35 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
 
     protected WindowListener defaultWindowListener;
 
+    private String currentSearchFilter;
+
+
     public ServiceActivityMonitor(final ServerMonitorPanel serverMonitor, final String busId, final String service) {
         this.serverMonitor = serverMonitor;
         this.busId = busId;
         this.service = service;
 
-        setTitle(service + "@" + busId);
+        updateTitle(null);
 
         tableModel = new ActivityMonitorTableModel();
 
-        final JTable activityTable = new JTable(tableModel);
+        activityTable = new JTable(tableModel);
+
+
         activityTable.setDefaultRenderer(Message.class, new MessageCellRenderer());
         activityTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
 
         detailsModel = new MessageDetailsTableModel();
 
-        final JTable detailsTable = new JTable(detailsModel);
+        detailsTable = new JTable(detailsModel);
         activityTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
 
         activityTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             public void valueChanged(ListSelectionEvent e) {
                 detailsModel.clear();
 
-                Message m = (Message) tableModel.getValueAt(activityTable.getSelectedRow(), 1);
+                Message m = UiHelper.uglyReEncode((String) tableModel.getValueAt(activityTable.getSelectedRow(), 1));
+                if (m == null) return;
 
                 for (Map.Entry<String, Object> entry : m.getParts().entrySet()) {
                     detailsModel.addPart(entry.getKey(), entry.getValue());
@@ -92,7 +102,7 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
                     public void run() {
                         if (detailsTable.getSelectedRow() == -1 &&
                                 detailsTable.getSelectedRow() >= detailsModel.getRowCount()) return;
-                        explorer.setRoot(detailsModel.getValueAt(detailsTable.getSelectedRow(), 1));
+                        explorer.setRoot(UiHelper.uglyReEncode((String) detailsModel.getValueAt(detailsTable.getSelectedRow(), 1)));
                         explorer.buildTree();
                     }
                 });
@@ -100,12 +110,56 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
         });
 
         final JScrollPane activityScroll;
-        JSplitPane bottomSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+        final JSplitPane bottomSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
                 new JScrollPane(detailsTable), new JScrollPane(explorer = new ObjectExplorer()));
         bottomSplit.setDividerLocation(300);
 
-        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-                activityScroll = new JScrollPane(activityTable), bottomSplit);
+
+        final JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+                activityScroll = new JScrollPane(activityTable),
+                bottomSplit);
+
+
+        activityTable.addKeyListener(new KeyListener() {
+            public void keyTyped(KeyEvent e) {
+                if (!Character.isWhitespace(e.getKeyChar()) || e.getKeyChar() == '\n') {
+                    searchDialog.setAlwaysOnTop(true);
+                    searchDialog.setLocationRelativeTo(ServiceActivityMonitor.this);
+                    if (e.getKeyChar() != '\n') searchDialog.keyTyped(e);
+                    searchDialog.setVisible(true);
+                }
+            }
+
+            public void keyPressed(KeyEvent e) {
+            }
+
+            public void keyReleased(KeyEvent e) {
+            }
+        });
+
+        KeyStroke escKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
+
+        getLayeredPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+                .put(escKeyStroke, "esc-pressed");
+
+        getLayeredPane().getActionMap().put("esc-pressed", new AbstractAction() {
+            public void actionPerformed(ActionEvent e) {
+                if (tableModel.isFiltered()) {
+                    SwingUtilities.invokeLater(new Runnable() {
+                        public void run() {
+                            activityTable.clearSelection();
+                            tableModel.setFilterTerm(null);
+                            activityTable.setModel(tableModel);
+                            tableModel.fireTableDataChanged();
+                            updateTitle(null);
+                        }
+                    });
+
+                }
+            }
+        });
+
+
         splitPane.setDividerLocation(150);
 
         final JScrollBar vertScroll = activityScroll.getVerticalScrollBar();
@@ -193,11 +247,16 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
         });
     }
 
-    public class AcvityLogEntry {
-        private long time;
-        private Message message;
+    public void updateTitle(String s) {
+        if (s == null) setTitle(service + "@" + busId);
+        else setTitle(service + "@" + busId + ": " + s);
+    }
 
-        public AcvityLogEntry(long time, Message message) {
+    public class ActivityLogEntry {
+        private long time;
+        private String message;
+
+        public ActivityLogEntry(long time, String message) {
             this.time = time;
             this.message = message;
         }
@@ -210,23 +269,26 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
             this.time = time;
         }
 
-        public Message getMessage() {
+        public String getMessage() {
             return message;
         }
 
-        public void setMessage(Message message) {
+        public void setMessage(String message) {
             this.message = message;
         }
     }
 
     public class ActivityMonitorTableModel extends AbstractTableModel {
-        private ArrayList<AcvityLogEntry> messages = new ArrayList<AcvityLogEntry>();
+        private ArrayList<ActivityLogEntry> messages = new ArrayList<ActivityLogEntry>();
+        private ArrayList<ActivityLogEntry> filteredMessages = new ArrayList<ActivityLogEntry>();
+
+        private volatile Pattern filter = null;
 
         private final String[] COLS
                 = {"Time", "Message Contents"};
 
         private final Class[] TYPES
-                = {String.class, Message.class};
+                = {String.class, String.class};
 
         private DateFormat formatter = new SimpleDateFormat("hh:mm:ss.SSS");
 
@@ -238,7 +300,7 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
         }
 
         public int getRowCount() {
-            return messages.size();
+            return filter == null ? messages.size() : filteredMessages.size();
         }
 
         public int getColumnCount() {
@@ -246,11 +308,21 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
         }
 
         public Object getValueAt(int rowIndex, int columnIndex) {
-            switch (columnIndex) {
-                case 0:
-                    return formatter.format(new Date(messages.get(rowIndex).getTime()));
-                case 1:
-                    return messages.get(rowIndex).getMessage();
+            if (rowIndex == -1) return null;
+            if (filter == null) {
+                switch (columnIndex) {
+                    case 0:
+                        return formatter.format(new Date(messages.get(rowIndex).getTime()));
+                    case 1:
+                        return messages.get(rowIndex).getMessage();
+                }
+            } else {
+                switch (columnIndex) {
+                    case 0:
+                        return formatter.format(new Date(filteredMessages.get(rowIndex).getTime()));
+                    case 1:
+                        return filteredMessages.get(rowIndex).getMessage();
+                }
             }
 
             return null;
@@ -261,11 +333,41 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
             return TYPES[columnIndex];
         }
 
-        public void addMessage(long time, Message message) {
-            messages.add(new AcvityLogEntry(time, message));
-            fireTableRowsInserted(messages.size() - 1, messages.size() - 1);
+        public void addMessage(long time, String message) {
+            ActivityLogEntry entry = new ActivityLogEntry(time, message);
+            messages.add(entry);
+            if (filter != null) {
+                if (filter.matcher(message).find()) {
+                    filteredMessages.add(entry);
+                    fireTableRowsInserted(filteredMessages.size() - 1, filteredMessages.size() - 1);
+                }
+
+            } else {
+                fireTableRowsInserted(messages.size() - 1, messages.size() - 1);
+            }
         }
 
+        public void setFilterTerm(String filterTerm) {
+            if (filterTerm != null && filterTerm.length() != 0) {
+                Pattern filter = Pattern.compile(filterTerm);
+                this.filteredMessages.clear();
+                for (ActivityLogEntry entry : messages) {
+                    if (filter.matcher(entry.getMessage()).find()) {
+                        filteredMessages.add(entry);
+                    }
+                }
+                this.filter = filter;
+
+            } else {
+                this.filter = null;
+                this.filteredMessages.clear();
+            }
+
+        }
+
+        public boolean isFiltered() {
+            return this.filter != null;
+        }
     }
 
     public class MessageDetailsTableModel extends AbstractTableModel {
@@ -318,6 +420,92 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
         }
     }
 
+    class SearchDialog extends JFrame {
+        JTextField searchField;
+        KeyEvent preEvent;
+
+        public SearchDialog() {
+            setUndecorated(true);
+
+            setSize(300, 30);
+            searchField = new JTextField();
+            //searchField.setSize(300, 30);
+
+            getContentPane().add(searchField);
+
+
+            KeyStroke escKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
+
+            getLayeredPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+                    .put(escKeyStroke, "esc-pressed");
+
+            getLayeredPane().getActionMap().put("esc-pressed", new AbstractAction() {
+                public void actionPerformed(ActionEvent e) {
+                    searchField.setText("");
+                    preEvent = null;
+                    setVisible(false);
+                }
+            });
+
+            searchField.addKeyListener(new KeyListener() {
+                public void keyTyped(KeyEvent e) {
+                    if (e.getKeyChar() == '\n') {
+                        final String val = searchField.getText();
+                        searchField.setText("");
+
+                        SwingUtilities.invokeLater(new Runnable() {
+                            public void run() {
+                                setVisible(false);
+                                activityTable.clearSelection();
+                                try {
+                                    tableModel.setFilterTerm(val);
+                                }
+                                catch (PatternSyntaxException e) {
+                                    JOptionPane.showMessageDialog(new JFrame(), e.getMessage(), "Dialog",
+                                            JOptionPane.ERROR_MESSAGE);
+                                    return;
+                                }
+
+                                activityTable.setModel(tableModel);
+                                tableModel.fireTableDataChanged();
+                                updateTitle("Filtering[\"" + val + "\"]");
+                            }
+                        });
+
+                    }
+                }
+
+                public void keyPressed(KeyEvent e) {
+                }
+
+                public void keyReleased(KeyEvent e) {
+                }
+            });
+
+            searchField.addFocusListener(new FocusListener() {
+                public void focusGained(FocusEvent e) {
+                    if (preEvent != null) {
+                        searchField.setText(new String(new char[]{preEvent.getKeyChar()}));
+                        searchField.setCaretPosition(1);
+                        preEvent = null;
+                    }
+                }
+
+                public void focusLost(FocusEvent e) {
+                }
+            });
+
+        }
+
+        public void keyTyped(KeyEvent s) {
+            preEvent = s;
+        }
+
+
+    }
+
+    private SearchDialog searchDialog = new SearchDialog();
+
 
     public void notifyMessage(long time, Message message) {
         /*
@@ -326,7 +514,7 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
          * it would be wacky to make the monitoring API such that we had to scan for one or the other, this
          * is much more consistent from an API point-of-view.
          */
-        tableModel.addMessage(time, uglyReEncode(message));
+        tableModel.addMessage(time, ServerBusUtils.encodeJSON(message.getParts()));
     }
 
     public void attach(ActivityProcessor proc) {

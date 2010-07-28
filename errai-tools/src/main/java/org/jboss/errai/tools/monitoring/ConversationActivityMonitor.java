@@ -28,7 +28,7 @@ public class ConversationActivityMonitor extends ServiceActivityMonitor {
 
     public ConversationActivityMonitor(final ServerMonitorPanel serverMonitor, final String busId, final String service) {
         super(serverMonitor, busId, service);
-        setTitle("Conversations: " + service + "@" + busId);
+        updateTitle(null);
 
         removeWindowListener(defaultWindowListener);
 
@@ -72,5 +72,10 @@ public class ConversationActivityMonitor extends ServiceActivityMonitor {
         });
 
         proc.notifyEvent(System.currentTimeMillis(), EventType.REPLAY_MESSAGES, SubEventType.NONE, null, null, service + "%:RespondTo:%", null, null, false);
+    }
+
+    public void updateTitle(String s) {
+        if (s == null) setTitle("Conversations: " + service + "@" + busId);
+        else setTitle("Conversations: " + service + "@" + busId + ": " + s);
     }
 }

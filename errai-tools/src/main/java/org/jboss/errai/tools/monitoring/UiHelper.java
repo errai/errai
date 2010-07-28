@@ -48,6 +48,17 @@ public class UiHelper {
         return new DefaultMutableTreeNode(new JLabel(name, getSwIcon(icon), SwingConstants.LEFT));
     }
 
+    public static Message uglyReEncode(String message) {
+        if (message == null) return null;
+        Map<String, Object> parts = (Map<String, Object>) JSONDecoder.decode(message);
+
+        Message newMessage = CommandMessage.createWithParts(parts);
+        if (parts.containsKey(SerializationParts.MARSHALLED_TYPES)) {
+            TypeDemarshallHelper.demarshallAll((String) parts.get(SerializationParts.MARSHALLED_TYPES), newMessage);
+        }
+        return newMessage;
+    }
+
     public static Message uglyReEncode(Message message) {
         Map<String, Object> parts = (Map<String, Object>) JSONDecoder.decode(ServerBusUtils.encodeJSON(message.getParts()));
 

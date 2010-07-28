@@ -119,7 +119,7 @@ public class ObjectExplorer extends JTree {
             return;
         }
 
-        final DefaultMutableTreeNode placeholder = new DefaultMutableTreeNode("<Loading ...>");
+        final DefaultMutableTreeNode placeholder = new DefaultMutableTreeNode("<...>");
         node.add(placeholder);
 
         Runnable r = new Runnable() {
