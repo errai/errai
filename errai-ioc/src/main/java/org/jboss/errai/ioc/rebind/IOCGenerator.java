@@ -216,8 +216,16 @@ public class IOCGenerator extends Generator {
 
                     JClassType bindType = null;
 
+                    boolean contextual = false;
                     for (JClassType iface : visit.getImplementedInterfaces()) {
-                        if (!typeProviderCls.isAssignableFrom(iface)) {
+                        if (iface.getQualifiedSourceName().equals(ContextualTypeProvider.class.getName())) {
+                            contextual = true;
+                            break;
+                        }
+                    }
+
+                    for (JClassType iface : visit.getImplementedInterfaces()) {
+                        if (!contextual && !typeProviderCls.isAssignableFrom(iface)) {
                             continue;
                         }
 
@@ -236,17 +244,9 @@ public class IOCGenerator extends Generator {
 
                     final JClassType finalBindType = bindType;
 
-                    boolean contextual = false;
-                    for (JClassType iface : visit.getImplementedInterfaces()) {
-                        if (iface.getQualifiedSourceName().equals(ContextualProviderInjector.class.getName())) {
-                            contextual = true;
-                            break;
-                        }
-                    }
-
                     if (contextual) {
                         injectFactory.addInjector(new ContextualProviderInjector(finalBindType, visit));
-                        
+
                     } else {
                         injectFactory.addInjector(new ProviderInjector(finalBindType, visit));
                     }

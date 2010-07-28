@@ -27,9 +27,6 @@ public class HelloWorld extends VerticalPanel implements MessageCallback
     private MessageBus bus;
 
     @Inject
-    public Thing<String> thing;
-
-    @Inject
     public HelloWorld(MessageBus bus) {
         this.bus = bus;
     }

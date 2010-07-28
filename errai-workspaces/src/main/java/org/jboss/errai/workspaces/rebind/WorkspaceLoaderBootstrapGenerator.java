@@ -27,7 +27,6 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
-import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.rebind.ProcessingContext;
 import org.jboss.errai.bus.server.annotations.security.RequireRoles;
 import org.jboss.errai.bus.server.util.ConfigUtil;
@@ -203,7 +202,12 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
                 new RebindVisitor() {
                     public void visit(JClassType clazz, GeneratorContext context, TreeLogger logger,
                                       SourceWriter writer) {
-                        visitTool(clazz, context, writer, logger, applyFilter, enabledTools);
+                        try {
+                            visitTool(clazz, context, writer, logger, applyFilter, enabledTools);
+                        }
+                        catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
 
                     public void visitError(String className, Throwable t) {
