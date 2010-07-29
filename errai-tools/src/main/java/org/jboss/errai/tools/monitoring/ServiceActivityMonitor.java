@@ -490,6 +490,9 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
                 }
 
                 public void focusLost(FocusEvent e) {
+                    searchField.setText("");
+                    preEvent = null;
+                    setVisible(false);
                 }
             });
 
