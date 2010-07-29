@@ -208,7 +208,7 @@ public class JSONDecoder {
 
     public static long _parseLong(char[] s, int start, int length) {
         long val = 0;
-        int factor = 1;
+        long factor = 1;
         for (int i = start-- + length - 1; i != start; i--) {
             switch (s[i]) {
                 case '-':
@@ -254,7 +254,7 @@ public class JSONDecoder {
 
     public static double _parseDouble(char[] s, int start, int length) {
         double val = 0;
-        int factor = 1;
+        long factor = 1;
         for (int i = start-- + length - 1; i != start; i--) {
             switch (s[i]) {
                 case '.':
