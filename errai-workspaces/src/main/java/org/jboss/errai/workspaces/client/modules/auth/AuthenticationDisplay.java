@@ -33,136 +33,138 @@ import org.gwt.mosaic.ui.client.layout.LayoutPanel;
  * A mosaic based based login box
  */
 public class AuthenticationDisplay extends LayoutPanel
-        implements AuthenticationModule.Display
+    implements AuthenticationModule.Display
 
 {
-    private TextBox userNameInput;
-    private PasswordTextBox passwordInput;
-    private Button loginButton;
+  private TextBox userNameInput;
+  private PasswordTextBox passwordInput;
+  private Button loginButton;
 
-    private WindowPanel windowPanel;
+  private WindowPanel windowPanel;
 
-    public AuthenticationDisplay() {
-        super();
+  public AuthenticationDisplay() {
+    super();
 
-        userNameInput = new TextBox();
-        passwordInput = new PasswordTextBox();
+    userNameInput = new TextBox();
+    passwordInput = new PasswordTextBox();
 
-        loginButton = new Button("Submit");
+    loginButton = new Button("Submit");
 
-        createLayoutWindowPanel();
+    createLayoutWindowPanel();
 
-      userNameInput.setFocus(true);
-    }
+    userNameInput.setFocus(true);
+  }
 
   private void createLayoutWindowPanel() {
-        windowPanel = new WindowPanel("Authentication required");
-        windowPanel.setAnimationEnabled(false);
-        LayoutPanel panel = new LayoutPanel();
-        //panel.addStyleName("WSLogin");
-        windowPanel.setWidget(panel);
+    windowPanel = new WindowPanel("Authentication required");
+    Widget closeBtn = windowPanel.getHeader().getWidget(0, Caption.CaptionRegion.RIGHT);
+    closeBtn.setVisible(false);
+    windowPanel.setAnimationEnabled(false);
+    LayoutPanel panel = new LayoutPanel();
+    //panel.addStyleName("WSLogin");
+    windowPanel.setWidget(panel);
 
 
-        // create contents
-        panel.setLayout(new BoxLayout(BoxLayout.Orientation.VERTICAL));
-        Grid grid = new Grid(3, 2);
-        grid.setWidget(0, 0, new Label("Username:"));
-        grid.setWidget(0, 1, userNameInput);
+    // create contents
+    panel.setLayout(new BoxLayout(BoxLayout.Orientation.VERTICAL));
+    Grid grid = new Grid(3, 2);
+    grid.setWidget(0, 0, new Label("Username:"));
+    grid.setWidget(0, 1, userNameInput);
 
-        grid.setWidget(1, 0, new Label("Password:"));
-        grid.setWidget(1, 1, passwordInput);
+    grid.setWidget(1, 0, new Label("Password:"));
+    grid.setWidget(1, 1, passwordInput);
 
-        grid.setWidget(2, 0, new HTML(""));
-        grid.setWidget(2, 1, loginButton);
+    grid.setWidget(2, 0, new HTML(""));
+    grid.setWidget(2, 1, loginButton);
 
-        /**
-         * Create a handler so that striking enter automatically
-         * submits the login.
-         */
-        KeyDownHandler clickOnEnter = new KeyDownHandler() {
-            
-            public void onKeyDown(KeyDownEvent event) {
-                if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-                    loginButton.click();
-                }
-            }
-        };
+    /**
+     * Create a handler so that striking enter automatically
+     * submits the login.
+     */
+    KeyDownHandler clickOnEnter = new KeyDownHandler() {
 
-        userNameInput.addKeyDownHandler(clickOnEnter);
-        passwordInput.addKeyDownHandler(clickOnEnter);
+      public void onKeyDown(KeyDownEvent event) {
+        if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+          loginButton.click();
+        }
+      }
+    };
 
-        /**
-         * Close the window immediately upon submission.
-         */
-        loginButton.addClickHandler(new ClickHandler() {
+    userNameInput.addKeyDownHandler(clickOnEnter);
+    passwordInput.addKeyDownHandler(clickOnEnter);
 
-            public void onClick(ClickEvent event) {
-                windowPanel.hide();
-            }
-        });
+    /**
+     * Close the window immediately upon submission.
+     */
+    loginButton.addClickHandler(new ClickHandler() {
 
-        panel.add(grid);
+      public void onClick(ClickEvent event) {
+        windowPanel.hide();
+      }
+    });
 
-        windowPanel.getHeader().add(Caption.IMAGES.window().createImage());
+    panel.add(grid);
 
-        windowPanel.addCloseHandler(new CloseHandler<PopupPanel>() {
-            public void onClose(CloseEvent<PopupPanel> event) {
-                windowPanel = null;
-            }
-        });
-    }
+    windowPanel.getHeader().add(Caption.IMAGES.window().createImage());
 
-
-    public void showLoginPanel() {
-        if (null == windowPanel)
-            createLayoutWindowPanel();
-
-        clearPanel();
-        windowPanel.pack();
-        windowPanel.center();
-    }
+    windowPanel.addCloseHandler(new CloseHandler<PopupPanel>() {
+      public void onClose(CloseEvent<PopupPanel> event) {
+        windowPanel = null;
+      }
+    });
+  }
 
 
-    public void clearPanel() {
-        userNameInput.setText("");
-        passwordInput.setText("");
-    }
+  public void showLoginPanel() {
+    if (null == windowPanel)
+      createLayoutWindowPanel();
+
+    clearPanel();
+    windowPanel.pack();
+    windowPanel.center();
+  }
 
 
-    public void hideLoginPanel() {
-        if (windowPanel != null)
-            windowPanel.hide();
-    }
+  public void clearPanel() {
+    userNameInput.setText("");
+    passwordInput.setText("");
+  }
 
 
-    public HasText getUsernameInput() {
-        return userNameInput;
-    }
+  public void hideLoginPanel() {
+    if (windowPanel != null)
+      windowPanel.hide();
+  }
 
 
-    public HasText getPasswordInput() {
-        return passwordInput;
-    }
+  public HasText getUsernameInput() {
+    return userNameInput;
+  }
 
 
-    public HasClickHandlers getSubmitButton() {
-        return loginButton;
-    }
+  public HasText getPasswordInput() {
+    return passwordInput;
+  }
 
 
-    public HasCloseHandlers getWindowPanel() {
-        return windowPanel;
-    }
+  public HasClickHandlers getSubmitButton() {
+    return loginButton;
+  }
 
 
-    public void showWelcomeMessage(final String messageText) {
-        Timer t = new Timer() {
+  public HasCloseHandlers getWindowPanel() {
+    return windowPanel;
+  }
 
-            public void run() {
-                MessageBox.info("Welcome", messageText);
-            }
-        };
 
-        t.schedule(500);
-    }
+  public void showWelcomeMessage(final String messageText) {
+    Timer t = new Timer() {
+
+      public void run() {
+        MessageBox.info("Welcome", messageText);
+      }
+    };
+
+    t.schedule(500);
+  }
 }
