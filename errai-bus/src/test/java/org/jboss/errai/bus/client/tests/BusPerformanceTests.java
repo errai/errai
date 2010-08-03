@@ -14,7 +14,19 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.tests;
+package org.jboss.errai.bus.client.tests;
 
-public class BusPerformanceTests {
+import com.google.gwt.junit.client.GWTTestCase;
+
+public class BusPerformanceTests extends GWTTestCase {
+    @Override
+    public String getModuleName() {
+        return "org.jboss.errai.bus.ErraiBusTests";
+    }
+
+    public void testRoundTripThroughput1() {
+
+        
+    }
+
 }

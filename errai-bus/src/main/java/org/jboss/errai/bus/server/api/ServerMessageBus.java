@@ -96,4 +96,10 @@ public interface ServerMessageBus extends MessageBus {
      * @return
      */
     public List<MessageCallback> getReceivers(String subject);
+
+
+    /**
+     * Stop the MessateBus.
+     */
+    public void stop();
 }

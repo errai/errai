@@ -70,4 +70,8 @@ public class DefaultTaskManager implements TaskManager {
 
         return t;
     }
+
+    public void requestStop() {
+        service.requestStop();
+    }
 }

@@ -35,4 +35,7 @@ public class GAETaskManager implements TaskManager {
                                        Runnable task) {
         throw new RuntimeException("Task scheduling not supported on GAE");
     }
+
+    public void requestStop() {
+    }
 }

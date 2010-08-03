@@ -131,7 +131,11 @@ public class ConfigUtil extends AbstractConfigBase {
         _traverseFiles(root, root, new HashSet<String>(), new VisitDelegate<Class>() {
             public void visit(String clazz) {
                 try {
-                    visitor.visit(Class.forName(clazz));
+                    Class c = Class.forName(clazz);
+                    visitor.visit(c);
+                    for (Class sc : c.getDeclaredClasses()) {
+                        visitor.visit(sc);
+                    }
                 }
                 catch (ClassNotFoundException e) {
                 }

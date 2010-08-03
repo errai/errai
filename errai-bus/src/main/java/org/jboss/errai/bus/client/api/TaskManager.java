@@ -24,4 +24,6 @@ public interface TaskManager {
     public AsyncTask scheduleRepeating(TimeUnit unit, int interval, Runnable task);
 
     public AsyncTask schedule(TimeUnit unit, int interval, Runnable task);
+
+    public void requestStop();
 }

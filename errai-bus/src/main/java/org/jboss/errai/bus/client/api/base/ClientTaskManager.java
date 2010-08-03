@@ -87,4 +87,6 @@ public class ClientTaskManager implements TaskManager {
         return asyncTask;
     }
 
+    public void requestStop() {
+    }
 }

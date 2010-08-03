@@ -28,12 +28,14 @@ public class ThreadWorker implements Runnable {
 
     public ThreadWorker(TaskProvider pool) {
         this.thread = new Thread(this, "ExecutorPoolWorker");
+        this.thread.setDaemon(true);
         this.pool = pool;
         this.errorCallback = null;
     }
 
     public ThreadWorker(ErrorCallback errorCallback, TaskProvider pool) {
         this.thread = new Thread(this);
+        this.thread.setDaemon(true);
         this.errorCallback = errorCallback;
         this.pool = pool;
     }

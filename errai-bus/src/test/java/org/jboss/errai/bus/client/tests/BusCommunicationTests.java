@@ -16,84 +16,46 @@
 
 package org.jboss.errai.bus.client.tests;
 
-import com.google.gwt.junit.client.GWTTestCase;
-import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.framework.ClientMessageBus;
-import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
-import org.jboss.errai.bus.client.framework.LogAdapter;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.tests.support.SType;
-
-import java.util.Date;
 
 /**
  * User: christopherbrock
  * Date: 26-Jul-2010
  * Time: 3:21:22 PM
  */
-public class BusCommunicationTests extends GWTTestCase {
+public class BusCommunicationTests extends AbstractErraiTest {
 
     @Override
     public String getModuleName() {
         return "org.jboss.errai.bus.ErraiBusTests";
     }
 
-    ClientMessageBus bus;
-
-    @Override
-    protected void gwtSetUp() throws Exception {
-        super.gwtSetUp();
-
-        bus = (ClientMessageBusImpl) ErraiBus.get();
-        bus.setLogAdapter(new LogAdapter() {
-            public void warn(String message) {
-                System.out.println("WARN: " + message);
-            }
-
-            public void info(String message) {
-                System.out.println("INFO: " + message);
-            }
-
-            public void debug(String message) {
-                System.out.println("DEBUG: " + message);
-            }
-
-            public void error(String message, Throwable t) {
-                System.out.println("ERROR: " + message);
-                if (t != null) t.printStackTrace();
-            }
-        });
-    }
-
     public void testBasicRoundTrip() {
-        bus.subscribe("MyTestService", new MessageCallback() {
-            public void callback(Message message) {
-                System.out.println("GOT ECHO");
-                finishTest();
+        runAfterInit(new Runnable() {
+            public void run() {
+                bus.subscribe("MyTestService", new MessageCallback() {
+                    public void callback(Message message) {
+                        System.out.println("GOT ECHO");
+                        finishTest();
+                    }
+                });
+
+                MessageBuilder.createMessage()
+                        .toSubject("ServerEchoService")
+                        .with(MessageParts.ReplyTo, "MyTestService")
+                        .done().sendNowWith(bus);
             }
         });
-
-        MessageBuilder.createMessage()
-                .toSubject("ServerEchoService")
-                .with(MessageParts.ReplyTo, "MyTestService")
-                .done().sendNowWith(bus);
-
-        delayTestFinish(5000);
     }
-
 
     public void testSerializableCase() {
-        bus.addPostInitTask(new Runnable() {
+        runAfterInit(new Runnable() {
             public void run() {
-                final SType sType1 = new SType();
-                sType1.setActive(true);
-                sType1.setEndDate(new Date(System.currentTimeMillis()));
-                sType1.setStartDate(new Date(System.currentTimeMillis() - 10000));
-                sType1.setFieldOne("One!");
-                sType1.setFieldTwo("Two!!");
+                final SType sType1 = SType.create();
 
                 bus.subscribe("ClientReceiver", new MessageCallback() {
                     public void callback(Message message) {
@@ -108,6 +70,7 @@ public class BusCommunicationTests extends GWTTestCase {
                             e.printStackTrace();
                             fail();
                         }
+
                         finishTest();
                     }
                 });
@@ -119,8 +82,6 @@ public class BusCommunicationTests extends GWTTestCase {
                         .done().sendNowWith(bus);
             }
         });
-
-        delayTestFinish(5000);
     }
 
 }

@@ -46,6 +46,7 @@ public class SimpleSchedulerService implements Runnable, SchedulerService {
         synchronized (this) {
             if (!running) {
                 currentThread = new Thread(this);
+                currentThread.setDaemon(true);
                 currentThread.setPriority(Thread.MIN_PRIORITY);
             }
         }

@@ -28,8 +28,9 @@ import java.util.HashSet;
 import java.util.List;
 
 /**
- * @author: Heiko Braun <hbraun@redhat.com>
- * @date: Jul 13, 2010
+ * @author Heiko Braun <hbraun@redhat.com>
+ * @author Mike Brock
+ * @date Jul 13, 2010
  */
 public class RebindUtil extends AbstractConfigBase {
     public static void visitAllTargets(List<File> targets, final GeneratorContext context,
@@ -54,7 +55,7 @@ public class RebindUtil extends AbstractConfigBase {
         _traverseFiles(root, root, new HashSet<String>(), new VisitDelegate<String>() {
             public void visit(String fqcn) {
                 try {
-                    visitor.visit(oracle.getType(fqcn), context, logger, writer);
+                    doVisit(oracle.getType(fqcn), context, logger, writer, visitor);
                 }
                 catch (NotFoundException e) {
                     visitor.visitError(fqcn, e);
@@ -71,6 +72,13 @@ public class RebindUtil extends AbstractConfigBase {
         });
 
         if (activeCacheContexts != null) activeCacheContexts.add(root.getPath());
+    }
+
+    private static void doVisit(JClassType type, GeneratorContext context, TreeLogger logger, SourceWriter writer, RebindVisitor visitor) {
+        visitor.visit(type, context, logger, writer);
+        for (JClassType declaredClass : type.getNestedTypes()) {
+            visitor.visit(declaredClass, context, logger, writer);
+        }
     }
 
     public static boolean isAnnotated(JClassType clazz, Class<? extends Annotation> annotation, JClassType ofType) {

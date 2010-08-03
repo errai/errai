@@ -342,4 +342,9 @@ public class PooledExecutorService implements TaskProvider {
         }
     }
 
+    public void requestStop() {
+        stopped = true;
+        pool.requestStopAll();
+    }
+
 }

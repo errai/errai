@@ -851,6 +851,14 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         monitor.attach(this);
     }
 
+    public void stop() {
+        for (MessageQueue queue : messageQueues.values()) {
+            queue.stopQueue();
+        }
+
+        houseKeeper.requestStop();
+    }
+
     public void finishInit() {
         reservedNames.addAll(subscriptions.keySet());
     }

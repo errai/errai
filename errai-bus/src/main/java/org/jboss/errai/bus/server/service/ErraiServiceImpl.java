@@ -21,6 +21,7 @@ import com.google.inject.Singleton;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.util.ErrorHelper;
+import org.jboss.errai.bus.server.DefaultTaskManager;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.bus.server.api.SessionProvider;
 import org.jboss.errai.bus.server.service.bootstrap.BootstrapContext;
@@ -82,6 +83,11 @@ public class ErraiServiceImpl<S> implements ErraiService<S> {
         }
     }
 
+
+    public void stopService() {
+        bus.stop();
+        DefaultTaskManager.get().requestStop();
+    }
 
     /**
      * Gets the bus associated with this service

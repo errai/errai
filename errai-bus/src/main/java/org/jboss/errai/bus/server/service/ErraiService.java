@@ -51,4 +51,9 @@ public interface ErraiService<S> extends ServiceComposite<S> {
      * @return the errai service configurator
      */
     public ErraiServiceConfigurator getConfiguration();
+
+    /**
+     * Shut down the entire Errai service.
+     */
+    public void stopService();
 }

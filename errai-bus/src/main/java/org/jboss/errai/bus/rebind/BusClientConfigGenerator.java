@@ -41,6 +41,10 @@ import java.util.jar.JarInputStream;
 import static org.mvel2.templates.TemplateCompiler.compileTemplate;
 import static org.mvel2.templates.TemplateRuntime.execute;
 
+/**
+ *
+ * @author Mike Brock
+ */
 public class BusClientConfigGenerator implements ExtensionGenerator {
 
     private CompiledTemplate demarshallerGenerator;
@@ -130,6 +134,7 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
                                         generateMarshaller(oracle.getType(s.trim()), logger, writer);
                                     }
                                     catch (Exception e) {
+                                        e.printStackTrace();
                                         throw new ErraiBootstrapFailure(e);
                                     }
                                 }
@@ -191,7 +196,7 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
                         m = getAccessorMethod(visit, ReflectionUtil.getGetter(f.getName()));
                     }
 
-                    types.put(f.getName(), Class.forName(type.getQualifiedSourceName()));
+                    types.put(f.getName(), Class.forName(type.getQualifiedBinaryName()));
                 }
 
                 if (m == null) {
@@ -206,6 +211,7 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
 
         }
         catch (ClassNotFoundException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
 
@@ -220,6 +226,7 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
 
         Map<String, Object> templateVars = Make.Map.<String, Object>$()
                 ._("className", visit.getQualifiedSourceName())
+                ._("canonicalClassName", visit.getQualifiedBinaryName())
                 ._("fields", types.keySet())
                 ._("targetTypes", types)
                 ._("getters", getters)
@@ -230,13 +237,13 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
 
         writer.print(genStr = (String) execute(demarshallerGenerator, templateVars));
 
-        System.out.println(genStr);
+      //  System.out.println(genStr);
 
         logger.log(TreeLogger.Type.INFO, genStr);
 
         writer.print(genStr = (String) execute(marshallerGenerator, templateVars));
 
-        System.out.println(genStr);
+   //     System.out.println(genStr);
 
         logger.log(TreeLogger.Type.INFO, genStr);
         logger.log(TreeLogger.Type.INFO, "Generated marshaller/demarshaller for: " + visit.getName());
