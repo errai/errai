@@ -230,6 +230,12 @@
                         <configuration>
                             <classifier>jboss6</classifier>
                             <webXml>src/jboss6/web.xml</webXml>
+
+                            <!--
+                                exclude client classes from packaging
+                                see https://jira.jboss.org/browse/JBAS-8277
+                                -->
+                            
                             <packagingExcludes>**/javax/**/*.*,**/client/**/*.class</packagingExcludes>
                             <webResources>
                                 <resource>
