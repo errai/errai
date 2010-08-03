@@ -157,4 +157,9 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
     public Set<Class> getSerializableTypes() {
         return serializableTypes;
     }
+
+
+    public RequestDispatcher getRequestDispatcher() {
+        return dispatcher;
+    }
 }

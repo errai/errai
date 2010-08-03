@@ -17,6 +17,7 @@
 package org.jboss.errai.bus.server.service;
 
 import org.jboss.errai.bus.client.api.ResourceProvider;
+import org.jboss.errai.bus.client.framework.RequestDispatcher;
 
 import java.io.File;
 import java.util.List;
@@ -68,6 +69,9 @@ public interface ErraiServiceConfigurator {
      * @return the property, if it exists, null otherwise
      */
     public String getProperty(String key);
+
+
+    public RequestDispatcher getRequestDispatcher();
 
 }
 
