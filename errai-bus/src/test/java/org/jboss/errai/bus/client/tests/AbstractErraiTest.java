@@ -17,6 +17,7 @@
 package org.jboss.errai.bus.client.tests;
 
 import com.google.gwt.junit.client.GWTTestCase;
+import com.google.gwt.user.client.Timer;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
@@ -52,14 +53,31 @@ public abstract class AbstractErraiTest extends GWTTestCase {
                     if (t != null) t.printStackTrace();
                 }
             });
-
-            super.gwtSetUp();
         }
     }
 
-    protected void runAfterInit(Runnable r) {
-        bus.addPostInitTask(r);
-        delayTestFinish(5000);
+    @Override
+    protected void gwtTearDown() throws Exception {
+        bus.stop();
+        bus = null;
     }
 
+    protected void runAfterInit(final Runnable r) {
+        Timer t = new Timer() {
+            @Override
+            public void run() {
+                try {
+                    r.run();
+                }
+                catch (Throwable t) {
+                    t.printStackTrace();
+                    fail();
+                }
+            }
+        };
+
+
+        delayTestFinish(5000);
+        t.schedule(100);
+    }
 }

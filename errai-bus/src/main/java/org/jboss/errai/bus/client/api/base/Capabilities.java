@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 JBoss, a divison Red Hat, Inc
+ * Copyright 2010 JBoss, a divison Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,13 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.tests;
+package org.jboss.errai.bus.client.api.base;
 
-import com.google.gwt.junit.client.GWTTestCase;
-
-public class BusPerformanceTests extends GWTTestCase {
-    @Override
-    public String getModuleName() {
-        return "org.jboss.errai.bus.ErraiBusTests";
-    }
-
-    public void testRoundTripThroughput1() {
-
-        
-    }
-
+/**
+ * User: christopherbrock
+ * Date: 4-Aug-2010
+ * Time: 10:28:28 AM
+ */
+public enum Capabilities {
+    LongPollAvailable, NoLongPollAvailable, WebSockets, Proxy
 }

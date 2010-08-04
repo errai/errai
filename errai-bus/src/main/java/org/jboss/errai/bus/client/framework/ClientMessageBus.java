@@ -64,6 +64,10 @@ public interface ClientMessageBus extends MessageBus {
     public void addPostInitTask(Runnable run);
 
 
+    public void init();
+
+    public void stop();
+    
     /**
      * Returns true if the bus has successfully initialized and can relay messages.
      *

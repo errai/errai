@@ -19,13 +19,14 @@ package org.jboss.errai.bus.server.servlet;
 import com.google.inject.Singleton;
 import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
+import org.jboss.errai.bus.server.api.ErraiConfig;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.QueueSession;
+import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -52,7 +53,7 @@ public class DefaultBlockingServlet extends AbstractErraiServlet {
             throws ServletException, IOException {
         pollForMessages(sessionProvider.getSession(httpServletRequest.getSession(),
                 httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER)),
-                httpServletRequest, httpServletResponse, true);
+                httpServletRequest, httpServletResponse, ErraiServiceConfigurator.LONG_POLLING);
     }
 
     /**

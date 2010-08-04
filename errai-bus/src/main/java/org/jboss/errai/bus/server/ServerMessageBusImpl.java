@@ -18,10 +18,7 @@ package org.jboss.errai.bus.server;
 
 import com.google.inject.Singleton;
 import org.jboss.errai.bus.client.api.*;
-import org.jboss.errai.bus.client.api.base.CommandMessage;
-import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.api.base.RuleDelegateMessageCallback;
-import org.jboss.errai.bus.client.api.base.TaskManagerFactory;
+import org.jboss.errai.bus.client.api.base.*;
 import org.jboss.errai.bus.client.framework.*;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;
@@ -170,6 +167,15 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                                     .with("SubjectsList", subjects)
                                     .with(MessageParts.PriorityProcessing, "1")
                                     .noErrorHandling().sendNowWith(ServerMessageBusImpl.this, false);
+
+                          //  if (!ErraiServiceConfigurator.LONG_POLLING) {
+                                createConversation(message)
+                                        .toSubject("ClientBus")
+                                        .command(BusCommands.CapabilitiesNotice)
+                                        .with("Flags", ErraiServiceConfigurator.LONG_POLLING ? Capabilities.LongPollAvailable.name() :
+                                                Capabilities.NoLongPollAvailable.name())
+                                        .noErrorHandling().sendNowWith(ServerMessageBusImpl.this, false);
+                            //}
 
                             createConversation(message)
                                     .toSubject("ClientBus")

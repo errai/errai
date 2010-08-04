@@ -25,6 +25,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.bus.client.api.*;
+import org.jboss.errai.bus.client.api.base.Capabilities;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.TransportIOException;
 import org.jboss.errai.bus.client.ext.ExtensionsLoader;
@@ -81,6 +82,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     /* The timer constantly ensures the client's polling with the server is active */
     private Timer incomingTimer;
+
+    private boolean noLongPoll = false;
 
     /* True if the client's message bus has been initialized */
     private boolean initialized = false;
@@ -423,6 +426,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         if (message == null) return;
 
         try {
+
             sendBuilder.sendRequest(message, new RequestCallback() {
                 public void onResponseReceived(Request request, Response response) {
                     if (503 == response.getStatusCode()) // Service Unavailable
@@ -453,6 +457,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 }
 
                 public void onError(Request request, Throwable exception) {
+                    exception.printStackTrace();
                     if (txMessage.getErrorCallback() == null || txMessage.getErrorCallback().error(txMessage, exception)) {
                         logError("Failed to communicate with remote bus", "", exception);
                     }
@@ -471,6 +476,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      */
     public void init() {
         init(null);
+
+    }
+
+    public void stop() {
+        this.incomingTimer.cancel();
+        this.disconnected = true;
     }
 
     public class RemoteMessageCallback implements MessageCallback {
@@ -488,6 +499,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      * @param callback - callback function used for to send the initial message to connect to the queue.
      */
     public void init(final HookCallback callback) {
+        initialized = false;
         subscribe("ClientBus", new MessageCallback() {
             @SuppressWarnings({"unchecked"})
             public void callback(final Message message) {
@@ -507,6 +519,23 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
                     case RemoteUnsubscribe:
                         unsubscribeAll(message.get(String.class, Subject));
+                        break;
+
+                    case CapabilitiesNotice:
+                        String[] capabilites = message.get(String.class, "Flags").split(",");
+
+                        for (String capability : capabilites) {
+                            switch (Capabilities.valueOf(capability)) {
+                                case LongPollAvailable:
+                                    COMM_CALLBACK = new LongPollRequestCallback();
+                                    break;
+                                case NoLongPollAvailable:
+                                    noLongPoll = true;
+                                    POLL_FREQUENCY = 500;
+                                    break;
+                            }
+                        }
+
                         break;
 
                     case FinishStateSync:
@@ -567,9 +596,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                         });
 
 
+                        logAdapter.debug("Executing " + postInitTasks.size() + " post init task(s)");
                         for (int i = 0; i < postInitTasks.size(); i++) {
                             postInitTasks.get(i).run();
                         }
+
+                        postInitTasks.clear();
 
                         initialized = true;
 
@@ -686,8 +718,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         retries = 0;
     }
 
-    private final RequestCallback COMM_CALLBACK = new RequestCallback() {
+    protected class LongPollRequestCallback implements RequestCallback {
         public void onError(Request request, Throwable throwable) {
+
             switch (statusCode) {
                 case 1:
                 case 408:
@@ -724,8 +757,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             }
 
             try {
+        //        System.out.println("Response");
                 procIncomingPayload(response);
-                incomingTimer.schedule(1);
+                schedule();
             }
             catch (Throwable e) {
                 logError("Errai MessageBus Disconnected Due to Fatal Error",
@@ -733,7 +767,23 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 incomingTimer.cancel();
             }
         }
-    };
+
+        public void schedule() {
+    //        System.out.println("LONG_POLL");
+            incomingTimer.schedule(1);
+        }
+    }
+
+    protected class ShortPollRequestCallback extends LongPollRequestCallback {
+        @Override
+        public void schedule() {
+    //        System.out.println("SHORT_POLL");
+            incomingTimer.schedule(POLL_FREQUENCY);
+        }
+    }
+
+    public static int POLL_FREQUENCY = 250;
+    private RequestCallback COMM_CALLBACK = new ShortPollRequestCallback();
 
     /**
      * Initializes the message bus by setting up the <tt>recvBuilder</tt> to accept responses. Also, initializes the
@@ -768,7 +818,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         new Timer() {
             @Override
             public void run() {
-                incomingTimer.scheduleRepeating(500);
+                incomingTimer.scheduleRepeating(POLL_FREQUENCY);
                 ExtensionsLoader loader = GWT.create(ExtensionsLoader.class);
                 loader.initExtensions(ClientMessageBusImpl.this);
             }
@@ -797,8 +847,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      * @param run a {@link Runnable} task.
      */
     public void addPostInitTask(Runnable run) {
-        logAdapter.debug("Executing post init task: " + run);
-
         if (isInitialized()) {
             run.run();
         } else {

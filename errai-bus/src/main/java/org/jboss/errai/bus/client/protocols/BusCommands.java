@@ -90,5 +90,7 @@ public enum BusCommands {
 
     RemoteMonitorAttach,
 
-    RemoteMonitorDetach
+    RemoteMonitorDetach,
+
+    CapabilitiesNotice
 }
