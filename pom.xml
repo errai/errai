@@ -168,27 +168,27 @@
                 <version>2.1-beta-1</version>
             </plugin>
 
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <childDelegation>true</childDelegation>
-                    <skipTests>false</skipTests>
-                    <failIfNoTests>false</failIfNoTests>
-                    <trimStackTrace>false</trimStackTrace>
-                    <systemProperties>
-                        <property>
-                            <name>log4j.output.dir</name>
-                            <value>${project.build.directory}</value>
-                        </property>
+            <!--<plugin>-->
+                <!--<artifactId>maven-surefire-plugin</artifactId>-->
+                <!--<configuration>-->
+                    <!--<childDelegation>true</childDelegation>-->
+                    <!--<skipTests>true</skipTests>-->
+                    <!--<failIfNoTests>false</failIfNoTests>-->
+                    <!--<trimStackTrace>false</trimStackTrace>-->
+                    <!--<systemProperties>-->
+                        <!--<property>-->
+                            <!--<name>log4j.output.dir</name>-->
+                            <!--<value>${project.build.directory}</value>-->
+                        <!--</property>-->
 
-                        <!-- Must disable long polling for automated tests to succeed -->
-                        <property>
-                            <name>org.jboss.errai.bus.do_long_poll</name>
-                            <value>false</value>
-                        </property>
-                    </systemProperties>
-                </configuration>
-            </plugin>
+                        <!--&lt;!&ndash; Must disable long polling for automated tests to succeed &ndash;&gt;-->
+                        <!--<property>-->
+                            <!--<name>org.jboss.errai.bus.do_long_poll</name>-->
+                            <!--<value>false</value>-->
+                        <!--</property>-->
+                    <!--</systemProperties>-->
+                <!--</configuration>-->
+            <!--</plugin>-->
 
             <plugin>
                 <artifactId>maven-jar-plugin</artifactId>
