@@ -87,6 +87,9 @@ public class ThreadWorker implements Runnable {
                      */
                     errorCallback.error(null, t);
                 }
+                else {
+                    t.printStackTrace();
+                }
             }
         }
     }

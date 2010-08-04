@@ -46,17 +46,16 @@ import static org.jboss.errai.bus.client.protocols.MessageParts.*;
 public class ClientMessageBusImpl implements ClientMessageBus {
     private static final int HEARTBEAT_DELAY = 20000;
 
-    private String clientId = String.valueOf(com.google.gwt.user.client.Random.nextInt(1000))
-            + "-" + (System.currentTimeMillis() % 1000);
+    private String clientId;
 
     /* The encoded URL to be used for the bus */
     private static final String SERVICE_ENTRY_POINT = "in.erraiBus";
 
     /* ArrayList of all subscription listeners */
-    private List<SubscribeListener> onSubscribeHooks = new ArrayList<SubscribeListener>();
+    private List<SubscribeListener> onSubscribeHooks;
 
     /* ArrayList of all unsubscription listeners */
-    private List<UnsubscribeListener> onUnsubscribeHooks = new ArrayList<UnsubscribeListener>();
+    private List<UnsubscribeListener> onUnsubscribeHooks;
 
     /* Used to build the HTTP POST request */
     private RequestBuilder sendBuilder;
@@ -65,25 +64,24 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     private RequestBuilder recvBuilder;
 
     /* Map of subjects to subscriptions  */
-    private final Map<String, List<Object>> subscriptions = new HashMap<String, List<Object>>();
+    private Map<String, List<Object>> subscriptions;
 
-    private final Set<String> remote = new HashSet<String>();
+    private Set<String> remote;
 
     /* Outgoing queue of messages to be transmitted */
     // private final Queue<Message> outgoingQueue = new LinkedList<Message>();
 
     /* Map of subjects to references registered in this session */
-    private Map<String, Set<Object>> registeredInThisSession = new HashMap<String, Set<Object>>();
+    private Map<String, List<Object>> registeredInThisSession = new HashMap<String, List<Object>>();
 
     /* A list of {@link Runnable} initialization tasks to be executed after the bus has successfully finished it's
      * initialization and is now communicating with the remote bus. */
     private List<Runnable> postInitTasks = new ArrayList<Runnable>();
-    private List<Message> deferredMessages = new ArrayList<Message>();
+    private List<Message> deferredMessages;
 
     /* The timer constantly ensures the client's polling with the server is active */
     private Timer incomingTimer;
-
-    private boolean noLongPoll = false;
+    private Timer heartBeatTimer;
 
     /* True if the client's message bus has been initialized */
     private boolean initialized = false;
@@ -91,6 +89,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     private long lastTransmit = 0;
 
     private boolean disconnected = false;
+
+    ProxySettings proxySettings;
 
     class ProxySettings {
         final String url = GWT.getModuleBaseURL() + "proxy";
@@ -117,62 +117,53 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     private BusErrorDialog errorDialog;
 
+    public ClientMessageBusImpl() {
+        init();
+    }
+
     /**
      * Constructor creates sendBuilder for HTTP POST requests, recvBuilder for HTTP GET requests and
      * initializes the message bus.
      */
-    public ClientMessageBusImpl() {
-        // proxy enabled?
-        final ProxySettings proxySettings = new ProxySettings();
 
-        if (!GWT.isScript()) {
-            RequestBuilder bootstrap = new RequestBuilder(RequestBuilder.GET, proxySettings.url);
-            try {
-                bootstrap.sendRequest(null, new RequestCallback() {
-                    public void onResponseReceived(Request request, Response response) {
-                        if (200 == response.getStatusCode()) {
-                            proxySettings.hasProxy = true;
-                            logAdapter.debug("Identified proxy at " + proxySettings.url);
-                        }
-
-                        createRequestBuilders(proxySettings);
-                        init();
-                    }
-
-                    public void onError(Request request, Throwable exception) {
-                        throw new RuntimeException("Bootstrap failed", exception);
-                    }
-                });
-            }
-            catch (RequestException e) {
-                logError("Bootstrap proxy settings failed", proxySettings.url, e);
-            }
-        } else {
-            // default in web mode, ignore proxy
-            createRequestBuilders(proxySettings);
-            init();
-        }
-    }
 
     private void createRequestBuilders(ProxySettings settings) {
-        String endpoint = settings.hasProxy ? settings.url : SERVICE_ENTRY_POINT;
-
-        (sendBuilder = new RequestBuilder(
-                RequestBuilder.POST,
-                URL.encode(endpoint)
-        )).setHeader("Connection", "Keep-Alive");
-
-        sendBuilder.setHeader("Content-Type", "application/json");
-        sendBuilder.setHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER, clientId);
-
-        (recvBuilder = new RequestBuilder(
-                RequestBuilder.GET,
-                URL.encode(endpoint)
-        )).setHeader("Connection", "Keep-Alive");
-        recvBuilder.setHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER, clientId);
+        sendBuilder = getSendBuilder();
+        recvBuilder = getRecvBuilder();
 
         logAdapter.debug("Connecting Errai at URL " + sendBuilder.getUrl());
     }
+
+    private RequestBuilder getSendBuilder() {
+        String endpoint = proxySettings.hasProxy ? proxySettings.url : SERVICE_ENTRY_POINT;
+
+        RequestBuilder builder = new RequestBuilder(
+                RequestBuilder.POST,
+                URL.encode(endpoint)
+        );
+
+        builder.setHeader("Connection", "Keep-Alive");
+        builder.setHeader("Content-Type", "application/json");
+        builder.setHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER, clientId);
+
+        return builder;
+    }
+
+    private RequestBuilder getRecvBuilder() {
+        String endpoint = proxySettings.hasProxy ? proxySettings.url : SERVICE_ENTRY_POINT;
+
+        RequestBuilder builder = new RequestBuilder(
+                RequestBuilder.GET,
+                URL.encode(endpoint)
+        );
+
+        builder.setHeader("Connection", "Keep-Alive");
+        builder.setHeader("Content-Type", "application/json");
+        builder.setHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER, clientId);
+
+        return builder;
+    }
+
 
     /**
      * Removes all subscriptions attached to the specified subject
@@ -196,7 +187,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      * @param callback - function called when the message is dispatched
      */
     public void subscribe(final String subject, final MessageCallback callback) {
-        logAdapter.debug("New subscription: " + subject + " -> " + callback);
+        logAdapter.debug("new subscription: " + subject + " -> " + callback);
 
         fireAllSubscribeListeners(subject);
 
@@ -206,7 +197,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                     callback.callback(message);
                 }
                 catch (Exception e) {
-                    logError("Receiver '" + subject + "' threw an exception", decodeCommandMessage(message), e);
+                    logError("receiver '" + subject + "' threw an exception", decodeCommandMessage(message), e);
                 }
             }
         };
@@ -353,7 +344,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         }
 
         if (registeredInThisSession != null && !registeredInThisSession.containsKey(subject)) {
-            registeredInThisSession.put(subject, new HashSet<Object>());
+            registeredInThisSession.put(subject, new ArrayList<Object>());
         }
 
         subscriptions.get(subject).add(reference);
@@ -378,7 +369,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      *
      * @return A map of registrations captured in the current capture context.
      */
-    public Map<String, Set<Object>> getCapturedRegistrations() {
+    public Map<String, List<Object>> getCapturedRegistrations() {
         return registeredInThisSession;
     }
 
@@ -387,7 +378,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      * registration events which occur will be captured.
      */
     public void beginCapture() {
-        registeredInThisSession = new HashMap<String, Set<Object>>();
+        registeredInThisSession = new HashMap<String, List<Object>>();
     }
 
     /**
@@ -403,8 +394,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      *
      * @param all A map of registrations to deregister.
      */
-    public void unregisterAll(Map<String, Set<Object>> all) {
-        for (Map.Entry<String, Set<Object>> entry : all.entrySet()) {
+    public void unregisterAll(Map<String, List<Object>> all) {
+        for (Map.Entry<String, List<Object>> entry : all.entrySet()) {
             for (Object o : entry.getValue()) {
                 subscriptions.get(entry.getKey()).remove(o);
                 _unsubscribe(o);
@@ -426,7 +417,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         if (message == null) return;
 
         try {
-
             sendBuilder.sendRequest(message, new RequestCallback() {
                 public void onResponseReceived(Request request, Response response) {
                     if (503 == response.getStatusCode()) // Service Unavailable
@@ -479,9 +469,35 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     }
 
-    public void stop() {
+    public void stop(boolean sendDisconnect) {
+        if (sendDisconnect) {
+            sendBuilder.setHeader("phase", "disconnect");
+
+            Message m = MessageBuilder.createMessage()
+                    .toSubject("ServerBus")
+                    .command(BusCommands.Disconnect).getMessage();
+
+            encodeAndTransmit(m);
+        }
+
+        for (Map.Entry<String, List<Object>> entry : subscriptions.entrySet()) {
+            for (Object o : entry.getValue()) {
+                _unsubscribe(o);
+            }
+        }
+
+        MessageBuilder.createMessage()
+                .toSubject("ClientBus")
+                .command(BusCommands.RemoteMonitorAttach)
+                .done().sendNowWith(this);
+
+        this.heartBeatTimer.cancel();
         this.incomingTimer.cancel();
+        this.incomingTimer = null;
         this.disconnected = true;
+        this.initialized = false;
+        this.sendBuilder = null;
+        this.recvBuilder = null;
     }
 
     public class RemoteMessageCallback implements MessageCallback {
@@ -489,6 +505,21 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             encodeAndTransmit(message);
         }
     }
+
+    private void initFields() {
+        initialized = false;
+        disconnected = false;
+
+        clientId = String.valueOf(com.google.gwt.user.client.Random.nextInt(1000))
+                + "-" + (System.currentTimeMillis() % 1000);
+        onSubscribeHooks = new ArrayList<SubscribeListener>();
+        onUnsubscribeHooks = new ArrayList<UnsubscribeListener>();
+        subscriptions = new HashMap<String, List<Object>>();
+        remote = new HashSet<String>();
+        deferredMessages = new ArrayList<Message>();
+        postInitTasks = new ArrayList<Runnable>();
+    }
+
 
     public final MessageCallback REMOTE_CALLBACK = new RemoteMessageCallback();
 
@@ -499,7 +530,46 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      * @param callback - callback function used for to send the initial message to connect to the queue.
      */
     public void init(final HookCallback callback) {
-        initialized = false;
+
+
+        if (sendBuilder == null) {
+            proxySettings = new ProxySettings();
+
+            if (GWT.isScript()) {
+
+                RequestBuilder bootstrap = new RequestBuilder(RequestBuilder.GET, proxySettings.url);
+                try {
+
+
+                    bootstrap.sendRequest(null, new RequestCallback() {
+                        public void onResponseReceived(Request request, Response response) {
+                            if (200 == response.getStatusCode()) {
+                                proxySettings.hasProxy = true;
+                                logAdapter.debug("Identified proxy at " + proxySettings.url);
+                            }
+
+                            initFields();
+                            createRequestBuilders(proxySettings);
+                            init(callback);
+                        }
+
+                        public void onError(Request request, Throwable exception) {
+                            throw new RuntimeException("Bootstrap failed", exception);
+                        }
+                    });
+                }
+                catch (RequestException e) {
+                    logError("Bootstrap proxy settings failed", proxySettings.url, e);
+                }
+            } else {
+                initFields();
+                createRequestBuilders(proxySettings);
+            }
+        }
+
+        if (sendBuilder == null) return;
+
+
         subscribe("ClientBus", new MessageCallback() {
             @SuppressWarnings({"unchecked"})
             public void callback(final Message message) {
@@ -530,7 +600,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                                     COMM_CALLBACK = new LongPollRequestCallback();
                                     break;
                                 case NoLongPollAvailable:
-                                    noLongPoll = true;
                                     POLL_FREQUENCY = 500;
                                     break;
                             }
@@ -538,7 +607,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
                         break;
 
+                    case RemoteMonitorAttach:
+                        break;
+
                     case FinishStateSync:
+
                         List<String> subjects = new ArrayList<String>();
                         for (String s : subscriptions.keySet()) {
                             if (s.startsWith("local:")) continue;
@@ -598,7 +671,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
                         logAdapter.debug("Executing " + postInitTasks.size() + " post init task(s)");
                         for (int i = 0; i < postInitTasks.size(); i++) {
-                            postInitTasks.get(i).run();
+                            try {
+                                postInitTasks.get(i).run();
+                            }
+                            catch (Throwable t) {
+                                t.printStackTrace();
+                                throw new RuntimeException("error running task", t);
+                            }
                         }
 
                         postInitTasks.clear();
@@ -610,8 +689,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                         break;
 
                     case Disconnect:
-                        if (incomingTimer != null) incomingTimer.cancel();
-                        disconnected = true;
+                        stop(false);
 
                         if (message.hasPart("Reason")) {
                             logError("The bus was disconnected by the server", "Reason: "
@@ -659,7 +737,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             String initialMessage = "{\"CommandType\":\"ConnectToQueue\",\"ToSubject\":\"ServerBus\"," +
                     " \"PriorityProcessing\":\"1\"}";
 
-            sendBuilder.sendRequest(initialMessage, new RequestCallback() {
+            RequestBuilder initialRequest = getSendBuilder();
+            initialRequest.setHeader("phase", "connection");
+
+            initialRequest.sendRequest(initialMessage, new RequestCallback() {
                 public void onResponseReceived(Request request, Response response) {
                     try {
                         procIncomingPayload(response);
@@ -677,6 +758,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                     logError("Could not connect to remote bus", "", exception);
                 }
             });
+
+
         }
         catch (RequestException e) {
             e.printStackTrace();
@@ -752,12 +835,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 onError(request, new Throwable());
                 return;
             }
+
             if (retries != 0) {
                 clearConnectAttemptGUI();
             }
 
             try {
-        //        System.out.println("Response");
                 procIncomingPayload(response);
                 schedule();
             }
@@ -769,16 +852,14 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         }
 
         public void schedule() {
-    //        System.out.println("LONG_POLL");
-            incomingTimer.schedule(1);
+            if (incomingTimer != null) incomingTimer.schedule(1);
         }
     }
 
     protected class ShortPollRequestCallback extends LongPollRequestCallback {
         @Override
         public void schedule() {
-    //        System.out.println("SHORT_POLL");
-            incomingTimer.schedule(POLL_FREQUENCY);
+            if (incomingTimer != null) incomingTimer.schedule(POLL_FREQUENCY);
         }
     }
 
@@ -796,8 +877,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         if (disconnected) {
             return;
         }
-
-        logAdapter.debug("Initialize message bus");
 
         incomingTimer = new Timer() {
             @Override
@@ -822,23 +901,25 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 ExtensionsLoader loader = GWT.create(ExtensionsLoader.class);
                 loader.initExtensions(ClientMessageBusImpl.this);
             }
-        }.schedule(10);
+        }.schedule(100);
 
-        new Timer() {
-            @Override
-            public void run() {
-                if (System.currentTimeMillis() - lastTransmit >= HEARTBEAT_DELAY) {
-                    encodeAndTransmit(MessageBuilder.createMessage().toSubject("ServerBus")
-                            .command(BusCommands.Heartbeat).noErrorHandling().getMessage());
-                    schedule(HEARTBEAT_DELAY);
-                } else {
-                    long win = System.currentTimeMillis() - lastTransmit;
-                    int diff = HEARTBEAT_DELAY - (int) win;
-                    schedule(diff);
-                }
-            }
-        }.scheduleRepeating(HEARTBEAT_DELAY);
+        heartBeatTimer =
+                new Timer() {
+                    @Override
+                    public void run() {
+                        if (System.currentTimeMillis() - lastTransmit >= HEARTBEAT_DELAY) {
+                            encodeAndTransmit(MessageBuilder.createMessage().toSubject("ServerBus")
+                                    .command(BusCommands.Heartbeat).noErrorHandling().getMessage());
+                            schedule(HEARTBEAT_DELAY);
+                        } else {
+                            long win = System.currentTimeMillis() - lastTransmit;
+                            int diff = HEARTBEAT_DELAY - (int) win;
+                            schedule(diff);
+                        }
+                    }
+                };
 
+        heartBeatTimer.scheduleRepeating(HEARTBEAT_DELAY);
     }
 
     /**

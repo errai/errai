@@ -22,7 +22,9 @@ import org.jboss.errai.bus.server.async.scheduling.PooledExecutorService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor;
 
 
 public class PooledExecuterServiceTests extends TestCase {
@@ -94,6 +96,11 @@ public class PooledExecuterServiceTests extends TestCase {
         svc.start();
 
         ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(100);
+        executor.setRejectedExecutionHandler(new RejectedExecutionHandler() {
+            public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+                r.run();
+            }
+        });
 
         final ConcurrentTestObj baseline = generateBaseLine();
         System.out.println("Generated baseline ...");
@@ -116,18 +123,6 @@ public class PooledExecuterServiceTests extends TestCase {
                         synchronized (test) {
                             test.add(test.getLast() + 2);
                         }
-
-           //             MVEL.eval("for (int i = 0; i < 10000; i++) { }");
-
-
-                        //      System.out.println("x=" + x);
-
-
-//                        try {
-//                            Thread.sleep(10);
-//                        }
-//                        catch (InterruptedException e) {
-//                        }
                     }
                 });
             }
@@ -158,17 +153,6 @@ public class PooledExecuterServiceTests extends TestCase {
                         synchronized (test2) {
                             test2.add(test2.getLast() + 2);
                         }
-
-
-                  //      MVEL.eval("for (int i = 0; i < 10000; i++) { }");
-
-                        //      System.out.println("x=" + x);
-//                        try {
-//                            Thread.sleep(10);
-//                        }
-//                        catch (InterruptedException e) {
-//                        }
-
                     }
                 });
             }

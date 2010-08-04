@@ -18,13 +18,13 @@ package org.jboss.errai.common.client.types;
 
 import com.google.gwt.json.client.*;
 import org.jboss.errai.common.client.json.JSONDecoderCli;
+import org.jboss.errai.common.client.protocols.SerializationParts;
 
 import java.util.*;
 
 
 public class JSONTypeHelper {
     public static <T> T convert(JSONValue value, Class<? extends T> to) {
-
         JSONValue v;
         if ((v = value.isString()) != null) {
             return TypeHandlerFactory.convert(String.class, to, ((JSONString) v).stringValue());
@@ -47,7 +47,7 @@ public class JSONTypeHelper {
             Map<String, Object> m = new HashMap<String, Object>();
 
             for (String key : eMap.keySet()) {
-                if ("__EncodedType".equals(key)) {
+                if (SerializationParts.ENCODED_TYPE.equals(key)) {
                     String className = eMap.get(key).isString().stringValue();
 
                     if (TypeDemarshallers.hasDemarshaller(className)) {

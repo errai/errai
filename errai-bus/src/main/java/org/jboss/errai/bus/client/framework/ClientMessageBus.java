@@ -16,6 +16,7 @@
 
 package org.jboss.errai.bus.client.framework;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -34,7 +35,7 @@ public interface ClientMessageBus extends MessageBus {
      *
      * @return A map of registrations captured in the current capture context.
      */
-    public Map<String, Set<Object>> getCapturedRegistrations();
+    public Map<String, List<Object>> getCapturedRegistrations();
 
     /**
      * Unregister all registrations in the specified Map.<p/>  It accepts a Map format returned from
@@ -42,7 +43,7 @@ public interface ClientMessageBus extends MessageBus {
      *
      * @param all A map of registrations to deregister.
      */
-    public void unregisterAll(Map<String, Set<Object>> all);
+    public void unregisterAll(Map<String, List<Object>> all);
 
     /**
      * Mark the beginning of a new capture context.<p/>  From the point this message is called forward, all
@@ -66,7 +67,7 @@ public interface ClientMessageBus extends MessageBus {
 
     public void init();
 
-    public void stop();
+    public void stop(boolean sendDisconnectToServer);
     
     /**
      * Returns true if the bus has successfully initialized and can relay messages.

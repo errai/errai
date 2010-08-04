@@ -148,6 +148,7 @@
             <resource>
                 <directory>src/main/java</directory>
             </resource>
+
         </resources>
 
         <plugins>
@@ -170,17 +171,25 @@
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <skipTests>true</skipTests>
-                    <failIfNoTests>false</failIfNoTests>
+                    <childDelegation>true</childDelegation>
+                    <skipTests>false</skipTests>
+                    <failIfNoTests>true</failIfNoTests>
                     <trimStackTrace>false</trimStackTrace>
                     <systemProperties>
                         <property>
                             <name>log4j.output.dir</name>
                             <value>${project.build.directory}</value>
                         </property>
+
+                        <!-- Must disable long polling for automated tests to succeed -->
+                        <property>
+                            <name>org.jboss.errai.bus.do_long_poll</name>
+                            <value>false</value>
+                        </property>
                     </systemProperties>
                 </configuration>
             </plugin>
+
             <plugin>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>2.2</version>
@@ -351,7 +360,7 @@
             <url>http://gilead.svn.sourceforge.net/svnroot/gilead/gilead/maven-snapshots-repo/</url>
             <layout>default</layout>
             <snapshots>
-               <enabled>true</enabled>
+                <enabled>true</enabled>
             </snapshots>
         </repository>
     </repositories>

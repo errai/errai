@@ -7,6 +7,7 @@ import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.server.io.JSONDecoder;
 import org.jboss.errai.bus.server.io.JSONEncoder;
 import org.jboss.errai.bus.server.io.JSONStreamDecoder;
+import org.jboss.errai.common.client.protocols.SerializationParts;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -30,7 +31,7 @@ public class JSONTests extends TestCase {
         inputParts.put("Message", "\"Hello, World\"");
         inputParts.put("Sentence", "He said he was \"okay\"!");
         inputParts.put("TestUnterminatedThings", "\" { [ ( ");
-        inputParts.put("Num", 123);
+        inputParts.put("Num", 123l);
 
         Message msg = MessageBuilder.createMessage().getMessage();
 
@@ -75,7 +76,7 @@ public class JSONTests extends TestCase {
     }
 
     public void testMarshalling() {
-        String jsonData = "{\"SType\":{__EncodedType:\"" + SType.class.getName()
+        String jsonData = "{\"SType\":{" + SerializationParts.ENCODED_TYPE + " :\"" + SType.class.getName()
                 + "\",startDate:1280250281006,fieldOne:\"One!\",active:true,endDate:1280251281006,fieldTwo:\"Two!!\"}," +
                 "\"ReplyTo\":\"ClientReceiver\",\"ToSubject\":\"TestService1\",__MarshalledTypes:\"SType\"}";
 
@@ -136,7 +137,6 @@ public class JSONTests extends TestCase {
 
         @Override
         public void close() throws IOException {
-            //To change body of implemented methods use File | Settings | File Templates.
         }
     }
 

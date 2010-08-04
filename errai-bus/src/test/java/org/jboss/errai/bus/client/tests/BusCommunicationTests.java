@@ -20,6 +20,7 @@ import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.protocols.MessageParts;
+import org.jboss.errai.bus.client.tests.support.SType;
 
 /**
  * User: christopherbrock
@@ -47,6 +48,50 @@ public class BusCommunicationTests extends AbstractErraiTest {
                         .toSubject("ServerEchoService")
                         .with(MessageParts.ReplyTo, "MyTestService")
                         .done().sendNowWith(bus);
+            }
+        });
+    }
+
+    public void testSerializableCase() {
+        System.out.println("testSerializableCase()");
+        runAfterInit(new Runnable() {
+            public void run() {
+                System.out.println("run-test");
+
+                try {
+
+                    final SType sType1 = SType.create();
+
+                    System.out.println("run-test-register-service");
+                    bus.subscribe("ClientReceiver", new MessageCallback() {
+                        public void callback(Message message) {
+                            SType type = message.get(SType.class, "SType");
+
+                            try {
+                                assertNotNull(type);
+                                assertTrue(sType1.equals(type));
+                                System.out.println("CLIENT: " + type.toString());
+                                finishTest();
+                                return;
+                            }
+                            catch (Throwable e) {
+                                e.printStackTrace();
+
+                            }
+                            fail();
+                        }
+                    });
+
+                    System.out.println("run-test-send-message");
+                    MessageBuilder.createMessage()
+                            .toSubject("TestService1")
+                            .with("SType", sType1)
+                            .with(MessageParts.ReplyTo, "ClientReceiver")
+                            .done().sendNowWith(bus);
+                }
+                catch (Throwable t) {
+                   t.printStackTrace(System.out);
+                }
             }
         });
     }

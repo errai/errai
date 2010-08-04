@@ -74,8 +74,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     private Set<String> reservedNames = new HashSet<String>();
 
-//    private ModelAdapter modelAdapter = null;
-
     /**
      * Sets up the <tt>ServerMessageBusImpl</tt> with the configuration supplied. Also, initializes the bus' callback
      * functions, scheduler, and monitor
@@ -92,18 +90,19 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             public void callback(Message message) {
                 try {
                     QueueSession session = getSession(message);
-                    MessageQueueImpl queue;
+                    MessageQueueImpl queue = (MessageQueueImpl) messageQueues.get(session);
 
                     switch (BusCommands.valueOf(message.getCommandType())) {
                         case Heartbeat:
-                            if (messageQueues.containsKey(session)) {
-                                messageQueues.get(session).heartBeat();
+                            if (queue != null) {
+                                queue.heartBeat();
                             }
                             break;
 
                         case RemoteSubscribe:
+                            if (queue == null) return;
+
                             if (message.hasPart("SubjectsList")) {
-                                queue = (MessageQueueImpl) messageQueues.get(session);
                                 for (String subject : (List<String>) message.get(List.class, "SubjectsList")) {
                                     remoteSubscribe(session, queue, subject);
                                 }
@@ -115,15 +114,29 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                             break;
 
                         case RemoteUnsubscribe:
-                            remoteUnsubscribe(session, messageQueues.get(session),
+                            if (queue == null) return;
+
+
+                            remoteUnsubscribe(session, queue,
                                     message.get(String.class, MessageParts.Subject));
                             break;
 
                         case FinishStateSync:
-                            queue = (MessageQueueImpl) messageQueues.get(session);
+                            if (queue == null) return;
                             queue.finishInit();
 
                             drainDeferredDeliveryQueue(queue);
+                            break;
+
+                        case Disconnect:
+                            if (queue == null) return;
+
+                            synchronized (messageQueues) {
+                                queue = (MessageQueueImpl) messageQueues.get(session);
+                                queue.stopQueue();
+                                closeQueue(queue);
+                            }
+
                             break;
 
                         case ConnectToQueue:
@@ -168,14 +181,13 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                                     .with(MessageParts.PriorityProcessing, "1")
                                     .noErrorHandling().sendNowWith(ServerMessageBusImpl.this, false);
 
-                          //  if (!ErraiServiceConfigurator.LONG_POLLING) {
-                                createConversation(message)
-                                        .toSubject("ClientBus")
-                                        .command(BusCommands.CapabilitiesNotice)
-                                        .with("Flags", ErraiServiceConfigurator.LONG_POLLING ? Capabilities.LongPollAvailable.name() :
-                                                Capabilities.NoLongPollAvailable.name())
-                                        .noErrorHandling().sendNowWith(ServerMessageBusImpl.this, false);
-                            //}
+                            createConversation(message)
+                                    .toSubject("ClientBus")
+                                    .command(BusCommands.CapabilitiesNotice)
+                                    .with("Flags", ErraiServiceConfigurator.LONG_POLLING ?
+                                            Capabilities.LongPollAvailable.name() :
+                                            Capabilities.NoLongPollAvailable.name())
+                                    .noErrorHandling().sendNowWith(ServerMessageBusImpl.this, false);
 
                             createConversation(message)
                                     .toSubject("ClientBus")
@@ -440,7 +452,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 deferDelivery(queue, message);
 
             } else {
-                throw new NoSubscribersToDeliverTo("for: " + message.getSubject() + ":" + isAnyoneListening(queue, message.getSubject()));
+                throw new NoSubscribersToDeliverTo("for: " + message.getSubject());
             }
         }
 
@@ -457,7 +469,20 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     @SuppressWarnings({"SynchronizationOnLocalVariableOrMethodParameter"})
     private void drainDeferredDeliveryQueue(final MessageQueue queue) {
         synchronized (queue) {
+
+
             if (deferredQueue.containsKey(queue)) {
+                List<Message> deferredMessages = deferredQueue.get(queue);
+                Iterator<Message> dmIter = deferredMessages.iterator();
+
+                Message m;
+                while (dmIter.hasNext()) {
+                    if ((m = dmIter.next()).hasPart(MessageParts.PriorityProcessing.toString())) {
+                      queue.offer(m);
+                      dmIter.remove();
+                    }
+                }
+                
                 for (Message message : deferredQueue.get(queue)) {
                     queue.offer(message);
                 }
@@ -579,7 +604,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         private final Queue<MessageQueue> queues = new ConcurrentLinkedQueue<MessageQueue>();
 
         public void callback(Message message) {
-//            message.commit();
             for (MessageQueue q : queues) {
                 send(q, message, true);
             }

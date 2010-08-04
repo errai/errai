@@ -34,9 +34,11 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.text.Normalizer;
 
 /**
  * The <tt>AbstractErraiServlet</tt> provides a starting point for creating Http-protocol gateway between the server
@@ -52,6 +54,25 @@ public abstract class AbstractErraiServlet extends HttpServlet {
     protected volatile ClassLoader contextClassLoader;
 
     protected Logger log = LoggerFactory.getLogger(getClass());
+
+    public enum ConnectionPhase {
+        NORMAL, CONNECTING, DISCONNECTING, UNKNOWN
+    }
+
+    public static ConnectionPhase getConnectionPhase(HttpServletRequest request) {
+        if (request.getHeader("phase") == null) return ConnectionPhase.NORMAL;
+        else {
+            String phase = request.getHeader("phase");
+            if ("connection".equals(phase)) {
+                return ConnectionPhase.CONNECTING;
+            }
+            else if ("disconnect".equals(phase)) {
+                return ConnectionPhase.DISCONNECTING;
+            }
+
+            return ConnectionPhase.UNKNOWN;
+        }
+    }
 
 
     @Override

@@ -21,6 +21,7 @@ import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
+import org.jboss.errai.common.client.protocols.SerializationParts;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -67,7 +68,7 @@ public class JSONDecoderCli {
     private Object decodeObject(JSONObject eMap) {
         Map<String, Object> m = new HashMap<String, Object>();
         for (String key : eMap.keySet()) {
-            if ("__EncodedType".equals(key)) {
+            if (SerializationParts.ENCODED_TYPE.equals(key)) {
                 String className = eMap.get(key).isString().stringValue();
                 if (hasDemarshaller(className)) {
                     try {

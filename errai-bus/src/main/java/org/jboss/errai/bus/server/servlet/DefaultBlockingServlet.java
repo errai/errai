@@ -29,6 +29,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Enumeration;
 
 import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
 
@@ -68,6 +69,7 @@ public class DefaultBlockingServlet extends AbstractErraiServlet {
     @Override
     protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
             throws ServletException, IOException {
+
         final QueueSession session = sessionProvider.getSession(httpServletRequest.getSession(),
                 httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
 
@@ -82,6 +84,12 @@ public class DefaultBlockingServlet extends AbstractErraiServlet {
             final MessageQueue queue = service.getBus().getQueue(session);
 
             if (queue == null) {
+                switch (getConnectionPhase(httpServletRequest)) {
+                    case CONNECTING:
+                    case DISCONNECTING:
+                        return;
+                }
+
                 sendDisconnectWithReason(httpServletResponse.getOutputStream(),
                         "There is no queue associated with this session.");
                 return;

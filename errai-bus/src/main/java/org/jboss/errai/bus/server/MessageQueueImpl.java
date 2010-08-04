@@ -165,6 +165,8 @@ public class MessageQueueImpl implements MessageQueue {
                 if (m == null) outstream.write(heartBeatBytes);
 
                 outstream.write(']');
+
+
                 return;
 
             }

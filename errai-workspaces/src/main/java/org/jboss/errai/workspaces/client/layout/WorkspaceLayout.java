@@ -517,7 +517,7 @@ public class WorkspaceLayout extends Composite {
 
                         bus.subscribe(getInstanceSubject(instanceId),
                                 new MessageCallback() {
-                                    private Map<String, Set<Object>> toUnregister = ((ClientMessageBus) bus).getCapturedRegistrations();
+                                    private Map<String, List<Object>> toUnregister = ((ClientMessageBus) bus).getCapturedRegistrations();
 
                                     public void callback(Message message) {
                                         switch (LayoutCommands.valueOf(message.getCommandType())) {

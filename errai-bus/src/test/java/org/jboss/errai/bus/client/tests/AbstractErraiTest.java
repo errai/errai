@@ -29,11 +29,13 @@ import org.jboss.errai.bus.client.framework.LogAdapter;
  * Time: 4:40:40 PM
  */
 public abstract class AbstractErraiTest extends GWTTestCase {
-    protected ClientMessageBus bus;
+    protected static ClientMessageBus bus;
 
     @Override
     protected void gwtSetUp() throws Exception {
+        System.out.println("set-up");
         if (bus == null) {
+            System.out.println("GET()");
             bus = (ClientMessageBusImpl) ErraiBus.get();
             bus.setLogAdapter(new LogAdapter() {
                 public void warn(String message) {
@@ -53,21 +55,29 @@ public abstract class AbstractErraiTest extends GWTTestCase {
                     if (t != null) t.printStackTrace();
                 }
             });
+        } else {
+            if (!bus.isInitialized()) {
+                System.out.println("reinit-bus");
+                bus.init();
+            } else {
+                System.out.println("bus-already-initialized");
+            }
         }
     }
 
     @Override
     protected void gwtTearDown() throws Exception {
-        bus.stop();
-        bus = null;
+
+        bus.stop(true);
     }
 
     protected void runAfterInit(final Runnable r) {
+
         Timer t = new Timer() {
             @Override
             public void run() {
                 try {
-                    r.run();
+                    bus.addPostInitTask(r);
                 }
                 catch (Throwable t) {
                     t.printStackTrace();
@@ -77,7 +87,7 @@ public abstract class AbstractErraiTest extends GWTTestCase {
         };
 
 
-        delayTestFinish(5000);
-        t.schedule(100);
+        delayTestFinish(10000);
+        t.schedule(800);
     }
 }

@@ -19,8 +19,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 @EntryPoint @Service
-public class HelloWorld extends VerticalPanel implements MessageCallback
-{
+public class HelloWorld extends VerticalPanel implements MessageCallback {
     private Button sayHello;
     private Label label;
 

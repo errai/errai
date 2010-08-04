@@ -67,8 +67,10 @@ public class ErraiServiceImpl<S> implements ErraiService<S> {
      * @param message - the message to store/deliver
      */
     public void store(Message message) {
-        if (message == null) return;
-        
+        if (message == null) {
+            return;
+        }
+
         message.addResources(config.getResourceProviders());
 
         /**

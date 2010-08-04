@@ -58,7 +58,7 @@
             <!-- This should not be packaged with the Errai Distro.  There are no runtime dependencies on it
    and it breaks deployment on JBoss AS and Tomcat -->
             <scope>provided</scope>
-        </dependency>       
+        </dependency>
         <dependency>
             <groupId>com.google.code.guice</groupId>
             <artifactId>guice</artifactId>
@@ -67,7 +67,7 @@
             <groupId>com.google.code.guice</groupId>
             <artifactId>guice</artifactId>
             <classifier>aopalliance</classifier>
-        </dependency>        
+        </dependency>
         <dependency>
             <groupId>org.mvel</groupId>
             <artifactId>mvel2</artifactId>
@@ -135,18 +135,61 @@
             <version>4.8.1</version>
         </dependency>
 
-		<dependency>
+        <dependency>
             <groupId>com.google.appengine</groupId>
-            <artifactId>appengine-api</artifactId>            
+            <artifactId>appengine-api</artifactId>
             <scope>provided</scope>
-            </dependency>
-            
-            <dependency>
+        </dependency>
+
+        <dependency>
             <groupId>com.google.appengine</groupId>
-            <artifactId>appengine-api-labs</artifactId>            
+            <artifactId>appengine-api-labs</artifactId>
             <scope>provided</scope>
-            </dependency>
-            
+        </dependency>
+
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <childDelegation>true</childDelegation>
+
+                    <skipTests>false</skipTests>
+                    <failIfNoTests>true</failIfNoTests>
+                    <trimStackTrace>false</trimStackTrace>
+
+                    <additionalClasspathElements>
+                        <additionalClasspathElement>${basedir}/test-classes/</additionalClasspathElement>
+                        <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
+                    </additionalClasspathElements>
+                    <useSystemClassLoader>false</useSystemClassLoader>
+
+                    <systemProperties>
+                        <property>
+                            <name>log4j.output.dir</name>
+                            <value>${project.build.directory}</value>
+                        </property>
+
+                        <!-- Must disable long polling for automated tests to succeed -->
+                        <property>
+                            <name>org.jboss.errai.bus.do_long_poll</name>
+                            <value>false</value>
+                        </property>
+                    </systemProperties>
+
+                    <includes>
+                        <include>**/*Test.java</include>
+                        <include>**/*Tests.java</include>
+                    </includes>
+                    <excludes>
+                        <exclude>**/ErraiBusTests.java</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
