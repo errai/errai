@@ -92,7 +92,8 @@ public class PooledExecuterServiceTests extends TestCase {
     double average2 = 0;
 
     public void testHighLoad() throws InterruptedException {
-        PooledExecutorService svc = new PooledExecutorService(10);
+        PooledExecutorService svc = new PooledExecutorService(10, PooledExecutorService.SaturationPolicy.CallerRuns);
+
         svc.start();
 
         ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(100);

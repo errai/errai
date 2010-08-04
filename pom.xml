@@ -173,7 +173,7 @@
                 <configuration>
                     <childDelegation>true</childDelegation>
                     <skipTests>false</skipTests>
-                    <failIfNoTests>true</failIfNoTests>
+                    <failIfNoTests>false</failIfNoTests>
                     <trimStackTrace>false</trimStackTrace>
                     <systemProperties>
                         <property>
