@@ -16,7 +16,6 @@
 
 package org.errai.samples.rpcdemo.client;
 
-import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.*;
@@ -24,14 +23,25 @@ import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.ioc.client.api.EntryPoint;
 
-public class RPCDemo implements EntryPoint {
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+
+@EntryPoint
+public class RPCDemo {
     /**
      * Get an instance of the MessageBus
      */
-    private MessageBus bus = ErraiBus.get();
+    private MessageBus bus;
 
-    public void onModuleLoad() {
+    @Inject
+    public RPCDemo(MessageBus bus) {
+        this.bus = bus;
+    }
+
+    @PostConstruct
+    public void init() {
         final Button checkMemoryButton = new Button("Check Memory Free");
         final Label memoryFreeLabel = new Label();
 

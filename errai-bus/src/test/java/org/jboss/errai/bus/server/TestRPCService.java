@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.ext;
+package org.jboss.errai.bus.server;
 
-import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.tests.support.TestRPCServiceRemote;
+import org.jboss.errai.bus.server.annotations.Service;
 
 /**
- * This interface, <tt>ExtensionsLoader</tt>, is used internally during compile time to produce all the things
- * we want to initialize at runtime.
+ * User: christopherbrock
+ * Date: 5-Aug-2010
+ * Time: 3:46:09 PM
  */
-public interface ExtensionsLoader {
-
-    /**
-     * Loads all the initialization extentions for the specified bus
-     *
-     * @param bus - the <tt>MessageBus</tt> to load the extensions for
-     */
-    public void initExtensions(MessageBus bus);
- }
+@Service
+public class TestRPCService implements TestRPCServiceRemote {
+    public boolean isGreaterThan(int a, int b) {
+        return a > b;
+    }
+}

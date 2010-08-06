@@ -105,9 +105,6 @@
                     <skip>true</skip>
                 </configuration>
             </plugin>
-
-
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -119,7 +116,6 @@
                     <trimStackTrace>false</trimStackTrace>
                 </configuration>
             </plugin>
- 
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

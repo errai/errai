@@ -20,6 +20,6 @@
 
     <inherits name="com.google.gwt.user.User"/>
     <inherits name="org.jboss.errai.bus.ErraiBus" />
+    <inherits name="org.jboss.errai.ioc.Container" />
 
-    <entry-point class='org.errai.samples.rpcdemo.client.RPCDemo'/>
 </module>
