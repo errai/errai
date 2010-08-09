@@ -39,6 +39,12 @@ public class PackageScanTest extends TestCase {
 
         File curr = new File(url.getFile());
         File parent = curr.getParentFile().getParentFile();
+
+        if (parent.getName().endsWith("target")) {
+            parent = parent.getParentFile();
+            parent = new File(parent + "/src/test/");
+        }
+
         File resourcesMetadata = new File(parent.getPath() + "/resources_metadata");
 
         if (!resourcesMetadata.exists())
