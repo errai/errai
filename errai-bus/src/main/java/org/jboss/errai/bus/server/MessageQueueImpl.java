@@ -87,8 +87,8 @@ public class MessageQueueImpl implements MessageQueue {
      * Gets the next message to send, and returns the <tt>Payload</tt>, which contains the current messages that
      * need to be sent from the specified bus to another.
      *
-     * @param wait - boolean is true if we should wait until the queue is ready. In this case, a
-     *             <tt>RuntimeException</tt> will be thrown if the polling is active already. Concurrent polling is not allowed.
+     * @param wait      - boolean is true if we should wait until the queue is ready. In this case, a
+     *                  <tt>RuntimeException</tt> will be thrown if the polling is active already. Concurrent polling is not allowed.
      * @param outstream - output stream to write the polling results to.
      */
     public void poll(final boolean wait, final OutputStream outstream) throws IOException {

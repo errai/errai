@@ -48,402 +48,372 @@ import java.util.*;
  * The main generator class for the errai-ioc framework.
  */
 public class IOCGenerator extends Generator {
-  /**
-   * Simple name of class to be generated
-   */
-  private String className = null;
+    /**
+     * Simple name of class to be generated
+     */
+    private String className = null;
 
-  /**
-   * Package name of class to be generated
-   */
-  private String packageName = null;
+    /**
+     * Package name of class to be generated
+     */
+    private String packageName = null;
 
-  private TypeOracle typeOracle;
+    private TypeOracle typeOracle;
 
-  private ProcessingContext procContext;
-  private InjectorFactory injectFactory;
-  private ProcessorFactory procFactory;
+    private ProcessingContext procContext;
+    private InjectorFactory injectFactory;
+    private ProcessorFactory procFactory;
 
-  private List<Runnable> deferredTasks = new LinkedList<Runnable>();
+    private List<Runnable> deferredTasks = new LinkedList<Runnable>();
 
 
-  public IOCGenerator() {
-  }
-
-  public IOCGenerator(ProcessingContext processingContext) {
-    this();
-    this.procContext = processingContext;
-    this.typeOracle = processingContext.getOracle();
-    this.injectFactory = new InjectorFactory(processingContext);
-    this.procFactory = new ProcessorFactory(injectFactory);
-    defaultConfigureProcessor();
-  }
-
-  @Override
-  public String generate(TreeLogger logger, GeneratorContext context, String typeName)
-      throws UnableToCompleteException {
-    typeOracle = context.getTypeOracle();
-
-    try {
-      // get classType and save instance variables
-
-      JClassType classType = typeOracle.getType(typeName);
-      packageName = classType.getPackage().getName();
-      className = classType.getSimpleSourceName() + "Impl";
-
-      logger.log(TreeLogger.INFO, "Generating Extensions Bootstrapper...");
-
-      // Generate class source code
-      generateIOCBootstrapClass(logger, context);
-    }
-    catch (Throwable e) {
-      // record sendNowWith logger that Map generation threw an exception
-      e.printStackTrace();
-      logger.log(TreeLogger.ERROR, "Error generating extensions", e);
+    public IOCGenerator() {
     }
 
-    // return the fully qualified name of the class generated
-    return packageName + "." + className;
-  }
-
-  /**
-   * Generate source code for new class. Class extends
-   * <code>HashMap</code>.
-   *
-   * @param logger  Logger object
-   * @param context Generator context
-   */
-  private void generateIOCBootstrapClass(TreeLogger logger, GeneratorContext context) {
-    // get print writer that receives the source code
-    PrintWriter printWriter = context.tryCreate(logger, packageName, className);
-    // print writer if null, source code has ALREADY been generated,
-
-    if (printWriter == null) return;
-
-    // init composer, set class properties, create source writer
-    ClassSourceFileComposerFactory composer = new ClassSourceFileComposerFactory(packageName,
-        className);
-
-    composer.addImplementedInterface(Bootstrapper.class.getName());
-    composer.addImport(InterfaceInjectionContext.class.getName());
-    composer.addImport(Widget.class.getName());
-    composer.addImport(List.class.getName());
-    composer.addImport(ArrayList.class.getName());
-    composer.addImport(Map.class.getName());
-    composer.addImport(HashMap.class.getName());
-    composer.addImport(com.google.gwt.user.client.ui.Panel.class.getName());
-    composer.addImport(ErraiBus.class.getName());
-
-    SourceWriter sourceWriter = composer.createSourceWriter(context, printWriter);
-
-    procContext = new ProcessingContext(logger, context, sourceWriter, typeOracle);
-    injectFactory = new InjectorFactory(procContext);
-    procFactory = new ProcessorFactory(injectFactory);
-    defaultConfigureProcessor();
-
-    // generator constructor source code
-    initializeProviders(context, logger, sourceWriter);
-    generateExtensions(context, logger, sourceWriter);
-    // close generated class
-    sourceWriter.outdent();
-    sourceWriter.println("}");
-
-    // commit generated class
-    context.commit(logger, printWriter);
-  }
-
-  public void initializeProviders(final GeneratorContext context, final TreeLogger logger, final SourceWriter sourceWriter) {
-
-    final JClassType typeProviderCls;
-    MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();    
-
-    try {
-      typeProviderCls = typeOracle.getType(TypeProvider.class.getName());
+    public IOCGenerator(ProcessingContext processingContext) {
+        this();
+        this.procContext = processingContext;
+        this.typeOracle = processingContext.getOracle();
+        this.injectFactory = new InjectorFactory(processingContext);
+        this.procFactory = new ProcessorFactory(injectFactory);
+        defaultConfigureProcessor();
     }
-    catch (NotFoundException e) {
-      throw new RuntimeException(e);
+
+    @Override
+    public String generate(TreeLogger logger, GeneratorContext context, String typeName)
+            throws UnableToCompleteException {
+        typeOracle = context.getTypeOracle();
+
+        try {
+            // get classType and save instance variables
+
+            JClassType classType = typeOracle.getType(typeName);
+            packageName = classType.getPackage().getName();
+            className = classType.getSimpleSourceName() + "Impl";
+
+            logger.log(TreeLogger.INFO, "Generating Extensions Bootstrapper...");
+
+            // Generate class source code
+            generateIOCBootstrapClass(logger, context);
+        }
+        catch (Throwable e) {
+            // record sendNowWith logger that Map generation threw an exception
+            e.printStackTrace();
+            logger.log(TreeLogger.ERROR, "Error generating extensions", e);
+        }
+
+        // return the fully qualified name of the class generated
+        return packageName + "." + className;
     }
 
     /**
-     * IOCExtension.class
+     * Generate source code for new class. Class extends
+     * <code>HashMap</code>.
+     *
+     * @param logger  Logger object
+     * @param context Generator context
      */
-    Set<Class<?>> iocExtensions = scanner.getTypesAnnotatedWith(IOCExtension.class);
-    for(Class<?> clazz : iocExtensions)
-    {
-      try {
-        Class<? extends IOCExtensionConfigurator> configuratorClass = clazz.asSubclass(IOCExtensionConfigurator.class);
-        configuratorClass.newInstance().configure(procContext, injectFactory, procFactory);
-      }
-      catch (Exception e) {
-        throw new ErraiBootstrapFailure("unable to load IOC Extension Configurator: " + e.getMessage(), e);
-      }
+    private void generateIOCBootstrapClass(TreeLogger logger, GeneratorContext context) {
+        // get print writer that receives the source code
+        PrintWriter printWriter = context.tryCreate(logger, packageName, className);
+        // print writer if null, source code has ALREADY been generated,
+
+        if (printWriter == null) return;
+
+        // init composer, set class properties, create source writer
+        ClassSourceFileComposerFactory composer = new ClassSourceFileComposerFactory(packageName,
+                className);
+
+        composer.addImplementedInterface(Bootstrapper.class.getName());
+        composer.addImport(InterfaceInjectionContext.class.getName());
+        composer.addImport(Widget.class.getName());
+        composer.addImport(List.class.getName());
+        composer.addImport(ArrayList.class.getName());
+        composer.addImport(Map.class.getName());
+        composer.addImport(HashMap.class.getName());
+        composer.addImport(com.google.gwt.user.client.ui.Panel.class.getName());
+        composer.addImport(ErraiBus.class.getName());
+
+        SourceWriter sourceWriter = composer.createSourceWriter(context, printWriter);
+
+        procContext = new ProcessingContext(logger, context, sourceWriter, typeOracle);
+        injectFactory = new InjectorFactory(procContext);
+        procFactory = new ProcessorFactory(injectFactory);
+        defaultConfigureProcessor();
+
+        // generator constructor source code
+        initializeProviders(context, logger, sourceWriter);
+        generateExtensions(context, logger, sourceWriter);
+        // close generated class
+        sourceWriter.outdent();
+        sourceWriter.println("}");
+
+        // commit generated class
+        context.commit(logger, printWriter);
     }
 
-    /**
-     * CodeDecorator.class
-     */
-    Set<Class<?>> decorators = scanner.getTypesAnnotatedWith(CodeDecorator.class);
-    for(Class<?> clazz : decorators)
-    {
-      try {
-        Class<? extends Decorator> decoratorClass = clazz.asSubclass(Decorator.class);
+    public void initializeProviders(final GeneratorContext context, final TreeLogger logger, final SourceWriter sourceWriter) {
 
-        Class<? extends Annotation> annoType = null;
-        Type t = decoratorClass.getGenericSuperclass();
-        if (!(t instanceof ParameterizedType)) {
-          throw new ErraiBootstrapFailure("code decorator must extend Decorator<@AnnotationType>");
+        final JClassType typeProviderCls;
+        MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
+
+        try {
+            typeProviderCls = typeOracle.getType(TypeProvider.class.getName());
+        }
+        catch (NotFoundException e) {
+            throw new RuntimeException(e);
         }
 
-        ParameterizedType pType = (ParameterizedType) t;
-        if (Decorator.class.equals(pType.getRawType())) {
-          if (pType.getActualTypeArguments().length == 0 || !Annotation.class.isAssignableFrom((Class) pType.getActualTypeArguments()[0])) {
-            throw new ErraiBootstrapFailure("code decorator must extend Decorator<@AnnotationType>");
-          }
-
-          annoType = ((Class) pType.getActualTypeArguments()[0]).asSubclass(Annotation.class);
+        /**
+         * IOCExtension.class
+         */
+        Set<Class<?>> iocExtensions = scanner.getTypesAnnotatedWith(IOCExtension.class);
+        for (Class<?> clazz : iocExtensions) {
+            try {
+                Class<? extends IOCExtensionConfigurator> configuratorClass = clazz.asSubclass(IOCExtensionConfigurator.class);
+                configuratorClass.newInstance().configure(procContext, injectFactory, procFactory);
+            }
+            catch (Exception e) {
+                throw new ErraiBootstrapFailure("unable to load IOC Extension Configurator: " + e.getMessage(), e);
+            }
         }
 
-        injectFactory.getInjectionContext().registerDecorator(decoratorClass.getConstructor(new Class[]{Class.class}).newInstance(annoType));
-      }
-      catch (Exception e) {
-        throw new ErraiBootstrapFailure("unable to load code decorator: " + e.getMessage(), e);
-      }
-    }
+        /**
+         * CodeDecorator.class
+         */
+        Set<Class<?>> decorators = scanner.getTypesAnnotatedWith(CodeDecorator.class);
+        for (Class<?> clazz : decorators) {
+            try {
+                Class<? extends Decorator> decoratorClass = clazz.asSubclass(Decorator.class);
 
-    /**
-     * Provider.class
-     */
-    Set<Class<?>> providers = scanner.getTypesAnnotatedWith(Provider.class);
-    for(Class<?> clazz : providers)
-    {
-      JClassType bindType = null;
-      JClassType type = loadType(typeOracle, clazz);
+                Class<? extends Annotation> annoType = null;
+                Type t = decoratorClass.getGenericSuperclass();
+                if (!(t instanceof ParameterizedType)) {
+                    throw new ErraiBootstrapFailure("code decorator must extend Decorator<@AnnotationType>");
+                }
 
-      boolean contextual = false;
-      for (JClassType iface : type.getImplementedInterfaces()) {
-        if (iface.getQualifiedSourceName().equals(ContextualTypeProvider.class.getName())) {
-          contextual = true;
+                ParameterizedType pType = (ParameterizedType) t;
+                if (Decorator.class.equals(pType.getRawType())) {
+                    if (pType.getActualTypeArguments().length == 0 || !Annotation.class.isAssignableFrom((Class) pType.getActualTypeArguments()[0])) {
+                        throw new ErraiBootstrapFailure("code decorator must extend Decorator<@AnnotationType>");
+                    }
 
-          JParameterizedType pType = iface.isParameterized();
+                    annoType = ((Class) pType.getActualTypeArguments()[0]).asSubclass(Annotation.class);
+                }
 
-          if (pType == null) {
-            throw new InjectionFailure("could not determine the bind type for the Provider class: " + type.getQualifiedSourceName());
-          }
-
-          bindType = pType.getTypeArgs()[0];
-          break;
+                injectFactory.getInjectionContext().registerDecorator(decoratorClass.getConstructor(new Class[]{Class.class}).newInstance(annoType));
+            }
+            catch (Exception e) {
+                throw new ErraiBootstrapFailure("unable to load code decorator: " + e.getMessage(), e);
+            }
         }
-      }
 
-      if (bindType == null) {
-        for (JClassType iface : type.getImplementedInterfaces()) {
-          if (!typeProviderCls.isAssignableFrom(iface)) {
-            continue;
-          }
+        /**
+         * Provider.class
+         */
+        Set<Class<?>> providers = scanner.getTypesAnnotatedWith(Provider.class);
+        for (Class<?> clazz : providers) {
+            JClassType bindType = null;
+            JClassType type = loadType(typeOracle, clazz);
 
-          JParameterizedType pType = iface.isParameterized();
+            boolean contextual = false;
+            for (JClassType iface : type.getImplementedInterfaces()) {
+                if (iface.getQualifiedSourceName().equals(ContextualTypeProvider.class.getName())) {
+                    contextual = true;
 
-          if (pType == null) {
-            throw new InjectionFailure("could not determine the bind type for the Provider class: " + type.getQualifiedSourceName());
-          }
+                    JParameterizedType pType = iface.isParameterized();
 
-          bindType = pType.getTypeArgs()[0];
+                    if (pType == null) {
+                        throw new InjectionFailure("could not determine the bind type for the Provider class: " + type.getQualifiedSourceName());
+                    }
+
+                    bindType = pType.getTypeArgs()[0];
+                    break;
+                }
+            }
+
+            if (bindType == null) {
+                for (JClassType iface : type.getImplementedInterfaces()) {
+                    if (!typeProviderCls.isAssignableFrom(iface)) {
+                        continue;
+                    }
+
+                    JParameterizedType pType = iface.isParameterized();
+
+                    if (pType == null) {
+                        throw new InjectionFailure("could not determine the bind type for the Provider class: " + type.getQualifiedSourceName());
+                    }
+
+                    bindType = pType.getTypeArgs()[0];
+                }
+            }
+
+            if (bindType == null) {
+                throw new InjectionFailure("the annotated provider class does not appear to implement " +
+                        TypeProvider.class.getName() + ": " + type.getQualifiedSourceName());
+            }
+
+            final JClassType finalBindType = bindType;
+
+            if (contextual) {
+                injectFactory.addInjector(new ContextualProviderInjector(finalBindType, type));
+
+            } else {
+                injectFactory.addInjector(new ProviderInjector(finalBindType, type));
+            }
         }
-      }
 
-      if (bindType == null) {
-        throw new InjectionFailure("the annotated provider class does not appear to implement " +
-            TypeProvider.class.getName() + ": " + type.getQualifiedSourceName());
-      }
 
-      final JClassType finalBindType = bindType;
+        /**
+         * GeneratedBy.class
+         */
+        Set<Class<?>> generatedBys = scanner.getTypesAnnotatedWith(GeneratedBy.class);
+        for (Class<?> clazz : generatedBys) {
+            JClassType type = loadType(typeOracle, clazz);
+            GeneratedBy anno = type.getAnnotation(GeneratedBy.class);
+            Class<? extends ContextualTypeProvider> injectorClass = anno.value();
 
-      if (contextual) {
-        injectFactory.addInjector(new ContextualProviderInjector(finalBindType, type));
+            try {
+                injectFactory.addInjector(new ContextualProviderInjector(type, getJClassType(injectorClass)));
+            }
+            catch (Exception e) {
+                throw new ErraiBootstrapFailure("could not load injector: " + e.getMessage(), e);
+            }
+        }
 
-      } else {
-        injectFactory.addInjector(new ProviderInjector(finalBindType, type));
-      }
     }
 
+    private void generateExtensions(final GeneratorContext context, final TreeLogger logger, final SourceWriter sourceWriter) {
+        // start constructor source generation
+        sourceWriter.println("public " + className + "() { ");
+        sourceWriter.indent();
+        sourceWriter.println("super();");
+        sourceWriter.outdent();
+        sourceWriter.println("}");
 
-    /**
-     * GeneratedBy.class
-     */
-    Set<Class<?>> generatedBys = scanner.getTypesAnnotatedWith(GeneratedBy.class);
-    for(Class<?> clazz : generatedBys)
-    {
-      JClassType type = loadType(typeOracle, clazz);
-      GeneratedBy anno = type.getAnnotation(GeneratedBy.class);
-      Class<? extends ContextualTypeProvider> injectorClass = anno.value();
+        sourceWriter.println("public InterfaceInjectionContext bootstrapContainer() { ");
+        sourceWriter.outdent();
+        sourceWriter.println("InterfaceInjectionContext ctx = new InterfaceInjectionContext();");
 
-      try {
-        injectFactory.addInjector(new ContextualProviderInjector(type, getJClassType(injectorClass)));
-      }
-      catch (Exception e) {
-        throw new ErraiBootstrapFailure("could not load injector: " + e.getMessage(), e);
-      }
+        MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
+        procFactory.process(scanner, procContext);
+
+        runAllDeferred();
+
+        sourceWriter.println("return ctx;");
+        sourceWriter.outdent();
+        sourceWriter.println("}");
     }
 
-  }
-
-  private void generateExtensions(final GeneratorContext context, final TreeLogger logger, final SourceWriter sourceWriter) {
-    // start constructor source generation
-    sourceWriter.println("public " + className + "() { ");
-    sourceWriter.indent();
-    sourceWriter.println("super();");
-    sourceWriter.outdent();
-    sourceWriter.println("}");
-
-    sourceWriter.println("public InterfaceInjectionContext bootstrapContainer() { ");
-    sourceWriter.outdent();
-    sourceWriter.println("InterfaceInjectionContext ctx = new InterfaceInjectionContext();");
-
-    MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
-    procFactory.process(scanner, procContext);
-
-    runAllDeferred();
-
-    sourceWriter.println("return ctx;");
-    sourceWriter.outdent();
-    sourceWriter.println("}");
-  }
-
-  public void addType(final JClassType type) {
-    injectFactory.addType(type);
-  }
-
-  public String generateWithSingletonSemantics(final JClassType visit) {
-    return injectFactory.generateSingleton(visit);
-  }
-
-  public String generateInjectors(final JClassType visit) {
-    return injectFactory.generate(visit);
-  }
-
-  public String generateAllProviders() {
-    return injectFactory.generateAllProviders();
-  }
-
-  public void addDeferred(Runnable task) {
-    deferredTasks.add(task);
-  }
-
-  private void runAllDeferred() {
-    for (Runnable r : deferredTasks)
-      r.run();
-  }
-
-  public JClassType getJClassType(Class cls) {
-    try {
-      return typeOracle.getType(cls.getName());
+    public void addType(final JClassType type) {
+        injectFactory.addType(type);
     }
-    catch (NotFoundException e) {
-      return null;
+
+    public String generateWithSingletonSemantics(final JClassType visit) {
+        return injectFactory.generateSingleton(visit);
     }
-  }
 
-  private void defaultConfigureProcessor() {
-    final JClassType widgetType = getJClassType(Widget.class);
-    final JClassType messageCallbackType = getJClassType(MessageCallback.class);
-    final JClassType messageBusType = getJClassType(MessageBus.class);
+    public String generateInjectors(final JClassType visit) {
+        return injectFactory.generate(visit);
+    }
 
-    procFactory.registerHandler(EntryPoint.class, new AnnotationHandler<EntryPoint>() {
-      public void handle(final JClassType type, EntryPoint annotation, ProcessingContext context) {
-        addDeferred(new Runnable() {
-          public void run() {
-            generateWithSingletonSemantics(type);
-          }
+    public String generateAllProviders() {
+        return injectFactory.generateAllProviders();
+    }
+
+    public void addDeferred(Runnable task) {
+        deferredTasks.add(task);
+    }
+
+    private void runAllDeferred() {
+        for (Runnable r : deferredTasks)
+            r.run();
+    }
+
+    public JClassType getJClassType(Class cls) {
+        try {
+            return typeOracle.getType(cls.getName());
+        }
+        catch (NotFoundException e) {
+            return null;
+        }
+    }
+
+    private void defaultConfigureProcessor() {
+        final JClassType widgetType = getJClassType(Widget.class);
+        final JClassType messageCallbackType = getJClassType(MessageCallback.class);
+        final JClassType messageBusType = getJClassType(MessageBus.class);
+
+        procFactory.registerHandler(EntryPoint.class, new AnnotationHandler<EntryPoint>() {
+            public void handle(final JClassType type, EntryPoint annotation, ProcessingContext context) {
+                addDeferred(new Runnable() {
+                    public void run() {
+                        generateWithSingletonSemantics(type);
+                    }
+                });
+            }
         });
-      }
-    });
 
-    procFactory.registerHandler(ToRootPanel.class, new AnnotationHandler<ToRootPanel>() {
-      public void handle(final JClassType type, final ToRootPanel annotation, final ProcessingContext context) {
-        if (widgetType.isAssignableFrom(type)) {
+        procFactory.registerHandler(ToRootPanel.class, new AnnotationHandler<ToRootPanel>() {
+            public void handle(final JClassType type, final ToRootPanel annotation, final ProcessingContext context) {
+                if (widgetType.isAssignableFrom(type)) {
 
-          addDeferred(new Runnable() {
-            public void run() {
-              context.getWriter().println("ctx.addToRootPanel(" + generateWithSingletonSemantics(type) + ");");
+                    addDeferred(new Runnable() {
+                        public void run() {
+                            context.getWriter().println("ctx.addToRootPanel(" + generateWithSingletonSemantics(type) + ");");
+                        }
+                    });
+
+
+                } else {
+                    throw new InjectionFailure("type declares @" + annotation.getClass().getSimpleName()
+                            + "  but does not extend type Widget: " + type.getQualifiedSourceName());
+                }
             }
-          });
+        });
 
+        procFactory.registerHandler(CreatePanel.class, new AnnotationHandler<CreatePanel>() {
+            public void handle(final JClassType type, final CreatePanel annotation, final ProcessingContext context) {
+                if (widgetType.isAssignableFrom(type)) {
 
-        } else {
-          throw new InjectionFailure("type declares @" + annotation.getClass().getSimpleName()
-              + "  but does not extend type Widget: " + type.getQualifiedSourceName());
-        }
-      }
-    });
-
-    procFactory.registerHandler(CreatePanel.class, new AnnotationHandler<CreatePanel>() {
-      public void handle(final JClassType type, final CreatePanel annotation, final ProcessingContext context) {
-        if (widgetType.isAssignableFrom(type)) {
-
-          addDeferred(new Runnable() {
-            public void run() {
-              context.getWriter().println("ctx.registerPanel(\"" + (annotation.value().equals("")
-                  ? type.getName() : annotation.value()) + "\", " + generateInjectors(type) + ");");
+                    addDeferred(new Runnable() {
+                        public void run() {
+                            context.getWriter().println("ctx.registerPanel(\"" + (annotation.value().equals("")
+                                    ? type.getName() : annotation.value()) + "\", " + generateInjectors(type) + ");");
+                        }
+                    });
+                } else {
+                    throw new InjectionFailure("type declares @" + annotation.getClass().getSimpleName()
+                            + "  but does not extend type Widget: " + type.getQualifiedSourceName());
+                }
             }
-          });
-        } else {
-          throw new InjectionFailure("type declares @" + annotation.getClass().getSimpleName()
-              + "  but does not extend type Widget: " + type.getQualifiedSourceName());
-        }
-      }
-    });
+        });
 
-    procFactory.registerHandler(ToPanel.class, new AnnotationHandler<ToPanel>() {
-      public void handle(final JClassType type, final ToPanel annotation, final ProcessingContext context) {
-        if (widgetType.isAssignableFrom(type)) {
+        procFactory.registerHandler(ToPanel.class, new AnnotationHandler<ToPanel>() {
+            public void handle(final JClassType type, final ToPanel annotation, final ProcessingContext context) {
+                if (widgetType.isAssignableFrom(type)) {
 
-          addDeferred(new Runnable() {
-            public void run() {
-              context.getWriter()
-                  .println("ctx.widgetToPanel(" + generateWithSingletonSemantics(type) + ", \"" + annotation.value() + "\");");
+                    addDeferred(new Runnable() {
+                        public void run() {
+                            context.getWriter()
+                                    .println("ctx.widgetToPanel(" + generateWithSingletonSemantics(type) + ", \"" + annotation.value() + "\");");
+                        }
+                    });
+                } else {
+                    throw new InjectionFailure("type declares @" + annotation.getClass().getSimpleName()
+                            + "  but does not extend type Widget: " + type.getQualifiedSourceName());
+                }
             }
-          });
-        } else {
-          throw new InjectionFailure("type declares @" + annotation.getClass().getSimpleName()
-              + "  but does not extend type Widget: " + type.getQualifiedSourceName());
-        }
-      }
-    });
-
-
-//        procFactory.registerHandler(Service.class, new AnnotationHandler<Service>() {
-//            public void handle(final JClassType type, final Service annotation, final ProcessingContext context) {
-//                if (messageCallbackType.isAssignableFrom(type)) {
-//                    addDeferred(new Runnable() {
-//                        public void run() {
-//                            String svcName = annotation.value().equals("") ? type.getName() : annotation.value();
-//
-//                            String busInstance = generateInjectors(messageBusType);
-//                            String svcInstance = generateWithSingletonSemantics(type);
-//
-//                            context.getWriter()
-//                                    .println(busInstance + ".subscribe(\"" + svcName + "\", " + svcInstance + ");");
-//                        }
-//                    });
-//                } else {
-//                    throw new InjectionFailure("@Service annotated class does not implement MessageCallaback: "
-//                            + type.getQualifiedSourceName());
-//                }
-//            }
-//        });
-
-  }
-
-  private JClassType loadType(TypeOracle oracle, Class<?> entity)
-  {
-    try
-    {
-      JClassType visit = oracle.getType(entity.getName());
-      return visit;
+        });
     }
-    catch (NotFoundException e)
-    {
-      throw new RuntimeException("Failed to load type "+entity.getName(), e);
+
+    private JClassType loadType(TypeOracle oracle, Class<?> entity) {
+        try {
+            JClassType visit = oracle.getType(entity.getName());
+            return visit;
+        }
+        catch (NotFoundException e) {
+            throw new RuntimeException("Failed to load type " + entity.getName(), e);
+        }
     }
-  }
 }

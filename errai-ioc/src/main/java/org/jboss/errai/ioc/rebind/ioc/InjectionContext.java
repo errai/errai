@@ -82,8 +82,7 @@ public class InjectionContext {
         }
         if (decoratorsByElementType.containsKey(type)) {
             return Collections.unmodifiableSet(decoratorsByElementType.get(type));
-        }
-        else {
+        } else {
             return Collections.EMPTY_SET;
         }
     }

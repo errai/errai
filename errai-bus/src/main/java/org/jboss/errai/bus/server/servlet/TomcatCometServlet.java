@@ -36,7 +36,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.CharBuffer;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
@@ -227,8 +229,7 @@ public class TomcatCometServlet extends AbstractErraiServlet implements CometPro
             if (msg != null) {
                 service.store(msg);
                 return 1;
-            }
-            else {
+            } else {
                 return 0;
             }
         }

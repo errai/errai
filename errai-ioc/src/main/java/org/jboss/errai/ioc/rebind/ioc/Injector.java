@@ -24,9 +24,11 @@ public abstract class Injector {
     public abstract String getType(InjectionContext injectContext, InjectionPoint injectionPoint);
 
     public abstract boolean isInjected();
+
     public abstract boolean isSingleton();
 
     public abstract String getVarName();
+
     public abstract JClassType getInjectedType();
 }
 

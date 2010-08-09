@@ -17,7 +17,6 @@
 package org.jboss.errai.bus.client;
 
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.user.client.ui.*;
 
 /**
  * User: christopherbrock

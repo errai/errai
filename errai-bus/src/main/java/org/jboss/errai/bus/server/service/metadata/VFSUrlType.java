@@ -33,46 +33,40 @@ import java.net.URL;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Aug 4, 2010
  */
-public class VFSUrlType implements Vfs.UrlType
-{
-  protected static final Logger log = LoggerFactory.getLogger(VFSUrlType.class);
-  
-  final static String VFS = "vfs";
-  final static String VFSZIP = "vfszip";
-  final static String VFSFILE = "vfsfile";
+public class VFSUrlType implements Vfs.UrlType {
+    protected static final Logger log = LoggerFactory.getLogger(VFSUrlType.class);
 
-  public boolean matches(URL url)
-  {
-    return url.getProtocol().equals(VFS)
-        || url.getProtocol().equals(VFSZIP)
-        || url.getProtocol().equals(VFSFILE);
-  }
+    final static String VFS = "vfs";
+    final static String VFSZIP = "vfszip";
+    final static String VFSFILE = "vfsfile";
 
-  public Vfs.Dir createDir(URL url)
-  {
-    // Create non VFS Url    
-    File deployment = PackagingUtil.identifyDeployment(url);
-    if(null==deployment)
-        throw new RuntimeException("Unable identify deployment file for: " + url);
-
-    // delegate unpacked archives to SystemDir handler
-    if(deployment.isDirectory())
-      return new SystemDir( toUrl(deployment.getAbsolutePath()) );
-
-    // if it's a file delegate to ZipDir handler
-    ZipDir delegate = new ZipDir( toUrl( "file:/" + deployment.getAbsolutePath() ));
-    return delegate;
-  }
-
-  private static URL toUrl(String s)
-  {
-    try
-    {
-      return new URL(s);
+    public boolean matches(URL url) {
+        return url.getProtocol().equals(VFS)
+                || url.getProtocol().equals(VFSZIP)
+                || url.getProtocol().equals(VFSFILE);
     }
-    catch (MalformedURLException e)
-    {
-      throw new RuntimeException("Invalid URL " +s, e);
+
+    public Vfs.Dir createDir(URL url) {
+        // Create non VFS Url
+        File deployment = PackagingUtil.identifyDeployment(url);
+        if (null == deployment)
+            throw new RuntimeException("Unable identify deployment file for: " + url);
+
+        // delegate unpacked archives to SystemDir handler
+        if (deployment.isDirectory())
+            return new SystemDir(toUrl(deployment.getAbsolutePath()));
+
+        // if it's a file delegate to ZipDir handler
+        ZipDir delegate = new ZipDir(toUrl("file:/" + deployment.getAbsolutePath()));
+        return delegate;
     }
-  } 
+
+    private static URL toUrl(String s) {
+        try {
+            return new URL(s);
+        }
+        catch (MalformedURLException e) {
+            throw new RuntimeException("Invalid URL " + s, e);
+        }
+    }
 }

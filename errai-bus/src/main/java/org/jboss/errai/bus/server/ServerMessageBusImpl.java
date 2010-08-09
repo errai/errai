@@ -478,11 +478,11 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 Message m;
                 while (dmIter.hasNext()) {
                     if ((m = dmIter.next()).hasPart(MessageParts.PriorityProcessing.toString())) {
-                      queue.offer(m);
-                      dmIter.remove();
+                        queue.offer(m);
+                        dmIter.remove();
                     }
                 }
-                
+
                 for (Message message : deferredQueue.get(queue)) {
                     queue.offer(message);
                 }

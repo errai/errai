@@ -51,7 +51,8 @@ public class BusCommunicationTests extends AbstractErraiTest {
                         .done().sendNowWith(bus);
             }
         });
-    }
+
+     }
 
     public void testSerializableCase() {
         runAfterInit(new Runnable() {
@@ -84,7 +85,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
                             .done().sendNowWith(bus);
                 }
                 catch (Throwable t) {
-                   t.printStackTrace(System.out);
+                    t.printStackTrace(System.out);
                 }
             }
         });
@@ -93,12 +94,12 @@ public class BusCommunicationTests extends AbstractErraiTest {
     public void testRPCCall() {
         runAfterInit(new Runnable() {
             public void run() {
-               MessageBuilder.createCall(new RemoteCallback<Boolean>() {
-                   public void callback(Boolean response) {
-                       assertTrue(response);
-                       finishTest();
-                   }
-               }, TestRPCServiceRemote.class).isGreaterThan(10, 5);
+                MessageBuilder.createCall(new RemoteCallback<Boolean>() {
+                    public void callback(Boolean response) {
+                        assertTrue(response);
+                        finishTest();
+                    }
+                }, TestRPCServiceRemote.class).isGreaterThan(10, 5);
             }
         });
     }

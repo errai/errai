@@ -154,6 +154,7 @@ public interface MessageBus {
 
     /**
      * Attach a monitor to the bus.
+     *
      * @param monitor
      */
     public void attachMonitor(BusMonitor monitor);

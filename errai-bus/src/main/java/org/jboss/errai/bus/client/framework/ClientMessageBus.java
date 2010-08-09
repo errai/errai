@@ -18,7 +18,6 @@ package org.jboss.errai.bus.client.framework;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * An extended client-specific/in-browser interface of {@link MessageBus}, which defines client-specific functionalities.
@@ -68,7 +67,7 @@ public interface ClientMessageBus extends MessageBus {
     public void init();
 
     public void stop(boolean sendDisconnectToServer);
-    
+
     /**
      * Returns true if the bus has successfully initialized and can relay messages.
      *
@@ -77,5 +76,6 @@ public interface ClientMessageBus extends MessageBus {
     public boolean isInitialized();
 
     public void setLogAdapter(LogAdapter logAdapter);
+
     public LogAdapter getLogAdapter();
 }

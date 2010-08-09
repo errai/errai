@@ -30,20 +30,17 @@ import java.net.URL;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Aug 9, 2010
  */
-public class WARUrlType implements Vfs.UrlType
-{
-  public boolean matches(URL url)
-  {
-    return url.getProtocol().equals("file") && url.toExternalForm().endsWith(".war");
-  }
+public class WARUrlType implements Vfs.UrlType {
+    public boolean matches(URL url) {
+        return url.getProtocol().equals("file") && url.toExternalForm().endsWith(".war");
+    }
 
-  public Vfs.Dir createDir(URL url)
-  {
-    File file = new File(url.toExternalForm());
-   
-    if(file.isDirectory())
-      return new SystemDir(url);
-    else
-      return new ZipDir(url);
-  }
+    public Vfs.Dir createDir(URL url) {
+        File file = new File(url.toExternalForm());
+
+        if (file.isDirectory())
+            return new SystemDir(url);
+        else
+            return new ZipDir(url);
+    }
 }

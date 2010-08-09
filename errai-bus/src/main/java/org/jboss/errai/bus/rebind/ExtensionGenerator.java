@@ -22,9 +22,6 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.user.rebind.SourceWriter;
 import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
 
-import java.io.File;
-import java.util.List;
-
 public interface ExtensionGenerator {
     public void generate(GeneratorContext context, TreeLogger logger, SourceWriter writer, MetaDataScanner scanner, TypeOracle oracle);
 }

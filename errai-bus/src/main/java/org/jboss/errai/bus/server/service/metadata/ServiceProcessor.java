@@ -39,7 +39,6 @@ import org.jboss.errai.bus.server.security.auth.rules.RolesRequiredRule;
 import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
 import org.jboss.errai.bus.server.service.bootstrap.BootstrapContext;
 import org.jboss.errai.bus.server.service.bootstrap.GuiceProviderProxy;
-import org.jboss.errai.bus.server.service.metadata.MetaDataProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,168 +52,165 @@ import java.util.Set;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Aug 3, 2010
  */
-public class ServiceProcessor implements MetaDataProcessor
-{
-  private Logger log = LoggerFactory.getLogger(ServiceProcessor.class);
+public class ServiceProcessor implements MetaDataProcessor {
+    private Logger log = LoggerFactory.getLogger(ServiceProcessor.class);
 
-  public void process(final BootstrapContext context, MetaDataScanner reflections)
-  {
-    final ErraiServiceConfiguratorImpl config = (ErraiServiceConfiguratorImpl)context.getConfig();
-    final Set<Class<?>> services = reflections.getTypesAnnotatedWithExcluding(Service.class, MetaDataScanner.CLIENT_PKG_REGEX);
-    
-    for(Class<?> loadClass : services)
-    {
-      Object svc = null;
-      String svcName = loadClass.getAnnotation(Service.class).value();
-      // If no name is specified, just use the class name as the service
-      // by default.
-      if ("".equals(svcName)) {
-        svcName = loadClass.getSimpleName();
-      }
+    public void process(final BootstrapContext context, MetaDataScanner reflections) {
+        final ErraiServiceConfiguratorImpl config = (ErraiServiceConfiguratorImpl) context.getConfig();
+        final Set<Class<?>> services = reflections.getTypesAnnotatedWithExcluding(Service.class, MetaDataScanner.CLIENT_PKG_REGEX);
 
-      Map<String, Method> commandPoints = new HashMap<String, Method>();
-      for (final Method method : loadClass.getDeclaredMethods()) {
-        if (method.isAnnotationPresent(Command.class)) {
-          Command command = method.getAnnotation(Command.class);
-          for (String cmdName : command.value()) {
-            if (cmdName.equals("")) cmdName = method.getName();
-            commandPoints.put(cmdName, method);
-          }
+        for (Class<?> loadClass : services) {
+            Object svc = null;
+            String svcName = loadClass.getAnnotation(Service.class).value();
+            // If no name is specified, just use the class name as the service
+            // by default.
+            if ("".equals(svcName)) {
+                svcName = loadClass.getSimpleName();
+            }
+
+            Map<String, Method> commandPoints = new HashMap<String, Method>();
+            for (final Method method : loadClass.getDeclaredMethods()) {
+                if (method.isAnnotationPresent(Command.class)) {
+                    Command command = method.getAnnotation(Command.class);
+                    for (String cmdName : command.value()) {
+                        if (cmdName.equals("")) cmdName = method.getName();
+                        commandPoints.put(cmdName, method);
+                    }
+                }
+            }
+
+            Class remoteImpl = getRemoteImplementation(loadClass);
+            if (remoteImpl != null) {
+                createRPCScaffolding(remoteImpl, loadClass, context);
+            } else if (MessageCallback.class.isAssignableFrom(loadClass)) {
+                final Class<? extends MessageCallback> clazz = loadClass.asSubclass(MessageCallback.class);
+
+                //loadedComponents.add(loadClass.getName());
+
+
+                log.info("discovered service: " + clazz.getName());
+                try {
+                    svc = Guice.createInjector(new AbstractModule() {
+                        @Override
+                        protected void configure() {
+                            bind(MessageCallback.class).to(clazz);
+                            bind(MessageBus.class).toInstance(context.getBus());
+                            bind(RequestDispatcher.class).toInstance(context.getService().getDispatcher());
+
+                            // Add any extension bindings.
+                            for (Map.Entry<Class<?>, ResourceProvider> entry : config.getExtensionBindings().entrySet()) {
+                                bind(entry.getKey()).toProvider(new GuiceProviderProxy(entry.getValue()));
+                            }
+                        }
+                    }).getInstance(MessageCallback.class);
+                }
+                catch (Throwable t) {
+                    t.printStackTrace();
+                }
+
+
+                if (commandPoints.isEmpty()) {
+                    // Subscribe the service to the bus.
+                    context.getBus().subscribe(svcName, (MessageCallback) svc);
+                }
+
+                RolesRequiredRule rule = null;
+                if (clazz.isAnnotationPresent(RequireRoles.class)) {
+                    rule = new RolesRequiredRule(clazz.getAnnotation(RequireRoles.class).value(), context.getBus());
+                } else if (clazz.isAnnotationPresent(RequireAuthentication.class)) {
+                    rule = new RolesRequiredRule(new HashSet<Object>(), context.getBus());
+                }
+                if (rule != null) {
+                    context.getBus().addRule(svcName, rule);
+                }
+            }
+
+            if (svc == null) {
+                svc = Guice.createInjector(new AbstractModule() {
+                    @Override
+                    protected void configure() {
+                        bind(MessageBus.class).toInstance(context.getBus());
+                        bind(RequestDispatcher.class).toInstance(context.getService().getDispatcher());
+
+                        // Add any extension bindings.
+                        for (Map.Entry<Class<?>, ResourceProvider> entry : config.getExtensionBindings().entrySet()) {
+                            bind(entry.getKey()).toProvider(new GuiceProviderProxy(entry.getValue()));
+                        }
+                    }
+                }).getInstance(loadClass);
+            }
+
+            Map<String, MessageCallback> epts = new HashMap<String, MessageCallback>();
+
+            // we scan for endpoints
+            for (final Method method : loadClass.getDeclaredMethods()) {
+                if (method.isAnnotationPresent(Endpoint.class)) {
+                    epts.put(method.getName(), method.getReturnType() == Void.class ?
+                            new EndpointCallback(svc, method) :
+                            new ConversationalEndpointCallback(svc, method, context.getBus()));
+                }
+            }
+
+            if (!epts.isEmpty()) {
+                context.getBus().subscribe(loadClass.getSimpleName() + ":RPC", new RemoteServiceCallback(epts));
+            }
+
+            if (!commandPoints.isEmpty()) {
+                context.getBus().subscribe(svcName, new CommandBindingsCallback(commandPoints, svc));
+            }
         }
-      }
+    }
 
-      Class remoteImpl = getRemoteImplementation(loadClass);
-      if (remoteImpl != null) {
-        createRPCScaffolding(remoteImpl, loadClass, context);
-      } else if (MessageCallback.class.isAssignableFrom(loadClass)) {
-        final Class<? extends MessageCallback> clazz = loadClass.asSubclass(MessageCallback.class);
+    private static Class getRemoteImplementation(Class type) {
+        for (Class iface : type.getInterfaces()) {
+            if (iface.isAnnotationPresent(Remote.class)) {
+                return iface;
+            } else if (iface.getInterfaces().length != 0 && ((iface = getRemoteImplementation(iface)) != null)) {
+                return iface;
+            }
+        }
+        return null;
+    }
 
-        //loadedComponents.add(loadClass.getName());
+    private static void createRPCScaffolding(final Class remoteIface, final Class<?> type, final BootstrapContext context) {
 
-
-        log.info("discovered service: " + clazz.getName());
-        try {
-          svc = Guice.createInjector(new AbstractModule() {
+        final ErraiServiceConfiguratorImpl config = (ErraiServiceConfiguratorImpl) context.getConfig();
+        final Injector injector = Guice.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
-              bind(MessageCallback.class).to(clazz);
-              bind(MessageBus.class).toInstance(context.getBus());
-              bind(RequestDispatcher.class).toInstance(context.getService().getDispatcher());
+                bind(MessageBus.class).toInstance(context.getBus());
+                bind(RequestDispatcher.class).toInstance(context.getService().getDispatcher());
 
-              // Add any extension bindings.
-              for (Map.Entry<Class<?>, ResourceProvider> entry : config.getExtensionBindings().entrySet()) {
-                bind(entry.getKey()).toProvider(new GuiceProviderProxy(entry.getValue()));
-              }
+                // Add any extension bindings.
+                for (Map.Entry<Class<?>, ResourceProvider> entry : config.getExtensionBindings().entrySet()) {
+                    bind(entry.getKey()).toProvider(new GuiceProviderProxy(entry.getValue()));
+                }
             }
-          }).getInstance(MessageCallback.class);
-        }
-        catch (Throwable t) {
-          t.printStackTrace();
-        }
+        });
 
+        final Object svc = injector.getInstance(type);
 
-        if (commandPoints.isEmpty()) {
-          // Subscribe the service to the bus.
-          context.getBus().subscribe(svcName, (MessageCallback) svc);
-        }
+        final Map<String, MessageCallback> epts = new HashMap<String, MessageCallback>();
 
-        RolesRequiredRule rule = null;
-        if (clazz.isAnnotationPresent(RequireRoles.class)) {
-          rule = new RolesRequiredRule(clazz.getAnnotation(RequireRoles.class).value(), context.getBus());
-        } else if (clazz.isAnnotationPresent(RequireAuthentication.class)) {
-          rule = new RolesRequiredRule(new HashSet<Object>(), context.getBus());
-        }
-        if (rule != null) {
-          context.getBus().addRule(svcName, rule);
-        }
-      }
-
-      if (svc == null) {
-        svc = Guice.createInjector(new AbstractModule() {
-          @Override
-          protected void configure() {
-            bind(MessageBus.class).toInstance(context.getBus());
-            bind(RequestDispatcher.class).toInstance(context.getService().getDispatcher());
-
-            // Add any extension bindings.
-            for (Map.Entry<Class<?>, ResourceProvider> entry : config.getExtensionBindings().entrySet()) {
-              bind(entry.getKey()).toProvider(new GuiceProviderProxy(entry.getValue()));
+        // beware of classloading issues. better reflect on the actual instance
+        for (Class<?> intf : svc.getClass().getInterfaces()) {
+            for (final Method method : intf.getDeclaredMethods()) {
+                if (RebindUtils.isMethodInInterface(remoteIface, method)) {
+                    epts.put(RebindUtils.createCallSignature(method), new ConversationalEndpointCallback(svc, method, context.getBus()));
+                }
             }
-          }
-        }).getInstance(loadClass);
-      }
-
-      Map<String, MessageCallback> epts = new HashMap<String, MessageCallback>();
-
-      // we scan for endpoints
-      for (final Method method : loadClass.getDeclaredMethods()) {
-        if (method.isAnnotationPresent(Endpoint.class)) {
-          epts.put(method.getName(), method.getReturnType() == Void.class ?
-              new EndpointCallback(svc, method) :
-              new ConversationalEndpointCallback(svc, method, context.getBus()));
         }
-      }
 
-      if (!epts.isEmpty()) {
-        context.getBus().subscribe(loadClass.getSimpleName() + ":RPC", new RemoteServiceCallback(epts));
-      }
+        context.getBus().subscribe(remoteIface.getName() + ":RPC", new RemoteServiceCallback(epts));
 
-      if (!commandPoints.isEmpty()) {
-        context.getBus().subscribe(svcName, new CommandBindingsCallback(commandPoints, svc));
-      }
+        new ProxyProvider() {
+            {
+                AbstractRemoteCallBuilder.setProxyFactory(this);
+            }
+
+            public <T> T getRemoteProxy(Class<T> proxyType) {
+                throw new RuntimeException("This API is not supported in the server-side environment.");
+            }
+        };
     }
-  }
-
-  private static Class getRemoteImplementation(Class type) {
-    for (Class iface : type.getInterfaces()) {
-      if (iface.isAnnotationPresent(Remote.class)) {
-        return iface;
-      } else if (iface.getInterfaces().length != 0 && ((iface = getRemoteImplementation(iface)) != null)) {
-        return iface;
-      }
-    }
-    return null;
-  }
-
-  private static void createRPCScaffolding(final Class remoteIface, final Class<?> type, final BootstrapContext context) {
-
-    final ErraiServiceConfiguratorImpl config = (ErraiServiceConfiguratorImpl) context.getConfig();
-    final Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bind(MessageBus.class).toInstance(context.getBus());
-        bind(RequestDispatcher.class).toInstance(context.getService().getDispatcher());
-
-        // Add any extension bindings.
-        for (Map.Entry<Class<?>, ResourceProvider> entry : config.getExtensionBindings().entrySet()) {
-          bind(entry.getKey()).toProvider(new GuiceProviderProxy(entry.getValue()));
-        }
-      }
-    });
-
-    final Object svc = injector.getInstance(type);
-
-    final Map<String, MessageCallback> epts = new HashMap<String, MessageCallback>();
-
-    // beware of classloading issues. better reflect on the actual instance
-    for (Class<?> intf : svc.getClass().getInterfaces()) {
-      for (final Method method : intf.getDeclaredMethods()) {
-        if (RebindUtils.isMethodInInterface(remoteIface, method)) {
-          epts.put(RebindUtils.createCallSignature(method), new ConversationalEndpointCallback(svc, method, context.getBus()));
-        }
-      }
-    }
-
-    context.getBus().subscribe(remoteIface.getName() + ":RPC", new RemoteServiceCallback(epts));
-
-    new ProxyProvider() {
-      {
-        AbstractRemoteCallBuilder.setProxyFactory(this);
-      }
-
-      public <T> T getRemoteProxy(Class<T> proxyType) {
-        throw new RuntimeException("This API is not supported in the server-side environment.");
-      }
-    };
-  }
 }

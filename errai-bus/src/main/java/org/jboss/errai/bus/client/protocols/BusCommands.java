@@ -28,7 +28,7 @@ public enum BusCommands {
      * for all communication, including authentication.
      */
     ConnectToQueue,
-    
+
     /**
      * The command sent from the remote bus back to the client bus to tell it that it should transition to a
      * normal communications mode, as all remote subscription data will have been sent at this point.

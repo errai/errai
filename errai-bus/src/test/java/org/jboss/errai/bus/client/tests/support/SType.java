@@ -161,7 +161,7 @@ public class SType {
         listOfStypes.add(sType3);
 
         sType1.setListOfStypes(listOfStypes);
-        
+
         return sType1;
     }
 }

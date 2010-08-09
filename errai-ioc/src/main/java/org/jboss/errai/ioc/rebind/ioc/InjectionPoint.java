@@ -17,7 +17,6 @@
 package org.jboss.errai.ioc.rebind.ioc;
 
 import com.google.gwt.core.ext.typeinfo.*;
-import org.mvel2.ast.WithNode;
 
 import java.lang.annotation.Annotation;
 
@@ -34,7 +33,7 @@ public class InjectionPoint<T extends Annotation> {
     private InjectionContext injectionContext;
 
     public InjectionPoint(T annotation, TaskType taskType, JConstructor constructor, JMethod method,
-                            JField field, JClassType type, JParameter parm, Injector injector, InjectionContext injectionContext) {
+                          JField field, JClassType type, JParameter parm, Injector injector, InjectionContext injectionContext) {
         this.annotation = annotation;
         this.taskType = taskType;
         this.constructor = constructor;
@@ -93,7 +92,7 @@ public class InjectionPoint<T extends Annotation> {
             case Parameter:
             case Type:
                 return injector.getVarName();
-            
+
             default:
                 return null;
         }

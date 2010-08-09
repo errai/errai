@@ -16,7 +16,10 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
-import com.google.gwt.core.ext.typeinfo.*;
+import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.JField;
+import com.google.gwt.core.ext.typeinfo.JMethod;
+import com.google.gwt.core.ext.typeinfo.JParameter;
 import org.mvel2.util.StringAppender;
 
 import java.lang.annotation.Annotation;
@@ -59,8 +62,7 @@ public class DecoratorTask extends InjectionTask {
                     anno = method.getAnnotation(dec.decoratesWith());
                     if (anno == null && field != null) {
                         anno = field.getAnnotation(dec.decoratesWith());
-                    }
-                    else if (anno == null && parm != null) {
+                    } else if (anno == null && parm != null) {
                         anno = parm.getAnnotation(dec.decoratesWith());
                     }
                     break;

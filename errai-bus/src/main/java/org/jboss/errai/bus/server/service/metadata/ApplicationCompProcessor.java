@@ -40,75 +40,72 @@ import java.util.Set;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Aug 3, 2010
  */
-public class ApplicationCompProcessor implements MetaDataProcessor
-{
-  private Logger log = LoggerFactory.getLogger(ApplicationCompProcessor.class);
+public class ApplicationCompProcessor implements MetaDataProcessor {
+    private Logger log = LoggerFactory.getLogger(ApplicationCompProcessor.class);
 
-  public void process(final BootstrapContext context, MetaDataScanner reflections)
-  {
-    final ErraiServiceConfiguratorImpl config = (ErraiServiceConfiguratorImpl)context.getConfig();
-    final Set<Class<?>> components = reflections.getTypesAnnotatedWith(ApplicationComponent.class);
+    public void process(final BootstrapContext context, MetaDataScanner reflections) {
+        final ErraiServiceConfiguratorImpl config = (ErraiServiceConfiguratorImpl) context.getConfig();
+        final Set<Class<?>> components = reflections.getTypesAnnotatedWith(ApplicationComponent.class);
 
-    for(Class<?> loadClass : components)
-    {
-      log.info("discovered application component: " + loadClass.getName());
+        for (Class<?> loadClass : components) {
+            log.info("discovered application component: " + loadClass.getName());
 
-      try {
-        Object inst = Guice.createInjector(new AbstractModule() {
-          @Override
-          protected void configure() {
-            bind(MessageBus.class).toInstance(context.getBus());
-            bind(RequestDispatcher.class).toInstance(context.getService().getDispatcher());
+            try {
+                Object inst = Guice.createInjector(new AbstractModule() {
+                    @Override
+                    protected void configure() {
+                        bind(MessageBus.class).toInstance(context.getBus());
+                        bind(RequestDispatcher.class).toInstance(context.getService().getDispatcher());
 
-            // Add any extension bindings.
-            for (Map.Entry<Class<?>, ResourceProvider> entry : config.getExtensionBindings().entrySet()) {
-              bind(entry.getKey()).toProvider(new GuiceProviderProxy(entry.getValue()));
-            }
-          }
-        }).getInstance(loadClass);
+                        // Add any extension bindings.
+                        for (Map.Entry<Class<?>, ResourceProvider> entry : config.getExtensionBindings().entrySet()) {
+                            bind(entry.getKey()).toProvider(new GuiceProviderProxy(entry.getValue()));
+                        }
+                    }
+                }).getInstance(loadClass);
 
 
-        for (Method m : loadClass.getMethods()) {
-          Class[] parmTypes = m.getParameterTypes();
+                for (Method m : loadClass.getMethods()) {
+                    Class[] parmTypes = m.getParameterTypes();
 
-          if (m.isAnnotationPresent(Service.class)) {
-            if (parmTypes.length != 1)
-              throw new ErraiBootstrapFailure("wrong number of method arguments for service endpoint: " + m.getName() + ": " + parmTypes.length);
+                    if (m.isAnnotationPresent(Service.class)) {
+                        if (parmTypes.length != 1)
+                            throw new ErraiBootstrapFailure("wrong number of method arguments for service endpoint: " + m.getName() + ": " + parmTypes.length);
 
-            if (!Message.class.isAssignableFrom(parmTypes[0]))
-              throw new ErraiBootstrapFailure("attempt to declare service handler on illegal type: " + parmTypes[0].getName());
+                        if (!Message.class.isAssignableFrom(parmTypes[0]))
+                            throw new ErraiBootstrapFailure("attempt to declare service handler on illegal type: " + parmTypes[0].getName());
 
-            Annotation annotation = m.getAnnotation(Service.class);
+                        Annotation annotation = m.getAnnotation(Service.class);
 
-            String svcName = ((Service) annotation).value().equals("") ? m.getName() : ((Service) annotation).value();
+                        String svcName = ((Service) annotation).value().equals("") ? m.getName() : ((Service) annotation).value();
 
-            context.getBus().subscribe(svcName, new MethodEndpointCallback(inst, m));
-          } else {
-            int i = 0;
-            for (Annotation[] annotations : m.getParameterAnnotations()) {
-              Class parmType = parmTypes[i++];
+                        context.getBus().subscribe(svcName, new MethodEndpointCallback(inst, m));
+                    } else {
+                        int i = 0;
+                        for (Annotation[] annotations : m.getParameterAnnotations()) {
+                            Class parmType = parmTypes[i++];
 
-              for (Annotation annotation : annotations) {
-                if (annotation instanceof Service) {
-                  if (!Message.class.isAssignableFrom(parmType))
-                    throw new ErraiBootstrapFailure("attempt to declare service handler on illegal type: " + parmType.getName());
+                            for (Annotation annotation : annotations) {
+                                if (annotation instanceof Service) {
+                                    if (!Message.class.isAssignableFrom(parmType))
+                                        throw new ErraiBootstrapFailure("attempt to declare service handler on illegal type: " + parmType.getName());
 
-                  if (parmTypes.length != 1)
-                    throw new ErraiBootstrapFailure("wrong number of method arguments for service endpoint: " + m.getName() + ": " + parmTypes.length);
+                                    if (parmTypes.length != 1)
+                                        throw new ErraiBootstrapFailure("wrong number of method arguments for service endpoint: " + m.getName() + ": " + parmTypes.length);
 
-                  String svcName = ((Service) annotation).value().equals("") ? m.getName() : ((Service) annotation).value();
+                                    String svcName = ((Service) annotation).value().equals("") ? m.getName() : ((Service) annotation).value();
 
-                  context.getBus().subscribe(svcName, new MethodEndpointCallback(inst, m));
+                                    context.getBus().subscribe(svcName, new MethodEndpointCallback(inst, m));
+                                }
+                            }
+                        }
+                    }
                 }
-              }
-            }
-          }
-        }
 
-      }
-      catch (Throwable t) {
-        t.printStackTrace();
-      }
+            }
+            catch (Throwable t) {
+                t.printStackTrace();
+            }
+        }
     }
-  }
 }

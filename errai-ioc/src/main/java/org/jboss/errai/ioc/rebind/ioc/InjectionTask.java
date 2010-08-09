@@ -19,8 +19,6 @@ package org.jboss.errai.ioc.rebind.ioc;
 import com.google.gwt.core.ext.typeinfo.*;
 import org.mvel2.util.StringAppender;
 
-import javax.inject.Inject;
-
 public class InjectionTask {
     protected final TaskType injectType;
     protected final Injector injector;
@@ -30,7 +28,6 @@ public class InjectionTask {
     protected JMethod method;
     protected JClassType type;
     protected JParameter parm;
-
 
 
     public InjectionTask(Injector injector, JField field) {
@@ -59,8 +56,8 @@ public class InjectionTask {
 
     public String doTask(InjectionContext ctx) {
         StringAppender appender = new StringAppender();
-              InjectionPoint injectionPoint
-                        = new InjectionPoint(null, injectType, constructor, method, field, type, parm, injector, ctx);
+        InjectionPoint injectionPoint
+                = new InjectionPoint(null, injectType, constructor, method, field, type, parm, injector, ctx);
         switch (injectType) {
             case Field:
 

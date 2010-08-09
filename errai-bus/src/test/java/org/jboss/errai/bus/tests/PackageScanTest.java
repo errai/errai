@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 JBoss, a divison Red Hat, Inc
+ * Copyright 2010 JBoss, a divison Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import java.util.Set;
  */
 public class PackageScanTest extends TestCase
 {
-  public void testEarScan() throws Exception
+  public void _testEarScan() throws Exception
   {    
     File ear = new File("src/test/resources/helloworld.ear");
     assertTrue(ear.exists());
@@ -70,7 +70,7 @@ public class PackageScanTest extends TestCase
     assertTrue("Cannot find @ExtensionComponent on MonitorExtension", match);
   }                                  
 
-  public void testWarScan() throws Exception
+  public void _testWarScan() throws Exception
   {
     File war = new File("src/test/resources/helloworld.war");
     assertTrue(war.exists());
@@ -84,7 +84,7 @@ public class PackageScanTest extends TestCase
     assertFalse("Cannot find @ApplicationComponent on HelloWorldService", annotated.isEmpty());
   }
 
-  public void testExplodedWarScan() throws Exception
+  public void _testExplodedWarScan() throws Exception
   {
     File war = new File("src/test/resources/hello_exp.war");
     assertTrue(war.exists());

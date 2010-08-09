@@ -172,7 +172,7 @@ public class JSONStreamDecoder {
                             ctx.addValue(Boolean.TRUE);
                         } else if ("false".equals(s)) {
                             ctx.addValue(Boolean.FALSE);
-                        } else  {
+                        } else {
                             ctx.addValue(s);
                         }
 

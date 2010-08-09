@@ -22,7 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Assign the {@link com.google.gwt.user.client.ui.Panel} object to a panel with the specified name.  
+ * Assign the {@link com.google.gwt.user.client.ui.Panel} object to a panel with the specified name.
  *
  * @see org.jboss.errai.ioc.client.api.CreatePanel
  */

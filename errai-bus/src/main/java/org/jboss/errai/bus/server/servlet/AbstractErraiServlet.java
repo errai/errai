@@ -38,7 +38,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.text.Normalizer;
 
 /**
  * The <tt>AbstractErraiServlet</tt> provides a starting point for creating Http-protocol gateway between the server
@@ -65,8 +64,7 @@ public abstract class AbstractErraiServlet extends HttpServlet {
             String phase = request.getHeader("phase");
             if ("connection".equals(phase)) {
                 return ConnectionPhase.CONNECTING;
-            }
-            else if ("disconnect".equals(phase)) {
+            } else if ("disconnect".equals(phase)) {
                 return ConnectionPhase.DISCONNECTING;
             }
 

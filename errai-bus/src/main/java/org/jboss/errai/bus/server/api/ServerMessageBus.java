@@ -19,7 +19,6 @@ package org.jboss.errai.bus.server.api;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.framework.BooleanRoutingRule;
 import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.client.framework.Payload;
 import org.jboss.errai.bus.server.async.SchedulerService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 
@@ -32,7 +31,6 @@ import java.util.List;
  * @author Mike Brock
  */
 public interface ServerMessageBus extends MessageBus {
-
 
 
     /**

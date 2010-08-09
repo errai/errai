@@ -477,8 +477,7 @@ public class CommandMessage implements Message {
     public void addResources(Map<String, ?> resources) {
         if (this.resources == null) {
             this.resources = new HashMap<String, Object>(resources);
-        }
-        else {
+        } else {
             this.resources.putAll(resources);
         }
     }

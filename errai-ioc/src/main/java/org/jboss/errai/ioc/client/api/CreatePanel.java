@@ -23,13 +23,13 @@ import java.lang.annotation.Target;
 
 /**
  * Instantiates and a panel and registers it with a specified name, which can be referred to by other components.
- *
+ * <p/>
  * <pre><code>
- * @CreatePanel("MyPanel")
- * public class SomePanel extends SimplePanel {
- *      ...
- * }
  *
+ * @CreatePanel("MyPanel") public class SomePanel extends SimplePanel {
+ * ...
+ * }
+ * <p/>
  * </code></pre>
  */
 @Retention(RetentionPolicy.RUNTIME)

@@ -30,4 +30,4 @@ public interface ExtensionsLoader {
      * @param bus - the <tt>MessageBus</tt> to load the extensions for
      */
     public void initExtensions(MessageBus bus);
- }
+}

@@ -17,9 +17,7 @@
 package org.jboss.errai.ioc.rebind.ioc;
 
 import com.google.gwt.core.ext.typeinfo.JClassType;
-import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.rebind.ProcessingContext;
-import org.jboss.errai.bus.server.annotations.Service;
 
 import java.util.List;
 
@@ -42,8 +40,7 @@ public class InjectorFactory {
         Injector i = ctx.getInjector(type);
         if (i.isInjected()) {
             return i.getVarName();
-        }
-        else {
+        } else {
             return i.getType(ctx, null);
         }
     }

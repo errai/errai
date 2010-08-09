@@ -18,7 +18,8 @@ package org.jboss.errai.ioc.client;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.ioc.client.api.Bootstrapper;
 
 import java.util.Map;
@@ -26,7 +27,7 @@ import java.util.Map;
 public class Container implements EntryPoint {
     public void onModuleLoad() {
         final Bootstrapper bootstrapper = GWT.create(Bootstrapper.class);
-               
+
         final RootPanel rootPanel = RootPanel.get();
         final InterfaceInjectionContext ctx = bootstrapper.bootstrapContainer();
 

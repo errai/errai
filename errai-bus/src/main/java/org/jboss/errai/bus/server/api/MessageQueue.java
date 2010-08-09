@@ -17,8 +17,6 @@
 package org.jboss.errai.bus.server.api;
 
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.framework.MarshalledMessage;
-import org.jboss.errai.bus.client.framework.Payload;
 
 import java.io.IOException;
 import java.io.OutputStream;

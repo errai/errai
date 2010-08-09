@@ -31,90 +31,76 @@ import java.util.*;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Aug 9, 2010
  */
-public class DeploymentContext
-{
-  private List<URL> configUrls;
-  private Map<String,File> subContexts = new HashMap<String, File>();
-  private Set<String> processedUrls = new HashSet<String>();
-  private Set<File> createdTmpFiles = new HashSet<File>();
+public class DeploymentContext {
+    private List<URL> configUrls;
+    private Map<String, File> subContexts = new HashMap<String, File>();
+    private Set<String> processedUrls = new HashSet<String>();
+    private Set<File> createdTmpFiles = new HashSet<File>();
 
-  public DeploymentContext(List<URL> configUrls)
-  {
-    this.configUrls = configUrls;
-  }
-
-  public List<URL> getConfigUrls()
-  {
-    return configUrls;
-  }
-
-  public Map<String, File> getSubContexts()
-  {
-    return subContexts;
-  }
-
-  public boolean hasProcessed(File file)
-  {
-    return processedUrls.contains(file.getAbsolutePath());
-  }
-
-  public void markProcessed(File file)
-  {
-    processedUrls.add(file.getAbsolutePath());
-  }
-
-  public List<URL> process()
-  {
-    PackagingUtil.process(this);
-
-    List<URL> superAndSubContexts = new ArrayList<URL>();
-
-    Iterator it = subContexts.keySet().iterator();
-    while(it.hasNext())
-    {
-      File unzipped = subContexts.get(it.next());
-      try
-      {
-        superAndSubContexts.add(unzipped.toURI().toURL());
-      }
-      catch (MalformedURLException e)
-      {
-        throw new RuntimeException(e);
-      }
+    public DeploymentContext(List<URL> configUrls) {
+        this.configUrls = configUrls;
     }
 
-    // orig urls needed? could be refactored...
-    superAndSubContexts.addAll(configUrls);    
-    return superAndSubContexts;
-  }  
-
-  public void markTmpFile(File file)
-  {
-    createdTmpFiles.add(file);
-  }
-
-  public void close()
-  {
-    for(File f : createdTmpFiles)
-    {
-      boolean deleted = deleteDirectory(f);
-      if(!deleted)
-      throw new RuntimeException("Failed to cleanup: " + f.getAbsolutePath());
+    public List<URL> getConfigUrls() {
+        return configUrls;
     }
-  }
 
-  static public boolean deleteDirectory(File path) {
-    if( path.exists() ) {
-      File[] files = path.listFiles();
-      for(int i=0; i<files.length; i++) {
-        if(files[i].isDirectory()) {
-          deleteDirectory(files[i]);
+    public Map<String, File> getSubContexts() {
+        return subContexts;
+    }
+
+    public boolean hasProcessed(File file) {
+        return processedUrls.contains(file.getAbsolutePath());
+    }
+
+    public void markProcessed(File file) {
+        processedUrls.add(file.getAbsolutePath());
+    }
+
+    public List<URL> process() {
+        PackagingUtil.process(this);
+
+        List<URL> superAndSubContexts = new ArrayList<URL>();
+
+        Iterator it = subContexts.keySet().iterator();
+        while (it.hasNext()) {
+            File unzipped = subContexts.get(it.next());
+            try {
+                superAndSubContexts.add(unzipped.toURI().toURL());
+            }
+            catch (MalformedURLException e) {
+                throw new RuntimeException(e);
+            }
         }
-        else {
-          files[i].delete();
-        }
-      }
+
+        // orig urls needed? could be refactored...
+        superAndSubContexts.addAll(configUrls);
+        return superAndSubContexts;
     }
-    return( path.delete() );
-  }
+
+    public void markTmpFile(File file) {
+        createdTmpFiles.add(file);
+    }
+
+    public void close() {
+        for (File f : createdTmpFiles) {
+            boolean deleted = deleteDirectory(f);
+            if (!deleted)
+                throw new RuntimeException("Failed to cleanup: " + f.getAbsolutePath());
+        }
+    }
+
+    static public boolean deleteDirectory(File path) {
+        if (path.exists()) {
+            File[] files = path.listFiles();
+            for (int i = 0; i < files.length; i++) {
+                if (files[i].isDirectory()) {
+                    deleteDirectory(files[i]);
+                } else {
+                    files[i].delete();
+                }
+            }
+        }
+        return (path.delete());
+    }
 }

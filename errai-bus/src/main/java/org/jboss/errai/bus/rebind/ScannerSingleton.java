@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 JBoss, a divison Red Hat, Inc
+ * Copyright 2010 JBoss, a divison Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,18 +19,16 @@ import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
 
 /**
  * Shared scanner instance used with {@link com.google.gwt.core.ext.Generator}'s
- * 
+ *
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Aug 4, 2010
  */
-public class ScannerSingleton
-{
-  private static MetaDataScanner scanner;
+public class ScannerSingleton {
+    private static MetaDataScanner scanner;
 
-  public static MetaDataScanner getOrCreateInstance()
-  {
-    if(null==scanner)
-      scanner = MetaDataScanner.createInstance();
-    return scanner;
-  }
+    public static MetaDataScanner getOrCreateInstance() {
+        if (null == scanner)
+            scanner = MetaDataScanner.createInstance();
+        return scanner;
+    }
 }

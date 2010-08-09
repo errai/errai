@@ -26,43 +26,41 @@ import org.slf4j.LoggerFactory;
  * @author Heiko Braun <hbraun@redhat.com>
  */
 class DiscoverServices implements BootstrapExecution {
-  private Logger log = LoggerFactory.getLogger(DiscoverServices.class);
+    private Logger log = LoggerFactory.getLogger(DiscoverServices.class);
 
-  public void execute(final BootstrapContext context) {
-    final ErraiServiceConfiguratorImpl config = (ErraiServiceConfiguratorImpl) context.getConfig();
+    public void execute(final BootstrapContext context) {
+        final ErraiServiceConfiguratorImpl config = (ErraiServiceConfiguratorImpl) context.getConfig();
 
-    if ( isAutoScanEnabled(config) ) {
-      log.debug("begin meta data scanning ...");
+        if (isAutoScanEnabled(config)) {
+            log.debug("begin meta data scanning ...");
 
-      // meta data scanner
-      MetaDataScanner scanner = context.getScanner();
+            // meta data scanner
+            MetaDataScanner scanner = context.getScanner();
 
-      // setup processors which are applied to the meta data
-      MetaDataProcessor[] processors = new MetaDataProcessor[] {
-          new ServiceProcessor(),
-          new EntityProcessor(),
-          new ApplicationCompProcessor()
-      };
+            // setup processors which are applied to the meta data
+            MetaDataProcessor[] processors = new MetaDataProcessor[]{
+                    new ServiceProcessor(),
+                    new EntityProcessor(),
+                    new ApplicationCompProcessor()
+            };
 
-      // execute meta data processing
-      for(MetaDataProcessor proc : processors)
-      {
-        proc.process(context, scanner);
-      }
-      
-    } else {
-      log.info("auto-discovery of services disabled.");
+            // execute meta data processing
+            for (MetaDataProcessor proc : processors) {
+                proc.process(context, scanner);
+            }
+
+        } else {
+            log.info("auto-discovery of services disabled.");
+        }
     }
-  }
 
-  private boolean isAutoScanEnabled(ErraiServiceConfiguratorImpl config)
-  {
-    boolean autoScanModules = true;
+    private boolean isAutoScanEnabled(ErraiServiceConfiguratorImpl config) {
+        boolean autoScanModules = true;
 
-    if (config.hasProperty("errai.auto_discover_services")) {
-      autoScanModules = Boolean.parseBoolean(config.getProperty("errai.auto_discover_services"));
+        if (config.hasProperty("errai.auto_discover_services")) {
+            autoScanModules = Boolean.parseBoolean(config.getProperty("errai.auto_discover_services"));
+        }
+        return autoScanModules;
     }
-    return autoScanModules;
-  }
 
 }

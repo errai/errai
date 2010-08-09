@@ -33,7 +33,7 @@ import static java.util.ResourceBundle.getBundle;
  */
 public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
 
-    private ServerMessageBus bus;    
+    private ServerMessageBus bus;
     private MetaDataScanner scanner;
     private Map<String, String> properties;
 
@@ -60,6 +60,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
     }
 
     // lockdown the configuration so it can't be modified.
+
     public void lockdown() {
 
         properties = Collections.unmodifiableMap(properties);
@@ -94,12 +95,11 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
         }
     }
 
-  public MetaDataScanner getMetaDataScanner()
-  {
-    return scanner;
-  }
+    public MetaDataScanner getMetaDataScanner() {
+        return scanner;
+    }
 
-  /**
+    /**
      * Gets the resource providers associated with this configurator
      *
      * @return the resource providers associated with this configurator
@@ -107,7 +107,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
     public Map<String, ResourceProvider> getResourceProviders() {
         return this.resourceProviders;
     }
-    
+
     /**
      * Returns true if the configuration has this <tt>key</tt> property
      *

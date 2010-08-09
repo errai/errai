@@ -31,7 +31,7 @@ public interface ErraiServiceConfigurator {
     public static final String CONFIG_ERRAI_SERIALIZABLE_TYPE = "errai.bus.serializableTypes";
     public static final String DO_LONG_POLL = "org.jboss.errai.bus.do_long_poll";
 
-   public static final boolean LONG_POLLING = System.getProperty(ErraiServiceConfigurator.DO_LONG_POLL) == null
+    public static final boolean LONG_POLLING = System.getProperty(ErraiServiceConfigurator.DO_LONG_POLL) == null
             || Boolean.getBoolean(ErraiServiceConfigurator.DO_LONG_POLL);
 
   /**

@@ -22,7 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Used for creating services which contain a set of different commands.  
+ * Used for creating services which contain a set of different commands.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD})

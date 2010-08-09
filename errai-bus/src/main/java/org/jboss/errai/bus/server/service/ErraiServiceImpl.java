@@ -38,7 +38,7 @@ public class ErraiServiceImpl<S> implements ErraiService<S> {
 
     private SessionProvider<S> sessionProvider;
     private RequestDispatcher dispatcher;
-    
+
     /**
      * Initializes the errai service with a bus and configurator
      *

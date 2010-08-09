@@ -47,8 +47,8 @@ public class MessageFactory {
      * Creates the command message from the given JSON string and session. The message is constructed in
      * parts depending on the string
      *
-     * @param session     - the queue session in which the message exists
-     * @param json        - the string representing the parts of the message
+     * @param session - the queue session in which the message exists
+     * @param json    - the string representing the parts of the message
      * @return the message array constructed using the JSON string
      */
     public static Message createCommandMessage(QueueSession session, String json) {
@@ -62,7 +62,7 @@ public class MessageFactory {
 
         // experimental feature. does this need to be cleaned?
         // any chance this leaks the CL?
-     //   msg.setResource("errai.experimental.classLoader", classLoader);
+        //   msg.setResource("errai.experimental.classLoader", classLoader);
 
         msg.setFlag(RoutingFlags.FromRemote);
 
@@ -79,7 +79,7 @@ public class MessageFactory {
 
         // experimental feature. does this need to be cleaned?
         // any chance this leaks the CL?
-     //   msg.setResource("errai.experimental.classLoader", classLoader);
+        //   msg.setResource("errai.experimental.classLoader", classLoader);
 
         msg.setFlag(RoutingFlags.FromRemote);
 
