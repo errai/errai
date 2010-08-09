@@ -76,7 +76,7 @@ public class PackagingUtil {
 
     private static void processNestedZip(File file, DeploymentContext ctx) {
         try {
-            if (file.getName().matches(".+\\.(ear|war|sar)$")) // process only certain deployment types
+            if (file.getName().matches(".+\\.(ear|war|sar)$") && !file.isDirectory()) // process only certain deployment types
             {
                 if (file.getName().endsWith(".war"))
                     ctx.getSubContexts().put(file.getName(), file); // WEB-INF/classes

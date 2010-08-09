@@ -32,8 +32,14 @@ import org.mvel2.util.ReflectionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarInputStream;
 
 import static org.mvel2.templates.TemplateCompiler.compileTemplate;
 import static org.mvel2.templates.TemplateRuntime.execute;
@@ -61,18 +67,25 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
         rpcProxyGenerator = compileTemplate(istream, null);
     }
 
+    private ClassLoader classLoader;
+
     public void generate(
             GeneratorContext context, TreeLogger logger,
             SourceWriter writer, MetaDataScanner scanner, final TypeOracle oracle) {
 
+
         Set<Class<?>> entities = scanner.getTypesAnnotatedWith(ExposeEntity.class);
         for (Class<?> entity : entities) {
+            if (classLoader == null) classLoader = entity.getClassLoader();
+
             JClassType type = loadType(oracle, entity);
             generateMarshaller(type, logger, writer);
         }
 
         Set<Class<?>> remoteIntf = scanner.getTypesAnnotatedWith(Remote.class);
         for (Class<?> remote : remoteIntf) {
+            if (classLoader == null) classLoader = remote.getClassLoader();
+
             JClassType type = loadType(oracle, remote);
             try {
                 writer.print((String) execute(rpcProxyGenerator,
@@ -85,6 +98,76 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
                 throw new ErraiBootstrapFailure(t);
             }
         }
+
+
+        boolean found = false;
+        String path;
+        for (URL root : MetaDataScanner.getConfigUrls()) {
+            path = root.getFile();
+
+            FileInputStream jarStream = null;
+            InputStream inputStream = null;
+            ResourceBundle bundle = null;
+            try {
+                try {
+                    if (path.endsWith(".jar")) {
+                        jarStream = new FileInputStream(path);
+                        JarInputStream jarInputStream = new JarInputStream(jarStream);
+                        inputStream = jarInputStream;
+
+                        JarEntry entry;
+                        while ((entry = jarInputStream.getNextJarEntry()) != null) {
+                            if (entry.getName().endsWith("ErraiApp.properties")) {
+                                bundle = new PropertyResourceBundle(inputStream);
+                                break;
+                            }
+                        }
+                    } else {
+                        inputStream = new FileInputStream(path + "/ErraiApp.properties");
+                        bundle = new PropertyResourceBundle(inputStream);
+                    }
+
+
+                    if (bundle != null) {
+                        found = true;
+                        logger.log(TreeLogger.Type.INFO, "checking ErraiApp.properties for configured types ...");
+
+                        Enumeration<String> keys = bundle.getKeys();
+
+                        while (keys.hasMoreElements()) {
+                            String key = keys.nextElement();
+                            if (ErraiServiceConfigurator.CONFIG_ERRAI_SERIALIZABLE_TYPE.equals(key)) {
+                                for (String s : bundle.getString(key).split(" ")) {
+                                    try {
+                                        generateMarshaller(oracle.getType(s.trim()), logger, writer);
+                                    }
+                                    catch (Exception e) {
+                                        e.printStackTrace();
+                                        throw new ErraiBootstrapFailure(e);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (FileNotFoundException e) {
+                    // ignore.  we don't expect to find this file in all paths.
+                }
+                finally {
+                    if (inputStream != null) inputStream.close();
+                    if (jarStream != null) jarStream.close();
+                }
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+        }
+        if (!found) {
+            log.warn("No modules found ot load. Unable to find ErraiApp.properties in the classpath");
+        }
+
 
         // Entity config in ErraiApp.properties
         ResourceBundle bundle = ResourceBundle.getBundle("ErraiApp");
@@ -130,13 +213,13 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
                 if (f.isTransient() || f.isStatic() || f.isEnumConstant() != null) continue;
 
                 JClassType type = f.getType().isClassOrInterface();
-                JMethod m = null;
+                JMethod m;
                 if (type == null) {
                     JPrimitiveType pType = f.getType().isPrimitive();
                     if (pType == null) continue;
 
                     Class c;
-                    types.put(f.getName(), ParseTools.unboxPrimitive(c = Class.forName(pType.getQualifiedBoxedSourceName())));
+                    types.put(f.getName(), c = ParseTools.unboxPrimitive(Class.forName(pType.getQualifiedBoxedSourceName())));
 
                     if (boolean.class.equals(c)) {
                         if ((m = getAccessorMethod(visit, ReflectionUtil.getIsGetter(f.getName()))) == null) {
@@ -183,6 +266,10 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
             throw new GenerationException(errorMsg, e);
         }
 
+
+        if (classLoader != null)
+            Thread.currentThread().setContextClassLoader(classLoader);
+
         Map<String, Object> templateVars = Make.Map.<String, Object>$()
                 ._("className", visit.getQualifiedSourceName())
                 ._("canonicalClassName", visit.getQualifiedBinaryName())
@@ -196,13 +283,16 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
 
         writer.print(genStr = (String) execute(demarshallerGenerator, templateVars));
 
-        //  System.out.println(genStr);
+        log.debug("generated demarshaller: \n" + genStr);
+
+     //   System.out.println(genStr);
 
         logger.log(TreeLogger.Type.INFO, genStr);
 
         writer.print(genStr = (String) execute(marshallerGenerator, templateVars));
 
-        //     System.out.println(genStr);
+        log.debug("generated marshaller: \n" + genStr);
+      //  System.out.println(genStr);
 
         logger.log(TreeLogger.Type.INFO, genStr);
         logger.log(TreeLogger.Type.INFO, "Generated marshaller/demarshaller for: " + visit.getName());
