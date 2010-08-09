@@ -26,7 +26,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
- * An UrlType handler for deployment archives served through the JBoss virtual filesytem. <br/>
+ * An {@link org.reflections.vfs.Vfs.UrlType} for deployment archives served through the JBoss virtual filesytem. <br/>
  * It simply delegates to {@link org.reflections.vfs.SystemDir} and
  * {@link org.reflections.vfs.ZipDir} respectively
  *

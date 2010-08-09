@@ -27,6 +27,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 /**
+ * A set of utilities for processing a {@link org.jboss.errai.bus.server.service.metadata.DeploymentContext}
+ *
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Aug 9, 2010
  */

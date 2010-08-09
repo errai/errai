@@ -33,6 +33,14 @@ import java.util.regex.Pattern;
 import static org.reflections.util.Utils.forNames;
 import static org.reflections.vfs.Vfs.UrlType;
 /**
+ * Scans component meta data using javassist.
+ * The scanner creates a {@link org.jboss.errai.bus.server.service.metadata.DeploymentContext}
+ * that identifies nested subdeployments (i.e. WAR inside EAR) and processes the resulting archive Url's
+ * using the <a href="http://code.google.com/p/reflections/">Reflections</a> library.
+ * 
+ * <p/>
+ * The initial set of config Url's (entry points) is discovered through through ErraiApp.properties.
+ *  
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Aug 3, 2010
  */

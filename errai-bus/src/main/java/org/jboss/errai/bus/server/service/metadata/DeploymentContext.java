@@ -21,6 +21,13 @@ import java.net.URL;
 import java.util.*;
 
 /**
+ * DeploymentContext and {@link org.jboss.errai.bus.server.service.metadata.PackagingUtil}
+ * identify and unpack nested subdeployments (i.e. WAR inside EAR) before passing the resulting URL's to
+ * the Reflections implementation.
+ * <p/>
+ * Calling {@link #close()} deletes the temporary created archive files.
+ * Subsequent call to Reflection rely on classloading and don't need these artefacts anymore.
+ *
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Aug 9, 2010
  */

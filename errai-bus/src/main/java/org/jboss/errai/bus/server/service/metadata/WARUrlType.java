@@ -23,6 +23,10 @@ import java.io.File;
 import java.net.URL;
 
 /**
+ * An {@link org.reflections.vfs.Vfs.UrlType} for scanning web application archives.
+ * It simply delegates to {@link org.reflections.vfs.SystemDir} and
+ * {@link org.reflections.vfs.ZipDir} respectively
+ * 
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Aug 9, 2010
  */
