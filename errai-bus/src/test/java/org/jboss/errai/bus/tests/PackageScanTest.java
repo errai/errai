@@ -84,6 +84,20 @@ public class PackageScanTest extends TestCase
     assertFalse("Cannot find @ApplicationComponent on HelloWorldService", annotated.isEmpty());
   }
 
+  public void testExplodedWarScan() throws Exception
+  {
+    File war = new File("src/test/resources/hello_exp.war");
+    assertTrue(war.exists());
+    URL warUrl = new URL(war.toURI().toURL()+"/WEB-INF/classes");
+
+    List<URL> urlList = new ArrayList<URL>();
+    urlList.add(warUrl);
+    MetaDataScanner scanner = MetaDataScanner.createInstance(urlList);
+
+    Set<String> annotated = scanner.getStore().getTypesAnnotatedWith(ApplicationComponent.class.getName());
+    assertFalse("Cannot find @ApplicationComponent on HelloWorldService", annotated.isEmpty());
+  }
+
   // w/o we cannot create VFS Url's for this test
   /*class VFSHandler extends URLStreamHandler
   {
