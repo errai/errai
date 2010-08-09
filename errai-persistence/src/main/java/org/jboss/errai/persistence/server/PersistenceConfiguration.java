@@ -27,14 +27,12 @@ import org.jboss.errai.bus.server.annotations.ExtensionComponent;
 import org.jboss.errai.bus.server.api.ErraiConfig;
 import org.jboss.errai.bus.server.api.ErraiConfigExtension;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
-import org.jboss.errai.bus.server.util.ConfigUtil;
-import org.jboss.errai.bus.server.util.ConfigVisitor;
+import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.persistence.Entity;
-import java.io.File;
-import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -75,16 +73,13 @@ public class PersistenceConfiguration implements ErraiConfigExtension {
     cfg.setProperty("hibernate.show_sql", "true");
     cfg.setProperty("hibernate.hbm2ddl.auto", "update");
 
-    List<File> roots = configurator.getConfigurationRoots();
-
-    logger.info("begin scan for annotated classes.");
-    ConfigUtil.visitAllTargets(roots, new ConfigVisitor() {
-      public void visit(Class<?> clazz) {
-        if (clazz.isAnnotationPresent(Entity.class)) {
-          cfg.addAnnotatedClass(clazz);
-        }
-      }
-    });
+    logger.debug("begin scan for annotated classes.");
+    MetaDataScanner scanner = configurator.getMetaDataScanner();
+    Set<Class<?>> entities = scanner.getTypesAnnotatedWith(Entity.class);
+    for(Class<?> entity : entities)
+    {
+      cfg.addAnnotatedClass(entity);
+    }
 
     try {
       final SessionFactory sessionFactory = cfg.buildSessionFactory();

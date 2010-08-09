@@ -18,9 +18,8 @@ package org.jboss.errai.bus.server.service;
 
 import org.jboss.errai.bus.client.api.ResourceProvider;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
+import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
 
-import java.io.File;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -32,15 +31,10 @@ public interface ErraiServiceConfigurator {
     public static final String CONFIG_ERRAI_SERIALIZABLE_TYPE = "errai.bus.serializableTypes";
     public static final String DO_LONG_POLL = "org.jboss.errai.bus.do_long_poll";
 
+    public MetaDataScanner getMetaDataScanner();
+
    public static final boolean LONG_POLLING = System.getProperty(ErraiServiceConfigurator.DO_LONG_POLL) == null
             || Boolean.getBoolean(ErraiServiceConfigurator.DO_LONG_POLL);
-
-    /**
-     * Gets a list of all configuration targets
-     *
-     * @return list of all configuration targets
-     */
-    public List<File> getConfigurationRoots();
 
     /**
      * Gets the resource providers associated with this configurator

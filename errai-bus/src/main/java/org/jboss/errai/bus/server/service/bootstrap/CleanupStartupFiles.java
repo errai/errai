@@ -15,7 +15,6 @@
  */
 package org.jboss.errai.bus.server.service.bootstrap;
 
-import org.jboss.errai.bus.server.util.ConfigUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,12 +24,13 @@ import org.slf4j.LoggerFactory;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: May 3, 2010
  */
+@Deprecated
 class CleanupStartupFiles implements BootstrapExecution {
     public static final Logger log = LoggerFactory.getLogger(CleanupStartupFiles.class);
 
     public void execute(BootstrapContext context) {
         try {
-            ConfigUtil.cleanupStartupTempFiles();
+            //ConfigUtil.cleanupStartupTempFiles();
         } catch (Exception e) {
             log.error("Failed to clean startup files, ignore...");
         }

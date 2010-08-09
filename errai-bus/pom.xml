@@ -48,8 +48,6 @@
         <dependency>
             <groupId>com.google.gwt</groupId>
             <artifactId>gwt-user</artifactId>
-            <!-- This should not be packaged with the Errai Distro.  There are no runtime dependencies on it
-   and it breaks deployment on JBoss AS and Tomcat -->
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -135,6 +133,7 @@
             <version>4.8.1</version>
         </dependency>
 
+        <!-- GAE -->
         <dependency>
             <groupId>com.google.appengine</groupId>
             <artifactId>appengine-api</artifactId>
@@ -147,49 +146,88 @@
             <scope>provided</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+            <version>${reflections.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.servlet</groupId>
+                    <artifactId>servlet-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.google.code.gson</groupId>
+                    <artifactId>gson</artifactId>
+                </exclusion>
+                <!--exclusion>
+                    <groupId>dom4j</groupId>
+                    <artifactId>dom4j</artifactId>
+                </exclusion-->
+                <exclusion>
+                    <groupId>ch.qos.logback</groupId>
+                    <artifactId>logback-classic</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>javassist</groupId>
+            <artifactId>javassist</artifactId>
+            <version>3.12.1.GA</version>
+        </dependency>
     </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <childDelegation>true</childDelegation>
 
-                    <skipTests>false</skipTests>
-                    <failIfNoTests>true</failIfNoTests>
-                    <trimStackTrace>false</trimStackTrace>
+    <profiles>
+        <profile>
+            <id>enableTests</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <skipTests>false</skipTests>
+                            <!--childDelegation>true</childDelegation>
 
-                    <additionalClasspathElements>
-                        <additionalClasspathElement>${basedir}/test-classes/</additionalClasspathElement>
-                        <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
-                    </additionalClasspathElements>
-                    <useSystemClassLoader>false</useSystemClassLoader>
+                            <skipTests>false</skipTests>
+                            <failIfNoTests>true</failIfNoTests>
+                            <trimStackTrace>false</trimStackTrace>
 
-                    <systemProperties>
-                        <property>
-                            <name>log4j.output.dir</name>
-                            <value>${project.build.directory}</value>
-                        </property>
+                            <additionalClasspathElements>
+                                <additionalClasspathElement>${basedir}/test-classes/</additionalClasspathElement>
+                                <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
+                            </additionalClasspathElements>
+                            <useSystemClassLoader>false</useSystemClassLoader-->
 
-                        <!-- Must disable long polling for automated tests to succeed -->
-                        <property>
-                            <name>org.jboss.errai.bus.do_long_poll</name>
-                            <value>false</value>
-                        </property>
-                    </systemProperties>
+                            <systemProperties>
+                                <property>
+                                    <name>java.io.tmpdir</name>
+                                    <value>${project.build.directory}</value>
+                                </property>
+                                <property>
+                                    <name>log4j.output.dir</name>
+                                    <value>${project.build.directory}</value>
+                                </property>
 
-                    <includes>
-                        <include>**/*Test.java</include>
-                        <include>**/*Tests.java</include>
-                    </includes>
-                    <excludes>
-                        <exclude>**/ErraiBusTests.java</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-
+                                <!-- Must disable long polling for automated tests to succeed -->
+                                <property>
+                                    <name>org.jboss.errai.bus.do_long_poll</name>
+                                    <value>false</value>
+                                </property>
+                            </systemProperties>
+                            
+                            <includes>
+                                <include>**/*Test.java</include>
+                                <include>**/*Tests.java</include>
+                            </includes>
+                            <excludes>
+                                <exclude>**/ErraiBusTests.java</exclude>
+                                <exclude>**/BusCommunicationTests.java</exclude>
+                            </excludes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

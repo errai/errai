@@ -22,7 +22,7 @@ import org.jboss.errai.bus.client.api.ResourceProvider;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: May 3, 2010
  */
-class GuiceProviderProxy implements Provider {
+public class GuiceProviderProxy implements Provider {
     private final ResourceProvider provider;
 
     public GuiceProviderProxy(ResourceProvider provider) {

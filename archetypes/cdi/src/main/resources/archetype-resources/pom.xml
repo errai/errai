@@ -170,14 +170,7 @@
                     <version>${errai-cdi.version}</version>
                     <scope>provided</scope>
                 </dependency>
-
-                <dependency>
-                    <groupId>org.jboss.errai</groupId>
-                    <artifactId>errai-cdi-jetty</artifactId>
-                    <version>${errai-cdi.version}</version>
-                    <scope>provided</scope>
-                </dependency>
-
+                
                 <dependency>
                     <groupId>org.mvel</groupId>
                     <artifactId>mvel2</artifactId>

@@ -22,9 +22,8 @@ import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.bus.server.api.SessionProvider;
-import org.jboss.errai.bus.server.util.ConfigUtil;
+import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
 
-import java.io.File;
 import java.util.*;
 
 import static java.util.ResourceBundle.getBundle;
@@ -34,8 +33,8 @@ import static java.util.ResourceBundle.getBundle;
  */
 public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
 
-    private ServerMessageBus bus;
-    private List<File> configRootTargets;
+    private ServerMessageBus bus;    
+    private MetaDataScanner scanner;
     private Map<String, String> properties;
 
     private Map<Class<?>, ResourceProvider> extensionBindings;
@@ -56,22 +55,21 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
         this.extensionBindings = new HashMap<Class<?>, ResourceProvider>();
         this.resourceProviders = new HashMap<String, ResourceProvider>();
         this.serializableTypes = new HashSet<Class>();
-
+        this.scanner = MetaDataScanner.createInstance();
         loadServiceProperties();
     }
 
+    // lockdown the configuration so it can't be modified.
     public void lockdown() {
-        // lockdown the configuration so it can't be modified.
-        configRootTargets = Collections.unmodifiableList(configRootTargets);
+
         properties = Collections.unmodifiableMap(properties);
         extensionBindings = Collections.unmodifiableMap(extensionBindings);
-      //  resourceProviders = Collections.unmodifiableMap(resourceProviders);
+        //  resourceProviders = Collections.unmodifiableMap(resourceProviders);
         serializableTypes = Collections.unmodifiableSet(serializableTypes);
     }
 
     private void loadServiceProperties() {
         properties = new HashMap<String, String>();
-        configRootTargets = ConfigUtil.findAllConfigTargets();
         String bundlePath = System.getProperty("errai.service_config_prefix_path");
 
         try {
@@ -96,7 +94,12 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
         }
     }
 
-    /**
+  public MetaDataScanner getMetaDataScanner()
+  {
+    return scanner;
+  }
+
+  /**
      * Gets the resource providers associated with this configurator
      *
      * @return the resource providers associated with this configurator
@@ -104,16 +107,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
     public Map<String, ResourceProvider> getResourceProviders() {
         return this.resourceProviders;
     }
-
-    /**
-     * Gets a list of all configuration targets
-     *
-     * @return list of all configuration targets
-     */
-    public List<File> getConfigurationRoots() {
-        return this.configRootTargets;
-    }
-
+    
     /**
      * Returns true if the configuration has this <tt>key</tt> property
      *

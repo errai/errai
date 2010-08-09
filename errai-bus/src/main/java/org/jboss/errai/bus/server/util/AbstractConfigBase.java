@@ -120,7 +120,7 @@ public abstract class AbstractConfigBase {
 
             String jarName = pathToJar.substring(startIdx, endIdx);
 
-            inStream = findResource(ConfigUtil.class.getClassLoader(), jarName.replaceAll("/", "\\."));
+            inStream = findResource(AbstractConfigBase.class.getClassLoader(), jarName.replaceAll("/", "\\."));
 
             if (inStream == null) {
                 /**

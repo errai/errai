@@ -18,13 +18,10 @@ package org.jboss.errai.bus.server.service.bootstrap;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
-import org.jboss.errai.bus.server.util.ConfigUtil;
+import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.util.Collections;
-import java.util.List;
 import java.util.Stack;
 
 /**
@@ -34,49 +31,47 @@ import java.util.Stack;
  * @date: May 3, 2010
  */
 public class BootstrapContext {
-    private final ServerMessageBus bus;
-    private final ErraiServiceConfigurator config;
-    private final ErraiService service;
-    private final List<File> configTargets;
+  private final ServerMessageBus bus;
+  private final ErraiServiceConfigurator config;
+  private final ErraiService service;    
 
+  private Stack<Runnable> deferredTasks = new Stack<Runnable>();
 
-    private Stack<Runnable> deferredTasks = new Stack<Runnable>();
+  private Logger log = LoggerFactory.getLogger(BootstrapContext.class);
 
-    private Logger log = LoggerFactory.getLogger(BootstrapContext.class);
+  public BootstrapContext(ErraiService service, ServerMessageBus bus, ErraiServiceConfigurator config) {
+    this.service = service;
+    this.bus = bus;
+    this.config = config;        
+  }
 
-    public BootstrapContext(ErraiService service, ServerMessageBus bus, ErraiServiceConfigurator config) {
-        this.service = service;
-        this.bus = bus;
-        this.config = config;
-        this.configTargets = Collections.unmodifiableList(ConfigUtil.findAllConfigTargets());
+  public ServerMessageBus getBus() {
+    return bus;
+  }
+
+  public ErraiServiceConfigurator getConfig() {
+    return config;
+  }
+
+  public MetaDataScanner getScanner()
+  {
+    return config.getMetaDataScanner();
+  }
+
+  public void defer(Runnable task) {
+    this.deferredTasks.push(task);
+  }
+
+  public ErraiService getService() {
+    return service;
+  }
+
+  void executeDeferred() {
+    log.info("Running deferred bootstrap tasks ...");
+
+    while (!deferredTasks.isEmpty()) {
+      Runnable task = deferredTasks.pop();
+      task.run();
     }
-
-    public ServerMessageBus getBus() {
-        return bus;
-    }
-
-    public ErraiServiceConfigurator getConfig() {
-        return config;
-    }
-
-    public List<File> getConfigTargets() {
-        return configTargets;
-    }
-
-    public void defer(Runnable task) {
-        this.deferredTasks.push(task);
-    }
-
-    public ErraiService getService() {
-        return service;
-    }
-
-    void executeDeferred() {
-        log.info("Running deferred bootstrap tasks ...");
-
-        while (!deferredTasks.isEmpty()) {
-            Runnable task = deferredTasks.pop();
-            task.run();
-        }
-    }
+  }
 }
