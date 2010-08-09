@@ -15,6 +15,7 @@
  */
 package org.jboss.errai.bus.server.service.metadata;
 
+import com.google.common.collect.ImmutableSet;
 import org.reflections.Reflections;
 import org.reflections.scanners.FieldAnnotationsScanner;
 import org.reflections.scanners.MethodAnnotationsScanner;
@@ -29,6 +30,7 @@ import java.net.URL;
 import java.util.*;
 import java.util.regex.Pattern;
 
+import static org.reflections.util.Utils.forNames;
 import static org.reflections.vfs.Vfs.UrlType;
 /**
  * @author: Heiko Braun <hbraun@redhat.com>
@@ -82,15 +84,16 @@ public class MetaDataScanner extends Reflections
       Class<? extends Annotation> annotation, String excludeRegex)
   {
     Pattern p = Pattern.compile(excludeRegex);
-    Set<Class<?>> result = new HashSet<Class<?>>();
+    Set<String> result = new HashSet<String>();
 
-    Set<Class<?>> types = super.getTypesAnnotatedWith(annotation);
-    for(Class<?> clazz : types)
+    Set<String> types = getStore().getTypesAnnotatedWith(annotation.getName());
+    for(String className : types)
     {
-      if(!p.matcher(clazz.getName()).matches())
-        result.add(clazz);
+      if(!p.matcher(className).matches())
+        result.add(className);
     }
-    return result;
+
+    return ImmutableSet.copyOf(forNames(result));
   }
 
   public static List<URL> getConfigUrls(ClassLoader loader)
