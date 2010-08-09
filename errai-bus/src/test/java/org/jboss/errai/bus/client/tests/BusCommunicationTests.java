@@ -94,13 +94,22 @@ public class BusCommunicationTests extends AbstractErraiTest {
     public void testRPCCall() {
         runAfterInit(new Runnable() {
             public void run() {
-                MessageBuilder.createCall(new RemoteCallback<Boolean>() {
+                TestRPCServiceRemote remote = MessageBuilder.createCall(new RemoteCallback<Boolean>() {
+                    int count = 0;
                     public void callback(Boolean response) {
+                        ++count;
+                        System.out.println("response (" + count + ")" + response);
                         assertTrue(response);
-                        finishTest();
+                        if (count == 3) finishTest();
                     }
-                }, TestRPCServiceRemote.class).isGreaterThan(10, 5);
+                }, TestRPCServiceRemote.class);
+
+                remote.isGreaterThan(10,5);
+                remote.isGreaterThan(5,1);
+                remote.isGreaterThan(11, 3);
             }
         });
+
+
     }
 }
