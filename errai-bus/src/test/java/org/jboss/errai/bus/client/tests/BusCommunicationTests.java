@@ -21,6 +21,7 @@ import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.protocols.MessageParts;
+import org.jboss.errai.bus.client.tests.support.RandomProvider;
 import org.jboss.errai.bus.client.tests.support.SType;
 import org.jboss.errai.bus.client.tests.support.TestRPCServiceRemote;
 
@@ -54,11 +55,42 @@ public class BusCommunicationTests extends AbstractErraiTest {
 
      }
 
+    public static class GWTRandomProvider implements RandomProvider {
+          private static char[] CHARS = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q',
+                  'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'};
+
+          public boolean nextBoolean() {
+              return com.google.gwt.user.client.Random.nextBoolean();
+          }
+
+          public int nextInt(int upper) {
+              return com.google.gwt.user.client.Random.nextInt(upper);
+          }
+
+          public double nextDouble() {
+              return com.google.gwt.user.client.Random.nextDouble();
+          }
+
+          public char nextChar() {
+              return CHARS[com.google.gwt.user.client.Random.nextInt(1000) % CHARS.length];
+          }
+
+          public String randString() {
+              StringBuilder builder = new StringBuilder();
+              int len = nextInt(25) + 5;
+              for (int i = 0; i < len; i++) {
+                  builder.append(nextChar());
+              }
+              return builder.toString();
+          }
+      }
+
+
     public void testSerializableCase() {
         runAfterInit(new Runnable() {
             public void run() {
                 try {
-                    final SType sType1 = SType.create();
+                    final SType sType1 = SType.create(new GWTRandomProvider());
                     bus.subscribe("ClientReceiver", new MessageCallback() {
                         public void callback(Message message) {
                             SType type = message.get(SType.class, "SType");
@@ -109,7 +141,5 @@ public class BusCommunicationTests extends AbstractErraiTest {
                 remote.isGreaterThan(11, 3);
             }
         });
-
-
     }
 }

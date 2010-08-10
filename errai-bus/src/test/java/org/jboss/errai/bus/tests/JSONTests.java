@@ -4,6 +4,8 @@ import junit.framework.TestCase;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.base.JSONMessage;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.tests.support.RandomProvider;
+import org.jboss.errai.bus.client.tests.support.SType;
 import org.jboss.errai.bus.server.io.JSONDecoder;
 import org.jboss.errai.bus.server.io.JSONEncoder;
 import org.jboss.errai.bus.server.io.JSONStreamDecoder;
@@ -16,6 +18,7 @@ import java.io.Writer;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 /**
  * User: christopherbrock
@@ -76,11 +79,11 @@ public class JSONTests extends TestCase {
     }
 
     public void testMarshalling() {
-        String jsonData = "{\"SType\":{" + SerializationParts.ENCODED_TYPE + " :\"" + SType.class.getName()
+        String jsonData = "{\"SType\":{" + SerializationParts.ENCODED_TYPE + " :\"" + TType.class.getName()
                 + "\",startDate:1280250281006,fieldOne:\"One!\",active:true,endDate:1280251281006,fieldTwo:\"Two!!\"}," +
                 "\"ReplyTo\":\"ClientReceiver\",\"ToSubject\":\"TestService1\",__MarshalledTypes:\"SType\"}";
 
-        SType sType = new SType();
+        TType sType = new TType();
         sType.setActive(true);
         sType.setFieldOne("One!");
         sType.setFieldTwo("Two!!");
@@ -92,13 +95,63 @@ public class JSONTests extends TestCase {
         try {
             ByteArrayInputStream instream = new ByteArrayInputStream(jsonData.getBytes());
             Map<String, Object> decoded = (Map<String, Object>) JSONStreamDecoder.decode(instream);
-            SType sType1 = (SType) decoded.get("SType");
+            TType sType1 = (TType) decoded.get("SType");
             assertTrue(sType.equals(sType1));
 
         }
         catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static class JavaRandomProvider implements RandomProvider {
+          private static char[] CHARS = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q',
+                  'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'};
+
+         private Random random = new Random(System.nanoTime());
+
+          public boolean nextBoolean() {
+              return random.nextBoolean();
+          }
+
+          public int nextInt(int upper) {
+              return random.nextInt(upper);
+          }
+
+          public double nextDouble() {
+              return random.nextDouble();
+          }
+
+          public char nextChar() {
+              return CHARS[nextInt(1000) % CHARS.length];
+          }
+
+          public String randString() {
+              StringBuilder builder = new StringBuilder();
+              int len = nextInt(25) + 5;
+              for (int i = 0; i < len; i++) {
+                  builder.append(nextChar());
+              }
+              return builder.toString();
+          }
+      }
+
+
+    public void testMarshalling2() {
+        SType type = SType.create(new JavaRandomProvider());
+
+        Map<String, Object> vars = new HashMap<String, Object>();
+        vars.put("SType", type);
+
+        String json = JSONEncoder.encode(vars);
+
+        System.out.println(json);
+
+        Map<String, Object> result = (Map<String,Object>) JSONDecoder.decode(json);
+
+        SType rSType = (SType) result.get("SType");
+
+        assertEquals(type, rSType);
     }
 
     public static class SimpleWriter extends Writer {
@@ -140,7 +193,7 @@ public class JSONTests extends TestCase {
         }
     }
 
-    public static class SType {
+    public static class TType {
         private String fieldOne;
         private String fieldTwo;
         private Date startDate;
@@ -192,7 +245,7 @@ public class JSONTests extends TestCase {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            SType sType = (SType) o;
+            TType sType = (TType) o;
 
             if (active != null ? !active.equals(sType.active) : sType.active != null) return false;
             if (endDate != null ? !endDate.equals(sType.endDate) : sType.endDate != null) return false;

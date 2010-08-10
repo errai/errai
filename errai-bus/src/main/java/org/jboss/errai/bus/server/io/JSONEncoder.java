@@ -119,9 +119,15 @@ public class JSONEncoder {
                 build.append(',');
             }
 
+            try {
             Object v = MVEL.executeExpression(s[i++], o);
             build.append(field.getName()).append(':').append(_encode(v));
             first = false;
+            }
+            catch (Throwable t) {
+                System.out.println("failed at encoding: " + field.getName());
+                t.printStackTrace();
+            }
         }
 
         return build.append('}').toString();
