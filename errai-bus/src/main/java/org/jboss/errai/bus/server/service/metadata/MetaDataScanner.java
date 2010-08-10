@@ -117,4 +117,13 @@ public class MetaDataScanner extends Reflections {
   public static List<URL> getConfigUrls() {
     return getConfigUrls(MetaDataScanner.class.getClassLoader());
   }
+
+  public static void main(String[] args) throws Exception
+  {
+    URL url = new URL("file:/Users/hbraun/dev/prj/errai/trunk/errai-bus/src/test/resources_metadata/hello_exp.war//WEB-INF/classes");
+    String s = Vfs.normalizePath(url);
+    System.out.println(s);
+    boolean b = url.getProtocol().equals("file") && new java.io.File(s).isDirectory();
+    System.out.println(b);
+  }
 }

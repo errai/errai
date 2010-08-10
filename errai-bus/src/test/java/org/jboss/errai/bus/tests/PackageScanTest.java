@@ -95,7 +95,7 @@ public class PackageScanTest extends TestCase {
         assertFalse("Cannot find @ApplicationComponent on HelloWorldService", annotated.isEmpty());
     }
 
-    public void _testExplodedWarScan() throws Exception {
+    public void testExplodedWarScan() throws Exception {
         File war = new File(getPackageResourcePath() + "/hello_exp.war");
         assertTrue(war.exists());
         URL warUrl = new URL(war.toURI().toURL() + "/WEB-INF/classes");
@@ -106,15 +106,5 @@ public class PackageScanTest extends TestCase {
 
         Set<String> annotated = scanner.getStore().getTypesAnnotatedWith(ApplicationComponent.class.getName());
         assertFalse("Cannot find @ApplicationComponent on HelloWorldService", annotated.isEmpty());
-    }
-
-    // w/o we cannot create VFS Url's for this test
-    /*class VFSHandler extends URLStreamHandler
-    {
-      @Override
-      protected URLConnection openConnection(URL u) throws IOException
-      {
-        throw new RuntimeException("Not implemented");
-      }
-    }*/
+    }    
 }
