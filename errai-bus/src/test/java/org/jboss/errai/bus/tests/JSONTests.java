@@ -145,11 +145,12 @@ public class JSONTests extends TestCase {
 
         String json = JSONEncoder.encode(vars);
 
-        System.out.println(json);
-
         Map<String, Object> result = (Map<String,Object>) JSONDecoder.decode(json);
 
         SType rSType = (SType) result.get("SType");
+
+        System.out.println("type  :" + type);
+        System.out.println("rSType:" + rSType);
 
         assertEquals(type, rSType);
     }

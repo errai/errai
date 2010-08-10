@@ -215,7 +215,22 @@ public class SType {
 
     @Override
     public String toString() {
-        return fieldOne + "|" + fieldTwo + "|" + startDate + "|" + endDate + "|" + active + "|" + place + "|" + listOfStypes;
+       return new StringBuilder("{")
+        .append("fieldOne: " + fieldOne + ",\n")
+        .append(" fieldTwo: " + fieldTwo + ",\n")
+        .append(" startDate: " + startDate + ",\n")
+        .append(" endDate:" + endDate + ",\n")
+        .append(" active: " + active + ",\n")
+        .append(" listOfStypes: " + listOfStypes + ",\n")
+        .append(" mapOfStypes: " + mapofStypes + ",\n")
+        .append(" place: " + place + ",\n")
+        .append(" longValue: " + longValue + ",\n")
+        .append(" shortValue: " + shortValue + ",\n")
+        .append(" doubleValue: " + doubleValue + ",\n")
+        .append(" floatValue: " + floatValue + ",\n")
+        .append(" byteValue: " + byteValue + ",\n")
+        .append(" charValue: " + charValue + ",\n")
+        .append("}").toString();
     }
 
     public static SType create(RandomProvider random) {

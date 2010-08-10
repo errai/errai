@@ -85,6 +85,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     /* True if the client's message bus has been initialized */
     private boolean initialized = false;
+    private boolean postInit = false;
 
     private long lastTransmit = 0;
 
@@ -189,7 +190,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     public void subscribe(final String subject, final MessageCallback callback) {
         if ("ServerBus".equals(subject) && subscriptions.containsKey("ServerBus")) return;
 
-        if (!initialized) {
+        if (!postInit) {
             postInitTasks.add(new Runnable() {
                 public void run() {
                     subscribe(subject, callback);
@@ -203,6 +204,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
         fireAllSubscribeListeners(subject);
 
+        directSubscribe(subject, callback);
+    }
+
+    private void directSubscribe(final String subject, final MessageCallback callback) {
         addSubscription(subject, _subscribe(subject, new MessageCallback() {
             public void callback(Message message) {
                 try {
@@ -583,7 +588,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
         if (sendBuilder == null) return;
 
-        subscribe("ClientBus", new MessageCallback() {
+        directSubscribe("ClientBus", new MessageCallback() {
             @SuppressWarnings({"unchecked"})
             public void callback(final Message message) {
                 switch (BusCommands.valueOf(message.getCommandType())) {
@@ -683,6 +688,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                         });
 
 
+
+                        postInit = true;
                         logAdapter.debug("Executing " + postInitTasks.size() + " post init task(s)");
                         for (int i = 0; i < postInitTasks.size(); i++) {
                             try {
@@ -694,11 +701,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                             }
                         }
 
+                        sendAllDeferred();
                         postInitTasks.clear();
 
-                        sendAllDeferred();
-
                         initialized = true;
+
 
                         break;
 
