@@ -49,7 +49,6 @@ import static org.mvel2.templates.TemplateRuntime.execute;
  * @author Heiko Braun
  */
 public class BusClientConfigGenerator implements ExtensionGenerator {
-
     private Logger log = LoggerFactory.getLogger(BusClientConfigGenerator.class);
 
     private CompiledTemplate demarshallerGenerator;
@@ -98,7 +97,6 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
                 throw new ErraiBootstrapFailure(t);
             }
         }
-
 
         boolean found = false;
         String path;

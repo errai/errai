@@ -95,7 +95,6 @@ public class DefaultBlockingServlet extends AbstractErraiServlet {
 
             queue.heartBeat();
 
-
             httpServletResponse.setHeader("Cache-Control", "no-cache");
             httpServletResponse.setContentType("application/json");
 
