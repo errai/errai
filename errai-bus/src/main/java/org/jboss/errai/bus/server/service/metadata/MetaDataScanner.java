@@ -15,9 +15,12 @@
  */
 package org.jboss.errai.bus.server.service.metadata;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import org.reflections.Reflections;
+import org.reflections.Store;
 import org.reflections.scanners.*;
+import org.reflections.scanners.Scanner;
 import org.reflections.util.ConfigurationBuilder;
 import org.reflections.vfs.Vfs;
 
@@ -48,17 +51,37 @@ public class MetaDataScanner extends Reflections {
   public static final String CLIENT_PKG_REGEX = "(.*?)(\\.client\\.)(.*?)";
   public static final String ERRAI_CONFIG_STUB_NAME = "ErraiApp.properties";
 
+  private final PropertyScanner propScanner = new PropertyScanner(
+      new Predicate<String>() {
+        public boolean apply(String file)
+        {
+          return file.endsWith(".properties");
+        }
+      }
+  );
+
   MetaDataScanner(List<URL> urls) {
-    super(new ConfigurationBuilder()
+
+    configuration = new ConfigurationBuilder()
         .setUrls(urls)
-        //.filterInputsBy(new FilterBuilder().exclude(CLIENT_PKG_REGEX))
+            //.filterInputsBy(new FilterBuilder().exclude(CLIENT_PKG_REGEX))
         .setScanners(
-        new FieldAnnotationsScanner(),
-        new MethodAnnotationsScanner(),
-        new TypeAnnotationsScanner(),
-        new SubTypesScanner(),
-        new ResourcesScanner()
-    ));
+            new FieldAnnotationsScanner(),
+            new MethodAnnotationsScanner(),
+            new TypeAnnotationsScanner(),
+            new SubTypesScanner(),
+            propScanner
+        );
+
+    store = new Store();
+
+    //inject to scanners
+    for (Scanner scanner : configuration.getScanners()) {
+      scanner.setConfiguration(configuration);
+      scanner.setStore(store.get(scanner.getClass()));
+    }
+
+    scan();
   }
 
   public static MetaDataScanner createInstance() {
@@ -118,12 +141,8 @@ public class MetaDataScanner extends Reflections {
     return getConfigUrls(MetaDataScanner.class.getClassLoader());
   }
 
-  public static void main(String[] args) throws Exception
+  public Properties getProperties(String name)
   {
-    URL url = new URL("file:/Users/hbraun/dev/prj/errai/trunk/errai-bus/src/test/resources_metadata/hello_exp.war//WEB-INF/classes");
-    String s = Vfs.normalizePath(url);
-    System.out.println(s);
-    boolean b = url.getProtocol().equals("file") && new java.io.File(s).isDirectory();
-    System.out.println(b);
+    return propScanner.getProperties().get(name);
   }
 }

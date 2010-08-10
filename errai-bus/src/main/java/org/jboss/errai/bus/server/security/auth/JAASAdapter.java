@@ -115,6 +115,7 @@ public class JAASAdapter implements AuthenticationAdapter {
                     .with(SecurityParts.Name, name).getMessage();
 
             try {
+                // TODO: Still used? Take a look at MetaDataScanner.getProperties() instead
                 ResourceBundle bundle = ResourceBundle.getBundle("errai");
                 String motdText = bundle.getString("errai.login_motd");
 
