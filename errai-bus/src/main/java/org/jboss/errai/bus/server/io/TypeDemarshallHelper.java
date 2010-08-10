@@ -107,9 +107,21 @@ public class TypeDemarshallHelper {
                         if (SerializationParts.ENCODED_TYPE.equals(entry.getKey())) continue;
                         final Serializable cachedSetExpr = s.get(entry.getKey());
                         if (cachedSetExpr != null) {
-                            MVEL.executeSetExpression(cachedSetExpr, newInstance, _demarshallAll(entry.getValue()));
+                            try {
+                                MVEL.executeSetExpression(cachedSetExpr, newInstance, _demarshallAll(entry.getValue()));
+                            }
+                            catch (Exception e) {
+                                e.printStackTrace();
+                                throw new RuntimeException(e);
+                            }
                         } else {
-                            MVEL.setProperty(newInstance, String.valueOf(entry.getKey()), _demarshallAll(entry.getValue()));
+                            try {
+                                MVEL.setProperty(newInstance, String.valueOf(entry.getKey()), _demarshallAll(entry.getValue()));
+                            }
+                            catch (Exception e) {
+                                e.printStackTrace();
+                                throw new RuntimeException(e);
+                            }
                         }
                     }
 

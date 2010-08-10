@@ -127,7 +127,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      */
 
 
-    private void createRequestBuilders(ProxySettings settings) {
+    private void createRequestBuilders() {
         sendBuilder = getSendBuilder();
         recvBuilder = getRecvBuilder();
 
@@ -188,6 +188,16 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      */
     public void subscribe(final String subject, final MessageCallback callback) {
         if ("ServerBus".equals(subject) && subscriptions.containsKey("ServerBus")) return;
+
+        if (!initialized) {
+            postInitTasks.add(new Runnable() {
+                public void run() {
+                    subscribe(subject, callback);
+                }
+            });
+
+            return;
+        }
 
         logAdapter.debug("new subscription: " + subject + " -> " + callback);
 
@@ -502,6 +512,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         this.initialized = false;
         this.sendBuilder = null;
         this.recvBuilder = null;
+        this.postInitTasks.clear();
     }
 
     public class RemoteMessageCallback implements MessageCallback {
@@ -516,12 +527,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
         clientId = String.valueOf(com.google.gwt.user.client.Random.nextInt(1000))
                 + "-" + (System.currentTimeMillis() % 1000);
+
         onSubscribeHooks = new ArrayList<SubscribeListener>();
         onUnsubscribeHooks = new ArrayList<UnsubscribeListener>();
         subscriptions = new HashMap<String, List<Object>>();
         remote = new HashSet<String>();
         deferredMessages = new ArrayList<Message>();
-        postInitTasks = new ArrayList<Runnable>();
+
     }
 
 
@@ -543,8 +555,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
                 RequestBuilder bootstrap = new RequestBuilder(RequestBuilder.GET, proxySettings.url);
                 try {
-
-
                     bootstrap.sendRequest(null, new RequestCallback() {
                         public void onResponseReceived(Request request, Response response) {
                             if (200 == response.getStatusCode()) {
@@ -553,7 +563,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                             }
 
                             initFields();
-                            createRequestBuilders(proxySettings);
+                            createRequestBuilders();
                             init(callback);
                         }
 
@@ -567,12 +577,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 }
             } else {
                 initFields();
-                createRequestBuilders(proxySettings);
+                createRequestBuilders();
             }
         }
 
         if (sendBuilder == null) return;
-
 
         subscribe("ClientBus", new MessageCallback() {
             @SuppressWarnings({"unchecked"})
@@ -615,7 +624,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                         break;
 
                     case FinishStateSync:
-
                         List<String> subjects = new ArrayList<String>();
                         for (String s : subscriptions.keySet()) {
                             if (s.startsWith("local:")) continue;

@@ -196,6 +196,13 @@ public class JSONEncoder {
                 return in.getTime();
             }
         });
+
+        tHandlers.put(Character.class, new TypeHandler<Character, String>() {
+            public String getConverted(Character in) {
+                return String.valueOf(in.charValue());
+            }
+        });
+
     }
 
     public static void addEncodingHandler(Class from, TypeHandler handler) {
