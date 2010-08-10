@@ -24,7 +24,6 @@ import org.reflections.scanners.Scanner;
 import org.reflections.util.ConfigurationBuilder;
 import org.reflections.vfs.Vfs;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.net.URL;
@@ -42,7 +41,7 @@ import static org.reflections.vfs.Vfs.UrlType;
  * using the <a href="http://code.google.com/p/reflections/">Reflections</a> library.
  *
  * <p/>
- * The initial set of config Url's (entry points) is discovered through through ErraiApp.properties.
+ * The initial set of config Url's (entry points) is discovered through ErraiApp.properties.
  *
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Aug 3, 2010
