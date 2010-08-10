@@ -108,25 +108,31 @@ public class ResourceFactoryGenerator extends Generator {
 
     SourceWriter sourceWriter = composer.createSourceWriter(context, printWriter);
 
-    // parse classes
     MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
+
+    /**
+     * Identify the default bundle (if exists, it's optional)
+     */
+
     Set<Class<?>> bundles = scanner.getTypesAnnotatedWith(DefaultBundle.class);
     for(Class<?> clazz : bundles)
     {
       bundleClass = clazz.getAnnotation(DefaultBundle.class).value();
     }
 
-    if(null==bundleClass) // fallback to LoadTool declaration
+    /**
+     * Fetch icon mappings from LoadTool annotation
+     * This will be used to reference the icon though the ResourceFactory
+     */
+    Set<Class<?>> tools = scanner.getTypesAnnotatedWith(LoadTool.class);
+    for(Class<?> tool : tools)
     {
-      Set<Class<?>> tools = scanner.getTypesAnnotatedWith(LoadTool.class);
-      for(Class<?> clazz : tools)
-      {
-        LoadTool lt = clazz.getAnnotation(LoadTool.class);
-        if (!"".equals(lt.icon()))
-          tool2imageRes.put(lt.name(), lt.icon());
-      }
+      LoadTool lt = tool.getAnnotation(LoadTool.class);
+      if (!"".equals(lt.icon()))
+        tool2imageRes.put(lt.name(), lt.icon());
+
     }
-    
+
     // generator constructor source code
     generateFactoryClass(context, logger, sourceWriter);
 
@@ -137,7 +143,7 @@ public class ResourceFactoryGenerator extends Generator {
     // commit generated class
     context.commit(logger, printWriter);
   }
-  
+
   private void generateFactoryClass(
       GeneratorContext context,
       TreeLogger logger,
