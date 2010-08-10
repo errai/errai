@@ -187,11 +187,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      * @param callback - function called when the message is dispatched
      */
     public void subscribe(final String subject, final MessageCallback callback) {
+        if ("ServerBus".equals(subject) && subscriptions.containsKey("ServerBus")) return;
+
         logAdapter.debug("new subscription: " + subject + " -> " + callback);
 
         fireAllSubscribeListeners(subject);
 
-        MessageCallback dispatcher = new MessageCallback() {
+        addSubscription(subject, _subscribe(subject, new MessageCallback() {
             public void callback(Message message) {
                 try {
                     callback.callback(message);
@@ -200,9 +202,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                     logError("receiver '" + subject + "' threw an exception", decodeCommandMessage(message), e);
                 }
             }
-        };
-
-        addSubscription(subject, _subscribe(subject, dispatcher, null));
+        }, null));
     }
 
     /**
@@ -297,7 +297,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         message.commit();
         try {
             if (message.hasPart(MessageParts.ToSubject)) {
-
                 if (!initialized) {
                     deferredMessages.add(message);
                 } else {
@@ -307,8 +306,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                         return;
                     }
 
-                    _store(message.getSubject(), message instanceof HasEncoded
-                            ? ((HasEncoded) message).getEncoded() : encodeMap(message.getParts()));
+                    directStore(message);
                 }
 
             } else {
@@ -325,6 +323,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             throw e;
         }
     }
+
+    private void directStore(final Message message) {
+        _store(message.getSubject(), message instanceof HasEncoded
+                ? ((HasEncoded) message).getEncoded() : encodeMap(message.getParts()));
+    }
+
 
     /**
      * Add message to the queue that remotely transmits messages to the server.
@@ -618,6 +622,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                             if (!remote.contains(s)) subjects.add(s);
                         }
 
+                        subscribe("ServerBus", REMOTE_CALLBACK);
+
                         MessageBuilder.createMessage()
                                 .toSubject("ServerBus")
                                 .command(RemoteSubscribe)
@@ -682,9 +688,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
                         postInitTasks.clear();
 
-                        initialized = true;
-
                         sendAllDeferred();
+
+                        initialized = true;
 
                         break;
 
@@ -714,13 +720,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         for (Iterator<Message> iter = deferredMessages.iterator(); iter.hasNext();) {
             Message m = iter.next();
             if (m.hasPart(MessageParts.PriorityProcessing)) {
-                send(m);
+                directStore(m);
                 iter.remove();
             }
         }
 
         for (Iterator<Message> iter = deferredMessages.iterator(); iter.hasNext();) {
-            send(iter.next());
+            directStore(iter.next());
             iter.remove();
         }
     }

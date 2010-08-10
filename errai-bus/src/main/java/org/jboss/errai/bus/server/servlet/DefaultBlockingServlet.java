@@ -47,7 +47,7 @@ public class DefaultBlockingServlet extends AbstractErraiServlet {
      * @throws IOException      - if an input or output error is detected when the servlet handles the GET request
      * @throws ServletException - if the request for the GET could not be handled
      */
-    @Override
+    @Override                         
     protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
             throws ServletException, IOException {
         pollForMessages(sessionProvider.getSession(httpServletRequest.getSession(),

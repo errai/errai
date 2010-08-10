@@ -66,25 +66,15 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
         rpcProxyGenerator = compileTemplate(istream, null);
     }
 
-    private ClassLoader classLoader;
-
     public void generate(
             GeneratorContext context, TreeLogger logger,
             SourceWriter writer, MetaDataScanner scanner, final TypeOracle oracle) {
 
-
-        Set<Class<?>> entities = scanner.getTypesAnnotatedWith(ExposeEntity.class);
-        for (Class<?> entity : entities) {
-            if (classLoader == null) classLoader = entity.getClassLoader();
-
-            JClassType type = loadType(oracle, entity);
-            generateMarshaller(type, logger, writer);
+        for (Class<?> entity : scanner.getTypesAnnotatedWith(ExposeEntity.class)) {
+            generateMarshaller(loadType(oracle, entity), logger, writer);
         }
 
-        Set<Class<?>> remoteIntf = scanner.getTypesAnnotatedWith(Remote.class);
-        for (Class<?> remote : remoteIntf) {
-            if (classLoader == null) classLoader = remote.getClassLoader();
-
+        for (Class<?> remote : scanner.getTypesAnnotatedWith(Remote.class)) {
             JClassType type = loadType(oracle, remote);
             try {
                 writer.print((String) execute(rpcProxyGenerator,
@@ -193,8 +183,7 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
 
     private JClassType loadType(TypeOracle oracle, Class<?> entity) {
         try {
-            JClassType visit = oracle.getType(entity.getCanonicalName());
-            return visit;
+            return oracle.getType(entity.getCanonicalName());
         }
         catch (NotFoundException e) {
             throw new RuntimeException("Failed to load type " + entity.getName(), e);
@@ -264,10 +253,6 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
             throw new GenerationException(errorMsg, e);
         }
 
-
-        if (classLoader != null)
-            Thread.currentThread().setContextClassLoader(classLoader);
-
         Map<String, Object> templateVars = Make.Map.<String, Object>$()
                 ._("className", visit.getQualifiedSourceName())
                 ._("canonicalClassName", visit.getQualifiedBinaryName())
@@ -283,14 +268,11 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
 
         log.debug("generated demarshaller: \n" + genStr);
 
-     //   System.out.println(genStr);
-
         logger.log(TreeLogger.Type.INFO, genStr);
 
         writer.print(genStr = (String) execute(marshallerGenerator, templateVars));
 
         log.debug("generated marshaller: \n" + genStr);
-      //  System.out.println(genStr);
 
         logger.log(TreeLogger.Type.INFO, genStr);
         logger.log(TreeLogger.Type.INFO, "Generated marshaller/demarshaller for: " + visit.getName());
