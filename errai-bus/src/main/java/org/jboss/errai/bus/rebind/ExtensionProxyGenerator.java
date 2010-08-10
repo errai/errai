@@ -66,7 +66,7 @@ public class ExtensionProxyGenerator extends Generator {
         }
         catch (Throwable e) {
 
-            // record sendNowWith logger that Map generation threw an exception
+            // record that Map generation threw an exception
             e.printStackTrace();
             logger.log(TreeLogger.ERROR, "Error generating extensions", e);
 
