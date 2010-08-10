@@ -17,9 +17,11 @@
 package org.jboss.errai.bus.tests;
 
 import junit.framework.TestCase;
+import org.jboss.errai.bus.client.api.base.TimeUnit;
 import org.jboss.errai.bus.server.async.scheduling.PooledExecutorService;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.RejectedExecutionHandler;
@@ -213,6 +215,49 @@ public class PooledExecuterServiceTests extends TestCase {
                 System.out.println("Average Run Perf (B):" + timer2);
             }
         });
+    }
 
+    public void testExecutorServiceStress() {
+        PooledExecutorService svc = new PooledExecutorService(10, PooledExecutorService.SaturationPolicy.CallerRuns);
+        svc.start();
+
+        int size = 50;
+        int seconds = 20;
+
+        final int[] vals = new int[size];
+        final int[] vals2 = new int[size];
+
+        for (int i = 0; i < size; i++) {
+            final int x = i;
+            svc.scheduleRepeating(new Runnable() {
+                public void run() {
+                    vals[x]++;
+                }
+            }, TimeUnit.MILLISECONDS, 0, 1);
+        }
+
+
+        boolean loop = true;
+        int loops = 0;
+        try {
+            do {
+                Thread.sleep(1000);
+                System.out.println("vals=" + Arrays.toString(vals));
+
+                if (loops != 0)
+                    for (int i = 0; i < vals.length; i++) {
+                        assertTrue(vals[i] > vals2[i]);
+                    }
+
+                for (int i = 0; i < vals.length; i++) {
+                    vals2[i] = vals[i];
+                }
+
+                if (++loops == seconds) loop = false;
+            } while (loop);
+        }
+        catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

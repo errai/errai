@@ -326,7 +326,11 @@ public class PooledExecutorService implements TaskProvider {
                     }
                 }
                 catch (InterruptedException e) {
+                    e.printStackTrace();
                     // just fall through.
+                }
+                catch (Throwable t) {
+                    t.printStackTrace();
                 }
             }
         }

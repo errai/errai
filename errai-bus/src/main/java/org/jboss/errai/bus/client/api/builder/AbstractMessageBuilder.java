@@ -144,12 +144,18 @@ public class AbstractMessageBuilder<R extends Sendable> {
                                             .get(String.class, MessageParts.ReplyTo);
 
                                     public void run() {
+                                        try {
                                         MessageBuilder.getMessageProvider().get()
                                                 .toSubject(replyTo)
                                                 .copyResource("Session", incomingMsg)
                                                 .addAllParts(message.getParts())
                                                 .addAllProvidedParts(message.getProvidedParts())
                                                 .errorsCall(errorCallback).sendNowWith(viaThis);
+                                        }
+                                        catch (Throwable t) {
+                                            t.printStackTrace();
+                                            getAsyncTask().cancel(true);
+                                        }
                                     }
                                 };
                             } else {
@@ -165,6 +171,7 @@ public class AbstractMessageBuilder<R extends Sendable> {
                                         }
                                         catch (Throwable t) {
                                             t.printStackTrace();
+                                            getAsyncTask().cancel(true);
                                         }
 
                                     }

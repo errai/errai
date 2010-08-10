@@ -17,11 +17,10 @@
 package org.jboss.errai.bus.client.api;
 
 /**
- * Marker interface for use by scheduler to assign a reference to the AsyncTask of a Runnable task so it can be
- * internally controlled.
+ * User: christopherbrock
+ * Date: 9-Aug-2010
+ * Time: 10:34:20 PM
  */
-public interface HasAsyncTaskRef extends Runnable {
-    public void setAsyncTask(AsyncTask task);
-
-    public AsyncTask getAsyncTask();
+public interface AsyncExceptionHandler {
+    public void handleException(Throwable t);
 }

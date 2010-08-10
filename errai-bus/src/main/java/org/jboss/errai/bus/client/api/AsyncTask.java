@@ -20,6 +20,6 @@ public interface AsyncTask {
     public boolean cancel(boolean interrupt);
 
     public void setExitHandler(Runnable runnable);
-
+    
     public boolean isCancelled();
 }

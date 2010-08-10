@@ -907,7 +907,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 ExtensionsLoader loader = GWT.create(ExtensionsLoader.class);
                 loader.initExtensions(ClientMessageBusImpl.this);
             }
-        }.schedule(100);
+        }.schedule(5);
 
         heartBeatTimer =
                 new Timer() {
