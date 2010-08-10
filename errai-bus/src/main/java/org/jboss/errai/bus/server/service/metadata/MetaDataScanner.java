@@ -65,10 +65,10 @@ public class MetaDataScanner extends Reflections {
         .setUrls(urls)
             //.filterInputsBy(new FilterBuilder().exclude(CLIENT_PKG_REGEX))
         .setScanners(
-            new FieldAnnotationsScanner(),
-            new MethodAnnotationsScanner(),
+            //new FieldAnnotationsScanner(),
+            //new MethodAnnotationsScanner(),
             new TypeAnnotationsScanner(),
-            new SubTypesScanner(),
+            //new SubTypesScanner(),
             propScanner
         );
 
@@ -80,7 +80,7 @@ public class MetaDataScanner extends Reflections {
       scanner.setStore(store.get(scanner.getClass()));
     }
 
-    scan();
+    scan();   
   }
 
   public static MetaDataScanner createInstance() {
@@ -94,6 +94,7 @@ public class MetaDataScanner extends Reflections {
     List<URL> actualUrls = ctx.process();
     MetaDataScanner scanner = new MetaDataScanner(actualUrls);
     ctx.close(); // needs to closed after the scanner was created
+
     return scanner;
   }
 

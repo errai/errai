@@ -33,78 +33,87 @@ import java.util.Set;
  * @date: Aug 5, 2010
  */
 public class PackageScanTest extends TestCase {
-    private static String getPackageResourcePath() {
-        URL url = PackageScanTest.class.getClassLoader().getResource("ErraiApp.properties");
-        if (url == null) throw new RuntimeException("Can't find the resource path for the test!");
+  private static String getPackageResourcePath() {
+    URL url = PackageScanTest.class.getClassLoader().getResource("ErraiApp.properties");
+    if (url == null) throw new RuntimeException("Can't find the resource path for the test!");
 
-        File curr = new File(url.getFile());
-        File parent = curr.getParentFile().getParentFile();
+    File curr = new File(url.getFile());
+    File parent = curr.getParentFile().getParentFile();
 
-        if (parent.getName().endsWith("target")) {
-            parent = parent.getParentFile();
-            parent = new File(parent + "/src/test/");
-        }
-
-        File resourcesMetadata = new File(parent.getPath() + "/resources_metadata");
-
-        if (!resourcesMetadata.exists())
-            throw new RuntimeException("Can't find the resource path for the test: " + resourcesMetadata.getPath() );
-
-        return resourcesMetadata.getPath();
+    if (parent.getName().endsWith("target")) {
+      parent = parent.getParentFile();
+      parent = new File(parent + "/src/test/");
     }
 
-    public void testEarScan() throws Exception {
-        File ear = new File(getPackageResourcePath() + "/helloworld.ear");
-        assertTrue(ear.exists());
-        URL earUrl = new URL(ear.toURI().toString() + "/helloworld.war!/WEB-INF/classes");
-        URL libUrl = new URL(ear.toURI().toString() + "/helloworld.war!/WEB-INF/lib/errai-tools-1.1-SNAPSHOT.jar");
+    File resourcesMetadata = new File(parent.getPath() + "/resources_metadata");
 
-        List<URL> urlList = new ArrayList<URL>();
-        urlList.add(earUrl);
-        urlList.add(libUrl);
+    if (!resourcesMetadata.exists())
+      throw new RuntimeException("Can't find the resource path for the test: " + resourcesMetadata.getPath() );
 
-        MetaDataScanner scanner = MetaDataScanner.createInstance(urlList);
+    return resourcesMetadata.getPath();
+  }
 
-        // nested in ear/war/WEB-INF/classes
-        Set<String> classesMeta = scanner.getStore().getTypesAnnotatedWith(ApplicationComponent.class.getName());
-        assertFalse("Cannot find @ApplicationComponent on HelloWorldService", classesMeta.isEmpty());
+  public void testEarScan() throws Exception {
+    File ear = new File(getPackageResourcePath() + "/helloworld.ear");
+    assertTrue(ear.exists());
+    URL earUrl = new URL(ear.toURI().toString() + "/helloworld.war!/WEB-INF/classes");
+    URL libUrl = new URL(ear.toURI().toString() + "/helloworld.war!/WEB-INF/lib/errai-tools-1.1-SNAPSHOT.jar");
 
-        // nested in ear/war/WEB-INF/lib
-        Set<String> libMeta = scanner.getStore().getTypesAnnotatedWith(ExtensionComponent.class.getName());
-        boolean match = false;
-        for (String className : libMeta) {
-            if ("org.jboss.errai.tools.monitoring.MonitorExtension".equals(className)) {
-                match = true;
-                break;
-            }
-        }
+    List<URL> urlList = new ArrayList<URL>();
+    urlList.add(earUrl);
+    urlList.add(libUrl);
 
-        assertTrue("Cannot find @ExtensionComponent on MonitorExtension", match);
+    MetaDataScanner scanner = createScanner(urlList);
+
+    // nested in ear/war/WEB-INF/classes
+    Set<String> classesMeta = scanner.getStore().getTypesAnnotatedWith(ApplicationComponent.class.getName());
+    assertFalse("Cannot find @ApplicationComponent on HelloWorldService", classesMeta.isEmpty());
+
+    // nested in ear/war/WEB-INF/lib
+    Set<String> libMeta = scanner.getStore().getTypesAnnotatedWith(ExtensionComponent.class.getName());
+    boolean match = false;
+    for (String className : libMeta) {
+      if ("org.jboss.errai.tools.monitoring.MonitorExtension".equals(className)) {
+        match = true;
+        break;
+      }
     }
 
-    public void testWarScan() throws Exception {
-        File war = new File(getPackageResourcePath() + "/helloworld.war");
-        assertTrue(war.exists());
-        URL warUrl = war.toURI().toURL();
+    assertTrue("Cannot find @ExtensionComponent on MonitorExtension", match);
+  }
 
-        List<URL> urlList = new ArrayList<URL>();
-        urlList.add(warUrl);
-        MetaDataScanner scanner = MetaDataScanner.createInstance(urlList);
+  public void testWarScan() throws Exception {
+    File war = new File(getPackageResourcePath() + "/helloworld.war");
+    assertTrue(war.exists());
+    URL warUrl = war.toURI().toURL();
 
-        Set<String> annotated = scanner.getStore().getTypesAnnotatedWith(ApplicationComponent.class.getName());
-        assertFalse("Cannot find @ApplicationComponent on HelloWorldService", annotated.isEmpty());
-    }
+    List<URL> urlList = new ArrayList<URL>();
+    urlList.add(warUrl);
+    MetaDataScanner scanner = createScanner(urlList);
 
-    public void testExplodedWarScan() throws Exception {
-        File war = new File(getPackageResourcePath() + "/hello_exp.war");
-        assertTrue(war.exists());
-        URL warUrl = new URL(war.toURI().toURL() + "/WEB-INF/classes");
+    Set<String> annotated = scanner.getStore().getTypesAnnotatedWith(ApplicationComponent.class.getName());
+    assertFalse("Cannot find @ApplicationComponent on HelloWorldService", annotated.isEmpty());
+  }
 
-        List<URL> urlList = new ArrayList<URL>();
-        urlList.add(warUrl);
-        MetaDataScanner scanner = MetaDataScanner.createInstance(urlList);
+  public void testExplodedWarScan() throws Exception {
+    File war = new File(getPackageResourcePath() + "/hello_exp.war");
+    assertTrue(war.exists());
+    URL warUrl = new URL(war.toURI().toURL() + "/WEB-INF/classes");
 
-        Set<String> annotated = scanner.getStore().getTypesAnnotatedWith(ApplicationComponent.class.getName());
-        assertFalse("Cannot find @ApplicationComponent on HelloWorldService", annotated.isEmpty());
-    }    
+    List<URL> urlList = new ArrayList<URL>();
+    urlList.add(warUrl);
+    MetaDataScanner scanner = createScanner(urlList);
+
+    Set<String> annotated = scanner.getStore().getTypesAnnotatedWith(ApplicationComponent.class.getName());
+    assertFalse("Cannot find @ApplicationComponent on HelloWorldService", annotated.isEmpty());
+  }
+
+  private MetaDataScanner createScanner(List<URL> urlList)
+  {
+    long s0 = System.currentTimeMillis();
+    MetaDataScanner scanner = MetaDataScanner.createInstance(urlList);
+    System.out.println("Scan time: "+ (System.currentTimeMillis()-s0));
+    return scanner;
+
+  }
 }
