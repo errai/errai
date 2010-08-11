@@ -90,4 +90,9 @@ public abstract class AbstractErraiTest extends GWTTestCase {
         delayTestFinish(10000);
         t.schedule(800);
     }
+
+    public static void main(String[] args) {
+
+
+    }
 }

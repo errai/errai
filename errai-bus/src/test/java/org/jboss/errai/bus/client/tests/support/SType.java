@@ -42,6 +42,8 @@ public class SType extends STypeSuper {
     private char[] charArray;
     private char[][] charArrayMulti;
 
+    private SType[] sTypeArray;
+
 
     @ExposeEntity
     public enum Place {
@@ -185,6 +187,14 @@ public class SType extends STypeSuper {
     }
 
 
+    public SType[] getsTypeArray() {
+        return sTypeArray;
+    }
+
+    public void setsTypeArray(SType[] sTypeArray) {
+        this.sTypeArray = sTypeArray;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -210,9 +220,19 @@ public class SType extends STypeSuper {
         if (place != sType.place) return false;
         if (startDate != null ? !startDate.equals(sType.startDate) : sType.startDate != null) return false;
 
-        for (int i = 0; i < charArrayMulti.length; i++) {
-            if (!Arrays.equals(charArrayMulti[i], sType.charArrayMulti[i])) return false;
-        }
+        if (charArrayMulti != null) {
+            for (int i = 0; i < charArrayMulti.length; i++) {
+                if (!Arrays.equals(charArrayMulti[i], sType.charArrayMulti[i])) return false;
+            }
+        } else if (sType.charArrayMulti != null) return false;
+
+
+        if (sTypeArray != null) {
+            for (int i = 0; i < sTypeArray.length; i++) {
+                if (!sTypeArray[i].equals(sType.sTypeArray[i])) return false;
+            }
+        } else if (sType.sTypeArray != null) return false;
+
 
         return true;
     }
@@ -244,25 +264,26 @@ public class SType extends STypeSuper {
 
     @Override
     public String toString() {
-       return new StringBuilder("{")
-        .append(" superValue: " + super.getSuperValue() + ",\n")
-        .append(" fieldOne: " + fieldOne + ",\n")
-        .append(" fieldTwo: " + fieldTwo + ",\n")
-        .append(" startDate: " + startDate + ",\n")
-        .append(" endDate:" + endDate + ",\n")
-        .append(" active: " + active + ",\n")
-        .append(" listOfStypes: " + listOfStypes + ",\n")
-        .append(" mapOfStypes: " + mapofStypes + ",\n")
-        .append(" place: " + place + ",\n")
-        .append(" longValue: " + longValue + ",\n")
-        .append(" shortValue: " + shortValue + ",\n")
-        .append(" doubleValue: " + doubleValue + ",\n")
-        .append(" floatValue: " + floatValue + ",\n")
-        .append(" byteValue: " + byteValue + ",\n")
-        .append(" charValue: " + charValue + ",\n")
-        .append(" charArray: " + Arrays.toString(charArray) + ",\n")
-        .append(" charArrayMulti: " + printMultiArray(charArrayMulti) + ", \n")
-        .append("}").toString();
+        return new StringBuilder("{")
+                .append(" superValue: " + super.getSuperValue() + ",\n")
+                .append(" fieldOne: " + fieldOne + ",\n")
+                .append(" fieldTwo: " + fieldTwo + ",\n")
+                .append(" startDate: " + startDate + ",\n")
+                .append(" endDate:" + endDate + ",\n")
+                .append(" active: " + active + ",\n")
+                .append(" listOfStypes: " + listOfStypes + ",\n")
+                .append(" mapOfStypes: " + mapofStypes + ",\n")
+                .append(" place: " + place + ",\n")
+                .append(" longValue: " + longValue + ",\n")
+                .append(" shortValue: " + shortValue + ",\n")
+                .append(" doubleValue: " + doubleValue + ",\n")
+                .append(" floatValue: " + floatValue + ",\n")
+                .append(" byteValue: " + byteValue + ",\n")
+                .append(" charValue: " + charValue + ",\n")
+                .append(" charArray: " + Arrays.toString(charArray) + ",\n")
+                .append(" charArrayMulti: " + printMultiArray(charArrayMulti) + ", \n")
+                .append(" sTypeArray: " + Arrays.toString(sTypeArray) + "\n")
+                .append("}").toString();
     }
 
     private static String printMultiArray(char[][] c) {
@@ -316,6 +337,14 @@ public class SType extends STypeSuper {
 
         sType1.setMapofStypes(mapOfSTypes);
 
+        SType[] sTypeArray = new SType[random.nextInt(10) + 1];
+
+        for (int i = 0; i < sTypeArray.length; i++) {
+            sTypeArray[i] = randomLeafCreate(random);
+        }
+
+        sType1.setsTypeArray(sTypeArray);
+
         return sType1;
     }
 
@@ -355,10 +384,11 @@ public class SType extends STypeSuper {
 
         sType.setCharArrayMulti(charArrayMulti);
 
+
         return sType;
     }
 
-  
+
     private static Date randDateFuture(RandomProvider random) {
         return new Date(System.currentTimeMillis() + random.nextInt(100000));
     }

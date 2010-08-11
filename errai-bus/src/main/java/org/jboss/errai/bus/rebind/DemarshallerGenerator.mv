@@ -20,31 +20,31 @@ limitations under the License.
 }@declare{'binding'}
 @if{targetType.isPrimitive()}
 @code{targetType = org.mvel2.util.ParseTools.boxPrimitive(targetType);}
-@if{Integer.isAssignableFrom(targetType)}n.@{setter}(new Double(o.get("@{fieldName}").isNumber().doubleValue()).intValue());
-@else{Long.isAssignableFrom(targetType)}n.@{setter}(new Double(o.get("@{fieldName}").isNumber().doubleValue()).longValue());
-@else{Short.isAssignableFrom(targetType)}n.@{setter}(new Double(o.get("@{fieldName}").isNumber().doubleValue()).shortValue());
-@else{Float.isAssignableFrom(targetType)}n.@{setter}(new Double(o.get("@{fieldName}").isNumber().doubleValue()).floatValue());
-@else{Double.isAssignableFrom(targetType)}n.@{setter}(o.get("@{fieldName}").isNumber().doubleValue());
-@else{Boolean.isAssignableFrom(targetType)}n.@{setter}(o.get("@{fieldName}").isBoolean().booleanValue());
-@else{Character.isAssignableFrom(targetType)}JSONString @{fieldName} = o.get("@{fieldName}").isString(); if (@{fieldName} != null) { n.@{setter}(new Character(@{fieldName}.stringValue().charAt(0)));}
-@else{Byte.isAssignableFrom(targetType)}n.@{setter}(new Double(o.get("@{fieldName}").isNumber().doubleValue()).byteValue());
-@end{}@else{String.isAssignableFrom(targetType)}JSONString @{fieldName} = o.get("@{fieldName}").isString(); if (@{fieldName} != null) { n.@{setter}(@{fieldName}.stringValue());}
-@else{Boolean.isAssignableFrom(targetType)}JSONBoolean @{fieldName} = o.get("@{fieldName}").isBoolean(); if (@{fieldName} != null) { n.@{setter}(@{fieldName}.booleanValue());}
-@else{Double.isAssignableFrom(targetType)}JSONNumber @{fieldName} = o.get("@{fieldName}").isNumber(); if (@{fieldName} != null) { n.@{setter}(@{fieldName}.doubleValue());}
-@else{Integer.isAssignableFrom(targetType)}JSONNumber @{fieldName} = o.get("@{fieldName}").isNumber(); if (@{fieldName} != null) { n.@{setter}(new Double(@{fieldName}.doubleValue()).intValue());}
-@else{Long.isAssignableFrom(targetType)}JSONNumber @{fieldName} = o.get("@{fieldName}").isNumber(); if (@{fieldName} != null) { n.@{setter}(new Double(@{fieldName}.doubleValue()).longValue());}
-@else{Short.isAssignableFrom(targetType)}JSONNumber @{fieldName} = o.get("@{fieldName}").isNumber(); if (@{fieldName} != null) { n.@{setter}(new Double(@{fieldName}.doubleValue()).shortValue());}
-@else{Float.isAssignableFrom(targetType)}JSONNumber @{fieldName} = o.get("@{fieldName}").isNumber(); if (@{fieldName} != null) { n.@{setter}(new Double(@{fieldName}.doubleValue()).floatValue());}
-@else{Byte.isAssignableFrom(targetType)}JSONNumber @{fieldName} = o.get("@{fieldName}").isNumber(); if (@{fieldName} != null) { n.@{setter}(new Double(@{fieldName}.doubleValue()).byteValue());}
-@else{Character.isAssignableFrom(targetType)}JSONString @{fieldName} = o.get("@{fieldName}").isString(); if (@{fieldName} != null) { n.@{setter}(new Character(@{fieldName}.stringValue().charAt(0)));}
-@else{}n.@{org.mvel2.util.ReflectionUtil.getSetter(fieldName)}(org.jboss.errai.common.client.types.JSONTypeHelper.convert(o.get("@{fieldName}"), @{targetType.getCanonicalName().replaceAll("\\$", "\\.")}.class));
+@if{Integer.isAssignableFrom(targetType)}n.@{binder.bindValue("new Double(o.get(\"" + fieldName + "\").isNumber().doubleValue()).intValue()")};
+@else{Long.isAssignableFrom(targetType)}n.@{binder.bindValue("new Double(o.get(\"" + fieldName + "\").isNumber().doubleValue()).longValue()")};
+@else{Short.isAssignableFrom(targetType)}n.@{binder.bindValue("new Double(o.get(\"" + fieldName + "\").isNumber().doubleValue()).shortValue()")};
+@else{Float.isAssignableFrom(targetType)}n.@{binder.bindValue("new Double(o.get(\"" + fieldName + "\").isNumber().doubleValue()).floatValue()")};
+@else{Double.isAssignableFrom(targetType)}n.@{binder.bindValue("o.get(\"" + fieldName + "\").isNumber().doubleValue()")};
+@else{Boolean.isAssignableFrom(targetType)}n.@{binder.bindValue("o.get(\"" + fieldName + "\").isBoolean().booleanValue()")};
+@else{Character.isAssignableFrom(targetType)}JSONString @{fieldName} = o.get("@{fieldName}").isString(); if (@{fieldName} != null) { n.@{binder.bindValue(fieldName + ".stringValue().charAt(0)")}; }
+@else{Byte.isAssignableFrom(targetType)}n.@{binder.bindValue("new Double(o.get(\"" + fieldName + "\").isNumber().doubleValue()).byteValue()")};
+@end{}@else{String.isAssignableFrom(targetType)}JSONString @{fieldName} = o.get("@{fieldName}").isString(); if (@{fieldName} != null) { n.@{binder.bindValue(fieldName + ".stringValue()")}; }
+@else{Boolean.isAssignableFrom(targetType)}JSONBoolean @{fieldName} = o.get("@{fieldName}").isBoolean(); if (@{fieldName} != null) { n.@{binder.bindValue(fieldName + ".booleanValue()")}; }
+@else{Double.isAssignableFrom(targetType)}JSONNumber @{fieldName} = o.get("@{fieldName}").isNumber(); if (@{fieldName} != null) {  n.@{binder.bindValue(fieldName + ".doubleValue()")}; }
+@else{Integer.isAssignableFrom(targetType)}JSONNumber @{fieldName} = o.get("@{fieldName}").isNumber(); if (@{fieldName} != null) { n.@{binder.bindValue("new Double(" + fieldName + ".doubleValue()).intValue()")};}
+@else{Long.isAssignableFrom(targetType)}JSONNumber @{fieldName} = o.get("@{fieldName}").isNumber(); if (@{fieldName} != null) { n.@{binder.bindValue("new Double(" + fieldName + ".doubleValue()).longValue()")}; }
+@else{Short.isAssignableFrom(targetType)}JSONNumber @{fieldName} = o.get("@{fieldName}").isNumber(); if (@{fieldName} != null) { n.@{binder.bindValue("new Double(" + fieldName + ".doubleValue()).shortValue()")}; }
+@else{Float.isAssignableFrom(targetType)}JSONNumber @{fieldName} = o.get("@{fieldName}").isNumber(); if (@{fieldName} != null) { n.@{binder.bindValue("new Double(" + fieldName + ".doubleValue()).floatValue()")}; }
+@else{Byte.isAssignableFrom(targetType)}JSONNumber @{fieldName} = o.get("@{fieldName}").isNumber(); if (@{fieldName} != null) { n.@{binder.bindValue("new Double(" + fieldName + ".doubleValue()).byteValue()")};}
+@else{Character.isAssignableFrom(targetType)}JSONString @{fieldName} = o.get("@{fieldName}").isString(); if (@{fieldName} != null) { n.@{binder.bindValue(fieldName + ".stringValue().charAt(0)")}; =}
+@else{}n.@{binder.bindValue("org.jboss.errai.common.client.types.JSONTypeHelper.convert(o.get(\"" + fieldName + "\"), " + targetType.getCanonicalName().replaceAll("\\$", "\\.") + ".class)")};
 @end{}@end{}
 org.jboss.errai.common.client.types.TypeDemarshallers.addDemarshaller(
     @{className}.class,
     new org.jboss.errai.common.client.types.Demarshaller<@{className}>() {
         public @{className} demarshall(com.google.gwt.json.client.JSONObject o) {
             try {
-@if{enumType}@{className} n = @{className}.valueOf(o.get("EnumStringValue").isString().stringValue());@else{}@{className} n = new @{className}();@foreach{fieldName : fields}@includeNamed{'binding'; setter=org.mvel2.util.ReflectionUtil.getSetter(fieldName); targetType=targetTypes.get(fieldName); fieldName=fieldName}@end{}@end{}
+@if{enumType}@{className} n = @{className}.valueOf(o.get("EnumStringValue").isString().stringValue());@else{}@{className} n = new @{className}();@foreach{fieldName : setters.keySet()}@includeNamed{'binding'; binder=setters.get(fieldName); targetType=targetTypes.get(fieldName); fieldName=fieldName}@end{}@end{}
 return n;
             }
             catch (Exception e) {
@@ -53,7 +53,6 @@ return n;
         }
     }
 );
-
 @declare{'arrayFurler'}
         @if{depth!=0}
             java.util.Collection col@{depth} = (java.util.Collection) iter@{depth-1}.next();
@@ -65,7 +64,6 @@ return n;
             @if{depth < dimensions - 1}@includeNamed{'arrayFurler'; depth=depth+1; dimensions=dimensions; componentType=componentType}@else{}a@foreach{i : dimensions}[i@{i}]@end{} = org.jboss.errai.common.client.types.TypeHandlerFactory.convert(iter@{depth}.next(), @{org.mvel2.util.ParseTools.boxPrimitive(org.mvel2.util.ParseTools.getBaseComponentType(componentType)).getName().replaceAll("\\$", "\\.")}.class);@end{}
         }
 @end{}
-
 @foreach{c : arrayConverters.keySet()}
 org.jboss.errai.common.client.types.TypeHandlerFactory.addHandler(
     java.util.Collection.class,
@@ -73,9 +71,7 @@ org.jboss.errai.common.client.types.TypeHandlerFactory.addHandler(
     new org.jboss.errai.common.client.types.TypeHandler<java.util.Collection, @{c.getCanonicalName()}>() {
         public @{c.getCanonicalName()} getConverted(java.util.Collection col0) {
              @{c.getCanonicalName()} a = new @{org.mvel2.util.ParseTools.getBaseComponentType(c).getCanonicalName()}[col0.size()]@foreach{count:arrayConverters.get(c) - 1}[]@end{};
-
              @includeNamed{'arrayFurler'; depth=0; dimensions=arrayConverters.get(c); componentType=c.getComponentType()}
-
              return a;
         }
     });

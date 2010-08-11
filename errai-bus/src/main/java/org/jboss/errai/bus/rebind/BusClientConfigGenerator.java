@@ -154,7 +154,8 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
                     if (f.isTransient() || f.isStatic() || f.isEnumConstant() != null) continue;
 
                     JClassType type = f.getType().isClassOrInterface();
-                    JMethod m;
+                    JMethod getterMeth;
+                    JMethod setterMeth;
                     if (type == null) {
                         JPrimitiveType pType = f.getType().isPrimitive();
                         Class c;
@@ -176,36 +177,35 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
                         } else {
                             types.put(f.getName(), c = ParseTools.unboxPrimitive(Class.forName(pType.getQualifiedBoxedSourceName())));
                         }
-
-                        if (boolean.class.equals(c)) {
-                            if ((m = getAccessorMethod(visit, ReflectionUtil.getIsGetter(f.getName()))) == null) {
-                                m = getAccessorMethod(visit, ReflectionUtil.getGetter(f.getName()));
-                            }
-                        } else {
-                            m = getAccessorMethod(visit, ReflectionUtil.getGetter(f.getName()));
-                        }
-
                     } else {
-                        if ("java.lang.Boolean".equals(f.getType().getQualifiedSourceName())) {
-                            if ((m = getAccessorMethod(visit, ReflectionUtil.getIsGetter(f.getName()))) == null) {
-                                m = getAccessorMethod(visit, ReflectionUtil.getGetter(f.getName()));
-                            }
-                        } else {
-                            m = getAccessorMethod(visit, ReflectionUtil.getGetter(f.getName()));
-                        }
 
                         types.put(f.getName(), Class.forName(type.getQualifiedBinaryName()));
                     }
 
-                    if (m == null) {
+                    getterMeth = getAccessorMethod(visit, f);
+                    setterMeth = getSetterMethod(visit, f);
+
+                    if (getterMeth == null) {
                         if (f.isPublic()) {
                             getters.put(f.getName(), new ValueExtractor(f));
                         } else if (visit == scan) {
-                            throw new GenerationException("could not find an accessor in class: " + visit.getQualifiedSourceName() + "; for field: " + f.getName());
+                            throw new GenerationException("could not find a read accessor in class: " + visit.getQualifiedSourceName() + "; for field: " + f.getName() + "; should declare an accessor: " + ReflectionUtil.getGetter(f.getName()));
                         }
                     } else {
-                        getters.put(f.getName(), new ValueExtractor(m));
+                        getters.put(f.getName(), new ValueExtractor(getterMeth));
                     }
+
+                    if (setterMeth == null) {
+                        if (f.isPublic()) {
+                            setters.put(f.getName(), new ValueBinder(f));
+                        } else if (visit == scan) {
+                            throw new GenerationException("could not find a write accessor in class: " + visit.getQualifiedSourceName() + "; for field: " + f.getName() + "; should declare an accessor: " + ReflectionUtil.getSetter(f.getName()));
+                        }
+                    } else {
+                        setters.put(f.getName(), new ValueBinder(setterMeth));
+                    }
+
+
                 }
             }
             while ((scan = scan.getSuperclass()) != null && !scan.getQualifiedSourceName().equals("java.lang.Object"));
@@ -291,14 +291,55 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
     }
 
 
-    private static JMethod getAccessorMethod(JClassType type, String name) {
-        JClassType scan = type;
+    private static JMethod getAccessorMethod(JClassType clazz, JField field) {
+        JMethod m = null;
+
+        if (field.getType().getQualifiedSourceName().equals("boolean"))
+            m = _findGetterMethod(clazz, ReflectionUtil.getIsGetter(field.getName()));
+
+        if (m == null)
+            m = _findGetterMethod(clazz, ReflectionUtil.getGetter(field.getName()));
+
+        if (m == null)
+            m = _findGetterMethod(clazz, "get" + field.getName());
+
+        return m;
+    }
+
+    private static JMethod getSetterMethod(JClassType clazz, JField field) {
+        JMethod m = null;
+
+        m = _findSetterMethod(clazz, field.getType(), ReflectionUtil.getSetter(field.getName()));
+
+        if (m == null)
+            m = _findSetterMethod(clazz, field.getType(), "set" + field.getName());
+
+        return m;
+    }
+
+
+    private static JMethod _findGetterMethod(JClassType clazz, String methName) {
+        JClassType scan = clazz;
         do {
             try {
-                return scan.getMethod(name, new JType[0]);
+                return scan.getMethod(methName, new JType[0]);
             }
             catch (NotFoundException e) {
-                // do nothing.
+                //
+            }
+        } while ((scan = scan.getSuperclass()) != null && !scan.getQualifiedSourceName().equals("java.lang.Object"));
+        return null;
+    }
+
+    private static JMethod _findSetterMethod(JClassType clazz, JType field, String methName) {
+        JClassType scan = clazz;
+        do {
+
+            try {
+                return scan.getMethod(methName, new JType[]{field});
+            }
+            catch (NotFoundException e) {
+                //
             }
         } while ((scan = scan.getSuperclass()) != null && !scan.getQualifiedSourceName().equals("java.lang.Object"));
         return null;
