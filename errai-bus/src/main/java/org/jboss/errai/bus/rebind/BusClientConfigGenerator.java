@@ -316,7 +316,7 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
     }
 
 
-    public static void main(String[] args) throws Exception {
+    /*public static void main(String[] args) throws Exception {
         org.jboss.errai.common.client.types.TypeHandlerFactory.addHandler(
                 java.util.Collection.class,
                 char[][].class,
@@ -347,5 +347,5 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
                     }
 
                 });
-    }
+    }   */
 }
