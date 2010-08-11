@@ -336,10 +336,10 @@
             <url>https://repository.jboss.org/nexus/content/groups/public/</url>
             <layout>default</layout>
             <releases>
-                <updatePolicy>never</updatePolicy>
+                <updatePolicy>always</updatePolicy>
             </releases>
             <snapshots>
-                <updatePolicy>never</updatePolicy>
+                <updatePolicy>always</updatePolicy>
             </snapshots>
         </repository>
         <repository>
@@ -371,7 +371,9 @@
         </repository>
 
         <repository>
-            <snapshots><enabled>true</enabled></snapshots>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
             <id>codehaus.org-snapshots</id>
             <name>Codehaus Snapshots Maven Repository</name>
             <url>dav:https://dav.codehaus.org/snapshots.repository/mvel/</url>
