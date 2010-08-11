@@ -376,7 +376,7 @@
             </snapshots>
             <id>codehaus.org-snapshots</id>
             <name>Codehaus Snapshots Maven Repository</name>
-            <url>hhttp://snapshots.repository.codehaus.org/</url>
+            <url>http://snapshots.repository.codehaus.org/</url>
         </repository>
 
 
