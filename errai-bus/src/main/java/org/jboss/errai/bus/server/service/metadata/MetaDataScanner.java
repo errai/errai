@@ -51,34 +51,29 @@ public class MetaDataScanner extends Reflections {
     /*
      * Use a thread local to avoid having to hack the API.
      */
-    private static ThreadLocal<PropertyScanner> propScannerLocal = new ThreadLocal<PropertyScanner>();
+    private static ThreadLocal<ErraiMetaDataConfigurationBuilder> propScannerLocal;
 
     private final PropertyScanner propScanner;
 
-    MetaDataScanner(List<URL> urls) {
-        super(new ConfigurationBuilder()
-                .setUrls(urls)
-                //.filterInputsBy(new FilterBuilder().exclude(CLIENT_PKG_REGEX))
-                .setScanners(
-                //new FieldAnnotationsScanner(),
-                //new MethodAnnotationsScanner(),
-                new TypeAnnotationsScanner(),
-                //new SubTypesScanner(),
-                new PropertyScanner(
-                        new Predicate<String>() {
-                            public boolean apply(String file) {
-                                return file.endsWith(".properties");
-                            }
-                        }
-                ) {
-                    {
-                        propScannerLocal.set(this);
+    private static class ErraiMetaDataConfigurationBuilder extends ConfigurationBuilder {
+        PropertyScanner propertyScanner = new PropertyScanner(
+                new Predicate<String>() {
+                    public boolean apply(String file) {
+                        return file.endsWith(".properties");
                     }
                 }
-        ));
+        );
 
+        private ErraiMetaDataConfigurationBuilder(List<URL> urls) {
+            setUrls(urls).setScanners(propertyScanner, new TypeAnnotationsScanner());
+            propScannerLocal = new ThreadLocal<ErraiMetaDataConfigurationBuilder>();
+            propScannerLocal.set(this);
+        }
+    }
 
-        propScanner = propScannerLocal.get();
+    MetaDataScanner(List<URL> urls) {
+        super(new ErraiMetaDataConfigurationBuilder(urls));
+        propScanner = propScannerLocal.get().propertyScanner;
         propScannerLocal.remove();
         propScannerLocal = null;
 
