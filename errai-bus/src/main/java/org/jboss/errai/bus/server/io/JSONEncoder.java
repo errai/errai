@@ -86,8 +86,12 @@ public class JSONEncoder {
         }
 
         StringAppender build = new StringAppender("{" + SerializationParts.ENCODED_TYPE + ":\"" + cls.getName() + "\",");
-        Field[] fields = cls.getDeclaredFields();
-        int i = 0;
+
+      // Preliminary fix for https://jira.jboss.org/browse/ERRAI-103
+      // TODO: Review my Mike
+      Field[] fields = getDeclaredFieldsInHierarchy(cls);
+      
+      int i = 0;
 
         Serializable[] s = MVELEncodingCache.get(cls);
         if (s == null) {
@@ -133,7 +137,7 @@ public class JSONEncoder {
         return build.append('}').toString();
     }
 
-    private static String encodeMap(Map<Object, Object> map) {
+  private static String encodeMap(Map<Object, Object> map) {
         StringAppender mapBuild = new StringAppender("{");
         boolean first = true;
 
@@ -217,4 +221,34 @@ public class JSONEncoder {
             return tHandlers.get(in.getClass()).getConverted(in);
         }
     }
+
+  /**
+   * Walks the class hierarchy and inspects al superclasss until
+   * @param cls
+   * @return
+   */
+  private static Field[] getDeclaredFieldsInHierarchy(Class cls)
+  {
+    Set<Class<?>> superClasses = new HashSet<Class<?>>();
+    collectSuperClasses(cls, superClasses);
+
+    Set<Field> declaredFields = new HashSet<Field>();
+    for(Class<?> spr : superClasses)
+    {
+      for(Field f : spr.getDeclaredFields())
+        declaredFields.add(f);
+    }
+
+    Field[] fields = declaredFields.toArray(new Field[] {});
+    return fields;
+  }
+  
+  public static void collectSuperClasses(Class<?> cls, Set<Class<?>> results)
+  {
+    results.add(cls);
+
+    Class<?> superClass = cls.getSuperclass();
+    if(!superClass.equals(Object.class))
+      collectSuperClasses(superClass, results);
+  }
 }
