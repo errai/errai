@@ -33,10 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 import static org.mvel2.templates.TemplateCompiler.compileTemplate;
 import static org.mvel2.templates.TemplateRuntime.execute;
@@ -147,7 +144,19 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
         Map<Class, Integer> arrayConverters = new HashMap<Class, Integer>();
 
         try {
-            for (JField f : visit.getFields()) {
+
+          Set<JClassType> superTypes = visit.getFlattenedSupertypeHierarchy();
+          Set<JField> declaredFields = new HashSet<JField>();
+          for(JClassType superType : superTypes)
+          {
+            if(superType.isInterface()==null && (!superType.getSimpleSourceName().equals("Object")))
+            {
+              for(JField f : superType.getFields())
+                declaredFields.add(f);
+            }
+          }
+
+          for (JField f : declaredFields) {
                 if (f.isTransient() || f.isStatic() || f.isEnumConstant() != null) continue;
 
                 JClassType type = f.getType().isClassOrInterface();
@@ -285,14 +294,24 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
     }
 
 
-    private static JMethod getAccessorMethod(JClassType type, String name) {
-        try {
-            return type.getMethod(name, new JType[0]);
-        }
-        catch (NotFoundException e) {
-            return null;
-        }
+  private static JMethod getAccessorMethod(JClassType type, String name) {
+    JMethod match = null;
+    Set<JClassType> superTypes = type.getFlattenedSupertypeHierarchy();
+    Iterator<JClassType> it = superTypes.iterator();
+    while(it.hasNext() && match==null)
+    {
+      try
+      {
+        match = it.next().getMethod(name, new JType[0]);
+      }
+      catch (NotFoundException e)
+      {
+        //
+      }
     }
+
+    return match;
+  }
 
     private String getInternalRep(String c) {
         if ("char".equals(c)) {
