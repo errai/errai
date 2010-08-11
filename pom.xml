@@ -367,7 +367,7 @@
         <repository>
             <id>codehaus.org</id>
             <name>Codehaus Maven Repository</name>
-            <url>dav:https://dav.codehaus.org/repository/mvel/</url>
+            <url>http://repository.codehaus.org/</url>
         </repository>
 
         <repository>
@@ -376,7 +376,7 @@
             </snapshots>
             <id>codehaus.org-snapshots</id>
             <name>Codehaus Snapshots Maven Repository</name>
-            <url>dav:https://dav.codehaus.org/snapshots.repository/mvel/</url>
+            <url>hhttp://snapshots.repository.codehaus.org/</url>
         </repository>
 
 
