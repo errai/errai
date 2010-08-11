@@ -72,7 +72,8 @@ public class BusCommunicationTests extends AbstractErraiTest {
           }
 
           public char nextChar() {
-              return CHARS[com.google.gwt.user.client.Random.nextInt(1000) % CHARS.length];
+              char c =  CHARS[com.google.gwt.user.client.Random.nextInt(1000) % CHARS.length];
+              return c;
           }
 
           public String randString() {
@@ -97,8 +98,9 @@ public class BusCommunicationTests extends AbstractErraiTest {
 
                             try {
                                 assertNotNull(type);
-                                assertTrue(sType1.equals(type));
                                 System.out.println("CLIENT: " + type.toString());
+                                assertTrue(sType1.equals(type));
+
                                 finishTest();
                                 return;
                             }

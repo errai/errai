@@ -635,7 +635,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                             if (!remote.contains(s)) subjects.add(s);
                         }
 
-                        subscribe("ServerBus", REMOTE_CALLBACK);
+                        directSubscribe("ServerBus", REMOTE_CALLBACK);
 
                         MessageBuilder.createMessage()
                                 .toSubject("ServerBus")
@@ -686,8 +686,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                                         message.get(String.class, "AdditionalDetails"), null);
                             }
                         });
-
-
 
                         postInit = true;
                         logAdapter.debug("Executing " + postInitTasks.size() + " post init task(s)");

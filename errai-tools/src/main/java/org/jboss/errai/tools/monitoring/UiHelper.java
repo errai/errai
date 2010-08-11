@@ -53,9 +53,9 @@ public class UiHelper {
         Map<String, Object> parts = (Map<String, Object>) JSONDecoder.decode(message);
 
         Message newMessage = CommandMessage.createWithParts(parts);
-        if (parts.containsKey(SerializationParts.MARSHALLED_TYPES)) {
-            TypeDemarshallHelper.demarshallAll((String) parts.get(SerializationParts.MARSHALLED_TYPES), newMessage);
-        }
+//        if (parts.containsKey(SerializationParts.MARSHALLED_TYPES)) {
+//            TypeDemarshallHelper.demarshallAll((String) parts.get(SerializationParts.MARSHALLED_TYPES), newMessage);
+//        }
         return newMessage;
     }
 
@@ -63,9 +63,9 @@ public class UiHelper {
         Map<String, Object> parts = (Map<String, Object>) JSONDecoder.decode(ServerBusUtils.encodeJSON(message.getParts()));
 
         Message newMessage = CommandMessage.createWithParts(parts);
-        if (parts.containsKey(SerializationParts.MARSHALLED_TYPES)) {
-            TypeDemarshallHelper.demarshallAll((String) parts.get(SerializationParts.MARSHALLED_TYPES), newMessage);
-        }
+//        if (parts.containsKey(SerializationParts.MARSHALLED_TYPES)) {
+//            TypeDemarshallHelper.demarshallAll((String) parts.get(SerializationParts.MARSHALLED_TYPES), newMessage);
+//        }
         return newMessage;
     }
 

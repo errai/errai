@@ -39,11 +39,6 @@ public class TypeHandlerFactory {
         collectionHandlers.put(Boolean[].class, new CollectionToBooleanArray());
         collectionHandlers.put(Double[].class, new CollectionToDoubleArray());
 
-        collectionHandlers.put(int[].class, new CollectionToIntArray());
-        collectionHandlers.put(long[].class, new CollectionToLongArray());
-        collectionHandlers.put(boolean[].class, new CollectionToBooleanArray());
-        collectionHandlers.put(double[].class, new CollectionToDoubleArray());
-
         collectionHandlers.put(Set.class, new CollectionToSet());
         collectionHandlers.put(List.class, new CollectionToList());
 
@@ -80,6 +75,12 @@ public class TypeHandlerFactory {
 
         inheritanceMap.put(Set.class, Collection.class);
         inheritanceMap.put(List.class, Collection.class);
+
+        addHandler(String.class, Character.class, new TypeHandler<String, Character>() {
+            public Character getConverted(String in) {
+                return in.charAt(0);
+            }
+        });
     }
 
     public static Map<Class, TypeHandler> getHandler(Class from) {
@@ -90,7 +91,12 @@ public class TypeHandlerFactory {
         return toHandlers;
     }
 
-    public static <T> T convert(final Class from, final Class<? extends T> to, final Object value) {
+    public static <T> T convert(final Object value, final Class<T> to) {
+        if (value == null) return null;
+        return convert(value.getClass(), to, value);
+    }
+
+    public static <T> T convert(final Class from, final Class<T> to, final Object value) {
         if (value.getClass() == to) return (T) value;
         Map<Class, TypeHandler> toHandlers = getHandler(from);
         if (toHandlers == null) {

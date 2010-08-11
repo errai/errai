@@ -16,11 +16,9 @@
 
 package org.jboss.errai.common.client.json;
 
-import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.common.client.types.Marshaller;
 import org.jboss.errai.common.client.types.TypeMarshallers;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -53,6 +51,25 @@ public class JSONEncoderCli {
             return encodeMap((Map<Object, Object>) v);
         } else if (v instanceof Object[]) {
             return encodeArray((Object[]) v);
+        } else if (v.getClass().isArray()) {
+            if (v instanceof char[]) {
+                return encodeArray((char[]) v);
+            } else if (v instanceof int[]) {
+                return encodeArray((int[]) v);
+            } else if (v instanceof double[]) {
+                return encodeArray((double[]) v);
+            } else if (v instanceof long[]) {
+                return encodeArray((long[]) v);
+            } else if (v instanceof boolean[]) {
+                return encodeArray((boolean[]) v);
+            } else if (v instanceof byte[]) {
+                return encodeArray((byte[]) v);
+            } else if (v instanceof short[]) {
+                return encodeArray((short[]) v);
+            } else if (v instanceof float[]) {
+                return encodeArray((float[]) v);
+            }
+            return null;
         } else if (TypeMarshallers.hasMarshaller(v.getClass().getName())) {
             Marshaller<Object> m = getMarshaller(marshall = v.getClass().getName());
             return m.marshall(v);
@@ -89,18 +106,18 @@ public class JSONEncoderCli {
             }
         }
 
-        if (marshalledTypes != null) {
-            mapBuild.append("," + SerializationParts.MARSHALLED_TYPES + ":\"");
-            first = true;
-            for (Map.Entry<String, String> m : marshalledTypes.entrySet()) {
-                if (!first) {
-                    mapBuild.append(',');
-                }
-                mapBuild.append(m.getKey());
-                first = false;
-            }
-            mapBuild.append("\"");
-        }
+//        if (marshalledTypes != null) {
+//            mapBuild.append("," + SerializationParts.MARSHALLED_TYPES + ":\"");
+//            first = true;
+//            for (Map.Entry<String, String> m : marshalledTypes.entrySet()) {
+//                if (!first) {
+//                    mapBuild.append(',');
+//                }
+//                mapBuild.append(m.getKey());
+//                first = false;
+//            }
+//            mapBuild.append("\"");
+//        }
 
         return mapBuild.append("}").toString();
     }
@@ -123,6 +140,79 @@ public class JSONEncoderCli {
         }
         return buildCol.append("]").toString();
     }
+
+    private String encodeArray(char[] array) {
+        StringBuilder buildCol = new StringBuilder("[");
+        for (int i = 0; i < array.length; i++) {
+            buildCol.append(_encode(array[i]));
+            if ((i + 1) < array.length) buildCol.append(",");
+        }
+        return buildCol.append("]").toString();
+    }
+
+    private String encodeArray(int[] array) {
+        StringBuilder buildCol = new StringBuilder("[");
+        for (int i = 0; i < array.length; i++) {
+            buildCol.append(_encode(array[i]));
+            if ((i + 1) < array.length) buildCol.append(",");
+        }
+        return buildCol.append("]").toString();
+    }
+
+    private String encodeArray(long[] array) {
+        StringBuilder buildCol = new StringBuilder("[");
+        for (int i = 0; i < array.length; i++) {
+            buildCol.append(_encode(array[i]));
+            if ((i + 1) < array.length) buildCol.append(",");
+        }
+        return buildCol.append("]").toString();
+    }
+
+    private String encodeArray(short[] array) {
+        StringBuilder buildCol = new StringBuilder("[");
+        for (int i = 0; i < array.length; i++) {
+            buildCol.append(_encode(array[i]));
+            if ((i + 1) < array.length) buildCol.append(",");
+        }
+        return buildCol.append("]").toString();
+    }
+
+    private String encodeArray(double[] array) {
+        StringBuilder buildCol = new StringBuilder("[");
+        for (int i = 0; i < array.length; i++) {
+            buildCol.append(_encode(array[i]));
+            if ((i + 1) < array.length) buildCol.append(",");
+        }
+        return buildCol.append("]").toString();
+    }
+
+    private String encodeArray(float[] array) {
+        StringBuilder buildCol = new StringBuilder("[");
+        for (int i = 0; i < array.length; i++) {
+            buildCol.append(_encode(array[i]));
+            if ((i + 1) < array.length) buildCol.append(",");
+        }
+        return buildCol.append("]").toString();
+    }
+
+    private String encodeArray(boolean[] array) {
+        StringBuilder buildCol = new StringBuilder("[");
+        for (int i = 0; i < array.length; i++) {
+            buildCol.append(_encode(array[i]));
+            if ((i + 1) < array.length) buildCol.append(",");
+        }
+        return buildCol.append("]").toString();
+    }
+
+    private String encodeArray(byte[] array) {
+        StringBuilder buildCol = new StringBuilder("[");
+        for (int i = 0; i < array.length; i++) {
+            buildCol.append(_encode(array[i]));
+            if ((i + 1) < array.length) buildCol.append(",");
+        }
+        return buildCol.append("]").toString();
+    }
+
 
     public Map<String, String> getMarshalledTypes() {
         return marshalledTypes;

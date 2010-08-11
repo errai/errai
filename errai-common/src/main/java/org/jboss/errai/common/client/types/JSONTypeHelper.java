@@ -24,7 +24,7 @@ import java.util.*;
 
 
 public class JSONTypeHelper {
-    public static <T> T convert(JSONValue value, Class<? extends T> to) {
+    public static <T> T convert(JSONValue value, Class<T> to) {
         JSONValue v;
         if ((v = value.isString()) != null) {
             return TypeHandlerFactory.convert(String.class, to, ((JSONString) v).stringValue());
@@ -36,11 +36,20 @@ public class JSONTypeHelper {
             List list = new ArrayList();
             JSONArray arr = (JSONArray) v;
 
+            Class cType = to.getComponentType();
+
+            while (cType != null && cType.getComponentType() != null)
+                cType = cType.getComponentType();
+
+            if (cType == null) cType = to;
+
             for (int i = 0; i < arr.size(); i++) {
-                list.add(convert(arr.get(i), to));
+                list.add(convert(arr.get(i), cType));
             }
 
-            return TypeHandlerFactory.convert(Collection.class, to, list);
+            T t =  TypeHandlerFactory.convert(Collection.class, to, list);
+
+            return t;
         } else if ((v = value.isObject()) != null) {
             JSONObject eMap = (JSONObject) v;
 

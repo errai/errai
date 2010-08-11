@@ -36,14 +36,12 @@ public class JSONDecoderCli {
     public Object decode(Object value) {
         if (value instanceof String) {
             return _decode(JSONParser.parse((String) value));
-        }
-        else if (value instanceof JSONValue) {
+        } else if (value instanceof JSONValue) {
             return _decode((JSONValue) value);
-        }
-        else if (value != null) {
+        } else if (value != null) {
             throw new RuntimeException("could not decode type: " + value.getClass());
         }
-        
+
         return null;
     }
 
@@ -84,7 +82,7 @@ public class JSONDecoderCli {
                             "Ensure you have exposed the class with @ExposeEntity.", null);
                     throw new RuntimeException("no available demarshaller: " + className);
                 }
-            }
+            } else if (SerializationParts.MARSHALLED_TYPES.equals(key)) continue;
 
             m.put(key, _decode(eMap.get(key)));
         }

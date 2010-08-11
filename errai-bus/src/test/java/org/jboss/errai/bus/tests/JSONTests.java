@@ -15,6 +15,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -105,47 +107,73 @@ public class JSONTests extends TestCase {
     }
 
     public static class JavaRandomProvider implements RandomProvider {
-          private static char[] CHARS = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q',
-                  'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'};
+        private static char[] CHARS = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q',
+                'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'};
 
-         private Random random = new Random(System.nanoTime());
+        private Random random = new Random(System.nanoTime());
 
-          public boolean nextBoolean() {
-              return random.nextBoolean();
-          }
+        public boolean nextBoolean() {
+            return random.nextBoolean();
+        }
 
-          public int nextInt(int upper) {
-              return random.nextInt(upper);
-          }
+        public int nextInt(int upper) {
+            return random.nextInt(upper);
+        }
 
-          public double nextDouble() {
-              return random.nextDouble();
-          }
+        public double nextDouble() {
+            return new BigDecimal(random.nextDouble(), MathContext.DECIMAL32).doubleValue();
+        }
 
-          public char nextChar() {
-              return CHARS[nextInt(1000) % CHARS.length];
-          }
+        public char nextChar() {
+            return CHARS[nextInt(1000) % CHARS.length];
+        }
 
-          public String randString() {
-              StringBuilder builder = new StringBuilder();
-              int len = nextInt(25) + 5;
-              for (int i = 0; i < len; i++) {
-                  builder.append(nextChar());
-              }
-              return builder.toString();
-          }
-      }
+        public String randString() {
+            StringBuilder builder = new StringBuilder();
+            int len = nextInt(25) + 5;
+            for (int i = 0; i < len; i++) {
+                builder.append(nextChar());
+            }
+            return builder.toString();
+        }
+    }
 
 
     public void testMarshalling2() {
         SType type = SType.create(new JavaRandomProvider());
+        System.out.println("type  :" + type);
 
         Map<String, Object> vars = new HashMap<String, Object>();
         vars.put("SType", type);
 
         String json = JSONEncoder.encode(vars);
 
-        Map<String, Object> result = (Map<String,Object>) JSONDecoder.decode(json);
+        System.out.println("---");
+        System.out.println("json:" + json);
+        System.out.println("----");
+
+        Map<String, Object> result = (Map<String, Object>) JSONDecoder.decode(json);
+
+        SType rSType = (SType) result.get("SType");
+
+
+        System.out.println("rSType:" + rSType);
+
+        assertEquals(type, rSType);
+    }
+
+    public void testMarshalling3() throws IOException {
+        SType type = SType.create(new JavaRandomProvider());
+
+        Map<String, Object> vars = new HashMap<String, Object>();
+        vars.put("SType", type);
+
+
+        String json = JSONEncoder.encode(vars);
+        ByteArrayInputStream instream = new ByteArrayInputStream(json.getBytes());
+
+
+        Map<String, Object> result = (Map<String, Object>) JSONStreamDecoder.decode(instream);
 
         SType rSType = (SType) result.get("SType");
 
@@ -155,44 +183,6 @@ public class JSONTests extends TestCase {
         assertEquals(type, rSType);
     }
 
-    public static class SimpleWriter extends Writer {
-        final StringBuilder builder = new StringBuilder();
-
-        @Override
-        public void write(char[] cbuf, int off, int len) throws IOException {
-            builder.append(cbuf, off, len);
-        }
-
-        @Override
-        public void flush() throws IOException {
-        }
-
-        @Override
-        public void close() throws IOException {
-            //To change body of implemented methods use File | Settings | File Templates
-        }
-    }
-
-    public static class SimpleReader extends Reader {
-        final StringBuilder builder;
-        int cursor = 0;
-
-        public SimpleReader(StringBuilder builder) {
-            this.builder = builder;
-        }
-
-        @Override
-        public int read(char[] cbuf, int off, int len) throws IOException {
-            int read = len > builder.length() ? builder.length() : len;
-            builder.getChars(cursor, read, cbuf, off);
-            cursor += read;
-            return read;
-        }
-
-        @Override
-        public void close() throws IOException {
-        }
-    }
 
     public static class TType {
         private String fieldOne;

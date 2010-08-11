@@ -39,6 +39,10 @@ public class SType {
     private byte byteValue;
     private char charValue;
 
+    private char[] charArray;
+    private char[][] charArrayMulti;
+
+
     @ExposeEntity
     public enum Place {
         FIRST, SECOND, THIRD
@@ -164,6 +168,22 @@ public class SType {
         this.place = place;
     }
 
+    public char[] getCharArray() {
+        return charArray;
+    }
+
+    public void setCharArray(char[] charArray) {
+        this.charArray = charArray;
+    }
+
+    public char[][] getCharArrayMulti() {
+        return charArrayMulti;
+    }
+
+    public void setCharArrayMulti(char[][] charArrayMulti) {
+        this.charArrayMulti = charArrayMulti;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -179,6 +199,7 @@ public class SType {
         if (longValue != sType.longValue) return false;
         if (shortValue != sType.shortValue) return false;
         if (active != null ? !active.equals(sType.active) : sType.active != null) return false;
+        if (!Arrays.equals(charArray, sType.charArray)) return false;
         if (endDate != null ? !endDate.equals(sType.endDate) : sType.endDate != null) return false;
         if (fieldOne != null ? !fieldOne.equals(sType.fieldOne) : sType.fieldOne != null) return false;
         if (fieldTwo != null ? !fieldTwo.equals(sType.fieldTwo) : sType.fieldTwo != null) return false;
@@ -210,6 +231,8 @@ public class SType {
         result = 31 * result + (floatValue != +0.0f ? new Float(floatValue).intValue() : 0);
         result = 31 * result + (int) byteValue;
         result = 31 * result + (int) charValue;
+        result = 31 * result + (charArray != null ? Arrays.hashCode(charArray) : 0);
+        result = 31 * result + (charArrayMulti != null ? Arrays.hashCode(charArrayMulti) : 0);
         return result;
     }
 
@@ -230,6 +253,7 @@ public class SType {
         .append(" floatValue: " + floatValue + ",\n")
         .append(" byteValue: " + byteValue + ",\n")
         .append(" charValue: " + charValue + ",\n")
+        .append(" charArray: " + Arrays.toString(charArray))
         .append("}").toString();
     }
 
@@ -290,7 +314,27 @@ public class SType {
         sType.setDoubleValue(random.nextInt(100000) + random.nextDouble());
         sType.setLongValue(random.nextInt(1000000));
         sType.setCharValue(random.nextChar());
+        sType.setShortValue((short) (random.nextInt(Short.MAX_VALUE) - 1));
         sType.setPlace(randPlace(random));
+
+        char[] charArray = new char[random.nextInt(10) + 1];
+
+        for (int i = 0; i < charArray.length; i++) {
+            charArray[i] = random.nextChar();
+        }
+
+        sType.setCharArray(charArray);
+
+        char[][] charArrayMulti = new char[random.nextInt(10) + 1][random.nextInt(10) + 1];
+
+        for (int i = 0; i < charArrayMulti.length; i++) {
+            char[] subArray = new char[charArrayMulti[i].length];
+            for (int i2 = 0; i2 < charArrayMulti[i].length; i2++) {
+                charArrayMulti[i][i2] = random.nextChar();
+            }
+        }
+
+        sType.setCharArrayMulti(charArrayMulti);
 
         return sType;
     }

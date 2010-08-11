@@ -35,6 +35,18 @@ public class TypeMarshallers {
                 return String.valueOf(object.getTime());
             }
         });
+
+        addMarshaller(Byte.class, new Marshaller<Byte>() {
+            public String marshall(Byte object) {
+                return String.valueOf(object.intValue());
+            }
+        });
+        
+        addMarshaller(Character.class, new Marshaller<Character>() {
+            public String marshall(Character object) {
+                return "\"" + String.valueOf(object.charValue()) + "\"";
+            }
+        });
     }
 
     public static void addMarshaller(Class type, Marshaller d) {

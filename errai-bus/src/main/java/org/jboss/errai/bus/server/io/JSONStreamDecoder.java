@@ -212,7 +212,7 @@ public class JSONStreamDecoder {
         long val = 0;
         double dVal = 0;
 
-        long factor = 1;
+        double factor = 1;
         boolean dbl = false;
 
         char[] buf = new char[21];

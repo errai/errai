@@ -253,12 +253,14 @@ public class JSONDecoder {
     }
 
     public static double _parseDouble(char[] s, int start, int length) {
-        double val = 0;
-        long factor = 1;
+        long val = 0;
+        double dVal = 0;
+        double factor = 1;
         for (int i = start-- + length - 1; i != start; i--) {
             switch (s[i]) {
                 case '.':
-                    val /= factor;
+                    dVal = ((double) val) / factor;
+                    val = 0;
                     factor = 1;
                     continue;
                 case '-':
@@ -299,6 +301,6 @@ public class JSONDecoder {
             factor *= 10;
         }
 
-        return val;
+        return val + dVal;
     }
 }
