@@ -47,102 +47,102 @@ import static org.reflections.vfs.Vfs.UrlType;
  * @date: Aug 3, 2010
  */
 public class MetaDataScanner extends Reflections {
-  public static final String CLIENT_PKG_REGEX = "(.*?)(\\.client\\.)(.*?)";
-  public static final String ERRAI_CONFIG_STUB_NAME = "ErraiApp.properties";
+    public static final String CLIENT_PKG_REGEX = "(.*?)(\\.client\\.)(.*?)";
+    public static final String ERRAI_CONFIG_STUB_NAME = "ErraiApp.properties";
 
-  private final PropertyScanner propScanner = new PropertyScanner(
-      new Predicate<String>() {
-        public boolean apply(String file)
-        {
-          return file.endsWith(".properties");
+    private final PropertyScanner propScanner = new PropertyScanner(
+            new Predicate<String>() {
+                public boolean apply(String file)
+                {
+                    return file.endsWith(".properties");
+                }
+            }
+    );
+
+    MetaDataScanner(List<URL> urls) {
+
+        configuration = new ConfigurationBuilder()
+                .setUrls(urls)
+                        //.filterInputsBy(new FilterBuilder().exclude(CLIENT_PKG_REGEX))
+                .setScanners(
+                        //new FieldAnnotationsScanner(),
+                        //new MethodAnnotationsScanner(),
+                        new TypeAnnotationsScanner(),
+                        //new SubTypesScanner(),
+                        propScanner
+                );
+
+        store = new Store();
+
+        //inject to scanners
+        for (Scanner scanner : configuration.getScanners()) {
+            scanner.setConfiguration(configuration);
+            scanner.setStore(store.get(scanner.getClass()));
         }
-      }
-  );
 
-  MetaDataScanner(List<URL> urls) {
-
-    configuration = new ConfigurationBuilder()
-        .setUrls(urls)
-            //.filterInputsBy(new FilterBuilder().exclude(CLIENT_PKG_REGEX))
-        .setScanners(
-            //new FieldAnnotationsScanner(),
-            //new MethodAnnotationsScanner(),
-            new TypeAnnotationsScanner(),
-            //new SubTypesScanner(),
-            propScanner
-        );
-
-    store = new Store();
-
-    //inject to scanners
-    for (Scanner scanner : configuration.getScanners()) {
-      scanner.setConfiguration(configuration);
-      scanner.setStore(store.get(scanner.getClass()));
+        scan();
     }
 
-    scan();   
-  }
-
-  public static MetaDataScanner createInstance() {
-    return createInstance(getConfigUrls());
-  }
-
-  public static MetaDataScanner createInstance(List<URL> urls) {
-    registerUrlTypeHandlers();
-
-    DeploymentContext ctx = new DeploymentContext(urls);
-    List<URL> actualUrls = ctx.process();
-    MetaDataScanner scanner = new MetaDataScanner(actualUrls);
-    ctx.close(); // needs to closed after the scanner was created
-
-    return scanner;
-  }
-
-  private static void registerUrlTypeHandlers() {
-    List<UrlType> urlTypes = Vfs.getDefaultUrlTypes();
-    urlTypes.add(new VFSUrlType());
-    urlTypes.add(new WARUrlType());
-
-    // thread safe?
-    Vfs.setDefaultURLTypes(urlTypes);
-  }
-
-  public Set<Class<?>> getTypesAnnotatedWithExcluding(
-      Class<? extends Annotation> annotation, String excludeRegex) {
-    Pattern p = Pattern.compile(excludeRegex);
-    Set<String> result = new HashSet<String>();
-
-    Set<String> types = getStore().getTypesAnnotatedWith(annotation.getName());
-    for (String className : types) {
-      if (!p.matcher(className).matches())
-        result.add(className);
+    public static MetaDataScanner createInstance() {
+        return createInstance(getConfigUrls());
     }
 
-    return ImmutableSet.copyOf(forNames(result));
-  }
+    public static MetaDataScanner createInstance(List<URL> urls) {
+        registerUrlTypeHandlers();
 
-  public static List<URL> getConfigUrls(ClassLoader loader) {
-    try {
-      Enumeration<URL> configTargets = loader.getResources(ERRAI_CONFIG_STUB_NAME);
+        DeploymentContext ctx = new DeploymentContext(urls);
+        List<URL> actualUrls = ctx.process();
+        MetaDataScanner scanner = new MetaDataScanner(actualUrls);
+        ctx.close(); // needs to closed after the scanner was created
 
-      List<URL> urls = new ArrayList<URL>();
-      while (configTargets.hasMoreElements()) {
-        String urlString = configTargets.nextElement().toExternalForm();
-        urls.add(new URL(URLDecoder.decode(urlString.substring(0, urlString.indexOf(ERRAI_CONFIG_STUB_NAME)), "utf-8")));
-      }
-      return urls;
+        return scanner;
     }
-    catch (IOException e) {
-      throw new RuntimeException("Failed to scan configuration Url's", e);
+
+    private static void registerUrlTypeHandlers() {
+        List<UrlType> urlTypes = Vfs.getDefaultUrlTypes();
+        urlTypes.add(new VFSUrlType());
+        urlTypes.add(new WARUrlType());
+
+        // thread safe?
+        Vfs.setDefaultURLTypes(urlTypes);
     }
-  }
 
-  public static List<URL> getConfigUrls() {
-    return getConfigUrls(MetaDataScanner.class.getClassLoader());
-  }
+    public Set<Class<?>> getTypesAnnotatedWithExcluding(
+            Class<? extends Annotation> annotation, String excludeRegex) {
+        Pattern p = Pattern.compile(excludeRegex);
+        Set<String> result = new HashSet<String>();
 
-  public Properties getProperties(String name)
-  {
-    return propScanner.getProperties().get(name);
-  }
+        Set<String> types = getStore().getTypesAnnotatedWith(annotation.getName());
+        for (String className : types) {
+            if (!p.matcher(className).matches())
+                result.add(className);
+        }
+
+        return ImmutableSet.copyOf(forNames(result));
+    }
+
+    public static List<URL> getConfigUrls(ClassLoader loader) {
+        try {
+            Enumeration<URL> configTargets = loader.getResources(ERRAI_CONFIG_STUB_NAME);
+
+            List<URL> urls = new ArrayList<URL>();
+            while (configTargets.hasMoreElements()) {
+                String urlString = configTargets.nextElement().toExternalForm();
+                urls.add(new URL(URLDecoder.decode(urlString.substring(0, urlString.indexOf(ERRAI_CONFIG_STUB_NAME)), "utf-8")));
+            }
+            return urls;
+        }
+        catch (IOException e) {
+            throw new RuntimeException("Failed to scan configuration Url's", e);
+        }
+    }
+
+    public static List<URL> getConfigUrls() {
+        return getConfigUrls(MetaDataScanner.class.getClassLoader());
+    }
+
+    public Properties getProperties(String name)
+    {
+        return propScanner.getProperties().get(name);
+    }
 }

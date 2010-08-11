@@ -145,18 +145,18 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
 
         try {
 
-          Set<JClassType> superTypes = visit.getFlattenedSupertypeHierarchy();
-          Set<JField> declaredFields = new HashSet<JField>();
-          for(JClassType superType : superTypes)
-          {
-            if(superType.isInterface()==null && (!superType.getSimpleSourceName().equals("Object")))
+            Set<JClassType> superTypes = visit.getFlattenedSupertypeHierarchy();
+            Set<JField> declaredFields = new HashSet<JField>();
+            for(JClassType superType : superTypes)
             {
-              for(JField f : superType.getFields())
-                declaredFields.add(f);
+                if(superType.isInterface()==null && (!superType.getSimpleSourceName().equals("Object")))
+                {
+                    for(JField f : superType.getFields())
+                        declaredFields.add(f);
+                }
             }
-          }
 
-          for (JField f : declaredFields) {
+            for (JField f : declaredFields) {
                 if (f.isTransient() || f.isStatic() || f.isEnumConstant() != null) continue;
 
                 JClassType type = f.getType().isClassOrInterface();
@@ -294,24 +294,24 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
     }
 
 
-  private static JMethod getAccessorMethod(JClassType type, String name) {
-    JMethod match = null;
-    Set<JClassType> superTypes = type.getFlattenedSupertypeHierarchy();
-    Iterator<JClassType> it = superTypes.iterator();
-    while(it.hasNext() && match==null)
-    {
-      try
-      {
-        match = it.next().getMethod(name, new JType[0]);
-      }
-      catch (NotFoundException e)
-      {
-        //
-      }
-    }
+    private static JMethod getAccessorMethod(JClassType type, String name) {
+        JMethod match = null;
+        Set<JClassType> superTypes = type.getFlattenedSupertypeHierarchy();
+        Iterator<JClassType> it = superTypes.iterator();
+        while(it.hasNext() && match==null)
+        {
+            try
+            {
+                match = it.next().getMethod(name, new JType[0]);
+            }
+            catch (NotFoundException e)
+            {
+                //
+            }
+        }
 
-    return match;
-  }
+        return match;
+    }
 
     private String getInternalRep(String c) {
         if ("char".equals(c)) {
