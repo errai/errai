@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.bus.tests.errai103;
+package org.jboss.errai.bus.client.tests.support;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;

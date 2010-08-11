@@ -13,13 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.bus.tests.errai103;
+package org.jboss.errai.bus.client.tests.support;
 
 import java.io.Serializable;
 
-import javax.persistence.CascadeType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 
 //import pl.scentia.smartoffice.persistence.pojo.AbstractDocument;
@@ -88,4 +85,8 @@ public abstract class AbstractAssignment extends AbstractDocument implements Ser
           return true;
      }  */
 
+    @Override
+    public boolean equals(Object o) {
+        return super.equals(o);  
+    }
 }

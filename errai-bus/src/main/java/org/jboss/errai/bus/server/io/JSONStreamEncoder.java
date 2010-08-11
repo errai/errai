@@ -83,8 +83,6 @@ public class JSONStreamEncoder {
         }
     }
 
-    private static final Map<Class, Serializable[]> MVELEncodingCache = new HashMap<Class, Serializable[]>();
-
     private static void encodeObject(Object o, OutputStream outstream) throws IOException {
         if (o == null) {
             outstream.write(NULL_BYTES);
@@ -103,29 +101,24 @@ public class JSONStreamEncoder {
         outstream.write(cls.getName().getBytes());
         outstream.write(',');
 
-        Field[] fields = cls.getDeclaredFields();
-        int i = 0;
+        final Field[] fields = EncodingUtil.getAllEncodingFields(cls);
 
-        Serializable[] s = MVELEncodingCache.get(cls);
-        if (s == null) {
-            synchronized (MVELEncodingCache) {
-                // double check after the lock.
-                s = MVELEncodingCache.get(cls);
-                if (s == null) {
-                    s = new Serializable[fields.length];
-                    for (Field f : fields) {
-                        if ((f.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
-                                || f.isSynthetic()) {
-                            continue;
-                        }
-                        s[i++] = MVEL.compileExpression(f.getName());
+        final Serializable[] s = EncodingCache.get(fields, new EncodingCache.ValueProvider<Serializable[]>() {
+            public Serializable[] get() {
+                Serializable[] s = new Serializable[fields.length];
+                int i = 0;
+                for (Field f : fields) {
+                    if ((f.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
+                            || f.isSynthetic()) {
+                        continue;
                     }
-                    MVELEncodingCache.put(cls, s);
+                    s[i++] = MVEL.compileExpression(f.getName());
                 }
+                return s;
             }
-        }
+        });
 
-        i = 0;
+        int i = 0;
         boolean first = true;
         for (Field field : fields) {
 

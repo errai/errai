@@ -21,7 +21,7 @@ import org.jboss.errai.bus.server.annotations.ExposeEntity;
 import java.util.*;
 
 @ExposeEntity
-public class SType {
+public class SType extends STypeSuper {
     private String fieldOne;
     private String fieldTwo;
     private Date startDate;
@@ -184,10 +184,12 @@ public class SType {
         this.charArrayMulti = charArrayMulti;
     }
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
 
         SType sType = (SType) o;
 
@@ -207,6 +209,10 @@ public class SType {
         if (mapofStypes != null ? !mapofStypes.equals(sType.mapofStypes) : sType.mapofStypes != null) return false;
         if (place != sType.place) return false;
         if (startDate != null ? !startDate.equals(sType.startDate) : sType.startDate != null) return false;
+
+        for (int i = 0; i < charArrayMulti.length; i++) {
+            if (!Arrays.equals(charArrayMulti[i], sType.charArrayMulti[i])) return false;
+        }
 
         return true;
     }
@@ -239,7 +245,8 @@ public class SType {
     @Override
     public String toString() {
        return new StringBuilder("{")
-        .append("fieldOne: " + fieldOne + ",\n")
+        .append(" superValue: " + super.getSuperValue() + ",\n")
+        .append(" fieldOne: " + fieldOne + ",\n")
         .append(" fieldTwo: " + fieldTwo + ",\n")
         .append(" startDate: " + startDate + ",\n")
         .append(" endDate:" + endDate + ",\n")
@@ -253,8 +260,19 @@ public class SType {
         .append(" floatValue: " + floatValue + ",\n")
         .append(" byteValue: " + byteValue + ",\n")
         .append(" charValue: " + charValue + ",\n")
-        .append(" charArray: " + Arrays.toString(charArray))
+        .append(" charArray: " + Arrays.toString(charArray) + ",\n")
+        .append(" charArrayMulti: " + printMultiArray(charArrayMulti) + ", \n")
         .append("}").toString();
+    }
+
+    private static String printMultiArray(char[][] c) {
+        StringBuilder builder = new StringBuilder("[");
+        for (int i = 0; i < c.length; i++) {
+            builder.append(Arrays.toString(c[i]));
+
+            if (i + 1 < c.length) builder.append(", ");
+        }
+        return builder.append("]").toString();
     }
 
     public static SType create(RandomProvider random) {
@@ -303,6 +321,7 @@ public class SType {
 
     private static SType randomLeafCreate(RandomProvider random) {
         final SType sType = new SType();
+        sType.setSuperValue(random.randString());
         sType.setActive(random.nextBoolean());
         sType.setFieldOne(random.randString());
         sType.setFieldTwo(random.randString());

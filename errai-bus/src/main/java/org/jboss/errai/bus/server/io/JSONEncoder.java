@@ -74,8 +74,6 @@ public class JSONEncoder {
         }
     }
 
-    private static final Map<Class, Serializable[]> MVELEncodingCache = new HashMap<Class, Serializable[]>();
-
     private static String encodeObject(Object o) {
         if (o == null) return "null";
 
@@ -87,32 +85,25 @@ public class JSONEncoder {
 
         StringAppender build = new StringAppender("{" + SerializationParts.ENCODED_TYPE + ":\"" + cls.getName() + "\",");
 
-      // Preliminary fix for https://jira.jboss.org/browse/ERRAI-103
-      // TODO: Review my Mike
-      Field[] fields = getDeclaredFieldsInHierarchy(cls);
-      
-      int i = 0;
-
-        Serializable[] s = MVELEncodingCache.get(cls);
-        if (s == null) {
-            synchronized (MVELEncodingCache) {
-                // double check after the lock.
-                s = MVELEncodingCache.get(cls);
-                if (s == null) {
-                    s = new Serializable[fields.length];
-                    for (Field f : fields) {
-                        if ((f.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
-                                || f.isSynthetic()) {
-                            continue;
-                        }
-                        s[i++] = MVEL.compileExpression(f.getName());
+        // Preliminary fix for https://jira.jboss.org/browse/ERRAI-103
+        // TODO: Review my Mike
+        final Field[] fields = EncodingUtil.getAllEncodingFields(cls);
+        final Serializable[] s = EncodingCache.get(fields, new EncodingCache.ValueProvider<Serializable[]>() {
+            public Serializable[] get() {
+                Serializable[] s = new Serializable[fields.length];
+                int i = 0;
+                for (Field f : fields) {
+                    if ((f.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
+                            || f.isSynthetic()) {
+                        continue;
                     }
-                    MVELEncodingCache.put(cls, s);
+                    s[i++] = MVEL.compileExpression(f.getName());
                 }
+                return s;
             }
-        }
+        });
 
-        i = 0;
+        int i = 0;
         boolean first = true;
         for (Field field : fields) {
 
@@ -124,9 +115,9 @@ public class JSONEncoder {
             }
 
             try {
-            Object v = MVEL.executeExpression(s[i++], o);
-            build.append(field.getName()).append(':').append(_encode(v));
-            first = false;
+                Object v = MVEL.executeExpression(s[i++], o);
+                build.append(field.getName()).append(':').append(_encode(v));
+                first = false;
             }
             catch (Throwable t) {
                 System.out.println("failed at encoding: " + field.getName());
@@ -137,7 +128,7 @@ public class JSONEncoder {
         return build.append('}').toString();
     }
 
-  private static String encodeMap(Map<Object, Object> map) {
+    private static String encodeMap(Map<Object, Object> map) {
         StringAppender mapBuild = new StringAppender("{");
         boolean first = true;
 
@@ -222,33 +213,4 @@ public class JSONEncoder {
         }
     }
 
-  /**
-   * Walks the class hierarchy and inspects al superclasss until
-   * @param cls
-   * @return
-   */
-  private static Field[] getDeclaredFieldsInHierarchy(Class cls)
-  {
-    Set<Class<?>> superClasses = new HashSet<Class<?>>();
-    collectSuperClasses(cls, superClasses);
-
-    Set<Field> declaredFields = new HashSet<Field>();
-    for(Class<?> spr : superClasses)
-    {
-      for(Field f : spr.getDeclaredFields())
-        declaredFields.add(f);
-    }
-
-    Field[] fields = declaredFields.toArray(new Field[] {});
-    return fields;
-  }
-  
-  public static void collectSuperClasses(Class<?> cls, Set<Class<?>> results)
-  {
-    results.add(cls);
-
-    Class<?> superClass = cls.getSuperclass();
-    if(!superClass.equals(Object.class))
-      collectSuperClasses(superClass, results);
-  }
 }

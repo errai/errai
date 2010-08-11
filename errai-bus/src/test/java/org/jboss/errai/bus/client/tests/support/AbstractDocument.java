@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.bus.tests.errai103;
+package org.jboss.errai.bus.client.tests.support;
 
 import java.io.Serializable;
 
@@ -39,4 +39,24 @@ public abstract class AbstractDocument extends AbstractEntity implements Seriali
           this.number = number;
      }
 
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        AbstractDocument that = (AbstractDocument) o;
+
+        if (number != null ? !number.equals(that.number) : that.number != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (number != null ? number.hashCode() : 0);
+        return result;
+    }
 }

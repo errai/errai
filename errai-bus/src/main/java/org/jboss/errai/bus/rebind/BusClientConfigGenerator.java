@@ -33,7 +33,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Properties;
 
 import static org.mvel2.templates.TemplateCompiler.compileTemplate;
 import static org.mvel2.templates.TemplateRuntime.execute;
@@ -144,74 +147,68 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
         Map<Class, Integer> arrayConverters = new HashMap<Class, Integer>();
 
         try {
+            JClassType scan = visit;
 
-            Set<JClassType> superTypes = visit.getFlattenedSupertypeHierarchy();
-            Set<JField> declaredFields = new HashSet<JField>();
-            for(JClassType superType : superTypes)
-            {
-                if(superType.isInterface()==null && (!superType.getSimpleSourceName().equals("Object")))
-                {
-                    for(JField f : superType.getFields())
-                        declaredFields.add(f);
-                }
-            }
+            do {
+                for (JField f : scan.getFields()) {
+                    if (f.isTransient() || f.isStatic() || f.isEnumConstant() != null) continue;
 
-            for (JField f : declaredFields) {
-                if (f.isTransient() || f.isStatic() || f.isEnumConstant() != null) continue;
+                    JClassType type = f.getType().isClassOrInterface();
+                    JMethod m;
+                    if (type == null) {
+                        JPrimitiveType pType = f.getType().isPrimitive();
+                        Class c;
+                        if (pType == null) {
+                            JArrayType aType = f.getType().isArray();
+                            if (aType == null) continue;
 
-                JClassType type = f.getType().isClassOrInterface();
-                JMethod m;
-                if (type == null) {
-                    JPrimitiveType pType = f.getType().isPrimitive();
-                    Class c;
-                    if (pType == null) {
-                        JArrayType aType = f.getType().isArray();
-                        if (aType == null) continue;
+                            String name = aType.getQualifiedBinaryName();
+                            int depth = 0;
+                            for (int i = 0; i < name.length(); i++) {
+                                if (name.charAt(i) == '[') depth++;
+                                else break;
+                            }
 
-                        String name = aType.getQualifiedBinaryName();
-                        int depth = 0;
-                        for (int i = 0; i < name.length(); i++) {
-                            if (name.charAt(i) == '[') depth++;
-                            else break;
+                            types.put(f.getName(), c = Class.forName(name.substring(0, depth) + getInternalRep(aType.getQualifiedBinaryName().substring(depth))));
+
+                            arrayConverters.put(c, depth);
+
+                        } else {
+                            types.put(f.getName(), c = ParseTools.unboxPrimitive(Class.forName(pType.getQualifiedBoxedSourceName())));
                         }
 
-                        types.put(f.getName(), c = Class.forName(name.substring(0, depth) + getInternalRep(aType.getQualifiedBinaryName().substring(depth))));
-
-                        arrayConverters.put(c, depth);
-
-                    } else {
-                        types.put(f.getName(), c = ParseTools.unboxPrimitive(Class.forName(pType.getQualifiedBoxedSourceName())));
-                    }
-
-                    if (boolean.class.equals(c)) {
-                        if ((m = getAccessorMethod(visit, ReflectionUtil.getIsGetter(f.getName()))) == null) {
+                        if (boolean.class.equals(c)) {
+                            if ((m = getAccessorMethod(visit, ReflectionUtil.getIsGetter(f.getName()))) == null) {
+                                m = getAccessorMethod(visit, ReflectionUtil.getGetter(f.getName()));
+                            }
+                        } else {
                             m = getAccessorMethod(visit, ReflectionUtil.getGetter(f.getName()));
                         }
-                    } else {
-                        m = getAccessorMethod(visit, ReflectionUtil.getGetter(f.getName()));
-                    }
 
-                } else {
-                    if ("java.lang.Boolean".equals(f.getType().getQualifiedSourceName())) {
-                        if ((m = getAccessorMethod(visit, ReflectionUtil.getIsGetter(f.getName()))) == null) {
+                    } else {
+                        if ("java.lang.Boolean".equals(f.getType().getQualifiedSourceName())) {
+                            if ((m = getAccessorMethod(visit, ReflectionUtil.getIsGetter(f.getName()))) == null) {
+                                m = getAccessorMethod(visit, ReflectionUtil.getGetter(f.getName()));
+                            }
+                        } else {
                             m = getAccessorMethod(visit, ReflectionUtil.getGetter(f.getName()));
                         }
-                    } else {
-                        m = getAccessorMethod(visit, ReflectionUtil.getGetter(f.getName()));
+
+                        types.put(f.getName(), Class.forName(type.getQualifiedBinaryName()));
                     }
 
-                    types.put(f.getName(), Class.forName(type.getQualifiedBinaryName()));
-                }
-
-                if (m == null) {
-                    if (f.isPublic()) {
-                        getters.put(f.getName(), new ValueExtractor(f));
+                    if (m == null) {
+                        if (f.isPublic()) {
+                            getters.put(f.getName(), new ValueExtractor(f));
+                        } else if (visit == scan) {
+                            throw new GenerationException("could not find an accessor in class: " + visit.getQualifiedSourceName() + "; for field: " + f.getName());
+                        }
                     } else {
-                        throw new GenerationException("could not find an accessor in class: " + visit.getQualifiedSourceName() + "; for field: " + f.getName());
+                        getters.put(f.getName(), new ValueExtractor(m));
                     }
                 }
-                getters.put(f.getName(), new ValueExtractor(m));
             }
+            while ((scan = scan.getSuperclass()) != null && !scan.getQualifiedSourceName().equals("java.lang.Object"));
 
         }
         catch (ClassNotFoundException e) {
@@ -295,22 +292,16 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
 
 
     private static JMethod getAccessorMethod(JClassType type, String name) {
-        JMethod match = null;
-        Set<JClassType> superTypes = type.getFlattenedSupertypeHierarchy();
-        Iterator<JClassType> it = superTypes.iterator();
-        while(it.hasNext() && match==null)
-        {
-            try
-            {
-                match = it.next().getMethod(name, new JType[0]);
+        JClassType scan = type;
+        do {
+            try {
+                return scan.getMethod(name, new JType[0]);
             }
-            catch (NotFoundException e)
-            {
-                //
+            catch (NotFoundException e) {
+                // do nothing.
             }
-        }
-
-        return match;
+        } while ((scan = scan.getSuperclass()) != null && !scan.getQualifiedSourceName().equals("java.lang.Object"));
+        return null;
     }
 
     private String getInternalRep(String c) {
