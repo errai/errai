@@ -363,6 +363,21 @@
             <name>Reflections Maven2 Repository</name>
             <url>http://reflections.googlecode.com/svn/repo</url>
         </repository>
+
+        <repository>
+            <id>codehaus.org</id>
+            <name>Codehaus Maven Repository</name>
+            <url>dav:https://dav.codehaus.org/repository/mvel/</url>
+        </repository>
+
+        <repository>
+            <snapshots><enabled>true</enabled></snapshots>
+            <id>codehaus.org-snapshots</id>
+            <name>Codehaus Snapshots Maven Repository</name>
+            <url>dav:https://dav.codehaus.org/snapshots.repository/mvel/</url>
+        </repository>
+
+
     </repositories>
 
     <pluginRepositories>
