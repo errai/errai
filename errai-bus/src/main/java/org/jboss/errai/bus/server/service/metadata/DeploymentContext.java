@@ -26,7 +26,7 @@ import java.util.*;
  * the Reflections implementation.
  * <p/>
  * Calling {@link #close()} deletes the temporary created archive files.
- * Subsequent call to Reflection rely on classloading and don't need these artefacts anymore.
+ * Subsequent call to Reflection rely on classloading and don't need these artifacts anymore.
  *
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Aug 9, 2010
