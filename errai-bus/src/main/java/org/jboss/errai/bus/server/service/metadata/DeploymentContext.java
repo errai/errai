@@ -15,6 +15,8 @@
  */
 package org.jboss.errai.bus.server.service.metadata;
 
+import org.apache.log4j.Logger;
+
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -36,6 +38,8 @@ public class DeploymentContext {
     private Map<String, File> subContexts = new HashMap<String, File>();
     private Set<String> processedUrls = new HashSet<String>();
     private Set<File> createdTmpFiles = new HashSet<File>();
+
+    private Logger log = Logger.getLogger(DeploymentContext.class);
 
     public DeploymentContext(List<URL> configUrls) {
         this.configUrls = configUrls;
@@ -85,8 +89,10 @@ public class DeploymentContext {
     public void close() {
         for (File f : createdTmpFiles) {
             boolean deleted = deleteDirectory(f);
-            if (!deleted)
-                throw new RuntimeException("Failed to cleanup: " + f.getAbsolutePath());
+            if (!deleted) {
+                //note: use an error message instead of an exception
+                log.error("failed to cleanup: files were not deleted: " + f.getPath() + " (exists:" + f.exists() + ")");
+            }
         }
     }
 
