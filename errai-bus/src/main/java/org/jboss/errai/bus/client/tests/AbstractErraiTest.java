@@ -31,6 +31,10 @@ import org.jboss.errai.bus.client.framework.LogAdapter;
 public abstract class AbstractErraiTest extends GWTTestCase {
     protected static ClientMessageBus bus;
 
+    static {
+        System.out.println("REMEMBER! Bus tests will not succeed if you do not run the unit tests with the flag: -Dorg.jboss.errai.bus.do_long_poll=true");
+    }
+
     @Override
     protected void gwtSetUp() throws Exception {
         System.out.println("set-up");

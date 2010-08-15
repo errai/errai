@@ -70,4 +70,51 @@
         </dependency>
     </dependencies>
 
+
+    <profiles>
+        <profile>
+            <id>enableTests</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <skipTests>false</skipTests>
+                            <additionalClasspathElements>
+                                <additionalClasspathElement>${basedir}/test-classes/</additionalClasspathElement>
+                                <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
+                            </additionalClasspathElements>
+                            <useSystemClassLoader>false</useSystemClassLoader>
+
+                            <systemProperties>
+                                <property>
+                                    <name>java.io.tmpdir</name>
+                                    <value>${project.build.directory}</value>
+                                </property>
+                                <property>
+                                    <name>log4j.output.dir</name>
+                                    <value>${project.build.directory}</value>
+                                </property>
+
+                                <!-- Must disable long polling for automated tests to succeed -->
+                                <property>
+                                    <name>org.jboss.errai.bus.do_long_poll</name>
+                                    <value>false</value>
+                                </property>
+                            </systemProperties>
+
+                            <includes>
+                                <include>**/*Test.java</include>
+                                <include>**/*Tests.java</include>
+                            </includes>
+                            <excludes>
+                                <exclude>**/IOCTests.java</exclude>
+                            </excludes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
 </project>

@@ -203,12 +203,13 @@
                             <skipTests>false</skipTests>
                             <failIfNoTests>true</failIfNoTests>
                             <trimStackTrace>false</trimStackTrace>
+-->
 
                             <additionalClasspathElements>
                                 <additionalClasspathElement>${basedir}/test-classes/</additionalClasspathElement>
                                 <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
                             </additionalClasspathElements>
-                            <useSystemClassLoader>false</useSystemClassLoader-->
+                            <useSystemClassLoader>false</useSystemClassLoader>
 
                             <systemProperties>
                                 <property>
@@ -233,7 +234,6 @@
                             </includes>
                             <excludes>
                                 <exclude>**/ErraiBusTests.java</exclude>
-                                <exclude>**/BusCommunicationTests.java</exclude>
                             </excludes>
                         </configuration>
                     </plugin>
