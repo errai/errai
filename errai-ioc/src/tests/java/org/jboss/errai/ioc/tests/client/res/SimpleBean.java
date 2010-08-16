@@ -42,6 +42,9 @@ public class SimpleBean {
     private RequestDispatcher dispatcher3;
     private MessageBus bus3;
 
+    private RequestDispatcher dispatcher4;
+    private MessageBus bus4;
+
     @Inject
     public SimpleBean(RequestDispatcher dispatcher3, MessageBus bus3) {
         this.dispatcher3 = dispatcher3;
@@ -94,6 +97,25 @@ public class SimpleBean {
 
     public void setBus3(MessageBus bus3) {
         this.bus3 = bus3;
+    }
+
+
+    public RequestDispatcher getDispatcher4() {
+        return dispatcher4;
+    }
+
+    @Inject
+    public void setDispatcher4(RequestDispatcher dispatcher4) {
+        this.dispatcher4 = dispatcher4;
+    }
+
+    public MessageBus getBus4() {
+        return bus4;
+    }
+
+    @Inject
+    public void setBus4(MessageBus bus4) {
+        this.bus4 = bus4;
     }
 
     @PostConstruct

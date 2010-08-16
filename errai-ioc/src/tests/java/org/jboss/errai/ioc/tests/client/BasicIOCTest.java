@@ -21,6 +21,7 @@ import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.tests.AbstractErraiTest;
 import org.jboss.errai.ioc.client.api.Bootstrapper;
 import org.jboss.errai.ioc.tests.client.res.SimpleBean;
+import org.jboss.errai.ioc.tests.client.res.SimpleBean2;
 
 /**
  * User: christopherbrock
@@ -50,14 +51,26 @@ public class BasicIOCTest extends AbstractErraiTest {
                 assertEquals(ErraiBus.get(), simpleBean.getBus());
                 assertEquals(ErraiBus.get(), simpleBean.getBus2());
                 assertEquals(ErraiBus.get(), simpleBean.getBus3());
+                assertEquals(ErraiBus.get(), simpleBean.getBus4());
 
                 assertNotNull(simpleBean.getDispatcher());
                 assertNotNull(simpleBean.getDispatcher2());
                 assertNotNull(simpleBean.getDispatcher3());
+                assertNotNull(simpleBean.getDispatcher4());
                 
                 finishTest();
             }
         });
     }
 
+    public void testInjectionFromProvider() {
+        runAfterInit(new Runnable() {
+            public void run() {
+                SimpleBean2 simpleBean2 = SimpleBean2.TEST_INSTANCE;
+                assertEquals("FOO", simpleBean2.getMessage());
+                finishTest();
+            }
+        });
+
+    }
 }
