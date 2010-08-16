@@ -78,7 +78,7 @@
             <artifactId>errai-cdi</artifactId>
             <version>${errai.cdi-version}</version>
         </dependency>
-                
+
     </dependencies>
 
     <!-- Plugins -->

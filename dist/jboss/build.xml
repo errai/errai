@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="errai-cdi-jboss" default="all">
+<project name="errai-jboss-installer" default="all">
 
     <property file="deployment.properties"/>
     <property environment="env"/>
-    
-    <target name="service-archive" description="Deploy the service archive">
+    <property name="errai.jboss.sar" value="errai-jboss.sar"/>
+    <property name="jboss.deploy.full" value="${jboss.home}/${jboss.deploy.path}"/>
+
+
+    <target name="service-archive" description="Deploy the errai service archive">
 
         <delete dir="${jboss.deploy.full}/${errai.jboss.sar}"/>
 
@@ -20,7 +23,14 @@
 
             <!-- global libs -->
             <fileset dir="../../lib">
-                <include name="*.jar"/>
+                <include name="errai-bus.jar"/>
+                <include name="errai-common.jar"/>
+                <include name="errai-tools.jar"/>
+                <include name="guice-aopalliance.jar"/>
+                <include name="guice-servlet.jar"/>
+                <include name="guice.jar"/>
+                <include name="mvel2.jar"/>
+                <include name="reflections.jar"/>                
             </fileset>
         </copy>
 
