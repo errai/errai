@@ -45,8 +45,16 @@
             <title>Sources</title>
 
             <para>The source code for this component can be found in the Errai SVN
-                repository: <ulink
-                        url="http://anonsvn.jboss.org/repos/errai/trunk/">https://anonsvn.jboss.org/repos/errai/trunk/</ulink></para>
+                repository:
+                <itemizedlist>
+                    <listitem>
+                        <para><ulink url="http://anonsvn.jboss.org/repos/errai/trunk/">Core Framework</ulink></para>
+                    </listitem>
+                    <listitem>
+                        <para><ulink url="http://anonsvn.jboss.org/repos/errai/projects/weld-integration/trunk/">CDI Extension</ulink></para>
+                    </listitem>
+                </itemizedlist>
+                </para>
         </section>
 
         <section>
@@ -62,7 +70,7 @@
 
                     <listitem>
                         <para>User Forum: <ulink
-                                url="http://www.jboss.org/index.html?module=bb&amp;op=viewforum&amp;f=295">http://www.jboss.org/index.html?module=bb&amp;op=viewforum&amp;f=295</ulink></para>
+                                url="http://community.jboss.org/en/errai?view=discussions">http://community.jboss.org/en/errai?view=discussions</ulink></para>
                     </listitem>
 
                     <listitem>
@@ -125,6 +133,10 @@
 
                 <listitem>
                     <para><filename>lib</filename>: Required libraries</para>
+                </listitem>
+
+                 <listitem>
+                    <para><filename>ext</filename>: Extension to the Core Framework (optional)</para>
                 </listitem>
             </itemizedlist>
         </section>
