@@ -204,28 +204,30 @@
                     this simple example we send it to the subject
                     'HelloWorldService'.</para>
 
-                <programlisting>    public class HelloWorld implements EntryPoint {
+                <programlisting>
+public class HelloWorld implements EntryPoint {
 
-                    // Get an instance of the RequestDispatcher
-                    private RequestDispatcher dispatcher = ErraiBus.getDispatcher();
+    // Get an instance of the RequestDispatcher
+    private RequestDispatcher dispatcher = ErraiBus.getDispatcher();
 
-                    public void onModuleLoad() {
-                    Button button = new Button("Send message");
+    public void onModuleLoad() {
+        Button button = new Button("Send message");
 
-                    button.addClickHandler(new ClickHandler() {
+        button.addClickHandler(new ClickHandler() {
 
-                    public void onClick(ClickEvent event) {
-                    // Send a message to the 'HelloWorldService'.
-                    MessageBuilder.createMessage()
-                    .toSubject("HelloWorldService")             // (1)
-                    .signalling()                               // (2)
-                    .noErrorHandling()                          // (3)
-                    .sendNowWith(dispatcher);                   // (4)
-                    });
+        public void onClick(ClickEvent event) {
+            // Send a message to the 'HelloWorldService'.
+            MessageBuilder.createMessage()
+                .toSubject("HelloWorldService")             // (1)
+                .signalling()                               // (2)
+                .noErrorHandling()                          // (3)
+                .sendNowWith(dispatcher);                   // (4)
+            });
 
-                    [...]
-                    }
-                    }</programlisting>
+            [...]
+        }
+}
+                </programlisting>
 
                 <para>In the above example we build and send a message every time the
                     button is clicked. Here's an explanation of what's going on as
@@ -281,12 +283,14 @@
                     pervasively across, both client and server code. Let's begin with
                     server side component that receives messages:</para>
 
-                <programlisting>   @Service
-                    public class HelloWorldService implements MessageCallback {
-                    public void callback(Message message) {
-                    System.out.println("Hello, World!");
-                    }
-                    }</programlisting>
+                <programlisting>
+@Service
+public class HelloWorldService implements MessageCallback {
+    public void callback(Message message) {
+        System.out.println("Hello, World!");
+    }
+}
+                </programlisting>
 
                 <para>He we declare an extremely simple service. The
                     <varname>@Service</varname> annotation provides a convenient,
@@ -302,27 +306,29 @@
                     create a message and address it to the subject
                     '<varname>HelloWorldClient</varname>':</para>
 
-                <programlisting>    @Service
-                    public class HelloWorldService implements MessageCallback {
+                <programlisting>
+@Service
+public class HelloWorldService implements MessageCallback {
 
-                    private RequestDispatcher dispatcher;
+    private RequestDispatcher dispatcher;
 
-                    @Inject
-                    public HelloWorldService(RequestDispatcher disaptcher) {
-                    dispatcher = dispatcher;
-                    }
+    @Inject
+    public HelloWorldService(RequestDispatcher disaptcher) {
+        dispatcher = dispatcher;
+    }
 
-                    public void callback(CommandMessage message) {
-                    // Send a message to the 'HelloWorldClient'.
-                    MessageBuilder.createMessage()
-                    .toSubject("HelloWorldClient")              // (1)
-                    .signalling()                               // (2)
-                    .with("text", "Hi There")                   // (3)
-                    .noErrorHandling()                          // (4)
-                    .sendNowWith(dispatcher);                   // (5)
-                    });
-                    }
-                    }   </programlisting>
+    public void callback(CommandMessage message) {
+        // Send a message to the 'HelloWorldClient'.
+        MessageBuilder.createMessage()
+            .toSubject("HelloWorldClient")              // (1)
+            .signalling()                               // (2)
+            .with("text", "Hi There")                   // (3)
+            .noErrorHandling()                          // (4)
+            .sendNowWith(dispatcher);                   // (5)
+        });
+    }
+}
+                </programlisting>
 
                 <para>The above example shows a service which sends a message in
                     response to receiving a message. Here's what's going on:</para>
@@ -370,28 +376,30 @@
                     built-in push messaging for all client services.</para>
 
                 <programlisting>
-                    public class HelloWorld implements EntryPoint {
-                    private MessageBus bus = ErraiBus.get();
+public class HelloWorld implements EntryPoint {
 
-                    public void onModuleLoad() {
-                    [...]
+    private MessageBus bus = ErraiBus.get();
 
-                    /**
-                    * Declare a local service to receive messages on the subject
-                    * "BroadcastReceiver".
-                    */
-                    bus.subscribe("BroadcastReceiver", new MessageCallback() {
-                    public void callback(CommandMessage message) {
-                    /**
-                    * When a message arrives, extract the "text" field and
-                    * do something with it
-                    */
-                    String messageText = message.get(String.class, "text");
-                    }
-                    });
+    public void onModuleLoad() {
+        [...]
 
-                    [...]
-                    }</programlisting>
+        /**
+        * Declare a local service to receive messages on the subject
+        * "BroadcastReceiver".
+        */
+        bus.subscribe("BroadcastReceiver", new MessageCallback() {
+            public void callback(CommandMessage message) {
+                /**
+                * When a message arrives, extract the "text" field and
+                * do something with it
+                */
+                String messageText = message.get(String.class, "text");
+            }
+        });
+
+        [...]
+}
+                </programlisting>
 
                 <para>In the above example, we declare a new client service called
                     <literal>"BroadcastReceiver"</literal> which can now accept both local
@@ -412,19 +420,21 @@
                     ensure that the message you are sending back is received by the same
                     client which sent the incoming message. A simple example:</para>
 
-                <programlisting>   @Service
-                    public class HelloWorldService implements MessageCallback {
-                    public void callback(CommandMessage message) {
-                    // Send a message to the 'HelloWorldClient' on the client that sent us the
-                    // the message.
-                    MessageBuilder.createConversation(message)
-                    .toSubject("HelloWorldClient")
-                    .signalling()
-                    .with("text", "Hi There! We're having a conversation!")
-                    .noErrorHandling().reply();
-                    });
-                    }
-                    }</programlisting>
+                <programlisting>
+@Service
+public class HelloWorldService implements MessageCallback {
+    public void callback(CommandMessage message) {
+        // Send a message to the 'HelloWorldClient' on the client that sent us the
+        // the message.
+        MessageBuilder.createConversation(message)
+            .toSubject("HelloWorldClient")
+            .signalling()
+            .with("text", "Hi There! We're having a conversation!")
+            .noErrorHandling().reply();
+        });
+    }
+}
+                </programlisting>
 
                 <para>Note that the only difference between the example in the
                     previous section (2.4) and this is the use of the
@@ -448,15 +458,17 @@
                         <literal>MessageBuilder</literal> API after specifying the error
                         handling of the message.</para>
 
-                    <programlisting>MessageBuilder.createMessage()
-                        .toSubject("ConversationalService").signalling()
-                        .with("SomeField", someValue)
-                        .noErrorHandling()
-                        .repliesTo(new MessageCallback() {
-                        public void callback(Message message) {
-                        System.out.println("I received a response");
-                        }
-                        })</programlisting>
+                    <programlisting>
+MessageBuilder.createMessage()
+    .toSubject("ConversationalService").signalling()
+    .with("SomeField", someValue)
+    .noErrorHandling()
+    .repliesTo(new MessageCallback() {
+        public void callback(Message message) {
+            System.out.println("I received a response");
+        }
+})
+                    </programlisting>
 
                     <para>See the next section on how to build conversational services
                         that can respond to such messages.</para>
@@ -474,18 +486,22 @@
 
                     <para>Consider the following client side code:</para>
 
-                    <programlisting>MessageBuilder.createMessage()
-                        .toSubject("ObjectService").signalling()
-                        .with(MessageParts.ReplyTo, "ClientEndpoint")
-                        .noErrorHandling().sendNowWith(dispatcher);</programlisting>
+                    <programlisting>
+MessageBuilder.createMessage()
+    .toSubject("ObjectService").signalling()
+    .with(MessageParts.ReplyTo, "ClientEndpoint")
+    .noErrorHandling().sendNowWith(dispatcher);
+                    </programlisting>
 
                     <para>And the conversational code on the server (for service
                         <emphasis>ObjectService</emphasis>):</para>
 
-                    <programlisting>MessageBuilder.createConversation(message)
-                        .subjectProvided().signalling()
-                        .with("Records", records)
-                        .noErrorHandling().reply();</programlisting>
+                    <programlisting>
+MessageBuilder.createConversation(message)
+    .subjectProvided().signalling()
+    .with("Records", records)
+    .noErrorHandling().reply();
+                    </programlisting>
 
                     <para>In the above examples, assuming that the latter example is
                         inside a service called "<varname>ObjectService</varname>" and is
@@ -504,10 +520,12 @@
                     subject is quite simple and involves nothing more than forgoing use of
                     the conversation API. For instance:</para>
 
-                <programlisting>MessageBuilder.createMessage().
-                    .toSubject("MessageListener")
-                    .with("Text", "Hello, from your overlords in the cloud")
-                    .noErrorHandling().sendGlobalWith(dispatcher);</programlisting>
+                <programlisting>
+MessageBuilder.createMessage().
+    .toSubject("MessageListener")
+    .with("Text", "Hello, from your overlords in the cloud")
+    .noErrorHandling().sendGlobalWith(dispatcher);
+                </programlisting>
 
                 <para>If sent from the server, all clients currently connected, who
                     are listening to the subject <filename>"MessageListener"</filename>
@@ -565,14 +583,12 @@
                         for routing. For example:</para>
 
                     <programlisting>...
-                        public void callback(Message message) {
-                        String sessionId = ServerBusUtils.getSessionId(message);
+public void callback(Message message) {
+    String sessionId = ServerBusUtils.getSessionId(message);
 
-                        // Record this sessionId somewhere.
-                        ...
-                        }
-                        ...
-
+    // Record this sessionId somewhere.
+        ...
+}
                     </programlisting>
 
                     <para>The <varname>SessionID</varname> can then be stored in a
@@ -583,13 +599,14 @@
                         MessagePart to indicate to the bus where you want the message to
                         go.</para>
 
-                    <programlisting>MessageBuilder.createMessage()
-                        .toSubject("ClientMessageListener")
-                        .signalling()
-                        .with(MessageParts.SessionID, sessionId)
-                        .with("Message", "We're relaying a message!")
-                        .noErrorHandling().sendNowWith(dispatcher);
-                    </programlisting>
+                    <programlisting>
+MessageBuilder.createMessage()
+    .toSubject("ClientMessageListener")
+    .signalling()
+    .with(MessageParts.SessionID, sessionId)
+    .with("Message", "We're relaying a message!")
+    .noErrorHandling().sendNowWith(dispatcher);
+    </programlisting>
 
                     <para>By providing the <varname>SessionID</varname> part in the
                         message, the bus will see this and use it for routing the message to
@@ -627,17 +644,19 @@
                     identification of problems with your applications if you have error
                     handlers, and generally help you build more robust code.</para>
 
-                <programlisting>MessageBuilder.createMessage()
-                    .toSubject("HelloWorldService")
-                    .signalling()
-                    .with("msg", "Hi there!")
-                    .errorsHandledBy(new ErrorCallback() {
-                    public boolean error(Message message, Throwable throwable) {
-                    throwable.printStackTrace();
-                    return true;
-                    }
-                    })
-                    .sendNowWith(dispatcher);                                                       </programlisting>
+                <programlisting>
+MessageBuilder.createMessage()
+    .toSubject("HelloWorldService")
+    .signalling()
+    .with("msg", "Hi there!")
+    .errorsHandledBy(new ErrorCallback() {
+        public boolean error(Message message, Throwable throwable) {
+            throwable.printStackTrace();
+            return true;
+        }
+    })
+    .sendNowWith(dispatcher);
+                </programlisting>
 
                 <para>The addition of error-handling at first may put off developers
                     as it makes code more verbose and less-readable. This is nothing that
@@ -645,19 +664,21 @@
                     same error-handler can appropriately be shared between multiple
                     different calls.</para>
 
-                <programlisting>ErrorCallback error = new ErrorCallback() {
-                    public boolean error(Message message, Throwable throwable) {
-                    throwable.printStackTrace();
-                    return true;
-                    }
-                    }
+                <programlisting>
+ErrorCallback error = new ErrorCallback() {
+    public boolean error(Message message, Throwable throwable) {
+        throwable.printStackTrace();
+        return true;
+    }
+}
 
-                    MessageBuilder.createMessage()
-                    .toSubject("HelloWorldService")
-                    .signalling()
-                    .with("msg", "Hi there!")
-                    .errorsHandledBy(error)
-                    .sendNowWith(dispatcher);   </programlisting>
+MessageBuilder.createMessage()
+    .toSubject("HelloWorldService")
+    .signalling()
+    .with("msg", "Hi there!")
+    .errorsHandledBy(error)
+    .sendNowWith(dispatcher);
+                </programlisting>
 
                 <para>A little nicer.</para>
 
@@ -690,21 +711,23 @@
                         <varname>replyDelayed()</varname> or
                         <varname>sendDelayed()</varname>). </para>
 
-                    <programlisting>MessageBuilder.createConversation(msg)
-                        .toSubject("FunSubject")
-                        .signalling()
-                        .noErrorHandling()
-                        .replyDelayed(TimeUnit.SECONDS, 5); // sends the message after 5 seconds.
+                    <programlisting>
+MessageBuilder.createConversation(msg)
+    .toSubject("FunSubject")
+    .signalling()
+    .noErrorHandling()
+    .replyDelayed(TimeUnit.SECONDS, 5); // sends the message after 5 seconds.
 
                     </programlisting>
 
                     <para>or </para>
 
-                    <programlisting>MessageBuilder.createMessage()
-                        .toSubject("FunSubject")
-                        .signalling()
-                        .noErrorHandling()
-                        .sendDelayed(requestDispatcher, TimeUnit.SECONDS, 5); // sends the message after 5 seconds.</programlisting>
+                    <programlisting>
+MessageBuilder.createMessage()
+    .toSubject("FunSubject")
+    .signalling()
+    .noErrorHandling()
+    .sendDelayed(requestDispatcher, TimeUnit.SECONDS, 5); // sends the message after 5 seconds.</programlisting>
                 </sect3>
 
                 <sect3>
@@ -714,17 +737,18 @@
                         <varname>repeatXXX() </varname>methods. The task will repeat
                         indefinitely until cancelled (see next section). </para>
 
-                    <programlisting>MessageBuilder.createMessage()
-                        .toSubject("FunSubject")
-                        .signalling()
-                        .withProvided("time", new ResourceProvider&lt;String&gt;() {
-                        SimpleDateFormat fmt = new SimpleDateFormat("hh:mm:ss");
-                        public String get() {
-                        return fmt.format(new Date(System.currentTimeMillis());
-                        }
-                        }
-                        .noErrorHandling()
-                        .sendRepeatingWith(requestDispatcher, TimeUnit.SECONDS, 1); //sends a message every 1 second</programlisting>
+                    <programlisting>
+MessageBuilder.createMessage()
+    .toSubject("FunSubject")
+    .signalling()
+    .withProvided("time", new ResourceProvider&lt;String&gt;() {
+        SimpleDateFormat fmt = new SimpleDateFormat("hh:mm:ss");
+        public String get() {
+            return fmt.format(new Date(System.currentTimeMillis());
+        }
+    }
+    .noErrorHandling()
+    .sendRepeatingWith(requestDispatcher, TimeUnit.SECONDS, 1); //sends a message every 1 second</programlisting>
 
                     <para>The above example sends a message very 1 second with a message
                         part called <varname>"time"</varname>, containing a formatted time
@@ -743,19 +767,19 @@
                         creating a task. Reference to the AsyncTask object can be retained
                         and cancelled by any other thread.</para>
 
-                    <programlisting>AsyncTask task = MessageBuilder.createConversation(message)
-                        .toSubject("TimeChannel").signalling()
-                        .withProvided(TimeServerParts.TimeString, new ResourceProvider&lt;String&gt;() {
-                        public String get() {
-                        return String.valueOf(System.currentTimeMillis());
-                        }
-                        }).defaultErrorHandling().replyRepeating(TimeUnit.MILLISECONDS, 100);
+                    <programlisting>
+AsyncTask task = MessageBuilder.createConversation(message)
+    .toSubject("TimeChannel").signalling()
+    .withProvided(TimeServerParts.TimeString, new ResourceProvider&lt;String&gt;() {
+        public String get() {
+            return String.valueOf(System.currentTimeMillis());
+        }
+    }).defaultErrorHandling().replyRepeating(TimeUnit.MILLISECONDS, 100);
 
-                        ...
+    ...
 
-                        // cancel the task and interrupt it's thread if necessary.
-                        task.cancel(true);
-
+    // cancel the task and interrupt it's thread if necessary.
+    task.cancel(true);
                     </programlisting>
                 </sect3>
             </sect2>
@@ -783,10 +807,11 @@
                     definition of a remote interface, and a service class which implements
                     it. See the following:</para>
 
-                <programlisting>@Remote
-                    public interface MyRemoteService {
-                    public boolean isEveryoneHappy();
-                    }
+                <programlisting>
+@Remote
+public interface MyRemoteService {
+    public boolean isEveryoneHappy();
+}
                 </programlisting>
 
                 <para>The <varname>@Remote</varname> annotation tells Errai that we'd
@@ -796,14 +821,15 @@
                     both the client and server side code. That said, the implementation of
                     a service is relatively to the point:</para>
 
-                <programlisting>@Service
-                    public class MyRemoteServiceImpl implements MyRemoteService {
+                <programlisting>
+@Service
+public class MyRemoteServiceImpl implements MyRemoteService {
 
-                    public boolean isEveryoneHappy() {
-                    // blatently lie and say everyone's happy.
-                    return true;
-                    }
-                    }
+    public boolean isEveryoneHappy() {
+        // blatently lie and say everyone's happy.
+        return true;
+    }
+}
                 </programlisting>
 
                 <para>That's all there is to it. You use the same
@@ -821,11 +847,13 @@
                     the use of a callback, which we use to receive the response from the
                     remote method. Let's see how it works:</para>
 
-                <programlisting>MessageBuilder.createCall(new RemoteCallback&lt;Boolean&gt;() {
-                    public void callback(Boolean isHappy) {
-                    if (isHappy) Window.alert("Everyone is happy!");
-                    }
-                    }, MyRemoteService.class).isEveryoneHappy();        </programlisting>
+                <programlisting>
+MessageBuilder.createCall(new RemoteCallback&lt;Boolean&gt;() {
+    public void callback(Boolean isHappy) {
+        if (isHappy) Window.alert("Everyone is happy!");
+    }
+}, MyRemoteService.class).isEveryoneHappy();
+                </programlisting>
 
                 <para>In the above example, we declare a remote callback that receives
                     a Boolean, to correpond to the return value of the method on the
@@ -833,7 +861,9 @@
                     directly call the method. However, <emphasis role="bold">don't be
                         tempted to write code like this</emphasis>:</para>
 
-                <programlisting>boolean bool = MessageBuilder.createCall(..., MyRemoteService.class).isEveryoneHappy();</programlisting>
+                <programlisting>
+boolean bool = MessageBuilder.createCall(..., MyRemoteService.class).isEveryoneHappy();
+                </programlisting>
 
                 <para>The above code will never return a valid result. In fact, it
                     will always return null, false, or 0 depending on the type. This is
@@ -872,15 +902,17 @@
                         scope just like with a session by using the
                         <varname>LocalContext</varname> helper class.</para>
 
-                    <programlisting>public class TestService implements MessageCallback {
-                        public void callback(final Message message) {
-                        // obtain a reference to the local context by referencing the incoming message.
-                        LocalContext injectionContext = LocalContext.get(message);
+                    <programlisting>
+public class TestService implements MessageCallback {
+    public void callback(final Message message) {
+        // obtain a reference to the local context by referencing the incoming message.
+        LocalContext injectionContext = LocalContext.get(message);
 
-                        // set an attribute.
-                        injectionContext.setAttribute("MyAttribute", "Foo");
-                        }
-                        }              </programlisting>
+        // set an attribute.
+        injectionContext.setAttribute("MyAttribute", "Foo");
+    }
+}
+                    </programlisting>
                 </sect3>
 
                 <sect3>
@@ -893,15 +925,17 @@
                     <para>The SessionContext helper class is used for accessing the
                         session scope.</para>
 
-                    <programlisting>public class TestService implements MessageCallback {
-                        public void callback(final Message message) {
-                        // obtain a reference to the session context by referencing the incoming message.
-                        SessionContext injectionContext = SessionContext.get(message);
+                    <programlisting>
+public class TestService implements MessageCallback {
+    public void callback(final Message message) {
+        // obtain a reference to the session context by referencing the incoming message.
+        SessionContext injectionContext = SessionContext.get(message);
 
-                        // set an attribute.
-                        injectionContext.setAttribute("MyAttribute", "Foo");
-                        }
-                        }   </programlisting>
+        // set an attribute.
+        injectionContext.setAttribute("MyAttribute", "Foo");
+    }
+}
+                    </programlisting>
                 </sect3>
             </sect2>
 
@@ -933,19 +967,19 @@
 
             <programlisting>
 
-                @ExposeEntity
-                public class User implements java.io.Serializable {
-                private int userId;
+@ExposeEntity
+public class User implements java.io.Serializable {
+    private int userId;
 
-                public int getUserId() {
-                return userId;
-                }
+    public int getUserId() {
+        return userId;
+    }
 
-                public void setUserId(int userId) {
-                this.userId = userId;
-                }
-                [...]
-                }
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+    [...]
+}
             </programlisting>
 
             <note>
@@ -967,9 +1001,11 @@
                     this entities made available by declaring them in the
                     <varname>ErraiApp.properties</varname> of any module.</para>
 
-                <programlisting>errai.bus.serializableTypes=org.foo.Foo \
-                    org.bar.Bar \
-                    org.foobie.Foobie</programlisting>
+                <programlisting>
+errai.bus.serializableTypes=org.foo.Foo \
+    org.bar.Bar \
+    org.foobie.Foobie
+                </programlisting>
             </sect2>
         </sect1>
 
@@ -1005,39 +1041,40 @@
 
                 <para>Here's a sample web.xml file:</para>
 
-                <programlisting>&lt;web-app xmlns="http://java.sun.com/xml/ns/javaee"
-                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
-                    http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
-                    version="2.5"&gt;
+                <programlisting>
+&lt;web-app xmlns="http://java.sun.com/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+    http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+    version="2.5"&gt;
 
-                    &lt;servlet&gt;
-                    &lt;servlet-name&gt;ErraiServlet&lt;/servlet-name&gt;
-                    &lt;servlet-class&gt;org.jboss.errai.bus.server.servlet.DefaultBlockingServlet&lt;/servlet-class&gt;
-                    &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
-                    &lt;/servlet&gt;
+    &lt;servlet&gt;
+        &lt;servlet-name&gt;ErraiServlet&lt;/servlet-name&gt;
+        &lt;servlet-class&gt;org.jboss.errai.bus.server.servlet.DefaultBlockingServlet&lt;/servlet-class&gt;
+        &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
+    &lt;/servlet&gt;
 
-                    &lt;servlet-mapping&gt;
-                    &lt;servlet-name&gt;ErraiServlet&lt;/servlet-name&gt;
-                    &lt;url-pattern&gt;*.erraiBus&lt;/url-pattern&gt;
-                    &lt;/servlet-mapping&gt;
+    &lt;servlet-mapping&gt;
+        &lt;servlet-name&gt;ErraiServlet&lt;/servlet-name&gt;
+        &lt;url-pattern&gt;*.erraiBus&lt;/url-pattern&gt;
+    &lt;/servlet-mapping&gt;
 
-                    &lt;context-param&gt;
-                    &lt;param-name&gt;errai.properties&lt;/param-name&gt;
-                    &lt;param-value&gt;/WEB-INF/errai.properties&lt;/param-value&gt;
-                    &lt;/context-param&gt;
+    &lt;context-param&gt;
+        &lt;param-name&gt;errai.properties&lt;/param-name&gt;
+        &lt;param-value&gt;/WEB-INF/errai.properties&lt;/param-value&gt;
+    &lt;/context-param&gt;
 
-                    &lt;context-param&gt;
-                    &lt;param-name&gt;login.config&lt;/param-name&gt;
-                    &lt;param-value&gt;/WEB-INF/login.config&lt;/param-value&gt;
-                    &lt;/context-param&gt;
+    &lt;context-param&gt;
+        &lt;param-name&gt;login.config&lt;/param-name&gt;
+        &lt;param-value&gt;/WEB-INF/login.config&lt;/param-value&gt;
+    &lt;/context-param&gt;
 
-                    &lt;context-param&gt;
-                    &lt;param-name&gt;users.properties&lt;/param-name&gt;
-                    &lt;param-value&gt;/WEB-INF/users.properties&lt;/param-value&gt;
-                    &lt;/context-param&gt;
+    &lt;context-param&gt;
+        &lt;param-name&gt;users.properties&lt;/param-name&gt;
+        &lt;param-value&gt;/WEB-INF/users.properties&lt;/param-value&gt;
+    &lt;/context-param&gt;
 
-                    &lt;/web-app&gt;</programlisting>
+&lt;/web-app&gt;</programlisting>
             </sect2>
 
             <sect2 id="bus-config">
@@ -1049,38 +1086,36 @@
                 <para>Example Configuration:</para>
 
                 <programlisting>
-                    ##
-                    ## Request dispatcher implementation (default is SimpleDispatcher)
-                    ##
-                    #errai.dispatcher_implementation=org.jboss.errai.bus.server.SimpleDispatcher
-                    errai.dispatcher_implementation=org.jboss.errai.bus.server.AsyncDispatcher
+##
+## Request dispatcher implementation (default is SimpleDispatcher)
+##
+#errai.dispatcher_implementation=org.jboss.errai.bus.server.SimpleDispatcher
+errai.dispatcher_implementation=org.jboss.errai.bus.server.AsyncDispatcher
 
 
-                    #
-                    ## Worker pool size.  This is the number of threads the asynchronous worker pool should provide for processing
-                    ## incoming messages. This option is only valid when using the AsyncDispatcher implementation.
-                    ##
-                    errai.async.thread_pool_size=5
+#
+## Worker pool size.  This is the number of threads the asynchronous worker pool should provide for processing
+## incoming messages. This option is only valid when using the AsyncDispatcher implementation.
+##
+errai.async.thread_pool_size=5
 
-                    ##
-                    ## Worker timeout (in seconds).  This defines the time that a single asychronous process may run, before the worker pool
-                    ## terminates it and reclaims the thread.   This option is only valid when using the AsyncDispatcher implementation.
-                    ##
-                    errai.async.worker.timeout=5
+##
+## Worker timeout (in seconds).  This defines the time that a single asychronous process may run, before the worker pool
+## terminates it and reclaims the thread.   This option is only valid when using the AsyncDispatcher implementation.
+##
+errai.async.worker.timeout=5
 
-                    ##
-                    ## Specify the Authentication/Authorization Adapter to use
-                    ##
-                    #errai.authentication_adapter=org.jboss.errai.persistence.server.security.HibernateAuthenticationAdapter
-                    #errai.authentication_adapter=org.jboss.errai.bus.server.security.auth.JAASAdapter
+##
+## Specify the Authentication/Authorization Adapter to use
+##
+#errai.authentication_adapter=org.jboss.errai.persistence.server.security.HibernateAuthenticationAdapter
+#errai.authentication_adapter=org.jboss.errai.bus.server.security.auth.JAASAdapter
 
-                    ##
-                    ## This property indicates whether or not authentication is required for all communication with the bus.  Set this
-                    ## to 'true' if all access to your application should be secure.
-                    ##
-                    #errai.require_authentication_for_all=true
-
-
+##
+## This property indicates whether or not authentication is required for all communication with the bus.  Set this
+## to 'true' if all access to your application should be secure.
+##
+#errai.require_authentication_for_all=true
 
                 </programlisting>
 
@@ -1168,10 +1203,10 @@
                     <para>Defines a list of serializable types to expose to the
                         bus.</para>
 
-                    <programlisting>errai.bus.serializableTypes=org.foo.Foo \
-                        org.bar.Bar \
-                        org.foobie.Foobie
-
+                    <programlisting>
+errai.bus.serializableTypes=org.foo.Foo \
+    org.bar.Bar \
+    org.foobie.Foobie
                     </programlisting>
                 </sect3>
             </sect2>
@@ -1409,21 +1444,24 @@
                     tools with the workspace. A tool needs to implement the WidgetProvider
                     interface. It's used by the workspace to instruct the tool to create
                     it's UI widget when needed. This widget will then be embedded in the
-                    workspace. <programlisting>
-                        @LoadTool(name = "Users", group = "Administration")                          (1)
-                        public class UserManagement implements WidgetProvider
-                        {
+                    workspace.
+                    <programlisting>
+@LoadTool(name = "Users", group = "Administration")                          (1)
+    public class UserManagement implements WidgetProvider
+    {
 
-                        public void provideWidget(final ProvisioningCallback callback) {           (2)
-                        callback.onSuccess(new UserManagementWidget());
-                        }
+    public void provideWidget(final ProvisioningCallback callback) {           (2)
+        callback.onSuccess(new UserManagementWidget());
+    }
 
-                        class UserManagementWidget extends LayoutPanel                             (3)
-                        {
-                        [...]
-                        }
-                        }
-                    </programlisting> <orderedlist>
+    class UserManagementWidget extends LayoutPanel                             (3)
+    {
+        [...]
+    }
+}
+                    </programlisting>
+
+                    <orderedlist>
                         <listitem>
                             <para>Toolset declaration including the name and group this tool
                                 belongs to</para>
@@ -1446,20 +1484,21 @@
                 <para>Workspaces relies on a authentication scheme similiar to JAAS.
                     It ships with different authentication modules (i.e. Hibernate, JAAS)
                     that enable role based access to tools on the client side and services
-                    on the server side. <programlisting>
-                        @LoadTool(name = "Inventory", group = "Administration")                (1)
-                        @RequireRoles({"admin"})                                               (2)
-                        public class Inventory implements WidgetProvider
-                        {
+                    on the server side.
+                    <programlisting>
+@LoadTool(name = "Inventory", group = "Administration")                (1)
+@RequireRoles({"admin"})                                               (2)
+public class Inventory implements WidgetProvider
+{
 
-                        public void provideWidget(final ProvisioningCallback callback)     (3)
-                        {
-                        [...]
-                        }
+    public void provideWidget(final ProvisioningCallback callback)     (3)
+    {
+        [...]
+    }
 
-                        }
-
-                    </programlisting> <orderedlist>
+}
+                    </programlisting>
+                    <orderedlist>
                         <listitem>
                             <para>A tool declaration</para>
                         </listitem>
@@ -1483,35 +1522,36 @@
                         url="http://code.google.com/p/google-web-toolkit/wiki/CodeSplitting">GWT
                     2.0 code splitting</ulink> can kick in. This allows true lazy loading
                     of tools upon demand, including all .js and resources necessary to run
-                    your tools: <programlisting>
-                        @LoadTool(name = "Group Tasks", group = "Tasks")
-                        public class OpenTasksModule implements WidgetProvider
-                        {
-                        static OpenTasksView instance = null;
+                    your tools:
+<programlisting>
+@LoadTool(name = "Group Tasks", group = "Tasks")
+public class OpenTasksModule implements WidgetProvider
+{
+    static OpenTasksView instance = null;
 
-                        public void provideWidget(final ProvisioningCallback callback)
-                        {
-                        GWT.runAsync(
-                        new RunAsyncCallback()
-                        {
-                        public void onFailure(Throwable err)
-                        {
-                        GWT.log("Failed to load tool", err);
-                        }
+    public void provideWidget(final ProvisioningCallback callback)
+    {
+        GWT.runAsync(
+            new RunAsyncCallback()
+            {
+                public void onFailure(Throwable err)
+                {
+                    GWT.log("Failed to load tool", err);
+                }
 
-                        public void onSuccess()
-                        {
-                        if (instance == null) {
+                public void onSuccess()
+                {
+                    if (instance == null) {
                         instance = new OpenTasksView();  // your tool here
-                        }
-                        callback.onSuccess(instance);
-                        }
-                        }
+                    }
 
-                        );
-                        }
-                        }
+                    callback.onSuccess(instance);
+                }
+            }
 
+        );
+    }
+}
                     </programlisting></para>
             </sect2>
         </sect1>
@@ -1533,9 +1573,10 @@
                 <para>The workspace registry
                     (org.jboss.errai.workspaces.client.framework.Registry) is a simple all
                     purpose lookup for common workspace API that is available to any
-                    workspace component: <programlisting>
-                        AuthenticationContext authenticationContext =
-                        Registry.get(SecurityService.class).getAuthenticationContext();
+                    workspace component:
+                    <programlisting>
+AuthenticationContext authenticationContext =
+    Registry.get(SecurityService.class).getAuthenticationContext();
                     </programlisting></para>
             </sect2>
 
@@ -1607,20 +1648,21 @@
                     through the <link linkend="workspace-registry">workspace
                         Registry</link>:
                     <programlisting>
-                        Preferences prefs = Registry.get(Preferences.class);
-                        prefs.set("default_sort_order", "ASC");
+Preferences prefs = Registry.get(Preferences.class);
+prefs.set("default_sort_order", "ASC");
                     </programlisting>
 
                     The default implementation uses a cookie based
                     approach, but it's easy to replace that one with a custom
-                    implementation in the module decriptor: <programlisting>
+                    implementation in the module decriptor:
+                    <programlisting>
 
-                        &lt;module&gt;
-                        [...]
-                        &lt;replace-with class="org.jboss.errai.workspaces.client.framework.CookiePreferences"&gt;
-                        &lt;when-type-is class="org.jboss.errai.workspaces.client.framework.Preferences"/&gt;
-                        &lt;/replace-with&gt;
-                        &lt;/module&gt;
+&lt;module&gt;
+[...]
+&lt;replace-with class="org.jboss.errai.workspaces.client.framework.CookiePreferences"&gt;
+&lt;when-type-is class="org.jboss.errai.workspaces.client.framework.Preferences"/&gt;
+&lt;/replace-with&gt;
+&lt;/module&gt;
 
                     </programlisting></para>
             </sect2>
@@ -1632,12 +1674,11 @@
                     to the browser error console and the GWT hosted mode window. To use the internal logging mechanism,
                     simply write messages to the Logger:
                     <programlisting>
-                        import com.allen_sauer.gwt.log.client.Log;
-                        [...]
+import com.allen_sauer.gwt.log.client.Log;
+[...]
 
-                        Log.warn("some log message");
-                        Log.error("message", throwable);
-
+Log.warn("some log message");
+Log.error("message", throwable);
                     </programlisting>
 
                 </para>
@@ -1672,18 +1713,19 @@
                     section and return here when you are done.</para>
 
                 <para>Once you've created a project using the maven archetype, make
-                    yourself familiar with the directory structure: <programlisting>
-                        Laika:gwt-app hbraun$ lstree
-                        | pom.xml
-                        |-src
-                        |---main
-                        |-----java
-                        |-------foo
-                        |---------bar
-                        |-----------client
-                        |-----------server
-                        |-war
-                        |---WEB-INF
+                    yourself familiar with the directory structure:
+                    <programlisting>
+ Laika:gwt-app hbraun$ lstree
+    | pom.xml
+    |-src
+    |---main
+    |-----java
+    |-------foo
+    |---------bar
+    |-----------client
+    |-----------server
+    |-war
+    |---WEB-INF
                     </programlisting> It basically follows the default GWT guidelines for breaking
                     up code between client and server. Simply put tools (@LoadToolSet)
                     into the client subpackage and services (@Service) into the server
@@ -1697,11 +1739,14 @@
 
                 <para>Several configuration files drive a workspace build and the
                     final application. Make sure to include all of them when porting the
-                    archetype example to a different GWT application: <programlisting>
-                        ./src/main/java/ErraiApp.properties
-                        ./src/main/java/ErraiService.properties
-                        ./src/main/java/my/app/App.gwt.xml
-                    </programlisting> <orderedlist>
+                    archetype example to a different GWT application:
+                    <programlisting>
+./src/main/java/ErraiApp.properties
+./src/main/java/ErraiService.properties
+./src/main/java/my/app/App.gwt.xml
+                    </programlisting>
+
+                    <orderedlist>
                         <listitem>
                             <para>ErraiApp.properties is a simple marker, that is required
                                 for the annotation processing to discover your modules. This is
@@ -1721,20 +1766,21 @@
                         <listitem>
                             <para>App.gwt.xml is your applications <ulink
                                     url="http://code.google.com/webtoolkit/doc/latest/DevGuideOrganizingProjects.html#DevGuideModules">module
-                                descriptor</ulink>. <programlisting>
+                                descriptor</ulink>.
+                                <programlisting>
 
-                                &lt;module rename-to="app"&gt;
-                                &lt;inherits name='com.google.gwt.user.User'/&gt;
-                                &lt;inherits name="com.google.gwt.uibinder.UiBinder"/&gt;
-                                &lt;inherits name="com.google.gwt.resources.Resources" /&gt;
+&lt;module rename-to="app"&gt;
+&lt;inherits name='com.google.gwt.user.User'/&gt;
+&lt;inherits name="com.google.gwt.uibinder.UiBinder"/&gt;
+&lt;inherits name="com.google.gwt.resources.Resources" /&gt;
 
-                                &lt;inherits name="org.jboss.errai.common.ErraiCommon"/&gt;
-                                &lt;inherits name="org.jboss.errai.bus.ErraiBus"/&gt;
-                                &lt;inherits name="org.jboss.errai.workspaces.ErraiWorkspaces" /&gt;
+&lt;inherits name="org.jboss.errai.common.ErraiCommon"/&gt;
+&lt;inherits name="org.jboss.errai.bus.ErraiBus"/&gt;
+&lt;inherits name="org.jboss.errai.workspaces.ErraiWorkspaces" /&gt;
 
-                                &lt;entry-point class='my.app.client.HelloWorldClient'/&gt;
+&lt;entry-point class='my.app.client.HelloWorldClient'/&gt;
 
-                                &lt;/module&gt;
+&lt;/module&gt;
 
                             </programlisting> If you are building on workspaces make sure to include it's
                                 dependencies common and bus as well.</para>
@@ -1748,11 +1794,12 @@
                 <para>If you followed the steps above, and did build your application
                     stub using the maven archetype, then you should be launch the <ulink
                             url="http://code.google.com/webtoolkit/doc/latest/DevGuideCompilingAndDebugging.html#DevGuideDevMode">GWT
-                        hosted mode</ulink> with the following commands: <programlisting>
-                        mvn gwt:run
+                        hosted mode</ulink> with the following commands:
+                    <programlisting>
+mvn gwt:run
 
-                        (alternatively)
-                        mvn gwt:debug
+(alternatively)
+mvn gwt:debug
                     </programlisting> <note>
                         <title>Launching maven the first time</title>
 
@@ -2162,41 +2209,45 @@ cp target/foobr-jboss6.war $JBOSS_HOME/server/default/deploy
                     <para>http://maven.apache.org/plugins/maven-archetype-plugin/</para>
                 </footnote> and needs to be invoked from the command line:
                 <programlisting>
-                    mvn archetype:generate \
-                    -DarchetypeGroupId=org.jboss.errai \
-                    -DarchetypeArtifactId=sandbox-archetype \
-                    -DarchetypeVersion=1.1-SNAPSHOT \
-                    -DarchetypeRepository=https://repository.jboss.org/nexus/content/groups/public/
-                </programlisting> When invoking the archetype build it ask you
+mvn archetype:generate \
+    -DarchetypeGroupId=org.jboss.errai \
+    -DarchetypeArtifactId=sandbox-archetype \
+    -DarchetypeVersion=1.1-SNAPSHOT \
+    -DarchetypeRepository=https://repository.jboss.org/nexus/content/groups/public/
+    </programlisting> When invoking the archetype build it ask you
                 about the maven groupId, artifactId and package name your GWT
-                application should use: <programlisting>
-                    Define value for groupId: : <emphasis>foo.bar</emphasis>
-                    Define value for artifactId: : <emphasis>gwt-app</emphasis>
-                    Define value for version:  1.0-SNAPSHOT: :
-                    Define value for package:  foo.bar: : <emphasis>foo.bar.ui</emphasis>
-                    Confirm properties configuration:
-                    groupId: foo.bar
-                    artifactId: gwt-app
-                    version: 1.0-SNAPSHOT
-                    package: foo.bar.ui
-                    Y: : <emphasis>Y</emphasis>
-                </programlisting> What will be created for you, is a maven build
+                application should use:
+                <programlisting>
+Define value for groupId: : <emphasis>foo.bar</emphasis>
+Define value for artifactId: : <emphasis>gwt-app</emphasis>
+Define value for version:  1.0-SNAPSHOT: :
+Define value for package:  foo.bar: : <emphasis>foo.bar.ui</emphasis>
+Confirm properties configuration:
+groupId: foo.bar
+artifactId: gwt-app
+version: 1.0-SNAPSHOT
+package: foo.bar.ui
+Y: : <emphasis>Y</emphasis>
+                </programlisting>
+                What will be created for you, is a maven build
                 structure, including references to the GWT SDK and the Errai
-                dependencies necessary to launch a simple application: <programlisting>
-                    Laika:test hbraun$ cd gwt-app/
-                    Laika:gwt-app hbraun$ lstree
-                    |-src
-                    |---main
-                    |-----java
-                    |-------foo
-                    |---------bar
-                    |-----------client
-                    |-----------server
-                    |-war
-                    |---WEB-INF
+                dependencies necessary to launch a simple application:
+                <programlisting>
+Laika:test hbraun$ cd gwt-app/
+Laika:gwt-app hbraun$ lstree
+|-src
+|---main
+|-----java
+|-------foo
+|---------bar
+|-----------client
+|-----------server
+|-war
+|---WEB-INF
                 </programlisting> In order launch the GWT hosted mode, change into
-                the project directory and type: <programlisting>
-                    mvn gwt:run
+                the project directory and type:
+                <programlisting>
+mvn gwt:run
                 </programlisting> The default project includes both a HelloWorld
                 client (GWT), and a HelloWorld service.</para>
         </section>
@@ -2232,21 +2283,21 @@ cp target/foobr-jboss6.war $JBOSS_HOME/server/default/deploy
                 The proxy is implemented a yet another servlet that you need to add to the web.xml
                 that's being sed in hosted mode:
                 <programlisting>
-                    &lt;servlet>
-                    &lt;servlet-name>erraiProxy&lt;/servlet-name>
-                    &lt;description>Errai Proxy&lt;/description>
-                    &lt;servlet-class>org.jboss.errai.tools.proxy.XmlHttpProxyServlet&lt;/servlet-class>
-                    &lt;init-param>
-                    &lt;param-name>config.name&lt;/param-name>
-                    &lt;param-value>errai-proxy.json&lt;/param-value>      (1)
-                    &lt;/init-param>
-                    &lt;load-on-startup>1&lt;/load-on-startup>
-                    &lt;/servlet>
+&lt;servlet>
+&lt;servlet-name>erraiProxy&lt;/servlet-name>
+&lt;description>Errai Proxy&lt;/description>
+&lt;servlet-class>org.jboss.errai.tools.proxy.XmlHttpProxyServlet&lt;/servlet-class>
+&lt;init-param>
+&lt;param-name>config.name&lt;/param-name>
+&lt;param-value>errai-proxy.json&lt;/param-value>      (1)
+&lt;/init-param>
+&lt;load-on-startup>1&lt;/load-on-startup>
+&lt;/servlet>
 
-                    &lt;servlet-mapping>
-                    &lt;servlet-name>erraiProxy&lt;/servlet-name>
-                    &lt;url-pattern>/app/proxy/*&lt;/url-pattern>                  (2)
-                    &lt;/servlet-mapping>
+&lt;servlet-mapping>
+&lt;servlet-name>erraiProxy&lt;/servlet-name>
+&lt;url-pattern>/app/proxy/*&lt;/url-pattern>                  (2)
+&lt;/servlet-mapping>
 
                 </programlisting>
                 <orderedlist>
@@ -2266,16 +2317,16 @@ cp target/foobr-jboss6.war $JBOSS_HOME/server/default/deploy
                 While the later shouldn't be changed (the bus bootstraps on this URL),
                 you need to change the proxy config according to your needs:
                 <programlisting>
-                    {"xhp": {
-                    "version": "1.1",
-                    "services": [
-                    {"id": "default",
-                    "url":"http://127.0.0.1:8080/my-gwt-app/in.erraiBus",
-                    "passthrough":true
-                    },
-                    ]
-                    }
-                    }
+{"xhp": {
+    "version": "1.1",
+    "services": [
+        {"id": "default",
+            "url":"http://127.0.0.1:8080/my-gwt-app/in.erraiBus",
+            "passthrough":true
+        },
+        ]
+    }
+}
                 </programlisting>
                 You would need to <emphasis>change the host, port and webcontext</emphasis> ('my-gwt-app' in this case)
                 to reflect the location of the external container. 'passthrough' simply means that any
