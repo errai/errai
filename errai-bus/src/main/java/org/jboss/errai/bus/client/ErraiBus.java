@@ -37,19 +37,20 @@ public class ErraiBus implements EntryPoint {
     public static MessageBus get() {
         return bus;
     }
+                                                                 
+    private static RequestDispatcher DISPATCHER_INST = new RequestDispatcher() {
+        public void dispatchGlobal(Message message) {
+            get().sendGlobal(message);
+        }
+
+        public void dispatch(Message message) {
+            get().send(message);
+        }
+    };
 
     public static RequestDispatcher getDispatcher() {
-        return new RequestDispatcher() {
-            public void dispatchGlobal(Message message) {
-                get().sendGlobal(message);
-            }
-
-            public void dispatch(Message message) {
-                get().send(message);
-            }
-        };
+        return DISPATCHER_INST;
     }
-
 
     public void onModuleLoad() {
     }

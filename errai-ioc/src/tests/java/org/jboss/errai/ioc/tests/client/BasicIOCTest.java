@@ -71,6 +71,5 @@ public class BasicIOCTest extends AbstractErraiTest {
                 finishTest();
             }
         });
-
     }
 }
