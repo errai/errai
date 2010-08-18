@@ -15,10 +15,13 @@
     </parent>
 
     <modules>
+        <module>asyncdemo</module>
         <module>clientservice</module>
         <module>helloworld</module>
         <module>queryservice</module>
         <module>serialization</module>
+        <module>rpcdemo</module>
+        <module>stockdemo</module>
     </modules>
 
     <dependencies>

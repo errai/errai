@@ -81,6 +81,16 @@
                 <exclude>pom.xml</exclude>
                 <exclude>**/*.iml</exclude>
                 <exclude>**/target/**</exclude>
+                <exclude>**/WEB-INF/lib/**</exclude>
+                <exclude>**/WEB-INF/classes/**</exclude>
+
+                <exclude>**/war/AsyncDemo/**</exclude>
+                <exclude>**/war/ClientService/**</exclude>
+                <exclude>**/war/HelloWorld/**</exclude>
+                <exclude>**/war/QueryService/**</exclude>
+                <exclude>**/war/RPCDemo/**</exclude>
+                <exclude>**/war/Serialization/**</exclude>
+                <exclude>**/war/StockDemo/**</exclude>
             </excludes>
         </fileSet>
 
