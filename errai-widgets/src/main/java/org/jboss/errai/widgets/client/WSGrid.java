@@ -100,6 +100,7 @@ public class WSGrid extends Composite implements RequiresResize {
         innerPanel.setSpacing(0);
 
         focusPanel = new FocusPanel(innerPanel);
+
         initWidget(focusPanel);
 
         titleBar = new WSAbstractGrid(false, GridType.TITLEBAR);
