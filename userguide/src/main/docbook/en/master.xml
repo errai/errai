@@ -1826,13 +1826,13 @@ mvn gwt:debug
     </chapter>
 
     <chapter id="cdi">
-        <title>CDI Integration</title>
+        <title>CDI Extension</title>
 
         <sect1>
-            <title>The CDI extension</title>
+            <title>Purpose</title>
 
             <para>
-                The CDI integration module offers seamless integration of CDI backend components
+                The CDI integration module offers seamless integration of <ulink url="http://seamframework.org/Weld">CDI backend components</ulink>
                 with GWT client applications. Build as an extension to the Errai core framework,
                 it allows you to transparently access CDI beans while harnessing the power of the core framework
             </para>
@@ -1994,7 +1994,7 @@ public class AccountService {
                 </sect3>
             </sect2>
         </sect1>
-
+    
         <sect1>
             <title>How to use the CDI integration</title>
             <para>
@@ -2112,7 +2112,27 @@ Laika:errai-&lt;VERSION> hbraun$ lstree
                     </para>
                 </sect3>
             </sect2>
+            <sect2>
+                <title>Configuration Options</title>
+                <sect3>
+                    <title>Service auto discovery</title>
+                    <para>
+                        Since the discovery of service implementations (beans) is delegated to the
+                        CDI container, we need to disable Errai's own service discovery mechanism.
+                        In order to do so, simply turn off the auto-discovery feature in
+                        <varname>ErraiService.properties</varname>:
+                        <programlisting>
+#
+# Disable service auto discovery
+# It's the CDI container responsibility
+#
+errai.auto_discover_services=false
+                        </programlisting>
+                    </para>
+                </sect3>
+            </sect2>
         </sect1>
+        
         <sect1>
             <title>Working with the Errai-CDI Archetype</title>
             <para>
@@ -2133,7 +2153,10 @@ mvn archetype:generate  \
  -DarchetypeArtifactId=cdi-archetype \
  -DarchetypeVersion=1.1-SNAPSHOT \
  -DarchetypeRepository=https://repository.jboss.org/nexus/content/groups/public/
+            </programlisting>
 
+            Customize the build properties according to your needs.
+                <programlisting>
 Define value for property 'groupId': : foo.bar
 Define value for property 'artifactId': : gwt-webapp
 Define value for property 'version': 1.0-SNAPSHOT:
@@ -2145,7 +2168,7 @@ version: 1.0-SNAPSHOT
 package: com.foo.bar
 Y:                 
             </programlisting>
-            Customize the build properties according to your needs.
+
 The archetype will be created in a directory that equals the artifactId.
             <programlisting>
 Laika:Desktop hbraun$ cd gwt-webapp/
@@ -2194,7 +2217,7 @@ cp target/foobr-jboss6.war $JBOSS_HOME/server/default/deploy
     <chapter id="quickstart">
         <title>Appendix A: Quickstart</title>
 
-        <section id="quickstart-intro">
+        <sect1 id="quickstart-intro">
             <title>Using the maven archetype</title>
 
             <para>If you have taken a look at the examples that ship with the
@@ -2214,7 +2237,14 @@ cp target/foobr-jboss6.war $JBOSS_HOME/server/default/deploy
                         <para>IDE setup is greatly simplfied, since most modern IDE's can
                             directly import the maven structure</para>
                     </listitem>
-                </itemizedlist> In order to get you going quickly, we've provided a
+                </itemizedlist>
+             </para>
+
+            <sect2>
+                <title>Create a Project Skeleton</title>
+
+                <para>
+                In order to get you going quickly, we've provided a
                 project archetype, that allows you to create a project skeleton similiar
                 to the one we use for building the examples. It's based on the maven
                 archetype plugin <footnote>
@@ -2241,6 +2271,11 @@ version: 1.0-SNAPSHOT
 package: foo.bar.ui
 Y: : <emphasis>Y</emphasis>
                 </programlisting>
+                </para>
+                    </sect2>
+            <sect2>
+                <title>Launching Hosted Mode</title>
+                <para>
                 What will be created for you, is a maven build
                 structure, including references to the GWT SDK and the Errai
                 dependencies necessary to launch a simple application:
@@ -2261,8 +2296,24 @@ Laika:gwt-app hbraun$ lstree
                 <programlisting>
 mvn gwt:run
                 </programlisting> The default project includes both a HelloWorld
-                client (GWT), and a HelloWorld service.</para>
-        </section>
+                client (GWT), and a HelloWorld service.
+                </para>
+            </sect2>
+
+             <sect2>
+                <title>Packaging and Deployment</title>
+
+            <para>
+                By default the archtype does <link linkend="runtimemodels">package the web application</link> for Hosted Mode execution
+                and other servlet environments. If you want to deploy your application to JBoss, you need
+                todo a clean rebuild using the JBoss profile (<varname>-Pjboss6</varname>).
+                <programlisting>
+mvn -Pjboss clean install
+cp target/foobar.war $JBOSS_HOME/server/default/deploy
+                </programlisting>
+            </para>
+            </sect2>
+        </sect1>
     </chapter>
 
     <chapter id="proxy">
