@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 public class LaundryListProviderFactory {
+
     private static final Object lock = new Object();
     private static volatile LaundryListProvider provider;
 
@@ -76,10 +77,11 @@ public class LaundryListProviderFactory {
 
     public static void setLaundryListProvider(LaundryListProvider p) {
         synchronized (lock) {
-            if (provider != null)
-                throw new IllegalStateException("can not modify the task manager once it's been initialized");
-
-            provider = p;
+            if (provider == null)
+            {
+                // Attempt to initialize the laundrylist provider twice. Will be ignored
+                provider = p;
+            }
         }
     }
 }

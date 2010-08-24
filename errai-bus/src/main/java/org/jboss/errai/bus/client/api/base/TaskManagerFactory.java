@@ -20,6 +20,7 @@ import org.jboss.errai.bus.client.api.TaskManager;
 import org.jboss.errai.bus.client.framework.TaskManagerProvider;
 
 public class TaskManagerFactory {
+    
     private static final Object lock = new Object();
     private static volatile TaskManagerProvider provider;
 
@@ -45,10 +46,11 @@ public class TaskManagerFactory {
 
     public static void setTaskManagerProvider(TaskManagerProvider p) {
         synchronized (lock) {
-            if (provider != null)
-                throw new IllegalStateException("can not modify the task manager once it's been initialized");
-
-            provider = p;
+            if (provider == null)
+            {
+                // Attempt to initialize the task manager twice. Will be ignored
+                provider = p;
+            }
         }
     }
 }

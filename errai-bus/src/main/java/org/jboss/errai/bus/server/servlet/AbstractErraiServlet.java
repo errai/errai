@@ -75,21 +75,28 @@ public abstract class AbstractErraiServlet extends HttpServlet {
 
     @Override
     public void init(ServletConfig config) throws ServletException {
-        // Build or lookup service
-        String jndiNameProperty = config.getInitParameter("jndiName");
-        service = jndiNameProperty != null ?
-                new JNDIServiceLocator(jndiNameProperty).locateService() : buildService();
+
+        if(config.getServletContext().getAttribute("errai")==null)
+        {
+            // Build or lookup service
+            String jndiNameProperty = config.getInitParameter("jndiName");
+            service = jndiNameProperty != null ?
+                    new JNDIServiceLocator(jndiNameProperty).locateService() : buildService();
+
+            contextClassLoader = Thread.currentThread().getContextClassLoader();
+
+            service.getConfiguration().getResourceProviders()
+                    .put("errai.experimental.classLoader", new ResourceProvider<ClassLoader>() {
+                        public ClassLoader get() {
+                            return contextClassLoader;
+                        }
+                    });
+
+            // store it in servlet context
+            config.getServletContext().setAttribute("errai", service);
+        }
 
         sessionProvider = service.getSessionProvider();
-
-        contextClassLoader = Thread.currentThread().getContextClassLoader();
-
-        service.getConfiguration().getResourceProviders()
-                .put("errai.experimental.classLoader", new ResourceProvider<ClassLoader>() {
-                    public ClassLoader get() {
-                        return contextClassLoader;
-                    }
-                });
     }
 
     protected ErraiService<HttpSession> buildService() {
