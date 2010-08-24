@@ -195,7 +195,10 @@ public class PooledExecutorService implements TaskProvider {
      * @throws InterruptedException thrown if the thread waiting on a ready task is interrupted.
      */
     public TimedTask getNextTask() throws InterruptedException {
-        return queue.poll(1, java.util.concurrent.TimeUnit.SECONDS);
+        if(queue!=null)
+            return queue.poll(1, java.util.concurrent.TimeUnit.SECONDS);
+        else
+            return null; // It's yet unclear how this happens. See https://jira.jboss.org/browse/ERRAI-104
     }
 
     private static class SingleFireTask extends TimedTask {
