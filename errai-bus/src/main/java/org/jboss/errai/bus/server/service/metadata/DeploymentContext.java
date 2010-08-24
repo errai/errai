@@ -15,7 +15,8 @@
  */
 package org.jboss.errai.bus.server.service.metadata;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -39,7 +40,7 @@ public class DeploymentContext {
     private Set<String> processedUrls = new HashSet<String>();
     private Set<File> createdTmpFiles = new HashSet<File>();
 
-    private Logger log = Logger.getLogger(DeploymentContext.class);
+    private Logger log = LoggerFactory.getLogger(DeploymentContext.class);
 
     public DeploymentContext(List<URL> configUrls) {
         this.configUrls = configUrls;
