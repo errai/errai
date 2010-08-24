@@ -78,7 +78,8 @@ public abstract class AbstractErraiServlet extends HttpServlet {
     public void init(ServletConfig config) throws ServletException {
 
         final ServletContext context = config.getServletContext();
-        if(context.getAttribute("errai")==null)
+        service = (ErraiService)context.getAttribute("errai");
+        if(null==service)
         {
             synchronized (context)
             {
