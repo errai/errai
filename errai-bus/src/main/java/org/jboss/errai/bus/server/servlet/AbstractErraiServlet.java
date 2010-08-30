@@ -93,7 +93,7 @@ public abstract class AbstractErraiServlet extends HttpServlet {
                 service.getConfiguration().getResourceProviders()
                         .put("errai.experimental.classLoader", new ResourceProvider<ClassLoader>() {
                             public ClassLoader get() {
-                                return contextClassLoader;
+                                 return contextClassLoader;
                             }
                         });
 
@@ -105,20 +105,19 @@ public abstract class AbstractErraiServlet extends HttpServlet {
         sessionProvider = service.getSessionProvider();
     }
 
+    @SuppressWarnings({"unchecked"})    
     protected ErraiService<HttpSession> buildService() {
-        return Guice.createInjector(new AbstractModule() {
+        return (ErraiService<HttpSession>) Guice.createInjector(new AbstractModule() {
             @SuppressWarnings({"unchecked"})
             public void configure() {
                 bind(MessageBus.class).to(ServerMessageBusImpl.class);
                 bind(ServerMessageBus.class).to(ServerMessageBusImpl.class);
-                bind(new TypeLiteral<ErraiService<HttpSession>>() {
-                }).to(new TypeLiteral<ErraiServiceImpl<HttpSession>>() {
-                });
-
                 bind(ErraiServiceConfigurator.class).to(ErraiServiceConfiguratorImpl.class);
+              //  bind(new TypeLiteral<ErraiService<HttpSession>>() {}).to(new TypeLiteral<ErraiServiceImpl<HttpSession>>() {});
+                bind(ErraiService.class).to(ErraiServiceImpl.class);
+
             }
-        }).getInstance(new Key<ErraiService<HttpSession>>() {
-        });
+        }).getInstance(ErraiService.class);
     }
 
 

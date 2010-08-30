@@ -81,8 +81,8 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
     protected StringBuffer buf = new StringBuffer();
 
     /* First is true if the <tt>buf</tt> is empty */
-    protected boolean first = true;
-    protected boolean ended = false;
+    protected volatile boolean first = true;
+    protected volatile boolean ended = false;
 
 
     public static final MessageProvider PROVIDER = new MessageProvider() {
@@ -453,7 +453,7 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
      * @return an encoded string of the buffer
      */
     public String getEncoded() {
-        _end();
+        if (!ended) _end();
         return buf.toString();
     }
 
@@ -479,9 +479,11 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
      * Appends the closing brace to the end of the buffer denoting the end of the message
      */
     protected void _end() {
-        if (!ended) {
-            ended = true;
-            buf.append("}");
+        synchronized (this) {
+            if (!ended) {
+                ended = true;
+                buf.append("}");
+            }
         }
     }
 

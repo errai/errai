@@ -143,7 +143,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 URL.encode(endpoint)
         );
 
-        builder.setHeader("Connection", "Keep-Alive");
+     //   builder.setHeader("Connection", "Keep-Alive");
         builder.setHeader("Content-Type", "application/json");
         builder.setHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER, clientId);
 
@@ -158,7 +158,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 URL.encode(endpoint)
         );
 
-        builder.setHeader("Connection", "Keep-Alive");
+     //   builder.setHeader("Connection", "Keep-Alive");
         builder.setHeader("Content-Type", "application/json");
         builder.setHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER, clientId);
 
@@ -551,8 +551,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      * @param callback - callback function used for to send the initial message to connect to the queue.
      */
     public void init(final HookCallback callback) {
-
-
         if (sendBuilder == null) {
             proxySettings = new ProxySettings();
 
@@ -573,7 +571,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                         }
 
                         public void onError(Request request, Throwable exception) {
-                            throw new RuntimeException("Bootstrap failed", exception);
+                            throw new RuntimeException("Client bootstrap failed", exception);
                         }
                     });
                 }

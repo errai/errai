@@ -64,7 +64,8 @@ public class OrderedBootstrap implements BootstrapExecution {
 
         }
         catch (Exception e) {
-            throw new RuntimeException("Bootstrap failed", e);
+            e.printStackTrace();
+            throw new RuntimeException("Server bootstrap failed", e);
         }
     }
 }

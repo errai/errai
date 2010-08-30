@@ -21,6 +21,7 @@ import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.server.api.*;
 import org.jboss.errai.bus.server.async.TimedTask;
 import org.jboss.errai.bus.server.io.JSONStreamEncoder;
+import org.mvel2.util.StringAppender;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -69,6 +70,28 @@ public class MessageQueueImpl implements MessageQueue {
     private final Semaphore lock = new Semaphore(1, true);
     private volatile boolean initLock = true;
     private final Object activationLock = new Object();
+
+
+    public static class OutputStreamCapture extends OutputStream {
+        private OutputStream wrap;
+        private StringAppender buf = new StringAppender();
+
+
+        public OutputStreamCapture(OutputStream wrap) {
+            this.wrap = wrap;
+        }
+
+        @Override
+        public void write(int b) throws IOException {
+            buf.append((char) b);
+            wrap.write(b);
+        }
+
+        @Override
+        public String toString() {
+            return buf.toString();
+        }
+    }
 
     /**
      * Initializes the message queue with an initial size and a specified bus
@@ -126,9 +149,7 @@ public class MessageQueueImpl implements MessageQueue {
                     while (!queue.isEmpty() && payLoadSize < MAXIMUM_PAYLOAD_SIZE
                             && !isWindowExceeded()) {
                         outstream.write(',');
-                        m = queue.poll();
-
-                        if (m instanceof HasEncoded) {
+                        if ((m = queue.poll()) instanceof HasEncoded) {
                             outstream.write(((HasEncoded) m).getEncoded().getBytes());
                         } else {
                             JSONStreamEncoder.encode(m.getParts(), outstream);
@@ -165,8 +186,6 @@ public class MessageQueueImpl implements MessageQueue {
                 if (m == null) outstream.write(heartBeatBytes);
 
                 outstream.write(']');
-
-
                 return;
 
             }
@@ -257,7 +276,6 @@ public class MessageQueueImpl implements MessageQueue {
 
     private void checkSession() {
         if (sessionControl != null && !sessionControl.isSessionValid()) {
-            System.out.println("SessionExpired");
             throw new MessageQueueExpired("session has expired");
         }
     }
