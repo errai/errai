@@ -97,6 +97,13 @@ public abstract class AbstractErraiServlet extends HttpServlet {
                             }
                         });
 
+                service.getConfiguration().getResourceProviders()
+                        .put("errai.experimental.servletContext", new ResourceProvider<ServletContext>() {
+                            public ServletContext get() {
+                                return context;
+                            }
+                        });
+
                 // store it in servlet context
                 config.getServletContext().setAttribute("errai", service);
             }
