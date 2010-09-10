@@ -554,7 +554,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         if (sendBuilder == null) {
             proxySettings = new ProxySettings();
 
-            if (GWT.isScript()) {
+            if (!GWT.isScript()) {   // Hosted Mode
 
                 RequestBuilder bootstrap = new RequestBuilder(RequestBuilder.GET, proxySettings.url);
                 try {
