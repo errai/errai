@@ -1,9 +1,6 @@
 package org.jboss.errai.common.client.types;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -40,6 +37,48 @@ public class DecodingContext {
 
     public Map<String, Object> getObjects() {
         return objects;
+    }
+
+    public boolean hasUnsatisfiedDependency(Object o) {
+        return unsatisfiedDependencies != null && (o instanceof Map ? __lookup((Map) o) : unsatisfiedDependencies.containsKey(o));
+    }
+
+    private boolean __lookup(Map o) {
+        for (Object o1 : unsatisfiedDependencies.keySet()) {
+            if (o == o1) return true;
+        }
+        return false;
+    }
+
+    public void swapDepReference(Object oldRef, Object newRef) {
+        List<UnsatisfiedForwardLookup> list;
+        if (oldRef instanceof Map) {
+            list = __get((Map) oldRef);
+            __remove((Map) oldRef);
+        }
+        else {
+           list =  unsatisfiedDependencies.remove(oldRef);
+        }
+
+        unsatisfiedDependencies.put(newRef, list);
+    }
+
+    private List<UnsatisfiedForwardLookup> __get(Map o) {
+        for (Map.Entry<Object, List<UnsatisfiedForwardLookup>> entry : unsatisfiedDependencies.entrySet()) {
+            if (entry.getKey() == o) return entry.getValue();
+        }
+        return null;
+    }
+
+    private void __remove(Map o) {
+        Iterator<Object> iter = unsatisfiedDependencies.keySet().iterator();
+        while (iter.hasNext()) {
+            if (iter.next() == o) {
+                iter.remove();
+                return;
+            }
+        }
+        return;
     }
 
     public Map<Object, List<UnsatisfiedForwardLookup>> getUnsatisfiedDependencies() {

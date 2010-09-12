@@ -68,6 +68,7 @@ public class User {
         user.groups = new ArrayList<Group>();
 
         Group adminGroup = new Group();
+        adminGroup.setSubGroup(adminGroup);
         adminGroup.setGroupId(1);
         adminGroup.setName("Admin");
         adminGroup.setUsersInGroup(new ArrayList<User>());

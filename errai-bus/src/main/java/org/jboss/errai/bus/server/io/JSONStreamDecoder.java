@@ -115,6 +115,7 @@ public class JSONStreamDecoder {
                         UnsatisfiedForwardLookup ufl = (UnsatisfiedForwardLookup) ctx.getValue();
                         decodingContext.addUnsatisfiedDependency(collection, ufl);
                         ctx.removeValue();
+                        ufl.setPath((String) ctx.getValue());
                     }
                     break;
 

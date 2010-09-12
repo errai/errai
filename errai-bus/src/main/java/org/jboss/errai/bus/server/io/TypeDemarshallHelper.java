@@ -69,10 +69,8 @@ public class TypeDemarshallHelper {
                     newList.add(demarshallAll(o2, ctx));
                 }
 
-                if (ctx.getUnsatisfiedDependencies().containsKey(o)) {
-                    for (UnsatisfiedForwardLookup l : ctx.getUnsatisfiedDependencies().remove(o)) {
-                        ctx.addUnsatisfiedDependency(newList, l);
-                    }
+                if (ctx.hasUnsatisfiedDependency(o)) {
+                    ctx.swapDepReference(o, newList);
                 }
 
                 return newList;
@@ -101,6 +99,10 @@ public class TypeDemarshallHelper {
 
                     Object newInstance = clazz.newInstance();
                     ctx.putObject(objId, newInstance);
+
+                    if (ctx.hasUnsatisfiedDependency(o)) {
+                        ctx.swapDepReference(o, newInstance);
+                    }
 
                     Map<String, Serializable> s = MVELDencodingCache.get(clazz);
 

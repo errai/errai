@@ -12,6 +12,8 @@ public class Group {
     private int groupId;
     private String name;
     private List<User> usersInGroup;
+    private Group subGroup;
+
 
     public int getGroupId() {
         return groupId;
@@ -35,6 +37,14 @@ public class Group {
 
     public void setUsersInGroup(List<User> usersInGroup) {
         this.usersInGroup = usersInGroup;
+    }
+
+    public Group getSubGroup() {
+        return subGroup;
+    }
+
+    public void setSubGroup(Group subGroup) {
+        this.subGroup = subGroup;
     }
 
     @Override
