@@ -126,9 +126,6 @@ public class JSONStreamDecoder {
                         try {
                             return demarshallAll(ctx.record(collection), decodingContext);
                         }
-                        catch (UnsatisfiedForwardLookup e) {
-                            return e;
-                        }
                         catch (Exception e) {
                             throw new RuntimeException("Could not demarshall object", e);
                         }
@@ -342,8 +339,7 @@ public class JSONStreamDecoder {
         private Object getValue() {
             if (rhs != null) {
                 return rhs;
-            }
-            else {
+            } else {
                 return lhs;
             }
         }
@@ -351,8 +347,7 @@ public class JSONStreamDecoder {
         private void removeValue() {
             if (rhs != null) {
                 rhs = null;
-            }
-            else {
+            } else {
                 lhs = null;
             }
         }

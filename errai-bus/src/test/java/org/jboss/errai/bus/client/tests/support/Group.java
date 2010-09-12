@@ -3,6 +3,7 @@ package org.jboss.errai.bus.client.tests.support;
 import org.jboss.errai.bus.server.annotations.ExposeEntity;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -13,7 +14,7 @@ public class Group {
     private String name;
     private List<User> usersInGroup;
     private Group subGroup;
-
+    private Map<Group, User> groupUserMap;
 
     public int getGroupId() {
         return groupId;
@@ -45,6 +46,14 @@ public class Group {
 
     public void setSubGroup(Group subGroup) {
         this.subGroup = subGroup;
+    }
+
+    public Map<Group, User> getGroupUserMap() {
+        return groupUserMap;
+    }
+
+    public void setGroupUserMap(Map<Group, User> groupUserMap) {
+        this.groupUserMap = groupUserMap;
     }
 
     @Override

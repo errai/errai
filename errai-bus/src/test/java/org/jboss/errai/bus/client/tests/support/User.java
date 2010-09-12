@@ -3,7 +3,9 @@ package org.jboss.errai.bus.client.tests.support;
 import org.jboss.errai.bus.server.annotations.ExposeEntity;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -75,6 +77,11 @@ public class User {
 
         user.groups.add(adminGroup);
         adminGroup.getUsersInGroup().add(user);
+
+        Map<Group, User> groupUser = new HashMap<Group, User>();
+        groupUser.put(adminGroup, user);
+
+        adminGroup.setGroupUserMap(groupUser);
 
         return user;
     }

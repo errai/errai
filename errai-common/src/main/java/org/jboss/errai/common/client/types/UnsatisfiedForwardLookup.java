@@ -3,7 +3,7 @@ package org.jboss.errai.common.client.types;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public final class UnsatisfiedForwardLookup extends RuntimeException {
+public final class UnsatisfiedForwardLookup {
     private final String id;
     private String path;
 

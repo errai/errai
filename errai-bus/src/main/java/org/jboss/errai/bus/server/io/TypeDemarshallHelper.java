@@ -88,7 +88,7 @@ public class TypeDemarshallHelper {
                         if (ctx.hasObject(objId)) {
                             return ctx.getObject(objId);
                         } else if (ref) {
-                            throw new UnsatisfiedForwardLookup(objId);
+                            return new UnsatisfiedForwardLookup(objId);
                         }
                     }
 
@@ -121,17 +121,19 @@ public class TypeDemarshallHelper {
                         }
                     }
 
+                    Object v;
                     for (Map.Entry<?, ?> entry : oMap.entrySet()) {
                         if (SerializationParts.ENCODED_TYPE.equals(entry.getKey()) || SerializationParts.OBJECT_ID.equals(entry.getKey()))
                             continue;
                         final Serializable cachedSetExpr = s.get(entry.getKey());
                         if (cachedSetExpr != null) {
                             try {
-                                MVEL.executeSetExpression(cachedSetExpr, newInstance, demarshallAll(entry.getValue(), ctx));
-                            }
-                            catch (UnsatisfiedForwardLookup e) {
-                                e.setPath((String) entry.getKey());
-                                ctx.addUnsatisfiedDependency(newInstance, e);
+                                if ((v = demarshallAll(entry.getValue(), ctx)) instanceof UnsatisfiedForwardLookup) {
+                                    ((UnsatisfiedForwardLookup) v).setPath((String) entry.getKey());
+                                    ctx.addUnsatisfiedDependency(newInstance, (UnsatisfiedForwardLookup) v);
+                                } else {
+                                    MVEL.executeSetExpression(cachedSetExpr, newInstance, v);
+                                }
                             }
                             catch (Exception e) {
                                 e.printStackTrace();
@@ -139,11 +141,12 @@ public class TypeDemarshallHelper {
                             }
                         } else {
                             try {
-                                MVEL.setProperty(newInstance, String.valueOf(entry.getKey()), demarshallAll(entry.getValue(), ctx));
-                            }
-                            catch (UnsatisfiedForwardLookup e) {
-                                e.setPath((String) entry.getKey());
-                                ctx.addUnsatisfiedDependency(newInstance, e);
+                                if ((v = demarshallAll(entry.getValue(), ctx)) instanceof UnsatisfiedForwardLookup) {
+                                    ((UnsatisfiedForwardLookup) v).setPath((String) entry.getKey());
+                                    ctx.addUnsatisfiedDependency(newInstance, (UnsatisfiedForwardLookup) v);
+                                } else {
+                                    MVEL.setProperty(newInstance, String.valueOf(entry.getKey()), v);
+                                }
                             }
                             catch (Exception e) {
                                 e.printStackTrace();
@@ -158,30 +161,36 @@ public class TypeDemarshallHelper {
             }
             return o;
         }
-        catch (UnsatisfiedForwardLookup e) {
-            throw e;
-        }
         catch (Exception e) {
             throw new RuntimeException("error demarshalling encoded object:\n" + o, e);
         }
     }
 
+    @SuppressWarnings({"unchecked"})
     public static void resolveDependencies(DecodingContext ctx) {
         for (Map.Entry<Object, List<UnsatisfiedForwardLookup>> entry : ctx.getUnsatisfiedDependencies().entrySet()) {
-            for (UnsatisfiedForwardLookup dep : entry.getValue()) {
-                if (!ctx.hasObject(dep.getId()))
-                    throw new RuntimeException("cannot satisfy dependency in object graph (bug?):" + dep.getId());
+            Iterator<UnsatisfiedForwardLookup> iter = entry.getValue().iterator();
 
-                if (entry.getKey() instanceof Collection) {
-                    ((Collection) entry.getKey()).add(ctx.getObject(dep.getId()));
-                } else {
-                    if (dep.getPath() == null) {
-                        throw new RuntimeException("cannot satisfy dependency in object graph (path unresolvable):" + dep.getId());
+            if (entry.getKey() instanceof Collection) {
+                while (iter.hasNext()) {
+                    ((Collection<Object>) entry.getKey()).add(ctx.getObject(iter.next().getId()));
+                }
+            } else if (entry.getKey() instanceof Map && !((Map) entry.getKey()).containsKey(SerializationParts.ENCODED_TYPE)) {
+                while (iter.hasNext()) {
+                    ((Map<Object, Object>) entry.getKey()).put(ctx.getObject(iter.next().getId()), ctx.getObject(iter.next().getId()));
+                }
+            } else {
+                UnsatisfiedForwardLookup ufl;
+                while (iter.hasNext()) {
+                    if ((ufl = iter.next()).getPath() == null) {
+                        throw new RuntimeException("cannot satisfy dependency in object graph (path unresolvable):" + ufl.getId());
+                    } else {
+                        MVEL.setProperty(entry.getKey(), ufl.getPath(), ctx.getObject(ufl.getId()));
+
                     }
-                    MVEL.setProperty(entry.getKey(), dep.getPath(), ctx.getObject(dep.getId()));
+
                 }
             }
         }
-
     }
 }

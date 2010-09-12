@@ -99,11 +99,11 @@ public class JSONEncoderCli {
                 mapBuild.append(_encode(entry.getKey(), ctx))
                         .append(":").append(val);
 
-                if (marshall != null) {
-                    if (marshalledTypes == null) marshalledTypes = new HashMap<String, String>();
-                    marshalledTypes.put((String) entry.getKey(), marshall);
-                    marshall = null;
-                }
+//                if (marshall != null) {
+//                    if (marshalledTypes == null) marshalledTypes = new HashMap<String, String>();
+//                    marshalledTypes.put((String) entry.getKey(), marshall);
+//                    marshall = null;
+//                }
 
                 first = false;
             } else {
