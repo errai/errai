@@ -25,8 +25,10 @@ import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.common.client.json.JSONDecoderCli;
 import org.jboss.errai.common.client.json.JSONEncoderCli;
+import org.jboss.errai.common.client.types.EncodingContext;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 public class JSONUtilCli {
@@ -84,6 +86,6 @@ public class JSONUtilCli {
     }
 
     public static String encodeMap(Map<String, Object> map) {
-        return new JSONEncoderCli().encode(map);
+        return new JSONEncoderCli().encode(map, new EncodingContext());
     }
 }

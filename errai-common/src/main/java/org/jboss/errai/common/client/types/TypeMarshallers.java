@@ -25,25 +25,25 @@ public class TypeMarshallers {
 
     static {
         addMarshaller(java.sql.Date.class, new Marshaller<java.sql.Date>() {
-            public String marshall(java.sql.Date object) {
+            public String marshall(java.sql.Date object, EncodingContext ctx) {
                 return String.valueOf(object.getTime());
             }
         });
 
         addMarshaller(java.util.Date.class, new Marshaller<java.util.Date>() {
-            public String marshall(java.util.Date object) {
+            public String marshall(java.util.Date object, EncodingContext ctx) {
                 return String.valueOf(object.getTime());
             }
         });
 
         addMarshaller(Byte.class, new Marshaller<Byte>() {
-            public String marshall(Byte object) {
+            public String marshall(Byte object, EncodingContext ctx) {
                 return String.valueOf(object.intValue());
             }
         });
         
         addMarshaller(Character.class, new Marshaller<Character>() {
-            public String marshall(Character object) {
+            public String marshall(Character object, EncodingContext ctx) {
                 return "\"" + String.valueOf(object.charValue()) + "\"";
             }
         });

@@ -23,7 +23,7 @@ import java.util.Map;
 
 import static java.lang.Character.isDigit;
 import static java.lang.Character.isJavaIdentifierPart;
-import static org.jboss.errai.bus.server.io.TypeDemarshallHelper._demarshallAll;
+import static org.jboss.errai.bus.server.io.TypeDemarshallHelper.demarshallAll;
 import static org.jboss.errai.common.client.protocols.SerializationParts.ENCODED_TYPE;
 import static org.mvel2.util.ParseTools.handleStringEscapes;
 import static org.mvel2.util.ParseTools.subArray;
@@ -35,6 +35,8 @@ public class JSONDecoder {
     private final char[] json;
     private final int length;
     private int cursor;
+    private Map<String, Object> objects = new HashMap<String, Object>();
+
 
     public static Object decode(String json) {
         return new JSONDecoder(json).parse();
@@ -90,7 +92,7 @@ public class JSONDecoder {
                     if (map && ctx.encodedType) {
                         ctx.encodedType = false;
                         try {
-                            return _demarshallAll(ctx.record(collection));
+                            return demarshallAll(ctx.record(collection), objects);
                         }
                         catch (Exception e) {
                             throw new RuntimeException("Could not demarshall object", e);

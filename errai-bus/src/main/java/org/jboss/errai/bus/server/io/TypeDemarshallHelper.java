@@ -16,7 +16,6 @@
 
 package org.jboss.errai.bus.server.io;
 
-import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.mvel2.ConversionHandler;
 import org.mvel2.MVEL;
@@ -53,39 +52,47 @@ public class TypeDemarshallHelper {
         });
     }
 
-    public static void demarshallAll(String object, Message command) {
-        try {
-            for (String t : object.split(",")) {
-                command.set(t, _demarshallAll(command.get(Object.class, t)));
-            }
-        }
-        catch (Exception e) {
-            throw new RuntimeException("could not demarshall types for message parts:" + object, e);
-        }
-    }
-
     private static final Map<Class, Map<String, Serializable>> MVELDencodingCache = new ConcurrentHashMap<Class, Map<String, Serializable>>();
 
-    public static Object _demarshallAll(Object o) throws Exception {
+
+    public static Object demarshallAll(Object o, Map<String, Object> encoded) throws Exception {
         try {
             if (o instanceof String) {
                 return o;
 
             } else if (o instanceof Collection) {
                 ArrayList newList = new ArrayList(((Collection) o).size());
+                Object dec;
                 for (Object o2 : ((Collection) o)) {
-                    newList.add(_demarshallAll(o2));
+                    newList.add(demarshallAll(o2, encoded));
                 }
                 return newList;
             } else if (o instanceof Map) {
                 Map<?, ?> oMap = (Map) o;
                 if (oMap.containsKey(SerializationParts.ENCODED_TYPE)) {
+                    String objId = (String) oMap.get(SerializationParts.OBJECT_ID);
+                    boolean ref = false;
+                    if (objId != null) {
+                        if (objId.charAt(0) == '$') {
+                            ref = true;
+                            objId = objId.substring(1);
+                        }
+
+                        if (encoded.containsKey(objId)) {
+                            return encoded.get(objId);
+                        }
+                        else if (ref) {
+                            return new UnsatisfiedForwardLookup(objId);
+                        }
+                    }
+
                     Class clazz = Thread.currentThread().getContextClassLoader().loadClass((String) oMap.get(SerializationParts.ENCODED_TYPE));
                     if (clazz.isEnum()) {
                         return Enum.valueOf(clazz, (String) oMap.get("EnumStringValue"));
                     }
 
                     Object newInstance = clazz.newInstance();
+                    encoded.put(objId, newInstance);
 
                     Map<String, Serializable> s = MVELDencodingCache.get(clazz);
 
@@ -95,7 +102,8 @@ public class TypeDemarshallHelper {
                             if (s == null) {
                                 s = new HashMap<String, Serializable>();
                                 for (String key : (Set<String>) oMap.keySet()) {
-                                    if (SerializationParts.ENCODED_TYPE.equals(key)) continue;
+                                    if (SerializationParts.ENCODED_TYPE.equals(key) || SerializationParts.OBJECT_ID.equals(key))
+                                        continue;
                                     s.put(key, MVEL.compileSetExpression(key));
                                 }
                             }
@@ -104,11 +112,12 @@ public class TypeDemarshallHelper {
                     }
 
                     for (Map.Entry<?, ?> entry : oMap.entrySet()) {
-                        if (SerializationParts.ENCODED_TYPE.equals(entry.getKey())) continue;
+                        if (SerializationParts.ENCODED_TYPE.equals(entry.getKey()) || SerializationParts.OBJECT_ID.equals(entry.getKey()))
+                            continue;
                         final Serializable cachedSetExpr = s.get(entry.getKey());
                         if (cachedSetExpr != null) {
                             try {
-                                MVEL.executeSetExpression(cachedSetExpr, newInstance, _demarshallAll(entry.getValue()));
+                                MVEL.executeSetExpression(cachedSetExpr, newInstance, demarshallAll(entry.getValue(), encoded));
                             }
                             catch (Exception e) {
                                 e.printStackTrace();
@@ -116,7 +125,7 @@ public class TypeDemarshallHelper {
                             }
                         } else {
                             try {
-                                MVEL.setProperty(newInstance, String.valueOf(entry.getKey()), _demarshallAll(entry.getValue()));
+                                MVEL.setProperty(newInstance, String.valueOf(entry.getKey()), demarshallAll(entry.getValue(), encoded));
                             }
                             catch (Exception e) {
                                 e.printStackTrace();
@@ -124,6 +133,8 @@ public class TypeDemarshallHelper {
                             }
                         }
                     }
+
+
 
                     return newInstance;
                 }

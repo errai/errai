@@ -66,7 +66,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     /* Map of subjects to subscriptions  */
     private Map<String, List<Object>> subscriptions;
 
-    private Set<String> remote;
+    private Map<String, MessageCallback> remotes;
 
     /* Outgoing queue of messages to be transmitted */
     // private final Queue<Message> outgoingQueue = new LinkedList<Message>();
@@ -340,8 +340,16 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
 
     private void directStore(final Message message) {
-        _store(message.getSubject(), message instanceof HasEncoded
+        String subject = message.getSubject();
+        Object v = (message instanceof HasEncoded
                 ? ((HasEncoded) message).getEncoded() : encodeMap(message.getParts()));
+
+        if (remotes.containsKey(subject)) {
+            remotes.get(subject).callback(message);
+        }
+        else {
+            _store(subject, v);
+        }
     }
 
 
@@ -433,6 +441,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      * @param txMessage - Message reference.
      */
     private void transmitRemote(final String message, final Message txMessage) {
+        System.out.println("TX_REMOTE:" + message);
+
         if (message == null) return;
 
         try {
@@ -505,6 +515,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             }
         }
 
+        this.remotes.clear();
+
         MessageBuilder.createMessage()
                 .toSubject("ClientBus")
                 .command(BusCommands.RemoteMonitorAttach)
@@ -536,13 +548,15 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         onSubscribeHooks = new ArrayList<SubscribeListener>();
         onUnsubscribeHooks = new ArrayList<UnsubscribeListener>();
         subscriptions = new HashMap<String, List<Object>>();
-        remote = new HashSet<String>();
+        remotes = new HashMap<String, MessageCallback>();
         deferredMessages = new ArrayList<Message>();
 
     }
 
 
     public final MessageCallback REMOTE_CALLBACK = new RemoteMessageCallback();
+
+
 
     /**
      * Initializes the message bus, by subscribing to the ClientBus (to receive subscription messages) and the
@@ -593,13 +607,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                     case RemoteSubscribe:
                         if (message.hasPart("SubjectsList")) {
                             for (String subject : (List<String>) message.get(List.class, "SubjectsList")) {
-                                subscribe(subject, REMOTE_CALLBACK);
-                                remote.add(subject);
+                                remoteSubscribe(subject);
                             }
                         } else {
                             String subject = message.get(String.class, Subject);
-                            subscribe(subject, REMOTE_CALLBACK);
-                            remote.add(subject);
+                            remoteSubscribe(subject);
+
                         }
                         break;
 
@@ -630,7 +643,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                         List<String> subjects = new ArrayList<String>();
                         for (String s : subscriptions.keySet()) {
                             if (s.startsWith("local:")) continue;
-                            if (!remote.contains(s)) subjects.add(s);
+                            if (!remotes.containsKey(s)) subjects.add(s);
                         }
 
                         directSubscribe("ServerBus", REMOTE_CALLBACK);
@@ -656,7 +669,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
                         addSubscribeListener(new SubscribeListener() {
                             public void onSubscribe(SubscriptionEvent event) {
-                                if (event.getSubject().startsWith("local:") || remote.contains(event.getSubject())) {
+                                if (event.getSubject().startsWith("local:") || remotes.containsKey(event.getSubject())) {
                                     return;
                                 }
 
@@ -725,6 +738,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         if (!sendInitialMessage(callback)) {
             logError("Could not connect to remote bus", "", null);
         }
+    }
+
+    private void remoteSubscribe(String subject) {
+        remotes.put(subject, REMOTE_CALLBACK);
+        addSubscription(subject, REMOTE_CALLBACK);
     }
 
     private void sendAllDeferred() {

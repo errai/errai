@@ -16,6 +16,8 @@
 
 package org.jboss.errai.common.client.json;
 
+import org.jboss.errai.common.client.protocols.SerializationParts;
+import org.jboss.errai.common.client.types.EncodingContext;
 import org.jboss.errai.common.client.types.Marshaller;
 import org.jboss.errai.common.client.types.TypeMarshallers;
 
@@ -25,6 +27,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import static org.jboss.errai.common.client.types.TypeMarshallers.getMarshaller;
+import static org.jboss.errai.common.client.types.TypeMarshallers.hasMarshaller;
 
 public class JSONEncoderCli {
     boolean defer;
@@ -32,12 +35,12 @@ public class JSONEncoderCli {
     String marshall;
     private Map<String, String> marshalledTypes;
 
-    public String encode(Object v) {
-        return _encode(v);
+    public String encode(Object v, EncodingContext ctx) {
+        return _encode(v, ctx);
     }
 
     @SuppressWarnings({"unchecked"})
-    public String _encode(Object v) {
+    public String _encode(Object v, EncodingContext ctx) {
         if (v == null) {
             return "null";
         } else if (v instanceof String) {
@@ -46,33 +49,43 @@ public class JSONEncoderCli {
         } else if (v instanceof Number || v instanceof Boolean) {
             return String.valueOf(v);
         } else if (v instanceof Collection) {
-            return encodeCollection((Collection) v);
+            return encodeCollection((Collection) v, ctx);
         } else if (v instanceof Map) {
-            return encodeMap((Map<Object, Object>) v);
+            return encodeMap((Map<Object, Object>) v, ctx);
         } else if (v instanceof Object[]) {
-            return encodeArray((Object[]) v);
+            return encodeArray((Object[]) v, ctx);
         } else if (v.getClass().isArray()) {
             if (v instanceof char[]) {
-                return encodeArray((char[]) v);
+                return encodeArray((char[]) v, ctx);
             } else if (v instanceof int[]) {
-                return encodeArray((int[]) v);
+                return encodeArray((int[]) v, ctx);
             } else if (v instanceof double[]) {
-                return encodeArray((double[]) v);
+                return encodeArray((double[]) v, ctx);
             } else if (v instanceof long[]) {
-                return encodeArray((long[]) v);
+                return encodeArray((long[]) v, ctx);
             } else if (v instanceof boolean[]) {
-                return encodeArray((boolean[]) v);
+                return encodeArray((boolean[]) v, ctx);
             } else if (v instanceof byte[]) {
-                return encodeArray((byte[]) v);
+                return encodeArray((byte[]) v, ctx);
             } else if (v instanceof short[]) {
-                return encodeArray((short[]) v);
+                return encodeArray((short[]) v, ctx);
             } else if (v instanceof float[]) {
-                return encodeArray((float[]) v);
+                return encodeArray((float[]) v, ctx);
             }
             return null;
-        } else if (TypeMarshallers.hasMarshaller(v.getClass().getName())) {
+        } else if (hasMarshaller(v.getClass().getName())) {
+//            if (ctx.isEncoded(v)) {
+//                return "{" + SerializationParts.ENCODED_TYPE + ": \"" + v.getClass().getName() + "\"" + ", " + SerializationParts.OBJECT_ID + ": \"" + ctx.markRef(v) + "\"}";
+//            }
+
             Marshaller<Object> m = getMarshaller(marshall = v.getClass().getName());
-            return m.marshall(v);
+            String enc = m.marshall(v, ctx);
+
+//            ctx.markEncoded(v);
+
+            System.out.println("EncodedZZZ:" + enc);
+
+            return enc;
         } else if (v instanceof Enum) {
             return "\"" + v.toString() + "\"";
         } else {
@@ -81,17 +94,17 @@ public class JSONEncoderCli {
         }
     }
 
-    public String encodeMap(Map<Object, Object> map) {
+    public String encodeMap(Map<Object, Object> map, EncodingContext ctx) {
         StringBuilder mapBuild = new StringBuilder("{");
         boolean first = true;
 
         for (Map.Entry<Object, Object> entry : map.entrySet()) {
-            String val = _encode(entry.getValue());
+            String val = _encode(entry.getValue(), ctx);
             if (!defer) {
                 if (!first) {
                     mapBuild.append(",");
                 }
-                mapBuild.append(_encode(entry.getKey()))
+                mapBuild.append(_encode(entry.getKey(), ctx))
                         .append(":").append(val);
 
                 if (marshall != null) {
@@ -122,92 +135,92 @@ public class JSONEncoderCli {
         return mapBuild.append("}").toString();
     }
 
-    private String encodeCollection(Collection col) {
+    private String encodeCollection(Collection col, EncodingContext ctx) {
         StringBuilder buildCol = new StringBuilder("[");
         Iterator iter = col.iterator();
         while (iter.hasNext()) {
-            buildCol.append(_encode(iter.next()));
+            buildCol.append(_encode(iter.next(), ctx));
             if (iter.hasNext()) buildCol.append(',');
         }
         return buildCol.append("]").toString();
     }
 
-    private String encodeArray(Object[] array) {
+    private String encodeArray(Object[] array, EncodingContext ctx) {
         StringBuilder buildCol = new StringBuilder("[");
         for (int i = 0; i < array.length; i++) {
-            buildCol.append(_encode(array[i]));
+            buildCol.append(_encode(array[i], ctx));
             if ((i + 1) < array.length) buildCol.append(",");
         }
         return buildCol.append("]").toString();
     }
 
-    private String encodeArray(char[] array) {
+    private String encodeArray(char[] array, EncodingContext ctx) {
         StringBuilder buildCol = new StringBuilder("[");
         for (int i = 0; i < array.length; i++) {
-            buildCol.append(_encode(array[i]));
+            buildCol.append(_encode(array[i], ctx));
             if ((i + 1) < array.length) buildCol.append(",");
         }
         return buildCol.append("]").toString();
     }
 
-    private String encodeArray(int[] array) {
+    private String encodeArray(int[] array, EncodingContext ctx) {
         StringBuilder buildCol = new StringBuilder("[");
         for (int i = 0; i < array.length; i++) {
-            buildCol.append(_encode(array[i]));
+            buildCol.append(_encode(array[i], ctx));
             if ((i + 1) < array.length) buildCol.append(",");
         }
         return buildCol.append("]").toString();
     }
 
-    private String encodeArray(long[] array) {
+    private String encodeArray(long[] array, EncodingContext ctx) {
         StringBuilder buildCol = new StringBuilder("[");
         for (int i = 0; i < array.length; i++) {
-            buildCol.append(_encode(array[i]));
+            buildCol.append(_encode(array[i], ctx));
             if ((i + 1) < array.length) buildCol.append(",");
         }
         return buildCol.append("]").toString();
     }
 
-    private String encodeArray(short[] array) {
+    private String encodeArray(short[] array, EncodingContext ctx) {
         StringBuilder buildCol = new StringBuilder("[");
         for (int i = 0; i < array.length; i++) {
-            buildCol.append(_encode(array[i]));
+            buildCol.append(_encode(array[i], ctx));
             if ((i + 1) < array.length) buildCol.append(",");
         }
         return buildCol.append("]").toString();
     }
 
-    private String encodeArray(double[] array) {
+    private String encodeArray(double[] array, EncodingContext ctx) {
         StringBuilder buildCol = new StringBuilder("[");
         for (int i = 0; i < array.length; i++) {
-            buildCol.append(_encode(array[i]));
+            buildCol.append(_encode(array[i], ctx));
             if ((i + 1) < array.length) buildCol.append(",");
         }
         return buildCol.append("]").toString();
     }
 
-    private String encodeArray(float[] array) {
+    private String encodeArray(float[] array, EncodingContext ctx) {
         StringBuilder buildCol = new StringBuilder("[");
         for (int i = 0; i < array.length; i++) {
-            buildCol.append(_encode(array[i]));
+            buildCol.append(_encode(array[i], ctx));
             if ((i + 1) < array.length) buildCol.append(",");
         }
         return buildCol.append("]").toString();
     }
 
-    private String encodeArray(boolean[] array) {
+    private String encodeArray(boolean[] array, EncodingContext ctx) {
         StringBuilder buildCol = new StringBuilder("[");
         for (int i = 0; i < array.length; i++) {
-            buildCol.append(_encode(array[i]));
+            buildCol.append(_encode(array[i], ctx));
             if ((i + 1) < array.length) buildCol.append(",");
         }
         return buildCol.append("]").toString();
     }
 
-    private String encodeArray(byte[] array) {
+    private String encodeArray(byte[] array, EncodingContext ctx) {
         StringBuilder buildCol = new StringBuilder("[");
         for (int i = 0; i < array.length; i++) {
-            buildCol.append(_encode(array[i]));
+            buildCol.append(_encode(array[i], ctx));
             if ((i + 1) < array.length) buildCol.append(",");
         }
         return buildCol.append("]").toString();

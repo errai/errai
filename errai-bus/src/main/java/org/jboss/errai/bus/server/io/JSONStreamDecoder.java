@@ -27,7 +27,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.jboss.errai.bus.server.io.TypeDemarshallHelper._demarshallAll;
+import static org.jboss.errai.bus.server.io.TypeDemarshallHelper.demarshallAll;
 import static org.jboss.errai.common.client.protocols.SerializationParts.ENCODED_TYPE;
 
 /**
@@ -46,6 +46,8 @@ public class JSONStreamDecoder {
 
     private int read;
     private boolean initial = true;
+
+    private Map<String, Object> objects = new HashMap<String, Object>();
 
     public JSONStreamDecoder(InputStream inStream) {
         this.buffer = CharBuffer.allocate(25);
@@ -107,7 +109,7 @@ public class JSONStreamDecoder {
                     if (map && ctx.encodedType) {
                         ctx.encodedType = false;
                         try {
-                            return _demarshallAll(ctx.record(collection));
+                            return demarshallAll(ctx.record(collection), objects);
                         }
                         catch (Exception e) {
                             throw new RuntimeException("Could not demarshall object", e);
@@ -320,6 +322,7 @@ public class JSONStreamDecoder {
                 if (lhs != null) {
                     if (collection instanceof Map) {
                         if (!encodedType) encodedType = ENCODED_TYPE.equals(lhs);
+
                         //noinspection unchecked
                         ((Map) collection).put(lhs, rhs);
 
