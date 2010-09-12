@@ -74,17 +74,9 @@ public class JSONEncoderCli {
             }
             return null;
         } else if (hasMarshaller(v.getClass().getName())) {
-//            if (ctx.isEncoded(v)) {
-//                return "{" + SerializationParts.ENCODED_TYPE + ": \"" + v.getClass().getName() + "\"" + ", " + SerializationParts.OBJECT_ID + ": \"" + ctx.markRef(v) + "\"}";
-//            }
 
             Marshaller<Object> m = getMarshaller(marshall = v.getClass().getName());
             String enc = m.marshall(v, ctx);
-
-//            ctx.markEncoded(v);
-
-            System.out.println("EncodedZZZ:" + enc);
-
             return enc;
         } else if (v instanceof Enum) {
             return "\"" + v.toString() + "\"";

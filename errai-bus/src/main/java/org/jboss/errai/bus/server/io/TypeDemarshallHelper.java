@@ -17,6 +17,8 @@
 package org.jboss.errai.bus.server.io;
 
 import org.jboss.errai.common.client.protocols.SerializationParts;
+import org.jboss.errai.common.client.types.DecodingContext;
+import org.jboss.errai.common.client.types.UnsatisfiedForwardLookup;
 import org.mvel2.ConversionHandler;
 import org.mvel2.MVEL;
 
@@ -55,7 +57,7 @@ public class TypeDemarshallHelper {
     private static final Map<Class, Map<String, Serializable>> MVELDencodingCache = new ConcurrentHashMap<Class, Map<String, Serializable>>();
 
 
-    public static Object demarshallAll(Object o, Map<String, Object> encoded) throws Exception {
+    public static Object demarshallAll(Object o, DecodingContext ctx) throws Exception {
         try {
             if (o instanceof String) {
                 return o;
@@ -64,8 +66,15 @@ public class TypeDemarshallHelper {
                 ArrayList newList = new ArrayList(((Collection) o).size());
                 Object dec;
                 for (Object o2 : ((Collection) o)) {
-                    newList.add(demarshallAll(o2, encoded));
+                    newList.add(demarshallAll(o2, ctx));
                 }
+
+                if (ctx.getUnsatisfiedDependencies().containsKey(o)) {
+                    for (UnsatisfiedForwardLookup l : ctx.getUnsatisfiedDependencies().remove(o)) {
+                        ctx.addUnsatisfiedDependency(newList, l);
+                    }
+                }
+
                 return newList;
             } else if (o instanceof Map) {
                 Map<?, ?> oMap = (Map) o;
@@ -78,11 +87,10 @@ public class TypeDemarshallHelper {
                             objId = objId.substring(1);
                         }
 
-                        if (encoded.containsKey(objId)) {
-                            return encoded.get(objId);
-                        }
-                        else if (ref) {
-                            return new UnsatisfiedForwardLookup(objId);
+                        if (ctx.hasObject(objId)) {
+                            return ctx.getObject(objId);
+                        } else if (ref) {
+                            throw new UnsatisfiedForwardLookup(objId);
                         }
                     }
 
@@ -92,7 +100,7 @@ public class TypeDemarshallHelper {
                     }
 
                     Object newInstance = clazz.newInstance();
-                    encoded.put(objId, newInstance);
+                    ctx.putObject(objId, newInstance);
 
                     Map<String, Serializable> s = MVELDencodingCache.get(clazz);
 
@@ -117,7 +125,11 @@ public class TypeDemarshallHelper {
                         final Serializable cachedSetExpr = s.get(entry.getKey());
                         if (cachedSetExpr != null) {
                             try {
-                                MVEL.executeSetExpression(cachedSetExpr, newInstance, demarshallAll(entry.getValue(), encoded));
+                                MVEL.executeSetExpression(cachedSetExpr, newInstance, demarshallAll(entry.getValue(), ctx));
+                            }
+                            catch (UnsatisfiedForwardLookup e) {
+                                e.setPath((String) entry.getKey());
+                                ctx.addUnsatisfiedDependency(newInstance, e);
                             }
                             catch (Exception e) {
                                 e.printStackTrace();
@@ -125,7 +137,11 @@ public class TypeDemarshallHelper {
                             }
                         } else {
                             try {
-                                MVEL.setProperty(newInstance, String.valueOf(entry.getKey()), demarshallAll(entry.getValue(), encoded));
+                                MVEL.setProperty(newInstance, String.valueOf(entry.getKey()), demarshallAll(entry.getValue(), ctx));
+                            }
+                            catch (UnsatisfiedForwardLookup e) {
+                                e.setPath((String) entry.getKey());
+                                ctx.addUnsatisfiedDependency(newInstance, e);
                             }
                             catch (Exception e) {
                                 e.printStackTrace();
@@ -135,14 +151,35 @@ public class TypeDemarshallHelper {
                     }
 
 
-
                     return newInstance;
                 }
             }
             return o;
         }
+        catch (UnsatisfiedForwardLookup e) {
+            throw e;
+        }
         catch (Exception e) {
             throw new RuntimeException("error demarshalling encoded object:\n" + o, e);
         }
+    }
+
+    public static void resolveDependencies(DecodingContext ctx) {
+        for (Map.Entry<Object, List<UnsatisfiedForwardLookup>> entry : ctx.getUnsatisfiedDependencies().entrySet()) {
+            for (UnsatisfiedForwardLookup dep : entry.getValue()) {
+                if (!ctx.hasObject(dep.getId()))
+                    throw new RuntimeException("cannot satisfy dependency in object graph (bug?):" + dep.getId());
+
+                if (entry.getKey() instanceof Collection) {
+                    ((Collection) entry.getKey()).add(ctx.getObject(dep.getId()));
+                } else {
+                    if (dep.getPath() == null) {
+                        throw new RuntimeException("cannot satisfy dependency in object graph (path unresolvable):" + dep.getId());
+                    }
+                    MVEL.setProperty(entry.getKey(), dep.getPath(), ctx.getObject(dep.getId()));
+                }
+            }
+        }
+
     }
 }

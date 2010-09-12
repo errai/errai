@@ -16,6 +16,8 @@
 
 package org.jboss.errai.bus.server.io;
 
+import org.jboss.errai.common.client.types.DecodingContext;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -35,7 +37,7 @@ public class JSONDecoder {
     private final char[] json;
     private final int length;
     private int cursor;
-    private Map<String, Object> objects = new HashMap<String, Object>();
+    private DecodingContext decodingContext = new DecodingContext();
 
 
     public static Object decode(String json) {
@@ -92,7 +94,7 @@ public class JSONDecoder {
                     if (map && ctx.encodedType) {
                         ctx.encodedType = false;
                         try {
-                            return demarshallAll(ctx.record(collection), objects);
+                            return demarshallAll(ctx.record(collection), decodingContext);
                         }
                         catch (Exception e) {
                             throw new RuntimeException("Could not demarshall object", e);
