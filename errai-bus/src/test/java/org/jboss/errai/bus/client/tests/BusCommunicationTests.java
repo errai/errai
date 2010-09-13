@@ -73,8 +73,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
         }
 
         public char nextChar() {
-            char c = CHARS[com.google.gwt.user.client.Random.nextInt(1000) % CHARS.length];
-            return c;
+            return CHARS[com.google.gwt.user.client.Random.nextInt(1000) % CHARS.length];
         }
 
         public String randString() {

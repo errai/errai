@@ -1,0 +1,6 @@
+*.iml
+/.idea/
+.gwt-tmp/
+target/
+classes/
+tomcat/
