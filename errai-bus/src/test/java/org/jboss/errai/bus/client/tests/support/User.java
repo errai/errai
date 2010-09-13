@@ -15,6 +15,8 @@ public class User {
     private int id;
     private String name;
     private List<Group> groups;
+    private Map<User, String> userStringMap;
+    private Map<String, User> userMapString;
 
     public int getId() {
         return id;
@@ -40,6 +42,22 @@ public class User {
         this.groups = groups;
     }
 
+    public Map<User, String> getUserStringMap() {
+        return userStringMap;
+    }
+
+    public void setUserStringMap(Map<User, String> userStringMap) {
+        this.userStringMap = userStringMap;
+    }
+
+    public Map<String, User> getUserMapString() {
+        return userMapString;
+    }
+
+    public void setUserMapString(Map<String, User> userMapString) {
+        this.userMapString = userMapString;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -62,6 +80,10 @@ public class User {
         return result;
     }
 
+    public String toString() {
+        return "User:[id:" + id + ";name:" + name + ";groups:" + groups.size() + ";userStringMap:" + userStringMap.size() + ";userMapString:" + userMapString.size() + "]";
+    }
+
     public static User create() {
         User user = new User();
         user.id = 1;
@@ -82,6 +104,12 @@ public class User {
         groupUser.put(adminGroup, user);
 
         adminGroup.setGroupUserMap(groupUser);
+
+        user.userStringMap = new HashMap<User, String>();
+        user.userStringMap.put(user, "foo");
+
+        user.userMapString = new HashMap<String, User>();
+        user.userMapString.put("bar", user);
 
         return user;
     }

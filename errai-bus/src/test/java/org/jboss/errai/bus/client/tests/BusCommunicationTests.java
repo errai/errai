@@ -93,6 +93,9 @@ public class BusCommunicationTests extends AbstractErraiTest {
             public void run() {
                 try {
                     final SType sType1 = SType.create(new GWTRandomProvider());
+
+                    System.out.println("ORIGINAL: " + sType1.toString());
+
                     bus.subscribe("ClientReceiver", new MessageCallback() {
                         public void callback(Message message) {
                             SType type = message.get(SType.class, "SType");
@@ -102,6 +105,8 @@ public class BusCommunicationTests extends AbstractErraiTest {
                                 System.out.println("CLIENT: " + type.toString());
                                 assertTrue(sType1.equals(type));
 
+
+                                System.out.println("**TEST PASSED**");
                                 finishTest();
                                 return;
                             }
@@ -137,8 +142,10 @@ public class BusCommunicationTests extends AbstractErraiTest {
 
                         try {
                             assertNotNull(u);
-                            System.out.println("CLIENT: " + u.toString());
-                            assertTrue(user.equals(u));
+
+                            System.out.println("BEFORE: " + user.toString());
+                            System.out.println("AFTER : " + u.toString());
+                            assertTrue(user.toString().equals(u.toString()));
 
                             finishTest();
                             return;

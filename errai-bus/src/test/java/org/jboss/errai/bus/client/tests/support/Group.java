@@ -57,6 +57,11 @@ public class Group {
     }
 
     @Override
+    public String toString() {
+        return "Group:[groupId:" + groupId + ";name:" + name + ";usersInGroup:" + usersInGroup.size() + ";subGroup:" + subGroup.hashCode() + ";groupUserMap:" + groupUserMap.size() + "]";
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Group)) return false;
@@ -65,7 +70,7 @@ public class Group {
 
         if (groupId != group.groupId) return false;
         if (name != null ? !name.equals(group.name) : group.name != null) return false;
-        if (usersInGroup != null ? !usersInGroup.equals(group.usersInGroup) : group.usersInGroup != null) return false;
+//        if (usersInGroup != null ? !usersInGroup.equals(group.usersInGroup) : group.usersInGroup != null) return false;
 
         return true;
     }

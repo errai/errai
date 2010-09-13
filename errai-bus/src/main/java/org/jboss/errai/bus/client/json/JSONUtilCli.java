@@ -25,10 +25,12 @@ import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.common.client.json.JSONDecoderCli;
 import org.jboss.errai.common.client.json.JSONEncoderCli;
+import org.jboss.errai.common.client.types.DecodingContext;
 import org.jboss.errai.common.client.types.EncodingContext;
+import org.jboss.errai.common.client.types.JSONTypeHelper;
+import org.jboss.errai.common.client.types.UHashMap;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
 public class JSONUtilCli {
@@ -43,20 +45,27 @@ public class JSONUtilCli {
          *
          */
 
-        JSONValue val = JSONParser.parse(value);
-        if (val == null) {
-            return EMPTYLIST;
-        }
-        JSONArray arr = val.isArray();
-        if (arr == null) {
-            throw new RuntimeException("unrecognized payload" + val.toString());
-        }
-        ArrayList<MarshalledMessage> list = new ArrayList<MarshalledMessage>(arr.size());
-        for (int i = 0; i < arr.size(); i++) {
-            list.add(new MarshalledMessageImpl((JSONObject) arr.get(i)));
-        }
+        try {
+            JSONValue val = JSONParser.parse(value);
+            if (val == null) {
+                return EMPTYLIST;
+            }
+            JSONArray arr = val.isArray();
+            if (arr == null) {
+                throw new RuntimeException("unrecognized payload" + val.toString());
+            }
+            ArrayList<MarshalledMessage> list = new ArrayList<MarshalledMessage>(arr.size());
+            for (int i = 0; i < arr.size(); i++) {
+                list.add(new MarshalledMessageImpl((JSONObject) arr.get(i)));
+            }
 
-        return list;
+            return list;
+        }
+        catch (Exception e) {
+            System.out.println("JSONUtilCli.decodePayload=" + value);
+            e.printStackTrace();
+            return null;
+        }
 
     }
 
@@ -78,7 +87,15 @@ public class JSONUtilCli {
 
     @SuppressWarnings({"unchecked"})
     public static Map<String, Object> decodeMap(Object value) {
-        return (Map<String, Object>) new JSONDecoderCli().decode(value);
+        DecodingContext ctx = new DecodingContext();
+        Map<String,Object> map = (Map<String, Object>) JSONDecoderCli.decode(value, ctx);
+
+        if (ctx.isUnsatisfiedDependencies()) {
+            JSONTypeHelper.resolveDependencies(ctx);
+        }
+     
+
+        return map;
     }
 
     public static Message decodeCommandMessage(Object value) {
@@ -88,4 +105,6 @@ public class JSONUtilCli {
     public static String encodeMap(Map<String, Object> map) {
         return new JSONEncoderCli().encode(map, new EncodingContext());
     }
+
+
 }

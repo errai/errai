@@ -25,10 +25,15 @@ public class DecodingContext {
         if (unsatisfiedDependencies == null)
             unsatisfiedDependencies = new HashMap<Object, List<UnsatisfiedForwardLookup>>();
 
+        if (instance instanceof UHashMap) {
+            ((UHashMap) instance).uniqueHashMode();
+        }
+
         List<UnsatisfiedForwardLookup> usls = unsatisfiedDependencies.get(instance);
         if (usls == null) unsatisfiedDependencies.put(instance, usls = new ArrayList<UnsatisfiedForwardLookup>());
 
         usls.add(ufl);
+
     }
 
     public boolean isUnsatisfiedDependencies() {
@@ -40,46 +45,16 @@ public class DecodingContext {
     }
 
     public boolean hasUnsatisfiedDependency(Object o) {
-        return unsatisfiedDependencies != null && (o instanceof Map ? __lookup((Map) o) : unsatisfiedDependencies.containsKey(o));
+        return unsatisfiedDependencies != null && unsatisfiedDependencies.containsKey(o);
     }
 
-    private boolean __lookup(Map o) {
-        for (Object o1 : unsatisfiedDependencies.keySet()) {
-            if (o == o1) return true;
-        }
-        return false;
-    }
 
     public void swapDepReference(Object oldRef, Object newRef) {
-        List<UnsatisfiedForwardLookup> list;
-        if (oldRef instanceof Map) {
-            list = __get((Map) oldRef);
-            __remove((Map) oldRef);
-        }
-        else {
-           list =  unsatisfiedDependencies.remove(oldRef);
-        }
-
+        if (unsatisfiedDependencies == null) return;
+        List<UnsatisfiedForwardLookup>  list =  unsatisfiedDependencies.remove(oldRef);
         unsatisfiedDependencies.put(newRef, list);
     }
 
-    private List<UnsatisfiedForwardLookup> __get(Map o) {
-        for (Map.Entry<Object, List<UnsatisfiedForwardLookup>> entry : unsatisfiedDependencies.entrySet()) {
-            if (entry.getKey() == o) return entry.getValue();
-        }
-        return null;
-    }
-
-    private void __remove(Map o) {
-        Iterator<Object> iter = unsatisfiedDependencies.keySet().iterator();
-        while (iter.hasNext()) {
-            if (iter.next() == o) {
-                iter.remove();
-                return;
-            }
-        }
-        return;
-    }
 
     public Map<Object, List<UnsatisfiedForwardLookup>> getUnsatisfiedDependencies() {
         return unsatisfiedDependencies;

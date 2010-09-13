@@ -203,6 +203,7 @@ public class SType extends STypeSuper {
 
         SType sType = (SType) o;
 
+        if (place != sType.place) return false;        
         if (byteValue != sType.byteValue) return false;
         if (charValue != sType.charValue) return false;
         if (Double.compare(sType.doubleValue, doubleValue) != 0) return false;
@@ -217,7 +218,6 @@ public class SType extends STypeSuper {
         if (fieldTwo != null ? !fieldTwo.equals(sType.fieldTwo) : sType.fieldTwo != null) return false;
         if (listOfStypes != null ? !listOfStypes.equals(sType.listOfStypes) : sType.listOfStypes != null) return false;
         if (mapofStypes != null ? !mapofStypes.equals(sType.mapofStypes) : sType.mapofStypes != null) return false;
-        if (place != sType.place) return false;
         if (startDate != null ? !startDate.equals(sType.startDate) : sType.startDate != null) return false;
 
         if (charArrayMulti != null) {

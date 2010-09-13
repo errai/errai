@@ -24,6 +24,7 @@ import org.jboss.errai.bus.client.framework.MessageProvider;
 import org.jboss.errai.bus.client.framework.RoutingFlags;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.common.client.json.JSONEncoderCli;
+import org.jboss.errai.common.client.types.DecodingContext;
 import org.jboss.errai.common.client.types.EncodingContext;
 import org.jboss.errai.common.client.types.TypeHandlerFactory;
 
@@ -288,7 +289,7 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
     public <T> T get(Class<T> type, Enum<?> part) {
         //noinspection unchecked
         Object value = parts.get(part.toString());
-        return value == null ? null : TypeHandlerFactory.convert(value.getClass(), type, value);
+        return value == null ? null : TypeHandlerFactory.convert(value.getClass(), type, value, new DecodingContext());
     }
 
     /**
@@ -304,7 +305,7 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
     public <T> T get(Class<T> type, String part) {
         //noinspection unchecked
         Object value = parts.get(part);
-        return value == null ? null : TypeHandlerFactory.convert(value.getClass(), type, value);
+        return value == null ? null : TypeHandlerFactory.convert(value.getClass(), type, value, new DecodingContext());
     }
 
     /**
@@ -509,7 +510,7 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
      */
     protected void _addStringPart(String a, String b) {
         _sep();
-        buf.append(a).append(':')
+        buf.append('\"').append(a).append('\"').append(':')
                 .append('\"').append(b).append("\"");
     }
 
@@ -521,7 +522,7 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
      */
     protected void _addObjectPart(String a, Object b) {
         _sep();
-        buf.append(a).append(':')
+        buf.append('\"').append(a).append('\"').append(':')
                 .append(new JSONEncoderCli().encode(b, encodingContext));
     }
 }

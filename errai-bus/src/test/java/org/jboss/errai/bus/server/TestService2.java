@@ -14,7 +14,7 @@ public class TestService2 implements MessageCallback {
     public void callback(Message message) {
         User user = message.get(User.class, "User");
 
-        System.out.println("user:" + user);
+         System.out.println("user:" + user);
 
         MessageBuilder.createConversation(message)
                 .subjectProvided()

@@ -18,6 +18,7 @@ package org.jboss.errai.bus.server.io;
 
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.common.client.types.DecodingContext;
+import org.jboss.errai.common.client.types.UHashMap;
 import org.jboss.errai.common.client.types.UnsatisfiedForwardLookup;
 import org.mvel2.ConversionHandler;
 import org.mvel2.MVEL;
@@ -64,9 +65,13 @@ public class TypeDemarshallHelper {
 
             } else if (o instanceof Collection) {
                 ArrayList newList = new ArrayList(((Collection) o).size());
-                Object dec;
+                Object dep;
                 for (Object o2 : ((Collection) o)) {
-                    newList.add(demarshallAll(o2, ctx));
+                    if ((dep = demarshallAll(o2, ctx)) instanceof UnsatisfiedForwardLookup) {
+                        ctx.addUnsatisfiedDependency(o, (UnsatisfiedForwardLookup) dep);
+                    } else {
+                        newList.add(dep);
+                    }
                 }
 
                 if (ctx.hasUnsatisfiedDependency(o)) {
@@ -98,7 +103,7 @@ public class TypeDemarshallHelper {
                     }
 
                     Object newInstance = clazz.newInstance();
-                    ctx.putObject(objId, newInstance);
+                    if (objId != null) ctx.putObject(objId, newInstance);
 
                     if (ctx.hasUnsatisfiedDependency(o)) {
                         ctx.swapDepReference(o, newInstance);
@@ -110,7 +115,7 @@ public class TypeDemarshallHelper {
                         synchronized (MVELDencodingCache) {
                             s = MVELDencodingCache.get(newInstance.getClass());
                             if (s == null) {
-                                s = new HashMap<String, Serializable>();
+                                s = new UHashMap<String, Serializable>();
                                 for (String key : (Set<String>) oMap.keySet()) {
                                     if (SerializationParts.ENCODED_TYPE.equals(key) || SerializationParts.OBJECT_ID.equals(key))
                                         continue;
@@ -176,9 +181,24 @@ public class TypeDemarshallHelper {
                     ((Collection<Object>) entry.getKey()).add(ctx.getObject(iter.next().getId()));
                 }
             } else if (entry.getKey() instanceof Map && !((Map) entry.getKey()).containsKey(SerializationParts.ENCODED_TYPE)) {
-                while (iter.hasNext()) {
-                    ((Map<Object, Object>) entry.getKey()).put(ctx.getObject(iter.next().getId()), ctx.getObject(iter.next().getId()));
+                UnsatisfiedForwardLookup u1 = iter.next();
+                if (!iter.hasNext()) {
+                    if (u1.getKey() != null) {
+                        if (u1.getKey() instanceof UnsatisfiedForwardLookup) {
+                            ((Map<Object, Object>) entry.getKey()).put(ctx.getObject(((UnsatisfiedForwardLookup) u1.getKey()).getId()), ctx.getObject(u1.getId()));
+                        } else {
+                            ((Map<Object, Object>) entry.getKey()).put(u1.getKey(), ctx.getObject(u1.getId()));
+                        }
+                    } else if (u1.getVal() != null) {
+                        ((Map<Object, Object>) entry.getKey()).put(ctx.getObject(u1.getId()), u1.getVal());
+                    } else {
+                        throw new RuntimeException("error resolving dependencies in payload (Map Element): " + u1.getId());
+                    }
+                } else {
+                    UnsatisfiedForwardLookup u2 = iter.next();
+                    ((Map<Object, Object>) entry.getKey()).put(ctx.getObject(u1.getId()), ctx.getObject(u2.getId()));
                 }
+
             } else {
                 UnsatisfiedForwardLookup ufl;
                 while (iter.hasNext()) {
@@ -191,6 +211,9 @@ public class TypeDemarshallHelper {
 
                 }
             }
+
+            if (entry.getKey() instanceof UHashMap)
+                ((UHashMap) entry.getKey()).normalHashMode();
         }
     }
 }

@@ -34,7 +34,7 @@ public class JSONMessageServer extends JSONMessage {
     @Override
     protected void _addObjectPart(String a, Object b) {
         _sep();
-        buf.append(a).append(':')
+        buf.append('\"').append(a).append('\"').append(':')
                 .append(JSONEncoder.encode(b));
     }
 }

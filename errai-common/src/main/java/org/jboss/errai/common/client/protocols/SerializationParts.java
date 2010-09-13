@@ -21,5 +21,8 @@ public class SerializationParts {
     public static final String ENCODED_TYPE     = "__EncodedType";
     public static final String OBJECT_ID        = "__ObjectID";
 
+    public static final String EMBEDDED_JSON = "${$JSON$}$::";
+    
+
     private SerializationParts() {}
 }

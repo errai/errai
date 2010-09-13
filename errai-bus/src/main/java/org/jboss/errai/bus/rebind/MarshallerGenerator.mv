@@ -23,15 +23,14 @@ org.jboss.errai.common.client.types.TypeMarshallers.addMarshaller(
     new org.jboss.errai.common.client.types.Marshaller<@{className}>() {
         public String marshall(@{className} o, org.jboss.errai.common.client.types.EncodingContext ctx) {
             if (ctx.isEncoded(o)) return "{@{org.jboss.errai.common.client.protocols.SerializationParts.ENCODED_TYPE}:\"@{canonicalClassName}\",@{org.jboss.errai.common.client.protocols.SerializationParts.OBJECT_ID}:\"$" + ctx.markRef(o) + "\"}";
-            ctx.markEncoded(o);
+
             try {
 @if{enumType}StringBuilder json = new StringBuilder("{@{org.jboss.errai.common.client.protocols.SerializationParts.ENCODED_TYPE}:\"@{canonicalClassName}\",EnumStringValue:\"");
                 json.append(o.toString()).append("\"}");@else{}
+                ctx.markEncoded(o);
                 StringBuilder json = new StringBuilder("{@{org.jboss.errai.common.client.protocols.SerializationParts.ENCODED_TYPE}:\"@{canonicalClassName}\",@{org.jboss.errai.common.client.protocols.SerializationParts.OBJECT_ID}:\"" + o.hashCode() + "\",");
                 org.jboss.errai.common.client.json.JSONEncoderCli jsonEncoder = new org.jboss.errai.common.client.json.JSONEncoderCli();
                 json.append("@foreach{fieldName : fields}@includeNamed{"extractor";fieldName=fieldName;targetType=targetTypes.get(fieldName);getter=getters.get(fieldName)}@end{","}}");@end{}
-
-
                 return json.toString();
             }
             catch (Exception e) {

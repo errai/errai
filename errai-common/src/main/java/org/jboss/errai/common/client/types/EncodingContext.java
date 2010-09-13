@@ -8,6 +8,7 @@ import java.util.*;
 public class EncodingContext {
     private Map<Object, String> alreadyEncoded;
     private Set<String> refs;
+    private int escapeMode;
 
     public EncodingContext() {
         alreadyEncoded = new HashMap<Object, String>();
@@ -18,6 +19,8 @@ public class EncodingContext {
     }
 
     public void markEncoded(Object o) {
+        if (o instanceof Number || o instanceof Boolean || o instanceof Character) return;
+        
         alreadyEncoded.put(o, String.valueOf(o.hashCode()));
     }
 
@@ -30,5 +33,17 @@ public class EncodingContext {
 
     public Set<String> getRefs() {
         return refs;
+    }
+
+    public boolean isEscapeMode() {
+        return escapeMode != 0;
+    }
+
+    public void setEscapeMode() {
+        escapeMode++;
+    }
+
+    public void unsetEscapeMode() {
+        escapeMode--;
     }
 }

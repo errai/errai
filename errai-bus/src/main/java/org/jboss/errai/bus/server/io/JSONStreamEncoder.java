@@ -17,6 +17,8 @@
 package org.jboss.errai.bus.server.io;
 
 import org.jboss.errai.common.client.protocols.SerializationParts;
+import org.jboss.errai.common.client.types.DecodingContext;
+import org.jboss.errai.common.client.types.EncodingContext;
 import org.jboss.errai.common.client.types.TypeHandler;
 import org.mvel2.MVEL;
 import org.mvel2.util.StringAppender;
@@ -39,15 +41,16 @@ public class JSONStreamEncoder {
     private static Set<Class> serializableTypes;
     private static final byte[] NULL_BYTES = {'n', 'u', 'l', 'l'};
 
+
     public static void setSerializableTypes(Set<Class> serializableTypes) {
         JSONEncoder.serializableTypes = serializableTypes;
     }
 
     public static void encode(Object v, OutputStream outstream) throws IOException {
-        _encode(v, outstream);
+        _encode(v, outstream, new EncodingContext());
     }
 
-    private static void _encode(Object v, OutputStream outstream) throws IOException {
+    private static void _encode(Object v, OutputStream outstream, EncodingContext ctx) throws IOException {
         if (v == null) {
             outstream.write(NULL_BYTES);
             return;
@@ -60,12 +63,12 @@ public class JSONStreamEncoder {
         if (v instanceof Number || v instanceof Boolean) {
             outstream.write(String.valueOf(v).getBytes());
         } else if (v instanceof Collection) {
-            encodeCollection((Collection) v, outstream);
+            encodeCollection((Collection) v, outstream, ctx);
         } else if (v instanceof Map) {
             //noinspection unchecked
-            encodeMap((Map) v, outstream);
+            encodeMap((Map) v, outstream, ctx);
         } else if (v.getClass().isArray()) {
-            encodeArray(v, outstream);
+            encodeArray(v, outstream, ctx);
 
             // CDI Integration: Loading entities after the service was initialized
             // This may cause the client to throw an exception if the entity is not known
@@ -77,13 +80,13 @@ public class JSONStreamEncoder {
             throw new RuntimeException("cannot serialize type: " + v.getClass().getName());
         }  */
         else if (v instanceof Enum) {
-            encodeEnum((Enum) v, outstream);
+            encodeEnum((Enum) v, outstream, ctx);
         } else {
-            encodeObject(v, outstream);
+            encodeObject(v, outstream, ctx);
         }
     }
 
-    private static void encodeObject(Object o, OutputStream outstream) throws IOException {
+    private static void encodeObject(Object o, OutputStream outstream, EncodingContext ctx) throws IOException {
         if (o == null) {
             outstream.write(NULL_BYTES);
             return;
@@ -92,13 +95,32 @@ public class JSONStreamEncoder {
         Class cls = o.getClass();
 
         if (tHandlers.containsKey(cls)) {
-            _encode(convert(o), outstream);
+            _encode(convert(o), outstream, ctx);
             return;
         }
+
+
+        if (ctx.isEncoded(o)) {
+            /**
+             * If this object is referencing a duplicate object in the graph, we only provide an ID reference.
+             */
+            write(outstream, ctx, "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + cls.getCanonicalName() + "\",\"" + SerializationParts.OBJECT_ID + "\":\"$" + ctx.markRef(o) + "\"}");
+
+            return;
+        }
+
+
+        ctx.markEncoded(o);
+
+
         outstream.write('{');
         outstream.write(SerializationParts.ENCODED_TYPE.getBytes());
         outstream.write(':');
-        outstream.write(cls.getName().getBytes());
+        outstream.write(cls.getCanonicalName().getBytes());
+        outstream.write(',');
+        outstream.write(SerializationParts.OBJECT_ID.getBytes());
+        outstream.write(':');
+        outstream.write(String.valueOf(o.hashCode()).getBytes());
         outstream.write(',');
 
         final Field[] fields = EncodingUtil.getAllEncodingFields(cls);
@@ -130,16 +152,18 @@ public class JSONStreamEncoder {
             }
 
             Object v = MVEL.executeExpression(s[i++], o);
+            outstream.write('\"');
             outstream.write(field.getName().getBytes());
+            outstream.write('\"');
             outstream.write(':');
-            _encode(v, outstream);
+            _encode(v, outstream, ctx);
             first = false;
         }
 
         outstream.write('}');
     }
 
-    private static void encodeMap(Map<Object, Object> map, OutputStream outstream) throws IOException {
+    private static void encodeMap(Map<Object, Object> map, OutputStream outstream, EncodingContext ctx) throws IOException {
         StringAppender mapBuild = new StringAppender("{");
         outstream.write('{');
         boolean first = true;
@@ -148,41 +172,52 @@ public class JSONStreamEncoder {
             if (!first) {
                 outstream.write('{');
             }
-            _encode(entry.getKey(), outstream);
+
+            if (!(entry.getKey() instanceof String)) {
+                write(outstream, ctx, '\"');
+                if (!ctx.isEscapeMode()) outstream.write(SerializationParts.EMBEDDED_JSON.getBytes());
+                ctx.setEscapeMode();
+                _encode(entry.getKey(), outstream, ctx);
+                ctx.unsetEscapeMode();
+                write(outstream, ctx, '\"');
+            } else {
+                _encode(entry.getKey(), outstream, ctx);
+            }
+
             outstream.write(':');
-            _encode(entry.getValue(), outstream);
+            _encode(entry.getValue(), outstream, ctx);
 
             first = false;
         }
         outstream.write('}');
     }
 
-    private static void encodeCollection(Collection col, OutputStream outstream) throws IOException {
+    private static void encodeCollection(Collection col, OutputStream outstream, EncodingContext ctx) throws IOException {
         outstream.write('[');
 
         StringAppender buildCol = new StringAppender("[");
         Iterator iter = col.iterator();
         while (iter.hasNext()) {
-            _encode(iter.next(), outstream);
+            _encode(iter.next(), outstream, ctx);
             if (iter.hasNext()) outstream.write(',');
         }
 
         outstream.write(']');
     }
 
-    private static void encodeArray(Object array, OutputStream outstream) throws IOException {
+    private static void encodeArray(Object array, OutputStream outstream, EncodingContext ctx) throws IOException {
         StringAppender buildCol = new StringAppender("[");
 
         int len = Array.getLength(array);
         for (int i = 0; i < len; i++) {
-            _encode(Array.get(array, 1), outstream);
+            _encode(Array.get(array, 1), outstream, ctx);
             if ((i + 1) < len) outstream.write(',');
         }
 
         outstream.write(']');
     }
 
-    private static void encodeEnum(Enum enumer, OutputStream outstream) throws IOException {
+    private static void encodeEnum(Enum enumer, OutputStream outstream, EncodingContext ctx) throws IOException {
         outstream.write('{');
         outstream.write(SerializationParts.ENCODED_TYPE.getBytes());
         outstream.write(':');
@@ -198,18 +233,18 @@ public class JSONStreamEncoder {
 
     static {
         tHandlers.put(java.sql.Date.class, new TypeHandler<java.sql.Date, Long>() {
-            public Long getConverted(java.sql.Date in) {
+            public Long getConverted(java.sql.Date in, DecodingContext ctx) {
                 return in.getTime();
             }
         });
         tHandlers.put(java.util.Date.class, new TypeHandler<java.util.Date, Long>() {
-            public Long getConverted(java.util.Date in) {
+            public Long getConverted(java.util.Date in, DecodingContext ctx) {
                 return in.getTime();
             }
         });
 
         tHandlers.put(Timestamp.class, new TypeHandler<Timestamp, Long>() {
-            public Long getConverted(Timestamp in) {
+            public Long getConverted(Timestamp in, DecodingContext ctx) {
                 return in.getTime();
             }
         });
@@ -219,12 +254,31 @@ public class JSONStreamEncoder {
         tHandlers.put(from, handler);
     }
 
+    private static void write(OutputStream stream, EncodingContext ctx, String s) throws IOException {
+        if (ctx.isEscapeMode()) {
+            stream.write(s.replaceAll("\"", "\\\\\"").getBytes());
+        } else {
+            stream.write(s.getBytes());
+        }
+    }
+
+    private static void write(OutputStream stream, EncodingContext ctx, char s) throws IOException {
+        if (ctx.isEscapeMode() && s == '\"') {
+            stream.write("\\\\\"".getBytes());
+
+        } else {
+            stream.write(s);
+        }
+    }
+
+
+    private static final DecodingContext STATIC_DEC_CONTEXT = new DecodingContext();
 
     private static Object convert(Object in) {
         if (in == null || !tHandlers.containsKey(in.getClass())) return in;
         else {
             //noinspection unchecked
-            return tHandlers.get(in.getClass()).getConverted(in);
+            return tHandlers.get(in.getClass()).getConverted(in, STATIC_DEC_CONTEXT);
         }
     }
 }

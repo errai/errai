@@ -17,6 +17,8 @@
 package org.jboss.errai.bus.server.io;
 
 import org.jboss.errai.common.client.protocols.SerializationParts;
+import org.jboss.errai.common.client.types.DecodingContext;
+import org.jboss.errai.common.client.types.EncodingContext;
 import org.jboss.errai.common.client.types.TypeHandler;
 import org.mvel2.MVEL;
 import org.mvel2.util.StringAppender;
@@ -32,6 +34,7 @@ import java.util.*;
  * Encodes an object into a JSON string
  */
 public class JSONEncoder {
+
     protected static Set<Class> serializableTypes;
 
     public static void setSerializableTypes(Set<Class> serializableTypes) {
@@ -39,10 +42,10 @@ public class JSONEncoder {
     }
 
     public static String encode(Object v) {
-        return _encode(v);
+        return _encode(v, new EncodingContext());
     }
 
-    private static String _encode(Object v) {
+    private static String _encode(Object v, EncodingContext ctx) {
         if (v == null) {
             return "null";
         } else if (v instanceof String) {
@@ -51,12 +54,12 @@ public class JSONEncoder {
         if (v instanceof Number || v instanceof Boolean) {
             return String.valueOf(v);
         } else if (v instanceof Collection) {
-            return encodeCollection((Collection) v);
+            return encodeCollection((Collection) v, ctx);
         } else if (v instanceof Map) {
             //noinspection unchecked
-            return encodeMap((Map) v);
+            return encodeMap((Map) v, ctx);
         } else if (v.getClass().isArray()) {
-            return encodeArray(v);
+            return encodeArray(v, ctx);
 
             // CDI Integration: Loading entities after the service was initialized
             // This may cause the client to throw an exception if the entity is not known
@@ -68,22 +71,32 @@ public class JSONEncoder {
             throw new RuntimeException("cannot serialize type: " + v.getClass().getName());
         }  */
         else if (v instanceof Enum) {
-            return encodeEnum((Enum) v);
+            return encodeEnum((Enum) v, ctx);
         } else {
-            return encodeObject(v);
+            return encodeObject(v, ctx);
         }
     }
 
-    private static String encodeObject(Object o) {
+    private static String encodeObject(Object o, EncodingContext ctx) {
         if (o == null) return "null";
 
         Class cls = o.getClass();
 
+
         if (tHandlers.containsKey(cls)) {
-            return _encode(convert(o));
+            return _encode(convert(o), ctx);
         }
 
-        StringAppender build = new StringAppender("{" + SerializationParts.ENCODED_TYPE + ":\"" + cls.getName() + "\",");
+        if (ctx.isEncoded(o)) {
+            /**
+             * If this object is referencing a duplicate object in the graph, we only provide an ID reference.
+             */
+            return write(ctx, "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + cls.getCanonicalName() + "\",\"" + SerializationParts.OBJECT_ID + "\":\"$" + ctx.markRef(o) + "\"}");
+        }
+
+        ctx.markEncoded(o);
+
+        StringAppender build = new StringAppender(write(ctx, "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + cls.getName() + "\",\"" + SerializationParts.OBJECT_ID + "\":\"" + String.valueOf(o.hashCode()) + "\","));
 
         // Preliminary fix for https://jira.jboss.org/browse/ERRAI-103
         // TODO: Review my Mike
@@ -116,7 +129,7 @@ public class JSONEncoder {
 
             try {
                 Object v = MVEL.executeExpression(s[i++], o);
-                build.append(field.getName()).append(':').append(_encode(v));
+                build.append(write(ctx, '\"')).append(field.getName()).append(write(ctx, '\"')).append(':').append(_encode(v, ctx));
                 first = false;
             }
             catch (Throwable t) {
@@ -128,17 +141,32 @@ public class JSONEncoder {
         return build.append('}').toString();
     }
 
-    private static String encodeMap(Map<Object, Object> map) {
+    private static String encodeMap(Map<Object, Object> map, EncodingContext ctx) {
         StringAppender mapBuild = new StringAppender("{");
         boolean first = true;
 
         for (Map.Entry<Object, Object> entry : map.entrySet()) {
-            String val = _encode(entry.getValue());
+            String val = _encode(entry.getValue(), ctx);
             if (!first) {
                 mapBuild.append(',');
             }
-            mapBuild.append(_encode(entry.getKey()))
-                    .append(':').append(val);
+
+            if (!(entry.getKey() instanceof String)) {
+                mapBuild.append(write(ctx, '\"'));
+                if (!ctx.isEscapeMode()) {
+                    mapBuild.append(SerializationParts.EMBEDDED_JSON);
+                }
+                ctx.setEscapeMode();
+                mapBuild.append(_encode(entry.getKey(), ctx));
+                ctx.unsetEscapeMode();
+                mapBuild.append(write(ctx, '\"'));
+                mapBuild.append(":")
+                        .append(val);
+
+            } else {
+                mapBuild.append(_encode(entry.getKey(), ctx))
+                        .append(':').append(val);
+            }
 
             first = false;
         }
@@ -146,58 +174,79 @@ public class JSONEncoder {
         return mapBuild.append('}').toString();
     }
 
-    private static String encodeCollection(Collection col) {
+    private static String encodeCollection(Collection col, EncodingContext ctx) {
         StringAppender buildCol = new StringAppender("[");
         Iterator iter = col.iterator();
         while (iter.hasNext()) {
-            buildCol.append(_encode(iter.next()));
+            buildCol.append(_encode(iter.next(), ctx));
             if (iter.hasNext()) buildCol.append(',');
         }
         return buildCol.append(']').toString();
     }
 
-    private static String encodeArray(Object array) {
+    private static String encodeArray(Object array, EncodingContext ctx) {
         StringAppender buildCol = new StringAppender("[");
 
         int len = Array.getLength(array);
         for (int i = 0; i < len; i++) {
-            buildCol.append(_encode(Array.get(array, i)));
+            buildCol.append(_encode(Array.get(array, i), ctx));
             if ((i + 1) < len) buildCol.append(',');
         }
 
         return buildCol.append(']').toString();
     }
 
-    private static String encodeEnum(Enum enumer) {
-        return "{" + SerializationParts.ENCODED_TYPE + ":\"" + enumer.getClass().getName() + "\", EnumStringValue:\"" + enumer.name() + "\"}";
+    private static String encodeEnum(Enum enumer, EncodingContext ctx) {
+        String s = "{" + SerializationParts.ENCODED_TYPE + ":\"" + enumer.getClass().getName() + "\", EnumStringValue:\"" + enumer.name() + "\"}";
+        if (ctx.isEscapeMode()) {
+            return s.replaceAll("\"", "\\\\\"");
+        } else {
+            return s;
+        }
     }
 
     private static final Map<Class, TypeHandler> tHandlers = new HashMap<Class, TypeHandler>();
 
     static {
         tHandlers.put(java.sql.Date.class, new TypeHandler<java.sql.Date, Long>() {
-            public Long getConverted(java.sql.Date in) {
+            public Long getConverted(java.sql.Date in, DecodingContext ctx) {
                 return in.getTime();
             }
         });
         tHandlers.put(java.util.Date.class, new TypeHandler<java.util.Date, Long>() {
-            public Long getConverted(java.util.Date in) {
+            public Long getConverted(java.util.Date in, DecodingContext ctx) {
                 return in.getTime();
             }
         });
 
         tHandlers.put(Timestamp.class, new TypeHandler<Timestamp, Long>() {
-            public Long getConverted(Timestamp in) {
+            public Long getConverted(Timestamp in, DecodingContext ctx) {
                 return in.getTime();
             }
         });
 
         tHandlers.put(Character.class, new TypeHandler<Character, String>() {
-            public String getConverted(Character in) {
+            public String getConverted(Character in, DecodingContext ctx) {
                 return String.valueOf(in.charValue());
             }
         });
 
+    }
+
+    private static String write(EncodingContext ctx, String s) {
+        if (ctx.isEscapeMode()) {
+            return s.replaceAll("\"", "\\\\\"");
+        } else {
+            return s;
+        }
+    }
+
+    private static String write(EncodingContext ctx, char s) {
+        if (ctx.isEscapeMode() && s == '\"') {
+            return "\\\\\"";
+        } else {
+            return String.valueOf(s);
+        }
     }
 
     public static void addEncodingHandler(Class from, TypeHandler handler) {
@@ -205,11 +254,13 @@ public class JSONEncoder {
     }
 
 
+    private static final DecodingContext STATIC_DEC_CONTEXT = new DecodingContext();
+
     private static Object convert(Object in) {
         if (in == null || !tHandlers.containsKey(in.getClass())) return in;
         else {
             //noinspection unchecked
-            return tHandlers.get(in.getClass()).getConverted(in);
+            return tHandlers.get(in.getClass()).getConverted(in, STATIC_DEC_CONTEXT);
         }
     }
 

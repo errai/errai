@@ -22,9 +22,12 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.common.client.protocols.SerializationParts;
+import org.jboss.errai.common.client.types.DecodingContext;
+import org.jboss.errai.common.client.types.JSONTypeHelper;
+import org.jboss.errai.common.client.types.UHashMap;
+import org.jboss.errai.common.client.types.UnsatisfiedForwardLookup;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,11 +36,30 @@ import static org.jboss.errai.common.client.types.TypeDemarshallers.hasDemarshal
 
 
 public class JSONDecoderCli {
-    public Object decode(Object value) {
+    public static Object decode(Object value) {
+        DecodingContext ctx = new DecodingContext();
+        Object v = null;
+
         if (value instanceof String) {
-            return _decode(JSONParser.parse((String) value));
+            v = _decode(JSONParser.parse((String) value), ctx);
         } else if (value instanceof JSONValue) {
-            return _decode((JSONValue) value);
+            v = _decode((JSONValue) value, ctx);
+        } else if (value != null) {
+            throw new RuntimeException("could not decode type: " + value.getClass());
+        }
+
+        if (ctx.isUnsatisfiedDependencies()) {
+            JSONTypeHelper.resolveDependencies(ctx);
+        }
+
+        return v;
+    }
+
+    public static Object decode(Object value, DecodingContext ctx) {
+        if (value instanceof String) {
+            return _decode(JSONParser.parse((String) value), ctx);
+        } else if (value instanceof JSONValue) {
+            return _decode((JSONValue) value, ctx);
         } else if (value != null) {
             throw new RuntimeException("could not decode type: " + value.getClass());
         }
@@ -45,7 +67,7 @@ public class JSONDecoderCli {
         return null;
     }
 
-    private Object _decode(JSONValue v) {
+    private static Object _decode(JSONValue v, DecodingContext ctx) {
         if (v.isString() != null) {
             return v.isString().stringValue();
         } else if (v.isNumber() != null) {
@@ -55,22 +77,42 @@ public class JSONDecoderCli {
         } else if (v.isNull() != null) {
             return null;
         } else if (v instanceof JSONObject) {
-            return decodeObject(v.isObject());
+            return decodeObject(v.isObject(), ctx);
         } else if (v instanceof JSONArray) {
-            return decodeList(v.isArray());
+            return decodeList(v.isArray(), ctx);
         } else {
             throw new RuntimeException("unknown encoding");
         }
     }
 
-    private Object decodeObject(JSONObject eMap) {
-        Map<String, Object> m = new HashMap<String, Object>();
+    private static Object decodeObject(JSONObject eMap, DecodingContext ctx) {
+        Map<String, Object> m = new UHashMap<String, Object>();
         for (String key : eMap.keySet()) {
             if (SerializationParts.ENCODED_TYPE.equals(key)) {
                 String className = eMap.get(key).isString().stringValue();
+
+                String objId = eMap.get(SerializationParts.OBJECT_ID).isString().stringValue();
+
+                boolean ref = false;
+                if (objId != null) {
+                    if (objId.charAt(0) == '$') {
+                        ref = true;
+                        objId = objId.substring(1);
+                    }
+
+                    if (ctx.hasObject(objId)) {
+                        return ctx.getObject(objId);
+                    } else if (ref) {
+                        return new UnsatisfiedForwardLookup(objId);
+                    }
+                }
+
+
                 if (hasDemarshaller(className)) {
                     try {
-                        return getDemarshaller(className).demarshall(eMap);
+                        Object o = getDemarshaller(className).demarshall(eMap, ctx);
+                        if (objId == null) ctx.putObject(objId, o);
+                        return o;
                     }
                     catch (Throwable t) {
                         t.printStackTrace();
@@ -84,15 +126,20 @@ public class JSONDecoderCli {
                 }
             } else if (SerializationParts.MARSHALLED_TYPES.equals(key)) continue;
 
-            m.put(key, _decode(eMap.get(key)));
+            m.put(key, _decode(eMap.get(key), ctx));
         }
         return m;
     }
 
-    private List<Object> decodeList(JSONArray arr) {
+    private static List<Object> decodeList(JSONArray arr, DecodingContext ctx) {
         List<Object> list = new ArrayList<Object>();
+        Object o;
         for (int i = 0; i < arr.size(); i++) {
-            list.add(_decode(arr.get(i)));
+            if ((o = _decode(arr.get(i), ctx)) instanceof UnsatisfiedForwardLookup) {
+                ctx.addUnsatisfiedDependency(list, ((UnsatisfiedForwardLookup) o));
+            } else {
+                list.add(o);
+            }
         }
         return list;
     }

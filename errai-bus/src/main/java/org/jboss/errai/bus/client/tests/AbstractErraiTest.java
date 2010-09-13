@@ -33,7 +33,7 @@ public abstract class AbstractErraiTest extends GWTTestCase {
 
     static {
         System.out.println("REMEMBER! Bus tests will not succeed if: \n" +
-                "1. You do not run the unit tests with the flag: -Dorg.jboss.errai.bus.do_long_poll=true \n" +
+                "1. You do not run the unit tests with the flag: -Dorg.jboss.errai.bus.do_long_poll=false \n" +
                 "2. You do not have the main and test source directories in the runtime classpath");
     }
 
@@ -93,12 +93,7 @@ public abstract class AbstractErraiTest extends GWTTestCase {
         };
 
 
-        delayTestFinish(10000);
-        t.schedule(800);
-    }
-
-    public static void main(String[] args) {
-
-
+        delayTestFinish(15000);
+        t.schedule(1000);
     }
 }

@@ -99,30 +99,12 @@ public class JSONEncoderCli {
                 mapBuild.append(_encode(entry.getKey(), ctx))
                         .append(":").append(val);
 
-//                if (marshall != null) {
-//                    if (marshalledTypes == null) marshalledTypes = new HashMap<String, String>();
-//                    marshalledTypes.put((String) entry.getKey(), marshall);
-//                    marshall = null;
-//                }
 
                 first = false;
             } else {
                 defer = false;
             }
         }
-
-//        if (marshalledTypes != null) {
-//            mapBuild.append("," + SerializationParts.MARSHALLED_TYPES + ":\"");
-//            first = true;
-//            for (Map.Entry<String, String> m : marshalledTypes.entrySet()) {
-//                if (!first) {
-//                    mapBuild.append(',');
-//                }
-//                mapBuild.append(m.getKey());
-//                first = false;
-//            }
-//            mapBuild.append("\"");
-//        }
 
         return mapBuild.append("}").toString();
     }

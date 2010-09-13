@@ -143,7 +143,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 URL.encode(endpoint)
         );
 
-     //   builder.setHeader("Connection", "Keep-Alive");
+        //   builder.setHeader("Connection", "Keep-Alive");
         builder.setHeader("Content-Type", "application/json");
         builder.setHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER, clientId);
 
@@ -158,7 +158,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 URL.encode(endpoint)
         );
 
-     //   builder.setHeader("Connection", "Keep-Alive");
+        //   builder.setHeader("Connection", "Keep-Alive");
         builder.setHeader("Content-Type", "application/json");
         builder.setHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER, clientId);
 
@@ -174,11 +174,16 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     public void unsubscribeAll(String subject) {
         if (subscriptions.containsKey(subject)) {
             for (Object o : subscriptions.get(subject)) {
+                if (o instanceof MessageCallback) continue;
+
                 _unsubscribe(o);
             }
 
             fireAllUnSubscribeListeners(subject);
+
+            subscriptions.remove(subject);
         }
+
     }
 
     /**
@@ -346,8 +351,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
         if (remotes.containsKey(subject)) {
             remotes.get(subject).callback(message);
-        }
-        else {
+        } else {
             _store(subject, v);
         }
     }
@@ -441,8 +445,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      * @param txMessage - Message reference.
      */
     private void transmitRemote(final String message, final Message txMessage) {
-        System.out.println("TX_REMOTE:" + message);
-
         if (message == null) return;
 
         try {
@@ -511,6 +513,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
         for (Map.Entry<String, List<Object>> entry : subscriptions.entrySet()) {
             for (Object o : entry.getValue()) {
+                if (o instanceof MessageCallback) continue;
                 _unsubscribe(o);
             }
         }
@@ -555,7 +558,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
 
     public final MessageCallback REMOTE_CALLBACK = new RemoteMessageCallback();
-
 
 
     /**
@@ -646,7 +648,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                             if (!remotes.containsKey(s)) subjects.add(s);
                         }
 
-                        directSubscribe("ServerBus", REMOTE_CALLBACK);
+                        remoteSubscribe("ServerBus");
 
                         MessageBuilder.createMessage()
                                 .toSubject("ServerBus")

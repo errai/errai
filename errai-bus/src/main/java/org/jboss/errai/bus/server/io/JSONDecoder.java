@@ -17,6 +17,8 @@
 package org.jboss.errai.bus.server.io;
 
 import org.jboss.errai.common.client.types.DecodingContext;
+import org.jboss.errai.common.client.types.UHashMap;
+import org.jboss.errai.common.client.types.UnsatisfiedForwardLookup;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -85,7 +87,7 @@ public class JSONDecoder {
 
                 case '{':
                     cursor++;
-                    ctx.addValue(_parse(new Context(), new HashMap(), true));
+                    ctx.addValue(_parse(new Context(), new UHashMap(), true));
                     break;
 
                 case ']':
@@ -94,18 +96,18 @@ public class JSONDecoder {
                     if (map && ctx.encodedType) {
                         ctx.encodedType = false;
                         try {
-                            return demarshallAll(ctx.record(collection), decodingContext);
+                            return demarshallAll(ctx.record(collection, decodingContext), decodingContext);
                         }
                         catch (Exception e) {
                             throw new RuntimeException("Could not demarshall object", e);
                         }
                     } else {
-                        return ctx.record(collection);
+                        return ctx.record(collection, decodingContext);
                     }
 
                 case ',':
                     cursor++;
-                    ctx.record(collection);
+                    ctx.record(collection, decodingContext);
                     break;
 
                 case '"':
@@ -152,7 +154,7 @@ public class JSONDecoder {
             }
         }
 
-        return ctx.record(collection);
+        return ctx.record(collection, decodingContext);
     }
 
     public static int captureStringLiteral(final char type, final char[] expr, int cursor, int length) {
@@ -165,48 +167,6 @@ public class JSONDecoder {
         }
 
         return cursor;
-    }
-
-    private static class Context {
-        Object lhs;
-        Object rhs;
-        boolean encodedType = false;
-
-        private Context() {
-        }
-
-        private void addValue(Object val) {
-            if (lhs == null) {
-                lhs = val;
-            } else {
-                rhs = val;
-            }
-        }
-
-        private Object record(Object collection) {
-            try {
-                if (lhs != null) {
-                    if (collection instanceof Map) {
-                        if (!encodedType) encodedType = ENCODED_TYPE.equals(lhs);
-
-                        //noinspection unchecked
-                        ((Map) collection).put(lhs, rhs);
-
-                    } else {
-                        if (collection == null) return lhs;
-                        //noinspection unchecked
-                        ((Collection) collection).add(lhs);
-                    }
-                }
-                return collection;
-            }
-            catch (ClassCastException e) {
-                throw new RuntimeException("error building collection", e);
-            }
-            finally {
-                lhs = rhs = null;
-            }
-        }
     }
 
 
@@ -306,5 +266,87 @@ public class JSONDecoder {
         }
 
         return val + dVal;
+    }
+
+
+    private static class Context {
+        Object lhs;
+        Object rhs;
+        boolean encodedType = false;
+
+        private Context() {
+        }
+
+        private Object addValue(Object val) {
+            if (lhs == null) {
+                return lhs = val;
+            } else {
+                return rhs = val;
+            }
+        }
+
+        private Object getValue() {
+            if (rhs != null) {
+                return rhs;
+            } else {
+                return lhs;
+            }
+        }
+
+        private void removeValue() {
+            if (rhs != null) {
+                rhs = null;
+            } else {
+                lhs = null;
+            }
+        }
+
+
+        private Object record(Object collection, DecodingContext ctx) {
+            try {
+                if (lhs != null) {
+                    if (collection instanceof Map) {
+                        if (!encodedType) encodedType = ENCODED_TYPE.equals(lhs);
+
+                        boolean rec = true;
+                        if (lhs instanceof UnsatisfiedForwardLookup) {
+                            ctx.addUnsatisfiedDependency(collection, (UnsatisfiedForwardLookup) lhs);
+                            if (!(rhs instanceof UnsatisfiedForwardLookup)) {
+                                ((UnsatisfiedForwardLookup) lhs).setVal(rhs);
+                                ((UnsatisfiedForwardLookup) lhs).setPath("{}");
+                            }
+                            rec = false;
+                        }
+                        if (rhs instanceof UnsatisfiedForwardLookup) {
+                            ctx.addUnsatisfiedDependency(collection, (UnsatisfiedForwardLookup) rhs);
+                            ((UnsatisfiedForwardLookup) rhs).setKey(lhs);
+                            ((UnsatisfiedForwardLookup) rhs).setPath(String.valueOf(lhs));
+                            rec = false;
+                        }
+
+                        //noinspection unchecked
+                        if (rec)
+                            ((Map) collection).put(lhs, rhs);
+
+                    } else {
+                        if (collection == null) return lhs;
+
+                        if (lhs instanceof UnsatisfiedForwardLookup) {
+                            ctx.addUnsatisfiedDependency(collection, (UnsatisfiedForwardLookup) lhs);
+                        } else {
+                            //noinspection unchecked
+                            ((Collection) collection).add(lhs);
+                        }
+                    }
+                }
+                return collection;
+            }
+            catch (ClassCastException e) {
+                throw new RuntimeException("error building collection", e);
+            }
+            finally {
+                lhs = rhs = null;
+            }
+        }
     }
 }

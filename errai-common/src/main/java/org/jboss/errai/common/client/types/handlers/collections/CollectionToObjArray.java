@@ -16,12 +16,13 @@
 
 package org.jboss.errai.common.client.types.handlers.collections;
 
+import org.jboss.errai.common.client.types.DecodingContext;
 import org.jboss.errai.common.client.types.TypeHandler;
 
 import java.util.Collection;
 
 public class CollectionToObjArray implements TypeHandler<Collection, Object[]> {
-    public Object[] getConverted(Collection in) {
+    public Object[] getConverted(Collection in, DecodingContext decodingContext) {
         if (in == null) return null;
         Object[] newArray = new Object[in.size()];
 

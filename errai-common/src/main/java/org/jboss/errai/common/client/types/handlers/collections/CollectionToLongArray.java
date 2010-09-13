@@ -16,12 +16,13 @@
 
 package org.jboss.errai.common.client.types.handlers.collections;
 
+import org.jboss.errai.common.client.types.DecodingContext;
 import org.jboss.errai.common.client.types.TypeHandler;
 
 import java.util.Collection;
 
 public class CollectionToLongArray implements TypeHandler<Collection, Long[]> {
-    public Long[] getConverted(Collection in) {
+    public Long[] getConverted(Collection in, DecodingContext ctx) {
         if (in == null) return null;
         Long[] newArray = new Long[in.size()];
 

@@ -23,6 +23,7 @@ import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.framework.RoutingFlags;
 import org.jboss.errai.bus.client.protocols.MessageParts;
+import org.jboss.errai.common.client.types.DecodingContext;
 import org.jboss.errai.common.client.types.TypeHandlerFactory;
 
 import java.util.HashMap;
@@ -328,7 +329,7 @@ public class CommandMessage implements Message {
     @SuppressWarnings({"UnusedDeclaration"})
     public <T> T get(Class<T> type, String part) {
         Object value = parts.get(part);
-        return value == null ? null : (T) TypeHandlerFactory.convert(value.getClass(), type, value);
+        return value == null ? null : (T) TypeHandlerFactory.convert(value.getClass(), type, value, new DecodingContext());
     }
 
     /**

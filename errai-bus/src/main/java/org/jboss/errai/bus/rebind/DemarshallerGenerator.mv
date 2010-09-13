@@ -37,18 +37,34 @@ limitations under the License.
 @else{Float.isAssignableFrom(targetType)}JSONNumber @{fieldName} = o.get("@{fieldName}").isNumber(); if (@{fieldName} != null) { n.@{binder.bindValue("new Double(" + fieldName + ".doubleValue()).floatValue()")}; }
 @else{Byte.isAssignableFrom(targetType)}JSONNumber @{fieldName} = o.get("@{fieldName}").isNumber(); if (@{fieldName} != null) { n.@{binder.bindValue("new Double(" + fieldName + ".doubleValue()).byteValue()")};}
 @else{Character.isAssignableFrom(targetType)}JSONString @{fieldName} = o.get("@{fieldName}").isString(); if (@{fieldName} != null) { n.@{binder.bindValue(fieldName + ".stringValue().charAt(0)")}; =}
-@else{}n.@{binder.bindValue("org.jboss.errai.common.client.types.JSONTypeHelper.convert(o.get(\"" + fieldName + "\"), " + targetType.getCanonicalName().replaceAll("\\$", "\\.") + ".class)")};
+@else{}
+    v = org.jboss.errai.common.client.types.JSONTypeHelper.convert(o.get("@{fieldName}"), @{targetType.getCanonicalName().replaceAll("\\$", "\\.")}.class, decodingContext);
+    if (v instanceof org.jboss.errai.common.client.types.UnsatisfiedForwardLookup) {
+        org.jboss.errai.common.client.types.UnsatisfiedForwardLookup usfl = (org.jboss.errai.common.client.types.UnsatisfiedForwardLookup) v;
+        usfl.setPath("@{binder.bindValue("")}");
+        usfl.setBinder(new org.jboss.errai.common.client.types.DeferredBinder() {
+            public void bind(Object v) {
+               n.@{binder.bindValue("(" + targetType.getCanonicalName().replaceAll("\\$", "\\.") + ") v")};
+            }
+        });
+
+        decodingContext.addUnsatisfiedDependency(n, usfl);
+    } else {
+       n.@{binder.bindValue("(" + targetType.getCanonicalName().replaceAll("\\$", "\\.") + ") v")};
+    }
 @end{}@end{}
 org.jboss.errai.common.client.types.TypeDemarshallers.addDemarshaller(
     @{className}.class,
     new org.jboss.errai.common.client.types.Demarshaller<@{className}>() {
-        public @{className} demarshall(com.google.gwt.json.client.JSONObject o) {
+        public @{className} demarshall(com.google.gwt.json.client.JSONObject o, org.jboss.errai.common.client.types.DecodingContext decodingContext) {
+            Object v = null;
             try {
-@if{enumType}@{className} n = @{className}.valueOf(o.get("EnumStringValue").isString().stringValue());@else{}@{className} n = new @{className}();@foreach{fieldName : setters.keySet()}@includeNamed{'binding'; binder=setters.get(fieldName); targetType=targetTypes.get(fieldName); fieldName=fieldName}@end{}@end{}
+@if{enumType}final @{className} n = @{className}.valueOf(o.get("EnumStringValue").isString().stringValue());@else{}final @{className} n = new @{className}();@foreach{fieldName : setters.keySet()}@includeNamed{'binding'; binder=setters.get(fieldName); targetType=targetTypes.get(fieldName); fieldName=fieldName}@end{}@end{}
 return n;
             }
             catch (Exception e) {
-                throw new RuntimeException("could not demarshall type: @{className}", e);
+                e.printStackTrace();
+                throw new RuntimeException("could not demarshall type: @{className}; value=" + o, e);
             }
         }
     }
@@ -61,7 +77,7 @@ return n;
 
         java.util.Iterator iter@{depth} = col@{depth}.iterator();
         for (int i@{depth} = 0; i@{depth} < a@foreach{i : depth}[i@{i}]@end{}.length; i@{depth}++) {
-            @if{depth < dimensions - 1}@includeNamed{'arrayFurler'; depth=depth+1; dimensions=dimensions; componentType=componentType}@else{}a@foreach{i : dimensions}[i@{i}]@end{} = org.jboss.errai.common.client.types.TypeHandlerFactory.convert(iter@{depth}.next(), @{org.mvel2.util.ParseTools.boxPrimitive(org.mvel2.util.ParseTools.getBaseComponentType(componentType)).getName().replaceAll("\\$", "\\.")}.class);@end{}
+            @if{depth < dimensions - 1}@includeNamed{'arrayFurler'; depth=depth+1; dimensions=dimensions; componentType=componentType}@else{}a@foreach{i : dimensions}[i@{i}]@end{} = org.jboss.errai.common.client.types.TypeHandlerFactory.convert(iter@{depth}.next(), @{org.mvel2.util.ParseTools.boxPrimitive(org.mvel2.util.ParseTools.getBaseComponentType(componentType)).getName().replaceAll("\\$", "\\.")}.class, decodingContext);@end{}
         }
 @end{}
 @foreach{c : arrayConverters.keySet()}
@@ -69,7 +85,7 @@ org.jboss.errai.common.client.types.TypeHandlerFactory.addHandler(
     java.util.Collection.class,
     @{c.getCanonicalName()}.class,
     new org.jboss.errai.common.client.types.TypeHandler<java.util.Collection, @{c.getCanonicalName()}>() {
-        public @{c.getCanonicalName()} getConverted(java.util.Collection col0) {
+        public @{c.getCanonicalName()} getConverted(java.util.Collection col0, org.jboss.errai.common.client.types.DecodingContext decodingContext) {
              @{c.getCanonicalName()} a = new @{org.mvel2.util.ParseTools.getBaseComponentType(c).getCanonicalName()}[col0.size()]@foreach{count:arrayConverters.get(c) - 1}[]@end{};
              @includeNamed{'arrayFurler'; depth=0; dimensions=arrayConverters.get(c); componentType=c.getComponentType()}
              return a;
