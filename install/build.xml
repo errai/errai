@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="errai-cdi-jboss" default="all" basedir="..">
+
+    <property file="install/build.properties"/>
+    <property environment="env"/>
+
+    <property name="maven" value="${env.MAVEN_HOME}/bin/mvn.bat"/>
+
+    <target name="service-archive" description="Deploy the service archive">
+        <!--exec dir="${build.service.dir}" executable="${maven}">
+              <arg line="${build.service.goal}" />
+          </exec-->
+        <delete dir="${jboss.deploy.full}/${errai.jboss.sar}"/>
+        <mkdir dir="${jboss.deploy.full}/${errai.jboss.sar}"/>
+        <unzip dest="${jboss.deploy.full}/${errai.jboss.sar}" src="${build.service.target}"/>
+    </target>
+
+    <target name="shared-model" description="Deploy the shared model jar">
+        <!--exec dir="${build.shared.model.dir}" executable="${maven}">
+              <arg line="${build.shared.model.goal}" />
+          </exec-->
+        <copy todir="${jboss.deploy.full}" file="${build.shared.model.target}" overwrite="true"/>
+    </target>
+
+    <target name="ui-frontend" description="Deploy the UI frontend">
+        <!--exec dir="${build.ui.frontend.dir}" executable="${maven}">
+              <arg line="${build.ui.frontend.goal}" />
+          </exec-->
+        <copy todir="${jboss.deploy.full}" file="${build.ui.frontend.target}" overwrite="true"/>
+    </target>
+
+    <target name="jms-topics" description="Deploy the JMS topic configuration">
+        <!--copy todir="${jboss.deploy.full}/messaging/"
+              file="jboss/conf/destinations-service.xml" overwrite="true"/-->
+    </target>
+
+    <target name="all" depends="service-archive, shared-model, ui-frontend,jms-topics">
+        <echo>Errai CDI integration module has been successfully deployed to JBoss Application Server.</echo>
+    </target>
+</project>
