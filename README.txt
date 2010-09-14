@@ -68,7 +68,7 @@ Troubleshooting
 
 If you run into trouble don't hesitate to get in touch with us:
 
-User Forum:     http://www.jboss.org/index.html?module=bb&op=viewforum&f=295
+User Forum:     http://community.jboss.org/en/errai?view=discussions 
 Mailing List:   http://jboss.org/errai/MailingLists.html
 IRC:            irc://irc.freenode.net/errai
 
