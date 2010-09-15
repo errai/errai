@@ -214,7 +214,7 @@ public class CDIExtensionPoints implements Extension
 
     public static void activateContexts(boolean active)
     {        
-        final ContextLifecycle contextLifecycle = Container.instance().services().get(ContextLifecycle.class);
+        /*final ContextLifecycle contextLifecycle = Container.instance().services().get(ContextLifecycle.class);
 
         // request
         RequestContext requestContext = contextLifecycle.getRequestContext();
@@ -224,6 +224,7 @@ public class CDIExtensionPoints implements Extension
         ConversationContext conversationContext = contextLifecycle.getConversationContext();
         conversationContext.setActive(active);
 
+        */        
         // TODO: session?
     }
     
