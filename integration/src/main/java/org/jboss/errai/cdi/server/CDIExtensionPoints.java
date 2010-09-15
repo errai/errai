@@ -26,14 +26,14 @@ import org.jboss.errai.bus.client.api.builder.AbstractRemoteCallBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.ProxyProvider;
 import org.jboss.errai.bus.rebind.RebindUtils;
-import org.jboss.errai.bus.server.ServerMessageBusImpl;
 import org.jboss.errai.bus.server.annotations.Command;
 import org.jboss.errai.bus.server.annotations.Remote;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.io.CommandBindingsCallback;
 import org.jboss.errai.bus.server.io.ConversationalEndpointCallback;
 import org.jboss.errai.bus.server.io.RemoteServiceCallback;
-import org.jboss.errai.cdi.server.api.Outbound;
+import org.jboss.errai.cdi.server.events.OutboundEventObserver;
+import org.jboss.errai.cdi.server.events.ShutdownEventObserver;
 import org.jboss.weld.Container;
 import org.jboss.weld.context.ContextLifecycle;
 import org.jboss.weld.context.ConversationContext;
@@ -42,19 +42,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Dependent;
-import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.event.Observes;
-import javax.enterprise.event.Reception;
-import javax.enterprise.event.TransactionPhase;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Default;
 import javax.enterprise.inject.spi.*;
-import javax.enterprise.util.AnnotationLiteral;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * Extension points to the CDI container.
@@ -68,14 +61,16 @@ public class CDIExtensionPoints implements Extension
 {
     private static final Logger log = LoggerFactory.getLogger(CDIExtensionPoints.class);
 
-    private List<AnnotatedType> services = new ArrayList<AnnotatedType>();
-    private Map<Class<?>, AnnotatedType> rpcEndpoints = new HashMap<Class<?>, AnnotatedType>();
+    private TypeRegistry managedTypes = null;    
 
-    private EventDispatcher eventDispatcher;
+    private String uuid = null;
 
     public void beforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd)
     {
-        log.info("Errai-CDI extension discovered");
+        this.uuid = UUID.randomUUID().toString();
+        this.managedTypes = new TypeRegistry();
+        
+        log.info("Created Errai-CDI context: " +uuid);
     }
 
     /**
@@ -101,13 +96,13 @@ public class CDIExtensionPoints implements Extension
                 if(isRpc)
                 {
                     log.debug("Identified Errai RPC interface: " + intf + " on "+type);
-                    rpcEndpoints.put(intf, type);
+                    managedTypes.addRPCEndpoint(intf, type);
                 }
             }
 
             if(!isRpc)
             {
-                services.add(type);
+                managedTypes.addServiceEndpoint(type);
             }
 
             // enforce application scope until we get the other scopes working
@@ -144,28 +139,26 @@ public class CDIExtensionPoints implements Extension
 
     public void afterBeanDiscovery(@Observes AfterBeanDiscovery abd,  BeanManager bm)
     {
+        final MessageBus bus = Util.lookupMessageBus();
+        EventDispatcher eventDispatcher = new EventDispatcher(bm, bus);
+
         // Errai bus injection
-        provideErraiBus(abd, bm);
+        abd.addBean(new MessageBusDelegate(bm, bus));
 
-        // Eventing support
-        observeEvents(abd, bm);
+        // Register observers
+        abd.addObserverMethod(new OutboundEventObserver(eventDispatcher));
+        abd.addObserverMethod(new ShutdownEventObserver(managedTypes, bus, uuid));
 
-        registerServices(bm);
+        // subscribe service and rpc endpoints
+        subscribeServices(bm, bus);
 
-        registerEventDispatcher(bm, Util.lookupMessageBus());
+        // subscribe event dispatcher
+        bus.subscribe(EventDispatcher.NAME, eventDispatcher);
     }
 
-    private void registerEventDispatcher(BeanManager bm, MessageBus messageBus)
-    {
-        this.eventDispatcher = new EventDispatcher(bm, messageBus);
-        messageBus.subscribe("cdi.event:Dispatcher", eventDispatcher);
-    }
-
-    private void registerServices(final BeanManager beanManager)
-    {
-        MessageBus bus = Util.lookupMessageBus();
-
-        for(final AnnotatedType<?> type : services)
+    private void subscribeServices(final BeanManager beanManager, final MessageBus bus)
+    {        
+        for(final AnnotatedType<?> type : managedTypes.getServiceEndpoints())
         {
             // Discriminate on @Command
             Map<String, Method> commandPoints = new HashMap<String, Method>();
@@ -201,9 +194,9 @@ public class CDIExtensionPoints implements Extension
 
         }
 
-        for(final Class<?> rpcIntf : rpcEndpoints.keySet())
+        for(final Class<?> rpcIntf : managedTypes.getRpcEndpoints().keySet())
         {
-            final AnnotatedType type = rpcEndpoints.get(rpcIntf);
+            final AnnotatedType type = managedTypes.getRpcEndpoints().get(rpcIntf);
             final Class beanClass = type.getJavaClass();
 
             log.info("Register RPC Endpoint: " + type + "("+rpcIntf+")");
@@ -220,8 +213,7 @@ public class CDIExtensionPoints implements Extension
     }
 
     public static void activateContexts(boolean active)
-    {
-        // TODO: Does this work in AS 6 ?
+    {        
         final ContextLifecycle contextLifecycle = Container.instance().services().get(ContextLifecycle.class);
 
         // request
@@ -235,168 +227,6 @@ public class CDIExtensionPoints implements Extension
         // TODO: session?
     }
     
-    private void observeEvents(AfterBeanDiscovery abd, BeanManager bm)
-    {
-        abd.addObserverMethod(
-                new ObserverMethod()
-                {
-                    public Class<?> getBeanClass()
-                    {
-                        return CDIExtensionPoints.class;
-                    }
-
-                    public Type getObservedType()
-                    {
-                        return Outbound.class;
-                    }
-
-                    public Set<Annotation> getObservedQualifiers()
-                    {
-                        Set<Annotation> qualifiers = new HashSet<Annotation>();
-                        return qualifiers;
-                    }
-
-                    public Reception getReception()
-                    {
-                        return Reception.ALWAYS;
-                    }
-
-                    public TransactionPhase getTransactionPhase()
-                    {
-                        return null;
-                    }
-
-                    public void notify(Object o)
-                    {
-                        if(null==eventDispatcher)
-                            throw new RuntimeException("EventDispatcher not initialized");
-                        eventDispatcher.sendMessage((Outbound)o);
-                    }
-                }
-        );
-
-        // Shutdownhook
-        abd.addObserverMethod(
-                new ObserverMethod()
-                {
-                    public Class<?> getBeanClass()
-                    {
-                        return CDIExtensionPoints.class;
-                    }
-
-                    public Type getObservedType()
-                    {
-                        return BeforeShutdown.class;
-                    }
-
-                    public Set<Annotation> getObservedQualifiers()
-                    {
-                        Set<Annotation> qualifiers = new HashSet<Annotation>();
-                        return qualifiers;
-                    }
-
-                    public Reception getReception()
-                    {
-                        return Reception.ALWAYS;
-                    }
-
-                    public TransactionPhase getTransactionPhase()
-                    {
-                        return null;
-                    }
-
-                    public void notify(Object o)
-                    {
-                        MessageBus bus = Util.lookupMessageBus();
-                        for(AnnotatedType<?> svc : services)
-                        {
-                            String subject = Util.resolveServiceName(svc.getJavaClass());
-                            log.debug("Unsubscribe: "+subject);
-                            bus.unsubscribeAll(subject);
-                        }
-
-                        for(Class<?> rpcIntf : rpcEndpoints.keySet())
-                        {
-                            String rpcSubjectName = rpcIntf.getName() + ":RPC";
-                            log.debug("Unsubscribe: "+rpcSubjectName);
-                            bus.unsubscribeAll(rpcSubjectName);
-                        }
-                    }
-                }
-        );
-    }
-
-    private void provideErraiBus(AfterBeanDiscovery abd, BeanManager bm)
-    {
-        //use this to read annotations of the class
-        AnnotatedType at = bm.createAnnotatedType(ServerMessageBusImpl.class);
-
-        //use this to create the class and inject dependencies
-        final InjectionTarget it = bm.createInjectionTarget(at);
-
-        abd.addBean( new Bean() {
-
-
-            public Class<?> getBeanClass() {
-                return MessageBus.class;
-            }
-
-
-            public Set<InjectionPoint> getInjectionPoints() {
-                return it.getInjectionPoints();
-            }
-
-            public String getName() {
-                return null;
-            }
-
-            public Set<Annotation> getQualifiers() {
-                Set<Annotation> qualifiers = new HashSet<Annotation>();
-                qualifiers.add( new AnnotationLiteral<Default>() {} );
-                qualifiers.add( new AnnotationLiteral<Any>() {} );
-                return qualifiers;
-            }
-
-            public Class<? extends Annotation> getScope() {
-                return Dependent.class;
-            }
-
-            public Set<Class<? extends Annotation>> getStereotypes() {
-                return Collections.emptySet();
-            }
-
-            public Set<Type> getTypes() {
-                Set<Type> types = new HashSet<Type>();
-                types.add(MessageBus.class);
-                types.add(Object.class);
-                return types;
-            }
-
-            public boolean isAlternative() {
-                return false;
-            }
-
-            public boolean isNullable() {
-                return false;
-            }
-
-            public Object create(CreationalContext ctx) {
-                Object instance = Util.lookupMessageBus();
-                it.inject(instance, ctx);
-                it.postConstruct(instance);
-                return instance;
-            }
-
-            public void destroy(Object instance, CreationalContext ctx) {
-                it.preDestroy(instance);
-                it.dispose(instance);
-                ctx.release();
-            }
-        }
-
-        );
-    }
-
     private void createRPCScaffolding(final Class remoteIface, final Class<?> type, final MessageBus bus, final ResourceProvider resourceProvider) {
 
         final Injector injector = Guice.createInjector(new AbstractModule() {
