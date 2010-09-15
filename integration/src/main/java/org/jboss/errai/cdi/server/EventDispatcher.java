@@ -21,6 +21,8 @@ import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.cdi.client.CDICommands;
 import org.jboss.errai.cdi.client.CDIProtocol;
+import org.jboss.errai.cdi.server.api.InboundQualifier;
+import org.jboss.errai.cdi.server.api.Outbound;
 
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.BeanManager;

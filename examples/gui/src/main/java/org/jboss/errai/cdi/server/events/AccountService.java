@@ -17,8 +17,8 @@ package org.jboss.errai.cdi.server.events;
 
 import org.jboss.errai.cdi.client.events.AccountActivity;
 import org.jboss.errai.cdi.client.events.Fraud;
-import org.jboss.errai.cdi.server.Inbound;
-import org.jboss.errai.cdi.server.Outbound;
+import org.jboss.errai.cdi.server.api.Inbound;
+import org.jboss.errai.cdi.server.api.Outbound;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;

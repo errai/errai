@@ -33,7 +33,7 @@ import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.io.CommandBindingsCallback;
 import org.jboss.errai.bus.server.io.ConversationalEndpointCallback;
 import org.jboss.errai.bus.server.io.RemoteServiceCallback;
-import org.jboss.errai.bus.server.service.ErraiService;
+import org.jboss.errai.cdi.server.api.Outbound;
 import org.jboss.weld.Container;
 import org.jboss.weld.context.ContextLifecycle;
 import org.jboss.weld.context.ConversationContext;
@@ -43,8 +43,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
-import javax.enterprise.context.RequestScoped;
-import javax.enterprise.context.spi.Context;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.event.Observes;
 import javax.enterprise.event.Reception;
@@ -53,9 +51,6 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Default;
 import javax.enterprise.inject.spi.*;
 import javax.enterprise.util.AnnotationLiteral;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.servlet.ServletContext;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -80,7 +75,7 @@ public class CDIExtensionPoints implements Extension
 
     public void beforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd)
     {
-        //System.out.println("** beginning the scanning process");
+        log.info("Errai-CDI extension discovered");
     }
 
     /**
@@ -157,7 +152,7 @@ public class CDIExtensionPoints implements Extension
 
         registerServices(bm);
 
-        registerEventDispatcher(bm, lookupMessageBus());
+        registerEventDispatcher(bm, Util.lookupMessageBus());
     }
 
     private void registerEventDispatcher(BeanManager bm, MessageBus messageBus)
@@ -166,39 +161,9 @@ public class CDIExtensionPoints implements Extension
         messageBus.subscribe("cdi.event:Dispatcher", eventDispatcher);
     }
 
-    private MessageBus lookupMessageBus()
-    {
-        InitialContext ctx = null;
-        ErraiService errai = null;
-
-        try
-        {
-            ctx = new InitialContext();
-            errai = (ErraiService)ctx.lookup("java:/Errai");
-        }
-        catch (NamingException e)
-        {
-            if(ctx!=null)
-            {
-                try
-                {
-                    errai = (ErraiService)ctx.lookup("java:comp/env/Errai"); // development mode
-                }
-                catch (NamingException e1)
-                {
-                }
-            }
-
-            if(null==errai)
-                throw new RuntimeException("Failed to locate Errai service instance", e);
-        }
-
-        return errai.getBus();
-    }
-
     private void registerServices(final BeanManager beanManager)
     {
-        MessageBus bus = lookupMessageBus();
+        MessageBus bus = Util.lookupMessageBus();
 
         for(final AnnotatedType<?> type : services)
         {
@@ -215,9 +180,9 @@ public class CDIExtensionPoints implements Extension
             }
 
             log.info("Register MessageCallback: " + type);
-            String subjectName = resolveServiceName(type.getJavaClass());
+            String subjectName = Util.resolveServiceName(type.getJavaClass());
 
-            Object targetbean = lookupCallbackBean(beanManager, type.getJavaClass());
+            Object targetbean = Util.lookupCallbackBean(beanManager, type.getJavaClass());
             final MessageCallback invocationTarget = commandPoints.isEmpty() ?
                     (MessageCallback)targetbean : new CommandBindingsCallback(commandPoints, targetbean);
 
@@ -248,7 +213,7 @@ public class CDIExtensionPoints implements Extension
             {
                 public Object get()
                 {
-                    return lookupRPCBean(beanManager, rpcIntf, beanClass);
+                    return Util.lookupRPCBean(beanManager, rpcIntf, beanClass);
                 }
             });
         }
@@ -269,32 +234,7 @@ public class CDIExtensionPoints implements Extension
 
         // TODO: session?
     }
-
-    private String resolveServiceName(Class<?> type)
-    {
-        String subjectName = type.getAnnotation(Service.class).value();
-        if(subjectName.equals("")) subjectName = type.getSimpleName();
-        return subjectName;
-    }
-
-    private Object lookupCallbackBean(BeanManager beanManager, Class<?> serviceType)
-    {
-        Set<Bean<?>> beans = beanManager.getBeans(serviceType);
-        Bean<?> bean = beanManager.resolve(beans);
-        CreationalContext<?> context = beanManager.createCreationalContext(bean);
-
-        return beanManager.getReference(bean, serviceType, context);
-    }
-
-    private <T> T lookupRPCBean(BeanManager beanManager, T rpcIntf, Class beanClass)
-    {
-        Set<Bean<?>> beans = beanManager.getBeans(beanClass);
-        Bean<?> bean = beanManager.resolve(beans);
-        CreationalContext<?> context = beanManager.createCreationalContext(bean);
-        return (T)beanManager.getReference(bean, beanClass, context);
-
-    }
-
+    
     private void observeEvents(AfterBeanDiscovery abd, BeanManager bm)
     {
         abd.addObserverMethod(
@@ -367,10 +307,10 @@ public class CDIExtensionPoints implements Extension
 
                     public void notify(Object o)
                     {
-                        MessageBus bus = lookupMessageBus();
+                        MessageBus bus = Util.lookupMessageBus();
                         for(AnnotatedType<?> svc : services)
                         {
-                            String subject = resolveServiceName(svc.getJavaClass());
+                            String subject = Util.resolveServiceName(svc.getJavaClass());
                             log.debug("Unsubscribe: "+subject);
                             bus.unsubscribeAll(subject);
                         }
@@ -441,7 +381,7 @@ public class CDIExtensionPoints implements Extension
             }
 
             public Object create(CreationalContext ctx) {
-                Object instance = lookupMessageBus();
+                Object instance = Util.lookupMessageBus();
                 it.inject(instance, ctx);
                 it.postConstruct(instance);
                 return instance;
@@ -455,23 +395,6 @@ public class CDIExtensionPoints implements Extension
         }
 
         );
-    }
-
-
-    public <T> void observeInjectionTarget(@Observes ProcessInjectionTarget<T> event)
-    {
-        //System.out.println("\t -> "+ event.getAnnotatedType().getJavaClass());
-    }
-
-    public static ServiceRegistry lookupServiceRegistry(BeanManager manager)
-    {
-        Set<Bean<?>> beans = manager.getBeans(ServiceRegistry.class);
-        Bean<?> bean = manager.resolve(beans);
-        if(null==bean)
-            throw new IllegalArgumentException("Failed to lookup ServiceRegistry");
-
-        CreationalContext<?> context = manager.createCreationalContext(bean);
-        return (ServiceRegistry) manager.getReference(bean, ServiceRegistry.class, context);
     }
 
     private void createRPCScaffolding(final Class remoteIface, final Class<?> type, final MessageBus bus, final ResourceProvider resourceProvider) {

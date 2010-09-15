@@ -13,32 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.cdi.server;
+package org.jboss.errai.cdi.server.api;
 
-/**
- * @author: Heiko Braun <hbraun@redhat.com>
- * @date: Apr 9, 2010
- */
-public class Outbound
+import org.jboss.errai.cdi.server.api.Inbound;
+
+import javax.enterprise.util.AnnotationLiteral;
+
+public class InboundQualifier extends AnnotationLiteral<Inbound>
+  implements Inbound
 {
-  Object payload;
-
-  public Outbound()
+  public InboundQualifier()
   {
-  }
-
-  public Outbound(Object payload)
-  {
-    this.payload = payload;
-  }
-
-  public Object getPayload()
-  {
-    return payload;
-  }
-
-  public void setPayload(Object payload)
-  {
-    this.payload = payload;
-  }
+  }  
 }

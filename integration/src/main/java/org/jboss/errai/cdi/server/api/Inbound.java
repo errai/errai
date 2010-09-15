@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.cdi.server;
+package org.jboss.errai.cdi.server.api;
 
 import javax.inject.Qualifier;
 import java.lang.annotation.ElementType;
