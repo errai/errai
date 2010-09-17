@@ -17,12 +17,12 @@ package org.jboss.errai.bus.server.service.bootstrap;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
+import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.ResourceProvider;
+import org.jboss.errai.bus.client.api.base.JSONMessage;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.client.framework.ModelAdapter;
-import org.jboss.errai.bus.client.framework.NoopModelAdapter;
-import org.jboss.errai.bus.client.framework.RequestDispatcher;
+import org.jboss.errai.bus.client.api.base.MessageModelWrapper;
+import org.jboss.errai.bus.client.framework.*;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.HttpSessionProvider;
 import org.jboss.errai.bus.server.SimpleDispatcher;
@@ -60,8 +60,13 @@ class DefaultComponents implements BootstrapExecution {
 
         /*** ModelAdapter ***/
         config.getExtensionBindings().put(ModelAdapter.class, modelAdapterProvider);
-
-        MessageBuilder.setMessageProvider(JSONMessageServer.PROVIDER);
+        MessageProvider modelAdapterProxy = new MessageProvider()
+        {
+            public Message get() {
+                return new MessageModelWrapper(new JSONMessageServer(), modelAdapterProvider.get());
+            }
+        };
+        MessageBuilder.setMessageProvider(modelAdapterProxy);
 
         /*** Authentication Adapter ***/
 
@@ -113,10 +118,11 @@ class DefaultComponents implements BootstrapExecution {
         /*** Dispatcher ***/
 
         RequestDispatcher dispatcher = createInjector(new AbstractModule() {
+
             @Override
             protected void configure() {
                 Class<? extends RequestDispatcher> dispatcherImplementation = SimpleDispatcher.class;
-
+                
                 if (config.hasProperty(ErraiServiceConfigurator.ERRAI_DISPATCHER_IMPLEMENTATION)) {
                     try {
                         dispatcherImplementation = Class.forName(config.getProperty(ErraiServiceConfigurator.ERRAI_DISPATCHER_IMPLEMENTATION))
