@@ -60,10 +60,12 @@ class DefaultComponents implements BootstrapExecution {
 
         /*** ModelAdapter ***/
         config.getExtensionBindings().put(ModelAdapter.class, modelAdapterProvider);
-        MessageProvider modelAdapterProxy = new MessageProvider()
+        final MessageProvider modelAdapterProxy = new MessageProvider()
         {
+            final MessageProvider delegate = JSONMessageServer.PROVIDER;
+
             public Message get() {
-                return new MessageModelWrapper(new JSONMessageServer(), modelAdapterProvider.get());
+                return new MessageModelWrapper(delegate.get(), modelAdapterProvider.get());
             }
         };
         MessageBuilder.setMessageProvider(modelAdapterProxy);
