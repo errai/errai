@@ -17,6 +17,7 @@
 package org.jboss.errai.bus.client.api.base;
 
 import org.jboss.errai.bus.client.api.ErrorCallback;
+import org.jboss.errai.bus.client.api.HasEncoded;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.ResourceProvider;
 import org.jboss.errai.bus.client.framework.MessageBus;
@@ -26,7 +27,7 @@ import org.jboss.errai.bus.client.framework.RoutingFlags;
 
 import java.util.Map;
 
-public class MessageModelWrapper implements Message {
+public class MessageModelWrapper implements Message, HasEncoded {
     private Message delegate;
     private transient final ModelAdapter modelAdapter;
 
@@ -35,6 +36,11 @@ public class MessageModelWrapper implements Message {
         if ((this.modelAdapter = modelAdapter) == null) {
             throw new AssertionError("ModelAdapter cannot be null!");
         }
+    }
+
+    // important!
+    public String getEncoded() {
+        return ((HasEncoded)delegate).getEncoded(); 
     }
 
     public Message toSubject(String subject) {
