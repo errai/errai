@@ -22,7 +22,7 @@ import org.jboss.errai.bus.client.api.base.MessageModelWrapper;
 import org.jboss.errai.bus.client.framework.MessageProvider;
 
 public class JSONMessageServer extends JSONMessage {
-    /*public static final MessageProvider PROVIDER = new MessageProvider() {
+    public static final MessageProvider PROVIDER = new MessageProvider() {
         public Message get() {            
             return create();
         }
@@ -30,7 +30,7 @@ public class JSONMessageServer extends JSONMessage {
 
     static JSONMessage create() {
         return new JSONMessageServer();
-    } */
+    }
 
     @Override
     protected void _addObjectPart(String a, Object b) {
