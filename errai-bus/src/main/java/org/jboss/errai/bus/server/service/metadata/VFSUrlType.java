@@ -54,7 +54,7 @@ public class VFSUrlType implements Vfs.UrlType {
 
         // delegate unpacked archives to SystemDir handler
         if (deployment.isDirectory())
-            return new SystemDir(toUrl(deployment.getAbsolutePath()));
+            return new SystemDir(toUrl("file:/"+deployment.getAbsolutePath()));
 
         // if it's a file delegate to ZipDir handler
         ZipDir delegate = new ZipDir(toUrl("file:/" + deployment.getAbsolutePath()));
