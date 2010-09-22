@@ -19,8 +19,8 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import org.reflections.Reflections;
 import org.reflections.Store;
-import org.reflections.scanners.*;
 import org.reflections.scanners.Scanner;
+import org.reflections.scanners.TypeAnnotationsScanner;
 import org.reflections.util.ConfigurationBuilder;
 import org.reflections.vfs.Vfs;
 

@@ -61,9 +61,22 @@ public class ServiceProcessor implements MetaDataProcessor {
 
         for (Class<?> loadClass : services) {
             Object svc = null;
-            String svcName = loadClass.getAnnotation(Service.class).value();
-            // If no name is specified, just use the class name as the service
-            // by default.
+
+            Service svcAnnotation = loadClass.getAnnotation(Service.class);
+            if(null==svcAnnotation)
+            {
+                // Diagnose Errai-111
+                StringBuffer sb = new StringBuffer();
+                sb.append("Service annotation cannot be loaded. (See https://jira.jboss.org/browse/ERRAI-111)\n");
+                sb.append(loadClass.getSimpleName()).append(" loader: ").append(loadClass.getClassLoader()).append("\n");
+                sb.append("@Service loader:").append(Service.class.getClassLoader()).append("\n");
+                log.warn(sb.toString());
+                continue;
+            }
+            
+            String svcName = svcAnnotation.value();
+
+            // If no name is specified, just use the class name as the service by default.
             if ("".equals(svcName)) {
                 svcName = loadClass.getSimpleName();
             }
