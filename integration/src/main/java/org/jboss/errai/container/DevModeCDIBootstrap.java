@@ -16,30 +16,29 @@
 package org.jboss.errai.container;
 
 import javassist.util.proxy.ProxyFactory;
+import javassist.util.proxy.ProxyFactory.ClassLoaderProvider;
+
+import javax.enterprise.inject.spi.BeanManager;
+import javax.servlet.ServletContextEvent;
+
 import org.jboss.weld.bootstrap.api.Bootstrap;
 import org.jboss.weld.bootstrap.api.Environments;
-import org.jboss.weld.context.api.BeanStore;
-import org.jboss.weld.context.api.helpers.ConcurrentHashMapBeanStore;
 import org.jboss.weld.environment.jetty.JettyWeldInjector;
 import org.jboss.weld.environment.servlet.Listener;
 import org.jboss.weld.environment.servlet.deployment.ServletDeployment;
 import org.jboss.weld.environment.servlet.services.ServletResourceInjectionServices;
-import org.jboss.weld.environment.servlet.services.ServletServicesImpl;
 import org.jboss.weld.environment.servlet.util.Reflections;
 import org.jboss.weld.environment.tomcat.WeldForwardingAnnotationProcessor;
+import org.jboss.weld.environment.tomcat7.WeldForwardingInstanceManager;
 import org.jboss.weld.injection.spi.ResourceInjectionServices;
 import org.jboss.weld.manager.api.WeldManager;
 import org.jboss.weld.servlet.api.ServletListener;
-import org.jboss.weld.servlet.api.ServletServices;
 import org.jboss.weld.servlet.api.helpers.ForwardingServletListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletContextEvent;
-
 /**
- * @author: Heiko Braun <hbraun@redhat.com>
- * @date: Aug 2, 2010
+ * @author Pete Muir
  */
 public class DevModeCDIBootstrap extends ForwardingServletListener
 {
@@ -47,10 +46,10 @@ public class DevModeCDIBootstrap extends ForwardingServletListener
 
     private static final String BOOTSTRAP_IMPL_CLASS_NAME = "org.jboss.weld.bootstrap.WeldBootstrap";
     private static final String WELD_LISTENER_CLASS_NAME = "org.jboss.weld.servlet.WeldListener";
-    private static final String APPLICATION_BEAN_STORE_ATTRIBUTE_NAME = Listener.class.getName() + ".applicationBeanStore";
     private static final String EXPRESSION_FACTORY_NAME = "org.jboss.weld.el.ExpressionFactory";
     private static final String JETTY_REQUIRED_CLASS_NAME = "org.mortbay.jetty.servlet.ServletHandler";
     public  static final String INJECTOR_ATTRIBUTE_NAME = "org.jboss.weld.environment.jetty.JettyWeldInjector";
+    public static final String BEAN_MANAGER_ATTRIBUTE_NAME = Listener.class.getPackage().getName() + "." + BeanManager.class.getName();
 
     private final transient Bootstrap bootstrap;
     private final transient ServletListener weldListener;
@@ -99,7 +98,7 @@ public class DevModeCDIBootstrap extends ForwardingServletListener
     public void contextInitialized(ServletContextEvent sce)
     {
         // Make Javassist always use the TCCL to load classes
-        ProxyFactory.classLoaderProvider = new ProxyFactory.ClassLoaderProvider()
+        ProxyFactory.classLoaderProvider = new ClassLoaderProvider()
         {
 
             public ClassLoader get(ProxyFactory pf)
@@ -108,8 +107,6 @@ public class DevModeCDIBootstrap extends ForwardingServletListener
             }
 
         };
-        BeanStore applicationBeanStore = new ConcurrentHashMapBeanStore();
-        sce.getServletContext().setAttribute(APPLICATION_BEAN_STORE_ATTRIBUTE_NAME, applicationBeanStore);
 
         ServletDeployment deployment = new ServletDeployment(sce.getServletContext(), bootstrap);
         try
@@ -123,13 +120,11 @@ public class DevModeCDIBootstrap extends ForwardingServletListener
             log.warn("@Resource injection not available in simple beans");
         }
 
-        deployment.getServices().add(ServletServices.class,
-                new ServletServicesImpl(deployment.getWebAppBeanDeploymentArchive()));
-
-        bootstrap.startContainer(Environments.SERVLET, deployment, applicationBeanStore).startInitialization();
+        bootstrap.startContainer(Environments.SERVLET, deployment).startInitialization();
         manager = bootstrap.getManager(deployment.getWebAppBeanDeploymentArchive());
 
         boolean tomcat = true;
+        boolean tomcat7 = false;
         try
         {
             Reflections.classForName("org.apache.AnnotationProcessor");
@@ -151,6 +146,15 @@ public class DevModeCDIBootstrap extends ForwardingServletListener
                 log.error("Unable to replace Tomcat AnnotationProcessor. CDI injection will not be available in Servlets, Filters, or Listeners", e);
             }
         }
+        try
+        {
+            Reflections.classForName("org.apache.tomcat.InstanceManager");
+            tomcat7 = true;
+        }
+        catch (IllegalArgumentException e)
+        {
+            tomcat7 = false;
+        }
 
         boolean jetty = true;
         try
@@ -162,7 +166,7 @@ public class DevModeCDIBootstrap extends ForwardingServletListener
             jetty = false;
         }
 
-        /*if (jetty)
+        if (jetty)
         {
             // Try pushing a Jetty Injector into the servlet context
             try
@@ -176,15 +180,27 @@ public class DevModeCDIBootstrap extends ForwardingServletListener
             {
                 log.error("Unable to create JettyWeldInjector. CDI injection will not be available in Servlets, Filters or Listeners", e);
             }
-        }*/
-
-        if (!tomcat && !jetty) {
+        }
+        if (tomcat7)
+        {
+            try
+            {
+                WeldForwardingInstanceManager.replacInstanceManager(sce, manager);
+                log.info("Tomcat 7 detected, CDI injection will be available in Servlets and Filters. Injection into Listeners is not supported");
+            }
+            catch (Exception e)
+            {
+                log.error("Unable to replace Tomcat 7 AnnotationProcessor. CDI injection will not be available in Servlets, Filters, or Listeners", e);
+            }
+        }
+        if (!tomcat && !jetty&&!tomcat7) {
             log.info("No supported servlet container detected, CDI injection will NOT be available in Servlets, Filtersor or Listeners");
         }
 
-        /*// Push the manager into the servlet context so we can access in JSF
+        // Push the manager into the servlet context so we can access in JSF
+        sce.getServletContext().setAttribute(BEAN_MANAGER_ATTRIBUTE_NAME, manager);
 
-        if (JspFactory.getDefaultFactory() != null)
+        /*if (JspFactory.getDefaultFactory() != null)
         {
             JspApplicationContext jspApplicationContext = JspFactory.getDefaultFactory().getJspApplicationContext(sce.getServletContext());
 
@@ -198,10 +214,9 @@ public class DevModeCDIBootstrap extends ForwardingServletListener
             // Push the wrapped expression factory into the servlet context so that Tomcat or Jetty can hook it in using a container code
             sce.getServletContext().setAttribute(EXPRESSION_FACTORY_NAME,
                     manager.wrapExpressionFactory(jspApplicationContext.getExpressionFactory()));
-        }*/
+        } */
 
         bootstrap.deployBeans().endInitialization();
-        //bootstrap.deployBeans().validateBeans().endInitialization();
         super.contextInitialized(sce);
     }
 
@@ -210,6 +225,5 @@ public class DevModeCDIBootstrap extends ForwardingServletListener
     {
         return weldListener;
     }
-
 
 }

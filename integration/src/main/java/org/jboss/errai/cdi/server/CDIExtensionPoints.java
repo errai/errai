@@ -34,10 +34,7 @@ import org.jboss.errai.bus.server.io.ConversationalEndpointCallback;
 import org.jboss.errai.bus.server.io.RemoteServiceCallback;
 import org.jboss.errai.cdi.server.events.OutboundEventObserver;
 import org.jboss.errai.cdi.server.events.ShutdownEventObserver;
-import org.jboss.weld.Container;
-import org.jboss.weld.context.ContextLifecycle;
-import org.jboss.weld.context.ConversationContext;
-import org.jboss.weld.context.RequestContext;
+import org.jboss.weld.context.bound.BoundRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,6 +61,8 @@ public class CDIExtensionPoints implements Extension
     private TypeRegistry managedTypes = null;    
 
     private String uuid = null;
+
+    private ContextManager contextManager;
 
     public void beforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd)
     {
@@ -139,8 +138,14 @@ public class CDIExtensionPoints implements Extension
 
     public void afterBeanDiscovery(@Observes AfterBeanDiscovery abd,  BeanManager bm)
     {
+        // context handling hooks
+        BoundRequestContext requestContextDelegate = (BoundRequestContext)
+                Util.lookupCallbackBean(bm, BoundRequestContext.class);
+        this.contextManager = new ContextManager(uuid, requestContextDelegate);
+
+        // event dispatcher
         final MessageBus bus = Util.lookupMessageBus();
-        EventDispatcher eventDispatcher = new EventDispatcher(bm, bus);
+        EventDispatcher eventDispatcher = new EventDispatcher(bm, bus, this.contextManager);
 
         // Errai bus injection
         abd.addBean(new MessageBusDelegate(bm, bus));
@@ -154,6 +159,7 @@ public class CDIExtensionPoints implements Extension
 
         // subscribe event dispatcher
         bus.subscribe(EventDispatcher.NAME, eventDispatcher);
+
     }
 
     private void subscribeServices(final BeanManager beanManager, final MessageBus bus)
@@ -183,11 +189,11 @@ public class CDIExtensionPoints implements Extension
             {
                 public void callback(final Message message) {
                     //ServletContext context = message.getResource(ServletContext.class, "errai.experimental.servletContext");
-                    activateContexts(true);
+                    CDIExtensionPoints.this.contextManager.activateContexts(true);
                     try {
                         invocationTarget.callback(message);
                     } finally {
-                        activateContexts(false);
+                        CDIExtensionPoints.this.contextManager.activateContexts(false);
                     }
                 }
             });
@@ -210,23 +216,7 @@ public class CDIExtensionPoints implements Extension
                 }
             });
         }
-    }
-
-    public static void activateContexts(boolean active)
-    {        
-        /*final ContextLifecycle contextLifecycle = Container.instance().services().get(ContextLifecycle.class);
-
-        // request
-        RequestContext requestContext = contextLifecycle.getRequestContext();
-        requestContext.setActive(active);
-
-        // conversation
-        ConversationContext conversationContext = contextLifecycle.getConversationContext();
-        conversationContext.setActive(active);
-
-        */        
-        // TODO: session?
-    }
+    }    
     
     private void createRPCScaffolding(final Class remoteIface, final Class<?> type, final MessageBus bus, final ResourceProvider resourceProvider) {
 
@@ -265,10 +255,10 @@ public class CDIExtensionPoints implements Extension
         {
             public void callback(Message message) {
                 try {
-                    activateContexts(true);
+                    CDIExtensionPoints.this.contextManager.activateContexts(true);
                     delegate.callback(message);
                 } finally {
-                    activateContexts(false);
+                    CDIExtensionPoints.this.contextManager.activateContexts(false);
                 }
             }
         });

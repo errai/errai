@@ -33,58 +33,61 @@ import javax.enterprise.inject.spi.BeanManager;
  */
 public class EventDispatcher implements MessageCallback
 {
-  private BeanManager beanManager;
+    private BeanManager beanManager;
 
-  private MessageBus erraiBus;
+    private MessageBus erraiBus;
 
-  public final static String NAME = "cdi.event:Dispatcher";
-    
-  public EventDispatcher(BeanManager beanManager, MessageBus erraiBus)
-  {
-    this.beanManager = beanManager;
-    this.erraiBus = erraiBus;
-  }
+    public final static String NAME = "cdi.event:Dispatcher";
 
-  // Invoked by Errai
-  public void callback(Message message)
-  {    
-    try
+    private ContextManager ctxMgr;
+
+    public EventDispatcher(BeanManager beanManager, MessageBus erraiBus, ContextManager ctxMgr)
     {
-      switch (CDICommands.valueOf(message.getCommandType()))
-      {
-        case CDI_EVENT:
-          String type = message.get(String.class, CDIProtocol.TYPE);
-          Class clazz = Thread.currentThread().getContextClassLoader().loadClass(type);
-          Object o = message.get(clazz, CDIProtocol.OBJECT_REF);
-            try {
-                CDIExtensionPoints.activateContexts(true);
-                beanManager.fireEvent(o, new InboundQualifier());
-            } finally {
-                CDIExtensionPoints.activateContexts(false);
+        this.beanManager = beanManager;
+        this.erraiBus = erraiBus;
+        this.ctxMgr = ctxMgr;
+    }
+
+    // Invoked by Errai
+    public void callback(Message message)
+    {
+        try
+        {
+            switch (CDICommands.valueOf(message.getCommandType()))
+            {
+                case CDI_EVENT:
+                    String type = message.get(String.class, CDIProtocol.TYPE);
+                    Class clazz = Thread.currentThread().getContextClassLoader().loadClass(type);
+                    Object o = message.get(clazz, CDIProtocol.OBJECT_REF);
+                    try {
+                        ctxMgr.activateContexts(true);
+                        beanManager.fireEvent(o, new InboundQualifier());
+                    } finally {
+                        ctxMgr.activateContexts(false);
+                    }
+
+                    break;
+                default:
+                    throw new IllegalArgumentException(
+                            "Unknown command type "+message.getCommandType());
             }
-
-            break;
-        default:
-          throw new IllegalArgumentException(
-              "Unknown command type "+message.getCommandType());
-      }
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException("Failed to dispatch CDI Event", e);
+        }
     }
-    catch (Exception e)
+
+    // Invoked by Weld Event producer
+    public void sendMessage(@Observes Outbound event)
     {
-      throw new RuntimeException("Failed to dispatch CDI Event", e);
+        Object payload = event.getPayload();
+        MessageBuilder.createMessage()
+                .toSubject("cdi.event:"+payload.getClass().getName())
+                .command(CDICommands.CDI_EVENT)
+                .with(CDIProtocol.TYPE, payload.getClass().getName())
+                .with(CDIProtocol.OBJECT_REF, event.getPayload())
+                .noErrorHandling().sendNowWith(erraiBus);
+
     }
-  }
-
-  // Invoked by Weld Event producer
-  public void sendMessage(@Observes Outbound event)
-  {   
-    Object payload = event.getPayload();
-    MessageBuilder.createMessage()
-        .toSubject("cdi.event:"+payload.getClass().getName())
-        .command(CDICommands.CDI_EVENT)
-        .with(CDIProtocol.TYPE, payload.getClass().getName())
-        .with(CDIProtocol.OBJECT_REF, event.getPayload())
-        .noErrorHandling().sendNowWith(erraiBus);
-
-  }  
 }
