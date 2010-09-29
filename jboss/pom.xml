@@ -86,7 +86,37 @@
         </dependency-->
     </dependencies>
 
-    <build>
+    <profiles>
+        <profile>
+            <id>eap5</id>            
+            <dependencies>
+                <dependency>
+                    <groupId>org.jboss.errai</groupId>
+                    <artifactId>errai-bus</artifactId>
+                    <version>${errai.version}</version>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>org.slf4j</groupId>
+                            <artifactId>slf4j-api</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>org.slf4j</groupId>
+                            <artifactId>slf4j-log4j12</artifactId>
+                        </exclusion>                        
+                        <exclusion>
+                            <groupId>dom4j</groupId>
+                            <artifactId>dom4j</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>javassist</groupId>
+                            <artifactId>javassist</artifactId>
+                        </exclusion>
+                    </exclusions>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
+    <build>        
         <plugins>
 
             <plugin>
