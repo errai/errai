@@ -24,13 +24,12 @@
         <dependency>
             <groupId>org.jboss.errai</groupId>
             <artifactId>errai-bus</artifactId>
-
         </dependency>
 
         <dependency>
             <groupId>org.jboss.errai</groupId>
             <artifactId>errai-ioc</artifactId>
-
+            <scope>provided</scope>
         </dependency>
 
         <!-- Weld -->
@@ -39,31 +38,12 @@
             <artifactId>weld-servlet</artifactId>
         </dependency>
 
-        <!--dependency>
-            <groupId>org.jboss.weld</groupId>
-            <artifactId>weld-extensions</artifactId>
-            <version>1.0.0.Alpha2</version>            
-        </dependency>
-
-        <dependency>
-            <groupId>org.jboss.weld</groupId>
-            <artifactId>weld-extensions</artifactId>
-            <classifier>sources</classifier>
-            <version>1.0.0.Alpha2</version>
-        </dependency-->
-
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <scope>provided</scope>
         </dependency>
-
-        <!--dependency>
-            <groupId>client.javax.enterprise</groupId>
-            <artifactId>gwtclient-javax-enterprise</artifactId>
-            <version>1.0</version>
-        </dependency-->
-        
+       
         <!--
            GWT
         -->
@@ -79,6 +59,7 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- JBOSS -->
         <dependency>
             <groupId>org.jboss.jbossas</groupId>
             <artifactId>jboss-as-system-jmx</artifactId>
@@ -90,12 +71,6 @@
             <artifactId>jboss-as-client</artifactId>
             <version>${jboss.version}</version>
             <type>pom</type>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jboss.errai</groupId>
-            <artifactId>errai-ioc</artifactId>
             <scope>provided</scope>
         </dependency>
 

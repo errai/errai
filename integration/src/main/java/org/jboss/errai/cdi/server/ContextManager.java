@@ -27,7 +27,10 @@ import java.util.Map;
 public class ContextManager {
 
     private BoundRequestContext delegate;
-    private Map requestContextMap = new HashMap<String, Object>();
+
+    private ThreadLocal<Map<String, Object>> boundContext =
+            new ThreadLocal<Map<String, Object>>();
+
     private String uuid;
 
     public ContextManager(String uuid, BoundRequestContext requestContext) {
@@ -38,13 +41,16 @@ public class ContextManager {
     {
         if(active)
         {
-            delegate.associate(requestContextMap);
+            boundContext.set(new HashMap<String, Object>());
+
+            delegate.associate(boundContext.get());
             delegate.activate();
         }
         else
         {
-            delegate.invalidate();
+            delegate.invalidate();            
             delegate.deactivate();
+            delegate.dissociate(boundContext.get());
         }
     }
 }
