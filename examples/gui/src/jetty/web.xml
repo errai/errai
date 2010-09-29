@@ -21,6 +21,10 @@
     </servlet-mapping>
 
     <listener>
+        <listener-class>org.jboss.errai.container.BootstrapListener</listener-class>
+    </listener>
+
+    <listener>
         <!--
 
         NOTE: The orig servlet listener has been patched, 
