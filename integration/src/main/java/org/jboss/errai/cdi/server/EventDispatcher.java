@@ -60,10 +60,10 @@ public class EventDispatcher implements MessageCallback
                     Class clazz = Thread.currentThread().getContextClassLoader().loadClass(type);
                     Object o = message.get(clazz, CDIProtocol.OBJECT_REF);
                     try {
-                        ctxMgr.activateContexts(true);
+                        ctxMgr.activateRequestContext();
                         beanManager.fireEvent(o, new InboundQualifier());
                     } finally {
-                        ctxMgr.activateContexts(false);
+                        ctxMgr.deactivateRequestContext();
                     }
 
                     break;

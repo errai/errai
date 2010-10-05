@@ -34,17 +34,15 @@ import org.jboss.errai.bus.server.io.ConversationalEndpointCallback;
 import org.jboss.errai.bus.server.io.RemoteServiceCallback;
 import org.jboss.errai.cdi.server.events.OutboundEventObserver;
 import org.jboss.errai.cdi.server.events.ShutdownEventObserver;
-import org.jboss.weld.context.bound.BoundRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Conversation;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.*;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Extension points to the CDI container.
@@ -138,17 +136,22 @@ public class CDIExtensionPoints implements Extension
 
     public void afterBeanDiscovery(@Observes AfterBeanDiscovery abd,  BeanManager bm)
     {
+        final MessageBus bus = Util.lookupMessageBus();
+
         // context handling hooks
-        BoundRequestContext requestContextDelegate = (BoundRequestContext)
-                Util.lookupCallbackBean(bm, BoundRequestContext.class);
-        this.contextManager = new ContextManager(uuid, requestContextDelegate);
+        this.contextManager = new ContextManager(uuid,  bm, bus);
+
+        // Custom Conversation
+        abd.addBean(new ConversationMetaData(bm, new ErraiConversation(
+                (Conversation)Util.lookupCallbackBean(bm, Conversation.class),
+                this.contextManager
+        )));
 
         // event dispatcher
-        final MessageBus bus = Util.lookupMessageBus();
         EventDispatcher eventDispatcher = new EventDispatcher(bm, bus, this.contextManager);
 
         // Errai bus injection
-        abd.addBean(new MessageBusDelegate(bm, bus));
+        abd.addBean(new MessageBusMetaData(bm, bus));
 
         // Register observers
         abd.addObserverMethod(new OutboundEventObserver(eventDispatcher));
@@ -188,12 +191,14 @@ public class CDIExtensionPoints implements Extension
             bus.subscribe(subjectName, new MessageCallback()
             {
                 public void callback(final Message message) {
-                    //ServletContext context = message.getResource(ServletContext.class, "errai.experimental.servletContext");
-                    CDIExtensionPoints.this.contextManager.activateContexts(true);
+
+                    contextManager.activateRequestContext();
+                    contextManager.activateConversationContext(message);
                     try {
                         invocationTarget.callback(message);
                     } finally {
-                        CDIExtensionPoints.this.contextManager.activateContexts(false);
+                        contextManager.deactivateRequestContext();
+                        contextManager.deactivateConversationContext(message);
                     }
                 }
             });
@@ -255,10 +260,10 @@ public class CDIExtensionPoints implements Extension
         {
             public void callback(Message message) {
                 try {
-                    CDIExtensionPoints.this.contextManager.activateContexts(true);
+                    CDIExtensionPoints.this.contextManager.activateRequestContext();
                     delegate.callback(message);
                 } finally {
-                    CDIExtensionPoints.this.contextManager.activateContexts(false);
+                    CDIExtensionPoints.this.contextManager.deactivateRequestContext();
                 }
             }
         });

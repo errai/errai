@@ -13,17 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.cdi.client;
+package org.jboss.errai.cdi.server;
 
-import com.google.gwt.core.client.EntryPoint;
+import javax.enterprise.inject.Produces;
+import javax.enterprise.util.AnnotationLiteral;
+import javax.inject.Named;
 
 /**
- * The GWT entry point
+ * @author: Heiko Braun <hbraun@redhat.com>
+ * @date: Oct 5, 2010
  */
-public class GWTBootstrap implements EntryPoint
-{
-    public void onModuleLoad()
-    {
-        CDI.registerConversationManager();
+public class NamedQualifier extends AnnotationLiteral<Named>
+       implements Named {
+
+    String value;
+
+    public NamedQualifier(String value) {
+        this.value = value;
+    }
+
+    public String value() {
+        return value;  
     }
 }

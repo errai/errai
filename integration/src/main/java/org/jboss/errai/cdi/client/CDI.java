@@ -20,6 +20,7 @@ import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.cdi.client.api.Conversation;
 
 /**
  * CDI client interface.
@@ -29,6 +30,7 @@ import org.jboss.errai.bus.client.framework.MessageBus;
  */
 public class CDI {
     static private final MessageBus bus = ErraiBus.get();
+    public static String conversationId = null;
 
     public static void handleEvent(final Class<?> type, final EventHandler handler) {
         bus.subscribe("cdi.event:" + type.getName(), // by convention
@@ -49,5 +51,26 @@ public class CDI {
                 .with(CDIProtocol.OBJECT_REF, payload)
                 .noErrorHandling()
                 .sendNowWith(bus);
+    }
+
+    public static void registerConversationManager() {
+        bus.subscribe("cdi.conversation:Manager", new MessageCallback()
+        {
+            public void callback(Message message) {
+                // TODO: order of delivery?
+                conversationId = message.get(String.class, "conversationId");                
+            }
+        });
+    }
+
+    public static String generateId()
+    {
+        return String.valueOf(com.google.gwt.user.client.Random.nextInt(1000))
+                + "-" + (System.currentTimeMillis() % 1000);
+    }
+
+    public static Conversation createConversation(String withSubject)
+    {
+        return new Conversation(generateId(), withSubject);
     }
 }

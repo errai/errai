@@ -45,7 +45,7 @@
         <dependency>
             <groupId>org.jboss.errai</groupId>
             <artifactId>errai-cdi</artifactId>
-            <version>${version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
@@ -63,21 +63,21 @@
         <dependency>
             <groupId>org.jboss.errai</groupId>
             <artifactId>errai-cdi-examples-model</artifactId>
-            <version>${version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.jboss.errai</groupId>
             <artifactId>errai-cdi-examples-model</artifactId>
             <classifier>sources</classifier>
-            <version>${version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.jboss.errai</groupId>
             <artifactId>errai-cdi-examples-server</artifactId>
             <scope>provided</scope>
-            <version>${version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <!--dependency>
@@ -90,7 +90,7 @@
         <dependency>
             <groupId>org.jboss.errai</groupId>
             <artifactId>errai-cdi-jetty</artifactId>
-            <version>${version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <!--
@@ -207,14 +207,14 @@
                 <dependency>
                     <groupId>org.jboss.errai</groupId>
                     <artifactId>errai-cdi</artifactId>
-                    <version>${version}</version>
+                    <version>${project.version}</version>
                     <scope>provided</scope>
                 </dependency>
 
                 <dependency>
                     <groupId>org.jboss.errai</groupId>
                     <artifactId>errai-cdi-examples-model</artifactId>
-                    <version>${version}</version>
+                    <version>${project.version}</version>
                     <scope>provided</scope>
                 </dependency>
 
@@ -241,7 +241,7 @@
                 <dependency>
                     <groupId>org.jboss.errai</groupId>
                     <artifactId>errai-cdi-jetty</artifactId>
-                    <version>${version}</version>
+                    <version>${project.version}</version>
                     <scope>provided</scope>
                 </dependency>
 

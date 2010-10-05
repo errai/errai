@@ -15,6 +15,7 @@
  */
 package org.jboss.errai.cdi.server;
 
+import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.service.ErraiService;
@@ -41,6 +42,12 @@ public class Util {
         return beanManager.getReference(bean, serviceType, context);
     }
 
+    public static String getSessionId(Message message)
+    {
+        String sessionID = message.getResource(String.class, "SessionID");
+        return sessionID;
+    }
+    
     public static <T> T lookupRPCBean(BeanManager beanManager, T rpcIntf, Class beanClass)
     {
         Set<Bean<?>> beans = beanManager.getBeans(beanClass);

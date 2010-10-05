@@ -15,10 +15,22 @@
  */
 package org.jboss.errai.cdi.server;
 
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.base.CommandMessage;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.protocols.MessageParts;
+import org.jboss.weld.context.ManagedConversation;
+import org.jboss.weld.context.bound.BoundConversationContext;
 import org.jboss.weld.context.bound.BoundRequestContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.enterprise.inject.spi.BeanManager;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author: Heiko Braun <hbraun@redhat.com>
@@ -26,31 +38,93 @@ import java.util.Map;
  */
 public class ContextManager {
 
-    private BoundRequestContext delegate;
+    private static final Logger log = LoggerFactory.getLogger(ContextManager.class);
+    
+    private BoundRequestContext requestContext;
+    private BoundConversationContext conversationContext;
 
-    private ThreadLocal<Map<String, Object>> boundContext =
+    private ThreadLocal<Map<String, Object>> requestContextStore =
             new ThreadLocal<Map<String, Object>>();
+
+    private Map<String, ConversationContext> conversationContextStore =
+            new ConcurrentHashMap<String, ConversationContext>();
 
     private String uuid;
 
-    public ContextManager(String uuid, BoundRequestContext requestContext) {
-        this.delegate = requestContext;
+    private ThreadLocal<String> threadContextId = new ThreadLocal<String>();
+
+    private MessageBus bus;
+    private static final String CDI_CONVERSATION_MANAGER = "cdi.conversation:Manager";
+
+    public ContextManager(String uuid, BeanManager beanManager, MessageBus bus) {
+
+        this.requestContext = (BoundRequestContext)
+                Util.lookupCallbackBean(beanManager, BoundRequestContext.class);
+
+        this.conversationContext= (BoundConversationContext)
+                Util.lookupCallbackBean(beanManager, BoundConversationContext.class);
+
+        this.bus = bus;
     }
 
-    public void activateContexts(boolean active)
+    public void activateRequestContext()
     {
-        if(active)
-        {
-            boundContext.set(new HashMap<String, Object>());
+        requestContextStore.set(new HashMap<String, Object>());
+        requestContext.associate(requestContextStore.get());
+        requestContext.activate();
+    }
 
-            delegate.associate(boundContext.get());
-            delegate.activate();
+    public void deactivateRequestContext()
+    {
+        requestContext.invalidate();
+        requestContext.deactivate();
+        requestContext.dissociate(requestContextStore.get());
+    }
+
+    public void activateConversationContext(Message message)
+    {
+        String sessionId = Util.getSessionId(message);
+        
+        if(null==conversationContextStore.get(sessionId))
+            conversationContextStore.put(sessionId, new ConversationContext());
+        
+        conversationContext.associate(conversationContextStore.get(sessionId));
+
+        // if the client does not provide a conversation id
+        // we fall back to transient conversations (id==null)
+        String conversationId = message.get(String.class, "conversationId");
+        threadContextId.set(conversationId);
+        conversationContext.activate(threadContextId.get()); 
+    }
+
+    private String generateThreadContextId(String sessionId)
+    {
+        return sessionId + "__" + UUID.randomUUID().toString();   
+    }
+
+    public void deactivateConversationContext(Message message)
+    {
+        String sessionId = Util.getSessionId(message);
+
+        if(conversationContextStore.get(sessionId)!=null) {
+            ManagedConversation managedConversation = conversationContext.getCurrentConversation();
+
+            // In case a conversation has been created, we need to pass the reference to the client
+            if(!managedConversation.isTransient())
+            {
+                MessageBuilder.createConversation(message)
+                        .toSubject(CDI_CONVERSATION_MANAGER)
+                        .with("conversationId", threadContextId.get())
+                        .with(MessageParts.PriorityProcessing, "1")
+                        .done().sendNowWith(bus);                        
+            }
+
+            conversationContext.deactivate();
+            conversationContext.dissociate(conversationContextStore.get(sessionId));
         }
-        else
-        {
-            delegate.invalidate();            
-            delegate.deactivate();
-            delegate.dissociate(boundContext.get());
-        }
+    }
+    
+    public String getThreadContextId() {        
+        return threadContextId.get();
     }
 }

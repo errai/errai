@@ -16,8 +16,8 @@
 package org.jboss.errai.cdi.server;
 
 import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.server.ServerMessageBusImpl;
 
+import javax.enterprise.context.Conversation;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.Any;
@@ -30,22 +30,20 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+
 /**
- * Basically a bean wrapper that provides CDI meta data.
- * It's used to inject the {@link org.jboss.errai.bus.client.framework.MessageBus} into the CDI context.
- *
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Sep 15, 2010
  */
-public class MessageBusDelegate implements Bean {
+public class ConversationMetaData implements Bean {
 
     final InjectionTarget it;
-    final MessageBus delegate;
+    final Conversation delegate;
 
-    public MessageBusDelegate(BeanManager bm, MessageBus delegate) {
+    public ConversationMetaData(BeanManager bm, Conversation delegate) {
 
         //use this to read annotations of the class
-        AnnotatedType at = bm.createAnnotatedType(ServerMessageBusImpl.class);
+        AnnotatedType at = bm.createAnnotatedType(ErraiConversation.class);
 
         //use this to create the class and inject dependencies
         this.it = bm.createInjectionTarget(at);
@@ -71,6 +69,7 @@ public class MessageBusDelegate implements Bean {
         Set<Annotation> qualifiers = new HashSet<Annotation>();
         qualifiers.add( new AnnotationLiteral<Default>() {} );
         qualifiers.add( new AnnotationLiteral<Any>() {} );
+        qualifiers.add( new NamedQualifier("ErraiConversation"));
         return qualifiers;
     }
 
@@ -84,7 +83,7 @@ public class MessageBusDelegate implements Bean {
 
     public Set<Type> getTypes() {
         Set<Type> types = new HashSet<Type>();
-        types.add(MessageBus.class);
+        types.add(ErraiConversation.class);        
         types.add(Object.class);
         return types;
     }

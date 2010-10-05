@@ -25,9 +25,9 @@
         <module>jetty</module>
         <module>integration</module>
         <module>jboss</module>
-        <module>examples/model</module>
+        <!--module>examples/model</module>
         <module>examples/gui</module>
-        <module>examples/server</module>
+        <module>examples/server</module-->
     </modules>
 
     <dependencyManagement>
