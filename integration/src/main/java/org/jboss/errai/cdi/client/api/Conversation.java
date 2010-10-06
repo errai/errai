@@ -15,6 +15,7 @@
  */
 package org.jboss.errai.cdi.client.api;
 
+import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.builder.MessageBuildParms;
 import org.jboss.errai.bus.client.api.builder.MessageBuildSendableWithReply;
@@ -28,6 +29,8 @@ public class Conversation {
     private String id;
     private String subject;
 
+    private boolean ended = false;
+
     public Conversation(String id, String subject) {
         this.id = id;
         this.subject = subject;
@@ -35,6 +38,7 @@ public class Conversation {
 
     public MessageBuildParms<MessageBuildSendableWithReply>  createMessage()
     {
+        assertEnded();
         MessageBuildParms<MessageBuildSendableWithReply> parms = MessageBuilder.createMessage()
                 .toSubject(subject)
                 .signalling()
@@ -45,6 +49,7 @@ public class Conversation {
 
     public MessageBuildParms<MessageBuildSendableWithReply>  createMessage(String command)
     {
+        assertEnded();
         MessageBuildParms<MessageBuildSendableWithReply> parms = MessageBuilder.createMessage()
                 .toSubject(subject)
                 .command(command)
@@ -55,6 +60,7 @@ public class Conversation {
 
     public MessageBuildParms<MessageBuildSendableWithReply>  createMessage(Enum command)
     {
+        assertEnded();
         MessageBuildParms<MessageBuildSendableWithReply> parms = MessageBuilder.createMessage()
                 .toSubject(subject)
                 .command(command)
@@ -65,5 +71,26 @@ public class Conversation {
 
     public String getId() {
         return id;
+    }
+
+    /**
+     * Explicitly end a conversation
+     */
+    public void end()
+    {
+        assertEnded();
+        
+        MessageBuilder.createMessage()
+                .toSubject("cdi.conversation:Manager,conversation="+id)
+                .command("end")
+                .with("conversationId", id)
+                .done().sendNowWith(ErraiBus.get());
+
+        ended = true;
+    }
+
+    private void assertEnded()
+    {
+        throw new IllegalStateException("Converation already ended: "+ id);       
     }
 }

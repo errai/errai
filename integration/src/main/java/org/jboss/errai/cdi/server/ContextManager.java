@@ -16,11 +16,8 @@
 package org.jboss.errai.cdi.server;
 
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.base.CommandMessage;
-import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.client.protocols.MessageParts;
-import org.jboss.weld.context.ManagedConversation;
 import org.jboss.weld.context.bound.BoundConversationContext;
 import org.jboss.weld.context.bound.BoundRequestContext;
 import org.slf4j.Logger;
@@ -29,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import javax.enterprise.inject.spi.BeanManager;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -58,14 +54,16 @@ public class ContextManager {
 
     public ContextManager(String uuid, BeanManager beanManager, MessageBus bus) {
 
+        this.bus = bus;
+        this.uuid = uuid;
+        
         this.requestContext = (BoundRequestContext)
                 Util.lookupCallbackBean(beanManager, BoundRequestContext.class);
 
         this.conversationContext= (BoundConversationContext)
                 Util.lookupCallbackBean(beanManager, BoundConversationContext.class);
 
-        this.bus = bus;
-    }
+    }    
 
     public void activateRequestContext()
     {
@@ -93,32 +91,39 @@ public class ContextManager {
         // if the client does not provide a conversation id
         // we fall back to transient conversations (id==null)
         String conversationId = message.get(String.class, "conversationId");
-        threadContextId.set(conversationId);
-        conversationContext.activate(threadContextId.get()); 
-    }
+        threadContextId.set(conversationId); // null value reset demote the conversation
+        conversationContext.activate(threadContextId.get());
 
-    private String generateThreadContextId(String sessionId)
-    {
-        return sessionId + "__" + UUID.randomUUID().toString();   
-    }
+        // expose the conversation context to the client
+        // TODO: wire CDI callbacks when conversation ends
+        String subject = "cdi.conversation:Manager,conversation=" + conversationId;
+        if(conversationId!=null && !bus.isSubscribed(subject))
+        {
+            bus.subscribe(subject,
+                    new MessageCallback()
+                    {
+                        public void callback(final Message message) {
+                                if("end".equals(message.getCommandType()))
+                                try {
+                                    activateConversationContext(message);
+                                    conversationContext.getCurrentConversation().end();                                    
+                                    deactivateConversationContext(message);
 
+                                    // TODO: properly cleanup
+                                    
+                                } catch (Exception e) {
+                                    log.error("Failed to end conversation", e);
+                                }
+                        }
+                    });
+        }
+    }
+    
     public void deactivateConversationContext(Message message)
     {
         String sessionId = Util.getSessionId(message);
 
-        if(conversationContextStore.get(sessionId)!=null) {
-            ManagedConversation managedConversation = conversationContext.getCurrentConversation();
-
-            // In case a conversation has been created, we need to pass the reference to the client
-            if(!managedConversation.isTransient())
-            {
-                MessageBuilder.createConversation(message)
-                        .toSubject(CDI_CONVERSATION_MANAGER)
-                        .with("conversationId", threadContextId.get())
-                        .with(MessageParts.PriorityProcessing, "1")
-                        .done().sendNowWith(bus);                        
-            }
-
+        if(conversationContextStore.get(sessionId)!=null) {            
             conversationContext.deactivate();
             conversationContext.dissociate(conversationContextStore.get(sessionId));
         }

@@ -53,16 +53,6 @@ public class CDI {
                 .sendNowWith(bus);
     }
 
-    public static void registerConversationManager() {
-        bus.subscribe("cdi.conversation:Manager", new MessageCallback()
-        {
-            public void callback(Message message) {
-                // TODO: order of delivery?
-                conversationId = message.get(String.class, "conversationId");                
-            }
-        });
-    }
-
     public static String generateId()
     {
         return String.valueOf(com.google.gwt.user.client.Random.nextInt(1000))

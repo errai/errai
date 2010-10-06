@@ -25,8 +25,6 @@ import org.gwt.mosaic.ui.client.layout.LayoutPanel;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.api.builder.MessageBuildParms;
-import org.jboss.errai.bus.client.api.builder.MessageBuildSendableWithReply;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.cdi.client.CDI;
 import org.jboss.errai.cdi.client.api.Conversation;
@@ -47,9 +45,9 @@ public class ScopeTestClient implements WidgetProvider
 
     private HTML responsePanel;
 
-    private boolean runningConversation = false;
+    private boolean hasActiveConversation = false;
 
-    private String conversationId;
+    private Conversation conversation;
 
     public void provideWidget(ProvisioningCallback callback)
     {
@@ -93,9 +91,9 @@ public class ScopeTestClient implements WidgetProvider
         conversationScope.setLayout(new BoxLayout(BoxLayout.Orientation.VERTICAL));
 
         final TextBox textBox = new TextBox();
-        final CheckBox flush = new CheckBox();
-        final CheckBox isConversational = new CheckBox();
-        isConversational.setValue(true);
+        final CheckBox requiresFlush = new CheckBox();
+        final CheckBox requiresConversation = new CheckBox();
+        requiresConversation.setValue(true);
 
         Button btn2 = new Button("Append to buffer", new ClickHandler()
         {
@@ -103,32 +101,30 @@ public class ScopeTestClient implements WidgetProvider
                 String text = textBox.getText();
                 textBox.setText("");
 
-                String command = flush.getValue() ? "last" : "append";
-                if(!runningConversation)
+                String command = requiresFlush.getValue() ? "last" : "append";
+                if(!hasActiveConversation)
                 {
+                    conversation = CDI.createConversation("wizard");
                     command = "first";
-                    runningConversation = true;
-                    conversationId = CDI.generateId();
+                    hasActiveConversation = true;
                 }
 
-                if(flush.getValue())
+                flushIfRequired(requiresFlush);
+
+                // send message
+                if(requiresConversation.getValue())
                 {
-                    runningConversation = false;                    
+                    // send conversational message
+                    conversation.createMessage(command)
+                            .with("word", text)
+                            .done().sendNowWith(bus);
                 }
-
-                flush.setValue(false);
-
-                MessageBuildParms<MessageBuildSendableWithReply> parms = MessageBuilder.createMessage()
-                        .toSubject("wizard")
-                        .command(command)
-                        .with("word", text);
-
-                if(isConversational.getValue())
+                else
                 {
-                    parms.with("conversationId", conversationId);
+                    // send regular
+                    sendNonConversational(command, text);
                 }
 
-                parms.done().sendNowWith(bus);
 
             }
         });
@@ -137,15 +133,44 @@ public class ScopeTestClient implements WidgetProvider
 
         LayoutPanel inner = new LayoutPanel(new BoxLayout(BoxLayout.Orientation.VERTICAL));
         inner.add(new Label("Flush?"));
-        inner.add(flush);
+        inner.add(requiresFlush);
         conversationScope.add(inner);
         conversationScope.add(btn2);
-        conversationScope.add(isConversational);
+        conversationScope.add(requiresConversation);
+        conversationScope.add(
+                new Button("Terminate Conversation", new ClickHandler()
+                {
+                    public void onClick(ClickEvent clickEvent) {
+                        if(conversation!=null)
+                        {
+                            conversation.end();
+                            hasActiveConversation = false;
+                        }
+                    }
+                }));
 
         // --------------------------------
         panel.add(requestScope, new BoxLayoutData(BoxLayoutData.FillStyle.BOTH));
         panel.add(conversationScope, new BoxLayoutData(BoxLayoutData.FillStyle.BOTH));
 
         callback.onSuccess(panel);
+    }
+
+    private void flushIfRequired(CheckBox flush) {        
+        if(flush.getValue())
+        {
+            hasActiveConversation = false;
+        }
+
+        flush.setValue(false);
+    }
+
+    private void sendNonConversational(String command, String text)
+    {
+        MessageBuilder.createMessage()
+                .toSubject("wizard")
+                .command(command)
+                .with("word", text)
+                .done().sendNowWith(bus);
     }
 }

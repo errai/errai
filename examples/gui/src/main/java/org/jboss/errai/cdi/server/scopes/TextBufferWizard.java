@@ -50,7 +50,7 @@ public class TextBufferWizard implements Serializable {
 
     @Command("append")
     public void append(Message message)
-    {                
+    {
         buffer.append(message.get(String.class, "word"));
         System.out.println("Current Buffer: " + buffer.toString());
     }
