@@ -74,8 +74,11 @@ public class MessageFactory {
         Map<String, Object> parts = (Map<String, Object>) JSONStreamDecoder.decode(stream);
         parts.remove(MessageParts.SessionID.name());
 
+        // Expose session and session id
+        // CDI ext makes use of it to manage conversation contexts
         Message msg = createWithParts(parts)
-                .setResource("Session", session);
+                .setResource("Session", session)
+                .setResource("SessionID", session.getSessionId());
 
         // experimental feature. does this need to be cleaned?
         // any chance this leaks the CL?
