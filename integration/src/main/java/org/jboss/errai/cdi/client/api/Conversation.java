@@ -91,6 +91,7 @@ public class Conversation {
 
     private void assertEnded()
     {
-        throw new IllegalStateException("Converation already ended: "+ id);       
+        if(ended)
+            throw new IllegalStateException("Converation already ended: "+ id);
     }
 }
