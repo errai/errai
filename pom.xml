@@ -84,11 +84,11 @@
             </dependency>
 
             <!-- Weld -->
-            <dependency>
+            <!--dependency>
                 <groupId>org.jboss.weld</groupId>
                 <artifactId>weld-se</artifactId>
                 <version>1.0.1-FINAL</version>
-            </dependency>
+            </dependency-->
 
             <dependency>
                 <groupId>org.jboss.weld.servlet</groupId>

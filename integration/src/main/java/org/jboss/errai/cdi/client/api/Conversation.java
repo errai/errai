@@ -73,6 +73,13 @@ public class Conversation {
         return id;
     }
 
+    public void begin()
+    {
+        // register client side conversation state globally
+        // so that the message builder picks it
+        // Once that's done we don't need to wrap the message builder calls
+    }
+
     /**
      * Explicitly end a conversation
      */
@@ -87,6 +94,14 @@ public class Conversation {
                 .done().sendNowWith(ErraiBus.get());
 
         ended = true;
+    }
+
+    public boolean hasEnded()
+    {
+        // might be a server side component ends the conversation
+        // in that case this instance needs to be terminated to reflect the
+        // server side state change
+        return ended;
     }
 
     private void assertEnded()
