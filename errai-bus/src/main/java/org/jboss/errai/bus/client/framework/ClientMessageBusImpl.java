@@ -98,6 +98,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         boolean hasProxy = false;
     }
 
+    private List<MessageInterceptor> interceptorStack = new LinkedList<MessageInterceptor>();
+    
     private LogAdapter logAdapter = new LogAdapter() {
         public void warn(String message) {
             GWT.log("WARN: " + message, null);
@@ -216,6 +218,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         addSubscription(subject, _subscribe(subject, new MessageCallback() {
             public void callback(Message message) {
                 try {
+                    // TODO: performance impact? might be better when decoding the message from the wire
+                    executeInterceptorStack(true, message);
                     callback.callback(message);
                 }
                 catch (Exception e) {
@@ -314,6 +318,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      *                          an error.
      */
     public void send(final Message message) {
+
+        executeInterceptorStack(false, message);
+        
         message.commit();
         try {
             if (message.hasPart(MessageParts.ToSubject)) {
@@ -1136,5 +1143,28 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     public LogAdapter getLogAdapter() {
         return logAdapter;
+    }
+
+    private boolean executeInterceptorStack(boolean inbound, Message message)
+    {
+        boolean validMessage = true;
+        for(MessageInterceptor intcp : interceptorStack)
+        {
+            if(inbound)
+                validMessage = intcp.processInbound(message);
+            else
+                validMessage = intcp.processOutbound(message);
+
+            if(!validMessage) // brute force for now
+                throw new RuntimeException("Interceptor " + intcp.getClass()  +" invalidates message");            
+
+        }
+        
+        return validMessage;
+    }
+
+    public void addInterceptor(MessageInterceptor interceptor)
+    {
+        interceptorStack.add(interceptor);
     }
 }
