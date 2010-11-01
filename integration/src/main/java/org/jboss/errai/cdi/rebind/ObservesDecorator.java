@@ -29,6 +29,10 @@ import org.jboss.errai.ioc.rebind.ioc.InjectionPoint;
 import javax.enterprise.event.Observes;
 
 /**
+ *
+ * Generates the boilder plate for @Observes annotations use in GWT clients.<br/>
+ * Basically creates a subscription for a CDI event type that invokes on the annotated method.
+ *
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Jul 27, 2010
  */

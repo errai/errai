@@ -29,6 +29,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * Maintains CDI invocation context lifecyle.
+ *
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Sep 28, 2010
  */
@@ -49,8 +51,7 @@ public class ContextManager {
 
     private ThreadLocal<String> threadContextId = new ThreadLocal<String>();
 
-    private MessageBus bus;
-    private static final String CDI_CONVERSATION_MANAGER = "cdi.conversation:Manager";
+    private MessageBus bus;    
 
     public ContextManager(String uuid, BeanManager beanManager, MessageBus bus) {
 
@@ -90,8 +91,8 @@ public class ContextManager {
 
         // if the client does not provide a conversation id
         // we fall back to transient conversations (id==null)
-        String conversationId = message.get(String.class, "conversationId");
-        threadContextId.set(conversationId); // null value reset demote the conversation
+        String conversationId = message.get(String.class, "cdi.conversation.id");
+        threadContextId.set(conversationId); // null value demotes the conversation
         conversationContext.activate(threadContextId.get());
 
         // expose the conversation context to the client
@@ -103,7 +104,8 @@ public class ContextManager {
                     new MessageCallback()
                     {
                         public void callback(final Message message) {
-                                if("end".equals(message.getCommandType()))
+                            if("end".equals(message.getCommandType()))
+                            {
                                 try {
                                     activateConversationContext(message);
                                     conversationContext.getCurrentConversation().end();                                    
@@ -114,6 +116,7 @@ public class ContextManager {
                                 } catch (Exception e) {
                                     log.error("Failed to end conversation", e);
                                 }
+                            }
                         }
                     });
         }

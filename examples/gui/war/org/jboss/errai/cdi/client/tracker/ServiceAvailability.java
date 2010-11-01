@@ -13,22 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.cdi.client;
-
-import com.google.gwt.core.client.EntryPoint;
-import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
-import org.jboss.errai.cdi.client.api.CDI;
+package org.jboss.errai.cdi.client.tracker;
 
 /**
- * The GWT entry point
+ * @author: Heiko Braun <hbraun@redhat.com>
+ * @date: May 10, 2010
  */
-public class GWTBootstrap implements EntryPoint
+public interface ServiceAvailability
 {
-    public void onModuleLoad()
-    {
-        // conversation interceptor
-        ((ClientMessageBusImpl)ErraiBus.get()).
-                addInterceptor(CDI.CONVERSATTION_INTERCEPTOR);
-    }
+  void status(String subject, boolean available);  
 }

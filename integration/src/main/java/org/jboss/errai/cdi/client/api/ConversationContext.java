@@ -13,22 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.cdi.client;
+package org.jboss.errai.cdi.client.api;
 
-import com.google.gwt.core.client.EntryPoint;
-import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
-import org.jboss.errai.cdi.client.api.CDI;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.CONSTRUCTOR;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * The GWT entry point
+ * @author: Heiko Braun <hbraun@redhat.com>
+ * @date: Oct 29, 2010
  */
-public class GWTBootstrap implements EntryPoint
-{
-    public void onModuleLoad()
-    {
-        // conversation interceptor
-        ((ClientMessageBusImpl)ErraiBus.get()).
-                addInterceptor(CDI.CONVERSATTION_INTERCEPTOR);
-    }
+@Target({ FIELD })
+@Retention(RUNTIME)
+@Documented
+public @interface ConversationContext {
+    String value();
 }

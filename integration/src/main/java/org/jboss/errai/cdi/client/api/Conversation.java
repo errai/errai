@@ -17,10 +17,16 @@ package org.jboss.errai.cdi.client.api;
 
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.api.builder.MessageBuildParms;
-import org.jboss.errai.bus.client.api.builder.MessageBuildSendableWithReply;
+import org.jboss.errai.ioc.client.api.GeneratedBy;
 
 /**
+ * Client side conversation handle.
+ * Conversations and messages correlate through the subject.<br/>
+ * Handles can be created through the
+ * {@link org.jboss.errai.cdi.client.api.CDI#createConversation(String)} client interface.
+ *
+ * @see CDI
+ *
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Oct 5, 2010
  */
@@ -29,44 +35,15 @@ public class Conversation {
     private String id;
     private String subject;
 
-    private boolean ended = false;
+    private boolean hasBegun, hasEnded = false;
 
-    public Conversation(String id, String subject) {
+    Conversation(String id, String subject) {
         this.id = id;
         this.subject = subject;
     }
 
-    public MessageBuildParms<MessageBuildSendableWithReply>  createMessage()
-    {
-        assertEnded();
-        MessageBuildParms<MessageBuildSendableWithReply> parms = MessageBuilder.createMessage()
-                .toSubject(subject)
-                .signalling()
-                .with("conversationId", id);                                                             
-
-        return parms;
-    }
-
-    public MessageBuildParms<MessageBuildSendableWithReply>  createMessage(String command)
-    {
-        assertEnded();
-        MessageBuildParms<MessageBuildSendableWithReply> parms = MessageBuilder.createMessage()
-                .toSubject(subject)
-                .command(command)
-                .with("conversationId", id);
-
-        return parms;
-    }
-
-    public MessageBuildParms<MessageBuildSendableWithReply>  createMessage(Enum command)
-    {
-        assertEnded();
-        MessageBuildParms<MessageBuildSendableWithReply> parms = MessageBuilder.createMessage()
-                .toSubject(subject)
-                .command(command)
-                .with("conversationId", id);
-
-        return parms;
+    public String getSubject() {
+        return subject;
     }
 
     public String getId() {
@@ -75,9 +52,19 @@ public class Conversation {
 
     public void begin()
     {
+        assertBegun();
+        
         // register client side conversation state globally
         // so that the message builder picks it
         // Once that's done we don't need to wrap the message builder calls
+
+        CDI.getActiveConversations().put(id, this);
+        hasBegun = true;
+    }
+
+    public boolean isActive()
+    {
+        return hasBegun;
     }
 
     /**
@@ -89,11 +76,14 @@ public class Conversation {
         
         MessageBuilder.createMessage()
                 .toSubject("cdi.conversation:Manager,conversation="+id)
-                .command("end")
-                .with("conversationId", id)
+                .command("end")                
+                .with("cdi.conversation.id", id)
+                .with("cdi.internal", true) // will be excluded in interceptor
                 .done().sendNowWith(ErraiBus.get());
 
-        ended = true;
+        CDI.getActiveConversations().remove(id);
+        
+        hasEnded = true;
     }
 
     public boolean hasEnded()
@@ -101,12 +91,24 @@ public class Conversation {
         // might be a server side component ends the conversation
         // in that case this instance needs to be terminated to reflect the
         // server side state change
-        return ended;
+        return hasEnded;
     }
 
     private void assertEnded()
     {
-        if(ended)
+        if(hasEnded)
             throw new IllegalStateException("Converation already ended: "+ id);
+    }
+
+    private void assertBegun()
+    {
+        if(hasBegun)
+            throw new IllegalStateException("Converation already begun: "+ id);
+    }
+
+    public void reset() {        
+        id = CDI.generateId();
+        hasBegun= false;
+        hasEnded = false;
     }
 }

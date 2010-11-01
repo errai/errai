@@ -26,8 +26,8 @@ import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.cdi.client.CDI;
 import org.jboss.errai.cdi.client.api.Conversation;
+import org.jboss.errai.cdi.client.api.ConversationContext;
 import org.jboss.errai.workspaces.client.api.ProvisioningCallback;
 import org.jboss.errai.workspaces.client.api.WidgetProvider;
 import org.jboss.errai.workspaces.client.api.annotations.LoadTool;
@@ -45,9 +45,8 @@ public class ScopeTestClient implements WidgetProvider
 
     private HTML responsePanel;
 
-    private boolean hasActiveConversation = false;
-
-    private Conversation conversation;
+    @ConversationContext("wizard")     
+    public Conversation conversation;
 
     public void provideWidget(ProvisioningCallback callback)
     {
@@ -102,30 +101,24 @@ public class ScopeTestClient implements WidgetProvider
                 textBox.setText("");
 
                 String command = requiresFlush.getValue() ? "last" : "append";
-                if(!hasActiveConversation)
+                if(!conversation.isActive() || conversation.hasEnded())
                 {
-                    conversation = CDI.createConversation("wizard");
+                    conversation.reset();                    
                     command = "first";
-                    hasActiveConversation = true;
                 }
 
-                flushIfRequired(requiresFlush);
+                beginConversationIfRequired(requiresConversation);
 
-                // send message
-                if(requiresConversation.getValue())
-                {
-                    // send conversational message
-                    conversation.createMessage(command)
-                            .with("word", text)
-                            .done().sendNowWith(bus);
-                }
-                else
-                {
-                    // send regular
-                    sendNonConversational(command, text);
-                }
+                // send conversational message
+                MessageBuilder.createMessage()
+                        .toSubject(conversation.getSubject())
+                        .command(command)
+                        .with("word", text)
+                        .done().sendNowWith(bus);
 
+                toggleFlush(requiresFlush);
 
+               
             }
         });
 
@@ -144,7 +137,6 @@ public class ScopeTestClient implements WidgetProvider
                         if(conversation!=null)
                         {
                             conversation.end();
-                            hasActiveConversation = false;
                         }
                     }
                 }));
@@ -156,21 +148,18 @@ public class ScopeTestClient implements WidgetProvider
         callback.onSuccess(panel);
     }
 
-    private void flushIfRequired(CheckBox flush) {        
-        if(flush.getValue())
+    private void toggleFlush(CheckBox requiresFlush) {
+        if(conversation.hasEnded() || requiresFlush.getValue())
         {
-            hasActiveConversation = false;
+            requiresFlush.setValue(false);
+            conversation.reset();
         }
-
-        flush.setValue(false);
     }
 
-    private void sendNonConversational(String command, String text)
-    {
-        MessageBuilder.createMessage()
-                .toSubject("wizard")
-                .command(command)
-                .with("word", text)
-                .done().sendNowWith(bus);
+    private void beginConversationIfRequired(CheckBox requiresConversation) {
+        if(requiresConversation.getValue() && !conversation.isActive())
+        {
+            conversation.begin();
+        }
     }
 }

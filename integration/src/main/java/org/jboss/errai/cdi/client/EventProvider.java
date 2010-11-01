@@ -1,12 +1,11 @@
 package org.jboss.errai.cdi.client;
 
+import org.jboss.errai.cdi.client.api.CDI;
 import org.jboss.errai.cdi.client.api.Event;
 import org.jboss.errai.ioc.client.api.Provider;
 import org.jboss.errai.ioc.client.api.TypeProvider;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Produces;
 import java.lang.annotation.Annotation;
 
 /**

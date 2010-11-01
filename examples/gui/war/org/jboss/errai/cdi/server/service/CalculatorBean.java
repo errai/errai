@@ -13,22 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.cdi.client;
+package org.jboss.errai.cdi.server.service;
 
-import com.google.gwt.core.client.EntryPoint;
-import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
-import org.jboss.errai.cdi.client.api.CDI;
+import javax.enterprise.context.ApplicationScoped;
 
 /**
- * The GWT entry point
+ * @author: Heiko Braun <hbraun@redhat.com>
+ * @date: Apr 6, 2010
  */
-public class GWTBootstrap implements EntryPoint
+@ApplicationScoped
+public class CalculatorBean implements Calculator
 {
-    public void onModuleLoad()
-    {
-        // conversation interceptor
-        ((ClientMessageBusImpl)ErraiBus.get()).
-                addInterceptor(CDI.CONVERSATTION_INTERCEPTOR);
-    }
+  public long add(long a, long b)
+  {
+    return a+b;  
+  }
 }

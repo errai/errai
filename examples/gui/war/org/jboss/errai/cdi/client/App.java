@@ -15,20 +15,31 @@
  */
 package org.jboss.errai.cdi.client;
 
-import com.google.gwt.core.client.EntryPoint;
-import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
-import org.jboss.errai.cdi.client.api.CDI;
+import com.allen_sauer.gwt.log.client.Log;
+import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.ioc.client.api.EntryPoint;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 /**
- * The GWT entry point
+ * Main application entry point.
  */
-public class GWTBootstrap implements EntryPoint
-{
-    public void onModuleLoad()
-    {
-        // conversation interceptor
-        ((ClientMessageBusImpl)ErraiBus.get()).
-                addInterceptor(CDI.CONVERSATTION_INTERCEPTOR);
-    }
+@EntryPoint
+public class App {
+
+  private MessageBus bus;
+  
+  @Inject
+  public App(MessageBus bus)
+  {
+    this.bus = bus;
+  }
+
+  @PostConstruct
+  public void init()
+  {
+
+    Log.debug("WELD demo loaded");
+  }
 }
