@@ -21,14 +21,14 @@
     <name>Errai::Persistence</name>
     <groupId>org.jboss.errai</groupId>
     <artifactId>errai-persistence</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.1-CR3</version>
     <packaging>jar</packaging>
 
     <!-- Parent -->
     <parent>
         <groupId>org.jboss.errai</groupId>
         <artifactId>errai-parent</artifactId>
-        <version>1.1-SNAPSHOT</version>
+        <version>1.1-CR3</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 

@@ -20,13 +20,24 @@
     <name>Errai</name>
     <groupId>org.jboss.errai</groupId>
     <artifactId>errai-parent</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.1-CR3</version>
     <packaging>pom</packaging>
 
+    <url>http://jboss.org/errai/errai</url>
+
+    <developers>
+        <developer>
+            <name>Mike Brock</name>
+        </developer>
+        <developer>
+            <name>Heiko Braun</name>
+        </developer>
+    </developers>
+
     <scm>
-        <connection>scm:svn:https://svn.jboss.org/repos/errai/trunk</connection>
-        <developerConnection>scm:svn:https://svn.jboss.org/repos/errai/trunk</developerConnection>
-        <url>https://svn.jboss.org/repos/errai/trunk</url>
+        <connection>scm:git:git@github.com:errai/errai.git</connection>
+        <developerConnection>scm:git:git@github.com:errai/errai.git</developerConnection>
+        <url>http://github.com/errai/errai</url>
     </scm>
 
     <organization>
