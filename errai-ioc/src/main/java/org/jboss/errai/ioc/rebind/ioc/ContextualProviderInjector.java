@@ -39,8 +39,13 @@ public class ContextualProviderInjector extends TypeInjector {
                 JClassType type = field.getType().isClassOrInterface();
 
                 JParameterizedType pType = type.isParameterized();
-                if (pType != null) {
+                
+                if(null==pType)
+                    sb.append("new Class[] {}");
+                else
+                {
                     JClassType[] typeArgs = pType.getTypeArgs();
+                    sb.append("new Class[] {");
                     for (int i = 0; i < typeArgs.length; i++) {
                         sb.append(typeArgs[i].getQualifiedSourceName()).append(".class");
 
@@ -48,7 +53,9 @@ public class ContextualProviderInjector extends TypeInjector {
                             sb.append(", ");
                         }
                     }
+                    sb.append("}");
                 }
+
                 break;
         }
 
