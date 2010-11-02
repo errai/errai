@@ -26,13 +26,17 @@
     <url>http://jboss.org/errai/errai</url>
 
     <licenses>
-    <license>
-      <name>The Apache Software License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-      <distribution>repo</distribution>
-    </license>
-  </licenses>
-	
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <description>
+        A GWT framework
+    </description>
+    
     <developers>
         <developer>
             <name>Mike Brock</name>
