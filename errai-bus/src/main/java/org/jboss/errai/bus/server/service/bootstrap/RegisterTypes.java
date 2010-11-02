@@ -28,6 +28,8 @@ import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
 class RegisterTypes implements BootstrapExecution {
     public void execute(BootstrapContext context) {
         final ErraiServiceConfiguratorImpl config = (ErraiServiceConfiguratorImpl) context.getConfig();
+
+        // TODO: get rid of the singleton
         JSONEncoder.setSerializableTypes(config.getSerializableTypes());
     }
 }
