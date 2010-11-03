@@ -21,6 +21,13 @@ import org.slf4j.LoggerFactory;
 import javax.enterprise.context.Conversation;
 
 /**
+ * Acts as a bridge between an externally managed conversation handle
+ * and the CDI container. It merely delegates to the default Conversation impl. but
+ * retrieves the conversation id through a thread local.
+ *
+ * @see ContextManager#getThreadContextId()
+ * @see Conversation#begin(String)
+ *  
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Oct 5, 2010
  */

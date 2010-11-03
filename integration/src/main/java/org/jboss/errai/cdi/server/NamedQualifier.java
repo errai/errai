@@ -15,7 +15,6 @@
  */
 package org.jboss.errai.cdi.server;
 
-import javax.enterprise.inject.Produces;
 import javax.enterprise.util.AnnotationLiteral;
 import javax.inject.Named;
 

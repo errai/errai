@@ -32,6 +32,9 @@ import java.util.Set;
 
 
 /**
+ * Basically provides the {@link org.jboss.errai.cdi.server.ErraiConversation}
+ * injection point target.
+ *
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Sep 15, 2010
  */
