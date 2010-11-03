@@ -30,19 +30,7 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Weld -->
-        <dependency>
-            <groupId>org.jboss.weld</groupId>
-            <artifactId>weld-se</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-simple</artifactId>
-                </exclusion>
-            </exclusions>
-            <scope>provided</scope>
-        </dependency>
-
+        <!-- Weld -->        
         <dependency>
             <groupId>org.jboss.weld.servlet</groupId>
             <artifactId>weld-servlet</artifactId>

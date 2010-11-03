@@ -245,12 +245,7 @@
                     <scope>provided</scope>
                 </dependency>
 
-                <!-- Weld is installed within JBoss 6-->
-                <!--dependency>
-                    <groupId>org.jboss.weld</groupId>
-                    <artifactId>weld-se</artifactId>
-                    <scope>provided</scope>
-                </dependency-->
+                <!-- Weld is installed within JBoss 6-->                
 
                 <dependency>
                     <groupId>org.glassfish.web</groupId>
