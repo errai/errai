@@ -10,16 +10,17 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <errai.version>1.1-CR3</errai.version>
-        <errai-cdi.version>1.1-CR3</errai-cdi.version>
+        <errai.version>1.1-Final</errai.version>
+        <errai-cdi.version>1.1-Beta1</errai-cdi.version>
         <gwt.version>2.0.4</gwt.version>
         <hsqldb.version>1.8.0.7</hsqldb.version>
-        <weld.version>1.0.1-Final</weld.version>
+        <weld.version>1.1.0.Beta2</weld.version>
         <gwt.maven>1.3-12393</gwt.maven>
         <mvel.version>2.0.18</mvel.version>
-        <jetty.version>6.1.22</jetty.version>
+        <jetty.version>6.1.25</jetty.version>
         <slf4j.version>1.5.11</slf4j.version>
         <webDescriptor>jetty</webDescriptor>
+        <uel.impl.version>2.1.2-b04</uel.impl.version>
     </properties>
 
     <dependencies>
@@ -68,6 +69,16 @@
             <version>${errai-cdi.version}</version>
         </dependency>
 
+         <!--
+            This must be placed above com.google.gwt:gwt-dev
+            to override the Jetty that is present there
+        -->
+        <dependency>
+            <groupId>org.mortbay.jetty</groupId>
+            <artifactId>jetty</artifactId>
+            <version>${jetty.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.mortbay.jetty</groupId>
             <artifactId>jetty-plus</artifactId>
@@ -80,23 +91,18 @@
             <version>${jetty.version}</version>
         </dependency>
 
-        <!-- Weld Modules -->
-        <dependency>
-            <groupId>org.jboss.weld</groupId>
-            <artifactId>weld-se</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-simple</artifactId>
-                </exclusion>
-            </exclusions>
-            <version>${weld.version}</version>
-        </dependency>
-
+        <!-- Weld Modules -->        
         <dependency>
             <groupId>org.jboss.weld.servlet</groupId>
             <artifactId>weld-servlet</artifactId>
             <version>${weld.version}</version>
+        </dependency>
+
+         <dependency>
+            <groupId>org.glassfish.web</groupId>
+            <artifactId>el-impl</artifactId>
+            <scope>runtime</scope>
+            <version>${uel.impl.version}</version>
         </dependency>
 
         <!-- GWT and GWT Extensions -->
@@ -180,9 +186,9 @@
 
                 <!-- Weld is installed within JBoss 6-->
                 <dependency>
-                    <groupId>org.jboss.weld</groupId>
-                    <artifactId>weld-se</artifactId>
-                    <version>${weld.version}</version>
+                    <groupId>org.glassfish.web</groupId>
+                    <artifactId>el-impl</artifactId>
+                    <version>${uel.impl.version}</version>
                     <scope>provided</scope>
                 </dependency>
 
