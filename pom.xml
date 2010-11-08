@@ -6,12 +6,12 @@
     <groupId>org.jboss.errai</groupId>
     <artifactId>cdi-integration-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.1-Beta1</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <errai.version>1.1-SNAPSHOT</errai.version>
-        <errai-jms.version>1.1-SNAPSHOT</errai-jms.version>
+        <errai.version>1.1-CR3</errai.version>
+        <errai-jms.version>1.0-Beta1</errai-jms.version>
         <gwt.version>2.0.4</gwt.version>
         <hsqldb.version>1.8.0.7</hsqldb.version>
         <weld.version>1.1.0.Beta2</weld.version>
@@ -26,8 +26,8 @@
         <module>integration</module>
         <module>jboss</module>
         <module>examples/model</module>
-        <module>examples/gui</module>
         <module>examples/server</module>
+        <!--module>examples/gui</module-->
     </modules>
 
     <dependencyManagement>
