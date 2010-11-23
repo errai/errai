@@ -27,8 +27,11 @@ import javax.servlet.ServletContextListener;
 /**
  * ErraiService bootstrap strategy: Either attach to an existing service instance
  * or create a new one and bind it to JNDI. Currently limited to JBoss.
- * The actually service instance will be exposed through the servlet context.
+ * The actually service instance will be exposed through the servlet context.<p/>
  *
+ * <b>Note</b>: This only works in conjunction with a Weld bootstrap listener.
+ * An AS 6 Weld is driven by the deployment framework and solution doesn't apply.
+ * 
  * @see org.jboss.errai.bus.server.servlet.AbstractErraiServlet
  * @see org.jboss.errai.cdi.server.CDIExtensionPoints
  * 
@@ -53,7 +56,7 @@ public class BootstrapListener implements ServletContextListener {
 
                 ErraiService service = null;
 
-                try {                    
+                try {
                     service = new JNDIServiceLocator(managedJndiName).locateService();
 
                     log.info("Service exists. Attaching to " + managedJndiName);
