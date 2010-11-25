@@ -9,8 +9,8 @@
         <servlet-name>ErraiServlet</servlet-name>
         <servlet-class>org.jboss.errai.bus.server.servlet.DefaultBlockingServlet</servlet-class>
         <init-param>
-            <param-name>jndiName</param-name>
-            <param-value>java:/Errai</param-value>
+            <param-name>service-locator</param-name>
+            <param-value>org.jboss.errai.cdi.server.CDIServiceLocator</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
@@ -19,11 +19,7 @@
         <servlet-name>ErraiServlet</servlet-name>
         <url-pattern>*.erraiBus</url-pattern>
     </servlet-mapping>
-
-    <listener>
-        <listener-class>org.jboss.errai.container.BootstrapListener</listener-class>
-    </listener>
-
+ 
     <listener>
         <!--
 
