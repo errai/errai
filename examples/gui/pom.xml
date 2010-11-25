@@ -85,7 +85,7 @@
             <artifactId>errai-jms</artifactId>
         </dependency-->
 
-        <!-- CDI Development Utils-->       
+        <!-- CDI Development Utils-->
 
         <dependency>
             <groupId>org.jboss.errai</groupId>
@@ -121,7 +121,7 @@
             <scope>runtime</scope>
             <version>${uel.impl.version}</version>
         </dependency>
-      
+
         <dependency>
             <groupId>org.jboss.weld.servlet</groupId>
             <artifactId>weld-servlet</artifactId>
@@ -181,19 +181,27 @@
                             <groupId>com.google.collections</groupId>
                             <artifactId>google-collections</artifactId>
                         </exclusion>
-                        <!--exclusion>
-                            <groupId>dom4j</groupId>
-                            <artifactId>dom4j</artifactId>
-                        </exclusion>
-                        <exclusion>
-                            <groupId>xml-apis</groupId>
-                            <artifactId>xml-apis</artifactId>
-                        </exclusion>
-                        <exclusion>
-                            <groupId>javassist</groupId>
-                            <artifactId>javassist</artifactId>
-                        </exclusion-->
+                       
                     </exclusions>
+                </dependency>
+
+                <dependency>
+                    <groupId>dom4j</groupId>
+                    <artifactId>dom4j</artifactId>
+                    <version>1.6</version>
+                    <scope>provided</scope>
+                </dependency>
+                <dependency>
+                    <groupId>xml-apis</groupId>
+                    <artifactId>xml-apis</artifactId>
+                    <version>1.0.b2</version>
+                    <scope>provided</scope>
+                </dependency>
+                <dependency>
+                    <groupId>javassist</groupId>
+                    <artifactId>javassist</artifactId>
+                    <version>3.12.1.GA</version>
+                    <scope>provided</scope>
                 </dependency>
 
                 <dependency>
@@ -271,7 +279,7 @@
                 <dependency>
                     <groupId>org.jboss.errai</groupId>
                     <artifactId>errai-cdi</artifactId>
-                    <version>${project.version}</version>                    
+                    <version>${project.version}</version>
                 </dependency>
 
                 <!-- example specific libraries -->
@@ -294,7 +302,7 @@
                     <artifactId>errai-cdi-jetty</artifactId>
                     <scope>provided</scope>
                 </dependency>
-               
+
                 <dependency>
                     <groupId>org.jboss.errai</groupId>
                     <artifactId>errai-cdi-jetty</artifactId>
@@ -302,11 +310,11 @@
                     <scope>provided</scope>
                 </dependency>
 
-                <!-- Weld is installed within JBoss 6-->                
+                <!-- Weld is installed within JBoss 6-->
 
                 <dependency>
                     <groupId>org.glassfish.web</groupId>
-                    <artifactId>el-impl</artifactId>                    
+                    <artifactId>el-impl</artifactId>
                     <version>${uel.impl.version}</version>
                     <scope>provided</scope>
                 </dependency>
@@ -329,7 +337,7 @@
                     <artifactId>jetty-naming</artifactId>
                     <scope>provided</scope>
                 </dependency>
-               
+
             </dependencies>
 
             <build>
@@ -354,6 +362,7 @@
                             </webResources>
                         </configuration>
                     </plugin>
+                   
                 </plugins>
             </build>
         </profile>
@@ -382,7 +391,7 @@
                     <extraJvmArgs>-Xmx512m -DDEBUG</extraJvmArgs>
                     <soyc>false</soyc>
                     <webXml>src/jetty/web.xml</webXml>
-                    <server>org.jboss.errai.cdi.server.gwt.JettyLauncher</server>                  
+                    <server>org.jboss.errai.cdi.server.gwt.JettyLauncher</server>
                 </configuration>
                 <executions>
                     <execution>
