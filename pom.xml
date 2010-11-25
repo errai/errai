@@ -20,7 +20,7 @@
     <name>Errai</name>
     <groupId>org.jboss.errai</groupId>
     <artifactId>errai-parent</artifactId>
-    <version>1.1-CR3</version>
+    <version>1.1-Final</version>
     <packaging>pom</packaging>
 
     <url>http://jboss.org/errai/errai</url>
@@ -73,6 +73,7 @@
         <mosaic.version>0.4.0-rc4</mosaic.version>
         <appengine.version>1.3.5</appengine.version>        
         <reflections.version>0.9.5-RC2_jboss-SP1</reflections.version>
+        <errai.cdi-version>1.1-Beta2</errai.cdi-version>
     </properties>
 
     <modules>
@@ -133,6 +134,12 @@
                 <version>1.0</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.jboss.errai</groupId>
+                <artifactId>errai-cdi</artifactId>
+                <version>${errai.cdi-version}</version>
+            </dependency>
+            
             <!--<dependency>-->
             <!--<groupId>org.hibernate</groupId>-->
             <!--<artifactId>hibernate-entitymanager</artifactId>-->
@@ -345,6 +352,15 @@
                 <module>errai-bus-demos</module>
                 <module>archetypes/quickstart</module>
                 <module>archetypes/cdi</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>core-libs</id>
+            <modules>
+                <module>errai-common</module>
+                <module>errai-bus</module>
+                <module>errai-ioc</module>
             </modules>
         </profile>
     </profiles>

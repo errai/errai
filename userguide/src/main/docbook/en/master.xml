@@ -2151,7 +2151,7 @@ bare bone project, including all dependencies, which can later on be imported in
 mvn archetype:generate  \
  -DarchetypeGroupId=org.jboss.errai \
  -DarchetypeArtifactId=cdi-archetype \
- -DarchetypeVersion=1.1-SNAPSHOT \
+ -DarchetypeVersion=1.1-Final \
  -DarchetypeRepository=https://repository.jboss.org/nexus/content/groups/public/
             </programlisting>
 
@@ -2254,7 +2254,7 @@ cp target/foobr-jboss6.war $JBOSS_HOME/server/default/deploy
 mvn archetype:generate \
     -DarchetypeGroupId=org.jboss.errai \
     -DarchetypeArtifactId=sandbox-archetype \
-    -DarchetypeVersion=1.1-SNAPSHOT \
+    -DarchetypeVersion=1.1-Final \
     -DarchetypeRepository=https://repository.jboss.org/nexus/content/groups/public/
     </programlisting> When invoking the archetype build it ask you
                 about the maven groupId, artifactId and package name your GWT

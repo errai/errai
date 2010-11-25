@@ -26,16 +26,24 @@
                 <include>org.jboss.errai:errai-common</include>
                 <include>org.jboss.errai:errai-bus</include>
                 <include>org.jboss.errai:errai-workspaces</include>
-                <include>org.jboss.errai:errai-widgets</include>
+                <!--include>org.jboss.errai:errai-widgets</include-->
                 <include>org.jboss.errai:errai-ioc</include>
                 <include>org.jboss.errai:errai-tools</include>
                 <!--include>org.jboss.errai:errai-persistence</include-->
 
+                <include>org.slf4j:slf4j-api</include>
+                <include>org.slf4j:slf4j-log4j12</include>
+                
                 <!-- 3rd Party -->
                 <include>com.google.code.guice:guice</include>
                 <include>com.google.code.guice:guice-servlet</include>
                 <include>org.mvel:mvel2</include>
-                <include>org.reflections:reflections</include>
+
+                <include>org.reflections:reflections:jar:0.9.5-RC2_jboss-SP1</include>
+                <include>com.google.collections:google-collections</include>
+                <include>dom4j:dom4j</include>
+                <include>xml-apis:xml-apis</include>
+                <include>javassist:javassist</include>
             </includes>
             <outputDirectory>lib</outputDirectory>
         </dependencySet>
