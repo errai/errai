@@ -23,6 +23,7 @@ import javax.servlet.http.HttpSession;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Jul 19, 2010
  */
+@Deprecated
 public class JNDIServiceLocator implements ServiceLocator<HttpSession> {
     public static final String DEFAULT_JNDI_NAME = "java:/Errai";
 

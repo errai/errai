@@ -18,8 +18,6 @@ package org.jboss.errai.bus.server.servlet;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
-import com.google.inject.Key;
-import com.google.inject.TypeLiteral;
 import org.jboss.errai.bus.client.api.ResourceProvider;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.client.framework.MessageBus;
@@ -27,7 +25,10 @@ import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.server.ServerMessageBusImpl;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.bus.server.api.SessionProvider;
-import org.jboss.errai.bus.server.service.*;
+import org.jboss.errai.bus.server.service.ErraiService;
+import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
+import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
+import org.jboss.errai.bus.server.service.ErraiServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,9 +85,24 @@ public abstract class AbstractErraiServlet extends HttpServlet {
             synchronized (context)
             {
                 // Build or lookup service
-                String jndiNameProperty = config.getInitParameter("jndiName");
-                service = jndiNameProperty != null ?
-                        new JNDIServiceLocator(jndiNameProperty).locateService() : buildService();
+                String serviceLocatorClass= config.getInitParameter("service-locator");
+                if(serviceLocatorClass!=null)
+                {
+                    // locate externally created service instance, i.e. CDI
+                    try {
+                        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+                        Class<?> aClass = loader.loadClass(serviceLocatorClass);
+                        ServiceLocator locator  = (ServiceLocator) aClass.newInstance();
+                        this.service = locator.locateService();
+                    } catch (Exception e) {
+                        throw new RuntimeException("Failed to create service", e);
+                    }
+                }
+                else
+                {
+                    // create a service instance manually
+                    this.service = buildService();
+                }
 
                 contextClassLoader = Thread.currentThread().getContextClassLoader();
 
