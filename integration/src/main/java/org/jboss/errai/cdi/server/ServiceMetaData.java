@@ -15,39 +15,35 @@
  */
 package org.jboss.errai.cdi.server;
 
-import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.server.service.ErraiService;
+import org.jboss.errai.bus.server.service.ErraiServiceImpl;
 
-import javax.enterprise.context.Conversation;
-import javax.enterprise.context.Dependent;
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Default;
 import javax.enterprise.inject.spi.*;
 import javax.enterprise.util.AnnotationLiteral;
-import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-
 /**
- * Basically provides the {@link org.jboss.errai.cdi.server.ErraiConversation}
- * injection point target.
  *
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Sep 15, 2010
  */
-public class ConversationMetaData implements Bean {
+public class ServiceMetaData implements Bean {
 
     final InjectionTarget it;
-    final Conversation delegate;
+    final ErraiService delegate;
 
-    public ConversationMetaData(BeanManager bm, Conversation delegate) {
+    public ServiceMetaData(BeanManager bm, ErraiService delegate) {
 
         //use this to read annotations of the class
-        AnnotatedType at = bm.createAnnotatedType(ErraiConversation.class);
+        AnnotatedType at = bm.createAnnotatedType(ErraiServiceImpl.class);
 
         //use this to create the class and inject dependencies
         this.it = bm.createInjectionTarget(at);
@@ -57,7 +53,7 @@ public class ConversationMetaData implements Bean {
     }
 
     public Class<?> getBeanClass() {
-        return MessageBus.class;
+        return ErraiService.class;
     }
 
 
@@ -66,19 +62,18 @@ public class ConversationMetaData implements Bean {
     }
 
     public String getName() {
-        return null;
+        return "Errai";
     }
 
     public Set<Annotation> getQualifiers() {
         Set<Annotation> qualifiers = new HashSet<Annotation>();
         qualifiers.add( new AnnotationLiteral<Default>() {} );
         qualifiers.add( new AnnotationLiteral<Any>() {} );
-        qualifiers.add( new NamedQualifier("ErraiConversation"));
         return qualifiers;
     }
 
     public Class<? extends Annotation> getScope() {
-        return Dependent.class;
+        return ApplicationScoped.class;
     }
 
     public Set<Class<? extends Annotation>> getStereotypes() {
@@ -87,7 +82,7 @@ public class ConversationMetaData implements Bean {
 
     public Set<Type> getTypes() {
         Set<Type> types = new HashSet<Type>();
-        types.add(ErraiConversation.class);        
+        types.add(ErraiService.class);
         types.add(Object.class);
         return types;
     }

@@ -32,8 +32,10 @@ import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.io.CommandBindingsCallback;
 import org.jboss.errai.bus.server.io.ConversationalEndpointCallback;
 import org.jboss.errai.bus.server.io.RemoteServiceCallback;
+import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.cdi.server.events.OutboundEventObserver;
 import org.jboss.errai.cdi.server.events.ShutdownEventObserver;
+import org.jboss.errai.container.ServiceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +44,9 @@ import javax.enterprise.context.Conversation;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.*;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * Extension points to the CDI container.
@@ -62,6 +66,8 @@ public class CDIExtensionPoints implements Extension
 
     private ContextManager contextManager;
 
+    private ErraiService service;
+
     public void beforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd)
     {
         this.uuid = UUID.randomUUID().toString();
@@ -78,7 +84,7 @@ public class CDIExtensionPoints implements Extension
     public <T> void observeResources(@Observes ProcessAnnotatedType<T> event)
     {
         final AnnotatedType<T> type = event.getAnnotatedType();
-
+        
         // services
         if(type.isAnnotationPresent(Service.class))
         {
@@ -136,7 +142,12 @@ public class CDIExtensionPoints implements Extension
 
     public void afterBeanDiscovery(@Observes AfterBeanDiscovery abd,  BeanManager bm)
     {
-        final MessageBus bus = Util.lookupMessageBus();
+
+        // Errai Service wrapper
+        this.service = ServiceFactory.create();
+        abd.addBean(new ServiceMetaData(bm, this.service));
+
+        final MessageBus bus = service.getBus();
 
         // context handling hooks
         this.contextManager = new ContextManager(uuid,  bm, bus);
@@ -164,7 +175,7 @@ public class CDIExtensionPoints implements Extension
         bus.subscribe(EventDispatcher.NAME, eventDispatcher);
 
     }
-
+    
     private void subscribeServices(final BeanManager beanManager, final MessageBus bus)
     {        
         for(final AnnotatedType<?> type : managedTypes.getServiceEndpoints())
@@ -188,14 +199,20 @@ public class CDIExtensionPoints implements Extension
             final MessageCallback invocationTarget = commandPoints.isEmpty() ?
                     (MessageCallback)targetbean : new CommandBindingsCallback(commandPoints, targetbean);
 
+
+            // TODO: enable CommandBindings
             bus.subscribe(subjectName, new MessageCallback()
             {
-                public void callback(final Message message) {
+                //private BeanLookup lookup = new BeanLookup(type,beanManager);
 
+                public void callback(final Message message) {
+              
                     contextManager.activateRequestContext();
                     contextManager.activateConversationContext(message);
                     try {
+                        //((MessageCallback)lookup.getInvocationTarget()).callback(message);
                         invocationTarget.callback(message);
+
                     } finally {
                         contextManager.deactivateRequestContext();
                         contextManager.deactivateConversationContext(message);
@@ -278,5 +295,27 @@ public class CDIExtensionPoints implements Extension
             }
         };
 
+    }
+
+    class BeanLookup
+    {
+        private BeanManager beanManager;
+        private AnnotatedType<?> type;
+
+        private Object invocationTarget;
+
+        BeanLookup(AnnotatedType<?> type, BeanManager bm) {
+            this.type = type;
+            this.beanManager = bm;
+        }
+
+        public Object getInvocationTarget() {
+            if(null==invocationTarget)
+            {
+                invocationTarget =
+                        Util.lookupCallbackBean(beanManager, type.getJavaClass());
+            }
+            return invocationTarget;
+        }
     }
 }

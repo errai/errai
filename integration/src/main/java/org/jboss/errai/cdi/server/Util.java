@@ -33,6 +33,9 @@ import java.util.Set;
  */
 public class Util {
 
+    private static final String BEAN_MANAGER_JNDI = "java:comp/BeanManager";
+    private static final String BEAN_MANAGER_FALLBACK_JNDI = "java:comp/env/BeanManager";
+
     public static Object lookupCallbackBean(BeanManager beanManager, Class<?> serviceType)
     {
         Set<Bean<?>> beans = beanManager.getBeans(serviceType);
@@ -57,6 +60,7 @@ public class Util {
 
     }
 
+    @Deprecated
     public static MessageBus lookupMessageBus()
     {
         InitialContext ctx = null;
@@ -85,6 +89,37 @@ public class Util {
         }
 
         return errai.getBus();
+    }
+
+    public static BeanManager lookupBeanManager()
+    {
+        InitialContext ctx = null;
+        BeanManager bm = null;
+
+        try
+        {
+            ctx = new InitialContext();
+            bm = (BeanManager)ctx.lookup(BEAN_MANAGER_JNDI);
+        }
+        catch (NamingException e)
+        {
+
+            if(ctx!=null)
+            {
+                try
+                {
+                    bm = (BeanManager)ctx.lookup(BEAN_MANAGER_FALLBACK_JNDI); // development mode
+                }
+                catch (NamingException e1)
+                {
+                }
+            }
+
+            if(null==bm)
+                throw new RuntimeException("Failed to locate BeanManager", e);
+        }
+
+        return bm;
     }
 
     public static String resolveServiceName(Class<?> type)

@@ -13,5 +13,7 @@
     
     <inherits name="org.jboss.errai.cdi.CDIIntegration"/>
 
+    <set-property name="user.agent" value="gecko1_8,safari"/>
+    
     <!--inherits name="gwt.JavaxEnterprise" /-->
 </module>

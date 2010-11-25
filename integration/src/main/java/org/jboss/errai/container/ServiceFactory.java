@@ -29,7 +29,7 @@ import org.jboss.errai.bus.server.service.ErraiServiceImpl;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Sep 29, 2010
  */
-class ServiceFactory {
+public class ServiceFactory {
     public static ErraiService create()
     {
         return Guice.createInjector(new AbstractModule() {

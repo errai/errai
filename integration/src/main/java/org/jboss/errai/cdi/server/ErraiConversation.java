@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.Conversation;
+import java.io.Serializable;
 
 /**
  * Acts as a bridge between an externally managed conversation handle

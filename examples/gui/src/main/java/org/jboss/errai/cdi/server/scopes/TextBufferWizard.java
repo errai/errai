@@ -22,6 +22,7 @@ import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.cdi.server.ErraiConversation;
 
 import javax.enterprise.context.ConversationScoped;
+import javax.enterprise.context.NormalScope;
 import javax.inject.Inject;
 import java.io.Serializable;
 
@@ -34,10 +35,10 @@ import java.io.Serializable;
 public class TextBufferWizard implements Serializable {
 
     @Inject
-    private ErraiConversation conversation;
+    private transient ErraiConversation conversation;
 
     @Inject
-    private MessageBus bus;
+    private transient MessageBus bus;
 
     private StringBuffer buffer = new StringBuffer();
 
