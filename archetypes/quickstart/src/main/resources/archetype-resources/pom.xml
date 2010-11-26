@@ -24,7 +24,7 @@
     <version>${version}</version>
 
     <properties>
-        <errai.version>1.1-Final</errai.version>
+        <errai.version>1.2-SNAPSHOT</errai.version>
         <gwt.version>2.0.4</gwt.version>
         <gwt.maven.version>1.3-12393</gwt.maven.version>
     </properties>
