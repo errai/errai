@@ -1839,8 +1839,8 @@ mvn gwt:debug
 
         </sect1>
 
-        <sect1>
-            <title>Use Cases</title>
+        <sect1 id="invocation-model">
+            <title>Invocation models</title>
 
             <para>
                 Beans that are deployed to a CDI container (i.e. JBoss 6) will automatically
@@ -1947,7 +1947,7 @@ mvn gwt:debug
                 <sect3>
                     <title>Event dispatcher proxy</title>
                     <para>
-                        The event dispatcher is responsible to send events created on the client side
+                        The event dispatcher is responsible to send events from the client
                         to the server side event subsystem (CDI container). This means any event that is fired through
                         a dispatcher will eventually be consumed by a CDI managed bean. If there is an Observer
                         registered for it on the server side.
@@ -1992,6 +1992,83 @@ public class AccountService {
                         a certain overhead invloved (serialization, HTTP traffic, etc).
                     </para>
                 </sect3>
+            </sect2>
+        </sect1>
+
+        <sect1>
+            <title>Bean Scopes</title>
+            <para>
+               Most bean scopes work as expected, but some require special attention.
+               Not all CDI concepts match directly to an Ajax client. In this chapter will talk about the ones
+               that do not work as expected, or inherit particular limitations and contstraints.
+            </para>
+            <sect2>
+                <title>Conversation Scope</title>
+                <para>
+                    The conversation scope basically subdevides the session scope into smaller,
+                    long running request/response cycles that correlate with each other. For backend components
+                    this means you safely keep state in a bean that belongs to a particular, identifiable conversation.
+                    Opposed to JSF frontends that maintain a reference to the conversation context
+                    by passing around URL encoded ID's, a GWT client needs to maintain this reference on it's own.
+                    Fortunately this is build into errai and supported by any <link linkend="invocation-model">invocation model</link>
+                    out-of-the-box.
+                </para>
+                <para>
+                    Let's take a look at an example client:
+                    <programlisting>
+public class ScopeTestClient implements WidgetProvider
+{
+    @ConversationContext("wizard")
+    public Conversation conversation;
+
+    public void invokeBackend()
+    {
+        conversation.begin();
+
+        // do some work
+
+        conversation.end();                
+    }
+                            
+}
+                    </programlisting>
+
+                    What's happening here? A client is provided with a conversation context handle
+                    (<varname>@ConversationContext</varname>). This handle can be used to drive the server side conversation scope
+                    across invocations. In this case we begin, do some work and end the conversation right away.
+                    But you can think of several backend invocations being executed, before actually calling <varname>conversation.end()</varname>.
+                    The conversation is associated with a particular <link linkend="bus">bus endpoint</link>. In this case it's a CDI
+                    managed bean that will be automatically exposed to the bus. In case you don't begin the conversation, no conversation id
+                    will be associated with the invocation, which results a transient conversation for the duration of a single request.                    
+                </para>
+                <para>
+                    To complete the picture we'll look at the conversation scoped CDI bean as well:
+                    <programlisting>
+@ConversationScoped
+@Service("wizard")
+public class TextBufferWizard implements Serializable {
+    @Inject
+    private transient ErraiConversation conversation;
+
+    public void businessLogic()
+    {
+      conversation.begin();
+      //
+      conversation.end();                  
+    }
+}
+                    </programlisting>
+
+                    Looks familiar, no? It actually represents the same constructs as on the client side.
+                    You get hold of a conversation handle (<varname>@Inject ErraiConversation</varname>)
+                    and work through <varname>begin()</varname> and <varname>end()</varname>. On the server
+                    side the conversation has a twofold purpose: On the one hand it specifies the conversation lifecycle
+                    and on the other it either creates transient conversations or ensures an existing one is associated.
+                    The actual conversation (and state associated with it) is kept on the server side and managed by the container.
+                    Thus it may be possible that the conversation is ended at anytime. This can either happen because the
+                    conversation reached a timeout or it's being explicitly ended. In both cases the client side handle
+                    will be notified.
+                </para>
             </sect2>
         </sect1>
     
@@ -2046,6 +2123,17 @@ public class AccountService {
 &lt;web-app>
 
     [...]
+    &lt;servlet>
+        &lt;servlet-name>ErraiServlet&lt;/servlet-name>
+        &lt;servlet-class>org.jboss.errai.bus.server.servlet.DefaultBlockingServlet&lt;/servlet-class>
+         &lt;init-param>
+            &lt;param-name>service-locator&lt;/param-name>
+            &lt;param-value>org.jboss.errai.cdi.server.CDIServiceLocator&lt;/param-value>
+        &lt;/init-param>
+        &lt;load-on-startup>1&lt;/load-on-startup>
+    &lt;/servlet>
+                            
+    [...]
 
     &lt;listener>
         &lt;listener-class>org.jboss.errai.container.DevModeCDIBootstrap&lt;/listener-class>
@@ -2062,7 +2150,87 @@ public class AccountService {
 &lt;/web-app>                            
                         </programlisting>
 
-                    <note>
+                        What's notable here:
+                        <itemizedlist>
+                             <listitem>
+                                You need to configure a custom service locator: <varname>org.jboss.errai.cdi.server.CDIServiceLocator</varname>.
+                                It's necessary because the ErraiService is managed by the CDI container. 
+                            </listitem>
+                            <listitem>
+                                In hosted mode (like any other servlet engine) you need to boostrap th CDI
+                                container on your own: <varname>org.jboss.errai.container.DevModeCDIBootstrap</varname>
+                            </listitem>
+                        </itemizedlist>
+
+                    </para>
+                </sect3>
+
+                <sect3>
+                    <title>Servlet Engine and Applications Servers</title>
+                    <para>
+                        If you want to move your application to a production runtime, a few things need to be considered.
+                        For servlet engines, follow the same steps as in hosted mode (see above). You basically bootstrap the CDI
+                        container through a servlet listener. On an EE6 application server (i.e. JBoss 6) the servlet listener can be omitted,
+                        but the CDI service locator is stil necessary. Running the the CDI extension on JBoss requires at least JBoss-6.0.0-CR1. Please let us know about problems
+                        you encounter on other systems.
+                    </para>
+
+                </sect3>
+
+            </sect2>
+            <sect2>
+                <title>Runtime Dependencies</title>
+                <para>
+                    The CDI integration jar can be found in the extension directory of the distribution.
+                    Simply include it with your web application, along with the other errai bus dependencies
+                    and optionally the weld-servlet binary (depends on the target runtime).
+                    The least troublesome way to setup your project dependencies is to simply rely on the maven
+                    archetypes we provide.
+                    <programlisting>
+[INFO] --- maven-dependency-plugin:2.1:tree (default-cli) @ cdi-test ---
+[INFO] foo.bar:cdi-test:war:1.0-SNAPSHOT
+[INFO] +- org.jboss.errai:errai-bus:jar:1.1-Final:compile
+[INFO] |  +- org.jboss.errai:errai-common:jar:1.1-Final:compile
+[INFO] |  +- com.google.code.guice:guice:jar:2.0:compile
+[INFO] |  +- com.google.code.guice:guice:jar:aopalliance:2.0:compile
+[INFO] |  +- com.google.code.guice:guice-servlet:jar:2.0:compile
+[INFO] |  +- org.slf4j:slf4j-log4j12:jar:1.5.10:compile
+[INFO] |  |  \- log4j:log4j:jar:1.2.14:compile
+[INFO] |  +- junit:junit:jar:4.8.1:compile
+[INFO] |  +- org.reflections:reflections:jar:0.9.5-RC2_jboss-SP1:compile
+[INFO] |  |  +- com.google.collections:google-collections:jar:1.0:compile
+[INFO] |  |  \- dom4j:dom4j:jar:1.6:compile
+[INFO] |  |     \- xml-apis:xml-apis:jar:1.0.b2:compile
+[INFO] |  \- javassist:javassist:jar:3.12.1.GA:compile
+[INFO] +- org.jboss.errai:errai-ioc:jar:1.1-Final:compile
+[INFO] +- org.mvel:mvel2:jar:2.0.18:compile
+[INFO] +- org.jboss.errai:errai-cdi:jar:1.1-Beta2:compile
+[INFO] +- org.jboss.errai:errai-cdi-jetty:jar:1.1-Beta2:compile
+[INFO] +- org.jboss.weld.servlet:weld-servlet:jar:1.1.0.Beta2:compile
+[INFO] +- org.glassfish.web:el-impl:jar:2.1.2-b04:runtime
+[INFO] |  \- javax.el:el-api:jar:2.1.2-b04:runtime
+[INFO] +- com.google.gwt:gwt-user:jar:2.0.4:provided
+[INFO] +- com.google.gwt:gwt-dev:jar:2.0.4:provided
+[INFO] \- org.slf4j:slf4j-api:jar:1.5.11:compile
+                        
+                    </programlisting>
+                </para>
+
+                 <sect3>
+                        <title>JBoss 6</title>
+                    If you look at the project skeleton created by the CDI archetype,
+                    you'll notice a custom  profile:
+
+                    <programlisting>
+mvn -Pjboss6 clean install
+                    </programlisting>
+
+                    It excludes certain libraries that would conflict with the pre-installed AS libraries.
+                    However on most systems, simply packaging the web application inlcuding all depedencies as
+                    listed on the maven descriptor should work fine.
+                    </sect3>
+                
+                <note>
                         <title>Errai-CDI maven archetype </title>
 
                         <para>
@@ -2071,47 +2239,9 @@ public class AccountService {
                             and configuration details.
                         </para>
                     </note>
-
-                    </para>
-                </sect3>
-
-                <sect3>
-                    <title>Deployment to a Servlet Engine</title>
-                    <para>
-                        Deployment to servlet engine has basically the same requirements
-                        as running in hosted mode. You need to include the servlet listener
-                        that bootstraps the CDI container and make sure both Errai and CDI are accessible through JNDI.
-                        For Jetty you can re-use the artefacts we ship with the archetype. In case you want
-                        to run on tomcat, please consult the <ulink url="http://tomcat.apache.org/tomcat-5.5-doc/jndi-resources-howto.html">Apache Tomcat Documentation</ulink>
-                        However the most simple case, is to use <ulink url="http://jboss.org/jbossas">JBoss</ulink> right away.
-                    </para>
-                </sect3>
-
-                <sect3>
-                    <title>Deployment to an Application Server</title>
-                    <para>
-                        We provide integration with the <ulink url="http://jboss.org/jbossas">JBoss Application Server</ulink>,
-                        but the requirements are basically the same for other vendors. When running a GWT client app that leverages
-                        CDI beans on a Java EE 6 application server, CDI is already part of the container and accessible through JNDI
-                        (<varname>java:/BeanManager</varname>). The only thing that needs to be done, is to expose Errai through JNDI (<varname>java:/Errai</varname>),                        
-                        which in case of JBoss, is done through the deployment of a service archive (<varname>errai-jboss.sar</varname>).
-                    </para>
-                    <para>
-                        The CDI extension, that is part of the distribution, contains an installer for the Errai-CDI service archive.
-                        Please consult the README.txt in the extension directory how to use it.
-                        <programlisting>
-Laika:errai-&lt;VERSION> hbraun$ lstree
-    |-doc
-    |-examples
-    |-ext
-    |---cdi
-    |-----lib
-    |-----resources
-    |-lib
-                        </programlisting>
-                    </para>
-                </sect3>
+                
             </sect2>
+
             <sect2>
                 <title>Configuration Options</title>
                 <sect3>
