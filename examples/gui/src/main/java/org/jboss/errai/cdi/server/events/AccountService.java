@@ -34,8 +34,12 @@ public class AccountService {
     @Inject @Any
     Event<Outbound> event;
 
+	@Inject @Any
+	Event<Fraud> frauds;
+
     public void watchActivity(@Observes @Inbound AccountActivity activity) {
         Fraud payload = new Fraud(System.currentTimeMillis());
-        event.fire(new Outbound(payload));
+        //event.fire(new Outbound(payload));
+	    frauds.fire(payload);
     }
 }

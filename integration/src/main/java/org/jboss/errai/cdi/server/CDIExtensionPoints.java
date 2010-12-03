@@ -142,7 +142,6 @@ public class CDIExtensionPoints implements Extension
 
     public void afterBeanDiscovery(@Observes AfterBeanDiscovery abd,  BeanManager bm)
     {
-
         // Errai Service wrapper
         this.service = ServiceFactory.create();
         abd.addBean(new ServiceMetaData(bm, this.service));
@@ -161,8 +160,11 @@ public class CDIExtensionPoints implements Extension
         // event dispatcher
         EventDispatcher eventDispatcher = new EventDispatcher(bm, bus, this.contextManager);
 
+	    EventSubscriptionListener listener = new EventSubscriptionListener(abd, bus);
+	    bus.addSubscribeListener(listener);
         // Errai bus injection
         abd.addBean(new MessageBusMetaData(bm, bus));
+
 
         // Register observers
         abd.addObserverMethod(new OutboundEventObserver(eventDispatcher));
