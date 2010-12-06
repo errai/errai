@@ -32,6 +32,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author: Heiko Braun <hbraun@redhat.com>
+ * @author Marcin Misiewicz
+ * 
  * @date: Jun 16, 2010
  */
 public class HibernateAdapter implements ModelAdapter {

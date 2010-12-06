@@ -31,6 +31,8 @@ import org.slf4j.LoggerFactory;
  * Configures {@link HibernateAdapter} and make it available
  * as an injection point in guice ( see {@link ResourceProvider} )
  *
+ * @author Heiko Braun
+ * @author Marcin Misiewicz 
  */
 @ExtensionComponent
 public class PersistenceConfiguration implements ErraiConfigExtension {
