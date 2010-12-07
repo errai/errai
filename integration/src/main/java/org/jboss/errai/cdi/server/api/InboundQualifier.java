@@ -15,8 +15,6 @@
  */
 package org.jboss.errai.cdi.server.api;
 
-import org.jboss.errai.cdi.server.api.Inbound;
-
 import javax.enterprise.util.AnnotationLiteral;
 
 public class InboundQualifier extends AnnotationLiteral<Inbound>

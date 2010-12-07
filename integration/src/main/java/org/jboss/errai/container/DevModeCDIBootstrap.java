@@ -17,10 +17,6 @@ package org.jboss.errai.container;
 
 import javassist.util.proxy.ProxyFactory;
 import javassist.util.proxy.ProxyFactory.ClassLoaderProvider;
-
-import javax.enterprise.inject.spi.BeanManager;
-import javax.servlet.ServletContextEvent;
-
 import org.jboss.weld.bootstrap.api.Bootstrap;
 import org.jboss.weld.bootstrap.api.Environments;
 import org.jboss.weld.environment.jetty.JettyWeldInjector;
@@ -36,6 +32,9 @@ import org.jboss.weld.servlet.api.ServletListener;
 import org.jboss.weld.servlet.api.helpers.ForwardingServletListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.enterprise.inject.spi.BeanManager;
+import javax.servlet.ServletContextEvent;
 
 /**
  * @author Pete Muir

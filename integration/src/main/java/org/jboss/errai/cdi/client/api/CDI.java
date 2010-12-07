@@ -24,7 +24,6 @@ import org.jboss.errai.bus.client.framework.MessageInterceptor;
 import org.jboss.errai.cdi.client.CDICommands;
 import org.jboss.errai.cdi.client.CDIProtocol;
 import org.jboss.errai.cdi.client.EventHandler;
-import org.jboss.errai.cdi.client.api.Conversation;
 
 import java.util.HashMap;
 import java.util.Map;

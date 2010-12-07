@@ -17,7 +17,6 @@ package org.jboss.errai.cdi.client.api;
 
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.ioc.client.api.GeneratedBy;
 
 /**
  * Client side conversation handle.

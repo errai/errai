@@ -16,12 +16,9 @@
 package org.jboss.errai.cdi.server;
 
 import org.jboss.weld.context.bound.BoundRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * <p>
