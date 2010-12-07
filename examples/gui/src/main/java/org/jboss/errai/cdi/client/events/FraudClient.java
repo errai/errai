@@ -22,7 +22,6 @@ import com.google.gwt.user.client.ui.HTML;
 import org.gwt.mosaic.ui.client.layout.BoxLayout;
 import org.gwt.mosaic.ui.client.layout.LayoutPanel;
 import org.jboss.errai.cdi.client.api.Event;
-import org.jboss.errai.tools.source.client.ViewSource;
 import org.jboss.errai.workspaces.client.api.annotations.LoadTool;
 
 import javax.enterprise.event.Observes;

@@ -114,6 +114,17 @@ public class CDIExtensionPoints implements Extension
 
         }
 
+
+        // veto on client side implementations that contain CDI annotations
+        // (i.e. @Observes) Otherwise Weld might try to invoke on them
+        if(type.getJavaClass().getPackage().getName().contains("client")
+                && !type.getJavaClass().isInterface())
+        {
+            event.veto();
+            log.info("Veto " + type);
+        }
+
+        
         /**
          * Mixing JSR-299 and Errai annotation causes bean valdation problems.
          * Therefore we need to provide additional meta data for the Provider implementations,
