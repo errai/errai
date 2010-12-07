@@ -44,9 +44,13 @@ public class EventSubscriptionListener implements SubscribeListener {
 	public void onSubscribe(SubscriptionEvent event) {
 		try {
 			if (event.getSubject().contains("cdi.event:")
-					&& !event.getSubject().equals(EventDispatcher.NAME)) {
-				final String className = event.getSubject().substring("cdi.event:".length());
-				abd.addObserverMethod(new EventObserverMethod(this.getClass().getClassLoader().loadClass(className), bus));
+					&& !event.getSubject().equals(EventDispatcher.NAME))
+            {
+
+                final String className = event.getSubject().substring("cdi.event:".length());
+                final Class<?> type = this.getClass().getClassLoader().loadClass(className);
+
+                abd.addObserverMethod(new EventObserverMethod(type, bus));
 			}
 		} catch (Exception e) {
 			throw new RuntimeException(e);

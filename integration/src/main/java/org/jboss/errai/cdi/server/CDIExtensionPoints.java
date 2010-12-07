@@ -33,7 +33,6 @@ import org.jboss.errai.bus.server.io.CommandBindingsCallback;
 import org.jboss.errai.bus.server.io.ConversationalEndpointCallback;
 import org.jboss.errai.bus.server.io.RemoteServiceCallback;
 import org.jboss.errai.bus.server.service.ErraiService;
-import org.jboss.errai.cdi.server.events.OutboundEventObserver;
 import org.jboss.errai.cdi.server.events.ShutdownEventObserver;
 import org.jboss.errai.container.ServiceFactory;
 import org.slf4j.Logger;
@@ -168,8 +167,7 @@ public class CDIExtensionPoints implements Extension
         abd.addBean(new MessageBusMetaData(bm, bus));
 
 
-        // Register observers
-        abd.addObserverMethod(new OutboundEventObserver(eventDispatcher));
+        // Register observers        
         abd.addObserverMethod(new ShutdownEventObserver(managedTypes, bus, uuid));
 
         // subscribe service and rpc endpoints

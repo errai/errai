@@ -26,7 +26,6 @@ import javax.enterprise.event.Reception;
 import javax.enterprise.event.TransactionPhase;
 import javax.enterprise.inject.spi.ObserverMethod;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -37,19 +36,21 @@ public class EventObserverMethod implements ObserverMethod {
 
 	private static final Logger log = LoggerFactory.getLogger(EventObserverMethod.class);
 
-	private Type type;
+	private Class<?> type;
 	private MessageBus bus;
+    private String subject;
 
-	public EventObserverMethod(Type type, MessageBus bus) {
+	public EventObserverMethod(Class<?> type, MessageBus bus) {
 		this.type = type;
 		this.bus = bus;
+        this.subject = "cdi.event:" + type.getName();
 	}
 
 	public Class<?> getBeanClass() {
 		return EventObserverMethod.class;
 	}
 
-	public Type getObservedType() {
+	public Class<?> getObservedType() {
 		return type;
 	}
 
@@ -68,9 +69,9 @@ public class EventObserverMethod implements ObserverMethod {
 
 	public void notify(Object event) {
         MessageBuilder.createMessage()
-                .toSubject("cdi.event:"+event.getClass().getName())
+                .toSubject(subject)
                 .command(CDICommands.CDI_EVENT)
-                .with(CDIProtocol.TYPE, event.getClass().getName())
+                .with(CDIProtocol.TYPE, type.getName())
                 .with(CDIProtocol.OBJECT_REF, event)
                 .noErrorHandling().sendNowWith(bus);
 	}

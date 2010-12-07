@@ -17,8 +17,6 @@ package org.jboss.errai.cdi.server.events;
 
 import org.jboss.errai.cdi.client.events.AccountActivity;
 import org.jboss.errai.cdi.client.events.Fraud;
-import org.jboss.errai.cdi.server.api.Inbound;
-import org.jboss.errai.cdi.server.api.Outbound;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
@@ -31,15 +29,12 @@ import javax.inject.Inject;
  */
 @ApplicationScoped
 public class AccountService {
-    @Inject @Any
-    Event<Outbound> event;
-
+    
 	@Inject @Any
 	Event<Fraud> frauds;
 
     public void watchActivity(@Observes AccountActivity activity) {
-        Fraud payload = new Fraud(System.currentTimeMillis());
-        //event.fire(new Outbound(payload));
+        Fraud payload = new Fraud(System.currentTimeMillis());        
 	    frauds.fire(payload);
     }
 }

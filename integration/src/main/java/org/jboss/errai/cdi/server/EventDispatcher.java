@@ -17,14 +17,10 @@ package org.jboss.errai.cdi.server;
 
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.cdi.client.CDICommands;
 import org.jboss.errai.cdi.client.CDIProtocol;
-import org.jboss.errai.cdi.server.api.InboundQualifier;
-import org.jboss.errai.cdi.server.api.Outbound;
 
-import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.BeanManager;
 
 /**
@@ -61,7 +57,7 @@ public class EventDispatcher implements MessageCallback
                     Object o = message.get(clazz, CDIProtocol.OBJECT_REF);
                     try {
                         ctxMgr.activateRequestContext();
-                        beanManager.fireEvent(o, new InboundQualifier());
+                        beanManager.fireEvent(o);
                     } finally {
                         ctxMgr.deactivateRequestContext();
                     }
@@ -76,18 +72,5 @@ public class EventDispatcher implements MessageCallback
         {
             throw new RuntimeException("Failed to dispatch CDI Event", e);
         }
-    }
-
-    // Invoked by Weld Event producer
-    public void sendMessage(@Observes Outbound event)
-    {
-        Object payload = event.getPayload();
-        MessageBuilder.createMessage()
-                .toSubject("cdi.event:"+payload.getClass().getName())
-                .command(CDICommands.CDI_EVENT)
-                .with(CDIProtocol.TYPE, payload.getClass().getName())
-                .with(CDIProtocol.OBJECT_REF, event.getPayload())
-                .noErrorHandling().sendNowWith(erraiBus);
-
-    }
+    }    
 }
