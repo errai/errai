@@ -162,6 +162,8 @@ public class CDIExtensionPoints implements Extension
 
 	    EventSubscriptionListener listener = new EventSubscriptionListener(abd, bus);
 	    bus.addSubscribeListener(listener);
+
+
         // Errai bus injection
         abd.addBean(new MessageBusMetaData(bm, bus));
 
