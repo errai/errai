@@ -23,6 +23,10 @@ import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.server.annotations.Service;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 @Service
 public class RPCDemoService implements TestService {
     private MessageBus bus;
@@ -46,5 +50,16 @@ public class RPCDemoService implements TestService {
 
     public void update(String status) {
         // check void return type
+    }
+
+    public List<Date> getDates() {
+        List<Date> dates = new ArrayList<Date>(2);
+        dates.add(new Date());
+        dates.add(new Date());
+        return dates; 
+    }
+
+    public Date getDate() {
+        return new Date(); 
     }
 }

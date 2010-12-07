@@ -26,6 +26,8 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import java.util.Date;
+import java.util.List;
 
 @EntryPoint
 public class RPCDemo {
@@ -79,6 +81,29 @@ public class RPCDemo {
             }
         });
 
+
+        final Button dates = new Button("Dates", new ClickHandler() {
+            public void onClick(ClickEvent clickEvent) {
+                MessageBuilder.createCall(new RemoteCallback<List<Date>>() {
+                    public void callback(List<Date> response) {
+
+                        for(Date d : response)
+                        appendResult.setText(d.toString());
+                    }
+                }, TestService.class).getDates();
+            }
+        });
+
+         final Button date = new Button("Date", new ClickHandler() {
+            public void onClick(ClickEvent clickEvent) {
+                MessageBuilder.createCall(new RemoteCallback<Date>() {
+                    public void callback(Date response) {
+                        appendResult.setText(response.toString());
+                    }
+                }, TestService.class).getDate();
+            }
+        });
+
         VerticalPanel vPanel = new VerticalPanel();
         HorizontalPanel memoryFreeTest = new HorizontalPanel();
         memoryFreeTest.add(checkMemoryButton);
@@ -90,9 +115,13 @@ public class RPCDemo {
         appendTest.add(inputTwo);
         appendTest.add(appendTwoStrings);
         appendTest.add(appendResult);
+
         vPanel.add(appendTest);
 
         vPanel.add(voidReturn);
+
+        vPanel.add(dates);
+        vPanel.add(date);
 
         RootPanel.get().add(vPanel);
     }

@@ -18,10 +18,17 @@ package org.errai.samples.rpcdemo.client;
 
 import org.jboss.errai.bus.server.annotations.Remote;
 
+import java.util.Date;
+import java.util.List;
+
 @Remote
 public interface TestService {
-  public long getMemoryFree();
-  public String append(String str, String str2);
-  public void update(String status);
-  public long add(long x, long y);
+    public long getMemoryFree();
+    public String append(String str, String str2);
+    public void update(String status);
+    public long add(long x, long y);
+
+    List<Date> getDates();
+    Date getDate();
+
 }
