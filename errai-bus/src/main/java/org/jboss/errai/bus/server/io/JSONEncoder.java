@@ -69,8 +69,7 @@ public class JSONEncoder {
             return encodeObject(v);
         } else {
             throw new RuntimeException("cannot serialize type: " + v.getClass().getName());
-        }  */
-        else if (v instanceof Enum) {
+        }  */ else if (v instanceof Enum) {
             return encodeEnum((Enum) v, ctx);
         } else {
             return encodeObject(v, ctx);
@@ -82,6 +81,12 @@ public class JSONEncoder {
 
         Class cls = o.getClass();
 
+        if (java.util.Date.class.isAssignableFrom(cls)) {
+            return "{__EncodedType:\"java.util.Date\", __ObjectID:\"" + o.hashCode() + "\", Value:" + ((java.util.Date) o).getTime() + "}";
+        }
+        if (java.sql.Date.class.isAssignableFrom(cls)) {
+            return "{__EncodedType:\"java.sql.Date\", __ObjectID:\"" + o.hashCode() + "\", Value:" + ((java.sql.Date) o).getTime() + "}";
+        }
 
         if (tHandlers.containsKey(cls)) {
             return _encode(convert(o), ctx);
@@ -131,8 +136,7 @@ public class JSONEncoder {
                 Object v = MVEL.executeExpression(s[i++], o);
                 build.append(write(ctx, '\"')).append(field.getName()).append(write(ctx, '\"')).append(':').append(_encode(v, ctx));
                 first = false;
-            }
-            catch (Throwable t) {
+            } catch (Throwable t) {
                 System.out.println("failed at encoding: " + field.getName());
                 t.printStackTrace();
             }
@@ -208,16 +212,17 @@ public class JSONEncoder {
     private static final Map<Class, TypeHandler> tHandlers = new HashMap<Class, TypeHandler>();
 
     static {
-        tHandlers.put(java.sql.Date.class, new TypeHandler<java.sql.Date, Long>() {
-            public Long getConverted(java.sql.Date in, DecodingContext ctx) {
-                return in.getTime();
-            }
-        });
-        tHandlers.put(java.util.Date.class, new TypeHandler<java.util.Date, Long>() {
-            public Long getConverted(java.util.Date in, DecodingContext ctx) {
-                return in.getTime();
-            }
-        });
+//        tHandlers.put(java.sql.Date.class, new TypeHandler<java.sql.Date, String>() {
+//            public String getConverted(java.sql.Date in, DecodingContext ctx) {
+//                return "{__EncodedType:\"java.sql.Date\", __ObjectID:\"" + in.hashCode() + "\", Value:\"" + in.getTime() + "\"}";
+//
+//            }
+//        });
+//        tHandlers.put(java.util.Date.class, new TypeHandler<java.util.Date, String>() {
+//            public String getConverted(java.util.Date in, DecodingContext ctx) {
+//                return "{__EncodedType:\"java.util.Date\", __ObjectID:\"" + in.hashCode() + "\", Value:\"" + in.getTime() + "\"}";
+//            }
+//        });
 
         tHandlers.put(Timestamp.class, new TypeHandler<Timestamp, Long>() {
             public Long getConverted(Timestamp in, DecodingContext ctx) {

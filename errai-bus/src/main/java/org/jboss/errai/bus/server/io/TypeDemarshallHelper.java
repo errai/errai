@@ -101,6 +101,14 @@ public class TypeDemarshallHelper {
                     if (clazz.isEnum()) {
                         return Enum.valueOf(clazz, (String) oMap.get("EnumStringValue"));
                     }
+                    else if (java.util.Date.class.isAssignableFrom(clazz))
+                    {
+                        return new java.util.Date((Long) oMap.get("Value"));
+                    }
+                    else if (java.sql.Date.class.isAssignableFrom(clazz))
+                    {
+                        return new java.sql.Date((Long) oMap.get("Value"));
+                    }
 
                     Object newInstance = clazz.newInstance();
                     if (objId != null) ctx.putObject(objId, newInstance);

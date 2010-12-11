@@ -18,7 +18,6 @@ package org.jboss.errai.bus.server.io;
 
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.base.JSONMessage;
-import org.jboss.errai.bus.client.api.base.MessageModelWrapper;
 import org.jboss.errai.bus.client.framework.MessageProvider;
 
 public class JSONMessageServer extends JSONMessage {

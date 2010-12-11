@@ -16,6 +16,8 @@
 
 package org.jboss.errai.common.client.types;
 
+import com.google.gwt.json.client.JSONObject;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,9 +25,39 @@ public class TypeDemarshallers {
     private static final Map<String, Demarshaller> classMap = new HashMap<String, Demarshaller>();
     private static final Map<Class, Demarshaller> demarshallers = new HashMap<Class, Demarshaller>();
 
+    static {
+        addDemarshaller(java.util.Date.class, new Demarshaller() {
+            public Object demarshall(JSONObject o, DecodingContext decodingContext) {
+                String objId = o.get("__ObjectID").isString().stringValue();
+                if (decodingContext.hasObject(objId)) {
+                    return decodingContext.getObject(objId);
+                } else {
+                    java.util.Date decDate = new java.util.Date((long) o.get("Value").isNumber().doubleValue());
+                    decodingContext.putObject(objId, decDate);
+                    return decDate;
+                }
+            }
+        });
+
+        addDemarshaller(java.sql.Date.class, new Demarshaller() {
+            public Object demarshall(JSONObject o, DecodingContext decodingContext) {
+                String objId = o.get("__ObjectID").isString().stringValue();
+                if (decodingContext.hasObject(objId)) {
+                    return decodingContext.getObject(objId);
+                } else {
+                    java.sql.Date decDate = new java.sql.Date((long) o.get("Value").isNumber().doubleValue());
+                    decodingContext.putObject(objId, decDate);
+                    return decDate;
+                }
+            }
+        });
+
+
+    }
+
     public static void addDemarshaller(Class type, Demarshaller d) {
         classMap.put(type.getName(), d);
-        demarshallers.put(type,d);
+        demarshallers.put(type, d);
     }
 
     public static <T> Demarshaller<T> getDemarshaller(Class<? extends T> type) {

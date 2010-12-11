@@ -78,8 +78,7 @@ public class JSONStreamEncoder {
             return encodeObject(v);
         } else {
             throw new RuntimeException("cannot serialize type: " + v.getClass().getName());
-        }  */
-        else if (v instanceof Enum) {
+        }  */ else if (v instanceof Enum) {
             encodeEnum((Enum) v, outstream, ctx);
         } else {
             encodeObject(v, outstream, ctx);
@@ -93,6 +92,15 @@ public class JSONStreamEncoder {
         }
 
         Class cls = o.getClass();
+
+        if (java.util.Date.class.isAssignableFrom(cls)) {
+            outstream.write(("{__EncodedType:\"java.util.Date\", __ObjectID:\"" + o.hashCode() + "\", Value:" + ((java.util.Date) o).getTime() + "}").getBytes());
+            return;
+        }
+        if (java.sql.Date.class.isAssignableFrom(cls)) {
+            outstream.write(("{__EncodedType:\"java.sql.Date\", __ObjectID:\"" + o.hashCode() + "\", Value:" + ((java.sql.Date) o).getTime() + "}").getBytes());
+            return;
+        }
 
         if (tHandlers.containsKey(cls)) {
             _encode(convert(o), outstream, ctx);

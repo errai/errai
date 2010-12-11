@@ -26,13 +26,13 @@ public class TypeMarshallers {
     static {
         addMarshaller(java.sql.Date.class, new Marshaller<java.sql.Date>() {
             public String marshall(java.sql.Date object, EncodingContext ctx) {
-                return String.valueOf(object.getTime());
+                return "{__EncodedType:\"java.sql.Date\", __ObjectID:\"" + object.hashCode() + "\", Value:" + object.getTime() + "}";
             }
         });
 
         addMarshaller(java.util.Date.class, new Marshaller<java.util.Date>() {
             public String marshall(java.util.Date object, EncodingContext ctx) {
-                return String.valueOf(object.getTime());
+                return "{__EncodedType:\"java.util.Date\", __ObjectID:\"" + object.hashCode() + "\", Value:" + object.getTime() + "}";
             }
         });
 

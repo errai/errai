@@ -28,6 +28,8 @@ public class SType extends STypeSuper {
     private Date endDate;
     private Boolean active;
     private List<SType> listOfStypes;
+    private List<Date> listOfDates;
+
     private Map<String, SType> mapofStypes;
     private Place place;
 
@@ -96,6 +98,14 @@ public class SType extends STypeSuper {
 
     public List<SType> getListOfStypes() {
         return listOfStypes;
+    }
+
+    public List<Date> getListOfDates() {
+        return listOfDates;
+    }
+
+    public void setListOfDates(List<Date> listOfDates) {
+        this.listOfDates = listOfDates;
     }
 
     public Map<String, SType> getMapofStypes() {
@@ -217,6 +227,8 @@ public class SType extends STypeSuper {
         if (fieldOne != null ? !fieldOne.equals(sType.fieldOne) : sType.fieldOne != null) return false;
         if (fieldTwo != null ? !fieldTwo.equals(sType.fieldTwo) : sType.fieldTwo != null) return false;
         if (listOfStypes != null ? !listOfStypes.equals(sType.listOfStypes) : sType.listOfStypes != null) return false;
+        if (listOfDates != null ? !listOfDates.equals(sType.listOfDates) : sType.listOfDates != null) return false;
+
         if (mapofStypes != null ? !mapofStypes.equals(sType.mapofStypes) : sType.mapofStypes != null) return false;
         if (startDate != null ? !startDate.equals(sType.startDate) : sType.startDate != null) return false;
 
@@ -272,6 +284,7 @@ public class SType extends STypeSuper {
                 .append(" endDate:" + endDate + ",\n")
                 .append(" active: " + active + ",\n")
                 .append(" listOfStypes: " + listOfStypes + ",\n")
+                .append(" listOfDates: " + listOfDates + ",\n")
                 .append(" mapOfStypes: " + mapofStypes + ",\n")
                 .append(" place: " + place + ",\n")
                 .append(" longValue: " + longValue + ",\n")
@@ -336,6 +349,13 @@ public class SType extends STypeSuper {
         mapOfSTypes.put(random.randString(), randomLeafCreate(random));
 
         sType1.setMapofStypes(mapOfSTypes);
+
+        List<Date> listOfDates = new LinkedList<Date>();
+        listOfDates.add(new Date(System.currentTimeMillis() + 3000));
+        listOfDates.add(new Date(System.currentTimeMillis() + 10000));
+        listOfDates.add(new Date(System.currentTimeMillis() + 20000));
+
+        sType1.setListOfDates(listOfDates);
 
         SType[] sTypeArray = new SType[random.nextInt(10) + 1];
 

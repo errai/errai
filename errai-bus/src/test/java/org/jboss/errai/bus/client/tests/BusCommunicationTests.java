@@ -104,7 +104,6 @@ public class BusCommunicationTests extends AbstractErraiTest {
                                 System.out.println("CLIENT: " + type.toString());
                                 assertTrue(sType1.equals(type));
 
-
                                 System.out.println("**TEST PASSED**");
                                 finishTest();
                                 return;

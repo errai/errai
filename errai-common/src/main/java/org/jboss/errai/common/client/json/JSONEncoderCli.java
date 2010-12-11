@@ -16,13 +16,10 @@
 
 package org.jboss.errai.common.client.json;
 
-import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.common.client.types.EncodingContext;
 import org.jboss.errai.common.client.types.Marshaller;
-import org.jboss.errai.common.client.types.TypeMarshallers;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 

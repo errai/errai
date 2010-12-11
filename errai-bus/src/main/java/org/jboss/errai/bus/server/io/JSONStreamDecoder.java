@@ -92,8 +92,7 @@ public class JSONStreamDecoder {
             }
 
             return v;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -117,8 +116,7 @@ public class JSONStreamDecoder {
                         ctx.encodedType = false;
                         try {
                             return demarshallAll(ctx.record(collection, decodingContext), decodingContext);
-                        }
-                        catch (Exception e) {
+                        } catch (Exception e) {
                             throw new RuntimeException("Could not demarshall object", e);
                         }
                     } else {
@@ -379,15 +377,13 @@ public class JSONStreamDecoder {
                     }
                 }
                 return collection;
-            }
-            catch (ClassCastException e) {
+            } catch (ClassCastException e) {
                 throw new RuntimeException("error building collection", e);
-            }
-            finally {
+            } finally {
                 lhs = rhs = null;
             }
         }
     }
 
-  
+
 }

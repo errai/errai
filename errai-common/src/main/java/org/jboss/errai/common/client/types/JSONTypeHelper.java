@@ -73,7 +73,6 @@ public class JSONTypeHelper {
                     String objId = null;
                     if ((v = eMap.get(SerializationParts.OBJECT_ID)) != null) {
                         objId = v.isString().stringValue();
-
                     }
                     
                     boolean ref = false;
