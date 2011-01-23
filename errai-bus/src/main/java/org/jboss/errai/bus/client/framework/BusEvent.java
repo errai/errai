@@ -38,4 +38,5 @@ public abstract class BusEvent<T> {
     public void setDisposeListener(boolean disposeListener) {
         this.disposeListener = disposeListener;
     }
+
 }
