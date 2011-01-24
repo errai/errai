@@ -31,7 +31,7 @@ import javax.inject.Inject;
 public class FraudClient extends LayoutPanel {
 
   @Inject
-  public Event event;
+  public Event<AccountActivity> event;
 
   private HTML responsePanel;
 

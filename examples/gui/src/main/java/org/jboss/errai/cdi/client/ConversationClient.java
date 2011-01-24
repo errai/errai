@@ -49,7 +49,7 @@ public class ConversationClient implements WidgetProvider {
                 {
                     public void onClick(ClickEvent clickEvent) {
 
-                        conversation.begin();
+                        conversation. begin();
 
                         MessageBuilder.createMessage()
                                 .toSubject("wizard")

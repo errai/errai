@@ -19,7 +19,7 @@
         <servlet-name>ErraiServlet</servlet-name>
         <url-pattern>*.erraiBus</url-pattern>
     </servlet-mapping>
- 
+
     <listener>
         <!--
 
@@ -58,5 +58,4 @@
         <param-name>users.properties</param-name>
         <param-value>/WEB-INF/users.properties</param-value>
     </context-param>
-
 </web-app>

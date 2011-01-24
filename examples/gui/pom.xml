@@ -21,17 +21,20 @@
     </properties>
 
     <dependencies>
-
         <!-- Errai Core -->
         <dependency>
             <groupId>org.jboss.errai</groupId>
             <artifactId>errai-bus</artifactId>
         </dependency>
 
-
         <dependency>
             <groupId>org.jboss.errai</groupId>
             <artifactId>errai-workspaces</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.errai</groupId>
+            <artifactId>errai-tools</artifactId>
         </dependency>
 
         <dependency>
@@ -46,12 +49,6 @@
             <groupId>org.jboss.errai</groupId>
             <artifactId>errai-cdi</artifactId>
             <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jboss.errai</groupId>
-            <artifactId>errai-tools</artifactId>
-            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -174,14 +171,14 @@
                             <artifactId>slf4j-log4j12</artifactId>
                         </exclusion>
                         <exclusion>
-                            <groupId> junit</groupId>
+                            <groupId>junit</groupId>
                             <artifactId>junit</artifactId>
                         </exclusion>
                         <exclusion>
                             <groupId>com.google.collections</groupId>
                             <artifactId>google-collections</artifactId>
                         </exclusion>
-                       
+
                     </exclusions>
                 </dependency>
 
@@ -362,7 +359,7 @@
                             </webResources>
                         </configuration>
                     </plugin>
-                   
+
                 </plugins>
             </build>
         </profile>
