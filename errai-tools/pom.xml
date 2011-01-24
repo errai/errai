@@ -30,7 +30,6 @@
             <groupId>hsqldb</groupId>
             <artifactId>hsqldb</artifactId>
             <version>${hsqldb.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
@@ -74,7 +73,7 @@
                     <runTarget>ClientService.html</runTarget>
                     <warSourceDirectory>war</warSourceDirectory>
                     <extraJvmArgs>-Xmx512m</extraJvmArgs>
-                    <soyc>false</soyc>
+                    <!--<soyc>false</soyc>-->
                 </configuration>
                 <executions>
                     <execution>
