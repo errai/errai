@@ -92,6 +92,12 @@ public class ContextManager {
         // if the client does not provide a conversation id
         // we fall back to transient conversations (id==null)
         String conversationId = message.get(String.class, "cdi.conversation.id");
+
+        /**
+         * Implicit transient conversations do not seem to be supported in CDI anymore
+         */
+        if (conversationId == null) return;
+
         threadContextId.set(conversationId); // null value demotes the conversation
         conversationContext.activate(threadContextId.get());
 
