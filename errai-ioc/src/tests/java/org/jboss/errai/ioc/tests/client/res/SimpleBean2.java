@@ -30,8 +30,14 @@ import javax.inject.Inject;
 public class SimpleBean2 {
     public static SimpleBean2 TEST_INSTANCE;
 
+    private final FooService svc;
+    private final BarService<String> bSvc;
+
     @Inject
-    private FooService svc;
+    public SimpleBean2(FooService svc, BarService<String> bSvc) {
+        this.svc = svc;
+        this.bSvc = bSvc;
+    }
 
     public String getMessage() {
         return svc.getMessage().toUpperCase();
@@ -41,8 +47,8 @@ public class SimpleBean2 {
         return svc;
     }
 
-    public void setSvc(FooService svc) {
-        this.svc = svc;
+    public BarService<String> getbSvc() {
+        return bSvc;
     }
 
     @PostConstruct

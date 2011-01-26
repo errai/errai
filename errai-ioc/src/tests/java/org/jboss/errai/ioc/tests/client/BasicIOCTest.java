@@ -17,6 +17,7 @@
 package org.jboss.errai.ioc.tests.client;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.junit.client.GWTTestCase;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.tests.AbstractErraiTest;
 import org.jboss.errai.ioc.client.api.Bootstrapper;
@@ -28,7 +29,7 @@ import org.jboss.errai.ioc.tests.client.res.SimpleBean2;
  * Date: 14-Aug-2010
  * Time: 6:49:53 PM
  */
-public class BasicIOCTest extends AbstractErraiTest {
+public class BasicIOCTest extends GWTTestCase {
     @Override
     public String getModuleName() {
         return "org.jboss.errai.ioc.tests.IOCTests";
@@ -43,33 +44,28 @@ public class BasicIOCTest extends AbstractErraiTest {
     }
 
     public void testBasicInjectionScenarios() {
-        runAfterInit(new Runnable() {
-            public void run() {
-                SimpleBean simpleBean = SimpleBean.TEST_INSTANCE;
-                assertNotNull(simpleBean);
+        SimpleBean simpleBean = SimpleBean.TEST_INSTANCE;
+        assertNotNull(simpleBean);
 
-                assertEquals(ErraiBus.get(), simpleBean.getBus());
-                assertEquals(ErraiBus.get(), simpleBean.getBus2());
-                assertEquals(ErraiBus.get(), simpleBean.getBus3());
-                assertEquals(ErraiBus.get(), simpleBean.getBus4());
+        assertEquals(ErraiBus.get(), simpleBean.getBus());
+        assertEquals(ErraiBus.get(), simpleBean.getBus2());
+        assertEquals(ErraiBus.get(), simpleBean.getBus3());
+        assertEquals(ErraiBus.get(), simpleBean.getBus4());
 
-                assertNotNull(simpleBean.getDispatcher());
-                assertNotNull(simpleBean.getDispatcher2());
-                assertNotNull(simpleBean.getDispatcher3());
-                assertNotNull(simpleBean.getDispatcher4());
-                
-                finishTest();
-            }
-        });
+        assertNotNull(simpleBean.getDispatcher());
+        assertNotNull(simpleBean.getDispatcher2());
+        assertNotNull(simpleBean.getDispatcher3());
+        assertNotNull(simpleBean.getDispatcher4());
     }
 
     public void testInjectionFromProvider() {
-        runAfterInit(new Runnable() {
-            public void run() {
-                SimpleBean2 simpleBean2 = SimpleBean2.TEST_INSTANCE;
-                assertEquals("FOO", simpleBean2.getMessage());
-                finishTest();
-            }
-        });
+        SimpleBean2 simpleBean2 = SimpleBean2.TEST_INSTANCE;
+        assertEquals("FOO", simpleBean2.getMessage());
+    }
+
+    public void testInjectionFromProviderContextual() {
+        SimpleBean2 simpleBean2 = SimpleBean2.TEST_INSTANCE;
+        assertEquals("FOO", simpleBean2.getMessage());
+        assertEquals("java.lang.String", simpleBean2.getbSvc().get());
     }
 }

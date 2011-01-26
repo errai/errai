@@ -16,9 +16,7 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.JField;
-import com.google.gwt.core.ext.typeinfo.JParameterizedType;
+import com.google.gwt.core.ext.typeinfo.*;
 
 public class ContextualProviderInjector extends TypeInjector {
     private final Injector providerInjector;
@@ -33,31 +31,40 @@ public class ContextualProviderInjector extends TypeInjector {
         injected = true;
         StringBuilder sb = new StringBuilder(providerInjector.getType(injectContext, injectionPoint) + ".provide(");
 
+        JParameterizedType pType = null;
         switch (injectionPoint.getTaskType()) {
             case Field:
                 JField field = injectionPoint.getField();
                 JClassType type = field.getType().isClassOrInterface();
 
-                JParameterizedType pType = type.isParameterized();
-                
-                if(null==pType)
-                    sb.append("new Class[] {}");
-                else
-                {
-                    JClassType[] typeArgs = pType.getTypeArgs();
-                    sb.append("new Class[] {");
-                    for (int i = 0; i < typeArgs.length; i++) {
-                        sb.append(typeArgs[i].getQualifiedSourceName()).append(".class");
-
-                        if ((i + 1) < typeArgs.length) {
-                            sb.append(", ");
-                        }
-                    }
-                    sb.append("}");
-                }
+                pType = type.isParameterized();
 
                 break;
+
+            case Parameter:
+                JParameter parm = injectionPoint.getParm();
+                type = parm.getType().isClassOrInterface();
+
+                pType = type.isParameterized();
+                break;
         }
+
+
+        if (pType == null) {
+            sb.append("new Class[] {}");
+        } else {
+            JClassType[] typeArgs = pType.getTypeArgs();
+            sb.append("new Class[] {");
+            for (int i = 0; i < typeArgs.length; i++) {
+                sb.append(typeArgs[i].getQualifiedSourceName()).append(".class");
+
+                if ((i + 1) < typeArgs.length) {
+                    sb.append(", ");
+                }
+            }
+            sb.append("}");
+        }
+
 
         return sb.append(")").toString();
 

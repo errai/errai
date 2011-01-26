@@ -33,6 +33,7 @@ public class ProcessingContext {
     private Map<JClassType, Generated> processedAnnotations;
     private TreeLogger treeLogger;
     private GeneratorContext context;
+
     private SourceWriter writer;
     private TypeOracle oracle;
 

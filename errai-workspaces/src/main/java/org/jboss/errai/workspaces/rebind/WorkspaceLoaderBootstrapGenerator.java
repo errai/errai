@@ -208,7 +208,6 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
     /**
      * LoadTool
      */
-
     Set<Class<?>> tools = scanner.getTypesAnnotatedWith(LoadTool.class);
     for(Class<?> toolClass : tools)
     {

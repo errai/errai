@@ -284,7 +284,7 @@ public class InjectUtil {
         for (int i = 0; i < parmTypes.length; i++) {
             Injector injector = ctx.getInjector(parmTypes[i]);
             InjectionPoint injectionPoint
-                    = new InjectionPoint(null, TaskType.Type, constructor, null, null, null, null, injector, ctx);
+                    = new InjectionPoint(null, TaskType.Parameter, constructor, null, null, null, parms[i], injector, ctx);
             varNames[i] = injector.getType(ctx, injectionPoint);
         }
 
