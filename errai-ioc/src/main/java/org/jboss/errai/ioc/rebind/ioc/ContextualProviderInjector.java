@@ -29,13 +29,14 @@ public class ContextualProviderInjector extends TypeInjector {
     @Override
     public String getType(InjectionContext injectContext, InjectionPoint injectionPoint) {
         injected = true;
-        StringBuilder sb = new StringBuilder(providerInjector.getType(injectContext, injectionPoint) + ".provide(");
 
+        JClassType type = null;
         JParameterizedType pType = null;
+
         switch (injectionPoint.getTaskType()) {
             case Field:
                 JField field = injectionPoint.getField();
-                JClassType type = field.getType().isClassOrInterface();
+                type = field.getType().isClassOrInterface();
 
                 pType = type.isParameterized();
 
@@ -49,12 +50,17 @@ public class ContextualProviderInjector extends TypeInjector {
                 break;
         }
 
+        StringBuilder sb = new StringBuilder();
+
 
         if (pType == null) {
-            sb.append("new Class[] {}");
+            sb.append(providerInjector.getType(injectContext, injectionPoint)).append(".provide(new Class[] {}");
         } else {
             JClassType[] typeArgs = pType.getTypeArgs();
-            sb.append("new Class[] {");
+            sb.append("(").append(type.getQualifiedSourceName()).append("<")
+                    .append(typeArgs[0].getQualifiedSourceName()).append(">) ");
+
+            sb.append(providerInjector.getType(injectContext, injectionPoint)).append(".provide(new Class[] {");
             for (int i = 0; i < typeArgs.length; i++) {
                 sb.append(typeArgs[i].getQualifiedSourceName()).append(".class");
 
