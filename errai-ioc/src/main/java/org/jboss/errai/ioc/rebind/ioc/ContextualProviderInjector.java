@@ -34,6 +34,7 @@ public class ContextualProviderInjector extends TypeInjector {
         JParameterizedType pType = null;
 
         switch (injectionPoint.getTaskType()) {
+            case PrivateField:
             case Field:
                 JField field = injectionPoint.getField();
                 type = field.getType().isClassOrInterface();

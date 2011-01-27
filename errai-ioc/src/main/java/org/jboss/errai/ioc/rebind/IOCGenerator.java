@@ -20,10 +20,7 @@ import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.JParameterizedType;
-import com.google.gwt.core.ext.typeinfo.NotFoundException;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import com.google.gwt.core.ext.typeinfo.*;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
@@ -303,6 +300,34 @@ public class IOCGenerator extends Generator {
         sourceWriter.println("return ctx;");
         sourceWriter.outdent();
         sourceWriter.println("}");
+
+        List<JField> privateFields = injectFactory.getInjectionContext().getPrivateFieldsToExpose();
+
+        if (!privateFields.isEmpty()) {
+            sourceWriter.println();
+        }
+
+        for (JField f : privateFields) {
+            sourceWriter.print("private static native void ");
+            sourceWriter.print(InjectUtil.getPrivateFieldInjectorName(f));
+            sourceWriter.print("(");
+            sourceWriter.print(f.getEnclosingType().getQualifiedSourceName());
+            sourceWriter.print(" instance, ");
+            sourceWriter.print(f.getType().getQualifiedBinaryName());
+            sourceWriter.print(" value) /*-{");
+            sourceWriter.println();
+            sourceWriter.outdent();
+            // begin JSNI call
+            sourceWriter.print("instance.@");
+            sourceWriter.print(f.getEnclosingType().getQualifiedSourceName());
+            sourceWriter.print("::");
+            sourceWriter.print(f.getName());
+            sourceWriter.print(" = ");
+            sourceWriter.print("value;");
+            sourceWriter.println();
+            sourceWriter.outdent();;
+            sourceWriter.println("}-*/;\n");
+        }
     }
 
     public void addType(final JClassType type) {

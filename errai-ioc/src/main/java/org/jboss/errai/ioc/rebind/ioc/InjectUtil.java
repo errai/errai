@@ -80,7 +80,6 @@ public class InjectUtil {
 
         } else {
             // field injection
-
             if (!hasDefaultConstructor(type))
                 throw new InjectionFailure("there is no default constructor for type: " + type.getQualifiedSourceName());
 
@@ -99,7 +98,6 @@ public class InjectUtil {
             };
         }
     }
-
 
     private static void handleInjectionTasks(StringAppender appender, InjectionContext ctx,
                                              List<InjectionTask> tasks) {
@@ -120,7 +118,6 @@ public class InjectUtil {
         }
     }
 
-
     private static List<InjectionTask> scanForTasks(Injector injector, InjectionContext ctx, JClassType type) {
         final List<InjectionTask> accumulator = new LinkedList<InjectionTask>();
         final Set<Class<? extends Annotation>> decorators = ctx.getDecoratorAnnotations();
@@ -135,8 +132,10 @@ public class InjectUtil {
                         accumulator.add(task);
                     }
                     catch (NotFoundException e) {
-                        throw new InjectionFailure("attempt to inject on a non-public field: "
-                                + type.getQualifiedSourceName() + "." + field.getName());
+
+                        InjectionTask task = new InjectionTask(injector, field);
+                        accumulator.add(task);
+
                     }
                 } else {
                     accumulator.add(new InjectionTask(injector, field));
@@ -160,7 +159,9 @@ public class InjectUtil {
                                         accumulator.add(task);
                                     }
                                     catch (NotFoundException e) {
-                                        throw new InjectionFailure("attempt to decorate a non-public field: "
+                                        throw new InjectionFailure("attempt to decorate a non-public field" +
+                                                " (private field injection is not supported -- please provide a " +
+                                                "public setter or change the field visibility to public): "
                                                 + type.getQualifiedSourceName() + "." + field.getName());
                                     }
                                 } else {
@@ -232,7 +233,6 @@ public class InjectUtil {
         return accumulator;
     }
 
-
     @SuppressWarnings({"unchecked"})
     private static boolean isInjectionPoint(JField field) {
         for (Class<? extends Annotation> ann : injectionAnnotations) {
@@ -249,7 +249,6 @@ public class InjectUtil {
         return false;
     }
 
-
     @SuppressWarnings({"unchecked"})
     private static boolean isInjectionPoint(JConstructor constructor) {
         for (Class<? extends Annotation> ann : injectionAnnotations) {
@@ -257,7 +256,6 @@ public class InjectUtil {
         }
         return false;
     }
-
 
     private static boolean hasDefaultConstructor(JClassType type) {
         try {
@@ -291,7 +289,6 @@ public class InjectUtil {
         return varNames;
     }
 
-
     public static String[] resolveInjectionDependencies(JParameter[] parms, InjectionContext ctx, InjectionPoint injectionPoint) {
         JClassType[] parmTypes = parametersToClassTypeArray(parms);
         String[] varNames = new String[parmTypes.length];
@@ -316,5 +313,7 @@ public class InjectUtil {
         return "inj" + counter.addAndGet(1);
     }
 
-
+    public static String getPrivateFieldInjectorName(JField field) {
+        return field.getEnclosingType().getQualifiedSourceName().replaceAll("\\.", "_") + "_" + field.getName();
+    }
 }

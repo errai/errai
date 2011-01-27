@@ -17,6 +17,7 @@
 package org.jboss.errai.ioc.rebind.ioc;
 
 import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.JField;
 import org.jboss.errai.bus.rebind.ProcessingContext;
 
 import java.lang.annotation.Annotation;
@@ -28,8 +29,8 @@ public class InjectionContext {
     private ProcessingContext processingContext;
     private Map<JClassType, Injector> injectors = new LinkedHashMap<JClassType, Injector>();
     private Map<Class<? extends Annotation>, List<Decorator>> decorators = new LinkedHashMap<Class<? extends Annotation>, List<Decorator>>();
-
     private Map<ElementType, Set<Class<? extends Annotation>>> decoratorsByElementType = new LinkedHashMap<ElementType, Set<Class<? extends Annotation>>>();
+    private List<JField> privateFieldsToExpose = new ArrayList<JField>();
 
     public InjectionContext(ProcessingContext processingContext) {
         this.processingContext = processingContext;
@@ -106,6 +107,10 @@ public class InjectionContext {
                 }
             }
         }
+    }
+
+    public List<JField> getPrivateFieldsToExpose() {
+        return privateFieldsToExpose;
     }
 
     public ProcessingContext getProcessingContext() {

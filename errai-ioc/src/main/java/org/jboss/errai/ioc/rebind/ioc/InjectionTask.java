@@ -31,7 +31,7 @@ public class InjectionTask {
 
 
     public InjectionTask(Injector injector, JField field) {
-        this.injectType = TaskType.Field;
+        this.injectType = field.isPrivate() ? TaskType.PrivateField : TaskType.Field;
         this.injector = injector;
         this.field = field;
     }
@@ -59,8 +59,15 @@ public class InjectionTask {
         InjectionPoint injectionPoint
                 = new InjectionPoint(null, injectType, constructor, method, field, type, parm, injector, ctx);
         switch (injectType) {
-            case Field:
+            case PrivateField:
+                appender.append(InjectUtil.getPrivateFieldInjectorName(field)).append("(")
+                        .append(injector.getVarName()).append(", ").append(ctx.getInjector(field.getType().isClassOrInterface()).getType(ctx, injectionPoint))
+                        .append(");\n");
 
+                ctx.getPrivateFieldsToExpose().add(field);
+                break;
+
+            case Field:
                 appender.append(injector.getVarName()).append('.').append(field.getName()).append(" = ")
                         .append(ctx.getInjector(field.getType().isClassOrInterface()).getType(ctx, injectionPoint))
                         .append(";\n");

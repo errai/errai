@@ -19,15 +19,13 @@ package org.jboss.errai.bus.rebind;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.JField;
 import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.user.rebind.SourceWriter;
 
 import java.lang.annotation.Annotation;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class ProcessingContext {
     private Map<JClassType, Generated> processedAnnotations;
@@ -36,6 +34,8 @@ public class ProcessingContext {
 
     private SourceWriter writer;
     private TypeOracle oracle;
+
+
 
     public ProcessingContext(TreeLogger treeLogger, GeneratorContext context, SourceWriter writer, TypeOracle oracle) {
         this.treeLogger = treeLogger;
