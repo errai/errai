@@ -37,7 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ContextManager {
 
     private static final Logger log = LoggerFactory.getLogger(ContextManager.class);
-    
+
     private BoundRequestContext requestContext;
     private BoundConversationContext conversationContext;
 
@@ -51,42 +51,48 @@ public class ContextManager {
 
     private ThreadLocal<String> threadContextId = new ThreadLocal<String>();
 
-    private MessageBus bus;    
+    private MessageBus bus;
 
     public ContextManager(String uuid, BeanManager beanManager, MessageBus bus) {
 
         this.bus = bus;
         this.uuid = uuid;
-        
+
         this.requestContext = (BoundRequestContext)
                 Util.lookupCallbackBean(beanManager, BoundRequestContext.class);
 
-        this.conversationContext= (BoundConversationContext)
+        this.conversationContext = (BoundConversationContext)
                 Util.lookupCallbackBean(beanManager, BoundConversationContext.class);
 
-    }    
+        if (requestContext == null) {
+            log.warn("BoundRequestContext not found. ContextManager will not be available.");
+        }
+    }
 
-    public void activateRequestContext()
-    {
+    public void activateRequestContext() {
+        if (requestContext == null) return;
+
         requestContextStore.set(new HashMap<String, Object>());
         requestContext.associate(requestContextStore.get());
         requestContext.activate();
     }
 
-    public void deactivateRequestContext()
-    {
+    public void deactivateRequestContext() {
+        if (requestContext == null) return;
+
         requestContext.invalidate();
         requestContext.deactivate();
         requestContext.dissociate(requestContextStore.get());
     }
 
-    public void activateConversationContext(Message message)
-    {
+    public void activateConversationContext(Message message) {
+        if (requestContext == null) return;
+
         String sessionId = Util.getSessionId(message);
-        
-        if(null==conversationContextStore.get(sessionId))
+
+        if (null == conversationContextStore.get(sessionId))
             conversationContextStore.put(sessionId, new ConversationContext());
-        
+
         conversationContext.associate(conversationContextStore.get(sessionId));
 
         // if the client does not provide a conversation id
@@ -104,21 +110,18 @@ public class ContextManager {
         // expose the conversation context to the client
         // TODO: wire CDI callbacks when conversation ends
         String subject = "cdi.conversation:Manager,conversation=" + conversationId;
-        if(conversationId!=null && !bus.isSubscribed(subject))
-        {
+        if (!bus.isSubscribed(subject)) {
             bus.subscribe(subject,
-                    new MessageCallback()
-                    {
+                    new MessageCallback() {
                         public void callback(final Message message) {
-                            if("end".equals(message.getCommandType()))
-                            {
+                            if ("end".equals(message.getCommandType())) {
                                 try {
                                     activateConversationContext(message);
-                                    conversationContext.getCurrentConversation().end();                                    
+                                    conversationContext.getCurrentConversation().end();
                                     deactivateConversationContext(message);
 
                                     // TODO: properly cleanup
-                                    
+
                                 } catch (Exception e) {
                                     log.error("Failed to end conversation", e);
                                 }
@@ -127,18 +130,19 @@ public class ContextManager {
                     });
         }
     }
-    
-    public void deactivateConversationContext(Message message)
-    {
+
+    public void deactivateConversationContext(Message message) {
+        if (requestContext == null) return;
+
         String sessionId = Util.getSessionId(message);
 
-        if(conversationContextStore.get(sessionId)!=null) {            
+        if (conversationContextStore.get(sessionId) != null) {
             conversationContext.deactivate();
             conversationContext.dissociate(conversationContextStore.get(sessionId));
         }
     }
-    
-    public String getThreadContextId() {        
+
+    public String getThreadContextId() {
         return threadContextId.get();
     }
 }

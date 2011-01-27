@@ -2,6 +2,7 @@ package org.jboss.errai.cdi.client;
 
 import org.jboss.errai.cdi.client.api.CDI;
 import org.jboss.errai.cdi.client.api.Event;
+import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.Provider;
 import org.jboss.errai.ioc.client.api.TypeProvider;
 
@@ -15,25 +16,29 @@ import java.lang.annotation.Annotation;
  */
 @Provider
 @ApplicationScoped
-public class EventProvider implements TypeProvider<Event>
-{
-  //@Produces
-  //@Dependent
-  public Event provide() {
-    
-    return new Event() {
-      public void fire(Object event) {
-        CDI.fireEvent(event);
-      }
+public class EventProvider implements ContextualTypeProvider<Event<?>> {
 
-      public Event select(Annotation... qualifiers) {
-        throw new RuntimeException("Not implemented");
-      }
+    public Event<?> provide(final Class[] typeargs) {
+        return new Event() {
+            private Class eventType = (typeargs.length == 1 ? typeargs[0] : Object.class);
 
-      public Event select(Class subtype, Annotation... qualifiers) {
-        throw new RuntimeException("Not implemented");
-      }
+            public void fire(Object event) {
+                if (event == null) return;
 
-    };
-  }
+                CDI.fireEvent(event);
+            }
+
+            public Event select(Annotation... qualifiers) {
+                throw new RuntimeException("Not implemented");
+            }
+
+            public Event select(Class subtype, Annotation... qualifiers) {
+                throw new RuntimeException("Not implemented");
+            }
+
+            public Class getEventType() {
+                return eventType;
+            }
+        };
+    }
 }

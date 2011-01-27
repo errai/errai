@@ -30,7 +30,7 @@ import javax.enterprise.event.Observes;
 
 /**
  *
- * Generates the boilder plate for @Observes annotations use in GWT clients.<br/>
+ * Generates the boiler plate for @Observes annotations use in GWT clients.<br/>
  * Basically creates a subscription for a CDI event type that invokes on the annotated method.
  *
  * @author: Heiko Braun <hbraun@redhat.com>
@@ -57,13 +57,11 @@ public class ObservesDecorator extends Decorator<Observes> {
         final String messageBusInst = ctx.getInjector(ctx
                 .getProcessingContext().loadClassType(MessageBus.class)).getType(ctx, injectionPoint);
 
-        String expression = messageBusInst + ".subscribe(\"cdi.event:" + parmClassName + "\", new " + MessageCallback.class.getName() + "() {\n" +
+        return messageBusInst + ".subscribe(\"cdi.event:" + parmClassName + "\", new " + MessageCallback.class.getName() + "() {\n" +
                 "                    public void callback(" + Message.class.getName() + " message) {\n" +
                 "                        java.lang.Object response = message.get(" + parmClassName + ".class, " + CDIProtocol.class.getName() + "." + CDIProtocol.OBJECT_REF.name() + ");\n" +
-                "                        " + varName + "." + method.getName() + "((" + parmClassName + ")response);\n" +
+                "                        " + varName + "." + method.getName() + "((" + parmClassName + ") response);\n" +
                 "                    }\n" +
                 "                });";
-
-        return expression;
     }
 }

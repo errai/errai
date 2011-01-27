@@ -1,0 +1,15 @@
+<component name="libraryTable">
+  <library name="Maven: org.jboss.errai:errai-cdi:1.1-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/jboss/errai/errai-cdi/1.1-SNAPSHOT/errai-cdi-1.1-SNAPSHOT.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$PROJECT_DIR$/integration/pom-javadoc.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/jboss/errai/errai-cdi/1.1-SNAPSHOT/errai-cdi-1.1-SNAPSHOT-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/integration/pom-sources.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/jboss/errai/errai-cdi/1.1-SNAPSHOT/errai-cdi-1.1-SNAPSHOT-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

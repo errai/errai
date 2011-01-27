@@ -87,7 +87,7 @@ public class CDIExtensionPoints implements Extension
         // services
         if(type.isAnnotationPresent(Service.class))
         {
-            log.debug("Discovered Errai Annotation on type: "+ type);
+            log.debug("Discovered Errai annotation on type: "+ type);
             boolean isRpc = false;
 
             Class<T> javaClass = type.getJavaClass();
@@ -154,6 +154,7 @@ public class CDIExtensionPoints implements Extension
     {
         // Errai Service wrapper
         this.service = Util.lookupErraiService();
+
         abd.addBean(new ServiceMetaData(bm, this.service));
 
         final MessageBus bus = service.getBus();
@@ -253,7 +254,8 @@ public class CDIExtensionPoints implements Extension
         }
     }    
     
-    private void createRPCScaffolding(final Class remoteIface, final Class<?> type, final MessageBus bus, final ResourceProvider resourceProvider) {
+    private void createRPCScaffolding(final Class remoteIface, final Class<?> type, final MessageBus bus,
+                                      final ResourceProvider resourceProvider) {
 
         final Injector injector = Guice.createInjector(new AbstractModule() {
             @Override
@@ -307,7 +309,6 @@ public class CDIExtensionPoints implements Extension
                 throw new RuntimeException("This API is not supported in the server-side environment.");
             }
         };
-
     }
 
     class BeanLookup

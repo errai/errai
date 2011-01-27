@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.jboss.errai:errai-cdi-examples-server:1.2-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/jboss/errai/errai-cdi-examples-server/1.2-SNAPSHOT/errai-cdi-examples-server-1.2-SNAPSHOT.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/jboss/errai/errai-cdi-examples-server/1.2-SNAPSHOT/errai-cdi-examples-server-1.2-SNAPSHOT-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/jboss/errai/errai-cdi-examples-server/1.2-SNAPSHOT/errai-cdi-examples-server-1.2-SNAPSHOT-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

@@ -42,8 +42,12 @@ public class Util {
     public static Object lookupCallbackBean(BeanManager beanManager, Class<?> serviceType) {
         Set<Bean<?>> beans = beanManager.getBeans(serviceType);
         Bean<?> bean = beanManager.resolve(beans);
-        CreationalContext<?> context = beanManager.createCreationalContext(bean);
 
+        if (bean == null) {
+            return null;
+        }
+
+        CreationalContext<?> context = beanManager.createCreationalContext(bean);
         return beanManager.getReference(bean, serviceType, context);
     }
 
