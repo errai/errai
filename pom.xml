@@ -32,7 +32,6 @@
 
     <dependencyManagement>
         <dependencies>
-
             <!-- Project Dependencies -->
             <dependency>
                 <groupId>org.jboss.errai</groupId>
@@ -70,7 +69,6 @@
                 <version>${errai.version}</version>
             </dependency>
 
-
             <dependency>
                 <groupId>org.jboss.errai</groupId>
                 <artifactId>errai-persistence</artifactId>
@@ -103,7 +101,6 @@
                 <version>${slf4j.version}</version>
             </dependency>
 
-
             <dependency>
                 <groupId>org.jboss.weld.se</groupId>
                 <artifactId>weld-se-core</artifactId>
@@ -116,7 +113,6 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-
 
             <!--dependency>
                 <groupId>client.javax.enterprise</groupId>
