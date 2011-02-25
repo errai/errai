@@ -77,7 +77,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     /* A list of {@link Runnable} initialization tasks to be executed after the bus has successfully finished it's
      * initialization and is now communicating with the remote bus. */
     private List<Runnable> postInitTasks = new ArrayList<Runnable>();
-    private List<Message> deferredMessages;
+    private List<Message> deferredMessages = new ArrayList<Message>();
 
     /* The timer constantly ensures the client's polling with the server is active */
     private Timer incomingTimer;
@@ -559,8 +559,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         onUnsubscribeHooks = new ArrayList<UnsubscribeListener>();
         subscriptions = new HashMap<String, List<Object>>();
         remotes = new HashMap<String, MessageCallback>();
-        deferredMessages = new ArrayList<Message>();
-
+     //   deferredMessages = new ArrayList<Message>();
     }
 
 

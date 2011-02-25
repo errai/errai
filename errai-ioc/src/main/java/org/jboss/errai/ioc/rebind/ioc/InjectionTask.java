@@ -61,7 +61,8 @@ public class InjectionTask {
         switch (injectType) {
             case PrivateField:
                 appender.append(InjectUtil.getPrivateFieldInjectorName(field)).append("(")
-                        .append(injector.getVarName()).append(", ").append(ctx.getInjector(field.getType().isClassOrInterface()).getType(ctx, injectionPoint))
+                        .append(injector.getVarName()).append(", ")
+                        .append(ctx.getInjector(field.getType().isClassOrInterface()).getType(ctx, injectionPoint))
                         .append(");\n");
 
                 ctx.getPrivateFieldsToExpose().add(field);

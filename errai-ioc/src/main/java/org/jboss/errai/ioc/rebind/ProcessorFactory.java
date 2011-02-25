@@ -44,7 +44,6 @@ public class ProcessorFactory {
     @SuppressWarnings({"unchecked"})
     public void process(MetaDataScanner scanner, ProcessingContext context) {
         for (Class<? extends Annotation> aClass : annotationHandlers.keySet()) {
-
             Set<Class<?>> classes = scanner.getTypesAnnotatedWith(aClass);
             for (Class<?> clazz : classes) {
                 JClassType type = loadType(context.getOracle(), clazz);
@@ -56,8 +55,7 @@ public class ProcessorFactory {
 
     private JClassType loadType(TypeOracle oracle, Class<?> clazz) {
         try {
-            JClassType visit = oracle.getType(clazz.getName());
-            return visit;
+            return oracle.getType(clazz.getName());
         }
         catch (NotFoundException e) {
             throw new RuntimeException("Failed to load type " + clazz.getName(), e);
