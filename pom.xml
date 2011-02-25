@@ -30,6 +30,12 @@
         <!--module>examples/gui</module-->
     </modules>
 
+    <scm>
+        <connection>scm:git:git@github.com:errai/errai.git</connection>
+        <developerConnection>scm:git:git@github.com:errai/errai.git</developerConnection>
+        <url>scm:git:git@github.com:errai/errai.git</url>
+    </scm>
+
     <dependencyManagement>
         <dependencies>
             <!-- Project Dependencies -->
@@ -81,7 +87,7 @@
                 <version>${mvel.version}</version>
             </dependency>
 
-            <!-- Weld -->           
+            <!-- Weld -->
             <dependency>
                 <groupId>org.jboss.weld.servlet</groupId>
                 <artifactId>weld-servlet</artifactId>
