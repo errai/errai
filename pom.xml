@@ -31,9 +31,9 @@
     </modules>
 
     <scm>
-        <connection>scm:git:git@github.com:errai/errai.git</connection>
-        <developerConnection>scm:git:git@github.com:errai/errai.git</developerConnection>
-        <url>scm:git:git@github.com:errai/errai.git</url>
+        <connection>scm:git:git@github.com:errai/errai-cdi.git</connection>
+        <developerConnection>scm:git:git@github.com:errai/errai-cdi.git</developerConnection>
+        <url>scm:git:git@github.com:errai/errai-cdi.git</url>
     </scm>
 
     <dependencyManagement>
