@@ -55,11 +55,10 @@ import java.util.UUID;
  * @author Heiko.Braun <hbraun@redhat.com>
  */
 @ApplicationScoped
-public class CDIExtensionPoints implements Extension
-{
+public class CDIExtensionPoints implements Extension {
     private static final Logger log = LoggerFactory.getLogger(CDIExtensionPoints.class);
 
-    private TypeRegistry managedTypes = null;    
+    private TypeRegistry managedTypes = null;
 
     private String uuid = null;
 
@@ -67,64 +66,58 @@ public class CDIExtensionPoints implements Extension
 
     private ErraiService service;
 
-    public void beforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd)
-    {
+    public void beforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
         this.uuid = UUID.randomUUID().toString();
         this.managedTypes = new TypeRegistry();
-        
-        log.info("Created Errai-CDI context: " +uuid);
+
+        log.info("Created Errai-CDI context: " + uuid);
     }
 
     /**
      * Register managed beans as Errai services
+     *
      * @param event
      * @param <T>
      */
-    public <T> void observeResources(@Observes ProcessAnnotatedType<T> event)
-    {
+    public <T> void observeResources(@Observes ProcessAnnotatedType<T> event) {
         final AnnotatedType<T> type = event.getAnnotatedType();
-        
+
         // services
-        if(type.isAnnotationPresent(Service.class))
-        {
-            log.debug("Discovered Errai annotation on type: "+ type);
+        if (type.isAnnotationPresent(Service.class)) {
+            log.debug("Discovered Errai annotation on type: " + type);
             boolean isRpc = false;
 
             Class<T> javaClass = type.getJavaClass();
-            for(Class<?> intf : javaClass.getInterfaces())
-            {
+            for (Class<?> intf : javaClass.getInterfaces()) {
                 isRpc = intf.isAnnotationPresent(Remote.class);
 
-                if(isRpc)
-                {
-                    log.debug("Identified Errai RPC interface: " + intf + " on "+type);
+                if (isRpc) {
+                    log.debug("Identified Errai RPC interface: " + intf + " on " + type);
                     managedTypes.addRPCEndpoint(intf, type);
                 }
             }
 
-            if(!isRpc)
-            {
+            if (!isRpc) {
                 managedTypes.addServiceEndpoint(type);
             }
 
             // enforce application scope until we get the other scopes working
             ApplicationScoped scope = type.getAnnotation(ApplicationScoped.class);
-            if(null==scope)
-                log.warn("Service implementation not @ApplicationScoped: "+type.getJavaClass());
+            if (null == scope)
+                log.warn("Service implementation not @ApplicationScoped: " + type.getJavaClass());
 
         }
 
 
         // veto on client side implementations that contain CDI annotations
         // (i.e. @Observes) Otherwise Weld might try to invoke on them
-        if(type.getJavaClass().getPackage().getName().contains("client")
-                && !type.getJavaClass().isInterface())
-        {
+        if (type.getJavaClass().getPackage().getName().contains("client")
+                && !type.getJavaClass().isInterface()) {
             event.veto();
             log.info("Veto " + type);
         }
 
-        
+
         /**
          * Mixing JSR-299 and Errai annotation causes bean valdation problems.
          * Therefore we need to provide additional meta data for the Provider implementations,
@@ -150,8 +143,7 @@ public class CDIExtensionPoints implements Extension
        } */
     }
 
-    public void afterBeanDiscovery(@Observes AfterBeanDiscovery abd,  BeanManager bm)
-    {
+    public void afterBeanDiscovery(@Observes AfterBeanDiscovery abd, BeanManager bm) {
         // Errai Service wrapper
         this.service = Util.lookupErraiService();
 
@@ -160,19 +152,19 @@ public class CDIExtensionPoints implements Extension
         final MessageBus bus = service.getBus();
 
         // context handling hooks
-        this.contextManager = new ContextManager(uuid,  bm, bus);
+        this.contextManager = new ContextManager(uuid, bm, bus);
 
         // Custom Conversation
         abd.addBean(new ConversationMetaData(bm, new ErraiConversation(
-                (Conversation)Util.lookupCallbackBean(bm, Conversation.class),
+                (Conversation) Util.lookupCallbackBean(bm, Conversation.class),
                 this.contextManager
         )));
 
         // event dispatcher
         EventDispatcher eventDispatcher = new EventDispatcher(bm, bus, this.contextManager);
 
-	    EventSubscriptionListener listener = new EventSubscriptionListener(abd, bus);
-	    bus.addSubscribeListener(listener);
+        EventSubscriptionListener listener = new EventSubscriptionListener(abd, bus);
+        bus.addSubscribeListener(listener);
 
 
         // Errai bus injection
@@ -189,11 +181,9 @@ public class CDIExtensionPoints implements Extension
         bus.subscribe(EventDispatcher.NAME, eventDispatcher);
 
     }
-    
-    private void subscribeServices(final BeanManager beanManager, final MessageBus bus)
-    {        
-        for(final AnnotatedType<?> type : managedTypes.getServiceEndpoints())
-        {
+
+    private void subscribeServices(final BeanManager beanManager, final MessageBus bus) {
+        for (final AnnotatedType<?> type : managedTypes.getServiceEndpoints()) {
             // Discriminate on @Command
             Map<String, Method> commandPoints = new HashMap<String, Method>();
             for (final AnnotatedMethod method : type.getMethods()) {
@@ -211,21 +201,23 @@ public class CDIExtensionPoints implements Extension
 
             Object targetbean = Util.lookupCallbackBean(beanManager, type.getJavaClass());
             final MessageCallback invocationTarget = commandPoints.isEmpty() ?
-                    (MessageCallback)targetbean : new CommandBindingsCallback(commandPoints, targetbean);
+                    (MessageCallback) targetbean : new CommandBindingsCallback(commandPoints, targetbean);
 
 
             // TODO: enable CommandBindings
-            bus.subscribe(subjectName, new MessageCallback()
-            {
+            bus.subscribe(subjectName, new MessageCallback() {
                 //private BeanLookup lookup = new BeanLookup(type,beanManager);
 
                 public void callback(final Message message) {
-              
+
                     contextManager.activateRequestContext();
                     contextManager.activateConversationContext(message);
                     try {
-                        //((MessageCallback)lookup.getInvocationTarget()).callback(message);
-                        invocationTarget.callback(message);
+                        if (invocationTarget == null) {
+                            ((MessageCallback) Util.lookupCallbackBean(beanManager, type.getJavaClass())).callback(message);
+                        } else {
+                            invocationTarget.callback(message);
+                        }
 
                     } finally {
                         contextManager.deactivateRequestContext();
@@ -236,24 +228,21 @@ public class CDIExtensionPoints implements Extension
 
         }
 
-        for(final Class<?> rpcIntf : managedTypes.getRpcEndpoints().keySet())
-        {
+        for (final Class<?> rpcIntf : managedTypes.getRpcEndpoints().keySet()) {
             final AnnotatedType type = managedTypes.getRpcEndpoints().get(rpcIntf);
             final Class beanClass = type.getJavaClass();
 
-            log.info("Register RPC Endpoint: " + type + "("+rpcIntf+")");
+            log.info("Register RPC Endpoint: " + type + "(" + rpcIntf + ")");
 
             // TODO: Copied from errai internals, refactor at some point
-            createRPCScaffolding(rpcIntf, beanClass, bus, new ResourceProvider()
-            {
-                public Object get()
-                {
+            createRPCScaffolding(rpcIntf, beanClass, bus, new ResourceProvider() {
+                public Object get() {
                     return Util.lookupRPCBean(beanManager, rpcIntf, beanClass);
                 }
             });
         }
-    }    
-    
+    }
+
     private void createRPCScaffolding(final Class remoteIface, final Class<?> type, final MessageBus bus,
                                       final ResourceProvider resourceProvider) {
 
@@ -263,10 +252,8 @@ public class CDIExtensionPoints implements Extension
                 bind(MessageBus.class).toInstance(bus);
                 //bind(RequestDispatcher.class).toInstance(context.getService().getDispatcher());
 
-                bind(type).toProvider(new Provider()
-                {
-                    public Object get()
-                    {
+                bind(type).toProvider(new Provider() {
+                    public Object get() {
                         return resourceProvider.get();
                     }
                 });
@@ -288,8 +275,7 @@ public class CDIExtensionPoints implements Extension
         }
 
         final RemoteServiceCallback delegate = new RemoteServiceCallback(epts);
-        bus.subscribe(remoteIface.getName() + ":RPC", new MessageCallback()
-        {
+        bus.subscribe(remoteIface.getName() + ":RPC", new MessageCallback() {
             public void callback(Message message) {
                 try {
                     CDIExtensionPoints.this.contextManager.activateRequestContext();
@@ -311,8 +297,7 @@ public class CDIExtensionPoints implements Extension
         };
     }
 
-    class BeanLookup
-    {
+    class BeanLookup {
         private BeanManager beanManager;
         private AnnotatedType<?> type;
 
@@ -324,8 +309,7 @@ public class CDIExtensionPoints implements Extension
         }
 
         public Object getInvocationTarget() {
-            if(null==invocationTarget)
-            {
+            if (null == invocationTarget) {
                 invocationTarget =
                         Util.lookupCallbackBean(beanManager, type.getJavaClass());
             }
