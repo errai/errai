@@ -5,7 +5,7 @@
     <groupId>org.jboss.errai</groupId>
     <artifactId>cdi-integration-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.2.1</version>
+    <version>1.2.2-SNAPSHOT</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
