@@ -1029,7 +1029,7 @@ errai.bus.serializableTypes=org.foo.Foo \
       <title>Wiring server side components</title>
 
       <para>Currently, ErraiBus uses Google Guice to wire components. However,
-      we plan on falling back on the <emphasis>JSR-330 Dependency
+      we plan on standardizing on <emphasis>JSR-330 Dependency
       Injection</emphasis> specification in the near future. When deploying
       services on the server-side, it is currently possible to obtain
       references to the <filename>MessageBus</filename>,
@@ -1885,7 +1885,7 @@ mvn gwt:debug
  public class FraudClient extends LayoutPanel {
 
   @Inject
-  public Event event;                                    (1)
+  public Event&lt;Fraud&gt; event;                                    (1)
 
   private HTML responsePanel;
 
@@ -1905,7 +1905,7 @@ mvn gwt:debug
   }
 
 
-  public void processFraud(@Observes Fraud fraudEvent) { (2)
+  public void processFraud(@Observes Fraud fraudEvent) {        (2)
     responsePanel.setText("Fraud detected: " + fraudEvent.getTimestamp());
   }
 }                       
@@ -1944,8 +1944,8 @@ mvn gwt:debug
         managed bean as well: <programlisting>
 @ApplicationScoped
 public class AccountService {
-    @Inject @Any
-    Event&lt;Outbound&gt; event;
+    @Inject
+    private Event&lt;Outbound&gt; event;
 
     public void watchActivity(@Observes @Inbound AccountActivity activity) {
         Fraud payload = new Fraud(System.currentTimeMillis());
@@ -1974,7 +1974,7 @@ public class AccountService {
       <title>How to use the CDI integration</title>
 
       <para>The CDI integration is a plugin to the Errai core framework and
-      represents a CDI portable extension. Which means it is disovered
+      represents a CDI portable extension. Which means it is discovered
       automatically by both Errai and the CDI container. In order to use it,
       you first need to understand the different runtime models involved when
       working GWT, Errai and CDI.</para>
