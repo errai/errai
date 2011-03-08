@@ -54,7 +54,8 @@
                 <artifactId>gwt-maven-plugin</artifactId>
                 <version>${gwt.maven}</version>
                 <configuration>
-                    <!--<skip>true</skip>-->
+                    <warSourceDirectory>war</warSourceDirectory>
+                    <hostedWebapp>war</hostedWebapp>
                 </configuration>
             </plugin>
         </plugins>
