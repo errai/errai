@@ -12,14 +12,6 @@
         <version>1.2.2.SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    
-    <dependencies>
-        <dependency>
-            <groupId>org.jboss.errai</groupId>
-            <artifactId>errai-bus</artifactId>
-            <version>${version}</version>
-        </dependency>      
-    </dependencies>
 
     <build>
         <outputDirectory>war/WEB-INF/classes</outputDirectory>
