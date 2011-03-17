@@ -91,6 +91,11 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
             final MessageQueue queue = service.getBus().getQueue(session);
 
             if (queue == null) {
+                switch (getConnectionPhase(request)) {
+                    case CONNECTING:
+                    case DISCONNECTING:
+                        return;
+                }
                 sendDisconnectWithReason(httpServletResponse.getOutputStream(),
                         "There is no queue associated with this session.");
                 return;
@@ -120,15 +125,13 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
 
                 pollQueue(queue, stream, httpServletResponse);
             }
-        }
-        catch (RetryRequest r) {
+        } catch (RetryRequest r) {
             /**
              * This *must* be caught and re-thrown to work property with Jetty.
              */
 
             throw r;
-        }
-        catch (final Throwable t) {
+        } catch (final Throwable t) {
             t.printStackTrace();
 
             httpServletResponse.setHeader("Cache-Control", "no-cache");
@@ -154,8 +157,7 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
             });
 
             stream.write(']');
-        }
-        finally {
+        } finally {
             stream.close();
         }
     }

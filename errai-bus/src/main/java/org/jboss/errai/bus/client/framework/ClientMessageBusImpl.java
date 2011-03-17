@@ -128,8 +128,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      * Constructor creates sendBuilder for HTTP POST requests, recvBuilder for HTTP GET requests and
      * initializes the message bus.
      */
-
-
     private void createRequestBuilders() {
         sendBuilder = getSendBuilder();
         recvBuilder = getRecvBuilder();
@@ -145,7 +143,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 URL.encode(endpoint)
         );
 
-        //   builder.setHeader("Connection", "Keep-Alive");
         builder.setHeader("Content-Type", "application/json");
         builder.setHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER, clientId);
 
@@ -160,13 +157,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 URL.encode(endpoint)
         );
 
-        //   builder.setHeader("Connection", "Keep-Alive");
         builder.setHeader("Content-Type", "application/json");
         builder.setHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER, clientId);
 
         return builder;
     }
-
 
     /**
      * Removes all subscriptions attached to the specified subject
@@ -185,7 +180,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
             subscriptions.remove(subject);
         }
-
     }
 
     /**
@@ -318,7 +312,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      *                          an error.
      */
     public void send(final Message message) {
-
         executeInterceptorStack(false, message);
         
         message.commit();
@@ -559,12 +552,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         onUnsubscribeHooks = new ArrayList<UnsubscribeListener>();
         subscriptions = new HashMap<String, List<Object>>();
         remotes = new HashMap<String, MessageCallback>();
-     //   deferredMessages = new ArrayList<Message>();
     }
 
-
     public final MessageCallback REMOTE_CALLBACK = new RemoteMessageCallback();
-
 
     /**
      * Initializes the message bus, by subscribing to the ClientBus (to receive subscription messages) and the
@@ -1102,7 +1092,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             }
         }
     }
-
 
     private void logError(String message, String additionalDetails, Throwable e) {
         logAdapter.error(message + "<br/>Additional details:<br/> " + additionalDetails, e);

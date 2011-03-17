@@ -1462,7 +1462,7 @@ errai.bus.serializableTypes=org.foo.Foo \
         it's UI widget when needed. This widget will then be embedded in the
         workspace. <programlisting>
 @LoadTool(name = "Users", group = "Administration")                          (1)
-    public class UserManagement implements WidgetProvider
+public class UserManagement implements WidgetProvider
     {
 
     public void provideWidget(final ProvisioningCallback callback) {           (2)
@@ -1881,7 +1881,7 @@ mvn gwt:debug
         produced on the server side. Likewise GWT clients can produce events
         that are consumed by a server side component.</para>
 
-        <para>Let's take alook at an example. <programlisting>
+        <para>Let's take a look at an example. <programlisting>
  public class FraudClient extends LayoutPanel {
 
   @Inject
@@ -1912,22 +1912,31 @@ mvn gwt:debug
                     </programlisting> Two things are notable in this example:
         <orderedlist>
             <listitem>
-              <para>Injection of an event dispatcher proxy</para>
+              <para>Injection of an Event dispatcher proxy</para>
             </listitem>
 
             <listitem>
               <para>Creation of an Oberserver method for a particular event
-              type</para>
+              typeTH</para>
             </listitem>
           </orderedlist></para>
+
+        <para>One important thing to note is the use of the
+        <literal>org.jboss.errai.cdi.client.api.Event</literal> interface,
+        which is the client-side equivlant of the standard CDI
+        <literal>javax.enterprise.event.Event</literal> interface. While
+        standard annotations can be used in client-side GWT code, other APIs
+        cannot be directly exposed as part of the emulation library, so this
+        class provides the equivalent functionality in the client, linking the
+        client to the server-side eventing subsystem.</para>
 
         <sect3>
           <title>Event dispatcher proxy</title>
 
-          <para>The event dispatcher is responsible to send events created on
-          the client side to the server side event subsystem (CDI container).
-          This means any event that is fired through a dispatcher will
-          eventually be consumed by a CDI managed bean. If there is an
+          <para>The event dispatcher is responsible for sending events created
+          on the client-side to the server-side event subsystem (CDI
+          container). This means any event that is fired through a dispatcher
+          will eventually be consumed by a CDI managed bean. If there is an
           Observer registered for it on the server side.</para>
         </sect3>
 

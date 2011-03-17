@@ -99,15 +99,18 @@ public class WeblogicAsyncServlet extends AbstractErraiServlet {
             final MessageQueue queue = service.getBus().getQueue(session);
 
             if (queue == null) {
+                switch (getConnectionPhase(httpServletRequest)) {
+                    case CONNECTING:
+                    case DISCONNECTING:
+                        return;
+                }
                 sendDisconnectWithReason(httpServletResponse.getOutputStream(),
                         "There is no queue associated with this session.");
             }
 
             pollQueue(queue, httpServletRequest, httpServletResponse);
 
-        }
-
-        catch (final Throwable t) {
+        } catch (final Throwable t) {
             t.printStackTrace();
 
             httpServletResponse.setHeader("Cache-Control", "no-cache");
@@ -138,27 +141,11 @@ public class WeblogicAsyncServlet extends AbstractErraiServlet {
 
     private static void pollQueue(MessageQueue queue, HttpServletRequest httpServletRequest,
                                   HttpServletResponse httpServletResponse) throws IOException {
-
         queue.heartBeat();
-
-//        List<MarshalledMessage> messages = queue.poll(false).getMessages();
 
         httpServletResponse.setHeader("Cache-Control", "no-cache");
         httpServletResponse.setContentType("application/json");
         queue.poll(false, httpServletResponse.getOutputStream());
-//        OutputStream stream = httpServletResponse.getOutputStream();
-//
-//        Iterator<MarshalledMessage> iter = messages.iterator();
-//
-//        stream.write('[');
-//        while (iter.hasNext()) {
-//            writeToOutputStream(stream, iter.next());
-//            if (iter.hasNext()) {
-//                stream.write(',');
-//            }
-//        }
-//        stream.write(']');
-//        stream.flush();
     }
 
     public static void main(String[] args) {

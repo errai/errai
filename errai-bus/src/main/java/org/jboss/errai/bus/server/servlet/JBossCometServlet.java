@@ -70,6 +70,12 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
                 boolean post = "POST".equals(request.getMethod());
                 queue = getQueue(session, !post);
                 if (queue == null) {
+                    switch (getConnectionPhase(request)) {
+                        case CONNECTING:
+                        case DISCONNECTING:
+                            return;
+                    }
+
                     sendDisconnectWithReason(event.getHttpServletResponse().getOutputStream(),
                             "There is no queue associated with this session.");
                 }
@@ -262,8 +268,7 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
                         transmitMessages((et = iter.next()).getHttpServletResponse(), queue);
                         iter.remove();
                         et.close();
-                    }
-                    catch (Exception e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }

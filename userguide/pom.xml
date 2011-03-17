@@ -18,13 +18,13 @@
     <name>Errai::Userguide</name>
     <groupId>org.jboss.errai</groupId>
     <artifactId>errai-userguide</artifactId>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
 
     <!-- Parent -->
     <parent>
         <groupId>org.jboss.errai</groupId>
         <artifactId>errai-parent</artifactId>
-        <version>1.2-SNAPSHOT</version>
+        <version>1.2.2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -32,9 +32,7 @@
     </dependencies>
 
     <build>
-
         <plugins>
-
             <plugin>
                 <groupId>org.jboss.maven.plugins</groupId>
                 <artifactId>maven-jdocbook-plugin</artifactId>

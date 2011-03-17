@@ -104,6 +104,12 @@ public class TomcatCometServlet extends AbstractErraiServlet implements CometPro
                         }
                     }
                 } else {
+                    switch (getConnectionPhase(request)) {
+                        case CONNECTING:
+                        case DISCONNECTING:
+                            return;
+                    }
+
                     sendDisconnectWithReason(event.getHttpServletResponse().getOutputStream(),
                             "There is no queue associated with this session.");
                 }
@@ -232,8 +238,7 @@ public class TomcatCometServlet extends AbstractErraiServlet implements CometPro
             } else {
                 return 0;
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             MessageQueue queue = service.getBus().getQueue(session);
             if (queue != null) {
                 queue.stopQueue();
@@ -283,21 +288,18 @@ public class TomcatCometServlet extends AbstractErraiServlet implements CometPro
 
                         try {
                             transmitMessages(et.getHttpServletResponse(), queue);
-                        }
-                        catch (NullPointerException e) {
+                        } catch (NullPointerException e) {
                             activeSessEvents.remove(et);
                             return;
                         }
 
                         try {
                             et.close();
-                        }
-                        catch (NullPointerException e) {
+                        } catch (NullPointerException e) {
                             // suppress.
                         }
 
-                    }
-                    catch (Exception e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }

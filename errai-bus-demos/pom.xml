@@ -3,7 +3,7 @@
     <name>Errai::Bus::Demos</name>
     <groupId>org.jboss.errai</groupId>
     <artifactId>errai-bus-demos</artifactId>
-  <version>1.2.2.SNAPSHOT</version>
+  <version>1.2.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <!-- Parent -->

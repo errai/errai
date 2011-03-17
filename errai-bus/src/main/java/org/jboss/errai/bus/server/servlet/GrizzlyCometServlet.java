@@ -104,6 +104,12 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
             final MessageQueue queue = service.getBus().getQueue(session);
 
             if (queue == null) {
+                switch (getConnectionPhase(httpServletRequest)) {
+                    case CONNECTING:
+                    case DISCONNECTING:
+                        return;
+                }
+
                 sendDisconnectWithReason(httpServletResponse.getOutputStream(),
                         "There is no queue associated with this session.");
             }
@@ -137,8 +143,7 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
 
                 pollQueue(queue, httpServletRequest, httpServletResponse);
             }
-        }
-        catch (final Throwable t) {
+        } catch (final Throwable t) {
             t.printStackTrace();
 
             httpServletResponse.setHeader("Cache-Control", "no-cache");
