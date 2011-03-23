@@ -19,14 +19,14 @@
     <name>Errai::IoC</name>
     <groupId>org.jboss.errai</groupId>
     <artifactId>errai-ioc</artifactId>
-  <version>1.2.2.Final</version>
+  <version>1.2.3-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <!-- Parent -->
     <parent>
         <groupId>org.jboss.errai</groupId>
         <artifactId>errai-parent</artifactId>
-        <version>1.2.2.Final</version>
+        <version>1.2.3-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -34,7 +34,7 @@
         <dependency>
             <groupId>org.jboss.errai</groupId>
             <artifactId>errai-bus</artifactId>
-            <version>1.2.2.Final</version>
+            <version>1.2.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.guice</groupId>
