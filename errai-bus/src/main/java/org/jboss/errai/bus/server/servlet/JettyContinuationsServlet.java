@@ -91,7 +91,7 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
             final MessageQueue queue = service.getBus().getQueue(session);
 
             if (queue == null) {
-                switch (getConnectionPhase(request)) {
+                switch (getConnectionPhase(httpServletRequest)) {
                     case CONNECTING:
                     case DISCONNECTING:
                         return;
