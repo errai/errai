@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.jboss.errai</groupId>
         <artifactId>errai-parent</artifactId>
-        <version>1.2.2-SNAPSHOT</version>
+        <version>1.2.2.Final</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -93,7 +93,7 @@
                             <tasks>
 
                                 <copy todir="${project.build.directory}/docbook/publish/en/html_single/">
-                                    <fileset dir="${basedir}/src/js" includes="*.js"/>
+                                    <fileset dir="${basedir}/src/js" includes="*.js" />
                                 </copy>
 
                             </tasks>

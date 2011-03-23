@@ -19,14 +19,14 @@
     <name>Errai::Common</name>
     <groupId>org.jboss.errai</groupId>
     <artifactId>errai-common</artifactId>
-    <version>1.2.2-SNAPSHOT</version>
+    <version>1.2.2.Final</version>
     <packaging>jar</packaging>
 
     <!-- Parent -->
     <parent>
         <groupId>org.jboss.errai</groupId>
         <artifactId>errai-parent</artifactId>
-        <version>1.2.2-SNAPSHOT</version>
+        <version>1.2.2.Final</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
