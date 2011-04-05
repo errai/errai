@@ -9,7 +9,6 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <errai.version>1.2</errai.version>
         <errai-jms.version>1.1-SNAPSHOT</errai-jms.version>
         <gwt.version>2.0.4</gwt.version>
         <hsqldb.version>1.8.0.7</hsqldb.version>
@@ -41,7 +40,7 @@
             <dependency>
                 <groupId>org.jboss.errai</groupId>
                 <artifactId>errai-bus</artifactId>
-                <version>${errai.version}</version>
+                <version>${project.version}</version>
             </dependency>
 
             <dependency>
@@ -53,31 +52,31 @@
             <dependency>
                 <groupId>org.jboss.errai</groupId>
                 <artifactId>errai-widgets</artifactId>
-                <version>${errai.version}</version>
+                <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.jboss.errai</groupId>
                 <artifactId>errai-workspaces</artifactId>
-                <version>${errai.version}</version>
+                <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.jboss.errai</groupId>
                 <artifactId>errai-ioc</artifactId>
-                <version>${errai.version}</version>
+                <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.jboss.errai</groupId>
                 <artifactId>errai-tools</artifactId>
-                <version>${errai.version}</version>
+                <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.jboss.errai</groupId>
                 <artifactId>errai-persistence</artifactId>
-                <version>${errai.version}</version>
+                <version>${project.version}</version>
             </dependency>
 
             <dependency>
