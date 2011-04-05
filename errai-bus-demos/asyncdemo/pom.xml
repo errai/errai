@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <name>Errai::Bus::Demos::AsyncDemo</name>
     <groupId>org.jboss.errai</groupId>
@@ -35,7 +36,8 @@
                     <runTarget>AsyncDemo.html</runTarget>
                     <warSourceDirectory>war</warSourceDirectory>
                     <extraJvmArgs>-Xmx512m</extraJvmArgs>
-                    <!--<soyc>false</soyc>-->
+                    <webXml>src/jetty/web.xml</webXml>
+                    <hostedWebapp>war</hostedWebapp>
                 </configuration>
                 <executions>
                     <execution>
@@ -77,10 +79,10 @@
                                     the plugin and remove all GWT related artifacts that are required
                                     to run the hosted mode.
                                 -->
-                                <delete dir="war/WEB-INF/classes" />
-                                <delete dir="war/WEB-INF/lib" />
-                                <delete dir="war/AsyncDemo" />
-                                <delete dir="target" />
+                                <delete dir="war/WEB-INF/classes"/>
+                                <delete dir="war/WEB-INF/lib"/>
+                                <delete dir="war/AsyncDemo"/>
+                                <delete dir="target"/>
                             </tasks>
                         </configuration>
                         <goals>
