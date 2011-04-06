@@ -18,7 +18,12 @@
         <dependency>
             <groupId>org.jboss.errai</groupId>
             <artifactId>errai-tools</artifactId>
-            <version>${version}</version>
+            <version>${errai.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.errai</groupId>
+            <artifactId>errai-ioc</artifactId>
+            <version>${errai.version}</version>
         </dependency>
     </dependencies>
 

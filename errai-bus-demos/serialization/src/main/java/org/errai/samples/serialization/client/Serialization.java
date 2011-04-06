@@ -16,7 +16,6 @@
 
 package org.errai.samples.serialization.client;
 
-import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.*;
@@ -26,52 +25,57 @@ import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.protocols.MessageParts;
+import org.jboss.errai.bus.server.annotations.Service;
+import org.jboss.errai.ioc.client.api.EntryPoint;
 
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 import java.util.List;
 
-public class Serialization implements EntryPoint {
-    private MessageBus bus = ErraiBus.get();
+@EntryPoint
+public class Serialization {
+    @Inject
+    private RequestDispatcher dispatcher;
 
-    public void onModuleLoad() {
+    private final FlexTable table = new FlexTable();
 
+    @Service("ClientEndpoint")
+    public final MessageCallback clientEndpoint = new MessageCallback() {
+        public void callback(Message message) {
+            List<Record> records = message.get(List.class, "Records");
+
+            int row = 0;
+            for (Record r : records) {
+                table.setWidget(row, 0, new HTML(String.valueOf(r.getRecordId())));
+                table.setWidget(row, 1, new HTML(r.getName()));
+                table.setWidget(row, 2, new HTML(String.valueOf(r.getBalance())));
+                table.setWidget(row, 3, new HTML(r.getAccountOpened().toString()));
+                table.setWidget(row, 4, new HTML(String.valueOf(r.getStuff())));
+                row++;
+            }
+
+            try {
+                MessageBuilder.createMessage().toSubject("ObjectService")
+                        .with("Recs", records)
+                        .noErrorHandling().sendNowWith(dispatcher);
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
+    @PostConstruct
+    public void init() {
         VerticalPanel p = new VerticalPanel();
-
-        final FlexTable table = new FlexTable();
-
-        bus.subscribe("ClientEndpoint",
-                new MessageCallback() {
-                    public void callback(Message message) {
-                        List<Record> records = message.get(List.class, "Records");
-                      
-                        int row = 0;
-                        for (Record r : records) {
-                            table.setWidget(row, 0, new HTML(String.valueOf(r.getRecordId())));
-                            table.setWidget(row, 1, new HTML(r.getName()));
-                            table.setWidget(row, 2, new HTML(String.valueOf(r.getBalance())));
-                            table.setWidget(row, 3, new HTML(r.getAccountOpened().toString()));
-                            table.setWidget(row, 4, new HTML(String.valueOf(r.getStuff())));
-                            row++;
-                        }
-
-                        try {
-                            MessageBuilder.createMessage().toSubject("ObjectService")
-                                    .with("Recs", records)
-                                    .noErrorHandling().sendNowWith(bus);
-                        }
-                        catch (Throwable e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-        );
 
         Button button = new Button("Load Objects", new ClickHandler() {
             public void onClick(ClickEvent clickEvent) {
                 MessageBuilder.createMessage()
                         .toSubject("ObjectService")
                         .with(MessageParts.ReplyTo, "ClientEndpoint")
-                        .noErrorHandling().sendNowWith(bus);
+                        .done().sendNowWith(dispatcher);
             }
         });
 
@@ -80,6 +84,4 @@ public class Serialization implements EntryPoint {
         RootPanel.get().add(p);
     }
 
-    public static void main(String[] args) {
-    }
 }
