@@ -22,10 +22,6 @@ import javax.inject.Inject;
 
 @EntryPoint
 public class HelloWorld extends VerticalPanel {
-
-    @Inject
-    public RequestDispatcher dispatcher;
-
     @Inject
     @ToSubject("HelloWorld")
     @ReplyTo("ReplyTo")

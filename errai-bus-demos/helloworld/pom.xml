@@ -26,12 +26,6 @@
             <artifactId>errai-ioc</artifactId>
             <version>${version}</version>
         </dependency>
-
-        <dependency>
-            <groupId>client.javax.enterprise</groupId>
-            <artifactId>gwtclient-javax-enterprise</artifactId>
-            <version>1.0</version>
-        </dependency>
     </dependencies>
 
     <build>
