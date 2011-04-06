@@ -58,6 +58,7 @@ public class InjectionTask {
         StringAppender appender = new StringAppender();
         InjectionPoint injectionPoint
                 = new InjectionPoint(null, injectType, constructor, method, field, type, parm, injector, ctx);
+
         switch (injectType) {
             case PrivateField:
                 appender.append(InjectUtil.getPrivateFieldInjectorName(field)).append("(")

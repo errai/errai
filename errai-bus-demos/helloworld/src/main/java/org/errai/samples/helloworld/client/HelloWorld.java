@@ -6,8 +6,11 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import org.jboss.errai.bus.client.api.Consumer;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.annotations.ReplyTo;
+import org.jboss.errai.bus.client.api.annotations.ToSubject;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.protocols.MessageParts;
@@ -23,12 +26,17 @@ public class HelloWorld extends VerticalPanel {
     @Inject
     public RequestDispatcher dispatcher;
 
+    @Inject
+    @ToSubject("HelloWorld")
+    @ReplyTo("ReplyTo")
+    public Consumer<String> sender;
+
     public Label text = new Label();
 
     @Service("ReplyTo")
     public MessageCallback replyTo = new MessageCallback() {
         public void callback(Message message) {
-            text.setText(message.get(String.class, "Message"));
+            text.setText(message.get(String.class, MessageParts.Value));
         }
     };
 
@@ -37,11 +45,7 @@ public class HelloWorld extends VerticalPanel {
         Button button = new Button("hello!");
         button.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                MessageBuilder.createMessage()
-                        .toSubject("HelloWorld")
-                        .with(MessageParts.ReplyTo, "ReplyTo")
-                        .with("Message", "Hello, World!")
-                        .done().sendNowWith(dispatcher);
+                sender.consume("Hello, World!");
             }
         });
 

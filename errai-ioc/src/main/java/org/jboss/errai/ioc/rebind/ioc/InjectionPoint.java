@@ -100,6 +100,8 @@ public class InjectionPoint<T extends Annotation> {
 
     public String getMemberName() {
         switch (taskType) {
+            case PrivateField:
+                return InjectUtil.getPrivateFieldInjectorName(field);
             case Field:
                 return field.getName();
 

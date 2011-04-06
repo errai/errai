@@ -37,6 +37,13 @@ public enum MessageParts {
      */
     Subject,
 
+
+    /**
+     * Default value payload. Used mostly for higher-level APIs.
+     */
+    Value,
+
+
     /**
      * A unique identifier for identifying the session with which a message is associated.
      */

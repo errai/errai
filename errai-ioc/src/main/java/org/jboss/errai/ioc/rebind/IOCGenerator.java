@@ -325,7 +325,7 @@ public class IOCGenerator extends Generator {
             sourceWriter.print(" = ");
             sourceWriter.print("value;");
             sourceWriter.println();
-            sourceWriter.outdent();;
+            sourceWriter.outdent();
             sourceWriter.println("}-*/;\n");
         }
     }
