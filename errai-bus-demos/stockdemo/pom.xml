@@ -53,7 +53,7 @@
                 <configuration>
                     <warSourceDirectory>war</warSourceDirectory>
                     <webappDirectory>war</webappDirectory>
-                    <packagingExcludes>**/javax/**/*.*,**/client/**/*.class</packagingExcludes>
+                    <packagingExcludes>**/javax/**/*.*</packagingExcludes>
                 </configuration>
             </plugin>
             <plugin>
