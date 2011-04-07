@@ -27,6 +27,14 @@ import org.jboss.errai.bus.client.api.ResourceProvider;
 public interface MessageBuildParms<R> extends MessageBuild {
 
     /**
+     * Include a default value with the message. This is the same as with(MessageParts.Value, value). This offers
+     * a convenience method for sending messages which contain a single object payload.
+     * @param value
+     * @return
+     */
+    public MessageBuildParms<R> withValue(Object value);
+
+    /**
      * Sets the message part to the specified value
      *
      * @param part  - the message part

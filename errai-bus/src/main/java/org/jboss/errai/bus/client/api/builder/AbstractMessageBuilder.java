@@ -282,6 +282,10 @@ public class AbstractMessageBuilder<R extends Sendable> {
                 return this;
             }
 
+            public MessageBuildParms<R> withValue(Object value) {
+                message.set(MessageParts.Value, value);
+                return this;
+            }
 
             public MessageBuildParms<R> with(String part, Object value) {
                 message.set(part, value);

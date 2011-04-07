@@ -20,9 +20,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.*;
 import org.errai.samples.serialization.client.model.Record;
-import org.jboss.errai.bus.client.*;
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
@@ -83,5 +81,4 @@ public class Serialization {
         p.add(button);
         RootPanel.get().add(p);
     }
-
 }

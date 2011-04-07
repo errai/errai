@@ -23,8 +23,11 @@ import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.annotations.ApplicationComponent;
+import org.jboss.errai.bus.server.annotations.ExposeEntity;
+import org.jboss.errai.bus.server.annotations.MessageParameter;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.io.MethodEndpointCallback;
+import org.jboss.errai.bus.server.io.MethodEndpointDynamicParmCallback;
 import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
 import org.jboss.errai.bus.server.service.bootstrap.BootstrapContext;
 import org.jboss.errai.bus.server.service.bootstrap.GuiceProviderProxy;
@@ -69,17 +72,38 @@ public class ApplicationCompProcessor implements MetaDataProcessor {
                     Class[] parmTypes = m.getParameterTypes();
 
                     if (m.isAnnotationPresent(Service.class)) {
-                        if (parmTypes.length != 1)
-                            throw new ErraiBootstrapFailure("wrong number of method arguments for service endpoint: " + m.getName() + ": " + parmTypes.length);
+//                        if (parmTypes.length != 1)
+//                            throw new ErraiBootstrapFailure("wrong number of method arguments for service endpoint: " + m.getName() + ": " + parmTypes.length);
 
-                        if (!Message.class.isAssignableFrom(parmTypes[0]))
-                            throw new ErraiBootstrapFailure("attempt to declare service handler on illegal type: " + parmTypes[0].getName());
+                        String[] parms = new String[parmTypes.length];
+
+                        if (m.getParameterAnnotations().length != 0) {
+                            //  Annotation[] parmAnnos;
+                            for (int i = 0; i < m.getParameterAnnotations().length; i++) {
+                                for (Annotation a : m.getParameterAnnotations()[i]) {
+                                    if (a instanceof MessageParameter) {
+                                        parms[i] = ((MessageParameter) a).value();
+                                    }
+                                }
+
+                            }
+
+                        }
 
                         Annotation annotation = m.getAnnotation(Service.class);
-
                         String svcName = ((Service) annotation).value().equals("") ? m.getName() : ((Service) annotation).value();
+                        if (parmTypes.length == 1 && !Message.class.isAssignableFrom(parmTypes[0])) {
+                            context.getBus().subscribe(svcName, new MethodEndpointCallback(inst, m));
+                        } else {
+                            Class parmClass = parmTypes[0];
+                            if (!parmClass.isAnnotationPresent(ExposeEntity.class)) {
+                                log.warn("method service-endpoint accepts a type which is not exposed to the Errai serializer: "
+                                        + m.getDeclaringClass().getName() + "#" + m.getName());
+                            }
 
-                        context.getBus().subscribe(svcName, new MethodEndpointCallback(inst, m));
+                            context.getBus().subscribe(svcName, new MethodEndpointDynamicParmCallback(inst, m, parms, parmTypes));
+                        }
+
                     } else {
                         int i = 0;
                         for (Annotation[] annotations : m.getParameterAnnotations()) {
@@ -101,9 +125,7 @@ public class ApplicationCompProcessor implements MetaDataProcessor {
                         }
                     }
                 }
-
-            }
-            catch (Throwable t) {
+            } catch (Throwable t) {
                 t.printStackTrace();
             }
         }

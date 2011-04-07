@@ -32,7 +32,7 @@ public class HelloWorld extends VerticalPanel {
     @Service("ReplyTo")
     public MessageCallback replyTo = new MessageCallback() {
         public void callback(Message message) {
-            text.setText(message.get(String.class, MessageParts.Value) + ":" + message.get(Long.class, "Time"));
+            text.setText(message.get(String.class, MessageParts.Value));
         }
     };
 
