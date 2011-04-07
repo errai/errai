@@ -18,7 +18,11 @@ package org.jboss.errai.bus.server.io;
 
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.ResourceProvider;
+import org.jboss.errai.bus.client.api.base.Conversation;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
+import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 
 import java.lang.reflect.Method;
@@ -33,36 +37,79 @@ public class MethodEndpointDynamicParmCallback implements MessageCallback {
     private final Method method;
 
     private final String[] parms;
-    private final boolean[] callPlan;
+    private final ParmType[] callPlan;
 
     public MethodEndpointDynamicParmCallback(Object instance, Method method, String[] parms, Class[] parmTypes) {
         this.instance = instance;
         this.method = method;
         this.parms = parms;
 
-        this.callPlan = new boolean[parmTypes.length];
+        this.callPlan = new ParmType[parmTypes.length];
 
         for (int i = 0; i < parmTypes.length; i++) {
-            callPlan[i] = Message.class.isAssignableFrom(parmTypes[i]);
+            if (Message.class.isAssignableFrom(parmTypes[i])) {
+                callPlan[i] = ParmType.Message;
+            } else if (Conversation.class.isAssignableFrom(parmTypes[i])) {
+                callPlan[i] = ParmType.Conversation;
+            } else {
+                callPlan[i] = ParmType.Object;
+            }
         }
     }
 
-    public void callback(Message message) {
+    public void callback(final Message message) {
         try {
             Object[] parmValues = new Object[parms.length];
             for (int i = 0; i < parmValues.length; i++) {
-                if (callPlan[i]) {
-                    parmValues[i] = message;
-                }
-                else {
-                    parmValues[i] = message.get(Object.class, parms[i]);
+                switch (callPlan[i]) {
+                    case Object:
+                        parmValues[i] = message.get(Object.class, parms[i]);
+                        break;
+                    case Message:
+                        parmValues[i] = message;
+                        break;
+                    case Conversation:
+                        parmValues[i] = new Conversation() {
+                            final Message replyMessage = MessageBuilder.createConversation(message).getMessage();
+
+                            public void setValue(Object value) {
+                                replyMessage.set(MessageParts.Value, value);
+                            }
+
+                            public void set(String part, Object value) {
+                                replyMessage.set(part, value);
+                            }
+
+                            public void set(Enum<?> part, Object value) {
+                                replyMessage.set(part, value);
+                            }
+
+                            public void setProvidedPart(String part, ResourceProvider provider) {
+                                replyMessage.setProvidedPart(part, provider);
+                            }
+
+                            public void setProvidedPart(Enum<?> part, ResourceProvider provider) {
+                                replyMessage.setProvidedPart(part, provider);
+                            }
+
+                            public void reply() {
+                                replyMessage.sendNowWith((RequestDispatcher) message.getResource(ResourceProvider.class,
+                                        RequestDispatcher.class.getName()).get());
+                            }
+                        };
+                        break;
                 }
             }
 
             method.invoke(instance, parmValues);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new MessageDeliveryFailure(e);
         }
+    }
+
+    enum ParmType {
+        Object,
+        Message,
+        Conversation
     }
 }
