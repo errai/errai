@@ -28,7 +28,7 @@ public class HelloWorld extends VerticalPanel {
     public Label text = new Label();
 
     @Service("ReplyTo")
-    public final MessageCallback replyTo = new MessageCallback() {
+    private final MessageCallback replyTo = new MessageCallback() {
         public void callback(Message message) {
             text.setText(message.get(String.class, MessageParts.Value));
         }

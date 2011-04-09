@@ -34,6 +34,11 @@ public class ServiceDecorator extends Decorator<Service> {
         final InjectionContext ctx = decContext.getInjectionContext();
 
         /**
+         * Ensure the the container generates a stub to internally expose the field if it's private.
+         */
+        decContext.ensureFieldExposed();
+
+        /**
          * Get an instance of the message bus.
          */
         final String inj = ctx.getInjector(decContext.getInjectionContext()

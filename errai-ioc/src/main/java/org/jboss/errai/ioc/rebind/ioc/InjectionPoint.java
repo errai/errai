@@ -20,6 +20,8 @@ import com.google.gwt.core.ext.typeinfo.*;
 
 import java.lang.annotation.Annotation;
 
+import static org.jboss.errai.ioc.rebind.ioc.InjectUtil.getPrivateFieldInjectorName;
+
 public class InjectionPoint<T extends Annotation> {
     private T annotation;
     private TaskType taskType;
@@ -81,10 +83,16 @@ public class InjectionPoint<T extends Annotation> {
         return injectionContext;
     }
 
+    public void ensureFieldExposed() {
+        if (!injectionContext.getPrivateFieldsToExpose().contains(field)) {
+            injectionContext.getPrivateFieldsToExpose().add(field);
+        }
+    }
+
     public String getValueExpression() {
         switch (taskType) {
             case PrivateField:
-                return InjectUtil.getPrivateFieldInjectorName(field) + "(" + injector.getVarName() + ")";
+                return getPrivateFieldInjectorName(field) + "(" + injector.getVarName() + ")";
 
             case Field:
                 return injector.getVarName() + "." + field.getName();
@@ -104,7 +112,7 @@ public class InjectionPoint<T extends Annotation> {
     public String getMemberName() {
         switch (taskType) {
             case PrivateField:
-                return InjectUtil.getPrivateFieldInjectorName(field) + "(" + injector.getVarName() + ")";
+                return getPrivateFieldInjectorName(field) + "(" + injector.getVarName() + ")";
 
             case Field:
                 return field.getName();
