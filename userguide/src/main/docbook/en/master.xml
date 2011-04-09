@@ -432,7 +432,7 @@ public class HelloWorld implements EntryPoint {
         ErraiBus, since by default, a message will be broadcast to all client
         services listening on a particular channel.</para>
 
-        <para>When you create a conversation with an incoming message, you
+        <para>When you create a reply with an incoming message, you
         ensure that the message you are sending back is received by the same
         client which sent the incoming message. A simple example:</para>
 
@@ -445,7 +445,7 @@ public class HelloWorldService implements MessageCallback {
         MessageBuilder.createConversation(message)
             .toSubject("HelloWorldClient")
             .signalling()
-            .with("text", "Hi There! We're having a conversation!")
+            .with("text", "Hi There! We're having a reply!")
             .noErrorHandling().reply();
         });
     }
@@ -534,7 +534,7 @@ MessageBuilder.createConversation(message)
 
         <para>Broadcasting messages to all clients listening on a specific
         subject is quite simple and involves nothing more than forgoing use of
-        the conversation API. For instance:</para>
+        the reply API. For instance:</para>
 
         <programlisting>
 MessageBuilder.createMessage().

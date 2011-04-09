@@ -23,6 +23,6 @@ public class ToSubjectDecorator extends Decorator<ToSubject> {
         final JField field = injectionPoint.getField();
         final ToSubject context = field.getAnnotation(ToSubject.class);
 
-        return injectionPoint.getInjector().getVarName() + "." + injectionPoint.getMemberName() + ".setToSubject(\"" + context.value() + "\");";
+        return injectionPoint.getValueExpression() + ".setToSubject(\"" + context.value() + "\");";
     }
 }

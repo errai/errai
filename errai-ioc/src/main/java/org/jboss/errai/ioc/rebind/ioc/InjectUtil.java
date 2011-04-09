@@ -130,8 +130,7 @@ public class InjectUtil {
                         InjectionTask task = new InjectionTask(injector, meth);
                         task.setField(field);
                         accumulator.add(task);
-                    }
-                    catch (NotFoundException e) {
+                    } catch (NotFoundException e) {
 
                         InjectionTask task = new InjectionTask(injector, field);
                         accumulator.add(task);
@@ -151,22 +150,22 @@ public class InjectUtil {
                     switch (elType) {
                         case FIELD:
                             if (field.isAnnotationPresent(a)) {
-                                if (!field.isPublic()) {
-                                    try {
-                                        JMethod meth = type.getMethod(ReflectionUtil.getGetter(field.getName()), new JType[0]);
-                                        DecoratorTask task = new DecoratorTask(injector, meth, ctx.getDecorator(a));
-                                        task.setField(field);
-                                        accumulator.add(task);
-                                    }
-                                    catch (NotFoundException e) {
-                                        throw new InjectionFailure("attempt to decorate a non-public field" +
-                                                " (private field injection is not supported -- please provide a " +
-                                                "public setter or change the field visibility to public): "
-                                                + type.getQualifiedSourceName() + "." + field.getName());
-                                    }
-                                } else {
-                                    accumulator.add(new DecoratorTask(injector, field, ctx.getDecorator(a)));
-                                }
+//                                if (!field.isPublic()) {
+//                                    try {
+//                                        JMethod meth = type.getMethod(ReflectionUtil.getGetter(field.getName()), new JType[0]);
+//                                        DecoratorTask task = new DecoratorTask(injector, meth, ctx.getDecorator(a));
+//                                        task.setField(field);
+//                                        accumulator.add(task);
+//                                    }
+//                                    catch (NotFoundException e) {
+//                                        throw new InjectionFailure("attempt to decorate a non-public field" +
+//                                                " (private field injection is not supported -- please provide a " +
+//                                                "public setter or change the field visibility to public): "
+//                                                + type.getQualifiedSourceName() + "." + field.getName());
+//                                    }
+//                                } else {
+                                accumulator.add(new DecoratorTask(injector, field, ctx.getDecorator(a)));
+//                                }
                             }
                             break;
                     }
@@ -204,7 +203,6 @@ public class InjectUtil {
             }
         }
 
-
         return accumulator;
     }
 
@@ -218,7 +216,6 @@ public class InjectUtil {
         }
 
         return accumulator;
-
     }
 
     private static List<JMethod> scanForPostConstruct(JClassType type) {
@@ -261,8 +258,7 @@ public class InjectUtil {
         try {
             type.getConstructor(new JType[0]);
             return true;
-        }
-        catch (NotFoundException e) {
+        } catch (NotFoundException e) {
             return false;
         }
     }

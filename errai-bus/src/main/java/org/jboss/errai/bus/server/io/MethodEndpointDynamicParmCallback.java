@@ -19,7 +19,7 @@ package org.jboss.errai.bus.server.io;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.ResourceProvider;
-import org.jboss.errai.bus.client.api.base.Conversation;
+import org.jboss.errai.bus.client.api.base.Reply;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
@@ -49,7 +49,7 @@ public class MethodEndpointDynamicParmCallback implements MessageCallback {
         for (int i = 0; i < parmTypes.length; i++) {
             if (Message.class.isAssignableFrom(parmTypes[i])) {
                 callPlan[i] = ParmType.Message;
-            } else if (Conversation.class.isAssignableFrom(parmTypes[i])) {
+            } else if (Reply.class.isAssignableFrom(parmTypes[i])) {
                 callPlan[i] = ParmType.Conversation;
             } else {
                 callPlan[i] = ParmType.Object;
@@ -69,7 +69,7 @@ public class MethodEndpointDynamicParmCallback implements MessageCallback {
                         parmValues[i] = message;
                         break;
                     case Conversation:
-                        parmValues[i] = new Conversation() {
+                        parmValues[i] = new Reply() {
                             final Message replyMessage = MessageBuilder.createConversation(message).getMessage();
 
                             public void setValue(Object value) {

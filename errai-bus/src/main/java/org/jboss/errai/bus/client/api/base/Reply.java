@@ -5,7 +5,7 @@ import org.jboss.errai.bus.client.api.ResourceProvider;
 /**
  * @author Mike Brock .
  */
-public interface Conversation {
+public interface Reply {
     public void setValue(Object value);
 
     /**

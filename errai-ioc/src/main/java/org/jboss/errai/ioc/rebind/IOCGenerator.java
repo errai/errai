@@ -63,7 +63,6 @@ public class IOCGenerator extends Generator {
 
     private List<Runnable> deferredTasks = new LinkedList<Runnable>();
 
-
     public IOCGenerator() {
     }
 
@@ -92,8 +91,7 @@ public class IOCGenerator extends Generator {
 
             // Generate class source code
             generateIOCBootstrapClass(logger, context);
-        }
-        catch (Throwable e) {
+        } catch (Throwable e) {
             // record sendNowWith logger that Map generation threw an exception
             e.printStackTrace();
             logger.log(TreeLogger.ERROR, "Error generating extensions", e);
@@ -156,8 +154,7 @@ public class IOCGenerator extends Generator {
 
         try {
             typeProviderCls = typeOracle.getType(TypeProvider.class.getName());
-        }
-        catch (NotFoundException e) {
+        } catch (NotFoundException e) {
             throw new RuntimeException(e);
         }
 
@@ -169,8 +166,7 @@ public class IOCGenerator extends Generator {
             try {
                 Class<? extends IOCExtensionConfigurator> configuratorClass = clazz.asSubclass(IOCExtensionConfigurator.class);
                 configuratorClass.newInstance().configure(procContext, injectFactory, procFactory);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 throw new ErraiBootstrapFailure("unable to load IOC Extension Configurator: " + e.getMessage(), e);
             }
         }
@@ -199,8 +195,7 @@ public class IOCGenerator extends Generator {
                 }
 
                 injectFactory.getInjectionContext().registerDecorator(decoratorClass.getConstructor(new Class[]{Class.class}).newInstance(annoType));
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 throw new ErraiBootstrapFailure("unable to load code decorator: " + e.getMessage(), e);
             }
         }
@@ -272,8 +267,7 @@ public class IOCGenerator extends Generator {
 
             try {
                 injectFactory.addInjector(new ContextualProviderInjector(type, getJClassType(injectorClass)));
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 throw new ErraiBootstrapFailure("could not load injector: " + e.getMessage(), e);
             }
         }
@@ -328,6 +322,27 @@ public class IOCGenerator extends Generator {
             sourceWriter.outdent();
             sourceWriter.println("}-*/;\n");
         }
+
+        for (JField f : privateFields) {
+            sourceWriter.print("private static native ");
+            sourceWriter.print(f.getType().getQualifiedSourceName());
+            sourceWriter.print(" ");
+            sourceWriter.print(InjectUtil.getPrivateFieldInjectorName(f));
+            sourceWriter.print("(");
+            sourceWriter.print(f.getEnclosingType().getQualifiedSourceName());
+            sourceWriter.print(" instance) /*-{");
+            sourceWriter.println();
+            sourceWriter.outdent();
+            // begin JSNI call
+            sourceWriter.print("return instance.@");
+            sourceWriter.print(f.getEnclosingType().getQualifiedSourceName());
+            sourceWriter.print("::");
+            sourceWriter.print(f.getName());
+            sourceWriter.print(";");
+            sourceWriter.println();
+            sourceWriter.outdent();
+            sourceWriter.println("}-*/;\n");
+        }
     }
 
     public void addType(final JClassType type) {
@@ -358,8 +373,7 @@ public class IOCGenerator extends Generator {
     public JClassType getJClassType(Class cls) {
         try {
             return typeOracle.getType(cls.getName());
-        }
-        catch (NotFoundException e) {
+        } catch (NotFoundException e) {
             return null;
         }
     }
@@ -436,8 +450,7 @@ public class IOCGenerator extends Generator {
         try {
             JClassType visit = oracle.getType(entity.getName());
             return visit;
-        }
-        catch (NotFoundException e) {
+        } catch (NotFoundException e) {
             throw new RuntimeException("Failed to load type " + entity.getName(), e);
         }
     }

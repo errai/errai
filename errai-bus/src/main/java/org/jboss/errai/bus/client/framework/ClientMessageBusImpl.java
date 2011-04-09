@@ -268,7 +268,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      * @param callback - The function to be called when the message is received
      */
     public void conversationWith(final Message message, final MessageCallback callback) {
-        final String tempSubject = "temp:Conversation:" + (++conversationCounter);
+        final String tempSubject = "temp:Reply:" + (++conversationCounter);
 
         message.set(ReplyTo, tempSubject);
 

@@ -83,6 +83,9 @@ public class InjectionPoint<T extends Annotation> {
 
     public String getValueExpression() {
         switch (taskType) {
+            case PrivateField:
+                return InjectUtil.getPrivateFieldInjectorName(field) + "(" + injector.getVarName() + ")";
+
             case Field:
                 return injector.getVarName() + "." + field.getName();
 
@@ -101,7 +104,8 @@ public class InjectionPoint<T extends Annotation> {
     public String getMemberName() {
         switch (taskType) {
             case PrivateField:
-                return InjectUtil.getPrivateFieldInjectorName(field);
+                return InjectUtil.getPrivateFieldInjectorName(field) + "(" + injector.getVarName() + ")";
+
             case Field:
                 return field.getName();
 

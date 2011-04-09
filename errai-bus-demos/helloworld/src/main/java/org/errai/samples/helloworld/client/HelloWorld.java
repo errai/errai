@@ -23,7 +23,7 @@ public class HelloWorld extends VerticalPanel {
     @Inject
     @ToSubject("HelloWorld")
     @ReplyTo("ReplyTo")
-    public Consumer<String> sender;
+    private Consumer<String> sender;
 
     public Label text = new Label();
 

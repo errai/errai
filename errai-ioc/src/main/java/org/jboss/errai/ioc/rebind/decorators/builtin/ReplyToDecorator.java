@@ -23,7 +23,7 @@ public class ReplyToDecorator extends Decorator<ReplyTo> {
         final JField field = injectionPoint.getField();
         final ReplyTo context = field.getAnnotation(ReplyTo.class);
 
-        return injectionPoint.getInjector().getVarName() + "." + injectionPoint.getMemberName()
+        return injectionPoint.getValueExpression()
                 + ".setReplyTo(\"" + context.value() + "\");";
     }
 }

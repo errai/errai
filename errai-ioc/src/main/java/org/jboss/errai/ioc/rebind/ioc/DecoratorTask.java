@@ -55,6 +55,7 @@ public class DecoratorTask extends InjectionTask {
 
         for (Decorator<?> dec : decorators) {
             switch (injectType) {
+                case PrivateField:
                 case Field:
                     anno = field.getAnnotation(dec.decoratesWith());
                     break;
@@ -73,6 +74,8 @@ public class DecoratorTask extends InjectionTask {
             }
 
             appender.append(dec.generateDecorator(new InjectionPoint(anno, injectType, constructor, method, field, type, parm, injector, ctx)));
+
+            appender.append("\n");
         }
         return appender.toString();
     }
