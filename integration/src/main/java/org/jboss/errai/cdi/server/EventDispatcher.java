@@ -33,8 +33,6 @@ public class EventDispatcher implements MessageCallback
 
     private MessageBus erraiBus;
 
-    public final static String NAME = "cdi.event:Dispatcher";
-
     private ContextManager ctxMgr;
 
     public EventDispatcher(BeanManager beanManager, MessageBus erraiBus, ContextManager ctxMgr)

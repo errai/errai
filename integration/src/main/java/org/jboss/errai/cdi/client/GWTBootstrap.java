@@ -29,6 +29,6 @@ public class GWTBootstrap implements EntryPoint
     {
         // conversation interceptor
         ((ClientMessageBusImpl)ErraiBus.get()).
-                addInterceptor(CDI.CONVERSATTION_INTERCEPTOR);
+                addInterceptor(CDI.CONVERSATION_INTERCEPTOR);
     }
 }

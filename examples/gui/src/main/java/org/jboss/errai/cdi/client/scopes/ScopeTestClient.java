@@ -86,7 +86,7 @@ public class ScopeTestClient implements WidgetProvider
 
         // --------------------------------
 
-        CaptionLayoutPanel conversationScope = new CaptionLayoutPanel("Conversation Scope Beans");
+        CaptionLayoutPanel conversationScope = new CaptionLayoutPanel("Reply Scope Beans");
         conversationScope.setLayout(new BoxLayout(BoxLayout.Orientation.VERTICAL));
 
         final TextBox textBox = new TextBox();
@@ -131,7 +131,7 @@ public class ScopeTestClient implements WidgetProvider
         conversationScope.add(btn2);
         conversationScope.add(requiresConversation);
         conversationScope.add(
-                new Button("Terminate Conversation", new ClickHandler()
+                new Button("Terminate Reply", new ClickHandler()
                 {
                     public void onClick(ClickEvent clickEvent) {
                         if(conversation!=null)

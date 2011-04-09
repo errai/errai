@@ -1,6 +1,7 @@
 package org.jboss.errai.cdi.client;
 
 import org.jboss.errai.cdi.client.api.CDI;
+import org.jboss.errai.cdi.client.api.Conversation;
 import org.jboss.errai.cdi.client.api.Event;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.Provider;
@@ -21,9 +22,13 @@ public class EventProvider implements ContextualTypeProvider<Event<?>> {
     public Event<?> provide(final Class[] typeargs) {
         return new Event() {
             private Class eventType = (typeargs.length == 1 ? typeargs[0] : Object.class);
+            private Conversation conversation;
 
             public void fire(Object event) {
                 if (event == null) return;
+                if (conversation != null && !conversation.isActive()) {
+                    conversation.begin();
+                }
 
                 CDI.fireEvent(event);
             }
@@ -38,6 +43,16 @@ public class EventProvider implements ContextualTypeProvider<Event<?>> {
 
             public Class getEventType() {
                 return eventType;
+            }
+
+            public void registerConversation(Conversation conversation) {
+
+            }
+
+            public void endActiveConversation() {
+                if (conversation != null && conversation.isActive()) {
+                    conversation.end();
+                }
             }
         };
     }

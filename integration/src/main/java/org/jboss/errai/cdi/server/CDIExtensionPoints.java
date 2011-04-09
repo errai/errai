@@ -33,6 +33,7 @@ import org.jboss.errai.bus.server.io.CommandBindingsCallback;
 import org.jboss.errai.bus.server.io.ConversationalEndpointCallback;
 import org.jboss.errai.bus.server.io.RemoteServiceCallback;
 import org.jboss.errai.bus.server.service.ErraiService;
+import org.jboss.errai.cdi.client.api.CDI;
 import org.jboss.errai.cdi.server.events.ShutdownEventObserver;
 import org.jboss.errai.container.ServiceFactory;
 import org.slf4j.Logger;
@@ -154,7 +155,7 @@ public class CDIExtensionPoints implements Extension {
         // context handling hooks
         this.contextManager = new ContextManager(uuid, bm, bus);
 
-        // Custom Conversation
+        // Custom Reply
         abd.addBean(new ConversationMetaData(bm, new ErraiConversation(
                 (Conversation) Util.lookupCallbackBean(bm, Conversation.class),
                 this.contextManager
@@ -178,7 +179,7 @@ public class CDIExtensionPoints implements Extension {
         subscribeServices(bm, bus);
 
         // subscribe event dispatcher
-        bus.subscribe(EventDispatcher.NAME, eventDispatcher);
+        bus.subscribe(CDI.DISPATCHER_SUBJECT, eventDispatcher);
 
     }
 

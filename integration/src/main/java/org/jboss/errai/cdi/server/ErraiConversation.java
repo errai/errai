@@ -22,7 +22,7 @@ import javax.enterprise.context.Conversation;
 
 /**
  * Acts as a bridge between an externally managed conversation handle
- * and the CDI container. It merely delegates to the default Conversation impl. but
+ * and the CDI container. It merely delegates to the default Reply impl. but
  * retrieves the conversation id through a thread local.
  *
  * @see ContextManager#getThreadContextId()

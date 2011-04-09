@@ -16,6 +16,7 @@
 package org.jboss.errai.cdi.server.events;
 
 import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.cdi.client.api.CDI;
 import org.jboss.errai.cdi.server.EventDispatcher;
 import org.jboss.errai.cdi.server.TypeRegistry;
 import org.jboss.errai.cdi.server.Util;
@@ -101,6 +102,6 @@ public class ShutdownEventObserver implements ObserverMethod {
         }
 
         // unsubscribe event dispatcher endpoint
-        bus.unsubscribeAll(EventDispatcher.NAME);
+        bus.unsubscribeAll(CDI.DISPATCHER_SUBJECT);
     }
 }

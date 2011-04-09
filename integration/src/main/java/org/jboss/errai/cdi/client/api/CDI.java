@@ -38,10 +38,12 @@ import java.util.Set;
 public class CDI {
     static private final MessageBus bus = ErraiBus.get();
 
+    public static final String DISPATCHER_SUBJECT = "cdi.event:Dispatcher";
+
     static private Map<String, Conversation> activeConversations =
             new HashMap<String, Conversation>();
 
-    public static MessageInterceptor CONVERSATTION_INTERCEPTOR = new ConversationInterceptor();
+    public static MessageInterceptor CONVERSATION_INTERCEPTOR = new ConversationInterceptor();
 
     public static void handleEvent(final Class<?> type, final EventHandler handler) {
         bus.subscribe("cdi.event:" + type.getName(), // by convention
@@ -54,9 +56,13 @@ public class CDI {
         );
     }
 
+    public static String getSubjectNameByType(final Class<?> type) {
+        return "cdi.event:" + type.getName();
+    }
+
     public static void fireEvent(final Object payload) {
         MessageBuilder.createMessage()
-                .toSubject("cdi.event:Dispatcher")
+                .toSubject(DISPATCHER_SUBJECT)
                 .command(CDICommands.CDI_EVENT)
                 .with(CDIProtocol.TYPE, payload.getClass().getName())
                 .with(CDIProtocol.OBJECT_REF, payload)

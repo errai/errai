@@ -32,7 +32,7 @@ import javax.inject.Inject;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Oct 7, 2010
  */
-//@LoadTool(name = "Conversation Client", group="Scopes")
+//@LoadTool(name = "Reply Client", group="Scopes")
 public class ConversationClient implements WidgetProvider {
 
     @Inject

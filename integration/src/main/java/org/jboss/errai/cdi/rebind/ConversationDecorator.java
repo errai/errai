@@ -40,9 +40,12 @@ public class ConversationDecorator extends Decorator<ConversationContext> {
 
         String varName = injectionPoint.getInjector().getVarName();
 
-        String expression = varName + "." +field.getName() +
-                " = org.jboss.errai.cdi.client.api.CDI.createConversation(\""+context.value()+"\");";
+  //      String expression = varName + "."
+
+
+//        String expression = varName + "." +field.getName() +
+//                " = org.jboss.errai.cdi.client.api.CDI.createConversation(\""+context.value()+"\");";
                 
-        return expression;
+        return "";
     }
 }
