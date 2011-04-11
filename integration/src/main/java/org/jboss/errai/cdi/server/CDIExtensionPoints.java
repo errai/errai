@@ -44,6 +44,8 @@ import javax.enterprise.context.Conversation;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.*;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -60,12 +62,11 @@ public class CDIExtensionPoints implements Extension {
     private static final Logger log = LoggerFactory.getLogger(CDIExtensionPoints.class);
 
     private TypeRegistry managedTypes = null;
-
     private String uuid = null;
-
     private ContextManager contextManager;
-
     private ErraiService service;
+
+    private Map<Class<?>, Class<?>> conversationalObservers = new HashMap<Class<?>, Class<?>>();
 
     public void beforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
         this.uuid = UUID.randomUUID().toString();
@@ -103,10 +104,12 @@ public class CDIExtensionPoints implements Extension {
             }
 
             // enforce application scope until we get the other scopes working
-            ApplicationScoped scope = type.getAnnotation(ApplicationScoped.class);
-            if (null == scope)
-                log.warn("Service implementation not @ApplicationScoped: " + type.getJavaClass());
+//            ApplicationScoped scope = type.getAnnotation(ApplicationScoped.class);
+//            if (null == scope)
+//                log.warn("Service implementation not @ApplicationScoped: " + type.getJavaClass());
 
+        } else {
+            log.info("scanning: " + event.getAnnotatedType().getJavaClass().getName());
         }
 
 
@@ -144,6 +147,23 @@ public class CDIExtensionPoints implements Extension {
        } */
     }
 
+    public void processObserverMethod(@Observes ProcessObserverMethod processObserverMethod) {
+        Type t = processObserverMethod.getObserverMethod().getObservedType();
+
+        if (t instanceof Class && ConversationalEvent.class.isAssignableFrom((Class) t)) {
+            throw new RuntimeException("observing unqualified ConversationalEvent. You must specify type parameters");
+        }
+
+        if (t instanceof ParameterizedType) {
+            ParameterizedType pType = (ParameterizedType) t;
+            if (ConversationalEvent.class.isAssignableFrom((Class) pType.getRawType())) {
+                Type[] tArgs = pType.getActualTypeArguments();
+                conversationalObservers.put((Class) tArgs[0], (Class) tArgs[1]);
+            }
+        }
+
+    }
+
     public void afterBeanDiscovery(@Observes AfterBeanDiscovery abd, BeanManager bm) {
         // Errai Service wrapper
         this.service = Util.lookupErraiService();
@@ -163,6 +183,10 @@ public class CDIExtensionPoints implements Extension {
 
         // event dispatcher
         EventDispatcher eventDispatcher = new EventDispatcher(bm, bus, this.contextManager);
+
+        for (Map.Entry<Class<?>, Class<?>> entry : conversationalObservers.entrySet()) {
+            eventDispatcher.registerConversationEvent(entry.getKey(), entry.getValue());
+        }
 
         EventSubscriptionListener listener = new EventSubscriptionListener(abd, bus);
         bus.addSubscribeListener(listener);

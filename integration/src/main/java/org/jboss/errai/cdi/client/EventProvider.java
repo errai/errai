@@ -46,7 +46,8 @@ public class EventProvider implements ContextualTypeProvider<Event<?>> {
             }
 
             public void registerConversation(Conversation conversation) {
-
+                endActiveConversation();
+                this.conversation = conversation;
             }
 
             public void endActiveConversation() {

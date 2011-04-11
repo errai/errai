@@ -15,6 +15,7 @@
  */
 package org.jboss.errai.cdi.client.api;
 
+import com.google.gwt.core.ext.typeinfo.JClassType;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
@@ -36,8 +37,6 @@ import java.util.Set;
  * @date: Apr 9, 2010
  */
 public class CDI {
-    static private final MessageBus bus = ErraiBus.get();
-
     public static final String DISPATCHER_SUBJECT = "cdi.event:Dispatcher";
 
     static private Map<String, Conversation> activeConversations =
@@ -46,7 +45,7 @@ public class CDI {
     public static MessageInterceptor CONVERSATION_INTERCEPTOR = new ConversationInterceptor();
 
     public static void handleEvent(final Class<?> type, final EventHandler handler) {
-        bus.subscribe("cdi.event:" + type.getName(), // by convention
+        ErraiBus.get().subscribe("cdi.event:" + type.getName(), // by convention
                 new MessageCallback() {
                     public void callback(Message message) {
                         Object response = message.get(type, CDIProtocol.OBJECT_REF);
@@ -57,7 +56,11 @@ public class CDI {
     }
 
     public static String getSubjectNameByType(final Class<?> type) {
-        return "cdi.event:" + type.getName();
+        return getSubjectNameByType(type.getName());
+    }
+
+   public static String getSubjectNameByType(final String typeName) {
+        return "cdi.event:" + typeName;
     }
 
     public static void fireEvent(final Object payload) {
@@ -67,7 +70,7 @@ public class CDI {
                 .with(CDIProtocol.TYPE, payload.getClass().getName())
                 .with(CDIProtocol.OBJECT_REF, payload)
                 .noErrorHandling()
-                .sendNowWith(bus);
+                .sendNowWith(ErraiBus.get());
     }
 
     public static String generateId()

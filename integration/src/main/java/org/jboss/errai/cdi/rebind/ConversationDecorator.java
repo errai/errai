@@ -15,16 +15,21 @@
  */
 package org.jboss.errai.cdi.rebind;
 
+import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.JField;
+import com.google.gwt.core.ext.typeinfo.JParameterizedType;
+import org.jboss.errai.cdi.client.api.CDI;
+import org.jboss.errai.cdi.client.api.Conversation;
 import org.jboss.errai.cdi.client.api.ConversationContext;
+import org.jboss.errai.cdi.client.api.Event;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.Decorator;
 import org.jboss.errai.ioc.rebind.ioc.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.InjectionPoint;
 
 /**
- * @author: Heiko Braun <hbraun@redhat.com>
- * @date: Oct 29, 2010
+ * @author Heiko Braun <hbraun@redhat.com>
+ * @author Mike Brock
  */
 @CodeDecorator
 public class ConversationDecorator extends Decorator<ConversationContext> {
@@ -35,17 +40,29 @@ public class ConversationDecorator extends Decorator<ConversationContext> {
     public String generateDecorator(InjectionPoint<ConversationContext> injectionPoint) {
         final InjectionContext ctx = injectionPoint.getInjectionContext();
 
+        final JClassType eventClassType = injectionPoint.getInjectionContext()
+                .getProcessingContext().loadClassType(Event.class);
+
         final JField field = injectionPoint.getField();
+
+        if (!eventClassType.isAssignableFrom(field.getType().isClassOrInterface())) {
+            throw new RuntimeException("@ConversationContext should be used with type Event");
+        }
+
         final ConversationContext context = field.getAnnotation(ConversationContext.class);
 
-        String varName = injectionPoint.getInjector().getVarName();
+        JParameterizedType type = field.getType().isParameterized();
+        if (type == null) {
+            throw new RuntimeException("Event<?> must be parameterized");
+        }
 
-  //      String expression = varName + "."
+        JClassType typeParm = type.getTypeArgs()[0];
 
+        String toSubject = CDI.getSubjectNameByType(typeParm.getQualifiedSourceName());
 
-//        String expression = varName + "." +field.getName() +
-//                " = org.jboss.errai.cdi.client.api.CDI.createConversation(\""+context.value()+"\");";
+        String expression = injectionPoint.getValueExpression()
+                + ".registerConversation(" + CDI.class.getName() + ".createConversation(\"" + toSubject + "\"));";
                 
-        return "";
+        return expression;
     }
 }

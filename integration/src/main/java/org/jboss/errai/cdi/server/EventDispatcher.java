@@ -15,47 +15,93 @@
  */
 package org.jboss.errai.cdi.server;
 
+import com.sun.tools.internal.ws.wsdl.document.MessagePart;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.cdi.client.CDICommands;
 import org.jboss.errai.cdi.client.CDIProtocol;
+import org.jboss.weld.manager.BeanManagerImpl;
 
 import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.util.TypeLiteral;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Acts as a bridge between Errai Bus and the CDI event system.<br/>
  * Includes marshalling/unmarshalling of event types.
  */
-public class EventDispatcher implements MessageCallback
-{
+public class EventDispatcher implements MessageCallback {
     private BeanManager beanManager;
-
-    private MessageBus erraiBus;
-
+    private MessageBus bus;
     private ContextManager ctxMgr;
 
-    public EventDispatcher(BeanManager beanManager, MessageBus erraiBus, ContextManager ctxMgr)
-    {
+    private Map<Class<?>, Class<?>> conversationalEvents = new HashMap<Class<?>, Class<?>>();
+
+    public EventDispatcher(BeanManager beanManager, MessageBus bus, ContextManager ctxMgr) {
         this.beanManager = beanManager;
-        this.erraiBus = erraiBus;
+        this.bus = bus;
         this.ctxMgr = ctxMgr;
     }
 
     // Invoked by Errai
-    public void callback(Message message)
-    {
-        try
-        {
-            switch (CDICommands.valueOf(message.getCommandType()))
-            {
+    public void callback(final Message message) {
+        try {
+            switch (CDICommands.valueOf(message.getCommandType())) {
                 case CDI_EVENT:
                     String type = message.get(String.class, CDIProtocol.TYPE);
-                    Class clazz = Thread.currentThread().getContextClassLoader().loadClass(type);
-                    Object o = message.get(clazz, CDIProtocol.OBJECT_REF);
+                    final Class clazz = Thread.currentThread().getContextClassLoader().loadClass(type);
+                    final Object o = message.get(clazz, CDIProtocol.OBJECT_REF);
+
                     try {
                         ctxMgr.activateRequestContext();
                         beanManager.fireEvent(o);
+
+                        if (conversationalEvents.containsKey(clazz)) {
+
+                            final Class outType = conversationalEvents.get(clazz);
+                            final String outTypeStr = outType.getName();
+                            final String sessionId = Util.getSessionId(message);
+
+                            /**
+                             * TODO: This effectively hard-codes us to Weld. But the CDI specification has no way
+                             *       of calling dynamically qualified types from BeanManager.
+                             */
+                            ((BeanManagerImpl) beanManager)
+                                    .fireEvent(new ParameterizedType() {
+                                        public Type[] getActualTypeArguments() {
+                                            return new Type[]{clazz, outType};
+                                        }
+
+                                        public Type getRawType() {
+                                            return ConversationalEvent.class;
+                                        }
+
+                                        public Type getOwnerType() {
+                                            return ConversationalEvent.class;
+                                        }
+                                    }, new ConversationalEvent<Object, Object>() {
+                                        public Object getEvent() {
+                                            return o;
+                                        }
+
+                                        public void fire(Object o) {
+                                            MessageBuilder.createMessage()
+                                                    .toSubject("cdi.event:" + outTypeStr)
+                                                    .command(CDICommands.CDI_EVENT)
+                                                    .with(MessageParts.SessionID, sessionId)
+                                                    .with(CDIProtocol.TYPE, outTypeStr)
+                                                    .with(CDIProtocol.OBJECT_REF, o)
+                                                    .noErrorHandling().sendNowWith(bus);
+                                        }
+                                    });
+                        }
+
                     } finally {
                         ctxMgr.deactivateRequestContext();
                     }
@@ -63,12 +109,14 @@ public class EventDispatcher implements MessageCallback
                     break;
                 default:
                     throw new IllegalArgumentException(
-                            "Unknown command type "+message.getCommandType());
+                            "Unknown command type " + message.getCommandType());
             }
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             throw new RuntimeException("Failed to dispatch CDI Event", e);
         }
-    }    
+    }
+
+    public void registerConversationEvent(Class<?> clientEvent, Class<?> serverEvent) {
+        conversationalEvents.put(clientEvent, serverEvent);
+    }
 }
