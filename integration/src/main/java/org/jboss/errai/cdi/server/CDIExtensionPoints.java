@@ -34,8 +34,8 @@ import org.jboss.errai.bus.server.io.ConversationalEndpointCallback;
 import org.jboss.errai.bus.server.io.RemoteServiceCallback;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.cdi.client.api.CDI;
+import org.jboss.errai.cdi.client.api.Conversational;
 import org.jboss.errai.cdi.server.events.ShutdownEventObserver;
-import org.jboss.errai.container.ServiceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,9 +46,7 @@ import javax.enterprise.inject.spi.*;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Extension points to the CDI container.
@@ -67,6 +65,7 @@ public class CDIExtensionPoints implements Extension {
     private ErraiService service;
 
     private Map<Class<?>, Class<?>> conversationalObservers = new HashMap<Class<?>, Class<?>>();
+    private Set<Class<?>> conversationalServices = new HashSet<Class<?>>();
 
     public void beforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
         this.uuid = UUID.randomUUID().toString();
@@ -154,14 +153,23 @@ public class CDIExtensionPoints implements Extension {
             throw new RuntimeException("observing unqualified ConversationalEvent. You must specify type parameters");
         }
 
+        Class type = null;
+
         if (t instanceof ParameterizedType) {
             ParameterizedType pType = (ParameterizedType) t;
             if (ConversationalEvent.class.isAssignableFrom((Class) pType.getRawType())) {
                 Type[] tArgs = pType.getActualTypeArguments();
-                conversationalObservers.put((Class) tArgs[0], (Class) tArgs[1]);
+                conversationalObservers.put(type = (Class) tArgs[0], (Class) tArgs[1]);
             }
         }
 
+        if (type == null && t instanceof Class) {
+            type = (Class) t;
+        }
+
+        if (processObserverMethod.getAnnotatedMethod().isAnnotationPresent(Conversational.class)) {
+            conversationalServices.add(type);
+        }
     }
 
     public void afterBeanDiscovery(@Observes AfterBeanDiscovery abd, BeanManager bm) {
@@ -188,7 +196,11 @@ public class CDIExtensionPoints implements Extension {
             eventDispatcher.registerConversationEvent(entry.getKey(), entry.getValue());
         }
 
-        EventSubscriptionListener listener = new EventSubscriptionListener(abd, bus);
+        for (Class<?> entry : conversationalServices) {
+            eventDispatcher.registerConversationalService(entry);
+        }
+
+        EventSubscriptionListener listener = new EventSubscriptionListener(abd, bus, contextManager);
         bus.addSubscribeListener(listener);
 
 

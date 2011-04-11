@@ -36,21 +36,23 @@ public class EventSubscriptionListener implements SubscribeListener {
 
     private MessageBus bus;
     private AfterBeanDiscovery abd;
+    private ContextManager mgr;
 
-    public EventSubscriptionListener(AfterBeanDiscovery abd, MessageBus bus) {
+    public EventSubscriptionListener(AfterBeanDiscovery abd, MessageBus bus, ContextManager mgr) {
         this.abd = abd;
         this.bus = bus;
+        this.mgr = mgr;
     }
 
     public void onSubscribe(SubscriptionEvent event) {
         try {
-            if (event.getSubject().startsWith("cdi.event:")
-                    && !event.getSubject().equals(CDI.DISPATCHER_SUBJECT) && !bus.isSubscribed(event.getSubject())) {
+            if (event.isRemote() && event.getSubject().startsWith("cdi.event:")
+                    && !event.getSubject().equals(CDI.DISPATCHER_SUBJECT) && event.getCount() == 1) {
 
                 final String className = event.getSubject().substring("cdi.event:".length());
                 final Class<?> type = this.getClass().getClassLoader().loadClass(className);
 
-                abd.addObserverMethod(new EventObserverMethod(type, bus));
+                abd.addObserverMethod(new EventObserverMethod(type, bus, mgr));
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

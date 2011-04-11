@@ -70,19 +70,24 @@ public class ContextManager {
     }
 
     public void activateRequestContext() {
-        if (requestContext == null) return;
+        //    if (requestContext == null) return;
 
         requestContextStore.set(new HashMap<String, Object>());
-        requestContext.associate(requestContextStore.get());
-        requestContext.activate();
+
+        if (requestContext != null) {
+            requestContext.associate(requestContextStore.get());
+            requestContext.activate();
+        }
     }
 
     public void deactivateRequestContext() {
-        if (requestContext == null) return;
+        requestContextStore.remove();
 
-        requestContext.invalidate();
-        requestContext.deactivate();
-        requestContext.dissociate(requestContextStore.get());
+        if (requestContext != null) {
+            requestContext.invalidate();
+            requestContext.deactivate();
+            requestContext.dissociate(requestContextStore.get());
+        }
     }
 
     public void activateConversationContext(Message message) {
@@ -144,5 +149,9 @@ public class ContextManager {
 
     public String getThreadContextId() {
         return threadContextId.get();
+    }
+
+    public Map<String, Object> getRequestContextStore() {
+        return requestContextStore.get();
     }
 }

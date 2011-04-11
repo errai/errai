@@ -30,7 +30,9 @@ import javax.enterprise.util.TypeLiteral;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Acts as a bridge between Errai Bus and the CDI event system.<br/>
@@ -42,6 +44,7 @@ public class EventDispatcher implements MessageCallback {
     private ContextManager ctxMgr;
 
     private Map<Class<?>, Class<?>> conversationalEvents = new HashMap<Class<?>, Class<?>>();
+    private Set<Class<?>> conversationalServices = new HashSet<Class<?>>();
 
     public EventDispatcher(BeanManager beanManager, MessageBus bus, ContextManager ctxMgr) {
         this.beanManager = beanManager;
@@ -60,6 +63,11 @@ public class EventDispatcher implements MessageCallback {
 
                     try {
                         ctxMgr.activateRequestContext();
+
+                        if (conversationalServices.contains(clazz)) {
+                            ctxMgr.getRequestContextStore().put(MessageParts.SessionID.name(),
+                                    Util.getSessionId(message));
+                        }
                         beanManager.fireEvent(o);
 
                         if (conversationalEvents.containsKey(clazz)) {
@@ -118,5 +126,9 @@ public class EventDispatcher implements MessageCallback {
 
     public void registerConversationEvent(Class<?> clientEvent, Class<?> serverEvent) {
         conversationalEvents.put(clientEvent, serverEvent);
+    }
+
+    public void registerConversationalService(Class<?> conversational) {
+        conversationalServices.add(conversational);
     }
 }
