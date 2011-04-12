@@ -19,6 +19,7 @@ import com.google.gwt.core.client.EntryPoint;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.cdi.client.api.CDI;
+import org.jboss.errai.cdi.client.events.BusReadyEvent;
 
 /**
  * The GWT entry point
@@ -30,5 +31,12 @@ public class GWTBootstrap implements EntryPoint
         // conversation interceptor
         ((ClientMessageBusImpl)ErraiBus.get()).
                 addInterceptor(CDI.CONVERSATION_INTERCEPTOR);
+
+        ((ClientMessageBusImpl) ErraiBus.get())
+        .addPostInitTask(new Runnable() {
+            public void run() {
+                CDI.fireEvent(new BusReadyEvent());
+            }
+        });
     }
 }
