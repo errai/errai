@@ -355,12 +355,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 if (subscriptions.containsKey(subject)) {
                     busMonitor.notifyInBusMessage(message);
                 }
-
-                if (remoteSubscriptions.containsKey(subject)) {
-                    for (Map.Entry<QueueSession, MessageQueue> entry : messageQueues.entrySet()) {
-                        busMonitor.notifyOutgoingMessageToRemote(entry.getValue().getSession().getSessionId(), message);
-                    }
-                }
             }
         }
 
@@ -455,7 +449,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 throw new NoSubscribersToDeliverTo("for: " + message.getSubject());
             }
         }
-
     }
 
     @SuppressWarnings({"SynchronizationOnLocalVariableOrMethodParameter"})

@@ -521,7 +521,7 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
     public void attach(ActivityProcessor proc) {
         handle = proc.registerEvent(EventType.MESSAGE, new MessageMonitor() {
             public void monitorEvent(MessageEvent event) {
-                if (service.equals(event.getSubject()))
+                if (event.getToBus().equals(busId) && service.equals(event.getSubject()))
                     notifyMessage(event.getTime(), (Message) event.getContents());
             }
         });
