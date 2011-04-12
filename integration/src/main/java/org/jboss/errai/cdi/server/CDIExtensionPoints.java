@@ -174,11 +174,17 @@ public class CDIExtensionPoints implements Extension {
 
     public void afterBeanDiscovery(@Observes AfterBeanDiscovery abd, BeanManager bm) {
         // Errai Service wrapper
+
         this.service = Util.lookupErraiService();
+
+        final MessageBus bus = service.getBus();
+
+        if (bus.isSubscribed(CDI.DISPATCHER_SUBJECT)) {
+            return;
+        }
 
         abd.addBean(new ServiceMetaData(bm, this.service));
 
-        final MessageBus bus = service.getBus();
 
         // context handling hooks
         this.contextManager = new ContextManager(uuid, bm, bus);

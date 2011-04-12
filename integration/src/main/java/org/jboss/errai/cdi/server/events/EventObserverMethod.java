@@ -73,6 +73,8 @@ public class EventObserverMethod implements ObserverMethod {
     }
 
     public void notify(Object event) {
+        if (!type.isInstance(event)) return;
+
         Map<String, Object> ctx = mgr.getRequestContextStore();
         if (ctx != null && ctx.containsKey(MessageParts.SessionID.name())) {
             MessageBuilder.createMessage()

@@ -18,7 +18,7 @@
         <dependency>
             <groupId>org.jboss.errai</groupId>
             <artifactId>errai-bus</artifactId>
-            <version>${errai.version}</version>
+            <!--<version>${project.version}</version>-->
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -45,12 +45,12 @@
         <dependency>
             <groupId>org.jboss.errai</groupId>
             <artifactId>errai-tools</artifactId>
-            <version>${errai.version}</version>
+            <!--<version>${errai.version}</version>-->
         </dependency>
         <dependency>
             <groupId>org.jboss.errai</groupId>
             <artifactId>errai-cdi</artifactId>
-            <version>${project.version}</version>
+            <version>${project.parent.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.jboss.weld.servlet</groupId>
