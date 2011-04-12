@@ -46,7 +46,7 @@ public class EventSubscriptionListener implements SubscribeListener {
 
     public void onSubscribe(SubscriptionEvent event) {
         try {
-            if (event.isRemote() && event.getSubject().startsWith("cdi.event:")
+            if (!event.isLocalOnly() && event.isRemote() && event.getSubject().startsWith("cdi.event:")
                     && !event.getSubject().equals(CDI.DISPATCHER_SUBJECT) && event.getCount() == 1) {
 
                 final String className = event.getSubject().substring("cdi.event:".length());

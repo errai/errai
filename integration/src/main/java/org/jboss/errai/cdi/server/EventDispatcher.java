@@ -20,6 +20,7 @@ import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.framework.RoutingFlags;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.cdi.client.CDICommands;
 import org.jboss.errai.cdi.client.CDIProtocol;
@@ -55,6 +56,11 @@ public class EventDispatcher implements MessageCallback {
     // Invoked by Errai
     public void callback(final Message message) {
         try {
+            /**
+             * If the message didn't not come from a remote, we don't handle it.
+             */
+            if (!message.isFlagSet(RoutingFlags.FromRemote)) return;
+
             switch (CDICommands.valueOf(message.getCommandType())) {
                 case CDI_EVENT:
                     String type = message.get(String.class, CDIProtocol.TYPE);

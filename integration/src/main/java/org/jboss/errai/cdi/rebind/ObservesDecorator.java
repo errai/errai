@@ -19,6 +19,7 @@ import com.google.gwt.core.ext.typeinfo.JMethod;
 import com.google.gwt.core.ext.typeinfo.JParameter;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.annotations.Local;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.cdi.client.CDIProtocol;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
@@ -33,8 +34,10 @@ import javax.enterprise.event.Observes;
  * Generates the boiler plate for @Observes annotations use in GWT clients.<br/>
  * Basically creates a subscription for a CDI event type that invokes on the annotated method.
  *
- * @author: Heiko Braun <hbraun@redhat.com>
- * @date: Jul 27, 2010
+ * @author Heiko Braun
+ * @author Mike Brock
+ *
+ * @date Jul 27, 2010
  */
 @CodeDecorator
 public class ObservesDecorator extends Decorator<Observes> {
@@ -57,7 +60,9 @@ public class ObservesDecorator extends Decorator<Observes> {
         final String messageBusInst = ctx.getInjector(ctx
                 .getProcessingContext().loadClassType(MessageBus.class)).getType(ctx, injectionPoint);
 
-        return messageBusInst + ".subscribe(\"cdi.event:" + parmClassName + "\", new " + MessageCallback.class.getName() + "() {\n" +
+        final String subscribeType = method.isAnnotationPresent(Local.class) ? "subscribeLocal" : "subscribe";
+
+        return messageBusInst + "." + subscribeType + "(\"cdi.event:" + parmClassName + "\", new " + MessageCallback.class.getName() + "() {\n" +
                 "                    public void callback(" + Message.class.getName() + " message) {\n" +
                 "                        java.lang.Object response = message.get(" + parmClassName + ".class, " + CDIProtocol.class.getName() + "." + CDIProtocol.OBJECT_REF.name() + ");\n" +
                 "                        " + varName + "." + method.getName() + "((" + parmClassName + ") response);\n" +
