@@ -210,7 +210,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
         addSubscribeListener(new SubscribeListener() {
             public void onSubscribe(SubscriptionEvent event) {
-                if (event.isRemote() || event.getSubject().startsWith("local:")) return;
+                if (event.isLocalOnly() || event.isRemote() || event.getSubject().startsWith("local:")) return;
                 synchronized (messageQueues) {
                     if (messageQueues.isEmpty()) return;
 
@@ -225,7 +225,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
         addUnsubscribeListener(new UnsubscribeListener() {
             public void onUnsubscribe(SubscriptionEvent event) {
-                if (event.isRemote() || event.getSubject().startsWith("local:")) return;
+                if (event.isLocalOnly() || event.isRemote() || event.getSubject().startsWith("local:")) return;
                 synchronized (messageQueues) {
                     if (messageQueues.isEmpty()) return;
 
@@ -544,11 +544,20 @@ public class ServerMessageBusImpl implements ServerMessageBus {
      */
     public void subscribe(String subject, MessageCallback receiver) {
         if (reservedNames.contains(subject))
-            throw new IllegalArgumentException("Attempt to modify lockdown service: " + subject);
+            throw new IllegalArgumentException("cannot modify or subscribe to reserved service: " + subject);
 
         DeliveryPlan plan = createOrAddDeliveryPlan(subject, receiver);
 
         fireSubscribeListeners(new SubscriptionEvent(false, null, plan.getTotalReceivers(), subject));
+    }
+
+    public void subscribeLocal(String subject, MessageCallback receiver) {
+        if (reservedNames.contains(subject))
+            throw new IllegalArgumentException("cannot modify or subscribe to reserved service: " + subject);
+
+        DeliveryPlan plan = createOrAddDeliveryPlan(subject, receiver);
+
+        fireSubscribeListeners(new SubscriptionEvent(false, false, true, plan.getTotalReceivers(), "InBus", subject));
     }
 
     private DeliveryPlan createOrAddDeliveryPlan(final String subject, final MessageCallback receiver) {
@@ -639,7 +648,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         rmc.removeQueue(queue);
 
         try {
-            fireUnsubscribeListeners(new SubscriptionEvent(true, rmc.getQueueCount() == 0, rmc.getQueueCount(),
+            fireUnsubscribeListeners(new SubscriptionEvent(true, rmc.getQueueCount() == 0, false, rmc.getQueueCount(),
                     sessionContext.getSessionId(), subject));
         }
         catch (Exception e) {

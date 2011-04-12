@@ -521,8 +521,19 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
     public void attach(ActivityProcessor proc) {
         handle = proc.registerEvent(EventType.MESSAGE, new MessageMonitor() {
             public void monitorEvent(MessageEvent event) {
-                if (event.getToBus().equals(busId) && service.equals(event.getSubject()))
+                if (event.getToBus().equals(busId) && service.equals(event.getSubject())) {
+
+                    if (service.endsWith("TagCloud")) {
+                        try {
+                            throw new Throwable();
+                        }
+                        catch (Throwable t) {
+                            t.printStackTrace();
+                        }
+                    }
+
                     notifyMessage(event.getTime(), (Message) event.getContents());
+                }
             }
         });
 

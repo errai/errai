@@ -64,7 +64,7 @@ public class JSONUtilCli {
         catch (Exception e) {
             System.out.println("JSONUtilCli.decodePayload=" + value);
             e.printStackTrace();
-            return null;
+            return EMPTYLIST;
         }
 
     }

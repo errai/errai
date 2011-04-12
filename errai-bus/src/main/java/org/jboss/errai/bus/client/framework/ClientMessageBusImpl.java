@@ -99,7 +99,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
 
     private List<MessageInterceptor> interceptorStack = new LinkedList<MessageInterceptor>();
-    
+
     private LogAdapter logAdapter = new LogAdapter() {
         public void warn(String message) {
             GWT.log("WARN: " + message, null);
@@ -189,12 +189,20 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      * @param callback - function called when the message is dispatched
      */
     public void subscribe(final String subject, final MessageCallback callback) {
+        _subscribe(subject, callback, false);
+    }
+
+    public void subscribeLocal(final String subject, final MessageCallback callback) {
+        _subscribe(subject, callback, true);
+    }
+
+    private void _subscribe(final String subject, final MessageCallback callback, final boolean local) {
         if ("ServerBus".equals(subject) && subscriptions.containsKey("ServerBus")) return;
 
         if (!postInit) {
             postInitTasks.add(new Runnable() {
                 public void run() {
-                    subscribe(subject, callback);
+                    _subscribe(subject, callback, local);
                 }
             });
 
@@ -203,10 +211,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
         logAdapter.debug("new subscription: " + subject + " -> " + callback);
 
-        fireAllSubscribeListeners(subject);
+        fireAllSubscribeListeners(subject, local);
 
         directSubscribe(subject, callback);
     }
+
 
     private void directSubscribe(final String subject, final MessageCallback callback) {
         addSubscription(subject, _subscribe(subject, new MessageCallback() {
@@ -215,8 +224,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                     // TODO: performance impact? might be better when decoding the message from the wire
                     executeInterceptorStack(true, message);
                     callback.callback(message);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     logError("receiver '" + subject + "' threw an exception", decodeCommandMessage(message), e);
                 }
             }
@@ -228,9 +236,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      *
      * @param subject - new subscription registered
      */
-    private void fireAllSubscribeListeners(String subject) {
+    private void fireAllSubscribeListeners(String subject, boolean local) {
         Iterator<SubscribeListener> iter = onSubscribeHooks.iterator();
-        SubscriptionEvent evt = new SubscriptionEvent(false, "InBrowser", 1, subject);
+        SubscriptionEvent evt = new SubscriptionEvent(false, false, local, 1, "InBrowser", subject);
 
         while (iter.hasNext()) {
             iter.next().onSubscribe(evt);
@@ -313,7 +321,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      */
     public void send(final Message message) {
         executeInterceptorStack(false, message);
-        
+
         message.commit();
         try {
             if (message.hasPart(MessageParts.ToSubject)) {
@@ -333,8 +341,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 throw new RuntimeException("Cannot send message using this method" +
                         " if the message does not contain a ToSubject field.");
             }
-        }
-        catch (RuntimeException e) {
+        } catch (RuntimeException e) {
             if (message.getErrorCallback() != null) {
                 if (!message.getErrorCallback().error(message, e)) {
                     return;
@@ -469,8 +476,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                      */
                     try {
                         procIncomingPayload(response);
-                    }
-                    catch (Throwable e) {
+                    } catch (Throwable e) {
                         e.printStackTrace();
                         logError("Problem decoding incoming message:", response.getText(), e);
                     }
@@ -484,8 +490,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                     }
                 }
             });
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -586,8 +591,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                             throw new RuntimeException("Client bootstrap failed", exception);
                         }
                     });
-                }
-                catch (RequestException e) {
+                } catch (RequestException e) {
                     logError("Bootstrap proxy settings failed", proxySettings.url, e);
                 }
             } else {
@@ -667,7 +671,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
                         addSubscribeListener(new SubscribeListener() {
                             public void onSubscribe(SubscriptionEvent event) {
-                                if (event.getSubject().startsWith("local:") || remotes.containsKey(event.getSubject())) {
+                                if (event.isLocalOnly() || event.getSubject().startsWith("local:") || remotes.containsKey(event.getSubject())) {
                                     return;
                                 }
 
@@ -701,8 +705,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                         for (int i = 0; i < postInitTasks.size(); i++) {
                             try {
                                 postInitTasks.get(i).run();
-                            }
-                            catch (Throwable t) {
+                            } catch (Throwable t) {
                                 t.printStackTrace();
                                 throw new RuntimeException("error running task", t);
                             }
@@ -778,8 +781,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                     try {
                         procIncomingPayload(response);
                         initializeMessagingBus(callback);
-                    }
-                    catch (Exception e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                         System.out.println("**DID NOT ATTACH**");
                         logError("Error attaching to bus", e.getMessage() + "<br/>Message Contents:<br/>"
@@ -793,8 +795,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             });
 
 
-        }
-        catch (RequestException e) {
+        } catch (RequestException e) {
             e.printStackTrace();
             return false;
         }
@@ -876,8 +877,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             try {
                 procIncomingPayload(response);
                 schedule();
-            }
-            catch (Throwable e) {
+            } catch (Throwable e) {
                 logError("Errai MessageBus Disconnected Due to Fatal Error",
                         response.getText(), e);
                 incomingTimer.cancel();
@@ -916,12 +916,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             public void run() {
                 try {
                     recvBuilder.sendRequest(null, COMM_CALLBACK);
-                }
-                catch (RequestTimeoutException e) {
+                } catch (RequestTimeoutException e) {
                     statusCode = 1;
                     COMM_CALLBACK.onError(null, e);
-                }
-                catch (RequestException e) {
+                } catch (RequestException e) {
                     logError(e.getMessage(), "", e);
                 }
             }
@@ -996,21 +994,21 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
 
     private native static void _unsubscribe(Object registrationHandle) /*-{
-         $wnd.PageBus.unsubscribe(registrationHandle);
-     }-*/;
+        $wnd.PageBus.unsubscribe(registrationHandle);
+    }-*/;
 
     private native static Object _subscribe(String subject, MessageCallback callback,
                                             Object subscriberData) /*-{
-          return $wnd.PageBus.subscribe(subject, null,
-                  function (subject, message) {
-                     callback.@org.jboss.errai.bus.client.api.MessageCallback::callback(Lorg/jboss/errai/bus/client/api/Message;)(@org.jboss.errai.bus.client.json.JSONUtilCli::decodeCommandMessage(Ljava/lang/Object;)(message))
-                  },
-                  null);
-     }-*/;
+        return $wnd.PageBus.subscribe(subject, null,
+                function (subject, message) {
+                    callback.@org.jboss.errai.bus.client.api.MessageCallback::callback(Lorg/jboss/errai/bus/client/api/Message;)(@org.jboss.errai.bus.client.json.JSONUtilCli::decodeCommandMessage(Ljava/lang/Object;)(message))
+                },
+                null);
+    }-*/;
 
     public native static void _store(String subject, Object value) /*-{
-          $wnd.PageBus.store(subject, value);
-     }-*/;
+        $wnd.PageBus.store(subject, value);
+    }-*/;
 
     private static String decodeCommandMessage(Message msg) {
         StringBuffer decode = new StringBuffer(
@@ -1115,8 +1113,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             for (MarshalledMessage m : decodePayload(response.getText())) {
                 _store(m.getSubject(), m.getMessage());
             }
-        }
-        catch (RuntimeException e) {
+        } catch (RuntimeException e) {
             logError("Error delivering message into bus", response.getText(), e);
             if (incomingTimer != null) incomingTimer.cancel();
         }
@@ -1133,26 +1130,23 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         return logAdapter;
     }
 
-    private boolean executeInterceptorStack(boolean inbound, Message message)
-    {
+    private boolean executeInterceptorStack(boolean inbound, Message message) {
         boolean validMessage = true;
-        for(MessageInterceptor intcp : interceptorStack)
-        {
-            if(inbound)
+        for (MessageInterceptor intcp : interceptorStack) {
+            if (inbound)
                 validMessage = intcp.processInbound(message);
             else
                 validMessage = intcp.processOutbound(message);
 
-            if(!validMessage) // brute force for now
-                throw new RuntimeException("Interceptor " + intcp.getClass()  +" invalidates message");            
+            if (!validMessage) // brute force for now
+                throw new RuntimeException("Interceptor " + intcp.getClass() + " invalidates message");
 
         }
-        
+
         return validMessage;
     }
 
-    public void addInterceptor(MessageInterceptor interceptor)
-    {
+    public void addInterceptor(MessageInterceptor interceptor) {
         interceptorStack.add(interceptor);
     }
 }

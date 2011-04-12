@@ -20,6 +20,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.ResourceProvider;
+import org.jboss.errai.bus.client.api.annotations.Local;
 import org.jboss.errai.bus.client.api.builder.AbstractRemoteCallBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.ProxyProvider;
@@ -63,8 +64,7 @@ public class ServiceProcessor implements MetaDataProcessor {
             Object svc = null;
 
             Service svcAnnotation = loadClass.getAnnotation(Service.class);
-            if(null==svcAnnotation)
-            {
+            if (null == svcAnnotation) {
                 // Diagnose Errai-111
                 StringBuffer sb = new StringBuffer();
                 sb.append("Service annotation cannot be loaded. (See https://jira.jboss.org/browse/ERRAI-111)\n");
@@ -73,7 +73,9 @@ public class ServiceProcessor implements MetaDataProcessor {
                 log.warn(sb.toString());
                 continue;
             }
-            
+
+            boolean local = loadClass.isAnnotationPresent(Local.class);
+
             String svcName = svcAnnotation.value();
 
             // If no name is specified, just use the class name as the service by default.
@@ -116,8 +118,7 @@ public class ServiceProcessor implements MetaDataProcessor {
                             }
                         }
                     }).getInstance(MessageCallback.class);
-                }
-                catch (Throwable t) {
+                } catch (Throwable t) {
                     t.printStackTrace();
                 }
 
@@ -165,11 +166,20 @@ public class ServiceProcessor implements MetaDataProcessor {
             }
 
             if (!epts.isEmpty()) {
-                context.getBus().subscribe(loadClass.getSimpleName() + ":RPC", new RemoteServiceCallback(epts));
+                if (local) {
+                    context.getBus().subscribeLocal(loadClass.getSimpleName() + ":RPC", new RemoteServiceCallback(epts));
+                } else {
+                    context.getBus().subscribe(loadClass.getSimpleName() + ":RPC", new RemoteServiceCallback(epts));
+                }
             }
 
             if (!commandPoints.isEmpty()) {
-                context.getBus().subscribe(svcName, new CommandBindingsCallback(commandPoints, svc));
+                if (local) {
+                    context.getBus().subscribeLocal(svcName, new CommandBindingsCallback(commandPoints, svc));
+
+                } else {
+                    context.getBus().subscribe(svcName, new CommandBindingsCallback(commandPoints, svc));
+                }
             }
         }
     }

@@ -116,6 +116,14 @@ public interface MessageBus {
      */
     public void subscribe(String subject, MessageCallback receiver);
 
+
+    /**
+     * Subscribe a listern locally, but do not advertise or make available the service to remote buses.
+     * @param subject
+     * @param receiver
+     */
+    public void subscribeLocal(String subject, MessageCallback receiver);
+
     /*
      * Unsubscribe all listeners registered for the specified subject.
      */

@@ -16,7 +16,6 @@
 
 package org.jboss.errai.tools.monitoring;
 
-import com.google.inject.spi.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.MessageListener;
 import org.jboss.errai.bus.client.api.SubscribeListener;
@@ -44,6 +43,9 @@ public class ClientBusProxyImpl implements MessageBus {
     }
 
     public void subscribe(String subject, MessageCallback receiver) {
+    }
+
+    public void subscribeLocal(String subject, MessageCallback receiver) {
     }
 
     public void unsubscribeAll(String subject) {

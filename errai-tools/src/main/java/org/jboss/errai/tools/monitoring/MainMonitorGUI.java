@@ -26,7 +26,7 @@ import java.util.Map;
 import static java.lang.String.valueOf;
 
 public class MainMonitorGUI extends JFrame implements Attachable {
-    public static final String APPLICATION_NAME = "ErraiBus Monitor";
+    public static final String APPLICATION_NAME = "Errai Bus Monitor";
 
     private JTabbedPane tabbedPane1;
     private ServerMonitorPanel serverMonitorPanel;
