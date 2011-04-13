@@ -81,13 +81,13 @@ public class ContextManager {
     }
 
     public void deactivateRequestContext() {
-        requestContextStore.remove();
-
         if (requestContext != null) {
             requestContext.invalidate();
             requestContext.deactivate();
             requestContext.dissociate(requestContextStore.get());
         }
+
+        requestContextStore.remove();
     }
 
     public void activateConversationContext(Message message) {
