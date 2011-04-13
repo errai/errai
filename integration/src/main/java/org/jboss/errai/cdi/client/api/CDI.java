@@ -67,6 +67,7 @@ public class CDI {
     public static void fireEvent(final Object payload) {
         if (!active) {
             deferredEvents.add(payload);
+            return;
         }
 
         String subject = getSubjectNameByType(payload.getClass());
