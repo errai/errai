@@ -16,8 +16,11 @@
 package org.jboss.errai.cdi.server;
 
 import org.jboss.errai.bus.client.api.SubscribeListener;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.SubscriptionEvent;
+import org.jboss.errai.bus.client.protocols.BusCommands;
+import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.cdi.client.api.CDI;
 import org.jboss.errai.cdi.server.events.EventObserverMethod;
 import org.slf4j.Logger;
@@ -25,9 +28,13 @@ import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Set;
 
 /**
- * @author: Filip Rogaczewski
+ * @author Filip Rogaczewski
+ * @author Mike Brock
  */
 @ApplicationScoped
 public class EventSubscriptionListener implements SubscribeListener {
@@ -37,21 +44,23 @@ public class EventSubscriptionListener implements SubscribeListener {
     private MessageBus bus;
     private AfterBeanDiscovery abd;
     private ContextManager mgr;
+    private Set<String> observedEventsSet;
 
-    public EventSubscriptionListener(AfterBeanDiscovery abd, MessageBus bus, ContextManager mgr) {
+    public EventSubscriptionListener(AfterBeanDiscovery abd, MessageBus bus, ContextManager mgr, Set<String> observedEvents) {
         this.abd = abd;
         this.bus = bus;
         this.mgr = mgr;
+        this.observedEventsSet = observedEvents;
     }
 
     public void onSubscribe(SubscriptionEvent event) {
+        if (event.isLocalOnly() || !event.isRemote() || !event.getSubject().startsWith("cdi.event:")) return;
+
+        String name = event.getSubject().substring("cdi.event:".length());
+
         try {
-            if (!event.isLocalOnly() && event.isRemote() && event.getSubject().startsWith("cdi.event:")
-                    && !event.getSubject().equals(CDI.DISPATCHER_SUBJECT) && event.getCount() == 1) {
-
-                final String className = event.getSubject().substring("cdi.event:".length());
-                final Class<?> type = this.getClass().getClassLoader().loadClass(className);
-
+            if (observedEventsSet.contains(name) && event.getCount() == 1) {
+                final Class<?> type = this.getClass().getClassLoader().loadClass(name);
                 abd.addObserverMethod(new EventObserverMethod(type, bus, mgr));
             }
         } catch (Exception e) {

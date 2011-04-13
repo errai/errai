@@ -15,19 +15,18 @@
  */
 package org.jboss.errai.cdi.server;
 
-import com.sun.tools.internal.ws.wsdl.document.MessagePart;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RoutingFlags;
+import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.cdi.client.CDICommands;
 import org.jboss.errai.cdi.client.CDIProtocol;
 import org.jboss.weld.manager.BeanManagerImpl;
 
 import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.util.TypeLiteral;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.HashMap;
@@ -47,10 +46,13 @@ public class EventDispatcher implements MessageCallback {
     private Map<Class<?>, Class<?>> conversationalEvents = new HashMap<Class<?>, Class<?>>();
     private Set<Class<?>> conversationalServices = new HashSet<Class<?>>();
 
-    public EventDispatcher(BeanManager beanManager, MessageBus bus, ContextManager ctxMgr) {
+    private String[] observedEvents;
+
+    public EventDispatcher(BeanManager beanManager, MessageBus bus, ContextManager ctxMgr, Set<String> observedEventSet) {
         this.beanManager = beanManager;
         this.bus = bus;
         this.ctxMgr = ctxMgr;
+        this.observedEvents = observedEventSet.toArray(new String[observedEventSet.size()]);
     }
 
     // Invoked by Errai
@@ -62,7 +64,7 @@ public class EventDispatcher implements MessageCallback {
             if (!message.isFlagSet(RoutingFlags.FromRemote)) return;
 
             switch (CDICommands.valueOf(message.getCommandType())) {
-                case CDI_EVENT:
+                case CDIEvent:
                     String type = message.get(String.class, CDIProtocol.TYPE);
                     final Class clazz = Thread.currentThread().getContextClassLoader().loadClass(type);
                     final Object o = message.get(clazz, CDIProtocol.OBJECT_REF);
@@ -107,7 +109,7 @@ public class EventDispatcher implements MessageCallback {
                                         public void fire(Object o) {
                                             MessageBuilder.createMessage()
                                                     .toSubject("cdi.event:" + outTypeStr)
-                                                    .command(CDICommands.CDI_EVENT)
+                                                    .command(CDICommands.CDIEvent)
                                                     .with(MessageParts.SessionID, sessionId)
                                                     .with(CDIProtocol.TYPE, outTypeStr)
                                                     .with(CDIProtocol.OBJECT_REF, o)
@@ -119,6 +121,15 @@ public class EventDispatcher implements MessageCallback {
                     } finally {
                         ctxMgr.deactivateRequestContext();
                     }
+
+                    break;
+
+                case AttachRemote:
+                    MessageBuilder.createConversation(message)
+                            .toSubject("cdi.event:ClientDispatcher")
+                            .command(BusCommands.RemoteSubscribe)
+                            .with(MessageParts.Value, observedEvents)
+                            .done().reply();
 
                     break;
                 default:

@@ -15,20 +15,16 @@
  */
 package org.jboss.errai.cdi.client.api;
 
-import com.google.gwt.core.ext.typeinfo.JClassType;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.MessageInterceptor;
 import org.jboss.errai.cdi.client.CDICommands;
 import org.jboss.errai.cdi.client.CDIProtocol;
 import org.jboss.errai.cdi.client.EventHandler;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * CDI client interface.
@@ -41,6 +37,11 @@ public class CDI {
 
     static private Map<String, Conversation> activeConversations =
             new HashMap<String, Conversation>();
+
+    static private Set<String> remoteEvents = new HashSet<String>();
+
+    static private boolean active = false;
+    static private List<Object> deferredEvents = new ArrayList<Object>();
 
     public static MessageInterceptor CONVERSATION_INTERCEPTOR = new ConversationInterceptor();
 
@@ -59,29 +60,45 @@ public class CDI {
         return getSubjectNameByType(type.getName());
     }
 
-   public static String getSubjectNameByType(final String typeName) {
+    public static String getSubjectNameByType(final String typeName) {
         return "cdi.event:" + typeName;
     }
 
     public static void fireEvent(final Object payload) {
-        MessageBuilder.createMessage()
-                .toSubject(DISPATCHER_SUBJECT)
-                .command(CDICommands.CDI_EVENT)
-                .with(CDIProtocol.TYPE, payload.getClass().getName())
-                .with(CDIProtocol.OBJECT_REF, payload)
-                .noErrorHandling()
-                .sendNowWith(ErraiBus.get());
+        if (!active) {
+            deferredEvents.add(payload);
+        }
+
+        String subject = getSubjectNameByType(payload.getClass());
+
+        if (ErraiBus.get().isSubscribed(subject)) {
+            MessageBuilder.createMessage()
+                    .toSubject(getSubjectNameByType(payload.getClass()))
+                    .command(CDICommands.CDIEvent)
+                    .with(CDIProtocol.TYPE, payload.getClass().getName())
+                    .with(CDIProtocol.OBJECT_REF, payload)
+                    .noErrorHandling()
+                    .sendNowWith(ErraiBus.get());
+        }
+
+        if (remoteEvents.contains(payload.getClass().getName())) {
+            MessageBuilder.createMessage()
+                    .toSubject(DISPATCHER_SUBJECT)
+                    .command(CDICommands.CDIEvent)
+                    .with(CDIProtocol.TYPE, payload.getClass().getName())
+                    .with(CDIProtocol.OBJECT_REF, payload)
+                    .noErrorHandling()
+                    .sendNowWith(ErraiBus.get());
+        }
     }
 
-    public static String generateId()
-    {
+    public static String generateId() {
         return String.valueOf(com.google.gwt.user.client.Random.nextInt(1000))
                 + "-" + (System.currentTimeMillis() % 1000);
     }
 
-    public static Conversation createConversation(String withSubject)
-    {
-        Conversation conversation = new Conversation(generateId(), withSubject);        
+    public static Conversation createConversation(String withSubject) {
+        Conversation conversation = new Conversation(generateId(), withSubject);
         return conversation;
     }
 
@@ -89,27 +106,47 @@ public class CDI {
         return activeConversations;
     }
 
+    public static void addRemoteEventType(String remoteEvent) {
+        remoteEvents.add(remoteEvent);
+    }
+
+    public static void addRemoteEventTypes(String[] remoteEvent) {
+        for (String s : remoteEvent) {
+            addRemoteEventType(s);
+        }
+    }
+
+    public static void activate() {
+        if (!active) {
+            active = true;
+
+            for (Object o : deferredEvents) {
+                fireEvent(o);
+            }
+
+            deferredEvents = null;
+        }
+    }
+
+
     /**
      * Decorates a message with the conversation id if required
      */
-    static class ConversationInterceptor implements MessageInterceptor
-    {
+    static class ConversationInterceptor implements MessageInterceptor {
         public boolean processOutbound(Message message) {
 
             // skip if none active
-            if(getActiveConversations().isEmpty()) return true;
+            if (getActiveConversations().isEmpty()) return true;
 
             // internal channel, don't decorate message
-            if(message.hasPart("cdi.internal")) return true;
+            if (message.hasPart("cdi.internal")) return true;
 
             // find a conversation handle exist for this subject
             Set<String> activeConversations = getActiveConversations().keySet();
             Conversation conversationHandle = null;
-            for(String id : activeConversations)
-            {
+            for (String id : activeConversations) {
                 Conversation c = getActiveConversations().get(id);
-                if(c.getSubject().equals(message.getSubject()))
-                {
+                if (c.getSubject().equals(message.getSubject())) {
                     conversationHandle = c;
                     break;
                 }
@@ -117,13 +154,12 @@ public class CDI {
 
             // if there is a matching active conversation for a particular subject
             // we attach the conversation id
-            if(conversationHandle!=null && conversationHandle.isActive())
-            {
-                Map<String, Object> parts = new HashMap<String,Object>(getActiveConversations().size());
+            if (conversationHandle != null && conversationHandle.isActive()) {
+                Map<String, Object> parts = new HashMap<String, Object>(getActiveConversations().size());
                 parts.put("cdi.conversation.id", conversationHandle.getId());
                 message.addAllParts(parts);
             }
-            
+
             return true;
         }
 

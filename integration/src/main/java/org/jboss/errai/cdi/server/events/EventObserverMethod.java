@@ -79,7 +79,7 @@ public class EventObserverMethod implements ObserverMethod {
         if (ctx != null && ctx.containsKey(MessageParts.SessionID.name())) {
             MessageBuilder.createMessage()
                     .toSubject(subject)
-                    .command(CDICommands.CDI_EVENT)
+                    .command(CDICommands.CDIEvent)
                     .with(MessageParts.SessionID.name(), ctx.get(MessageParts.SessionID.name()))
                     .with(CDIProtocol.TYPE, type.getName())
                     .with(CDIProtocol.OBJECT_REF, event)
@@ -87,7 +87,7 @@ public class EventObserverMethod implements ObserverMethod {
         } else {
             MessageBuilder.createMessage()
                     .toSubject(subject)
-                    .command(CDICommands.CDI_EVENT)
+                    .command(CDICommands.CDIEvent)
                     .with(CDIProtocol.TYPE, type.getName())
                     .with(CDIProtocol.OBJECT_REF, event)
                     .noErrorHandling().sendNowWith(bus);

@@ -27,6 +27,7 @@ import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.ProxyProvider;
 import org.jboss.errai.bus.rebind.RebindUtils;
 import org.jboss.errai.bus.server.annotations.Command;
+import org.jboss.errai.bus.server.annotations.ExposeEntity;
 import org.jboss.errai.bus.server.annotations.Remote;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.io.CommandBindingsCallback;
@@ -36,13 +37,17 @@ import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.cdi.client.api.CDI;
 import org.jboss.errai.cdi.client.api.Conversational;
 import org.jboss.errai.cdi.server.events.ShutdownEventObserver;
+import org.jboss.errai.common.client.types.TypeHandlerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Conversation;
+import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.*;
+import javax.inject.Inject;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -66,6 +71,7 @@ public class CDIExtensionPoints implements Extension {
 
     private Map<Class<?>, Class<?>> conversationalObservers = new HashMap<Class<?>, Class<?>>();
     private Set<Class<?>> conversationalServices = new HashSet<Class<?>>();
+    private Set<String> observableEvents = new HashSet<String>();
 
     public void beforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
         this.uuid = UUID.randomUUID().toString();
@@ -122,6 +128,26 @@ public class CDIExtensionPoints implements Extension {
 
 
         /**
+         * We must scan for Event injection points to build the tables
+         */
+
+
+        Class clazz = type.getJavaClass();
+
+        for (Field f : clazz.getDeclaredFields()) {
+            if (Event.class.isAssignableFrom(f.getType()) && f.isAnnotationPresent(Inject.class)) {
+                ParameterizedType pType = (ParameterizedType) f.getGenericType();
+
+                Class eventType = (Class) pType.getActualTypeArguments()[0];
+
+                if (isExposedEntityType(eventType)) {
+                    observableEvents.add(eventType.getName());
+                }
+            }
+        }
+
+
+        /**
          * Mixing JSR-299 and Errai annotation causes bean valdation problems.
          * Therefore we need to provide additional meta data for the Provider implementations,
          * (the Produces annotation literal)
@@ -146,6 +172,18 @@ public class CDIExtensionPoints implements Extension {
        } */
     }
 
+
+    private boolean isExposedEntityType(Class type) {
+        if (type.isAnnotationPresent(ExposeEntity.class)) {
+            return true;
+        } else {
+            if (String.class.equals(type) || TypeHandlerFactory.getHandler(type) != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void processObserverMethod(@Observes ProcessObserverMethod processObserverMethod) {
         Type t = processObserverMethod.getObserverMethod().getObservedType();
 
@@ -165,6 +203,10 @@ public class CDIExtensionPoints implements Extension {
 
         if (type == null && t instanceof Class) {
             type = (Class) t;
+        }
+
+        if (isExposedEntityType(type)) {
+            observableEvents.add(type.getName());
         }
 
         if (processObserverMethod.getAnnotatedMethod().isAnnotationPresent(Conversational.class)) {
@@ -196,7 +238,7 @@ public class CDIExtensionPoints implements Extension {
         )));
 
         // event dispatcher
-        EventDispatcher eventDispatcher = new EventDispatcher(bm, bus, this.contextManager);
+        EventDispatcher eventDispatcher = new EventDispatcher(bm, bus, this.contextManager, observableEvents);
 
         for (Map.Entry<Class<?>, Class<?>> entry : conversationalObservers.entrySet()) {
             eventDispatcher.registerConversationEvent(entry.getKey(), entry.getValue());
@@ -206,7 +248,7 @@ public class CDIExtensionPoints implements Extension {
             eventDispatcher.registerConversationalService(entry);
         }
 
-        EventSubscriptionListener listener = new EventSubscriptionListener(abd, bus, contextManager);
+        EventSubscriptionListener listener = new EventSubscriptionListener(abd, bus, contextManager, observableEvents);
         bus.addSubscribeListener(listener);
 
 
@@ -222,7 +264,6 @@ public class CDIExtensionPoints implements Extension {
 
         // subscribe event dispatcher
         bus.subscribe(CDI.DISPATCHER_SUBJECT, eventDispatcher);
-
     }
 
     private void subscribeServices(final BeanManager beanManager, final MessageBus bus) {
