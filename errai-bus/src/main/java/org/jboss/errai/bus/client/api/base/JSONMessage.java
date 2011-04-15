@@ -457,8 +457,10 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
      * @return an encoded string of the buffer
      */
     public String getEncoded() {
-        if (!ended) _end();
-        return buf.toString();
+        synchronized (this) {
+            if (!ended) _end();
+            return buf.toString();
+        }
     }
 
     /**
