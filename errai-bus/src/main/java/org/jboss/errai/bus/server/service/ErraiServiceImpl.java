@@ -22,10 +22,13 @@ import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.util.ErrorHelper;
 import org.jboss.errai.bus.server.DefaultTaskManager;
+import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.bus.server.api.SessionProvider;
 import org.jboss.errai.bus.server.service.bootstrap.BootstrapContext;
 import org.jboss.errai.bus.server.service.bootstrap.OrderedBootstrap;
+
+import java.lang.annotation.Annotation;
 
 /**
  * Default implementation of the ErraiBus server-side service.
@@ -55,10 +58,8 @@ public class ErraiServiceImpl<S> implements ErraiService<S> {
     }
 
     private void boostrap() {
-
         BootstrapContext context = new BootstrapContext(this, bus, config);
         new OrderedBootstrap().execute(context);
-
     }
 
     /**
@@ -78,8 +79,7 @@ public class ErraiServiceImpl<S> implements ErraiService<S> {
          */
         try {
             getDispatcher().dispatchGlobal(message);
-        }
-        catch (Throwable t) {
+        } catch (Throwable t) {
             t.printStackTrace();
             ErrorHelper.sendClientError(bus, message, t.getMessage(), t);
         }
@@ -114,6 +114,9 @@ public class ErraiServiceImpl<S> implements ErraiService<S> {
     }
 
     public void setSessionProvider(SessionProvider<S> sessionProvider) {
+        if (this.sessionProvider != null) {
+            throw new IllegalStateException("cannot set session provider more than once.");
+        }
         this.sessionProvider = sessionProvider;
     }
 
@@ -122,6 +125,9 @@ public class ErraiServiceImpl<S> implements ErraiService<S> {
     }
 
     public void setDispatcher(RequestDispatcher dispatcher) {
+        if (this.sessionProvider != null) {
+            throw new IllegalStateException("cannot set dispatcher more than once.");
+        }
         this.dispatcher = dispatcher;
     }
 }

@@ -39,7 +39,6 @@ import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
  * The <tt>JettyContinuationsServlet</tt> provides the HTTP-protocol gateway between the server bus and the client buses,
  * using Jetty Continuations.
  */
-@Singleton
 public class JettyContinuationsServlet extends AbstractErraiServlet {
 
     /**

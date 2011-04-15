@@ -60,8 +60,7 @@ class DefaultComponents implements BootstrapExecution {
 
         /*** ModelAdapter ***/
         config.getExtensionBindings().put(ModelAdapter.class, modelAdapterProvider);
-        final MessageProvider modelAdapterProxy = new MessageProvider()
-        {
+        final MessageProvider modelAdapterProxy = new MessageProvider() {
             final MessageProvider delegate = JSONMessageServer.PROVIDER;
 
             public Message get() {
@@ -103,17 +102,14 @@ class DefaultComponents implements BootstrapExecution {
 
                 try {
                     create.run();
-                }
-                catch (Throwable e) {
+                } catch (Throwable e) {
                     log.info("authentication adapter " + authAdapterClass.getName() + " cannot be bound yet, deferring ...");
                     context.defer(create);
                 }
 
-            }
-            catch (ErraiBootstrapFailure e) {
+            } catch (ErraiBootstrapFailure e) {
                 throw e;
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 throw new ErraiBootstrapFailure("cannot configure authentication adapter", e);
             }
         }
@@ -126,13 +122,12 @@ class DefaultComponents implements BootstrapExecution {
             @Override
             protected void configure() {
                 Class<? extends RequestDispatcher> dispatcherImplementation = SimpleDispatcher.class;
-                
+
                 if (config.hasProperty(ErraiServiceConfigurator.ERRAI_DISPATCHER_IMPLEMENTATION)) {
                     try {
                         dispatcherImplementation = Class.forName(config.getProperty(ErraiServiceConfigurator.ERRAI_DISPATCHER_IMPLEMENTATION))
                                 .asSubclass(RequestDispatcher.class);
-                    }
-                    catch (Exception e) {
+                    } catch (Exception e) {
                         throw new ErraiBootstrapFailure("could not load request dispatcher implementation class", e);
                     }
                 }
@@ -159,8 +154,7 @@ class DefaultComponents implements BootstrapExecution {
                     try {
                         sessionProviderImplementation = Class.forName(config.getProperty(ErraiServiceConfigurator.ERRAI_SESSION_PROVIDER_IMPLEMENTATION))
                                 .asSubclass(SessionProvider.class);
-                    }
-                    catch (Exception e) {
+                    } catch (Exception e) {
                         throw new ErraiBootstrapFailure("could not load session provider implementation class", e);
                     }
                 }

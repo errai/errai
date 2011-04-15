@@ -44,7 +44,6 @@ import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
  * The <tt>GrizzlyCometServlet</tt> provides the HTTP-protocol gateway between the server bus and the client buses,
  * using Glassfish.
  */
-@Singleton
 public class GrizzlyCometServlet extends AbstractErraiServlet {
 
     private static CometContext context = null;

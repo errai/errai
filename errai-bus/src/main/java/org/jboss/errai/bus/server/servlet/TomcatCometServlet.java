@@ -47,7 +47,6 @@ import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
  * The <tt>TomcatCometServlet</tt> provides the HTTP-protocol gateway between the server bus and the client buses,
  * using Tomcat Comet.
  */
-@Singleton
 public class TomcatCometServlet extends AbstractErraiServlet implements CometProcessor {
     private volatile ClassLoader contextClassLoader;
 

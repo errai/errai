@@ -73,9 +73,6 @@ public interface ErraiServiceConfigurator {
      */
     public String getProperty(String key);
 
-
-    public RequestDispatcher getRequestDispatcher();
-
 }
 
 

@@ -1,5 +1,5 @@
 *.iml
-/.idea/
+/.idea/*
 .gwt-tmp/
 target/
 classes/

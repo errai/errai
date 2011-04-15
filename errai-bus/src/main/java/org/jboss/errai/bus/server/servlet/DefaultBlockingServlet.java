@@ -16,7 +16,6 @@
 
 package org.jboss.errai.bus.server.servlet;
 
-import com.google.inject.Singleton;
 import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.server.api.MessageQueue;
@@ -34,7 +33,6 @@ import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
 /**
  * The default DefaultBlockingServlet which provides the HTTP-protocol gateway between the server bus and the client buses.
  */
-@Singleton
 public class DefaultBlockingServlet extends AbstractErraiServlet {
 
 

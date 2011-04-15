@@ -44,7 +44,6 @@ import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
  * The <tt>JBossCometServlet</tt> provides the HTTP-protocol gateway between the server bus and the client buses,
  * using JBoss Comet.
  */
-@Singleton
 public class JBossCometServlet extends AbstractErraiServlet implements HttpEventServlet {
 
     private final Map<MessageQueue, QueueSession> queueToSession = new HashMap<MessageQueue, QueueSession>();
