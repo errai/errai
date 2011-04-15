@@ -59,6 +59,7 @@ import java.util.*;
  * and registers CDI components as services with Errai.
  *
  * @author Heiko.Braun <hbraun@redhat.com>
+ * @author Mike Brock <cbrock@redhat.com>
  */
 @ApplicationScoped
 public class CDIExtensionPoints implements Extension {
@@ -145,31 +146,6 @@ public class CDIExtensionPoints implements Extension {
                 }
             }
         }
-
-
-        /**
-         * Mixing JSR-299 and Errai annotation causes bean valdation problems.
-         * Therefore we need to provide additional meta data for the Provider implementations,
-         * (the Produces annotation literal)
-         * even though these classes are only client side implementations.
-         */
-        /*else if(type.isAnnotationPresent(org.jboss.errai.ioc.client.api.Provider.class))
-       {
-         AnnotatedTypeBuilder<T> builder = AnnotatedTypeBuilder.newInstance(event.getAnnotatedType().getJavaClass());
-         builder.readAnnotationsFromUnderlyingType();
-
-         //builder.addToClass(new ApplicationScopedQualifier(){});
-         for(AnnotatedMethod method : type.getMethods())
-         {
-           if("provide".equals(method.getJavaMember().getName()))
-           {
-             builder.addToMethod(method.getJavaMember(), new ProducesQualifier(){});
-             break;
-           }
-         }
-         AnnotatedType<T> replacement = builder.create();
-         event.setAnnotatedType(replacement);
-       } */
     }
 
 
@@ -254,6 +230,9 @@ public class CDIExtensionPoints implements Extension {
 
         // Errai bus injection
         abd.addBean(new MessageBusMetaData(bm, bus));
+
+        // Support to inject the request dispatcher.
+        abd.addBean(new RequestDispatcherMetaData(bm, service.getDispatcher()));
 
 
         // Register observers        

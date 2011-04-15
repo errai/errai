@@ -77,47 +77,6 @@ public class EventDispatcher implements MessageCallback {
                                     Util.getSessionId(message));
                         }
                         beanManager.fireEvent(o);
-
-                        if (conversationalEvents.containsKey(clazz)) {
-
-                            final Class outType = conversationalEvents.get(clazz);
-                            final String outTypeStr = outType.getName();
-                            final String sessionId = Util.getSessionId(message);
-
-                            /**
-                             * TODO: This effectively hard-codes us to Weld. But the CDI specification has no way
-                             *       of calling dynamically qualified types from BeanManager.
-                             */
-                            ((BeanManagerImpl) beanManager)
-                                    .fireEvent(new ParameterizedType() {
-                                        public Type[] getActualTypeArguments() {
-                                            return new Type[]{clazz, outType};
-                                        }
-
-                                        public Type getRawType() {
-                                            return ConversationalEvent.class;
-                                        }
-
-                                        public Type getOwnerType() {
-                                            return ConversationalEvent.class;
-                                        }
-                                    }, new ConversationalEvent<Object, Object>() {
-                                        public Object getEvent() {
-                                            return o;
-                                        }
-
-                                        public void fire(Object o) {
-                                            MessageBuilder.createMessage()
-                                                    .toSubject("cdi.event:" + outTypeStr)
-                                                    .command(CDICommands.CDIEvent)
-                                                    .with(MessageParts.SessionID, sessionId)
-                                                    .with(CDIProtocol.TYPE, outTypeStr)
-                                                    .with(CDIProtocol.OBJECT_REF, o)
-                                                    .noErrorHandling().sendNowWith(bus);
-                                        }
-                                    });
-                        }
-
                     } finally {
                         ctxMgr.deactivateRequestContext();
                     }
