@@ -14,7 +14,8 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <name>Errai</name>
     <groupId>org.jboss.errai</groupId>
@@ -35,7 +36,7 @@
     <description>
         A GWT framework
     </description>
-    
+
     <developers>
         <developer>
             <name>Mike Brock</name>
@@ -70,7 +71,7 @@
         <guice.version>3.0</guice.version>
         <mvel.version>2.0.18-RC4</mvel.version>
         <mosaic.version>0.4.0-rc4</mosaic.version>
-        <appengine.version>1.3.5</appengine.version>        
+        <appengine.version>1.3.5</appengine.version>
         <reflections.version>0.9.5-RC2_jboss-SP1</reflections.version>
     </properties>
 
@@ -104,12 +105,19 @@
                 <groupId>com.google.inject</groupId>
                 <artifactId>guice</artifactId>
                 <version>3.0</version>
+
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.inject</groupId>
+                        <artifactId>javax.inject</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <!--<dependency>-->
-                <!--<groupId>com.google.code.guice</groupId>-->
-                <!--<artifactId>guice</artifactId>-->
-                <!--<classifier>aopalliance</classifier>-->
-                <!--<version>${guice.version}</version>-->
+            <!--<groupId>com.google.code.guice</groupId>-->
+            <!--<artifactId>guice</artifactId>-->
+            <!--<classifier>aopalliance</classifier>-->
+            <!--<version>${guice.version}</version>-->
             <!--</dependency>-->
 
             <dependency>
@@ -242,9 +250,9 @@
                     <version>1.5</version>
                 </plugin>
                 <!--<plugin>-->
-                    <!--<groupId>net.sourceforge.maven-taglib</groupId>-->
-                    <!--<artifactId>maven-taglib-plugin</artifactId>-->
-                    <!--<version>2.3</version>-->
+                <!--<groupId>net.sourceforge.maven-taglib</groupId>-->
+                <!--<artifactId>maven-taglib-plugin</artifactId>-->
+                <!--<version>2.3</version>-->
                 <!--</plugin>-->
             </plugins>
         </pluginManagement>

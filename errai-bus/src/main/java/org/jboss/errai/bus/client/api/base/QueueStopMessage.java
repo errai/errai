@@ -20,7 +20,7 @@ import java.util.Map;
  */
 public class QueueStopMessage implements Message {
     static final Map<String, Object> parts;
-    static final String encoded;
+  //  static final String encoded;
 
     static {
         Map<String, Object> p = new HashMap<String,Object>();
@@ -29,7 +29,7 @@ public class QueueStopMessage implements Message {
 
         parts = Collections.unmodifiableMap(p);
 
-        encoded = JSONEncoder.encode(p);
+       // encoded = JSONEncoder.encode(p);
     }
 
     public Message toSubject(String subject) {
@@ -168,10 +168,10 @@ public class QueueStopMessage implements Message {
         return true;
     }
 
-
-    public String getEncoded() {
-        return encoded;
-    }
+//
+//    public String getEncoded() {
+//        return encoded;
+//    }
 
     public void sendNowWith(MessageBus viaThis) {
         
