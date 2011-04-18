@@ -40,7 +40,6 @@ import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
  * using Jetty Continuations.
  */
 public class JettyContinuationsServlet extends AbstractErraiServlet {
-
     /**
      * Called by the server (via the <tt>service</tt> method) to allow a servlet to handle a GET request by supplying
      * a response
@@ -98,7 +97,7 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
 
                 sendDisconnectDueToSessionExpiry(httpServletResponse.getOutputStream());
 
-              return;
+                return;
             }
 
             synchronized (queue) {
@@ -107,12 +106,7 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
 
                     if (!queue.messagesWaiting()) {
 
-                        queue.setActivationCallback(new QueueActivationCallback() {
-                            public void activate(MessageQueue queue) {
-                                queue.setActivationCallback(null);
-                                cont.resume();
-                            }
-                        });
+                        queue.setActivationCallback(new JettyQueueActivationCallback(cont));
 
                         if (!queue.messagesWaiting()) {
                             cont.suspend(45 * 1000);
@@ -172,5 +166,20 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
         httpServletResponse.setHeader("Cache-Control", "no-cache");
         httpServletResponse.setContentType("application/json");
         queue.poll(false, stream);
+    }
+
+    private static class JettyQueueActivationCallback implements QueueActivationCallback {
+        private Continuation cont;
+
+
+        private JettyQueueActivationCallback(Continuation cont) {
+            this.cont = cont;
+        }
+
+        public void activate(MessageQueue queue) {
+            queue.setActivationCallback(null);
+            cont.resume();
+        }
+
     }
 }

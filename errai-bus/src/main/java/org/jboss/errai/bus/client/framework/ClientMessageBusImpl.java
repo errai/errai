@@ -94,6 +94,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     /* True if the client's message bus has been initialized */
     private boolean initialized = false;
+    private boolean reinit = false;
     private boolean postInit = false;
 
     private long lastTransmit = 0;
@@ -402,6 +403,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
 
     private void addShadowSubscription(String subject, MessageCallback reference) {
+        if ("ClientBus".equals(subject)) return;
+
         if (!shadowSubscriptions.containsKey(subject)) {
             shadowSubscriptions.put(subject, new ArrayList<MessageCallback>());
         }
@@ -645,7 +648,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             listener.onInitilization();
         }
 
-        resubscribeShadowSubcriptions();
+        if (reinit) {
+            reinit = false;
+            resubscribeShadowSubcriptions();
+        }
 
         directSubscribe("ClientBus", new MessageCallback() {
             @SuppressWarnings({"unchecked"})
@@ -773,6 +779,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
                         stop(false);
 
+                        reinit = true;
 
                         init(null);
 
