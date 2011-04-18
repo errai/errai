@@ -24,6 +24,7 @@ import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.cdi.client.CDICommands;
 import org.jboss.errai.cdi.client.CDIProtocol;
+import org.jboss.errai.cdi.client.api.Event;
 import org.jboss.weld.manager.BeanManagerImpl;
 
 import javax.enterprise.inject.spi.BeanManager;
@@ -67,8 +68,8 @@ public class EventDispatcher implements MessageCallback {
                 case CDIEvent:
                     String type = message.get(String.class, CDIProtocol.TYPE);
                     final Class clazz = Thread.currentThread().getContextClassLoader().loadClass(type);
+                    //final Event<?> o = (Event<?>) message.get(clazz, CDIProtocol.OBJECT_REF);
                     final Object o = message.get(clazz, CDIProtocol.OBJECT_REF);
-
                     try {
                         ctxMgr.activateRequestContext();
 
@@ -76,8 +77,8 @@ public class EventDispatcher implements MessageCallback {
                             ctxMgr.getRequestContextStore().put(MessageParts.SessionID.name(),
                                     Util.getSessionId(message));
                         }
+                       // beanManager.fireEvent(o, o.getQualifiers());
                         beanManager.fireEvent(o);
-
                         if (conversationalEvents.containsKey(clazz)) {
 
                             final Class outType = conversationalEvents.get(clazz);

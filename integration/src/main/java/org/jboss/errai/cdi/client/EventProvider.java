@@ -19,22 +19,24 @@ import java.lang.annotation.Annotation;
 @ApplicationScoped
 public class EventProvider implements ContextualTypeProvider<Event<?>> {
 
-    public Event<?> provide(final Class[] typeargs) {
-        return new Event() {
+    public Event<?> provide(final Class[] typeargs, final Annotation... qualifiers) {
+    	return new Event() {
             private Class eventType = (typeargs.length == 1 ? typeargs[0] : Object.class);
             private Conversation conversation;
-
+            private Annotation[] _qualifiers = qualifiers;
+            
             public void fire(Object event) {
                 if (event == null) return;
                 if (conversation != null && !conversation.isActive()) {
                     conversation.begin();
                 }
 
-                CDI.fireEvent(event);
+                CDI.fireEvent(event, qualifiers);
             }
 
             public Event select(Annotation... qualifiers) {
-                throw new RuntimeException("Not implemented");
+                _qualifiers = qualifiers;
+                return this;
             }
 
             public Event select(Class subtype, Annotation... qualifiers) {
@@ -44,7 +46,11 @@ public class EventProvider implements ContextualTypeProvider<Event<?>> {
             public Class getEventType() {
                 return eventType;
             }
-
+            
+            public Annotation[] getQualifiers() {
+            	return qualifiers;
+			}
+            
             public void registerConversation(Conversation conversation) {
                 endActiveConversation();
                 this.conversation = conversation;
@@ -55,6 +61,6 @@ public class EventProvider implements ContextualTypeProvider<Event<?>> {
                     conversation.end();
                 }
             }
-        };
+    	};
     }
 }

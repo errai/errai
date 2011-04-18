@@ -19,16 +19,17 @@ import java.lang.annotation.Annotation;
 
 /**
  * @author: Heiko Braun <hbraun@redhat.com>
+ * @author: Christian Sadilek <csadilek@redhat.com>
  * @date: Jul 28, 2010
  */
 public interface Event<T> {
   public void fire(T event);
 
   public Event<T> select(Annotation... qualifiers);
-
   public <U extends T> Event<U> select(Class<U> subtype, Annotation... qualifiers);
 
   public Class getEventType();
+  public Annotation[] getQualifiers();
 
   public void registerConversation(Conversation conversation);
 }

@@ -15,6 +15,16 @@
  */
 package org.jboss.errai.cdi.client.api;
 
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
@@ -24,12 +34,11 @@ import org.jboss.errai.cdi.client.CDICommands;
 import org.jboss.errai.cdi.client.CDIProtocol;
 import org.jboss.errai.cdi.client.EventHandler;
 
-import java.util.*;
-
 /**
  * CDI client interface.
  *
  * @author: Heiko Braun <hbraun@redhat.com>
+ * @author: Christian Sadilek <csadilek@redhat.com>
  * @date: Apr 9, 2010
  */
 public class CDI {
@@ -56,15 +65,27 @@ public class CDI {
         );
     }
 
-    public static String getSubjectNameByType(final Class<?> type) {
-        return getSubjectNameByType(type.getName());
+    public static String getSubjectNameByType(final Class<?> type, final Annotation... qualifiers) {
+        return getSubjectNameByType(type.getName(), qualifiers);
     }
 
-    public static String getSubjectNameByType(final String typeName) {
-        return "cdi.event:" + typeName;
+    public static String getSubjectNameByType(final String typeName, final Annotation... qualifiers) {
+        return "cdi.event:" + getEventTypeName(typeName, qualifiers);
+    }
+    
+    public static String getEventTypeName(String typeName, final Annotation... qualifiers) {
+		SortedSet<String> qualifierNames = new TreeSet<String>();
+		for (Annotation qualifier : qualifiers) {
+			qualifierNames.add(qualifier.annotationType().getName());
+		}
+		for (String qualifierName : qualifierNames) {
+			typeName += "@" + qualifierName;
+		}
+
+		return typeName;
     }
 
-    public static void fireEvent(final Object payload) {
+    public static void fireEvent(final Object payload, final Annotation... qualifiers) {
         if (!active) {
             deferredEvents.add(payload);
             return;
@@ -74,7 +95,7 @@ public class CDI {
 
         if (ErraiBus.get().isSubscribed(subject)) {
             MessageBuilder.createMessage()
-                    .toSubject(getSubjectNameByType(payload.getClass()))
+                    .toSubject(getSubjectNameByType(payload.getClass(), qualifiers))
                     .command(CDICommands.CDIEvent)
                     .with(CDIProtocol.TYPE, payload.getClass().getName())
                     .with(CDIProtocol.OBJECT_REF, payload)

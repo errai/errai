@@ -15,10 +15,31 @@
  */
 package org.jboss.errai.cdi.server;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Provider;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Conversation;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.spi.AfterBeanDiscovery;
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.BeforeBeanDiscovery;
+import javax.enterprise.inject.spi.Extension;
+import javax.enterprise.inject.spi.ProcessAnnotatedType;
+import javax.enterprise.inject.spi.ProcessObserverMethod;
+import javax.inject.Inject;
+
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.ResourceProvider;
@@ -41,17 +62,10 @@ import org.jboss.errai.common.client.types.TypeHandlerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Conversation;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.*;
-import javax.inject.Inject;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.*;
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Provider;
 
 /**
  * Extension points to the CDI container.
@@ -186,7 +200,7 @@ public class CDIExtensionPoints implements Extension {
 
     public void processObserverMethod(@Observes ProcessObserverMethod processObserverMethod) {
         Type t = processObserverMethod.getObserverMethod().getObservedType();
-
+        
         if (t instanceof Class && ConversationalEvent.class.isAssignableFrom((Class) t)) {
             throw new RuntimeException("observing unqualified ConversationalEvent. You must specify type parameters");
         }
@@ -206,7 +220,8 @@ public class CDIExtensionPoints implements Extension {
         }
 
         if (isExposedEntityType(type)) {
-            observableEvents.add(type.getName());
+        	Set<Annotation> qualifiers = processObserverMethod.getObserverMethod().getObservedQualifiers();
+            observableEvents.add(CDI.getEventTypeName(type.getName(), qualifiers.toArray(new Annotation[0])));
         }
 
         if (processObserverMethod.getAnnotatedMethod().isAnnotationPresent(Conversational.class)) {

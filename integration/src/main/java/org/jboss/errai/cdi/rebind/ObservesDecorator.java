@@ -15,8 +15,10 @@
  */
 package org.jboss.errai.cdi.rebind;
 
-import com.google.gwt.core.ext.typeinfo.JMethod;
-import com.google.gwt.core.ext.typeinfo.JParameter;
+import java.lang.annotation.Annotation;
+
+import javax.enterprise.event.Observes;
+
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.annotations.Local;
@@ -25,10 +27,12 @@ import org.jboss.errai.cdi.client.CDIProtocol;
 import org.jboss.errai.cdi.client.api.CDI;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.Decorator;
+import org.jboss.errai.ioc.rebind.ioc.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.InjectionPoint;
 
-import javax.enterprise.event.Observes;
+import com.google.gwt.core.ext.typeinfo.JMethod;
+import com.google.gwt.core.ext.typeinfo.JParameter;
 
 /**
  *
@@ -37,12 +41,14 @@ import javax.enterprise.event.Observes;
  *
  * @author Heiko Braun
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  *
  * @date Jul 27, 2010
  */
 @CodeDecorator
 public class ObservesDecorator extends Decorator<Observes> {
-    public ObservesDecorator(Class<Observes> decoratesWith) {
+
+	public ObservesDecorator(Class<Observes> decoratesWith) {
         super(decoratesWith);
     }
 
@@ -55,15 +61,17 @@ public class ObservesDecorator extends Decorator<Observes> {
 
         String parmClassName = parm.getType().getQualifiedSourceName();
         String varName = injectionPoint.getInjector().getVarName();
-
-
+        
         // Get an instance of the message bus.
         final String messageBusInst = ctx.getInjector(ctx
                 .getProcessingContext().loadClassType(MessageBus.class)).getType(ctx, injectionPoint);
 
         final String subscribeType = method.isAnnotationPresent(Local.class) ? "subscribeLocal" : "subscribe";
-
-        String expr = messageBusInst + "." + subscribeType + "(\"cdi.event:" + parmClassName + "\", new " + MessageCallback.class.getName() + "() {\n" +
+        
+        final String subject = CDI.getSubjectNameByType(parmClassName,
+        		InjectUtil.extractQualifiers(injectionPoint).toArray(new Annotation[0]));
+        
+        String expr = messageBusInst + "." + subscribeType + "(\"" + subject + "\", new " + MessageCallback.class.getName() + "() {\n" +
                 "                    public void callback(" + Message.class.getName() + " message) {\n" +
                 "                        java.lang.Object response = message.get(" + parmClassName + ".class, " + CDIProtocol.class.getName() + "." + CDIProtocol.OBJECT_REF.name() + ");\n" +
                 "                        " + varName + "." + method.getName() + "((" + parmClassName + ") response);\n" +
@@ -73,6 +81,5 @@ public class ObservesDecorator extends Decorator<Observes> {
       //  expr += CDI.class.getName() + ".addRemoteEventType(\"" + parmClassName + "\");\n";
 
         return expr;
-
     };
 }

@@ -15,22 +15,26 @@
  */
 package org.jboss.errai.cdi.server.events;
 
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import javax.enterprise.event.Reception;
+import javax.enterprise.event.TransactionPhase;
+import javax.enterprise.inject.spi.ObserverMethod;
+
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.cdi.client.CDICommands;
 import org.jboss.errai.cdi.client.CDIProtocol;
+import org.jboss.errai.cdi.client.api.CDI;
 import org.jboss.errai.cdi.server.ContextManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.enterprise.event.Reception;
-import javax.enterprise.event.TransactionPhase;
-import javax.enterprise.inject.spi.ObserverMethod;
-import java.lang.annotation.Annotation;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author: Filip Rogaczewski
@@ -40,15 +44,17 @@ public class EventObserverMethod implements ObserverMethod {
     private static final Logger log = LoggerFactory.getLogger(EventObserverMethod.class);
 
     private Class<?> type;
+    private Annotation[] qualifiers;
     private MessageBus bus;
     private String subject;
     private ContextManager mgr;
 
-    public EventObserverMethod(Class<?> type, MessageBus bus, ContextManager mgr) {
+    public EventObserverMethod(Class<?> type, MessageBus bus, ContextManager mgr, Annotation... qualifiers) {
         this.type = type;
         this.bus = bus;
-        this.subject = "cdi.event:" + type.getName();
         this.mgr = mgr;
+        this.qualifiers = qualifiers;
+        this.subject = CDI.getSubjectNameByType(type, qualifiers);
     }
 
     public Class<?> getBeanClass() {
@@ -60,8 +66,7 @@ public class EventObserverMethod implements ObserverMethod {
     }
 
     public Set<Annotation> getObservedQualifiers() {
-        Set<Annotation> qualifiers = new HashSet<Annotation>();
-        return qualifiers;
+        return new HashSet<Annotation>(Arrays.asList(qualifiers));
     }
 
     public Reception getReception() {
