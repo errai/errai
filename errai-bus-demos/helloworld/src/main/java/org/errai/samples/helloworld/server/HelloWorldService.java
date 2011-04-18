@@ -32,18 +32,5 @@ public class HelloWorldService {
 
         reply.setValue(val);
         reply.reply();
-
-        manager.schedule(TimeUnit.SECONDS, 1, new Runnable() {
-            public void run() {
-                System.out.println("INVALIDATE KINDS!");
-
-                ServerMessageBusImpl serverBus = (ServerMessageBusImpl) bus;
-
-                for (Map.Entry<QueueSession, MessageQueue> entry : serverBus.getMessageQueues().entrySet()) {
-                    entry.getKey().endSession();
-                    entry.getValue().stopQueue();
-                }
-            }
-        });
     }
 }
