@@ -79,6 +79,7 @@ public class EventDispatcher implements MessageCallback {
                         }
                        // beanManager.fireEvent(o, o.getQualifiers());
                         beanManager.fireEvent(o);
+
                         if (conversationalEvents.containsKey(clazz)) {
 
                             final Class outType = conversationalEvents.get(clazz);
