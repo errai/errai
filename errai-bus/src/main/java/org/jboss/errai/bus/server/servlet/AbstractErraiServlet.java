@@ -79,27 +79,22 @@ public abstract class AbstractErraiServlet extends HttpServlet {
     public void init(ServletConfig config) throws ServletException {
 
         final ServletContext context = config.getServletContext();
-        service = (ErraiService)context.getAttribute("errai");
-        if(null==service)
-        {
-            synchronized (context)
-            {
+        service = (ErraiService) context.getAttribute("errai");
+        if (null == service) {
+            synchronized (context) {
                 // Build or lookup service
-                String serviceLocatorClass= config.getInitParameter("service-locator");
-                if(serviceLocatorClass!=null)
-                {
+                String serviceLocatorClass = config.getInitParameter("service-locator");
+                if (serviceLocatorClass != null) {
                     // locate externally created service instance, i.e. CDI
                     try {
                         ClassLoader loader = Thread.currentThread().getContextClassLoader();
                         Class<?> aClass = loader.loadClass(serviceLocatorClass);
-                        ServiceLocator locator  = (ServiceLocator) aClass.newInstance();
+                        ServiceLocator locator = (ServiceLocator) aClass.newInstance();
                         this.service = locator.locateService();
                     } catch (Exception e) {
                         throw new RuntimeException("Failed to create service", e);
                     }
-                }
-                else
-                {
+                } else {
                     // create a service instance manually
                     this.service = buildService();
                 }
@@ -109,7 +104,7 @@ public abstract class AbstractErraiServlet extends HttpServlet {
                 service.getConfiguration().getResourceProviders()
                         .put("errai.experimental.classLoader", new ResourceProvider<ClassLoader>() {
                             public ClassLoader get() {
-                                 return contextClassLoader;
+                                return contextClassLoader;
                             }
                         });
 
@@ -128,7 +123,7 @@ public abstract class AbstractErraiServlet extends HttpServlet {
         sessionProvider = service.getSessionProvider();
     }
 
-    @SuppressWarnings({"unchecked"})    
+    @SuppressWarnings({"unchecked"})
     protected ErraiService<HttpSession> buildService() {
         return (ErraiService<HttpSession>) Guice.createInjector(new AbstractModule() {
             @SuppressWarnings({"unchecked"})
@@ -136,7 +131,7 @@ public abstract class AbstractErraiServlet extends HttpServlet {
                 bind(MessageBus.class).to(ServerMessageBusImpl.class);
                 bind(ServerMessageBus.class).to(ServerMessageBusImpl.class);
                 bind(ErraiServiceConfigurator.class).to(ErraiServiceConfiguratorImpl.class);
-              //  bind(new TypeLiteral<ErraiService<HttpSession>>() {}).to(new TypeLiteral<ErraiServiceImpl<HttpSession>>() {});
+                //  bind(new TypeLiteral<ErraiService<HttpSession>>() {}).to(new TypeLiteral<ErraiServiceImpl<HttpSession>>() {});
                 bind(ErraiService.class).to(ErraiServiceImpl.class);
 
             }
@@ -177,6 +172,19 @@ public abstract class AbstractErraiServlet extends HttpServlet {
             public Object getMessage() {
                 return reason != null ? "{ToSubject:\"ClientBus\", CommandType:\"" + BusCommands.Disconnect + "\",Reason:\"" + reason + "\"}"
                         : "{CommandType:\"" + BusCommands.Disconnect + "\"}";
+            }
+        });
+    }
+
+
+    protected void sendDisconnectDueToSessionExpiry(OutputStream stream) throws IOException {
+        writeToOutputStream(stream, new MarshalledMessage() {
+            public String getSubject() {
+                return "ClientBus";
+            }
+
+            public Object getMessage() {
+                return "{ToSubject:\"ClientBus\", CommandType:\"" + BusCommands.SessionExpired + "\"}";
             }
         });
     }

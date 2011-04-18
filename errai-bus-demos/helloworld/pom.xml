@@ -50,7 +50,6 @@
                     <warSourceDirectory>war</warSourceDirectory>
                     <extraJvmArgs>-Xmx512m</extraJvmArgs>
                     <soyc>false</soyc>
-                    <webXml>src/jetty/web.xml</webXml>
                     <hostedWebapp>war</hostedWebapp>
                 </configuration>
                 <executions>

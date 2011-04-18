@@ -19,6 +19,8 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.ResourceProvider;
+import org.jboss.errai.bus.client.api.TaskManager;
+import org.jboss.errai.bus.client.api.base.TaskManagerFactory;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
@@ -59,6 +61,7 @@ public class ApplicationCompProcessor implements MetaDataProcessor {
                     protected void configure() {
                         bind(MessageBus.class).toInstance(context.getBus());
                         bind(RequestDispatcher.class).toInstance(context.getService().getDispatcher());
+                        bind(TaskManager.class).toInstance(TaskManagerFactory.get());
 
                         // Add any extension bindings.
                         for (Map.Entry<Class<?>, ResourceProvider> entry : config.getExtensionBindings().entrySet()) {
@@ -85,9 +88,7 @@ public class ApplicationCompProcessor implements MetaDataProcessor {
                                         parms[i] = ((MessageParameter) a).value();
                                     }
                                 }
-
                             }
-
                         }
 
                         Annotation annotation = m.getAnnotation(Service.class);

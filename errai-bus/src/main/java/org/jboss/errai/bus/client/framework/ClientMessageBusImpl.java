@@ -66,10 +66,19 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     /* Map of subjects to subscriptions  */
     private Map<String, List<Object>> subscriptions;
 
+    private Map<String, List<MessageCallback>> shadowSubscriptions =
+            new HashMap<String, List<MessageCallback>>();
+
     private Map<String, MessageCallback> remotes;
 
     /* Outgoing queue of messages to be transmitted */
     // private final Queue<Message> outgoingQueue = new LinkedList<Message>();
+
+    private List<SessionExpirationListener> onSessionExpirationListeners
+            = new ArrayList<SessionExpirationListener>();
+
+    private List<InitializationListener> onInitializationListeners
+            = new ArrayList<InitializationListener>();
 
     /* Map of subjects to references registered in this session */
     private Map<String, List<Object>> registeredInThisSession = new HashMap<String, List<Object>>();
@@ -171,7 +180,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     public void unsubscribeAll(String subject) {
         if (subscriptions.containsKey(subject)) {
             for (Object o : subscriptions.get(subject)) {
-                if (o instanceof MessageCallback) continue;
+                if (o instanceof MessageCallback) {
+                    continue;
+                }
 
                 _unsubscribe(o);
             }
@@ -189,6 +200,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      * @param callback - function called when the message is dispatched
      */
     public void subscribe(final String subject, final MessageCallback callback) {
+        addShadowSubscription(subject, callback);
         _subscribe(subject, callback, false);
     }
 
@@ -389,6 +401,28 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         if (registeredInThisSession != null) registeredInThisSession.get(subject).add(reference);
     }
 
+    private void addShadowSubscription(String subject, MessageCallback reference) {
+        if (!shadowSubscriptions.containsKey(subject)) {
+            shadowSubscriptions.put(subject, new ArrayList<MessageCallback>());
+        }
+
+        if (!shadowSubscriptions.get(subject).contains(reference)) {
+            shadowSubscriptions.get(subject).add(reference);
+        }
+    }
+
+    public void remoteShadowSubscription(String subject) {
+        shadowSubscriptions.remove(subject);
+    }
+
+    private void resubscribeShadowSubcriptions() {
+        for (Map.Entry<String, List<MessageCallback>> entry : shadowSubscriptions.entrySet()) {
+            for (MessageCallback callback : entry.getValue()) {
+                _subscribe(entry.getKey(), callback, false);
+            }
+        }
+    }
+
     /**
      * Checks if subject is already listed in the subscriptions map
      *
@@ -518,17 +552,19 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
         for (Map.Entry<String, List<Object>> entry : subscriptions.entrySet()) {
             for (Object o : entry.getValue()) {
-                if (o instanceof MessageCallback) continue;
+                if (o instanceof MessageCallback) {
+                    continue;
+                }
                 _unsubscribe(o);
             }
         }
 
         this.remotes.clear();
 
-        MessageBuilder.createMessage()
-                .toSubject("ClientBus")
-                .command(BusCommands.RemoteMonitorAttach)
-                .done().sendNowWith(this);
+//        MessageBuilder.createMessage()
+//                .toSubject("ClientBus")
+//                .command(BusCommands.RemoteMonitorAttach)
+//                .done().sendNowWith(this);
 
         this.heartBeatTimer.cancel();
         this.incomingTimer.cancel();
@@ -601,6 +637,15 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         }
 
         if (sendBuilder == null) return;
+
+        /**
+         * Fire initialization listeners now.
+         */
+        for (InitializationListener listener : onInitializationListeners) {
+            listener.onInitilization();
+        }
+
+        resubscribeShadowSubcriptions();
 
         directSubscribe("ClientBus", new MessageCallback() {
             @SuppressWarnings({"unchecked"})
@@ -702,9 +747,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
                         postInit = true;
                         logAdapter.debug("Executing " + postInitTasks.size() + " post init task(s)");
-                        for (int i = 0; i < postInitTasks.size(); i++) {
+                        for (Runnable postInitTask : postInitTasks) {
                             try {
-                                postInitTasks.get(i).run();
+                                postInitTask.run();
                             } catch (Throwable t) {
                                 t.printStackTrace();
                                 throw new RuntimeException("error running task", t);
@@ -716,6 +761,20 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
                         initialized = true;
 
+
+                        break;
+
+                    case SessionExpired:
+                        if (!initialized) return;
+
+                        for (SessionExpirationListener listener : onSessionExpirationListeners) {
+                            listener.onSessionExpire();
+                        }
+
+                        stop(false);
+
+
+                        init(null);
 
                         break;
 
@@ -961,9 +1020,16 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     public void addPostInitTask(Runnable run) {
         if (isInitialized()) {
             run.run();
-        } else {
-            postInitTasks.add(run);
         }
+        postInitTasks.add(run);
+    }
+
+    public void addSessionExpirationListener(SessionExpirationListener listener) {
+        onSessionExpirationListeners.add(listener);
+    }
+
+    public void addInitializationListener(InitializationListener listener) {
+        onInitializationListeners.add(listener);
     }
 
     /**

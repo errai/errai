@@ -178,7 +178,7 @@ public class JSONStreamEncoder {
 
         for (Map.Entry<Object, Object> entry : map.entrySet()) {
             if (!first) {
-                outstream.write('{');
+                outstream.write(',');
             }
 
             if (!(entry.getKey() instanceof String)) {

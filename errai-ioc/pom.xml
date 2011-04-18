@@ -37,7 +37,7 @@
             <version>1.2.3-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>com.google.code.guice</groupId>
+            <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
             <scope>provided</scope>
         </dependency>

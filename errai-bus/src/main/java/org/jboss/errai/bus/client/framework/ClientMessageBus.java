@@ -16,6 +16,9 @@
 
 package org.jboss.errai.bus.client.framework;
 
+import org.jboss.errai.bus.client.api.InitializationListener;
+import org.jboss.errai.bus.client.api.SessionExpirationListener;
+
 import java.util.List;
 import java.util.Map;
 
@@ -62,6 +65,10 @@ public interface ClientMessageBus extends MessageBus {
      * @param run a {@link Runnable} task.
      */
     public void addPostInitTask(Runnable run);
+
+    public void addSessionExpirationListener(SessionExpirationListener listener);
+
+    public void addInitializationListener(InitializationListener listener);
 
 
     public void init();

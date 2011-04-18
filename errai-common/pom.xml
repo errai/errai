@@ -37,7 +37,7 @@
             <scope>provided</scope>
         </dependency>      
         <dependency>
-            <groupId>com.google.code.guice</groupId>
+            <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
             <scope>provided</scope>
         </dependency>       

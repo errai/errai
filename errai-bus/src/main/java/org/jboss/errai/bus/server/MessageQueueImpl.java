@@ -18,6 +18,7 @@ package org.jboss.errai.bus.server;
 
 import org.jboss.errai.bus.client.api.HasEncoded;
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.base.QueueStopMessage;
 import org.jboss.errai.bus.server.api.*;
 import org.jboss.errai.bus.server.async.TimedTask;
 import org.jboss.errai.bus.server.io.JSONStreamEncoder;
@@ -408,6 +409,7 @@ public class MessageQueueImpl implements MessageQueue {
         queueRunning = false;
         queue.clear();
         bus.closeQueue(this);
+        queue.offer(new QueueStopMessage());
     }
 
 

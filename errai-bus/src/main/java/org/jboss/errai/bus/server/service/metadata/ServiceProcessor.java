@@ -20,7 +20,9 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.ResourceProvider;
+import org.jboss.errai.bus.client.api.TaskManager;
 import org.jboss.errai.bus.client.api.annotations.Local;
+import org.jboss.errai.bus.client.api.base.TaskManagerFactory;
 import org.jboss.errai.bus.client.api.builder.AbstractRemoteCallBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.ProxyProvider;
@@ -111,6 +113,7 @@ public class ServiceProcessor implements MetaDataProcessor {
                             bind(MessageCallback.class).to(clazz);
                             bind(MessageBus.class).toInstance(context.getBus());
                             bind(RequestDispatcher.class).toInstance(context.getService().getDispatcher());
+                            bind(TaskManager.class).toInstance(TaskManagerFactory.get());
 
                             // Add any extension bindings.
                             for (Map.Entry<Class<?>, ResourceProvider> entry : config.getExtensionBindings().entrySet()) {
@@ -145,6 +148,7 @@ public class ServiceProcessor implements MetaDataProcessor {
                     protected void configure() {
                         bind(MessageBus.class).toInstance(context.getBus());
                         bind(RequestDispatcher.class).toInstance(context.getService().getDispatcher());
+                        bind(TaskManager.class).toInstance(TaskManagerFactory.get());
 
                         // Add any extension bindings.
                         for (Map.Entry<Class<?>, ResourceProvider> entry : config.getExtensionBindings().entrySet()) {
@@ -203,6 +207,7 @@ public class ServiceProcessor implements MetaDataProcessor {
             protected void configure() {
                 bind(MessageBus.class).toInstance(context.getBus());
                 bind(RequestDispatcher.class).toInstance(context.getService().getDispatcher());
+                bind(TaskManager.class).toInstance(TaskManagerFactory.get());
 
                 // Add any extension bindings.
                 for (Map.Entry<Class<?>, ResourceProvider> entry : config.getExtensionBindings().entrySet()) {

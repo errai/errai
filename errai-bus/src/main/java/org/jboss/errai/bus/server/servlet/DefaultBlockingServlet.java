@@ -45,7 +45,7 @@ public class DefaultBlockingServlet extends AbstractErraiServlet {
      * @throws IOException      - if an input or output error is detected when the servlet handles the GET request
      * @throws ServletException - if the request for the GET could not be handled
      */
-    @Override                         
+    @Override
     protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
             throws ServletException, IOException {
         pollForMessages(sessionProvider.getSession(httpServletRequest.getSession(),
@@ -86,8 +86,8 @@ public class DefaultBlockingServlet extends AbstractErraiServlet {
                         return;
                 }
 
-                sendDisconnectWithReason(httpServletResponse.getOutputStream(),
-                        "There is no queue associated with this session.");
+                sendDisconnectDueToSessionExpiry(httpServletResponse.getOutputStream());
+
                 return;
             }
 
@@ -99,8 +99,7 @@ public class DefaultBlockingServlet extends AbstractErraiServlet {
             queue.poll(wait, httpServletResponse.getOutputStream());
 
             httpServletResponse.getOutputStream().close();
-        }
-        catch (final Throwable t) {
+        } catch (final Throwable t) {
             t.printStackTrace();
             httpServletResponse.setHeader("Cache-Control", "no-cache");
             httpServletResponse.addHeader("Payload-Size", "1");

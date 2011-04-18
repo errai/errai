@@ -95,9 +95,10 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
                     case DISCONNECTING:
                         return;
                 }
-                sendDisconnectWithReason(httpServletResponse.getOutputStream(),
-                        "There is no queue associated with this session.");
-                return;
+
+                sendDisconnectDueToSessionExpiry(httpServletResponse.getOutputStream());
+
+              return;
             }
 
             synchronized (queue) {
