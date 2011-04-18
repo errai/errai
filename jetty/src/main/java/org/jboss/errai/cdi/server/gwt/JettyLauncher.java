@@ -334,10 +334,10 @@ public class JettyLauncher extends ServletContainerLauncher {
             @Override
             protected Class<?> findClass(String name) throws ClassNotFoundException {
                 if ((name.startsWith("org.jboss.errai.bus.server.servlet.")
-                        && !name.endsWith(ServiceLocator.class.getSimpleName())
+                        && !name.contains(ServiceLocator.class.getSimpleName())
                         && !name.contains(AbstractErraiServlet.class.getSimpleName())
-                        && !name.endsWith(JettyContinuationsServlet.class.getName())
-                        && !name.endsWith(DefaultBlockingServlet.class.getName())) ||
+                        && !name.contains(JettyContinuationsServlet.class.getName())
+                        && !name.contains(DefaultBlockingServlet.class.getName())) ||
                         name.equals("org.jboss.servlet.http.HttpEventServlet") ||
                         name.equals("org.apache.catalina.CometProcessor")) {
                     return null;
