@@ -663,15 +663,15 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             return;
         }
 
+        if (reinit) {
+            resubscribeShadowSubcriptions();
+        }
+
         /**
          * Fire initialization listeners now.
          */
         for (InitializationListener listener : onInitializationListeners) {
             listener.onInitilization();
-        }
-
-        if (reinit) {
-            resubscribeShadowSubcriptions();
         }
 
         directSubscribe("ClientBus", new MessageCallback() {
@@ -841,7 +841,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     private void sendAllDeferred() {
         for (Iterator<Message> iter = deferredMessages.iterator(); iter.hasNext();) {
-            Message m = iter.next();;
+            Message m = iter.next();
+            ;
             if (m.hasPart(MessageParts.PriorityProcessing)) {
                 directStore(m);
                 iter.remove();
