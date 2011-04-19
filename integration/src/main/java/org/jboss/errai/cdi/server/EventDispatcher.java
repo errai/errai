@@ -77,6 +77,7 @@ public class EventDispatcher implements MessageCallback {
                             ctxMgr.getRequestContextStore().put(MessageParts.SessionID.name(),
                                     Util.getSessionId(message));
                         }
+
                         beanManager.fireEvent(o);
                     } finally {
                         ctxMgr.deactivateRequestContext();

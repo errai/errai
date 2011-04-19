@@ -26,6 +26,7 @@ import org.jboss.errai.bus.client.api.builder.AbstractRemoteCallBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.ProxyProvider;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
+import org.jboss.errai.bus.client.util.ErrorHelper;
 import org.jboss.errai.bus.rebind.RebindUtils;
 import org.jboss.errai.bus.server.ServerMessageBusImpl;
 import org.jboss.errai.bus.server.annotations.Command;
@@ -129,7 +130,13 @@ public class CDIExtensionPoints implements Extension {
 //                log.warn("Service implementation not @ApplicationScoped: " + type.getJavaClass());
 
         } else {
-        //    log.info("scanning: " + event.getAnnotatedType().getJavaClass().getName());
+
+            for (AnnotatedMethod method : type.getMethods()) {
+                if (method.isAnnotationPresent(Service.class)) {
+                    managedTypes.addServiceMethod(type, method);
+                }
+
+            }
         }
 
 
@@ -138,7 +145,7 @@ public class CDIExtensionPoints implements Extension {
 
 
         if (vetoClasses.contains(type.getJavaClass().getName())
-            || (type.getJavaClass().getPackage().getName().contains("client")
+                || (type.getJavaClass().getPackage().getName().contains("client")
                 && !type.getJavaClass().isInterface())) {
             event.veto();
             log.info("Veto " + type);
@@ -161,6 +168,8 @@ public class CDIExtensionPoints implements Extension {
             }
         }
     }
+
+    ;
 
 
     private boolean isExposedEntityType(Class type) {
@@ -262,6 +271,57 @@ public class CDIExtensionPoints implements Extension {
     }
 
     private void subscribeServices(final BeanManager beanManager, final MessageBus bus) {
+        for (Map.Entry<AnnotatedType, List<AnnotatedMethod>> entry : managedTypes.getServiceMethods().entrySet()) {
+            //    final Object targetBean = Util.lookupCallbackBean(beanManager, entry.getKey().getJavaClass());
+            final Class<?> type = entry.getKey().getJavaClass();
+
+            for (final AnnotatedMethod method : entry.getValue()) {
+                Service svc = method.getAnnotation(Service.class);
+                String svcName = svc.value().equals("") ? method.getJavaMember().getName() : svc.value();
+
+                final Method callMethod = method.getJavaMember();
+
+                if (isApplicationScoped(entry.getKey())) {
+                    bus.subscribe(svcName, new MessageCallback() {
+                        volatile Object targetBean;
+
+                        public void callback(Message message) {
+                            if (targetBean == null) {
+                                targetBean = Util.lookupCallbackBean(beanManager, type);
+                            }
+
+                            try {
+                                contextManager.activateRequestContext();
+                                callMethod.invoke(targetBean, message);
+                            } catch (Exception e) {
+                                ErrorHelper.sendClientError(bus, message, "Error dispatching service", e);
+                            } finally {
+                                contextManager.deactivateRequestContext();
+                            }
+                        }
+                    });
+                } else {
+                    bus.subscribe(svcName, new MessageCallback() {
+                        public void callback(Message message) {
+                            try {
+                                contextManager.activateRequestContext();
+                                contextManager.activateSessionContext(message);
+
+                                callMethod.invoke(Util.lookupCallbackBean(beanManager, type), message);
+                            } catch (Exception e) {
+                                ErrorHelper.sendClientError(bus, message, "Error dispatching service", e);
+                            } finally {
+                                contextManager.deactivateRequestContext();
+                            }
+                        }
+                    });
+                }
+
+            }
+
+        }
+
+
         for (final AnnotatedType<?> type : managedTypes.getServiceEndpoints()) {
             // Discriminate on @Command
             Map<String, Method> commandPoints = new HashMap<String, Method>();
@@ -273,50 +333,58 @@ public class CDIExtensionPoints implements Extension {
                         commandPoints.put(cmdName, method.getJavaMember());
                     }
                 }
-                else if (method.isAnnotationPresent(Service.class)) {
-                    Service svc = method.getAnnotation(Service.class);
-                    String svcName = svc.value().equals("") ? method.getJavaMember().getName() : svc.value();
-
-                    bus.subscribe(svcName, new MessageCallback() {
-                        public void callback(Message message) {
-
-                        }
-                    });
-
-                }
-
             }
+
 
             log.info("Register MessageCallback: " + type);
             String subjectName = Util.resolveServiceName(type.getJavaClass());
 
-            Object targetbean = Util.lookupCallbackBean(beanManager, type.getJavaClass());
-            final MessageCallback invocationTarget = commandPoints.isEmpty() ?
-                    (MessageCallback) targetbean : new CommandBindingsCallback(commandPoints, targetbean);
+            if (isApplicationScoped(type)) {
+                Object targetbean = Util.lookupCallbackBean(beanManager, type.getJavaClass());
+
+//                final MessageCallback invocationTarget = commandPoints.isEmpty() ?
+//                        (MessageCallback) targetbean : new CommandBindingsCallback(commandPoints, targetbean);
 
 
-            // TODO: enable CommandBindings
-            bus.subscribe(subjectName, new MessageCallback() {
-                //private BeanLookup lookup = new BeanLookup(type,beanManager);
+                // TODO: enable CommandBindings
+                bus.subscribe(subjectName, new MessageCallback() {
+                    volatile MessageCallback callback;
 
-                public void callback(final Message message) {
-
-                    contextManager.activateSessionContext(message);
-                    contextManager.activateRequestContext();
-                    contextManager.activateConversationContext(message);
-                    try {
-                        if (invocationTarget == null) {
-                            ((MessageCallback) Util.lookupCallbackBean(beanManager, type.getJavaClass())).callback(message);
-                        } else {
-                            invocationTarget.callback(message);
+                    public void callback(final Message message) {
+                        if (callback == null) {
+                            callback = (MessageCallback) Util.lookupCallbackBean(beanManager, type.getJavaClass());
                         }
 
-                    } finally {
-                        contextManager.deactivateRequestContext();
-                        contextManager.deactivateConversationContext(message);
+                        contextManager.activateSessionContext(message);
+                        contextManager.activateRequestContext();
+                        contextManager.activateConversationContext(message);
+                        try {
+                            callback.callback(message);
+                        } finally {
+                            contextManager.deactivateRequestContext();
+                            contextManager.deactivateConversationContext(message);
+                        }
                     }
-                }
-            });
+                });
+            } else {
+                /**
+                 * Map passitivating scope.
+                 */
+                bus.subscribe(subjectName, new MessageCallback() {
+                    public void callback(final Message message) {
+                        contextManager.activateSessionContext(message);
+                        contextManager.activateRequestContext();
+//                        contextManager.activateConversationContext(message);
+                        try {
+                            ((MessageCallback) Util.lookupCallbackBean(beanManager, type.getJavaClass())).callback(message);
+                        } finally {
+                            contextManager.deactivateRequestContext();
+                            contextManager.deactivateConversationContext(message);
+                        }
+                    }
+                });
+
+            }
 
         }
 
@@ -387,6 +455,11 @@ public class CDIExtensionPoints implements Extension {
                 throw new RuntimeException("This API is not supported in the server-side environment.");
             }
         };
+    }
+
+
+    private static boolean isApplicationScoped(AnnotatedType type) {
+        return type.isAnnotationPresent(ApplicationScoped.class);
     }
 
     class BeanLookup {
