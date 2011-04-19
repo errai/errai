@@ -60,7 +60,7 @@ public class GWTBootstrap implements EntryPoint {
             public void run() {
                 bus.addInitializationListener(new InitializationListener() {
                     public void onInitilization() {
-                        busReadyEvent.run();
+                        bus.addPostInitTask(busReadyEvent);
                     }
                 });
             }
