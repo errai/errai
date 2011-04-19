@@ -37,7 +37,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author: Filip Rogaczewski
+ * @author Filip Rogaczewski
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class EventObserverMethod implements ObserverMethod {
 
@@ -66,7 +67,11 @@ public class EventObserverMethod implements ObserverMethod {
     }
 
     public Set<Annotation> getObservedQualifiers() {
-        return new HashSet<Annotation>(Arrays.asList(qualifiers));
+    	if(qualifiers!=null) {
+    		return new HashSet<Annotation>(Arrays.asList(qualifiers));
+    	} else {
+    		return new HashSet<Annotation>();
+    	}
     }
 
     public Reception getReception() {

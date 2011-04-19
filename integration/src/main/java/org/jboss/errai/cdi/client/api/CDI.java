@@ -75,11 +75,14 @@ public class CDI {
     
     public static String getEventTypeName(String typeName, final Annotation... qualifiers) {
 		SortedSet<String> qualifierNames = new TreeSet<String>();
-		for (Annotation qualifier : qualifiers) {
-			qualifierNames.add(qualifier.annotationType().getName());
-		}
-		for (String qualifierName : qualifierNames) {
-			typeName += "@" + qualifierName;
+		
+		if(qualifiers!=null) {
+			for (Annotation qualifier : qualifiers) {
+				qualifierNames.add(qualifier.annotationType().getName());
+			}
+			for (String qualifierName : qualifierNames) {
+				typeName += "@" + qualifierName;
+			}
 		}
 
 		return typeName;
@@ -91,11 +94,11 @@ public class CDI {
             return;
         }
 
-        String subject = getSubjectNameByType(payload.getClass());
+        String subject = getSubjectNameByType(payload.getClass(), qualifiers);
 
         if (ErraiBus.get().isSubscribed(subject)) {
             MessageBuilder.createMessage()
-                    .toSubject(getSubjectNameByType(payload.getClass(), qualifiers))
+                    .toSubject(subject)
                     .command(CDICommands.CDIEvent)
                     .with(CDIProtocol.TYPE, payload.getClass().getName())
                     .with(CDIProtocol.OBJECT_REF, payload)
@@ -103,12 +106,14 @@ public class CDI {
                     .sendNowWith(ErraiBus.get());
         }
 
-        if (remoteEvents.contains(payload.getClass().getName())) {
+        String eventTypeName = CDI.getEventTypeName(payload.getClass().getName(), qualifiers);
+        if (remoteEvents.contains(eventTypeName)) {
             MessageBuilder.createMessage()
                     .toSubject(DISPATCHER_SUBJECT)
                     .command(CDICommands.CDIEvent)
                     .with(CDIProtocol.TYPE, payload.getClass().getName())
                     .with(CDIProtocol.OBJECT_REF, payload)
+                    .with(CDIProtocol.EVENT_TYPE, eventTypeName)
                     .noErrorHandling()
                     .sendNowWith(ErraiBus.get());
         }

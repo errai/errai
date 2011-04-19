@@ -17,5 +17,5 @@ package org.jboss.errai.cdi.client;
 
 public enum CDIProtocol
 {
-  TYPE, OBJECT_REF
+  TYPE, EVENT_TYPE, OBJECT_REF
 }

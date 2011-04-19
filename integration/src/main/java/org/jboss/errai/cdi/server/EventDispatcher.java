@@ -15,6 +15,16 @@
  */
 package org.jboss.errai.cdi.server;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import javax.enterprise.inject.spi.BeanManager;
+
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
@@ -24,16 +34,7 @@ import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.cdi.client.CDICommands;
 import org.jboss.errai.cdi.client.CDIProtocol;
-import org.jboss.errai.cdi.client.api.Event;
 import org.jboss.weld.manager.BeanManagerImpl;
-
-import javax.enterprise.inject.spi.BeanManager;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Acts as a bridge between Errai Bus and the CDI event system.<br/>
@@ -47,13 +48,13 @@ public class EventDispatcher implements MessageCallback {
     private Map<Class<?>, Class<?>> conversationalEvents = new HashMap<Class<?>, Class<?>>();
     private Set<Class<?>> conversationalServices = new HashSet<Class<?>>();
 
-    private String[] observedEvents;
+    private Map<String, Annotation[]> observedEvents;
 
-    public EventDispatcher(BeanManager beanManager, MessageBus bus, ContextManager ctxMgr, Set<String> observedEventSet) {
+    public EventDispatcher(BeanManager beanManager, MessageBus bus, ContextManager ctxMgr, Map<String, Annotation[]> observedEvents) {
         this.beanManager = beanManager;
         this.bus = bus;
         this.ctxMgr = ctxMgr;
-        this.observedEvents = observedEventSet.toArray(new String[observedEventSet.size()]);
+        this.observedEvents = observedEvents;
     }
 
     // Invoked by Errai
@@ -68,7 +69,6 @@ public class EventDispatcher implements MessageCallback {
                 case CDIEvent:
                     String type = message.get(String.class, CDIProtocol.TYPE);
                     final Class clazz = Thread.currentThread().getContextClassLoader().loadClass(type);
-                    //final Event<?> o = (Event<?>) message.get(clazz, CDIProtocol.OBJECT_REF);
                     final Object o = message.get(clazz, CDIProtocol.OBJECT_REF);
                     try {
                         ctxMgr.activateRequestContext();
@@ -77,9 +77,14 @@ public class EventDispatcher implements MessageCallback {
                             ctxMgr.getRequestContextStore().put(MessageParts.SessionID.name(),
                                     Util.getSessionId(message));
                         }
-                       // beanManager.fireEvent(o, o.getQualifiers());
-                        beanManager.fireEvent(o);
-
+                        
+                        Annotation[] qualifiers = observedEvents.get(message.get(String.class, CDIProtocol.EVENT_TYPE));
+                        if(qualifiers!=null) {
+                        	beanManager.fireEvent(o, qualifiers);	
+                        } else {
+                        	beanManager.fireEvent(o);
+                        }
+                        
                         if (conversationalEvents.containsKey(clazz)) {
 
                             final Class outType = conversationalEvents.get(clazz);
@@ -130,7 +135,7 @@ public class EventDispatcher implements MessageCallback {
                     MessageBuilder.createConversation(message)
                             .toSubject("cdi.event:ClientDispatcher")
                             .command(BusCommands.RemoteSubscribe)
-                            .with(MessageParts.Value, observedEvents)
+                            .with(MessageParts.Value, observedEvents.keySet().toArray(new String[observedEvents.size()]))
                             .done().reply();
 
                     break;

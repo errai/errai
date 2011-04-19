@@ -20,8 +20,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -39,6 +41,7 @@ import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.ProcessObserverMethod;
 import javax.inject.Inject;
+import javax.inject.Qualifier;
 
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
@@ -87,7 +90,7 @@ public class CDIExtensionPoints implements Extension {
 
     private Map<Class<?>, Class<?>> conversationalObservers = new HashMap<Class<?>, Class<?>>();
     private Set<Class<?>> conversationalServices = new HashSet<Class<?>>();
-    private Set<String> observableEvents = new HashSet<String>();
+    private Map<String, Annotation[]> observableEvents = new HashMap<String, Annotation[]>();
 
     public void beforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
         this.uuid = UUID.randomUUID().toString();
@@ -157,7 +160,14 @@ public class CDIExtensionPoints implements Extension {
                 Class eventType = (Class) pType.getActualTypeArguments()[0];
 
                 if (isExposedEntityType(eventType)) {
-                    observableEvents.add(eventType.getName());
+                	List<Annotation> qualifiers = new ArrayList<Annotation>();
+                	for (Annotation annotation : f.getAnnotations()) {
+         				if(annotation.annotationType().isAnnotationPresent(Qualifier.class)) {
+         					qualifiers.add(annotation);
+         				}
+         			}
+                    observableEvents.put(CDI.getEventTypeName(eventType.getName(), qualifiers.toArray(new Annotation[0])), 
+                    		qualifiers.toArray(new Annotation[0]));
                 }
             }
         }
@@ -197,8 +207,9 @@ public class CDIExtensionPoints implements Extension {
         }
 
         if (isExposedEntityType(type)) {
-        	Set<Annotation> qualifiers = processObserverMethod.getObserverMethod().getObservedQualifiers();
-            observableEvents.add(CDI.getEventTypeName(type.getName(), qualifiers.toArray(new Annotation[0])));
+        	Annotation[] qualifiers = (Annotation[]) processObserverMethod.getObserverMethod().
+        		getObservedQualifiers().toArray(new Annotation[0]);
+            observableEvents.put(CDI.getEventTypeName(type.getName(), qualifiers), qualifiers);
         }
 
         if (processObserverMethod.getAnnotatedMethod().isAnnotationPresent(Conversational.class)) {
@@ -276,7 +287,7 @@ public class CDIExtensionPoints implements Extension {
             }
 
             log.info("Register MessageCallback: " + type);
-            String subjectName = Util.resolveServiceName(type.getJavaClass());
+            final String subjectName = Util.resolveServiceName(type.getJavaClass());
 
             Object targetbean = Util.lookupCallbackBean(beanManager, type.getJavaClass());
             final MessageCallback invocationTarget = commandPoints.isEmpty() ?
@@ -288,7 +299,6 @@ public class CDIExtensionPoints implements Extension {
                 //private BeanLookup lookup = new BeanLookup(type,beanManager);
 
                 public void callback(final Message message) {
-
                     contextManager.activateRequestContext();
                     contextManager.activateConversationContext(message);
                     try {
