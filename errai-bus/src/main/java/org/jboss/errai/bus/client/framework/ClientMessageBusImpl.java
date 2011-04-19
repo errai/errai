@@ -553,6 +553,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             encodeAndTransmit(m);
         }
 
+        unsubscribeAll("ClientBus");
+
         for (Map.Entry<String, List<Object>> entry : subscriptions.entrySet()) {
             for (Object o : entry.getValue()) {
                 if (o instanceof MessageCallback) {
@@ -598,6 +600,19 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         remotes = new HashMap<String, MessageCallback>();
     }
 
+
+    public void setInitialized(boolean initialized) {
+        this.initialized = initialized;
+    }
+
+    public boolean isReinit() {
+        return this.reinit;
+    }
+
+    private void setReinit(boolean reinit) {
+        this.reinit = reinit;
+    }
+
     public final MessageCallback REMOTE_CALLBACK = new RemoteMessageCallback();
 
     /**
@@ -614,6 +629,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
                 RequestBuilder bootstrap = new RequestBuilder(RequestBuilder.GET, proxySettings.url);
                 try {
+                    final boolean isReinit = isReinit();
+
                     bootstrap.sendRequest(null, new RequestCallback() {
                         public void onResponseReceived(Request request, Response response) {
                             if (200 == response.getStatusCode()) {
@@ -623,7 +640,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
                             initFields();
                             createRequestBuilders();
+
+                            if (isReinit) setReinit(true);
                             init(callback);
+                            setReinit(false);
                         }
 
                         public void onError(Request request, Throwable exception) {
@@ -639,7 +659,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             }
         }
 
-        if (sendBuilder == null) return;
+        if (sendBuilder == null) {
+            return;
+        }
 
         /**
          * Fire initialization listeners now.
@@ -649,7 +671,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         }
 
         if (reinit) {
-            reinit = false;
             resubscribeShadowSubcriptions();
         }
 
@@ -765,13 +786,18 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                         sendAllDeferred();
                         postInitTasks.clear();
 
-                        initialized = true;
+                        setInitialized(true);
 
 
                         break;
 
                     case SessionExpired:
-                        if (!initialized) return;
+                        if (isReinit()) {
+                            showError("Session was terminated and could not be re-established", null);
+                            return;
+                        }
+
+                        if (!isInitialized()) return;
 
                         for (SessionExpirationListener listener : onSessionExpirationListeners) {
                             listener.onSessionExpire();
@@ -779,9 +805,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
                         stop(false);
 
-                        reinit = true;
+                        setReinit(true);
 
                         init(null);
+                        setReinit(false);
 
                         break;
 
@@ -814,7 +841,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     private void sendAllDeferred() {
         for (Iterator<Message> iter = deferredMessages.iterator(); iter.hasNext();) {
-            Message m = iter.next();
+            Message m = iter.next();;
             if (m.hasPart(MessageParts.PriorityProcessing)) {
                 directStore(m);
                 iter.remove();
@@ -846,6 +873,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 public void onResponseReceived(Request request, Response response) {
                     try {
                         procIncomingPayload(response);
+
                         initializeMessagingBus(callback);
                     } catch (Exception e) {
                         e.printStackTrace();

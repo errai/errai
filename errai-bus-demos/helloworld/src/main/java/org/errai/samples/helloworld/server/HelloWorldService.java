@@ -11,6 +11,7 @@ import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.QueueSession;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.util.Map;
 
@@ -21,9 +22,23 @@ public class HelloWorldService {
     private TaskManager manager;
 
     @Inject
-    public HelloWorldService(MessageBus bus, TaskManager manager) {
+    public HelloWorldService(final MessageBus bus, final TaskManager manager) {
         this.bus = bus;
         this.manager = manager;
+
+        manager.scheduleRepeating(TimeUnit.SECONDS, 30, new Runnable() {
+            public void run() {
+                System.out.println("INVALIDATE KINDS!");
+
+                ServerMessageBusImpl serverBus = (ServerMessageBusImpl) bus;
+
+                for (Map.Entry<QueueSession, MessageQueue> entry : serverBus.getMessageQueues().entrySet()) {
+                   // entry.getKey().endSession();
+                     entry.getValue().stopQueue();
+                }
+            }
+        });
+
     }
 
     @Service("HelloWorld")
@@ -32,5 +47,7 @@ public class HelloWorldService {
 
         reply.setValue(val);
         reply.reply();
+
+
     }
 }

@@ -18,6 +18,8 @@ package org.jboss.errai.bus.server.servlet;
 
 import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
+import org.jboss.errai.bus.client.util.ErrorHelper;
+import org.jboss.errai.bus.server.QueueUnavailableException;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.QueueSession;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
@@ -101,30 +103,7 @@ public class DefaultBlockingServlet extends AbstractErraiServlet {
             httpServletResponse.getOutputStream().close();
         } catch (final Throwable t) {
             t.printStackTrace();
-            httpServletResponse.setHeader("Cache-Control", "no-cache");
-            httpServletResponse.addHeader("Payload-Size", "1");
-            httpServletResponse.setContentType("application/json");
-            OutputStream stream = httpServletResponse.getOutputStream();
-
-            stream.write('[');
-
-            writeToOutputStream(stream, new MarshalledMessage() {
-                public String getSubject() {
-                    return "ClientBusErrors";
-                }
-
-                public Object getMessage() {
-                    StringBuilder b = new StringBuilder("{ErrorMessage:\"").append(t.getMessage()).append("\",AdditionalDetails:\"");
-                    for (StackTraceElement e : t.getStackTrace()) {
-                        b.append(e.toString()).append("<br/>");
-                    }
-
-                    return b.append("\"}").toString();
-                }
-            });
-
-            stream.write(']');
-            stream.close();
+            writeExceptionToOutputStream(httpServletResponse, t);
         }
     }
 

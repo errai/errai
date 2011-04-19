@@ -37,6 +37,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -161,6 +162,36 @@ public abstract class AbstractErraiServlet extends HttpServlet {
         }
         stream.write(']');
 
+    }
+
+
+    protected void writeExceptionToOutputStream(HttpServletResponse httpServletResponse
+            , final
+            Throwable t) throws IOException {
+        httpServletResponse.setHeader("Cache-Control", "no-cache");
+        httpServletResponse.addHeader("Payload-Size", "1");
+        httpServletResponse.setContentType("application/json");
+        OutputStream stream = httpServletResponse.getOutputStream();
+
+        stream.write('[');
+
+        writeToOutputStream(stream, new MarshalledMessage() {
+            public String getSubject() {
+                return "ClientBusErrors";
+            }
+
+            public Object getMessage() {
+                StringBuilder b = new StringBuilder("{ErrorMessage:\"").append(t.getMessage()).append("\",AdditionalDetails:\"");
+                for (StackTraceElement e : t.getStackTrace()) {
+                    b.append(e.toString()).append("<br/>");
+                }
+
+                return b.append("\"}").toString();
+            }
+        });
+
+        stream.write(']');
+        stream.close();
     }
 
     protected void sendDisconnectWithReason(OutputStream stream, final String reason) throws IOException {

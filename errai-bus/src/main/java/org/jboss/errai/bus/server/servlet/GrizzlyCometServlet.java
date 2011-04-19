@@ -90,7 +90,15 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
 
         Message msg = createCommandMessage(session, sb.toString());
         if (msg != null) {
-            service.store(msg);
+            try {
+                service.store(msg);
+            } catch (Exception e) {
+                if (!e.getMessage().contains("expired")) {
+                    writeExceptionToOutputStream(response
+                            , e);
+                    return;
+                }
+            }
         }
 
         pollQueue(service.getBus().getQueue(session), request, response);

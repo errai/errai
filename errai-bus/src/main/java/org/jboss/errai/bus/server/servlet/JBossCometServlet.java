@@ -155,7 +155,7 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
                 break;
 
             case READ:
-                readInRequest(request);
+                readInRequest(request, event.getHttpServletResponse());
                 event.close();
         }
     }
@@ -205,7 +205,7 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
         stream.write(']');
     }
 
-    private int readInRequest(HttpServletRequest request) throws IOException {
+    private int readInRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
         BufferedReader reader = request.getReader();
         if (!reader.ready()) return 0;
         StringAppender sb = new StringAppender(request.getContentLength());
@@ -222,7 +222,15 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
         Message msg = createCommandMessage(sessionProvider.getSession(request.getSession(),
                 request.getHeader(REMOTE_QUEUE_ID_HEADER)), sb.toString());
         if (msg != null) {
-            service.store(msg);
+            try {
+                service.store(msg);
+            } catch (Exception e) {
+                if (!e.getMessage().contains("expired")) {
+                    writeExceptionToOutputStream(response, e);
+                    return 0;
+                }
+            }
+
             return 1;
         } else {
             return 0;

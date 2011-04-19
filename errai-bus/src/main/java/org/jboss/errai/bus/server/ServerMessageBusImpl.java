@@ -262,8 +262,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                         }
 
                         houseKeepingPerformed = true;
-                    }
-                    catch (ConcurrentModificationException cme) {
+                    } catch (ConcurrentModificationException cme) {
                         // fall-through and try again.
                     }
                 }
@@ -338,8 +337,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
                 try {
                     enqueueForDelivery(getQueueByMessage(message), CommandMessage.createWithParts(rawMsg));
-                }
-                catch (NoSubscribersToDeliverTo nstdt) {
+                } catch (NoSubscribersToDeliverTo nstdt) {
                     handleMessageDeliveryFailure(this, message, nstdt.getMessage(), nstdt, false);
                 }
             }
@@ -417,8 +415,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             }
 
             asyncEnqueue(queue, message);
-        }
-        catch (NoSubscribersToDeliverTo nstdt) {
+        } catch (NoSubscribersToDeliverTo nstdt) {
             // catch this so we can get a full trace
             handleMessageDeliveryFailure(this, message, nstdt.getMessage(), nstdt, false);
         }
@@ -429,8 +426,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             public void run() {
                 try {
                     enqueueForDelivery(queue, message);
-                }
-                catch (QueueOverloadedException e) {
+                } catch (QueueOverloadedException e) {
                     handleMessageDeliveryFailure(ServerMessageBusImpl.this, message, e.getMessage(), e, false);
                 }
             }
@@ -650,8 +646,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         try {
             fireUnsubscribeListeners(new SubscriptionEvent(true, rmc.getQueueCount() == 0, false, rmc.getQueueCount(),
                     sessionContext.getSessionId(), subject));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Exception running listeners");
             return;

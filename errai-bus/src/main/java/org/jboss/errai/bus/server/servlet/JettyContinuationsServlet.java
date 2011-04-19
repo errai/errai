@@ -62,6 +62,7 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
      * sending the request
      * xxxxxxx
      *
+     *
      * @param httpServletRequest  - object that contains the request the client has made of the servlet
      * @param httpServletResponse - object that contains the response the servlet sends to the client
      * @throws IOException      - if an input or output error is detected when the servlet handles the request
@@ -74,7 +75,15 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
         final QueueSession session = sessionProvider.getSession(httpServletRequest.getSession(),
                 httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
 
-        service.store(createCommandMessage(session, httpServletRequest.getInputStream()));
+        try {
+            service.store(createCommandMessage(session, httpServletRequest.getInputStream()));
+        } catch (Exception e) {
+            if (!e.getMessage().contains("expired")) {
+                writeExceptionToOutputStream(httpServletResponse, e);
+                return;
+            }
+        }
+
 
         pollQueue(service.getBus().getQueue(session), httpServletResponse.getOutputStream(), httpServletResponse);
     }

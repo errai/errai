@@ -22,6 +22,7 @@ import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.util.ErrorHelper;
 import org.jboss.errai.bus.server.DefaultTaskManager;
+import org.jboss.errai.bus.server.QueueUnavailableException;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.bus.server.api.SessionProvider;
@@ -79,7 +80,8 @@ public class ErraiServiceImpl<S> implements ErraiService<S> {
          */
         try {
             getDispatcher().dispatchGlobal(message);
-        } catch (Throwable t) {
+        }
+        catch (Throwable t) {
             t.printStackTrace();
             ErrorHelper.sendClientError(bus, message, t.getMessage(), t);
         }

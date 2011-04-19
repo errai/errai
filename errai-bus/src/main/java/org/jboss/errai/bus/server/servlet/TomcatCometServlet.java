@@ -162,7 +162,7 @@ public class TomcatCometServlet extends AbstractErraiServlet implements CometPro
                 break;
 
             case READ:
-                readInRequest(session, request);
+                readInRequest(session, request, event.getHttpServletResponse());
                 event.close();
         }
     }
@@ -212,7 +212,7 @@ public class TomcatCometServlet extends AbstractErraiServlet implements CometPro
         stream.write(']');
     }
 
-    private int readInRequest(QueueSession session, HttpServletRequest request) {
+    private int readInRequest(QueueSession session, HttpServletRequest request, HttpServletResponse response) {
         try {
 
             BufferedReader reader = request.getReader();
@@ -232,7 +232,15 @@ public class TomcatCometServlet extends AbstractErraiServlet implements CometPro
             Message msg = createCommandMessage(sessionProvider.getSession(request.getSession(),
                     request.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER)), sb.toString());
             if (msg != null) {
-                service.store(msg);
+                try {
+                    service.store(msg);
+                } catch (Exception e) {
+                    if (!e.getMessage().contains("expired")) {
+                        writeExceptionToOutputStream(response, e);
+                        return 0;
+                    }
+                }
+
                 return 1;
             } else {
                 return 0;

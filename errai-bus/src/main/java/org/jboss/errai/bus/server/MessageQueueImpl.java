@@ -117,7 +117,10 @@ public class MessageQueueImpl implements MessageQueue {
      */
     public void poll(final boolean wait, final OutputStream outstream) throws IOException {
         if (!queueRunning) {
-            throw new QueueUnavailableException("queue is not available");
+            JSONStreamEncoder.encode(new QueueStopMessage().getParts(), outstream);
+            return;
+
+         //   throw new QueueUnavailableException("queue is not available");
         }
 
         Message m = null;
@@ -139,7 +142,12 @@ public class MessageQueueImpl implements MessageQueue {
 
                 if (m instanceof HasEncoded) {
                     outstream.write(((HasEncoded) m).getEncoded().getBytes());
-                } else if (m != null) {
+                } else if (m instanceof QueueStopMessage) {
+                    JSONStreamEncoder.encode(m.getParts(), outstream);
+                    queueRunning = false;
+                    bus.closeQueue(this);
+                }
+                else if (m != null) {
                     JSONStreamEncoder.encode(m.getParts(), outstream);
                 }
 
@@ -406,10 +414,10 @@ public class MessageQueueImpl implements MessageQueue {
      * Stops the queue, closes it on the bus and clears it completely
      */
     public void stopQueue() {
-        queueRunning = false;
-        queue.clear();
-        bus.closeQueue(this);
         queue.offer(new QueueStopMessage());
+
+//        queueRunning = false;
+//        bus.closeQueue(this);
     }
 
 
