@@ -67,10 +67,11 @@ public class EventDispatcher implements MessageCallback {
                 case CDIEvent:
                     String type = message.get(String.class, CDIProtocol.TYPE);
                     final Class clazz = Thread.currentThread().getContextClassLoader().loadClass(type);
-                    final Object o = message.get(clazz, CDIProtocol.OBJECT_REF);
+                    final Object o = message.get(Object.class, CDIProtocol.OBJECT_REF);
 
                     try {
                         ctxMgr.activateRequestContext();
+                        ctxMgr.activateSessionContext(message);
 
                         if (conversationalServices.contains(clazz)) {
                             ctxMgr.getRequestContextStore().put(MessageParts.SessionID.name(),

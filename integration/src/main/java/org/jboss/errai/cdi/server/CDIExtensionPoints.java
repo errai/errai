@@ -25,7 +25,9 @@ import org.jboss.errai.bus.client.api.ResourceProvider;
 import org.jboss.errai.bus.client.api.builder.AbstractRemoteCallBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.ProxyProvider;
+import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.rebind.RebindUtils;
+import org.jboss.errai.bus.server.ServerMessageBusImpl;
 import org.jboss.errai.bus.server.annotations.Command;
 import org.jboss.errai.bus.server.annotations.ExposeEntity;
 import org.jboss.errai.bus.server.annotations.Remote;
@@ -74,6 +76,18 @@ public class CDIExtensionPoints implements Extension {
     private Set<Class<?>> conversationalServices = new HashSet<Class<?>>();
     private Set<String> observableEvents = new HashSet<String>();
 
+    private static final Set<String> vetoClasses;
+
+    static {
+        Set<String> veto = new HashSet<String>();
+        veto.add(ServerMessageBusImpl.class.getName());
+        veto.add(RequestDispatcher.class.getName());
+        veto.add(ErraiService.class.getName());
+
+        vetoClasses = Collections.unmodifiableSet(veto);
+    }
+
+
     public void beforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
         this.uuid = UUID.randomUUID().toString();
         this.managedTypes = new TypeRegistry();
@@ -115,24 +129,24 @@ public class CDIExtensionPoints implements Extension {
 //                log.warn("Service implementation not @ApplicationScoped: " + type.getJavaClass());
 
         } else {
-            log.info("scanning: " + event.getAnnotatedType().getJavaClass().getName());
+        //    log.info("scanning: " + event.getAnnotatedType().getJavaClass().getName());
         }
 
 
         // veto on client side implementations that contain CDI annotations
         // (i.e. @Observes) Otherwise Weld might try to invoke on them
-        if (type.getJavaClass().getPackage().getName().contains("client")
-                && !type.getJavaClass().isInterface()) {
+
+
+        if (vetoClasses.contains(type.getJavaClass().getName())
+            || (type.getJavaClass().getPackage().getName().contains("client")
+                && !type.getJavaClass().isInterface())) {
             event.veto();
             log.info("Veto " + type);
         }
 
-
         /**
          * We must scan for Event injection points to build the tables
          */
-
-
         Class clazz = type.getJavaClass();
 
         for (Field f : clazz.getDeclaredFields()) {
@@ -201,11 +215,14 @@ public class CDIExtensionPoints implements Extension {
             return;
         }
 
+        QueueSessionContext sessionContext = new QueueSessionContext();
+
+        abd.addContext(sessionContext);
+
         abd.addBean(new ServiceMetaData(bm, this.service));
 
-
         // context handling hooks
-        this.contextManager = new ContextManager(uuid, bm, bus);
+        this.contextManager = new ContextManager(uuid, bm, bus, sessionContext);
 
         // Custom Reply
         abd.addBean(new ConversationMetaData(bm, new ErraiConversation(
@@ -234,7 +251,6 @@ public class CDIExtensionPoints implements Extension {
         // Support to inject the request dispatcher.
         abd.addBean(new RequestDispatcherMetaData(bm, service.getDispatcher()));
 
-
         // Register observers        
         abd.addObserverMethod(new ShutdownEventObserver(managedTypes, bus, uuid));
 
@@ -257,6 +273,18 @@ public class CDIExtensionPoints implements Extension {
                         commandPoints.put(cmdName, method.getJavaMember());
                     }
                 }
+                else if (method.isAnnotationPresent(Service.class)) {
+                    Service svc = method.getAnnotation(Service.class);
+                    String svcName = svc.value().equals("") ? method.getJavaMember().getName() : svc.value();
+
+                    bus.subscribe(svcName, new MessageCallback() {
+                        public void callback(Message message) {
+
+                        }
+                    });
+
+                }
+
             }
 
             log.info("Register MessageCallback: " + type);
@@ -273,6 +301,7 @@ public class CDIExtensionPoints implements Extension {
 
                 public void callback(final Message message) {
 
+                    contextManager.activateSessionContext(message);
                     contextManager.activateRequestContext();
                     contextManager.activateConversationContext(message);
                     try {
