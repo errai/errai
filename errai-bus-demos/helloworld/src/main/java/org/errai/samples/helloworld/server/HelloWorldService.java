@@ -1,6 +1,9 @@
 package org.errai.samples.helloworld.server;
 
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.TaskManager;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.Reply;
 import org.jboss.errai.bus.client.api.base.TimeUnit;
 import org.jboss.errai.bus.client.framework.MessageBus;
@@ -15,39 +18,12 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.util.Map;
 
-@ApplicationComponent
-public class HelloWorldService {
-
-    private MessageBus bus;
-    private TaskManager manager;
-
-    @Inject
-    public HelloWorldService(final MessageBus bus, final TaskManager manager) {
-        this.bus = bus;
-        this.manager = manager;
-
-        manager.scheduleRepeating(TimeUnit.SECONDS, 30, new Runnable() {
-            public void run() {
-                System.out.println("INVALIDATE KINDS!");
-
-                ServerMessageBusImpl serverBus = (ServerMessageBusImpl) bus;
-
-                for (Map.Entry<QueueSession, MessageQueue> entry : serverBus.getMessageQueues().entrySet()) {
-                   // entry.getKey().endSession();
-                     entry.getValue().stopQueue();
-                }
-            }
-        });
-
-    }
-
-    @Service("HelloWorld")
-    public void helloWorld(@MessageParameter String val, Reply reply) {
-        System.out.println("received message: " + val);
-
-        reply.setValue(val);
-        reply.reply();
-
-
+@Service
+public class HelloWorldService implements MessageCallback {
+    public void callback(Message message) {
+        MessageBuilder.createConversation(message)
+                .subjectProvided()
+                .withValue("Hello, World!")
+                .done().reply();
     }
 }

@@ -708,6 +708,13 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         return remoteSubscriptions.containsKey(subject);
     }
 
+    public boolean hasRemoteSubscription(String sessionId, String subject) {
+        MessageQueue q = getQueueBySession(sessionId);
+        return remoteSubscriptions.containsKey(subject) && remoteSubscriptions.get(subject)
+                .contains(q);
+    }
+
+
     private boolean fireGlobalMessageListeners(Message message) {
         boolean allowContinue = true;
 
@@ -820,7 +827,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         return queue;
     }
 
-    private MessageQueue getQueueBySession(String sessionId) {
+    public MessageQueue getQueueBySession(String sessionId) {
         return getQueue(sessionLookup.get(sessionId));
     }
 

@@ -50,26 +50,8 @@ class DefaultComponents implements BootstrapExecution {
     public void execute(final BootstrapContext context) {
 
         final ErraiServiceConfiguratorImpl config = (ErraiServiceConfiguratorImpl) context.getConfig();
-        final NoopModelAdapter adapter = new NoopModelAdapter();
 
-        final ResourceProvider<ModelAdapter> modelAdapterProvider = new ResourceProvider<ModelAdapter>() {
-            public ModelAdapter get() {
-                return adapter;
-            }
-        };
-
-        /*** ModelAdapter ***/
-        config.getExtensionBindings().put(ModelAdapter.class, modelAdapterProvider);
-        final MessageProvider modelAdapterProxy = new MessageProvider() {
-            final MessageProvider delegate = JSONMessageServer.PROVIDER;
-
-            public Message get() {
-                return new MessageModelWrapper(delegate.get(),
-                        (ModelAdapter) config.getExtensionBindings().get(ModelAdapter.class).get()
-                );
-            }
-        };
-        MessageBuilder.setMessageProvider(modelAdapterProxy);
+        MessageBuilder.setMessageProvider(JSONMessageServer.PROVIDER);
 
         /*** Authentication Adapter ***/
 

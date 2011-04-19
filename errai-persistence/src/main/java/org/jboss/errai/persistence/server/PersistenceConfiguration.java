@@ -17,12 +17,19 @@
 package org.jboss.errai.persistence.server;
 
 import com.google.inject.Inject;
+import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.ResourceProvider;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.api.base.MessageModelWrapper;
+import org.jboss.errai.bus.client.framework.MessageProvider;
 import org.jboss.errai.bus.client.framework.ModelAdapter;
+import org.jboss.errai.bus.client.framework.NoopModelAdapter;
 import org.jboss.errai.bus.server.annotations.ExtensionComponent;
 import org.jboss.errai.bus.server.api.ErraiConfig;
 import org.jboss.errai.bus.server.api.ErraiConfigExtension;
+import org.jboss.errai.bus.server.io.JSONMessageServer;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
+import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +68,7 @@ public class PersistenceConfiguration implements ErraiConfigExtension {
 	logger.info("Using JPA  : "+usingJpa);
 
 	final ModelAdapter modelAdapter = new HibernateAdapter(jndiName, useJbossUtil, usingJpa);
-	ResourceProvider<ModelAdapter> modelAdapterProvider = new ResourceProvider<ModelAdapter>() {
+	final ResourceProvider<ModelAdapter> modelAdapterProvider = new ResourceProvider<ModelAdapter>() {
 
 		public ModelAdapter get() {
 			return modelAdapter;
@@ -70,5 +77,27 @@ public class PersistenceConfiguration implements ErraiConfigExtension {
 	
 	logger.info("Adding binding for: "+modelAdapter.getClass());
 	config.addBinding(ModelAdapter.class, modelAdapterProvider);
+
+
+      final NoopModelAdapter adapter = new NoopModelAdapter();
+
+//      final ResourceProvider<ModelAdapter> modelAdapterProvider = new ResourceProvider<ModelAdapter>() {
+//          public ModelAdapter get() {
+//              return adapter;
+//          }
+//      };
+
+      /*** ModelAdapter ***/
+      config.addBinding(ModelAdapter.class, modelAdapterProvider);
+
+      final MessageProvider modelAdapterProxy = new MessageProvider() {
+          final MessageProvider delegate = JSONMessageServer.PROVIDER;
+
+          public Message get() {
+              return new MessageModelWrapper(delegate.get(), modelAdapterProvider.get());
+          }
+      };
+      MessageBuilder.setMessageProvider(modelAdapterProxy);
+
   }
 }

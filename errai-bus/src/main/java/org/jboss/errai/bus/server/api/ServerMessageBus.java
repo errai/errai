@@ -96,6 +96,10 @@ public interface ServerMessageBus extends MessageBus {
      */
     public List<MessageCallback> getReceivers(String subject);
 
+    public boolean hasRemoteSubscriptions(String subject);
+
+    public boolean hasRemoteSubscription(String sessionId, String subject);
+
     public Map<QueueSession, MessageQueue> getMessageQueues();
 
 

@@ -43,13 +43,6 @@ public interface MessageBuildSendable extends Sendable {
      */
     public void sendNowWith(MessageBus viaThis, boolean fireMessageListener);
 
-    /**
-     * Sends the message with the specified <tt>RequestDispatcher</tt>
-     *
-     * @param viaThis - the dispatcher to send the message with
-     */
-    public void sendNowWith(RequestDispatcher viaThis);
-
 
     /**
      * Sends the message globally with the specified <tt>MessageBus</tt>
@@ -58,16 +51,6 @@ public interface MessageBuildSendable extends Sendable {
      */
     public void sendGlobalWith(MessageBus viaThis);
 
-    /**
-     * Sends the message globally with the specified <tt>RequestDispatcher</tt>
-     *
-     * @param viaThis - the dispatcher to send the message with
-     */
-    public void sendGlobalWith(RequestDispatcher viaThis);
 
-
-    public AsyncTask sendRepeatingWith(RequestDispatcher viaThis, TimeUnit unit, int interval);
-
-    public AsyncTask sendDelayedWith(RequestDispatcher viaThis, TimeUnit unit, int interval);
 
 }
