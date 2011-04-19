@@ -224,13 +224,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
         logAdapter.debug("new subscription: " + subject + " -> " + callback);
 
-        fireAllSubscribeListeners(subject, local);
-
-        directSubscribe(subject, callback);
+        fireAllSubscribeListeners(subject, local, directSubscribe(subject, callback));
     }
 
 
-    private void directSubscribe(final String subject, final MessageCallback callback) {
+    private boolean directSubscribe(final String subject, final MessageCallback callback) {
+        boolean isNew = !isSubscribed(subject);
         addSubscription(subject, _subscribe(subject, new MessageCallback() {
             public void callback(Message message) {
                 try {
@@ -242,6 +241,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 }
             }
         }, null));
+
+        return isNew;
     }
 
     /**
@@ -249,12 +250,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      *
      * @param subject - new subscription registered
      */
-    private void fireAllSubscribeListeners(String subject, boolean local) {
+    private void fireAllSubscribeListeners(String subject, boolean local, boolean isNew) {
         Iterator<SubscribeListener> iter = onSubscribeHooks.iterator();
-        SubscriptionEvent evt = new SubscriptionEvent(false, false, local, 1, "InBrowser", subject);
+        SubscriptionEvent evt = new SubscriptionEvent(false, false, local, isNew, 1, "InBrowser", subject);
 
         while (iter.hasNext()) {
             iter.next().onSubscribe(evt);
+
             if (evt.isDisposeListener()) {
                 iter.remove();
                 evt.setDisposeListener(false);
@@ -269,7 +271,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      */
     private void fireAllUnSubscribeListeners(String subject) {
         Iterator<UnsubscribeListener> iter = onUnsubscribeHooks.iterator();
-        SubscriptionEvent evt = new SubscriptionEvent(false, "InBrowser", 0, subject);
+        SubscriptionEvent evt = new SubscriptionEvent(false, "InBrowser", 0, false, subject);
 
         while (iter.hasNext()) {
             iter.next().onUnsubscribe(evt);
