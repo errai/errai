@@ -272,7 +272,6 @@ public class CDIExtensionPoints implements Extension {
 
     private void subscribeServices(final BeanManager beanManager, final MessageBus bus) {
         for (Map.Entry<AnnotatedType, List<AnnotatedMethod>> entry : managedTypes.getServiceMethods().entrySet()) {
-            //    final Object targetBean = Util.lookupCallbackBean(beanManager, entry.getKey().getJavaClass());
             final Class<?> type = entry.getKey().getJavaClass();
 
             for (final AnnotatedMethod method : entry.getValue()) {
@@ -282,6 +281,10 @@ public class CDIExtensionPoints implements Extension {
                 final Method callMethod = method.getJavaMember();
 
                 if (isApplicationScoped(entry.getKey())) {
+                    /**
+                     * Register the endpoint as a ApplicationScoped bean.
+                     */
+
                     bus.subscribe(svcName, new MessageCallback() {
                         volatile Object targetBean;
 
@@ -301,6 +304,9 @@ public class CDIExtensionPoints implements Extension {
                         }
                     });
                 } else {
+                    /**
+                     * Register the endpoint as a passivating scoped bean.
+                     */
                     bus.subscribe(svcName, new MessageCallback() {
                         public void callback(Message message) {
                             try {
@@ -340,7 +346,7 @@ public class CDIExtensionPoints implements Extension {
             String subjectName = Util.resolveServiceName(type.getJavaClass());
 
             if (isApplicationScoped(type)) {
-                Object targetbean = Util.lookupCallbackBean(beanManager, type.getJavaClass());
+             //   Object targetbean = Util.lookupCallbackBean(beanManager, type.getJavaClass());
 
 //                final MessageCallback invocationTarget = commandPoints.isEmpty() ?
 //                        (MessageCallback) targetbean : new CommandBindingsCallback(commandPoints, targetbean);
@@ -388,6 +394,7 @@ public class CDIExtensionPoints implements Extension {
 
         }
 
+        //todo: needs to be rewritten to support @SessionScoped
         for (final Class<?> rpcIntf : managedTypes.getRpcEndpoints().keySet()) {
             final AnnotatedType type = managedTypes.getRpcEndpoints().get(rpcIntf);
             final Class beanClass = type.getJavaClass();
