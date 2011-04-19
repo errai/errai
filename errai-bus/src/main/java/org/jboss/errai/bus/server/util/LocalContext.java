@@ -19,6 +19,7 @@ package org.jboss.errai.bus.server.util;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.server.api.QueueSession;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -77,6 +78,10 @@ public class LocalContext implements Context {
         return ctx.getAttribute(type, param);
     }
 
+    public Collection<String> getAttributeNames() {
+        return ctx.getAttributeNames();
+    }
+
     public boolean removeAttribute(Enum<?> key) {
         return ctx.removeAttribute(key.toString());
     }
@@ -128,6 +133,10 @@ public class LocalContext implements Context {
 
         public boolean removeAttribute(String attribute) {
             return contextAttributes.remove(attribute) != null;
+        }
+
+        public Collection<String> getAttributeNames() {
+            return contextAttributes.keySet();
         }
     }
 }

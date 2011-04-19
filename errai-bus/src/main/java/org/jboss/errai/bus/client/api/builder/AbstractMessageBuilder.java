@@ -214,7 +214,8 @@ public class AbstractMessageBuilder<R extends Sendable> {
                 });
 
                 if (isConversational) {
-                    final LaundryReclaim reclaim = LaundryListProviderFactory.get().getLaundryList(((ConversationMessageWrapper) message).getIncomingMessage().getResource(Object.class, "Session"))
+                    final LaundryReclaim reclaim =
+                            LaundryListProviderFactory.get().getLaundryList(((ConversationMessageWrapper) message).getIncomingMessage().getResource(Object.class, "Session"))
                             .addToHamper(new Laundry() {
                                 public void clean() {
                                     task.cancel(true);

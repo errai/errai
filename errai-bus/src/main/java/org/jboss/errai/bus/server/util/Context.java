@@ -16,6 +16,8 @@
 
 package org.jboss.errai.bus.server.util;
 
+import java.util.Collection;
+
 public interface Context {
     public void setAttribute(Enum<?> key, Object value);
 
@@ -30,6 +32,8 @@ public interface Context {
     public <T> T getAttribute(Class<T> type);
 
     public <T> T getAttribute(Class<T> type, String param);
+
+    public Collection<String> getAttributeNames();
 
     public boolean removeAttribute(Enum<?> key);
 

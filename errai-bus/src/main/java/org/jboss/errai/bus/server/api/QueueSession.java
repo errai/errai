@@ -16,6 +16,8 @@
 
 package org.jboss.errai.bus.server.api;
 
+import java.util.Collection;
+
 /**
  * This interface, <tt>QueueSession</tt>, is a template for creating a queue session with the bus. In practice, the
  * <tt>QueueSession</tt> would be wrapped around an HTTP session. The purpose is to separate Errai from the Servlet API
@@ -61,7 +63,10 @@ public interface QueueSession {
      */
     public <T> T getAttribute(Class<T> type, String attribute);
 
+    public Collection<String> getAttributeNames();
+
     /**
+
      * Returns true if the specified attribute exists
      *
      * @param attribute - the attribute to search for

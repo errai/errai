@@ -134,7 +134,7 @@ public class Worker extends Thread {
     }
 
 
-    public static final void deliverToBus(MessageBus bus, Message message) {
+    public static void deliverToBus(MessageBus bus, Message message) {
         if (message.isFlagSet(RoutingFlags.NonGlobalRouting)) {
             bus.send(message);
         } else {

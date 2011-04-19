@@ -19,6 +19,8 @@ package org.jboss.errai.bus.server.util;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.server.api.QueueSession;
 
+import java.util.Collection;
+
 public class SessionContext implements Context {
     private QueueSession session;
 
@@ -67,6 +69,10 @@ public class SessionContext implements Context {
 
     public <T> T getAttribute(Class<T> type, String param) {
         return session.getAttribute(type, param);
+    }
+
+    public Collection<String> getAttributeNames() {
+        return session.getAttributeNames();
     }
 
     public boolean removeAttribute(Enum key) {

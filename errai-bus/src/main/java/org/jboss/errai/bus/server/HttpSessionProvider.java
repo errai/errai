@@ -115,6 +115,10 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
             return (T) container.sharedAttributes.get(attribute);
         }
 
+        public Collection<String> getAttributeNames() {
+            return container.sharedAttributes.keySet();
+        }
+
         public boolean hasAttribute(String attribute) {
             return container.sharedAttributes.containsKey(attribute);
         }

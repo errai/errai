@@ -23,6 +23,7 @@ import org.jboss.errai.bus.server.async.SchedulerService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * This interface, <tt>ServerMessageBus</tt>, extends the client's {@link org.jboss.errai.bus.client.framework.MessageBus},
@@ -94,6 +95,8 @@ public interface ServerMessageBus extends MessageBus {
      * @return
      */
     public List<MessageCallback> getReceivers(String subject);
+
+    public Map<QueueSession, MessageQueue> getMessageQueues();
 
 
     /**
