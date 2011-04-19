@@ -90,7 +90,8 @@ public class CDIExtensionPoints implements Extension {
 
     private Map<Class<?>, Class<?>> conversationalObservers = new HashMap<Class<?>, Class<?>>();
     private Set<Class<?>> conversationalServices = new HashSet<Class<?>>();
-    private Map<String, Annotation[]> observableEvents = new HashMap<String, Annotation[]>();
+    private Map<String, List<Annotation[]>> observableEvents = new HashMap<String, List<Annotation[]>>();
+    private Map<String, Annotation> eventQualifiers = new HashMap<String, Annotation>();
 
     public void beforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
         this.uuid = UUID.randomUUID().toString();
@@ -164,15 +165,25 @@ public class CDIExtensionPoints implements Extension {
                 	for (Annotation annotation : f.getAnnotations()) {
          				if(annotation.annotationType().isAnnotationPresent(Qualifier.class)) {
          					qualifiers.add(annotation);
+         					eventQualifiers.put(annotation.annotationType().getName(), annotation);
          				}
          			}
-                    observableEvents.put(CDI.getEventTypeName(eventType.getName(), qualifiers.toArray(new Annotation[0])), 
-                    		qualifiers.toArray(new Annotation[0]));
+                    addObservableEvent(eventType.getName(), qualifiers.toArray(new Annotation[qualifiers.size()]));
                 }
             }
         }
     }
 
+    private void addObservableEvent(String typeName, Annotation[] qualifiers) {
+    	List<Annotation[]> allQualifiers = observableEvents.get(typeName);
+    	if (allQualifiers==null) {
+    		allQualifiers = new ArrayList<Annotation[]>();
+    	}
+    	if(qualifiers!=null && qualifiers.length>0) {
+    		allQualifiers.add(qualifiers);
+    	}
+    	observableEvents.put(typeName, allQualifiers);
+    }
 
     private boolean isExposedEntityType(Class type) {
         if (type.isAnnotationPresent(ExposeEntity.class)) {
@@ -207,9 +218,12 @@ public class CDIExtensionPoints implements Extension {
         }
 
         if (isExposedEntityType(type)) {
-        	Annotation[] qualifiers = (Annotation[]) processObserverMethod.getObserverMethod().
+        	Annotation[] methodQualifiers = (Annotation[]) processObserverMethod.getObserverMethod().
         		getObservedQualifiers().toArray(new Annotation[0]);
-            observableEvents.put(CDI.getEventTypeName(type.getName(), qualifiers), qualifiers);
+        	for(Annotation qualifier : methodQualifiers) {
+        		eventQualifiers.put(qualifier.annotationType().getName(), qualifier);
+        	}
+        	addObservableEvent(type.getName(), methodQualifiers);
         }
 
         if (processObserverMethod.getAnnotatedMethod().isAnnotationPresent(Conversational.class)) {
@@ -241,7 +255,7 @@ public class CDIExtensionPoints implements Extension {
         )));
 
         // event dispatcher
-        EventDispatcher eventDispatcher = new EventDispatcher(bm, bus, this.contextManager, observableEvents);
+        EventDispatcher eventDispatcher = new EventDispatcher(bm, bus, this.contextManager, observableEvents.keySet(), eventQualifiers);
 
         for (Map.Entry<Class<?>, Class<?>> entry : conversationalObservers.entrySet()) {
             eventDispatcher.registerConversationEvent(entry.getKey(), entry.getValue());

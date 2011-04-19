@@ -16,7 +16,10 @@
 package org.jboss.errai.cdi.server;
 
 import java.lang.annotation.Annotation;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
@@ -25,8 +28,6 @@ import org.jboss.errai.bus.client.api.SubscribeListener;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.SubscriptionEvent;
 import org.jboss.errai.cdi.server.events.EventObserverMethod;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Filip Rogaczewski
@@ -35,15 +36,13 @@ import org.slf4j.LoggerFactory;
  */
 @ApplicationScoped
 public class EventSubscriptionListener implements SubscribeListener {
-
-    private static final Logger log = LoggerFactory.getLogger(EventSubscriptionListener.class);
-
     private MessageBus bus;
     private AfterBeanDiscovery abd;
     private ContextManager mgr;
-    private Map<String, Annotation[]> observedEventsSet;
+    private Map<String, List<Annotation[]>> observedEventsSet;
+    private Set<String> processedTypes = new CopyOnWriteArraySet<String>();
 
-    public EventSubscriptionListener(AfterBeanDiscovery abd, MessageBus bus, ContextManager mgr, Map<String, Annotation[]> observedEvents) {
+    public EventSubscriptionListener(AfterBeanDiscovery abd, MessageBus bus, ContextManager mgr, Map<String, List<Annotation[]>> observedEvents) {
         this.abd = abd;
         this.bus = bus;
         this.mgr = mgr;
@@ -55,9 +54,12 @@ public class EventSubscriptionListener implements SubscribeListener {
 
         String name = event.getSubject().substring("cdi.event:".length());
         try {
-            if (observedEventsSet.containsKey(name) && event.getCount() == 1) {
-                final Class<?> type = this.getClass().getClassLoader().loadClass(name.split("@")[0]);
-                abd.addObserverMethod(new EventObserverMethod(type, bus, mgr, observedEventsSet.get(name)));
+            if (observedEventsSet.containsKey(name) && event.getCount() == 1 && !processedTypes.contains(name)) {
+                final Class<?> type = this.getClass().getClassLoader().loadClass(name);
+                for(Annotation[] qualifiers : observedEventsSet.get(name)) {
+                	abd.addObserverMethod(new EventObserverMethod(type, bus, mgr, qualifiers));	
+                }
+                processedTypes.add(name);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

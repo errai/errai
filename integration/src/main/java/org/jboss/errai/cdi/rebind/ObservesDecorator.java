@@ -16,6 +16,7 @@
 package org.jboss.errai.cdi.rebind;
 
 import java.lang.annotation.Annotation;
+import java.util.Set;
 
 import javax.enterprise.event.Observes;
 
@@ -68,11 +69,23 @@ public class ObservesDecorator extends Decorator<Observes> {
 
         final String subscribeType = method.isAnnotationPresent(Local.class) ? "subscribeLocal" : "subscribe";
         
-        final String subject = CDI.getSubjectNameByType(parmClassName,
-        		InjectUtil.extractQualifiers(injectionPoint).toArray(new Annotation[0]));
+        final String subject = CDI.getSubjectNameByType(parmClassName);
+        final Annotation[] qualifiers = InjectUtil.extractQualifiers(injectionPoint).toArray(new Annotation[0]);
+        final Set<String> qualifierNames = CDI.getQualifiersPart(qualifiers);
         
         String expr = messageBusInst + "." + subscribeType + "(\"" + subject + "\", new " + MessageCallback.class.getName() + "() {\n" +
                 "                    public void callback(" + Message.class.getName() + " message) {\n" +
+                "						java.util.List<String> methodQualifiers = new java.util.ArrayList<String>() {{\n";
+                						for(String qualifierName : qualifierNames) expr+=
+                "							add(\""+qualifierName+"\");\n";
+                						expr+=
+            	"						}};\n" + 
+            	
+            	"						java.util.Set<String> qualifiers = message.get(java.util.Set.class,"+CDIProtocol.class.getName() + "." + CDIProtocol.QUALIFIERS.name()+");\n" +
+            	"						for(String methodQualifier : methodQualifiers) {\n" +
+            	"							if(!qualifiers.contains(methodQualifier)) return;\n" +
+            	"						}\n" +
+                
                 "                        java.lang.Object response = message.get(" + parmClassName + ".class, " + CDIProtocol.class.getName() + "." + CDIProtocol.OBJECT_REF.name() + ");\n" +
                 "                        " + varName + "." + method.getName() + "((" + parmClassName + ") response);\n" +
                 "                    }\n" +

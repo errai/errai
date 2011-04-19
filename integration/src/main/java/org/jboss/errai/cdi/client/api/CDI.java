@@ -22,8 +22,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Message;
@@ -65,57 +63,73 @@ public class CDI {
         );
     }
 
-    public static String getSubjectNameByType(final Class<?> type, final Annotation... qualifiers) {
-        return getSubjectNameByType(type.getName(), qualifiers);
+    public static String getSubjectNameByType(final Class<?> type) {
+        return getSubjectNameByType(type.getName());
     }
 
-    public static String getSubjectNameByType(final String typeName, final Annotation... qualifiers) {
-        return "cdi.event:" + getEventTypeName(typeName, qualifiers);
+    public static String getSubjectNameByType(final String typeName) {
+        return "cdi.event:" + typeName;
     }
     
-    public static String getEventTypeName(String typeName, final Annotation... qualifiers) {
-		SortedSet<String> qualifierNames = new TreeSet<String>();
-		
-		if(qualifiers!=null) {
-			for (Annotation qualifier : qualifiers) {
-				qualifierNames.add(qualifier.annotationType().getName());
-			}
-			for (String qualifierName : qualifierNames) {
-				typeName += "@" + qualifierName;
-			}
+    public static Set<String> getQualifiersPart(Annotation... qualifiers) {
+		Set<String> qualifiersPart = null;
+		for (Annotation qualifier : qualifiers) {
+			if (qualifiersPart == null)
+				qualifiersPart = new HashSet<String>();
+			qualifiersPart.add(qualifier.annotationType().getName());
 		}
-
-		return typeName;
+		return qualifiersPart;
     }
-
+    
     public static void fireEvent(final Object payload, final Annotation... qualifiers) {
         if (!active) {
             deferredEvents.add(payload);
             return;
         }
 
-        String subject = getSubjectNameByType(payload.getClass(), qualifiers);
-
+        String subject = getSubjectNameByType(payload.getClass());
+        Set<String> qualifiersPart = getQualifiersPart(qualifiers);
+        
         if (ErraiBus.get().isSubscribed(subject)) {
-            MessageBuilder.createMessage()
-                    .toSubject(subject)
-                    .command(CDICommands.CDIEvent)
-                    .with(CDIProtocol.TYPE, payload.getClass().getName())
-                    .with(CDIProtocol.OBJECT_REF, payload)
-                    .noErrorHandling()
-                    .sendNowWith(ErraiBus.get());
+           if(qualifiersPart!=null && !qualifiersPart.isEmpty()) {
+        	   MessageBuilder.createMessage()
+	               	.toSubject(subject)
+	               	.command(CDICommands.CDIEvent)
+	               	.with(CDIProtocol.TYPE, payload.getClass().getName())
+	               	.with(CDIProtocol.OBJECT_REF, payload)
+	               	.with(CDIProtocol.QUALIFIERS, qualifiersPart)
+	               	.noErrorHandling()
+	               	.sendNowWith(ErraiBus.get());
+           } else {
+        	   MessageBuilder.createMessage()
+	              	.toSubject(subject)
+	              	.command(CDICommands.CDIEvent)
+	              	.with(CDIProtocol.TYPE, payload.getClass().getName())
+	              	.with(CDIProtocol.OBJECT_REF, payload)
+	              	.noErrorHandling()
+	              	.sendNowWith(ErraiBus.get());
+           }
         }
 
-        String eventTypeName = CDI.getEventTypeName(payload.getClass().getName(), qualifiers);
-        if (remoteEvents.contains(eventTypeName)) {
-            MessageBuilder.createMessage()
-                    .toSubject(DISPATCHER_SUBJECT)
-                    .command(CDICommands.CDIEvent)
-                    .with(CDIProtocol.TYPE, payload.getClass().getName())
-                    .with(CDIProtocol.OBJECT_REF, payload)
-                    .with(CDIProtocol.EVENT_TYPE, eventTypeName)
-                    .noErrorHandling()
-                    .sendNowWith(ErraiBus.get());
+        if (remoteEvents.contains(payload.getClass().getName())) {
+        	 if(qualifiersPart!=null && !qualifiersPart.isEmpty()) {
+	        	MessageBuilder.createMessage()
+	                    .toSubject(DISPATCHER_SUBJECT)
+	                    .command(CDICommands.CDIEvent)
+	                    .with(CDIProtocol.TYPE, payload.getClass().getName())
+	                    .with(CDIProtocol.OBJECT_REF, payload)
+	                    .with(CDIProtocol.QUALIFIERS, qualifiersPart)
+	                    .noErrorHandling()
+	                    .sendNowWith(ErraiBus.get());
+        	 } else {
+        		 MessageBuilder.createMessage()
+	                 .toSubject(DISPATCHER_SUBJECT)
+	                 .command(CDICommands.CDIEvent)
+	                 .with(CDIProtocol.TYPE, payload.getClass().getName())
+	                 .with(CDIProtocol.OBJECT_REF, payload)
+	                 .noErrorHandling()
+	                 .sendNowWith(ErraiBus.get());
+        	 }
         }
     }
 

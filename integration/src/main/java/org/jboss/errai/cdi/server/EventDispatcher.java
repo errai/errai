@@ -18,8 +18,10 @@ package org.jboss.errai.cdi.server;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -48,13 +50,16 @@ public class EventDispatcher implements MessageCallback {
     private Map<Class<?>, Class<?>> conversationalEvents = new HashMap<Class<?>, Class<?>>();
     private Set<Class<?>> conversationalServices = new HashSet<Class<?>>();
 
-    private Map<String, Annotation[]> observedEvents;
-
-    public EventDispatcher(BeanManager beanManager, MessageBus bus, ContextManager ctxMgr, Map<String, Annotation[]> observedEvents) {
+    private Set<String> observedEvents;
+    private Map<String, Annotation> allQualifiers;
+    
+    public EventDispatcher(BeanManager beanManager, MessageBus bus, ContextManager ctxMgr, Set<String> observedEvents,
+    		Map<String, Annotation> qualifiers) {
         this.beanManager = beanManager;
         this.bus = bus;
         this.ctxMgr = ctxMgr;
         this.observedEvents = observedEvents;
+        this.allQualifiers = qualifiers;
     }
 
     // Invoked by Errai
@@ -78,9 +83,22 @@ public class EventDispatcher implements MessageCallback {
                                     Util.getSessionId(message));
                         }
                         
-                        Annotation[] qualifiers = observedEvents.get(message.get(String.class, CDIProtocol.EVENT_TYPE));
+                        Set<String> qualifierNames = message.get(Set.class, CDIProtocol.QUALIFIERS);
+                        List<Annotation> qualifiers = null;
+                        if(qualifierNames!=null) {
+	                        for(String qualifierName : qualifierNames) {
+                        		if(qualifiers==null) {
+                        			qualifiers = new ArrayList<Annotation>();
+                        		}
+                        		Annotation qualifier=allQualifiers.get(qualifierName);
+                        		if(qualifier!=null) {
+                        			qualifiers.add(qualifier);
+                        		}
+	                        }
+                        }
+                        
                         if(qualifiers!=null) {
-                        	beanManager.fireEvent(o, qualifiers);	
+                        	beanManager.fireEvent(o, qualifiers.toArray(new Annotation[qualifiers.size()]));	
                         } else {
                         	beanManager.fireEvent(o);
                         }
@@ -135,7 +153,7 @@ public class EventDispatcher implements MessageCallback {
                     MessageBuilder.createConversation(message)
                             .toSubject("cdi.event:ClientDispatcher")
                             .command(BusCommands.RemoteSubscribe)
-                            .with(MessageParts.Value, observedEvents.keySet().toArray(new String[observedEvents.size()]))
+                            .with(MessageParts.Value, observedEvents.toArray(new String[observedEvents.size()]))
                             .done().reply();
 
                     break;

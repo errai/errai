@@ -17,7 +17,6 @@ package org.jboss.errai.cdi.server.events;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -33,16 +32,12 @@ import org.jboss.errai.cdi.client.CDICommands;
 import org.jboss.errai.cdi.client.CDIProtocol;
 import org.jboss.errai.cdi.client.api.CDI;
 import org.jboss.errai.cdi.server.ContextManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Filip Rogaczewski
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class EventObserverMethod implements ObserverMethod {
-
-    private static final Logger log = LoggerFactory.getLogger(EventObserverMethod.class);
 
     private Class<?> type;
     private Annotation[] qualifiers;
@@ -55,7 +50,7 @@ public class EventObserverMethod implements ObserverMethod {
         this.bus = bus;
         this.mgr = mgr;
         this.qualifiers = qualifiers;
-        this.subject = CDI.getSubjectNameByType(type, qualifiers);
+        this.subject = CDI.getSubjectNameByType(type);
     }
 
     public Class<?> getBeanClass() {
@@ -86,21 +81,43 @@ public class EventObserverMethod implements ObserverMethod {
         if (!type.isInstance(event)) return;
 
         Map<String, Object> ctx = mgr.getRequestContextStore();
+        Set<String> qualifiersPart = CDI.getQualifiersPart(qualifiers);
         if (ctx != null && ctx.containsKey(MessageParts.SessionID.name())) {
-            MessageBuilder.createMessage()
-                    .toSubject(subject)
-                    .command(CDICommands.CDIEvent)
-                    .with(MessageParts.SessionID.name(), ctx.get(MessageParts.SessionID.name()))
-                    .with(CDIProtocol.TYPE, type.getName())
-                    .with(CDIProtocol.OBJECT_REF, event)
-                    .noErrorHandling().sendNowWith(bus);
+        	if(qualifiersPart!=null&&!qualifiersPart.isEmpty()) {
+        		MessageBuilder.createMessage()
+	                .toSubject(subject)
+	                .command(CDICommands.CDIEvent)
+	                .with(MessageParts.SessionID.name(), ctx.get(MessageParts.SessionID.name()))
+	                .with(CDIProtocol.TYPE, type.getName())
+	                .with(CDIProtocol.QUALIFIERS, qualifiersPart)
+	                .with(CDIProtocol.OBJECT_REF, event)
+	                .noErrorHandling().sendNowWith(bus);
+        	} else {
+        		MessageBuilder.createMessage()
+	                .toSubject(subject)
+	                .command(CDICommands.CDIEvent)
+	                .with(MessageParts.SessionID.name(), ctx.get(MessageParts.SessionID.name()))
+	                .with(CDIProtocol.TYPE, type.getName())
+	                .with(CDIProtocol.OBJECT_REF, event)
+	                .noErrorHandling().sendNowWith(bus);
+        	}
         } else {
-            MessageBuilder.createMessage()
-                    .toSubject(subject)
-                    .command(CDICommands.CDIEvent)
-                    .with(CDIProtocol.TYPE, type.getName())
-                    .with(CDIProtocol.OBJECT_REF, event)
-                    .noErrorHandling().sendNowWith(bus);
+        	if(qualifiersPart!=null&&!qualifiersPart.isEmpty()) {
+        		MessageBuilder.createMessage()
+	                 .toSubject(subject)
+	                 .command(CDICommands.CDIEvent)
+	                 .with(CDIProtocol.TYPE, type.getName())
+	                 .with(CDIProtocol.OBJECT_REF, event)
+	                 .with(CDIProtocol.QUALIFIERS, qualifiersPart)
+	                 .noErrorHandling().sendNowWith(bus);
+        	} else {
+	            MessageBuilder.createMessage()
+	                    .toSubject(subject)
+	                    .command(CDICommands.CDIEvent)
+	                    .with(CDIProtocol.TYPE, type.getName())
+	                    .with(CDIProtocol.OBJECT_REF, event)
+	                    .noErrorHandling().sendNowWith(bus);
+        	}
         }
     }
 }
