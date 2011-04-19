@@ -26,22 +26,25 @@ public class SubscriptionEvent extends BusEvent<SubscriptionEvent> {
     private boolean remote = false;
     private boolean lastRemoteSubject = false;
     private boolean localOnly = false;
+    private boolean isNew = false;
     private int count;
 
     private String sessionId;
     private String subject;
 
-    public SubscriptionEvent(boolean remote, String sessionId, int count, String subject) {
+    public SubscriptionEvent(boolean remote, String sessionId, int count, boolean isNew, String subject) {
         this.remote = remote;
         this.sessionId = sessionId;
         this.count = count;
+        this.isNew = isNew;
         this.subject = subject;
     }
 
-    public SubscriptionEvent(boolean remote, boolean lastRemoteSubject, boolean localOnly, int count, String sessionId, String subject) {
+    public SubscriptionEvent(boolean remote, boolean lastRemoteSubject, boolean localOnly, boolean isNew, int count, String sessionId, String subject) {
         this.remote = remote;
         this.lastRemoteSubject = lastRemoteSubject;
         this.localOnly = localOnly;
+        this.isNew = isNew;
         this.count = count;
         this.sessionId = sessionId;
         this.subject = subject;
@@ -67,6 +70,9 @@ public class SubscriptionEvent extends BusEvent<SubscriptionEvent> {
         return remote;
     }
 
+    public boolean isNew() {
+        return isNew;
+    }
 
     public boolean isLastRemoteSubject() {
         return lastRemoteSubject;

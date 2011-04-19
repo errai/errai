@@ -544,7 +544,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
         DeliveryPlan plan = createOrAddDeliveryPlan(subject, receiver);
 
-        fireSubscribeListeners(new SubscriptionEvent(false, null, plan.getTotalReceivers(), subject));
+        fireSubscribeListeners(new SubscriptionEvent(false, null,plan.getTotalReceivers(), true, subject));
     }
 
     public void subscribeLocal(String subject, MessageCallback receiver) {
@@ -553,7 +553,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
         DeliveryPlan plan = createOrAddDeliveryPlan(subject, receiver);
 
-        fireSubscribeListeners(new SubscriptionEvent(false, false, true, plan.getTotalReceivers(), "InBus", subject));
+        fireSubscribeListeners(new SubscriptionEvent(false, false, true, true, plan.getTotalReceivers(), "InBus", subject));
     }
 
     private DeliveryPlan createOrAddDeliveryPlan(final String subject, final MessageCallback receiver) {
@@ -580,12 +580,16 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     public void remoteSubscribe(QueueSession sessionContext, MessageQueue queue, String subject) {
         if (subject == null) return;
 
+        boolean isNew = false;
+
         RemoteMessageCallback rmc;
         synchronized (remoteSubscriptions) {
             rmc = remoteSubscriptions.get(subject);
             if (rmc == null) {
                 rmc = new RemoteMessageCallback();
                 rmc.addQueue(queue);
+
+                isNew = true;
 
                 remoteSubscriptions.put(subject, rmc);
                 createOrAddDeliveryPlan(subject, rmc);
@@ -595,7 +599,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             }
         }
 
-        fireSubscribeListeners(new SubscriptionEvent(true, sessionContext.getSessionId(), rmc.getQueueCount(), subject));
+        fireSubscribeListeners(new SubscriptionEvent(true, sessionContext.getSessionId(), rmc.getQueueCount(), isNew, subject));
     }
 
     public class RemoteMessageCallback implements MessageCallback {
@@ -644,7 +648,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         rmc.removeQueue(queue);
 
         try {
-            fireUnsubscribeListeners(new SubscriptionEvent(true, rmc.getQueueCount() == 0, false, rmc.getQueueCount(),
+            fireUnsubscribeListeners(new SubscriptionEvent(true, rmc.getQueueCount() == 0, false, false, rmc.getQueueCount(),
                     sessionContext.getSessionId(), subject));
         } catch (Exception e) {
             e.printStackTrace();
@@ -676,7 +680,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
         subscriptions.remove(subject);
 
-        fireUnsubscribeListeners(new SubscriptionEvent(false, null, 0, subject));
+        fireUnsubscribeListeners(new SubscriptionEvent(false, null, 0, false, subject));
     }
 
     /**
@@ -874,11 +878,11 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
 
         for (String subject : subscriptions.keySet()) {
-            busMonitor.notifyNewSubscriptionEvent(new SubscriptionEvent(false, "None", 1, subject));
+            busMonitor.notifyNewSubscriptionEvent(new SubscriptionEvent(false, "None", 1, false, subject));
         }
         for (Map.Entry<String, RemoteMessageCallback> entry : remoteSubscriptions.entrySet()) {
             for (MessageQueue queue : entry.getValue().getQueues()) {
-                busMonitor.notifyNewSubscriptionEvent(new SubscriptionEvent(true, queue.getSession().getSessionId(), 1, entry.getKey()));
+                busMonitor.notifyNewSubscriptionEvent(new SubscriptionEvent(true, queue.getSession().getSessionId(), 1, false, entry.getKey()));
             }
         }
 
