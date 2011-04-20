@@ -71,12 +71,14 @@ public class CDI {
         return "cdi.event:" + typeName;
     }
     
-    public static Set<String> getQualifiersPart(Annotation... qualifiers) {
+    public static Set<String> getQualifiersPart(Annotation[] qualifiers) {
 		Set<String> qualifiersPart = null;
-		for (Annotation qualifier : qualifiers) {
-			if (qualifiersPart == null)
-				qualifiersPart = new HashSet<String>();
-			qualifiersPart.add(qualifier.annotationType().getName());
+		if(qualifiers!=null) {
+			for (Annotation qualifier : qualifiers) {
+				if (qualifiersPart == null)
+					qualifiersPart = new HashSet<String>();
+				qualifiersPart.add(qualifier.annotationType().getName());
+			}
 		}
 		return qualifiersPart;
     }

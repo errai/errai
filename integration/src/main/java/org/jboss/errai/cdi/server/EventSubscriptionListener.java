@@ -39,14 +39,13 @@ public class EventSubscriptionListener implements SubscribeListener {
     private MessageBus bus;
     private AfterBeanDiscovery abd;
     private ContextManager mgr;
-    private Map<String, List<Annotation[]>> observedEventsSet;
-    private Set<String> processedTypes = new CopyOnWriteArraySet<String>();
+    private Map<String, List<Annotation[]>> observedEvents;
 
     public EventSubscriptionListener(AfterBeanDiscovery abd, MessageBus bus, ContextManager mgr, Map<String, List<Annotation[]>> observedEvents) {
         this.abd = abd;
         this.bus = bus;
         this.mgr = mgr;
-        this.observedEventsSet = observedEvents;
+        this.observedEvents = observedEvents;
     }
 
     public void onSubscribe(SubscriptionEvent event) {
@@ -54,12 +53,12 @@ public class EventSubscriptionListener implements SubscribeListener {
 
         String name = event.getSubject().substring("cdi.event:".length());
         try {
-            if (observedEventsSet.containsKey(name) && event.getCount() == 1 && !processedTypes.contains(name)) {
+            if (observedEvents.containsKey(name) && event.getCount() == 1 && event.isNew()) {
                 final Class<?> type = this.getClass().getClassLoader().loadClass(name);
-                for(Annotation[] qualifiers : observedEventsSet.get(name)) {
+                abd.addObserverMethod(new EventObserverMethod(type, bus, mgr));
+                for(Annotation[] qualifiers : observedEvents.get(name)) {
                 	abd.addObserverMethod(new EventObserverMethod(type, bus, mgr, qualifiers));	
                 }
-                processedTypes.add(name);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

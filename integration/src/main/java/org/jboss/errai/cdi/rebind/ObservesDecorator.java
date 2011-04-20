@@ -76,17 +76,22 @@ public class ObservesDecorator extends Decorator<Observes> {
         String expr = messageBusInst + "." + subscribeType + "(\"" + subject + "\", new " + MessageCallback.class.getName() + "() {\n" +
                 "                    public void callback(" + Message.class.getName() + " message) {\n" +
                 "						java.util.List<String> methodQualifiers = new java.util.ArrayList<String>() {{\n";
-                						for(String qualifierName : qualifierNames) expr+=
-                "							add(\""+qualifierName+"\");\n";
+                						if(qualifierNames!=null) {
+	        								for(String qualifierName : qualifierNames) expr+=
+	            "								add(\""+qualifierName+"\");\n";
+                						}
                 						expr+=
             	"						}};\n" + 
             	
             	"						java.util.Set<String> qualifiers = message.get(java.util.Set.class,"+CDIProtocol.class.getName() + "." + CDIProtocol.QUALIFIERS.name()+");\n" +
-            	"						for(String methodQualifier : methodQualifiers) {\n" +
-            	"							if(!qualifiers.contains(methodQualifier)) return;\n" +
-            	"						}\n" +
-                
-                "                        java.lang.Object response = message.get(" + parmClassName + ".class, " + CDIProtocol.class.getName() + "." + CDIProtocol.OBJECT_REF.name() + ");\n" +
+            	"						if((qualifiers==null || qualifiers.isEmpty()) && !methodQualifiers.isEmpty()) return;\n" + 
+                "						if(qualifiers!=null) {\n" +
+            	"							if(methodQualifiers.size()!=qualifiers.size()) return;\n" +
+            	"							for(String methodQualifier : methodQualifiers) {\n" +
+            	"								if(!qualifiers.contains(methodQualifier)) return;\n" +
+            	"							}\n" +
+                "						}\n" + 
+                "                       java.lang.Object response = message.get(" + parmClassName + ".class, " + CDIProtocol.class.getName() + "." + CDIProtocol.OBJECT_REF.name() + ");\n" +
                 "                        " + varName + "." + method.getName() + "((" + parmClassName + ") response);\n" +
                 "                    }\n" +
                 "                });\n";

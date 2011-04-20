@@ -18,8 +18,10 @@ package org.jboss.errai.cdi.server;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.server.api.QueueSession;
 import org.jboss.weld.context.bound.BoundConversationContext;
 import org.jboss.weld.context.bound.BoundRequestContext;
+import org.jboss.weld.context.bound.BoundSessionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,13 +33,15 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Maintains CDI invocation context lifecyle.
  *
- * @author: Heiko Braun <hbraun@redhat.com>
+ * @author Heiko Braun <hbraun@redhat.com>
+ * @author Mike Brock
  * @date: Sep 28, 2010
  */
 public class ContextManager {
 
     private static final Logger log = LoggerFactory.getLogger(ContextManager.class);
 
+    private QueueSessionContext sessionContext;
     private BoundRequestContext requestContext;
     private BoundConversationContext conversationContext;
 
@@ -53,7 +57,7 @@ public class ContextManager {
 
     private MessageBus bus;
 
-    public ContextManager(String uuid, BeanManager beanManager, MessageBus bus) {
+    public ContextManager(String uuid, BeanManager beanManager, MessageBus bus, QueueSessionContext context) {
 
         this.bus = bus;
         this.uuid = uuid;
@@ -63,6 +67,11 @@ public class ContextManager {
 
         this.conversationContext = (BoundConversationContext)
                 Util.lookupCallbackBean(beanManager, BoundConversationContext.class);
+
+        this.sessionContext = context;
+
+//        this.sessionContext = (QueueSessionContext)
+//                Util.lookupCallbackBean(beanManager, QueueSessionContext.class);
 
         if (requestContext == null) {
             log.warn("BoundRequestContext not found. ContextManager will not be available.");
@@ -89,6 +98,15 @@ public class ContextManager {
 
         requestContextStore.remove();
     }
+
+    public void activateSessionContext(Message message) {
+        if (sessionContext == null) {
+            System.out.println("no session context?");
+            return;
+        }
+        sessionContext.associate(message);
+    }
+
 
     public void activateConversationContext(Message message) {
         if (requestContext == null) return;
