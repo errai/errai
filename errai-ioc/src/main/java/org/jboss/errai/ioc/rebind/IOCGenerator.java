@@ -21,6 +21,7 @@ import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.core.ext.typeinfo.*;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
@@ -61,6 +62,8 @@ public class IOCGenerator extends Generator {
     private ProcessingContext procContext;
     private InjectorFactory injectFactory;
     private ProcessorFactory procFactory;
+
+    public static final boolean isDebugCompile = Boolean.getBoolean("errai.ioc.debug");
 
     private List<Runnable> deferredTasks = new LinkedList<Runnable>();
 
@@ -444,6 +447,14 @@ public class IOCGenerator extends Generator {
                 }
             }
         });
+    }
+
+    public static String debugOutput(CharSequence s) {
+        if (isDebugCompile) {
+            String debugStmt = Window.class.getName() + ".alert(" + s.toString().replaceAll("\"", "\\\"") + ");\n";
+            return debugStmt + s.toString();
+        }
+        return s.toString();
     }
 
     private JClassType loadType(TypeOracle oracle, Class<?> entity) {

@@ -30,6 +30,7 @@ import javax.inject.Qualifier;
 
 import org.jboss.errai.bus.rebind.ScannerSingleton;
 import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
+import org.jboss.errai.ioc.rebind.IOCGenerator;
 import org.mvel2.util.ReflectionUtil;
 import org.mvel2.util.StringAppender;
 import org.slf4j.Logger;
@@ -89,7 +90,7 @@ public class InjectUtil {
 
                     doPostConstruct(appender, injector, postConstructTasks);
 
-                    return appender.toString();
+                    return IOCGenerator.debugOutput(appender.toString());
                 }
             };
 
@@ -108,7 +109,7 @@ public class InjectUtil {
 
                     doPostConstruct(appender, injector, postConstructTasks);
 
-                    return appender.toString();
+                    return IOCGenerator.debugOutput(appender.toString());
                 }
             };
         }

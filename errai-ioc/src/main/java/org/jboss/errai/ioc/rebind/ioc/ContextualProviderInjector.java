@@ -23,6 +23,8 @@ import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.JField;
 import com.google.gwt.core.ext.typeinfo.JParameter;
 import com.google.gwt.core.ext.typeinfo.JParameterizedType;
+import com.google.gwt.user.client.Window;
+import org.jboss.errai.ioc.rebind.IOCGenerator;
 
 public class ContextualProviderInjector extends TypeInjector {
     private final Injector providerInjector;
@@ -59,6 +61,8 @@ public class ContextualProviderInjector extends TypeInjector {
 
         StringBuilder sb = new StringBuilder();
 
+
+
         if (pType == null) {
             sb.append(providerInjector.getType(injectContext, injectionPoint)).append(".provide(new Class[] {}");
         } else {
@@ -88,7 +92,9 @@ public class ContextualProviderInjector extends TypeInjector {
 	        	sb.append("\n}");
 	        }
         }
-        return sb.append(")").toString();
+        sb.append(")");
+
+        return IOCGenerator.debugOutput(sb);
     }
 
     @Override
