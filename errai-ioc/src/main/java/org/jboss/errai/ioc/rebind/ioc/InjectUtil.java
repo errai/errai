@@ -313,7 +313,6 @@ public class InjectUtil {
         return field.getEnclosingType().getQualifiedSourceName().replaceAll("\\.", "_") + "_" + field.getName();
     }
 
-
     private static Set<Class<?>> qualifiers;
 
     public static Set<Class<?>> getQualifiers() {
@@ -351,7 +350,6 @@ public class InjectUtil {
             JClassType jType = injectionPoint.getInjector().getInjectedType();
             JMethod observesMethod = jType.getMethod(method.getName(), jMethodParms);
 
-
             for (Class<?> qualifier : getQualifiers()) {
                 if (observesMethod.getParameters()[eventParamIndex].isAnnotationPresent((Class<? extends Annotation>) qualifier)) {
                     qualifiers.add(observesMethod.getParameters()[eventParamIndex].getAnnotation((Class<? extends Annotation>) qualifier));
@@ -369,7 +367,6 @@ public class InjectUtil {
 
         try {
             // find all qualifiers of the event field
-
             JField jEventField = injectionPoint.getField();
 
             for (Class<?> qualifier : getQualifiers()) {
@@ -377,14 +374,9 @@ public class InjectUtil {
                     qualifiers.add(jEventField.getAnnotation((Class<? extends Annotation>) qualifier));
                 }
             }
-
-
         } catch (Exception e) {
             log.error("Problem reading qualifiers for " + injectionPoint.getField(), e);
         }
-
         return qualifiers;
     }
-    
-
 }
