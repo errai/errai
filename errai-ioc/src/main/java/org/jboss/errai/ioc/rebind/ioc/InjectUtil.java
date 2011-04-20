@@ -21,16 +21,15 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Qualifier;
 
+import org.jboss.errai.bus.rebind.ScannerSingleton;
+import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
 import org.mvel2.util.ReflectionUtil;
 import org.mvel2.util.StringAppender;
 import org.slf4j.Logger;
@@ -313,62 +312,79 @@ public class InjectUtil {
     public static String getPrivateFieldInjectorName(JField field) {
         return field.getEnclosingType().getQualifiedSourceName().replaceAll("\\.", "_") + "_" + field.getName();
     }
-    
-    public static List<Annotation> extractQualifiers(InjectionPoint<?> injectionPoint) { 
-		return (injectionPoint.getMethod()!=null)?
-				extractQualifiersFromMethod(injectionPoint):extractQualifiersFromField(injectionPoint);
-	}
-    
+
+
+    private static Set<Class<?>> qualifiers;
+
+    public static Set<Class<?>> getQualifiers() {
+        if (qualifiers == null) {
+            qualifiers = new HashSet<Class<?>>();
+
+            MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
+            qualifiers.addAll(scanner.getTypesAnnotatedWith(Qualifier.class));
+        }
+
+        return qualifiers;
+    }
+
+    public static List<Annotation> extractQualifiers(InjectionPoint<?> injectionPoint) {
+        return (injectionPoint.getMethod() != null) ?
+                extractQualifiersFromMethod(injectionPoint) : extractQualifiersFromField(injectionPoint);
+    }
+
     private static List<Annotation> extractQualifiersFromMethod(InjectionPoint<?> injectionPoint) {
-    	List<Annotation> qualifiers = new ArrayList<Annotation>();
-     	
-    	try {
-    		final JMethod method = injectionPoint.getMethod();
-    		final JParameter parm = injectionPoint.getParm();
-    	        
-         	// collect parameters and find the index of the event parameter
-         	Class<?>[] methodParams = new Class<?>[method.getParameters().length];
-    		int eventParamIndex=0;
-         	for(int i=0; i<method.getParameters().length; i++) {
-         		if(method.getParameters()[i].getName().equals(parm.getName())) {
-         			eventParamIndex=i;
-         		}
-         		methodParams[i]=Class.forName(method.getParameters()[i].getType().getQualifiedSourceName());
-         	}
-         	
-         	// find all qualifiers of the event parameter
- 			Class<?> type = Class.forName(injectionPoint.getInjector().getInjectedType().getQualifiedSourceName());
-         	Method observesMethod = type.getMethod(method.getName(), methodParams);
-         	
- 			for (Annotation annotation : observesMethod.getParameterAnnotations()[eventParamIndex]) {
- 				if(annotation.annotationType().isAnnotationPresent(Qualifier.class)) {
- 					qualifiers.add(annotation);
- 				}
- 			}
- 		} catch (Exception e) {
- 			log.error("Problem reading qualifiers for " + injectionPoint.getMethod(), e);
- 		}
-	 		
-	 	return qualifiers;
+        List<Annotation> qualifiers = new ArrayList<Annotation>();
+
+        try {
+            final JMethod method = injectionPoint.getMethod();
+            final JParameter parm = injectionPoint.getParm();
+
+            JType[] jMethodParms = new JType[method.getParameters().length];
+            int eventParamIndex = 0;
+            for (int i = 0; i < method.getParameters().length; i++) {
+                if (method.getParameters()[i].getName().equals(parm.getName())) {
+                    eventParamIndex = i;
+                }
+                jMethodParms[i] = method.getParameters()[i].getType();
+            }
+
+            JClassType jType = injectionPoint.getInjector().getInjectedType();
+            JMethod observesMethod = jType.getMethod(method.getName(), jMethodParms);
+
+
+            for (Class<?> qualifier : getQualifiers()) {
+                if (observesMethod.getParameters()[eventParamIndex].isAnnotationPresent((Class<? extends Annotation>) qualifier)) {
+                    qualifiers.add(observesMethod.getParameters()[eventParamIndex].getAnnotation((Class<? extends Annotation>) qualifier));
+                }
+            }
+        } catch (Exception e) {
+              log.error("Problem reading qualifiers for " + injectionPoint.getMethod(), e);
+        }
+
+        return qualifiers;
+    }
+
+    private static List<Annotation> extractQualifiersFromField(InjectionPoint<?> injectionPoint) {
+        List<Annotation> qualifiers = new ArrayList<Annotation>();
+
+        try {
+            // find all qualifiers of the event field
+
+            JField jEventField = injectionPoint.getField();
+
+            for (Class<?> qualifier : getQualifiers()) {
+                if (jEventField.isAnnotationPresent((Class<? extends Annotation>) qualifier)) {
+                    qualifiers.add(jEventField.getAnnotation((Class<? extends Annotation>) qualifier));
+                }
+            }
+
+
+        } catch (Exception e) {
+            log.error("Problem reading qualifiers for " + injectionPoint.getField(), e);
+        }
+
+        return qualifiers;
     }
     
-    private static List<Annotation> extractQualifiersFromField(InjectionPoint<?> injectionPoint) {
-    	List<Annotation> qualifiers = new ArrayList<Annotation>();
-     	
-    	try {
-         	// find all qualifiers of the event field
- 			Class<?> type = Class.forName(injectionPoint.getInjector().getInjectedType().getQualifiedSourceName());
-         	Field eventField = type.getDeclaredField(injectionPoint.getField().getName());
-         	
- 			for (Annotation annotation : eventField.getAnnotations()) {
- 				if(annotation.annotationType().isAnnotationPresent(Qualifier.class)) {
- 					qualifiers.add(annotation);
- 				}
- 			}
- 		} catch (Exception e) {
- 			log.error("Problem reading qualifiers for " + injectionPoint.getField(), e);
- 		}
-	 		
-	 	return qualifiers;
-    }
+
 }

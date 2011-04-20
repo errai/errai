@@ -35,6 +35,7 @@ import org.jboss.errai.ioc.client.InterfaceInjectionContext;
 import org.jboss.errai.ioc.client.api.*;
 import org.jboss.errai.ioc.rebind.ioc.*;
 
+import javax.inject.Qualifier;
 import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
@@ -157,7 +158,6 @@ public class IOCGenerator extends Generator {
         } catch (NotFoundException e) {
             throw new RuntimeException(e);
         }
-
         /**
          * IOCExtension.class
          */
