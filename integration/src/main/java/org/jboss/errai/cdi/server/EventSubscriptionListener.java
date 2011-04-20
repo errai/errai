@@ -56,8 +56,10 @@ public class EventSubscriptionListener implements SubscribeListener {
             if (observedEvents.containsKey(name) && event.getCount() == 1 && event.isNew()) {
                 final Class<?> type = this.getClass().getClassLoader().loadClass(name);
                 abd.addObserverMethod(new EventObserverMethod(type, bus, mgr));
-                for(Annotation[] qualifiers : observedEvents.get(name)) {
-                	abd.addObserverMethod(new EventObserverMethod(type, bus, mgr, qualifiers));	
+                if(observedEvents!=null) {
+	                for(Annotation[] qualifiers : observedEvents.get(name)) {
+	                	abd.addObserverMethod(new EventObserverMethod(type, bus, mgr, qualifiers));	
+	                }
                 }
             }
         } catch (Exception e) {
