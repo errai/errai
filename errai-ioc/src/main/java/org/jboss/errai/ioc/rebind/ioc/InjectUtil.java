@@ -16,21 +16,37 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
-import com.google.gwt.core.ext.typeinfo.*;
-import org.mvel2.util.ReflectionUtil;
-import org.mvel2.util.StringAppender;
-
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+import javax.inject.Qualifier;
+
+import org.mvel2.util.ReflectionUtil;
+import org.mvel2.util.StringAppender;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.JConstructor;
+import com.google.gwt.core.ext.typeinfo.JField;
+import com.google.gwt.core.ext.typeinfo.JMethod;
+import com.google.gwt.core.ext.typeinfo.JParameter;
+import com.google.gwt.core.ext.typeinfo.JType;
+import com.google.gwt.core.ext.typeinfo.NotFoundException;
+
 public class InjectUtil {
+	private static final Logger log = LoggerFactory.getLogger(InjectUtil.class);
+	
     private static final Class[] injectionAnnotations
             = {Inject.class, com.google.inject.Inject.class};
 
@@ -296,5 +312,63 @@ public class InjectUtil {
 
     public static String getPrivateFieldInjectorName(JField field) {
         return field.getEnclosingType().getQualifiedSourceName().replaceAll("\\.", "_") + "_" + field.getName();
+    }
+    
+    public static List<Annotation> extractQualifiers(InjectionPoint<?> injectionPoint) { 
+		return (injectionPoint.getMethod()!=null)?
+				extractQualifiersFromMethod(injectionPoint):extractQualifiersFromField(injectionPoint);
+	}
+    
+    private static List<Annotation> extractQualifiersFromMethod(InjectionPoint<?> injectionPoint) {
+    	List<Annotation> qualifiers = new ArrayList<Annotation>();
+     	
+    	try {
+    		final JMethod method = injectionPoint.getMethod();
+    		final JParameter parm = injectionPoint.getParm();
+    	        
+         	// collect parameters and find the index of the event parameter
+         	Class<?>[] methodParams = new Class<?>[method.getParameters().length];
+    		int eventParamIndex=0;
+         	for(int i=0; i<method.getParameters().length; i++) {
+         		if(method.getParameters()[i].getName().equals(parm.getName())) {
+         			eventParamIndex=i;
+         		}
+         		methodParams[i]=Class.forName(method.getParameters()[i].getType().getQualifiedSourceName());
+         	}
+         	
+         	// find all qualifiers of the event parameter
+ 			Class<?> type = Class.forName(injectionPoint.getInjector().getInjectedType().getQualifiedSourceName());
+         	Method observesMethod = type.getMethod(method.getName(), methodParams);
+         	
+ 			for (Annotation annotation : observesMethod.getParameterAnnotations()[eventParamIndex]) {
+ 				if(annotation.annotationType().isAnnotationPresent(Qualifier.class)) {
+ 					qualifiers.add(annotation);
+ 				}
+ 			}
+ 		} catch (Exception e) {
+ 			log.error("Problem reading qualifiers for " + injectionPoint.getMethod(), e);
+ 		}
+	 		
+	 	return qualifiers;
+    }
+    
+    private static List<Annotation> extractQualifiersFromField(InjectionPoint<?> injectionPoint) {
+    	List<Annotation> qualifiers = new ArrayList<Annotation>();
+     	
+    	try {
+         	// find all qualifiers of the event field
+ 			Class<?> type = Class.forName(injectionPoint.getInjector().getInjectedType().getQualifiedSourceName());
+         	Field eventField = type.getDeclaredField(injectionPoint.getField().getName());
+         	
+ 			for (Annotation annotation : eventField.getAnnotations()) {
+ 				if(annotation.annotationType().isAnnotationPresent(Qualifier.class)) {
+ 					qualifiers.add(annotation);
+ 				}
+ 			}
+ 		} catch (Exception e) {
+ 			log.error("Problem reading qualifiers for " + injectionPoint.getField(), e);
+ 		}
+	 		
+	 	return qualifiers;
     }
 }

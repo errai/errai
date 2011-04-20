@@ -16,7 +16,13 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
-import com.google.gwt.core.ext.typeinfo.*;
+import java.lang.annotation.Annotation;
+import java.util.List;
+
+import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.JField;
+import com.google.gwt.core.ext.typeinfo.JParameter;
+import com.google.gwt.core.ext.typeinfo.JParameterizedType;
 
 public class ContextualProviderInjector extends TypeInjector {
     private final Injector providerInjector;
@@ -69,11 +75,20 @@ public class ContextualProviderInjector extends TypeInjector {
                 }
             }
             sb.append("}");
+        
+	        List<Annotation> qualifiers = InjectUtil.extractQualifiers(injectionPoint);
+	        if(!qualifiers.isEmpty()) {
+	        	sb.append(", new java.lang.annotation.Annotation[] {");
+	        	for(int i=0; i<qualifiers.size(); i++) {
+	        		sb.append("\nnew java.lang.annotation.Annotation() {")
+	        			.append("\npublic Class<? extends java.lang.annotation.Annotation> annotationType() {\n return ")
+	        			.append(qualifiers.get(i).annotationType().getName()).append(".class").append(";\n}\n}");
+	        		if ((i + 1) < qualifiers.size()) sb.append(",");
+	        	}
+	        	sb.append("\n}");
+	        }
         }
-
-
         return sb.append(")").toString();
-
     }
 
     @Override

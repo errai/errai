@@ -1,5 +1,7 @@
 package org.jboss.errai.ioc.client.api.builtin;
 
+import java.lang.annotation.Annotation;
+
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Consumer;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
@@ -13,7 +15,7 @@ import org.jboss.errai.ioc.client.api.IOCProvider;
  */
 @IOCProvider
 public class ConsumerProvider implements ContextualTypeProvider<Consumer<?>> {
-    public Consumer<?> provide(Class[] typeargs) {
+    public Consumer<?> provide(Class[] typeargs, Annotation... qualifiers) {
         return new Consumer<Object>() {
             private RequestDispatcher requestDispatcher = ErraiBus.getDispatcher();
             private String toSubject = null;
