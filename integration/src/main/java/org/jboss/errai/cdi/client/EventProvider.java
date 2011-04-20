@@ -1,21 +1,21 @@
 package org.jboss.errai.cdi.client;
 
+import java.lang.annotation.Annotation;
+
+import javax.enterprise.context.ApplicationScoped;
+
 import org.jboss.errai.cdi.client.api.CDI;
 import org.jboss.errai.cdi.client.api.Conversation;
 import org.jboss.errai.cdi.client.api.Event;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
-import org.jboss.errai.ioc.client.api.Provider;
-import org.jboss.errai.ioc.client.api.TypeProvider;
-
-import javax.enterprise.context.ApplicationScoped;
-import java.lang.annotation.Annotation;
+import org.jboss.errai.ioc.client.api.IOCProvider;
 
 /**
  * User: christopherbrock
  * Date: 27-Jul-2010
  * Time: 4:24:02 PM
  */
-@Provider
+@IOCProvider
 @ApplicationScoped
 public class EventProvider implements ContextualTypeProvider<Event<?>> {
 
