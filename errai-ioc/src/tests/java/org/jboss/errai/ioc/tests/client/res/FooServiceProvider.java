@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ioc.tests.client.res;
 
-import org.jboss.errai.ioc.client.api.Provider;
+import org.jboss.errai.ioc.client.api.IOCProvider;
 import org.jboss.errai.ioc.client.api.TypeProvider;
 
 /**
@@ -24,7 +24,7 @@ import org.jboss.errai.ioc.client.api.TypeProvider;
  * Date: 15-Aug-2010
  * Time: 7:54:20 PM
  */
-@Provider
+@IOCProvider
 public class FooServiceProvider implements TypeProvider<FooService> {
     public FooService provide() {
           return new FooService() {

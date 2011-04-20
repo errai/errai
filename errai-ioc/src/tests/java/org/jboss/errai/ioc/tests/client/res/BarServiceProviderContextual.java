@@ -1,12 +1,12 @@
 package org.jboss.errai.ioc.tests.client.res;
 
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
-import org.jboss.errai.ioc.client.api.Provider;
+import org.jboss.errai.ioc.client.api.IOCProvider;
 
 /**
  * @author Mike Brock .
  */
-@Provider
+@IOCProvider
 public class BarServiceProviderContextual implements ContextualTypeProvider<BarService> {
     public BarService provide(final Class[] typeargs) {
          return new BarService() {

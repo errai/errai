@@ -127,7 +127,7 @@ public class TypeDemarshallHelper {
                                 for (String key : (Set<String>) oMap.keySet()) {
                                     if (SerializationParts.ENCODED_TYPE.equals(key) || SerializationParts.OBJECT_ID.equals(key))
                                         continue;
-                                    s.put(key, MVEL.compileSetExpression(key));
+                                    s.put(key, compileSetExpression(key));
                                 }
                             }
                             MVELDencodingCache.put(newInstance.getClass(), s);
@@ -158,7 +158,7 @@ public class TypeDemarshallHelper {
                                     ((UnsatisfiedForwardLookup) v).setPath((String) entry.getKey());
                                     ctx.addUnsatisfiedDependency(newInstance, (UnsatisfiedForwardLookup) v);
                                 } else {
-                                    MVEL.setProperty(newInstance, String.valueOf(entry.getKey()), v);
+                                    setProperty(newInstance, String.valueOf(entry.getKey()),v );
                                 }
                             }
                             catch (Exception e) {
@@ -213,7 +213,7 @@ public class TypeDemarshallHelper {
                     if ((ufl = iter.next()).getPath() == null) {
                         throw new RuntimeException("cannot satisfy dependency in object graph (path unresolvable):" + ufl.getId());
                     } else {
-                        MVEL.setProperty(entry.getKey(), ufl.getPath(), ctx.getObject(ufl.getId()));
+                        setProperty(entry.getKey(), ufl.getPath(), ctx.getObject(ufl.getId()));
 
                     }
 
@@ -223,5 +223,24 @@ public class TypeDemarshallHelper {
             if (entry.getKey() instanceof UHashMap)
                 ((UHashMap) entry.getKey()).normalHashMode();
         }
+    }
+
+
+
+    public static Serializable compileSetExpression(String s) {
+        return MVEL.compileSetExpression(ensureSafe(s));
+    }
+
+    public static void setProperty(Object i, String s, Object v) {
+        MVEL.setProperty(i, ensureSafe(s), v);
+    }
+
+    public static String ensureSafe(String s) {
+        for (int i = 0; i < s.length(); i++) {
+            if (!Character.isJavaIdentifierPart(s.charAt(i))) {
+                throw new RuntimeException("illegal character in property");
+            }
+        }
+        return s;
     }
 }

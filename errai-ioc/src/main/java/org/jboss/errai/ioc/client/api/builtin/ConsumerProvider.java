@@ -2,19 +2,16 @@ package org.jboss.errai.ioc.client.api.builtin;
 
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Consumer;
-import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.api.builder.MessageBuildCommand;
-import org.jboss.errai.bus.client.api.builder.MessageBuildParms;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
-import org.jboss.errai.ioc.client.api.Provider;
+import org.jboss.errai.ioc.client.api.IOCProvider;
 
 /**
  * @author Mike Brock .
  */
-@Provider
+@IOCProvider
 public class ConsumerProvider implements ContextualTypeProvider<Consumer<?>> {
     public Consumer<?> provide(Class[] typeargs) {
         return new Consumer<Object>() {

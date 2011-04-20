@@ -29,7 +29,7 @@ import static org.jboss.errai.bus.client.api.base.MessageBuilder.createMessage;
  * and clients <i>demanding</i> a subject through the shoutbox service.
  * <p/>
  * <p/>
- * Provider's do <i>submit</i> or <i>retract</i> offers:
+ * IOCProvider's do <i>submit</i> or <i>retract</i> offers:
  * <br>
  * <pre>
  *  Shoutbox shoutbox = new Shoutbox(); // stateful

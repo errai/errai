@@ -201,9 +201,9 @@ public class IOCGenerator extends Generator {
         }
 
         /**
-         * Provider.class
+         * IOCProvider.class
          */
-        Set<Class<?>> providers = scanner.getTypesAnnotatedWith(Provider.class);
+        Set<Class<?>> providers = scanner.getTypesAnnotatedWith(IOCProvider.class);
         for (Class<?> clazz : providers) {
             JClassType bindType = null;
             JClassType type = loadType(typeOracle, clazz);
@@ -216,7 +216,7 @@ public class IOCGenerator extends Generator {
                     JParameterizedType pType = iface.isParameterized();
 
                     if (pType == null) {
-                        throw new InjectionFailure("could not determine the bind type for the Provider class: " + type.getQualifiedSourceName());
+                        throw new InjectionFailure("could not determine the bind type for the IOCProvider class: " + type.getQualifiedSourceName());
                     }
 
                     bindType = pType.getTypeArgs()[0];
@@ -233,7 +233,7 @@ public class IOCGenerator extends Generator {
                     JParameterizedType pType = iface.isParameterized();
 
                     if (pType == null) {
-                        throw new InjectionFailure("could not determine the bind type for the Provider class: " + type.getQualifiedSourceName());
+                        throw new InjectionFailure("could not determine the bind type for the IOCProvider class: " + type.getQualifiedSourceName());
                     }
 
                     bindType = pType.getTypeArgs()[0];
