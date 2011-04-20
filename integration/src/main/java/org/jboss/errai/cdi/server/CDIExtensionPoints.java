@@ -198,7 +198,7 @@ public class CDIExtensionPoints implements Extension {
     
     private void addObservableEvent(String typeName, Annotation[] qualifiers) {
     	List<Annotation[]> eventQualifiers = observableEvents.get(typeName);
-    	if (eventQualifiers==null&&qualifiers!=null&&qualifiers.length>0) {
+    	if (eventQualifiers==null) {
     		eventQualifiers = new ArrayList<Annotation[]>();
     	}
     	
