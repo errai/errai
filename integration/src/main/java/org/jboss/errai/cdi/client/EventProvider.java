@@ -20,7 +20,8 @@ import org.jboss.errai.ioc.client.api.IOCProvider;
 public class EventProvider implements ContextualTypeProvider<Event<?>> {
 
     public Event<?> provide(final Class[] typeargs, final Annotation... qualifiers) {
-    	return new Event() {
+
+        return new Event() {
             private Class eventType = (typeargs.length == 1 ? typeargs[0] : Object.class);
             private Conversation conversation;
             private Annotation[] _qualifiers = qualifiers;
