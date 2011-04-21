@@ -90,6 +90,8 @@ public class ContextualProviderInjector extends TypeInjector {
 	        		if ((i + 1) < qualifiers.size()) sb.append(",");
 	        	}
 	        	sb.append("\n}");
+	        } else {
+	        	sb.append(", null");
 	        }
         }
         sb.append(")");

@@ -24,5 +24,5 @@ import java.lang.annotation.Annotation;
  * Time: 3:44:27 PM
  */
 public interface ContextualTypeProvider<T> {
-    public T provide(Class[] typeargs, Annotation... qualifiers);
+    public T provide(Class[] typeargs, Annotation[] qualifiers);
 }
