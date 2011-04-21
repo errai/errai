@@ -10,6 +10,8 @@ import org.jboss.errai.cdi.client.api.Event;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 
+import com.google.gwt.user.client.Window;
+
 /**
  * User: christopherbrock
  * Date: 27-Jul-2010
@@ -19,9 +21,8 @@ import org.jboss.errai.ioc.client.api.IOCProvider;
 @ApplicationScoped
 public class EventProvider implements ContextualTypeProvider<Event<?>> {
 
-    public Event<?> provide(final Class[] typeargs, final Annotation... qualifiers) {
-
-        return new Event() {
+    public Event<?> provide(final Class[] typeargs, final Annotation[] qualifiers) {
+    	return new Event() {
             private Class eventType = (typeargs.length == 1 ? typeargs[0] : Object.class);
             private Conversation conversation;
             private Annotation[] _qualifiers = qualifiers;
