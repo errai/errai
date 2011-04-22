@@ -129,20 +129,6 @@ public class Util {
                 }
             }
 
-            /**
-             * Experimental stand-alone Weld-support
-             */
-//            if (bm == null) {
-//                try {
-//                    Weld weld = new Weld();
-//                    ctx.bind(BEAN_MANAGER_JNDI, weld.initialize().getBeanManager());
-//                    return lookupBeanManager();
-//                } catch (NamingException e2) {
-//                    bm = null;
-//                }
-//
-//            }
-
             if (null == bm)
                 throw new RuntimeException("Failed to locate BeanManager", e);
         }

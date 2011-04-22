@@ -33,9 +33,9 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Maintains CDI invocation context lifecyle.
  *
- * @author Heiko Braun <hbraun@redhat.com>
+ * @author Heiko Braun
  * @author Mike Brock
- * @date: Sep 28, 2010
+ * @date Sep 28, 2010
  */
 public class ContextManager {
 
@@ -70,16 +70,13 @@ public class ContextManager {
 
         this.sessionContext = context;
 
-//        this.sessionContext = (QueueSessionContext)
-//                Util.lookupCallbackBean(beanManager, QueueSessionContext.class);
-
         if (requestContext == null) {
             log.warn("BoundRequestContext not found. ContextManager will not be available.");
         }
     }
 
     public void activateRequestContext() {
-        //    if (requestContext == null) return;
+           if (requestContext == null) return;
 
         requestContextStore.set(new HashMap<String, Object>());
 
@@ -101,7 +98,6 @@ public class ContextManager {
 
     public void activateSessionContext(Message message) {
         if (sessionContext == null) {
-            System.out.println("no session context?");
             return;
         }
         sessionContext.associate(message);
