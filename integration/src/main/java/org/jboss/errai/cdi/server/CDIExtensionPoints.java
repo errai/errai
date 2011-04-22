@@ -79,7 +79,7 @@ import com.google.inject.Provider;
  * Makes Errai components available as CDI beans (i.e. the message bus)
  * and registers CDI components as services with Errai.
  *
- * @author Heiko.Braun <hbraun@redhat.com>
+ * @author Heiko Braun <hbraun@redhat.com>
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -107,7 +107,6 @@ public class CDIExtensionPoints implements Extension {
 
         vetoClasses = Collections.unmodifiableSet(veto);
     }
-
 
     public void beforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
         this.uuid = UUID.randomUUID().toString();
@@ -144,26 +143,16 @@ public class CDIExtensionPoints implements Extension {
                 managedTypes.addServiceEndpoint(type);
             }
 
-            // enforce application scope until we get the other scopes working
-//            ApplicationScoped scope = type.getAnnotation(ApplicationScoped.class);
-//            if (null == scope)
-//                log.warn("Service implementation not @ApplicationScoped: " + type.getJavaClass());
-
         } else {
-
             for (AnnotatedMethod method : type.getMethods()) {
                 if (method.isAnnotationPresent(Service.class)) {
                     managedTypes.addServiceMethod(type, method);
                 }
-
             }
         }
 
-
         // veto on client side implementations that contain CDI annotations
         // (i.e. @Observes) Otherwise Weld might try to invoke on them
-
-
         if (vetoClasses.contains(type.getJavaClass().getName())
                 || (type.getJavaClass().getPackage().getName().contains("client")
                 && !type.getJavaClass().isInterface())) {
@@ -172,7 +161,7 @@ public class CDIExtensionPoints implements Extension {
         }
 
         /**
-         * We must scan for Event injection points to build the tables
+         * We must scan for Event consumer injection points to build the tables
          */
         Class clazz = type.getJavaClass();
 
@@ -183,52 +172,56 @@ public class CDIExtensionPoints implements Extension {
                 Class eventType = (Class) pType.getActualTypeArguments()[0];
 
                 if (isExposedEntityType(eventType)) {
-                	List<Annotation> qualifiers = new ArrayList<Annotation>();
-                	for (Annotation annotation : f.getAnnotations()) {
-         				if(annotation.annotationType().isAnnotationPresent(Qualifier.class)) {
-         					qualifiers.add(annotation);
-         					eventQualifiers.put(annotation.annotationType().getName(), annotation);
-         				}
-         			}
+                    List<Annotation> qualifiers = new ArrayList<Annotation>();
+
+                    /**
+                     * Collect Qualifier types for the Event consumer.
+                     */
+                    for (Annotation annotation : f.getAnnotations()) {
+                        if (annotation.annotationType().isAnnotationPresent(Qualifier.class)) {
+                            qualifiers.add(annotation);
+                            eventQualifiers.put(annotation.annotationType().getName(), annotation);
+                        }
+                    }
                     addObservableEvent(eventType.getName(), qualifiers.toArray(new Annotation[qualifiers.size()]));
                 }
             }
         }
     }
-    
+
     private void addObservableEvent(String typeName, Annotation[] qualifiers) {
-    	List<Annotation[]> eventQualifiers = observableEvents.get(typeName);
-    	if (eventQualifiers==null) {
-    		eventQualifiers = new ArrayList<Annotation[]>();
-    	}
-    	
-    	// make sure this combination of qualifiers is not already existing for the event
-    	boolean qualifiersExisting=false;
-    	if(qualifiers!=null && qualifiers.length>0) {
-    		for(Annotation[] existingQualifiers : eventQualifiers) {
-    			Set<String> existingQualifierNames = CDI.getQualifiersPart(existingQualifiers);
-    			Set<String> qualifierNames = CDI.getQualifiersPart(qualifiers);
-    		
-    			boolean qualifierListsEqual = true;
-    			if(existingQualifierNames.size()==qualifierNames.size()) {
-    				for(String qualifierName : qualifierNames) {
-    					if(!existingQualifierNames.contains(qualifierName)) {
-    						qualifierListsEqual = false;
-    						break;
-    					}
-    				}
-    			} else {
-					qualifierListsEqual = false;
-    			}
-    			
-    			if(qualifierListsEqual) {
-    				qualifiersExisting = true;
-    				break;
-    			}
-    		}
-    		if(!qualifiersExisting) eventQualifiers.add(qualifiers);
-    	}
-    	observableEvents.put(typeName, eventQualifiers);
+        List<Annotation[]> eventQualifiers = observableEvents.get(typeName);
+        if (eventQualifiers == null) {
+            eventQualifiers = new ArrayList<Annotation[]>();
+        }
+
+        // make sure this combination of qualifiers is not already existing for the event
+        boolean qualifiersExisting = false;
+        if (qualifiers != null && qualifiers.length > 0) {
+            for (Annotation[] existingQualifiers : eventQualifiers) {
+                Set<String> existingQualifierNames = CDI.getQualifiersPart(existingQualifiers);
+                Set<String> qualifierNames = CDI.getQualifiersPart(qualifiers);
+
+                boolean qualifierListsEqual = true;
+                if (existingQualifierNames.size() == qualifierNames.size()) {
+                    for (String qualifierName : qualifierNames) {
+                        if (!existingQualifierNames.contains(qualifierName)) {
+                            qualifierListsEqual = false;
+                            break;
+                        }
+                    }
+                } else {
+                    qualifierListsEqual = false;
+                }
+
+                if (qualifierListsEqual) {
+                    qualifiersExisting = true;
+                    break;
+                }
+            }
+            if (!qualifiersExisting) eventQualifiers.add(qualifiers);
+        }
+        observableEvents.put(typeName, eventQualifiers);
     }
 
     private boolean isExposedEntityType(Class type) {
@@ -244,7 +237,7 @@ public class CDIExtensionPoints implements Extension {
 
     public void processObserverMethod(@Observes ProcessObserverMethod processObserverMethod) {
         Type t = processObserverMethod.getObserverMethod().getObservedType();
-        
+
         if (t instanceof Class && ConversationalEvent.class.isAssignableFrom((Class) t)) {
             throw new RuntimeException("observing unqualified ConversationalEvent. You must specify type parameters");
         }
@@ -264,12 +257,12 @@ public class CDIExtensionPoints implements Extension {
         }
 
         if (isExposedEntityType(type)) {
-        	Annotation[] methodQualifiers = (Annotation[]) processObserverMethod.getObserverMethod().
-        		getObservedQualifiers().toArray(new Annotation[0]);
-        	for(Annotation qualifier : methodQualifiers) {
-        		eventQualifiers.put(qualifier.annotationType().getName(), qualifier);
-        	}
-        	addObservableEvent(type.getName(), methodQualifiers);
+            Annotation[] methodQualifiers = (Annotation[]) processObserverMethod.getObserverMethod().
+                    getObservedQualifiers().toArray(new Annotation[0]);
+            for (Annotation qualifier : methodQualifiers) {
+                eventQualifiers.put(qualifier.annotationType().getName(), qualifier);
+            }
+            addObservableEvent(type.getName(), methodQualifiers);
         }
 
         if (processObserverMethod.getAnnotatedMethod().isAnnotationPresent(Conversational.class)) {
@@ -291,7 +284,6 @@ public class CDIExtensionPoints implements Extension {
         QueueSessionContext sessionContext = new QueueSessionContext();
 
         abd.addContext(sessionContext);
-
         abd.addBean(new ServiceMetaData(bm, this.service));
 
         // context handling hooks
@@ -316,7 +308,6 @@ public class CDIExtensionPoints implements Extension {
 
         EventSubscriptionListener listener = new EventSubscriptionListener(abd, bus, contextManager, observableEvents);
         bus.addSubscribeListener(listener);
-
 
         // Errai bus injection
         abd.addBean(new MessageBusMetaData(bm, bus));
@@ -348,7 +339,6 @@ public class CDIExtensionPoints implements Extension {
                     /**
                      * Register the endpoint as a ApplicationScoped bean.
                      */
-
                     bus.subscribe(svcName, new MessageCallback() {
                         volatile Object targetBean;
 
@@ -386,11 +376,8 @@ public class CDIExtensionPoints implements Extension {
                         }
                     });
                 }
-
             }
-
         }
-
 
         for (final AnnotatedType<?> type : managedTypes.getServiceEndpoints()) {
             // Discriminate on @Command
@@ -405,18 +392,14 @@ public class CDIExtensionPoints implements Extension {
                 }
             }
 
-
             log.info("Register MessageCallback: " + type);
             final String subjectName = Util.resolveServiceName(type.getJavaClass());
 
             if (isApplicationScoped(type)) {
-             //   Object targetbean = Util.lookupCallbackBean(beanManager, type.getJavaClass());
+                /**
+                 * Create callback for application scope.
+                 */
 
-//                final MessageCallback invocationTarget = commandPoints.isEmpty() ?
-//                        (MessageCallback) targetbean : new CommandBindingsCallback(commandPoints, targetbean);
-
-
-                // TODO: enable CommandBindings
                 bus.subscribe(subjectName, new MessageCallback() {
                     volatile MessageCallback callback;
 
@@ -453,9 +436,7 @@ public class CDIExtensionPoints implements Extension {
                         }
                     }
                 });
-
             }
-
         }
 
         //todo: needs to be rewritten to support @SessionScoped
@@ -527,7 +508,6 @@ public class CDIExtensionPoints implements Extension {
             }
         };
     }
-
 
     private static boolean isApplicationScoped(AnnotatedType type) {
         return type.isAnnotationPresent(ApplicationScoped.class);
