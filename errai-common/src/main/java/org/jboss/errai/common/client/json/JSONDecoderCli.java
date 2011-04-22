@@ -41,7 +41,7 @@ public class JSONDecoderCli {
         Object v = null;
 
         if (value instanceof String) {
-            v = _decode(JSONParser.parse((String) value), ctx);
+            v = _decode(JSONParser.parseStrict((String) value), ctx);
         } else if (value instanceof JSONValue) {
             v = _decode((JSONValue) value, ctx);
         } else if (value != null) {
@@ -57,7 +57,7 @@ public class JSONDecoderCli {
 
     public static Object decode(Object value, DecodingContext ctx) {
         if (value instanceof String) {
-            return _decode(JSONParser.parse((String) value), ctx);
+            return _decode(JSONParser.parseStrict((String) value), ctx);
         } else if (value instanceof JSONValue) {
             return _decode((JSONValue) value, ctx);
         } else if (value != null) {
@@ -106,7 +106,6 @@ public class JSONDecoderCli {
                         return new UnsatisfiedForwardLookup(objId);
                     }
                 }
-
 
                 if (hasDemarshaller(className)) {
                     try {
