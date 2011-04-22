@@ -9,7 +9,7 @@
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express b  or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
@@ -28,7 +28,6 @@ import org.jboss.errai.bus.server.async.SimpleSchedulerService;
 import org.jboss.errai.bus.server.async.TimedTask;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -38,6 +37,7 @@ import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversat
 import static org.jboss.errai.bus.client.protocols.MessageParts.ReplyTo;
 import static org.jboss.errai.bus.client.protocols.SecurityCommands.MessageNotDelivered;
 import static org.jboss.errai.bus.client.util.ErrorHelper.handleMessageDeliveryFailure;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * The <tt>ServerMessageBusImpl</tt> implements the <tt>ServerMessageBus</tt>, making it possible for the server to
@@ -68,7 +68,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     private final SchedulerService houseKeeper = new SimpleSchedulerService(); // GAESchedulerService.INSTANCE;
 
-    private Logger log = LoggerFactory.getLogger(getClass());
+    private Logger log = getLogger(getClass());
 
     private BusMonitor busMonitor;
 
@@ -204,7 +204,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 } catch (Throwable t) {
                     t.printStackTrace();
                 }
-
             }
         });
 
@@ -243,6 +242,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 this.period = (1000 * 10);
             }
 
+            @SuppressWarnings({"UnusedParameters"})
             public void setExceptionHandler(AsyncExceptionHandler handler) {
             }
 
@@ -785,7 +785,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             }
         }
     }
-
 
     /**
      * Adds a global listener
