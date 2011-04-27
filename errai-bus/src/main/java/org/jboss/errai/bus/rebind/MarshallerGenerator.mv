@@ -17,7 +17,7 @@ limitations under the License.
      # This class is used to generate the marshaller code used by the ErraiBus
      # serialization engine.
 
-}@declare{'extractor'}@{fieldName}:").append(jsonEncoder.encode(o.@{getter}, ctx)).append("@end{}
+}@declare{'extractor'}\"@{fieldName}\":").append(jsonEncoder.encode(o.@{getter}, ctx)).append("@end{}
 org.jboss.errai.common.client.types.TypeMarshallers.addMarshaller(
     @{className}.class,
     new org.jboss.errai.common.client.types.Marshaller<@{className}>() {
@@ -32,9 +32,12 @@ org.jboss.errai.common.client.types.TypeMarshallers.addMarshaller(
                 @if{!fields.isEmpty()}
                 json.append(",");
                 org.jboss.errai.common.client.json.JSONEncoderCli jsonEncoder = new org.jboss.errai.common.client.json.JSONEncoderCli();
-                json.append("@foreach{fieldName : fields}@includeNamed{"extractor";fieldName=fieldName;targetType=targetTypes.get(fieldName);getter=getters.get(fieldName)}@end{","}}");@end{}
-                @end{}
+                json.append("@foreach{fieldName : fields}@includeNamed{"extractor";fieldName=fieldName;targetType=targetTypes.get(fieldName);getter=getters.get(fieldName)}@end{","}}");
                 return json.toString();
+                @else{}
+                return json.append("}").toString();
+                @end{}
+                @end{}
             }
             catch (Exception e) {
                 System.out.println("o=" + o + ";ctx=" + ctx);
