@@ -60,8 +60,7 @@ public class JSONUtilCli {
             }
 
             return list;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.out.println("JSONUtilCli.decodePayload=" + value);
             e.printStackTrace();
             return EMPTYLIST;
@@ -87,15 +86,22 @@ public class JSONUtilCli {
 
     @SuppressWarnings({"unchecked"})
     public static Map<String, Object> decodeMap(Object value) {
-        DecodingContext ctx = new DecodingContext();
-        Map<String,Object> map = (Map<String, Object>) JSONDecoderCli.decode(value, ctx);
+        try {
+            DecodingContext ctx = new DecodingContext();
+            Map<String, Object> map = (Map<String, Object>) JSONDecoderCli.decode(value, ctx);
 
-        if (ctx.isUnsatisfiedDependencies()) {
-            JSONTypeHelper.resolveDependencies(ctx);
+            if (ctx.isUnsatisfiedDependencies()) {
+                JSONTypeHelper.resolveDependencies(ctx);
+            }
+
+            return map;
+        } catch (RuntimeException e) {
+            System.out.println("<<" + String.valueOf(value) + ">>");
+
+            e.printStackTrace();
         }
-     
+        return null;
 
-        return map;
     }
 
     public static Message decodeCommandMessage(Object value) {

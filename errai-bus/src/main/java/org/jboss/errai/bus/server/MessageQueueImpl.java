@@ -119,8 +119,6 @@ public class MessageQueueImpl implements MessageQueue {
         if (!queueRunning) {
             JSONStreamEncoder.encode(new QueueStopMessage().getParts(), outstream);
             return;
-
-         //   throw new QueueUnavailableException("queue is not available");
         }
 
         Message m = null;
@@ -415,11 +413,7 @@ public class MessageQueueImpl implements MessageQueue {
      */
     public void stopQueue() {
         queue.offer(new QueueStopMessage());
-
-//        queueRunning = false;
-//        bus.closeQueue(this);
     }
-
 
     private static long secs(long secs) {
         return secs * 1000000000;

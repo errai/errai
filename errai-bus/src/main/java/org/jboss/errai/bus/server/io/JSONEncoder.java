@@ -82,10 +82,10 @@ public class JSONEncoder {
         Class cls = o.getClass();
 
         if (java.util.Date.class.isAssignableFrom(cls)) {
-            return "{__EncodedType:\"java.util.Date\", __ObjectID:\"" + o.hashCode() + "\", Value:" + ((java.util.Date) o).getTime() + "}";
+            return "{\"__EncodedType\":\"java.util.Date\", \"__ObjectID\":\"" + o.hashCode() + "\", \"Value\":" + ((java.util.Date) o).getTime() + "}";
         }
         if (java.sql.Date.class.isAssignableFrom(cls)) {
-            return "{__EncodedType:\"java.sql.Date\", __ObjectID:\"" + o.hashCode() + "\", Value:" + ((java.sql.Date) o).getTime() + "}";
+            return "{\"__EncodedType\":\"java.sql.Date\", \"__ObjectID\":\"" + o.hashCode() + "\", \"Value\":" + ((java.sql.Date) o).getTime() + "}";
         }
 
         if (tHandlers.containsKey(cls)) {
@@ -158,7 +158,7 @@ public class JSONEncoder {
             if (!(entry.getKey() instanceof String)) {
                 mapBuild.append(write(ctx, '\"'));
                 if (!ctx.isEscapeMode()) {
-                    mapBuild.append(SerializationParts.EMBEDDED_JSON);
+                    mapBuild.append("\"").append(SerializationParts.EMBEDDED_JSON).append("\"");
                 }
                 ctx.setEscapeMode();
                 mapBuild.append(_encode(entry.getKey(), ctx));
@@ -201,7 +201,7 @@ public class JSONEncoder {
     }
 
     private static String encodeEnum(Enum enumer, EncodingContext ctx) {
-        String s = "{" + SerializationParts.ENCODED_TYPE + ":\"" + enumer.getClass().getName() + "\", EnumStringValue:\"" + enumer.name() + "\"}";
+        String s = "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + enumer.getClass().getName() + "\", \"EnumStringValue\":\"" + enumer.name() + "\"}";
         if (ctx.isEscapeMode()) {
             return s.replaceAll("\"", "\\\\\"");
         } else {
