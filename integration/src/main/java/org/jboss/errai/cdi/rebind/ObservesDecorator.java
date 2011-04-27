@@ -20,6 +20,7 @@ import java.util.Set;
 
 import javax.enterprise.event.Observes;
 
+import com.google.gwt.user.client.Window;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.annotations.Local;
@@ -75,6 +76,8 @@ public class ObservesDecorator extends Decorator<Observes> {
         
         String expr = messageBusInst + "." + subscribeType + "(\"" + subject + "\", new " + MessageCallback.class.getName() + "() {\n" +
                 "                    public void callback(" + Message.class.getName() + " message) {\n" +
+                Window.class.getName() + ".alert(\"FIRED!\");\n" +
+
                 "						java.util.List<String> methodQualifiers = new java.util.ArrayList<String>() {{\n";
                 						if(qualifierNames!=null) {
 	        								for(String qualifierName : qualifierNames) expr+=
