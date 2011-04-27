@@ -78,6 +78,7 @@ public class EventDispatcher implements MessageCallback {
                         ctxMgr.activateSessionContext(message);
 
                         if (conversationalServices.contains(clazz)) {
+                            ctxMgr.activateRequestContextStore();
                             ctxMgr.getRequestContextStore().put(MessageParts.SessionID.name(),
                                     Util.getSessionId(message));
                         }

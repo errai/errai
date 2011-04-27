@@ -75,10 +75,15 @@ public class ContextManager {
         }
     }
 
-    public void activateRequestContext() {
-           if (requestContext == null) return;
+    public void activateRequestContextStore() {
+        if (requestContextStore.get() == null)
+            requestContextStore.set(new HashMap<String, Object>());
+    }
 
-        requestContextStore.set(new HashMap<String, Object>());
+    public void activateRequestContext() {
+        if (requestContext == null) return;
+
+        activateRequestContextStore();
 
         if (requestContext != null) {
             requestContext.associate(requestContextStore.get());
