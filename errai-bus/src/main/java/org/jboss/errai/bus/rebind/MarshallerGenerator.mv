@@ -29,11 +29,11 @@ org.jboss.errai.common.client.types.TypeMarshallers.addMarshaller(
                 json.append(o.toString()).append("\"}");@else{}
                 ctx.markEncoded(o);
                 StringBuilder json = new StringBuilder("{\"@{org.jboss.errai.common.client.protocols.SerializationParts.ENCODED_TYPE}\":\"@{canonicalClassName}\",\"@{org.jboss.errai.common.client.protocols.SerializationParts.OBJECT_ID}\":\"" + o.hashCode() + "\"");
-                if (!fields.isEmpty()) {
-                    json.append(",");
-                    org.jboss.errai.common.client.json.JSONEncoderCli jsonEncoder = new org.jboss.errai.common.client.json.JSONEncoderCli();
-                    json.append("@foreach{fieldName : fields}@includeNamed{"extractor";fieldName=fieldName;targetType=targetTypes.get(fieldName);getter=getters.get(fieldName)}@end{","}}");@end{}
-                }
+                @if{!fields.isEmpty()}
+                json.append(",");
+                org.jboss.errai.common.client.json.JSONEncoderCli jsonEncoder = new org.jboss.errai.common.client.json.JSONEncoderCli();
+                json.append("@foreach{fieldName : fields}@includeNamed{"extractor";fieldName=fieldName;targetType=targetTypes.get(fieldName);getter=getters.get(fieldName)}@end{","}}");@end{}
+                @end{}
                 return json.toString();
             }
             catch (Exception e) {
