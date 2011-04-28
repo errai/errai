@@ -25,8 +25,8 @@ org.jboss.errai.common.client.types.TypeMarshallers.addMarshaller(
             if (ctx.isEncoded(o)) return "{\"@{org.jboss.errai.common.client.protocols.SerializationParts.ENCODED_TYPE}\":\"@{canonicalClassName}\",\"@{org.jboss.errai.common.client.protocols.SerializationParts.OBJECT_ID}\":\"$" + ctx.markRef(o) + "\"}";
 
             try {
-@if{enumType}StringBuilder json = new StringBuilder("{\"@{org.jboss.errai.common.client.protocols.SerializationParts.ENCODED_TYPE}\":\"@{canonicalClassName}\",EnumStringValue:\"");
-                json.append(o.toString()).append("\"}");@else{}
+@if{enumType}return new StringBuilder("{\"@{org.jboss.errai.common.client.protocols.SerializationParts.ENCODED_TYPE}\":\"@{canonicalClassName}\",EnumStringValue:\"")
+                .append(o.toString()).append("\"}").toString();@else{}
                 ctx.markEncoded(o);
                 StringBuilder json = new StringBuilder("{\"@{org.jboss.errai.common.client.protocols.SerializationParts.ENCODED_TYPE}\":\"@{canonicalClassName}\",\"@{org.jboss.errai.common.client.protocols.SerializationParts.OBJECT_ID}\":\"" + o.hashCode() + "\"");
                 @if{!fields.isEmpty()}

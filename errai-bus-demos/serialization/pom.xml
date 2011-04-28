@@ -37,7 +37,7 @@
                 <version>${gwt.maven}</version>
                 <configuration>
                     <inplace>true</inplace>
-                    <logLevel>DEBUG</logLevel>
+                    <logLevel>ERROR</logLevel>
                     <runTarget>Serialization.html</runTarget>
                     <warSourceDirectory>war</warSourceDirectory>
                     <extraJvmArgs>-Xmx512m</extraJvmArgs>
