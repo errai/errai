@@ -45,7 +45,7 @@
                 <version>${gwt.maven}</version>
                 <configuration>
                     <inplace>true</inplace>
-                    <logLevel>DEBUG</logLevel>
+                    <logLevel>INFO</logLevel>
                     <runTarget>HelloWorld.html</runTarget>
                     <warSourceDirectory>war</warSourceDirectory>
                     <extraJvmArgs>-Xmx512m</extraJvmArgs>
