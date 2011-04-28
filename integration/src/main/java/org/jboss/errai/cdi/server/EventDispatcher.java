@@ -90,7 +90,7 @@ public class EventDispatcher implements MessageCallback {
                         		if(qualifiers==null) {
                         			qualifiers = new ArrayList<Annotation>();
                         		}
-                        		Annotation qualifier=allQualifiers.get(qualifierName);
+                        		Annotation qualifier = allQualifiers.get(qualifierName);
                         		if(qualifier!=null) {
                         			qualifiers.add(qualifier);
                         		}
