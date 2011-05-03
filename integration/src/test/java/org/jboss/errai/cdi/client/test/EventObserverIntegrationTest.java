@@ -18,14 +18,14 @@ import com.google.gwt.user.client.Timer;
 public class EventObserverIntegrationTest extends AbstractErraiCDITest {
 
     private static final Map<String, List<String>> expectedEvents = new HashMap<String, List<String>>() {{
-            put("", Arrays.asList(new String[] { "", "A", "B", "C", "AB", "AC", "BC", "ABC" }));
-            put("A", Arrays.asList(new String[] { "A", "AB", "AC", "ABC" }));
-            put("B", Arrays.asList(new String[] { "B", "AB", "BC", "ABC" }));
-            put("C", Arrays.asList(new String[] { "C", "AC", "BC", "ABC" }));
-            put("AB", Arrays.asList(new String[] { "AB", "ABC" }));
-            put("AC", Arrays.asList(new String[] { "AC", "ABC" }));
-            put("BC", Arrays.asList(new String[] { "BC", "ABC" }));
-            put("ABC", Arrays.asList(new String[] { "ABC" }));
+        put("", Arrays.asList(new String[]{"","A","B","C","AB","AC","BC","ABC"}));
+        put("A", Arrays.asList(new String[]{"A","AB","AC","ABC"}));
+        put("B", Arrays.asList(new String[]{"B","AB","BC","ABC"}));
+        put("C", Arrays.asList(new String[]{"C","AC","BC","ABC"}));
+        put("AB", Arrays.asList(new String[]{"AB","ABC"}));
+        put("AC", Arrays.asList(new String[]{"AC","ABC"}));
+        put("BC", Arrays.asList(new String[]{"BC","ABC"}));
+        put("ABC", Arrays.asList(new String[]{"ABC"}));
     }};
 
     @Override
