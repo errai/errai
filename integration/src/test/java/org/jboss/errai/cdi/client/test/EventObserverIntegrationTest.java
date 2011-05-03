@@ -57,10 +57,10 @@ public class EventObserverIntegrationTest extends AbstractErraiCDITest {
 	 * A      => {},A
 	 * B      => {},B
 	 * C      => {},C
-	 * A,B    => {},A,B,AB,(BA (redundant but still worth testing)) 
+	 * A,B    => {},A,B,AB,(BA (redundant, but still worth testing to make sure that the sequence doesn't matter)) 
 	 * A,C    => {},A,C,AC
 	 * B,C    => {},B,C,BC
-     * A,B,C  => {},A,B,C,AB,BC,AC,ABC,(BA (redundant but still worth testing)) 
+     * A,B,C  => {},A,B,C,AB,BA,BC,AC,ABC
 	 */
 	public void testEventObservers() {
 	    assertNotNull(CDITestObserverModule.getInstance().getStartEvent());
