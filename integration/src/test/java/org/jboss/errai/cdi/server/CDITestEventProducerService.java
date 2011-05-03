@@ -1,12 +1,11 @@
 package org.jboss.errai.cdi.server;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
-import org.jboss.errai.cdi.client.CDITestStartEvent;
+import org.jboss.errai.cdi.client.StartEvent;
 import org.jboss.errai.cdi.client.api.Conversational;
 import org.jboss.errai.cdi.client.qualifier.A;
 import org.jboss.errai.cdi.client.qualifier.B;
@@ -14,8 +13,6 @@ import org.jboss.errai.cdi.client.qualifier.C;
 
 @ApplicationScoped
 public class CDITestEventProducerService {
-
-    private static CDITestEventProducerService instance;
     
     @Inject
     private Event<String> event;
@@ -40,18 +37,9 @@ public class CDITestEventProducerService {
     
     @Inject @A @B @C
     private Event<String> eventABC;
-
-    @PostConstruct
-    public void doPostConstruct() {
-        instance = this;
-    }
-	
-    public CDITestEventProducerService getInstance() {
-        return instance;
-    }
     
     @Conversational
-    public void start(@Observes CDITestStartEvent event) {
+    public void start(@Observes StartEvent event) {
         fireAll();
     }
     

@@ -18,12 +18,12 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
 
 @EntryPoint
 public class CDITestObserverModule {
-    private static int busReadyEventsReceived = 0;
+    private int busReadyEventsReceived = 0;
     private static CDITestObserverModule instance;
     private Map<String, List<String>> receivedEvents = new HashMap<String, List<String>>();
     
     @Inject
-    private Event<CDITestStartEvent> startEvent;
+    private Event<StartEvent> startEvent;
     
 	@PostConstruct
 	public void doPostConstruct() {
@@ -34,7 +34,7 @@ public class CDITestObserverModule {
         return instance;
     }
 	
-	public static int getBusReadyEventsReceived() {
+	public int getBusReadyEventsReceived() {
 	    return busReadyEventsReceived;
 	}
 	
@@ -42,17 +42,25 @@ public class CDITestObserverModule {
 	    return receivedEvents;
 	}
 	
-	public Event<CDITestStartEvent> getStartEvent() {
+	public Event<StartEvent> getStartEvent() {
 	    return startEvent;
 	}
 	
+	/**
+	 * count the {@link BusReadyEvents}
+	 */
 	public void onBusReady(@Observes BusReadyEvent event) {
 		busReadyEventsReceived++;
 	}
 	
+	/**
+	 * start the event producers on the server
+	 */
 	public void start() {
-	    startEvent.fire(new CDITestStartEvent());
+	    startEvent.fire(new StartEvent());
 	}
+	
+	// all the observer methods
 	
 	public void onEvent(@Observes String event) {
 	    addEvent("", event);

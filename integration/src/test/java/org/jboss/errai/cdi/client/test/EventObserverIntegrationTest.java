@@ -75,17 +75,17 @@ public class EventObserverIntegrationTest extends AbstractErraiCDITest {
 		Timer timer = new Timer() {
 			public void run() {
 				assertEquals("Wrong number of BusReadyEvents received:", 1, 
-				        CDITestObserverModule.getBusReadyEventsReceived());
+				        CDITestObserverModule.getInstance().getBusReadyEventsReceived());
 				finishTest();
 			}
 		};
-		timer.schedule(5000);
-		delayTestFinish(6000);
+		timer.schedule(10000);
+		delayTestFinish(15000);
 	}
 	
 	/**
 	 * The following table describes the events being fired on the server (left column) 
-	 * and the expected events received by the client observers (right column). 
+	 * and the expected events received by the client-side observers (right column). 
 	 * We basically fire all combinations of qualified events using three 
 	 * qualifiers (@A @B @C) and test if each observer received its corresponding events,
 	 * and only those events. The {} empty set is used to describe an event without
@@ -101,11 +101,11 @@ public class EventObserverIntegrationTest extends AbstractErraiCDITest {
      * A,B,C  => {},A,B,C,AB,BC,AC,ABC,(BA (redundant but still worth testing)) 
 	 */
 	public void testEventObservers() {
+	    assertNotNull(CDITestObserverModule.getInstance().getStartEvent());
 	    CDITestObserverModule.getInstance().start();
 	    
 	    Timer timer = new Timer() {
             public void run() {
-                assertNotNull(CDITestObserverModule.getInstance().getStartEvent());
                 Map<String, List<String>> receivedEvents = 
                     CDITestObserverModule.getInstance().getReceivedEvents();
                 
@@ -122,7 +122,7 @@ public class EventObserverIntegrationTest extends AbstractErraiCDITest {
                 finishTest();
             }
         };
-        timer.schedule(5000);
-        delayTestFinish(6000);
+        timer.schedule(10000);
+        delayTestFinish(15000);
 	}
 }
