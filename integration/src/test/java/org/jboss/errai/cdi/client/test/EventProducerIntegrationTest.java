@@ -1,6 +1,7 @@
 package org.jboss.errai.cdi.client.test;
 
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,56 +16,17 @@ import com.google.gwt.user.client.Timer;
  */
 @SuppressWarnings("serial")
 public class EventProducerIntegrationTest extends AbstractErraiCDITest {
-    private static final List<String> expectedEvents = new ArrayList<String>() {{
-        add("");
-        add("A");
-        add("B");
-        add("C");
-        add("AB");
-        add("AC");
-        add("BC");
-        add("ABC");
-    }};
     
-    private static final List<String> expectedEventsA = new ArrayList<String>() {{
-        add("A");
-        add("AB");
-        add("AC");
-        add("ABC");
-    }};
-
-    private static final List<String> expectedEventsB = new ArrayList<String>() {{
-        add("B");
-        add("AB");
-        add("BC");
-        add("ABC");
-    }};
-    
-    private static final List<String> expectedEventsC = new ArrayList<String>() {{
-        add("C");
-        add("AC");
-        add("BC");
-        add("ABC");
-    }};
-    
-    private static final List<String> expectedEventsAB = new ArrayList<String>() {{
-        add("AB");
-        add("ABC");
-    }};
-
-    private static final List<String> expectedEventsAC = new ArrayList<String>() {{
-        add("AC");
-        add("ABC");
-    }};
-    
-    private static final List<String> expectedEventsBC = new ArrayList<String>() {{
-        add("BC");
-        add("ABC");
-    }};
-    
-    private static final List<String> expectedEventsABC = new ArrayList<String>() {{
-        add("ABC");
-    }};
+    private static final Map<String, List<String>> expectedEvents = new HashMap<String, List<String>>(){{
+        put("", Arrays.asList(new String[]{"","A","B","C","AB","AC","BC","ABC"}));
+        put("A", Arrays.asList(new String[]{"A","AB","AC","ABC"}));
+        put("B", Arrays.asList(new String[]{"B","AB","BC","ABC"}));
+        put("C", Arrays.asList(new String[]{"C","AC","BC","ABC"}));
+        put("AB", Arrays.asList(new String[]{"AB","ABC"}));
+        put("AC", Arrays.asList(new String[]{"AC","ABC"}));
+        put("BC", Arrays.asList(new String[]{"BC","ABC"}));
+        put("ABC", Arrays.asList(new String[]{"ABC"}));
+     }};
 
 	@Override
 	public String getModuleName() {
@@ -89,9 +51,9 @@ public class EventProducerIntegrationTest extends AbstractErraiCDITest {
 	 
 	/**
      * The following table describes the events being fired on the client (left column) 
-     * and the expected events received by the server-side observers (right column). 
+     * and the server-side observers expected to receive the events (right column). 
      * We basically fire all combinations of qualified events using three 
-     * qualifiers (@A @B @C) and test if each observer received its corresponding events,
+     * qualifiers ( @A @B @C ) and test if each observer received its corresponding events,
      * and only those events. The {} empty set is used to describe an event without
      * qualifiers.  
      * 
@@ -99,10 +61,10 @@ public class EventProducerIntegrationTest extends AbstractErraiCDITest {
      * A      => {},A
      * B      => {},B
      * C      => {},C
-     * A,B    => {},A,B,AB,(BA (redundant but still worth testing)) 
+     * A,B    => {},A,B,AB,(BA (redundant, but still worth testing to make sure that the sequence doesn't matter)) 
      * A,C    => {},A,C,AC
      * B,C    => {},B,C,BC
-     * A,B,C  => {},A,B,C,AB,BC,AC,ABC,(BA (redundant but still worth testing)) 
+     * A,B,C  => {},A,B,C,AB,BA,BC,AC,ABC 
      */
 	public void testEventProducers() {	   
 	    final Timer testInitTimer = new Timer() {
@@ -119,18 +81,18 @@ public class EventProducerIntegrationTest extends AbstractErraiCDITest {
 	    
 	    final Timer testResultTimer = new Timer() {
             public void run() {
-                Map<String, List<String>> receivedEvents = 
+                Map<String, List<String>> actualEvents = 
                     CDITestProducerModule.getInstance().getReceivedEventsOnServer();
                 
-                assertEquals("Wrong events observed on Server for @{}", expectedEvents, receivedEvents.get(""));
-                assertEquals("Wrong events observed on Server for @A", expectedEventsA, receivedEvents.get("A"));
-                assertEquals("Wrong events observed on Server for @B", expectedEventsB, receivedEvents.get("B"));
-                assertEquals("Wrong events observed on Server for @C", expectedEventsC, receivedEvents.get("C"));
-                assertEquals("Wrong events observed on Server for @AB", expectedEventsAB, receivedEvents.get("AB"));
-                assertEquals("Wrong events observed on Server for @BA", expectedEventsAB, receivedEvents.get("BA"));
-                assertEquals("Wrong events observed on Server for @AC", expectedEventsAC, receivedEvents.get("AC"));
-                assertEquals("Wrong events observed on Server for @BC", expectedEventsBC, receivedEvents.get("BC"));
-                assertEquals("Wrong events observed on Server for @ABC", expectedEventsABC, receivedEvents.get("ABC"));
+                assertEquals("Server got wrong events for @{}", expectedEvents.get(""), actualEvents.get(""));
+                assertEquals("Server got wrong events for @A", expectedEvents.get("A"), actualEvents.get("A"));
+                assertEquals("Server got wrong events for @B", expectedEvents.get("B"), actualEvents.get("B"));
+                assertEquals("Server got wrong events for @C", expectedEvents.get("C"), actualEvents.get("C"));
+                assertEquals("Server got wrong events for @AB", expectedEvents.get("AB"), actualEvents.get("AB"));
+                assertEquals("Server got wrong events for @BA", expectedEvents.get("AB"), actualEvents.get("BA"));
+                assertEquals("Server got wrong events for @AC", expectedEvents.get("AC"), actualEvents.get("AC"));
+                assertEquals("Server got wrong events for @BC", expectedEvents.get("BC"), actualEvents.get("BC"));
+                assertEquals("Server got wrong events for @ABC", expectedEvents.get("ABC"), actualEvents.get("ABC"));
                 
                 finishTest();
             }
