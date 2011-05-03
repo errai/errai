@@ -20,10 +20,9 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
 public class CDITestProducerModule {
     private boolean busReadyEventReceived = false;
     private static CDITestProducerModule instance;
-    
-    private Map<String, List<String>> receivedEventsOnServer = 
-        new HashMap<String, List<String>>();
-    
+
+    private Map<String, List<String>> receivedEventsOnServer = new HashMap<String, List<String>>();
+
     @Inject
     private Event<String> event;
 
@@ -42,32 +41,32 @@ public class CDITestProducerModule {
     @Inject @B @C
     private Event<String> eventBC;
 
-    @Inject @A @C
+    @Inject@A @C
     private Event<String> eventAC;
-    
+
     @Inject @A @B @C
     private Event<String> eventABC;
-    
-	@PostConstruct
-	public void doPostConstruct() {
-		instance = this;
-	}
 
-	public static CDITestProducerModule getInstance() {
+    @PostConstruct
+    public void doPostConstruct() {
+        instance = this;
+    }
+
+    public static CDITestProducerModule getInstance() {
         return instance;
     }
-	
-	public boolean getBusReadyEventsReceived() {
+
+    public boolean getBusReadyEventsReceived() {
         return busReadyEventReceived;
     }
-	  
+
     /**
      * count the {@link BusReadyEvents}
      */
     public void onBusReady(@Observes BusReadyEvent event) {
-        busReadyEventReceived=true;
+        busReadyEventReceived = true;
     }
-    
+
     public void fireAll() {
         fire();
         fireA();
@@ -78,35 +77,35 @@ public class CDITestProducerModule {
         fireBC();
         fireABC();
     }
-    
+
     public void fire() {
         event.fire("");
     }
-    
+
     public void fireA() {
         eventA.fire("A");
     }
-    
+
     public void fireB() {
         eventB.fire("B");
     }
-    
+
     public void fireC() {
         eventC.fire("C");
     }
-    
+
     public void fireAB() {
         eventAB.fire("AB");
     }
-    
+
     public void fireBC() {
         eventBC.fire("BC");
     }
-    
+
     public void fireAC() {
         eventAC.fire("AC");
     }
-    
+
     public void fireABC() {
         eventABC.fire("ABC");
     }
@@ -142,15 +141,16 @@ public class CDITestProducerModule {
     public Event<String> getEventABC() {
         return eventABC;
     }
-    
+
     public void collectResults(@Observes ReceivedEvent event) {
         List<String> events = receivedEventsOnServer.get(event.getReceiver());
-        if(events==null) events = new ArrayList<String>();
+        if (events == null)
+            events = new ArrayList<String>();
         events.add(event.getEvent());
         receivedEventsOnServer.put(event.getReceiver(), events);
     }
 
     public Map<String, List<String>> getReceivedEventsOnServer() {
         return receivedEventsOnServer;
-    }   
+    }
 }
