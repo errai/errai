@@ -50,7 +50,7 @@ public class WorkerFactory {
 
     private int poolSize = DEFAULT_THREAD_POOL_SIZE;
     private int deliveryQueueSize = DEFAULT_DELIVERY_QUEUE_SIZE;
-    private long workerTimeout = seconds(30);
+    private long workerTimeout = Boolean.getBoolean("org.jboss.errai.debugmode") ? seconds(360) : seconds(30);
 
     private Logger log = LoggerFactory.getLogger(this.getClass());
 

@@ -38,15 +38,15 @@ public class JSONUtilCli {
 
     public static ArrayList<MarshalledMessage> decodePayload(String value) {
         if (value == null || value.trim().length() == 0) return EMPTYLIST;
+
         /**
          * We have to do a two-stage decoding of the message.  We cannot fully decode the message here, as we
          * cannot be sure the destination endpoint exists within this Errai bundle.  So we extract the ToSubject
          * field and send the unparsed JSON object onwards.
          *
          */
-
         try {
-            JSONValue val = JSONParser.parse(value);
+            JSONValue val = JSONParser.parseStrict(value);
             if (val == null) {
                 return EMPTYLIST;
             }

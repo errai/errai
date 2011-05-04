@@ -133,7 +133,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     public ClientMessageBusImpl() {
         init();
     }
-
     /**
      * Constructor creates sendBuilder for HTTP POST requests, recvBuilder for HTTP GET requests and
      * initializes the message bus.
@@ -230,6 +229,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     private boolean directSubscribe(final String subject, final MessageCallback callback) {
         boolean isNew = !isSubscribed(subject);
+
         addSubscription(subject, _subscribe(subject, new MessageCallback() {
             public void callback(Message message) {
                 try {
@@ -519,7 +519,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                         e.printStackTrace();
                         logError("Problem decoding incoming message:", response.getText(), e);
                     }
-
                 }
 
                 public void onError(Request request, Throwable exception) {
@@ -541,7 +540,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      */
     public void init() {
         init(null);
-
     }
 
     public void stop(boolean sendDisconnect) {
@@ -567,11 +565,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         }
 
         this.remotes.clear();
-
-//        MessageBuilder.createMessage()
-//                .toSubject("ClientBus")
-//                .command(BusCommands.RemoteMonitorAttach)
-//                .done().sendNowWith(this);
 
         this.heartBeatTimer.cancel();
         this.incomingTimer.cancel();
@@ -844,7 +837,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     private void sendAllDeferred() {
         for (Iterator<Message> iter = deferredMessages.iterator(); iter.hasNext();) {
             Message m = iter.next();
-            ;
             if (m.hasPart(MessageParts.PriorityProcessing)) {
                 directStore(m);
                 iter.remove();
@@ -1042,6 +1034,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                         } else {
                             long win = System.currentTimeMillis() - lastTransmit;
                             int diff = HEARTBEAT_DELAY - (int) win;
+                            if (diff <= 1) diff = 1;
                             schedule(diff);
                         }
                     }
@@ -1097,6 +1090,78 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         this.onUnsubscribeHooks.add(listener);
     }
 
+    private static String decodeCommandMessage(Message msg) {
+        StringBuffer decode = new StringBuffer(
+                "<table><thead style='font-weight:bold;'><tr><td>Field</td><td>Value</td></tr></thead><tbody>");
+
+        for (Map.Entry<String, Object> entry : msg.getParts().entrySet()) {
+            decode.append("<tr><td>").append(entry.getKey()).append("</td><td>").append(entry.getValue()).append("</td></tr>");
+        }
+
+        return decode.append("</tbody></table>").toString();
+    }
+
+
+    private void logError(String message, String additionalDetails, Throwable e) {
+        logAdapter.error(message + "<br/>Additional details:<br/> " + additionalDetails, e);
+    }
+
+    private void showError(String message, Throwable e) {
+        if (errorDialog == null) {
+            errorDialog = new BusErrorDialog();
+        }
+        errorDialog.addError(message, "", e);
+    }
+
+    /**
+     * Process the incoming payload and push all the incoming messages onto the bus.
+     *
+     * @param response -
+     * @throws Exception -
+     */
+    private void procIncomingPayload(Response response) throws Exception {
+        try {
+            for (MarshalledMessage m : decodePayload(response.getText())) {
+                _store(m.getSubject(), m.getMessage());
+            }
+        } catch (RuntimeException e) {
+            logError("Error delivering message into bus", response.getText(), e);
+            if (incomingTimer != null) incomingTimer.cancel();
+        }
+    }
+
+    public void attachMonitor(BusMonitor monitor) {
+    }
+
+    public void setLogAdapter(LogAdapter logAdapter) {
+        this.logAdapter = logAdapter;
+    }
+
+    public LogAdapter getLogAdapter() {
+        return logAdapter;
+    }
+
+    private boolean executeInterceptorStack(boolean inbound, Message message) {
+        boolean validMessage = true;
+        for (MessageInterceptor intcp : interceptorStack) {
+            if (inbound)
+                validMessage = intcp.processInbound(message);
+            else
+                validMessage = intcp.processOutbound(message);
+
+            if (!validMessage) // brute force for now
+                throw new RuntimeException("Interceptor " + intcp.getClass() + " invalidates message");
+
+        }
+
+        return validMessage;
+    }
+
+    public void addInterceptor(MessageInterceptor interceptor) {
+        interceptorStack.add(interceptor);
+    }
+
+
     private native static void _unsubscribe(Object registrationHandle) /*-{
         $wnd.PageBus.unsubscribe(registrationHandle);
     }-*/;
@@ -1114,16 +1179,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         $wnd.PageBus.store(subject, value);
     }-*/;
 
-    private static String decodeCommandMessage(Message msg) {
-        StringBuffer decode = new StringBuffer(
-                "<table><thead style='font-weight:bold;'><tr><td>Field</td><td>Value</td></tr></thead><tbody>");
-
-        for (Map.Entry<String, Object> entry : msg.getParts().entrySet()) {
-            decode.append("<tr><td>").append(entry.getKey()).append("</td><td>").append(entry.getValue()).append("</td></tr>");
-        }
-
-        return decode.append("</tbody></table>").toString();
-    }
 
     class BusErrorDialog extends DialogBox {
         ScrollPanel scrollPanel;
@@ -1193,64 +1248,5 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 getElement().getStyle().setProperty("zIndex", "5000");
             }
         }
-    }
-
-    private void logError(String message, String additionalDetails, Throwable e) {
-        logAdapter.error(message + "<br/>Additional details:<br/> " + additionalDetails, e);
-    }
-
-    private void showError(String message, Throwable e) {
-        if (errorDialog == null) {
-            errorDialog = new BusErrorDialog();
-        }
-        errorDialog.addError(message, "", e);
-    }
-
-    /**
-     * Process the incoming payload and push all the incoming messages onto the bus.
-     *
-     * @param response -
-     * @throws Exception -
-     */
-    private void procIncomingPayload(Response response) throws Exception {
-        try {
-            for (MarshalledMessage m : decodePayload(response.getText())) {
-                _store(m.getSubject(), m.getMessage());
-            }
-        } catch (RuntimeException e) {
-            logError("Error delivering message into bus", response.getText(), e);
-            if (incomingTimer != null) incomingTimer.cancel();
-        }
-    }
-
-    public void attachMonitor(BusMonitor monitor) {
-    }
-
-    public void setLogAdapter(LogAdapter logAdapter) {
-        this.logAdapter = logAdapter;
-    }
-
-    public LogAdapter getLogAdapter() {
-        return logAdapter;
-    }
-
-    private boolean executeInterceptorStack(boolean inbound, Message message) {
-        boolean validMessage = true;
-        for (MessageInterceptor intcp : interceptorStack) {
-            if (inbound)
-                validMessage = intcp.processInbound(message);
-            else
-                validMessage = intcp.processOutbound(message);
-
-            if (!validMessage) // brute force for now
-                throw new RuntimeException("Interceptor " + intcp.getClass() + " invalidates message");
-
-        }
-
-        return validMessage;
-    }
-
-    public void addInterceptor(MessageInterceptor interceptor) {
-        interceptorStack.add(interceptor);
     }
 }

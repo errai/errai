@@ -40,8 +40,9 @@ import static java.lang.System.nanoTime;
  * messages.
  */
 public class MessageQueueImpl implements MessageQueue {
+    private static final long HEARTBEAT_PERIOD = secs(30);
     private static final long TIMEOUT = Boolean.getBoolean("org.jboss.errai.debugmode") ?
-            secs(60) : secs(30);
+            secs(360) : secs(30);
 
     private static final int MAXIMUM_PAYLOAD_SIZE = 10;
     private static final long DEFAULT_TRANSMISSION_WINDOW = millis(25);
@@ -125,9 +126,9 @@ public class MessageQueueImpl implements MessageQueue {
 
         checkSession();
 
-        outstream.write('[');
-
         if (lock.tryAcquire()) {
+            outstream.write('[');
+
             int payLoadSize = 0;
             try {
 
@@ -144,8 +145,7 @@ public class MessageQueueImpl implements MessageQueue {
                     JSONStreamEncoder.encode(m.getParts(), outstream);
                     queueRunning = false;
                     bus.closeQueue(this);
-                }
-                else if (m != null) {
+                } else if (m != null) {
                     JSONStreamEncoder.encode(m.getParts(), outstream);
                 }
 
@@ -166,8 +166,7 @@ public class MessageQueueImpl implements MessageQueue {
                         try {
                             if (queue.isEmpty())
                                 Thread.sleep(nanoTime() - endWindow);
-                        }
-                        catch (Exception e) {
+                        } catch (Exception e) {
                             // just resume.
                         }
                     }
@@ -190,23 +189,30 @@ public class MessageQueueImpl implements MessageQueue {
                 lastQueueSize = queue.size();
                 endWindow = (lastTransmission = nanoTime()) + transmissionWindow;
 
-                if (m == null) outstream.write(heartBeatBytes);
+                if (m == null && isHeartbeatNeeded()) {
+                    outstream.write(heartBeatBytes);
+                }
 
                 outstream.write(']');
                 return;
 
-            }
-            catch (InterruptedException e) {
+            } catch (InterruptedException e) {
                 e.printStackTrace();
-            }
-            finally {
+            } finally {
                 lock.release();
             }
+            if (m == null && isHeartbeatNeeded()) {
+                System.out.println("Server_send_heartbeat");
+                outstream.write(heartBeatBytes);
+                outstream.write(']');
+            }
 
+        } else if (isHeartbeatNeeded()) {
+            System.out.println("Server_send_heartbeat");
+            outstream.write('[');
+            outstream.write(heartBeatBytes);
+            outstream.write(']');
         }
-
-        if (m == null) outstream.write(heartBeatBytes);
-        outstream.write(']');
     }
 
     private static final byte[] heartBeatBytes = "{ToSubject:\"ClientBus\", CommandType:\"Heartbeat\"}".getBytes();
@@ -226,8 +232,7 @@ public class MessageQueueImpl implements MessageQueue {
         activity();
         try {
             b = (throttleIncoming ? queue.offer(message, 1, TimeUnit.SECONDS) : queue.offer(message));
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             // fall-through.
         }
 
@@ -301,6 +306,10 @@ public class MessageQueueImpl implements MessageQueue {
 
     private boolean isWindowExceeded() {
         return nanoTime() > endWindow;
+    }
+
+    private boolean isHeartbeatNeeded() {
+        return (nanoTime() - lastTransmission) > HEARTBEAT_PERIOD;
     }
 
     private long getEndOfWindow() {
