@@ -138,6 +138,8 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
             t.printStackTrace();
 
             httpServletResponse.setHeader("Cache-Control", "no-cache");
+            httpServletResponse.setHeader("Pragma", "no-cache");
+            httpServletResponse.setHeader("Expires", "-1");
             httpServletResponse.addHeader("Payload-Size", "1");
             httpServletResponse.setContentType("application/json");
 
@@ -173,6 +175,8 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
         queue.heartBeat();
 
         httpServletResponse.setHeader("Cache-Control", "no-cache");
+        httpServletResponse.setHeader("Pragma", "no-cache");
+        httpServletResponse.setHeader("Expires", "-1");
         httpServletResponse.setContentType("application/json");
         queue.poll(false, stream);
     }

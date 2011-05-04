@@ -179,6 +179,8 @@ public class TomcatCometServlet extends AbstractErraiServlet implements CometPro
     protected void service(HttpServletRequest req, HttpServletResponse httpServletResponse) throws ServletException, IOException {
         System.out.println(CONFIG_PROBLEM_TEXT);
         httpServletResponse.setHeader("Cache-Control", "no-cache");
+        httpServletResponse.setHeader("Pragma", "no-cache");
+        httpServletResponse.setHeader("Expires", "-1");
         httpServletResponse.addHeader("Payload-Size", "1");
         httpServletResponse.setContentType("application/json");
         OutputStream stream = httpServletResponse.getOutputStream();

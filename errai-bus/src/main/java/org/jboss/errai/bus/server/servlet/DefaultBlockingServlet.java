@@ -68,6 +68,7 @@ public class DefaultBlockingServlet extends AbstractErraiServlet {
     protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
             throws ServletException, IOException {
 
+
         final QueueSession session = sessionProvider.getSession(httpServletRequest.getSession(),
                 httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
 
@@ -79,6 +80,11 @@ public class DefaultBlockingServlet extends AbstractErraiServlet {
     private void pollForMessages(QueueSession session, HttpServletRequest httpServletRequest,
                                  HttpServletResponse httpServletResponse, boolean wait) throws IOException {
         try {
+            httpServletResponse.setHeader("Cache-Control", "no-cache");
+            httpServletResponse.setHeader("Pragma", "no-cache");
+            httpServletResponse.setHeader("Expires", "-1");
+            httpServletResponse.setContentType("application/json");
+
             final MessageQueue queue = service.getBus().getQueue(session);
 
             if (queue == null) {
@@ -94,9 +100,6 @@ public class DefaultBlockingServlet extends AbstractErraiServlet {
             }
 
             queue.heartBeat();
-
-            httpServletResponse.setHeader("Cache-Control", "no-cache");
-            httpServletResponse.setContentType("application/json");
 
             queue.poll(wait, httpServletResponse.getOutputStream());
 

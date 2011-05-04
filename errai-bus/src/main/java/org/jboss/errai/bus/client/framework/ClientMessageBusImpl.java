@@ -495,6 +495,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
         try {
             sendBuilder.sendRequest(message, new RequestCallback() {
+
                 public void onResponseReceived(Request request, Response response) {
                     if (503 == response.getStatusCode()) // Service Unavailable
                     {
@@ -709,6 +710,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                         break;
 
                     case FinishStateSync:
+                        if (isInitialized()) {
+                            return;
+                        }
+
                         List<String> subjects = new ArrayList<String>();
                         for (String s : subscriptions.keySet()) {
                             if (s.startsWith("local:")) continue;
@@ -782,7 +787,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                         postInitTasks.clear();
 
                         setInitialized(true);
-
 
                         break;
 
@@ -872,7 +876,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                         initializeMessagingBus(callback);
                     } catch (Exception e) {
                         e.printStackTrace();
-                        System.out.println("**DID NOT ATTACH**");
                         logError("Error attaching to bus", e.getMessage() + "<br/>Message Contents:<br/>"
                                 + response.getText(), e);
                     }
@@ -971,10 +974,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                         response.getText(), e);
                 incomingTimer.cancel();
             }
+            finally {
+               //  recvBuilder = getRecvBuilder();
+            }
         }
 
         public void schedule() {
-            if (incomingTimer != null) incomingTimer.schedule(1);
+            if (incomingTimer != null) incomingTimer.schedule(25);
         }
     }
 
