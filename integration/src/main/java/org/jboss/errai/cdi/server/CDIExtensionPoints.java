@@ -21,7 +21,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -195,31 +194,21 @@ public class CDIExtensionPoints implements Extension {
             eventQualifiers = new ArrayList<Annotation[]>();
         }
 
-        // make sure this combination of qualifiers is not already existing for the event
+        // make sure this combination of qualifiers is not already existing for this event type
         boolean qualifiersExisting = false;
         if (qualifiers != null && qualifiers.length > 0) {
             for (Annotation[] existingQualifiers : eventQualifiers) {
                 Set<String> existingQualifierNames = CDI.getQualifiersPart(existingQualifiers);
                 Set<String> qualifierNames = CDI.getQualifiersPart(qualifiers);
 
-                boolean qualifierListsEqual = true;
-                if (existingQualifierNames.size() == qualifierNames.size()) {
-                    for (String qualifierName : qualifierNames) {
-                        if (!existingQualifierNames.contains(qualifierName)) {
-                            qualifierListsEqual = false;
-                            break;
-                        }
-                    }
-                } else {
-                    qualifierListsEqual = false;
-                }
-
-                if (qualifierListsEqual) {
+                if (qualifierNames.equals(existingQualifierNames)) {
                     qualifiersExisting = true;
                     break;
                 }
             }
-            if (!qualifiersExisting) eventQualifiers.add(qualifiers);
+            if (!qualifiersExisting) {
+                eventQualifiers.add(qualifiers);
+            }
         }
         observableEvents.put(typeName, eventQualifiers);
     }

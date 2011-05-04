@@ -10,7 +10,7 @@ import org.jboss.errai.cdi.client.CDITestProducerModule;
 import com.google.gwt.user.client.Timer;
 
 /**
- * Tests CDI event observers.
+ * Tests CDI event producers.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */

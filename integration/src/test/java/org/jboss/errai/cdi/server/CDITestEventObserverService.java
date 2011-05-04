@@ -6,7 +6,7 @@ import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
-import org.jboss.errai.cdi.client.ReceivedEvent;
+import org.jboss.errai.cdi.client.event.ReceivedEvent;
 import org.jboss.errai.cdi.client.qualifier.A;
 import org.jboss.errai.cdi.client.qualifier.B;
 import org.jboss.errai.cdi.client.qualifier.C;
@@ -16,8 +16,8 @@ public class CDITestEventObserverService {
     private static CDITestEventObserverService instance;
    
     @Inject
-    // we use this event to report received event back to the client for easier testability
-    private Event<ReceivedEvent> receivedEventEvent;
+    // we use this event to report received events back to the client for easier testability
+    private Event<ReceivedEvent> receivedEvent;
     
     @PostConstruct
     public void doPostConstruct() {
@@ -29,38 +29,38 @@ public class CDITestEventObserverService {
     }
     
     public void onEvent(@Observes String event) {
-        receivedEventEvent.fire(new ReceivedEvent("", event));
+        receivedEvent.fire(new ReceivedEvent("", event));
     }
     
     public void onEventA(@Observes @A String event) {
-        receivedEventEvent.fire(new ReceivedEvent("A", event));
+        receivedEvent.fire(new ReceivedEvent("A", event));
     }
 
     public void onEventB(@Observes @B String event) {
-        receivedEventEvent.fire(new ReceivedEvent("B", event));
+        receivedEvent.fire(new ReceivedEvent("B", event));
     }
 
     public void onEventC(@Observes @C String event) {
-        receivedEventEvent.fire(new ReceivedEvent("C", event));
+        receivedEvent.fire(new ReceivedEvent("C", event));
     }
     
     public void onEventAB(@Observes @A @B String event) {
-        receivedEventEvent.fire(new ReceivedEvent("AB", event));
+        receivedEvent.fire(new ReceivedEvent("AB", event));
     }
     
     public void onEventBA(@Observes @B @A String event) {
-        receivedEventEvent.fire(new ReceivedEvent("BA", event));
+        receivedEvent.fire(new ReceivedEvent("BA", event));
     }
     
     public void onEventAC(@Observes @A @C String event) {
-        receivedEventEvent.fire(new ReceivedEvent("AC", event));
+        receivedEvent.fire(new ReceivedEvent("AC", event));
     }
     
     public void onEventBC(@Observes @B @C String event) {
-        receivedEventEvent.fire(new ReceivedEvent("BC", event));
+        receivedEvent.fire(new ReceivedEvent("BC", event));
     }
     
     public void onEventABC(@Observes @A @B @C String event) {
-        receivedEventEvent.fire(new ReceivedEvent("ABC", event));
+        receivedEvent.fire(new ReceivedEvent("ABC", event));
     }
 }
