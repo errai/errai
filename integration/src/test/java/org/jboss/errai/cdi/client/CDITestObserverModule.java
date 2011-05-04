@@ -17,6 +17,11 @@ import org.jboss.errai.cdi.client.qualifier.B;
 import org.jboss.errai.cdi.client.qualifier.C;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
+/**
+ * Test module used by {@see EventObserverIntegrationTest}.
+ * 
+ * @author Christian Sadilek <csadilek@redhat.com>
+ */
 @EntryPoint
 public class CDITestObserverModule {
     private int busReadyEventsReceived = 0;
