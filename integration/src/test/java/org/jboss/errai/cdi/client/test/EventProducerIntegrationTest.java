@@ -74,7 +74,7 @@ public class EventProducerIntegrationTest extends AbstractErraiCDITest {
                 if (CDITestProducerModule.getInstance().getBusReadyEventsReceived()) {
                     CDITestProducerModule.getInstance().fireAll();
                 } else {
-                    fail("Did not receive BusReadyEvent!");
+                    fail("Did not receive a BusReadyEvent!");
                 }
             }
         };
