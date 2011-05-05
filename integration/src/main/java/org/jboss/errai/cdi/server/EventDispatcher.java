@@ -75,16 +75,17 @@ public class EventDispatcher implements MessageCallback {
 
                     try {
                         ctxMgr.activateRequestContext();
+                        ctxMgr.activateRequestContextStore();
                         ctxMgr.activateSessionContext(message);
 
-                        if (conversationalServices.contains(clazz)) {
-                            ctxMgr.activateRequestContextStore();
+                        Map<String,Object> store = ctxMgr.getRequestContextStore();
 
-                            Map<String,Object> store = ctxMgr.getRequestContextStore();
+                        if (conversationalServices.contains(clazz)) {
                             store.put(MessageParts.SessionID.name(), Util.getSessionId(message));
-                            store.put(CDIProtocol.OBJECT_REF.name(), o);
                         }
-                        
+
+                        store.put(CDIProtocol.OBJECT_REF.name(), o);
+
                         Set<String> qualifierNames = message.get(Set.class, CDIProtocol.QUALIFIERS);
                         List<Annotation> qualifiers = null;
                         if(qualifierNames!=null) {
