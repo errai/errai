@@ -83,7 +83,7 @@ public class EventObserverIntegrationTest extends AbstractErraiCDITest {
                 finishTest();
             }
         };
-        timer.schedule(10000);
-        delayTestFinish(15000);
+        timer.schedule(20000);
+        delayTestFinish(25000);
     }
 }

@@ -98,7 +98,7 @@ public class EventProducerIntegrationTest extends AbstractErraiCDITest {
                 finishTest();
             }
         };
-        testResultTimer.schedule(15000);
-        delayTestFinish(20000);
+        testResultTimer.schedule(20000);
+        delayTestFinish(25000);
     }
 }
