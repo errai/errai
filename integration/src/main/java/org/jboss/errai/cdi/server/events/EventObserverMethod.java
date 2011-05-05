@@ -82,6 +82,11 @@ public class EventObserverMethod implements ObserverMethod {
 
         Map<String, Object> ctx = mgr.getRequestContextStore();
         Set<String> qualifiersPart = CDI.getQualifiersPart(qualifiers);
+
+        if (event == mgr.getRequestContextStore().get(CDIProtocol.OBJECT_REF.name())) {
+            return;
+        }
+
         if (ctx != null && ctx.containsKey(MessageParts.SessionID.name())) {
         	if(qualifiersPart!=null&&!qualifiersPart.isEmpty()) {
         		MessageBuilder.createMessage()
