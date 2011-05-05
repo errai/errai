@@ -100,14 +100,6 @@
 			</dependencies>
 		
 			<build>
-				<resources>
-					<resource>
-						<directory>src/test/java</directory>
-					</resource>
-					<resource>
-						<directory>src/test/resources</directory>
-					</resource>
-				</resources>
 				<plugins>
 					<plugin>
 		                <artifactId>maven-compiler-plugin</artifactId>
@@ -138,6 +130,14 @@
        		</properties>
 			
 			<build>
+				<resources>
+					<resource>
+						<directory>src/test/java</directory>
+					</resource>
+					<resource>
+						<directory>src/test/resources</directory>
+					</resource>
+				</resources>
 				<plugins>
 					<plugin>
 		                <artifactId>maven-compiler-plugin</artifactId>
