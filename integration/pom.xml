@@ -225,12 +225,6 @@
 					<version>${mvel.version}</version>
 				</dependency>
 
-				<!-- CDI Integration Modules -->
-				<dependency>
-					<groupId>org.jboss.errai</groupId>
-					<artifactId>errai-cdi</artifactId>
-					<version>${project.version}</version>
-				</dependency>
 				<dependency>
 					<groupId>org.jboss.errai</groupId>
 					<artifactId>errai-cdi-jetty</artifactId>
