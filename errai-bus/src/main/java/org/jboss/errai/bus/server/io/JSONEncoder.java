@@ -101,7 +101,7 @@ public class JSONEncoder {
 
         ctx.markEncoded(o);
 
-        StringAppender build = new StringAppender(write(ctx, "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + cls.getName() + "\",\"" + SerializationParts.OBJECT_ID + "\":\"" + String.valueOf(o.hashCode()) + "\","));
+        StringAppender build = new StringAppender(write(ctx, "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + cls.getName() + "\",\"" + SerializationParts.OBJECT_ID + "\":\"" + String.valueOf(o.hashCode()) + "\""));
 
         // Preliminary fix for https://jira.jboss.org/browse/ERRAI-103
         // TODO: Review my Mike
@@ -123,7 +123,9 @@ public class JSONEncoder {
 
         int i = 0;
         boolean first = true;
+
         for (Field field : fields) {
+            if (first) build.append(',');
 
             if ((field.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
                     || field.isSynthetic()) {
