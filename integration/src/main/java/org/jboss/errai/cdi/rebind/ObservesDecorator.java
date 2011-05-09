@@ -49,7 +49,7 @@ import com.google.gwt.core.ext.typeinfo.JParameter;
 @CodeDecorator
 public class ObservesDecorator extends Decorator<Observes> {
 
-	public ObservesDecorator(Class<Observes> decoratesWith) {
+    public ObservesDecorator(Class<Observes> decoratesWith) {
         super(decoratesWith);
     }
 
