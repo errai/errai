@@ -19,7 +19,13 @@ package org.jboss.errai.ioc.rebind.ioc;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 
 public abstract class Injector {
+    protected QualifyingMetadata qualifyingMetadata;
+
     public abstract String instantiateOnly(InjectionContext injectContext, InjectionPoint injectionPoint);
+
+    public String getType(InjectionPoint injectionPoint) {
+         return getType(injectionPoint.getInjectionContext(), injectionPoint);
+    }
 
     public abstract String getType(InjectionContext injectContext, InjectionPoint injectionPoint);
 
@@ -30,5 +36,20 @@ public abstract class Injector {
     public abstract String getVarName();
 
     public abstract JClassType getInjectedType();
+
+    public boolean metadataMatches(Injector injector) {
+        return (injector == null && qualifyingMetadata == null) ||
+                (injector != null && injector.getQualifyingMetadata() != null
+                        && qualifyingMetadata != null
+                        && injector.getQualifyingMetadata().doesSatisfy(qualifyingMetadata));
+    }
+
+    public QualifyingMetadata getQualifyingMetadata() {
+        return qualifyingMetadata;
+    }
+
+    public void setQualifyingMetadata(QualifyingMetadata qualifyingMetadata) {
+        this.qualifyingMetadata = qualifyingMetadata;
+    }
 }
 

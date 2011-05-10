@@ -59,19 +59,27 @@ public class InjectionTask {
         InjectionPoint injectionPoint
                 = new InjectionPoint(null, injectType, constructor, method, field, type, parm, injector, ctx);
 
+        Injector inj;
+
         switch (injectType) {
             case PrivateField:
+                inj = ctx.getQualifiedInjector(field.getType().isClassOrInterface(),
+                        JSR299QualifyingMetadata.createFromAnnotations(injectionPoint.getAnnotations()));
+
                 appender.append(InjectUtil.getPrivateFieldInjectorName(field)).append("(")
                         .append(injector.getVarName()).append(", ")
-                        .append(ctx.getInjector(field.getType().isClassOrInterface()).getType(ctx, injectionPoint))
+                        .append(inj.getType(ctx, injectionPoint))
                         .append(");\n");
 
                 ctx.getPrivateFieldsToExpose().add(field);
                 break;
 
             case Field:
+                inj = ctx.getQualifiedInjector(field.getType().isClassOrInterface(),
+                        JSR299QualifyingMetadata.createFromAnnotations(injectionPoint.getAnnotations()));
+
                 appender.append(injector.getVarName()).append('.').append(field.getName()).append(" = ")
-                        .append(ctx.getInjector(field.getType().isClassOrInterface()).getType(ctx, injectionPoint))
+                        .append(inj.getType(ctx, injectionPoint))
                         .append(";\n");
                 break;
 

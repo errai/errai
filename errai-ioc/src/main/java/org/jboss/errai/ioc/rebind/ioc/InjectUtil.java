@@ -45,14 +45,14 @@ import com.google.gwt.core.ext.typeinfo.JType;
 import com.google.gwt.core.ext.typeinfo.NotFoundException;
 
 public class InjectUtil {
-	private static final Logger log = LoggerFactory.getLogger(InjectUtil.class);
-	
+    private static final Logger log = LoggerFactory.getLogger(InjectUtil.class);
+
     private static final Class[] injectionAnnotations
             = {Inject.class, com.google.inject.Inject.class};
 
     private static final AtomicInteger counter = new AtomicInteger(0);
 
-    public static ConstructionStrategy getConstructionStrategy(final Injector injector, final InjectionContext ctx, final InjectionPoint injectionPoint) {
+    public static ConstructionStrategy getConstructionStrategy(final Injector injector, final InjectionContext ctx) {
         final JClassType type = injector.getInjectedType();
 
         final List<JConstructor> constructorInjectionPoints = scanForConstructorInjectionPoints(type);
@@ -147,7 +147,6 @@ public class InjectUtil {
                         task.setField(field);
                         accumulator.add(task);
                     } catch (NotFoundException e) {
-
                         InjectionTask task = new InjectionTask(injector, field);
                         accumulator.add(task);
 
@@ -280,6 +279,7 @@ public class InjectUtil {
             Injector injector = ctx.getInjector(parmTypes[i]);
             InjectionPoint injectionPoint
                     = new InjectionPoint(null, TaskType.Parameter, constructor, null, null, null, parms[i], injector, ctx);
+
             varNames[i] = injector.getType(ctx, injectionPoint);
         }
 
@@ -357,7 +357,7 @@ public class InjectUtil {
                 }
             }
         } catch (Exception e) {
-              log.error("Problem reading qualifiers for " + injectionPoint.getMethod(), e);
+            log.error("Problem reading qualifiers for " + injectionPoint.getMethod(), e);
         }
 
         return qualifiers;
@@ -379,5 +379,45 @@ public class InjectUtil {
             log.error("Problem reading qualifiers for " + injectionPoint.getField(), e);
         }
         return qualifiers;
+    }
+
+    public static Class<?> loadClass(String name) {
+        try {
+            return Class.forName(name);
+        } catch (UnsupportedOperationException e) {
+            // ignore
+        } catch (Throwable e) {
+            // ignore
+        }
+        return null;
+    }
+
+    public static Field loadField(JField field) {
+        Class<?> cls = loadClass(field.getEnclosingType().getQualifiedSourceName());
+        if (cls == null) return null;
+        try {
+            return cls.getField(field.getName());
+        } catch (NoSuchFieldException e) {
+        }
+        return null;
+    }
+
+    public static Method loadMethod(JMethod method) {
+        Class<?> cls = loadClass(method.getEnclosingType().getQualifiedSourceName());
+        if (cls == null) return null;
+
+        JParameter[] jparms = method.getParameters();
+        Class[] parms = new Class[jparms.length];
+
+        for (int i = 0; i < jparms.length; i++) {
+            parms[i] = loadClass(jparms[i].getType().isClassOrInterface().getQualifiedSourceName());
+        }
+
+        try {
+            return cls.getMethod(method.getName(), parms);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

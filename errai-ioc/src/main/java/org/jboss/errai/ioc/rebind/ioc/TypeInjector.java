@@ -19,13 +19,14 @@ package org.jboss.errai.ioc.rebind.ioc;
 
 import com.google.gwt.core.ext.typeinfo.JClassType;
 
+import javax.inject.Qualifier;
 import javax.inject.Singleton;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-/**
- * User: christopherbrock
- * Date: 7-Jul-2010
- * Time: 1:00:03 PM
- */
 public class TypeInjector extends Injector {
     protected final JClassType type;
     protected boolean injected;
@@ -49,10 +50,28 @@ public class TypeInjector extends Injector {
             }
         }
 
-        ConstructionStrategy cs = InjectUtil.getConstructionStrategy(this, injectContext, injectionPoint);
+        ConstructionStrategy cs = InjectUtil.getConstructionStrategy(this, injectContext);
 
         String generated = cs.generateConstructor();
         injectContext.getProcessingContext().getWriter().print(generated);
+
+        try {
+            Class<?> cls = Class.forName(type.getQualifiedSourceName());
+
+            Set<Annotation> qualifiers = new HashSet<Annotation>();
+            for (Annotation a : cls.getAnnotations()) {
+                if (a.annotationType().isAnnotationPresent(Qualifier.class)) {
+                    qualifiers.add(a);
+                }
+            }
+
+            if (!qualifiers.isEmpty()) {
+                qualifyingMetadata = new JSR299QualifyingMetadata(qualifiers);
+            }
+
+        } catch (Throwable e) {
+            // ignore
+        }
 
         injected = true;
 

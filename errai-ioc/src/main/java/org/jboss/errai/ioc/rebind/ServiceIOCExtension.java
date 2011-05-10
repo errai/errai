@@ -19,13 +19,13 @@ package org.jboss.errai.ioc.rebind;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
-import org.jboss.errai.ioc.rebind.ioc.Decorator;
+import org.jboss.errai.ioc.rebind.ioc.IOCExtension;
 import org.jboss.errai.ioc.rebind.ioc.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.InjectionPoint;
 
 @CodeDecorator
-public class ServiceDecorator extends Decorator<Service> {
-    public ServiceDecorator(Class<Service> decoratesWith) {
+public class ServiceIOCExtension extends IOCExtension<Service> {
+    public ServiceIOCExtension(Class<Service> decoratesWith) {
         super(decoratesWith);
     }
 

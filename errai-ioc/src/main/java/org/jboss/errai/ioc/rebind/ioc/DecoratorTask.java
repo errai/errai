@@ -25,26 +25,26 @@ import org.mvel2.util.StringAppender;
 import java.lang.annotation.Annotation;
 
 public class DecoratorTask extends InjectionTask {
-    private final Decorator[] decorators;
+    private final IOCExtension[] IOCExtensions;
 
-    public DecoratorTask(Injector injector, JClassType type, Decorator[] decs) {
+    public DecoratorTask(Injector injector, JClassType type, IOCExtension[] decs) {
         super(injector, type);
-        this.decorators = decs;
+        this.IOCExtensions = decs;
     }
 
-    public DecoratorTask(Injector injector, JField field, Decorator[] decs) {
+    public DecoratorTask(Injector injector, JField field, IOCExtension[] decs) {
         super(injector, field);
-        this.decorators = decs;
+        this.IOCExtensions = decs;
     }
 
-    public DecoratorTask(Injector injector, JMethod method, Decorator[] decs) {
+    public DecoratorTask(Injector injector, JMethod method, IOCExtension[] decs) {
         super(injector, method);
-        this.decorators = decs;
+        this.IOCExtensions = decs;
     }
 
-    public DecoratorTask(Injector injector, JParameter parm, Decorator[] decs) {
+    public DecoratorTask(Injector injector, JParameter parm, IOCExtension[] decs) {
         super(injector, parm);
-        this.decorators = decs;
+        this.IOCExtensions = decs;
     }
 
     @SuppressWarnings({"unchecked"})
@@ -53,7 +53,7 @@ public class DecoratorTask extends InjectionTask {
         StringAppender appender = new StringAppender();
         Annotation anno = null;
 
-        for (Decorator<?> dec : decorators) {
+        for (IOCExtension<?> dec : IOCExtensions) {
             switch (injectType) {
                 case PrivateField:
                 case Field:

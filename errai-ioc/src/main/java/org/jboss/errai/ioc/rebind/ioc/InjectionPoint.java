@@ -19,6 +19,8 @@ package org.jboss.errai.ioc.rebind.ioc;
 import com.google.gwt.core.ext.typeinfo.*;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 import static org.jboss.errai.ioc.rebind.ioc.InjectUtil.getPrivateFieldInjectorName;
 
@@ -127,5 +129,43 @@ public class InjectionPoint<T extends Annotation> {
             default:
                 return null;
         }
+    }
+
+    public Annotation[] getAnnotations() {
+        Class<?> clz;
+
+        switch (taskType) {
+            case PrivateField:
+            case Field:
+                return getAnnotations(InjectUtil.loadField(field));
+
+            case Parameter:
+                JMethod jMethod = parm.getEnclosingMethod().isMethod();
+
+                int index = -1;
+                for (int i = 0; i < jMethod.getParameters().length; i++) {
+                    if (jMethod.getParameters()[i] == parm) {
+                        index = i;
+                    }
+                }
+
+                Method meth = InjectUtil.loadMethod(jMethod);
+
+                if (method == null) return null;
+
+                return meth.getParameterAnnotations()[index];
+            case Method:
+                return InjectUtil.loadMethod(method).getAnnotations();
+
+            case Type:
+                return InjectUtil.loadClass(type.getQualifiedSourceName()).getAnnotations();
+
+            default:
+                return null;
+        }
+    }
+
+    public Annotation[] getAnnotations(Field field) {
+        return field == null ? null : field.getAnnotations();
     }
 }

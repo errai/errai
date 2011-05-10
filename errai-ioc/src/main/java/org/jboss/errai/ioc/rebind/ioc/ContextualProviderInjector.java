@@ -61,8 +61,6 @@ public class ContextualProviderInjector extends TypeInjector {
 
         StringBuilder sb = new StringBuilder();
 
-
-
         if (pType == null) {
             sb.append(providerInjector.getType(injectContext, injectionPoint)).append(".provide(new Class[] {}");
         } else {

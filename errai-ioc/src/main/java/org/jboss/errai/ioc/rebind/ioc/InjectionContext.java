@@ -27,8 +27,8 @@ import java.util.*;
 
 public class InjectionContext {
     private ProcessingContext processingContext;
-    private Map<JClassType, Injector> injectors = new LinkedHashMap<JClassType, Injector>();
-    private Map<Class<? extends Annotation>, List<Decorator>> decorators = new LinkedHashMap<Class<? extends Annotation>, List<Decorator>>();
+    private Map<JClassType, List<Injector>> injectors = new LinkedHashMap<JClassType, List<Injector>>();
+    private Map<Class<? extends Annotation>, List<IOCExtension>> decorators = new LinkedHashMap<Class<? extends Annotation>, List<IOCExtension>>();
     private Map<ElementType, Set<Class<? extends Annotation>>> decoratorsByElementType = new LinkedHashMap<ElementType, Set<Class<? extends Annotation>>>();
     private List<JField> privateFieldsToExpose = new ArrayList<JField>();
 
@@ -36,43 +36,81 @@ public class InjectionContext {
         this.processingContext = processingContext;
     }
 
+    public Injector getQualifiedInjector(JClassType type, QualifyingMetadata metadata) {
+        JClassType erased = type.getErasedType();
+        List<Injector> injs = injectors.get(erased);
+        if (injs != null) {
+            for (Injector inj : injs) {
+                if (metadata == null && inj.getQualifyingMetadata() == null) {
+                    return inj;
+                } else if (metadata != null && inj.getQualifyingMetadata() != null
+                        && metadata.doesSatisfy(inj.getQualifyingMetadata())) {
+                    return inj;
+                }
+            }
+        }
+        throw new InjectionFailure("could not resolve type for injection: " + erased.getQualifiedSourceName());
+    }
+
+    public Injector getInjector(Class<?> injectorType) {
+        return getInjector(processingContext.loadClassType(injectorType));
+    }
+
     public Injector getInjector(JClassType type) {
         JClassType erased = type.getErasedType();
         if (!injectors.containsKey(erased)) {
             throw new InjectionFailure("could not resolve type for injection: " + erased.getQualifiedSourceName());
         }
-        return injectors.get(erased);
+        List<Injector> injectorList = injectors.get(erased);
+        if (injectorList.size() > 1) {
+            throw new InjectionFailure("ambiguous injection type (multiple injectors resolved): "
+                    + erased.getQualifiedSourceName());
+        } else if (injectorList.isEmpty()) {
+            throw new InjectionFailure("could not resolve type for injection: " + erased.getQualifiedSourceName());
+        }
+
+        return injectorList.get(0);
     }
 
     public List<Injector> getInjectorsByType(Class<? extends Injector> injectorType) {
         List<Injector> injs = new LinkedList<Injector>();
-        for (Injector i : injectors.values()) {
-            if (injectorType.isAssignableFrom(i.getClass())) {
-                injs.add(i);
+        for (List<Injector> inj : injectors.values()) {
+            if (injectorType.isAssignableFrom(inj.getClass())) {
+                injs.addAll(inj);
             }
         }
         return injs;
     }
 
     public void registerInjector(Injector injector) {
-        if (!injectors.containsKey(injector.getInjectedType()))
-            injectors.put(injector.getInjectedType().getErasedType(), injector);
+        List<Injector> injectorList = injectors.get(injector.getInjectedType().getErasedType());
+        if (injectorList == null) {
+            injectors.put(injector.getInjectedType().getErasedType(), injectorList = new ArrayList<Injector>());
+        } else {
+            for (Injector inj : injectorList) {
+                if (inj.metadataMatches(injector)) {
+                    return;
+                }
+            }
+        }
+
+        injectorList.add(injector);
     }
 
-    public void registerDecorator(Decorator<?> decorator) {
-        if (!decorators.containsKey(decorator.decoratesWith()))
-            decorators.put(decorator.decoratesWith(), new ArrayList<Decorator>());
+    public void registerDecorator(IOCExtension<?> IOCExtension) {
+        if (!decorators.containsKey(IOCExtension.decoratesWith()))
+            decorators.put(IOCExtension.decoratesWith(), new ArrayList<IOCExtension>());
 
-        decorators.get(decorator.decoratesWith()).add(decorator);
+        decorators.get(IOCExtension.decoratesWith()).add(IOCExtension);
     }
 
     public Set<Class<? extends Annotation>> getDecoratorAnnotations() {
         return Collections.unmodifiableSet(decorators.keySet());
     }
 
-    public Decorator[] getDecorator(Class<? extends Annotation> annotation) {
-        List<Decorator> decs = decorators.get(annotation);
-        Decorator[] da = new Decorator[decs.size()];
+    public IOCExtension[] getDecorator(Class<? extends Annotation> annotation) {
+        List<IOCExtension> decs = decorators.get(annotation);
+        IOCExtension[] da = new IOCExtension[decs.size()];
         decs.toArray(da);
         return da;
     }
@@ -84,7 +122,7 @@ public class InjectionContext {
         if (decoratorsByElementType.containsKey(type)) {
             return Collections.unmodifiableSet(decoratorsByElementType.get(type));
         } else {
-            return Collections.EMPTY_SET;
+            return Collections.emptySet();
         }
     }
 
