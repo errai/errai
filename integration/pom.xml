@@ -155,7 +155,7 @@
                                 <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
                             </additionalClasspathElements>
                             <useSystemClassLoader>false</useSystemClassLoader>
-                    		<forkMode>once</forkMode> 
+                    		<forkMode>pertest</forkMode> 
                     		<argLine>-Xmx1024m</argLine> 
 						</configuration>
 					</plugin>
