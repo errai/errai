@@ -19,11 +19,10 @@ import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.JField;
 import com.google.gwt.core.ext.typeinfo.JParameterizedType;
 import org.jboss.errai.cdi.client.api.CDI;
-import org.jboss.errai.cdi.client.api.Conversation;
 import org.jboss.errai.cdi.client.api.ConversationContext;
 import org.jboss.errai.cdi.client.api.Event;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
-import org.jboss.errai.ioc.rebind.ioc.Decorator;
+import org.jboss.errai.ioc.rebind.ioc.IOCExtension;
 import org.jboss.errai.ioc.rebind.ioc.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.InjectionPoint;
 
@@ -32,7 +31,7 @@ import org.jboss.errai.ioc.rebind.ioc.InjectionPoint;
  * @author Mike Brock
  */
 @CodeDecorator
-public class ConversationDecorator extends Decorator<ConversationContext> {
+public class ConversationDecorator extends IOCExtension<ConversationContext> {
     public ConversationDecorator(Class<ConversationContext> decoratesWith) {
         super(decoratesWith);
     }

@@ -50,6 +50,13 @@
 					<artifactId>errai-ioc</artifactId>
 					<scope>provided</scope>
 				</dependency>
+
+                <dependency>
+                    <groupId>org.jboss.errai</groupId>
+                    <artifactId>errai-cdi-jetty</artifactId>
+                    <version>${project.parent.version}</version>
+                    <scope>test</scope>
+                </dependency>
 		
 				<!-- Weld -->
 				<dependency>
