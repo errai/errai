@@ -19,6 +19,7 @@ package org.jboss.errai.ioc.rebind.ioc;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.JField;
 import org.jboss.errai.bus.rebind.ProcessingContext;
+import sun.tools.tree.PostIncExpression;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
@@ -28,7 +29,7 @@ import java.util.*;
 public class InjectionContext {
     private ProcessingContext processingContext;
     private Map<JClassType, List<Injector>> injectors = new LinkedHashMap<JClassType, List<Injector>>();
-    private Map<Class<? extends Annotation>, List<IOCExtension>> decorators = new LinkedHashMap<Class<? extends Annotation>, List<IOCExtension>>();
+    private Map<Class<? extends Annotation>, List<IOCDecoratorExtension>> decorators = new LinkedHashMap<Class<? extends Annotation>, List<IOCDecoratorExtension>>();
     private Map<ElementType, Set<Class<? extends Annotation>>> decoratorsByElementType = new LinkedHashMap<ElementType, Set<Class<? extends Annotation>>>();
     private List<JField> privateFieldsToExpose = new ArrayList<JField>();
 
@@ -97,20 +98,20 @@ public class InjectionContext {
         injectorList.add(injector);
     }
 
-    public void registerDecorator(IOCExtension<?> IOCExtension) {
-        if (!decorators.containsKey(IOCExtension.decoratesWith()))
-            decorators.put(IOCExtension.decoratesWith(), new ArrayList<IOCExtension>());
+    public void registerDecorator(IOCDecoratorExtension<?> iocExtension) {
+        if (!decorators.containsKey(iocExtension.decoratesWith()))
+            decorators.put(iocExtension.decoratesWith(), new ArrayList<IOCDecoratorExtension>());
 
-        decorators.get(IOCExtension.decoratesWith()).add(IOCExtension);
+        decorators.get(iocExtension.decoratesWith()).add(iocExtension);
     }
 
     public Set<Class<? extends Annotation>> getDecoratorAnnotations() {
         return Collections.unmodifiableSet(decorators.keySet());
     }
 
-    public IOCExtension[] getDecorator(Class<? extends Annotation> annotation) {
-        List<IOCExtension> decs = decorators.get(annotation);
-        IOCExtension[] da = new IOCExtension[decs.size()];
+    public IOCDecoratorExtension[] getDecorator(Class<? extends Annotation> annotation) {
+        List<IOCDecoratorExtension> decs = decorators.get(annotation);
+        IOCDecoratorExtension[] da = new IOCDecoratorExtension[decs.size()];
         decs.toArray(da);
         return da;
     }

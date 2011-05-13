@@ -62,6 +62,11 @@ public class InjectionTask {
         Injector inj;
 
         switch (injectType) {
+            case Type:
+                inj = ctx.getQualifiedInjector(type,
+                        JSR299QualifyingMetadata.createFromAnnotations(injectionPoint.getAnnotations()));
+                break;
+
             case PrivateField:
                 inj = ctx.getQualifiedInjector(field.getType().isClassOrInterface(),
                         JSR299QualifyingMetadata.createFromAnnotations(injectionPoint.getAnnotations()));

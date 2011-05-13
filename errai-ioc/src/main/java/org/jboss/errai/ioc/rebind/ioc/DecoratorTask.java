@@ -25,24 +25,24 @@ import org.mvel2.util.StringAppender;
 import java.lang.annotation.Annotation;
 
 public class DecoratorTask extends InjectionTask {
-    private final IOCExtension[] IOCExtensions;
+    private final IOCDecoratorExtension[] IOCExtensions;
 
-    public DecoratorTask(Injector injector, JClassType type, IOCExtension[] decs) {
+    public DecoratorTask(Injector injector, JClassType type, IOCDecoratorExtension[] decs) {
         super(injector, type);
         this.IOCExtensions = decs;
     }
 
-    public DecoratorTask(Injector injector, JField field, IOCExtension[] decs) {
+    public DecoratorTask(Injector injector, JField field, IOCDecoratorExtension[] decs) {
         super(injector, field);
         this.IOCExtensions = decs;
     }
 
-    public DecoratorTask(Injector injector, JMethod method, IOCExtension[] decs) {
+    public DecoratorTask(Injector injector, JMethod method, IOCDecoratorExtension[] decs) {
         super(injector, method);
         this.IOCExtensions = decs;
     }
 
-    public DecoratorTask(Injector injector, JParameter parm, IOCExtension[] decs) {
+    public DecoratorTask(Injector injector, JParameter parm, IOCDecoratorExtension[] decs) {
         super(injector, parm);
         this.IOCExtensions = decs;
     }
@@ -53,7 +53,7 @@ public class DecoratorTask extends InjectionTask {
         StringAppender appender = new StringAppender();
         Annotation anno = null;
 
-        for (IOCExtension<?> dec : IOCExtensions) {
+        for (IOCDecoratorExtension<?> dec : IOCExtensions) {
             switch (injectType) {
                 case PrivateField:
                 case Field:

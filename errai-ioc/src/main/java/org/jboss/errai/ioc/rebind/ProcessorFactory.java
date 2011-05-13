@@ -46,6 +46,11 @@ public class ProcessorFactory {
         for (Class<? extends Annotation> aClass : annotationHandlers.keySet()) {
             Set<Class<?>> classes = scanner.getTypesAnnotatedWith(aClass);
             for (Class<?> clazz : classes) {
+                if (clazz.getPackage().getName().contains("server")) {
+                  //  System.out.println("Skip: " + clazz.getName());
+                    continue;
+                }
+
                 JClassType type = loadType(context.getOracle(), clazz);
                 injectorFactory.addType(type);
                 annotationHandlers.get(aClass).handle(type, type.getAnnotation(aClass), context);

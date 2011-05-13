@@ -138,6 +138,12 @@ public class InjectUtil {
         final List<InjectionTask> accumulator = new LinkedList<InjectionTask>();
         final Set<Class<? extends Annotation>> decorators = ctx.getDecoratorAnnotations();
 
+        for (Class<? extends Annotation> decorator : decorators) {
+             if (type.isAnnotationPresent(decorator)) {
+                 accumulator.add(new InjectionTask(injector, type));
+             }
+        }
+
         for (JField field : type.getFields()) {
             if (isInjectionPoint(field)) {
                 if (!field.isPublic()) {

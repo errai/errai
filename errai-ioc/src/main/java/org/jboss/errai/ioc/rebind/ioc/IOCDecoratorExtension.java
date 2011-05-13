@@ -18,10 +18,10 @@ package org.jboss.errai.ioc.rebind.ioc;
 
 import java.lang.annotation.Annotation;
 
-public abstract class IOCExtension<T extends Annotation> {
+public abstract class IOCDecoratorExtension<T extends Annotation> {
     private final Class<T> decoratesWith;
 
-    protected IOCExtension(Class<T> decoratesWith) {
+    protected IOCDecoratorExtension(Class<T> decoratesWith) {
         this.decoratesWith = decoratesWith;
     }
 

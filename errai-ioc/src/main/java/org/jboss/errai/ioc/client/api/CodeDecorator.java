@@ -21,11 +21,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * User: christopherbrock
- * Date: 23-Jul-2010
- * Time: 5:35:56 PM
- */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface CodeDecorator {

@@ -38,6 +38,7 @@ public class InjectorFactory {
 
     public String generateSingleton(JClassType type) {
         Injector i = ctx.getInjector(type);
+        ctx.registerInjector(i);
         if (i.isInjected()) {
             return i.getVarName();
         } else {

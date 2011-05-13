@@ -35,7 +35,7 @@ import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
 import org.jboss.errai.ioc.client.InterfaceInjectionContext;
 import org.jboss.errai.ioc.client.api.*;
 import org.jboss.errai.ioc.rebind.ioc.*;
-import org.jboss.errai.ioc.rebind.ioc.IOCExtension;
+import org.jboss.errai.ioc.rebind.ioc.IOCDecoratorExtension;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
@@ -162,13 +162,19 @@ public class IOCGenerator extends Generator {
             throw new RuntimeException(e);
         }
         /**
-         * IOCExtension.class
+         * IOCDecoratorExtension.class
          */
         Set<Class<?>> iocExtensions = scanner.getTypesAnnotatedWith(org.jboss.errai.ioc.client.api.IOCExtension.class);
+        List<IOCExtensionConfigurator> extensionConfigurators = new ArrayList<IOCExtensionConfigurator>();
         for (Class<?> clazz : iocExtensions) {
             try {
                 Class<? extends IOCExtensionConfigurator> configuratorClass = clazz.asSubclass(IOCExtensionConfigurator.class);
-                configuratorClass.newInstance().configure(procContext, injectFactory, procFactory);
+
+                IOCExtensionConfigurator configurator = configuratorClass.newInstance();
+
+                configurator.configure(procContext, injectFactory, procFactory);
+
+                extensionConfigurators.add(configurator);
             } catch (Exception e) {
                 throw new ErraiBootstrapFailure("unable to load IOC Extension Configurator: " + e.getMessage(), e);
             }
@@ -180,18 +186,18 @@ public class IOCGenerator extends Generator {
         Set<Class<?>> decorators = scanner.getTypesAnnotatedWith(CodeDecorator.class);
         for (Class<?> clazz : decorators) {
             try {
-                Class<? extends IOCExtension> decoratorClass = clazz.asSubclass(IOCExtension.class);
+                Class<? extends IOCDecoratorExtension> decoratorClass = clazz.asSubclass(IOCDecoratorExtension.class);
 
                 Class<? extends Annotation> annoType = null;
                 Type t = decoratorClass.getGenericSuperclass();
                 if (!(t instanceof ParameterizedType)) {
-                    throw new ErraiBootstrapFailure("code decorator must extend IOCExtension<@AnnotationType>");
+                    throw new ErraiBootstrapFailure("code decorator must extend IOCDecoratorExtension<@AnnotationType>");
                 }
 
                 ParameterizedType pType = (ParameterizedType) t;
-                if (IOCExtension.class.equals(pType.getRawType())) {
+                if (IOCDecoratorExtension.class.equals(pType.getRawType())) {
                     if (pType.getActualTypeArguments().length == 0 || !Annotation.class.isAssignableFrom((Class) pType.getActualTypeArguments()[0])) {
-                        throw new ErraiBootstrapFailure("code decorator must extend IOCExtension<@AnnotationType>");
+                        throw new ErraiBootstrapFailure("code decorator must extend IOCDecoratorExtension<@AnnotationType>");
                     }
 
                     annoType = ((Class) pType.getActualTypeArguments()[0]).asSubclass(Annotation.class);
@@ -275,6 +281,9 @@ public class IOCGenerator extends Generator {
             }
         }
 
+        for (IOCExtensionConfigurator extensionConfigurator : extensionConfigurators) {
+            extensionConfigurator.afterInitialization(procContext, injectFactory, procFactory);
+        }
     }
 
     private void generateExtensions(final GeneratorContext context, final TreeLogger logger, final SourceWriter sourceWriter) {

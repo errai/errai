@@ -30,12 +30,12 @@ import java.util.Set;
 public class TypeInjector extends Injector {
     protected final JClassType type;
     protected boolean injected;
-    protected boolean singleTon;
+    protected boolean singleton;
     protected String varName;
 
     public TypeInjector(JClassType type) {
         this.type = type;
-        this.singleTon = type.isAnnotationPresent(Singleton.class)
+        this.singleton = type.isAnnotationPresent(Singleton.class)
                 || type.isAnnotationPresent(com.google.inject.Singleton.class);
         this.varName = InjectUtil.getNewVarName();
     }
@@ -90,7 +90,11 @@ public class TypeInjector extends Injector {
 
     @Override
     public boolean isSingleton() {
-        return singleTon;
+        return singleton;
+    }
+
+    public void setSingleton(boolean singleton) {
+        this.singleton = singleton;
     }
 
     @Override
