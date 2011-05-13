@@ -12,13 +12,7 @@ import org.jboss.errai.ioc.client.api.IOCProvider;
 
 import com.google.gwt.user.client.Window;
 
-/**
- * User: christopherbrock
- * Date: 27-Jul-2010
- * Time: 4:24:02 PM
- */
 @IOCProvider
-@ApplicationScoped
 public class EventProvider implements ContextualTypeProvider<Event<?>> {
 
     public Event<?> provide(final Class[] typeargs, final Annotation[] qualifiers) {

@@ -27,7 +27,7 @@ import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.cdi.client.CDIProtocol;
 import org.jboss.errai.cdi.client.api.CDI;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
-import org.jboss.errai.ioc.rebind.ioc.IOCExtension;
+import org.jboss.errai.ioc.rebind.ioc.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.InjectionPoint;
@@ -47,9 +47,9 @@ import com.google.gwt.core.ext.typeinfo.JParameter;
  * @date Jul 27, 2010
  */
 @CodeDecorator
-public class ObservesDecorator extends IOCExtension<Observes> {
+public class ObservesExtension extends IOCDecoratorExtension<Observes> {
 
-	public ObservesDecorator(Class<Observes> decoratesWith) {
+	public ObservesExtension(Class<Observes> decoratesWith) {
         super(decoratesWith);
     }
 

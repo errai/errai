@@ -22,7 +22,7 @@ import org.jboss.errai.cdi.client.api.CDI;
 import org.jboss.errai.cdi.client.api.ConversationContext;
 import org.jboss.errai.cdi.client.api.Event;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
-import org.jboss.errai.ioc.rebind.ioc.IOCExtension;
+import org.jboss.errai.ioc.rebind.ioc.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.InjectionPoint;
 
@@ -31,8 +31,8 @@ import org.jboss.errai.ioc.rebind.ioc.InjectionPoint;
  * @author Mike Brock
  */
 @CodeDecorator
-public class ConversationDecorator extends IOCExtension<ConversationContext> {
-    public ConversationDecorator(Class<ConversationContext> decoratesWith) {
+public class ConversationExtension extends IOCDecoratorExtension<ConversationContext> {
+    public ConversationExtension(Class<ConversationContext> decoratesWith) {
         super(decoratesWith);
     }
 
