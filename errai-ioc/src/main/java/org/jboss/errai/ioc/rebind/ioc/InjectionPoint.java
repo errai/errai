@@ -17,7 +17,9 @@
 package org.jboss.errai.ioc.rebind.ioc;
 
 import com.google.gwt.core.ext.typeinfo.*;
+import org.mvel2.util.ReflectionUtil;
 
+import javax.management.RuntimeErrorException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -132,12 +134,10 @@ public class InjectionPoint<T extends Annotation> {
     }
 
     public Annotation[] getAnnotations() {
-        Class<?> clz;
-
         switch (taskType) {
             case PrivateField:
             case Field:
-                return getAnnotations(InjectUtil.loadField(field));
+                return InjectUtil.getAnnotations(field);
 
             case Parameter:
                 JMethod jMethod = parm.getEnclosingMethod().isMethod();
@@ -168,4 +168,6 @@ public class InjectionPoint<T extends Annotation> {
     public Annotation[] getAnnotations(Field field) {
         return field == null ? null : field.getAnnotations();
     }
+
+
 }

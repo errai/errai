@@ -28,6 +28,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Qualifier;
 
+import com.google.inject.internal.Annotations;
 import org.jboss.errai.bus.rebind.ScannerSingleton;
 import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
 import org.jboss.errai.ioc.rebind.IOCGenerator;
@@ -139,9 +140,9 @@ public class InjectUtil {
         final Set<Class<? extends Annotation>> decorators = ctx.getDecoratorAnnotations();
 
         for (Class<? extends Annotation> decorator : decorators) {
-             if (type.isAnnotationPresent(decorator)) {
-                 accumulator.add(new InjectionTask(injector, type));
-             }
+            if (type.isAnnotationPresent(decorator)) {
+                accumulator.add(new InjectionTask(injector, type));
+            }
         }
 
         for (JField field : type.getFields()) {
@@ -425,5 +426,39 @@ public class InjectUtil {
             e.printStackTrace();
         }
         return null;
+    }
+
+    //  The following is a pretty epic hack to extract all of the annotation data from the GWT deferred binding
+    //  type system, since it only lets us query on specific annotations.
+    //  Nothing to see here, move along ...
+
+     public static Annotation[] getAnnotations(JField field) {
+        try {
+            Object annotationsField = annotationsField_JField.get(field);
+            return (Annotation[]) gwtAnnotationsInternalClass_getAnnotations.invoke(annotationsField);
+
+        } catch (Throwable t) {
+            throw new RuntimeException("Cannot access JField.annotations " +
+                    "-- possibly using an incompatible version of GWT", t);
+        }
+    }
+
+    static final Class gwtAnnotationsInternalClass;
+    static final Method gwtAnnotationsInternalClass_getAnnotations;
+
+    static final Field annotationsField_JField;
+
+    static {
+        try {
+            gwtAnnotationsInternalClass = Class.forName("com.google.gwt.core.ext.typeinfo.Annotations");
+            gwtAnnotationsInternalClass_getAnnotations = gwtAnnotationsInternalClass.getDeclaredMethod("getDeclaredAnnotations");
+            gwtAnnotationsInternalClass_getAnnotations.setAccessible(true);
+
+            annotationsField_JField = JField.class.getDeclaredField("annotations");
+            annotationsField_JField.setAccessible(true);
+        } catch (Throwable e) {
+            throw new RuntimeException("Cannot access JField.annotations " +
+                    "-- possibly using an incompatible version of GWT", e);
+        }
     }
 }
