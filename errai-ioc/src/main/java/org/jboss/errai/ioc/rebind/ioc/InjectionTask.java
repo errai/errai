@@ -54,22 +54,23 @@ public class InjectionTask {
         this.type = type;
     }
 
+    @SuppressWarnings({"unchecked"})
     public String doTask(InjectionContext ctx) {
         StringAppender appender = new StringAppender();
-        InjectionPoint injectionPoint
+        InjectionPoint<?> injectionPoint
                 = new InjectionPoint(null, injectType, constructor, method, field, type, parm, injector, ctx);
 
         Injector inj;
 
         switch (injectType) {
             case Type:
-                inj = ctx.getQualifiedInjector(type,
-                        JSR299QualifyingMetadata.createFromAnnotations(injectionPoint.getAnnotations()));
+                ctx.getQualifiedInjector(type,
+                        JSR299QualifyingMetadata.createFromAnnotations(injectionPoint.getQualifiers()));
                 break;
 
             case PrivateField:
                 inj = ctx.getQualifiedInjector(field.getType().isClassOrInterface(),
-                        JSR299QualifyingMetadata.createFromAnnotations(injectionPoint.getAnnotations()));
+                        JSR299QualifyingMetadata.createFromAnnotations(injectionPoint.getQualifiers()));
 
                 appender.append(InjectUtil.getPrivateFieldInjectorName(field)).append("(")
                         .append(injector.getVarName()).append(", ")
@@ -81,7 +82,7 @@ public class InjectionTask {
 
             case Field:
                 inj = ctx.getQualifiedInjector(field.getType().isClassOrInterface(),
-                        JSR299QualifyingMetadata.createFromAnnotations(injectionPoint.getAnnotations()));
+                        JSR299QualifyingMetadata.createFromAnnotations(injectionPoint.getQualifiers()));
 
                 appender.append(injector.getVarName()).append('.').append(field.getName()).append(" = ")
                         .append(inj.getType(ctx, injectionPoint))

@@ -18,6 +18,7 @@ package org.jboss.errai.ioc.rebind.ioc;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -28,22 +29,13 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Qualifier;
 
-import com.google.inject.internal.Annotations;
+import com.google.gwt.core.ext.typeinfo.*;
 import org.jboss.errai.bus.rebind.ScannerSingleton;
-import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
 import org.jboss.errai.ioc.rebind.IOCGenerator;
 import org.mvel2.util.ReflectionUtil;
 import org.mvel2.util.StringAppender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.JConstructor;
-import com.google.gwt.core.ext.typeinfo.JField;
-import com.google.gwt.core.ext.typeinfo.JMethod;
-import com.google.gwt.core.ext.typeinfo.JParameter;
-import com.google.gwt.core.ext.typeinfo.JType;
-import com.google.gwt.core.ext.typeinfo.NotFoundException;
 
 public class InjectUtil {
     private static final Logger log = LoggerFactory.getLogger(InjectUtil.class);
@@ -321,30 +313,66 @@ public class InjectUtil {
         return field.getEnclosingType().getQualifiedSourceName().replaceAll("\\.", "_") + "_" + field.getName();
     }
 
-    private static Set<Class<?>> qualifiers;
+    private static Set<Class<?>> qualifiersCache;
+    private static Set<Class<?>> annotationsCache;
 
-    public static Set<Class<?>> getQualifiers() {
-        if (qualifiers == null) {
-            qualifiers = new HashSet<Class<?>>();
+    public static Set<Class<?>> getQualifiersCache() {
+        if (qualifiersCache == null) {
+            qualifiersCache = new HashSet<Class<?>>();
 
-            MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
-            qualifiers.addAll(scanner.getTypesAnnotatedWith(Qualifier.class));
+            qualifiersCache.addAll(ScannerSingleton.getOrCreateInstance()
+                    .getTypesAnnotatedWith(Qualifier.class));
+        }
+
+        return qualifiersCache;
+    }
+
+    public static Set<Class<?>> getKnownAnnotationsCache() {
+        if (annotationsCache == null) {
+            annotationsCache = new HashSet<Class<?>>();
+
+            ScannerSingleton.getOrCreateInstance();
+
+            annotationsCache.addAll(ScannerSingleton.getOrCreateInstance()
+                    .getTypesAnnotatedWith(Retention.class));
+        }
+
+        return annotationsCache;
+    }
+
+    public static List<Annotation> extractQualifiers(InjectionPoint<?> injectionPoint) {
+        switch (injectionPoint.getTaskType()) {
+            case Field:
+                return extractQualifiersFromField(injectionPoint.getField());
+            case Method:
+                return extractQualifiersFromMethod(injectionPoint.getMethod());
+            case Parameter:
+                return extractQualifiersFromParameter(injectionPoint.getParm());
+            case Type:
+                return extractQualifiersFromType(injectionPoint);
+            default:
+                return Collections.emptyList();
+        }
+    }
+
+    public static List<Annotation> extractQualifiersFromMethod(final JMethod method) {
+        List<Annotation> qualifiers = new ArrayList<Annotation>();
+
+        for (Class<?> annotation : getQualifiersCache()) {
+            if (method.isAnnotationPresent(annotation.asSubclass(Annotation.class))) {
+                qualifiers.add(method.getAnnotation(annotation.asSubclass(Annotation.class)));
+            }
         }
 
         return qualifiers;
     }
 
-    public static List<Annotation> extractQualifiers(InjectionPoint<?> injectionPoint) {
-        return (injectionPoint.getMethod() != null) ?
-                extractQualifiersFromMethod(injectionPoint) : extractQualifiersFromField(injectionPoint);
-    }
 
-    private static List<Annotation> extractQualifiersFromMethod(InjectionPoint<?> injectionPoint) {
+    public static List<Annotation> extractQualifiersFromParameter(final JParameter parm) {
         List<Annotation> qualifiers = new ArrayList<Annotation>();
 
         try {
-            final JMethod method = injectionPoint.getMethod();
-            final JParameter parm = injectionPoint.getParm();
+            final JAbstractMethod method =  parm.getEnclosingMethod();
 
             JType[] jMethodParms = new JType[method.getParameters().length];
             int eventParamIndex = 0;
@@ -355,38 +383,57 @@ public class InjectUtil {
                 jMethodParms[i] = method.getParameters()[i].getType();
             }
 
-            JClassType jType = injectionPoint.getInjector().getInjectedType();
+            JClassType jType = parm.getEnclosingMethod().getEnclosingType();
             JMethod observesMethod = jType.getMethod(method.getName(), jMethodParms);
 
-            for (Class<?> qualifier : getQualifiers()) {
-                if (observesMethod.getParameters()[eventParamIndex].isAnnotationPresent((Class<? extends Annotation>) qualifier)) {
-                    qualifiers.add(observesMethod.getParameters()[eventParamIndex].getAnnotation((Class<? extends Annotation>) qualifier));
+            for (Class<?> qualifier : getQualifiersCache()) {
+                if (observesMethod.getParameters()[eventParamIndex].isAnnotationPresent(qualifier.asSubclass(Annotation.class))) {
+                    qualifiers.add(observesMethod.getParameters()[eventParamIndex].getAnnotation(qualifier.asSubclass(Annotation.class)));
                 }
             }
         } catch (Exception e) {
-            log.error("Problem reading qualifiers for " + injectionPoint.getMethod(), e);
+            log.error("Problem reading qualifiersCache for " + parm.getEnclosingMethod().getEnclosingType(), e);
         }
 
         return qualifiers;
     }
 
-    private static List<Annotation> extractQualifiersFromField(InjectionPoint<?> injectionPoint) {
+    public static List<Annotation> extractQualifiersFromField(JField field) {
         List<Annotation> qualifiers = new ArrayList<Annotation>();
 
         try {
-            // find all qualifiers of the event field
-            JField jEventField = injectionPoint.getField();
+            // find all qualifiersCache of the event field
+         //   JField jEventField = injectionPoint.getField();
 
-            for (Class<?> qualifier : getQualifiers()) {
-                if (jEventField.isAnnotationPresent((Class<? extends Annotation>) qualifier)) {
-                    qualifiers.add(jEventField.getAnnotation((Class<? extends Annotation>) qualifier));
+            for (Class<?> qualifier : getQualifiersCache()) {
+                if (field.isAnnotationPresent(qualifier.asSubclass(Annotation.class))) {
+                    qualifiers.add(field.getAnnotation(qualifier.asSubclass(Annotation.class)));
                 }
             }
         } catch (Exception e) {
-            log.error("Problem reading qualifiers for " + injectionPoint.getField(), e);
+            log.error("Problem reading qualifiersCache for " + field, e);
         }
         return qualifiers;
     }
+
+    public static List<Annotation> extractQualifiersFromType(InjectionPoint<?> injectionPoint) {
+        List<Annotation> qualifiers = new ArrayList<Annotation>();
+
+        try {
+            JClassType type = injectionPoint.getType();
+
+            for (Class<?> qualifier : getQualifiersCache()) {
+                if (type.isAnnotationPresent(qualifier.asSubclass(Annotation.class))) {
+                    qualifiers.add(type.getAnnotation(qualifier.asSubclass(Annotation.class)));
+                }
+            }
+        } catch (Exception e) {
+            log.error("Problem reading qualifiersCache for " + injectionPoint.getField(), e);
+        }
+        return qualifiers;
+
+    }
+
 
     public static Class<?> loadClass(String name) {
         try {
@@ -426,39 +473,5 @@ public class InjectUtil {
             e.printStackTrace();
         }
         return null;
-    }
-
-    //  The following is a pretty epic hack to extract all of the annotation data from the GWT deferred binding
-    //  type system, since it only lets us query on specific annotations.
-    //  Nothing to see here, move along ...
-
-     public static Annotation[] getAnnotations(JField field) {
-        try {
-            Object annotationsField = annotationsField_JField.get(field);
-            return (Annotation[]) gwtAnnotationsInternalClass_getAnnotations.invoke(annotationsField);
-
-        } catch (Throwable t) {
-            throw new RuntimeException("Cannot access JField.annotations " +
-                    "-- possibly using an incompatible version of GWT", t);
-        }
-    }
-
-    static final Class gwtAnnotationsInternalClass;
-    static final Method gwtAnnotationsInternalClass_getAnnotations;
-
-    static final Field annotationsField_JField;
-
-    static {
-        try {
-            gwtAnnotationsInternalClass = Class.forName("com.google.gwt.core.ext.typeinfo.Annotations");
-            gwtAnnotationsInternalClass_getAnnotations = gwtAnnotationsInternalClass.getDeclaredMethod("getDeclaredAnnotations");
-            gwtAnnotationsInternalClass_getAnnotations.setAccessible(true);
-
-            annotationsField_JField = JField.class.getDeclaredField("annotations");
-            annotationsField_JField.setAccessible(true);
-        } catch (Throwable e) {
-            throw new RuntimeException("Cannot access JField.annotations " +
-                    "-- possibly using an incompatible version of GWT", e);
-        }
     }
 }

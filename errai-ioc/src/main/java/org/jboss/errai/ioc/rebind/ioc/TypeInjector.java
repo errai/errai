@@ -22,9 +22,7 @@ import com.google.gwt.core.ext.typeinfo.JClassType;
 import javax.inject.Qualifier;
 import javax.inject.Singleton;
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class TypeInjector extends Injector {

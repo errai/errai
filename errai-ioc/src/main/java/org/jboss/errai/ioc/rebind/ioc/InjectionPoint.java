@@ -23,6 +23,7 @@ import javax.management.RuntimeErrorException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.List;
 
 import static org.jboss.errai.ioc.rebind.ioc.InjectUtil.getPrivateFieldInjectorName;
 
@@ -133,11 +134,12 @@ public class InjectionPoint<T extends Annotation> {
         }
     }
 
-    public Annotation[] getAnnotations() {
+    public Annotation[] getQualifiers() {
         switch (taskType) {
             case PrivateField:
             case Field:
-                return InjectUtil.getAnnotations(field);
+                List<Annotation> annotations = InjectUtil.extractQualifiersFromField(field);
+                return annotations.toArray(new Annotation[annotations.size()]);
 
             case Parameter:
                 JMethod jMethod = parm.getEnclosingMethod().isMethod();
@@ -168,6 +170,4 @@ public class InjectionPoint<T extends Annotation> {
     public Annotation[] getAnnotations(Field field) {
         return field == null ? null : field.getAnnotations();
     }
-
-
 }
