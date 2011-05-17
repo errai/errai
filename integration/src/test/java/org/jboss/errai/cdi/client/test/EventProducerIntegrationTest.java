@@ -3,7 +3,7 @@ package org.jboss.errai.cdi.client.test;
 import java.util.List;
 import java.util.Map;
 
-import org.jboss.errai.cdi.client.CDITestProducerModule;
+import org.jboss.errai.cdi.client.EventProducerTestModule;
 
 import com.google.gwt.user.client.Timer;
 
@@ -16,32 +16,31 @@ public class EventProducerIntegrationTest extends AbstractEventIntegrationTest {
 
     @Override
     public String getModuleName() {
-        return "org.jboss.errai.cdi.CDITestProducerModule";
+        return "org.jboss.errai.cdi.EventProducerTestModule";
     }
 
     @Override
     public void gwtSetUp() throws Exception {
         super.gwtSetUp();
-
     }
 
     public void testInjectedEvents() {
-        assertNotNull(CDITestProducerModule.getInstance().getEvent());
-        assertNotNull(CDITestProducerModule.getInstance().getEventA());
-        assertNotNull(CDITestProducerModule.getInstance().getEventB());
-        assertNotNull(CDITestProducerModule.getInstance().getEventC());
-        assertNotNull(CDITestProducerModule.getInstance().getEventAB());
-        assertNotNull(CDITestProducerModule.getInstance().getEventAC());
-        assertNotNull(CDITestProducerModule.getInstance().getEventBC());
-        assertNotNull(CDITestProducerModule.getInstance().getEventABC());
+        assertNotNull(EventProducerTestModule.getInstance().getEvent());
+        assertNotNull(EventProducerTestModule.getInstance().getEventA());
+        assertNotNull(EventProducerTestModule.getInstance().getEventB());
+        assertNotNull(EventProducerTestModule.getInstance().getEventC());
+        assertNotNull(EventProducerTestModule.getInstance().getEventAB());
+        assertNotNull(EventProducerTestModule.getInstance().getEventAC());
+        assertNotNull(EventProducerTestModule.getInstance().getEventBC());
+        assertNotNull(EventProducerTestModule.getInstance().getEventABC());
     }
 
     public void testEventProducers() {
         final Timer testInitTimer = new Timer() {
             public void run() {
                 // we need to wait for the BusReadyEvent because deferred events are fired without qualifiers!
-                if (CDITestProducerModule.getInstance().getBusReadyEventsReceived()) {
-                    CDITestProducerModule.getInstance().fireAll();
+                if (EventProducerTestModule.getInstance().getBusReadyEventsReceived()) {
+                    EventProducerTestModule.getInstance().fireAll();
                 } else {
                     fail("Did not receive a BusReadyEvent!");
                 }
@@ -51,7 +50,7 @@ public class EventProducerIntegrationTest extends AbstractEventIntegrationTest {
 
         final Timer testResultTimer = new Timer() {
             public void run() {
-                Map<String, List<String>> actualEvents = CDITestProducerModule.getInstance()
+                Map<String, List<String>> actualEvents = EventProducerTestModule.getInstance()
                         .getReceivedEventsOnServer();
 
                 // assert that the server received all events

@@ -3,7 +3,7 @@ package org.jboss.errai.cdi.client.test;
 import java.util.List;
 import java.util.Map;
 
-import org.jboss.errai.cdi.client.CDITestObserverModule;
+import org.jboss.errai.cdi.client.EventObserverTestModule;
 
 import com.google.gwt.user.client.Timer;
 
@@ -16,14 +16,14 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
 
     @Override
     public String getModuleName() {
-        return "org.jboss.errai.cdi.CDITestObserverModule";
+        return "org.jboss.errai.cdi.EventObserverTestModule";
     }
 
     public void testBusReadyEventObserver() {
         Timer timer = new Timer() {
             public void run() {
                 assertEquals("Wrong number of BusReadyEvents received:", 1, 
-                        CDITestObserverModule.getInstance().getBusReadyEventsReceived());
+                        EventObserverTestModule.getInstance().getBusReadyEventsReceived());
                 finishTest();
             }
         };
@@ -32,12 +32,12 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
     }
    
     public void testEventObservers() {
-        assertNotNull(CDITestObserverModule.getInstance().getStartEvent());
-        CDITestObserverModule.getInstance().start();
+        assertNotNull(EventObserverTestModule.getInstance().getStartEvent());
+        EventObserverTestModule.getInstance().start();
 
         Timer timer = new Timer() {
             public void run() {
-                Map<String, List<String>> actualEvents = CDITestObserverModule.getInstance().getReceivedEvents();
+                Map<String, List<String>> actualEvents = EventObserverTestModule.getInstance().getReceivedEvents();
                 
                 // assert that the client received all events
                 EventObserverIntegrationTest.this.verifyEvents(actualEvents);
