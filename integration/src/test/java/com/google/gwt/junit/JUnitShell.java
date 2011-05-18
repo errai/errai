@@ -15,30 +15,6 @@
  */
 package com.google.gwt.junit;
 
-import java.io.File;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import junit.framework.AssertionFailedError;
-import junit.framework.TestCase;
-import junit.framework.TestResult;
-
-import org.jboss.errai.cdi.server.gwt.JettyLauncher;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.webapp.WebAppContext;
-
 import com.google.gwt.core.ext.Linker;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.TreeLogger.Type;
@@ -57,20 +33,7 @@ import com.google.gwt.dev.cfg.Property;
 import com.google.gwt.dev.javac.CompilationState;
 import com.google.gwt.dev.javac.CompilationUnit;
 import com.google.gwt.dev.shell.CheckForUpdates;
-import com.google.gwt.dev.util.arg.ArgHandlerDisableAggressiveOptimization;
-import com.google.gwt.dev.util.arg.ArgHandlerDisableCastChecking;
-import com.google.gwt.dev.util.arg.ArgHandlerDisableClassMetadata;
-import com.google.gwt.dev.util.arg.ArgHandlerDisableRunAsync;
-import com.google.gwt.dev.util.arg.ArgHandlerDraftCompile;
-import com.google.gwt.dev.util.arg.ArgHandlerEnableAssertions;
-import com.google.gwt.dev.util.arg.ArgHandlerExtraDir;
-import com.google.gwt.dev.util.arg.ArgHandlerGenDir;
-import com.google.gwt.dev.util.arg.ArgHandlerLocalWorkers;
-import com.google.gwt.dev.util.arg.ArgHandlerLogLevel;
-import com.google.gwt.dev.util.arg.ArgHandlerMaxPermsPerPrecompile;
-import com.google.gwt.dev.util.arg.ArgHandlerScriptStyle;
-import com.google.gwt.dev.util.arg.ArgHandlerWarDir;
-import com.google.gwt.dev.util.arg.ArgHandlerWorkDirOptional;
+import com.google.gwt.dev.util.arg.*;
 import com.google.gwt.junit.JUnitMessageQueue.ClientStatus;
 import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.junit.client.TimeoutException;
@@ -79,6 +42,23 @@ import com.google.gwt.junit.client.impl.JUnitResult;
 import com.google.gwt.util.tools.ArgHandlerFlag;
 import com.google.gwt.util.tools.ArgHandlerInt;
 import com.google.gwt.util.tools.ArgHandlerString;
+import junit.framework.AssertionFailedError;
+import junit.framework.TestCase;
+import junit.framework.TestResult;
+import org.jboss.errai.cdi.server.gwt.JettyLauncher;
+import org.mortbay.jetty.Server;
+import org.mortbay.jetty.webapp.WebAppContext;
+
+import java.io.File;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This class is responsible for hosting JUnit test case execution. There are

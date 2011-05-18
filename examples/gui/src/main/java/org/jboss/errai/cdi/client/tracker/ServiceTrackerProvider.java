@@ -17,7 +17,7 @@ package org.jboss.errai.cdi.client.tracker;
 
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.ioc.client.api.Provider;
+import org.jboss.errai.ioc.client.api.IOCProvider;
 import org.jboss.errai.ioc.client.api.TypeProvider;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -28,7 +28,7 @@ import javax.enterprise.inject.Produces;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Jul 20, 2010
  */
-@Provider
+@IOCProvider
 @ApplicationScoped
 public class ServiceTrackerProvider implements TypeProvider<ServiceTracker>
 {
