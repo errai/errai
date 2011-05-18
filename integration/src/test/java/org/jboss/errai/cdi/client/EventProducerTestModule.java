@@ -67,7 +67,7 @@ public class EventProducerTestModule {
     }
 
     /**
-     * count the {@link BusReadyEvents}
+     * count the {@link BusReadyEvent}
      */
     public void onBusReady(@Observes BusReadyEvent event) {
         busReadyEventReceived = true;

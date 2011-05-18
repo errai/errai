@@ -49,7 +49,7 @@ import com.google.gwt.core.ext.typeinfo.JParameter;
 @CodeDecorator
 public class ObservesExtension extends IOCDecoratorExtension<Observes> {
 
-	public ObservesDecorator(Class<Observes> decoratesWith) {
+	public ObservesExtension(Class<Observes> decoratesWith) {
         super(decoratesWith);
     }
 
