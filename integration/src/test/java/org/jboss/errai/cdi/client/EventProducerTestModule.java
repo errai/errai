@@ -23,9 +23,9 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @EntryPoint
-public class CDITestProducerModule {
+public class EventProducerTestModule {
     private boolean busReadyEventReceived = false;
-    private static CDITestProducerModule instance;
+    private static EventProducerTestModule instance;
 
     private Map<String, List<String>> receivedEventsOnServer = new HashMap<String, List<String>>();
 
@@ -47,7 +47,7 @@ public class CDITestProducerModule {
     @Inject @B @C
     private Event<String> eventBC;
 
-    @Inject@A @C
+    @Inject @A @C
     private Event<String> eventAC;
 
     @Inject @A @B @C
@@ -58,7 +58,7 @@ public class CDITestProducerModule {
         instance = this;
     }
 
-    public static CDITestProducerModule getInstance() {
+    public static EventProducerTestModule getInstance() {
         return instance;
     }
 

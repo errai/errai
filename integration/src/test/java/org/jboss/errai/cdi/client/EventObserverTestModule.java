@@ -23,9 +23,9 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @EntryPoint
-public class CDITestObserverModule {
+public class EventObserverTestModule {
     private int busReadyEventsReceived = 0;
-    private static CDITestObserverModule instance;
+    private static EventObserverTestModule instance;
     private Map<String, List<String>> receivedEvents = new HashMap<String, List<String>>();
 
     @Inject
@@ -36,7 +36,7 @@ public class CDITestObserverModule {
         instance = this;
     }
 
-    public static CDITestObserverModule getInstance() {
+    public static EventObserverTestModule getInstance() {
         return instance;
     }
 
@@ -69,42 +69,42 @@ public class CDITestObserverModule {
     // all the observer methods
 
     public void onEvent(@Observes String event) {
-        addEvent("", event);
+        addReceivedEvent("", event);
     }
 
     public void onEventA(@Observes @A String event) {
-        addEvent("A", event);
+        addReceivedEvent("A", event);
     }
 
     public void onEventB(@Observes @B String event) {
-        addEvent("B", event);
+        addReceivedEvent("B", event);
     }
 
     public void onEventC(@Observes @C String event) {
-        addEvent("C", event);
+        addReceivedEvent("C", event);
     }
 
     public void onEventAB(@Observes @A @B String event) {
-        addEvent("AB", event);
+        addReceivedEvent("AB", event);
     }
 
     public void onEventBA(@Observes @B @A String event) {
-        addEvent("BA", event);
+        addReceivedEvent("BA", event);
     }
 
     public void onEventAC(@Observes @A @C String event) {
-        addEvent("AC", event);
+        addReceivedEvent("AC", event);
     }
 
     public void onEventBC(@Observes @B @C String event) {
-        addEvent("BC", event);
+        addReceivedEvent("BC", event);
     }
 
     public void onEventABC(@Observes @A @B @C String event) {
-        addEvent("ABC", event);
+        addReceivedEvent("ABC", event);
     }
 
-    private void addEvent(String receiver, String event) {
+    private void addReceivedEvent(String receiver, String event) {
         List<String> events = receivedEvents.get(receiver);
         if (events == null)
             events = new ArrayList<String>();
