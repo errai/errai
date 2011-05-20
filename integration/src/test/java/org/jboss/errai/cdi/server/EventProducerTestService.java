@@ -12,7 +12,7 @@ import org.jboss.errai.cdi.client.qualifier.B;
 import org.jboss.errai.cdi.client.qualifier.C;
 
 @ApplicationScoped
-public class CDITestEventProducerService {
+public class EventProducerTestService {
     
     @Inject
     private Event<String> event;
@@ -40,6 +40,7 @@ public class CDITestEventProducerService {
     
     @Conversational
     public void start(@Observes StartEvent event) {
+        System.out.println("Start ^_^");
         fireAll();
     }
     

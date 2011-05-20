@@ -20,14 +20,14 @@ public class EventProvider implements ContextualTypeProvider<Event<?>> {
             private Class eventType = (typeargs.length == 1 ? typeargs[0] : Object.class);
             private Conversation conversation;
             private Annotation[] _qualifiers = qualifiers;
-            
+
             public void fire(Object event) {
                 if (event == null) return;
                 if (conversation != null && !conversation.isActive()) {
                     conversation.begin();
                 }
 
-                CDI.fireEvent(event, qualifiers);
+                CDI.fireEvent(event, _qualifiers);
             }
 
             public Event select(Annotation... qualifiers) {
@@ -44,7 +44,7 @@ public class EventProvider implements ContextualTypeProvider<Event<?>> {
             }
             
             public Annotation[] getQualifiers() {
-            	return qualifiers;
+            	return _qualifiers;
 			}
             
             public void registerConversation(Conversation conversation) {

@@ -12,8 +12,8 @@ import org.jboss.errai.cdi.client.qualifier.B;
 import org.jboss.errai.cdi.client.qualifier.C;
 
 @ApplicationScoped
-public class CDITestEventObserverService {
-    private static CDITestEventObserverService instance;
+public class EventObserverTestService {
+    private static EventObserverTestService instance;
    
     @Inject
     // we use this event to report received events back to the client for easier testability
@@ -24,7 +24,7 @@ public class CDITestEventObserverService {
         instance = this;
     }
 
-    public static CDITestEventObserverService getInstance() {
+    public static EventObserverTestService getInstance() {
         return instance;
     }
     

@@ -69,7 +69,7 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
         final String subscribeType = method.isAnnotationPresent(Local.class) ? "subscribeLocal" : "subscribe";
         
         final String subject = CDI.getSubjectNameByType(parmClassName);
-        final Annotation[] qualifiers = InjectUtil.extractQualifiers(injectionPoint).toArray(new Annotation[0]);
+        final Annotation[] qualifiers = injectionPoint.getQualifiers();
         final Set<String> qualifierNames = CDI.getQualifiersPart(qualifiers);
         
         String expr = messageBusInst + "." + subscribeType + "(\"" + subject + "\", new " + MessageCallback.class.getName() + "() {\n" +
@@ -90,5 +90,5 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
                 "});\n";
 
         return expr;
-    };
+    }
 }

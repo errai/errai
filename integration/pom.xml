@@ -16,7 +16,6 @@
     </parent>
 
     <build>
-        <testOutputDirectory>${profile.testOutputDirectory}</testOutputDirectory>
         <resources>
             <resource>
                 <directory>src/main/java</directory>
@@ -29,7 +28,7 @@
 
     <profiles>
         <profile>
-            <id>default</id>
+            <id>default-profile</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
@@ -109,9 +108,8 @@
                     <groupId>junit</groupId>
                     <artifactId>junit</artifactId>
                     <version>4.8.1</version>
-                    <scope>provided</scope>
+                    <scope>test,provided</scope>
                 </dependency>
-
             </dependencies>
 
             <build>
@@ -156,9 +154,15 @@
                 <plugins>
                     <plugin>
                         <artifactId>maven-compiler-plugin</artifactId>
+                        <version>2.3.2</version>
+
                         <configuration>
-                            <source>1.5</source>
-                            <target>1.5</target>
+                            <source>1.6</source>
+                            <target>1.6</target>
+
+                            <excludes>
+                                <exclude>**/JUnitShell.java</exclude>
+                            </excludes>
                         </configuration>
                     </plugin>
                     <plugin>
@@ -166,14 +170,14 @@
                         <configuration>
                             <skipTests>false</skipTests>
                             <additionalClasspathElements>
-                                <additionalClasspathElement>${basedir}/${profile.testOutputDirectory}/
-                                </additionalClasspathElement>
+                                <additionalClasspathElement>${basedir}/${profile.testOutputDirectory}/</additionalClasspathElement>
                                 <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
                             </additionalClasspathElements>
                             <useSystemClassLoader>false</useSystemClassLoader>
                             <forkMode>pertest</forkMode>
                             <argLine>-Xmx1024m</argLine>
                         </configuration>
+                        <version>2.5</version>
                     </plugin>
                 </plugins>
             </build>
@@ -200,7 +204,7 @@
                     <groupId>junit</groupId>
                     <artifactId>junit</artifactId>
                     <version>4.8.1</version>
-                    <scope>provided</scope>
+                    <scope>compile</scope>
                 </dependency>
                 <dependency>
                     <groupId>org.jboss.ejb3</groupId>
@@ -289,13 +293,13 @@
                     <groupId>com.google.gwt</groupId>
                     <artifactId>gwt-user</artifactId>
                     <version>${gwt.version}</version>
-                    <scope>provided</scope>
+                    <scope>compile</scope>
                 </dependency>
                 <dependency>
                     <groupId>com.google.gwt</groupId>
                     <artifactId>gwt-dev</artifactId>
                     <version>${gwt.version}</version>
-                    <scope>provided</scope>
+                    <scope>compile</scope>
                 </dependency>
 
                 <!-- Runtime / Container dependencies -->
