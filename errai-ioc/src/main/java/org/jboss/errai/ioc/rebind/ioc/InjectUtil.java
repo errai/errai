@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -32,10 +33,13 @@ import javax.inject.Qualifier;
 import com.google.gwt.core.ext.typeinfo.*;
 import org.jboss.errai.bus.rebind.ScannerSingleton;
 import org.jboss.errai.ioc.rebind.IOCGenerator;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.JavaReflectionClass;
 import org.mvel2.util.ReflectionUtil;
 import org.mvel2.util.StringAppender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.reflect.ReflectionFactory;
 
 public class InjectUtil {
     private static final Logger log = LoggerFactory.getLogger(InjectUtil.class);
@@ -377,7 +381,7 @@ public class InjectUtil {
         List<Annotation> qualifiers = new ArrayList<Annotation>();
 
         try {
-            final JAbstractMethod method =  parm.getEnclosingMethod();
+            final JAbstractMethod method = parm.getEnclosingMethod();
 
             JType[] jMethodParms = new JType[method.getParameters().length];
             int eventParamIndex = 0;
@@ -408,7 +412,7 @@ public class InjectUtil {
 
         try {
             // find all qualifiersCache of the event field
-         //   JField jEventField = injectionPoint.getField();
+            //   JField jEventField = injectionPoint.getField();
 
             for (Class<?> qualifier : getQualifiersCache()) {
                 if (field.isAnnotationPresent(qualifier.asSubclass(Annotation.class))) {
@@ -476,4 +480,23 @@ public class InjectUtil {
         }
         return null;
     }
+
+
+    public static Class<?>[] jParmToClass(JParameter[] parms) throws ClassNotFoundException {
+        Class<?>[] classes = new Class<?>[parms.length];
+        for (int i = 0; i < parms.length; i++) {
+            classes[i] = Class.forName(parms[i].getType().getQualifiedSourceName(), false,
+                    Thread.currentThread().getContextClassLoader());
+        }
+        return classes;
+    }
+
+    public static MetaClass[] classToMeta(Class<?>[] types) {
+        MetaClass[] metaClasses = new MetaClass[types.length];
+        for (int i = 0; i < types.length; i++) {
+            metaClasses[i] = new JavaReflectionClass(types[i]);
+        }
+        return metaClasses;
+    }
+
 }

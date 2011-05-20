@@ -2,6 +2,8 @@ package org.jboss.errai.ioc.rebind.ioc.codegen;
 
 import com.google.gwt.core.ext.typeinfo.JMethod;
 import com.google.gwt.core.ext.typeinfo.JParameter;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.TypeVariable;
@@ -17,10 +19,10 @@ public class DefParameters implements Statement {
         this.parameters = parameters;
     }
 
-    public static DefParameters from(JMethod method) {
+    public static DefParameters from(MetaMethod method) {
         List<Parameter> parameters = new ArrayList<Parameter>();
-        for (JParameter parm : method.getParameters()) {
-            parameters.add(Parameter.of(parm.getType().isClassOrInterface(), parm.getName()));
+        for (MetaParameter parm : method.getParameters()) {
+            parameters.add(Parameter.of(parm.getType(), parm.getName()));
         }
         return new DefParameters(parameters);
     }

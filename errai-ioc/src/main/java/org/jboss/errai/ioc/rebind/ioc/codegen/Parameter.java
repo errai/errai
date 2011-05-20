@@ -1,21 +1,21 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen;
 
-import com.google.gwt.core.ext.typeinfo.JClassType;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 public class Parameter implements Statement {
-    private JClassType type;
+    private MetaClass type;
     private String name;
 
-    public Parameter(JClassType type, String name) {
+    public Parameter(MetaClass type, String name) {
         this.type = type;
         this.name = name;
     }
 
-    public static Parameter of(JClassType type, String name) {
+    public static Parameter of(MetaClass type, String name) {
         return new Parameter(type, name);
     }
 
     public String getStatement() {
-        return type.getQualifiedSourceName() + " " + name;
+        return type.getFullyQualifedName() + " " + name;
     }
 }
