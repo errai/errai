@@ -14,12 +14,13 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <name>Errai::IoC</name>
     <groupId>org.jboss.errai</groupId>
     <artifactId>errai-ioc</artifactId>
-  <version>1.2.3-SNAPSHOT</version>
+    <version>1.2.3-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <!-- Parent -->
@@ -53,6 +54,13 @@
             <version>1.0</version>
             <!--<scope>provided</scope>-->
         </dependency>
+        <dependency>
+            <groupId>javax.enterprise</groupId>
+            <artifactId>cdi-api</artifactId>
+            <version>1.0-SP4</version>
+            <scope>provided</scope>
+        </dependency>
+
 
         <dependency>
             <groupId>com.google.gwt</groupId>

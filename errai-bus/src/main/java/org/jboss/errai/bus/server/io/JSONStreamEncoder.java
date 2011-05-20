@@ -39,7 +39,7 @@ import java.util.*;
  */
 public class JSONStreamEncoder {
     private static Set<Class> serializableTypes;
-    private static final byte[] NULL_BYTES = {'n', 'u', 'l', 'l'};
+    private static final byte[] NULL_BYTES = "null".getBytes();
 
 
     public static void setSerializableTypes(Set<Class> serializableTypes) {

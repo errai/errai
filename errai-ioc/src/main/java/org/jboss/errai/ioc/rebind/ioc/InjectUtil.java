@@ -340,6 +340,11 @@ public class InjectUtil {
         return annotationsCache;
     }
 
+    public static Annotation[] extractQualifiersAsArray(InjectionPoint<?> injectionPoint) {
+        List<Annotation> annos = extractQualifiers(injectionPoint);
+        return annos.toArray(new Annotation[annos.size()]);
+    }
+
     public static List<Annotation> extractQualifiers(InjectionPoint<?> injectionPoint) {
         switch (injectionPoint.getTaskType()) {
             case Field:
@@ -349,7 +354,7 @@ public class InjectUtil {
             case Parameter:
                 return extractQualifiersFromParameter(injectionPoint.getParm());
             case Type:
-                return extractQualifiersFromType(injectionPoint);
+                return extractQualifiersFromType(injectionPoint.getType());
             default:
                 return Collections.emptyList();
         }
@@ -416,19 +421,16 @@ public class InjectUtil {
         return qualifiers;
     }
 
-    public static List<Annotation> extractQualifiersFromType(InjectionPoint<?> injectionPoint) {
+    public static List<Annotation> extractQualifiersFromType(JClassType type) {
         List<Annotation> qualifiers = new ArrayList<Annotation>();
-
         try {
-            JClassType type = injectionPoint.getType();
-
             for (Class<?> qualifier : getQualifiersCache()) {
                 if (type.isAnnotationPresent(qualifier.asSubclass(Annotation.class))) {
                     qualifiers.add(type.getAnnotation(qualifier.asSubclass(Annotation.class)));
                 }
             }
         } catch (Exception e) {
-            log.error("Problem reading qualifiersCache for " + injectionPoint.getField(), e);
+            log.error("Problem reading qualifiersCache for " + type, e);
         }
         return qualifiers;
 

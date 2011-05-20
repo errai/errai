@@ -22,6 +22,7 @@ import com.google.gwt.core.ext.typeinfo.JClassType;
 import javax.inject.Qualifier;
 import javax.inject.Singleton;
 import java.lang.annotation.Annotation;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -36,6 +37,20 @@ public class TypeInjector extends Injector {
         this.singleton = type.isAnnotationPresent(Singleton.class)
                 || type.isAnnotationPresent(com.google.inject.Singleton.class);
         this.varName = InjectUtil.getNewVarName();
+
+        try {
+            Set<Annotation> qualifiers = new HashSet<Annotation>();
+            qualifiers.addAll(InjectUtil.extractQualifiersFromType(type));
+
+            if (!qualifiers.isEmpty()) {
+                qualifyingMetadata = new JSR299QualifyingMetadata(qualifiers);
+            } else {
+                qualifyingMetadata = JSR299QualifyingMetadata.createDefaultQualifyingMetaData();
+            }
+
+        } catch (Throwable e) {
+            // ignore
+        }
     }
 
     @Override
@@ -53,23 +68,6 @@ public class TypeInjector extends Injector {
         String generated = cs.generateConstructor();
         injectContext.getProcessingContext().getWriter().print(generated);
 
-        try {
-            Class<?> cls = Class.forName(type.getQualifiedSourceName());
-
-            Set<Annotation> qualifiers = new HashSet<Annotation>();
-            for (Annotation a : cls.getAnnotations()) {
-                if (a.annotationType().isAnnotationPresent(Qualifier.class)) {
-                    qualifiers.add(a);
-                }
-            }
-
-            if (!qualifiers.isEmpty()) {
-                qualifyingMetadata = new JSR299QualifyingMetadata(qualifiers);
-            }
-
-        } catch (Throwable e) {
-            // ignore
-        }
 
         injected = true;
 

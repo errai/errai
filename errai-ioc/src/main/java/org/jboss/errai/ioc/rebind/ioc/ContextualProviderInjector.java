@@ -77,20 +77,20 @@ public class ContextualProviderInjector extends TypeInjector {
                 }
             }
             sb.append("}");
-        
-	        List<Annotation> qualifiers = InjectUtil.extractQualifiers(injectionPoint);
-	        if(!qualifiers.isEmpty()) {
-	        	sb.append(", new java.lang.annotation.Annotation[] {");
-	        	for(int i=0; i<qualifiers.size(); i++) {
-	        		sb.append("\nnew java.lang.annotation.Annotation() {")
-	        			.append("\npublic Class<? extends java.lang.annotation.Annotation> annotationType() {\n return ")
-	        			.append(qualifiers.get(i).annotationType().getName()).append(".class").append(";\n}\n}");
-	        		if ((i + 1) < qualifiers.size()) sb.append(",");
-	        	}
-	        	sb.append("\n}");
-	        } else {
-	        	sb.append(", null");
-	        }
+
+            Annotation[] qualifiers = injectionPoint.getQualifiers();
+            if (qualifiers.length != 0) {
+                sb.append(", new java.lang.annotation.Annotation[] {");
+                for (int i = 0; i < qualifiers.length; i++) {
+                    sb.append("\nnew java.lang.annotation.Annotation() {")
+                            .append("\npublic Class<? extends java.lang.annotation.Annotation> annotationType() {\n return ")
+                            .append(qualifiers[i].annotationType().getName()).append(".class").append(";\n}\n}");
+                    if ((i + 1) < qualifiers.length) sb.append(",");
+                }
+                sb.append("\n}");
+            } else {
+                sb.append(", null");
+            }
         }
         sb.append(")");
 

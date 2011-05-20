@@ -17,6 +17,7 @@
 package org.jboss.errai.ioc.rebind.ioc;
 
 import com.google.gwt.core.ext.typeinfo.*;
+import com.sun.xml.internal.rngom.ast.builder.*;
 import org.mvel2.util.ReflectionUtil;
 
 import javax.management.RuntimeErrorException;
@@ -135,35 +136,27 @@ public class InjectionPoint<T extends Annotation> {
     }
 
     public Annotation[] getQualifiers() {
+        List<Annotation> annotations;
         switch (taskType) {
             case PrivateField:
             case Field:
-                List<Annotation> annotations = InjectUtil.extractQualifiersFromField(field);
+                annotations = InjectUtil.extractQualifiersFromField(field);
                 return annotations.toArray(new Annotation[annotations.size()]);
 
             case Parameter:
-                JMethod jMethod = parm.getEnclosingMethod().isMethod();
+                annotations = InjectUtil.extractQualifiersFromParameter(parm);
+                return annotations.toArray(new Annotation[annotations.size()]);
 
-                int index = -1;
-                for (int i = 0; i < jMethod.getParameters().length; i++) {
-                    if (jMethod.getParameters()[i] == parm) {
-                        index = i;
-                    }
-                }
-
-                Method meth = InjectUtil.loadMethod(jMethod);
-
-                if (method == null) return null;
-
-                return meth.getParameterAnnotations()[index];
             case Method:
-                return InjectUtil.loadMethod(method).getAnnotations();
+                annotations = InjectUtil.extractQualifiersFromMethod(method);
+                return annotations.toArray(new Annotation[annotations.size()]);
 
             case Type:
-                return InjectUtil.loadClass(type.getQualifiedSourceName()).getAnnotations();
+                annotations = InjectUtil.extractQualifiersFromType(type);
+                return annotations.toArray(new Annotation[annotations.size()]);
 
             default:
-                return null;
+                return new Annotation[0];
         }
     }
 

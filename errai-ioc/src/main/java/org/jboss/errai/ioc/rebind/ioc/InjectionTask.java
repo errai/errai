@@ -43,7 +43,7 @@ public class InjectionTask {
     }
 
     public InjectionTask(Injector injector, JParameter parm) {
-        this.injectType = TaskType.Method;
+        this.injectType = TaskType.Parameter;
         this.injector = injector;
         this.parm = parm;
     }

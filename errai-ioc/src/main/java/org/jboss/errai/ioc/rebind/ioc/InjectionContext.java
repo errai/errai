@@ -38,6 +38,10 @@ public class InjectionContext {
     }
 
     public Injector getQualifiedInjector(JClassType type, QualifyingMetadata metadata) {
+        if (metadata == null) {
+            metadata = JSR299QualifyingMetadata.createDefaultQualifyingMetaData();
+        }
+
         JClassType erased = type.getErasedType();
         List<Injector> injs = injectors.get(erased);
         if (injs != null) {
