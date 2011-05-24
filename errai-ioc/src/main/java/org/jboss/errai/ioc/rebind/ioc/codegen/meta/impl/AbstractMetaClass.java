@@ -3,6 +3,7 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl;
 import org.jboss.errai.ioc.rebind.ioc.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.HasAnnotations;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaConstructor;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 
 import java.lang.annotation.Annotation;
@@ -10,8 +11,12 @@ import java.lang.annotation.Annotation;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public abstract class AbstractMetaClass implements MetaClass, HasAnnotations {
-    protected Annotation[] annotations;
+public abstract class AbstractMetaClass<T> implements MetaClass, HasAnnotations {
+    private final T enclosedMetaObject;
+
+    protected AbstractMetaClass(T enclosedMetaObject) {
+        this.enclosedMetaObject = enclosedMetaObject;
+    }
 
     protected static MetaMethod _getMethod(MetaMethod[] methods, String name, MetaClass... parmTypes) {
         Outer:
@@ -28,6 +33,22 @@ public abstract class AbstractMetaClass implements MetaClass, HasAnnotations {
         return null;
     }
 
+    protected static MetaConstructor _getConstructor(MetaConstructor[] constructors, MetaClass... parmTypes) {
+        Outer:
+        for (MetaConstructor constructor : constructors) {
+            if ( constructor.getParameters().length == parmTypes.length) {
+                for (int i = 0; i < parmTypes.length; i++) {
+                    if (!constructor.getParameters()[i].getType().equals(parmTypes[i])) {
+                        continue Outer;
+                    }
+                }
+                return constructor;
+            }
+        }
+        return null;
+    }
+
+
     public MetaMethod getMethod(String name, Class... parmTypes) {
         return _getMethod(getMethods(), name, InjectUtil.classToMeta(parmTypes));
     }
@@ -36,18 +57,43 @@ public abstract class AbstractMetaClass implements MetaClass, HasAnnotations {
         return _getMethod(getDeclaredMethods(), name, InjectUtil.classToMeta(parmTypes));
     }
 
-    public Annotation[] getAnnotations() {
-        return annotations;
+    public MetaConstructor getConstructor(Class... parameters) {
+        return _getConstructor(getConstructors(), InjectUtil.classToMeta(parameters));
     }
 
-    public Annotation getAnnotation(Class<? extends Annotation> annotation) {
+    public MetaConstructor getDeclaredConstructor(Class... parameters) {
+        return _getConstructor(getDeclaredConstructors(), InjectUtil.classToMeta(parameters));
+    }
+
+    public final Annotation getAnnotation(Class<? extends Annotation> annotation) {
         for (Annotation a : getAnnotations()) {
             if (a.annotationType().equals(annotation)) return a;
         }
         return null;
     }
 
-    public boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
+    public final boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
         return getAnnotation(annotation) != null;
     }
+
+    public T getEnclosedMetaObject() {
+        return enclosedMetaObject;
+    }
+
+    private String hashString;
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof MetaClass && hashString.equals("MetaClass:" + ((MetaClass) o).getFullyQualifedName());
+    }
+
+    @Override
+    public int hashCode() {
+        if (hashString == null) {
+            hashString = "MetaClass:" + getFullyQualifedName();
+        }
+        return hashString.hashCode();
+    }
+
+
 }

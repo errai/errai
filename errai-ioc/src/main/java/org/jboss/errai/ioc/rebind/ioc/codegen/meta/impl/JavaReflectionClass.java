@@ -1,33 +1,30 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl;
 
-import org.jboss.errai.ioc.rebind.ioc.InjectUtil;
-import org.jboss.errai.ioc.rebind.ioc.codegen.DefParameters;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaConstructor;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
-import org.mvel2.util.ParseTools;
-import sun.java2d.pipe.OutlineTextRenderer;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JavaReflectionClass extends AbstractMetaClass {
-    private Class clazz;
+public class JavaReflectionClass extends AbstractMetaClass<Class> {
+    private Annotation[] annotationsCache;
 
     public JavaReflectionClass(Class clazz) {
-        this.clazz = clazz;
-        this.annotations = clazz.getAnnotations();
-        this.hashString = "MetaClass:" + getFullyQualifedName();
+        super(clazz);
+        this.annotationsCache = clazz.getAnnotations();
     }
 
     public String getName() {
-        return clazz.getSimpleName();
+        return getEnclosedMetaObject().getSimpleName();
     }
 
     public String getFullyQualifedName() {
-        return clazz.getName();
+        return getEnclosedMetaObject().getName();
     }
 
     private static MetaMethod[] fromMethodArray(Method[] methods) {
@@ -41,11 +38,11 @@ public class JavaReflectionClass extends AbstractMetaClass {
     }
 
     public MetaMethod[] getMethods() {
-        return fromMethodArray(clazz.getMethods());
+        return fromMethodArray(getEnclosedMetaObject().getMethods());
     }
 
     public MetaMethod[] getDeclaredMethods() {
-        return fromMethodArray(clazz.getDeclaredMethods());
+        return fromMethodArray(getEnclosedMetaObject().getDeclaredMethods());
     }
 
     private static MetaField[] fromFieldArray(Field[] methods) {
@@ -59,22 +56,69 @@ public class JavaReflectionClass extends AbstractMetaClass {
     }
 
     public MetaField[] getFields() {
-        return fromFieldArray(clazz.getFields());
+        return fromFieldArray(getEnclosedMetaObject().getFields());
     }
 
     public MetaField[] getDeclaredFields() {
-        return fromFieldArray(clazz.getDeclaredFields());
+        return fromFieldArray(getEnclosedMetaObject().getDeclaredFields());
     }
 
-    private final String hashString;
-
-    @Override
-    public boolean equals(Object o) {
-        return o instanceof MetaClass && hashString.equals("MetaClass:" + ((MetaClass) o).getFullyQualifedName());
+    public MetaField getField(String name) {
+        try {
+            return new JavaReflectionField(getEnclosedMetaObject().getField(name));
+        } catch (Exception e) {
+            throw new RuntimeException("Could not get field: " + name, e);
+        }
     }
 
-    @Override
-    public int hashCode() {
-        return hashString.hashCode();
+    public MetaField getDeclaredField(String name) {
+        try {
+            return new JavaReflectionField(getEnclosedMetaObject().getDeclaredField(name));
+        } catch (Exception e) {
+            throw new RuntimeException("Could not get field: " + name, e);
+        }
+    }
+
+    public MetaConstructor[] getConstructors() {
+        List<MetaConstructor> constructorList = new ArrayList<MetaConstructor>();
+
+        for (Constructor c : getEnclosedMetaObject().getConstructors()) {
+            constructorList.add(new JavaReflectionConstructor(c));
+        }
+
+        return constructorList.toArray(new MetaConstructor[constructorList.size()]);
+    }
+
+    public MetaConstructor[] getDeclaredConstructors() {
+        List<MetaConstructor> constructorList = new ArrayList<MetaConstructor>();
+
+        for (Constructor c : getEnclosedMetaObject().getDeclaredConstructors()) {
+            constructorList.add(new JavaReflectionConstructor(c));
+        }
+
+        return constructorList.toArray(new MetaConstructor[constructorList.size()]);
+    }
+
+    public MetaConstructor getConstructor(Class... parameters) {
+        try {
+            return new JavaReflectionConstructor(getEnclosedMetaObject().getConstructor(parameters));
+        } catch (Exception e) {
+            throw new RuntimeException("Could not get constructor", e);
+        }
+    }
+
+    public MetaConstructor getDeclaredConstructor(Class... parameters) {
+        try {
+            return new JavaReflectionConstructor(getEnclosedMetaObject().getDeclaredConstructor(parameters));
+        } catch (Exception e) {
+            throw new RuntimeException("Could not get constructor", e);
+        }
+    }
+
+    public Annotation[] getAnnotations() {
+        if (annotationsCache == null) {
+            annotationsCache = getEnclosedMetaObject().getAnnotations();
+        }
+        return annotationsCache;
     }
 }

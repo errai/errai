@@ -13,16 +13,13 @@ import java.util.List;
 
 public class JavaReflectionMethod implements MetaMethod {
     private Method method;
+    private MetaParameter[] parameters;
+    private MetaClass declaringClass;
+    private MetaClass returnType;
 
     public JavaReflectionMethod(Method method) {
         this.method = method;
-    }
 
-    public String getName() {
-        return method.getName();
-    }
-
-    public MetaParameter[] getParameters() {
         List<MetaParameter> parmList = new ArrayList<MetaParameter>();
 
         for (int i = 0; i < method.getParameterTypes().length; i++) {
@@ -30,11 +27,22 @@ public class JavaReflectionMethod implements MetaMethod {
                     method.getParameterAnnotations()[i]));
         }
 
-        return parmList.toArray(new MetaParameter[parmList.size()]);
+        parameters = parmList.toArray(new MetaParameter[parmList.size()]);
+
+        declaringClass = new JavaReflectionClass(method.getDeclaringClass());
+        returnType = new JavaReflectionClass(method.getReturnType());
+    }
+
+    public String getName() {
+        return method.getName();
+    }
+
+    public MetaParameter[] getParameters() {
+        return parameters;
     }
 
     public MetaClass getReturnType() {
-        return new JavaReflectionClass(method.getReturnType());
+        return returnType;
     }
 
     public Annotation[] getAnnotations() {
@@ -53,6 +61,6 @@ public class JavaReflectionMethod implements MetaMethod {
     }
 
     public MetaClass getDeclaringClass() {
-        return new JavaReflectionClass(method.getDeclaringClass());
+        return declaringClass;
     }
 }

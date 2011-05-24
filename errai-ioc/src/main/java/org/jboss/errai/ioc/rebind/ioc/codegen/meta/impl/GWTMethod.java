@@ -1,6 +1,7 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl;
 
 import com.google.gwt.core.ext.typeinfo.JMethod;
+import com.google.gwt.core.ext.typeinfo.JParameter;
 import org.jboss.errai.ioc.rebind.ioc.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.HasAnnotations;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
@@ -9,6 +10,8 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -44,7 +47,13 @@ public class GWTMethod implements MetaMethod {
     }
 
     public MetaParameter[] getParameters() {
-        return new MetaParameter[0];
+        List<MetaParameter> parameterList = new ArrayList<MetaParameter>();
+
+        for (JParameter jParameter : method.getParameters()) {
+            parameterList.add(new GWTParameter(jParameter, this));
+        }
+
+        return parameterList.toArray(new MetaParameter[parameterList.size()]);
     }
 
     public Annotation[] getAnnotations() {

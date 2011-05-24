@@ -51,7 +51,7 @@ public class ObjectBuilder extends AbstractStatement {
     }
 
     public ClassStructureBuilder extend() {
-        return new ClassStructureBuilder(type, this);
+        return new ClassStructureBuilder(type);
     }
 
     public void integrateClassStructure(ClassStructureBuilder builder) {
