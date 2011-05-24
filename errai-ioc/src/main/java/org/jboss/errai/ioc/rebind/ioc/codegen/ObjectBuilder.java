@@ -40,7 +40,7 @@ public class ObjectBuilder implements Statement {
     }
 
     public ClassStructureBuilder extend() {
-        return new ClassStructureBuilder(type, this);
+        return new ClassStructureBuilder(type);
     }
 
     public void integrateClassStructure(ClassStructureBuilder builder) {

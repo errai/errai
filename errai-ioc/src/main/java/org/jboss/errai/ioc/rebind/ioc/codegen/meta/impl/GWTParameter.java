@@ -4,6 +4,7 @@ import com.google.gwt.core.ext.typeinfo.JAbstractMethod;
 import com.google.gwt.core.ext.typeinfo.JParameter;
 import org.jboss.errai.ioc.rebind.ioc.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassMember;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
 
 import java.lang.annotation.Annotation;
@@ -15,9 +16,11 @@ import java.lang.reflect.Method;
 public class GWTParameter implements MetaParameter {
     private JParameter parameter;
     private Annotation[] annotations;
+    private MetaClassMember declaredBy;
 
-    public GWTParameter(JParameter parameter) {
+    public GWTParameter(JParameter parameter, MetaClassMember declaredBy) {
         this.parameter = parameter;
+        this.declaredBy = declaredBy;
 
         try {
             Class<?> cls = Class.forName(parameter.getEnclosingMethod().getEnclosingType().getQualifiedSourceName(),
@@ -52,11 +55,11 @@ public class GWTParameter implements MetaParameter {
         return new GWTClass(parameter.getType());
     }
 
-    public GWTParameter() {
-        super();    //To change body of overridden methods use File | Settings | File Templates.
-    }
-
     public Annotation[] getAnnotations() {
         return annotations;
+    }
+
+    public MetaClassMember getDeclaringMember() {
+        return declaredBy;
     }
 }

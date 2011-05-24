@@ -6,12 +6,10 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 
 public class ClassStructureBuilder {
     private MetaClass toExtend;
-    private ObjectBuilder objectBuilder;
     private StringBuilder buf = new StringBuilder();
 
-    ClassStructureBuilder(MetaClass toExtend, ObjectBuilder objectBuilder) {
+    ClassStructureBuilder(MetaClass toExtend) {
         this.toExtend = toExtend;
-        this.objectBuilder = objectBuilder;
     }
 
     public ClassStructureBuilder publicConstructor(DefParameters parameters, Statement body) {
