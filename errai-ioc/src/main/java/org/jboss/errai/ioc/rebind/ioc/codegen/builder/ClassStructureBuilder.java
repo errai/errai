@@ -1,6 +1,8 @@
-package org.jboss.errai.ioc.rebind.ioc.codegen;
+package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.DefParameters;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 
@@ -13,9 +15,9 @@ public class ClassStructureBuilder {
     }
 
     public ClassStructureBuilder publicConstructor(DefParameters parameters, Statement body) {
-        buf.append("public ").append(toExtend.getFullyQualifedName()).append(parameters.getStatement()).append(" {\n");
+        buf.append("public ").append(toExtend.getFullyQualifedName()).append(parameters.generate()).append(" {\n");
         if (body != null) {
-            buf.append(body.getStatement()).append("\n");
+            buf.append(body.generate()).append("\n");
         }
         buf.append("}\n");
         return this;
@@ -23,9 +25,9 @@ public class ClassStructureBuilder {
 
     public ClassStructureBuilder publicOverridesMethod(MetaMethod method, Statement body) {
         buf.append("public ").append(method.getReturnType().getFullyQualifedName()).append(" ").append(method.getName())
-                .append(DefParameters.from(method).getStatement()).append(" {\n");
+                .append(DefParameters.from(method).generate()).append(" {\n");
         if (body != null) {
-            buf.append(body.getStatement()).append("\n");
+            buf.append(body.generate()).append("\n");
         }
         buf.append("}\n");
         return this;

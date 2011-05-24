@@ -1,12 +1,15 @@
-package org.jboss.errai.ioc.rebind.ioc.codegen;
+package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
 
 import com.google.gwt.core.ext.typeinfo.JClassType;
+
+import org.jboss.errai.ioc.rebind.ioc.codegen.AbstractStatement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.CallParameters;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.GWTClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.JavaReflectionClass;
 
-public class ObjectBuilder implements Statement {
+public class ObjectBuilder extends AbstractStatement {
     StringBuilder buf = new StringBuilder();
 
     private static final int CONSTRUCT_STATEMENT_COMPLETE = 1;
@@ -27,6 +30,14 @@ public class ObjectBuilder implements Statement {
     public static ObjectBuilder newInstanceOf(JClassType type) {
         return new ObjectBuilder(new GWTClass(type)).newInstance();
     }
+    
+    public static ObjectBuilder newInstanceOf(JavaReflectionClass type) {
+        return new ObjectBuilder(type).newInstance();
+    }
+
+    public static ObjectBuilder newInstanceOf(GWTClass type) {
+        return new ObjectBuilder(type).newInstance();
+    }
 
     private ObjectBuilder newInstance() {
         buf.append("new ").append(type.getFullyQualifedName());
@@ -34,7 +45,7 @@ public class ObjectBuilder implements Statement {
     }
 
     public ObjectBuilder withParameters(CallParameters parameters) {
-        buf.append(parameters.getStatement());
+        buf.append(parameters.generate()).append(";");
         buildState |= CONSTRUCT_STATEMENT_COMPLETE;
         return this;
     }
@@ -58,7 +69,7 @@ public class ObjectBuilder implements Statement {
         return type;
     }
 
-    public String getStatement() {
+    public String generate() {
         finishConstructIfNecessary();
         return buf.toString();
     }

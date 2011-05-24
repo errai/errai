@@ -2,7 +2,7 @@ package org.jboss.errai.ioc.rebind.ioc.codegen;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
-public class Parameter implements Statement {
+public class Parameter extends AbstractStatement {
     private MetaClass type;
     private String name;
 
@@ -15,7 +15,7 @@ public class Parameter implements Statement {
         return new Parameter(type, name);
     }
 
-    public String getStatement() {
+    public String generate() {
         return type.getFullyQualifedName() + " " + name;
     }
 }

@@ -1,26 +1,45 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
-import org.apache.catalina.User;
-import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.HasScope;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Scope;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.LoopBuilder.LoopBodyBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.GWTClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.JavaReflectionClass;
 
 /**
- * @author Mike Brock <cbrock@redhat.com>
+ * 
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class StatementBuilder {
-    public static Actions create() {
-        return null;
+public class StatementBuilder extends AbstractStatementBuilder {
+
+    private StatementBuilder(Scope scope) {
+        super(scope);
     }
 
-    public static void main(String[] args) {
-        create().newObject(null).invokeMethod("foo").invokeMethod("bar");
+    public static StatementBuilder create() {
+        return new StatementBuilder(new Scope());
+    }
 
-        for (int i = 0; i < 100; i++) {
+    public static StatementBuilder createInScopeOf(HasScope parent) {
+        return new StatementBuilder(parent.getScope());
+    }
 
-        }
+    public StatementBuilder loadVariable(String name, MetaClass type) {
+        scope.addVariable(name, new Variable(name, type));
+        return this;
+    }
 
+    public ObjectBuilder newObject(GWTClass type) {
+        return ObjectBuilder.newInstanceOf(type);
+    }
 
+    public ObjectBuilder newObject(JavaReflectionClass type) {
+        return ObjectBuilder.newInstanceOf(type);
+    }
 
-
-        // new Object().foo().bar();
+    public LoopBodyBuilder loop(String loopVarName, String sequenceVarName) {
+        return LoopBuilder.createInScopeOf(this).loop(loopVarName, sequenceVarName);
     }
 }
