@@ -1,5 +1,7 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ClassStructureBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ObjectBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 
 import java.lang.annotation.Annotation;
@@ -17,7 +19,7 @@ public class AnnotationEncoder {
         classStructureBuilder.publicOverridesMethod(m, statement);
         builder.integrateClassStructure(classStructureBuilder);
 
-        return builder.getStatement();
+        return builder.generate();
     }
 
 

@@ -21,7 +21,15 @@ public class Scope {
         return var;
     }
     
+    public boolean containsVariable(String var) {
+        return scope.containsKey(var);
+    }
+    
     public boolean containsVariable(Variable var) {
         return scope.containsValue(var);
-    }    
+    }
+    
+    public void merge(Scope scope) {
+        this.scope.putAll(scope.scope);
+    }
 }

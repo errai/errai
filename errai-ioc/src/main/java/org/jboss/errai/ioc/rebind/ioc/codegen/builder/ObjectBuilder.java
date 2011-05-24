@@ -1,7 +1,10 @@
-package org.jboss.errai.ioc.rebind.ioc.codegen;
+package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
 
 import com.google.gwt.core.ext.typeinfo.JClassType;
+
+import org.jboss.errai.ioc.rebind.ioc.codegen.AbstractStatement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.CallParameters;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.GWTClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.JavaReflectionClass;
@@ -42,7 +45,7 @@ public class ObjectBuilder extends AbstractStatement {
     }
 
     public ObjectBuilder withParameters(CallParameters parameters) {
-        buf.append(parameters.getStatement()).append(";");
+        buf.append(parameters.generate()).append(";");
         buildState |= CONSTRUCT_STATEMENT_COMPLETE;
         return this;
     }
@@ -66,7 +69,7 @@ public class ObjectBuilder extends AbstractStatement {
         return type;
     }
 
-    public String getStatement() {
+    public String generate() {
         finishConstructIfNecessary();
         return buf.toString();
     }

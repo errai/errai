@@ -7,7 +7,7 @@ public class StringStatement extends AbstractStatement {
         this.statement = statement;
     }
 
-    public String getStatement() {
+    public String generate() {
         return statement;
     }
 }

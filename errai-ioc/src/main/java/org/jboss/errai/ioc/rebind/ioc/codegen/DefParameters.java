@@ -36,10 +36,10 @@ public class DefParameters extends AbstractStatement {
     }
 
 
-    public String getStatement() {
+    public String generate() {
         StringBuilder buf = new StringBuilder("(");
         for (int i = 0; i < parameters.size(); i++) {
-            buf.append(parameters.get(i).getStatement());
+            buf.append(parameters.get(i).generate());
 
             if (i + 1 < parameters.size()) {
                 buf.append(", ");

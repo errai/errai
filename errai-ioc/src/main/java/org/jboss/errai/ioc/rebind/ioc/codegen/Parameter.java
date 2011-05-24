@@ -15,7 +15,7 @@ public class Parameter extends AbstractStatement {
         return new Parameter(type, name);
     }
 
-    public String getStatement() {
+    public String generate() {
         return type.getFullyQualifedName() + " " + name;
     }
 }

@@ -15,14 +15,14 @@ public class BlockStatement extends AbstractStatement {
         return this;
     }
     
-    public String getStatement() {
+    public String generate() {
         StringBuilder buf = new StringBuilder();
 
         for (Statement statement : statements) {
             if(buf.length()!=0)
                 buf.append("\n");
             
-            buf.append(statement.getStatement());
+            buf.append(statement.generate());
         }
         return buf.toString();
     }

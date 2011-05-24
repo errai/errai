@@ -11,29 +11,31 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class LoopBuilder extends AbstractStatementBuilder implements Statement {
-    public class LoopBody implements Statement, HasScope {
+    public class LoopBodyBuilder extends AbstractStatementBuilder implements Statement {
         private BlockStatement blockStatement = null;
         
-        private LoopBody(BlockStatement blockStatement) {
+        private LoopBodyBuilder(BlockStatement blockStatement) {
+            super(LoopBuilder.this.getScope());
             this.blockStatement = blockStatement;
         }
         
-        public LoopBody addStatement(Statement statement) {
+        public LoopBodyBuilder addStatement(Statement statement) {
             blockStatement.addStatement(statement);
+            statement.getScope().merge(scope);
             return this;
         }
         
-        public String getStatement() {
-            return LoopBuilder.this.getStatement();
+        public String generate() {
+            return LoopBuilder.this.generate();
         }
         
         public Scope getScope() {
-            return LoopBuilder.this.getScope();
+            return scope;
         }
     }
     
-    private Variable loopVar;
-    private Variable sequenceVar;
+    private String loopVarName;
+    private String sequenceVarName;
     private BlockStatement body;
     
     private LoopBuilder(Scope scope) {
@@ -48,24 +50,26 @@ public class LoopBuilder extends AbstractStatementBuilder implements Statement {
         return new LoopBuilder(parent.getScope());
     }
     
-    public LoopBody loop(Variable loopVar, Variable sequenceVar) {
-        assertVariableInScope(loopVar);
-        assertVariableInScope(sequenceVar);
-        
-        this.loopVar = loopVar;
-        this.sequenceVar = sequenceVar;
+    public LoopBodyBuilder loop(String loopVarName, String sequenceVarName) {
+        this.loopVarName = loopVarName;
+        this.sequenceVarName = sequenceVarName;
         this.body = new BlockStatement();
-        return new LoopBody(body);
+        return new LoopBodyBuilder(body);
     }
     
-    public String getStatement() {
-        StringBuilder buf = new StringBuilder();
+    public String generate() {
+        assertVariableInScope(loopVarName);
+        assertVariableInScope(sequenceVarName);
 
+        Variable loopVar = scope.getVariable(loopVarName);
+        Variable sequenceVar = scope.getVariable(sequenceVarName);
+        
+        StringBuilder buf = new StringBuilder();
         buf.append("for (").append(loopVar.getType().getFullyQualifedName()).append(" ").append(loopVar.getName())
             .append(" : ").append(sequenceVar.getName()).append(") {")
-                .append("\n\t").append(body.getStatement().replaceAll("\n", "\n\t"))
+                .append("\n\t").append(body.generate().replaceAll("\n", "\n\t"))
             .append("\n};");
-        
+
         return buf.toString();
     }
 }
