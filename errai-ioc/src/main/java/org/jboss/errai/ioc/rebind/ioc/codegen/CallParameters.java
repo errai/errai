@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class CallParameters implements Statement {
+public class CallParameters extends AbstractStatement {
     private List<Statement> parameters;
 
     public CallParameters(List<Statement> parameters) {

@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class DefParameters implements Statement {
+public class DefParameters extends AbstractStatement {
     private List<Parameter> parameters;
 
     public DefParameters(List<Parameter> parameters) {

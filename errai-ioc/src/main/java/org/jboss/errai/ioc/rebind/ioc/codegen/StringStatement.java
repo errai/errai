@@ -1,6 +1,6 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen;
 
-public class StringStatement implements Statement {
+public class StringStatement extends AbstractStatement {
     private final String statement;
 
     public StringStatement(String statement) {
