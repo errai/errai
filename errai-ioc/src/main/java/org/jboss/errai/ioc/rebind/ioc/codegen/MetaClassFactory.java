@@ -8,6 +8,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.gwt.GWTClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java.JavaReflectionClass;
 
+import javax.enterprise.util.TypeLiteral;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,6 +34,10 @@ public final class MetaClassFactory {
         return createOrGet(clazz);
     }
 
+    public static MetaClass get(TypeLiteral literal) {
+        return null;
+    }
+
     public static boolean isCached(String name) {
         return CLASS_CACHE.containsKey(name);
     }
@@ -52,6 +57,18 @@ public final class MetaClassFactory {
 
         return CLASS_CACHE.get(fullyQualifiedClassName);
     }
+
+    private static MetaClass createOrGet(TypeLiteral type) {
+        if (!CLASS_CACHE.containsKey(type.toString())) {
+            MetaClass gwtClass = JavaReflectionClass.newUncachedInstance(type);
+
+            addLookups(type, gwtClass);
+            return gwtClass;
+        }
+
+        return CLASS_CACHE.get(type.toString());
+    }
+
 
     private static MetaClass createOrGet(JType type) {
         if (!CLASS_CACHE.containsKey(type.isClassOrInterface().getName())) {
@@ -74,6 +91,10 @@ public final class MetaClassFactory {
         }
 
         return CLASS_CACHE.get(cls.getName());
+    }
+
+    private static void addLookups(TypeLiteral literal, MetaClass metaClass) {
+        CLASS_CACHE.put(literal.toString(), metaClass);
     }
 
     private static void addLookups(Class cls, MetaClass metaClass) {

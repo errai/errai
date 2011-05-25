@@ -36,7 +36,7 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     }
 
     public static MetaClass newInstance(TypeLiteral type) {
-        return MetaClassFactory.get(type.getRawType());
+        return MetaClassFactory.get(type);
     }
 
     public static MetaClass newUncachedInstance(TypeLiteral type) {
