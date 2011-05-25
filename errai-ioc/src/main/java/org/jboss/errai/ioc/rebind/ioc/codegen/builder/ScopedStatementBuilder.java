@@ -27,11 +27,11 @@ public class ScopedStatementBuilder extends AbstractStatementBuilder {
         return LoopBuilder.createInScopeOf(this).foreach(loopVarName, loopVarType);
     }
     
-    public LoopBodyBuilder foreach(String loopVarName, String sequenceVarName) {
-        return LoopBuilder.createInScopeOf(this).foreach(loopVarName, sequenceVarName);
+    public LoopBodyBuilder foreach(String loopVarName, String collectionVarName) {
+        return LoopBuilder.createInScopeOf(this).foreach(loopVarName, collectionVarName);
     }
     
-    public LoopBodyBuilder foreach(String loopVarName, MetaClass loopVarType, String sequenceVarName) {
-        return LoopBuilder.createInScopeOf(this).foreach(loopVarName, loopVarType, sequenceVarName);
+    public LoopBodyBuilder foreach(String loopVarName, MetaClass loopVarType, String collectionVarName) {
+        return LoopBuilder.createInScopeOf(this).foreach(loopVarName, loopVarType, collectionVarName);
     }
 }

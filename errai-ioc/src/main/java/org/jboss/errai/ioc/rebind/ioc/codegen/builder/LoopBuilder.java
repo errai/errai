@@ -5,6 +5,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java.JavaReflectionClass;
 
 /**
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class LoopBuilder extends AbstractStatementBuilder implements Statement {
@@ -17,7 +18,7 @@ public class LoopBuilder extends AbstractStatementBuilder implements Statement {
             this.blockStatement = blockStatement;
         }
 
-        public LoopBodyBuilder addStatement(Statement statement) {
+        public LoopBodyBuilder execute(Statement statement) {
             blockStatement.addStatement(statement);
             statement.getScope().merge(scope);
             return this;
@@ -34,7 +35,8 @@ public class LoopBuilder extends AbstractStatementBuilder implements Statement {
 
     private String loopVarName;
     private MetaClass loopVarType;
-    private String sequenceVarName;
+    private Variable loopVar;
+    private Variable collectionVar;
     private BlockStatement body;
 
     private LoopBuilder(Scope scope) {
@@ -57,25 +59,31 @@ public class LoopBuilder extends AbstractStatementBuilder implements Statement {
         return foreach(loopVarName, loopVarType, scope.peekVariable().getName());
     }
 
-    public LoopBodyBuilder foreach(String loopVarName, String sequenceVarName) {
-        return foreach(loopVarName, null, sequenceVarName);
+    public LoopBodyBuilder foreach(String loopVarName, String collectionVarName) {
+        return foreach(loopVarName, null, collectionVarName);
     }
 
-    public LoopBodyBuilder foreach(String loopVarName, MetaClass loopVarType, String sequenceVarName) {
+    public LoopBodyBuilder foreach(String loopVarName, MetaClass loopVarType, String collectionVarName) {
+        assertVariableInScope(collectionVarName);
+        
+        Variable collectionVar = scope.getVariable(collectionVarName);
+        assertVariableIsIterable(collectionVar);
+
+        this.collectionVar = collectionVar;
         this.loopVarName = loopVarName;
         this.loopVarType = loopVarType;
-        this.sequenceVarName = sequenceVarName;
+        this.loopVar = createLoopVar(collectionVar);
         return new LoopBodyBuilder(body = new BlockStatement());
     }
 
-    private Variable createLoopVar(Variable sequenceVar) {
+    private Variable createLoopVar(Variable collectionVar) {
 
         // infer the loop variable type
         MetaClass loopVarType = new JavaReflectionClass(Object.class);
-        if (sequenceVar.getType().getParameterizedTypes().length > 0) {
-            loopVarType = sequenceVar.getType().getParameterizedTypes()[0];
-        } else if (getVariableComponentType(sequenceVar) != null) {
-            loopVarType = getVariableComponentType(sequenceVar);
+        if (collectionVar.getType().getParameterizedTypes().length > 0) {
+            loopVarType = collectionVar.getType().getParameterizedTypes()[0];
+        } else if (getVariableComponentType(collectionVar) != null) {
+            loopVarType = getVariableComponentType(collectionVar);
         }
 
         // try the use the provided loop var type if possible
@@ -90,17 +98,11 @@ public class LoopBuilder extends AbstractStatementBuilder implements Statement {
     }
 
     public String generate() {
-        assertVariableInScope(sequenceVarName);
-        Variable sequenceVar = scope.getVariable(sequenceVarName);
-        assertVariableIsIterable(sequenceVar);
-
-        Variable loopVar = createLoopVar(sequenceVar);
-
         StringBuilder buf = new StringBuilder();
         buf.append("for (").append(loopVar.getType().getFullyQualifedName()).append(" ").append(loopVar.getName())
-                .append(" : ").append(sequenceVar.getName()).append(") {")
+            .append(" : ").append(collectionVar.getName()).append(") {")
                 .append("\n\t").append(body.generate().replaceAll("\n", "\n\t"))
-                .append("\n};");
+            .append("\n};");
 
         return buf.toString();
     }
