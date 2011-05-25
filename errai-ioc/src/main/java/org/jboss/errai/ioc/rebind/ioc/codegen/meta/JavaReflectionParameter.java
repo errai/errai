@@ -14,7 +14,6 @@ public class JavaReflectionParameter implements MetaParameter {
     private Annotation[] annotations;
     private MetaClassMember declaredBy;
 
-
     public JavaReflectionParameter(Class<?> type, Annotation[] annotations, MetaClassMember declaredBy) {
         this.name = ReflectionUtil.getPropertyFromAccessor(type.getSimpleName());
         this.type = type;
@@ -33,7 +32,6 @@ public class JavaReflectionParameter implements MetaParameter {
     public Annotation[] getAnnotations() {
         return annotations;
     }
-
 
     public MetaClassMember getDeclaringMember() {
         return declaredBy;
