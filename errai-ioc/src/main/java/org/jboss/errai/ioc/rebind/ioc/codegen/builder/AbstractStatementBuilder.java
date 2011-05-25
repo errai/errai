@@ -1,13 +1,13 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.HasScope;
+import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Scope;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.TypeNotIterableException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedVariableException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java.JavaReflectionClass;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -47,7 +47,7 @@ public abstract class AbstractStatementBuilder implements HasScope {
                     Thread.currentThread().getContextClassLoader());
 
             if (cls.getComponentType() != null)
-                return new JavaReflectionClass(cls.getComponentType());
+                return MetaClassFactory.get(cls.getComponentType());
 
             return null;
         } catch (ClassNotFoundException e) {

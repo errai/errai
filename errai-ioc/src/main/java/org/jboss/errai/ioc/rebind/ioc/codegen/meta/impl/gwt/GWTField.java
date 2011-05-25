@@ -1,6 +1,7 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.gwt;
 
 import com.google.gwt.core.ext.typeinfo.JField;
+import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
 
@@ -14,7 +15,7 @@ public class GWTField implements MetaField {
     private JField field;
     private Annotation[] annotations;
 
-    public GWTField(JField field) {
+    GWTField(JField field) {
         this.field = field;
 
         try {
@@ -33,7 +34,7 @@ public class GWTField implements MetaField {
     }
 
     public MetaClass getType() {
-        return new GWTClass(field.getType());
+        return MetaClassFactory.get(field.getType());
     }
 
     public String getName() {

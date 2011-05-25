@@ -2,7 +2,6 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java.JavaReflectionClass;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -71,7 +70,7 @@ public class LoopBuilder extends AbstractStatementBuilder implements Statement {
     private Variable createLoopVar(Variable sequenceVar) {
 
         // infer the loop variable type
-        MetaClass loopVarType = new JavaReflectionClass(Object.class);
+        MetaClass loopVarType = MetaClassFactory.get(Object.class);
         if (sequenceVar.getType().getParameterizedTypes().length > 0) {
             loopVarType = sequenceVar.getType().getParameterizedTypes()[0];
         } else if (getVariableComponentType(sequenceVar) != null) {

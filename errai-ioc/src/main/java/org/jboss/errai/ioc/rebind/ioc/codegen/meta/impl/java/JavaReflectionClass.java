@@ -1,5 +1,6 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaConstructor;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
@@ -16,14 +17,30 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     private Annotation[] annotationsCache;
     private TypeLiteral typeLiteral;
 
-    public JavaReflectionClass(Class clazz) {
+    private JavaReflectionClass(Class clazz) {
         super(clazz);
         this.annotationsCache = clazz.getAnnotations();
     }
 
-    public JavaReflectionClass(TypeLiteral typeLiteral) {
+    private JavaReflectionClass(TypeLiteral typeLiteral) {
         super(typeLiteral.getRawType());
         this.typeLiteral = typeLiteral;
+    }
+
+    public static MetaClass newInstance(Class type) {
+        return MetaClassFactory.get(type);
+    }
+
+    public static MetaClass newUncachedInstance(Class type) {
+        return new JavaReflectionClass(type);
+    }
+
+    public static MetaClass newInstance(TypeLiteral type) {
+        return MetaClassFactory.get(type.getRawType());
+    }
+
+    public static MetaClass newUncachedInstance(TypeLiteral type) {
+        return new JavaReflectionClass(type);
     }
 
     public String getName() {

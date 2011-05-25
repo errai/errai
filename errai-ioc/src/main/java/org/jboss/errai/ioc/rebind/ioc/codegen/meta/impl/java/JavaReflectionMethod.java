@@ -1,5 +1,6 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.JavaReflectionParameter;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
@@ -16,7 +17,7 @@ public class JavaReflectionMethod implements MetaMethod {
     private MetaClass declaringClass;
     private MetaClass returnType;
 
-    public JavaReflectionMethod(Method method) {
+    JavaReflectionMethod(Method method) {
         this.method = method;
 
         List<MetaParameter> parmList = new ArrayList<MetaParameter>();
@@ -28,8 +29,8 @@ public class JavaReflectionMethod implements MetaMethod {
 
         parameters = parmList.toArray(new MetaParameter[parmList.size()]);
 
-        declaringClass = new JavaReflectionClass(method.getDeclaringClass());
-        returnType = new JavaReflectionClass(method.getReturnType());
+        declaringClass = MetaClassFactory.get(method.getDeclaringClass());
+        returnType = MetaClassFactory.get(method.getReturnType());
     }
 
     public String getName() {

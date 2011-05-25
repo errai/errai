@@ -19,8 +19,8 @@ package org.jboss.errai.ioc.rebind.ioc;
 import com.google.gwt.core.ext.typeinfo.*;
 import org.jboss.errai.bus.rebind.ScannerSingleton;
 import org.jboss.errai.ioc.rebind.IOCGenerator;
+import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java.JavaReflectionClass;
 import org.mvel2.util.ReflectionUtil;
 import org.mvel2.util.StringAppender;
 import org.slf4j.Logger;
@@ -491,7 +491,7 @@ public class InjectUtil {
     public static MetaClass[] classToMeta(Class<?>[] types) {
         MetaClass[] metaClasses = new MetaClass[types.length];
         for (int i = 0; i < types.length; i++) {
-            metaClasses[i] = new JavaReflectionClass(types[i]);
+            metaClasses[i] = MetaClassFactory.get(types[i]);
         }
         return metaClasses;
     }

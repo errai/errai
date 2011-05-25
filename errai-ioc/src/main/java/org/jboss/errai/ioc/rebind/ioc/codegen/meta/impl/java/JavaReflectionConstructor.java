@@ -1,5 +1,6 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.JavaReflectionParameter;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaConstructor;
@@ -20,7 +21,7 @@ public class JavaReflectionConstructor extends AbstractMetaMember implements Met
     private MetaClass declaringClass;
     private Annotation[] annotationsCache;
 
-    public JavaReflectionConstructor(Constructor c) {
+    JavaReflectionConstructor(Constructor c) {
         constructor = c;
 
         List<MetaParameter> parmList = new ArrayList<MetaParameter>();
@@ -31,7 +32,7 @@ public class JavaReflectionConstructor extends AbstractMetaMember implements Met
         }
 
         parameters = parmList.toArray(new MetaParameter[parmList.size()]);
-        declaringClass = new JavaReflectionClass(c.getDeclaringClass());
+        declaringClass = MetaClassFactory.get(c.getDeclaringClass());
     }
 
     public MetaParameter[] getParameters() {

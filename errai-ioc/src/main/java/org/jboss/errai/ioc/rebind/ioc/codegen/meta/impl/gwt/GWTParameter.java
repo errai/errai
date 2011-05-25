@@ -3,6 +3,7 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.gwt;
 import com.google.gwt.core.ext.typeinfo.JAbstractMethod;
 import com.google.gwt.core.ext.typeinfo.JParameter;
 import org.jboss.errai.ioc.rebind.ioc.InjectUtil;
+import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassMember;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
@@ -18,7 +19,7 @@ public class GWTParameter implements MetaParameter {
     private Annotation[] annotations;
     private MetaClassMember declaredBy;
 
-    public GWTParameter(JParameter parameter, MetaClassMember declaredBy) {
+    GWTParameter(JParameter parameter, MetaClassMember declaredBy) {
         this.parameter = parameter;
         this.declaredBy = declaredBy;
 
@@ -52,7 +53,7 @@ public class GWTParameter implements MetaParameter {
     }
 
     public MetaClass getType() {
-        return new GWTClass(parameter.getType());
+        return MetaClassFactory.get(parameter.getType());
     }
 
     public Annotation[] getAnnotations() {

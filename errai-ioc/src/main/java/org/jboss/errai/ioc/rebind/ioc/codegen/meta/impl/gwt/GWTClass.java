@@ -1,6 +1,7 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.gwt;
 
 import com.google.gwt.core.ext.typeinfo.*;
+import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaConstructor;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
@@ -14,8 +15,16 @@ import java.util.List;
 public class GWTClass extends AbstractMetaClass<JType> {
     private Annotation[] annotationsCache;
 
-    public GWTClass(JType classType) {
+    private GWTClass(JType classType) {
         super(classType);
+    }
+
+    public static MetaClass newInstance(JType type) {
+        return MetaClassFactory.get(type);
+    }
+
+    public static MetaClass newUncachedInstance(JType type) {
+        return new GWTClass(type);
     }
 
     public String getName() {
