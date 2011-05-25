@@ -13,6 +13,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.JavaReflectionClass;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class LoopBuilder extends AbstractStatementBuilder implements Statement {
+  
     public class LoopBodyBuilder extends AbstractStatementBuilder implements Statement {
         private BlockStatement blockStatement = null;
         
@@ -37,6 +38,7 @@ public class LoopBuilder extends AbstractStatementBuilder implements Statement {
     }
     
     private String loopVarName;
+    private MetaClass loopVarType;
     private String sequenceVarName;
     private BlockStatement body;
     
@@ -53,18 +55,26 @@ public class LoopBuilder extends AbstractStatementBuilder implements Statement {
     }
     
     public LoopBodyBuilder foreach(String loopVarName) {
-        this.sequenceVarName = scope.peekVariable().getName();
-        this.loopVarName = loopVarName;
-        return new LoopBodyBuilder(body = new BlockStatement());
+        return foreach(loopVarName, scope.peekVariable().getName());
+    }
+
+    public LoopBodyBuilder foreach(String loopVarName, MetaClass loopVarType) {
+        return foreach(loopVarName, loopVarType, scope.peekVariable().getName());
     }
     
     public LoopBodyBuilder foreach(String loopVarName, String sequenceVarName) {
-        this.sequenceVarName = sequenceVarName;
+        return foreach(loopVarName, null, sequenceVarName);
+    }    
+    
+    public LoopBodyBuilder foreach(String loopVarName, MetaClass loopVarType, String sequenceVarName) {
         this.loopVarName = loopVarName;
+        this.loopVarType = loopVarType;
+        this.sequenceVarName = sequenceVarName;
         return new LoopBodyBuilder(body = new BlockStatement());
     }
     
     private Variable createLoopVar(Variable sequenceVar) {
+        
         // infer the loop variable type
         MetaClass loopVarType = new JavaReflectionClass(Object.class);
         if (sequenceVar.getType().getParameterizedTypes().length>0) {
@@ -72,6 +82,13 @@ public class LoopBuilder extends AbstractStatementBuilder implements Statement {
         } else if (getVariableComponentType(sequenceVar)!=null) {
             loopVarType = getVariableComponentType(sequenceVar);
         }
+
+        // try the use the provided loop var type if possible
+        if(this.loopVarType!=null) {
+            assertAssignableTypes(loopVarType, this.loopVarType);
+            loopVarType=this.loopVarType;
+        }
+        
         Variable loopVar = new Variable(loopVarName, loopVarType);
         scope.pushVariable(loopVar);
         return loopVar;

@@ -8,17 +8,18 @@ import javax.enterprise.util.TypeLiteral;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.TypeNotIterableException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedVariableException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.JavaReflectionClass;
 import org.junit.Test;
 
 /**
- * Tests for our {@link StatementBuilder} API.
+ * Tests the generation of loops with our {@link StatementBuilder} API.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class StatementBuilderTest {
+public class LoopStatementBuilderTest {
     
     @Test
     public void testLoop() throws Exception {
@@ -30,10 +31,10 @@ public class StatementBuilderTest {
             .newObject(new JavaReflectionClass(Integer.class));
 
         Statement loop = StatementBuilder.create()
-                .loadVariable("list", new JavaReflectionClass(new TypeLiteral<List<String>>(){}))
-                .foreach("element")
-                .addStatement(createObject)
-                .addStatement(createAnotherObject);
+            .loadVariable("list", new JavaReflectionClass(new TypeLiteral<List<String>>(){}))
+            .foreach("element")
+            .addStatement(createObject)
+            .addStatement(createAnotherObject);
 
         Statement loopWithArray = StatementBuilder.create()
             .loadVariable("list", new JavaReflectionClass(String[].class))
@@ -41,7 +42,6 @@ public class StatementBuilderTest {
             .addStatement(createObject)
             .addStatement(createAnotherObject);
         
-
         Statement loopWithList = StatementBuilder.create()
             .loadVariable("list", new JavaReflectionClass(List.class))
             .foreach("element")
@@ -54,17 +54,38 @@ public class StatementBuilderTest {
     }
     
     @Test
+    public void testLoopWithProvidedLoopVarType() throws Exception {
+        Statement loop = StatementBuilder.create()
+            .loadVariable("list", new JavaReflectionClass((new TypeLiteral<List<String>>(){})))
+            .foreach("element", new JavaReflectionClass(Object.class), "list");
+        
+        System.out.println(loop.generate());
+        
+        try {
+            StatementBuilder.create()
+                .loadVariable("list", new JavaReflectionClass((new TypeLiteral<List<String>>(){})))
+                .foreach("element", new JavaReflectionClass(Integer.class))
+                .generate();
+            fail("Expected InvalidTypeException");
+        } catch(InvalidTypeException ite) {
+            // expected
+            System.out.println(ite.getMessage());
+        }
+    }
+    
+    @Test
     public void testNestedLoops() throws Exception {
         Statement createObject = StatementBuilder.create().newObject(
                 new JavaReflectionClass(Integer.class));
 
         Statement outerLoop = StatementBuilder.create()
-                .loadVariable("list", new JavaReflectionClass(new TypeLiteral<List<String>>(){}))
-                .foreach("element")
-                .addStatement(StatementBuilder.create()
-                        .foreach("element2", "list")
-                        .addStatement(createObject)
-                 );
+            .loadVariable("list", new JavaReflectionClass(new TypeLiteral<List<String>>(){}))
+            .foreach("element")
+            .addStatement(StatementBuilder.create()
+                    .loadVariable("list2", new JavaReflectionClass(new TypeLiteral<List<String>>(){}))
+                    .foreach("element2", "list2")
+                    .addStatement(createObject)
+             );
                 
         System.out.println(outerLoop.generate());
     }
@@ -80,6 +101,7 @@ public class StatementBuilderTest {
                 .loadVariable("list", new JavaReflectionClass(List.class))
                 .foreach("element", "list")
                 .addStatement(StatementBuilder.create()
+                        .loadVariable("list2", new JavaReflectionClass(new TypeLiteral<List<String>>(){}))
                         .foreach("element2", "listDoesNotExist")
                         .addStatement(createObject)
                  )

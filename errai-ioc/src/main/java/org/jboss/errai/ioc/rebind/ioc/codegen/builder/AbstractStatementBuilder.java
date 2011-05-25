@@ -3,6 +3,7 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.HasScope;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Scope;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.TypeNotIterableException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedVariableException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
@@ -50,6 +51,23 @@ public abstract class AbstractStatementBuilder implements HasScope {
                 return new JavaReflectionClass(cls.getComponentType());
             
             return null;
+        } catch (ClassNotFoundException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+    
+    protected void assertAssignableTypes(MetaClass from, MetaClass to) {
+        try {
+            Class<?> fromCls = Class.forName(from.getFullyQualifedName(), false,
+                    Thread.currentThread().getContextClassLoader());
+            
+            Class<?> toCls = Class.forName(to.getFullyQualifedName(), false,
+                    Thread.currentThread().getContextClassLoader());
+            
+            if(!toCls.isAssignableFrom(fromCls))
+                throw new InvalidTypeException(to.getFullyQualifedName() + 
+                        " is not assignable from " + from.getFullyQualifedName());
+            
         } catch (ClassNotFoundException e) {
             throw new IllegalArgumentException(e);
         }
