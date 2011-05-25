@@ -36,7 +36,7 @@ public class StatementBuilder extends AbstractStatementBuilder {
     }
 
     public ScopedStatementBuilder loadVariable(String name, TypeLiteral literal) {
-        return loadVariable(name, MetaClassFactory.get(literal.getRawType()));
+        return loadVariable(name, MetaClassFactory.get(literal));
     }
 
     public ObjectBuilder newObject(MetaClass type) {

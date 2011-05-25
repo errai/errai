@@ -34,7 +34,7 @@ public class LoopStatementBuilderTest extends AbstractStatementBuilderTest imple
             .execute(createObject)
             .generate();
          
-       /* String foreachWithStringArray = StatementBuilder.create()
+        String foreachWithStringArray = StatementBuilder.create()
             .loadVariable("list", String[].class)
             .foreach("element")
             .execute(createObject)
@@ -45,11 +45,11 @@ public class LoopStatementBuilderTest extends AbstractStatementBuilderTest imple
             .foreach("element")
             .execute(createObject)
             .execute(createAnotherObject)
-            .generate();*/
+            .generate();
         
         assertEquals(FOREACH_RESULT_STRING_IN_LIST, foreachWithListOfStrings);
-        //assertEquals(FOREACH_RESULT_STRING_IN_LIST, foreachWithStringArray);
-        //assertEquals(FOREACH_RESULT_OBJECT_IN_LIST_TWO_STATEMENTS, foreachWithList);
+        assertEquals(FOREACH_RESULT_STRING_IN_LIST, foreachWithStringArray);
+        assertEquals(FOREACH_RESULT_OBJECT_IN_LIST_TWO_STATEMENTS, foreachWithList);
     }
     
     @Test
