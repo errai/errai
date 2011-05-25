@@ -28,4 +28,6 @@ public interface MetaClass extends HasAnnotations {
     public MetaConstructor getConstructor(Class... parameters);
 
     public MetaConstructor getDeclaredConstructor(Class... parameters);
+    
+    public MetaClass[] getParameterizedTypes();
 }

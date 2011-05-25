@@ -27,7 +27,7 @@ public class StatementBuilder extends AbstractStatementBuilder {
     }
 
     public StatementBuilder loadVariable(String name, MetaClass type) {
-        scope.addVariable(name, new Variable(name, type));
+        scope.pushVariable(new Variable(name, type));
         return this;
     }
 
@@ -39,7 +39,11 @@ public class StatementBuilder extends AbstractStatementBuilder {
         return ObjectBuilder.newInstanceOf(type);
     }
 
-    public LoopBodyBuilder loop(String loopVarName, String sequenceVarName) {
-        return LoopBuilder.createInScopeOf(this).loop(loopVarName, sequenceVarName);
+    public LoopBodyBuilder foreach(String loopVarName) {
+        return LoopBuilder.createInScopeOf(this).foreach(loopVarName);
+    }
+    
+    public LoopBodyBuilder foreach(String loopVarName, String sequenceVarName) {
+        return LoopBuilder.createInScopeOf(this).foreach(loopVarName, sequenceVarName);
     }
 }

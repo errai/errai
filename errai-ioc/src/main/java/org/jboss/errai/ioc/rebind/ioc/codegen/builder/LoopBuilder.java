@@ -5,6 +5,8 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.HasScope;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Scope;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.JavaReflectionClass;
 
 /**
  * 
@@ -50,19 +52,37 @@ public class LoopBuilder extends AbstractStatementBuilder implements Statement {
         return new LoopBuilder(parent.getScope());
     }
     
-    public LoopBodyBuilder loop(String loopVarName, String sequenceVarName) {
+    public LoopBodyBuilder foreach(String loopVarName) {
+        this.sequenceVarName = scope.peekVariable().getName();
         this.loopVarName = loopVarName;
+        return new LoopBodyBuilder(body = new BlockStatement());
+    }
+    
+    public LoopBodyBuilder foreach(String loopVarName, String sequenceVarName) {
         this.sequenceVarName = sequenceVarName;
-        this.body = new BlockStatement();
-        return new LoopBodyBuilder(body);
+        this.loopVarName = loopVarName;
+        return new LoopBodyBuilder(body = new BlockStatement());
+    }
+    
+    private Variable createLoopVar(Variable sequenceVar) {
+        // infer the loop variable type
+        MetaClass loopVarType = new JavaReflectionClass(Object.class);
+        if (sequenceVar.getType().getParameterizedTypes().length>0) {
+            loopVarType = sequenceVar.getType().getParameterizedTypes()[0];
+        } else if (getVariableComponentType(sequenceVar)!=null) {
+            loopVarType = getVariableComponentType(sequenceVar);
+        }
+        Variable loopVar = new Variable(loopVarName, loopVarType);
+        scope.pushVariable(loopVar);
+        return loopVar;
     }
     
     public String generate() {
-        assertVariableInScope(loopVarName);
         assertVariableInScope(sequenceVarName);
-
-        Variable loopVar = scope.getVariable(loopVarName);
         Variable sequenceVar = scope.getVariable(sequenceVarName);
+        assertVariableIsIterable(sequenceVar);
+        
+        Variable loopVar = createLoopVar(sequenceVar);
         
         StringBuilder buf = new StringBuilder();
         buf.append("for (").append(loopVar.getType().getFullyQualifedName()).append(" ").append(loopVar.getName())
