@@ -1,6 +1,6 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java.JavaReflectionClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.mvel2.util.ReflectionUtil;
 
 import java.lang.annotation.Annotation;
@@ -27,7 +27,7 @@ public class JavaReflectionParameter implements MetaParameter {
     }
 
     public MetaClass getType() {
-        return new JavaReflectionClass(type);
+        return MetaClassFactory.get(type);
     }
 
     public Annotation[] getAnnotations() {

@@ -3,6 +3,7 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.gwt;
 import com.google.gwt.core.ext.typeinfo.JMethod;
 import com.google.gwt.core.ext.typeinfo.JParameter;
 import org.jboss.errai.ioc.rebind.ioc.InjectUtil;
+import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
@@ -19,7 +20,7 @@ public class GWTMethod implements MetaMethod {
     private JMethod method;
     private Annotation[] annotations;
 
-    public GWTMethod(JMethod method) {
+    GWTMethod(JMethod method) {
         this.method = method;
 
         try {
@@ -42,7 +43,7 @@ public class GWTMethod implements MetaMethod {
     }
 
     public MetaClass getReturnType() {
-        return new GWTClass(method.getReturnType());
+        return MetaClassFactory.get(method.getReturnType());
     }
 
     public MetaParameter[] getParameters() {
@@ -71,6 +72,6 @@ public class GWTMethod implements MetaMethod {
     }
 
     public MetaClass getDeclaringClass() {
-        return new GWTClass(method.getEnclosingType());
+        return MetaClassFactory.get(method.getEnclosingType());
     }
 }

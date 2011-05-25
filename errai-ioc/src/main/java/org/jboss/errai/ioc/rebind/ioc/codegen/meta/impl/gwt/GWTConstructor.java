@@ -3,6 +3,7 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.gwt;
 import com.google.gwt.core.ext.typeinfo.JConstructor;
 import com.google.gwt.core.ext.typeinfo.JParameter;
 import org.jboss.errai.ioc.rebind.ioc.InjectUtil;
+import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaConstructor;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
@@ -23,7 +24,7 @@ public class GWTConstructor extends AbstractMetaMember implements MetaConstructo
 
     public GWTConstructor(JConstructor c) {
         this.constructor = c;
-        this.declaringClass = new GWTClass(c.getEnclosingType());
+        this.declaringClass = MetaClassFactory.get(c.getEnclosingType());
 
         try {
             Class<?> cls = Class.forName(c.getEnclosingType().getQualifiedSourceName(), false,

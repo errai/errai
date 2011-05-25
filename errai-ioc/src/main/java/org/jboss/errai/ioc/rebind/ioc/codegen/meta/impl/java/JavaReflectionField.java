@@ -1,5 +1,6 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
 
@@ -9,7 +10,7 @@ import java.lang.reflect.Field;
 public class JavaReflectionField implements MetaField {
     private Field field;
 
-    public JavaReflectionField(Field field) {
+    JavaReflectionField(Field field) {
         this.field = field;
     }
 
@@ -18,7 +19,7 @@ public class JavaReflectionField implements MetaField {
     }
 
     public MetaClass getType() {
-        return new JavaReflectionClass(field.getType());
+        return MetaClassFactory.get(field.getType());
     }
 
     public Annotation[] getAnnotations() {

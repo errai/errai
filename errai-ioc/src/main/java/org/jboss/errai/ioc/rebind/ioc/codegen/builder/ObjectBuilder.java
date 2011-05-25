@@ -4,9 +4,8 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import org.jboss.errai.ioc.rebind.ioc.codegen.AbstractStatement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.CallParameters;
+import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.gwt.GWTClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java.JavaReflectionClass;
 
 public class ObjectBuilder extends AbstractStatement {
     StringBuilder buf = new StringBuilder();
@@ -22,20 +21,16 @@ public class ObjectBuilder extends AbstractStatement {
         this.type = type;
     }
 
+    public static ObjectBuilder newInstanceOf(MetaClass type) {
+        return new ObjectBuilder(type).newInstance();
+    }
+
     public static ObjectBuilder newInstanceOf(Class type) {
-        return new ObjectBuilder(new JavaReflectionClass(type)).newInstance();
+        return newInstanceOf(MetaClassFactory.get(type));
     }
 
     public static ObjectBuilder newInstanceOf(JClassType type) {
-        return new ObjectBuilder(new GWTClass(type)).newInstance();
-    }
-
-    public static ObjectBuilder newInstanceOf(JavaReflectionClass type) {
-        return new ObjectBuilder(type).newInstance();
-    }
-
-    public static ObjectBuilder newInstanceOf(GWTClass type) {
-        return new ObjectBuilder(type).newInstance();
+        return newInstanceOf(MetaClassFactory.get(type));
     }
 
     private ObjectBuilder newInstance() {
