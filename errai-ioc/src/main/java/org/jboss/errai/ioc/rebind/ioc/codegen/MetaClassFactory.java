@@ -35,7 +35,7 @@ public final class MetaClassFactory {
     }
 
     public static MetaClass get(TypeLiteral literal) {
-        return null;
+        return createOrGet(literal);
     }
 
     public static boolean isCached(String name) {
