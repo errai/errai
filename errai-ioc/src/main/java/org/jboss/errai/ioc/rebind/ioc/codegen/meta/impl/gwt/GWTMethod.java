@@ -1,9 +1,8 @@
-package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl;
+package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.gwt;
 
 import com.google.gwt.core.ext.typeinfo.JMethod;
 import com.google.gwt.core.ext.typeinfo.JParameter;
 import org.jboss.errai.ioc.rebind.ioc.InjectUtil;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.HasAnnotations;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;

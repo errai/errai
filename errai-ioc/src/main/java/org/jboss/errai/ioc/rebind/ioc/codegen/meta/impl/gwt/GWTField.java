@@ -1,8 +1,6 @@
-package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl;
+package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.gwt;
 
 import com.google.gwt.core.ext.typeinfo.JField;
-import com.sun.xml.internal.rngom.ast.builder.Annotations;
-import org.jboss.errai.ioc.rebind.ioc.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
 

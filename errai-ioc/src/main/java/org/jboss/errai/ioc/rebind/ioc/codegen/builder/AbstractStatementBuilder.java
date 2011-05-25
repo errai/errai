@@ -7,29 +7,28 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.TypeNotIterableException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedVariableException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.JavaReflectionClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java.JavaReflectionClass;
 
 /**
- * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public abstract class AbstractStatementBuilder implements HasScope {
     protected Scope scope = null;
-    
+
     protected AbstractStatementBuilder(Scope scope) {
         this.scope = scope;
     }
-    
+
     protected void assertVariableInScope(String varName) {
         if (varName == null || !scope.containsVariable(varName))
             throw new UndefinedVariableException("Variable:" + varName);
     }
-    
+
     protected void assertVariableInScope(Variable var) {
         if (var == null || !scope.containsVariable(var))
             throw new UndefinedVariableException("Variable:" + var);
     }
-    
+
     protected void assertVariableIsIterable(Variable var) {
         try {
             Class<?> cls = Class.forName(var.getType().getFullyQualifedName(), false,
@@ -41,38 +40,38 @@ public abstract class AbstractStatementBuilder implements HasScope {
             throw new IllegalArgumentException(e);
         }
     }
-    
+
     protected MetaClass getVariableComponentType(Variable var) {
         try {
             Class<?> cls = Class.forName(var.getType().getFullyQualifedName(), false,
                     Thread.currentThread().getContextClassLoader());
-            
-            if(cls.getComponentType()!=null)
+
+            if (cls.getComponentType() != null)
                 return new JavaReflectionClass(cls.getComponentType());
-            
+
             return null;
         } catch (ClassNotFoundException e) {
             throw new IllegalArgumentException(e);
         }
     }
-    
+
     protected void assertAssignableTypes(MetaClass from, MetaClass to) {
         try {
             Class<?> fromCls = Class.forName(from.getFullyQualifedName(), false,
                     Thread.currentThread().getContextClassLoader());
-            
+
             Class<?> toCls = Class.forName(to.getFullyQualifedName(), false,
                     Thread.currentThread().getContextClassLoader());
-            
-            if(!toCls.isAssignableFrom(fromCls))
-                throw new InvalidTypeException(to.getFullyQualifedName() + 
+
+            if (!toCls.isAssignableFrom(fromCls))
+                throw new InvalidTypeException(to.getFullyQualifedName() +
                         " is not assignable from " + from.getFullyQualifedName());
-            
+
         } catch (ClassNotFoundException e) {
             throw new IllegalArgumentException(e);
         }
     }
-    
+
     public Scope getScope() {
         return scope;
     }

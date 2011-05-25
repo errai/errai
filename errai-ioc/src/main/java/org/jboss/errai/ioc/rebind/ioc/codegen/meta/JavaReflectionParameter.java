@@ -1,6 +1,6 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.JavaReflectionClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java.JavaReflectionClass;
 import org.mvel2.util.ReflectionUtil;
 
 import java.lang.annotation.Annotation;

@@ -1,25 +1,21 @@
-package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.enterprise.util.TypeLiteral;
+package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaConstructor;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.AbstractMetaClass;
+
+import javax.enterprise.util.TypeLiteral;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class JavaReflectionClass extends AbstractMetaClass<Class> {
     private Annotation[] annotationsCache;
     private TypeLiteral typeLiteral;
-    
+
     public JavaReflectionClass(Class clazz) {
         super(clazz);
         this.annotationsCache = clazz.getAnnotations();
@@ -29,7 +25,7 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
         super(typeLiteral.getRawType());
         this.typeLiteral = typeLiteral;
     }
-    
+
     public String getName() {
         return getEnclosedMetaObject().getSimpleName();
     }
@@ -135,11 +131,11 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
 
     public MetaClass[] getParameterizedTypes() {
         List<MetaClass> parameterizedTypes = new ArrayList<MetaClass>();
-        
-        if(typeLiteral!=null && typeLiteral.getType() instanceof ParameterizedType) {
+
+        if (typeLiteral != null && typeLiteral.getType() instanceof ParameterizedType) {
             ParameterizedType parameterizedType = ((ParameterizedType) typeLiteral.getType());
             for (Type type : parameterizedType.getActualTypeArguments()) {
-                parameterizedTypes.add(new JavaReflectionClass((Class)type));
+                parameterizedTypes.add(new JavaReflectionClass((Class) type));
             }
         }
         return parameterizedTypes.toArray(new MetaClass[parameterizedTypes.size()]);

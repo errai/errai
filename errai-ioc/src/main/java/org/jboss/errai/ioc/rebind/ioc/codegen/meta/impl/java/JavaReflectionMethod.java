@@ -1,14 +1,14 @@
-package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
+package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.JavaReflectionParameter;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 public class JavaReflectionMethod implements MetaMethod {
     private Method method;

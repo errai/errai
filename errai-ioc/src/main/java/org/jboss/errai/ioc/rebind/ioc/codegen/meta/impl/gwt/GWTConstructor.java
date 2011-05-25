@@ -1,4 +1,4 @@
-package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl;
+package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.gwt;
 
 import com.google.gwt.core.ext.typeinfo.JConstructor;
 import com.google.gwt.core.ext.typeinfo.JParameter;
@@ -6,10 +6,10 @@ import org.jboss.errai.ioc.rebind.ioc.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaConstructor;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.AbstractMetaMember;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 

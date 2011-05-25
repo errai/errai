@@ -16,30 +16,27 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
-import java.lang.annotation.Annotation;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import javax.inject.Qualifier;
-
 import com.google.gwt.core.ext.typeinfo.*;
 import org.jboss.errai.bus.rebind.ScannerSingleton;
 import org.jboss.errai.ioc.rebind.IOCGenerator;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.JavaReflectionClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java.JavaReflectionClass;
 import org.mvel2.util.ReflectionUtil;
 import org.mvel2.util.StringAppender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.reflect.ReflectionFactory;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+import javax.inject.Qualifier;
+import java.lang.annotation.Annotation;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class InjectUtil {
     private static final Logger log = LoggerFactory.getLogger(InjectUtil.class);

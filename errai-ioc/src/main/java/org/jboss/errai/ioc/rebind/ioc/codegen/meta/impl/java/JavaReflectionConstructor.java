@@ -1,9 +1,10 @@
-package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl;
+package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.JavaReflectionParameter;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaConstructor;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.AbstractMetaMember;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -43,7 +44,7 @@ public class JavaReflectionConstructor extends AbstractMetaMember implements Met
 
     public Annotation[] getAnnotations() {
         if (annotationsCache == null) {
-            annotationsCache = constructor.getAnnotations() ;
+            annotationsCache = constructor.getAnnotations();
         }
         return annotationsCache;
     }

@@ -1,4 +1,4 @@
-package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl;
+package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.gwt;
 
 import com.google.gwt.core.ext.typeinfo.JAbstractMethod;
 import com.google.gwt.core.ext.typeinfo.JParameter;

@@ -4,11 +4,10 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.HasScope;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Scope;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.GWTClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.JavaReflectionClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.gwt.GWTClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java.JavaReflectionClass;
 
 /**
- * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class StatementBuilder extends AbstractStatementBuilder {
