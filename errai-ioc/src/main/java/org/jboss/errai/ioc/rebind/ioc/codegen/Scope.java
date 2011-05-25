@@ -1,35 +1,41 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen;
 
-import com.google.common.collect.ArrayListMultimap;
+import java.util.LinkedList;
 
 /**
+ * This class represents a scope for variables used by {@link Statement}s. 
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class Scope {
-    protected ArrayListMultimap<String, Variable> scope = ArrayListMultimap.<String, Variable> create();
+    protected LinkedList<Variable> stack = new LinkedList<Variable>();
 
-    public void addVariable(String name, Variable var) {
-        scope.put(name, var);
+    public void pushVariable(Variable var) {
+        stack.addFirst(var);
+    }
+    
+    public Variable peekVariable() {
+        return stack.peekFirst();
     }
     
     public Variable getVariable(String name) {
-        Variable var = null;
-        if(!scope.get(name).isEmpty())
-            var = scope.get(name).get(0);
-        
-        return var;
+        Variable found = null;
+        for (Variable var : stack) {
+            if (var.getName().equals(name))
+                found = var;
+        }
+        return found;
     }
     
     public boolean containsVariable(String var) {
-        return scope.containsKey(var);
+        return getVariable(var)!=null;
     }
     
     public boolean containsVariable(Variable var) {
-        return scope.containsValue(var);
+        return stack.indexOf(var)!=-1;
     }
     
     public void merge(Scope scope) {
-        this.scope.putAll(scope.scope);
+        this.stack.addAll(stack.size(), scope.stack);
     }
 }

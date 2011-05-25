@@ -1,16 +1,19 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl;
 
-import com.google.gwt.core.ext.typeinfo.JConstructor;
-import com.google.gwt.core.ext.typeinfo.JField;
-import com.google.gwt.core.ext.typeinfo.JMethod;
-import com.google.gwt.core.ext.typeinfo.JType;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaConstructor;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
+import com.google.gwt.core.ext.typeinfo.JConstructor;
+import com.google.gwt.core.ext.typeinfo.JField;
+import com.google.gwt.core.ext.typeinfo.JMethod;
+import com.google.gwt.core.ext.typeinfo.JParameterizedType;
+import com.google.gwt.core.ext.typeinfo.JType;
 
 public class GWTClass extends AbstractMetaClass<JType> {
     private Annotation[] annotationsCache;
@@ -66,7 +69,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
 
     public MetaField getField(String name) {
         JField field = getEnclosedMetaObject().isClassOrInterface().getField(name);
-
+        
         if (field == null) {
             throw new RuntimeException("no such field: " + field);
         }
@@ -110,5 +113,14 @@ public class GWTClass extends AbstractMetaClass<JType> {
         }
 
         return annotationsCache;
+    }
+
+    public MetaClass[] getParameterizedTypes() {
+        MetaClass[] parameterizedTypes = new MetaClass[1];
+        JParameterizedType paramType = getEnclosedMetaObject().isParameterized();
+        if (paramType!=null) 
+            parameterizedTypes[0] = new GWTClass(paramType);
+        
+        return parameterizedTypes;
     }
 }
