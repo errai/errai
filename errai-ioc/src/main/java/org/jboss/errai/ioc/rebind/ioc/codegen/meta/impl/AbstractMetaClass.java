@@ -36,7 +36,7 @@ public abstract class AbstractMetaClass<T> implements MetaClass, HasAnnotations 
     protected static MetaConstructor _getConstructor(MetaConstructor[] constructors, MetaClass... parmTypes) {
         Outer:
         for (MetaConstructor constructor : constructors) {
-            if ( constructor.getParameters().length == parmTypes.length) {
+            if (constructor.getParameters().length == parmTypes.length) {
                 for (int i = 0; i < parmTypes.length; i++) {
                     if (!constructor.getParameters()[i].getType().equals(parmTypes[i])) {
                         continue Outer;
@@ -60,7 +60,7 @@ public abstract class AbstractMetaClass<T> implements MetaClass, HasAnnotations 
     public MetaMethod getDeclaredMethod(String name, MetaClass... parmTypes) {
         return _getMethod(getDeclaredMethods(), name, parmTypes);
     }
-    
+
     public MetaConstructor getConstructor(Class... parameters) {
         return _getConstructor(getConstructors(), InjectUtil.classToMeta(parameters));
     }
@@ -86,17 +86,21 @@ public abstract class AbstractMetaClass<T> implements MetaClass, HasAnnotations 
 
     private String hashString;
 
+    private String hashString() {
+        if (hashString == null) {
+            hashString = "MetaClass:" + getFullyQualifedName();
+        }
+        return hashString;
+    }
+
     @Override
     public boolean equals(Object o) {
-        return o instanceof MetaClass && hashString.equals("MetaClass:" + ((MetaClass) o).getFullyQualifedName());
+        return o instanceof MetaClass && hashString().equals("MetaClass:" + ((MetaClass) o).getFullyQualifedName());
     }
 
     @Override
     public int hashCode() {
-        if (hashString == null) {
-            hashString = "MetaClass:" + getFullyQualifedName();
-        }
-        return hashString.hashCode();
+        return hashString().hashCode();
     }
 
 
