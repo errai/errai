@@ -1,6 +1,5 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.control;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.Scope;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 
 /**
@@ -37,9 +36,5 @@ public class ForLoop extends AbstractBlockConditional {
                 .append("\n}\n");
 
         return builder.toString();
-    }
-
-    public Scope getScope() {
-        return null;
     }
 }

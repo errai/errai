@@ -1,7 +1,9 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.values;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Scope;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -25,5 +27,9 @@ public abstract class LiteralValue<T> implements Statement {
 
     public Scope getScope() {
         return null;
+    }
+    
+    public MetaClass getType() {
+        return MetaClassFactory.get(value.getClass());
     }
 }
