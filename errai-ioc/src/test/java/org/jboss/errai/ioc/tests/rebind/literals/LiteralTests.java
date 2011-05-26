@@ -53,5 +53,8 @@ public class LiteralTests extends TestCase {
         assertEquals(expected, LiteralFactory.getLiteral(input).generate());
     }
 
+    public void testClassLiteral() {
+        assertEquals("java.lang.String.class", LiteralFactory.getLiteral(String.class).generate());
+    }
 
 }
