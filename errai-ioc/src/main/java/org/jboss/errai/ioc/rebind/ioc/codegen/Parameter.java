@@ -18,4 +18,8 @@ public class Parameter extends AbstractStatement {
     public String generate() {
         return type.getFullyQualifedName() + " " + name;
     }
+
+    public MetaClass getType() {
+        return type;
+    }
 }

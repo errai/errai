@@ -22,7 +22,7 @@ public class StatementBuilder extends AbstractStatementBuilder {
     }
 
     public ScopedStatementBuilder loadVariable(String name, MetaClass type) {
-        scope.pushVariable(new Variable(name, type));
+        scope.push(new Variable(name, type));
         return ScopedStatementBuilder.createInScopeOf(this);
     }
 

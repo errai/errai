@@ -7,7 +7,7 @@ import java.util.List;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class BlockStatement extends AbstractStatement {
+public class BlockStatement extends AbstractStatement  {
     private List<Statement> statements = new ArrayList<Statement>();
     
     public BlockStatement addStatement(Statement statement) {
@@ -22,7 +22,7 @@ public class BlockStatement extends AbstractStatement {
             if(buf.length()!=0)
                 buf.append("\n");
             
-            buf.append(statement.generate());
+            buf.append(statement.generate()).append(";");
         }
         return buf.toString();
     }

@@ -3,6 +3,7 @@ package org.jboss.errai.ioc.tests.rebind;
 import static org.junit.Assert.fail;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.enterprise.util.TypeLiteral;
 
@@ -10,11 +11,10 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.TypeNotIterableException;
-import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedVariableException;
 import org.junit.Test;
 
 /**
- * Tests the generation of loops using our {@link StatementBuilder} API.
+ * Tests the generation of loops using the {@link StatementBuilder} API.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -56,7 +56,7 @@ public class LoopStatementBuilderTest extends AbstractStatementBuilderTest imple
     public void testForeachLoopWithProvidedLoopVarType() throws Exception {
         Statement loop = StatementBuilder.create()
             .loadVariable("list", new TypeLiteral<List<String>>(){})
-            .foreach("element", Object.class, "list");
+            .foreach("element", Object.class);
         
         assertEquals(FOREACH_RESULT_OBJECT_IN_LIST_EMPTY_BODY, loop.generate());
         
@@ -81,33 +81,11 @@ public class LoopStatementBuilderTest extends AbstractStatementBuilderTest imple
             .foreach("element")
             .execute(StatementBuilder.create()
                     .loadVariable("anotherList", new TypeLiteral<List<String>>(){})
-                    .foreach("anotherElement", "anotherList")
+                    .foreach("anotherElement")
                     .execute(createObject)
              );
                 
         assertEquals(FOREACH_RESULT_NESTED_STRING_IN_LIST, outerLoop.generate());
-    }
-    
-    @Test
-    public void testNestedForeachLoopsWithInvalidVariable() throws Exception {
-        Statement createObject = StatementBuilder.create().newObject(Integer.class);
-
-        // uses a not existing list in inner loop -> should fail with UndefinedVariableExcpetion
-        try {
-            StatementBuilder.create()
-                .loadVariable("list", List.class)
-                .foreach("element", "list")
-                .execute(StatementBuilder.create()
-                        .loadVariable("list2", new TypeLiteral<List<String>>(){})
-                        .foreach("element2", "listDoesNotExist")
-                        .execute(createObject)
-                 )
-                 .generate();
-
-            fail("Expected UndefinedVariableException");
-        } catch(UndefinedVariableException ude) {
-            // expected
-        }
     }
     
     @Test
@@ -123,5 +101,15 @@ public class LoopStatementBuilderTest extends AbstractStatementBuilderTest imple
         } catch(TypeNotIterableException tnie) {
             // expected
         }
+    }
+    
+    @Test
+    public void testForeachLoopWithInvoke() throws Exception {
+        Statement loop = StatementBuilder.create()
+            .loadVariable("map", Map.class)
+            .invoke("keySet")
+            .foreach("key");
+    
+        assertEquals(FOREACH_RESULT_KEYSET_LOOP, loop.generate());
     }
 }

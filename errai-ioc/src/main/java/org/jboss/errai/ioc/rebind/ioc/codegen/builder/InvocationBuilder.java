@@ -4,7 +4,6 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.CallParameters;
 import org.jboss.errai.ioc.rebind.ioc.codegen.HasScope;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Scope;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedMethodException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
@@ -14,9 +13,8 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class InvocationBuilder extends AbstractStatementBuilder implements Statement {
-
-    private Variable var;
+public class InvocationBuilder extends AbstractStatementBuilder {
+    private Statement statement;
     private MetaMethod method;
     private CallParameters parameters;
     
@@ -28,25 +26,26 @@ public class InvocationBuilder extends AbstractStatementBuilder implements State
         return new InvocationBuilder(parent.getScope());
     }
 
-    public InvocationBuilder invoke(String methodName, Variable... parameters) {
-        this.var = scope.peekVariable();
-       
+    public ScopedStatementBuilder invoke(String methodName, Statement... parameters) {
+        this.statement = scope.peek();
+        this.parameters = CallParameters.fromStatements(parameters);
+        
         MetaClass[] parameterTypes = new MetaClass[parameters.length];
         for (int i=0; i<parameters.length; i++) {
+            // TODO assertInScope(parameters[i]);
             parameterTypes[i] = parameters[i].getType();
         }
         
-        this.method = var.getType().getDeclaredMethod(methodName, parameterTypes);
+        this.method = statement.getType().getDeclaredMethod(methodName, parameterTypes);
         if (method == null) 
             throw new UndefinedMethodException(methodName, parameterTypes);
 
-        this.parameters = CallParameters.fromStatements(parameters);
-        return this;
+        buf.append(statement.generate()).append(".").append(method.getName()).append(this.parameters.generate());
+        scope.push(this);
+        return ScopedStatementBuilder.createInScopeOf(this);
     }
     
-    public String generate() {
-        StringBuilder buf = new StringBuilder();
-        buf.append(var.getName()).append(".").append(method.getName()).append(parameters.generate());
-        return buf.toString();
+    public MetaClass getType() {
+        return method.getReturnType();
     }
 }

@@ -8,7 +8,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class Variable implements Statement {
+public class Variable extends AbstractStatement {
     private String name;
     private MetaClass type;
 
@@ -67,10 +67,6 @@ public class Variable implements Statement {
     @Override
     public String toString() {
         return "Variable [name=" + name + ", type=" + type + "]";
-    }
-
-    public Scope getScope() {
-        return null;
     }
 
     public String generate() {

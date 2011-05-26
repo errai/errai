@@ -10,17 +10,37 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedMethodException
 import org.junit.Test;
 
 /**
+ * Tests for the {@link StatementBuilder} API.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class StatementBuilderTest {
+public class StatementBuilderTest extends AbstractStatementBuilderTest {
 
     @Test
     public void testInvoke() {
+      /*  try {
+            StatementBuilder.create()
+                .loadVariable("injector", MessageBusProvider.class)
+                .invoke("provide", Variable.get("param", String.class), Variable.get("param2", Integer.class));
+            fail("expected UndefinedVariableException");
+        } catch(UndefinedVariableException udve) {
+            //expected
+        } */
+
         try {
             StatementBuilder.create()
-                    .loadVariable("injector", MessageBusProvider.class)
-                    .invoke("provide", Variable.get("param", String.class), Variable.get("param2", Integer.class));
+                .loadVariable("injector", MessageBusProvider.class)
+                .invoke("provide", Variable.get("param", String.class));
+            fail("expected UndefinedMethodException");
+        } catch(UndefinedMethodException udme) {
+            //expected
+        } 
+
+        try {
+            StatementBuilder.create()
+                .loadVariable("s", String.class)
+                .invoke("replaceAll", Variable.get("regex", String.class), Variable.get("replacement", String.class))
+                .invoke("idontexist", Variable.get("regex", String.class), Variable.get("replacement", String.class));
             fail("expected UndefinedMethodException");
         } catch(UndefinedMethodException udme) {
             //expected
@@ -30,12 +50,13 @@ public class StatementBuilderTest {
             .loadVariable("injector", MessageBusProvider.class)
             .invoke("provide");
         
-        System.out.println(invokeStatement.generate());
+        assertEquals("injector.provide()", invokeStatement.generate());
         
-        Statement invokeStatement2 = StatementBuilder.create()
-            .loadVariable("s", String.class)
+        invokeStatement = StatementBuilder.create()
+            .loadVariable("i", Integer.class)
+            .invoke("toString")
             .invoke("replaceAll", Variable.get("regex", String.class), Variable.get("replacement", String.class));
-    
-        System.out.println(invokeStatement2.generate());
+        
+        assertEquals("i.toString().replaceAll(regex, replacement)", invokeStatement.generate());
     }
 }

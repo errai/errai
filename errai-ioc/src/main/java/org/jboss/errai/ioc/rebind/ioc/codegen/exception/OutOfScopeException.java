@@ -4,14 +4,14 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.exception;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class UndefinedVariableException extends RuntimeException {
+public class OutOfScopeException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
-    public UndefinedVariableException() {
+    public OutOfScopeException() {
         super();
     }
 
-    public UndefinedVariableException(String msg) {
+    public OutOfScopeException(String msg) {
         super(msg);
     }
 }

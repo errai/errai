@@ -1,49 +1,45 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.HasScope;
+import org.jboss.errai.ioc.rebind.ioc.codegen.AbstractStatement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Scope;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
+import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.TypeNotIterableException;
-import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedVariableException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public abstract class AbstractStatementBuilder implements HasScope {
+public abstract class AbstractStatementBuilder extends AbstractStatement {
+    protected StringBuilder buf = new StringBuilder();
     protected Scope scope = null;
 
     protected AbstractStatementBuilder(Scope scope) {
         this.scope = scope;
     }
 
-    protected void assertVariableInScope(String varName) {
-        if (varName == null || !scope.containsVariable(varName))
-            throw new UndefinedVariableException("Variable:" + varName);
+    protected void assertInScope(Statement statement) {
+        if (!scope.contains(statement))
+            throw new OutOfScopeException(statement.generate());
     }
 
-    protected void assertVariableInScope(Variable var) {
-        if (var == null || !scope.containsVariable(var))
-            throw new UndefinedVariableException("Variable:" + var);
-    }
-
-    protected void assertVariableIsIterable(Variable var) {
+    protected void assertIsIterable(Statement statement) {
         try {
-            Class<?> cls = Class.forName(var.getType().getFullyQualifedName(), false,
+            Class<?> cls = Class.forName(statement.getType().getFullyQualifedName(), false,
                     Thread.currentThread().getContextClassLoader());
 
             if (!cls.isArray() && !Iterable.class.isAssignableFrom(cls))
-                throw new TypeNotIterableException("Variable:" + var);
+                throw new TypeNotIterableException(statement.generate());
         } catch (ClassNotFoundException e) {
             throw new IllegalArgumentException(e);
         }
     }
 
-    protected MetaClass getVariableComponentType(Variable var) {
+    protected MetaClass getComponentType(Statement statement) {
         try {
-            Class<?> cls = Class.forName(var.getType().getFullyQualifedName(), false,
+            Class<?> cls = Class.forName(statement.getType().getFullyQualifedName(), false,
                     Thread.currentThread().getContextClassLoader());
 
             if (cls.getComponentType() != null)
@@ -74,5 +70,12 @@ public abstract class AbstractStatementBuilder implements HasScope {
 
     public Scope getScope() {
         return scope;
+    }
+    
+    public String generate() {
+        if(buf.length()==0) 
+            return scope.peek().generate();
+        
+        return buf.toString();
     }
 }

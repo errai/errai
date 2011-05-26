@@ -8,9 +8,9 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class LoopBuilder extends AbstractStatementBuilder implements Statement {
+public class LoopBuilder extends AbstractStatementBuilder {
 
-    public class LoopBodyBuilder extends AbstractStatementBuilder implements Statement {
+    public class LoopBodyBuilder extends AbstractStatementBuilder {
         private BlockStatement blockStatement = null;
 
         private LoopBodyBuilder(BlockStatement blockStatement) {
@@ -27,7 +27,7 @@ public class LoopBuilder extends AbstractStatementBuilder implements Statement {
         public String generate() {
             return LoopBuilder.this.generate();
         }
-
+        
         public Scope getScope() {
             return scope;
         }
@@ -36,7 +36,7 @@ public class LoopBuilder extends AbstractStatementBuilder implements Statement {
     private String loopVarName;
     private MetaClass loopVarType;
     private Variable loopVar;
-    private Variable collectionVar;
+    private Statement collectionVar;
     private BlockStatement body;
 
     private LoopBuilder(Scope scope) {
@@ -52,22 +52,15 @@ public class LoopBuilder extends AbstractStatementBuilder implements Statement {
     }
 
     public LoopBodyBuilder foreach(String loopVarName) {
-        return foreach(loopVarName, scope.peekVariable().getName());
+        return foreach(loopVarName, null);
     }
 
     public LoopBodyBuilder foreach(String loopVarName, MetaClass loopVarType) {
-        return foreach(loopVarName, loopVarType, scope.peekVariable().getName());
+        return foreach(loopVarName, loopVarType, scope.peek());
     }
 
-    public LoopBodyBuilder foreach(String loopVarName, String collectionVarName) {
-        return foreach(loopVarName, null, collectionVarName);
-    }
-
-    public LoopBodyBuilder foreach(String loopVarName, MetaClass loopVarType, String collectionVarName) {
-        assertVariableInScope(collectionVarName);
-        
-        Variable collectionVar = scope.getVariable(collectionVarName);
-        assertVariableIsIterable(collectionVar);
+    private LoopBodyBuilder foreach(String loopVarName, MetaClass loopVarType, Statement collectionVar) {
+        assertIsIterable(collectionVar);
 
         this.collectionVar = collectionVar;
         this.loopVarName = loopVarName;
@@ -75,15 +68,15 @@ public class LoopBuilder extends AbstractStatementBuilder implements Statement {
         this.loopVar = createLoopVar(collectionVar);
         return new LoopBodyBuilder(body = new BlockStatement());
     }
-
-    private Variable createLoopVar(Variable collectionVar) {
+    
+    private Variable createLoopVar(Statement collectionVar) {
 
         // infer the loop variable type
         MetaClass loopVarType = MetaClassFactory.get(Object.class);
         if (collectionVar.getType().getParameterizedTypes().length > 0) {
             loopVarType = collectionVar.getType().getParameterizedTypes()[0];
-        } else if (getVariableComponentType(collectionVar) != null) {
-            loopVarType = getVariableComponentType(collectionVar);
+        } else if (getComponentType(collectionVar) != null) {
+            loopVarType = getComponentType(collectionVar);
         }
 
         // try to use the provided loop var type if possible (assignable from the inferred type)
@@ -93,16 +86,15 @@ public class LoopBuilder extends AbstractStatementBuilder implements Statement {
         }
 
         Variable loopVar = new Variable(this.loopVarName, loopVarType);
-        scope.pushVariable(loopVar);
+        scope.push(loopVar);
         return loopVar;
     }
 
     public String generate() {
-        StringBuilder buf = new StringBuilder();
         buf.append("for (").append(loopVar.getType().getFullyQualifedName()).append(" ").append(loopVar.getName())
-            .append(" : ").append(collectionVar.getName()).append(") {")
+            .append(" : ").append(collectionVar.generate()).append(") {")
                 .append("\n\t").append(body.generate().replaceAll("\n", "\n\t"))
-            .append("\n};");
+            .append("\n}");
 
         return buf.toString();
     }
