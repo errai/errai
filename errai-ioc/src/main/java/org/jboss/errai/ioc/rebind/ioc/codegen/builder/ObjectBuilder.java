@@ -39,7 +39,7 @@ public class ObjectBuilder extends AbstractStatement {
     }
 
     public ObjectBuilder withParameters(CallParameters parameters) {
-        buf.append(parameters.generate()).append(";");
+        buf.append(parameters.generate());
         buildState |= CONSTRUCT_STATEMENT_COMPLETE;
         return this;
     }

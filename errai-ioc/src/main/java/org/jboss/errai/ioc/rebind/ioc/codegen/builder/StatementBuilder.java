@@ -1,13 +1,12 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.HasScope;
+import javax.enterprise.util.TypeLiteral;
+
 import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Scope;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java.JavaReflectionClass;
-
-import javax.enterprise.util.TypeLiteral;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -20,10 +19,6 @@ public class StatementBuilder extends AbstractStatementBuilder {
 
     public static StatementBuilder create() {
         return new StatementBuilder(new Scope());
-    }
-
-    public static StatementBuilder createInScopeOf(HasScope parent) {
-        return new StatementBuilder(parent.getScope());
     }
 
     public ScopedStatementBuilder loadVariable(String name, MetaClass type) {

@@ -3,6 +3,7 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.HasScope;
 import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Scope;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.LoopBuilder.LoopBodyBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
@@ -39,7 +40,11 @@ public class ScopedStatementBuilder extends AbstractStatementBuilder {
         return LoopBuilder.createInScopeOf(this).foreach(loopVarName, loopVarType, collectionVarName);
     }
     
-    public LoopBodyBuilder foreach(String loopVarName, Class<?> loopVarType, String sequenceVarName) {
-        return foreach(loopVarName, MetaClassFactory.get(loopVarType), sequenceVarName);
+    public LoopBodyBuilder foreach(String loopVarName, Class<?> loopVarType, String collectionVarName) {
+        return foreach(loopVarName, MetaClassFactory.get(loopVarType), collectionVarName);
+    }
+    
+    public InvocationBuilder invoke(String methodName, Variable... parameters) {
+        return InvocationBuilder.createInScopeOf(this).invoke(methodName, parameters);
     }
 }

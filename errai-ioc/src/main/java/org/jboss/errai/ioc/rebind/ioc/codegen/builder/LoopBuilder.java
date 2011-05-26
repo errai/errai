@@ -4,6 +4,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
+ * StatementBuilder to generate loops.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -83,16 +84,15 @@ public class LoopBuilder extends AbstractStatementBuilder implements Statement {
             loopVarType = collectionVar.getType().getParameterizedTypes()[0];
         } else if (getVariableComponentType(collectionVar) != null) {
             loopVarType = getVariableComponentType(collectionVar);
-
         }
 
-        // try the use the provided loop var type if possible
+        // try to use the provided loop var type if possible (assignable from the inferred type)
         if (this.loopVarType != null) {
             assertAssignableTypes(loopVarType, this.loopVarType);
             loopVarType = this.loopVarType;
         }
 
-        Variable loopVar = new Variable(loopVarName, loopVarType);
+        Variable loopVar = new Variable(this.loopVarName, loopVarType);
         scope.pushVariable(loopVar);
         return loopVar;
     }

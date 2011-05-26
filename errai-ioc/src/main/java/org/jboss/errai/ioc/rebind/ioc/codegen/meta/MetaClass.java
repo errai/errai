@@ -12,6 +12,8 @@ public interface MetaClass extends HasAnnotations {
     public MetaMethod getMethod(String name, Class... parameters);
 
     public MetaMethod getDeclaredMethod(String name, Class... parameters);
+    
+    public MetaMethod getDeclaredMethod(String name, MetaClass... parameters);
 
     public MetaField[] getFields();
 

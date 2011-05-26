@@ -57,6 +57,10 @@ public abstract class AbstractMetaClass<T> implements MetaClass, HasAnnotations 
         return _getMethod(getDeclaredMethods(), name, InjectUtil.classToMeta(parmTypes));
     }
 
+    public MetaMethod getDeclaredMethod(String name, MetaClass... parmTypes) {
+        return _getMethod(getDeclaredMethods(), name, parmTypes);
+    }
+    
     public MetaConstructor getConstructor(Class... parameters) {
         return _getConstructor(getConstructors(), InjectUtil.classToMeta(parameters));
     }
