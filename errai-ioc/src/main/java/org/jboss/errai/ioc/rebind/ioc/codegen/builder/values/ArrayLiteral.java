@@ -33,7 +33,7 @@ public class ArrayLiteral extends LiteralValue<Object> {
         for (int i = 0; i < dimensions; i++) {
             buf.append("[]");
         }
-
+        buf.append(" ");
         buf.append(renderInlineArrayLiteral(getValue()));
 
         return buf.toString();
@@ -59,6 +59,6 @@ public class ArrayLiteral extends LiteralValue<Object> {
             }
         }
 
-        return builder.toString();
+        return builder.append("}").toString();
     }
 }

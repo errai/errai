@@ -30,6 +30,6 @@ public class StringLiteral extends LiteralValue<String> {
                     builder.append(c);
             }
         }
-        return builder.toString();
+        return builder.append("\"").toString();
     }
 }
