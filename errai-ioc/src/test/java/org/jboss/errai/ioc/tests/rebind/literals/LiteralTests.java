@@ -29,7 +29,7 @@ public class LiteralTests extends TestCase {
     }
 
     public void testByteLiteral() {
-        assertEquals("12345", LiteralFactory.getLiteral((byte) 12345).generate());
+        assertEquals("72", LiteralFactory.getLiteral((byte) 72).generate());
     }
 
     public void testBooleanLiteral() {
