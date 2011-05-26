@@ -27,12 +27,16 @@ public class ScopedStatementBuilder extends AbstractStatementBuilder {
     public LoopBodyBuilder foreach(String loopVarName, Class<?> loopVarType) {
         return foreach(loopVarName, MetaClassFactory.get(loopVarType));
     }
-    
+
     public LoopBodyBuilder foreach(String loopVarName, MetaClass loopVarType) {
         return LoopBuilder.createInScopeOf(this).foreach(loopVarName, loopVarType);
     }
-    
+
     public ScopedStatementBuilder invoke(String methodName, Variable... parameters) {
+        return InvocationBuilder.createInScopeOf(this).invoke(methodName, parameters);
+    }
+
+    public ScopedStatementBuilder invoke(String methodName, Object... parameters) {
         return InvocationBuilder.createInScopeOf(this).invoke(methodName, parameters);
     }
 }
