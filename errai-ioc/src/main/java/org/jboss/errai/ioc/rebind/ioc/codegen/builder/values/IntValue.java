@@ -5,7 +5,7 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder.values;
  */
 public class IntValue extends LiteralValue<Integer> {
 
-    public IntValue(int value) {
+    public IntValue(Integer value) {
         super(value);
     }
 

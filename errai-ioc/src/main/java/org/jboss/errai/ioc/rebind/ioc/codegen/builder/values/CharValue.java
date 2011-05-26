@@ -5,7 +5,7 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder.values;
  */
 public class CharValue extends LiteralValue<Character> {
 
-    public CharValue(char value) {
+    public CharValue(Character value) {
         super(value);
     }
 

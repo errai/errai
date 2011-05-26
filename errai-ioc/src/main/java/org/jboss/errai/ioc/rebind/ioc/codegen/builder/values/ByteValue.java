@@ -5,8 +5,12 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder.values;
  */
 public class ByteValue extends LiteralValue<Byte> {
 
-    public ByteValue(int value) {
-        super(new Integer(value).byteValue());
+    public ByteValue(Byte value) {
+        super(value);
+    }
+
+    public ByteValue(Integer value) {
+        super(value.byteValue());
     }
 
     @Override

@@ -5,7 +5,7 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder.values;
  */
 public class DoubleValue extends LiteralValue<Double> {
 
-    public DoubleValue(double value) {
+    public DoubleValue(Double value) {
         super(value);
     }
 

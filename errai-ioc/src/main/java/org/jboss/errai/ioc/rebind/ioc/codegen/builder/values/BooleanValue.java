@@ -5,7 +5,7 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder.values;
  */
 public class BooleanValue extends LiteralValue<Boolean> {
 
-    public BooleanValue(boolean value) {
+    public BooleanValue(Boolean value) {
         super(value);
     }
 

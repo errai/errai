@@ -5,7 +5,7 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder.values;
  */
 public class LongValue extends LiteralValue<Long> {
 
-    public LongValue(long value) {
+    public LongValue(Long value) {
         super(value);
     }
 
