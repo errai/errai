@@ -58,6 +58,4 @@ public class GWTConstructor extends AbstractMetaMember implements MetaConstructo
     public Annotation[] getAnnotations() {
         return annotations;
     }
-
-
 }
