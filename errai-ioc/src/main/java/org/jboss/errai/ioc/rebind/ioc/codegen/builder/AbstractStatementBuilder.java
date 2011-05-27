@@ -1,11 +1,10 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.AbstractStatement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
-import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.TypeNotIterableException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
@@ -18,11 +17,6 @@ public abstract class AbstractStatementBuilder extends AbstractStatement {
 
     protected AbstractStatementBuilder(Context scope) {
         this.context = scope;
-    }
-
-    protected void assertInScope(Statement statement) {
-        if (!context.contains(statement))
-            throw new OutOfScopeException(statement.generate());
     }
 
     protected void assertIsIterable(Statement statement) {

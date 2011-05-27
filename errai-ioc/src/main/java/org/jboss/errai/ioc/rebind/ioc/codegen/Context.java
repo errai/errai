@@ -14,7 +14,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
  */
 public class Context {
     protected LinkedList<Statement> stack = new LinkedList<Statement>();
-
+    
     private Context() {}
     
     public static Context create() {
@@ -22,17 +22,17 @@ public class Context {
     }
     
     public Context push(Statement statement) {
-        stack.addFirst(statement);
+        stack.push(statement);
         return this;
     }
     
     public Context push(Object object) {
-        stack.addFirst(LiteralFactory.getLiteral(object));
+        stack.push(LiteralFactory.getLiteral(object));
         return this;
     }
     
     public Statement peek() {
-        return stack.peekFirst();
+        return stack.peek();
     }
     
     public boolean contains(Statement var) {

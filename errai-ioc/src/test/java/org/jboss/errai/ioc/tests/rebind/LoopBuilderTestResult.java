@@ -9,6 +9,10 @@ public interface LoopBuilderTestResult {
 
     public static final String FOREACH_RESULT_STRING_IN_LIST = 
         "for (java.lang.String element : list) {" +
+        "\n}";
+
+    public static final String FOREACH_RESULT_STRING_IN_LIST_ONE_STATEMENT = 
+        "for (java.lang.String element : list) {" +
             "\nnew java.lang.String();" + 
         "\n}";
     
@@ -18,7 +22,7 @@ public interface LoopBuilderTestResult {
             "\nnew java.lang.Object();" + 
         "\n}";
     
-    public static final String FOREACH_RESULT_OBJECT_IN_LIST_EMPTY_BODY = 
+    public static final String FOREACH_RESULT_OBJECT_IN_LIST = 
         "for (java.lang.Object element : list) {" +
         "\n}";
     
@@ -31,5 +35,10 @@ public interface LoopBuilderTestResult {
     
     public static final String FOREACH_RESULT_KEYSET_LOOP = 
         "for (java.lang.Object key : map.keySet()) {" +
+        "\n}";  
+    
+    public static final String FOREACH_RESULT_LITERAL_STRING_ARRAY = 
+        "for (java.lang.String s : new java.lang.String[] {\"s1\", \"s2\"}) {" +
+            "\ns.getBytes();" +
         "\n}";  
 }
