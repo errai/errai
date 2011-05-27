@@ -13,7 +13,6 @@ public class ContextualStatementBuilder extends AbstractStatementBuilder {
     private ContextualStatementBuilder(AbstractStatementBuilder parent) {
         super(parent.context);
         this.statement = parent.statement;
-        this.parent = parent;
     }
 
     public static ContextualStatementBuilder createInContextOf(AbstractStatementBuilder parent) {
