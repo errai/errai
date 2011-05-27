@@ -2,6 +2,9 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder.values;
 
 
 /**
+ * The literal factory provides a LiteralValue for
+ * the specified object (if possible).
+ *
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class LiteralFactory {
@@ -35,5 +38,4 @@ public class LiteralFactory {
                     + o.getClass().getName());
         }
     }
-
 }

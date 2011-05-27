@@ -62,6 +62,10 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
 
     @Test
     public void testCallLiterals() {
-        System.out.println(StatementBuilder.create().loadVariable("s", String.class).invoke("replaceAll", "foo", "foo\t\n").generate());
+        final String expected = "s.replaceAll(\"foo\", \"foo\\t\\n\")";
+        final String result = StatementBuilder.create()
+                .loadVariable("s", String.class).invoke("replaceAll", "foo", "foo\t\n").generate();
+
+        assertEquals(expected, result);
     }
 }
