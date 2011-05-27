@@ -1,7 +1,6 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.values.LiteralFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java.JavaReflectionClass;
@@ -24,13 +23,12 @@ public class StatementBuilder extends AbstractStatementBuilder {
     }
     
     public ContextualStatementBuilder loadVariable(String name) {
-        Variable var = context.getVariable(name);
-        context.push(var);
+        context.setStatement(context.getVariable(name));
         return ContextualStatementBuilder.createInContextOf(this);
     }
     
     public ContextualStatementBuilder loadLiteral(Object o) {
-        context.push(LiteralFactory.getLiteral(o));
+        context.setStatement(LiteralFactory.getLiteral(o));
         return ContextualStatementBuilder.createInContextOf(this);
     }
 

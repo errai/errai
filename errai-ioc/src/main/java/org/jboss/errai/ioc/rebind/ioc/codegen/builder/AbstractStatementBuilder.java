@@ -15,8 +15,8 @@ public abstract class AbstractStatementBuilder extends AbstractStatement {
     protected StringBuilder buf = new StringBuilder();
     protected Context context = null;
 
-    protected AbstractStatementBuilder(Context scope) {
-        this.context = scope;
+    protected AbstractStatementBuilder(Context context) {
+        this.context = context;
     }
 
     protected void assertIsIterable(Statement statement) {
@@ -68,7 +68,7 @@ public abstract class AbstractStatementBuilder extends AbstractStatement {
     
     public String generate() {
         if(buf.length()==0) 
-            return context.peek().generate();
+            return context.getStatement().generate();
         
         return buf.toString();
     }

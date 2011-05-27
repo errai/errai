@@ -17,7 +17,7 @@ public class ContextualStatementBuilder extends AbstractStatementBuilder {
     }
 
     public static ContextualStatementBuilder createInContextOf(Statement parent) {
-        return new ContextualStatementBuilder(parent.getContext());
+        return new ContextualStatementBuilder(Context.create(parent.getContext()));
     }
 
     public LoopBodyBuilder foreach(String loopVarName) {

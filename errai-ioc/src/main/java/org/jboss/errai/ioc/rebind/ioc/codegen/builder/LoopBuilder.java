@@ -25,7 +25,6 @@ public class LoopBuilder extends AbstractStatementBuilder {
 
         public LoopBodyBuilder execute(Statement statement) {
             blockStatement.addStatement(statement);
-            statement.getContext().merge(context);
             return this;
         }
 
@@ -45,7 +44,7 @@ public class LoopBuilder extends AbstractStatementBuilder {
     }
 
     public static LoopBuilder createInContextOf(Statement parent) {
-        return new LoopBuilder(parent.getContext());
+        return new LoopBuilder(Context.create(parent.getContext()));
     }
 
     public LoopBodyBuilder foreach(String loopVarName) {
@@ -53,7 +52,7 @@ public class LoopBuilder extends AbstractStatementBuilder {
     }
 
     public LoopBodyBuilder foreach(String loopVarName, MetaClass loopVarType) {
-        return foreach(loopVarName, loopVarType, context.peek());
+        return foreach(loopVarName, loopVarType, context.getStatement());
     }
 
     private LoopBodyBuilder foreach(String loopVarName, MetaClass loopVarType, Statement collection) {
@@ -83,7 +82,7 @@ public class LoopBuilder extends AbstractStatementBuilder {
         }
 
         Variable loopVar = Variable.get(loopVarName, loopVarType);
-        context.push(loopVar);
+        context.add(loopVar);
         return loopVar;
     }
 

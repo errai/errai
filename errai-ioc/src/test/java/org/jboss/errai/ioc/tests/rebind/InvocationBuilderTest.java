@@ -22,15 +22,15 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
     @Test
     public void testInvoke() {
         Statement invokeStatement = StatementBuilder.create(
-                    Context.create().push(Variable.get("injector", MessageBusProvider.class)))
+                    Context.create().add(Variable.get("injector", MessageBusProvider.class)))
                 .loadVariable("injector")
                 .invoke("provide");
         assertEquals("injector.provide()", invokeStatement.generate());
 
         invokeStatement = StatementBuilder.create(Context.create()
-                    .push(Variable.get("i", Integer.class))
-                    .push(Variable.get("regex", String.class))
-                    .push(Variable.get("replacement", String.class)))
+                    .add(Variable.get("i", Integer.class))
+                    .add(Variable.get("regex", String.class))
+                    .add(Variable.get("replacement", String.class)))
                 .loadVariable("i")
                 .invoke("toString")
                 .invoke("replaceAll", Variable.get("regex"), Variable.get("replacement"));
@@ -39,7 +39,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
 
     @Test
     public void testInvokeWithLiterals() {
-        String result = StatementBuilder.create(Context.create().push(Variable.get("s", String.class)))
+        String result = StatementBuilder.create(Context.create().add(Variable.get("s", String.class)))
                 .loadVariable("s").invoke("replaceAll", "foo", "foo\t\n").generate();
 
         assertEquals("s.replaceAll(\"foo\", \"foo\\t\\n\")", result);
@@ -53,8 +53,8 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
         try {
             StatementBuilder.create(
                     Context.create()
-                        .push(Variable.get("injector", MessageBusProvider.class))
-                        .push(Variable.get("param", String.class)))
+                        .add(Variable.get("injector", MessageBusProvider.class))
+                        .add(Variable.get("param", String.class)))
                 .loadVariable("injector")
                 .invoke("provide", Variable.get("param"));
             fail("expected UndefinedMethodException");
@@ -64,9 +64,9 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
 
         try {
             Context context = Context.create()
-                .push(Variable.get("s", String.class))
-                .push(Variable.get("regex", String.class))
-                .push(Variable.get("replacement", String.class));
+                .add(Variable.get("s", String.class))
+                .add(Variable.get("regex", String.class))
+                .add(Variable.get("replacement", String.class));
             
             StatementBuilder.create(context)
                 .loadVariable("s")
@@ -94,8 +94,8 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
         try {
             // param2 undefined
             StatementBuilder.create(Context.create()
-                    .push(Variable.get("injector", MessageBusProvider.class))
-                    .push(Variable.get("param", String.class)))
+                    .add(Variable.get("injector", MessageBusProvider.class))
+                    .add(Variable.get("param", String.class)))
                 .loadVariable("injector")
                 .invoke("provide", Variable.get("param"), Variable.get("param2"));
             fail("expected OutOfScopeException");

@@ -33,20 +33,20 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
             .newObject(Object.class);
 
         String foreachWithListOfStrings = StatementBuilder.create(
-                Context.create().push(Variable.get("list", new TypeLiteral<List<String>>(){})))
+                Context.create().add(Variable.get("list", new TypeLiteral<List<String>>(){})))
             .loadVariable("list")
             .foreach("element")
             .generate();
          
         String foreachWithStringArray = StatementBuilder.create(
-                Context.create().push(Variable.get("list", String[].class)))
+                Context.create().add(Variable.get("list", String[].class)))
             .loadVariable("list")
             .foreach("element")
             .execute(createObject)
             .generate();
             
         String foreachWithList = StatementBuilder.create(
-                Context.create().push(Variable.get("list", List.class)))
+                Context.create().add(Variable.get("list", List.class)))
             .loadVariable("list")
             .foreach("element")
             .execute(createObject)
@@ -76,7 +76,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
     @Test
     public void testForeachLoopWithProvidedLoopVarType() throws Exception {
         Statement loop = StatementBuilder.create(
-                Context.create().push(Variable.get("list", new TypeLiteral<List<String>>(){})))
+                Context.create().add(Variable.get("list", new TypeLiteral<List<String>>(){})))
             .loadVariable("list")
             .foreach("element", Object.class);
         
@@ -84,7 +84,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         
         try {
             StatementBuilder.create(
-                    Context.create().push(Variable.get("list", new TypeLiteral<List<String>>(){})))
+                    Context.create().add(Variable.get("list", new TypeLiteral<List<String>>(){})))
                 .loadVariable("list")
                 .foreach("element", Integer.class)
                 .generate();
@@ -100,11 +100,11 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         Statement createObject = StatementBuilder.create().newObject(Integer.class);
 
         Statement outerLoop = StatementBuilder.create(
-                Context.create().push(Variable.get("list", new TypeLiteral<List<String>>(){})))
+                Context.create().add(Variable.get("list", new TypeLiteral<List<String>>(){})))
             .loadVariable("list")
             .foreach("element")
             .execute(StatementBuilder.create(
-                        Context.create().push(Variable.get("anotherList", new TypeLiteral<List<String>>(){})))
+                        Context.create().add(Variable.get("anotherList", new TypeLiteral<List<String>>(){})))
                     .loadVariable("anotherList")
                     .foreach("anotherElement")
                     .execute(createObject)
@@ -118,7 +118,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         
         try {
             StatementBuilder.create(
-                    Context.create().push(Variable.get("list", String.class)))
+                    Context.create().add(Variable.get("list", String.class)))
                 .loadVariable("list")
                 .foreach("element")
                 .generate();
@@ -132,7 +132,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
     @Test
     public void testForeachLoopWithInvoke() throws Exception {
         Statement loop = StatementBuilder.create(
-                Context.create().push(Variable.get("map", Map.class)))
+                Context.create().add(Variable.get("map", Map.class)))
             .loadVariable("map")
             .invoke("keySet")
             .foreach("key");
@@ -151,7 +151,6 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         
         Statement loop = loopBody.execute(body);
 
-        System.out.println(loop.generate());
         assertEquals(FOREACH_RESULT_LITERAL_STRING_ARRAY, loop.generate());
     }
 }
