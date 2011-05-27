@@ -142,15 +142,20 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
     
     @Test
     public void testForeachLoopWithLiterals() throws Exception {
-        
         LoopBodyBuilder loopBody = StatementBuilder.create()
             .loadLiteral(new String[]{"s1","s2"})
             .foreach("s");
         
         Statement body = StatementBuilder.create(loopBody.getContext()).loadVariable("s").invoke("getBytes");
-        
         Statement loop = loopBody.execute(body);
-
+        assertEquals(FOREACH_RESULT_LITERAL_STRING_ARRAY, loop.generate());
+        
+        Context c = Context.create().add(Variable.get("s", String.class));
+        loop = StatementBuilder.create(c)
+                .loadLiteral(new String[]{"s1","s2"})
+                .foreach("s")
+                .execute(StatementBuilder.create(c).loadVariable("s").invoke("getBytes"));
+    
         assertEquals(FOREACH_RESULT_LITERAL_STRING_ARRAY, loop.generate());
     }
 }
