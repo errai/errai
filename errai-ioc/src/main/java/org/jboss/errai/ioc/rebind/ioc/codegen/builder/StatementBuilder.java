@@ -1,10 +1,8 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
-import javax.enterprise.util.TypeLiteral;
-
-import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.values.LiteralFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java.JavaReflectionClass;
 
@@ -25,18 +23,14 @@ public class StatementBuilder extends AbstractStatementBuilder {
         return new StatementBuilder(context);
     }
     
-    public ContextualStatementBuilder loadVariable(String name, Class type) {
-        return loadVariable(name, MetaClassFactory.get(type));
-    }
-
-    public ContextualStatementBuilder loadVariable(String name, TypeLiteral literal) {
-        return loadVariable(name, MetaClassFactory.get(literal));
-    }
-
-    public ContextualStatementBuilder loadVariable(String name, MetaClass type) {
-        Variable var = Variable.get(name, type);
-        assertInScope(var);
+    public ContextualStatementBuilder loadVariable(String name) {
+        Variable var = context.getVariable(name);
         context.push(var);
+        return ContextualStatementBuilder.createInContextOf(this);
+    }
+    
+    public ContextualStatementBuilder loadLiteral(Object o) {
+        context.push(LiteralFactory.getLiteral(o));
         return ContextualStatementBuilder.createInContextOf(this);
     }
 

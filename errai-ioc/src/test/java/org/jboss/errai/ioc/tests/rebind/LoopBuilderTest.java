@@ -33,21 +33,21 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
 
         String foreachWithListOfStrings = StatementBuilder.create(
                 Context.create().push(Variable.get("list", new TypeLiteral<List<String>>(){})))
-            .loadVariable("list", new TypeLiteral<List<String>>(){})
+            .loadVariable("list")
             .foreach("element")
             .execute(createObject)
             .generate();
          
         String foreachWithStringArray = StatementBuilder.create(
                 Context.create().push(Variable.get("list", String[].class)))
-            .loadVariable("list", String[].class)
+            .loadVariable("list")
             .foreach("element")
             .execute(createObject)
             .generate();
             
         String foreachWithList = StatementBuilder.create(
                 Context.create().push(Variable.get("list", List.class)))
-            .loadVariable("list", List.class)
+            .loadVariable("list")
             .foreach("element")
             .execute(createObject)
             .execute(createAnotherObject)
@@ -64,7 +64,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
       
         try {
             StatementBuilder.create()
-                .loadVariable("list", new TypeLiteral<List<String>>(){})
+                .loadVariable("list")
                 .foreach("element", Integer.class)
                 .generate();
   
@@ -78,7 +78,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
     public void testForeachLoopWithProvidedLoopVarType() throws Exception {
         Statement loop = StatementBuilder.create(
                 Context.create().push(Variable.get("list", new TypeLiteral<List<String>>(){})))
-            .loadVariable("list", new TypeLiteral<List<String>>(){})
+            .loadVariable("list")
             .foreach("element", Object.class);
         
         assertEquals(FOREACH_RESULT_OBJECT_IN_LIST_EMPTY_BODY, loop.generate());
@@ -86,7 +86,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         try {
             StatementBuilder.create(
                     Context.create().push(Variable.get("list", new TypeLiteral<List<String>>(){})))
-                .loadVariable("list", new TypeLiteral<List<String>>(){})
+                .loadVariable("list")
                 .foreach("element", Integer.class)
                 .generate();
   
@@ -102,11 +102,11 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
 
         Statement outerLoop = StatementBuilder.create(
                 Context.create().push(Variable.get("list", new TypeLiteral<List<String>>(){})))
-            .loadVariable("list", new TypeLiteral<List<String>>(){})
+            .loadVariable("list")
             .foreach("element")
             .execute(StatementBuilder.create(
                         Context.create().push(Variable.get("anotherList", new TypeLiteral<List<String>>(){})))
-                    .loadVariable("anotherList", new TypeLiteral<List<String>>(){})
+                    .loadVariable("anotherList")
                     .foreach("anotherElement")
                     .execute(createObject)
              );
@@ -120,7 +120,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         try {
             StatementBuilder.create(
                     Context.create().push(Variable.get("list", String.class)))
-                .loadVariable("list", String.class)
+                .loadVariable("list")
                 .foreach("element")
                 .generate();
 
@@ -134,7 +134,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
     public void testForeachLoopWithInvoke() throws Exception {
         Statement loop = StatementBuilder.create(
                 Context.create().push(Variable.get("map", Map.class)))
-            .loadVariable("map", Map.class)
+            .loadVariable("map")
             .invoke("keySet")
             .foreach("key");
     

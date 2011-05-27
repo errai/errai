@@ -30,6 +30,10 @@ public class Variable extends AbstractStatement {
         return new Variable(name, type);
     }
 
+    public static Variable get(String name) {
+        return new Variable(name, null);
+    }
+    
     public String getName() {
         return name;
     }
