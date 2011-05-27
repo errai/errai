@@ -14,7 +14,6 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 public class Context {
     private Map<String, Variable> variables = new HashMap<String, Variable>();
     private Context parent = null;
-    private Statement statement = null;
 
     private Context() {
     }
@@ -34,21 +33,6 @@ public class Context {
     public Context add(Variable variable) {
         variables.put(variable.getName(), variable);
         return this;
-    }
-
-    public Statement getParentStatement() {
-        if (this.parent != null)
-            return parent.statement;
-
-        return null;
-    }
-
-    public Statement getStatement() {
-        return statement;
-    }
-
-    public void setStatement(Statement statement) {
-        this.statement = statement;
     }
 
     public Variable getVariable(String name) {

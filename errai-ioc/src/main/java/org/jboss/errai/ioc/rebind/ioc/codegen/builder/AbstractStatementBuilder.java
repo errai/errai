@@ -14,7 +14,9 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 public abstract class AbstractStatementBuilder extends AbstractStatement {
     protected StringBuilder buf = new StringBuilder();
     protected Context context = null;
-
+    protected Statement statement = null;
+    protected AbstractStatementBuilder parent = null;
+    
     protected AbstractStatementBuilder(Context context) {
         this.context = context;
     }
@@ -68,7 +70,7 @@ public abstract class AbstractStatementBuilder extends AbstractStatement {
     
     public String generate() {
         if(buf.length()==0) 
-            return context.getStatement().generate();
+            return statement.generate();
         
         return buf.toString();
     }

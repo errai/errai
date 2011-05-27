@@ -15,20 +15,19 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class InvocationBuilder extends AbstractStatementBuilder {
-    private Statement target;
     private MetaMethod method;
     private CallParameters parameters;
 
-    protected InvocationBuilder(Context scope) {
-        super(scope);
+    protected InvocationBuilder(AbstractStatementBuilder parent) {
+        super(Context.create(parent.context));
+        this.parent = parent;
     }
 
-    public static InvocationBuilder create(Statement parent) {
-        return new InvocationBuilder(Context.create(parent.getContext()));
+    public static InvocationBuilder create(AbstractStatementBuilder parent) {
+        return new InvocationBuilder(parent);
     }
 
     public ContextualStatementBuilder invoke(String methodName, Statement... parameters) {
-        this.target = context.getParentStatement();
         this.parameters = CallParameters.fromStatements(parameters);
 
         MetaClass[] parameterTypes = new MetaClass[parameters.length];
@@ -36,12 +35,12 @@ public class InvocationBuilder extends AbstractStatementBuilder {
             parameterTypes[i] = parameters[i].getType();
         }
 
-        this.method = target.getType().getDeclaredMethod(methodName, parameterTypes);
+        this.method = parent.statement.getType().getDeclaredMethod(methodName, parameterTypes);
         if (method == null)
             throw new UndefinedMethodException(methodName, parameterTypes);
 
-        buf.append(target.generate()).append(".").append(method.getName()).append(this.parameters.generate());
-        context.setStatement(this);
+        buf.append(parent.statement.generate()).append(".").append(method.getName()).append(this.parameters.generate());
+        statement = this;
         return ContextualStatementBuilder.createInContextOf(this);
     }
 

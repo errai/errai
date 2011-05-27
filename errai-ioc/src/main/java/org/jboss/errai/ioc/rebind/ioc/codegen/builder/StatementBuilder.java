@@ -23,12 +23,12 @@ public class StatementBuilder extends AbstractStatementBuilder {
     }
     
     public ContextualStatementBuilder loadVariable(String name) {
-        context.setStatement(context.getVariable(name));
+        statement = context.getVariable(name);
         return ContextualStatementBuilder.createInContextOf(this);
     }
     
     public ContextualStatementBuilder loadLiteral(Object o) {
-        context.setStatement(LiteralFactory.getLiteral(o));
+        statement = LiteralFactory.getLiteral(o);
         return ContextualStatementBuilder.createInContextOf(this);
     }
 
