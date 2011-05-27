@@ -2,6 +2,8 @@ package org.jboss.errai.ioc.rebind.ioc.codegen;
 
 import java.util.LinkedList;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.values.LiteralFactory;
+
 /**
  * This class represents a {@link Statement} context. It's basically
  * a simple stack of statements which is used to ensure that referenced 
@@ -18,8 +20,14 @@ public class Context {
         return new Context();
     }
     
-    public void push(Statement var) {
-        stack.addFirst(var);
+    public Context push(Statement statement) {
+        stack.addFirst(statement);
+        return this;
+    }
+    
+    public Context push(Object object) {
+        stack.addFirst(LiteralFactory.getLiteral(object));
+        return this;
     }
     
     public Statement peek() {

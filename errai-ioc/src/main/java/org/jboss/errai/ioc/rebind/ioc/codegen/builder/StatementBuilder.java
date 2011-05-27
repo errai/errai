@@ -24,7 +24,7 @@ public class StatementBuilder extends AbstractStatementBuilder {
     public static StatementBuilder create(Context context) {
         return new StatementBuilder(context);
     }
-
+    
     public ContextualStatementBuilder loadVariable(String name, Class type) {
         return loadVariable(name, MetaClassFactory.get(type));
     }
@@ -34,7 +34,9 @@ public class StatementBuilder extends AbstractStatementBuilder {
     }
 
     public ContextualStatementBuilder loadVariable(String name, MetaClass type) {
-        context.push(Variable.get(name, type));
+        Variable var = Variable.get(name, type);
+        assertInScope(var);
+        context.push(var);
         return ContextualStatementBuilder.createInContextOf(this);
     }
 

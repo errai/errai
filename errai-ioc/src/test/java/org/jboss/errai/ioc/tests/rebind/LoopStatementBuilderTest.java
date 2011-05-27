@@ -7,9 +7,12 @@ import java.util.Map;
 
 import javax.enterprise.util.TypeLiteral;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
+import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.TypeNotIterableException;
 import org.junit.Test;
 
@@ -28,19 +31,22 @@ public class LoopStatementBuilderTest extends AbstractStatementBuilderTest imple
         Statement createAnotherObject = StatementBuilder.create()
             .newObject(Object.class);
 
-        String foreachWithListOfStrings = StatementBuilder.create()
+        String foreachWithListOfStrings = StatementBuilder.create(
+                Context.create().push(Variable.get("list", new TypeLiteral<List<String>>(){})))
             .loadVariable("list", new TypeLiteral<List<String>>(){})
             .foreach("element")
             .execute(createObject)
             .generate();
          
-        String foreachWithStringArray = StatementBuilder.create()
+        String foreachWithStringArray = StatementBuilder.create(
+                Context.create().push(Variable.get("list", String[].class)))
             .loadVariable("list", String[].class)
             .foreach("element")
             .execute(createObject)
             .generate();
             
-        String foreachWithList = StatementBuilder.create()
+        String foreachWithList = StatementBuilder.create(
+                Context.create().push(Variable.get("list", List.class)))
             .loadVariable("list", List.class)
             .foreach("element")
             .execute(createObject)
@@ -53,15 +59,33 @@ public class LoopStatementBuilderTest extends AbstractStatementBuilderTest imple
     }
     
     @Test
+    public void testForeachLoopWithUndefinedCollection() throws Exception {
+  
+      
+        try {
+            StatementBuilder.create()
+                .loadVariable("list", new TypeLiteral<List<String>>(){})
+                .foreach("element", Integer.class)
+                .generate();
+  
+            fail("Expected OutOfScopeException");
+        } catch(OutOfScopeException oose) {
+            // expected
+        }
+    }
+    
+    @Test
     public void testForeachLoopWithProvidedLoopVarType() throws Exception {
-        Statement loop = StatementBuilder.create()
+        Statement loop = StatementBuilder.create(
+                Context.create().push(Variable.get("list", new TypeLiteral<List<String>>(){})))
             .loadVariable("list", new TypeLiteral<List<String>>(){})
             .foreach("element", Object.class);
         
         assertEquals(FOREACH_RESULT_OBJECT_IN_LIST_EMPTY_BODY, loop.generate());
         
         try {
-            StatementBuilder.create()
+            StatementBuilder.create(
+                    Context.create().push(Variable.get("list", new TypeLiteral<List<String>>(){})))
                 .loadVariable("list", new TypeLiteral<List<String>>(){})
                 .foreach("element", Integer.class)
                 .generate();
@@ -76,10 +100,12 @@ public class LoopStatementBuilderTest extends AbstractStatementBuilderTest imple
     public void testNestedForeachLoops() throws Exception {
         Statement createObject = StatementBuilder.create().newObject(Integer.class);
 
-        Statement outerLoop = StatementBuilder.create()
+        Statement outerLoop = StatementBuilder.create(
+                Context.create().push(Variable.get("list", new TypeLiteral<List<String>>(){})))
             .loadVariable("list", new TypeLiteral<List<String>>(){})
             .foreach("element")
-            .execute(StatementBuilder.create()
+            .execute(StatementBuilder.create(
+                        Context.create().push(Variable.get("anotherList", new TypeLiteral<List<String>>(){})))
                     .loadVariable("anotherList", new TypeLiteral<List<String>>(){})
                     .foreach("anotherElement")
                     .execute(createObject)
@@ -92,7 +118,8 @@ public class LoopStatementBuilderTest extends AbstractStatementBuilderTest imple
     public void testForeachLoopWithInvalidCollectionType() throws Exception {
         
         try {
-            StatementBuilder.create()
+            StatementBuilder.create(
+                    Context.create().push(Variable.get("list", String.class)))
                 .loadVariable("list", String.class)
                 .foreach("element")
                 .generate();
@@ -105,7 +132,8 @@ public class LoopStatementBuilderTest extends AbstractStatementBuilderTest imple
     
     @Test
     public void testForeachLoopWithInvoke() throws Exception {
-        Statement loop = StatementBuilder.create()
+        Statement loop = StatementBuilder.create(
+                Context.create().push(Variable.get("map", Map.class)))
             .loadVariable("map", Map.class)
             .invoke("keySet")
             .foreach("key");

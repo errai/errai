@@ -4,6 +4,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.CallParameters;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.values.LiteralFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.values.LiteralValue;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedMethodException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
@@ -32,7 +33,8 @@ public class InvocationBuilder extends AbstractStatementBuilder {
 
         MetaClass[] parameterTypes = new MetaClass[parameters.length];
         for (int i = 0; i < parameters.length; i++) {
-            // TODO assertInScope(parameters[i]);
+            if(!(parameters[i] instanceof LiteralValue))
+                assertInScope(parameters[i]);
             parameterTypes[i] = parameters[i].getType();
         }
 
