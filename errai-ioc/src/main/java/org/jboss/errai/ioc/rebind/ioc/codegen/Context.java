@@ -36,16 +36,15 @@ public class Context {
         return this;
     }
 
+    public Statement getParentStatement() {
+        if (this.parent != null)
+            return parent.statement;
+
+        return null;
+    }
+
     public Statement getStatement() {
-        Statement found = statement;
-
-        Context parent = this.parent;
-        while (found == null && parent != null) {
-            found = parent.statement;
-            parent = parent.parent;
-        }
-
-        return found;
+        return statement;
     }
 
     public void setStatement(Statement statement) {

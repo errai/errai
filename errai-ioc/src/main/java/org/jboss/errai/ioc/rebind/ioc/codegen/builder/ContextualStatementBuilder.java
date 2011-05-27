@@ -17,11 +17,11 @@ public class ContextualStatementBuilder extends AbstractStatementBuilder {
     }
 
     public static ContextualStatementBuilder createInContextOf(Statement parent) {
-        return new ContextualStatementBuilder(Context.create(parent.getContext()));
+        return new ContextualStatementBuilder(parent.getContext());
     }
-
+    
     public LoopBodyBuilder foreach(String loopVarName) {
-        return LoopBuilder.createInContextOf(this).foreach(loopVarName);
+        return LoopBuilder.create(this).foreach(loopVarName);
     }
 
     public LoopBodyBuilder foreach(String loopVarName, Class<?> loopVarType) {
@@ -29,14 +29,14 @@ public class ContextualStatementBuilder extends AbstractStatementBuilder {
     }
 
     public LoopBodyBuilder foreach(String loopVarName, MetaClass loopVarType) {
-        return LoopBuilder.createInContextOf(this).foreach(loopVarName, loopVarType);
+        return LoopBuilder.create(this).foreach(loopVarName, loopVarType);
     }
 
     public ContextualStatementBuilder invoke(String methodName, Variable... parameters) {
-        return InvocationBuilder.createInScopeOf(this).invoke(methodName, parameters);
+        return InvocationBuilder.create(this).invoke(methodName, parameters);
     }
 
     public ContextualStatementBuilder invoke(String methodName, Object... parameters) {
-        return InvocationBuilder.createInScopeOf(this).invoke(methodName, parameters);
+        return InvocationBuilder.create(this).invoke(methodName, parameters);
     }
 }
