@@ -1,11 +1,11 @@
 package org.jboss.errai.ioc.tests.rebind;
 
 /**
- * Expected test results for the {@link LoopStatementBuilderTest}
+ * Expected test results for the {@link LoopBuilderTest}
  *  
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface LoopStatementBuilderTestResult {
+public interface LoopBuilderTestResult {
 
     public static final String FOREACH_RESULT_STRING_IN_LIST = 
         "for (java.lang.String element : list) {" +

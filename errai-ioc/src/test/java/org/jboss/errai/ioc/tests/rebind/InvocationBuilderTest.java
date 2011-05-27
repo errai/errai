@@ -17,10 +17,37 @@ import static org.junit.Assert.fail;
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class StatementBuilderTest extends AbstractStatementBuilderTest {
+public class InvocationBuilderTest extends AbstractStatementBuilderTest {
 
     @Test
     public void testInvoke() {
+        Statement invokeStatement = StatementBuilder.create(
+                    Context.create().push(Variable.get("injector", MessageBusProvider.class)))
+                .loadVariable("injector", MessageBusProvider.class)
+                .invoke("provide");
+        assertEquals("injector.provide()", invokeStatement.generate());
+
+        invokeStatement = StatementBuilder.create(Context.create()
+                    .push(Variable.get("i", Integer.class))
+                    .push(Variable.get("regex", String.class))
+                    .push(Variable.get("replacement", String.class)))
+                .loadVariable("i", Integer.class)
+                .invoke("toString")
+                .invoke("replaceAll", Variable.get("regex", String.class), Variable.get("replacement", String.class));
+        assertEquals("i.toString().replaceAll(regex, replacement)", invokeStatement.generate());
+    }
+
+    @Test
+    public void testInvokeWithLiterals() {
+        final String expected = "s.replaceAll(\"foo\", \"foo\\t\\n\")";
+        final String result = StatementBuilder.create(Context.create().push(Variable.get("s", String.class)))
+                .loadVariable("s", String.class).invoke("replaceAll", "foo", "foo\t\n").generate();
+
+        assertEquals(expected, result);
+    }
+    
+    @Test
+    public void testInvokeOnUndefinedMethods() {
         try {
             StatementBuilder.create(
                     Context.create()
@@ -47,36 +74,10 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
         } catch (UndefinedMethodException udme) {
             //expected
         }
-
-        Statement invokeStatement = StatementBuilder.create(
-                    Context.create().push(Variable.get("injector", MessageBusProvider.class)))
-                .loadVariable("injector", MessageBusProvider.class)
-                .invoke("provide");
-
-        assertEquals("injector.provide()", invokeStatement.generate());
-
-        invokeStatement = StatementBuilder.create(Context.create()
-                    .push(Variable.get("i", Integer.class))
-                    .push(Variable.get("regex", String.class))
-                    .push(Variable.get("replacement", String.class)))
-                .loadVariable("i", Integer.class)
-                .invoke("toString")
-                .invoke("replaceAll", Variable.get("regex", String.class), Variable.get("replacement", String.class));
-
-        assertEquals("i.toString().replaceAll(regex, replacement)", invokeStatement.generate());
-    }
-
-    @Test
-    public void testCallLiterals() {
-        final String expected = "s.replaceAll(\"foo\", \"foo\\t\\n\")";
-        final String result = StatementBuilder.create(Context.create().push(Variable.get("s", String.class)))
-                .loadVariable("s", String.class).invoke("replaceAll", "foo", "foo\t\n").generate();
-
-        assertEquals(expected, result);
     }
     
     @Test
-    public void testInvokeWithUndefinedParameters() {
+    public void testInvokeWithUndefinedVariables() {
         try {
             // injector undefined
             StatementBuilder.create()
@@ -90,13 +91,15 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
         
         try {
             // param2 undefined
-            StatementBuilder.create(
-                    Context.create().push(Variable.get("param", String.class)))
+            StatementBuilder.create(Context.create()
+                    .push(Variable.get("injector", MessageBusProvider.class))
+                    .push(Variable.get("param", String.class)))
                 .loadVariable("injector", MessageBusProvider.class)
                 .invoke("provide", Variable.get("param", String.class), Variable.get("param2", Integer.class));
             fail("expected OutOfScopeException");
         } catch(OutOfScopeException oose) {
             //expected
+            assertTrue(oose.getMessage().contains("param2"));
         } 
     }
 }

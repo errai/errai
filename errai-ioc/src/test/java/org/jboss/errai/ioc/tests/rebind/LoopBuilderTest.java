@@ -21,7 +21,7 @@ import org.junit.Test;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class LoopStatementBuilderTest extends AbstractStatementBuilderTest implements LoopStatementBuilderTestResult {
+public class LoopBuilderTest extends AbstractStatementBuilderTest implements LoopBuilderTestResult {
     
     @Test
     public void testForeachLoop() throws Exception {
