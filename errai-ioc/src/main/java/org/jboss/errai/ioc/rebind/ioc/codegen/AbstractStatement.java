@@ -8,8 +8,8 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
  */
 public abstract class AbstractStatement implements Statement {
 
-    public Scope getScope() {
-        return new Scope();
+    public Context getContext() {
+        return Context.create();
     }
     
     public MetaClass getType() {

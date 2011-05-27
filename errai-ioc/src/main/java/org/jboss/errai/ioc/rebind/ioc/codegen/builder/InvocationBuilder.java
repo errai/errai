@@ -1,8 +1,7 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.CallParameters;
-import org.jboss.errai.ioc.rebind.ioc.codegen.HasScope;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Scope;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.values.LiteralFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedMethodException;
@@ -19,16 +18,16 @@ public class InvocationBuilder extends AbstractStatementBuilder {
     private MetaMethod method;
     private CallParameters parameters;
 
-    protected InvocationBuilder(Scope scope) {
+    protected InvocationBuilder(Context scope) {
         super(scope);
     }
 
-    public static InvocationBuilder createInScopeOf(HasScope parent) {
-        return new InvocationBuilder(parent.getScope());
+    public static InvocationBuilder createInScopeOf(Statement parent) {
+        return new InvocationBuilder(parent.getContext());
     }
 
-    public ScopedStatementBuilder invoke(String methodName, Statement... parameters) {
-        this.statement = scope.peek();
+    public ContextualStatementBuilder invoke(String methodName, Statement... parameters) {
+        this.statement = context.peek();
         this.parameters = CallParameters.fromStatements(parameters);
 
         MetaClass[] parameterTypes = new MetaClass[parameters.length];
@@ -42,17 +41,17 @@ public class InvocationBuilder extends AbstractStatementBuilder {
             throw new UndefinedMethodException(methodName, parameterTypes);
 
         buf.append(statement.generate()).append(".").append(method.getName()).append(this.parameters.generate());
-        scope.push(this);
-        return ScopedStatementBuilder.createInScopeOf(this);
+        context.push(this);
+        return ContextualStatementBuilder.createInContextOf(this);
     }
 
-    public ScopedStatementBuilder invoke(String methodName, Object... parameters) {
-        Statement[] stmt = new Statement[parameters.length];
+    public ContextualStatementBuilder invoke(String methodName, Object... parameters) {
+        Statement[] statements = new Statement[parameters.length];
         int i = 0;
         for (Object o : parameters) {
-            stmt[i] = LiteralFactory.getLiteral(parameters[i++]);
+            statements[i] = LiteralFactory.getLiteral(parameters[i++]);
         }
-        return invoke(methodName, stmt);
+        return invoke(methodName, statements);
     }
 
     public MetaClass getType() {

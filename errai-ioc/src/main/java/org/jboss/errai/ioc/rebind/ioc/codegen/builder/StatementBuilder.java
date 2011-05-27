@@ -3,7 +3,7 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 import javax.enterprise.util.TypeLiteral;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Scope;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java.JavaReflectionClass;
@@ -13,25 +13,29 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java.JavaReflectionClass
  */
 public class StatementBuilder extends AbstractStatementBuilder {
 
-    private StatementBuilder(Scope scope) {
-        super(scope);
+    private StatementBuilder(Context context) {
+        super(context);
     }
 
     public static StatementBuilder create() {
-        return new StatementBuilder(new Scope());
+        return new StatementBuilder(Context.create());
     }
 
-    public ScopedStatementBuilder loadVariable(String name, MetaClass type) {
-        scope.push(new Variable(name, type));
-        return ScopedStatementBuilder.createInScopeOf(this);
+    public static StatementBuilder create(Context context) {
+        return new StatementBuilder(context);
     }
 
-    public ScopedStatementBuilder loadVariable(String name, Class type) {
+    public ContextualStatementBuilder loadVariable(String name, Class type) {
         return loadVariable(name, MetaClassFactory.get(type));
     }
 
-    public ScopedStatementBuilder loadVariable(String name, TypeLiteral literal) {
+    public ContextualStatementBuilder loadVariable(String name, TypeLiteral literal) {
         return loadVariable(name, MetaClassFactory.get(literal));
+    }
+
+    public ContextualStatementBuilder loadVariable(String name, MetaClass type) {
+        context.push(Variable.get(name, type));
+        return ContextualStatementBuilder.createInContextOf(this);
     }
 
     public ObjectBuilder newObject(MetaClass type) {

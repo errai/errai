@@ -2,7 +2,7 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.AbstractStatement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Scope;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
@@ -14,14 +14,14 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
  */
 public abstract class AbstractStatementBuilder extends AbstractStatement {
     protected StringBuilder buf = new StringBuilder();
-    protected Scope scope = null;
+    protected Context context = null;
 
-    protected AbstractStatementBuilder(Scope scope) {
-        this.scope = scope;
+    protected AbstractStatementBuilder(Context scope) {
+        this.context = scope;
     }
 
     protected void assertInScope(Statement statement) {
-        if (!scope.contains(statement))
+        if (!context.contains(statement))
             throw new OutOfScopeException(statement.generate());
     }
 
@@ -68,13 +68,13 @@ public abstract class AbstractStatementBuilder extends AbstractStatement {
         }
     }
 
-    public Scope getScope() {
-        return scope;
+    public Context getContext() {
+        return context;
     }
     
     public String generate() {
         if(buf.length()==0) 
-            return scope.peek().generate();
+            return context.peek().generate();
         
         return buf.toString();
     }

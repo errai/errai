@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Represents a code block (e.g. loop body).
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */

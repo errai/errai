@@ -1,28 +1,34 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.control;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.Scope;
+import org.jboss.errai.ioc.rebind.ioc.codegen.AbstractStatement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 
 /**
+ * Foreach statement (enhanced for loop).
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class ForeachLoop implements Statement {
+public class ForeachLoop extends AbstractStatement {
 
+    private Variable loopVar;
+    private Statement collection;
+    private Statement body;
+    
+    public ForeachLoop(Variable loopVar, Statement collection, Statement body) {
+       this.loopVar = loopVar;
+       this.collection = collection;
+       this.body = body;
+    }
+    
     public String generate() {
-        // TODO Auto-generated method stub
-        return null;
-    }
+        StringBuilder buf = new StringBuilder();
+        
+        buf.append("for (").append(loopVar.getType().getFullyQualifedName()).append(" ").append(loopVar.getName())
+            .append(" : ").append(collection.generate()).append(") {")
+                .append("\n\t").append(body.generate().replaceAll("\n", "\n\t"))
+            .append("\n}");
 
-    public Scope getScope() {
-        // TODO Auto-generated method stub
-        return null;
+        return buf.toString();
     }
-
-    public MetaClass getType() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-   
 }

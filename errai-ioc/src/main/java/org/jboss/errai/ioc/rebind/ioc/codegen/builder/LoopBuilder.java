@@ -1,6 +1,11 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.*;
+import org.jboss.errai.ioc.rebind.ioc.codegen.BlockStatement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.control.ForeachLoop;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
@@ -14,13 +19,13 @@ public class LoopBuilder extends AbstractStatementBuilder {
         private BlockStatement blockStatement = null;
 
         private LoopBodyBuilder(BlockStatement blockStatement) {
-            super(LoopBuilder.this.getScope());
+            super(LoopBuilder.this.getContext());
             this.blockStatement = blockStatement;
         }
 
         public LoopBodyBuilder execute(Statement statement) {
             blockStatement.addStatement(statement);
-            statement.getScope().merge(scope);
+            statement.getContext().merge(context);
             return this;
         }
 
@@ -28,27 +33,19 @@ public class LoopBuilder extends AbstractStatementBuilder {
             return LoopBuilder.this.generate();
         }
         
-        public Scope getScope() {
-            return scope;
+        public Context getContext() {
+            return context;
         }
     }
 
-    private String loopVarName;
-    private MetaClass loopVarType;
-    private Variable loopVar;
-    private Statement collectionVar;
-    private BlockStatement body;
-
-    private LoopBuilder(Scope scope) {
-        super(scope);
+    private Statement loop;
+    
+    private LoopBuilder(Context context) {
+        super(context);
     }
 
-    public static LoopBuilder create() {
-        return new LoopBuilder(new Scope());
-    }
-
-    public static LoopBuilder createInScopeOf(HasScope parent) {
-        return new LoopBuilder(parent.getScope());
+    public static LoopBuilder createInContextOf(Statement parent) {
+        return new LoopBuilder(parent.getContext());
     }
 
     public LoopBodyBuilder foreach(String loopVarName) {
@@ -56,46 +53,41 @@ public class LoopBuilder extends AbstractStatementBuilder {
     }
 
     public LoopBodyBuilder foreach(String loopVarName, MetaClass loopVarType) {
-        return foreach(loopVarName, loopVarType, scope.peek());
+        return foreach(loopVarName, loopVarType, context.peek());
     }
 
-    private LoopBodyBuilder foreach(String loopVarName, MetaClass loopVarType, Statement collectionVar) {
-        assertIsIterable(collectionVar);
+    private LoopBodyBuilder foreach(String loopVarName, MetaClass loopVarType, Statement collection) {
+        assertIsIterable(collection);
 
-        this.collectionVar = collectionVar;
-        this.loopVarName = loopVarName;
-        this.loopVarType = loopVarType;
-        this.loopVar = createLoopVar(collectionVar);
-        return new LoopBodyBuilder(body = new BlockStatement());
+        Variable loopVar = createLoopVar(collection, loopVarName, loopVarType);
+        BlockStatement body = new BlockStatement();
+        loop = new ForeachLoop(loopVar, collection, body);
+        
+        return new LoopBodyBuilder(body);
     }
     
-    private Variable createLoopVar(Statement collectionVar) {
+    private Variable createLoopVar(Statement collection, String loopVarName, MetaClass providedLoopVarType) {
 
         // infer the loop variable type
         MetaClass loopVarType = MetaClassFactory.get(Object.class);
-        if (collectionVar.getType().getParameterizedTypes().length > 0) {
-            loopVarType = collectionVar.getType().getParameterizedTypes()[0];
-        } else if (getComponentType(collectionVar) != null) {
-            loopVarType = getComponentType(collectionVar);
+        if (collection.getType().getParameterizedTypes().length > 0) {
+            loopVarType = collection.getType().getParameterizedTypes()[0];
+        } else if (getComponentType(collection) != null) {
+            loopVarType = getComponentType(collection);
         }
 
-        // try to use the provided loop var type if possible (assignable from the inferred type)
-        if (this.loopVarType != null) {
-            assertAssignableTypes(loopVarType, this.loopVarType);
-            loopVarType = this.loopVarType;
+        // try to use the provided loop variable type if possible (assignable from the inferred type)
+        if (providedLoopVarType != null) {
+            assertAssignableTypes(loopVarType, providedLoopVarType);
+            loopVarType = providedLoopVarType;
         }
 
-        Variable loopVar = new Variable(this.loopVarName, loopVarType);
-        scope.push(loopVar);
+        Variable loopVar = Variable.get(loopVarName, loopVarType);
+        context.push(loopVar);
         return loopVar;
     }
 
     public String generate() {
-        buf.append("for (").append(loopVar.getType().getFullyQualifedName()).append(" ").append(loopVar.getName())
-            .append(" : ").append(collectionVar.generate()).append(") {")
-                .append("\n\t").append(body.generate().replaceAll("\n", "\n\t"))
-            .append("\n}");
-
-        return buf.toString();
+        return loop.generate();
     }
 }

@@ -1,6 +1,6 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.control;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.Scope;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 
 /**
@@ -24,7 +24,7 @@ public class WhileBlock extends AbstractBlockConditional {
         return builder.toString();
     }
 
-    public Scope getScope() {
+    public Context getContext() {
         return null;
     }
 }
