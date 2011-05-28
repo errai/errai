@@ -1,7 +1,6 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.LoopBuilder.LoopBodyBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
@@ -18,7 +17,7 @@ public class ContextualStatementBuilder extends AbstractStatementBuilder {
     public static ContextualStatementBuilder createInContextOf(AbstractStatementBuilder parent) {
         return new ContextualStatementBuilder(parent);
     }
-    
+
     public LoopBodyBuilder foreach(String loopVarName) {
         return LoopBuilder.create(this).foreach(loopVarName);
     }
@@ -29,10 +28,6 @@ public class ContextualStatementBuilder extends AbstractStatementBuilder {
 
     public LoopBodyBuilder foreach(String loopVarName, MetaClass loopVarType) {
         return LoopBuilder.create(this).foreach(loopVarName, loopVarType);
-    }
-
-    public ContextualStatementBuilder invoke(String methodName, Variable... parameters) {
-        return InvocationBuilder.create(this).invoke(methodName, parameters);
     }
 
     public ContextualStatementBuilder invoke(String methodName, Object... parameters) {

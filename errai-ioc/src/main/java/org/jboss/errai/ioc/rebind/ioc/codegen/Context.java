@@ -2,6 +2,7 @@ package org.jboss.errai.ioc.rebind.ioc.codegen;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 
+import javax.enterprise.util.TypeLiteral;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,6 +39,11 @@ public class Context {
     public Context add(String name, Class type) {
         return add(Variable.get(name, type));
     }
+
+    public Context add(String name, TypeLiteral<?> type) {
+        return add(Variable.get(name, type));
+    }
+
 
     public Variable getVariable(String name) {
         Variable found = variables.get(name);

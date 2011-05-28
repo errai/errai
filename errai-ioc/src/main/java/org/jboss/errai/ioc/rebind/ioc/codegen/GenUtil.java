@@ -20,6 +20,8 @@ public class GenUtil {
                 } else {
                     throw new OutOfScopeException("variable cannot be referenced from this scope: " + v.getName());
                 }
+            } else if (o instanceof Statement) {
+                statements[i++] = (Statement) o;
             } else {
                 statements[i++] = LiteralFactory.getLiteral(o);
             }
