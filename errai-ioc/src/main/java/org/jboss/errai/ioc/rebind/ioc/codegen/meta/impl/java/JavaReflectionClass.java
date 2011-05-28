@@ -153,6 +153,10 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
         return MetaClassFactory.get(getEnclosedMetaObject().getSuperclass());
     }
 
+    public MetaClass getComponentType() {
+        return MetaClassFactory.get(getEnclosedMetaObject().getComponentType());
+    }
+
     public Annotation[] getAnnotations() {
         if (annotationsCache == null) {
             annotationsCache = getEnclosedMetaObject().getAnnotations();
@@ -178,6 +182,10 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
 
     public boolean isAbstract() {
         return (getEnclosedMetaObject().getModifiers() & Modifier.ABSTRACT) != 0;
+    }
+
+    public boolean isArray() {
+        return getEnclosedMetaObject().isArray();
     }
 
     public boolean isEnum() {

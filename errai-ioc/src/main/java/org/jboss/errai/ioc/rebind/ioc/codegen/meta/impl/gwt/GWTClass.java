@@ -133,12 +133,25 @@ public class GWTClass extends AbstractMetaClass<JType> {
         return metaClassList.toArray(new MetaClass[metaClassList.size()]);
     }
 
+    public boolean isArray() {
+        return getEnclosedMetaObject().isArray() != null;
+    }
+
     public MetaClass getSuperClass() {
         JClassType type = getEnclosedMetaObject().isClassOrInterface();
         if (type == null) {
             return null;
         }
+
         return MetaClassFactory.get(type.getEnclosingType());
+    }
+
+    public MetaClass getComponentType() {
+        JArrayType type = getEnclosedMetaObject().isArray();
+        if (type == null) {
+            return null;
+        }
+        return MetaClassFactory.get(type.getComponentType());
     }
 
     public Annotation[] getAnnotations() {

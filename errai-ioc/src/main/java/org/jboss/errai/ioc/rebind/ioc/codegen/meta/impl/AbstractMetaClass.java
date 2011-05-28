@@ -50,7 +50,6 @@ public abstract class AbstractMetaClass<T> implements MetaClass, HasAnnotations 
         return null;
     }
 
-
     public MetaMethod getMethod(String name, Class... parmTypes) {
         return _getMethod(getMethods(), name, InjectUtil.classToMeta(parmTypes));
     }

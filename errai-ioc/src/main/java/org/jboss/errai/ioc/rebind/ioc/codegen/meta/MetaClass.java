@@ -39,6 +39,8 @@ public interface MetaClass extends HasAnnotations {
 
     public MetaClass getSuperClass();
 
+    public MetaClass getComponentType();
+
     public boolean isAssignableFrom(MetaClass clazz);
 
     public boolean isAssignableTo(MetaClass clazz);
@@ -55,6 +57,8 @@ public interface MetaClass extends HasAnnotations {
 
     public boolean isAbstract();
 
+    public boolean isArray();
+
     public boolean isEnum();
 
     public boolean isAnnotation();
@@ -68,6 +72,4 @@ public interface MetaClass extends HasAnnotations {
     public boolean isFinal();
 
     public boolean isStatic();
-
-
 }
