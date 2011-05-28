@@ -1,6 +1,8 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl;
 
+import com.google.gwt.core.ext.typeinfo.JClassType;
 import org.jboss.errai.ioc.rebind.ioc.InjectUtil;
+import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.HasAnnotations;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaConstructor;
@@ -93,6 +95,48 @@ public abstract class AbstractMetaClass<T> implements MetaClass, HasAnnotations 
         return hashString;
     }
 
+    public boolean isAssignableFrom(MetaClass clazz) {
+        MetaClass cls = this;
+        do {
+            if (cls.equals(clazz)) return true;
+        } while ((cls = clazz.getSuperClass()) != null);
+
+        for (MetaClass iface : getInterfaces()) {
+            if (iface.isAssignableFrom(clazz)) return true;
+        }
+
+        return false;
+    }
+
+    public boolean isAssignableTo(MetaClass clazz) {
+        MetaClass cls = clazz;
+        do {
+            if (cls.equals(this)) return true;
+        } while ((cls = clazz.getSuperClass()) != null);
+
+        for (MetaClass iface : clazz.getInterfaces()) {
+            if (iface.isAssignableFrom(this)) return true;
+        }
+
+        return false;
+    }
+
+    public boolean isAssignableFrom(Class clazz) {
+        return isAssignableFrom(MetaClassFactory.get(clazz));
+    }
+
+    public boolean isAssignableTo(Class clazz) {
+        return isAssignableTo(MetaClassFactory.get(clazz));
+    }
+
+    public boolean isAssignableTo(JClassType clazz) {
+        return isAssignableFrom(MetaClassFactory.get(clazz));
+    }
+
+    public boolean isAssignableFrom(JClassType clazz) {
+        return isAssignableTo(MetaClassFactory.get(clazz));
+    }
+
     @Override
     public boolean equals(Object o) {
         return o instanceof MetaClass && hashString().equals("MetaClass:" + ((MetaClass) o).getFullyQualifedName());
@@ -102,6 +146,4 @@ public abstract class AbstractMetaClass<T> implements MetaClass, HasAnnotations 
     public int hashCode() {
         return hashString().hashCode();
     }
-
-
 }

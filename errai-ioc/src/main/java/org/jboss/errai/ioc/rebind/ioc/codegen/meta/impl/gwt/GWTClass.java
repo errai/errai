@@ -46,7 +46,12 @@ public class GWTClass extends AbstractMetaClass<JType> {
     }
 
     public MetaMethod[] getMethods() {
-        return fromMethodArray(getEnclosedMetaObject().isClassOrInterface().getMethods());
+        JClassType type = getEnclosedMetaObject().isClassOrInterface();
+        if (type == null) {
+            return null;
+        }
+
+        return fromMethodArray(type.getMethods());
     }
 
     public MetaMethod[] getDeclaredMethods() {
@@ -64,16 +69,24 @@ public class GWTClass extends AbstractMetaClass<JType> {
     }
 
     public MetaField[] getFields() {
-        return fromFieldArray(getEnclosedMetaObject().isClassOrInterface().getFields());
+        JClassType type = getEnclosedMetaObject().isClassOrInterface();
+        if (type == null) {
+            return null;
+        }
+        return fromFieldArray(type.getFields());
     }
 
     public MetaField[] getDeclaredFields() {
         return getFields();
     }
 
-
     public MetaField getField(String name) {
-        JField field = getEnclosedMetaObject().isClassOrInterface().getField(name);
+        JClassType type = getEnclosedMetaObject().isClassOrInterface();
+        if (type == null) {
+            return null;
+        }
+
+        JField field = type.getField(name);
 
         if (field == null) {
             throw new RuntimeException("no such field: " + field);
@@ -97,11 +110,35 @@ public class GWTClass extends AbstractMetaClass<JType> {
     }
 
     public MetaConstructor[] getConstructors() {
-        return fromMethodArray(getEnclosedMetaObject().isClassOrInterface().getConstructors());
+        JClassType type = getEnclosedMetaObject().isClassOrInterface();
+        if (type == null) {
+            return null;
+        }
+
+        return fromMethodArray(type.getConstructors());
     }
 
     public MetaConstructor[] getDeclaredConstructors() {
         return getConstructors();
+    }
+
+    public MetaClass[] getInterfaces() {
+        List<MetaClass> metaClassList = new ArrayList<MetaClass>();
+        for (JClassType type : getEnclosedMetaObject().isClassOrInterface()
+                .getImplementedInterfaces()) {
+
+            metaClassList.add(MetaClassFactory.get(type));
+        }
+
+        return metaClassList.toArray(new MetaClass[metaClassList.size()]);
+    }
+
+    public MetaClass getSuperClass() {
+        JClassType type = getEnclosedMetaObject().isClassOrInterface();
+        if (type == null) {
+            return null;
+        }
+        return MetaClassFactory.get(type.getEnclosingType());
     }
 
     public Annotation[] getAnnotations() {
@@ -127,5 +164,47 @@ public class GWTClass extends AbstractMetaClass<JType> {
             parameterizedTypes[0] = new GWTClass(paramType);
 
         return parameterizedTypes;
+    }
+
+    public boolean isInterface() {
+        return getEnclosedMetaObject().isInterface() != null;
+    }
+
+    public boolean isAbstract() {
+        return getEnclosedMetaObject().isClass() != null && getEnclosedMetaObject().isClass().isAbstract();
+    }
+
+
+    public boolean isEnum() {
+        return getEnclosedMetaObject().isEnum() != null;
+    }
+
+    public boolean isAnnotation() {
+        return getEnclosedMetaObject().isAnnotation() != null;
+    }
+
+    public boolean isPublic() {
+        return getEnclosedMetaObject().isClassOrInterface() != null &&
+                getEnclosedMetaObject().isClassOrInterface().isPublic();
+    }
+
+    public boolean isPrivate() {
+        return getEnclosedMetaObject().isClassOrInterface() != null &&
+                getEnclosedMetaObject().isClassOrInterface().isPrivate();
+    }
+
+    public boolean isProtected() {
+        return getEnclosedMetaObject().isClassOrInterface() != null &&
+                getEnclosedMetaObject().isClassOrInterface().isProtected();
+    }
+
+    public boolean isFinal() {
+        return getEnclosedMetaObject().isClassOrInterface() != null &&
+                getEnclosedMetaObject().isClassOrInterface().isFinal();
+    }
+
+    public boolean isStatic() {
+        return getEnclosedMetaObject().isClassOrInterface() != null &&
+                getEnclosedMetaObject().isClassOrInterface().isStatic();
     }
 }

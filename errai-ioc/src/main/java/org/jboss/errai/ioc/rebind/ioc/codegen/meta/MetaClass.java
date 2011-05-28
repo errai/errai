@@ -1,5 +1,7 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta;
 
+import com.google.gwt.core.ext.typeinfo.JClassType;
+
 public interface MetaClass extends HasAnnotations {
     public String getName();
 
@@ -12,7 +14,7 @@ public interface MetaClass extends HasAnnotations {
     public MetaMethod getMethod(String name, Class... parameters);
 
     public MetaMethod getDeclaredMethod(String name, Class... parameters);
-    
+
     public MetaMethod getDeclaredMethod(String name, MetaClass... parameters);
 
     public MetaField[] getFields();
@@ -30,6 +32,42 @@ public interface MetaClass extends HasAnnotations {
     public MetaConstructor getConstructor(Class... parameters);
 
     public MetaConstructor getDeclaredConstructor(Class... parameters);
-    
+
     public MetaClass[] getParameterizedTypes();
+
+    public MetaClass[] getInterfaces();
+
+    public MetaClass getSuperClass();
+
+    public boolean isAssignableFrom(MetaClass clazz);
+
+    public boolean isAssignableTo(MetaClass clazz);
+
+    public boolean isAssignableFrom(Class clazz);
+
+    public boolean isAssignableTo(Class clazz);
+
+    public boolean isAssignableFrom(JClassType clazz);
+
+    public boolean isAssignableTo(JClassType clazz);
+
+    public boolean isInterface();
+
+    public boolean isAbstract();
+
+    public boolean isEnum();
+
+    public boolean isAnnotation();
+
+    public boolean isPublic();
+
+    public boolean isPrivate();
+
+    public boolean isProtected();
+
+    public boolean isFinal();
+
+    public boolean isStatic();
+
+
 }

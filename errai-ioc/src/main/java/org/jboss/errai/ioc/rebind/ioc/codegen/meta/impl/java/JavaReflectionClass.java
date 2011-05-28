@@ -139,6 +139,20 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
         }
     }
 
+    public MetaClass[] getInterfaces() {
+        List<MetaClass> metaClassList = new ArrayList<MetaClass>();
+        for (Class<?> type : getEnclosedMetaObject().getInterfaces()) {
+
+            metaClassList.add(MetaClassFactory.get(type));
+        }
+
+        return metaClassList.toArray(new MetaClass[metaClassList.size()]);
+    }
+
+    public MetaClass getSuperClass() {
+        return MetaClassFactory.get(getEnclosedMetaObject().getSuperclass());
+    }
+
     public Annotation[] getAnnotations() {
         if (annotationsCache == null) {
             annotationsCache = getEnclosedMetaObject().getAnnotations();
@@ -156,5 +170,41 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
             }
         }
         return parameterizedTypes.toArray(new MetaClass[parameterizedTypes.size()]);
+    }
+
+    public boolean isInterface() {
+        return getEnclosedMetaObject().isInterface();
+    }
+
+    public boolean isAbstract() {
+        return (getEnclosedMetaObject().getModifiers() & Modifier.ABSTRACT) != 0;
+    }
+
+    public boolean isEnum() {
+        return getEnclosedMetaObject().isEnum();
+    }
+
+    public boolean isAnnotation() {
+        return getEnclosedMetaObject().isAnnotation();
+    }
+
+    public boolean isPublic() {
+        return (getEnclosedMetaObject().getModifiers() & Modifier.PUBLIC) != 0;
+    }
+
+    public boolean isPrivate() {
+        return (getEnclosedMetaObject().getModifiers() & Modifier.PRIVATE) != 0;
+    }
+
+    public boolean isProtected() {
+        return (getEnclosedMetaObject().getModifiers() & Modifier.PROTECTED) != 0;
+    }
+
+    public boolean isFinal() {
+        return (getEnclosedMetaObject().getModifiers() & Modifier.FINAL) != 0;
+    }
+
+    public boolean isStatic() {
+        return (getEnclosedMetaObject().getModifiers() & Modifier.STATIC) != 0;
     }
 }
