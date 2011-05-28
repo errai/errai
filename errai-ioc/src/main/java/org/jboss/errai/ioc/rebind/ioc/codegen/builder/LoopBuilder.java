@@ -84,8 +84,4 @@ public class LoopBuilder extends AbstractStatementBuilder {
         context.add(loopVar);
         return loopVar;
     }
-
-    public String generate() {
-        return statement.generate();
-    }
 }

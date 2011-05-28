@@ -7,7 +7,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 
 /**
  * This class represents a {@link Statement} context. It has a reference to its
- * parent context and holds a map of variables that are currently in scope.
+ * parent context and holds a map of variables to represent the statement's scope.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
