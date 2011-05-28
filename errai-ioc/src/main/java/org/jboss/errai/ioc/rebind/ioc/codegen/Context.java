@@ -1,14 +1,14 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 
 /**
  * This class represents a {@link Statement} context. It has a reference to its
  * parent context and holds a map of variables to represent the statement's scope.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class Context {
@@ -35,6 +35,10 @@ public class Context {
         return this;
     }
 
+    public Context add(String name, Class type) {
+        return add(Variable.get(name, type));
+    }
+
     public Variable getVariable(String name) {
         Variable found = variables.get(name);
 
@@ -47,5 +51,13 @@ public class Context {
             throw new OutOfScopeException(name);
 
         return found;
+    }
+
+    public boolean isScoped(Variable variable) {
+        Context ctx = this;
+        do {
+            if (ctx.variables.containsValue(variable)) return true;
+        } while ((ctx = ctx.parent) != null);
+        return false;
     }
 }

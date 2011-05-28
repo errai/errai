@@ -1,12 +1,12 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen;
 
-import javax.enterprise.util.TypeLiteral;
-
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+
+import javax.enterprise.util.TypeLiteral;
 
 /**
  * This class represents a variable.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class Variable extends AbstractStatement {
@@ -17,7 +17,7 @@ public class Variable extends AbstractStatement {
         this.name = name;
         this.type = type;
     }
-    
+
     public static Variable get(String name, Class type) {
         return new Variable(name, MetaClassFactory.get(type));
     }
@@ -30,10 +30,14 @@ public class Variable extends AbstractStatement {
         return new Variable(name, type);
     }
 
-    public static Variable get(String name) {
-        return new Variable(name, null);
+    public static Reference get(final String name) {
+        return new Reference() {
+            public String getName() {
+                return name;
+            }
+        };
     }
-    
+
     public String getName() {
         return name;
     }
@@ -46,22 +50,22 @@ public class Variable extends AbstractStatement {
 
     private String hashString() {
         if (hashString == null) {
-            hashString = "Variable:"+name + ":" + type.getFullyQualifedName();
+            hashString = "Variable:" + name + ":" + type.getFullyQualifedName();
         }
         return hashString;
     }
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof Variable && 
-            hashString().equals("Variable:"+name + ":" + ((Variable) o).type.getFullyQualifedName());
+        return o instanceof Variable &&
+                hashString().equals("Variable:" + name + ":" + ((Variable) o).type.getFullyQualifedName());
     }
 
     @Override
     public int hashCode() {
         return hashString().hashCode();
     }
-    
+
     @Override
     public String toString() {
         return "Variable [name=" + name + ", type=" + type + "]";
