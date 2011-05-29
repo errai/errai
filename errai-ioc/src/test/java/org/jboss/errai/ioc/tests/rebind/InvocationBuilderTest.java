@@ -13,7 +13,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
- * Tests for the {@link StatementBuilder} API.
+ * Tests the generation of method invocations using the {@link StatementBuilder} API.
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -25,7 +25,9 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
                 Context.create().add(Variable.get("injector", MessageBusProvider.class)))
                 .loadVariable("injector")
                 .invoke("provide");
-        assertEquals("injector.provide()", invokeStatement.generate());
+        
+        assertEquals("failed to generate invocation on variable", 
+                "injector.provide()", invokeStatement.generate());
 
         invokeStatement = StatementBuilder.create(Context.create()
                 .add("i", Integer.class)
@@ -34,7 +36,9 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
                 .loadVariable("i")
                 .invoke("toString")
                 .invoke("replaceAll", Variable.get("regex"), Variable.get("replacement"));
-        assertEquals("i.toString().replaceAll(regex, replacement)", invokeStatement.generate());
+        
+        assertEquals("failed to generate multiple invocations on variable", 
+                "i.toString().replaceAll(regex, replacement)", invokeStatement.generate());
     }
 
     @Test
@@ -42,10 +46,13 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
         String result = StatementBuilder.create(Context.create().add(Variable.get("s", String.class)))
                 .loadVariable("s").invoke("replaceAll", "foo", "foo\t\n").generate();
 
-        assertEquals("s.replaceAll(\"foo\", \"foo\\t\\n\")", result);
+        assertEquals("failed to generate invocation using literal parameters",
+                "s.replaceAll(\"foo\", \"foo\\t\\n\")", result);
 
         result = StatementBuilder.create().loadLiteral("foo").invoke("toString").generate();
-        assertEquals("\"foo\".toString()", result);
+        
+        assertEquals("failed to generate invocation using literal parameters", 
+                "\"foo\".toString()", result);
     }
 
     @Test

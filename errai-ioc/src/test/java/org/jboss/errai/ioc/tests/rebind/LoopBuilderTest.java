@@ -1,5 +1,12 @@
 package org.jboss.errai.ioc.tests.rebind;
 
+import static org.junit.Assert.fail;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.enterprise.util.TypeLiteral;
+
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
@@ -9,12 +16,6 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.TypeNotIterableException;
 import org.junit.Test;
-
-import javax.enterprise.util.TypeLiteral;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.fail;
 
 /**
  * Tests the generation of loops using the {@link StatementBuilder} API.
@@ -32,8 +33,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
                 .newObject(Object.class);
 
         String foreachWithListOfStrings = StatementBuilder.create(
-                Context.create().add("list", new TypeLiteral<List<String>>() {
-                }))
+                Context.create().add("list", new TypeLiteral<List<String>>() {}))
                 .loadVariable("list")
                 .foreach("element")
                 .generate();
@@ -53,19 +53,21 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
                 .execute(createAnotherObject)
                 .generate();
 
-        assertEquals(FOREACH_RESULT_STRING_IN_LIST, foreachWithListOfStrings);
-        assertEquals(FOREACH_RESULT_STRING_IN_LIST_ONE_STATEMENT, foreachWithStringArray);
-        assertEquals(FOREACH_RESULT_OBJECT_IN_LIST_TWO_STATEMENTS, foreachWithList);
+        assertEquals("failed to generate foreach loop using a List<String>", 
+                FOREACH_RESULT_STRING_IN_LIST, foreachWithListOfStrings);
+        assertEquals("failed to generate foreach loop using a String[]",
+                FOREACH_RESULT_STRING_IN_ARRAY_ONE_STATEMENT, foreachWithStringArray);
+        assertEquals("failed to generate foreach loop using a List<?>", 
+                FOREACH_RESULT_OBJECT_IN_LIST_TWO_STATEMENTS, foreachWithList);
     }
 
     @Test
     public void testForeachLoopWithUndefinedCollection() throws Exception {
-
         try {
             StatementBuilder.create()
-                    .loadVariable("list")
-                    .foreach("element", Integer.class)
-                    .generate();
+                .loadVariable("list")
+                .foreach("element", Integer.class)
+                .generate();
 
             fail("Expected OutOfScopeException");
         } catch (OutOfScopeException oose) {
@@ -76,17 +78,16 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
     @Test
     public void testForeachLoopWithProvidedLoopVarType() throws Exception {
         Statement loop = StatementBuilder.create(
-                Context.create().add("list", new TypeLiteral<List<String>>() {
-                }))
+                Context.create().add("list", new TypeLiteral<List<String>>() {}))
                 .loadVariable("list")
                 .foreach("element", Object.class);
 
-        assertEquals(FOREACH_RESULT_OBJECT_IN_LIST, loop.generate());
+        assertEquals("failed to generate foreach loop with provided loop var type", 
+                FOREACH_RESULT_OBJECT_IN_LIST, loop.generate());
 
         try {
             StatementBuilder.create(
-                    Context.create().add("list", new TypeLiteral<List<String>>() {
-                    }))
+                    Context.create().add("list", new TypeLiteral<List<String>>() {}))
                     .loadVariable("list")
                     .foreach("element", Integer.class)
                     .generate();
@@ -102,19 +103,18 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         Statement createObject = StatementBuilder.create().newObject(Integer.class);
 
         Statement outerLoop = StatementBuilder.create(
-                Context.create().add("list", new TypeLiteral<List<String>>() {
-                }))
+                Context.create().add("list", new TypeLiteral<List<String>>() {}))
                 .loadVariable("list")
                 .foreach("element")
                 .execute(StatementBuilder.create(
-                        Context.create().add(Variable.get("anotherList", new TypeLiteral<List<String>>() {
-                        })))
+                        Context.create().add(Variable.get("anotherList", new TypeLiteral<List<String>>() {})))
                         .loadVariable("anotherList")
                         .foreach("anotherElement")
                         .execute(createObject)
                 );
 
-        assertEquals(FOREACH_RESULT_NESTED_STRING_IN_LIST, outerLoop.generate());
+        assertEquals("failed to generate nested foreach loops",
+                FOREACH_RESULT_NESTED_STRING_IN_LIST, outerLoop.generate());
     }
 
     @Test
@@ -141,7 +141,8 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
                 .invoke("keySet")
                 .foreach("key");
 
-        assertEquals(FOREACH_RESULT_KEYSET_LOOP, loop.generate());
+        assertEquals("failed to generate foreach loop using invoke()",
+                FOREACH_RESULT_KEYSET_LOOP, loop.generate());
     }
 
     @Test
@@ -152,7 +153,8 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
 
         Statement body = StatementBuilder.create(loopBody.getContext()).loadVariable("s").invoke("getBytes");
         Statement loop = loopBody.execute(body);
-        assertEquals(FOREACH_RESULT_LITERAL_STRING_ARRAY, loop.generate());
+        assertEquals("failed to generate foreach loop using a literal String array",
+                FOREACH_RESULT_LITERAL_STRING_ARRAY, loop.generate());
 
         Context c = Context.create().add(Variable.get("s", String.class));
         loop = StatementBuilder.create(c)
@@ -160,6 +162,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
                 .foreach("s")
                 .execute(StatementBuilder.create(c).loadVariable("s").invoke("getBytes"));
 
-        assertEquals(FOREACH_RESULT_LITERAL_STRING_ARRAY, loop.generate());
+        assertEquals("failed to generate foreach loop using a literal String array", 
+                FOREACH_RESULT_LITERAL_STRING_ARRAY, loop.generate());
     }
 }

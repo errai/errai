@@ -11,7 +11,7 @@ public interface LoopBuilderTestResult {
         "for (java.lang.String element : list) {" +
         "\n}";
 
-    public static final String FOREACH_RESULT_STRING_IN_LIST_ONE_STATEMENT = 
+    public static final String FOREACH_RESULT_STRING_IN_ARRAY_ONE_STATEMENT = 
         "for (java.lang.String element : list) {" +
             "\nnew java.lang.String();" + 
         "\n}";

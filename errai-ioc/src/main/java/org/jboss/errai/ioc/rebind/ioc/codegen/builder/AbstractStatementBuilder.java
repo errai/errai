@@ -11,7 +11,6 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public abstract class AbstractStatementBuilder implements Statement {
-    protected StringBuilder buf = new StringBuilder();
     protected Context context = null;
     protected Statement statement = null;
     protected AbstractStatementBuilder parent = null;
