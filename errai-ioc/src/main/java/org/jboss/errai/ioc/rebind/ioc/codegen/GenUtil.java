@@ -11,21 +11,25 @@ public class GenUtil {
         Statement[] statements = new Statement[parameters.length];
         int i = 0;
         for (Object o : parameters) {
-            if (o instanceof Reference) {
-                statements[i++] = context.getVariable(((Reference) o).getName());
-            } else if (o instanceof Variable) {
-                Variable v = (Variable) o;
-                if (context.isScoped(v)) {
-                    statements[i++] = v;
-                } else {
-                    throw new OutOfScopeException("variable cannot be referenced from this scope: " + v.getName());
-                }
-            } else if (o instanceof Statement) {
-                statements[i++] = (Statement) o;
-            } else {
-                statements[i++] = LiteralFactory.getLiteral(o);
-            }
+            statements[i++] = generate(context, o);
         }
         return statements;
+    }
+
+    public static Statement generate(Context context, Object o) {
+        if (o instanceof Reference) {
+            return context.getVariable(((Reference) o).getName());
+        } else if (o instanceof Variable) {
+            Variable v = (Variable) o;
+            if (context.isScoped(v)) {
+                return v;
+            } else {
+                throw new OutOfScopeException("variable cannot be referenced from this scope: " + v.getName());
+            }
+        } else if (o instanceof Statement) {
+            return (Statement) o;
+        } else {
+            return LiteralFactory.getLiteral(o);
+        }
     }
 }

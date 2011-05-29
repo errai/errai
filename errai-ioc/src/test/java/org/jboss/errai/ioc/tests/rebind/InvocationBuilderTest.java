@@ -104,4 +104,34 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
             assertTrue(oose.getMessage().contains("param2"));
         }
     }
+
+    @Test
+    public void testStandardizedReferences() {
+        Context context = Context.create()
+                .add("s", String.class)
+                .add("regex", String.class)
+                .add("replacement", String.class);
+
+        String s = StatementBuilder.create(context)
+                .load(Variable.get("s"))
+                .invoke("toUpperCase").generate();
+
+        assertEquals("failed using load() passing a Reference",
+                "s.toUpperCase()", s);
+
+        Variable v = Variable.get("s", String.class);
+        s = StatementBuilder.create(context)
+                .load(v)
+                .invoke("toUpperCase").generate();
+
+        assertEquals("failed using load() passing a Variable instance",
+                "s.toUpperCase()", s);
+
+        s = StatementBuilder.create(context)
+                .load("foo")
+                .invoke("toUpperCase").generate();
+
+        assertEquals("failed injecting literal with load()",
+                "\"foo\".toUpperCase()", s);
+    }
 }
