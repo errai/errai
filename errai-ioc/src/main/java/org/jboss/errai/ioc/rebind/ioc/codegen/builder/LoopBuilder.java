@@ -1,8 +1,9 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.BlockStatement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.GenUtil;
+import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.control.ForeachLoop;
@@ -55,7 +56,7 @@ public class LoopBuilder extends AbstractStatementBuilder {
     }
 
     private LoopBodyBuilder foreach(String loopVarName, MetaClass loopVarType, Statement collection) {
-        assertIsIterable(collection);
+        GenUtil.assertIsIterable(collection);
 
         Variable loopVar = createLoopVar(collection, loopVarName, loopVarType);
         BlockStatement body = new BlockStatement();
@@ -70,13 +71,13 @@ public class LoopBuilder extends AbstractStatementBuilder {
         MetaClass loopVarType = MetaClassFactory.get(Object.class);
         if (collection.getType().getParameterizedTypes().length > 0) {
             loopVarType = collection.getType().getParameterizedTypes()[0];
-        } else if (getComponentType(collection) != null) {
-            loopVarType = getComponentType(collection);
+        } else if (GenUtil.getComponentType(collection) != null) {
+            loopVarType = GenUtil.getComponentType(collection);
         }
 
         // try to use the provided loop variable type if possible (assignable from the inferred type)
         if (providedLoopVarType != null) {
-            assertAssignableTypes(loopVarType, providedLoopVarType);
+            GenUtil.assertAssignableTypes(loopVarType, providedLoopVarType);
             loopVarType = providedLoopVarType;
         }
 
