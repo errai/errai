@@ -14,29 +14,69 @@ import javax.enterprise.util.TypeLiteral;
 public class Variable extends AbstractStatement {
     private String name;
     private MetaClass type;
-    private Object initialization;
+    private Statement value;
 
     private Variable(String name, MetaClass type) {
         this.name = name;
         this.type = type;
     }
 
+    private Variable(String name, Object initialization) {
+        this.name = name;
+        initialize(initialization);
+    }
+    
+    private Variable(String name, MetaClass type, Object initialization) {
+       this(name, type);
+       initialize(initialization);
+    }
+    
     public void initialize(Object initialization) {
-        this.initialization = initialization;
+        this.value = createInitialization(initialization);
     }
 
-    public static Variable create(String name, Class type) {
+    public static Variable create(String name, Class<?> type) {
         return new Variable(name, MetaClassFactory.get(type));
     }
 
-    public static Variable create(String name, TypeLiteral type) {
+    public static Variable create(String name, TypeLiteral<?> type) {
         return new Variable(name, MetaClassFactory.get(type));
     }
 
     public static Variable create(String name, MetaClass type) {
         return new Variable(name, type);
     }
+    
+    public static Variable create(String name, Object initialization) {
+        return new Variable(name, null, initialization);
+    }
+    
+    public static Variable create(String name, Class<?> type, Object initialization) {
+        return new Variable(name, MetaClassFactory.get(type), initialization);
+    }
 
+    public static Variable create(String name, TypeLiteral<?> type, Object initialization) {
+        return new Variable(name, MetaClassFactory.get(type), initialization);
+    }
+
+    public static Variable create(String name, MetaClass type, Object initialization) {
+        return new Variable(name, type, initialization);
+    }
+
+    // use type inference and implicit conversions if necessary
+    private Statement createInitialization(Object initialization) {
+        Statement initStatement = GenUtil.generate(getContext(), initialization);
+        MetaClass inferredType = (initStatement != null) ? initStatement.getType() : null;
+        if (type == null) {
+            if (inferredType == null) {
+                throw new InvalidTypeException("No type specified and no initialization provided to infer the type.");
+            } else {
+                type = inferredType;
+            }
+        }
+        return GenUtil.convert(getContext(), initialization, type);
+    }
+    
     public static VariableReference get(final String name) {
         return new VariableReference() {
             public String getName() {
@@ -52,6 +92,10 @@ public class Variable extends AbstractStatement {
             }
 
             public Context getContext() {
+                return null;
+            }
+            
+            public Statement getValue() {
                 return null;
             }
         };
@@ -73,6 +117,10 @@ public class Variable extends AbstractStatement {
 
             public Context getContext() {
                 return null;
+            }
+            
+            public Statement getValue() {
+                return value;
             }
         };
     }
@@ -111,17 +159,6 @@ public class Variable extends AbstractStatement {
     }
 
     public String generate() {
-        Statement initialization = GenUtil.generate(getContext(), this.initialization);
-        MetaClass inferredType = (initialization != null) ? initialization.getType() : null;
-        if (type == null) {
-            if (inferredType == null) {
-                throw new InvalidTypeException("No type and no initialization specified to infer the type.");
-            } else {
-                type = initialization.getType();
-            }
-        }
-        initialization = GenUtil.convert(getContext(), this.initialization, type);
-
-        return new DeclareAssignmentBuilder(getReference(), initialization).generate() + ";";
+        return new DeclareAssignmentBuilder(getReference(), value).generate() + ";";
     }
 }

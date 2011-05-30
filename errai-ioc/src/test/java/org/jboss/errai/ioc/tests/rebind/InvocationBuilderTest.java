@@ -1,14 +1,18 @@
 package org.jboss.errai.ioc.tests.rebind;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import org.jboss.errai.ioc.client.api.builtin.MessageBusProvider;
-import org.jboss.errai.ioc.rebind.ioc.codegen.*;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Refs;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ContextBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedMethodException;
 import org.junit.Test;
-
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Tests the generation of method invocations using the {@link StatementBuilder} API.
@@ -19,18 +23,18 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
 
     @Test
     public void testInvoke() {
-        Statement invokeStatement = StatementBuilder.create(
-                Context.create().add(Variable.create("injector", MessageBusProvider.class)))
+        Statement invokeStatement = StatementBuilder.create()
+                .addVariable(Variable.create("injector", MessageBusProvider.class))
                 .loadVariable("injector")
                 .invoke("provide");
 
         assertEquals("failed to generate invocation on variable",
                 "injector.provide()", invokeStatement.generate());
 
-        invokeStatement = StatementBuilder.create(Context.create()
-                .add("i", Integer.class)
-                .add("regex", String.class)
-                .add("replacement", String.class))
+        invokeStatement = StatementBuilder.create()
+                .addVariable("i", Integer.class)
+                .addVariable("regex", String.class)
+                .addVariable("replacement", String.class)
                 .loadVariable("i")
                 .invoke("toString")
                 .invoke("replaceAll", Variable.get("regex"), Variable.get("replacement"));
@@ -41,7 +45,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
 
     @Test
     public void testInvokeWithLiterals() {
-        String result = StatementBuilder.create(Context.create().add(Variable.create("s", String.class)))
+        String result = StatementBuilder.create().addVariable(Variable.create("s", String.class))
                 .loadVariable("s").invoke("replaceAll", "foo", "foo\t\n").generate();
 
         assertEquals("failed to generate invocation using literal parameters",
@@ -56,10 +60,9 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
     @Test
     public void testInvokeOnUndefinedMethods() {
         try {
-            StatementBuilder.create(
-                    Context.create()
-                            .add("injector", MessageBusProvider.class)
-                            .add("param", String.class))
+            StatementBuilder.create()
+                    .addVariable("injector", MessageBusProvider.class)
+                    .addVariable("param", String.class)
                     .loadVariable("injector")
                     .invoke("provide", Variable.get("param"));
             fail("expected UndefinedMethodException");
@@ -68,12 +71,10 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
         }
 
         try {
-            Context context = Context.create()
-                    .add("s", String.class)
-                    .add("regex", String.class)
-                    .add("replacement", String.class);
-
-            StatementBuilder.create(context)
+            StatementBuilder.create()
+                    .addVariable("s", String.class)
+                    .addVariable("regex", String.class)
+                    .addVariable("replacement", String.class)
                     .loadVariable("s")
                     .invoke("replaceAll", Variable.get("regex"), Variable.get("replacement"))
                     .invoke("idontexist", Variable.get("regex"), Variable.get("replacement"));
@@ -98,9 +99,9 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
 
         try {
             // param2 undefined
-            StatementBuilder.create(Context.create()
-                    .add(Variable.create("injector", MessageBusProvider.class))
-                    .add(Variable.create("param", String.class)))
+            StatementBuilder.create()
+                    .addVariable(Variable.create("injector", MessageBusProvider.class))
+                    .addVariable(Variable.create("param", String.class))
                     .loadVariable("injector")
                     .invoke("provide", Variable.get("param"), Variable.get("param2"));
             fail("expected OutOfScopeException");
@@ -112,10 +113,11 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
 
     @Test
     public void testStandardizedReferences() {
-        Context context = Context.create()
-                .add("s", String.class)
-                .add("regex", String.class)
-                .add("replacement", String.class);
+        Context context = ContextBuilder.create()
+                .addVariable("s", String.class)
+                .addVariable("regex", String.class)
+                .addVariable("replacement", String.class)
+                .getContext();
 
         String s = StatementBuilder.create(context)
                 .load(Variable.get("s"))

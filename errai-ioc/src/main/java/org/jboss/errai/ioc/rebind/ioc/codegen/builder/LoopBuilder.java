@@ -77,7 +77,7 @@ public class LoopBuilder extends AbstractStatementBuilder {
         }
 
         Variable loopVar = Variable.create(loopVarName, loopVarType);
-        context.add(loopVar);
+        context.addVariable(loopVar);
         return loopVar;
     }
 }

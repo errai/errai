@@ -23,6 +23,10 @@ public abstract class Refs {
             public Context getContext() {
                 return null;
             }
+
+            public Statement getValue() {
+                return null;
+            }
         };
     }
 }

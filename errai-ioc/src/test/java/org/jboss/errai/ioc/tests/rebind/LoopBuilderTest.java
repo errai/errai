@@ -1,20 +1,22 @@
 package org.jboss.errai.ioc.tests.rebind;
 
+import static org.junit.Assert.fail;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.enterprise.util.TypeLiteral;
+
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ContextBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.LoopBuilder.LoopBodyBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.TypeNotIterableException;
 import org.junit.Test;
-
-import javax.enterprise.util.TypeLiteral;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.fail;
 
 /**
  * Tests the generation of loops using the {@link StatementBuilder} API.
@@ -31,21 +33,21 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         Statement createAnotherObject = StatementBuilder.create()
                 .newObject(Object.class);
 
-        String foreachWithListOfStrings = StatementBuilder.create(
-                Context.create().add("list", new TypeLiteral<List<String>>() {}))
+        String foreachWithListOfStrings = StatementBuilder.create()
+                .addVariable("list", new TypeLiteral<List<String>>() {})
                 .loadVariable("list")
                 .foreach("element")
                 .generate();
 
-        String foreachWithStringArray = StatementBuilder.create(
-                Context.create().add("list", String[].class))
+        String foreachWithStringArray = StatementBuilder.create()
+                .addVariable("list", String[].class)
                 .loadVariable("list")
                 .foreach("element")
                 .execute(createObject)
                 .generate();
 
-        String foreachWithList = StatementBuilder.create(
-                Context.create().add(Variable.create("list", List.class)))
+        String foreachWithList = StatementBuilder.create()
+                .addVariable(Variable.create("list", List.class))
                 .loadVariable("list")
                 .foreach("element")
                 .execute(createObject)
@@ -76,8 +78,8 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
 
     @Test
     public void testForeachLoopWithProvidedLoopVarType() throws Exception {
-        Statement loop = StatementBuilder.create(
-                Context.create().add("list", new TypeLiteral<List<String>>() {}))
+        Statement loop = StatementBuilder.create()
+                .addVariable("list", new TypeLiteral<List<String>>() {})
                 .loadVariable("list")
                 .foreach("element", Object.class);
 
@@ -85,8 +87,8 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
                 FOREACH_RESULT_OBJECT_IN_LIST, loop.generate());
 
         try {
-            StatementBuilder.create(
-                    Context.create().add("list", new TypeLiteral<List<String>>() {}))
+            StatementBuilder.create()
+                    .addVariable("list", new TypeLiteral<List<String>>() {})
                     .loadVariable("list")
                     .foreach("element", Integer.class)
                     .generate();
@@ -101,12 +103,12 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
     public void testNestedForeachLoops() throws Exception {
         Statement createObject = StatementBuilder.create().newObject(Integer.class);
 
-        Statement outerLoop = StatementBuilder.create(
-                Context.create().add("list", new TypeLiteral<List<String>>() {}))
+        Statement outerLoop = StatementBuilder.create()
+                .addVariable("list", new TypeLiteral<List<String>>() {})
                 .loadVariable("list")
                 .foreach("element")
                 .execute(StatementBuilder.create(
-                        Context.create().add(Variable.create("anotherList", new TypeLiteral<List<String>>() {})))
+                        ContextBuilder.create().addVariable(Variable.create("anotherList", new TypeLiteral<List<String>>() {})))
                         .loadVariable("anotherList")
                         .foreach("anotherElement")
                         .execute(createObject)
@@ -120,8 +122,8 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
     public void testForeachLoopWithInvalidCollectionType() throws Exception {
 
         try {
-            StatementBuilder.create(
-                    Context.create().add("list", String.class))
+            StatementBuilder.create()
+                    .addVariable("list", String.class)
                     .loadVariable("list")
                     .foreach("element")
                     .generate();
@@ -134,8 +136,8 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
 
     @Test
     public void testForeachLoopWithInvoke() throws Exception {
-        Statement loop = StatementBuilder.create(
-                Context.create().add("map", Map.class))
+        Statement loop = StatementBuilder.create()
+                .addVariable("map", Map.class)
                 .loadVariable("map")
                 .invoke("keySet")
                 .foreach("key");
@@ -155,7 +157,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         assertEquals("failed to generate foreach loop using a literal String array",
                 FOREACH_RESULT_LITERAL_STRING_ARRAY, loop.generate());
 
-        Context c = Context.create().add(Variable.create("s", String.class));
+        Context c = ContextBuilder.create().addVariable(Variable.create("s", String.class)).getContext();
         loop = StatementBuilder.create(c)
                 .loadLiteral(new String[]{"s1", "s2"})
                 .foreach("s")

@@ -1,12 +1,9 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.VariableDeclarationBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.VariableDeclarationBuilder.VariableInitializationBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
-
-import javax.enterprise.util.TypeLiteral;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 
 /**
  * This class represents a {@link Statement} context. It has a reference to its
@@ -33,31 +30,10 @@ public class Context {
         return new Context(parent);
     }
 
-    public Context add(Variable variable) {
+    public void addVariable(Variable variable) {
         variables.put(variable.getName(), variable);
-        return this;
     }
 
-    public Context add(String name, Class<?> type) {
-        return add(Variable.create(name, type));
-    }
-
-    public Context add(String name, TypeLiteral<?> type) {
-        return add(Variable.create(name, type));
-    }
-
-    public VariableInitializationBuilder declareVariable(String name, Class<?> type) {
-        return VariableDeclarationBuilder.createInContextOf(this).declareVariable(Variable.create(name, type));
-    }
-
-    public VariableInitializationBuilder declareVariable(String name, TypeLiteral<?> type) {
-        return VariableDeclarationBuilder.createInContextOf(this).declareVariable(Variable.create(name, type));
-    }
-
-    public VariableInitializationBuilder declareVariable(String name) {
-        return VariableDeclarationBuilder.createInContextOf(this).declareVariable(name);
-    }
-    
     public VariableReference getVariable(String name) {
         Variable found = variables.get(name);
 

@@ -6,4 +6,5 @@ package org.jboss.errai.ioc.rebind.ioc.codegen;
  */
 public interface VariableReference extends Statement {
     public String getName();
+    public Statement getValue();
 }

@@ -1,6 +1,5 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 
@@ -23,21 +22,21 @@ public class VariableDeclarationBuilder extends AbstractStatementBuilder {
         }
     }
 
-    private VariableDeclarationBuilder(Context context) {
-        super(context);
+    private VariableDeclarationBuilder(ContextBuilder parent) {
+        super(parent.getContext());
     }
 
-    public static VariableDeclarationBuilder createInContextOf(Context context) {
-        return new VariableDeclarationBuilder(context);
+    public static VariableDeclarationBuilder createInContextOf(ContextBuilder parent) {
+        return new VariableDeclarationBuilder(parent);
     }
 
     public VariableInitializationBuilder declareVariable(Variable var) {
+        context.addVariable(var);
         statement = var;
         return new VariableInitializationBuilder();
     }
 
     public VariableInitializationBuilder declareVariable(String name) {
-        statement = Variable.create(name, (Class<?>) null);
-        return new VariableInitializationBuilder();
+        return declareVariable(Variable.create(name, (Class<?>) null));
     }
 }
