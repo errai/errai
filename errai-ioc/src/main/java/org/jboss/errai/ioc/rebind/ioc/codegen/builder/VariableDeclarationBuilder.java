@@ -4,7 +4,6 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.GenUtil;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
-import org.jboss.errai.ioc.rebind.ioc.codegen.VariableDeclaration;
 
 /**
  * StatementBuilder to generate variable declarations.
@@ -20,7 +19,7 @@ public class VariableDeclarationBuilder extends AbstractStatementBuilder {
         }
         
         public Statement initializeWith(Object initialization) {
-            ((VariableDeclaration)statement).initialize(GenUtil.generate(context, initialization));
+            ((Variable)statement).initialize(GenUtil.generate(context, initialization));
             return statement;
         }
     }
@@ -35,12 +34,12 @@ public class VariableDeclarationBuilder extends AbstractStatementBuilder {
     }
     
     public VariableInitializationBuilder declareVariable(Variable var) {
-        statement = new VariableDeclaration(var);
+        statement = var;
         return new VariableInitializationBuilder();
     }
     
     public VariableInitializationBuilder declareVariable(String name) {
-        statement = new VariableDeclaration(Variable.get(name, (Class<?>) null));
+        statement = Variable.get(name, (Class<?>) null);
         return new VariableInitializationBuilder();
     }
 }

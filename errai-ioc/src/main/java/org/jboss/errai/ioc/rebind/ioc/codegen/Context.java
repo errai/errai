@@ -44,7 +44,7 @@ public class Context {
         return add(Variable.get(name, type));
     }
 
-    public Variable getVariable(String name) {
+    public VariableReference getVariable(String name) {
         Variable found = variables.get(name);
 
         Context parent = this.parent;
@@ -55,7 +55,7 @@ public class Context {
         if (found == null)
             throw new OutOfScopeException(name);
 
-        return found;
+        return found.getReference();
     }
 
     public boolean isScoped(Variable variable) {

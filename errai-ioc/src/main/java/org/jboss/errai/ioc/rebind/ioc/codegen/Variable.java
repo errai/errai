@@ -1,5 +1,6 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 import javax.enterprise.util.TypeLiteral;
@@ -12,12 +13,17 @@ import javax.enterprise.util.TypeLiteral;
 public class Variable extends AbstractStatement {
     private String name;
     private MetaClass type;
+    private Statement initialization;
 
     private Variable(String name, MetaClass type) {
         this.name = name;
         this.type = type;
     }
 
+    public void initialize(Statement initialization) {
+        this.initialization = initialization;
+    }
+    
     public static Variable get(String name, Class type) {
         return new Variable(name, MetaClassFactory.get(type));
     }
@@ -30,14 +36,46 @@ public class Variable extends AbstractStatement {
         return new Variable(name, type);
     }
 
-    public static Reference get(final String name) {
-        return new Reference() {
+    public static VariableReference get(final String name) {
+        return new VariableReference() {
             public String getName() {
                 return name;
+            }
+
+            public String generate() {
+                return name;
+            }
+
+            public MetaClass getType() {
+                return null;
+            }
+
+            public Context getContext() {
+                return null;
             }
         };
     }
 
+    public VariableReference getReference() {
+        return new VariableReference() {
+            public String getName() {
+                return name;
+            }
+
+            public String generate() {
+                return name;
+            }
+
+            public MetaClass getType() {
+                return type;
+            }
+
+            public Context getContext() {
+                return null;
+            }
+        };
+    }
+    
     public String getName() {
         return name;
     }
@@ -72,6 +110,24 @@ public class Variable extends AbstractStatement {
     }
 
     public String generate() {
-        return name;
+        StringBuilder buf = new StringBuilder();
+
+        MetaClass inferredType = (initialization!=null)?initialization.getType():null;
+        if (type==null) {
+            if (inferredType==null) {
+                throw new InvalidTypeException("No type and no initialization specified to infer the type.");
+            } else {
+                type = initialization.getType();
+            }
+        } 
+        // use mvel instead and try to convert types
+        GenUtil.assertAssignableTypes(inferredType, type);
+        
+        buf.append(type.getFullyQualifedName()).append(" ").append(name);
+        if (initialization != null)
+            buf.append(" = ").append(initialization.generate());
+        buf.append(";");
+
+        return buf.toString();
     }
 }

@@ -22,12 +22,12 @@ public class GenUtil {
     }
 
     public static Statement generate(Context context, Object o) {
-        if (o instanceof Reference) {
-            return context.getVariable(((Reference) o).getName());
+        if (o instanceof VariableReference) {
+            return context.getVariable(((VariableReference) o).getName());
         } else if (o instanceof Variable) {
             Variable v = (Variable) o;
             if (context.isScoped(v)) {
-                return v;
+                return v.getReference();
             } else {
                 throw new OutOfScopeException("variable cannot be referenced from this scope: " + v.getName());
             }
