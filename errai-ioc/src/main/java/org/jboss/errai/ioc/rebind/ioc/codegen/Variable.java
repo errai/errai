@@ -1,10 +1,10 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen;
 
-import javax.enterprise.util.TypeLiteral;
-
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.DeclareAssignmentBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+
+import javax.enterprise.util.TypeLiteral;
 
 /**
  * This class represents a variable.
@@ -120,8 +120,8 @@ public class Variable extends AbstractStatement {
                 type = initialization.getType();
             }
         }
-        initialization=GenUtil.convert(getContext(), this.initialization, type);
+        initialization = GenUtil.convert(getContext(), this.initialization, type);
 
-        return new DeclareAssignmentBuilder(getReference(), initialization).generate()+";";
+        return new DeclareAssignmentBuilder(getReference(), initialization).generate() + ";";
     }
 }
