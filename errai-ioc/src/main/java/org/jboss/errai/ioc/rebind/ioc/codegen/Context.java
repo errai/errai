@@ -44,7 +44,6 @@ public class Context {
         return add(Variable.get(name, type));
     }
 
-
     public Variable getVariable(String name) {
         Variable found = variables.get(name);
 

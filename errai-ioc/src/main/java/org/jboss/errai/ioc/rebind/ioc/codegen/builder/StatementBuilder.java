@@ -1,7 +1,11 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
+import javax.enterprise.util.TypeLiteral;
+
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.GenUtil;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.VariableDeclarationBuilder.VariableInitializationBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.values.LiteralFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java.JavaReflectionClass;
@@ -38,6 +42,18 @@ public class StatementBuilder extends AbstractStatementBuilder {
         return ContextualStatementBuilder.createInContextOf(this);
     }
 
+    public VariableInitializationBuilder declareVariable(String name, Class<?> type) {
+        return VariableDeclarationBuilder.create(this).declareVariable(Variable.get(name, type));
+    }
+    
+    public VariableInitializationBuilder declareVariable(String name, TypeLiteral<?> type) {
+        return VariableDeclarationBuilder.create(this).declareVariable(Variable.get(name, type));
+    }
+    
+    public VariableInitializationBuilder declareVariable(String name) {
+        return VariableDeclarationBuilder.create(this).declareVariable(name);
+    }
+    
     public ObjectBuilder newObject(MetaClass type) {
         return ObjectBuilder.newInstanceOf(type);
     }
