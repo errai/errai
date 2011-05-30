@@ -1,17 +1,12 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.BlockStatement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.GenUtil;
-import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.control.ForeachLoop;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
  * StatementBuilder to generate loops.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class LoopBuilder extends AbstractStatementBuilder {
@@ -32,7 +27,7 @@ public class LoopBuilder extends AbstractStatementBuilder {
         public String generate() {
             return LoopBuilder.this.generate();
         }
-        
+
         public Context getContext() {
             return context;
         }
@@ -61,10 +56,10 @@ public class LoopBuilder extends AbstractStatementBuilder {
         Variable loopVar = createLoopVar(collection, loopVarName, loopVarType);
         BlockStatement body = new BlockStatement();
         statement = new ForeachLoop(loopVar, collection, body);
-        
+
         return new LoopBodyBuilder(body);
     }
-    
+
     private Variable createLoopVar(Statement collection, String loopVarName, MetaClass providedLoopVarType) {
 
         // infer the loop variable type
@@ -81,7 +76,7 @@ public class LoopBuilder extends AbstractStatementBuilder {
             loopVarType = providedLoopVarType;
         }
 
-        Variable loopVar = Variable.get(loopVarName, loopVarType);
+        Variable loopVar = Variable.create(loopVarName, loopVarType);
         context.add(loopVar);
         return loopVar;
     }

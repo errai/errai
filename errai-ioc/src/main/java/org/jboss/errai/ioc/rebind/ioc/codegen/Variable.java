@@ -23,16 +23,16 @@ public class Variable extends AbstractStatement {
     public void initialize(Statement initialization) {
         this.initialization = initialization;
     }
-    
-    public static Variable get(String name, Class type) {
+
+    public static Variable create(String name, Class type) {
         return new Variable(name, MetaClassFactory.get(type));
     }
 
-    public static Variable get(String name, TypeLiteral type) {
+    public static Variable create(String name, TypeLiteral type) {
         return new Variable(name, MetaClassFactory.get(type));
     }
 
-    public static Variable get(String name, MetaClass type) {
+    public static Variable create(String name, MetaClass type) {
         return new Variable(name, type);
     }
 
@@ -75,7 +75,7 @@ public class Variable extends AbstractStatement {
             }
         };
     }
-    
+
     public String getName() {
         return name;
     }
@@ -112,17 +112,17 @@ public class Variable extends AbstractStatement {
     public String generate() {
         StringBuilder buf = new StringBuilder();
 
-        MetaClass inferredType = (initialization!=null)?initialization.getType():null;
-        if (type==null) {
-            if (inferredType==null) {
+        MetaClass inferredType = (initialization != null) ? initialization.getType() : null;
+        if (type == null) {
+            if (inferredType == null) {
                 throw new InvalidTypeException("No type and no initialization specified to infer the type.");
             } else {
                 type = initialization.getType();
             }
-        } 
+        }
         // use mvel instead and try to convert types
         GenUtil.assertAssignableTypes(inferredType, type);
-        
+
         buf.append(type.getFullyQualifedName()).append(" ").append(name);
         if (initialization != null)
             buf.append(" = ").append(initialization.generate());

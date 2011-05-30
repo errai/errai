@@ -1,7 +1,5 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
-import javax.enterprise.util.TypeLiteral;
-
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.GenUtil;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
@@ -9,6 +7,8 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.VariableDeclarationBuilder
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.values.LiteralFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java.JavaReflectionClass;
+
+import javax.enterprise.util.TypeLiteral;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -27,7 +27,7 @@ public class StatementBuilder extends AbstractStatementBuilder {
         return new StatementBuilder(context);
     }
 
-    public ContextualStatementBuilder loadVariable(String name) {
+    public VariableReferenceContextualStatement loadVariable(String name) {
         statement = context.getVariable(name);
         return ContextualStatementBuilder.createInContextOf(this);
     }
@@ -43,17 +43,17 @@ public class StatementBuilder extends AbstractStatementBuilder {
     }
 
     public VariableInitializationBuilder declareVariable(String name, Class<?> type) {
-        return VariableDeclarationBuilder.create(this).declareVariable(Variable.get(name, type));
+        return VariableDeclarationBuilder.create(this).declareVariable(Variable.create(name, type));
     }
-    
+
     public VariableInitializationBuilder declareVariable(String name, TypeLiteral<?> type) {
-        return VariableDeclarationBuilder.create(this).declareVariable(Variable.get(name, type));
+        return VariableDeclarationBuilder.create(this).declareVariable(Variable.create(name, type));
     }
-    
+
     public VariableInitializationBuilder declareVariable(String name) {
         return VariableDeclarationBuilder.create(this).declareVariable(name);
     }
-    
+
     public ObjectBuilder newObject(MetaClass type) {
         return ObjectBuilder.newInstanceOf(type);
     }

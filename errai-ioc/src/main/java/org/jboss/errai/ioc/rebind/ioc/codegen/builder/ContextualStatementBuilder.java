@@ -1,15 +1,18 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.GenUtil;
 import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.VariableReference;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.LoopBuilder.LoopBodyBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class ContextualStatementBuilder extends AbstractStatementBuilder {
+public class ContextualStatementBuilder extends AbstractStatementBuilder implements ContextualStatement, VariableReferenceContextualStatement {
 
-    private ContextualStatementBuilder(AbstractStatementBuilder parent) {
+    protected ContextualStatementBuilder(AbstractStatementBuilder parent) {
         super(parent.context);
         this.statement = parent.statement;
     }
@@ -32,5 +35,9 @@ public class ContextualStatementBuilder extends AbstractStatementBuilder {
 
     public ContextualStatementBuilder invoke(String methodName, Object... parameters) {
         return InvocationBuilder.create(this).invoke(methodName, parameters);
+    }
+
+    public Statement assignValue(Object statement) {
+        return new AssignmentBuilder((VariableReference) this.statement, GenUtil.generate(context, statement));
     }
 }

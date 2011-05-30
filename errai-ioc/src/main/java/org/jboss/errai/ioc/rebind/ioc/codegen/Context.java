@@ -37,11 +37,11 @@ public class Context {
     }
 
     public Context add(String name, Class type) {
-        return add(Variable.get(name, type));
+        return add(Variable.create(name, type));
     }
 
     public Context add(String name, TypeLiteral<?> type) {
-        return add(Variable.get(name, type));
+        return add(Variable.create(name, type));
     }
 
     public VariableReference getVariable(String name) {
