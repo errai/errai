@@ -1,5 +1,6 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.AssignmentOperator;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 
 /**
@@ -7,4 +8,6 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
  */
 public interface VariableReferenceContextualStatement extends ContextualStatement {
     public Statement assignValue(Object statement);
+
+    public Statement assignValue(AssignmentOperator operator, Object statement);
 }

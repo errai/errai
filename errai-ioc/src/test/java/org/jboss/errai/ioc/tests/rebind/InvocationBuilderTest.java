@@ -1,10 +1,7 @@
 package org.jboss.errai.ioc.tests.rebind;
 
 import org.jboss.errai.ioc.client.api.builtin.MessageBusProvider;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Refs;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedMethodException;
@@ -42,7 +39,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
                 .invoke("toString")
                 .invoke("replaceAll", Variable.get("regex"), Variable.get("replacement"));
 
-        String s = StatementBuilder.create(ctx).loadVariable("regex").assignValue("abcdefg").generate();
+        String s = StatementBuilder.create(ctx).loadVariable("regex").assignValue(AssignmentOperator.PreIncrementAssign, "abcdefg").generate();
 
         System.out.println(s);
 
