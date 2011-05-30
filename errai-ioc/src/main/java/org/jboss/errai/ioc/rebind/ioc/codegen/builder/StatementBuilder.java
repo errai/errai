@@ -48,5 +48,7 @@ public class StatementBuilder extends AbstractStatementBuilder {
 
     public ObjectBuilder newObject(Class<?> cls) {
         return ObjectBuilder.newInstanceOf(cls);
+
+
     }
 }
