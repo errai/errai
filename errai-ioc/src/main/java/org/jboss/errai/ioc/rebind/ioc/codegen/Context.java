@@ -1,5 +1,7 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.VariableDeclarationBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.VariableDeclarationBuilder.VariableInitializationBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 
 import javax.enterprise.util.TypeLiteral;
@@ -36,7 +38,7 @@ public class Context {
         return this;
     }
 
-    public Context add(String name, Class type) {
+    public Context add(String name, Class<?> type) {
         return add(Variable.create(name, type));
     }
 
@@ -44,6 +46,18 @@ public class Context {
         return add(Variable.create(name, type));
     }
 
+    public VariableInitializationBuilder declareVariable(String name, Class<?> type) {
+        return VariableDeclarationBuilder.createInContextOf(this).declareVariable(Variable.create(name, type));
+    }
+
+    public VariableInitializationBuilder declareVariable(String name, TypeLiteral<?> type) {
+        return VariableDeclarationBuilder.createInContextOf(this).declareVariable(Variable.create(name, type));
+    }
+
+    public VariableInitializationBuilder declareVariable(String name) {
+        return VariableDeclarationBuilder.createInContextOf(this).declareVariable(name);
+    }
+    
     public VariableReference getVariable(String name) {
         Variable found = variables.get(name);
 

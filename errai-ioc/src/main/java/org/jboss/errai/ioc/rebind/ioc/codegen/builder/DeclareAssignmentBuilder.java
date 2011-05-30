@@ -1,5 +1,6 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.AssignmentOperator;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.VariableReference;
 
@@ -8,7 +9,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.VariableReference;
  */
 public class DeclareAssignmentBuilder extends AssignmentBuilder {
     public DeclareAssignmentBuilder(VariableReference reference, Statement statement) {
-        super(reference, statement);
+        super(AssignmentOperator.Assignment, reference, statement);
     }
 
     @Override

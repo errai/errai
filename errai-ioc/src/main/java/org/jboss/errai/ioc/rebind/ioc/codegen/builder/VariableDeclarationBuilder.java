@@ -23,13 +23,12 @@ public class VariableDeclarationBuilder extends AbstractStatementBuilder {
         }
     }
 
-    private VariableDeclarationBuilder(AbstractStatementBuilder parent) {
-        super(Context.create(parent.getContext()));
-        this.parent = parent;
+    private VariableDeclarationBuilder(Context context) {
+        super(context);
     }
 
-    public static VariableDeclarationBuilder create(AbstractStatementBuilder parent) {
-        return new VariableDeclarationBuilder(parent);
+    public static VariableDeclarationBuilder createInContextOf(Context context) {
+        return new VariableDeclarationBuilder(context);
     }
 
     public VariableInitializationBuilder declareVariable(Variable var) {

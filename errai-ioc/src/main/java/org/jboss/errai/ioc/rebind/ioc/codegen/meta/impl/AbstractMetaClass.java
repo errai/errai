@@ -98,23 +98,25 @@ public abstract class AbstractMetaClass<T> implements MetaClass, HasAnnotations 
         MetaClass cls = this;
         do {
             if (cls.equals(clazz)) return true;
-        } while ((cls = clazz.getSuperClass()) != null);
+        } while ((cls = cls.getSuperClass()) != null);
 
-        for (MetaClass iface : getInterfaces()) {
-            if (iface.isAssignableFrom(clazz)) return true;
-        }
-
-        return false;
+        return _hasInterface(clazz.getInterfaces(), this);
     }
 
     public boolean isAssignableTo(MetaClass clazz) {
         MetaClass cls = clazz;
         do {
             if (cls.equals(this)) return true;
-        } while ((cls = clazz.getSuperClass()) != null);
+        } while ((cls = cls.getSuperClass()) != null);
 
-        for (MetaClass iface : clazz.getInterfaces()) {
-            if (iface.isAssignableFrom(this)) return true;
+
+        return _hasInterface(getInterfaces(), clazz);
+    }
+
+    private static boolean _hasInterface(MetaClass[] from, MetaClass to) {
+        for (MetaClass iface : from) {
+            if (to.equals(iface)) return true;
+            else if (_hasInterface(iface.getInterfaces(), to)) return true;
         }
 
         return false;
