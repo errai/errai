@@ -5,6 +5,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.TypeNotIterableException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.mvel2.DataConversion;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -77,6 +78,14 @@ public class GenUtil {
 
         } catch (ClassNotFoundException e) {
             throw new IllegalArgumentException(e);
+        }
+    }
+      
+    public static Statement doInference(Context context, Object input, Class<?> targetType) {
+        if (DataConversion.canConvert(targetType, input.getClass())) {
+            return generate(context, DataConversion.convert(input, targetType));
+        } else {
+            throw new RuntimeException("cannot inference");
         }
     }
 }

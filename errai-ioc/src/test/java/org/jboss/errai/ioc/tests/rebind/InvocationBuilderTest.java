@@ -25,8 +25,8 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
                 Context.create().add(Variable.get("injector", MessageBusProvider.class)))
                 .loadVariable("injector")
                 .invoke("provide");
-        
-        assertEquals("failed to generate invocation on variable", 
+
+        assertEquals("failed to generate invocation on variable",
                 "injector.provide()", invokeStatement.generate());
 
         invokeStatement = StatementBuilder.create(Context.create()
@@ -36,8 +36,8 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
                 .loadVariable("i")
                 .invoke("toString")
                 .invoke("replaceAll", Variable.get("regex"), Variable.get("replacement"));
-        
-        assertEquals("failed to generate multiple invocations on variable", 
+
+        assertEquals("failed to generate multiple invocations on variable",
                 "i.toString().replaceAll(regex, replacement)", invokeStatement.generate());
     }
 
@@ -50,8 +50,8 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
                 "s.replaceAll(\"foo\", \"foo\\t\\n\")", result);
 
         result = StatementBuilder.create().loadLiteral("foo").invoke("toString").generate();
-        
-        assertEquals("failed to generate invocation using literal parameters", 
+
+        assertEquals("failed to generate invocation using literal parameters",
                 "\"foo\".toString()", result);
     }
 
@@ -140,5 +140,6 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
 
         assertEquals("failed injecting literal with load()",
                 "\"foo\".toUpperCase()", s);
+
     }
 }

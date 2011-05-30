@@ -31,6 +31,7 @@ public class VariableDeclaration extends AbstractStatement {
                 variable = Variable.get(variable.getName(), initialization.getType());
             }
         } 
+        // use mvel instead and try to convert types
         GenUtil.assertAssignableTypes(inferredType, variable.getType());
         
         buf.append(variable.getType().getFullyQualifedName()).append(" ").append(variable.generate());
