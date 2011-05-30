@@ -127,4 +127,13 @@ public final class MetaClassFactory {
             throw new RuntimeException("Could not load class: " + fullyQualifiedName);
         }
     }
+
+
+    public static MetaClass[] fromClassArray(Class<?>[] classes) {
+        MetaClass[] newClasses = new MetaClass[classes.length];
+        for (int i = 0; i < classes.length; i++) {
+            newClasses[i] = createOrGet(classes[i]);
+        }
+        return newClasses;
+    }
 }
