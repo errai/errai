@@ -95,7 +95,7 @@ public abstract class AbstractMetaClass<T> implements MetaClass, HasAnnotations 
     }
 
     public boolean isAssignableFrom(MetaClass clazz) {
-        MetaClass cls = this;
+        MetaClass cls = clazz;
         do {
             if (cls.equals(clazz)) return true;
         } while ((cls = cls.getSuperClass()) != null);
@@ -104,7 +104,7 @@ public abstract class AbstractMetaClass<T> implements MetaClass, HasAnnotations 
     }
 
     public boolean isAssignableTo(MetaClass clazz) {
-        MetaClass cls = clazz;
+        MetaClass cls = this;
         do {
             if (cls.equals(this)) return true;
         } while ((cls = cls.getSuperClass()) != null);
