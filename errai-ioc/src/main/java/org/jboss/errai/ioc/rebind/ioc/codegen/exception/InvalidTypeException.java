@@ -11,6 +11,10 @@ public class InvalidTypeException extends RuntimeException {
         super();
     }
 
+    public InvalidTypeException(Throwable t) {
+        super(t);
+    }
+    
     public InvalidTypeException(String msg) {
         super(msg);
     }

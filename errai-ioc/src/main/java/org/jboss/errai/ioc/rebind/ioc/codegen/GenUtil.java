@@ -81,11 +81,20 @@ public class GenUtil {
         }
     }
       
-    public static Statement doInference(Context context, Object input, Class<?> targetType) {
-        if (DataConversion.canConvert(targetType, input.getClass())) {
-            return generate(context, DataConversion.convert(input, targetType));
-        } else {
-            throw new RuntimeException("cannot inference");
+    public static Statement convert(Context context, Object input, MetaClass targetType) {
+        try {
+            Class<?> targetClass = Class.forName(targetType.getFullyQualifedName(), false,
+                    Thread.currentThread().getContextClassLoader());
+            
+            if (DataConversion.canConvert(targetClass, input.getClass())) {
+                return generate(context, DataConversion.convert(input, targetClass));
+            } else {
+                throw new InvalidTypeException("cannot convert to target type:" + targetClass.getName());
+            }
+        } catch (ClassNotFoundException e) {
+            throw new IllegalArgumentException(e);
+        } catch (Throwable t) {
+            throw new InvalidTypeException(t);
         }
     }
 }

@@ -32,12 +32,12 @@ public class StatementBuilder extends AbstractStatementBuilder {
         return ContextualStatementBuilder.createInContextOf(this);
     }
 
-    public ContextualStatementBuilder loadLiteral(Object o) {
+    public ContextualStatement loadLiteral(Object o) {
         statement = LiteralFactory.getLiteral(o);
         return ContextualStatementBuilder.createInContextOf(this);
     }
 
-    public ContextualStatementBuilder load(Object o) {
+    public ContextualStatement load(Object o) {
         statement = GenUtil.generate(context, o);
         return ContextualStatementBuilder.createInContextOf(this);
     }
@@ -64,7 +64,5 @@ public class StatementBuilder extends AbstractStatementBuilder {
 
     public ObjectBuilder newObject(Class<?> cls) {
         return ObjectBuilder.newInstanceOf(cls);
-
-
     }
 }
