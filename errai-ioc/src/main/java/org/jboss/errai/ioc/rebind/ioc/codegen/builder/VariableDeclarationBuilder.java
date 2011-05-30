@@ -1,7 +1,6 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.GenUtil;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 
@@ -19,7 +18,7 @@ public class VariableDeclarationBuilder extends AbstractStatementBuilder {
         }
 
         public Statement initializeWith(Object initialization) {
-            ((Variable) statement).initialize(GenUtil.generate(context, initialization));
+            ((Variable) statement).initialize(initialization);
             return statement;
         }
     }

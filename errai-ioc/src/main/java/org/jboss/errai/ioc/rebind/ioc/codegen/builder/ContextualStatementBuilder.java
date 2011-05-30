@@ -10,7 +10,8 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class ContextualStatementBuilder extends AbstractStatementBuilder implements ContextualStatement, VariableReferenceContextualStatement {
+public class ContextualStatementBuilder extends AbstractStatementBuilder implements ContextualStatement,
+        VariableReferenceContextualStatement {
 
     protected ContextualStatementBuilder(AbstractStatementBuilder parent) {
         super(parent.context);
@@ -33,7 +34,7 @@ public class ContextualStatementBuilder extends AbstractStatementBuilder impleme
         return LoopBuilder.create(this).foreach(loopVarName, loopVarType);
     }
 
-    public ContextualStatementBuilder invoke(String methodName, Object... parameters) {
+    public ContextualStatement invoke(String methodName, Object... parameters) {
         return InvocationBuilder.create(this).invoke(methodName, parameters);
     }
 

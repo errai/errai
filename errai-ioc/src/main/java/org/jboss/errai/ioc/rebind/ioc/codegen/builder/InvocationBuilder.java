@@ -1,6 +1,10 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.*;
+import org.jboss.errai.ioc.rebind.ioc.codegen.CallParameters;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.GenUtil;
+import org.jboss.errai.ioc.rebind.ioc.codegen.MethodInvocation;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedMethodException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
@@ -21,7 +25,7 @@ public class InvocationBuilder extends AbstractStatementBuilder {
         return new InvocationBuilder(parent);
     }
 
-    public ContextualStatementBuilder invoke(String methodName, Statement... parameters) {
+    public ContextualStatement invoke(String methodName, Statement... parameters) {
         CallParameters callParams = CallParameters.fromStatements(parameters);
 
         MetaClass[] parameterTypes = new MetaClass[parameters.length];
@@ -37,7 +41,7 @@ public class InvocationBuilder extends AbstractStatementBuilder {
         return ContextualStatementBuilder.createInContextOf(this);
     }
 
-    public ContextualStatementBuilder invoke(String methodName, Object... parameters) {
+    public ContextualStatement invoke(String methodName, Object... parameters) {
         return invoke(methodName, GenUtil.generateCallParameters(context, parameters));
     }
 }

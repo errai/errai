@@ -1,9 +1,10 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen;
 
+import javax.enterprise.util.TypeLiteral;
+
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.DeclareAssignmentBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-
-import javax.enterprise.util.TypeLiteral;
 
 /**
  * This class represents a variable.
@@ -13,14 +14,14 @@ import javax.enterprise.util.TypeLiteral;
 public class Variable extends AbstractStatement {
     private String name;
     private MetaClass type;
-    private Statement initialization;
+    private Object initialization;
 
     private Variable(String name, MetaClass type) {
         this.name = name;
         this.type = type;
     }
 
-    public void initialize(Statement initialization) {
+    public void initialize(Object initialization) {
         this.initialization = initialization;
     }
 
@@ -110,8 +111,7 @@ public class Variable extends AbstractStatement {
     }
 
     public String generate() {
-        StringBuilder buf = new StringBuilder();
-
+        Statement initialization = GenUtil.generate(getContext(), this.initialization);
         MetaClass inferredType = (initialization != null) ? initialization.getType() : null;
         if (type == null) {
             if (inferredType == null) {
@@ -120,14 +120,8 @@ public class Variable extends AbstractStatement {
                 type = initialization.getType();
             }
         }
-        // use mvel instead and try to convert types
-        GenUtil.assertAssignableTypes(inferredType, type);
+        initialization=GenUtil.convert(getContext(), this.initialization, type);
 
-        buf.append(type.getFullyQualifedName()).append(" ").append(name);
-        if (initialization != null)
-            buf.append(" = ").append(initialization.generate());
-        buf.append(";");
-
-        return buf.toString();
+        return new DeclareAssignmentBuilder(getReference(), initialization).generate()+";";
     }
 }

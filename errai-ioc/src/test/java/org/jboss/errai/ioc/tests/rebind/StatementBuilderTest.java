@@ -1,5 +1,6 @@
 package org.jboss.errai.ioc.tests.rebind;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
@@ -30,6 +31,20 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
         assertEquals("failed to generate variable declaration using a literal initialization and type inference", 
                 "java.lang.Integer n = 10;", declaration.generate());
 
+        declaration = StatementBuilder.create()
+            .declareVariable("n")
+            .initializeWith("10");
+        
+        assertEquals("failed to generate variable declaration using a literal initialization and type inference", 
+            "java.lang.String n = \"10\";", declaration.generate());
+    
+        declaration = StatementBuilder.create()
+            .declareVariable("n", Integer.class)
+            .initializeWith("10");
+
+        assertEquals("failed to generate variable declaration using a literal initialization and type conversion", 
+               "java.lang.Integer n = 10;", declaration.generate());
+        
         try {
             StatementBuilder.create()
                 .declareVariable("n", Integer.class)
@@ -38,6 +53,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
             fail("Expected InvalidTypeException");
         } catch(InvalidTypeException ive) {
             //expected
+            assertTrue(ive.getCause() instanceof NumberFormatException);
         }
     }
 }
