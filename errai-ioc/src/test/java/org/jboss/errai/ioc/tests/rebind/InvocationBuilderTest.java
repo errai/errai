@@ -15,7 +15,6 @@ import static org.junit.Assert.fail;
 
 /**
  * Tests the generation of method invocations using the {@link StatementBuilder} API.
- * x
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -31,20 +30,13 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
         assertEquals("failed to generate invocation on variable",
                 "injector.provide()", invokeStatement.generate());
 
-
-        Context ctx;
-
-        invokeStatement = StatementBuilder.create(ctx = Context.create()
+        invokeStatement = StatementBuilder.create(Context.create()
                 .add("i", Integer.class)
                 .add("regex", String.class)
                 .add("replacement", String.class))
                 .loadVariable("i")
                 .invoke("toString")
                 .invoke("replaceAll", Variable.get("regex"), Variable.get("replacement"));
-
-        String s = StatementBuilder.create(ctx).loadVariable("regex").assignValue("abcdefg").generate();
-
-        System.out.println(s);
 
         assertEquals("failed to generate multiple invocations on variable",
                 "i.toString().replaceAll(regex, replacement)", invokeStatement.generate());
@@ -149,6 +141,5 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
 
         assertEquals("failed injecting literal with load()",
                 "\"foo\".toUpperCase()", s);
-
     }
 }

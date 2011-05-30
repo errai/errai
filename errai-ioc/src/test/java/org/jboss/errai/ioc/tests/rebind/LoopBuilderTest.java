@@ -32,8 +32,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
                 .newObject(Object.class);
 
         String foreachWithListOfStrings = StatementBuilder.create(
-                Context.create().add("list", new TypeLiteral<List<String>>() {
-                }))
+                Context.create().add("list", new TypeLiteral<List<String>>() {}))
                 .loadVariable("list")
                 .foreach("element")
                 .generate();
@@ -78,8 +77,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
     @Test
     public void testForeachLoopWithProvidedLoopVarType() throws Exception {
         Statement loop = StatementBuilder.create(
-                Context.create().add("list", new TypeLiteral<List<String>>() {
-                }))
+                Context.create().add("list", new TypeLiteral<List<String>>() {}))
                 .loadVariable("list")
                 .foreach("element", Object.class);
 
@@ -88,8 +86,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
 
         try {
             StatementBuilder.create(
-                    Context.create().add("list", new TypeLiteral<List<String>>() {
-                    }))
+                    Context.create().add("list", new TypeLiteral<List<String>>() {}))
                     .loadVariable("list")
                     .foreach("element", Integer.class)
                     .generate();
@@ -105,13 +102,11 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         Statement createObject = StatementBuilder.create().newObject(Integer.class);
 
         Statement outerLoop = StatementBuilder.create(
-                Context.create().add("list", new TypeLiteral<List<String>>() {
-                }))
+                Context.create().add("list", new TypeLiteral<List<String>>() {}))
                 .loadVariable("list")
                 .foreach("element")
                 .execute(StatementBuilder.create(
-                        Context.create().add(Variable.create("anotherList", new TypeLiteral<List<String>>() {
-                        })))
+                        Context.create().add(Variable.create("anotherList", new TypeLiteral<List<String>>() {})))
                         .loadVariable("anotherList")
                         .foreach("anotherElement")
                         .execute(createObject)

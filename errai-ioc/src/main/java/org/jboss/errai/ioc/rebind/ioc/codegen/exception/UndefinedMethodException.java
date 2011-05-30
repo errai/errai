@@ -3,7 +3,6 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.exception;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
- * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class UndefinedMethodException extends RuntimeException {
