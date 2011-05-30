@@ -22,10 +22,10 @@ public class AssignmentBuilder implements Statement {
     }
 
     public MetaClass getType() {
-        return null;
+        return reference.getType();
     }
 
     public Context getContext() {
-        return null;
+        return reference.getContext();
     }
 }
