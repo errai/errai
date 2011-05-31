@@ -20,6 +20,11 @@ public class VariableDeclarationBuilder extends AbstractStatementBuilder {
             ((Variable) statement).initialize(initialization);
             return statement;
         }
+        
+        public Statement initializeWith(Statement initialization) {
+            ((Variable) statement).initialize(initialization);
+            return statement;
+        }
     }
 
     private VariableDeclarationBuilder(ContextBuilder parent) {

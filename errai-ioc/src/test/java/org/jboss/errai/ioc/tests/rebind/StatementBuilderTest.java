@@ -68,5 +68,12 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
         VariableReference injector = ctx.getVariable("injector");
         assertEquals("Wrong variable name", "injector", injector.getName());
         Assert.assertEquals("Wrong variable type", MetaClassFactory.get(MessageBusProvider.class), injector.getType());
+        
+        ctx = StatementBuilder.create().addVariable("injector", 
+                ObjectBuilder.newInstanceOf(MessageBusProvider.class)).getContext();
+        
+        injector = ctx.getVariable("injector");
+        assertEquals("Wrong variable name", "injector", injector.getName());
+        Assert.assertEquals("Wrong variable type", MetaClassFactory.get(MessageBusProvider.class), injector.getType());
     }
 }

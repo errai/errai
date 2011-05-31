@@ -10,6 +10,8 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java.JavaReflectionClass;
 
 /**
+ * The root of our fluent StatementBuilder API.
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class StatementBuilder extends AbstractStatementBuilder {
@@ -28,11 +30,6 @@ public class StatementBuilder extends AbstractStatementBuilder {
     
     public static StatementBuilder create(ContextBuilder context) {
         return new StatementBuilder(context.getContext());
-    }
-
-    public StatementBuilder addVariable(Variable variable) {
-        context.addVariable(variable);
-        return this;
     }
     
     public StatementBuilder addVariable(String name, Class<?> type) {
@@ -83,7 +80,7 @@ public class StatementBuilder extends AbstractStatementBuilder {
         return ObjectBuilder.newInstanceOf(type);
     }
 
-    public ObjectBuilder newObject(Class<?> cls) {
-        return ObjectBuilder.newInstanceOf(cls);
+    public ObjectBuilder newObject(Class<?> type) {
+        return ObjectBuilder.newInstanceOf(type);
     }
 }

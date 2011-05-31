@@ -8,7 +8,7 @@ import javax.enterprise.util.TypeLiteral;
 
 /**
  * This class represents a variable.
- *
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class Variable extends AbstractStatement {
@@ -25,16 +25,32 @@ public class Variable extends AbstractStatement {
         this.name = name;
         initialize(initialization);
     }
-    
+
     private Variable(String name, MetaClass type, Object initialization) {
-       this(name, type);
-       initialize(initialization);
+        this(name, type);
+        initialize(initialization);
     }
     
-    public void initialize(Object initialization) {
-        this.value = createInitialization(initialization);
+    private Variable(String name, MetaClass type, Statement initialization) {
+        this(name, type);
+        initialize(initialization);
     }
 
+    public void initialize(Object initialization) {
+        this.type = (type == null) ? inferType(initialization) : type;
+        value = GenUtil.convert(getContext(), initialization, type);
+    }
+    
+    private MetaClass inferType(Object initialization) {
+        Statement initStatement = GenUtil.generate(getContext(), initialization);
+        MetaClass inferredType = (initStatement != null) ? initStatement.getType() : null;
+        if (inferredType == null) {
+            throw new InvalidTypeException("No type specified and no initialization provided to infer the type.");
+        }
+        
+        return inferredType;
+    }
+    
     public static Variable create(String name, Class<?> type) {
         return new Variable(name, MetaClassFactory.get(type));
     }
@@ -46,7 +62,7 @@ public class Variable extends AbstractStatement {
     public static Variable create(String name, MetaClass type) {
         return new Variable(name, type);
     }
-    
+
     public static Variable create(String name, Object initialization) {
         return new Variable(name, null, initialization);
     }
@@ -62,20 +78,6 @@ public class Variable extends AbstractStatement {
     public static Variable create(String name, MetaClass type, Object initialization) {
         return new Variable(name, type, initialization);
     }
-
-    // use type inference and implicit conversions if necessary
-    private Statement createInitialization(Object initialization) {
-        Statement initStatement = GenUtil.generate(getContext(), initialization);
-        MetaClass inferredType = (initStatement != null) ? initStatement.getType() : null;
-        if (type == null) {
-            if (inferredType == null) {
-                throw new InvalidTypeException("No type specified and no initialization provided to infer the type.");
-            } else {
-                type = inferredType;
-            }
-        }
-        return(initialization instanceof Statement)?(Statement)initialization:GenUtil.convert(getContext(), initialization, type);
-    }
     
     public static VariableReference get(final String name) {
         return new VariableReference() {
@@ -83,18 +85,6 @@ public class Variable extends AbstractStatement {
                 return name;
             }
 
-            public String generate() {
-                return name;
-            }
-
-            public MetaClass getType() {
-                return null;
-            }
-
-            public Context getContext() {
-                return null;
-            }
-            
             public Statement getValue() {
                 return null;
             }
@@ -107,18 +97,10 @@ public class Variable extends AbstractStatement {
                 return name;
             }
 
-            public String generate() {
-                return name;
-            }
-
             public MetaClass getType() {
                 return type;
             }
 
-            public Context getContext() {
-                return null;
-            }
-            
             public Statement getValue() {
                 return value;
             }
@@ -144,8 +126,8 @@ public class Variable extends AbstractStatement {
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof Variable &&
-                hashString().equals("Variable:" + name + ":" + ((Variable) o).type.getFullyQualifedName());
+        return o instanceof Variable
+                && hashString().equals("Variable:" + name + ":" + ((Variable) o).type.getFullyQualifedName());
     }
 
     @Override
