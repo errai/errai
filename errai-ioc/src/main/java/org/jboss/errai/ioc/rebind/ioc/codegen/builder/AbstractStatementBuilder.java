@@ -1,10 +1,13 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
+ * Base class of all {@link StatementBuilder}s
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public abstract class AbstractStatementBuilder implements Statement {
@@ -21,10 +24,16 @@ public abstract class AbstractStatementBuilder implements Statement {
     }
     
     public String generate() {
-        return statement.generate();
+       if (statement!=null) {
+         return statement.generate();
+       } 
+       return "";
     }
     
     public MetaClass getType() {
-        return statement.getType();
+        if (statement!=null) {
+            return statement.getType();
+        }
+        return MetaClassFactory.get(Void.class);
     }
 }

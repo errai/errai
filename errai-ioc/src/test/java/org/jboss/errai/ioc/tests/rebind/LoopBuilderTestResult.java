@@ -29,7 +29,7 @@ public interface LoopBuilderTestResult {
     public static final String FOREACH_RESULT_NESTED_STRING_IN_LIST = 
         "for (java.lang.String element : list) {" +
             "\nfor (java.lang.String anotherElement : anotherList) {" +
-                "\nnew java.lang.Integer();" +
+                "\nnew java.lang.String();" +
             "\n};" +
         "\n}";
     

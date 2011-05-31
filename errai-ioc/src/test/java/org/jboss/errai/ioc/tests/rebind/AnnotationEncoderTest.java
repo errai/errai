@@ -1,15 +1,17 @@
 package org.jboss.errai.ioc.tests.rebind;
 
-import junit.framework.TestCase;
-import org.jboss.errai.ioc.rebind.ioc.codegen.AnnotationEncoder;
+import java.lang.annotation.Target;
 
 import javax.annotation.PostConstruct;
-import java.lang.annotation.Target;
+
+import junit.framework.TestCase;
+
+import org.jboss.errai.ioc.rebind.ioc.codegen.AnnotationEncoder;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public class AnnotationEncoderTests extends TestCase {
+public class AnnotationEncoderTest extends TestCase {
     public void testEncode() {
         String enc = AnnotationEncoder.encode(PostConstruct.class.getAnnotation(Target.class));
 

@@ -101,7 +101,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
 
     @Test
     public void testNestedForeachLoops() throws Exception {
-        Statement createObject = StatementBuilder.create().newObject(Integer.class);
+        Statement createObject = StatementBuilder.create().newObject(String.class);
 
         Statement outerLoop = StatementBuilder.create()
                 .addVariable("list", new TypeLiteral<List<String>>() {})
@@ -113,7 +113,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
                         .foreach("anotherElement")
                         .execute(createObject)
                 );
-
+       
         assertEquals("failed to generate nested foreach loops",
                 FOREACH_RESULT_NESTED_STRING_IN_LIST, outerLoop.generate());
     }

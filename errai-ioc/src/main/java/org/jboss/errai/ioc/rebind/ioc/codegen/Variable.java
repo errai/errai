@@ -74,7 +74,7 @@ public class Variable extends AbstractStatement {
                 type = inferredType;
             }
         }
-        return GenUtil.convert(getContext(), initialization, type);
+        return(initialization instanceof Statement)?(Statement)initialization:GenUtil.convert(getContext(), initialization, type);
     }
     
     public static VariableReference get(final String name) {

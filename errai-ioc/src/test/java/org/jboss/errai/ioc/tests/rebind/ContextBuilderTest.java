@@ -3,11 +3,13 @@ package org.jboss.errai.ioc.tests.rebind;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import org.jboss.errai.ioc.client.api.builtin.MessageBusProvider;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.VariableReference;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ContextBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ObjectBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.values.LiteralFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
@@ -64,31 +66,49 @@ public class ContextBuilderTest extends AbstractStatementBuilderTest {
     }
     
     @Test
-    public void testAddVariable() {
+    public void testDeclareVariableWithObjectInitialization() {
+        Statement declaration = ContextBuilder.create()
+            .declareVariable("injector", MessageBusProvider.class)
+            .initializeWith(ObjectBuilder.newInstanceOf(MessageBusProvider.class));
+        
+        assertEquals("failed to generate variable declaration using a object builder initialization", 
+                "org.jboss.errai.ioc.client.api.builtin.MessageBusProvider injector = " +
+                "new org.jboss.errai.ioc.client.api.builtin.MessageBusProvider();", declaration.generate());
+        
+        declaration = ContextBuilder.create()
+            .declareVariable("str", String.class)
+            .initializeWith(ObjectBuilder.newInstanceOf(String.class).withParameters("abc"));
+    
+        assertEquals("failed to generate variable declaration using a object builder initialization with parameters", 
+            "java.lang.String str = new java.lang.String(\"abc\");", declaration.generate());
+    }
+    
+    @Test
+    public void testAddVariableWithLiteralInitialization() {
         Context ctx = ContextBuilder.create().addVariable("n", Integer.class, 10).getContext();
         VariableReference n = ctx.getVariable("n");
-        assertEquals("n", n.getName());
-        Assert.assertEquals(MetaClassFactory.get(Integer.class), n.getType());
-        Assert.assertEquals(LiteralFactory.getLiteral(10), n.getValue());
+        assertEquals("Wrong variable name", "n", n.getName());
+        Assert.assertEquals("Wrong variable type", MetaClassFactory.get(Integer.class), n.getType());
+        Assert.assertEquals("Wrong variable value", LiteralFactory.getLiteral(10), n.getValue());
         
         ctx = ContextBuilder.create().addVariable("n", 10).getContext();
         n = ctx.getVariable("n");
-        assertEquals("n", n.getName());
-        Assert.assertEquals(MetaClassFactory.get(Integer.class), n.getType());
-        Assert.assertEquals(LiteralFactory.getLiteral(10), n.getValue());
+        assertEquals("Wrong variable name", "n", n.getName());
+        Assert.assertEquals("Wrong variable type", MetaClassFactory.get(Integer.class), n.getType());
+        Assert.assertEquals("Wrong variable value", LiteralFactory.getLiteral(10), n.getValue());
                
         ctx = ContextBuilder.create().addVariable("n", "10").getContext();
         n = ctx.getVariable("n");
-        assertEquals("n", n.getName());
-        Assert.assertEquals(MetaClassFactory.get(String.class), n.getType());
-        Assert.assertEquals(LiteralFactory.getLiteral("10"), n.getValue());
+        assertEquals("Wrong variable name", "n", n.getName());
+        Assert.assertEquals("Wrong variable type", MetaClassFactory.get(String.class), n.getType());
+        Assert.assertEquals("Wrong variable value", LiteralFactory.getLiteral("10"), n.getValue());
         
         ctx = ContextBuilder.create().addVariable("n", Integer.class, "10").getContext();
         n = ctx.getVariable("n");
-        assertEquals("n", n.getName());
-        Assert.assertEquals(MetaClassFactory.get(Integer.class), n.getType());
-        Assert.assertEquals(LiteralFactory.getLiteral(10), n.getValue());
-        
+        assertEquals("Wrong variable name", "n", n.getName());
+        Assert.assertEquals("Wrong variable type", MetaClassFactory.get(Integer.class), n.getType());
+        Assert.assertEquals("Wrong variable value", LiteralFactory.getLiteral(10), n.getValue());
+       
         try {
             ctx = ContextBuilder.create().addVariable("n", Integer.class, "abc").getContext();
             fail("Expected InvalidTypeException");
@@ -96,5 +116,15 @@ public class ContextBuilderTest extends AbstractStatementBuilderTest {
             //expected
             assertTrue(ive.getCause() instanceof NumberFormatException);
         } 
+    }
+    
+    @Test
+    public void testAddVariableWithObjectInitialization() {
+        Context ctx = ContextBuilder.create().addVariable("injector", MessageBusProvider.class, 
+                ObjectBuilder.newInstanceOf(MessageBusProvider.class)).getContext();
+        
+        VariableReference injector = ctx.getVariable("injector");
+        assertEquals("Wrong variable name", "injector", injector.getName());
+        Assert.assertEquals("Wrong variable type", MetaClassFactory.get(MessageBusProvider.class), injector.getType());
     }
 }

@@ -12,6 +12,7 @@ import java.lang.annotation.Annotation;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public abstract class AbstractMetaClass<T> implements MetaClass, HasAnnotations {
     private final T enclosedMetaObject;
@@ -66,10 +67,14 @@ public abstract class AbstractMetaClass<T> implements MetaClass, HasAnnotations 
         return _getConstructor(getConstructors(), InjectUtil.classToMeta(parameters));
     }
 
+    public MetaConstructor getConstructor(MetaClass... parameters) {
+        return _getConstructor(getConstructors(), parameters);
+    }
+    
     public MetaConstructor getDeclaredConstructor(Class... parameters) {
         return _getConstructor(getDeclaredConstructors(), InjectUtil.classToMeta(parameters));
     }
-
+    
     public final Annotation getAnnotation(Class<? extends Annotation> annotation) {
         for (Annotation a : getAnnotations()) {
             if (a.annotationType().equals(annotation)) return a;
