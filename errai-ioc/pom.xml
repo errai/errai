@@ -113,7 +113,6 @@
 
                             <includes>
                                 <include>**/*Test.java</include>
-                                <include>**/*Tests.java</include>
                             </includes>
                             <excludes>
                                 <exclude>**/IOCTests.java</exclude>

@@ -6,7 +6,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.values.LiteralFactory;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public class LiteralTests extends TestCase {
+public class LiteralTest extends TestCase {
 
     public void testIntegerLiteral() {
         assertEquals("1234", LiteralFactory.getLiteral(1234).generate());

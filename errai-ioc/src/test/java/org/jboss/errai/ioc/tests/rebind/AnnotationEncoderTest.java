@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public class AnnotationEncoderTests extends TestCase {
+public class AnnotationEncoderTest extends TestCase {
     public void testEncode() {
         String enc = AnnotationEncoder.encode(PostConstruct.class.getAnnotation(Target.class));
 

@@ -1,12 +1,19 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
 
-import com.google.gwt.core.ext.typeinfo.JClassType;
 import org.jboss.errai.ioc.rebind.ioc.codegen.AbstractStatement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.CallParameters;
+import org.jboss.errai.ioc.rebind.ioc.codegen.GenUtil;
 import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
+import com.google.gwt.core.ext.typeinfo.JClassType;
+
+/**
+ * @author Mike Brock <cbrock@redhat.com> 
+ * @author Christian Sadilek <csadilek@redhat.com>
+ */
 public class ObjectBuilder extends AbstractStatement {
     StringBuilder buf = new StringBuilder();
 
@@ -38,6 +45,14 @@ public class ObjectBuilder extends AbstractStatement {
         return this;
     }
 
+    public ObjectBuilder withParameters(Object... parameters) {
+        return withParameters(GenUtil.generateCallParameters(getContext(), parameters));
+    }
+    
+    public ObjectBuilder withParameters(Statement... parameters) {
+        return withParameters(CallParameters.fromStatements(parameters));
+    }
+    
     public ObjectBuilder withParameters(CallParameters parameters) {
         buf.append(parameters.generate());
         buildState |= CONSTRUCT_STATEMENT_COMPLETE;
