@@ -89,7 +89,7 @@ public abstract class AbstractMetaClass<T> implements MetaClass, HasAnnotations 
 
     private String hashString() {
         if (hashString == null) {
-            hashString = "MetaClass:" + getFullyQualifedName();
+            hashString = MetaClass.class.getName() + ":" + getFullyQualifedName();
         }
         return hashString;
     }
