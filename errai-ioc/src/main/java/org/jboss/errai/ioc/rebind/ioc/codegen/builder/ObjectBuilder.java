@@ -6,6 +6,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.CallParameters;
 import org.jboss.errai.ioc.rebind.ioc.codegen.GenUtil;
 import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedConstructorException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 import com.google.gwt.core.ext.typeinfo.JClassType;
@@ -54,6 +55,9 @@ public class ObjectBuilder extends AbstractStatement {
     }
     
     public ObjectBuilder withParameters(CallParameters parameters) {
+        if (!type.isInterface() && type.getConstructor(parameters.getParameterTypes())==null)
+            throw new UndefinedConstructorException(type, parameters.getParameterTypes());
+        
         buf.append(parameters.generate());
         buildState |= CONSTRUCT_STATEMENT_COMPLETE;
         return this;

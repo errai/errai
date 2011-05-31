@@ -5,6 +5,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+
+/**
+ * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
+ */
 public class CallParameters extends AbstractStatement {
     private List<Statement> parameters;
 
@@ -27,7 +33,14 @@ public class CallParameters extends AbstractStatement {
     public static CallParameters none() {
         return new CallParameters(Collections.<Statement>emptyList());
     }
-
+    
+    public MetaClass[] getParameterTypes() {
+        MetaClass[] parameterTypes = new MetaClass[parameters.size()];
+        for (int i = 0; i < parameters.size(); i++) {
+            parameterTypes[i] = parameters.get(i).getType();
+        }
+        return parameterTypes;
+    }
 
     public String generate() {
         StringBuilder buf = new StringBuilder("(");

@@ -28,11 +28,7 @@ public class InvocationBuilder extends AbstractStatementBuilder {
     public ContextualStatement invoke(String methodName, Statement... parameters) {
         CallParameters callParams = CallParameters.fromStatements(parameters);
 
-        MetaClass[] parameterTypes = new MetaClass[parameters.length];
-        for (int i = 0; i < parameters.length; i++) {
-            parameterTypes[i] = parameters[i].getType();
-        }
-
+        MetaClass[] parameterTypes = callParams.getParameterTypes();
         MetaMethod method = parent.statement.getType().getDeclaredMethod(methodName, parameterTypes);
         if (method == null)
             throw new UndefinedMethodException(methodName, parameterTypes);
