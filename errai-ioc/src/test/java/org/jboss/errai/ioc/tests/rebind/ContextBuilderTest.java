@@ -82,10 +82,26 @@ public class ContextBuilderTest extends AbstractStatementBuilderTest {
         assertEquals("failed to generate variable declaration using an objectbuilder initialization with parameters", 
             "java.lang.String str = new java.lang.String(\"abc\");", declaration.generate());
         
+        declaration = ContextBuilder.create()
+            .declareVariable("str", Object.class)
+            .initializeWith(ObjectBuilder.newInstanceOf(String.class).withParameters("abc"));
+
+        assertEquals("failed to generate variable declaration using an objectbuilder initialization with parameters", 
+                "java.lang.Object str = new java.lang.String(\"abc\");", declaration.generate());
+        
         try {
             ContextBuilder.create()
                 .declareVariable("str", Integer.class)
                 .initializeWith(ObjectBuilder.newInstanceOf(String.class).withParameters("abc"));
+            fail("Expected InvalidTypeException");
+        } catch (InvalidTypeException ive) {
+            // expected
+        }
+        
+        try {
+            ContextBuilder.create()
+                .declareVariable("str", String.class)
+                .initializeWith(ObjectBuilder.newInstanceOf(Object.class));
             fail("Expected InvalidTypeException");
         } catch (InvalidTypeException ive) {
             // expected

@@ -83,6 +83,12 @@ public class GenUtil {
       
     public static Statement convert(Context context, Object input, MetaClass targetType) {
         try {
+            
+            if(input instanceof Statement) {
+                assertAssignableTypes(((Statement)input).getType(), targetType);
+                return (Statement) input;
+            }
+            
             Class<?> targetClass = Class.forName(targetType.getFullyQualifedName(), false,
                     Thread.currentThread().getContextClassLoader());
             

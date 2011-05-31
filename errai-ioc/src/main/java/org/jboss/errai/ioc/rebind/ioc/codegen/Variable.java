@@ -37,19 +37,11 @@ public class Variable extends AbstractStatement {
     }
 
     public void initialize(Object initialization) {
-        this.type = inferType(initialization);
+        this.type = (type == null) ? inferType(initialization) : type;
         value = GenUtil.convert(getContext(), initialization, type);
-    }
-
-    public void initialize(Statement initialization) {
-        this.type = inferType(initialization);
-        value = initialization;
-        GenUtil.assertAssignableTypes(value.getType(), type);
     }
     
     private MetaClass inferType(Object initialization) {
-        if (type!=null) return type;
-        
         Statement initStatement = GenUtil.generate(getContext(), initialization);
         MetaClass inferredType = (initStatement != null) ? initStatement.getType() : null;
         if (inferredType == null) {
@@ -84,22 +76,6 @@ public class Variable extends AbstractStatement {
     }
 
     public static Variable create(String name, MetaClass type, Object initialization) {
-        return new Variable(name, type, initialization);
-    }
-
-    public static Variable create(String name, Statement initialization) {
-        return new Variable(name, null, initialization);
-    }
-    
-    public static Variable create(String name, Class<?> type, Statement initialization) {
-        return new Variable(name, MetaClassFactory.get(type), initialization);
-    }
-
-    public static Variable create(String name, TypeLiteral<?> type, Statement initialization) {
-        return new Variable(name, MetaClassFactory.get(type), initialization);
-    }
-
-    public static Variable create(String name, MetaClass type, Statement initialization) {
         return new Variable(name, type, initialization);
     }
     
