@@ -47,7 +47,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
                 .generate();
 
         String foreachWithList = StatementBuilder.create()
-                .addVariable(Variable.create("list", List.class))
+                .addVariable("list", List.class)
                 .loadVariable("list")
                 .foreach("element")
                 .execute(createObject)

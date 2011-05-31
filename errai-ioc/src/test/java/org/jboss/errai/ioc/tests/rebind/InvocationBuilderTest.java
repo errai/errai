@@ -24,7 +24,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
     @Test
     public void testInvoke() {
         Statement invokeStatement = StatementBuilder.create()
-                .addVariable(Variable.create("injector", MessageBusProvider.class))
+                .addVariable("injector", MessageBusProvider.class)
                 .loadVariable("injector")
                 .invoke("provide");
 
@@ -45,7 +45,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
 
     @Test
     public void testInvokeWithLiterals() {
-        String result = StatementBuilder.create().addVariable(Variable.create("s", String.class))
+        String result = StatementBuilder.create().addVariable("s", String.class)
                 .loadVariable("s").invoke("replaceAll", "foo", "foo\t\n").generate();
 
         assertEquals("failed to generate invocation using literal parameters",
@@ -100,8 +100,8 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
         try {
             // param2 undefined
             StatementBuilder.create()
-                    .addVariable(Variable.create("injector", MessageBusProvider.class))
-                    .addVariable(Variable.create("param", String.class))
+                    .addVariable("injector", MessageBusProvider.class)
+                    .addVariable("param", String.class)
                     .loadVariable("injector")
                     .invoke("provide", Variable.get("param"), Variable.get("param2"));
             fail("expected OutOfScopeException");

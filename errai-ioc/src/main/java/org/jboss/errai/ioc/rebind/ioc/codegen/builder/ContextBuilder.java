@@ -3,6 +3,7 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 import javax.enterprise.util.TypeLiteral;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.VariableDeclarationBuilder.VariableInitializationBuilder;
 
@@ -52,6 +53,21 @@ public class ContextBuilder {
     }
 
     public ContextBuilder addVariable(String name, TypeLiteral<?> type, Object initialization) {
+        context.addVariable(Variable.create(name, type, initialization));
+        return this;
+    }
+    
+    public ContextBuilder addVariable(String name, Statement initialization) {
+        context.addVariable(Variable.create(name, initialization));
+        return this;
+    }
+    
+    public ContextBuilder addVariable(String name, Class<?> type, Statement initialization) {
+        context.addVariable(Variable.create(name, type, initialization));
+        return this;
+    }
+
+    public ContextBuilder addVariable(String name, TypeLiteral<?> type, Statement initialization) {
         context.addVariable(Variable.create(name, type, initialization));
         return this;
     }

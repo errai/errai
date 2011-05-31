@@ -4,6 +4,7 @@ import javax.enterprise.util.TypeLiteral;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.GenUtil;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.values.LiteralFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
@@ -29,11 +30,6 @@ public class StatementBuilder extends AbstractStatementBuilder {
     public static StatementBuilder create(ContextBuilder context) {
         return new StatementBuilder(context.getContext());
     }
-
-    public StatementBuilder addVariable(Variable variable) {
-        context.addVariable(variable);
-        return this;
-    }
     
     public StatementBuilder addVariable(String name, Class<?> type) {
         context.addVariable(Variable.create(name, type));
@@ -56,6 +52,21 @@ public class StatementBuilder extends AbstractStatementBuilder {
     }
 
     public StatementBuilder addVariable(String name, TypeLiteral<?> type, Object initialization) {
+        context.addVariable(Variable.create(name, type, initialization));
+        return this;
+    }
+    
+    public StatementBuilder addVariable(String name, Statement initialization) {
+        context.addVariable(Variable.create(name, initialization));
+        return this;
+    }
+    
+    public StatementBuilder addVariable(String name, Class<?> type, Statement initialization) {
+        context.addVariable(Variable.create(name, type, initialization));
+        return this;
+    }
+
+    public StatementBuilder addVariable(String name, TypeLiteral<?> type, Statement initialization) {
         context.addVariable(Variable.create(name, type, initialization));
         return this;
     }

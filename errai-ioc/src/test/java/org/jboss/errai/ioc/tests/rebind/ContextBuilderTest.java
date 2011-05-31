@@ -71,7 +71,7 @@ public class ContextBuilderTest extends AbstractStatementBuilderTest {
             .declareVariable("injector", MessageBusProvider.class)
             .initializeWith(ObjectBuilder.newInstanceOf(MessageBusProvider.class));
         
-        assertEquals("failed to generate variable declaration using a object builder initialization", 
+        assertEquals("failed to generate variable declaration using an objectbuilder initialization", 
                 "org.jboss.errai.ioc.client.api.builtin.MessageBusProvider injector = " +
                 "new org.jboss.errai.ioc.client.api.builtin.MessageBusProvider();", declaration.generate());
         
@@ -79,8 +79,17 @@ public class ContextBuilderTest extends AbstractStatementBuilderTest {
             .declareVariable("str", String.class)
             .initializeWith(ObjectBuilder.newInstanceOf(String.class).withParameters("abc"));
     
-        assertEquals("failed to generate variable declaration using a object builder initialization with parameters", 
+        assertEquals("failed to generate variable declaration using an objectbuilder initialization with parameters", 
             "java.lang.String str = new java.lang.String(\"abc\");", declaration.generate());
+        
+        try {
+            ContextBuilder.create()
+                .declareVariable("str", Integer.class)
+                .initializeWith(ObjectBuilder.newInstanceOf(String.class).withParameters("abc"));
+            fail("Expected InvalidTypeException");
+        } catch (InvalidTypeException ive) {
+            // expected
+        }
     }
     
     @Test
@@ -124,6 +133,13 @@ public class ContextBuilderTest extends AbstractStatementBuilderTest {
                 ObjectBuilder.newInstanceOf(MessageBusProvider.class)).getContext();
         
         VariableReference injector = ctx.getVariable("injector");
+        assertEquals("Wrong variable name", "injector", injector.getName());
+        Assert.assertEquals("Wrong variable type", MetaClassFactory.get(MessageBusProvider.class), injector.getType());
+        
+        ctx = ContextBuilder.create().addVariable("injector", 
+                ObjectBuilder.newInstanceOf(MessageBusProvider.class)).getContext();
+        
+        injector = ctx.getVariable("injector");
         assertEquals("Wrong variable name", "injector", injector.getName());
         Assert.assertEquals("Wrong variable type", MetaClassFactory.get(MessageBusProvider.class), injector.getType());
     }
