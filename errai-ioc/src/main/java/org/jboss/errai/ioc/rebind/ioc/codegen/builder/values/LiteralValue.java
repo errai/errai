@@ -35,9 +35,9 @@ public abstract class LiteralValue<T> implements Statement {
 
     @Override
     public int hashCode() {
-        return value.hashCode();
+        return (value == null) ? 0 : value.hashCode();
     }
-
+    
     @Override
     public boolean equals(Object obj) {
         if (this == obj)

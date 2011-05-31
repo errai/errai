@@ -85,18 +85,6 @@ public class Variable extends AbstractStatement {
                 return name;
             }
 
-            public String generate() {
-                return name;
-            }
-
-            public MetaClass getType() {
-                return null;
-            }
-
-            public Context getContext() {
-                return null;
-            }
-
             public Statement getValue() {
                 return null;
             }
@@ -109,16 +97,8 @@ public class Variable extends AbstractStatement {
                 return name;
             }
 
-            public String generate() {
-                return name;
-            }
-
             public MetaClass getType() {
                 return type;
-            }
-
-            public Context getContext() {
-                return null;
             }
 
             public Statement getValue() {
