@@ -34,16 +34,16 @@ public class ContextualStatementBuilderImpl extends AbstractStatementBuilder imp
         return LoopBuilderImpl.create(this).foreach(loopVarName, loopVarType);
     }
 
-    public IfBlockBuilder if_(BooleanOperator op, Statement rhs) {
-        return IfBlockBuilderImpl.create(this).if_(op, rhs);
+    public ElseBlockBuilder if_(BooleanOperator op, Statement rhs, Statement block) {
+        return IfBlockBuilderImpl.create(this).if_(op, rhs, block);
     }
 
-    public IfBlockBuilder if_(BooleanOperator op, Object rhs) {
-        return IfBlockBuilderImpl.create(this).if_(op, rhs);
+    public ElseBlockBuilder if_(BooleanOperator op, Object rhs, Statement block) {
+        return IfBlockBuilderImpl.create(this).if_(op, rhs, block);
     }
     
-    public IfBlockBuilder if_() {
-        return IfBlockBuilderImpl.create(this).if_();
+    public ElseBlockBuilder if_(Statement block) {
+        return IfBlockBuilderImpl.create(this).if_(block);
     }
     
     public ContextualStatementBuilder invoke(String methodName, Object... parameters) {
