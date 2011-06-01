@@ -7,7 +7,8 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaConstructor;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.AbstractMetaMember;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaTypeVariable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.MetaType;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -17,7 +18,7 @@ import java.util.List;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public class GWTConstructor extends AbstractMetaMember implements MetaConstructor {
+public class GWTConstructor extends MetaConstructor {
     private JConstructor constructor;
     private MetaClass declaringClass;
     private Annotation[] annotations;
@@ -57,5 +58,66 @@ public class GWTConstructor extends AbstractMetaMember implements MetaConstructo
 
     public Annotation[] getAnnotations() {
         return annotations;
+    }
+
+    public final Annotation getAnnotation(Class<? extends Annotation> annotation) {
+        for (Annotation a : getAnnotations()) {
+            if (a.annotationType().equals(annotation)) return a;
+        }
+        return null;
+    }
+
+    public final boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
+        return getAnnotation(annotation) != null;
+    }
+
+    @Override
+    public MetaType[] getGenericParameterTypes() {
+        return null;
+    }
+
+    @Override
+    public boolean isVarArgs() {
+        return constructor.isVarArgs();
+    }
+
+    public boolean isAbstract() {
+        return false;
+    }
+
+    public boolean isPublic() {
+        return constructor.isPublic();
+    }
+
+    public boolean isPrivate() {
+        return constructor.isPrivate();
+    }
+
+    public boolean isProtected() {
+        return constructor.isProtected();
+    }
+
+    public boolean isFinal() {
+        return false;
+    }
+
+    public boolean isStatic() {
+        return false;
+    }
+
+    public boolean isTransient() {
+        return false;
+    }
+
+    public boolean isSynthetic() {
+        return false;
+    }
+
+    public boolean isSynchronized() {
+        return false;
+    }
+
+    public MetaTypeVariable[] getTypeParameters() {
+        return GWTUtil.fromTypeVariable(constructor.getTypeParameters());
     }
 }

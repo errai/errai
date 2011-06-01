@@ -1,5 +1,6 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.gwt;
 
+import com.google.gwt.core.ext.typeinfo.JGenericType;
 import com.google.gwt.core.ext.typeinfo.JMethod;
 import com.google.gwt.core.ext.typeinfo.JParameter;
 import org.jboss.errai.ioc.rebind.ioc.InjectUtil;
@@ -7,6 +8,8 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaTypeVariable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.MetaType;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -16,7 +19,7 @@ import java.util.List;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public class GWTMethod implements MetaMethod {
+public class GWTMethod extends MetaMethod {
     private JMethod method;
     private Annotation[] annotations;
 
@@ -73,5 +76,59 @@ public class GWTMethod implements MetaMethod {
 
     public MetaClass getDeclaringClass() {
         return MetaClassFactory.get(method.getEnclosingType());
+    }
+
+    @Override
+    public MetaType getGenericReturnType() {
+        JGenericType type = method.getReturnType().isGenericType();
+        if (type != null) {
+            return new GWTGenericDeclaration(type);
+        }
+        return null;
+    }
+
+    @Override
+    public MetaType[] getGenericParameterTypes() {
+        return null;
+    }
+
+    public boolean isAbstract() {
+        return method.isAbstract();
+    }
+
+    public boolean isPublic() {
+        return method.isPublic();
+    }
+
+    public boolean isPrivate() {
+        return method.isPrivate();
+    }
+
+    public boolean isProtected() {
+        return method.isProtected();
+    }
+
+    public boolean isFinal() {
+        return method.isFinal();
+    }
+
+    public boolean isStatic() {
+        return method.isStatic();
+    }
+
+    public boolean isTransient() {
+        return false;
+    }
+
+    public boolean isSynthetic() {
+        return false;
+    }
+
+    public boolean isSynchronized() {
+        return false;
+    }
+
+    public MetaTypeVariable[] getTypeParameters() {
+        return GWTUtil.fromTypeVariable(method.getTypeParameters());
     }
 }

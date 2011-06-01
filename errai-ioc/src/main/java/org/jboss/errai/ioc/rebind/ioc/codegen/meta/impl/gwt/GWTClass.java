@@ -2,21 +2,25 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.gwt;
 
 import com.google.gwt.core.ext.typeinfo.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaConstructor;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.AbstractMetaClass;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author Mike Brock <cbrock@redhat.com>
+ */
 public class GWTClass extends AbstractMetaClass<JType> {
     private Annotation[] annotationsCache;
 
     private GWTClass(JType classType) {
         super(classType);
+        JParameterizedType parameterizedType = classType.isParameterized();
+        if (parameterizedType != null) {
+            super.parameterizedType = new GWTParameterizedType(parameterizedType);
+        }
     }
 
     public static MetaClass newInstance(JType type) {
@@ -170,13 +174,17 @@ public class GWTClass extends AbstractMetaClass<JType> {
         return annotationsCache;
     }
 
-    public MetaClass[] getParameterizedTypes() {
-        MetaClass[] parameterizedTypes = new MetaClass[1];
-        JParameterizedType paramType = getEnclosedMetaObject().isParameterized();
-        if (paramType != null)
-            parameterizedTypes[0] = new GWTClass(paramType);
+    public MetaTypeVariable[] getTypeParameters() {
+        List<MetaTypeVariable> typeVariables = new ArrayList<MetaTypeVariable>();
+        JGenericType genericType = getEnclosedMetaObject().isGenericType();
 
-        return parameterizedTypes;
+        if (genericType != null) {
+            for (JTypeParameter typeParameter : genericType.getTypeParameters()) {
+                typeVariables.add(new GWTTypeVariable(typeParameter));
+            }
+        }
+
+        return typeVariables.toArray(new MetaTypeVariable[typeVariables.size()]);
     }
 
     public boolean isInterface() {

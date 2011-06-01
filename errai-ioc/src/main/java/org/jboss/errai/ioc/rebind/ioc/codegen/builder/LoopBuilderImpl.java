@@ -3,6 +3,7 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.control.ForeachLoop;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameterizedType;
 
 /**
  * StatementBuilder to generate loops.
@@ -43,13 +44,13 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements LoopBui
     }
 
     public LoopBodyBuilder foreach(String loopVarName) {
-        return foreach(loopVarName, (MetaClass)null);
+        return foreach(loopVarName, (MetaClass) null);
     }
 
     public LoopBodyBuilder foreach(String loopVarName, Class<?> loopVarType) {
         return foreach(loopVarName, MetaClassFactory.get(loopVarType));
     }
-    
+
     public LoopBodyBuilder foreach(String loopVarName, MetaClass loopVarType) {
         return foreach(loopVarName, loopVarType, parent.statement);
     }
@@ -68,8 +69,11 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements LoopBui
 
         // infer the loop variable type
         MetaClass loopVarType = MetaClassFactory.get(Object.class);
-        if (collection.getType().getParameterizedTypes().length > 0) {
-            loopVarType = collection.getType().getParameterizedTypes()[0];
+
+        MetaParameterizedType parameterizedType = collection.getType().getParameterizedType();
+
+        if (parameterizedType != null && parameterizedType.getTypeParameters().length != 0) {
+            loopVarType = (MetaClass) parameterizedType.getTypeParameters()[0];
         } else if (GenUtil.getComponentType(collection) != null) {
             loopVarType = GenUtil.getComponentType(collection);
         }
