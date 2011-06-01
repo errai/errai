@@ -1,5 +1,11 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta;
 
-public interface MetaConstructor extends MetaClassMember {
-    public MetaParameter[] getParameters();
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.MetaType;
+
+public abstract class MetaConstructor implements MetaClassMember, MetaGenericDeclaration {
+    public abstract MetaParameter[] getParameters();
+
+    public abstract MetaType[] getGenericParameterTypes();
+
+    public abstract boolean isVarArgs();
 }

@@ -1,89 +1,93 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta;
 
 import com.google.gwt.core.ext.typeinfo.JClassType;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.MetaType;
 
-public interface MetaClass extends HasAnnotations {
-    public String getName();
+/**
+ * @author Mike Brock <cbrock@redhat.com>
+ */
+public abstract class MetaClass implements HasAnnotations, MetaType, MetaGenericDeclaration {
+    public abstract String getName();
 
-    public String getFullyQualifedName();
+    public abstract String getFullyQualifedName();
 
-    public MetaMethod[] getMethods();
+    public abstract MetaMethod[] getMethods();
 
-    public MetaMethod[] getDeclaredMethods();
+    public abstract MetaMethod[] getDeclaredMethods();
 
-    public MetaMethod getMethod(String name, Class... parameters);
+    public abstract MetaMethod getMethod(String name, Class... parameters);
 
-    public MetaMethod getMethod(String name, MetaClass... parameters);
+    public abstract MetaMethod getMethod(String name, MetaClass... parameters);
 
-    public MetaMethod getBestMatchingMethod(String name, Class... parameters);
+    public abstract MetaMethod getBestMatchingMethod(String name, Class... parameters);
 
-    public MetaMethod getBestMatchingMethod(String name, MetaClass... parameters);
+    public abstract MetaMethod getBestMatchingMethod(String name, MetaClass... parameters);
 
-    public MetaMethod getDeclaredMethod(String name, Class... parameters);
+    public abstract MetaMethod getDeclaredMethod(String name, Class... parameters);
 
-    public MetaMethod getDeclaredMethod(String name, MetaClass... parameters);
+    public abstract MetaMethod getDeclaredMethod(String name, MetaClass... parameters);
 
-    public MetaField[] getFields();
+    public abstract MetaField[] getFields();
 
-    public MetaField[] getDeclaredFields();
+    public abstract MetaField[] getDeclaredFields();
 
-    public MetaField getField(String name);
+    public abstract MetaField getField(String name);
 
-    public MetaField getDeclaredField(String name);
+    public abstract MetaField getDeclaredField(String name);
 
-    public MetaConstructor[] getConstructors();
+    public abstract MetaConstructor[] getConstructors();
 
-    public MetaConstructor[] getDeclaredConstructors();
+    public abstract MetaConstructor[] getDeclaredConstructors();
 
-    public MetaConstructor getConstructor(Class... parameters);
+    public abstract MetaConstructor getConstructor(Class... parameters);
 
-    public MetaConstructor getConstructor(MetaClass... parameters);
+    public abstract MetaConstructor getConstructor(MetaClass... parameters);
 
-    public MetaConstructor getBestMatchingConstructor(Class... parameters);
+    public abstract MetaConstructor getBestMatchingConstructor(Class... parameters);
 
-    public MetaConstructor getBestMatchingConstructor(MetaClass... parameters);
+    public abstract MetaConstructor getBestMatchingConstructor(MetaClass... parameters);
 
-    public MetaConstructor getDeclaredConstructor(Class... parameters);
+    public abstract MetaConstructor getDeclaredConstructor(Class... parameters);
 
-    public MetaClass[] getParameterizedTypes();
+    public abstract MetaParameterizedType getParameterizedType();
 
-    public MetaClass[] getInterfaces();
+    public abstract MetaClass[] getInterfaces();
 
-    public MetaClass getSuperClass();
+    public abstract MetaClass getSuperClass();
 
-    public MetaClass getComponentType();
+    public abstract MetaClass getComponentType();
 
-    public boolean isAssignableFrom(MetaClass clazz);
+    public abstract boolean isAssignableFrom(MetaClass clazz);
 
-    public boolean isAssignableTo(MetaClass clazz);
+    public abstract boolean isAssignableTo(MetaClass clazz);
 
-    public boolean isAssignableFrom(Class clazz);
+    public abstract boolean isAssignableFrom(Class clazz);
 
-    public boolean isAssignableTo(Class clazz);
+    public abstract boolean isAssignableTo(Class clazz);
 
-    public boolean isAssignableFrom(JClassType clazz);
+    public abstract boolean isAssignableFrom(JClassType clazz);
 
-    public boolean isAssignableTo(JClassType clazz);
+    public abstract boolean isAssignableTo(JClassType clazz);
 
-    public boolean isInterface();
+    public abstract boolean isInterface();
 
-    public boolean isAbstract();
+    public abstract boolean isAbstract();
 
-    public boolean isArray();
+    public abstract boolean isArray();
 
-    public boolean isEnum();
+    public abstract boolean isEnum();
 
-    public boolean isAnnotation();
+    public abstract boolean isAnnotation();
 
-    public boolean isPublic();
+    public abstract boolean isPublic();
 
-    public boolean isPrivate();
+    public abstract boolean isPrivate();
 
-    public boolean isProtected();
+    public abstract boolean isProtected();
 
-    public boolean isFinal();
+    public abstract boolean isFinal();
 
-    public boolean isStatic();
+    public abstract boolean isStatic();
 
-    public Class<?> asClass();
+    public abstract Class<?> asClass();
 }

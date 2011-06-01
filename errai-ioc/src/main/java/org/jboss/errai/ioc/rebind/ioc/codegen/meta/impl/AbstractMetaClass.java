@@ -3,10 +3,10 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import org.jboss.errai.ioc.rebind.ioc.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.HasAnnotations;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaConstructor;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameterizedType;
 import org.mvel2.util.ParseTools;
 
 import java.lang.annotation.Annotation;
@@ -17,8 +17,9 @@ import java.lang.reflect.Method;
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public abstract class AbstractMetaClass<T> implements MetaClass, HasAnnotations {
+public abstract class AbstractMetaClass<T> extends MetaClass {
     private final T enclosedMetaObject;
+    protected MetaParameterizedType parameterizedType;
 
     protected AbstractMetaClass(T enclosedMetaObject) {
         this.enclosedMetaObject = enclosedMetaObject;
@@ -174,6 +175,11 @@ public abstract class AbstractMetaClass<T> implements MetaClass, HasAnnotations 
 
     public boolean isAssignableFrom(JClassType clazz) {
         return isAssignableTo(MetaClassFactory.get(clazz));
+    }
+
+    @Override
+    public MetaParameterizedType getParameterizedType() {
+        return parameterizedType;
     }
 
     @Override

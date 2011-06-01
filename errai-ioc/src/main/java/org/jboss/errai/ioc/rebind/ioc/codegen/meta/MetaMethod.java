@@ -1,9 +1,15 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta;
 
-public interface MetaMethod extends MetaClassMember {
-    public String getName();
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.MetaType;
 
-    public MetaClass getReturnType();
+public abstract class MetaMethod implements MetaClassMember, MetaGenericDeclaration {
+    public abstract String getName();
 
-    public MetaParameter[] getParameters();
+    public abstract MetaClass getReturnType();
+
+    public abstract MetaType getGenericReturnType();
+
+    public abstract MetaType[] getGenericParameterTypes();
+
+    public abstract MetaParameter[] getParameters();
 }
