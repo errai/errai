@@ -12,11 +12,6 @@ public class IfBlock extends AbstractBlockConditional {
     public IfBlock(Statement condition, Statement block) {
         super(condition, block);
     }
-
-    public IfBlock(Statement condition, Statement block, Statement elseBlock) {
-        super(condition, block);
-        this.elseBlock = elseBlock;
-    }
     
     public IfBlock(Statement condition, Statement block, IfBlock elseIf) {
         super(condition, block);
@@ -27,10 +22,6 @@ public class IfBlock extends AbstractBlockConditional {
         this.elseBlock = elseBlock;
     }
     
-    public void setElseIf(IfBlock elseIf) {
-        this.elseIf = elseIf;
-    }
-
     public String generate() {
         StringBuilder builder = new StringBuilder("if ");
         if (getCondition() != null) {
@@ -45,7 +36,7 @@ public class IfBlock extends AbstractBlockConditional {
         builder.append("\n} ");
 
         if (elseIf != null) {
-            builder.append("else ").append(elseBlock.generate());
+            builder.append("else ").append(elseIf.generate());
             return builder.toString();
         }
         

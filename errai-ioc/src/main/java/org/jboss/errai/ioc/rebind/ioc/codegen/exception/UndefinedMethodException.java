@@ -10,7 +10,7 @@ public class UndefinedMethodException extends RuntimeException {
 
     private String methodName;
     private MetaClass[] parameterTypes;
-    
+
     public UndefinedMethodException() {
         super();
     }
@@ -18,7 +18,7 @@ public class UndefinedMethodException extends RuntimeException {
     public UndefinedMethodException(String msg) {
         super(msg);
     }
-    
+
     public UndefinedMethodException(String methodName, MetaClass... parameterTypes) {
         this.methodName = methodName;
         this.parameterTypes = parameterTypes;
@@ -27,11 +27,15 @@ public class UndefinedMethodException extends RuntimeException {
     @Override
     public String toString() {
         StringBuilder buf = new StringBuilder();
-        
+
         buf.append(super.toString()).append(": methodName:").append(methodName).append(" parameterTypes:");
-        for(MetaClass type : parameterTypes) {
+        for (MetaClass type : parameterTypes) {
             buf.append(type.getFullyQualifedName()).append(" ");
         }
         return buf.toString();
+    }
+    
+    public String getMethodName() {
+        return methodName;
     }
 }

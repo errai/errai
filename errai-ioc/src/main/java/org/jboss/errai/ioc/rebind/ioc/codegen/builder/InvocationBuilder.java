@@ -29,7 +29,7 @@ public class InvocationBuilder extends AbstractStatementBuilder {
         CallParameters callParams = CallParameters.fromStatements(parameters);
 
         MetaClass[] parameterTypes = callParams.getParameterTypes();
-        MetaMethod method = parent.statement.getType().getDeclaredMethod(methodName, parameterTypes);
+        MetaMethod method = parent.statement.getType().getBestMatchingMethod(methodName, parameterTypes);
         if (method == null)
             throw new UndefinedMethodException(methodName, parameterTypes);
 

@@ -5,6 +5,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
 import org.jboss.errai.ioc.rebind.ioc.codegen.GenUtil;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.VariableReference;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.control.IfBlock;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
@@ -34,16 +35,28 @@ public class ContextualStatementBuilderImpl extends AbstractStatementBuilder imp
         return LoopBuilderImpl.create(this).foreach(loopVarName, loopVarType);
     }
 
+    public ElseBlockBuilder if_(Statement block) {
+        return IfBlockBuilderImpl.create(this).if_(block);
+    }
+    
+    public IfBlock if_(Statement block, IfBlock elseIf) {
+        return IfBlockBuilderImpl.create(this).if_(block, elseIf);
+    }
+    
     public ElseBlockBuilder if_(BooleanOperator op, Statement rhs, Statement block) {
         return IfBlockBuilderImpl.create(this).if_(op, rhs, block);
+    }
+    
+    public IfBlock if_(BooleanOperator op, Statement rhs, Statement block, IfBlock elseIf) {
+        return IfBlockBuilderImpl.create(this).if_(op, rhs, block, elseIf);
     }
 
     public ElseBlockBuilder if_(BooleanOperator op, Object rhs, Statement block) {
         return IfBlockBuilderImpl.create(this).if_(op, rhs, block);
     }
     
-    public ElseBlockBuilder if_(Statement block) {
-        return IfBlockBuilderImpl.create(this).if_(block);
+    public IfBlock if_(BooleanOperator op, Object rhs, Statement block, IfBlock elseIf) {
+        return IfBlockBuilderImpl.create(this).if_(op, rhs, block, elseIf);
     }
     
     public ContextualStatementBuilder invoke(String methodName, Object... parameters) {
