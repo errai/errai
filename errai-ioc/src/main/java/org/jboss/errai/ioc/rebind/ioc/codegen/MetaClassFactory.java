@@ -136,4 +136,12 @@ public final class MetaClassFactory {
         }
         return newClasses;
     }
+
+    public static Class<?>[] asClassArray(MetaClass[] cls) {
+        Class<?>[] newClasses = new Class<?>[cls.length];
+        for (int i = 0; i < cls.length; i++) {
+            newClasses[i] = cls[i].asClass();
+        }
+        return newClasses;
+    }
 }
