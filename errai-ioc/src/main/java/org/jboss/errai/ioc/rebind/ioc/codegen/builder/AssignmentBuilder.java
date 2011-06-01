@@ -20,7 +20,7 @@ public class AssignmentBuilder implements Statement {
         this.statement = statement;
     }
 
-    public String generate() {
+    public String generate(Context context) {
         return operator.generate(reference, statement);
     }
 

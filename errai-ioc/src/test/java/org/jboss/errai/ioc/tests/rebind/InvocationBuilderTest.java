@@ -1,18 +1,18 @@
 package org.jboss.errai.ioc.tests.rebind;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import org.jboss.errai.ioc.client.api.builtin.MessageBusProvider;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Builder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Refs;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ContextBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedMethodException;
 import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Tests the generation of method invocations using the {@link StatementBuilder} API.
@@ -23,13 +23,13 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
 
     @Test
     public void testInvoke() {
-        Statement invokeStatement = StatementBuilder.create()
+        Builder invokeStatement = StatementBuilder.create()
                 .addVariable("injector", MessageBusProvider.class)
                 .loadVariable("injector")
                 .invoke("provide");
 
         assertEquals("failed to generate invocation on variable",
-                "injector.provide()", invokeStatement.generate());
+                "injector.provide()", invokeStatement.toJavaString());
 
         invokeStatement = StatementBuilder.create()
                 .addVariable("i", Integer.class)
@@ -40,18 +40,18 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
                 .invoke("replaceAll", Variable.get("regex"), Variable.get("replacement"));
 
         assertEquals("failed to generate multiple invocations on variable",
-                "i.toString().replaceAll(regex, replacement)", invokeStatement.generate());
+                "i.toString().replaceAll(regex, replacement)", invokeStatement.toJavaString());
     }
 
     @Test
     public void testInvokeWithLiterals() {
         String result = StatementBuilder.create().addVariable("s", String.class)
-                .loadVariable("s").invoke("replaceAll", "foo", "foo\t\n").generate();
+                .loadVariable("s").invoke("replaceAll", "foo", "foo\t\n").toJavaString();
 
         assertEquals("failed to generate invocation using literal parameters",
                 "s.replaceAll(\"foo\", \"foo\\t\\n\")", result);
 
-        result = StatementBuilder.create().loadLiteral("foo").invoke("toString").generate();
+        result = StatementBuilder.create().loadLiteral("foo").invoke("toString").toJavaString();
 
         assertEquals("failed to generate invocation using literal parameters",
                 "\"foo\".toString()", result);
@@ -59,15 +59,15 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
 
     @Test
     public void testInvokeOnBestMatchingMethod() {
-        Statement statement = StatementBuilder.create()
-            .addVariable("n", Integer.class)
-            .loadVariable("n")
-            // 1 will be inferred to LiteralValue<Integer>, equals(Integer.class) should match equals(Object.class)
-            .invoke("equals", 1);
+        Builder statement = StatementBuilder.create()
+                .addVariable("n", Integer.class)
+                .loadVariable("n")
+                        // 1 will be inferred to LiteralValue<Integer>, equals(Integer.class) should match equals(Object.class)
+                .invoke("equals", 1);
 
-        assertEquals("failed to generate invocation on matched method", "n.equals(1)", statement.generate());
+        assertEquals("failed to generate invocation on matched method", "n.equals(1)", statement.toJavaString());
     }
-    
+
     @Test
     public void testInvokeOnUndefinedMethods() {
         try {
@@ -88,11 +88,12 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
                     .addVariable("replacement", String.class)
                     .loadVariable("s")
                     .invoke("replaceAll", Variable.get("regex"), Variable.get("replacement"))
-                    .invoke("idontexist", Variable.get("regex"), Variable.get("replacement"));
+                    .invoke("idontexist", Variable.get("regex"), Variable.get("replacement"))
+                    .toJavaString();
             fail("expected UndefinedMethodException");
         } catch (UndefinedMethodException udme) {
             //expected
-            assertEquals("Wrong exception thrown", udme.getMethodName(),"idontexist");
+            assertEquals("Wrong exception thrown", udme.getMethodName(), "idontexist");
         }
     }
 
@@ -102,7 +103,8 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
             // injector undefined
             StatementBuilder.create()
                     .loadVariable("injector")
-                    .invoke("provide", Refs.get("param"), Refs.get("param2"));
+                    .invoke("provide", Refs.get("param"), Refs.get("param2"))
+                    .toJavaString();
             fail("expected OutOfScopeException");
         } catch (OutOfScopeException oose) {
             //expected
@@ -115,7 +117,8 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
                     .addVariable("injector", MessageBusProvider.class)
                     .addVariable("param", String.class)
                     .loadVariable("injector")
-                    .invoke("provide", Variable.get("param"), Variable.get("param2"));
+                    .invoke("provide", Variable.get("param"), Variable.get("param2"))
+                    .toJavaString();
             fail("expected OutOfScopeException");
         } catch (OutOfScopeException oose) {
             //expected
@@ -133,7 +136,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
 
         String s = StatementBuilder.create(context)
                 .load(Variable.get("s"))
-                .invoke("toUpperCase").generate();
+                .invoke("toUpperCase").toJavaString();
 
         assertEquals("failed using load() passing a Reference",
                 "s.toUpperCase()", s);
@@ -141,14 +144,14 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
         Variable v = Variable.create("s", String.class);
         s = StatementBuilder.create(context)
                 .load(v)
-                .invoke("toUpperCase").generate();
+                .invoke("toUpperCase").toJavaString();
 
         assertEquals("failed using load() passing a Variable instance",
                 "s.toUpperCase()", s);
 
         s = StatementBuilder.create(context)
                 .load("foo")
-                .invoke("toUpperCase").generate();
+                .invoke("toUpperCase").toJavaString();
 
         assertEquals("failed injecting literal with load()",
                 "\"foo\".toUpperCase()", s);

@@ -1,5 +1,6 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.control;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 
 /**
@@ -10,14 +11,14 @@ public class DoWhileBlock extends AbstractBlockConditional {
         super(condition, block);
     }
 
-    public String generate() {
+    public String generate(Context context) {
         StringBuilder builder = new StringBuilder("do {\n");
 
         if (getBlock() != null) {
-            builder.append(getBlock().generate());
+            builder.append(getBlock().generate(context));
         }
 
-        builder.append("} while (").append(getBlock().generate()).append(");\n");
+        builder.append("} while (").append(getBlock().generate(context)).append(");\n");
 
         return builder.toString();
     }

@@ -1,5 +1,6 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.control;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 
 /**
@@ -19,20 +20,20 @@ public class ForLoop extends AbstractBlockConditional {
         this.afterBlock = afterBlock;
     }
 
-    public String generate() {
+    public String generate(Context context) {
         StringBuilder builder = new StringBuilder("for (");
 
         if (initializer != null) {
-            builder.append(initializer.generate());
+            builder.append(initializer.generate(context));
         }
-        builder.append("; ").append(getCondition().generate()).append("; ");
+        builder.append("; ").append(getCondition().generate(context)).append("; ");
 
         if (afterBlock != null) {
-            builder.append(afterBlock.generate());
+            builder.append(afterBlock.generate(context));
         }
 
         builder.append(") {\n")
-                .append(getBlock().generate())
+                .append(getBlock().generate(context))
                 .append("\n}\n");
 
         return builder.toString();

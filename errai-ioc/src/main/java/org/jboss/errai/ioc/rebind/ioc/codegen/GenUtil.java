@@ -37,14 +37,14 @@ public class GenUtil {
             return LiteralFactory.getLiteral(o);
         }
     }
-    
+
     public static void assertIsIterable(Statement statement) {
         try {
             Class<?> cls = Class.forName(statement.getType().getFullyQualifedName(), false,
                     Thread.currentThread().getContextClassLoader());
 
             if (!cls.isArray() && !Iterable.class.isAssignableFrom(cls))
-                throw new TypeNotIterableException(statement.generate());
+                throw new TypeNotIterableException(statement.generate(Context.create()));
         } catch (ClassNotFoundException e) {
             throw new IllegalArgumentException(e);
         }
@@ -80,18 +80,18 @@ public class GenUtil {
             throw new IllegalArgumentException(e);
         }
     }
-      
+
     public static Statement convert(Context context, Object input, MetaClass targetType) {
         try {
-            
-            if(input instanceof Statement) {
-                assertAssignableTypes(((Statement)input).getType(), targetType);
+
+            if (input instanceof Statement) {
+                assertAssignableTypes(((Statement) input).getType(), targetType);
                 return (Statement) input;
             }
-            
+
             Class<?> targetClass = Class.forName(targetType.getFullyQualifedName(), false,
                     Thread.currentThread().getContextClassLoader());
-            
+
             if (DataConversion.canConvert(targetClass, input.getClass())) {
                 return generate(context, DataConversion.convert(input, targetClass));
             } else {

@@ -11,12 +11,12 @@ public class WhileBlock extends AbstractBlockConditional {
         super(condition, block);
     }
 
-    public String generate() {
+    public String generate(Context context) {
         StringBuilder builder = new StringBuilder("while (")
-                .append(getCondition().generate()).append(") {\n");
+                .append(getCondition().generate(context)).append(") {\n");
 
         if (getBlock() != null) {
-            builder.append(getBlock().generate());
+            builder.append(getBlock().generate(context));
         }
 
         builder.append("}\n");

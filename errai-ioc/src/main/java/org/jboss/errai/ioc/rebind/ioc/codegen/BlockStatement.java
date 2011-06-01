@@ -5,25 +5,25 @@ import java.util.List;
 
 /**
  * Represents a code block (e.g. loop body).
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class BlockStatement extends AbstractStatement  {
+public class BlockStatement extends AbstractStatement {
     private List<Statement> statements = new ArrayList<Statement>();
-    
+
     public BlockStatement addStatement(Statement statement) {
         statements.add(statement);
         return this;
     }
-    
-    public String generate() {
+
+    public String generate(Context context) {
         StringBuilder buf = new StringBuilder();
 
         for (Statement statement : statements) {
-            if(buf.length()!=0)
+            if (buf.length() != 0)
                 buf.append("\n");
-            
-            buf.append(statement.generate()).append(";");
+
+            buf.append(statement.generate(context)).append(";");
         }
         return buf.toString();
     }

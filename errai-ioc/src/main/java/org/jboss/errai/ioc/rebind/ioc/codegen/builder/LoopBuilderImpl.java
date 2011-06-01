@@ -25,8 +25,8 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements LoopBui
             return this;
         }
 
-        public String generate() {
-            return LoopBuilderImpl.this.generate();
+        public String generate(Context context) {
+            return LoopBuilderImpl.this.generate(Context.create());
         }
 
         public Context getContext() {

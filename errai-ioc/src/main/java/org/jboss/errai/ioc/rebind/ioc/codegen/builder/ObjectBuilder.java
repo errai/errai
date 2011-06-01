@@ -1,18 +1,13 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.AbstractStatement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.CallParameters;
-import org.jboss.errai.ioc.rebind.ioc.codegen.GenUtil;
-import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import com.google.gwt.core.ext.typeinfo.JClassType;
+import org.jboss.errai.ioc.rebind.ioc.codegen.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedConstructorException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
-import com.google.gwt.core.ext.typeinfo.JClassType;
-
 /**
- * @author Mike Brock <cbrock@redhat.com> 
+ * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ObjectBuilder extends AbstractStatement {
@@ -49,16 +44,16 @@ public class ObjectBuilder extends AbstractStatement {
     public ObjectBuilder withParameters(Object... parameters) {
         return withParameters(GenUtil.generateCallParameters(getContext(), parameters));
     }
-    
+
     public ObjectBuilder withParameters(Statement... parameters) {
         return withParameters(CallParameters.fromStatements(parameters));
     }
-    
+
     public ObjectBuilder withParameters(CallParameters parameters) {
-        if (!type.isInterface() && type.getBestMatchingConstructor(parameters.getParameterTypes())==null)
+        if (!type.isInterface() && type.getBestMatchingConstructor(parameters.getParameterTypes()) == null)
             throw new UndefinedConstructorException(type, parameters.getParameterTypes());
-        
-        buf.append(parameters.generate());
+
+        buf.append(parameters.generate(Context.create()));
         buildState |= CONSTRUCT_STATEMENT_COMPLETE;
         return this;
     }
@@ -69,7 +64,7 @@ public class ObjectBuilder extends AbstractStatement {
 
     public void integrateClassStructure(ClassStructureBuilder builder) {
         finishConstructIfNecessary();
-        buf.append(" {\n").append(builder.getStatement()).append("\n}\n");
+        buf.append(" {\n").append(builder.toJavaString()).append("\n}\n");
     }
 
     private void finishConstructIfNecessary() {
@@ -82,7 +77,7 @@ public class ObjectBuilder extends AbstractStatement {
         return type;
     }
 
-    public String generate() {
+    public String generate(Context context) {
         finishConstructIfNecessary();
         return buf.toString();
     }

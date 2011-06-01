@@ -12,7 +12,7 @@ public abstract class Refs {
                 return name;
             }
 
-            public String generate() {
+            public String generate(Context context) {
                 return getName();
             }
 

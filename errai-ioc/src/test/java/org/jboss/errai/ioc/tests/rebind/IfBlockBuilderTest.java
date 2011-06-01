@@ -17,52 +17,52 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest {
     @Test
     public void testEmptyIfBlockUsingNoRhs() {
         Statement s = StatementBuilder.create()
-            .addVariable("str", String.class)
-            .loadVariable("str")
-            .invoke("endsWith", "abc")
-            .if_(null);
+                .addVariable("str", String.class)
+                .loadVariable("str")
+                .invoke("endsWith", "abc")
+                .if_(null);
 
-        assertEquals("Failed to generate empty if block using no rhs", "if (str.endsWith(\"abc\")) { }\n", s.generate());
+        assertEquals("Failed to generate empty if block using no rhs", "if (str.endsWith(\"abc\")) { }\n", s.generate(Context.create()));
     }
 
     @Test
     public void testIfElseBlockUsingNoRhs() {
         Statement s = StatementBuilder.create()
-            .addVariable("str", String.class)
-            .loadVariable("str")
-            .invoke("endsWith", "abc")
-            .if_(ContextBuilder.create().declareVariable("n", Integer.class).initializeWith(0))
-            .else_(ContextBuilder.create().declareVariable("n", Integer.class).initializeWith(1));
-        
+                .addVariable("str", String.class)
+                .loadVariable("str")
+                .invoke("endsWith", "abc")
+                .if_(ContextBuilder.create().declareVariable("n", Integer.class).initializeWith(0))
+                .else_(ContextBuilder.create().declareVariable("n", Integer.class).initializeWith(1));
+
         assertEquals("Failed to generate empty if block using no rhs", "if (str.endsWith(\"abc\")) { " +
-        		"java.lang.Integer n = 0;\n} else { java.lang.Integer n = 1;\n}\n", s.generate());
-   }
+                "java.lang.Integer n = 0;\n} else { java.lang.Integer n = 1;\n}\n", s.generate(Context.create()));
+    }
 
     @Test
     public void testIfElseIfBlockUsingNoRhs() {
-       Context c = ContextBuilder.create().addVariable("s", String.class).addVariable("n", Integer.class).getContext();
-        
+        Context c = ContextBuilder.create().addVariable("s", String.class).addVariable("n", Integer.class).getContext();
+
         Statement s = StatementBuilder.create(c)
-            .loadVariable("s")
-            .invoke("endsWith", "abc")
-            .if_(StatementBuilder.create(c).loadVariable("n").assignValue(0), 
-                    StatementBuilder.create(c).loadVariable("s")
-                    .invoke("startsWith", "def")
-                    .if_(StatementBuilder.create(c).loadVariable("n").assignValue(1))
-                    .else_(StatementBuilder.create(c).loadVariable("n").assignValue(2)));
-        
+                .loadVariable("s")
+                .invoke("endsWith", "abc")
+                .if_(StatementBuilder.create(c).loadVariable("n").assignValue(0),
+                        StatementBuilder.create(c).loadVariable("s")
+                                .invoke("startsWith", "def")
+                                .if_(StatementBuilder.create(c).loadVariable("n").assignValue(1))
+                                .else_(StatementBuilder.create(c).loadVariable("n").assignValue(2)));
+
         assertEquals("Failed to generate if - else if block using no rhs", "if (s.endsWith(\"abc\")) { " +
                 "n = 0;\n} else if (s.startsWith(\"def\")) {\nn = 1;\n} else {\nn=2;\n}\n",
-                s.generate());
-   }
+                s.generate(c));
+    }
 
-   @Test
-   public void testEmptyIfBlockUsingLiteralRhs() {
-       Statement s = StatementBuilder.create()
-           .addVariable("n", int.class)
-           .loadVariable("n")
-           .if_(BooleanOperator.Equals, 1, null);
-       
-       assertEquals("Failed to generate empty if block using a literal rhs", "if (n == 1) { }\n", s.generate());
-   }
+    @Test
+    public void testEmptyIfBlockUsingLiteralRhs() {
+        Statement s = StatementBuilder.create()
+                .addVariable("n", int.class)
+                .loadVariable("n")
+                .if_(BooleanOperator.Equals, 1, null);
+
+        assertEquals("Failed to generate empty if block using a literal rhs", "if (n == 1) { }\n", s.generate(Context.create()));
+    }
 }

@@ -1,7 +1,7 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.values;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
@@ -21,14 +21,14 @@ public abstract class LiteralValue<T> implements Statement {
         return value;
     }
 
-    public String generate() {
+    public String generate(Context context) {
         return getCanonicalString();
     }
 
     public Context getContext() {
         return null;
     }
-    
+
     public MetaClass getType() {
         return MetaClassFactory.get(value.getClass());
     }
@@ -37,7 +37,7 @@ public abstract class LiteralValue<T> implements Statement {
     public int hashCode() {
         return (value == null) ? 0 : value.hashCode();
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj)

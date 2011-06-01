@@ -51,6 +51,6 @@ public enum AssignmentOperator {
             throw new RuntimeException("variable expected");
         }
 
-        return reference.getName() + " " + getCanonicalString() + " " + statement.generate();
+        return reference.getName() + " " + getCanonicalString() + " " + statement.generate(Context.create());
     }
 }

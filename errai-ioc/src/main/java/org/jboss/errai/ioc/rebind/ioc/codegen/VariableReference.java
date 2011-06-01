@@ -8,6 +8,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
  */
 public abstract class VariableReference implements Statement {
     public abstract String getName();
+
     public abstract Statement getValue();
 
     public MetaClass getType() {
@@ -17,8 +18,8 @@ public abstract class VariableReference implements Statement {
     public Context getContext() {
         return null;
     }
-    
-    public String generate() {
+
+    public String generate(Context context) {
         return getName();
     }
 }

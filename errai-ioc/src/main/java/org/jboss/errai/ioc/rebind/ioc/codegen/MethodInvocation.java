@@ -5,7 +5,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 
 /**
  * Represents a method invocation statement.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class MethodInvocation extends AbstractStatement {
@@ -19,12 +19,12 @@ public class MethodInvocation extends AbstractStatement {
         this.parameters = parameters;
     }
 
-    public String generate() {
+    public String generate(Context context) {
         StringBuilder buf = new StringBuilder();
-        buf.append(target.generate()).append(".").append(method.getName()).append(parameters.generate());
+        buf.append(target.generate(context)).append(".").append(method.getName()).append(parameters.generate(context));
         return buf.toString();
     }
-    
+
     public MetaClass getType() {
         return method.getReturnType();
     }

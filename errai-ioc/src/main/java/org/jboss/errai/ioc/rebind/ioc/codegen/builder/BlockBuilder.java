@@ -1,42 +1,32 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.BlockStatement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public class BlockBuilder implements Statement {
-    private Context context;
-    private List<Statement> statements;
+public class BlockBuilder<T> implements Finishable<T> {
+    private BlockStatement blockStatement;
+    private BuildCallback<T> callback;
 
-    public BlockBuilder(Context context) {
-        this.context = context;
-        this.statements = new ArrayList<Statement>();
+    public BlockBuilder() {
+        this.blockStatement = new BlockStatement();
     }
 
-    public BlockBuilder append(Statement statement) {
-        statements.add(statement);
+    public BlockBuilder(BuildCallback<T> callback) {
+        this.callback = callback;
+    }
+
+    public BlockBuilder<T> append(Statement statement) {
+        blockStatement.addStatement(statement);
         return this;
     }
 
-    public String generate() {
-        StringBuilder builder = new StringBuilder();
-        for (Statement statement : statements) {
-            builder.append(statement.generate()).append(";\n");
+    public T finish() {
+        if (callback != null) {
+            return callback.callback(blockStatement);
         }
-        return builder.toString();
-    }
-
-    public MetaClass getType() {
-        return null;
-    }
-
-    public Context getContext() {
         return null;
     }
 }

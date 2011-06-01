@@ -1,5 +1,6 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.Builder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
@@ -7,14 +8,14 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
  * Base class of all {@link StatementBuilder}s
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public abstract class AbstractStatementBuilder implements Statement {
+public abstract class AbstractStatementBuilder implements Statement, Builder {
     protected Context context = null;
     protected Statement statement = null;
     protected AbstractStatementBuilder parent = null;
-    
+
     protected AbstractStatementBuilder(Context context) {
         this.context = context;
     }
@@ -22,16 +23,16 @@ public abstract class AbstractStatementBuilder implements Statement {
     public Context getContext() {
         return context;
     }
-    
-    public String generate() {
-       if (statement!=null) {
-         return statement.generate();
-       } 
-       return "";
+
+    public String generate(Context context) {
+        if (statement != null) {
+            return statement.generate(Context.create());
+        }
+        return "";
     }
-    
+
     public MetaClass getType() {
-        if (statement!=null) {
+        if (statement != null) {
             return statement.getType();
         }
         return MetaClassFactory.get(Void.class);
@@ -39,6 +40,6 @@ public abstract class AbstractStatementBuilder implements Statement {
 
     public String toJavaString() {
         //TODO generate(context)
-        return generate();
+        return generate(context);
     }
 }

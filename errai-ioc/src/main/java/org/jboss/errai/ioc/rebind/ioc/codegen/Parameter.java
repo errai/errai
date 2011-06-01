@@ -15,11 +15,15 @@ public class Parameter extends AbstractStatement {
         return new Parameter(type, name);
     }
 
-    public String generate() {
+    public String generate(Context context) {
         return type.getFullyQualifedName() + " " + name;
     }
 
     public MetaClass getType() {
         return type;
+    }
+
+    public String getName() {
+        return name;
     }
 }

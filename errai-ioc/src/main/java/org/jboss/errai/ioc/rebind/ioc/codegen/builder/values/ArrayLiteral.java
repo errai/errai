@@ -51,7 +51,7 @@ public class ArrayLiteral extends LiteralValue<Object> {
                 builder.append(renderInlineArrayLiteral(element));
 
             } else {
-                builder.append(LiteralFactory.getLiteral(element).generate());
+                builder.append(LiteralFactory.getLiteral(element).generate(null));
             }
 
             if (i + 1 < length) {

@@ -1,11 +1,11 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -33,7 +33,7 @@ public class CallParameters extends AbstractStatement {
     public static CallParameters none() {
         return new CallParameters(Collections.<Statement>emptyList());
     }
-    
+
     public MetaClass[] getParameterTypes() {
         MetaClass[] parameterTypes = new MetaClass[parameters.size()];
         for (int i = 0; i < parameters.size(); i++) {
@@ -42,10 +42,10 @@ public class CallParameters extends AbstractStatement {
         return parameterTypes;
     }
 
-    public String generate() {
+    public String generate(Context context) {
         StringBuilder buf = new StringBuilder("(");
         for (int i = 0; i < parameters.size(); i++) {
-            buf.append(parameters.get(i).generate());
+            buf.append(parameters.get(i).generate(context));
 
             if (i + 1 < parameters.size()) {
                 buf.append(", ");

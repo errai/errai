@@ -1,10 +1,10 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen;
 
-import java.lang.annotation.Annotation;
-
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ObjectBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
+
+import java.lang.annotation.Annotation;
 
 public class AnnotationEncoder {
     public static String encode(Annotation annotation) {
@@ -19,6 +19,6 @@ public class AnnotationEncoder {
         classStructureBuilder.publicOverridesMethod(m, statement);
         builder.integrateClassStructure(classStructureBuilder);
 
-        return builder.generate();
+        return builder.generate(Context.create());
     }
 }
