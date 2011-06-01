@@ -57,19 +57,19 @@ public class StatementBuilder extends AbstractStatementBuilder {
         return this;
     }
     
-    public VariableReferenceContextualStatement loadVariable(String name) {
+    public VariableReferenceContextualStatementBuilder loadVariable(String name) {
         statement = context.getVariable(name);
-        return ContextualStatementBuilder.createInContextOf(this);
+        return ContextualStatementBuilderImpl.createInContextOf(this);
     }
 
-    public ContextualStatement loadLiteral(Object o) {
+    public ContextualStatementBuilder loadLiteral(Object o) {
         statement = LiteralFactory.getLiteral(o);
-        return ContextualStatementBuilder.createInContextOf(this);
+        return ContextualStatementBuilderImpl.createInContextOf(this);
     }
 
-    public ContextualStatement load(Object o) {
+    public ContextualStatementBuilder load(Object o) {
         statement = GenUtil.generate(context, o);
-        return ContextualStatementBuilder.createInContextOf(this);
+        return ContextualStatementBuilderImpl.createInContextOf(this);
     }
 
     public ObjectBuilder newObject(MetaClass type) {
