@@ -12,7 +12,7 @@ import org.junit.Test;
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class IfBlockBuilderTest extends AbstractStatementBuilderTest {
+public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements IfBlockBuilderTestResult {
 
     @Test
     public void testEmptyIfBlockUsingNoRhs() {
@@ -22,7 +22,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest {
             .invoke("endsWith", "abc")
             .if_(null);
 
-        assertEquals("Failed to generate empty if block using no rhs", "if (str.endsWith(\"abc\")) { }\n", s.generate());
+        assertEquals("Failed to generate empty if block using no rhs", EMPTY_IF_BLOCK_RESULT_NO_RHS, s.generate());
     }
 
     @Test
@@ -34,8 +34,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest {
             .if_(ContextBuilder.create().declareVariable("n", Integer.class).initializeWith(0))
             .else_(ContextBuilder.create().declareVariable("n", Integer.class).initializeWith(1));
         
-        assertEquals("Failed to generate empty if block using no rhs", "if (str.endsWith(\"abc\")) { " +
-        		"java.lang.Integer n = 0;\n} else { java.lang.Integer n = 1;\n}\n", s.generate());
+        assertEquals("Failed to generate empty if block using no rhs", IF_ELSE_BLOCK_RESULT_NO_RHS, s.generate());
    }
 
     @Test
@@ -51,9 +50,8 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest {
                     .if_(StatementBuilder.create(c).loadVariable("n").assignValue(1))
                     .else_(StatementBuilder.create(c).loadVariable("n").assignValue(2)));
         
-        assertEquals("Failed to generate if - else if block using no rhs", "if (s.endsWith(\"abc\")) { " +
-                "n = 0;\n} else if (s.startsWith(\"def\")) {\nn = 1;\n} else {\nn=2;\n}\n",
-                s.generate());
+        assertEquals("Failed to generate if - else if - else block using no rhs", 
+                IF_ELSEIF_ELSE_BLOCK_RESULT_NO_RHS, s.generate());
    }
 
    @Test
@@ -63,6 +61,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest {
            .loadVariable("n")
            .if_(BooleanOperator.Equals, 1, null);
        
-       assertEquals("Failed to generate empty if block using a literal rhs", "if (n == 1) { }\n", s.generate());
+       assertEquals("Failed to generate empty if block using a literal rhs", 
+               EMPTY_IF_BLOCK_RESULT_LITERAL_RHS, s.generate());
    }
 }

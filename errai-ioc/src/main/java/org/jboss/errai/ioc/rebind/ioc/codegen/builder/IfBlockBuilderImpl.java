@@ -1,5 +1,6 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.BlockStatement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.GenUtil;
@@ -37,25 +38,23 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements IfBl
         return this;
     }
 
+    public ElseBlockBuilder if_(BooleanOperator op, Object rhs, Statement block) {
+        Statement rhsStatement = GenUtil.generate(context, rhs);
+        return if_(op, rhsStatement, block);
+    }
+    
     public IfBlock if_(BooleanOperator op, Statement rhs, Statement block, IfBlock elseIf) {
         statement = new IfBlock(new BooleanExpressionBuilder(parent.statement, rhs, op), block, elseIf);
         return (IfBlock) statement;
     }
 
-    public ElseBlockBuilder if_(BooleanOperator op, Object rhs, Statement block) {
-        Statement rhsStatement = GenUtil.generate(context, rhs);
-        statement = new IfBlock(new BooleanExpressionBuilder(parent.statement, rhsStatement, op), block);
-        return this;
-    }
-
     public IfBlock if_(BooleanOperator op, Object rhs, Statement block, IfBlock elseIf) {
         Statement rhsStatement = GenUtil.generate(context, rhs);
-        statement = new IfBlock(new BooleanExpressionBuilder(parent.statement, rhsStatement, op), block, elseIf);
-        return (IfBlock) statement;
+        return if_(op, rhsStatement, block, elseIf);
     }
 
     public IfBlock else_(Statement block) {
-        ((IfBlock) statement).setElseBlock(block);
+        ((IfBlock) statement).setElseBlock(new BlockStatement(block));
         return (IfBlock) statement;
     }
 }
