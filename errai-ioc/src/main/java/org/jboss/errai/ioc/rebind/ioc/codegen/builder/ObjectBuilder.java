@@ -5,12 +5,13 @@ import com.google.gwt.core.ext.typeinfo.JClassType;
 import org.jboss.errai.ioc.rebind.ioc.codegen.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedConstructorException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class ObjectBuilder extends AbstractStatement {
+public class ObjectBuilder extends AbstractStatementBuilder {
     StringBuilder buf = new StringBuilder();
 
     private static final int CONSTRUCT_STATEMENT_COMPLETE = 1;
@@ -20,8 +21,13 @@ public class ObjectBuilder extends AbstractStatement {
     private MetaClass type;
     private int buildState;
 
-    private ObjectBuilder(MetaClass type) {
+    ObjectBuilder(MetaClass type) {
+        super(Context.create());
         this.type = type;
+
+        for (MetaField field : type.getFields()) {
+            context.addVariable(Variable.create(field.getName(), field.getType()));
+        }
     }
 
     public static ObjectBuilder newInstanceOf(MetaClass type) {
@@ -59,12 +65,13 @@ public class ObjectBuilder extends AbstractStatement {
     }
 
     public ClassStructureBuilder extend() {
-        return new ClassStructureBuilder(type);
-    }
-
-    public void integrateClassStructure(ClassStructureBuilder builder) {
-        finishConstructIfNecessary();
-        buf.append(" {\n").append(builder.toJavaString()).append("\n}\n");
+        return new ClassStructureBuilder(type, context, new BuildCallback<ObjectBuilder>() {
+            public ObjectBuilder callback(Statement statement) {
+                finishConstructIfNecessary();
+                buf.append(" {\n").append(statement.generate(context)).append("\n}\n");
+                return ObjectBuilder.this;
+            }
+        });
     }
 
     private void finishConstructIfNecessary() {

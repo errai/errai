@@ -3,21 +3,18 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 
-public class ClassStructureBuilder implements Builder {
+public class ClassStructureBuilder implements Builder, Finishable<ObjectBuilder> {
     private MetaClass toExtend;
     private Context classContext;
     private StringBuilder buf = new StringBuilder();
+    private BuildCallback<ObjectBuilder> callback;
 
-    ClassStructureBuilder(MetaClass toExtend) {
+    ClassStructureBuilder(MetaClass toExtend, Context classContext, BuildCallback<ObjectBuilder> builderBuildCallback) {
         this.toExtend = toExtend;
-        this.classContext = Context.create();
-
-        for (MetaField field : toExtend.getFields()) {
-            classContext.addVariable(Variable.create(field.getName(), field.getType()));
-        }
+        this.classContext = classContext;
+        this.callback = builderBuildCallback;
     }
 
     public BlockBuilder<ClassStructureBuilder> publicConstructor(final DefParameters parameters) {
@@ -39,7 +36,6 @@ public class ClassStructureBuilder implements Builder {
             }
         });
     }
-
 
     public BlockBuilder<ClassStructureBuilder> publicOverridesMethod(final MetaMethod method) {
         final DefParameters parameters = DefParameters.from(method);
@@ -67,6 +63,14 @@ public class ClassStructureBuilder implements Builder {
 
     public BlockBuilder<ClassStructureBuilder> publicOverridesMethod(String name, Class... args) {
         return publicOverridesMethod(toExtend.getBestMatchingMethod(name, args));
+    }
+
+    public ObjectBuilder finish() {
+        if (callback != null) {
+            return callback.callback(new StringStatement(toJavaString()));
+        }
+
+        return null;
     }
 
     public String toJavaString() {

@@ -15,6 +15,7 @@ public class BlockBuilder<T> implements Finishable<T> {
     }
 
     public BlockBuilder(BuildCallback<T> callback) {
+        this();
         this.callback = callback;
     }
 

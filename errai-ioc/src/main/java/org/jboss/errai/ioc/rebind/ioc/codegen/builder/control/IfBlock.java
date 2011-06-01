@@ -1,5 +1,6 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.control;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.BlockStatement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 
@@ -11,11 +12,11 @@ public class IfBlock extends AbstractBlockConditional {
     protected IfBlock elseIf;
 
     public IfBlock(Statement condition, Statement block) {
-        super(condition, block);
+        super(condition, new BlockStatement(block));
     }
 
     public IfBlock(Statement condition, Statement block, IfBlock elseIf) {
-        super(condition, block);
+        this(condition, block);
         this.elseIf = elseIf;
     }
 

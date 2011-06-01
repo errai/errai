@@ -11,6 +11,13 @@ import java.util.List;
 public class BlockStatement extends AbstractStatement {
     private List<Statement> statements = new ArrayList<Statement>();
 
+    public BlockStatement(Statement... statements) {
+        for (Statement statement : statements) {
+            if (statement != null)
+                this.statements.add(statement);
+        }
+    }
+
     public BlockStatement addStatement(Statement statement) {
         statements.add(statement);
         return this;
@@ -23,7 +30,10 @@ public class BlockStatement extends AbstractStatement {
             if (buf.length() != 0)
                 buf.append("\n");
 
-            buf.append(statement.generate(context)).append(";");
+            buf.append(statement.generate(context));
+
+            if (!buf.toString().endsWith(";"))
+                buf.append(";");
         }
         return buf.toString();
     }
