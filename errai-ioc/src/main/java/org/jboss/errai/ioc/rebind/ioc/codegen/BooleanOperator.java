@@ -1,4 +1,4 @@
-package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
+package org.jboss.errai.ioc.rebind.ioc.codegen;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

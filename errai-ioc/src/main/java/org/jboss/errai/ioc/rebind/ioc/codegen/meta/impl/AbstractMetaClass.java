@@ -145,7 +145,7 @@ public abstract class AbstractMetaClass<T> implements MetaClass, HasAnnotations 
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof MetaClass && hashString().equals("MetaClass:" + ((MetaClass) o).getFullyQualifedName());
+        return o instanceof MetaClass && hashString().equals(MetaClass.class.getName() + ":" + ((MetaClass) o).getFullyQualifedName());
     }
 
     @Override

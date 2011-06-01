@@ -25,7 +25,7 @@ public class InvocationBuilder extends AbstractStatementBuilder {
         return new InvocationBuilder(parent);
     }
 
-    public ContextualStatement invoke(String methodName, Statement... parameters) {
+    public ContextualStatementBuilder invoke(String methodName, Statement... parameters) {
         CallParameters callParams = CallParameters.fromStatements(parameters);
 
         MetaClass[] parameterTypes = callParams.getParameterTypes();
@@ -34,10 +34,10 @@ public class InvocationBuilder extends AbstractStatementBuilder {
             throw new UndefinedMethodException(methodName, parameterTypes);
 
         statement = new MethodInvocation(parent.statement, method, callParams);
-        return ContextualStatementBuilder.createInContextOf(this);
+        return ContextualStatementBuilderImpl.createInContextOf(this);
     }
 
-    public ContextualStatement invoke(String methodName, Object... parameters) {
+    public ContextualStatementBuilder invoke(String methodName, Object... parameters) {
         return invoke(methodName, GenUtil.generateCallParameters(context, parameters));
     }
 }
