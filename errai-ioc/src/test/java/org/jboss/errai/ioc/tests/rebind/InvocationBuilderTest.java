@@ -58,6 +58,17 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
     }
 
     @Test
+    public void testInvokeOnBestMatchingMethod() {
+        Statement statement = StatementBuilder.create()
+            .addVariable("n", Integer.class)
+            .loadVariable("n")
+            // 1 will be inferred to LiteralValue<Integer>, equals(Integer.class) should match equals(Object.class)
+            .invoke("equals", 1);
+
+        assertEquals("failed to generate invocation on matched method", "n.equals(1)", statement.generate());
+    }
+    
+    @Test
     public void testInvokeOnUndefinedMethods() {
         try {
             StatementBuilder.create()
@@ -81,6 +92,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
             fail("expected UndefinedMethodException");
         } catch (UndefinedMethodException udme) {
             //expected
+            assertEquals("Wrong exception thrown", udme.getMethodName(),"idontexist");
         }
     }
 
@@ -94,7 +106,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
             fail("expected OutOfScopeException");
         } catch (OutOfScopeException oose) {
             //expected
-            assertTrue(oose.getMessage().contains("injector"));
+            assertTrue("Wrong exception thrown", oose.getMessage().contains("injector"));
         }
 
         try {

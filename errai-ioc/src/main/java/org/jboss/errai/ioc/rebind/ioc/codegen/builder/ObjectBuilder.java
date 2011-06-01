@@ -55,7 +55,7 @@ public class ObjectBuilder extends AbstractStatement {
     }
     
     public ObjectBuilder withParameters(CallParameters parameters) {
-        if (!type.isInterface() && type.getConstructor(parameters.getParameterTypes())==null)
+        if (!type.isInterface() && type.getBestMatchingConstructor(parameters.getParameterTypes())==null)
             throw new UndefinedConstructorException(type, parameters.getParameterTypes());
         
         buf.append(parameters.generate());
