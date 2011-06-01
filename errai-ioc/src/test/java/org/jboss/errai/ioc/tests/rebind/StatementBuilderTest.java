@@ -11,6 +11,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ObjectBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.values.LiteralFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
+import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -75,5 +76,15 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
         injector = ctx.getVariable("injector");
         assertEquals("Wrong variable name", "injector", injector.getName());
         Assert.assertEquals("Wrong variable type", MetaClassFactory.get(MessageBusProvider.class), injector.getType());
+    }
+    
+    @Test
+    public void testUndefinedVariable() {
+        try {
+            StatementBuilder.create().loadVariable("n");
+            fail("Expected OutOfScopeException");
+        } catch (OutOfScopeException oose) {
+            // expected
+        }
     }
 }

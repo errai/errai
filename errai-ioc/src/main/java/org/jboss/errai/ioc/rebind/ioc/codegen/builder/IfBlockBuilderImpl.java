@@ -34,6 +34,7 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements IfBl
     }
 
     public IfBlockBuilderImpl if_() {
-        return null;
+        statement = new IfBlock(parent.statement, null);
+        return this;
     }
 }
