@@ -13,6 +13,12 @@ public interface MetaClass extends HasAnnotations {
 
     public MetaMethod getMethod(String name, Class... parameters);
 
+    public MetaMethod getMethod(String name, MetaClass... parameters);
+
+    public MetaMethod getBestMatchingMethod(String name, Class... parameters);
+
+    public MetaMethod getBestMatchingMethod(String name, MetaClass... parameters);
+
     public MetaMethod getDeclaredMethod(String name, Class... parameters);
 
     public MetaMethod getDeclaredMethod(String name, MetaClass... parameters);
@@ -33,8 +39,12 @@ public interface MetaClass extends HasAnnotations {
 
     public MetaConstructor getConstructor(MetaClass... parameters);
 
+    public MetaConstructor getBestMatchingConstructor(Class... parameters);
+
+    public MetaConstructor getBestMatchingConstructor(MetaClass... parameters);
+
     public MetaConstructor getDeclaredConstructor(Class... parameters);
-    
+
     public MetaClass[] getParameterizedTypes();
 
     public MetaClass[] getInterfaces();
@@ -74,4 +84,6 @@ public interface MetaClass extends HasAnnotations {
     public boolean isFinal();
 
     public boolean isStatic();
+
+    public Class<?> asClass();
 }

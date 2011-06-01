@@ -21,7 +21,6 @@ import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.core.ext.typeinfo.*;
-import com.google.gwt.dev.asm.tree.AnnotationNode;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
@@ -36,13 +35,9 @@ import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
 import org.jboss.errai.ioc.client.InterfaceInjectionContext;
 import org.jboss.errai.ioc.client.api.*;
 import org.jboss.errai.ioc.rebind.ioc.*;
-import org.jboss.errai.ioc.rebind.ioc.IOCDecoratorExtension;
-import org.jboss.errai.ioc.rebind.ioc.codegen.AnnotationEncoder;
 
-import javax.annotation.PostConstruct;
 import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
-import java.lang.annotation.Target;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
@@ -472,8 +467,7 @@ public class IOCGenerator extends Generator {
 
     private JClassType loadType(TypeOracle oracle, Class<?> entity) {
         try {
-            JClassType visit = oracle.getType(entity.getName());
-            return visit;
+            return oracle.getType(entity.getName());
         } catch (NotFoundException e) {
             throw new RuntimeException("Failed to load type " + entity.getName(), e);
         }

@@ -7,8 +7,11 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.HasAnnotations;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaConstructor;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
+import org.mvel2.util.ParseTools;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -55,12 +58,42 @@ public abstract class AbstractMetaClass<T> implements MetaClass, HasAnnotations 
         return _getMethod(getMethods(), name, InjectUtil.classToMeta(parmTypes));
     }
 
+    public MetaMethod getMethod(String name, MetaClass... parameters) {
+        return _getMethod(getMethods(), name, parameters);
+    }
+
     public MetaMethod getDeclaredMethod(String name, Class... parmTypes) {
         return _getMethod(getDeclaredMethods(), name, InjectUtil.classToMeta(parmTypes));
     }
 
     public MetaMethod getDeclaredMethod(String name, MetaClass... parmTypes) {
         return _getMethod(getDeclaredMethods(), name, parmTypes);
+    }
+
+    public MetaMethod getBestMatchingMethod(String name, Class... parameters) {
+        Class<?> cls = asClass();
+        Method m = ParseTools.getBestCandidate(parameters, name, cls, cls.getMethods(), false);
+        if (m == null) return null;
+
+        MetaClass metaClass = MetaClassFactory.get(cls);
+        return metaClass.getMethod(name, m.getParameterTypes());
+    }
+
+    public MetaMethod getBestMatchingMethod(String name, MetaClass... parameters) {
+        return getBestMatchingMethod(name, MetaClassFactory.asClassArray(parameters));
+    }
+
+    public MetaConstructor getBestMatchingConstructor(Class... parameters) {
+        Class<?> cls = asClass();
+        Constructor c = ParseTools.getBestConstructorCandidate(parameters, cls, false);
+        if (c == null) return null;
+
+        MetaClass metaClass = MetaClassFactory.get(cls);
+        return metaClass.getConstructor(c.getParameterTypes());
+    }
+
+    public MetaConstructor getBestMatchingConstructor(MetaClass... parameters) {
+        return getBestMatchingConstructor(MetaClassFactory.asClassArray(parameters));
     }
 
     public MetaConstructor getConstructor(Class... parameters) {
@@ -70,11 +103,11 @@ public abstract class AbstractMetaClass<T> implements MetaClass, HasAnnotations 
     public MetaConstructor getConstructor(MetaClass... parameters) {
         return _getConstructor(getConstructors(), parameters);
     }
-    
+
     public MetaConstructor getDeclaredConstructor(Class... parameters) {
         return _getConstructor(getDeclaredConstructors(), InjectUtil.classToMeta(parameters));
     }
-    
+
     public final Annotation getAnnotation(Class<? extends Annotation> annotation) {
         for (Annotation a : getAnnotations()) {
             if (a.annotationType().equals(annotation)) return a;
@@ -151,5 +184,18 @@ public abstract class AbstractMetaClass<T> implements MetaClass, HasAnnotations 
     @Override
     public int hashCode() {
         return hashString().hashCode();
+    }
+
+    public Class<?> asClass() {
+        if (enclosedMetaObject instanceof Class) {
+            return (Class<?>) enclosedMetaObject;
+        } else {
+            try {
+                return Class.forName(((JClassType) enclosedMetaObject).getQualifiedSourceName(), false,
+                        Thread.currentThread().getContextClassLoader());
+            } catch (ClassNotFoundException e) {
+                return null;
+            }
+        }
     }
 }
