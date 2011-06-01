@@ -36,4 +36,9 @@ public abstract class AbstractStatementBuilder implements Statement {
         }
         return MetaClassFactory.get(Void.class);
     }
+
+    public String toJavaString() {
+        //TODO generate(context)
+        return generate();
+    }
 }
