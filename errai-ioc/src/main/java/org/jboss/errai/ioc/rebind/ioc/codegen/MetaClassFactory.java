@@ -111,7 +111,6 @@ public final class MetaClassFactory {
         CLASS_CACHE.put(cls.isClassOrInterface().getName(), metaClass);
     }
 
-
     private static Class<?> load(String fullyQualifiedName) {
         try {
             return Class.forName(fullyQualifiedName, false, Thread.currentThread().getContextClassLoader());
@@ -127,7 +126,6 @@ public final class MetaClassFactory {
             throw new RuntimeException("Could not load class: " + fullyQualifiedName);
         }
     }
-
 
     public static MetaClass[] fromClassArray(Class<?>[] classes) {
         MetaClass[] newClasses = new MetaClass[classes.length];

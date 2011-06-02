@@ -167,7 +167,6 @@ public class StatementBuilder extends AbstractStatementBuilder
     }
 
     private Variable createLoopVar(Statement collection, String loopVarName, MetaClass providedLoopVarType) {
-
         // infer the loop variable type
         MetaClass loopVarType = MetaClassFactory.get(Object.class);
 
@@ -189,7 +188,6 @@ public class StatementBuilder extends AbstractStatementBuilder
         context.addVariable(loopVar);
         return loopVar;
     }
-
 
     // If-Then-Else
     public ElseBlockBuilder if_(Statement block) {
@@ -215,7 +213,6 @@ public class StatementBuilder extends AbstractStatementBuilder
     public IfBlock if_(BooleanOperator op, Object rhs, Statement block, IfBlock elseIf) {
         return IfBlockBuilderImpl.create(this).if_(op, rhs, block, elseIf);
     }
-
 
     // Value return
     public Statement returnValue() {
