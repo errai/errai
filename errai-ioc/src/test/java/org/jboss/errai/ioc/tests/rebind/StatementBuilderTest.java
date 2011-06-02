@@ -1,6 +1,5 @@
 package org.jboss.errai.ioc.tests.rebind;
 
-import org.jboss.errai.ioc.client.api.builtin.MessageBusProvider;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.VariableReference;
@@ -16,7 +15,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
- * Tests the {@link org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder} API.
+ * Tests the {@link StatementBuilder} API.
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -63,19 +62,18 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
 
     @Test
     public void testAddVariableWithObjectInitialization() {
-        Context ctx = StatementBuilder.create().addVariable("injector", MessageBusProvider.class,
-                ObjectBuilder.newInstanceOf(MessageBusProvider.class)).getContext();
+        Context ctx = StatementBuilder.create().addVariable("str", String.class,
+                ObjectBuilder.newInstanceOf(String.class)).getContext();
 
-        VariableReference injector = ctx.getVariable("injector");
-        assertEquals("Wrong variable name", "injector", injector.getName());
-        Assert.assertEquals("Wrong variable type", MetaClassFactory.get(MessageBusProvider.class), injector.getType());
+        VariableReference str = ctx.getVariable("str");
+        assertEquals("Wrong variable name", "str", str.getName());
+        Assert.assertEquals("Wrong variable type", MetaClassFactory.get(String.class), str.getType());
 
-        ctx = StatementBuilder.create().addVariable("injector",
-                ObjectBuilder.newInstanceOf(MessageBusProvider.class)).getContext();
+        ctx = StatementBuilder.create().addVariable("str", ObjectBuilder.newInstanceOf(String.class)).getContext();
 
-        injector = ctx.getVariable("injector");
-        assertEquals("Wrong variable name", "injector", injector.getName());
-        Assert.assertEquals("Wrong variable type", MetaClassFactory.get(MessageBusProvider.class), injector.getType());
+        str = ctx.getVariable("str");
+        assertEquals("Wrong variable name", "str", str.getName());
+        Assert.assertEquals("Wrong variable type", MetaClassFactory.get(String.class), str.getType());
     }
 
     @Test

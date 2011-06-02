@@ -1,6 +1,5 @@
 package org.jboss.errai.ioc.tests.rebind;
 
-import org.jboss.errai.ioc.client.api.builtin.MessageBusProvider;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Builder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Refs;
@@ -15,7 +14,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
- * Tests the generation of method invocations using the {@link org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder} API.
+ * Tests the generation of method invocations using the {@link StatementBuilder} API.
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -24,12 +23,12 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
     @Test
     public void testInvoke() {
         Builder invokeStatement = StatementBuilder.create()
-                .addVariable("injector", MessageBusProvider.class)
-                .loadVariable("injector")
-                .invoke("provide");
+                .addVariable("obj", Object.class)
+                .loadVariable("obj")
+                .invoke("toString");
 
         assertEquals("failed to generate invocation on variable",
-                "injector.provide()", invokeStatement.toJavaString());
+                "obj.toString()", invokeStatement.toJavaString());
 
         invokeStatement = StatementBuilder.create()
                 .addVariable("i", Integer.class)
@@ -72,10 +71,10 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
     public void testInvokeOnUndefinedMethods() {
         try {
             StatementBuilder.create()
-                    .addVariable("injector", MessageBusProvider.class)
+                    .addVariable("obj", Object.class)
                     .addVariable("param", String.class)
-                    .loadVariable("injector")
-                    .invoke("provide", Variable.get("param"))
+                    .loadVariable("obj")
+                    .invoke("udefinedMethod", Variable.get("param"))
                     .toJavaString();
             fail("expected UndefinedMethodException");
         } catch (UndefinedMethodException udme) {
@@ -89,12 +88,12 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
                     .addVariable("replacement", String.class)
                     .loadVariable("s")
                     .invoke("replaceAll", Variable.get("regex"), Variable.get("replacement"))
-                    .invoke("idontexist", Variable.get("regex"), Variable.get("replacement"))
+                    .invoke("undefinedMethod", Variable.get("regex"), Variable.get("replacement"))
                     .toJavaString();
             fail("expected UndefinedMethodException");
         } catch (UndefinedMethodException udme) {
             //expected
-            assertEquals("Wrong exception thrown", udme.getMethodName(), "idontexist");
+            assertEquals("Wrong exception thrown", udme.getMethodName(), "undefinedMethod");
         }
     }
 
@@ -115,10 +114,10 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
         try {
             // param2 undefined
             StatementBuilder.create()
-                    .addVariable("injector", MessageBusProvider.class)
+                    .addVariable("obj", Object.class)
                     .addVariable("param", String.class)
-                    .loadVariable("injector")
-                    .invoke("provide", Variable.get("param"), Variable.get("param2"))
+                    .loadVariable("obj")
+                    .invoke("undefinedMethod", Variable.get("param"), Variable.get("param2"))
                     .toJavaString();
             fail("expected OutOfScopeException");
         } catch (OutOfScopeException oose) {

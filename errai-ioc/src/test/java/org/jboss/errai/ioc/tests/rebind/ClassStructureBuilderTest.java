@@ -9,7 +9,7 @@ import java.lang.annotation.Retention;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public class ClassStructureBuilderTests extends AbstractStatementBuilderTest {
+public class ClassStructureBuilderTest extends AbstractStatementBuilderTest {
     @Test
     public void testOverrideConstructor() {
 
