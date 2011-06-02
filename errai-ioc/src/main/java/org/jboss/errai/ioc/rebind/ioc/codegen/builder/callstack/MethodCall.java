@@ -7,12 +7,13 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class MethodCall extends AbstractCallElement {
     private String methodName;
-    private Statement[] parameters;
+    private Object[] parameters;
 
-    public MethodCall(String methodName, Statement[] parameters) {
+    public MethodCall(String methodName, Object[] parameters) {
         this.methodName = methodName;
         this.parameters = parameters;
     }

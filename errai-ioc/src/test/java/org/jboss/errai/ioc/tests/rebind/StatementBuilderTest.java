@@ -23,28 +23,32 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
 
     @Test
     public void testAddVariableWithLiteralInitialization() {
-        Context ctx = StatementBuilder.create().addVariable("n", Integer.class, 10).getContext();
+        Context ctx = Context.create(); 
+        StatementBuilder.create().addVariable("n", Integer.class, 10).generate(ctx);
 
         VariableReference n = ctx.getVariable("n");
         assertEquals("Wrong variable name", "n", n.getName());
         Assert.assertEquals("Wrong variable type", MetaClassFactory.get(Integer.class), n.getType());
         Assert.assertEquals("Wrong variable value", LiteralFactory.getLiteral(10), n.getValue());
 
-        ctx = StatementBuilder.create().addVariable("n", 10).getContext();
+        ctx = Context.create(); 
+        StatementBuilder.create().addVariable("n", 10).generate(ctx);
 
         n = ctx.getVariable("n");
         assertEquals("Wrong variable name", "n", n.getName());
         Assert.assertEquals("Wrong variable type", MetaClassFactory.get(Integer.class), n.getType());
         Assert.assertEquals("Wrong variable value", LiteralFactory.getLiteral(10), n.getValue());
 
-        ctx = StatementBuilder.create().addVariable("n", "10").getContext();
+        ctx = Context.create(); 
+        StatementBuilder.create().addVariable("n", "10").generate(ctx);
 
         n = ctx.getVariable("n");
         assertEquals("Wrong variable name", "n", n.getName());
         Assert.assertEquals("Wrong variable type", MetaClassFactory.get(String.class), n.getType());
         Assert.assertEquals("Wrong variable value", LiteralFactory.getLiteral("10"), n.getValue());
 
-        ctx = StatementBuilder.create().addVariable("n", Integer.class, "10").getContext();
+        ctx = Context.create(); 
+        StatementBuilder.create().addVariable("n", Integer.class, "10").generate(ctx);
 
         n = ctx.getVariable("n");
         assertEquals("Wrong variable name", "n", n.getName());
@@ -62,14 +66,16 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
 
     @Test
     public void testAddVariableWithObjectInitialization() {
-        Context ctx = StatementBuilder.create().addVariable("str", String.class,
-                ObjectBuilder.newInstanceOf(String.class)).getContext();
+        Context ctx = Context.create(); 
+        StatementBuilder.create().addVariable("str", String.class, 
+                ObjectBuilder.newInstanceOf(String.class)).generate(ctx);
 
         VariableReference str = ctx.getVariable("str");
         assertEquals("Wrong variable name", "str", str.getName());
         Assert.assertEquals("Wrong variable type", MetaClassFactory.get(String.class), str.getType());
 
-        ctx = StatementBuilder.create().addVariable("str", ObjectBuilder.newInstanceOf(String.class)).getContext();
+        ctx = Context.create(); 
+        StatementBuilder.create().addVariable("str", ObjectBuilder.newInstanceOf(String.class)).generate(ctx);
 
         str = ctx.getVariable("str");
         assertEquals("Wrong variable name", "str", str.getName());

@@ -6,7 +6,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public class DeferredCallElement<T> extends AbstractCallElement {
+public class DeferredCallElement extends AbstractCallElement {
     private DeferredCallback callback;
 
     public DeferredCallElement(DeferredCallback callback) {
