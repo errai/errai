@@ -161,7 +161,7 @@ public class StatementBuilder extends AbstractStatementBuilder
                 // destroy the buffer up until now.
                 writer.reset();
 
-                writer.append(new ForeachLoop(loopVar, collectionExpr, body).generate(context));
+                writer.append(new ForeachLoop(loopVar, collectionExpr, body).generate(Context.create(context)));
             }
         };
     }

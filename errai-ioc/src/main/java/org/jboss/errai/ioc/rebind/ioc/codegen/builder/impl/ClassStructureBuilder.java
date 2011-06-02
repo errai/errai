@@ -36,7 +36,7 @@ public class ClassStructureBuilder implements Builder, Finishable<ObjectBuilder>
                 buf.append("public ").append(toExtend.getFullyQualifedName())
                         .append(parameters.generate(context)).append(" {\n");
                 if (statement != null) {
-                    buf.append(statement.generate(classContext)).append("\n");
+                    buf.append(statement.generate(Context.create(classContext))).append("\n");
                 }
                 buf.append("}\n");
 
@@ -55,12 +55,15 @@ public class ClassStructureBuilder implements Builder, Finishable<ObjectBuilder>
 
         return new BlockBuilder<ClassStructureBuilder>(new BuildCallback<ClassStructureBuilder>() {
             public ClassStructureBuilder callback(Statement statement) {
+
+                Context ctx = Context.create(context);
+
                 buf.append("public ").append(method.getReturnType().getFullyQualifedName())
                         .append(" ")
                         .append(method.getName())
-                        .append(parameters.generate(context)).append(" {\n");
+                        .append(parameters.generate(ctx)).append(" {\n");
                 if (statement != null) {
-                    buf.append(statement.generate(context)).append("\n");
+                    buf.append(statement.generate(ctx)).append("\n");
                 }
                 buf.append("}\n");
 
