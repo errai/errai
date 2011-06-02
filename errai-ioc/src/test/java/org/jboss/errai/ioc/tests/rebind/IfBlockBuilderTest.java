@@ -3,6 +3,7 @@ package org.jboss.errai.ioc.tests.rebind;
 import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ContextBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementBuilder;
 import org.junit.Test;
@@ -22,9 +23,21 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
                 .invoke("endsWith", "abc")
                 .if_(null);
 
-        assertEquals("Failed to generate empty if block using no rhs", EMPTY_IF_BLOCK_RESULT_NO_RHS, s.generate(Context.create()));
+        assertEquals("Failed to generate empty if block using no rhs", 
+                EMPTY_IF_BLOCK_RESULT_NO_RHS, s.generate(Context.create()));
     }
 
+    @Test
+    public void testEmptyIfBlockUsingLiteralRhs() {
+        Statement s = StatementBuilder.create()
+                .addVariable("n", int.class)
+                .loadVariable("n")
+                .if_(BooleanOperator.Equals, 1, null);
+
+        assertEquals("Failed to generate empty if block using a literal rhs",
+                EMPTY_IF_BLOCK_RESULT_LITERAL_RHS, s.generate(Context.create()));
+    }
+    
     @Test
     public void testIfElseBlockUsingNoRhs() {
         Statement s = StatementBuilder.create()
@@ -34,7 +47,22 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
                 .if_(ContextBuilder.create().declareVariable("n", Integer.class).initializeWith(0))
                 .else_(ContextBuilder.create().declareVariable("n", Integer.class).initializeWith(1));
 
-        assertEquals("Failed to generate empty if block using no rhs", IF_ELSE_BLOCK_RESULT_NO_RHS, s.generate(Context.create()));
+        assertEquals("Failed to generate empty if block using no rhs", 
+                IF_ELSE_BLOCK_RESULT_NO_RHS, s.generate(Context.create()));
+    }
+    
+    @Test
+    public void testIfElseBlockUsingRhs() {
+        Statement s = StatementBuilder.create()
+                .addVariable("n", Integer.class)
+                .addVariable("m", Integer.class)
+                .loadVariable("n")
+                .if_(BooleanOperator.GreaterThan, Variable.get("m"), 
+                        ContextBuilder.create().declareVariable("n", Integer.class).initializeWith(0))
+                .else_(ContextBuilder.create().declareVariable("n", Integer.class).initializeWith(1));
+
+        assertEquals("Failed to generate empty if block using a rhs", 
+                IF_ELSE_BLOCK_RESULT_RHS, s.generate(Context.create()));
     }
 
     @Test
@@ -53,15 +81,21 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
         assertEquals("Failed to generate if - else if - else block using no rhs",
                 IF_ELSEIF_ELSE_BLOCK_RESULT_NO_RHS, s.generate(Context.create()));
     }
-
+    
     @Test
-    public void testEmptyIfBlockUsingLiteralRhs() {
-        Statement s = StatementBuilder.create()
-                .addVariable("n", int.class)
-                .loadVariable("n")
-                .if_(BooleanOperator.Equals, 1, null);
+    public void testIfElseIfBlockUsingRhs() {
+        Context c = ContextBuilder.create().addVariable("n", Integer.class).addVariable("m", Integer.class).getContext();
 
-        assertEquals("Failed to generate empty if block using a literal rhs",
-                EMPTY_IF_BLOCK_RESULT_LITERAL_RHS, s.generate(Context.create()));
+        Statement s = StatementBuilder.create(c)
+                .loadVariable("n")
+                .if_(BooleanOperator.GreaterThan, Variable.get("m"), 
+                        StatementBuilder.create(c).loadVariable("n").assignValue(0), 
+                        StatementBuilder.create(c).loadVariable("m")
+                                .if_(BooleanOperator.GreaterThan, Variable.get("n"), 
+                                        StatementBuilder.create(c).loadVariable("n").assignValue(1))
+                                .else_(StatementBuilder.create(c).loadVariable("n").assignValue(2)));
+
+        assertEquals("Failed to generate if - else if - else block using rhs",
+                IF_ELSEIF_ELSE_BLOCK_RESULT_RHS, s.generate(Context.create()));
     }
 }
