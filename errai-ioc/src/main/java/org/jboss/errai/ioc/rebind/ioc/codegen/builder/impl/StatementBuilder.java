@@ -41,7 +41,6 @@ public class StatementBuilder extends AbstractStatementBuilder
         return new StatementBuilder(context);
     }
 
-
     public StatementBuilder addVariable(String name, Class<?> type) {
         Variable v = Variable.create(name, type);
         appendCallElement(new DeclareVariable(v));
@@ -126,7 +125,6 @@ public class StatementBuilder extends AbstractStatementBuilder
     public ObjectBuilder newObject(Class<?> type) {
         return ObjectBuilder.newInstanceOf(type);
     }
-
 
     // Looping
     public BlockBuilder<LoopBuilder> foreach(String loopVarName) {

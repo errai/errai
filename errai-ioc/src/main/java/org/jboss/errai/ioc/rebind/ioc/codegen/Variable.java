@@ -21,17 +21,7 @@ public class Variable extends AbstractStatement {
         this.type = type;
     }
 
-    private Variable(String name, Object initialization) {
-        this.name = name;
-        initialize(initialization);
-    }
-
     private Variable(String name, MetaClass type, Object initialization) {
-        this(name, type);
-        initialize(initialization);
-    }
-
-    private Variable(String name, MetaClass type, Statement initialization) {
         this(name, type);
         initialize(initialization);
     }
