@@ -34,31 +34,26 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements LoopBui
         return foreach(loopVarName, MetaClassFactory.get(loopVarType));
     }
 
-    private BlockBuilder<LoopBuilder> foreach(String loopVarName, MetaClass loopVarType) {
-        BlockStatement body = new BlockStatement();
-        appendCallElement(new DeferredCallElement(genBuilderCallback(loopVarName, loopVarType, body)));
+    private BlockBuilder<LoopBuilder> foreach(final String loopVarName, final MetaClass loopVarType) {
+        final BlockStatement body = new BlockStatement();
         
+        appendCallElement(new DeferredCallElement(new DeferredCallback() {
+            public void doDeferred(CallWriter writer, Context context, Statement statement) {
+                GenUtil.assertIsIterable(statement);
+
+                Variable loopVar = createLoopVar(statement, loopVarName, loopVarType);
+                String collection = writer.getCallString();
+                // destroy the buffer up until now.
+                writer.reset();
+                writer.append(new ForeachLoop(loopVar, collection, body).generate(Context.create(context)));
+            }
+        }));
+
         return new BlockBuilder<LoopBuilder>(body, new BuildCallback<LoopBuilder>() {
             public LoopBuilder callback(Statement statement) {
                 return LoopBuilderImpl.this;
             }
         });
-    }
-
-    private DeferredCallback genBuilderCallback(final String loopVarName, final MetaClass loopVarType,
-            final BlockStatement body) {
-        
-        return new DeferredCallback() {
-            public void doDeferred(CallWriter writer, Context context, Statement statement) {
-                GenUtil.assertIsIterable(statement);
-
-                Variable loopVar = createLoopVar(statement, loopVarName, loopVarType);
-                String collectionExpr = writer.getCallString();
-                // destroy the buffer up until now.
-                writer.reset();
-                writer.append(new ForeachLoop(loopVar, collectionExpr, body).generate(Context.create(context)));
-            }
-        };
     }
 
     private Variable createLoopVar(Statement collection, String loopVarName, MetaClass providedLoopVarType) {
