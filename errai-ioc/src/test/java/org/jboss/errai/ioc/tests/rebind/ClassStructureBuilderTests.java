@@ -1,7 +1,7 @@
 package org.jboss.errai.ioc.tests.rebind;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ObjectBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ObjectBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
 import org.junit.Test;
 
 import java.lang.annotation.Retention;

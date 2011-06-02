@@ -5,8 +5,8 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Builder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Refs;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ContextBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ContextBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedMethodException;
 import org.junit.Test;
@@ -15,7 +15,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
- * Tests the generation of method invocations using the {@link StatementBuilder} API.
+ * Tests the generation of method invocations using the {@link org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder} API.
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -75,7 +75,8 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
                     .addVariable("injector", MessageBusProvider.class)
                     .addVariable("param", String.class)
                     .loadVariable("injector")
-                    .invoke("provide", Variable.get("param"));
+                    .invoke("provide", Variable.get("param"))
+                    .toJavaString();
             fail("expected UndefinedMethodException");
         } catch (UndefinedMethodException udme) {
             //expected

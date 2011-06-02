@@ -1,0 +1,34 @@
+package org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack;
+
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+
+/**
+ * @author Mike Brock <cbrock@redhat.com>
+ */
+public abstract class AbstractCallElement implements CallElement {
+    protected CallElement next;
+
+    public String nextOrReturn(Context ctx, Statement statement) {
+        if (next != null) {
+            return statement.generate(ctx) + "." + next.getStatement(ctx, statement);
+        } else {
+            return statement.generate(ctx);
+        }
+    }
+
+    public void setNext(CallElement next) {
+        this.next = next;
+    }
+
+    public CallElement getNext() {
+        return next;
+    }
+
+    public static void append(CallElement start, CallElement last) {
+        CallElement el = start;
+        while (el.getNext() != null) el = el.getNext();
+
+        el.setNext(last);
+    }
+}

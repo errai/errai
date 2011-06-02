@@ -1,5 +1,6 @@
-package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
+package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 
@@ -13,31 +14,37 @@ public class VariableDeclarationBuilder extends AbstractStatementBuilder {
     public class VariableInitializationBuilder extends AbstractStatementBuilder {
         private VariableInitializationBuilder() {
             super(VariableDeclarationBuilder.this.context);
-            statement = VariableDeclarationBuilder.this.statement;
+            //statement = VariableDeclarationBuilder.this.statement;
         }
 
         public Statement initializeWith(Object initialization) {
-            ((Variable) statement).initialize(initialization);
-            return statement;
+//            ((Variable) statement).initialize(initialization);
+//            return statement;
+            return null;
         }
-        
+
         public Statement initializeWith(Statement initialization) {
-            ((Variable) statement).initialize(initialization);
-            return statement;
+//            ((Variable) statement).initialize(initialization);
+//            return statement;
+            return null;
         }
     }
 
-    private VariableDeclarationBuilder(ContextBuilder parent) {
-        super(parent.getContext());
+    public VariableDeclarationBuilder(Context context) {
+        super(context);
     }
 
-    public static VariableDeclarationBuilder createInContextOf(ContextBuilder parent) {
-        return new VariableDeclarationBuilder(parent);
+    //    private VariableDeclarationBuilder(ContextBuilder parent) {
+//        super(parent);
+//    }
+
+    public static VariableDeclarationBuilder createInContextOf(Context context) {
+        return new VariableDeclarationBuilder(context);
     }
 
     public VariableInitializationBuilder declareVariable(Variable var) {
         context.addVariable(var);
-        statement = var;
+        //     statement = var;
         return new VariableInitializationBuilder();
     }
 

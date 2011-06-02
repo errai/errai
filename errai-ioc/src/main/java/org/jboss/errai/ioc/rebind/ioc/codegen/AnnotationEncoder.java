@@ -1,8 +1,8 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen;
 
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ObjectBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ObjectBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
 
 import java.lang.annotation.Annotation;
 
@@ -15,7 +15,7 @@ public class AnnotationEncoder {
                         // override the annotationType() method.
                 .publicOverridesMethod("annotationType")
                         //   {
-                .append(StatementBuilder.create().load(annotationClass).returnValue())
+                .append(StatementBuilder.create().loadVariable("x").returnValue())
                         //   }
                 .finish()
                         // }

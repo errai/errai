@@ -1,7 +1,9 @@
-package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
+package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.BlockStatement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BuildCallback;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.Finishable;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -16,6 +18,11 @@ public class BlockBuilder<T> implements Finishable<T> {
 
     public BlockBuilder(BuildCallback<T> callback) {
         this();
+        this.callback = callback;
+    }
+
+    public BlockBuilder(BlockStatement blockStatement, BuildCallback<T> callback) {
+        this.blockStatement = blockStatement;
         this.callback = callback;
     }
 

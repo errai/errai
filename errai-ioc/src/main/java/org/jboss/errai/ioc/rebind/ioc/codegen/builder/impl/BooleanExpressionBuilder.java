@@ -1,4 +1,4 @@
-package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
+package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;

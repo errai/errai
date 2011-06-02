@@ -3,9 +3,9 @@ package org.jboss.errai.ioc.tests.rebind;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ContextBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.LoopBodyBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ContextBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.TypeNotIterableException;
@@ -18,7 +18,7 @@ import java.util.Map;
 import static org.junit.Assert.fail;
 
 /**
- * Tests the generation of loops using the {@link StatementBuilder} API.
+ * Tests the generation of loops using the {@link org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder} API.
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -33,7 +33,8 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
                 .newObject(Object.class);
 
         String foreachWithListOfStrings = StatementBuilder.create()
-                .addVariable("list", new TypeLiteral<List<String>>() {})
+                .addVariable("list", new TypeLiteral<List<String>>() {
+                })
                 .loadVariable("list")
                 .foreach("element")
                 .generate(Context.create());
@@ -78,7 +79,8 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
     @Test
     public void testForeachLoopWithProvidedLoopVarType() throws Exception {
         Statement loop = StatementBuilder.create()
-                .addVariable("list", new TypeLiteral<List<String>>() {})
+                .addVariable("list", new TypeLiteral<List<String>>() {
+                })
                 .loadVariable("list")
                 .foreach("element", Object.class);
 
@@ -87,7 +89,8 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
 
         try {
             StatementBuilder.create()
-                    .addVariable("list", new TypeLiteral<List<String>>() {})
+                    .addVariable("list", new TypeLiteral<List<String>>() {
+                    })
                     .loadVariable("list")
                     .foreach("element", Integer.class)
                     .generate(Context.create());
@@ -103,11 +106,13 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         Statement createObject = StatementBuilder.create().newObject(String.class);
 
         Statement outerLoop = StatementBuilder.create()
-                .addVariable("list", new TypeLiteral<List<String>>() {})
+                .addVariable("list", new TypeLiteral<List<String>>() {
+                })
                 .loadVariable("list")
                 .foreach("element")
                 .execute(StatementBuilder.create(
-                        ContextBuilder.create().addVariable(Variable.create("anotherList", new TypeLiteral<List<String>>() {})))
+                        ContextBuilder.create().addVariable(Variable.create("anotherList", new TypeLiteral<List<String>>() {
+                        })))
                         .loadVariable("anotherList")
                         .foreach("anotherElement")
                         .execute(createObject)

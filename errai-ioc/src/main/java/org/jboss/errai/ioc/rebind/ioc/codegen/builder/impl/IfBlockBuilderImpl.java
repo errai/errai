@@ -1,6 +1,11 @@
-package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
+package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.*;
+import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.GenUtil;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ElseBlockBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.IfBlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.control.IfBlock;
 
 /**
@@ -20,17 +25,18 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements IfBl
     }
 
     public ElseBlockBuilder if_(Statement block) {
-        statement = new IfBlock(parent.statement, block);
+        //   statement = new IfBlock(parent.statement, block);
         return this;
     }
 
     public IfBlock if_(Statement block, IfBlock elseIf) {
-        statement = new IfBlock(parent.statement, block, elseIf);
-        return (IfBlock) statement;
+        //    statement = new IfBlock(parent.statement, block, elseIf);
+        //    return (IfBlock) statement;
+        return null;
     }
 
     public ElseBlockBuilder if_(BooleanOperator op, Statement rhs, Statement block) {
-        statement = new IfBlock(new BooleanExpressionBuilder(parent.statement, rhs, op), block);
+        //   statement = new IfBlock(new BooleanExpressionBuilder(parent.statement, rhs, op), block);
         return this;
     }
 
@@ -40,8 +46,9 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements IfBl
     }
 
     public IfBlock if_(BooleanOperator op, Statement rhs, Statement block, IfBlock elseIf) {
-        statement = new IfBlock(new BooleanExpressionBuilder(parent.statement, rhs, op), block, elseIf);
-        return (IfBlock) statement;
+        //      statement = new IfBlock(new BooleanExpressionBuilder(parent.statement, rhs, op), block, elseIf);
+        //       return (IfBlock) statement;
+        return null;
     }
 
     public IfBlock if_(BooleanOperator op, Object rhs, Statement block, IfBlock elseIf) {
@@ -50,7 +57,8 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements IfBl
     }
 
     public IfBlock else_(Statement block) {
-        ((IfBlock) statement).setElseBlock(new BlockStatement(block));
-        return (IfBlock) statement;
+        //    ((IfBlock) statement).setElseBlock(new BlockStatement(block));
+        //    return (IfBlock) statement;
+        return null;
     }
 }

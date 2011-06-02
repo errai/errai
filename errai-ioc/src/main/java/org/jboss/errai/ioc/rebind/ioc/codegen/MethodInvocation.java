@@ -9,19 +9,17 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class MethodInvocation extends AbstractStatement {
-    private final Statement target;
     private final MetaMethod method;
     private final CallParameters parameters;
 
-    public MethodInvocation(Statement target, MetaMethod method, CallParameters parameters) {
-        this.target = target;
+    public MethodInvocation(MetaMethod method, CallParameters parameters) {
         this.method = method;
         this.parameters = parameters;
     }
 
     public String generate(Context context) {
         StringBuilder buf = new StringBuilder();
-        buf.append(target.generate(context)).append(".").append(method.getName()).append(parameters.generate(context));
+        buf.append(method.getName()).append(parameters.generate(context));
         return buf.toString();
     }
 
