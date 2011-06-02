@@ -52,7 +52,7 @@ public class ClassStructureBuilder implements Builder, Finishable<ObjectBuilder>
                         .append(method.getName())
                         .append(parameters.generate(context)).append(" {\n");
                 if (statement != null) {
-                    buf.append(statement.generate(classContext)).append("\n");
+                    buf.append(statement.generate(context)).append("\n");
                 }
                 buf.append("}\n");
 

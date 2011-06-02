@@ -10,13 +10,13 @@ public class AnnotationEncoder {
     public static String encode(Annotation annotation) {
         Class<? extends Annotation> annotationClass = annotation.annotationType();
         return ObjectBuilder.newInstanceOf(annotationClass)
-                // { extend the class type
+                //         { extend the class type
                 .extend()
                         // override the annotationType() method.
                 .publicOverridesMethod("annotationType")
-                        // {
+                        //   {
                 .append(StatementBuilder.create().load(annotationClass).returnValue())
-                        // }
+                        //   }
                 .finish()
                         // }
                 .finish()
