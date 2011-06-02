@@ -65,10 +65,10 @@ public class ObjectBuilder extends AbstractStatementBuilder {
     }
 
     public ClassStructureBuilder extend() {
-        return new ClassStructureBuilder(type, context, new BuildCallback<ObjectBuilder>() {
+        return new ClassStructureBuilder(type, new BuildCallback<ObjectBuilder>() {
             public ObjectBuilder callback(Statement statement) {
                 finishConstructIfNecessary();
-                buf.append(" {\n").append(statement.generate(context)).append("\n}\n");
+                buf.append(" {\n").append(statement.generate(null)).append("\n}\n");
                 return ObjectBuilder.this;
             }
         });

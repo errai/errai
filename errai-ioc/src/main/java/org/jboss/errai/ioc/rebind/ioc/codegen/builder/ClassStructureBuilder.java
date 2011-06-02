@@ -3,6 +3,7 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 
 public class ClassStructureBuilder implements Builder, Finishable<ObjectBuilder> {
@@ -11,9 +12,14 @@ public class ClassStructureBuilder implements Builder, Finishable<ObjectBuilder>
     private StringBuilder buf = new StringBuilder();
     private BuildCallback<ObjectBuilder> callback;
 
-    ClassStructureBuilder(MetaClass toExtend, Context classContext, BuildCallback<ObjectBuilder> builderBuildCallback) {
+    ClassStructureBuilder(MetaClass toExtend, BuildCallback<ObjectBuilder> builderBuildCallback) {
         this.toExtend = toExtend;
-        this.classContext = classContext;
+        this.classContext = Context.create();
+
+        for (MetaField field : toExtend.getFields()) {
+            this.classContext.addVariable(Variable.create(field.getName(), field.getType()));
+        }
+
         this.callback = builderBuildCallback;
     }
 
