@@ -18,38 +18,72 @@ import javax.enterprise.util.TypeLiteral;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class StatementBuilder extends AbstractStatementBuilder
-        implements StatementBegin, ContextualStatementBuilder, VariableReferenceContextualStatementBuilder, StatementBegin {
+        implements
+        StatementBegin,
+        ContextualStatementBuilder,
+        VariableReferenceContextualStatementBuilder {
 
-    private StatementBuilder(StatementBuilder builder) {
-        super(builder);
+    public StatementBuilder(Context context) {
+        super(context);
+
+        if (context != null) {
+            for (Variable v : context.getDeclaredVariables()) {
+                appendCallElement(new DeclareVariable(v));
+            }
+        }
     }
 
     public static StatementBegin create() {
         return new StatementBuilder(null);
     }
 
+    public static StatementBegin create(Context context) {
+        return new StatementBuilder(context);
+    }
+
+
     public StatementBuilder addVariable(String name, Class<?> type) {
-        context.addVariable(Variable.create(name, type));
+        Variable v = Variable.create(name, type);
+        appendCallElement(new DeclareVariable(v));
+
+        // this is added for completeness, although is now redundant.
+        context.addVariable(v);
         return this;
     }
 
     public StatementBuilder addVariable(String name, TypeLiteral<?> type) {
-        context.addVariable(Variable.create(name, type));
+        Variable v = Variable.create(name, type);
+        appendCallElement(new DeclareVariable(v));
+
+        // this is added for completeness, although is now redundant.
+        context.addVariable(v);
         return this;
     }
 
     public StatementBuilder addVariable(String name, Object initialization) {
-        context.addVariable(Variable.create(name, initialization));
+        Variable v = Variable.create(name, initialization);
+        appendCallElement(new DeclareVariable(v));
+
+        // this is added for completeness, although is now redundant.
+        context.addVariable(v);
         return this;
     }
 
     public StatementBuilder addVariable(String name, Class<?> type, Object initialization) {
-        context.addVariable(Variable.create(name, type, initialization));
+        Variable v = Variable.create(name, type, initialization);
+        appendCallElement(new DeclareVariable(v));
+
+        // this is added for completeness, although is now redundant.
+        context.addVariable(v);
         return this;
     }
 
     public StatementBuilder addVariable(String name, TypeLiteral<?> type, Object initialization) {
-        context.addVariable(Variable.create(name, type, initialization));
+        Variable v = Variable.create(name, type, initialization);
+        appendCallElement(new DeclareVariable(v));
+
+        // this is added for completeness, although is now redundant.
+        context.addVariable(v);
         return this;
     }
 
@@ -119,12 +153,17 @@ public class StatementBuilder extends AbstractStatementBuilder
                                                 final MetaClass loopVarType,
                                                 final BlockStatement body) {
         return new DeferredCallback() {
-            public String doDeferred(Context context, Statement statement) {
+            public void doDeferred(CallWriter writer, Context context, Statement statement) {
                 GenUtil.assertIsIterable(statement);
 
                 Variable loopVar = createLoopVar(statement, loopVarName, loopVarType);
 
-                return new ForeachLoop(loopVar, statement, body).generate(context);
+                String collectionExpr = writer.getCallString();
+
+                // destroy the buffer up until now.
+                writer.reset();
+
+                writer.append(new ForeachLoop(loopVar, collectionExpr, body).generate(context));
             }
         };
     }

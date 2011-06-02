@@ -15,13 +15,13 @@ public class LoadVariable extends AbstractCallElement {
         this.variableName = variableName;
     }
 
-    public String getStatement(Context context, Statement statement) {
+    public void handleCall(CallWriter writer, Context context, Statement statement) {
         VariableReference ref = context.getVariable(variableName);
 
         if (ref == null) {
             throw new OutOfScopeException(variableName);
         }
 
-        return nextOrReturn(context, ref);
+        nextOrReturn(writer, context, ref);
     }
 }

@@ -1,7 +1,9 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.VariableDeclaration;
 
 import javax.enterprise.util.TypeLiteral;
 
@@ -55,17 +57,32 @@ public class ContextBuilder {
         return this;
     }
 
-    public VariableDeclarationBuilder.VariableInitializationBuilder declareVariable(String name, Class<?> type) {
-        return VariableDeclarationBuilder.createInContextOf(context).declareVariable(Variable.create(name, type));
+    public VariableDeclaration declareVariable(final Variable var) {
+        return new VariableDeclaration() {
+            public Statement initializeWith(Object initialization) {
+                var.initialize(initialization);
+                return var;
+            }
+
+            public Statement initializeWith(Statement initialization) {
+                var.initialize(initialization);
+                return var;
+            }
+        };
     }
 
-    public VariableDeclarationBuilder.VariableInitializationBuilder declareVariable(String name, TypeLiteral<?> type) {
-        return VariableDeclarationBuilder.createInContextOf(context).declareVariable(Variable.create(name, type));
+    public VariableDeclaration declareVariable(String name) {
+        return declareVariable(Variable.create(name, (Class<?>) null));
     }
 
-    public VariableDeclarationBuilder.VariableInitializationBuilder declareVariable(String name) {
-        return VariableDeclarationBuilder.createInContextOf(context).declareVariable(name);
+    public VariableDeclaration declareVariable(String name, Class<?> type) {
+        return declareVariable(Variable.create(name, type));
     }
+
+    public VariableDeclaration declareVariable(String name, TypeLiteral<?> type) {
+        return declareVariable(Variable.create(name, type));
+    }
+
 
     public Context getContext() {
         return context;

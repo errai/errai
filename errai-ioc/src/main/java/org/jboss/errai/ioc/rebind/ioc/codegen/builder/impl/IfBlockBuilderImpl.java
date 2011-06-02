@@ -17,7 +17,6 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements IfBl
 
     private IfBlockBuilderImpl(AbstractStatementBuilder parent) {
         super(Context.create(parent.getContext()));
-        this.parent = parent;
     }
 
     public static IfBlockBuilderImpl create(AbstractStatementBuilder parent) {

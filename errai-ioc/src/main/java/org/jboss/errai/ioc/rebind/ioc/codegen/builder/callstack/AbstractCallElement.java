@@ -9,11 +9,16 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 public abstract class AbstractCallElement implements CallElement {
     protected CallElement next;
 
-    public String nextOrReturn(Context ctx, Statement statement) {
+    public void nextOrReturn(CallWriter writer, Context ctx, Statement statement) {
+        if (statement != null) {
+            if (!writer.getCallString().isEmpty()) {
+                writer.append(".");
+            }
+            writer.append(statement.generate(ctx));
+        }
+
         if (next != null) {
-            return statement.generate(ctx) + "." + next.getStatement(ctx, statement);
-        } else {
-            return statement.generate(ctx);
+            getNext().handleCall(writer, ctx, statement);
         }
     }
 

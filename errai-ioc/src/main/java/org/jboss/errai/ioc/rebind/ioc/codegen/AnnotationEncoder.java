@@ -15,7 +15,7 @@ public class AnnotationEncoder {
                         // override the annotationType() method.
                 .publicOverridesMethod("annotationType")
                         //   {
-                .append(StatementBuilder.create().loadVariable("x").returnValue())
+                .append(StatementBuilder.create().load(annotationClass).returnValue())
                         //   }
                 .finish()
                         // }

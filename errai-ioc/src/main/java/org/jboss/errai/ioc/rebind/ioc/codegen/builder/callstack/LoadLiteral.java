@@ -14,7 +14,7 @@ public class LoadLiteral extends AbstractCallElement {
         this.literalValue = literalValue;
     }
 
-    public String getStatement(Context context, Statement statement) {
-        return nextOrReturn(context, LiteralFactory.getLiteral(literalValue));
+    public void handleCall(CallWriter writer, Context context, Statement statement) {
+        nextOrReturn(writer, context, LiteralFactory.getLiteral(literalValue));
     }
 }

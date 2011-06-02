@@ -17,7 +17,7 @@ public class UnresolvedMethodCall extends AbstractCallElement {
         this.parameters = parameters;
     }
 
-    public String getStatement(Context context, Statement statement) {
+    public void handleCall(CallWriter writer, Context context, Statement statement) {
         CallParameters callParams = CallParameters.fromStatements(GenUtil.generateCallParameters(context, parameters));
 
         MetaClass[] parameterTypes = callParams.getParameterTypes();
@@ -27,6 +27,6 @@ public class UnresolvedMethodCall extends AbstractCallElement {
 
         statement = new MethodInvocation(method, callParams);
 
-        return nextOrReturn(context, statement);
+        nextOrReturn(writer, context, statement);
     }
 }

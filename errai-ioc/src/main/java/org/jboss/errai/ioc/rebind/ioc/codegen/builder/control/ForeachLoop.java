@@ -13,12 +13,12 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 public class ForeachLoop extends AbstractStatement {
 
     private Variable loopVar;
-    private Statement collection;
+    private String collectionExpr;
     private Statement body;
 
-    public ForeachLoop(Variable loopVar, Statement collection, Statement body) {
+    public ForeachLoop(Variable loopVar, String collectionExpr, Statement body) {
         this.loopVar = loopVar;
-        this.collection = collection;
+        this.collectionExpr = collectionExpr;
         this.body = body;
     }
 
@@ -26,7 +26,7 @@ public class ForeachLoop extends AbstractStatement {
         StringBuilder buf = new StringBuilder();
 
         buf.append("for (").append(loopVar.getType().getFullyQualifedName()).append(" ").append(loopVar.getName())
-                .append(" : ").append(collection.generate(context)).append(") {")
+                .append(" : ").append(collectionExpr).append(") {")
                 .append("\n\t").append(body.generate(context).replaceAll("\n", "\n\t"))
                 .append("\n}");
 

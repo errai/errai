@@ -1,9 +1,10 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
+
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 
 /**
  * This class represents a {@link Statement} context. It has a reference to its
@@ -54,5 +55,9 @@ public class Context {
             if (ctx.variables.containsValue(variable)) return true;
         } while ((ctx = ctx.parent) != null);
         return false;
+    }
+
+    public Collection<Variable> getDeclaredVariables() {
+        return variables.values();
     }
 }

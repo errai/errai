@@ -13,11 +13,12 @@ public class DeferredCallElement<T> extends AbstractCallElement {
         this.callback = callback;
     }
 
-    public String getStatement(Context context, Statement statement) {
+    public void handleCall(CallWriter writer, Context context, Statement statement) {
+        callback.doDeferred(writer, context, statement);
+
         if (next != null) {
-            return callback.doDeferred(context, statement) + "." + next.getStatement(context, statement);
-        } else {
-            return callback.doDeferred(context, statement);
+            writer.append(".");
+            getNext().handleCall(writer, context, statement);
         }
     }
 }

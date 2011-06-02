@@ -6,6 +6,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.AbstractCallElement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.CallElement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.CallWriter;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
@@ -16,19 +17,13 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 public abstract class AbstractStatementBuilder implements Statement, Builder {
     protected Context context = null;
     protected CallElement callElement;
-    protected AbstractStatementBuilder parent = null;
 
     protected AbstractStatementBuilder(Context context) {
-        this.context = context;
-    }
-
-    protected AbstractStatementBuilder(AbstractStatementBuilder parent) {
-        this.parent = parent;
-        if (parent == null || parent.context == null) {
-            this.context = Context.create();
-        } else {
-            this.context = parent.context;
+        if (context == null) {
+            context = Context.create();
         }
+
+        this.context = context;
     }
 
     public Context getContext() {
@@ -36,23 +31,17 @@ public abstract class AbstractStatementBuilder implements Statement, Builder {
     }
 
     public String generate(Context context) {
-        return getAbsoluteParent().callElement.getStatement(context, null);
+        CallWriter writer = new CallWriter();
+        callElement.handleCall(writer, context, null);
+        return writer.getCallString();
     }
 
     public void appendCallElement(CallElement element) {
-        AbstractStatementBuilder builder = getAbsoluteParent();
-        if (builder.callElement == null) {
-            builder.callElement = element;
+        if (callElement == null) {
+            callElement = element;
         } else {
-            AbstractCallElement.append(builder.callElement, element);
+            AbstractCallElement.append(callElement, element);
         }
-    }
-
-    private AbstractStatementBuilder getAbsoluteParent() {
-        AbstractStatementBuilder builder = this;
-        while (builder.parent != null) builder = builder.parent;
-
-        return builder;
     }
 
     public MetaClass getType() {
@@ -63,10 +52,6 @@ public abstract class AbstractStatementBuilder implements Statement, Builder {
     }
 
     public String toJavaString() {
-        //TODO generate(context)
-        AbstractStatementBuilder builder = this;
-        while (builder.parent != null) builder = builder.parent;
-
-        return builder.generate(context);
+        return generate(context);
     }
 }

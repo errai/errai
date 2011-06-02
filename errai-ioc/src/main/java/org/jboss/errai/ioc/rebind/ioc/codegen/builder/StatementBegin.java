@@ -11,6 +11,7 @@ import javax.enterprise.util.TypeLiteral;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public interface StatementBegin {
+
     public StatementBuilder addVariable(String name, Class<?> type);
 
     public StatementBuilder addVariable(String name, TypeLiteral<?> type);
