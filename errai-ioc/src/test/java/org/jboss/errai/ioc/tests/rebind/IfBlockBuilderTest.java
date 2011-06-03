@@ -77,7 +77,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
                     .invoke("startsWith", "def")
                     .if_(StatementBuilder.create(c).loadVariable("n").assignValue(1)));
 
-        assertEquals("Failed to generate if - else if - else block using no rhs",
+        assertEquals("Failed to generate if - if - block using no rhs",
                 IF_ELSEIF_BLOCK_RESULT_NO_RHS, s.generate(Context.create()));
 
          s = StatementBuilder.create(c)

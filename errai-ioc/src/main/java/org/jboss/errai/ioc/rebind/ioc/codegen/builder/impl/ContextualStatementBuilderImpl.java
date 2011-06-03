@@ -9,6 +9,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ContextualStatementBuilder
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ElseBlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.LoopBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.VariableReferenceContextualStatementBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.AssignVariable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.MethodCall;
 
 /**
@@ -48,12 +49,24 @@ public class ContextualStatementBuilderImpl extends AbstractStatementBuilder imp
         return new IfBlockBuilderImpl(context, callElementBuilder).if_(block);
     }
 
+    public AbstractStatementBuilder if_(Statement block, Statement elseIf) {
+        return new IfBlockBuilderImpl(context, callElementBuilder).if_(block, elseIf);
+    }
+    
     public ElseBlockBuilder if_(BooleanOperator op, Statement rhs, Statement block) {
         return new IfBlockBuilderImpl(context, callElementBuilder).if_(op, rhs, block);
     }
 
+    public AbstractStatementBuilder if_(BooleanOperator op, Statement rhs, Statement block, Statement elseIf) {
+        return new IfBlockBuilderImpl(context, callElementBuilder).if_(op, rhs, block, elseIf);
+    }
+    
     public ElseBlockBuilder if_(BooleanOperator op, Object rhs, Statement block) {
         return new IfBlockBuilderImpl(context, callElementBuilder).if_(op, rhs, block);
+    }
+
+    public AbstractStatementBuilder if_(BooleanOperator op, Object rhs, Statement block, Statement elseIf) {
+        return new IfBlockBuilderImpl(context, callElementBuilder).if_(op, rhs, block, elseIf);
     }
 
     // Value return
@@ -67,8 +80,7 @@ public class ContextualStatementBuilderImpl extends AbstractStatementBuilder imp
     }
 
     public Statement assignValue(AssignmentOperator operator, Object statement) {
-        //return new AssignmentBuilder(operator,
-                //(VariableReference) this.statement, GenUtil.generate(context, statement));
-        return null;
+        appendCallElement(new AssignVariable(operator, statement));
+        return this;
     }
 }

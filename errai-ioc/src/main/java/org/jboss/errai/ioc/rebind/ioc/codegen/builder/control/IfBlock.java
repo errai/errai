@@ -1,5 +1,6 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.control;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.BlockStatement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.BooleanExpressionBuilder;
@@ -10,14 +11,14 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.BooleanExpressionBuil
  */
 public class IfBlock extends AbstractBlockConditional {
     private Statement elseBlock;
-    private IfBlock elseIf;
+    private Statement elseIf;
   
     public IfBlock(BooleanExpressionBuilder condition, Statement block) {
-        super(condition, block);
+        super(condition, new BlockStatement(block));
     }
     
-    public IfBlock(BooleanExpressionBuilder condition, Statement block, IfBlock elseIf) {
-        super(condition, block);
+    public IfBlock(BooleanExpressionBuilder condition, Statement block, Statement elseIf) {
+        super(condition, new BlockStatement(block));
         this.elseIf = elseIf;
     }
 
@@ -25,8 +26,8 @@ public class IfBlock extends AbstractBlockConditional {
         return (BooleanExpressionBuilder) super.getCondition();
     }
     
-    public void setElseBlock(Statement elseBlock) {
-        this.elseBlock = elseBlock;
+    public void setElseBlock(Statement... elseBlock) {
+        this.elseBlock = new BlockStatement(elseBlock);
     }
 
     public void setElseIf(IfBlock elseIf) {

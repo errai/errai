@@ -23,12 +23,12 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements IfBl
         super(context, callElementBuilder);
     }
 
-    public ElseBlockBuilder if_(final Statement block) {
+    public ElseBlockBuilder if_(Statement block) {
         ifBlock = new IfBlock(new BooleanExpressionBuilder(), block);
         return _if_();
     }
     
-    public ElseBlockBuilder if_(Statement block, IfBlock elseIf) {
+    public AbstractStatementBuilder if_(Statement block, Statement elseIf) {
         ifBlock = new IfBlock(new BooleanExpressionBuilder(), block, elseIf);
         return _if_();
     }
@@ -38,7 +38,7 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements IfBl
         return _if_();
     }
 
-    public ElseBlockBuilder if_(BooleanOperator op, Statement rhs, Statement block, IfBlock elseIf) {
+    public AbstractStatementBuilder if_(BooleanOperator op, Statement rhs, Statement block, Statement elseIf) {
         ifBlock = new IfBlock(new BooleanExpressionBuilder(rhs, op), block, elseIf);
         return _if_();
     }
@@ -48,12 +48,12 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements IfBl
         return if_(op, rhsStatement, block);
     }
     
-    public ElseBlockBuilder if_(BooleanOperator op, Object rhs, Statement block, IfBlock elseIf) {
+    public AbstractStatementBuilder if_(BooleanOperator op, Object rhs, Statement block, Statement elseIf) {
         Statement rhsStatement = GenUtil.generate(context, rhs);
         return if_(op, rhsStatement, block, elseIf);
     }
     
-    public ElseBlockBuilder else_(Statement elseBlock) {
+    public AbstractStatementBuilder else_(Statement elseBlock) {
         ifBlock.setElseBlock(elseBlock);
         return this;
     }
