@@ -2,6 +2,7 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.GenUtil;
 import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
@@ -47,9 +48,16 @@ public class BooleanExpressionBuilder implements Statement {
     }
 
     public String generate(Context context) {
-        return (lhs != null) ? lhs.generate(context) : lhsExpr +
-                ((operator != null) ? (" " + operator.getCanonicalString()) : "") +
-                ((rhs != null) ? (" " + rhs.generate(context)) : "");
+        if (operator != null) {
+            if (lhs != null)
+                operator.canBeApplied(GenUtil.generate(context, lhs).getType());
+            if (rhs != null)
+                operator.canBeApplied(GenUtil.generate(context, rhs).getType());
+        }
+        
+        return (lhs != null) ? lhs.generate(context) : lhsExpr
+                + ((operator != null) ? (" " + operator.getCanonicalString()) : "")
+                + ((rhs != null) ? (" " + rhs.generate(context)) : "");
     }
 
     public Context getContext() {

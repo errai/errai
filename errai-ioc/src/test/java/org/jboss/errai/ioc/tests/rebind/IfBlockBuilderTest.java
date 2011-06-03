@@ -1,15 +1,17 @@
 package org.jboss.errai.ioc.tests.rebind;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ContextBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidOperatorException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.junit.Test;
-
-import static org.junit.Assert.fail;
 
 /**
  * Tests the generation of if blocks using the {@link StatementBuilder} API.
@@ -127,6 +129,22 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
             fail("Expected InvalidTypeException");
         } catch (InvalidTypeException e) {
             // expected
+        }
+    }
+    
+    @Test
+    public void testIfBlockWithInvalidOperator() {
+        try {
+            StatementBuilder.create()
+                    .addVariable("str", String.class)
+                    .addVariable("str2", String.class)
+                    .loadVariable("str")
+                    .if_(BooleanOperator.GreaterThan, Variable.get("str2"), null)
+                    .toJavaString();
+
+            fail("Expected InvalidOperatorException");
+        } catch (InvalidOperatorException e) {
+            assertTrue("Wrong exception thrown", e.getMessage().contains(String.class.getName()));
         }
     }
 }
