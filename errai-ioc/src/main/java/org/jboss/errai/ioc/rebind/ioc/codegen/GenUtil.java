@@ -7,7 +7,9 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.values.LiteralFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.TypeNotIterableException;
+import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedMethodException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 import org.mvel2.DataConversion;
 
 /**
@@ -35,6 +37,19 @@ public class GenUtil {
         return statements;
     }
 
+    public static Statement[] generateCallParameters(MetaMethod method, Context context, Object... parameters) {
+        if (parameters.length!=method.getParameters().length) {
+            throw new UndefinedMethodException("Wrong number of parameters");
+        }
+        
+        Statement[] statements = new Statement[parameters.length];
+        int i = 0;
+        for (Object o : parameters) {
+            statements[i] = convert(context, o, method.getParameters()[i++].getType());
+        }
+        return statements;
+    }
+    
     public static Statement generate(Context context, Object o) {
         if (o instanceof VariableReference) {
             return context.getVariable(((VariableReference) o).getName());
@@ -101,11 +116,14 @@ public class GenUtil {
     public static Statement convert(Context context, Object input, MetaClass targetType) {
         try {
             if (input instanceof Statement) {
+                if (((Statement) input).getType()==null) {
+                    input = generate(context, input);
+                }
                 assertAssignableTypes(((Statement) input).getType(), targetType);
                 return (Statement) input;
             }
 
-            Class<?> targetClass = Class.forName(targetType.getFullyQualifedName(), false,
+            Class<?> targetClass = Class.forName(primitiveToWrapperType(targetType).getFullyQualifedName(), false,
                     Thread.currentThread().getContextClassLoader());
 
             if (DataConversion.canConvert(targetClass, input.getClass())) {

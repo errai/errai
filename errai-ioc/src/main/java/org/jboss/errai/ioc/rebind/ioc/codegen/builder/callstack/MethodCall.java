@@ -26,6 +26,7 @@ public class MethodCall extends AbstractCallElement {
         if (method == null)
             throw new UndefinedMethodException(methodName, parameterTypes);
 
+        callParams = CallParameters.fromStatements(GenUtil.generateCallParameters(method, context, parameters));
         statement = new MethodInvocation(method, callParams);
 
         nextOrReturn(writer, context, statement);
