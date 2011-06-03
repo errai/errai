@@ -16,13 +16,14 @@ public class BooleanExpressionBuilder implements Statement {
     private Statement rhs;
     private BooleanOperator operator;
 
-    public BooleanExpressionBuilder() {}
-    
+    public BooleanExpressionBuilder() {
+    }
+
     public BooleanExpressionBuilder(Statement rhs, BooleanOperator operator) {
         this.rhs = rhs;
         this.operator = operator;
     }
-    
+
     public BooleanExpressionBuilder(Statement lhs, Statement rhs, BooleanOperator operator) {
         this(rhs, operator);
         this.lhs = lhs;
@@ -36,7 +37,7 @@ public class BooleanExpressionBuilder implements Statement {
     public BooleanOperator getOperator() {
         return operator;
     }
-    
+
     public void setLhs(Statement lhs) {
         this.lhs = lhs;
     }
@@ -44,11 +45,11 @@ public class BooleanExpressionBuilder implements Statement {
     public void setLhsExpr(String lhsExpr) {
         this.lhsExpr = lhsExpr;
     }
-    
+
     public String generate(Context context) {
-        return (lhs != null) ? lhs.generate(context) : lhsExpr + 
-                ((operator !=null) ? (" " + operator.getCanonicalString()) : "") + 
-                ((rhs !=null) ? (" " + rhs.generate(context)) : "");
+        return (lhs != null) ? lhs.generate(context) : lhsExpr +
+                ((operator != null) ? (" " + operator.getCanonicalString()) : "") +
+                ((rhs != null) ? (" " + rhs.generate(context)) : "");
     }
 
     public Context getContext() {

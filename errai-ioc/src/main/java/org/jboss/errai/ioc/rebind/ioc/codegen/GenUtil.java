@@ -1,8 +1,5 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.values.LiteralFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.values.LiteralValue;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
@@ -12,6 +9,9 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedMethodException
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 import org.mvel2.DataConversion;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

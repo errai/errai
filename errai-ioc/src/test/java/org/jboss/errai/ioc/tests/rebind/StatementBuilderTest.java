@@ -23,7 +23,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
 
     @Test
     public void testAddVariableWithLiteralInitialization() {
-        Context ctx = Context.create(); 
+        Context ctx = Context.create();
         StatementBuilder.create().addVariable("n", Integer.class, 10).generate(ctx);
 
         VariableReference n = ctx.getVariable("n");
@@ -31,7 +31,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
         Assert.assertEquals("Wrong variable type", MetaClassFactory.get(Integer.class), n.getType());
         Assert.assertEquals("Wrong variable value", LiteralFactory.getLiteral(10), n.getValue());
 
-        ctx = Context.create(); 
+        ctx = Context.create();
         StatementBuilder.create().addVariable("n", 10).generate(ctx);
 
         n = ctx.getVariable("n");
@@ -39,7 +39,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
         Assert.assertEquals("Wrong variable type", MetaClassFactory.get(Integer.class), n.getType());
         Assert.assertEquals("Wrong variable value", LiteralFactory.getLiteral(10), n.getValue());
 
-        ctx = Context.create(); 
+        ctx = Context.create();
         StatementBuilder.create().addVariable("n", "10").generate(ctx);
 
         n = ctx.getVariable("n");
@@ -47,7 +47,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
         Assert.assertEquals("Wrong variable type", MetaClassFactory.get(String.class), n.getType());
         Assert.assertEquals("Wrong variable value", LiteralFactory.getLiteral("10"), n.getValue());
 
-        ctx = Context.create(); 
+        ctx = Context.create();
         StatementBuilder.create().addVariable("n", Integer.class, "10").generate(ctx);
 
         n = ctx.getVariable("n");
@@ -66,15 +66,15 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
 
     @Test
     public void testAddVariableWithObjectInitialization() {
-        Context ctx = Context.create(); 
-        StatementBuilder.create().addVariable("str", String.class, 
+        Context ctx = Context.create();
+        StatementBuilder.create().addVariable("str", String.class,
                 ObjectBuilder.newInstanceOf(String.class)).generate(ctx);
 
         VariableReference str = ctx.getVariable("str");
         assertEquals("Wrong variable name", "str", str.getName());
         Assert.assertEquals("Wrong variable type", MetaClassFactory.get(String.class), str.getType());
 
-        ctx = Context.create(); 
+        ctx = Context.create();
         StatementBuilder.create().addVariable("str", ObjectBuilder.newInstanceOf(String.class)).generate(ctx);
 
         str = ctx.getVariable("str");

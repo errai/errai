@@ -1,7 +1,5 @@
 package org.jboss.errai.ioc.tests.rebind;
 
-import static org.junit.Assert.fail;
-
 import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
@@ -10,6 +8,8 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ContextBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.junit.Test;
+
+import static org.junit.Assert.fail;
 
 /**
  * Tests the generation of if blocks using the {@link StatementBuilder} API.
@@ -73,24 +73,24 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
         Context c = ContextBuilder.create().addVariable("s", String.class).addVariable("n", Integer.class).getContext();
 
         Statement s = StatementBuilder.create(c)
-            .loadVariable("s")
-            .invoke("endsWith", "abc")
-            .if_(StatementBuilder.create(c).loadVariable("n").assignValue(0), 
-                    StatementBuilder.create(c).loadVariable("s")
-                    .invoke("startsWith", "def")
-                    .if_(StatementBuilder.create(c).loadVariable("n").assignValue(1)));
-
-        assertEquals("Failed to generate if - if - block using no rhs",
-                IF_ELSEIF_BLOCK_RESULT_NO_RHS, s.generate(Context.create()));
-
-         s = StatementBuilder.create(c)
                 .loadVariable("s")
                 .invoke("endsWith", "abc")
                 .if_(StatementBuilder.create(c).loadVariable("n").assignValue(0),
                         StatementBuilder.create(c).loadVariable("s")
-                        .invoke("startsWith", "def")
-                        .if_(StatementBuilder.create(c).loadVariable("n").assignValue(1))
-                        .else_(StatementBuilder.create(c).loadVariable("n").assignValue(2)));
+                                .invoke("startsWith", "def")
+                                .if_(StatementBuilder.create(c).loadVariable("n").assignValue(1)));
+
+        assertEquals("Failed to generate if - if - block using no rhs",
+                IF_ELSEIF_BLOCK_RESULT_NO_RHS, s.generate(Context.create()));
+
+        s = StatementBuilder.create(c)
+                .loadVariable("s")
+                .invoke("endsWith", "abc")
+                .if_(StatementBuilder.create(c).loadVariable("n").assignValue(0),
+                        StatementBuilder.create(c).loadVariable("s")
+                                .invoke("startsWith", "def")
+                                .if_(StatementBuilder.create(c).loadVariable("n").assignValue(1))
+                                .else_(StatementBuilder.create(c).loadVariable("n").assignValue(2)));
 
         assertEquals("Failed to generate if - else if - else block using no rhs",
                 IF_ELSEIF_ELSE_BLOCK_RESULT_NO_RHS, s.generate(Context.create()));
@@ -102,9 +102,9 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
 
         Statement s = StatementBuilder.create(c)
                 .loadVariable("n")
-                .if_(BooleanOperator.GreaterThan, Variable.get("m"), 
+                .if_(BooleanOperator.GreaterThan, Variable.get("m"),
                         StatementBuilder.create(c).loadVariable("n").assignValue(0),
-                            StatementBuilder.create(c).loadVariable("m")
+                        StatementBuilder.create(c).loadVariable("m")
                                 .if_(BooleanOperator.GreaterThan, Variable.get("n"),
                                         StatementBuilder.create(c).loadVariable("n").assignValue(1))
                                 .else_(StatementBuilder.create(c).loadVariable("n").assignValue(2)));
@@ -112,20 +112,20 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
         assertEquals("Failed to generate if - else if - else block using rhs",
                 IF_ELSEIF_ELSE_BLOCK_RESULT_RHS, s.generate(Context.create()));
     }
-    
+
     @Test
     public void testIfBlockWithInvalidBooleanExpression() {
         try {
             StatementBuilder.create()
-                .addVariable("str", String.class)
-                .loadVariable("str")
-                // not a boolean expression
-                .invoke("compareTo", "asd")
-                .if_(null)
-                .toJavaString();
-                
-           fail("Expected InvalidTypeException");
-        } catch(InvalidTypeException e) {
+                    .addVariable("str", String.class)
+                    .loadVariable("str")
+                            // not a boolean expression
+                    .invoke("compareTo", "asd")
+                    .if_(null)
+                    .toJavaString();
+
+            fail("Expected InvalidTypeException");
+        } catch (InvalidTypeException e) {
             // expected
         }
     }

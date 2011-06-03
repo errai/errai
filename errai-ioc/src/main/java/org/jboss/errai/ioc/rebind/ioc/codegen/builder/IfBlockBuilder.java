@@ -10,11 +10,14 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.AbstractStatementBuil
  */
 public interface IfBlockBuilder extends Statement, Builder {
     ElseBlockBuilder if_(Statement block);
+
     AbstractStatementBuilder if_(Statement block, Statement elseIf);
-    
+
     ElseBlockBuilder if_(BooleanOperator op, Statement rhs, Statement block);
+
     AbstractStatementBuilder if_(BooleanOperator op, Statement rhs, Statement block, Statement elseIf);
-    
+
     ElseBlockBuilder if_(BooleanOperator op, Object rhs, Statement block);
+
     AbstractStatementBuilder if_(BooleanOperator op, Object rhs, Statement block, Statement elseIf);
 }

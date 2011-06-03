@@ -61,7 +61,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
         Builder statement = StatementBuilder.create()
                 .addVariable("n", Integer.class)
                 .loadVariable("n")
-                 // 1 will be inferred to LiteralValue<Integer>, equals(Integer.class) should match equals(Object.class)
+                        // 1 will be inferred to LiteralValue<Integer>, equals(Integer.class) should match equals(Object.class)
                 .invoke("equals", 1);
 
         assertEquals("failed to generate invocation on matched method", "n.equals(1)", statement.toJavaString());
@@ -156,22 +156,22 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
         assertEquals("failed injecting literal with load()",
                 "\"foo\".toUpperCase()", s);
     }
-    
+
     @Test
     public void testInvokeWithParameterTypeConversion() {
        Builder invokeStatement = StatementBuilder.create()
                 .addVariable("str", String.class)
                 .loadVariable("str")
-                //passing in an Integer
+                        //passing in an Integer
                 .invoke("endsWith", 123);
 
         assertEquals("failed to generate invocation with parameter type conversion",
                 "str.endsWith(\"123\")", invokeStatement.toJavaString());
-        
+
         invokeStatement = StatementBuilder.create()
-            .addVariable("str", String.class)
-            .loadVariable("str")
-            .invoke("substring", "1", "3");
+                .addVariable("str", String.class)
+                .loadVariable("str")
+                .invoke("substring", "1", "3");
 
         assertEquals("failed to generate invocation with parameter type conversion",
                 "str.substring(1, 3)", invokeStatement.toJavaString());

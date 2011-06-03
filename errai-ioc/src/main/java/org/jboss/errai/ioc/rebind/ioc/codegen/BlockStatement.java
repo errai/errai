@@ -12,7 +12,7 @@ public class BlockStatement extends AbstractStatement {
     private List<Statement> statements = new ArrayList<Statement>();
 
     public BlockStatement(Statement... statements) {
-        if(statements!=null) {
+        if (statements != null) {
             for (Statement statement : statements) {
                 if (statement != null)
                     this.statements.add(statement);

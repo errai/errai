@@ -1,7 +1,5 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
-import javax.enterprise.util.TypeLiteral;
-
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ContextualStatementBuilder;
@@ -13,6 +11,8 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadLiteral;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadVariable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java.JavaReflectionClass;
+
+import javax.enterprise.util.TypeLiteral;
 
 /**
  * The root of our fluent StatementBuilder API.
@@ -69,7 +69,7 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
         appendCallElement(new DeclareVariable(v));
         return this;
     }
-    
+
     public VariableReferenceContextualStatementBuilder loadVariable(String name) {
         appendCallElement(new LoadVariable(name));
         return new ContextualStatementBuilderImpl(context, callElementBuilder);

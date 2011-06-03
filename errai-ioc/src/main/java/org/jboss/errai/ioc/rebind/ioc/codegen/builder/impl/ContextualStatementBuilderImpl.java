@@ -1,10 +1,6 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.AssignmentOperator;
-import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.StringStatement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ElseBlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.LoopBuilder;
@@ -14,7 +10,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.MethodCall;
 
 /**
  * Implementation of the {@link ContextualStatementBuilder}.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ContextualStatementBuilderImpl extends AbstractStatementBuilder implements ContextualStatementBuilder,
@@ -34,7 +30,7 @@ public class ContextualStatementBuilderImpl extends AbstractStatementBuilder imp
         appendCallElement(new MethodCall(methodName, parameters));
         return this;
     }
-    
+
     // Looping
     public BlockBuilder<LoopBuilder> foreach(String loopVarName) {
         return new LoopBuilderImpl(context, callElementBuilder).foreach(loopVarName);
@@ -52,7 +48,7 @@ public class ContextualStatementBuilderImpl extends AbstractStatementBuilder imp
     public AbstractStatementBuilder if_(Statement block, Statement elseIf) {
         return new IfBlockBuilderImpl(context, callElementBuilder).if_(block, elseIf);
     }
-    
+
     public ElseBlockBuilder if_(BooleanOperator op, Statement rhs, Statement block) {
         return new IfBlockBuilderImpl(context, callElementBuilder).if_(op, rhs, block);
     }
@@ -60,7 +56,7 @@ public class ContextualStatementBuilderImpl extends AbstractStatementBuilder imp
     public AbstractStatementBuilder if_(BooleanOperator op, Statement rhs, Statement block, Statement elseIf) {
         return new IfBlockBuilderImpl(context, callElementBuilder).if_(op, rhs, block, elseIf);
     }
-    
+
     public ElseBlockBuilder if_(BooleanOperator op, Object rhs, Statement block) {
         return new IfBlockBuilderImpl(context, callElementBuilder).if_(op, rhs, block);
     }

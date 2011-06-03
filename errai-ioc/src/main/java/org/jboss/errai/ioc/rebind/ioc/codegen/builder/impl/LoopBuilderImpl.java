@@ -1,11 +1,6 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.BlockStatement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.GenUtil;
-import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BuildCallback;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.LoopBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.CallWriter;
@@ -17,7 +12,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameterizedType;
 
 /**
  * StatementBuilder to generate loops.
- *  
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class LoopBuilderImpl extends AbstractStatementBuilder implements LoopBuilder {
@@ -36,7 +31,7 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements LoopBui
 
     private BlockBuilder<LoopBuilder> foreach(final String loopVarName, final MetaClass loopVarType) {
         final BlockStatement body = new BlockStatement();
-        
+
         appendCallElement(new DeferredCallElement(new DeferredCallback() {
             public void doDeferred(CallWriter writer, Context context, Statement statement) {
                 GenUtil.assertIsIterable(statement);
