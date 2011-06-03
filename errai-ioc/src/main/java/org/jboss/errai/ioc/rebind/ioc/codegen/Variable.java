@@ -104,6 +104,10 @@ public class Variable extends AbstractStatement {
     public MetaClass getType() {
         return type;
     }
+    
+    public Statement getValue () {
+        return value;
+    }
 
     private String hashString;
 

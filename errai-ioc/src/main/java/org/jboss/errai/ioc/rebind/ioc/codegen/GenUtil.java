@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.values.LiteralFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.values.LiteralValue;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.TypeNotIterableException;
@@ -31,8 +32,8 @@ public class GenUtil {
     public static Statement[] generateCallParameters(Context context, Object... parameters) {
         Statement[] statements = new Statement[parameters.length];
         int i = 0;
-        for (Object o : parameters) {
-            statements[i++] = generate(context, o);
+        for (Object parameter : parameters) {
+            statements[i++] = generate(context, parameter);
         }
         return statements;
     }
@@ -44,8 +45,13 @@ public class GenUtil {
         
         Statement[] statements = new Statement[parameters.length];
         int i = 0;
-        for (Object o : parameters) {
-            statements[i] = convert(context, o, method.getParameters()[i++].getType());
+        for (Object parameter : parameters) {
+            if (parameter instanceof Statement) {
+                if (((Statement) parameter).getType()==null) {
+                    parameter = generate(context, parameter);
+                }
+            }
+            statements[i] = convert(context, parameter, method.getParameters()[i++].getType());
         }
         return statements;
     }
@@ -116,11 +122,13 @@ public class GenUtil {
     public static Statement convert(Context context, Object input, MetaClass targetType) {
         try {
             if (input instanceof Statement) {
-                if (((Statement) input).getType()==null) {
-                    input = generate(context, input);
+                if (input instanceof VariableReference && 
+                        (((VariableReference) input).getValue() instanceof LiteralValue)) {
+                    input = ((LiteralValue<?>) ((VariableReference) input).getValue()).getValue();
+                } else {
+                    assertAssignableTypes(((Statement) input).getType(), targetType);
+                    return (Statement) input;
                 }
-                assertAssignableTypes(((Statement) input).getType(), targetType);
-                return (Statement) input;
             }
 
             Class<?> targetClass = Class.forName(primitiveToWrapperType(targetType).getFullyQualifedName(), false,
