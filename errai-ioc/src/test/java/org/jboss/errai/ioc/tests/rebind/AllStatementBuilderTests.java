@@ -8,8 +8,9 @@ import org.junit.runners.Suite;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ AnnotationEncoderTest.class, ContextBuilderTest.class, IfBlockBuilderTest.class,
-        InvocationBuilderTest.class, LiteralTest.class, LoopBuilderTest.class, StatementBuilderTest.class })
+@Suite.SuiteClasses({AnnotationEncoderTest.class, ClassStructureBuilderTest.class, ContextBuilderTest.class,
+        IfBlockBuilderTest.class, InvocationBuilderTest.class, LiteralTest.class, LoopBuilderTest.class,
+        StatementBuilderTest.class})
 public class AllStatementBuilderTests {
 
 }

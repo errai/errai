@@ -80,8 +80,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
     @Test
     public void testForeachLoopWithProvidedLoopVarType() throws Exception {
         Builder builder = StatementBuilder.create()
-                .addVariable("list", new TypeLiteral<List<String>>() {
-                })
+                .addVariable("list", new TypeLiteral<List<String>>() {})
                 .loadVariable("list")
                 .foreach("element", Object.class)
                 .finish();
@@ -91,8 +90,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
 
         try {
             StatementBuilder.create()
-                    .addVariable("list", new TypeLiteral<List<String>>() {
-                    })
+                    .addVariable("list", new TypeLiteral<List<String>>() {})
                     .loadVariable("list")
                     .foreach("element", Integer.class)
                     .finish().toJavaString();
@@ -108,13 +106,11 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         Statement createObject = StatementBuilder.create().newObject(String.class);
 
         Builder outerLoop = StatementBuilder.create()
-                .addVariable("list", new TypeLiteral<List<String>>() {
-                })
+                .addVariable("list", new TypeLiteral<List<String>>() {})
                 .loadVariable("list")
                 .foreach("element")
                 .append(StatementBuilder.create(
-                        ContextBuilder.create().addVariable(Variable.create("anotherList",
-                                new TypeLiteral<List<String>>() {})).getContext())
+                        ContextBuilder.create().addVariable(Variable.create("anotherList", new TypeLiteral<List<String>>() {})).getContext())
                         .loadVariable("anotherList")
                         .foreach("anotherElement")
                         .append(createObject)

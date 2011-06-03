@@ -7,6 +7,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class MethodCall extends AbstractCallElement {
     private String methodName;
@@ -25,6 +26,7 @@ public class MethodCall extends AbstractCallElement {
         if (method == null)
             throw new UndefinedMethodException(methodName, parameterTypes);
 
+        callParams = CallParameters.fromStatements(GenUtil.generateCallParameters(method, context, parameters));
         statement = new MethodInvocation(method, callParams);
 
         nextOrReturn(writer, context, statement);

@@ -15,12 +15,11 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
  */
 public abstract class AbstractStatementBuilder implements Statement, Builder {
     protected Context context = null;
-
-    protected CallElementBuilder elementBuilder;
+    protected CallElementBuilder callElementBuilder;
 
     protected AbstractStatementBuilder(Context context, CallElementBuilder callElementBuilder) {
         this(context);
-        this.elementBuilder = callElementBuilder;
+        this.callElementBuilder = callElementBuilder;
     }
 
     protected AbstractStatementBuilder(Context context) {
@@ -29,7 +28,7 @@ public abstract class AbstractStatementBuilder implements Statement, Builder {
         }
 
         this.context = context;
-        this.elementBuilder = new CallElementBuilder();
+        this.callElementBuilder = new CallElementBuilder();
     }
 
     public Context getContext() {
@@ -38,18 +37,15 @@ public abstract class AbstractStatementBuilder implements Statement, Builder {
 
     public String generate(Context context) {
         CallWriter writer = new CallWriter();
-        elementBuilder.getRootElement().handleCall(writer, context, null);
+        callElementBuilder.getRootElement().handleCall(writer, context, null);
         return writer.getCallString();
     }
 
     public void appendCallElement(CallElement element) {
-        elementBuilder.appendCallElement(element);
+        callElementBuilder.appendCallElement(element);
     }
 
     public MetaClass getType() {
-//        if (statement != null) {
-//            return statement.getType();
-//        }
         return MetaClassFactory.get(Void.class);
     }
 
