@@ -25,6 +25,13 @@ public interface IfBlockBuilderTestResult {
                     "\njava.lang.Integer n = 1;\n" +
                     "}\n";
 
+    public static final String IF_ELSEIF_BLOCK_RESULT_NO_RHS =
+        "if (s.endsWith(\"abc\")) {\n" +
+                "n = 0;\n" +
+                "} else if (s.startsWith(\"def\")) { " +
+                "n = 1;\n" +
+                "}\n";
+    
     public static final String IF_ELSEIF_ELSE_BLOCK_RESULT_NO_RHS =
             "if (s.endsWith(\"abc\")) {\n" +
                     "n = 0;\n" +

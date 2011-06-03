@@ -10,7 +10,6 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ElseBlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.LoopBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.VariableReferenceContextualStatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.MethodCall;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.control.IfBlock;
 
 /**
  * Implementation of the {@link ContextualStatementBuilder}.
@@ -46,27 +45,15 @@ public class ContextualStatementBuilderImpl extends AbstractStatementBuilder imp
 
     // If-Then-Else
     public ElseBlockBuilder if_(Statement block) {
-        return IfBlockBuilderImpl.create(this).if_(block);
-    }
-
-    public IfBlock if_(Statement block, IfBlock elseIf) {
-        return IfBlockBuilderImpl.create(this).if_(block, elseIf);
+        return new IfBlockBuilderImpl(context, callElementBuilder).if_(block);
     }
 
     public ElseBlockBuilder if_(BooleanOperator op, Statement rhs, Statement block) {
-        return IfBlockBuilderImpl.create(this).if_(op, rhs, block);
-    }
-
-    public IfBlock if_(BooleanOperator op, Statement rhs, Statement block, IfBlock elseIf) {
-        return IfBlockBuilderImpl.create(this).if_(op, rhs, block, elseIf);
+        return new IfBlockBuilderImpl(context, callElementBuilder).if_(op, rhs, block);
     }
 
     public ElseBlockBuilder if_(BooleanOperator op, Object rhs, Statement block) {
-        return IfBlockBuilderImpl.create(this).if_(op, rhs, block);
-    }
-
-    public IfBlock if_(BooleanOperator op, Object rhs, Statement block, IfBlock elseIf) {
-        return IfBlockBuilderImpl.create(this).if_(op, rhs, block, elseIf);
+        return new IfBlockBuilderImpl(context, callElementBuilder).if_(op, rhs, block);
     }
 
     // Value return

@@ -70,13 +70,24 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
         Context c = ContextBuilder.create().addVariable("s", String.class).addVariable("n", Integer.class).getContext();
 
         Statement s = StatementBuilder.create(c)
+            .loadVariable("s")
+            .invoke("endsWith", "abc")
+            .if_(StatementBuilder.create(c).loadVariable("n").assignValue(0), 
+                    StatementBuilder.create(c).loadVariable("s")
+                    .invoke("startsWith", "def")
+                    .if_(StatementBuilder.create(c).loadVariable("n").assignValue(1)));
+
+        assertEquals("Failed to generate if - else if - else block using no rhs",
+                IF_ELSEIF_BLOCK_RESULT_NO_RHS, s.generate(Context.create()));
+
+         s = StatementBuilder.create(c)
                 .loadVariable("s")
                 .invoke("endsWith", "abc")
                 .if_(StatementBuilder.create(c).loadVariable("n").assignValue(0),
                         StatementBuilder.create(c).loadVariable("s")
-                                .invoke("startsWith", "def")
-                                .if_(StatementBuilder.create(c).loadVariable("n").assignValue(1))
-                                .else_(StatementBuilder.create(c).loadVariable("n").assignValue(2)));
+                        .invoke("startsWith", "def")
+                        .if_(StatementBuilder.create(c).loadVariable("n").assignValue(1))
+                        .else_(StatementBuilder.create(c).loadVariable("n").assignValue(2)));
 
         assertEquals("Failed to generate if - else if - else block using no rhs",
                 IF_ELSEIF_ELSE_BLOCK_RESULT_NO_RHS, s.generate(Context.create()));
@@ -88,9 +99,9 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
 
         Statement s = StatementBuilder.create(c)
                 .loadVariable("n")
-                .if_(BooleanOperator.GreaterThan, Variable.get("m"),
+                .if_(BooleanOperator.GreaterThan, Variable.get("m"), 
                         StatementBuilder.create(c).loadVariable("n").assignValue(0),
-                        StatementBuilder.create(c).loadVariable("m")
+                            StatementBuilder.create(c).loadVariable("m")
                                 .if_(BooleanOperator.GreaterThan, Variable.get("n"),
                                         StatementBuilder.create(c).loadVariable("n").assignValue(1))
                                 .else_(StatementBuilder.create(c).loadVariable("n").assignValue(2)));

@@ -1,34 +1,42 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.control;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.BlockStatement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.BooleanExpressionBuilder;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class IfBlock extends AbstractBlockConditional {
-    protected Statement elseBlock;
-    protected IfBlock elseIf;
-
-    public IfBlock(Statement condition, Statement block) {
-        super(condition, new BlockStatement(block));
+    private Statement elseBlock;
+    private IfBlock elseIf;
+  
+    public IfBlock(BooleanExpressionBuilder condition, Statement block) {
+        super(condition, block);
     }
-
-    public IfBlock(Statement condition, Statement block, IfBlock elseIf) {
-        this(condition, block);
+    
+    public IfBlock(BooleanExpressionBuilder condition, Statement block, IfBlock elseIf) {
+        super(condition, block);
         this.elseIf = elseIf;
     }
 
+    public BooleanExpressionBuilder getCondition() {
+        return (BooleanExpressionBuilder) super.getCondition();
+    }
+    
     public void setElseBlock(Statement elseBlock) {
         this.elseBlock = elseBlock;
     }
 
+    public void setElseIf(IfBlock elseIf) {
+        this.elseIf = elseIf;
+    }
+
     public String generate(Context context) {
         StringBuilder builder = new StringBuilder("if ");
-        if (getCondition() != null) {
-            builder.append("(").append(getCondition().generate(context)).append(") ");
-        }
+        builder.append("(").append(getCondition().generate(context)).append(") ");
+        
         builder.append("{\n");
 
         if (getBlock() != null) {
