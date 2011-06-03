@@ -9,8 +9,6 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Refs;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ContextBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.values.IntValue;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.values.LiteralValue;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedMethodException;
 import org.junit.Test;

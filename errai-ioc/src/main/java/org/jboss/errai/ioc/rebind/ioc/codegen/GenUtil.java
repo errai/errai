@@ -18,17 +18,20 @@ import org.mvel2.DataConversion;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class GenUtil {
-    private static final Map<MetaClass, MetaClass> primitiveWrappers = new HashMap<MetaClass, MetaClass>() {{
-        put(MetaClassFactory.get(boolean.class), MetaClassFactory.get(Boolean.class));
-        put(MetaClassFactory.get(byte.class), MetaClassFactory.get(Byte.class));
-        put(MetaClassFactory.get(char.class), MetaClassFactory.get(Character.class));
-        put(MetaClassFactory.get(double.class), MetaClassFactory.get(Double.class));
-        put(MetaClassFactory.get(float.class), MetaClassFactory.get(Float.class));
-        put(MetaClassFactory.get(int.class), MetaClassFactory.get(Integer.class));
-        put(MetaClassFactory.get(long.class), MetaClassFactory.get(Long.class));
-        put(MetaClassFactory.get(short.class), MetaClassFactory.get(Short.class));
-    }};
-    
+    @SuppressWarnings("serial")
+    private static final Map<MetaClass, MetaClass> primitiveWrappers = new HashMap<MetaClass, MetaClass>() {
+        {
+            put(MetaClassFactory.get(boolean.class), MetaClassFactory.get(Boolean.class));
+            put(MetaClassFactory.get(byte.class), MetaClassFactory.get(Byte.class));
+            put(MetaClassFactory.get(char.class), MetaClassFactory.get(Character.class));
+            put(MetaClassFactory.get(double.class), MetaClassFactory.get(Double.class));
+            put(MetaClassFactory.get(float.class), MetaClassFactory.get(Float.class));
+            put(MetaClassFactory.get(int.class), MetaClassFactory.get(Integer.class));
+            put(MetaClassFactory.get(long.class), MetaClassFactory.get(Long.class));
+            put(MetaClassFactory.get(short.class), MetaClassFactory.get(Short.class));
+        }
+    };
+
     public static Statement[] generateCallParameters(Context context, Object... parameters) {
         Statement[] statements = new Statement[parameters.length];
         int i = 0;
@@ -39,15 +42,15 @@ public class GenUtil {
     }
 
     public static Statement[] generateCallParameters(MetaMethod method, Context context, Object... parameters) {
-        if (parameters.length!=method.getParameters().length) {
+        if (parameters.length != method.getParameters().length) {
             throw new UndefinedMethodException("Wrong number of parameters");
         }
-        
+
         Statement[] statements = new Statement[parameters.length];
         int i = 0;
         for (Object parameter : parameters) {
             if (parameter instanceof Statement) {
-                if (((Statement) parameter).getType()==null) {
+                if (((Statement) parameter).getType() == null) {
                     parameter = generate(context, parameter);
                 }
             }
@@ -55,7 +58,7 @@ public class GenUtil {
         }
         return statements;
     }
-    
+
     public static Statement generate(Context context, Object o) {
         if (o instanceof VariableReference) {
             return context.getVariable(((VariableReference) o).getName());
@@ -75,7 +78,7 @@ public class GenUtil {
 
     public static void assertIsIterable(Statement statement) {
         try {
-            Class<?> cls = Class.forName(statement.getType().getFullyQualifedName(), false,
+            Class<?> cls = Class.forName(statement.getType().getFullyQualifedName(), false, 
                     Thread.currentThread().getContextClassLoader());
 
             if (!cls.isArray() && !Iterable.class.isAssignableFrom(cls))
@@ -87,7 +90,7 @@ public class GenUtil {
 
     public static MetaClass getComponentType(Statement statement) {
         try {
-            Class<?> cls = Class.forName(statement.getType().getFullyQualifedName(), false,
+            Class<?> cls = Class.forName(statement.getType().getFullyQualifedName(), false, 
                     Thread.currentThread().getContextClassLoader());
 
             if (cls.getComponentType() != null)
@@ -103,16 +106,16 @@ public class GenUtil {
         try {
             from = primitiveToWrapperType(from);
             to = primitiveToWrapperType(to);
-            
-            Class<?> fromCls = Class.forName(from.getFullyQualifedName(), false,
-                    Thread.currentThread().getContextClassLoader());
 
-            Class<?> toCls = Class.forName(to.getFullyQualifedName(), false,
-                    Thread.currentThread().getContextClassLoader());
+            Class<?> fromCls = Class.forName(from.getFullyQualifedName(), false, Thread.currentThread()
+                    .getContextClassLoader());
+
+            Class<?> toCls = Class.forName(to.getFullyQualifedName(), false, Thread.currentThread()
+                    .getContextClassLoader());
 
             if (!toCls.isAssignableFrom(fromCls))
-                throw new InvalidTypeException(to.getFullyQualifedName() +
-                        " is not assignable from " + from.getFullyQualifedName());
+                throw new InvalidTypeException(to.getFullyQualifedName() + " is not assignable from "
+                        + from.getFullyQualifedName());
 
         } catch (ClassNotFoundException e) {
             throw new IllegalArgumentException(e);
@@ -122,8 +125,8 @@ public class GenUtil {
     public static Statement convert(Context context, Object input, MetaClass targetType) {
         try {
             if (input instanceof Statement) {
-                if (input instanceof VariableReference && 
-                        (((VariableReference) input).getValue() instanceof LiteralValue)) {
+                if (input instanceof VariableReference
+                        && (((VariableReference) input).getValue() instanceof LiteralValue)) {
                     input = ((LiteralValue<?>) ((VariableReference) input).getValue()).getValue();
                 } else {
                     assertAssignableTypes(((Statement) input).getType(), targetType);
