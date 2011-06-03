@@ -9,7 +9,7 @@ import java.lang.annotation.Annotation;
 public class AnnotationEncoder {
     public static String encode(Annotation annotation) {
         Class<? extends Annotation> annotationClass = annotation.annotationType();
-        return ObjectBuilder.newInstanceOf(annotationClass)
+        String str = ObjectBuilder.newInstanceOf(annotationClass)
                 //         { extend the class type
                 .extend()
                         // override the annotationType() method.
@@ -21,5 +21,9 @@ public class AnnotationEncoder {
                         // }
                 .finish()
                 .toJavaString();
+
+        System.out.println(str);
+
+        return str;
     }
 }

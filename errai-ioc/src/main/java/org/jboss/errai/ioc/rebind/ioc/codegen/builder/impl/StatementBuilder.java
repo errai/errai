@@ -109,7 +109,7 @@ public class StatementBuilder extends AbstractStatementBuilder
     }
 
     public ContextualStatementBuilder invoke(String methodName, Object... parameters) {
-        appendCallElement(new UnresolvedMethodCall(methodName, parameters));
+        appendCallElement(new MethodCall(methodName, parameters));
         return this;
     }
 

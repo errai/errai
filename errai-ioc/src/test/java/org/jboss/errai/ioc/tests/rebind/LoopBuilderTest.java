@@ -34,8 +34,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
                 .newObject(Object.class);
 
         String foreachWithListOfStrings = StatementBuilder.create()
-                .addVariable("list", new TypeLiteral<List<String>>() {
-                })
+                .addVariable("list", new TypeLiteral<List<String>>() {})
                 .loadVariable("list")
                 .foreach("element")
                 .finish().toJavaString();
@@ -114,8 +113,8 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
                 .loadVariable("list")
                 .foreach("element")
                 .append(StatementBuilder.create(
-                        ContextBuilder.create().addVariable(Variable.create("anotherList", new TypeLiteral<List<String>>() {
-                        })).getContext())
+                        ContextBuilder.create().addVariable(Variable.create("anotherList",
+                                new TypeLiteral<List<String>>() {})).getContext())
                         .loadVariable("anotherList")
                         .foreach("anotherElement")
                         .append(createObject)
