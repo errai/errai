@@ -3,6 +3,7 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.GenUtil;
+import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ElseBlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.IfBlockBuilder;
@@ -61,6 +62,10 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements IfBl
     private IfBlockBuilderImpl _if_() {
         appendCallElement(new DeferredCallElement(new DeferredCallback() {
             public void doDeferred(CallWriter writer, Context context, Statement statement) {
+                if (ifBlock.getCondition().getOperator()==null) {
+                    statement = GenUtil.convert(context, statement, MetaClassFactory.get(Boolean.class));
+                }
+                
                 ifBlock.getCondition().setLhsExpr(writer.getCallString());
                 writer.reset();
                 writer.append(ifBlock.generate(Context.create(context)));

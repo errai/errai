@@ -61,7 +61,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
         Builder statement = StatementBuilder.create()
                 .addVariable("n", Integer.class)
                 .loadVariable("n")
-                        // 1 will be inferred to LiteralValue<Integer>, equals(Integer.class) should match equals(Object.class)
+                 // 1 will be inferred to LiteralValue<Integer>, equals(Integer.class) should match equals(Object.class)
                 .invoke("equals", 1);
 
         assertEquals("failed to generate invocation on matched method", "n.equals(1)", statement.toJavaString());

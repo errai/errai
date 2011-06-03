@@ -33,6 +33,10 @@ public class BooleanExpressionBuilder implements Statement {
         this.lhsExpr = lhsExpr;
     }
 
+    public BooleanOperator getOperator() {
+        return operator;
+    }
+    
     public void setLhs(Statement lhs) {
         this.lhs = lhs;
     }

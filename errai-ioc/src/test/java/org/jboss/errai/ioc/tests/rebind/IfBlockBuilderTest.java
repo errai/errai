@@ -1,11 +1,14 @@
 package org.jboss.errai.ioc.tests.rebind;
 
+import static org.junit.Assert.fail;
+
 import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ContextBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.junit.Test;
 
 /**
@@ -108,5 +111,22 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
 
         assertEquals("Failed to generate if - else if - else block using rhs",
                 IF_ELSEIF_ELSE_BLOCK_RESULT_RHS, s.generate(Context.create()));
+    }
+    
+    @Test
+    public void testIfBlockWithInvalidBooleanExpression() {
+        try {
+            StatementBuilder.create()
+                .addVariable("str", String.class)
+                .loadVariable("str")
+                // not a boolean expression
+                .invoke("compareTo", "asd")
+                .if_(null)
+                .toJavaString();
+                
+           fail("Expected InvalidTypeException");
+        } catch(InvalidTypeException e) {
+            // expected
+        }
     }
 }

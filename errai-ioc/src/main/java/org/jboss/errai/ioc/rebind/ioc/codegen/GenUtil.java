@@ -1,5 +1,8 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.values.LiteralFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
@@ -12,6 +15,17 @@ import org.mvel2.DataConversion;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class GenUtil {
+    private static final Map<MetaClass, MetaClass> primitiveWrappers = new HashMap<MetaClass, MetaClass>() {{
+        put(MetaClassFactory.get(boolean.class), MetaClassFactory.get(Boolean.class));
+        put(MetaClassFactory.get(byte.class), MetaClassFactory.get(Byte.class));
+        put(MetaClassFactory.get(char.class), MetaClassFactory.get(Character.class));
+        put(MetaClassFactory.get(double.class), MetaClassFactory.get(Double.class));
+        put(MetaClassFactory.get(float.class), MetaClassFactory.get(Float.class));
+        put(MetaClassFactory.get(int.class), MetaClassFactory.get(Integer.class));
+        put(MetaClassFactory.get(long.class), MetaClassFactory.get(Long.class));
+        put(MetaClassFactory.get(short.class), MetaClassFactory.get(Short.class));
+    }};
+    
     public static Statement[] generateCallParameters(Context context, Object... parameters) {
         Statement[] statements = new Statement[parameters.length];
         int i = 0;
@@ -66,6 +80,9 @@ public class GenUtil {
 
     public static void assertAssignableTypes(MetaClass from, MetaClass to) {
         try {
+            from = primitiveToWrapperType(from);
+            to = primitiveToWrapperType(to);
+            
             Class<?> fromCls = Class.forName(from.getFullyQualifedName(), false,
                     Thread.currentThread().getContextClassLoader());
 
@@ -83,7 +100,6 @@ public class GenUtil {
 
     public static Statement convert(Context context, Object input, MetaClass targetType) {
         try {
-
             if (input instanceof Statement) {
                 assertAssignableTypes(((Statement) input).getType(), targetType);
                 return (Statement) input;
@@ -95,12 +111,17 @@ public class GenUtil {
             if (DataConversion.canConvert(targetClass, input.getClass())) {
                 return generate(context, DataConversion.convert(input, targetClass));
             } else {
-                throw new InvalidTypeException("cannot convert to target type:" + targetClass.getName());
+                throw new InvalidTypeException("cannot convert input to target type:" + targetClass.getName());
             }
         } catch (ClassNotFoundException e) {
             throw new IllegalArgumentException(e);
         } catch (Throwable t) {
             throw new InvalidTypeException(t);
         }
+    }
+
+    public static MetaClass primitiveToWrapperType(MetaClass type) {
+        MetaClass wrapperType = primitiveWrappers.get(type);
+        return (wrapperType != null) ? wrapperType : type;
     }
 }
