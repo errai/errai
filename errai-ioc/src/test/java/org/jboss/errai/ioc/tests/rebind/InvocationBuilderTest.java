@@ -184,4 +184,27 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
         assertEquals("failed to generate invocation with parameter type conversion",
                 "str.endsWith(\"123\")", invokeStatement.toJavaString());
     }
+    
+    @Test
+    public void testInvokeStaticMethod() {
+       Builder invokeStatement = StatementBuilder.create()
+                .loadStatic(Integer.class)
+                .invoke("getInteger", "123");
+
+        assertEquals("failed to generate static method invocation",
+                "java.lang.Integer.getInteger(\"123\")", invokeStatement.toJavaString());
+    }
+    
+    public void testInvokeUndefinedStaticMethod() {
+         
+         try {
+             StatementBuilder.create()
+                 .loadStatic(Integer.class)
+                 .invoke("undefinedMethod", "123")
+                  .toJavaString();
+             fail("expected UndefinedMethodException");
+         } catch (UndefinedMethodException udme) {
+             assertTrue(udme.getMessage().contains("undefinedMethod"));
+         }
+     }
 }

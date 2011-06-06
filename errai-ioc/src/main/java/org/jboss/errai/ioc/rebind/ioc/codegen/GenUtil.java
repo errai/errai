@@ -71,7 +71,7 @@ public class GenUtil {
             }
         } else if (o instanceof Statement) {
             return (Statement) o;
-        } else {
+       } else {
             return LiteralFactory.getLiteral(o);
         }
     }

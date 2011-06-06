@@ -14,18 +14,18 @@ public class OperatorImpl implements Operator {
     private final MetaClass[] lhsConstraints;
     private final MetaClass[] rhsConstraints;
     
-    OperatorImpl(String canonicalString, int operatorPrecedence, Class<?>... applicability) {
+    OperatorImpl(String canonicalString, int operatorPrecedence, Class<?>... constraints) {
         this.canonicalString = canonicalString;
         this.operatorPrecedence = operatorPrecedence;
-        this.lhsConstraints = MetaClassFactory.fromClassArray(applicability);
+        this.lhsConstraints = MetaClassFactory.fromClassArray(constraints);
         this.rhsConstraints = lhsConstraints;
     }
 
-    OperatorImpl(String canonicalString, int operatorPrecedence, Class<?>[] lhsApplicability, Class<?>[] rhsApplicability) {
+    OperatorImpl(String canonicalString, int operatorPrecedence, Class<?>[] lhsConstraints, Class<?>[] rhsConstraints) {
         this.canonicalString = canonicalString;
         this.operatorPrecedence = operatorPrecedence;
-        this.lhsConstraints = MetaClassFactory.fromClassArray(lhsApplicability);
-        this.rhsConstraints = MetaClassFactory.fromClassArray(rhsApplicability);
+        this.lhsConstraints = MetaClassFactory.fromClassArray(lhsConstraints);
+        this.rhsConstraints = MetaClassFactory.fromClassArray(rhsConstraints);
     }
     
     public String getCanonicalString() {

@@ -32,18 +32,17 @@ public final class MetaClassFactory {
         return createOrGet(clazz);
     }
 
-    public static MetaClass get(Class clazz) {
+    public static MetaClass get(Class<?> clazz) {
         return createOrGet(clazz);
     }
 
-    public static MetaClass get(TypeLiteral literal) {
+    public static MetaClass get(TypeLiteral<?> literal) {
         return createOrGet(literal);
     }
     
-    public static Statement getAsStatement(Class clazz) {
+    public static Statement getAsStatement(Class<?> clazz) {
         final MetaClass metaClass = createOrGet(clazz);
         return new Statement() {
-
             public String generate(Context context) {
                 return metaClass.getFullyQualifedName();
             }
@@ -57,7 +56,6 @@ public final class MetaClassFactory {
             }
         };
     }
-    
 
     public static boolean isCached(String name) {
         return CLASS_CACHE.containsKey(name);

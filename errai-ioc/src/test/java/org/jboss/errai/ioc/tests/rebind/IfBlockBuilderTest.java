@@ -153,12 +153,11 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
         String s = StatementBuilder.create()
                 .addVariable("str", String.class)
                 .loadVariable("str")
-                .if_(BooleanOperator.InstanceOf, MetaClassFactory.getAsStatement(Integer.class), null)
+                .if_(BooleanOperator.InstanceOf, MetaClassFactory.getAsStatement(String.class), null)
                 .toJavaString();
         
         assertEquals("Failed to generate empty if block using an instance of expression", 
                 EMPTY_IF_BLOCK_RESULT_INSTANCE_OF_RHS, s);
-            
     }
     
     @Test

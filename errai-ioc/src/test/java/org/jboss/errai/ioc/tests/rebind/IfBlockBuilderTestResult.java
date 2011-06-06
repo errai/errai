@@ -12,7 +12,7 @@ public interface IfBlockBuilderTestResult {
             "if (n == 1) { }\n";
 
     public static final String EMPTY_IF_BLOCK_RESULT_INSTANCE_OF_RHS = 
-            "if (str instanceof java.lang.Integer) { }\n";
+            "if (str instanceof java.lang.String) { }\n";
     
     public static final String IF_ELSE_BLOCK_RESULT_NO_RHS =
             "if (str.endsWith(\"abc\")) { " +

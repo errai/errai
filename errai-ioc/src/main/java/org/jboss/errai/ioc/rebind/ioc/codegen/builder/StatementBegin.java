@@ -27,6 +27,8 @@ public interface StatementBegin {
     public ContextualStatementBuilder loadLiteral(Object o);
 
     public ContextualStatementBuilder load(Object o);
+    
+    public ContextualStatementBuilder loadStatic(Class<?> clazz);
 
     public ObjectBuilder newObject(MetaClass type);
 
