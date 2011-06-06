@@ -45,6 +45,24 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements IfBl
         return if_(op, rhsStatement);
     }
 
+    private BlockBuilder<ElseBlockBuilder> _if_() {
+        appendCallElement(new DeferredCallElement(new DeferredCallback() {
+            public void doDeferred(CallWriter writer, Context context, Statement statement) {
+                statement = validateOrConvertLhs(statement);
+
+                ifBlock.getCondition().setLhsExpr(writer.getCallString());
+                writer.reset();
+                writer.append(ifBlock.generate(Context.create(context)));
+            }
+        }));
+        
+        return new BlockBuilder<ElseBlockBuilder>(ifBlock.getBlock(), new BuildCallback<ElseBlockBuilder>() {
+            public ElseBlockBuilder callback(Statement statement) {
+                return IfBlockBuilderImpl.this;
+            }
+        });
+    }
+    
     public BlockBuilder<AbstractStatementBuilder> else_() {
         return new BlockBuilder<AbstractStatementBuilder>(ifBlock.getElseBlock(), new BuildCallback<AbstractStatementBuilder>() {
             public AbstractStatementBuilder callback(Statement statement) {
@@ -66,7 +84,6 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements IfBl
         IfBlock elseIfBlock = new IfBlock(new BooleanExpressionBuilder(lhs, rhs, op));
         ifBlock.setElseIfBlock(elseIfBlock);
         return _elseif_(elseIfBlock);
-     
     }
     
     public BlockBuilder<ElseBlockBuilder> elseif_(Statement lhs, BooleanOperator op, Object rhs) {
@@ -78,24 +95,6 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements IfBl
         return new BlockBuilder<ElseBlockBuilder>(elseIfBlock.getBlock(), new BuildCallback<ElseBlockBuilder>() {
             public ElseBlockBuilder callback(Statement statement) {
                 return new IfBlockBuilderImpl(context, callElementBuilder, elseIfBlock);
-            }
-        });
-    }
-    
-    private BlockBuilder<ElseBlockBuilder> _if_() {
-        appendCallElement(new DeferredCallElement(new DeferredCallback() {
-            public void doDeferred(CallWriter writer, Context context, Statement statement) {
-                statement = validateOrConvertLhs(statement);
-
-                ifBlock.getCondition().setLhsExpr(writer.getCallString());
-                writer.reset();
-                writer.append(ifBlock.generate(Context.create(context)));
-            }
-        }));
-        
-        return new BlockBuilder<ElseBlockBuilder>(ifBlock.getBlock(), new BuildCallback<ElseBlockBuilder>() {
-            public ElseBlockBuilder callback(Statement statement) {
-                return IfBlockBuilderImpl.this;
             }
         });
     }
