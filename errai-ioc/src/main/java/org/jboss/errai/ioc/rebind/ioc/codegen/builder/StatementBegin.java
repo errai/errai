@@ -27,7 +27,7 @@ public interface StatementBegin {
     public ContextualStatementBuilder loadLiteral(Object o);
 
     public ContextualStatementBuilder load(Object o);
-    
+
     public ContextualStatementBuilder loadStatic(Class<?> clazz);
 
     public ObjectBuilder newObject(MetaClass type);
@@ -35,4 +35,5 @@ public interface StatementBegin {
     public ObjectBuilder newObject(JavaReflectionClass type);
 
     public ObjectBuilder newObject(Class<?> type);
+
 }
