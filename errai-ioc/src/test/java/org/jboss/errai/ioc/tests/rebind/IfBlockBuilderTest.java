@@ -191,20 +191,4 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
         assertEquals("Failed to generate empty if block using an instance of expression", 
                 EMPTY_IF_BLOCK_RESULT_INSTANCE_OF_RHS, s);
     }
-    
-    @Test
-    public void testIfBlockWithInvalidInstanceOfExpression() {
-        try {
-            StatementBuilder.create()
-                .addVariable("str", String.class)
-                .addVariable("str2", String.class)
-                .loadVariable("str")
-                .if_(BooleanOperator.InstanceOf, Variable.get("str2")).finish()
-                .toJavaString();
-
-            fail("Expected InvalidExpressionException");
-        } catch (InvalidExpressionException e) {
-            assertTrue("Wrong exception thrown", e.getMessage().contains(String.class.getName()));
-        }
-    }
 }

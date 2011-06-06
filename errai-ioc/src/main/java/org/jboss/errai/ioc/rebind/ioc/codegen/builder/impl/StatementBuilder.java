@@ -86,11 +86,11 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
         return new ContextualStatementBuilderImpl(context, callElementBuilder);
     }
     
-    public ContextualStatementBuilder loadStatic(Class<?> clazz) {
+    public ContextualStatementBuilder invokeStatic(Class<?> clazz, String methodName, Object... parameters) {
         appendCallElement(new StaticLoad(clazz));
-        return new ContextualStatementBuilderImpl(context, callElementBuilder);
+        return new ContextualStatementBuilderImpl(context, callElementBuilder).invoke(methodName, parameters);
     }
-
+    
     public ObjectBuilder newObject(MetaClass type) {
         return ObjectBuilder.newInstanceOf(type);
     }

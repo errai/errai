@@ -35,11 +35,11 @@ public enum AssignmentOperator implements Operator {
         return op.getOperatorPrecedence() <= getOperatorPrecedence();
     }
 
-    public void canBeAppliedLhs(MetaClass clazz) {
-        operator.canBeAppliedLhs(clazz);
+    public boolean canBeApplied(MetaClass clazz) {
+        return operator.canBeApplied(clazz);
     }
     
-    public void canBeAppliedRhs(MetaClass clazz) {
-        operator.canBeAppliedRhs(clazz);
+    public void assertCanBeApplied(MetaClass clazz) {
+        operator.assertCanBeApplied(clazz);
     }
 }

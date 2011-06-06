@@ -41,6 +41,10 @@ public class BlockStatement extends AbstractStatement {
         return buf.toString();
     }
     
+    public List<Statement> getStatements() { 
+        return statements;
+    }
+    
     public boolean isEmpty() {
         return statements.isEmpty();
     }

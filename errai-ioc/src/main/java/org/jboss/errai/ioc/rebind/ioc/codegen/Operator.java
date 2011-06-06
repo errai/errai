@@ -11,6 +11,6 @@ public interface Operator {
     public int getOperatorPrecedence();
     public boolean isHigherPrecedenceThan(Operator operator);
     public boolean isEqualOrHigherPrecedenceThan(Operator operator);
-    public void canBeAppliedLhs(MetaClass clazz);
-    public void canBeAppliedRhs(MetaClass clazz);
+    public boolean canBeApplied(MetaClass clazz);
+    public void assertCanBeApplied(MetaClass clazz);
 }
