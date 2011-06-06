@@ -60,6 +60,8 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements IfBl
             public void doDeferred(CallWriter writer, Context context, Statement statement) {
                 if (ifBlock.getCondition().getOperator() == null) {
                     statement = GenUtil.convert(context, statement, MetaClassFactory.get(Boolean.class));
+                } else {
+                    ifBlock.getCondition().getOperator().canBeAppliedLhs(statement.getType());
                 }
 
                 ifBlock.getCondition().setLhsExpr(writer.getCallString());

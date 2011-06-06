@@ -136,7 +136,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     public boolean isAssignableFrom(MetaClass clazz) {
         MetaClass cls = clazz;
         do {
-            if (cls.equals(clazz)) return true;
+            if (this.equals(cls)) return true;
         } while ((cls = cls.getSuperClass()) != null);
 
         return _hasInterface(clazz.getInterfaces(), this);
@@ -145,7 +145,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     public boolean isAssignableTo(MetaClass clazz) {
         MetaClass cls = this;
         do {
-            if (cls.equals(this)) return true;
+            if (cls.equals(clazz)) return true;
         } while ((cls = cls.getSuperClass()) != null);
 
 

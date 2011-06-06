@@ -4,53 +4,42 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
-public enum AssignmentOperator {
-    Assignment("=", 0, Object.class),
+public enum AssignmentOperator implements Operator {
+    Assignment("=", 0),
     PreIncrementAssign("+=", 0, CharSequence.class, Number.class),
     PostIncrementAssign("=+", 0, CharSequence.class, Number.class),
     PreDecrementAssign("-=", 0, Number.class),
     PostDecrementAssign("=-", 0, Number.class);
 
-    private final String canonicalString;
-    private final int operatorPrecedence;
-    private final MetaClass[] applicability;
-
-    AssignmentOperator(String canonicalString, int operatorPrecedence, Class<?>... applicability) {
-        this.canonicalString = canonicalString;
-        this.operatorPrecedence = operatorPrecedence;
-        this.applicability = MetaClassFactory.fromClassArray(applicability);
+    private final Operator operator;
+    
+    AssignmentOperator(String canonicalString, int operatorPrecedence, Class<?>... constraints) {
+        operator = new OperatorImpl(canonicalString, operatorPrecedence, constraints);
     }
 
     public String getCanonicalString() {
-        return canonicalString;
+        return operator.getCanonicalString();
     }
 
     public int getOperatorPrecedence() {
-        return operatorPrecedence;
+        return operator.getOperatorPrecedence();
     }
 
-    public boolean isHigherPrecedenceThan(UnaryOperator operator) {
-        return operator.getOperatorPrecedence() < getOperatorPrecedence();
+    public boolean isHigherPrecedenceThan(Operator op) {
+        return op.getOperatorPrecedence() < getOperatorPrecedence();
     }
 
-    public boolean isEqualOrHigherPrecedenceThan(UnaryOperator operator) {
-        return operator.getOperatorPrecedence() <= getOperatorPrecedence();
+    public boolean isEqualOrHigherPrecedenceThan(Operator op) {
+        return op.getOperatorPrecedence() <= getOperatorPrecedence();
     }
 
-    public boolean canBeApplied(MetaClass clazz) {
-        for (MetaClass mc : applicability) {
-            if (mc.isAssignableFrom(clazz)) return true;
-        }
-
-        return false;
+    public void canBeAppliedLhs(MetaClass clazz) {
+        operator.canBeAppliedLhs(clazz);
     }
-
-    public String generate(VariableReference reference, Statement statement) {
-        if (!canBeApplied(statement.getType())) {
-            throw new RuntimeException("variable expected");
-        }
-
-        return reference.getName() + " " + getCanonicalString() + " " + statement.generate(Context.create());
+    
+    public void canBeAppliedRhs(MetaClass clazz) {
+        operator.canBeAppliedRhs(clazz);
     }
 }
