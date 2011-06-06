@@ -21,11 +21,6 @@ public class ContextualStatementBuilderImpl extends AbstractStatementBuilder imp
     }
 
     // Invocation
-    public ContextualStatementBuilder invoke(String methodName, Statement... parameters) {
-        appendCallElement(new MethodCall(methodName, parameters));
-        return this;
-    }
-
     public ContextualStatementBuilder invoke(String methodName, Object... parameters) {
         appendCallElement(new MethodCall(methodName, parameters));
         return this;
@@ -45,25 +40,13 @@ public class ContextualStatementBuilderImpl extends AbstractStatementBuilder imp
         return new IfBlockBuilderImpl(context, callElementBuilder).if_();
     }
 
-    /*public AbstractStatementBuilder if_(Statement block, Statement elseIf) {
-        return new IfBlockBuilderImpl(context, callElementBuilder).if_(block, elseIf);
-    }*/
-
     public BlockBuilder<ElseBlockBuilder> if_(BooleanOperator op, Statement rhs) {
         return new IfBlockBuilderImpl(context, callElementBuilder).if_(op, rhs);
     }
 
-    /*public AbstractStatementBuilder if_(BooleanOperator op, Statement rhs, Statement block, Statement elseIf) {
-        return new IfBlockBuilderImpl(context, callElementBuilder).if_(op, rhs, block, elseIf);
-    }*/
-
     public BlockBuilder<ElseBlockBuilder> if_(BooleanOperator op, Object rhs) {
         return new IfBlockBuilderImpl(context, callElementBuilder).if_(op, rhs);
     }
-
-    /*public AbstractStatementBuilder if_(BooleanOperator op, Object rhs, Statement block, Statement elseIf) {
-        return new IfBlockBuilderImpl(context, callElementBuilder).if_(op, rhs, block, elseIf);
-    }*/
 
     // Value return
     public Statement returnValue() {

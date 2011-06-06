@@ -28,12 +28,11 @@ public interface StatementBegin {
 
     public ContextualStatementBuilder load(Object o);
 
-    public ContextualStatementBuilder loadStatic(Class<?> clazz);
+    public ContextualStatementBuilder invokeStatic(Class<?> clazz, String methodName, Object... parameters);
 
     public ObjectBuilder newObject(MetaClass type);
 
     public ObjectBuilder newObject(JavaReflectionClass type);
 
     public ObjectBuilder newObject(Class<?> type);
-
 }

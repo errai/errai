@@ -8,9 +8,14 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
  */
 public interface Operator {
     public String getCanonicalString();
+
     public int getOperatorPrecedence();
+
     public boolean isHigherPrecedenceThan(Operator operator);
+
     public boolean isEqualOrHigherPrecedenceThan(Operator operator);
-    public void canBeAppliedLhs(MetaClass clazz);
-    public void canBeAppliedRhs(MetaClass clazz);
+
+    public boolean canBeApplied(MetaClass clazz);
+
+    public void assertCanBeApplied(MetaClass clazz);
 }

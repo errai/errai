@@ -1,18 +1,14 @@
 package org.jboss.errai.ioc.tests.rebind;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ContextBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidExpressionException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Tests the generation of if blocks using the {@link StatementBuilder} API.
@@ -53,10 +49,10 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
                 .loadVariable("str")
                 .invoke("endsWith", "abc")
                 .if_()
-                    .append(ContextBuilder.create().declareVariable("n", Integer.class).initializeWith(0))
+                .append(ContextBuilder.create().declareVariable("n", Integer.class).initializeWith(0))
                 .finish()
                 .else_()
-                    .append(ContextBuilder.create().declareVariable("n", Integer.class).initializeWith(1))
+                .append(ContextBuilder.create().declareVariable("n", Integer.class).initializeWith(1))
                 .finish();
 
         assertEquals("Failed to generate empty if block using no rhs",
@@ -70,10 +66,10 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
                 .addVariable("m", Integer.class)
                 .loadVariable("n")
                 .if_(BooleanOperator.GreaterThan, Variable.get("m"))
-                    .append(ContextBuilder.create().declareVariable("n", Integer.class).initializeWith(0))
+                .append(ContextBuilder.create().declareVariable("n", Integer.class).initializeWith(0))
                 .finish()
                 .else_()
-                    .append(ContextBuilder.create().declareVariable("n", Integer.class).initializeWith(1))
+                .append(ContextBuilder.create().declareVariable("n", Integer.class).initializeWith(1))
                 .finish();
 
         assertEquals("Failed to generate empty if block using a rhs",
@@ -88,15 +84,15 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
                 .loadVariable("s")
                 .invoke("endsWith", "abc")
                 .if_()
-                    .append(StatementBuilder.create(c).loadVariable("n").assignValue(0))
+                .append(StatementBuilder.create(c).loadVariable("n").assignValue(0))
                 .finish()
                 .else_()
-                    .append(StatementBuilder.create(c).loadVariable("s")
+                .append(StatementBuilder.create(c).loadVariable("s")
                         .invoke("startsWith", "def")
                         .if_()
-                            .append(StatementBuilder.create(c).loadVariable("n").assignValue(1))
+                        .append(StatementBuilder.create(c).loadVariable("n").assignValue(1))
                         .finish()
-                    )
+                )
                 .finish();
 
         assertEquals("Failed to generate if - if - block using no rhs",
@@ -106,18 +102,18 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
                 .loadVariable("s")
                 .invoke("endsWith", "abc")
                 .if_()
-                    .append(StatementBuilder.create(c).loadVariable("n").assignValue(0))
+                .append(StatementBuilder.create(c).loadVariable("n").assignValue(0))
                 .finish()
                 .else_()
-                    .append(StatementBuilder.create(c).loadVariable("s")
+                .append(StatementBuilder.create(c).loadVariable("s")
                         .invoke("startsWith", "def")
                         .if_()
-                            .append(StatementBuilder.create(c).loadVariable("n").assignValue(1))
+                        .append(StatementBuilder.create(c).loadVariable("n").assignValue(1))
                         .finish()
                         .else_()
-                            .append(StatementBuilder.create(c).loadVariable("n").assignValue(2))
+                        .append(StatementBuilder.create(c).loadVariable("n").assignValue(2))
                         .finish()
-                    )
+                )
                 .finish();
 
         assertEquals("Failed to generate if - else if - else block using no rhs",
@@ -131,18 +127,18 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
         Statement s = StatementBuilder.create(c)
                 .loadVariable("n")
                 .if_(BooleanOperator.GreaterThan, Variable.get("m"))
-                    .append(StatementBuilder.create(c).loadVariable("n").assignValue(0))
+                .append(StatementBuilder.create(c).loadVariable("n").assignValue(0))
                 .finish()
                 .else_()
-                    .append(StatementBuilder.create(c).loadVariable("m")
+                .append(StatementBuilder.create(c).loadVariable("m")
                         .if_(BooleanOperator.GreaterThan, Variable.get("n"))
-                           .append(StatementBuilder.create(c).loadVariable("n").assignValue(1))
+                        .append(StatementBuilder.create(c).loadVariable("n").assignValue(1))
                         .finish()
                         .else_()
-                            .append(StatementBuilder.create(c).loadVariable("n").assignValue(2))
+                        .append(StatementBuilder.create(c).loadVariable("n").assignValue(2))
                         .finish()
-                    )
-                .finish();                
+                )
+                .finish();
 
         assertEquals("Failed to generate if - else if - else block using rhs",
                 IF_ELSEIF_ELSE_BLOCK_RESULT_RHS, s.generate(Context.create()));
@@ -163,7 +159,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
             // expected
         }
     }
-    
+
     @Test
     public void testIfBlockWithInvalidExpression() {
         try {
@@ -179,7 +175,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
             assertTrue("Wrong exception thrown", e.getMessage().contains(String.class.getName()));
         }
     }
-    
+
     @Test
     public void testIfBlockWithInstanceOfExpression() {
         String s = StatementBuilder.create()
@@ -187,24 +183,8 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
                 .loadVariable("str")
                 .if_(BooleanOperator.InstanceOf, MetaClassFactory.getAsStatement(String.class)).finish()
                 .toJavaString();
-        
-        assertEquals("Failed to generate empty if block using an instance of expression", 
-                EMPTY_IF_BLOCK_RESULT_INSTANCE_OF_RHS, s);
-    }
-    
-    @Test
-    public void testIfBlockWithInvalidInstanceOfExpression() {
-        try {
-            StatementBuilder.create()
-                .addVariable("str", String.class)
-                .addVariable("str2", String.class)
-                .loadVariable("str")
-                .if_(BooleanOperator.InstanceOf, Variable.get("str2")).finish()
-                .toJavaString();
 
-            fail("Expected InvalidExpressionException");
-        } catch (InvalidExpressionException e) {
-            assertTrue("Wrong exception thrown", e.getMessage().contains(String.class.getName()));
-        }
+        assertEquals("Failed to generate empty if block using an instance of expression",
+                EMPTY_IF_BLOCK_RESULT_INSTANCE_OF_RHS, s);
     }
 }

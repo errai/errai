@@ -21,7 +21,7 @@ public class BlockStatement extends AbstractStatement {
     }
 
     public BlockStatement addStatement(Statement statement) {
-        if(statement!=null)
+        if (statement != null)
             statements.add(statement);
         return this;
     }
@@ -40,7 +40,11 @@ public class BlockStatement extends AbstractStatement {
         }
         return buf.toString();
     }
-    
+
+    public List<Statement> getStatements() {
+        return statements;
+    }
+
     public boolean isEmpty() {
         return statements.isEmpty();
     }
