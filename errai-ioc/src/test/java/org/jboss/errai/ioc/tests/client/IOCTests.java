@@ -17,13 +17,7 @@
 package org.jboss.errai.ioc.tests.client;
 
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.user.client.ui.*;
 
-/**
- * User: christopherbrock
- * Date: 14-Aug-2010
- * Time: 6:41:56 PM
- */
 public class IOCTests implements EntryPoint {
     public void onModuleLoad() {
     }

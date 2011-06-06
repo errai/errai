@@ -19,7 +19,6 @@ import static org.junit.Assert.fail;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class InvocationBuilderTest extends AbstractStatementBuilderTest {
-
     @Test
     public void testInvoke() {
         Builder invokeStatement = StatementBuilder.create()
