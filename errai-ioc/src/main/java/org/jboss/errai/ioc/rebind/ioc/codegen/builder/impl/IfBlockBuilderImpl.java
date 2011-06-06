@@ -58,16 +58,12 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements IfBl
     }
     
     public BlockBuilder<ElseBlockBuilder> elseif_(Statement lhs, BooleanOperator op, Statement rhs) {
+        // generate to internally set the type
         lhs.generate(context);
         
-        if (ifBlock.getCondition().getOperator() == null) {
-            lhs = GenUtil.convert(context, lhs, MetaClassFactory.get(Boolean.class));
-        } else {
-            ifBlock.getCondition().getOperator().assertCanBeApplied(lhs.getType());
-        }
+        lhs = validateOrConvertLhs(lhs);
         
         IfBlock elseIfBlock = new IfBlock(new BooleanExpressionBuilder(lhs, rhs, op));
-        elseIfBlock.getCondition().setLhs(lhs);
         ifBlock.setElseIfBlock(elseIfBlock);
         return _elseif_(elseIfBlock);
      
@@ -89,11 +85,7 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements IfBl
     private BlockBuilder<ElseBlockBuilder> _if_() {
         appendCallElement(new DeferredCallElement(new DeferredCallback() {
             public void doDeferred(CallWriter writer, Context context, Statement statement) {
-                if (ifBlock.getCondition().getOperator() == null) {
-                    statement = GenUtil.convert(context, statement, MetaClassFactory.get(Boolean.class));
-                } else {
-                    ifBlock.getCondition().getOperator().assertCanBeApplied(statement.getType());
-                }
+                statement = validateOrConvertLhs(statement);
 
                 ifBlock.getCondition().setLhsExpr(writer.getCallString());
                 writer.reset();
@@ -106,5 +98,15 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements IfBl
                 return IfBlockBuilderImpl.this;
             }
         });
+    }
+    
+    private Statement validateOrConvertLhs(Statement lhs) {
+        if (ifBlock.getCondition().getOperator() == null) {
+            lhs = GenUtil.convert(context, lhs, MetaClassFactory.get(Boolean.class));
+        } else {
+            ifBlock.getCondition().getOperator().assertCanBeApplied(lhs.getType());
+        }
+        
+        return lhs;
     }
 }

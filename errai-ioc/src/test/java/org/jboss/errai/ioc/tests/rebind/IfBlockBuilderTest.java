@@ -149,7 +149,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
     }
 
     @Test
-    public void testIfElseIfBlockUsingNoRhsElseIfKeyword() {
+    public void testIfElseIfBlockUsingNoRhsAndElseIfKeyword() {
         Context c = ContextBuilder.create().addVariable("s", String.class).addVariable("n", Integer.class).getContext();
 
         Statement s = StatementBuilder.create(c)
@@ -183,7 +183,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
     }
 
     @Test
-    public void testIfElseIfBlockUsingRhsElseIfKeyword() {
+    public void testIfElseIfBlockUsingRhsAndElseIfKeyword() {
         Context c = ContextBuilder.create().addVariable("n", Integer.class).addVariable("m", Integer.class).getContext();
 
         Statement s = StatementBuilder.create(c)

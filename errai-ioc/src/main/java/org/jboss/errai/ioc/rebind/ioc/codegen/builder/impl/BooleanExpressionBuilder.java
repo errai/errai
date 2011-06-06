@@ -67,5 +67,4 @@ public class BooleanExpressionBuilder implements Statement {
     public MetaClass getType() {
         return MetaClassFactory.get(boolean.class);
     }
-
 }
