@@ -81,7 +81,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
     }
 
     @Test
-    public void testIfElseIfBlockUsingNoRhs() {
+    public void testNestedIfElseIfBlockUsingNoRhs() {
         Context c = ContextBuilder.create().addVariable("s", String.class).addVariable("n", Integer.class).getContext();
 
         Statement s = StatementBuilder.create(c)
@@ -125,7 +125,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
     }
 
     @Test
-    public void testIfElseIfBlockUsingRhs() {
+    public void testNestedIfElseIfBlockUsingRhs() {
         Context c = ContextBuilder.create().addVariable("n", Integer.class).addVariable("m", Integer.class).getContext();
 
         Statement s = StatementBuilder.create(c)
@@ -194,8 +194,11 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
                 .elseif_(StatementBuilder.create(c).loadVariable("m"), BooleanOperator.GreaterThan, Variable.get("n"))
                     .append(StatementBuilder.create(c).loadVariable("n").assignValue(1))
                 .finish()
-                .else_()
+                .elseif_(StatementBuilder.create(c).loadVariable("m"), BooleanOperator.Equals, Variable.get("n"))
                     .append(StatementBuilder.create(c).loadVariable("n").assignValue(2))
+                .finish()
+                .else_()
+                    .append(StatementBuilder.create(c).loadVariable("n").assignValue(3))
                 .finish();
 
         assertEquals("Failed to generate if - else if - else block using rhs",

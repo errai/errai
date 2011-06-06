@@ -80,7 +80,9 @@ public interface IfBlockBuilderTestResult {
             "n = 0;\n" +
         "} else if (m > n) { " +
             "n = 1;\n" +
-        "} else { " +
+        "} else if (m == n) { " +
             "n = 2;\n" +
+        "} else { " +
+            "n = 3;\n" +
         "}\n";
 }
