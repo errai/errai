@@ -100,7 +100,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
                 .finish();
 
         assertEquals("Failed to generate if - if - block using no rhs",
-                IF_ELSEIF_BLOCK_RESULT_NO_RHS, s.generate(Context.create()));
+                IF_ELSEIF_BLOCK_RESULT_NO_RHS_NESTED, s.generate(Context.create()));
 
         s = StatementBuilder.create(c)
                 .loadVariable("s")
@@ -121,7 +121,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
                 .finish();
 
         assertEquals("Failed to generate if - else if - else block using no rhs",
-                IF_ELSEIF_ELSE_BLOCK_RESULT_NO_RHS, s.generate(Context.create()));
+                IF_ELSEIF_ELSE_BLOCK_RESULT_NO_RHS_NESTED, s.generate(Context.create()));
     }
 
     @Test
@@ -145,9 +145,63 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
                 .finish();                
 
         assertEquals("Failed to generate if - else if - else block using rhs",
-                IF_ELSEIF_ELSE_BLOCK_RESULT_RHS, s.generate(Context.create()));
+                IF_ELSEIF_ELSE_BLOCK_RESULT_RHS_NESTED, s.generate(Context.create()));
     }
 
+    @Test
+    public void testIfElseIfBlockUsingNoRhsElseIfKeyword() {
+        Context c = ContextBuilder.create().addVariable("s", String.class).addVariable("n", Integer.class).getContext();
+
+        Statement s = StatementBuilder.create(c)
+                .loadVariable("s")
+                .invoke("endsWith", "abc")
+                .if_()
+                    .append(StatementBuilder.create(c).loadVariable("n").assignValue(0))
+                .finish()
+                .elseif_(StatementBuilder.create(c).loadVariable("s").invoke("startsWith", "def"))
+                    .append(StatementBuilder.create(c).loadVariable("n").assignValue(1))
+                .finish();
+
+        assertEquals("Failed to generate if - if - block using no rhs",
+                IF_ELSEIF_BLOCK_RESULT_NO_RHS, s.generate(Context.create()));
+
+        s = StatementBuilder.create(c)
+                .loadVariable("s")
+                .invoke("endsWith", "abc")
+                .if_()
+                    .append(StatementBuilder.create(c).loadVariable("n").assignValue(0))
+                .finish()
+                .elseif_(StatementBuilder.create(c).loadVariable("s").invoke("startsWith", "def"))
+                    .append(StatementBuilder.create(c).loadVariable("n").assignValue(1))
+                .finish()
+                .else_()
+                    .append(StatementBuilder.create(c).loadVariable("n").assignValue(2))
+                .finish();
+
+        assertEquals("Failed to generate if - else if - else block using no rhs",
+                IF_ELSEIF_ELSE_BLOCK_RESULT_NO_RHS, s.generate(Context.create()));
+    }
+
+    @Test
+    public void testIfElseIfBlockUsingRhsElseIfKeyword() {
+        Context c = ContextBuilder.create().addVariable("n", Integer.class).addVariable("m", Integer.class).getContext();
+
+        Statement s = StatementBuilder.create(c)
+                .loadVariable("n")
+                .if_(BooleanOperator.GreaterThan, Variable.get("m"))
+                    .append(StatementBuilder.create(c).loadVariable("n").assignValue(0))
+                .finish()
+                .elseif_(StatementBuilder.create(c).loadVariable("m"), BooleanOperator.GreaterThan, Variable.get("n"))
+                    .append(StatementBuilder.create(c).loadVariable("n").assignValue(1))
+                .finish()
+                .else_()
+                    .append(StatementBuilder.create(c).loadVariable("n").assignValue(2))
+                .finish();
+
+        assertEquals("Failed to generate if - else if - else block using rhs",
+                IF_ELSEIF_ELSE_BLOCK_RESULT_RHS, s.generate(Context.create()));
+    }
+    
     @Test
     public void testIfBlockWithInvalidBooleanExpression() {
         try {

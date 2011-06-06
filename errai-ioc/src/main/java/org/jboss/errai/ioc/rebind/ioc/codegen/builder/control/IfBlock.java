@@ -11,6 +11,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.BooleanExpressionBuil
  */
 public class IfBlock extends AbstractBlockConditional {
     private BlockStatement elseBlock = new BlockStatement();
+    private IfBlock elseIfBlock;
 
     public IfBlock(BooleanExpressionBuilder condition) {
         super(condition);
@@ -28,6 +29,14 @@ public class IfBlock extends AbstractBlockConditional {
         return elseBlock;
     }
     
+    public IfBlock getElseIfBlock() {
+        return elseIfBlock;
+    }
+    
+    public void setElseIfBlock(IfBlock elseIfBlock) {
+        this.elseIfBlock = elseIfBlock;
+    }
+    
     public String generate(Context context) {
         StringBuilder builder = new StringBuilder("if ");
         builder.append("(").append(getCondition().generate(context)).append(") ");
@@ -40,6 +49,11 @@ public class IfBlock extends AbstractBlockConditional {
 
         builder.append("\n} ");
 
+        if (elseIfBlock != null) {
+            builder.append("else ").append(elseIfBlock.generate(context));
+            return builder.toString();
+        }
+        
         if (elseBlock != null && !elseBlock.isEmpty()) {
             builder.append("else { ").append(elseBlock.generate(context)).append("\n} ");
             return builder.toString();

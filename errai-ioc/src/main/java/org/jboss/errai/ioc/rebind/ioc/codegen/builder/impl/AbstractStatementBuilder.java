@@ -46,7 +46,7 @@ public abstract class AbstractStatementBuilder implements Statement, Builder {
     }
 
     public MetaClass getType() {
-        return MetaClassFactory.get(Void.class);
+        return callElementBuilder.getCallElement().getResultType();
     }
 
     public String toJavaString() {

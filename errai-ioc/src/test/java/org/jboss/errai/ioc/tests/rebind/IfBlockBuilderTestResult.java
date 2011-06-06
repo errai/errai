@@ -28,7 +28,7 @@ public interface IfBlockBuilderTestResult {
             "\njava.lang.Integer n = 1;\n" +
         "}\n";
 
-    public static final String IF_ELSEIF_BLOCK_RESULT_NO_RHS =
+    public static final String IF_ELSEIF_BLOCK_RESULT_NO_RHS_NESTED =
         "if (s.endsWith(\"abc\")) {\n" +
             "n = 0;\n" +
         "} else {\n" +
@@ -36,8 +36,15 @@ public interface IfBlockBuilderTestResult {
                 "n = 1;\n" +
             "}\n;\n" +   
         "}\n";
+    
+    public static final String IF_ELSEIF_BLOCK_RESULT_NO_RHS =
+        "if (s.endsWith(\"abc\")) {\n" +
+            "n = 0;\n" +
+        "} else if (s.startsWith(\"def\")) { " +
+            "n = 1;\n" +
+        "}\n";
 
-    public static final String IF_ELSEIF_ELSE_BLOCK_RESULT_NO_RHS =
+    public static final String IF_ELSEIF_ELSE_BLOCK_RESULT_NO_RHS_NESTED =
         "if (s.endsWith(\"abc\")) {\n" +
             "n = 0;\n" +
         "} else {\n" +
@@ -47,8 +54,17 @@ public interface IfBlockBuilderTestResult {
                 "n = 2;\n" +
             "}\n;\n" +
         "}\n";
+    
+    public static final String IF_ELSEIF_ELSE_BLOCK_RESULT_NO_RHS =
+        "if (s.endsWith(\"abc\")) {\n" +
+            "n = 0;\n" +
+        "} else if (s.startsWith(\"def\")) { " +
+            "n = 1;\n" +
+        "} else { " +
+            "n = 2;\n" +
+        "}\n";
 
-    public static final String IF_ELSEIF_ELSE_BLOCK_RESULT_RHS =
+    public static final String IF_ELSEIF_ELSE_BLOCK_RESULT_RHS_NESTED =
         "if (n > m) {\n" +
             "n = 0;\n" +
         "} else {\n" +
@@ -57,5 +73,14 @@ public interface IfBlockBuilderTestResult {
             "} else { " +
                 "n = 2;\n" +
             "}\n;\n" +
+        "}\n";
+    
+    public static final String IF_ELSEIF_ELSE_BLOCK_RESULT_RHS =
+        "if (n > m) {\n" +
+            "n = 0;\n" +
+        "} else if (m > n) { " +
+            "n = 1;\n" +
+        "} else { " +
+            "n = 2;\n" +
         "}\n";
 }

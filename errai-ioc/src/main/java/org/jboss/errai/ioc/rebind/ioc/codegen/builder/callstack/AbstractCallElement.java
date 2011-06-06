@@ -2,12 +2,14 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public abstract class AbstractCallElement implements CallElement {
     protected CallElement next;
+    protected MetaClass resultType = null;
 
     public void nextOrReturn(CallWriter writer, Context ctx, Statement statement) {
         if (statement != null) {
@@ -15,6 +17,7 @@ public abstract class AbstractCallElement implements CallElement {
                 writer.append(".");
             }
             writer.append(statement.generate(ctx));
+            resultType = statement.getType();
         }
 
         if (next != null) {
@@ -35,5 +38,9 @@ public abstract class AbstractCallElement implements CallElement {
         while (el.getNext() != null) el = el.getNext();
 
         el.setNext(last);
+    }
+    
+    public MetaClass getResultType() {
+        return resultType;
     }
 }
