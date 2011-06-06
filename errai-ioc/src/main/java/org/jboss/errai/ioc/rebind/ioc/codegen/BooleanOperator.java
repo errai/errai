@@ -48,6 +48,6 @@ public enum BooleanOperator {
     }
     
     public void canBeAppliedRhs(MetaClass clazz) {
-        operator.canBeAppliedLhs(clazz);
+        operator.canBeAppliedRhs(clazz);
      }
 }

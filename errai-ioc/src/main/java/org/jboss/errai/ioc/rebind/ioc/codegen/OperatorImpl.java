@@ -50,15 +50,15 @@ public class OperatorImpl implements Operator {
     
     public void canBeAppliedLhs(MetaClass clazz) {
         if (!canBeApplied(clazz, lhsConstraints)) {
-            throw new InvalidExpressionException(getCanonicalString() + 
-                " not a valid lhs type for operator '" + canonicalString + "':" + clazz.getFullyQualifedName());
+            throw new InvalidExpressionException("Not a valid lhs type for operator '" + 
+                    canonicalString + "':" + clazz.getFullyQualifedName());
         }
     }
   
     public void canBeAppliedRhs(MetaClass clazz) {
         if (!canBeApplied(clazz, rhsConstraints)) {
-            throw new InvalidExpressionException(getCanonicalString() + 
-                " not a valid rhs type for operator '" + canonicalString + "':" + clazz.getFullyQualifedName());
+            throw new InvalidExpressionException("Not a valid rhs type for operator '" + 
+                    canonicalString + "':" + clazz.getFullyQualifedName());
         }
     }
   

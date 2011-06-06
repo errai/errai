@@ -110,7 +110,8 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
                 .loadVariable("list")
                 .foreach("element")
                 .append(StatementBuilder.create(
-                        ContextBuilder.create().addVariable(Variable.create("anotherList", new TypeLiteral<List<String>>() {})).getContext())
+                        ContextBuilder.create().addVariable(Variable.create("anotherList", 
+                                new TypeLiteral<List<String>>() {})).getContext())
                         .loadVariable("anotherList")
                         .foreach("anotherElement")
                         .append(createObject)

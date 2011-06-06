@@ -162,7 +162,6 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
        Builder invokeStatement = StatementBuilder.create()
                 .addVariable("str", String.class)
                 .loadVariable("str")
-                        //passing in an Integer
                 .invoke("endsWith", 123);
 
         assertEquals("failed to generate invocation with parameter type conversion",

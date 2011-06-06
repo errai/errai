@@ -1,16 +1,18 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen;
 
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.JType;
-import com.google.gwt.core.ext.typeinfo.NotFoundException;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.enterprise.util.TypeLiteral;
+
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.gwt.GWTClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java.JavaReflectionClass;
 
-import javax.enterprise.util.TypeLiteral;
-import java.util.HashMap;
-import java.util.Map;
+import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.JType;
+import com.google.gwt.core.ext.typeinfo.NotFoundException;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -37,6 +39,25 @@ public final class MetaClassFactory {
     public static MetaClass get(TypeLiteral literal) {
         return createOrGet(literal);
     }
+    
+    public static Statement getAsStatement(Class clazz) {
+        final MetaClass metaClass = createOrGet(clazz);
+        return new Statement() {
+
+            public String generate(Context context) {
+                return metaClass.getFullyQualifedName();
+            }
+
+            public MetaClass getType() {
+                return MetaClassFactory.get(Class.class);
+            }
+
+            public Context getContext() {
+                return null;
+            }
+        };
+    }
+    
 
     public static boolean isCached(String name) {
         return CLASS_CACHE.containsKey(name);
