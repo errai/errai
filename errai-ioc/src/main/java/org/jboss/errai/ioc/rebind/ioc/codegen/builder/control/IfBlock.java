@@ -10,30 +10,24 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.BooleanExpressionBuil
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class IfBlock extends AbstractBlockConditional {
-    private Statement elseBlock;
-    private Statement elseIf;
+    private BlockStatement elseBlock = new BlockStatement();
+
+    public IfBlock(BooleanExpressionBuilder condition) {
+        super(condition);
+    }
 
     public IfBlock(BooleanExpressionBuilder condition, Statement block) {
         super(condition, new BlockStatement(block));
-    }
-
-    public IfBlock(BooleanExpressionBuilder condition, Statement block, Statement elseIf) {
-        super(condition, new BlockStatement(block));
-        this.elseIf = elseIf;
     }
 
     public BooleanExpressionBuilder getCondition() {
         return (BooleanExpressionBuilder) super.getCondition();
     }
 
-    public void setElseBlock(Statement... elseBlock) {
-        this.elseBlock = new BlockStatement(elseBlock);
+    public BlockStatement getElseBlock() {
+        return elseBlock;
     }
-
-    public void setElseIf(IfBlock elseIf) {
-        this.elseIf = elseIf;
-    }
-
+    
     public String generate(Context context) {
         StringBuilder builder = new StringBuilder("if ");
         builder.append("(").append(getCondition().generate(context)).append(") ");
@@ -46,12 +40,7 @@ public class IfBlock extends AbstractBlockConditional {
 
         builder.append("\n} ");
 
-        if (elseIf != null) {
-            builder.append("else ").append(elseIf.generate(context));
-            return builder.toString();
-        }
-
-        if (elseBlock != null) {
+        if (elseBlock != null && !elseBlock.isEmpty()) {
             builder.append("else { ").append(elseBlock.generate(context)).append("\n} ");
             return builder.toString();
         }
