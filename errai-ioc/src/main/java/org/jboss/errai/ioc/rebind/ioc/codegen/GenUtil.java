@@ -88,39 +88,11 @@ public class GenUtil {
         }
     }
 
-    public static MetaClass getComponentType(Statement statement) {
-        try {
-            Class<?> cls = Class.forName(statement.getType().getFullyQualifedName(), false, 
-                    Thread.currentThread().getContextClassLoader());
-
-            if (cls.getComponentType() != null)
-                return MetaClassFactory.get(cls.getComponentType());
-
-            return null;
-        } catch (ClassNotFoundException e) {
-            throw new IllegalArgumentException(e);
-        }
-    }
-    public static boolean isAssignable(MetaClass to, MetaClass from) {
-        try {
-            to = primitiveToWrapperType(to);
-            from = primitiveToWrapperType(from);
-         
-            Class<?> toCls = Class.forName(to.getFullyQualifedName(), false, Thread.currentThread()
-                    .getContextClassLoader());
-
-            Class<?> fromCls = Class.forName(from.getFullyQualifedName(), false, Thread.currentThread()
-                    .getContextClassLoader());
-
-            return toCls.isAssignableFrom(fromCls);
-
-        } catch (ClassNotFoundException e) {
-            throw new IllegalArgumentException(e);
-        }
-    }
-    
     public static void assertAssignableTypes(MetaClass from, MetaClass to) {
-        if(!isAssignable(to, from)) {
+        to = primitiveToWrapperType(to);
+        from = primitiveToWrapperType(from);
+     
+        if(!to.isAssignableFrom(from)) {
             throw new InvalidTypeException(to.getFullyQualifedName() + " is not assignable from "
                     + from.getFullyQualifedName());
         }

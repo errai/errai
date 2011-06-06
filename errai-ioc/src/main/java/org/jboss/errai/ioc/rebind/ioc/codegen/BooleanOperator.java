@@ -9,9 +9,9 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 public enum BooleanOperator {
     Or("||", 3, Boolean.class),
     And("&&", 4, Boolean.class),
-    Equals("==", 8, Object.class),
-    NotEquals("!=", 8, Object.class),
-    InstanceOf("instanceof", 9, Object.class),
+    Equals("==", 8),
+    NotEquals("!=", 8),
+    InstanceOf("instanceof", 9, new Class[]{Object.class}, new Class[]{Class.class}),
     GreaterThanOrEqual(">=", 9, Number.class),
     GreaterThan(">", 9, Number.class),
     LessThanOrEqual("<=", 9, Number.class),
@@ -19,8 +19,12 @@ public enum BooleanOperator {
 
     private final Operator operator;
 
-    BooleanOperator(String canonicalString, int operatorPrecedence, Class<?>... applicability) {
-        operator = new OperatorImpl(canonicalString, operatorPrecedence, applicability);
+    BooleanOperator(String canonicalString, int operatorPrecedence, Class<?>... lhsConstraints) {
+        operator = new OperatorImpl(canonicalString, operatorPrecedence, lhsConstraints);
+    }
+    
+    BooleanOperator(String canonicalString, int operatorPrecedence, Class<?>[] lhsConstraints, Class<?>[] rhsConstraints) {
+        operator = new OperatorImpl(canonicalString, operatorPrecedence, lhsConstraints, rhsConstraints);
     }
 
     public String getCanonicalString() {
@@ -39,7 +43,11 @@ public enum BooleanOperator {
         return operator.getOperatorPrecedence() <= getOperatorPrecedence();
     }
     
-    public void canBeApplied(MetaClass clazz) {
-       operator.canBeApplied(GenUtil.primitiveToWrapperType(clazz));
+    public void canBeAppliedLhs(MetaClass clazz) {
+       operator.canBeAppliedLhs(clazz);
     }
+    
+    public void canBeAppliedRhs(MetaClass clazz) {
+        operator.canBeAppliedLhs(clazz);
+     }
 }

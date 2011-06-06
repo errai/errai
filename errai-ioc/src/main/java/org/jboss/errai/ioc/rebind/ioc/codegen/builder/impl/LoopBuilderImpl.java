@@ -57,8 +57,8 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements LoopBui
         MetaParameterizedType parameterizedType = collection.getType().getParameterizedType();
         if (parameterizedType != null && parameterizedType.getTypeParameters().length != 0) {
             loopVarType = (MetaClass) parameterizedType.getTypeParameters()[0];
-        } else if (GenUtil.getComponentType(collection) != null) {
-            loopVarType = GenUtil.getComponentType(collection);
+        } else if (collection.getType().getComponentType() != null) {
+            loopVarType = collection.getType().getComponentType();
         }
 
         // try to use the provided loop variable type if possible (assignable from the inferred type)

@@ -21,8 +21,8 @@ public class AssignmentBuilder implements Statement {
     }
 
     public String generate(Context context) {
-        operator.canBeApplied(reference.getType());
-        operator.canBeApplied(statement.getType());
+        operator.canBeAppliedLhs(reference.getType());
+        operator.canBeAppliedRhs(statement.getType());
         
         return reference.getName() + " " + operator.getCanonicalString() + " " + statement.generate(Context.create());
     }

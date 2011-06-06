@@ -33,7 +33,11 @@ public enum UnaryOperator implements Operator {
         return operator.getOperatorPrecedence() <= getOperatorPrecedence();
     }
 
-    public void canBeApplied(MetaClass clazz) {
-        operator.canBeApplied(clazz);
+    public void canBeAppliedLhs(MetaClass clazz) {
+        operator.canBeAppliedLhs(clazz);
+    }
+    
+    public void canBeAppliedRhs(MetaClass clazz) {
+        operator.canBeAppliedRhs(clazz);
     }
 }

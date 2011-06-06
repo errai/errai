@@ -50,9 +50,9 @@ public class BooleanExpressionBuilder implements Statement {
     public String generate(Context context) {
         if (operator != null) {
             if (lhs != null)
-                operator.canBeApplied(GenUtil.generate(context, lhs).getType());
+                operator.canBeAppliedLhs(GenUtil.generate(context, lhs).getType());
             if (rhs != null)
-                operator.canBeApplied(GenUtil.generate(context, rhs).getType());
+                operator.canBeAppliedRhs(GenUtil.generate(context, rhs).getType());
         }
         
         return (lhs != null) ? lhs.generate(context) : lhsExpr

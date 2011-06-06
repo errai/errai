@@ -9,7 +9,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ContextBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidOperatorException;
+import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidExpressionException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.junit.Test;
 
@@ -143,7 +143,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
                     .toJavaString();
 
             fail("Expected InvalidOperatorException");
-        } catch (InvalidOperatorException e) {
+        } catch (InvalidExpressionException e) {
             assertTrue("Wrong exception thrown", e.getMessage().contains(String.class.getName()));
         }
     }

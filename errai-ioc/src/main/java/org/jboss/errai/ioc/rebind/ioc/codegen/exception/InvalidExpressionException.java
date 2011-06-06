@@ -3,18 +3,18 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.exception;
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class InvalidOperatorException extends RuntimeException {
+public class InvalidExpressionException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
-    public InvalidOperatorException() {
+    public InvalidExpressionException() {
         super();
     }
 
-    public InvalidOperatorException(Throwable t) {
+    public InvalidExpressionException(Throwable t) {
         super(t);
     }
     
-    public InvalidOperatorException(String msg) {
+    public InvalidExpressionException(String msg) {
         super(msg);
     }
 }

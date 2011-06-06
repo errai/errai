@@ -7,7 +7,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public enum AssignmentOperator implements Operator {
-    Assignment("=", 0, Object.class),
+    Assignment("=", 0),
     PreIncrementAssign("+=", 0, CharSequence.class, Number.class),
     PostIncrementAssign("=+", 0, CharSequence.class, Number.class),
     PreDecrementAssign("-=", 0, Number.class),
@@ -15,8 +15,8 @@ public enum AssignmentOperator implements Operator {
 
     private final Operator operator;
     
-    AssignmentOperator(String canonicalString, int operatorPrecedence, Class<?>... applicability) {
-        operator = new OperatorImpl(canonicalString, operatorPrecedence, applicability);
+    AssignmentOperator(String canonicalString, int operatorPrecedence, Class<?>... constraints) {
+        operator = new OperatorImpl(canonicalString, operatorPrecedence, constraints);
     }
 
     public String getCanonicalString() {
@@ -35,7 +35,11 @@ public enum AssignmentOperator implements Operator {
         return op.getOperatorPrecedence() <= getOperatorPrecedence();
     }
 
-    public void canBeApplied(MetaClass clazz) {
-        operator.canBeApplied(clazz);
+    public void canBeAppliedLhs(MetaClass clazz) {
+        operator.canBeAppliedLhs(clazz);
+    }
+    
+    public void canBeAppliedRhs(MetaClass clazz) {
+        operator.canBeAppliedRhs(clazz);
     }
 }
