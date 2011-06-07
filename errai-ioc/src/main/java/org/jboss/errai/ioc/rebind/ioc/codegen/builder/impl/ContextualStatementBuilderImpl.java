@@ -42,6 +42,11 @@ public class ContextualStatementBuilderImpl extends AbstractStatementBuilder imp
         return this;
     }
 
+    public ContextualStatementBuilder invokeStatic(String methodName, Object... parameters) {
+        appendCallElement(new MethodCall(methodName, parameters, true));
+        return this;
+    }
+
     // Looping
     public BlockBuilder<LoopBuilder> foreach(String loopVarName) {
         return new LoopBuilderImpl(context, callElementBuilder).foreach(loopVarName);

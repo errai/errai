@@ -209,15 +209,24 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
                 "java.lang.Integer.getInteger(\"123\")", invokeStatement.toJavaString());
     }
 
+    @Test
     public void testInvokeUndefinedStaticMethod() {
-
         try {
             StatementBuilder.create()
                     .invokeStatic(Integer.class, "undefinedMethod", "123")
                     .toJavaString();
             fail("expected UndefinedMethodException");
         } catch (UndefinedMethodException udme) {
-            assertTrue(udme.getMessage().contains("undefinedMethod"));
+            assertEquals(udme.getMethodName(), "undefinedMethod");
+        }
+        
+        try {
+            StatementBuilder.create()
+                    .invokeStatic(Integer.class, "intValue")
+                    .toJavaString();
+            fail("expected UndefinedMethodException");
+        } catch (UndefinedMethodException udme) {
+            assertEquals(udme.getMethodName(), "intValue");;
         }
     }
 }

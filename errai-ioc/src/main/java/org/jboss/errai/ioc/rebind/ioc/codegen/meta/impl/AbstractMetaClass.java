@@ -106,7 +106,8 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
         Method m = ParseTools.getBestCandidate(parameters, name, cls,
                 fromMetaMethod(getStaticMethods()), false);
-
+        if (m == null) return null;
+        
         return getMethod(name, m.getParameterTypes());
     }
 
