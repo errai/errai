@@ -28,6 +28,8 @@ import org.mvel2.util.ParseTools;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -99,6 +101,36 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     public MetaMethod getBestMatchingMethod(String name, MetaClass... parameters) {
         return getBestMatchingMethod(name, MetaClassFactory.asClassArray(parameters));
     }
+
+    @Override
+    public MetaMethod getBestMatchingStaticMethod(String name, Class... parameters) {
+        Class<?> cls = asClass();
+        MetaMethod[] staticMethods = getStaticMethods();
+
+
+        // Method m = ParseTools.getBestCandidate(parameters, cls, getStaticMethods(), false);
+
+
+        return null;
+    }
+
+    @Override
+    public MetaMethod getBestMatchingStaticMethod(String name, MetaClass... parameters) {
+        return null;
+    }
+
+    private MetaMethod[] getStaticMethods() {
+        List<MetaMethod> methods = new ArrayList<MetaMethod>();
+
+        for (MetaMethod method : getMethods()) {
+            if (method.isStatic()) {
+                methods.add(method);
+            }
+        }
+
+        return methods.toArray(new MetaMethod[methods.size()]);
+    }
+
 
     public MetaConstructor getBestMatchingConstructor(Class... parameters) {
         Class<?> cls = asClass();
