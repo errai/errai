@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 JBoss, a divison Red Hat, Inc
+ * Copyright 2011 JBoss, a divison Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,6 @@
  */
 package org.jboss.errai.cdi.rebind;
 
-import java.lang.annotation.Annotation;
-import java.util.Set;
-
-import javax.enterprise.event.Observes;
-
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.annotations.Local;
@@ -28,12 +23,14 @@ import org.jboss.errai.cdi.client.CDIProtocol;
 import org.jboss.errai.cdi.client.api.CDI;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.IOCDecoratorExtension;
-import org.jboss.errai.ioc.rebind.ioc.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.InjectionPoint;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
 
-import com.google.gwt.core.ext.typeinfo.JMethod;
-import com.google.gwt.core.ext.typeinfo.JParameter;
+import javax.enterprise.event.Observes;
+import java.lang.annotation.Annotation;
+import java.util.Set;
 
 /**
  *
@@ -57,8 +54,8 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
     public String generateDecorator(InjectionPoint<Observes> injectionPoint) {
         final InjectionContext ctx = injectionPoint.getInjectionContext();
 
-        final JMethod method = injectionPoint.getMethod();
-        final JParameter parm = injectionPoint.getParm();
+        final MetaMethod method = injectionPoint.getMethod();
+        final MetaParameter parm = injectionPoint.getParm();
 
         String parmClassName = parm.getType().getQualifiedSourceName();
         String varName = injectionPoint.getInjector().getVarName();

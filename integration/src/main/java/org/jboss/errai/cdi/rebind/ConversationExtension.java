@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 JBoss, a divison Red Hat, Inc
+ * Copyright 2011 JBoss, a divison Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 package org.jboss.errai.cdi.rebind;
 
 import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.JField;
 import com.google.gwt.core.ext.typeinfo.JParameterizedType;
 import org.jboss.errai.cdi.client.api.CDI;
 import org.jboss.errai.cdi.client.api.ConversationContext;
@@ -25,6 +24,8 @@ import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.InjectionPoint;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
 
 /**
  * @author Heiko Braun <hbraun@redhat.com>
@@ -39,10 +40,10 @@ public class ConversationExtension extends IOCDecoratorExtension<ConversationCon
     public String generateDecorator(InjectionPoint<ConversationContext> injectionPoint) {
         final InjectionContext ctx = injectionPoint.getInjectionContext();
 
-        final JClassType eventClassType = injectionPoint.getInjectionContext()
+        final MetaClass eventClassType = injectionPoint.getInjectionContext()
                 .getProcessingContext().loadClassType(Event.class);
 
-        final JField field = injectionPoint.getField();
+        final MetaField field = injectionPoint.getField();
 
         if (!eventClassType.isAssignableFrom(field.getType().isClassOrInterface())) {
             throw new RuntimeException("@ConversationContext should be used with type Event");
