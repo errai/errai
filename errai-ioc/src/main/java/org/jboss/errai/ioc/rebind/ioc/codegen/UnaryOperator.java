@@ -12,7 +12,7 @@ public enum UnaryOperator implements Operator {
     Decrement("--", 0);
 
     private final Operator operator;
-    
+
     UnaryOperator(String canonicalString, int operatorPrecedence) {
         operator = new OperatorImpl(canonicalString, operatorPrecedence);
     }
@@ -36,7 +36,7 @@ public enum UnaryOperator implements Operator {
     public boolean canBeApplied(MetaClass clazz) {
         return operator.canBeApplied(clazz);
     }
-    
+
     public void assertCanBeApplied(MetaClass clazz) {
         operator.assertCanBeApplied(clazz);
     }

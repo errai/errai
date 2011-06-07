@@ -1,18 +1,14 @@
 package org.jboss.errai.ioc.tests.rebind;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ContextBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidExpressionException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Tests the generation of if blocks using the {@link StatementBuilder} API.
@@ -96,7 +92,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
                         .if_()
                             .append(StatementBuilder.create(c).loadVariable("n").assignValue(1))
                         .finish()
-                    )
+                )
                 .finish();
 
         assertEquals("Failed to generate if - if - block using no rhs",
@@ -117,7 +113,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
                         .else_()
                             .append(StatementBuilder.create(c).loadVariable("n").assignValue(2))
                         .finish()
-                    )
+                )
                 .finish();
 
         assertEquals("Failed to generate if - else if - else block using no rhs",
@@ -136,13 +132,13 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
                 .else_()
                     .append(StatementBuilder.create(c).loadVariable("m")
                         .if_(BooleanOperator.GreaterThan, Variable.get("n"))
-                           .append(StatementBuilder.create(c).loadVariable("n").assignValue(1))
+                            .append(StatementBuilder.create(c).loadVariable("n").assignValue(1))
                         .finish()
                         .else_()
                             .append(StatementBuilder.create(c).loadVariable("n").assignValue(2))
                         .finish()
-                    )
-                .finish();                
+                )
+                .finish();
 
         assertEquals("Failed to generate if - else if - else block using rhs",
                 IF_ELSEIF_ELSE_BLOCK_RESULT_RHS_NESTED, s.generate(Context.create()));
@@ -220,7 +216,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
             // expected
         }
     }
-    
+
     @Test
     public void testIfBlockWithInvalidExpression() {
         try {
@@ -236,7 +232,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
             assertTrue("Wrong exception thrown", e.getMessage().contains(String.class.getName()));
         }
     }
-    
+
     @Test
     public void testIfBlockWithInstanceOfExpression() {
         String s = StatementBuilder.create()
@@ -244,8 +240,8 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
                 .loadVariable("str")
                 .if_(BooleanOperator.InstanceOf, MetaClassFactory.getAsStatement(String.class)).finish()
                 .toJavaString();
-        
-        assertEquals("Failed to generate empty if block using an instance of expression", 
+
+        assertEquals("Failed to generate empty if block using an instance of expression",
                 EMPTY_IF_BLOCK_RESULT_INSTANCE_OF_RHS, s);
     }
 }

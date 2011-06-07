@@ -38,12 +38,12 @@ public enum BooleanOperator implements Operator {
     public boolean isEqualOrHigherPrecedenceThan(Operator operator) {
         return operator.getOperatorPrecedence() <= getOperatorPrecedence();
     }
-    
+
     public boolean canBeApplied(MetaClass clazz) {
-       return operator.canBeApplied(clazz);
+        return operator.canBeApplied(clazz);
     }
-    
+
     public void assertCanBeApplied(MetaClass clazz) {
         operator.assertCanBeApplied(clazz);
-     }
+    }
 }

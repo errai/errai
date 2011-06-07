@@ -1,10 +1,6 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.GenUtil;
-import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
@@ -54,7 +50,7 @@ public class BooleanExpressionBuilder implements Statement {
             if (rhs != null)
                 operator.assertCanBeApplied(GenUtil.generate(context, rhs).getType());
         }
-        
+
         return ((lhs != null) ? lhs.generate(context) : lhsExpr)
                 + ((operator != null) ? (" " + operator.getCanonicalString()) : "")
                 + ((rhs != null) ? (" " + rhs.generate(context)) : "");

@@ -23,7 +23,7 @@ public class AssignmentBuilder implements Statement {
     public String generate(Context context) {
         operator.assertCanBeApplied(reference.getType());
         operator.assertCanBeApplied(statement.getType());
-        
+
         return reference.getName() + " " + operator.getCanonicalString() + " " + statement.generate(Context.create());
     }
 

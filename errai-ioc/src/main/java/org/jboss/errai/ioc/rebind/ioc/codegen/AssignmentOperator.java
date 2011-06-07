@@ -14,7 +14,7 @@ public enum AssignmentOperator implements Operator {
     PostDecrementAssign("=-", 0, Number.class);
 
     private final Operator operator;
-    
+
     AssignmentOperator(String canonicalString, int operatorPrecedence, Class<?>... constraints) {
         operator = new OperatorImpl(canonicalString, operatorPrecedence, constraints);
     }
@@ -38,7 +38,7 @@ public enum AssignmentOperator implements Operator {
     public boolean canBeApplied(MetaClass clazz) {
         return operator.canBeApplied(clazz);
     }
-    
+
     public void assertCanBeApplied(MetaClass clazz) {
         operator.assertCanBeApplied(clazz);
     }

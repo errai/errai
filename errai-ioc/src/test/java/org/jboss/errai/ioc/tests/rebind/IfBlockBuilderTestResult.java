@@ -27,7 +27,7 @@ public interface IfBlockBuilderTestResult {
         "} else {" +
             "\njava.lang.Integer n = 1;\n" +
         "}\n";
-
+    
     public static final String IF_ELSEIF_BLOCK_RESULT_NO_RHS_NESTED =
         "if (s.endsWith(\"abc\")) {\n" +
             "n = 0;\n" +

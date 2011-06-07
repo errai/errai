@@ -30,7 +30,8 @@ public abstract class LiteralValue<T> implements Statement {
     }
 
     public MetaClass getType() {
-        return MetaClassFactory.get(value.getClass());
+        return Class.class.isAssignableFrom(value.getClass())
+                ? MetaClassFactory.get((Class<?>) value) : MetaClassFactory.get(value.getClass());
     }
 
     @Override

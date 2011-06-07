@@ -1,8 +1,5 @@
 package org.jboss.errai.ioc.tests.rebind;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import org.jboss.errai.ioc.rebind.ioc.codegen.Builder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Refs;
@@ -13,13 +10,15 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedMethodException;
 import org.junit.Test;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 /**
  * Tests the generation of method invocations using the {@link StatementBuilder} API.
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class InvocationBuilderTest extends AbstractStatementBuilderTest {
-
     @Test
     public void testInvoke() {
         Builder invokeStatement = StatementBuilder.create()
@@ -159,7 +158,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
 
     @Test
     public void testInvokeWithParameterTypeConversion() {
-       Builder invokeStatement = StatementBuilder.create()
+        Builder invokeStatement = StatementBuilder.create()
                 .addVariable("str", String.class)
                 .loadVariable("str")
                 .invoke("endsWith", 123);
@@ -174,35 +173,35 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
 
         assertEquals("failed to generate invocation with parameter type conversion",
                 "str.substring(1, 3)", invokeStatement.toJavaString());
-        
+
         invokeStatement = StatementBuilder.create()
-            .addVariable("str", String.class)
-            .addVariable("n", Integer.class, 123)
-            .loadVariable("str")
-            .invoke("endsWith", Variable.get("n"));
+                .addVariable("str", String.class)
+                .addVariable("n", Integer.class, 123)
+                .loadVariable("str")
+                .invoke("endsWith", Variable.get("n"));
 
         assertEquals("failed to generate invocation with parameter type conversion",
                 "str.endsWith(\"123\")", invokeStatement.toJavaString());
     }
-    
+
     @Test
     public void testInvokeStaticMethod() {
-       Builder invokeStatement = StatementBuilder.create()
+        Builder invokeStatement = StatementBuilder.create()
                 .invokeStatic(Integer.class, "getInteger", "123");
 
         assertEquals("failed to generate static method invocation",
                 "java.lang.Integer.getInteger(\"123\")", invokeStatement.toJavaString());
     }
-    
+
     public void testInvokeUndefinedStaticMethod() {
-         
-         try {
-             StatementBuilder.create()
-                 .invokeStatic(Integer.class, "undefinedMethod", "123")
-                 .toJavaString();
-             fail("expected UndefinedMethodException");
-         } catch (UndefinedMethodException udme) {
-             assertTrue(udme.getMessage().contains("undefinedMethod"));
-         }
-     }
+
+        try {
+            StatementBuilder.create()
+                    .invokeStatic(Integer.class, "undefinedMethod", "123")
+                    .toJavaString();
+            fail("expected UndefinedMethodException");
+        } catch (UndefinedMethodException udme) {
+            assertTrue(udme.getMessage().contains("undefinedMethod"));
+        }
+    }
 }

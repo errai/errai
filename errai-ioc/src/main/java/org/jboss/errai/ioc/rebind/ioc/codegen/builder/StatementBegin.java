@@ -27,7 +27,7 @@ public interface StatementBegin {
     public ContextualStatementBuilder loadLiteral(Object o);
 
     public ContextualStatementBuilder load(Object o);
-    
+
     public ContextualStatementBuilder invokeStatic(Class<?> clazz, String methodName, Object... parameters);
 
     public ObjectBuilder newObject(MetaClass type);
