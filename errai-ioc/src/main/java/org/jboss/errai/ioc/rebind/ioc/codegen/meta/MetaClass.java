@@ -39,6 +39,10 @@ public abstract class MetaClass implements HasAnnotations, MetaType, MetaGeneric
 
     public abstract MetaMethod getBestMatchingMethod(String name, MetaClass... parameters);
 
+  public abstract MetaMethod getBestMatchingStaticMethod(String name, Class... parameters);
+
+  public abstract MetaMethod getBestMatchingStaticMethod(String name, MetaClass... parameters);
+
     public abstract MetaMethod getDeclaredMethod(String name, Class... parameters);
 
     public abstract MetaMethod getDeclaredMethod(String name, MetaClass... parameters);

@@ -19,15 +19,14 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import org.jboss.errai.ioc.rebind.ioc.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaConstructor;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameterizedType;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.*;
 import org.mvel2.util.ParseTools;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -92,12 +91,76 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
         Method m = ParseTools.getBestCandidate(parameters, name, cls, cls.getMethods(), false);
         if (m == null) return null;
 
-        MetaClass metaClass = MetaClassFactory.get(cls);
-        return metaClass.getMethod(name, m.getParameterTypes());
+        //  MetaClass metaClass = MetaClassFactory.get(cls);
+        return getMethod(name, m.getParameterTypes());
     }
 
     public MetaMethod getBestMatchingMethod(String name, MetaClass... parameters) {
         return getBestMatchingMethod(name, MetaClassFactory.asClassArray(parameters));
+    }
+
+    @Override
+    public MetaMethod getBestMatchingStaticMethod(String name, Class... parameters) {
+        Class<?> cls = asClass();
+        MetaMethod[] staticMethods = getStaticMethods();
+
+
+        Method m = ParseTools.getBestCandidate(parameters, name, cls,
+                fromMetaMethod(getStaticMethods()), false);
+
+        return getMethod(name, m.getParameterTypes());
+    }
+
+    @Override
+    public MetaMethod getBestMatchingStaticMethod(String name, MetaClass... parameters) {
+        return getBestMatchingStaticMethod(name, MetaClassFactory.asClassArray(parameters));
+    }
+
+    private MetaMethod[] getStaticMethods() {
+        List<MetaMethod> methods = new ArrayList<MetaMethod>();
+
+        for (MetaMethod method : getMethods()) {
+            if (method.isStatic()) {
+                methods.add(method);
+            }
+        }
+
+        return methods.toArray(new MetaMethod[methods.size()]);
+    }
+
+    private static Method[] fromMetaMethod(MetaMethod[] methods) {
+        if (methods == null || methods.length == 0) {
+            return new Method[0];
+        }
+
+        List<Method> staticMethods = new ArrayList<Method>();
+
+        for (MetaMethod m : methods) {
+            staticMethods.add(getJavaMethodFromMetaMethod(m));
+        }
+
+        return staticMethods.toArray(new Method[staticMethods.size()]);
+    }
+
+    private static Method getJavaMethodFromMetaMethod(MetaMethod method) {
+        Class<?> declaring = method.getDeclaringClass().asClass();
+        Class<?>[] parms = getParmTypes(method.getParameters());
+
+        try {
+            return declaring.getMethod(method.getName(), parms);
+        } catch (NoSuchMethodException e) {
+            return null;
+        }
+    }
+
+    private static Class<?>[] getParmTypes(MetaParameter[] parameters) {
+        List<Class<?>> parmTypes = new ArrayList<Class<?>>();
+
+        for (MetaParameter parameter : parameters) {
+            parmTypes.add(parameter.getType().asClass());
+        }
+
+        return parmTypes.toArray(new Class<?>[parmTypes.size()]);
     }
 
     public MetaConstructor getBestMatchingConstructor(Class... parameters) {
