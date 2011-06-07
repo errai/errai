@@ -17,8 +17,8 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaGenericDeclaration;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaType;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaTypeVariable;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.MetaType;
 
 import java.lang.reflect.TypeVariable;
 

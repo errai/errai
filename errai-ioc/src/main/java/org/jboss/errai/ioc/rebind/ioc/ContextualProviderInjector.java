@@ -16,18 +16,15 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.JField;
-import com.google.gwt.core.ext.typeinfo.JParameter;
-import com.google.gwt.core.ext.typeinfo.JParameterizedType;
 import org.jboss.errai.ioc.rebind.IOCGenerator;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.*;
 
 import java.lang.annotation.Annotation;
 
 public class ContextualProviderInjector extends TypeInjector {
     private final Injector providerInjector;
 
-    public ContextualProviderInjector(JClassType type, JClassType providerType) {
+    public ContextualProviderInjector(MetaClass type, MetaClass providerType) {
         super(type);
         this.providerInjector = new TypeInjector(providerType);
     }
@@ -36,24 +33,24 @@ public class ContextualProviderInjector extends TypeInjector {
     public String getType(InjectionContext injectContext, InjectionPoint injectionPoint) {
         injected = true;
 
-        JClassType type = null;
-        JParameterizedType pType = null;
+        MetaClass type = null;
+        MetaParameterizedType pType = null;
 
         switch (injectionPoint.getTaskType()) {
             case PrivateField:
             case Field:
-                JField field = injectionPoint.getField();
-                type = field.getType().isClassOrInterface();
+                MetaField field = injectionPoint.getField();
+                type = field.getType();
 
-                pType = type.isParameterized();
+                pType = type.getParameterizedType();
 
                 break;
 
             case Parameter:
-                JParameter parm = injectionPoint.getParm();
-                type = parm.getType().isClassOrInterface();
+                MetaParameter parm = injectionPoint.getParm();
+                type = parm.getType();
 
-                pType = type.isParameterized();
+                pType = type.getParameterizedType();
                 break;
         }
 
@@ -62,13 +59,13 @@ public class ContextualProviderInjector extends TypeInjector {
         if (pType == null) {
             sb.append(providerInjector.getType(injectContext, injectionPoint)).append(".provide(new Class[] {}");
         } else {
-            JClassType[] typeArgs = pType.getTypeArgs();
-            sb.append("(").append(type.getQualifiedSourceName()).append("<")
-                    .append(typeArgs[0].getQualifiedSourceName()).append(">) ");
+            MetaType[] typeArgs = pType.getTypeParameters();
+            sb.append("(").append(type.getFullyQualifedName()).append("<")
+                    .append(typeArgs[0].toString()).append(">) ");
 
             sb.append(providerInjector.getType(injectContext, injectionPoint)).append(".provide(new Class[] {");
             for (int i = 0; i < typeArgs.length; i++) {
-                sb.append(typeArgs[i].getQualifiedSourceName()).append(".class");
+                sb.append(typeArgs[i].toString()).append(".class");
 
                 if ((i + 1) < typeArgs.length) {
                     sb.append(", ");

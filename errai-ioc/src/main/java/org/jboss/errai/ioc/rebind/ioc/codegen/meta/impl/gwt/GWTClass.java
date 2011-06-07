@@ -29,219 +29,234 @@ import java.util.List;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class GWTClass extends AbstractMetaClass<JType> {
-    private Annotation[] annotationsCache;
+  private Annotation[] annotationsCache;
 
-    private GWTClass(JType classType) {
-        super(classType);
-        JParameterizedType parameterizedType = classType.isParameterized();
-        if (parameterizedType != null) {
-            super.parameterizedType = new GWTParameterizedType(parameterizedType);
-        }
+  private GWTClass(JType classType) {
+    super(classType);
+    JParameterizedType parameterizedType = classType.isParameterized();
+    if (parameterizedType != null) {
+      super.parameterizedType = new GWTParameterizedType(parameterizedType);
+    }
+  }
+
+  public static MetaClass newInstance(JType type) {
+    return MetaClassFactory.get(type);
+  }
+
+  public static MetaClass newUncachedInstance(JType type) {
+    return new GWTClass(type);
+  }
+
+  public String getName() {
+    return getEnclosedMetaObject().getSimpleSourceName();
+  }
+
+  public String getFullyQualifedName() {
+    return getEnclosedMetaObject().getQualifiedSourceName();
+  }
+
+  @Override
+  public String getCanonicalName() {
+    return getEnclosedMetaObject().getQualifiedSourceName();
+  }
+
+  @Override
+  public String getInternalName() {
+    return getEnclosedMetaObject().getJNISignature().replace("/", ".");
+  }
+
+  private static MetaMethod[] fromMethodArray(JMethod[] methods) {
+    List<MetaMethod> methodList = new ArrayList<MetaMethod>();
+
+    for (JMethod m : methods) {
+      methodList.add(new GWTMethod(m));
     }
 
-    public static MetaClass newInstance(JType type) {
-        return MetaClassFactory.get(type);
+    return methodList.toArray(new MetaMethod[methodList.size()]);
+  }
+
+  public MetaMethod[] getMethods() {
+    JClassType type = getEnclosedMetaObject().isClassOrInterface();
+    if (type == null) {
+      return null;
     }
 
-    public static MetaClass newUncachedInstance(JType type) {
-        return new GWTClass(type);
+    return fromMethodArray(type.getMethods());
+  }
+
+  public MetaMethod[] getDeclaredMethods() {
+    return getMethods();
+  }
+
+  private static MetaField[] fromFieldArray(JField[] methods) {
+    List<MetaField> methodList = new ArrayList<MetaField>();
+
+    for (JField f : methods) {
+      methodList.add(new GWTField(f));
     }
 
-    public String getName() {
-        return getEnclosedMetaObject().getSimpleSourceName();
+    return methodList.toArray(new MetaField[methodList.size()]);
+  }
+
+  public MetaField[] getFields() {
+    JClassType type = getEnclosedMetaObject().isClassOrInterface();
+    if (type == null) {
+      return null;
+    }
+    return fromFieldArray(type.getFields());
+  }
+
+  public MetaField[] getDeclaredFields() {
+    return getFields();
+  }
+
+  public MetaField getField(String name) {
+    JClassType type = getEnclosedMetaObject().isClassOrInterface();
+    if (type == null) {
+      return null;
     }
 
-    public String getFullyQualifedName() {
-        return getEnclosedMetaObject().getQualifiedSourceName();
+    JField field = type.getField(name);
+
+    if (field == null) {
+      throw new RuntimeException("no such field: " + field);
     }
 
-    private static MetaMethod[] fromMethodArray(JMethod[] methods) {
-        List<MetaMethod> methodList = new ArrayList<MetaMethod>();
+    return new GWTField(field);
+  }
 
-        for (JMethod m : methods) {
-            methodList.add(new GWTMethod(m));
-        }
+  public MetaField getDeclaredField(String name) {
+    return getField(name);
+  }
 
-        return methodList.toArray(new MetaMethod[methodList.size()]);
+  private static MetaConstructor[] fromMethodArray(JConstructor[] constructors) {
+    List<MetaConstructor> constructorList = new ArrayList<MetaConstructor>();
+
+    for (JConstructor c : constructors) {
+      constructorList.add(new GWTConstructor(c));
     }
 
-    public MetaMethod[] getMethods() {
-        JClassType type = getEnclosedMetaObject().isClassOrInterface();
-        if (type == null) {
-            return null;
-        }
+    return constructorList.toArray(new MetaConstructor[constructorList.size()]);
+  }
 
-        return fromMethodArray(type.getMethods());
+  public MetaConstructor[] getConstructors() {
+    JClassType type = getEnclosedMetaObject().isClassOrInterface();
+    if (type == null) {
+      return null;
     }
 
-    public MetaMethod[] getDeclaredMethods() {
-        return getMethods();
+    return fromMethodArray(type.getConstructors());
+  }
+
+  public MetaConstructor[] getDeclaredConstructors() {
+    return getConstructors();
+  }
+
+  public MetaClass[] getInterfaces() {
+    List<MetaClass> metaClassList = new ArrayList<MetaClass>();
+    for (JClassType type : getEnclosedMetaObject().isClassOrInterface()
+            .getImplementedInterfaces()) {
+
+      metaClassList.add(new GWTClass(type));
     }
 
-    private static MetaField[] fromFieldArray(JField[] methods) {
-        List<MetaField> methodList = new ArrayList<MetaField>();
+    return metaClassList.toArray(new MetaClass[metaClassList.size()]);
+  }
 
-        for (JField f : methods) {
-            methodList.add(new GWTField(f));
-        }
+  public boolean isArray() {
+    return getEnclosedMetaObject().isArray() != null;
+  }
 
-        return methodList.toArray(new MetaField[methodList.size()]);
+  public MetaClass getSuperClass() {
+    JClassType type = getEnclosedMetaObject().isClassOrInterface();
+    if (type == null) {
+      return null;
     }
 
-    public MetaField[] getFields() {
-        JClassType type = getEnclosedMetaObject().isClassOrInterface();
-        if (type == null) {
-            return null;
-        }
-        return fromFieldArray(type.getFields());
+    return MetaClassFactory.get(type.getEnclosingType());
+  }
+
+  public MetaClass getComponentType() {
+    JArrayType type = getEnclosedMetaObject().isArray();
+    if (type == null) {
+      return null;
+    }
+    return MetaClassFactory.get(type.getComponentType());
+  }
+
+  public Annotation[] getAnnotations() {
+    if (annotationsCache == null) {
+      try {
+        Class<?> cls = Class.forName(getEnclosedMetaObject().getQualifiedSourceName(), false,
+                Thread.currentThread().getContextClassLoader());
+
+        annotationsCache = cls.getAnnotations();
+
+      } catch (ClassNotFoundException e) {
+        e.printStackTrace();
+      }
     }
 
-    public MetaField[] getDeclaredFields() {
-        return getFields();
+    return annotationsCache;
+  }
+
+  public MetaTypeVariable[] getTypeParameters() {
+    List<MetaTypeVariable> typeVariables = new ArrayList<MetaTypeVariable>();
+    JGenericType genericType = getEnclosedMetaObject().isGenericType();
+
+    if (genericType != null) {
+      for (JTypeParameter typeParameter : genericType.getTypeParameters()) {
+        typeVariables.add(new GWTTypeVariable(typeParameter));
+      }
     }
 
-    public MetaField getField(String name) {
-        JClassType type = getEnclosedMetaObject().isClassOrInterface();
-        if (type == null) {
-            return null;
-        }
+    return typeVariables.toArray(new MetaTypeVariable[typeVariables.size()]);
+  }
 
-        JField field = type.getField(name);
+  public boolean isInterface() {
+    return getEnclosedMetaObject().isInterface() != null;
+  }
 
-        if (field == null) {
-            throw new RuntimeException("no such field: " + field);
-        }
-
-        return new GWTField(field);
-    }
-
-    public MetaField getDeclaredField(String name) {
-        return getField(name);
-    }
-
-    private static MetaConstructor[] fromMethodArray(JConstructor[] constructors) {
-        List<MetaConstructor> constructorList = new ArrayList<MetaConstructor>();
-
-        for (JConstructor c : constructors) {
-            constructorList.add(new GWTConstructor(c));
-        }
-
-        return constructorList.toArray(new MetaConstructor[constructorList.size()]);
-    }
-
-    public MetaConstructor[] getConstructors() {
-        JClassType type = getEnclosedMetaObject().isClassOrInterface();
-        if (type == null) {
-            return null;
-        }
-
-        return fromMethodArray(type.getConstructors());
-    }
-
-    public MetaConstructor[] getDeclaredConstructors() {
-        return getConstructors();
-    }
-
-    public MetaClass[] getInterfaces() {
-        List<MetaClass> metaClassList = new ArrayList<MetaClass>();
-        for (JClassType type : getEnclosedMetaObject().isClassOrInterface()
-                .getImplementedInterfaces()) {
-
-            metaClassList.add(MetaClassFactory.get(type));
-        }
-
-        return metaClassList.toArray(new MetaClass[metaClassList.size()]);
-    }
-
-    public boolean isArray() {
-        return getEnclosedMetaObject().isArray() != null;
-    }
-
-    public MetaClass getSuperClass() {
-        JClassType type = getEnclosedMetaObject().isClassOrInterface();
-        if (type == null) {
-            return null;
-        }
-
-        return MetaClassFactory.get(type.getEnclosingType());
-    }
-
-    public MetaClass getComponentType() {
-        JArrayType type = getEnclosedMetaObject().isArray();
-        if (type == null) {
-            return null;
-        }
-        return MetaClassFactory.get(type.getComponentType());
-    }
-
-    public Annotation[] getAnnotations() {
-        if (annotationsCache == null) {
-            try {
-                Class<?> cls = Class.forName(getEnclosedMetaObject().getQualifiedSourceName(), false,
-                        Thread.currentThread().getContextClassLoader());
-
-                annotationsCache = cls.getAnnotations();
-
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return annotationsCache;
-    }
-
-    public MetaTypeVariable[] getTypeParameters() {
-        List<MetaTypeVariable> typeVariables = new ArrayList<MetaTypeVariable>();
-        JGenericType genericType = getEnclosedMetaObject().isGenericType();
-
-        if (genericType != null) {
-            for (JTypeParameter typeParameter : genericType.getTypeParameters()) {
-                typeVariables.add(new GWTTypeVariable(typeParameter));
-            }
-        }
-
-        return typeVariables.toArray(new MetaTypeVariable[typeVariables.size()]);
-    }
-
-    public boolean isInterface() {
-        return getEnclosedMetaObject().isInterface() != null;
-    }
-
-    public boolean isAbstract() {
-        return getEnclosedMetaObject().isClass() != null && getEnclosedMetaObject().isClass().isAbstract();
-    }
+  public boolean isAbstract() {
+    return getEnclosedMetaObject().isClass() != null && getEnclosedMetaObject().isClass().isAbstract();
+  }
 
 
-    public boolean isEnum() {
-        return getEnclosedMetaObject().isEnum() != null;
-    }
+  public boolean isEnum() {
+    return getEnclosedMetaObject().isEnum() != null;
+  }
 
-    public boolean isAnnotation() {
-        return getEnclosedMetaObject().isAnnotation() != null;
-    }
+  public boolean isAnnotation() {
+    return getEnclosedMetaObject().isAnnotation() != null;
+  }
 
-    public boolean isPublic() {
-        return getEnclosedMetaObject().isClassOrInterface() != null &&
-                getEnclosedMetaObject().isClassOrInterface().isPublic();
-    }
+  public boolean isPublic() {
+    return getEnclosedMetaObject().isClassOrInterface() != null &&
+            getEnclosedMetaObject().isClassOrInterface().isPublic();
+  }
 
-    public boolean isPrivate() {
-        return getEnclosedMetaObject().isClassOrInterface() != null &&
-                getEnclosedMetaObject().isClassOrInterface().isPrivate();
-    }
+  public boolean isPrivate() {
+    return getEnclosedMetaObject().isClassOrInterface() != null &&
+            getEnclosedMetaObject().isClassOrInterface().isPrivate();
+  }
 
-    public boolean isProtected() {
-        return getEnclosedMetaObject().isClassOrInterface() != null &&
-                getEnclosedMetaObject().isClassOrInterface().isProtected();
-    }
+  public boolean isProtected() {
+    return getEnclosedMetaObject().isClassOrInterface() != null &&
+            getEnclosedMetaObject().isClassOrInterface().isProtected();
+  }
 
-    public boolean isFinal() {
-        return getEnclosedMetaObject().isClassOrInterface() != null &&
-                getEnclosedMetaObject().isClassOrInterface().isFinal();
-    }
+  public boolean isFinal() {
+    return getEnclosedMetaObject().isClassOrInterface() != null &&
+            getEnclosedMetaObject().isClassOrInterface().isFinal();
+  }
 
-    public boolean isStatic() {
-        return getEnclosedMetaObject().isClassOrInterface() != null &&
-                getEnclosedMetaObject().isClassOrInterface().isStatic();
-    }
+  public boolean isStatic() {
+    return getEnclosedMetaObject().isClassOrInterface() != null &&
+            getEnclosedMetaObject().isClassOrInterface().isStatic();
+  }
+
+  public String toString() {
+    return getFullyQualifedName();
+  }
+
 }

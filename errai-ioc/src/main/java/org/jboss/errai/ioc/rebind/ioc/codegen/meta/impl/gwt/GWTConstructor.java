@@ -20,11 +20,7 @@ import com.google.gwt.core.ext.typeinfo.JConstructor;
 import com.google.gwt.core.ext.typeinfo.JParameter;
 import org.jboss.errai.ioc.rebind.ioc.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaConstructor;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaTypeVariable;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.MetaType;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -35,105 +31,105 @@ import java.util.List;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class GWTConstructor extends MetaConstructor {
-    private JConstructor constructor;
-    private MetaClass declaringClass;
-    private Annotation[] annotations;
+  private JConstructor constructor;
+  private MetaClass declaringClass;
+  private Annotation[] annotations;
 
-    public GWTConstructor(JConstructor c) {
-        this.constructor = c;
-        this.declaringClass = MetaClassFactory.get(c.getEnclosingType());
+  public GWTConstructor(JConstructor c) {
+    this.constructor = c;
+    this.declaringClass = MetaClassFactory.get(c.getEnclosingType());
 
-        try {
-            Class<?> cls = Class.forName(c.getEnclosingType().getQualifiedSourceName(), false,
-                    Thread.currentThread().getContextClassLoader());
+    try {
+      Class<?> cls = Class.forName(c.getEnclosingType().getQualifiedSourceName(), false,
+              Thread.currentThread().getContextClassLoader());
 
-            Constructor constr = cls.getConstructor(InjectUtil.jParmToClass(c.getParameters()));
+      Constructor constr = cls.getConstructor(InjectUtil.jParmToClass(c.getParameters()));
 
-            annotations = constr.getAnnotations();
+      annotations = constr.getAnnotations();
 
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        }
+    } catch (ClassNotFoundException e) {
+      e.printStackTrace();
+    } catch (NoSuchMethodException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public MetaParameter[] getParameters() {
+    List<MetaParameter> parameterList = new ArrayList<MetaParameter>();
+
+    for (JParameter jParameter : constructor.getParameters()) {
+      parameterList.add(new GWTParameter(jParameter, this));
     }
 
-    public MetaParameter[] getParameters() {
-        List<MetaParameter> parameterList = new ArrayList<MetaParameter>();
+    return parameterList.toArray(new MetaParameter[parameterList.size()]);
+  }
 
-        for (JParameter jParameter : constructor.getParameters()) {
-            parameterList.add(new GWTParameter(jParameter, this));
-        }
+  public MetaClass getDeclaringClass() {
+    return declaringClass;
+  }
 
-        return parameterList.toArray(new MetaParameter[parameterList.size()]);
+  public Annotation[] getAnnotations() {
+      return annotations == null ? new Annotation[0] : annotations;
+  }
+
+  public final <A extends Annotation> A getAnnotation(Class<A> annotation) {
+    for (Annotation a : getAnnotations()) {
+      if (a.annotationType().equals(annotation)) return (A) a;
     }
+    return null;
+  }
 
-    public MetaClass getDeclaringClass() {
-        return declaringClass;
-    }
+  public final boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
+    return getAnnotation(annotation) != null;
+  }
 
-    public Annotation[] getAnnotations() {
-        return annotations;
-    }
+  @Override
+  public MetaType[] getGenericParameterTypes() {
+    return null;
+  }
 
-    public final Annotation getAnnotation(Class<? extends Annotation> annotation) {
-        for (Annotation a : getAnnotations()) {
-            if (a.annotationType().equals(annotation)) return a;
-        }
-        return null;
-    }
+  @Override
+  public boolean isVarArgs() {
+    return constructor.isVarArgs();
+  }
 
-    public final boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
-        return getAnnotation(annotation) != null;
-    }
+  public boolean isAbstract() {
+    return false;
+  }
 
-    @Override
-    public MetaType[] getGenericParameterTypes() {
-        return null;
-    }
+  public boolean isPublic() {
+    return constructor.isPublic();
+  }
 
-    @Override
-    public boolean isVarArgs() {
-        return constructor.isVarArgs();
-    }
+  public boolean isPrivate() {
+    return constructor.isPrivate();
+  }
 
-    public boolean isAbstract() {
-        return false;
-    }
+  public boolean isProtected() {
+    return constructor.isProtected();
+  }
 
-    public boolean isPublic() {
-        return constructor.isPublic();
-    }
+  public boolean isFinal() {
+    return false;
+  }
 
-    public boolean isPrivate() {
-        return constructor.isPrivate();
-    }
+  public boolean isStatic() {
+    return false;
+  }
 
-    public boolean isProtected() {
-        return constructor.isProtected();
-    }
+  public boolean isTransient() {
+    return false;
+  }
 
-    public boolean isFinal() {
-        return false;
-    }
+  public boolean isSynthetic() {
+    return false;
+  }
 
-    public boolean isStatic() {
-        return false;
-    }
+  public boolean isSynchronized() {
+    return false;
+  }
 
-    public boolean isTransient() {
-        return false;
-    }
-
-    public boolean isSynthetic() {
-        return false;
-    }
-
-    public boolean isSynchronized() {
-        return false;
-    }
-
-    public MetaTypeVariable[] getTypeParameters() {
-        return GWTUtil.fromTypeVariable(constructor.getTypeParameters());
-    }
+  public MetaTypeVariable[] getTypeParameters() {
+    return GWTUtil.fromTypeVariable(constructor.getTypeParameters());
+  }
 }

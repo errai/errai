@@ -18,7 +18,7 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.gwt;
 
 import com.google.gwt.core.ext.typeinfo.JGenericType;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaGenericArrayType;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.MetaType;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaType;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

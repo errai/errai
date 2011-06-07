@@ -16,39 +16,41 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
-import com.google.gwt.core.ext.typeinfo.*;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.*;
 import org.mvel2.util.StringAppender;
+
+import java.lang.annotation.Annotation;
 
 public class InjectionTask {
     protected final TaskType injectType;
     protected final Injector injector;
 
-    protected JConstructor constructor;
-    protected JField field;
-    protected JMethod method;
-    protected JClassType type;
-    protected JParameter parm;
+    protected MetaConstructor constructor;
+    protected MetaField field;
+    protected MetaMethod method;
+    protected MetaClass type;
+    protected MetaParameter parm;
 
 
-    public InjectionTask(Injector injector, JField field) {
+    public InjectionTask(Injector injector, MetaField field) {
         this.injectType = field.isPrivate() ? TaskType.PrivateField : TaskType.Field;
         this.injector = injector;
         this.field = field;
     }
 
-    public InjectionTask(Injector injector, JMethod method) {
+    public InjectionTask(Injector injector, MetaMethod method) {
         this.injectType = TaskType.Method;
         this.injector = injector;
         this.method = method;
     }
 
-    public InjectionTask(Injector injector, JParameter parm) {
+    public InjectionTask(Injector injector, MetaParameter parm) {
         this.injectType = TaskType.Parameter;
         this.injector = injector;
         this.parm = parm;
     }
 
-    public InjectionTask(Injector injector, JClassType type) {
+    public InjectionTask(Injector injector, MetaClass type) {
         this.injectType = TaskType.Type;
         this.injector = injector;
         this.type = type;
@@ -57,7 +59,7 @@ public class InjectionTask {
     @SuppressWarnings({"unchecked"})
     public String doTask(InjectionContext ctx) {
         StringAppender appender = new StringAppender();
-        InjectionPoint<?> injectionPoint
+        InjectionPoint<? extends Annotation> injectionPoint
                 = new InjectionPoint(null, injectType, constructor, method, field, type, parm, injector, ctx);
 
         Injector inj;
@@ -69,7 +71,7 @@ public class InjectionTask {
                 break;
 
             case PrivateField:
-                inj = ctx.getQualifiedInjector(field.getType().isClassOrInterface(),
+                inj = ctx.getQualifiedInjector(field.getType(),
                         JSR299QualifyingMetadata.createFromAnnotations(injectionPoint.getQualifiers()));
 
                 appender.append(InjectUtil.getPrivateFieldInjectorName(field)).append("(")
@@ -81,7 +83,7 @@ public class InjectionTask {
                 break;
 
             case Field:
-                inj = ctx.getQualifiedInjector(field.getType().isClassOrInterface(),
+                inj = ctx.getQualifiedInjector(field.getType(),
                         JSR299QualifyingMetadata.createFromAnnotations(injectionPoint.getQualifiers()));
 
                 appender.append(injector.getVarName()).append('.').append(field.getName()).append(" = ")
@@ -110,20 +112,20 @@ public class InjectionTask {
         return injector;
     }
 
-    public JField getField() {
+    public MetaField getField() {
         return field;
     }
 
-    public JMethod getMethod() {
+    public MetaMethod getMethod() {
         return method;
     }
 
-    public void setMethod(JMethod method) {
+    public void setMethod(MetaMethod method) {
         if (this.method == null)
             this.method = method;
     }
 
-    public void setField(JField field) {
+    public void setField(MetaField field) {
         if (this.field == null)
             this.field = field;
     }

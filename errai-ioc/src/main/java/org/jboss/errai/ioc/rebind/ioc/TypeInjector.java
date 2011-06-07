@@ -17,7 +17,7 @@
 package org.jboss.errai.ioc.rebind.ioc;
 
 
-import com.google.gwt.core.ext.typeinfo.JClassType;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 import javax.inject.Singleton;
 import java.lang.annotation.Annotation;
@@ -25,12 +25,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class TypeInjector extends Injector {
-    protected final JClassType type;
+    protected final MetaClass type;
     protected boolean injected;
     protected boolean singleton;
     protected String varName;
 
-    public TypeInjector(JClassType type) {
+    public TypeInjector(MetaClass type) {
         this.type = type;
         this.singleton = type.isAnnotationPresent(Singleton.class)
                 || type.isAnnotationPresent(com.google.inject.Singleton.class);
@@ -97,7 +97,7 @@ public class TypeInjector extends Injector {
     }
 
     @Override
-    public JClassType getInjectedType() {
+    public MetaClass getInjectedType() {
         return type;
     }
 }

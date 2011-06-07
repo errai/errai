@@ -16,9 +16,10 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.JField;
 import org.jboss.errai.bus.rebind.ProcessingContext;
+import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
@@ -27,21 +28,22 @@ import java.util.*;
 
 public class InjectionContext {
     private ProcessingContext processingContext;
-    private Map<JClassType, List<Injector>> injectors = new LinkedHashMap<JClassType, List<Injector>>();
+    private Map<MetaClass, List<Injector>> injectors = new LinkedHashMap<MetaClass, List<Injector>>();
     private Map<Class<? extends Annotation>, List<IOCDecoratorExtension>> decorators = new LinkedHashMap<Class<? extends Annotation>, List<IOCDecoratorExtension>>();
     private Map<ElementType, Set<Class<? extends Annotation>>> decoratorsByElementType = new LinkedHashMap<ElementType, Set<Class<? extends Annotation>>>();
-    private List<JField> privateFieldsToExpose = new ArrayList<JField>();
+    private List<MetaField> privateFieldsToExpose = new ArrayList<MetaField>();
 
     public InjectionContext(ProcessingContext processingContext) {
         this.processingContext = processingContext;
     }
 
-    public Injector getQualifiedInjector(JClassType type, QualifyingMetadata metadata) {
+    public Injector getQualifiedInjector(MetaClass type, QualifyingMetadata metadata) {
         if (metadata == null) {
             metadata = JSR299QualifyingMetadata.createDefaultQualifyingMetaData();
         }
 
-        JClassType erased = type.getErasedType();
+        //todo: figure out why I was doing this.
+        MetaClass erased = type;
         List<Injector> injs = injectors.get(erased);
         if (injs != null) {
             for (Injector inj : injs) {
@@ -53,24 +55,24 @@ public class InjectionContext {
                 }
             }
         }
-        throw new InjectionFailure("could not resolve type for injection: " + erased.getQualifiedSourceName());
+        throw new InjectionFailure("could not resolve type for injection: " + erased.getFullyQualifedName());
     }
 
     public Injector getInjector(Class<?> injectorType) {
-        return getInjector(processingContext.loadClassType(injectorType));
+        return getInjector(MetaClassFactory.get(processingContext.loadClassType(injectorType)));
     }
 
-    public Injector getInjector(JClassType type) {
-        JClassType erased = type.getErasedType();
+    public Injector getInjector(MetaClass type) {
+        MetaClass erased = type;
         if (!injectors.containsKey(erased)) {
-            throw new InjectionFailure("could not resolve type for injection: " + erased.getQualifiedSourceName());
+            throw new InjectionFailure("could not resolve type for injection: " + erased.getFullyQualifedName());
         }
         List<Injector> injectorList = injectors.get(erased);
         if (injectorList.size() > 1) {
             throw new InjectionFailure("ambiguous injection type (multiple injectors resolved): "
-                    + erased.getQualifiedSourceName());
+                    + erased.getFullyQualifedName());
         } else if (injectorList.isEmpty()) {
-            throw new InjectionFailure("could not resolve type for injection: " + erased.getQualifiedSourceName());
+            throw new InjectionFailure("could not resolve type for injection: " + erased.getFullyQualifedName());
         }
 
         return injectorList.get(0);
@@ -87,9 +89,9 @@ public class InjectionContext {
     }
 
     public void registerInjector(Injector injector) {
-        List<Injector> injectorList = injectors.get(injector.getInjectedType().getErasedType());
+        List<Injector> injectorList = injectors.get(injector.getInjectedType());
         if (injectorList == null) {
-            injectors.put(injector.getInjectedType().getErasedType(), injectorList = new ArrayList<Injector>());
+            injectors.put(injector.getInjectedType(), injectorList = new ArrayList<Injector>());
         } else {
             for (Injector inj : injectorList) {
                 if (inj.metadataMatches(injector)) {
@@ -151,7 +153,7 @@ public class InjectionContext {
         }
     }
 
-    public List<JField> getPrivateFieldsToExpose() {
+    public List<MetaField> getPrivateFieldsToExpose() {
         return privateFieldsToExpose;
     }
 

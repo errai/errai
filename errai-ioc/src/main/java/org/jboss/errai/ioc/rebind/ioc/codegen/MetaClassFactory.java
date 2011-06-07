@@ -42,6 +42,10 @@ public final class MetaClassFactory {
         return createOrGet(typeOracle, fullyQualifiedClassName);
     }
 
+    public static MetaClass get(TypeOracle typeOracle, Class<?> clazz) {
+        return get(typeOracle, clazz.getName());
+    }
+
     public static MetaClass get(JType clazz) {
         return createOrGet(clazz);
     }

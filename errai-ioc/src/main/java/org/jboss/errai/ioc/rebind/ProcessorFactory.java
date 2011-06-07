@@ -16,12 +16,11 @@
 
 package org.jboss.errai.ioc.rebind;
 
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.NotFoundException;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import org.jboss.errai.bus.rebind.ProcessingContext;
 import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
 import org.jboss.errai.ioc.rebind.ioc.InjectorFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
@@ -51,19 +50,11 @@ public class ProcessorFactory {
                     continue;
                 }
 
-                JClassType type = loadType(context.getOracle(), clazz);
+                MetaClass type = MetaClassFactory.get(context.getOracle(), clazz);
                 injectorFactory.addType(type);
                 annotationHandlers.get(aClass).handle(type, type.getAnnotation(aClass), context);
             }
         }
     }
 
-    private JClassType loadType(TypeOracle oracle, Class<?> clazz) {
-        try {
-            return oracle.getType(clazz.getName());
-        }
-        catch (NotFoundException e) {
-            throw new RuntimeException("Failed to load type " + clazz.getName(), e);
-        }
-    }
 }

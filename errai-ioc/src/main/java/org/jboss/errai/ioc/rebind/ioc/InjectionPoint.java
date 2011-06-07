@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
-import com.google.gwt.core.ext.typeinfo.*;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -28,16 +28,16 @@ public class InjectionPoint<T extends Annotation> {
     private T annotation;
     private TaskType taskType;
 
-    private JConstructor constructor;
-    private JMethod method;
-    private JField field;
-    private JClassType type;
-    private JParameter parm;
+    private MetaConstructor constructor;
+    private MetaMethod method;
+    private MetaField field;
+    private MetaClass type;
+    private MetaParameter parm;
     private Injector injector;
     private InjectionContext injectionContext;
 
-    public InjectionPoint(T annotation, TaskType taskType, JConstructor constructor, JMethod method,
-                          JField field, JClassType type, JParameter parm, Injector injector, InjectionContext injectionContext) {
+    public InjectionPoint(T annotation, TaskType taskType, MetaConstructor constructor, MetaMethod method,
+                          MetaField field, MetaClass type, MetaParameter parm, Injector injector, InjectionContext injectionContext) {
         this.annotation = annotation;
         this.taskType = taskType;
         this.constructor = constructor;
@@ -53,7 +53,7 @@ public class InjectionPoint<T extends Annotation> {
         return annotation;
     }
 
-    public JConstructor getConstructor() {
+    public MetaConstructor getConstructor() {
         return constructor;
     }
 
@@ -61,19 +61,19 @@ public class InjectionPoint<T extends Annotation> {
         return taskType;
     }
 
-    public JMethod getMethod() {
+    public MetaMethod getMethod() {
         return method;
     }
 
-    public JField getField() {
+    public MetaField getField() {
         return field;
     }
 
-    public JClassType getType() {
+    public MetaClass getType() {
         return type;
     }
 
-    public JParameter getParm() {
+    public MetaParameter getParm() {
         return parm;
     }
 

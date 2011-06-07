@@ -16,8 +16,6 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.MetaType;
-
 public abstract class MetaMethod implements MetaClassMember, MetaGenericDeclaration {
     public abstract String getName();
 

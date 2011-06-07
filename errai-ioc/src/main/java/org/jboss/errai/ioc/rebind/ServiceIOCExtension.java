@@ -22,6 +22,8 @@ import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.InjectionPoint;
+import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 @CodeDecorator
 public class ServiceIOCExtension extends IOCDecoratorExtension<Service> {
@@ -41,8 +43,10 @@ public class ServiceIOCExtension extends IOCDecoratorExtension<Service> {
         /**
          * Get an instance of the message bus.
          */
-        final String inj = ctx.getInjector(decContext.getInjectionContext()
-                .getProcessingContext().loadClassType(MessageBus.class)).getType(ctx, decContext);
+        final MetaClass busClass = MetaClassFactory.get(decContext.getInjectionContext()
+                .getProcessingContext().loadClassType(MessageBus.class));
+
+        final String inj = ctx.getInjector(busClass).getType(ctx, decContext);
 
         /**
          * Figure out the service name;

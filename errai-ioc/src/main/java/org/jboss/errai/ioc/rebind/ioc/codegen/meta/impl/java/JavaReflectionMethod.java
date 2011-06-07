@@ -17,12 +17,8 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaTypeVariable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.JavaReflectionParameter;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.MetaType;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -82,9 +78,9 @@ public class JavaReflectionMethod extends MetaMethod {
         return method.getAnnotations();
     }
 
-    public Annotation getAnnotation(Class<? extends Annotation> annotation) {
+    public final <A extends Annotation> A getAnnotation(Class<A> annotation) {
         for (Annotation a : getAnnotations()) {
-            if (a.annotationType().equals(annotation)) return a;
+            if (a.annotationType().equals(annotation)) return (A) a;
         }
         return null;
     }

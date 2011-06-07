@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
-import com.google.gwt.core.ext.typeinfo.JClassType;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 public abstract class Injector {
     protected QualifyingMetadata qualifyingMetadata;
@@ -35,7 +35,7 @@ public abstract class Injector {
 
     public abstract String getVarName();
 
-    public abstract JClassType getInjectedType();
+    public abstract MetaClass getInjectedType();
 
     public boolean metadataMatches(Injector injector) {
         return (injector == null && qualifyingMetadata == null) ||

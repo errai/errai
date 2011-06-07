@@ -43,6 +43,7 @@ public class BasicIOCTest extends GWTTestCase {
     }
 
     public void testBasicInjectionScenarios() {
+
         SimpleBean simpleBean = SimpleBean.TEST_INSTANCE;
         assertNotNull(simpleBean);
 

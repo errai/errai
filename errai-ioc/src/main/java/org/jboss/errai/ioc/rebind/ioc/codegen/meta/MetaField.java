@@ -16,8 +16,6 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.MetaType;
-
 import java.lang.annotation.Annotation;
 
 public abstract class MetaField implements HasAnnotations, MetaClassMember {

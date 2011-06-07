@@ -20,7 +20,7 @@ import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.JParameterizedType;
 import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameterizedType;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.MetaType;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaType;
 
 import java.util.ArrayList;
 import java.util.List;

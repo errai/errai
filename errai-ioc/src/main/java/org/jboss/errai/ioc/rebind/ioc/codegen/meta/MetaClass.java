@@ -17,7 +17,6 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta;
 
 import com.google.gwt.core.ext.typeinfo.JClassType;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.MetaType;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -26,6 +25,10 @@ public abstract class MetaClass implements HasAnnotations, MetaType, MetaGeneric
     public abstract String getName();
 
     public abstract String getFullyQualifedName();
+
+    public abstract String getCanonicalName();
+
+    public abstract String getInternalName();
 
     public abstract MetaMethod[] getMethods();
 
@@ -109,9 +112,9 @@ public abstract class MetaClass implements HasAnnotations, MetaType, MetaGeneric
 
     public abstract boolean isStatic();
 
-    public abstract Class<?> asClass();
-
     public abstract MetaClass asBoxed();
 
     public abstract MetaClass asUnboxed();
+
+    public abstract Class<?> asClass();
 }

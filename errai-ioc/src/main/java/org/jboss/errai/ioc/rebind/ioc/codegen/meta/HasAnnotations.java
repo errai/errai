@@ -26,5 +26,5 @@ public interface HasAnnotations {
 
     public boolean isAnnotationPresent(Class<? extends Annotation> annotation);
 
-    public Annotation getAnnotation(Class<? extends Annotation> annotation);
+    public <A extends Annotation> A getAnnotation(Class<A> annotation);
 }

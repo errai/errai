@@ -17,7 +17,7 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameterizedType;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.MetaType;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaType;
 
 import java.lang.reflect.ParameterizedType;
 
