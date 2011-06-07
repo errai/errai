@@ -28,6 +28,7 @@ public class ObjectBuilder extends AbstractStatementBuilder implements ArrayBuil
 
     private MetaClass type;
     private int buildState;
+    private Integer length;
 
     ObjectBuilder(MetaClass type) {
         super(Context.create());
@@ -75,6 +76,8 @@ public class ObjectBuilder extends AbstractStatementBuilder implements ArrayBuil
     }
 
     private ArrayBuilder newArrayInstance(Integer length) {
+        this.length = length;
+        
         buf.append("new ").append(type.getFullyQualifedName())
            .append("[").append((length==null)?"":length).append("]");
         buildState = FINISHED;
@@ -82,6 +85,8 @@ public class ObjectBuilder extends AbstractStatementBuilder implements ArrayBuil
     }
     
     public AbstractStatementBuilder initialize(Object... values) {
+        if (length!=null && values.length > length) throw new RuntimeException("Too many values");
+        
         buf.append(" {\n");
         for (int i=0; i<values.length; i++) {
             Statement s = GenUtil.generate(context, values[i]);

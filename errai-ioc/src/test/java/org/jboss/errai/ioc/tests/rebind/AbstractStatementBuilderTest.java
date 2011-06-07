@@ -9,7 +9,6 @@ public class AbstractStatementBuilderTest {
 
     /**
      * assertEquals, less sensitive to indentation differences.
-     * <p/>
      * TODO compare parsed ASTs instead?
      *
      * @param expected

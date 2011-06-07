@@ -108,6 +108,15 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
             // expected
         }
         
+        try {
+            StatementBuilder.create().newArray(String.class, 2)
+                .initialize("1", "2", "3").toJavaString();
+            fail("Expected RuntimeException");
+        } catch (Exception e) {
+            // expected
+            assertEquals("Too many values", e.getMessage());
+        }
+        
         String s = StatementBuilder.create().newArray(String.class, 2).initialize("1", "2").toJavaString();
         assertEquals("new java.lang.String[2] {\n\"1\", \"2\"\n}", s);
         
@@ -130,16 +139,16 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
             .toJavaString();
         
         assertEquals("new java.lang.annotation.Annotation[] {\n" +
-                "new java.lang.annotation.Annotation() {\n" +
-                    "public java.lang.Class annotationType() {\n" +
-                        "return javax.inject.Inject.class;\n" +
-                     "}\n" +
-                "}\n" +
-                ", new java.lang.annotation.Annotation() {\n" +
-                    "public java.lang.Class annotationType() {\n" +
-                        "return javax.annotation.PostConstruct.class;\n" +
-                    "}\n" +
+            "new java.lang.annotation.Annotation() {\n" +
+                "public java.lang.Class annotationType() {\n" +
+                    "return javax.inject.Inject.class;\n" +
                  "}\n" +
-               "}", s);
+            "}\n" +
+            ", new java.lang.annotation.Annotation() {\n" +
+                "public java.lang.Class annotationType() {\n" +
+                    "return javax.annotation.PostConstruct.class;\n" +
+                "}\n" +
+             "}\n" +
+           "}", s);
     }
 }
