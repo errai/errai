@@ -2,7 +2,6 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.Builder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.CallElement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.CallWriter;
@@ -46,7 +45,7 @@ public abstract class AbstractStatementBuilder implements Statement, Builder {
     }
 
     public MetaClass getType() {
-        return MetaClassFactory.get(Void.class);
+        return callElementBuilder.getCallElement().getResultType();
     }
 
     public String toJavaString() {
