@@ -1,15 +1,20 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
+import javax.enterprise.util.TypeLiteral;
+
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ArrayBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementBegin;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.VariableReferenceContextualStatementBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.*;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DeclareVariable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DynamicLoad;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadLiteral;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadVariable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.StaticLoad;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java.JavaReflectionClass;
-
-import javax.enterprise.util.TypeLiteral;
 
 /**
  * The root of our fluent StatementBuilder API.
@@ -97,5 +102,29 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
 
     public ObjectBuilder newObject(Class<?> type) {
         return ObjectBuilder.newInstanceOf(type);
+    }
+    
+    public ArrayBuilder newArray(MetaClass type) {
+        return ObjectBuilder.newArrayOf(type);
+    }
+
+    public ArrayBuilder newArray(JavaReflectionClass type) {
+        return ObjectBuilder.newArrayOf(type);
+    }
+
+    public ArrayBuilder newArray(Class<?> type) {
+        return ObjectBuilder.newArrayOf(type);
+    }
+    
+    public ArrayBuilder newArray(MetaClass type, int length) {
+        return ObjectBuilder.newArrayOf(type, length);
+    }
+
+    public ArrayBuilder newArray(JavaReflectionClass type,  int length) {
+        return ObjectBuilder.newArrayOf(type, length);
+    }
+
+    public ArrayBuilder newArray(Class<?> type,  int length) {
+        return ObjectBuilder.newArrayOf(type, length);
     }
 }

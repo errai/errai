@@ -35,4 +35,16 @@ public interface StatementBegin {
     public ObjectBuilder newObject(JavaReflectionClass type);
 
     public ObjectBuilder newObject(Class<?> type);
+    
+    public ArrayBuilder newArray(MetaClass type);
+
+    public ArrayBuilder newArray(JavaReflectionClass type);
+
+    public ArrayBuilder newArray(Class<?> type);
+    
+    public ArrayBuilder newArray(MetaClass type, int length);
+
+    public ArrayBuilder newArray(JavaReflectionClass type, int length);
+
+    public ArrayBuilder newArray(Class<?> type, int length);   
 }

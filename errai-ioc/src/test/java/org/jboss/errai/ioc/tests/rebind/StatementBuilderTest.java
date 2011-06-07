@@ -1,7 +1,16 @@
 package org.jboss.errai.ioc.tests.rebind;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.lang.annotation.Annotation;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.VariableReference;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
@@ -10,9 +19,6 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 import org.junit.Assert;
 import org.junit.Test;
-
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Tests the {@link StatementBuilder} API.
@@ -90,5 +96,50 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
         } catch (OutOfScopeException oose) {
             // expected
         }
+    }
+    
+    @Test
+    public void testCreateAndInitializeArray() {
+        try {
+            StatementBuilder.create().newArray(Annotation.class)
+                .initialize("1", "2").toJavaString();
+            fail("Expected InvalidTypeException");
+        } catch (InvalidTypeException oose) {
+            // expected
+        }
+        
+        String s = StatementBuilder.create().newArray(String.class, 2).initialize("1", "2").toJavaString();
+        assertEquals("new java.lang.String[2] {\n\"1\", \"2\"\n}", s);
+        
+        Statement annotation1=ObjectBuilder.newInstanceOf(Annotation.class)
+            .extend()
+            .publicOverridesMethod("annotationType")
+            .append(StatementBuilder.create().load(Inject.class).returnValue())
+            .finish()
+            .finish();
+        
+        Statement annotation2=ObjectBuilder.newInstanceOf(Annotation.class)
+            .extend()
+            .publicOverridesMethod("annotationType")
+            .append(StatementBuilder.create().load(PostConstruct.class).returnValue())
+            .finish()
+            .finish();
+        
+        s = StatementBuilder.create().newArray(Annotation.class)
+            .initialize(annotation1, annotation2)
+            .toJavaString();
+        
+        assertEquals("new java.lang.annotation.Annotation[] {\n" +
+                "new java.lang.annotation.Annotation() {\n" +
+                    "public java.lang.Class annotationType() {\n" +
+                        "return javax.inject.Inject.class;\n" +
+                     "}\n" +
+                "}\n" +
+                ", new java.lang.annotation.Annotation() {\n" +
+                    "public java.lang.Class annotationType() {\n" +
+                        "return javax.annotation.PostConstruct.class;\n" +
+                    "}\n" +
+                 "}\n" +
+               "}", s);
     }
 }
