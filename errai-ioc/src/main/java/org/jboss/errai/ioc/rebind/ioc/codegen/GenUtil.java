@@ -67,7 +67,7 @@ public class GenUtil {
     }
 
     public static void assertAssignableTypes(MetaClass from, MetaClass to) {
-        if(!to.box().isAssignableFrom(from.box())) {
+        if(!to.asBoxed().isAssignableFrom(from.asBoxed())) {
             throw new InvalidTypeException(to.getFullyQualifedName() + " is not assignable from "
                     + from.getFullyQualifedName());
         }
@@ -85,7 +85,7 @@ public class GenUtil {
                 }
             }
 
-            Class<?> targetClass = targetType.box().asClass();
+            Class<?> targetClass = targetType.asBoxed().asClass();
             if (DataConversion.canConvert(targetClass, input.getClass())) {
                 return generate(context, DataConversion.convert(input, targetClass));
             } else {
