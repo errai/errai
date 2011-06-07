@@ -26,28 +26,11 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 import org.mvel2.DataConversion;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class GenUtil {
-    @SuppressWarnings("serial")
-    private static final Map<MetaClass, MetaClass> primitiveWrappers = new HashMap<MetaClass, MetaClass>() {
-        {
-            put(MetaClassFactory.get(boolean.class), MetaClassFactory.get(Boolean.class));
-            put(MetaClassFactory.get(byte.class), MetaClassFactory.get(Byte.class));
-            put(MetaClassFactory.get(char.class), MetaClassFactory.get(Character.class));
-            put(MetaClassFactory.get(double.class), MetaClassFactory.get(Double.class));
-            put(MetaClassFactory.get(float.class), MetaClassFactory.get(Float.class));
-            put(MetaClassFactory.get(int.class), MetaClassFactory.get(Integer.class));
-            put(MetaClassFactory.get(long.class), MetaClassFactory.get(Long.class));
-            put(MetaClassFactory.get(short.class), MetaClassFactory.get(Short.class));
-        }
-    };
-
     public static Statement[] generateCallParameters(Context context, Object... parameters) {
         Statement[] statements = new Statement[parameters.length];
         int i = 0;
@@ -93,22 +76,14 @@ public class GenUtil {
     }
 
     public static void assertIsIterable(Statement statement) {
-        try {
-            Class<?> cls = Class.forName(statement.getType().getFullyQualifedName(), false, 
-                    Thread.currentThread().getContextClassLoader());
+        Class<?> cls = statement.getType().asClass();
 
-            if (!cls.isArray() && !Iterable.class.isAssignableFrom(cls))
-                throw new TypeNotIterableException(statement.generate(Context.create()));
-        } catch (ClassNotFoundException e) {
-            throw new IllegalArgumentException(e);
-        }
+        if (!cls.isArray() && !Iterable.class.isAssignableFrom(cls))
+            throw new TypeNotIterableException(statement.generate(Context.create()));
     }
 
     public static void assertAssignableTypes(MetaClass from, MetaClass to) {
-        to = primitiveToWrapperType(to);
-        from = primitiveToWrapperType(from);
-     
-        if(!to.isAssignableFrom(from)) {
+        if(!to.asBoxed().isAssignableFrom(from.asBoxed())) {
             throw new InvalidTypeException(to.getFullyQualifedName() + " is not assignable from "
                     + from.getFullyQualifedName());
         }
@@ -126,23 +101,14 @@ public class GenUtil {
                 }
             }
 
-            Class<?> targetClass = Class.forName(primitiveToWrapperType(targetType).getFullyQualifedName(), false,
-                    Thread.currentThread().getContextClassLoader());
-
+            Class<?> targetClass = targetType.asBoxed().asClass();
             if (DataConversion.canConvert(targetClass, input.getClass())) {
                 return generate(context, DataConversion.convert(input, targetClass));
             } else {
                 throw new InvalidTypeException("cannot convert input to target type:" + targetClass.getName());
             }
-        } catch (ClassNotFoundException e) {
-            throw new IllegalArgumentException(e);
         } catch (Throwable t) {
             throw new InvalidTypeException(t);
         }
-    }
-
-    public static MetaClass primitiveToWrapperType(MetaClass type) {
-        MetaClass wrapperType = primitiveWrappers.get(type);
-        return (wrapperType != null) ? wrapperType : type;
     }
 }

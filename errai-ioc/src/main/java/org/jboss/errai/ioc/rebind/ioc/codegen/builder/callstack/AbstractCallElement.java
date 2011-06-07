@@ -22,6 +22,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public abstract class AbstractCallElement implements CallElement {
     protected CallElement next;

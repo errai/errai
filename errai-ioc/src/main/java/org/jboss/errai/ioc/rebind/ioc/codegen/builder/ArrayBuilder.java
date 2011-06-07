@@ -14,22 +14,15 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack;
+package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Builder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.AbstractStatementBuilder;
 
 /**
- * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface CallElement {
-    public void handleCall(CallWriter writer, Context context, Statement statement);
-
-    public void setNext(CallElement element);
-
-    public CallElement getNext();
-
-    public MetaClass getResultType();
+public interface ArrayBuilder extends Statement, Builder {
+    public AbstractStatementBuilder initialize(Object...values);
 }

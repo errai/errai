@@ -18,6 +18,7 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ArrayBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementBegin;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.VariableReferenceContextualStatementBuilder;
@@ -113,5 +114,29 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
 
     public ObjectBuilder newObject(Class<?> type) {
         return ObjectBuilder.newInstanceOf(type);
+    }
+    
+    public ArrayBuilder newArray(MetaClass type) {
+        return ObjectBuilder.newArrayOf(type);
+    }
+
+    public ArrayBuilder newArray(JavaReflectionClass type) {
+        return ObjectBuilder.newArrayOf(type);
+    }
+
+    public ArrayBuilder newArray(Class<?> type) {
+        return ObjectBuilder.newArrayOf(type);
+    }
+    
+    public ArrayBuilder newArray(MetaClass type, int length) {
+        return ObjectBuilder.newArrayOf(type, length);
+    }
+
+    public ArrayBuilder newArray(JavaReflectionClass type,  int length) {
+        return ObjectBuilder.newArrayOf(type, length);
+    }
+
+    public ArrayBuilder newArray(Class<?> type,  int length) {
+        return ObjectBuilder.newArrayOf(type, length);
     }
 }

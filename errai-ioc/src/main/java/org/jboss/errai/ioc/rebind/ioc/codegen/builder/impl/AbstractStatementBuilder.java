@@ -61,6 +61,9 @@ public abstract class AbstractStatementBuilder implements Statement, Builder {
     }
 
     public MetaClass getType() {
+        if(callElementBuilder.getCallElement()==null)
+            return null;
+
         return callElementBuilder.getCallElement().getResultType();
     }
 

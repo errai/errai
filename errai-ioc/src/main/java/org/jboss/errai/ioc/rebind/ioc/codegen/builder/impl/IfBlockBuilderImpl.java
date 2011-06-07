@@ -57,6 +57,24 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements IfBl
         return if_(op, rhsStatement);
     }
 
+    private BlockBuilder<ElseBlockBuilder> _if_() {
+        appendCallElement(new DeferredCallElement(new DeferredCallback() {
+            public void doDeferred(CallWriter writer, Context context, Statement statement) {
+                statement = validateOrConvertLhs(statement);
+
+                ifBlock.getCondition().setLhsExpr(writer.getCallString());
+                writer.reset();
+                writer.append(ifBlock.generate(Context.create(context)));
+            }
+        }));
+
+        return new BlockBuilder<ElseBlockBuilder>(ifBlock.getBlock(), new BuildCallback<ElseBlockBuilder>() {
+            public ElseBlockBuilder callback(Statement statement) {
+                return IfBlockBuilderImpl.this;
+            }
+        });
+    }
+    
     public BlockBuilder<AbstractStatementBuilder> else_() {
         return new BlockBuilder<AbstractStatementBuilder>(ifBlock.getElseBlock(), new BuildCallback<AbstractStatementBuilder>() {
             public AbstractStatementBuilder callback(Statement statement) {
@@ -64,25 +82,20 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements IfBl
             }
         });
     }
-
+    
     public BlockBuilder<ElseBlockBuilder> elseif_(Statement lhs) {
         return elseif_(lhs, null, null);
     }
 
     public BlockBuilder<ElseBlockBuilder> elseif_(Statement lhs, BooleanOperator op, Statement rhs) {
+        // generate to internally set the type
         lhs.generate(context);
-
-        if (ifBlock.getCondition().getOperator() == null) {
-            lhs = GenUtil.convert(context, lhs, MetaClassFactory.get(Boolean.class));
-        } else {
-            ifBlock.getCondition().getOperator().assertCanBeApplied(lhs.getType());
-        }
-
+        
+        lhs = validateOrConvertLhs(lhs);
+        
         IfBlock elseIfBlock = new IfBlock(new BooleanExpressionBuilder(lhs, rhs, op));
-        elseIfBlock.getCondition().setLhs(lhs);
         ifBlock.setElseIfBlock(elseIfBlock);
         return _elseif_(elseIfBlock);
-
     }
 
     public BlockBuilder<ElseBlockBuilder> elseif_(Statement lhs, BooleanOperator op, Object rhs) {
@@ -97,26 +110,14 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements IfBl
             }
         });
     }
-
-    private BlockBuilder<ElseBlockBuilder> _if_() {
-        appendCallElement(new DeferredCallElement(new DeferredCallback() {
-            public void doDeferred(CallWriter writer, Context context, Statement statement) {
-                if (ifBlock.getCondition().getOperator() == null) {
-                    statement = GenUtil.convert(context, statement, MetaClassFactory.get(Boolean.class));
-                } else {
-                    ifBlock.getCondition().getOperator().assertCanBeApplied(statement.getType());
-                }
-
-                ifBlock.getCondition().setLhsExpr(writer.getCallString());
-                writer.reset();
-                writer.append(ifBlock.generate(Context.create(context)));
-            }
-        }));
-
-        return new BlockBuilder<ElseBlockBuilder>(ifBlock.getBlock(), new BuildCallback<ElseBlockBuilder>() {
-            public ElseBlockBuilder callback(Statement statement) {
-                return IfBlockBuilderImpl.this;
-            }
-        });
+    
+    private Statement validateOrConvertLhs(Statement lhs) {
+        if (ifBlock.getCondition().getOperator() == null) {
+            lhs = GenUtil.convert(context, lhs, MetaClassFactory.get(Boolean.class));
+        } else {
+            ifBlock.getCondition().getOperator().assertCanBeApplied(lhs.getType());
+        }
+        
+        return lhs;
     }
 }
