@@ -90,4 +90,8 @@ public abstract class MetaClass implements HasAnnotations, MetaType, MetaGeneric
     public abstract boolean isStatic();
 
     public abstract Class<?> asClass();
+    
+    public abstract MetaClass box();
+    
+    public abstract MetaClass unbox();
 }

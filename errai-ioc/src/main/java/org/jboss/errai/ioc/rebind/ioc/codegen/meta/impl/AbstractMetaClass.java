@@ -1,6 +1,9 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl;
 
-import com.google.gwt.core.ext.typeinfo.JClassType;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+
 import org.jboss.errai.ioc.rebind.ioc.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
@@ -9,9 +12,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameterizedType;
 import org.mvel2.util.ParseTools;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
+import com.google.gwt.core.ext.typeinfo.JClassType;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -203,5 +204,15 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
                 return null;
             }
         }
+    }
+
+    @Override
+    public MetaClass box() {
+        return MetaClassFactory.get(ParseTools.boxPrimitive(asClass()));
+    }
+
+    @Override
+    public MetaClass unbox() {
+        return MetaClassFactory.get(ParseTools.unboxPrimitive(asClass()));
     }
 }
