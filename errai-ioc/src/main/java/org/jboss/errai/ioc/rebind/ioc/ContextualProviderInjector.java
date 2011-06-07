@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 JBoss, a divison Red Hat, Inc
+ * Copyright 2011 JBoss, a divison Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,13 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
-import java.lang.annotation.Annotation;
-import java.util.List;
-
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.JField;
 import com.google.gwt.core.ext.typeinfo.JParameter;
 import com.google.gwt.core.ext.typeinfo.JParameterizedType;
-import com.google.gwt.user.client.Window;
 import org.jboss.errai.ioc.rebind.IOCGenerator;
+
+import java.lang.annotation.Annotation;
 
 public class ContextualProviderInjector extends TypeInjector {
     private final Injector providerInjector;

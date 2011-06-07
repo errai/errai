@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 JBoss, a divison Red Hat, Inc
+ * Copyright 2011 JBoss, a divison Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,9 @@
 package org.jboss.errai.ioc.rebind.ioc;
 
 import com.google.gwt.core.ext.typeinfo.*;
-import com.sun.xml.internal.rngom.ast.builder.*;
-import org.mvel2.util.ReflectionUtil;
 
-import javax.management.RuntimeErrorException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.List;
 
 import static org.jboss.errai.ioc.rebind.ioc.InjectUtil.getPrivateFieldInjectorName;

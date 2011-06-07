@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 JBoss, a divison Red Hat, Inc
+ * Copyright 2011 JBoss, a divison Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.jboss.errai.ioc.rebind.ioc;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.JField;
 import org.jboss.errai.bus.rebind.ProcessingContext;
-import sun.tools.tree.PostIncExpression;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 JBoss, a divison Red Hat, Inc
+ * Copyright 2011 JBoss, a divison Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.jboss.errai.ioc.tests.client;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.junit.client.GWTTestCase;
 import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.tests.AbstractErraiTest;
 import org.jboss.errai.ioc.client.api.Bootstrapper;
 import org.jboss.errai.ioc.tests.client.res.SimpleBean;
 import org.jboss.errai.ioc.tests.client.res.SimpleBean2;
