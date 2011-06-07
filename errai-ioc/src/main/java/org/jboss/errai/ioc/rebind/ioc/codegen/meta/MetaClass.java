@@ -39,9 +39,9 @@ public abstract class MetaClass implements HasAnnotations, MetaType, MetaGeneric
 
     public abstract MetaMethod getBestMatchingMethod(String name, MetaClass... parameters);
 
-  public abstract MetaMethod getBestMatchingStaticMethod(String name, Class... parameters);
+    public abstract MetaMethod getBestMatchingStaticMethod(String name, Class... parameters);
 
-  public abstract MetaMethod getBestMatchingStaticMethod(String name, MetaClass... parameters);
+    public abstract MetaMethod getBestMatchingStaticMethod(String name, MetaClass... parameters);
 
     public abstract MetaMethod getDeclaredMethod(String name, Class... parameters);
 
@@ -110,8 +110,8 @@ public abstract class MetaClass implements HasAnnotations, MetaType, MetaGeneric
     public abstract boolean isStatic();
 
     public abstract Class<?> asClass();
-    
+
     public abstract MetaClass asBoxed();
-    
+
     public abstract MetaClass asUnboxed();
 }

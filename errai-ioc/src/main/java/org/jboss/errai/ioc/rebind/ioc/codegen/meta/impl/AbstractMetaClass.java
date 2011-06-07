@@ -17,7 +17,6 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl;
 
 import com.google.gwt.core.ext.typeinfo.JClassType;
-import org.jboss.errai.ioc.rebind.ioc.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.*;
 import org.mvel2.util.ParseTools;
@@ -27,6 +26,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.jboss.errai.ioc.rebind.ioc.InjectUtil.classToMeta;
+import static org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory.asClassArray;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -71,7 +73,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     }
 
     public MetaMethod getMethod(String name, Class... parmTypes) {
-        return _getMethod(getMethods(), name, InjectUtil.classToMeta(parmTypes));
+        return _getMethod(getMethods(), name, classToMeta(parmTypes));
     }
 
     public MetaMethod getMethod(String name, MetaClass... parameters) {
@@ -79,7 +81,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     }
 
     public MetaMethod getDeclaredMethod(String name, Class... parmTypes) {
-        return _getMethod(getDeclaredMethods(), name, InjectUtil.classToMeta(parmTypes));
+        return _getMethod(getDeclaredMethods(), name, classToMeta(parmTypes));
     }
 
     public MetaMethod getDeclaredMethod(String name, MetaClass... parmTypes) {
@@ -91,19 +93,16 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
         Method m = ParseTools.getBestCandidate(parameters, name, cls, cls.getMethods(), false);
         if (m == null) return null;
 
-        //  MetaClass metaClass = MetaClassFactory.get(cls);
         return getMethod(name, m.getParameterTypes());
     }
 
     public MetaMethod getBestMatchingMethod(String name, MetaClass... parameters) {
-        return getBestMatchingMethod(name, MetaClassFactory.asClassArray(parameters));
+        return getBestMatchingMethod(name, asClassArray(parameters));
     }
 
     @Override
     public MetaMethod getBestMatchingStaticMethod(String name, Class... parameters) {
         Class<?> cls = asClass();
-        MetaMethod[] staticMethods = getStaticMethods();
-
 
         Method m = ParseTools.getBestCandidate(parameters, name, cls,
                 fromMetaMethod(getStaticMethods()), false);
@@ -113,7 +112,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
     @Override
     public MetaMethod getBestMatchingStaticMethod(String name, MetaClass... parameters) {
-        return getBestMatchingStaticMethod(name, MetaClassFactory.asClassArray(parameters));
+        return getBestMatchingStaticMethod(name, asClassArray(parameters));
     }
 
     private MetaMethod[] getStaticMethods() {
@@ -173,11 +172,11 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     }
 
     public MetaConstructor getBestMatchingConstructor(MetaClass... parameters) {
-        return getBestMatchingConstructor(MetaClassFactory.asClassArray(parameters));
+        return getBestMatchingConstructor(asClassArray(parameters));
     }
 
     public MetaConstructor getConstructor(Class... parameters) {
-        return _getConstructor(getConstructors(), InjectUtil.classToMeta(parameters));
+        return _getConstructor(getConstructors(), classToMeta(parameters));
     }
 
     public MetaConstructor getConstructor(MetaClass... parameters) {
@@ -185,7 +184,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     }
 
     public MetaConstructor getDeclaredConstructor(Class... parameters) {
-        return _getConstructor(getDeclaredConstructors(), InjectUtil.classToMeta(parameters));
+        return _getConstructor(getDeclaredConstructors(), classToMeta(parameters));
     }
 
     public final Annotation getAnnotation(Class<? extends Annotation> annotation) {
@@ -263,7 +262,8 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof MetaClass && hashString().equals(MetaClass.class.getName() + ":" + ((MetaClass) o).getFullyQualifedName());
+        return o instanceof MetaClass && hashString().equals(MetaClass.class.getName()
+                + ":" + ((MetaClass) o).getFullyQualifedName());
     }
 
     @Override
