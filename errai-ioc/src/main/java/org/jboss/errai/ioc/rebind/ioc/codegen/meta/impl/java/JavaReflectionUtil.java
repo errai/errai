@@ -29,41 +29,41 @@ import java.util.List;
  */
 public class JavaReflectionUtil {
 
-    public static MetaTypeVariable[] fromTypeVariable(TypeVariable[] typeVariables) {
-        List<MetaTypeVariable> typeVariableList = new ArrayList<MetaTypeVariable>();
+  public static MetaTypeVariable[] fromTypeVariable(TypeVariable[] typeVariables) {
+    List<MetaTypeVariable> typeVariableList = new ArrayList<MetaTypeVariable>();
 
-        for (TypeVariable typeVariable : typeVariables) {
-            typeVariableList.add(new JavaReflectionTypeVariable(typeVariable));
-        }
-
-        return typeVariableList.toArray(new MetaTypeVariable[typeVariableList.size()]);
+    for (TypeVariable typeVariable : typeVariables) {
+      typeVariableList.add(new JavaReflectionTypeVariable(typeVariable));
     }
 
-    public static MetaType[] fromTypeArray(Type[] types) {
-        List<MetaType> typeList = new ArrayList<MetaType>();
+    return typeVariableList.toArray(new MetaTypeVariable[typeVariableList.size()]);
+  }
 
-        for (Type t : types) {
-            typeList.add(fromType(t));
-        }
+  public static MetaType[] fromTypeArray(Type[] types) {
+    List<MetaType> typeList = new ArrayList<MetaType>();
 
-        return typeList.toArray(new MetaType[types.length]);
+    for (Type t : types) {
+      typeList.add(fromType(t));
     }
 
-    public static MetaType fromType(Type t) {
-        if (t instanceof Class) {
-            return (MetaClassFactory.get((Class) t));
-        } else if (t instanceof TypeVariable) {
-            return new JavaReflectionTypeVariable((TypeVariable) t);
-        } else if (t instanceof ParameterizedType) {
-            return new JavaReflectionParameterizedType((ParameterizedType) t);
-        } else if (t instanceof GenericArrayType) {
-            return new JavaReflectionGenericArrayType((GenericArrayType) t);
-        } else if (t instanceof GenericDeclaration) {
-            return new JavaReflectionGenericDeclaration((GenericDeclaration) t);
-        } else if (t instanceof WildcardType) {
-            return new JavaReflectionWildcardType((WildcardType) t);
-        } else {
-            return null;
-        }
+    return typeList.toArray(new MetaType[types.length]);
+  }
+
+  public static MetaType fromType(Type t) {
+    if (t instanceof Class) {
+      return (MetaClassFactory.get((Class) t));
+    } else if (t instanceof TypeVariable) {
+      return new JavaReflectionTypeVariable((TypeVariable) t);
+    } else if (t instanceof ParameterizedType) {
+      return new JavaReflectionParameterizedType((ParameterizedType) t);
+    } else if (t instanceof GenericArrayType) {
+      return new JavaReflectionGenericArrayType((GenericArrayType) t);
+    } else if (t instanceof GenericDeclaration) {
+      return new JavaReflectionGenericDeclaration((GenericDeclaration) t);
+    } else if (t instanceof WildcardType) {
+      return new JavaReflectionWildcardType((WildcardType) t);
+    } else {
+      return null;
     }
+  }
 }

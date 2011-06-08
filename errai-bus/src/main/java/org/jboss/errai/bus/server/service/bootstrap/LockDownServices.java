@@ -22,8 +22,8 @@ import org.jboss.errai.bus.server.ServerMessageBusImpl;
  * @date: May 10, 2010
  */
 public class LockDownServices implements BootstrapExecution {
-    public void execute(BootstrapContext context) {
-        // freeze unmodifiable services
-        ((ServerMessageBusImpl) context.getBus()).finishInit();
-    }
+  public void execute(BootstrapContext context) {
+    // freeze unmodifiable services
+    ((ServerMessageBusImpl) context.getBus()).finishInit();
+  }
 }

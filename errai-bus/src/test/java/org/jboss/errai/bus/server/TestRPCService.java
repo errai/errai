@@ -26,8 +26,8 @@ import org.jboss.errai.bus.server.annotations.Service;
  */
 @Service
 public class TestRPCService implements TestRPCServiceRemote {
-    public boolean isGreaterThan(int a, int b) {
-        System.out.println("TestRPCService.isGreaterThan(" + a + ", " + b + ")");
-        return a > b;
-    }
+  public boolean isGreaterThan(int a, int b) {
+    System.out.println("TestRPCService.isGreaterThan(" + a + ", " + b + ")");
+    return a > b;
+  }
 }

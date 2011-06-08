@@ -18,6 +18,6 @@ package org.jboss.errai.bus.client.protocols;
 
 
 public enum SerializationParts {
-    PropertyPath,
-    Data
+  PropertyPath,
+  Data
 }

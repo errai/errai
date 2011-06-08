@@ -27,16 +27,16 @@ import java.util.HashSet;
  * @date: May 3, 2010
  */
 class AuthenticationRules implements BootstrapExecution {
-    private Logger log = LoggerFactory.getLogger(AuthenticationRules.class);
+  private Logger log = LoggerFactory.getLogger(AuthenticationRules.class);
 
-    public void execute(BootstrapContext context) {
-        String requireAuthenticationForAll = "errai.require_authentication_for_all";
+  public void execute(BootstrapContext context) {
+    String requireAuthenticationForAll = "errai.require_authentication_for_all";
 
-        final ErraiServiceConfigurator config = context.getConfig();
+    final ErraiServiceConfigurator config = context.getConfig();
 
-        if (config.hasProperty(requireAuthenticationForAll) && "true".equals(config.getProperty(requireAuthenticationForAll))) {
-            log.info("authentication for all requests required, adding rule ... ");
-            context.getBus().addRule("AuthorizationService", new RolesRequiredRule(new HashSet<Object>(), context.getBus()));
-        }
+    if (config.hasProperty(requireAuthenticationForAll) && "true".equals(config.getProperty(requireAuthenticationForAll))) {
+      log.info("authentication for all requests required, adding rule ... ");
+      context.getBus().addRule("AuthorizationService", new RolesRequiredRule(new HashSet<Object>(), context.getBus()));
     }
+  }
 }

@@ -23,11 +23,11 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
  */
 public abstract class AbstractStatement implements Statement {
 
-    public Context getContext() {
-        return Context.create();
-    }
-    
-    public MetaClass getType() {
-        return MetaClassFactory.get(Void.class);
-    }
+  public Context getContext() {
+    return Context.create();
+  }
+
+  public MetaClass getType() {
+    return MetaClassFactory.get(Void.class);
+  }
 }

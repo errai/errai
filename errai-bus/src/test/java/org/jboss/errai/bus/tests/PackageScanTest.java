@@ -48,7 +48,7 @@ public class PackageScanTest extends TestCase {
     File resourcesMetadata = new File(parent.getPath() + "/resources_metadata");
 
     if (!resourcesMetadata.exists())
-      throw new RuntimeException("Can't find the resource path for the test: " + resourcesMetadata.getPath() );
+      throw new RuntimeException("Can't find the resource path for the test: " + resourcesMetadata.getPath());
 
     return resourcesMetadata.getPath();
   }
@@ -108,11 +108,10 @@ public class PackageScanTest extends TestCase {
     assertFalse("Cannot find @ApplicationComponent on HelloWorldService", annotated.isEmpty());
   }
 
-  private MetaDataScanner createScanner(List<URL> urlList)
-  {
+  private MetaDataScanner createScanner(List<URL> urlList) {
     long s0 = System.currentTimeMillis();
     MetaDataScanner scanner = MetaDataScanner.createInstance(urlList);
-    System.out.println("Scan time: "+ (System.currentTimeMillis()-s0));
+    System.out.println("Scan time: " + (System.currentTimeMillis() - s0));
     return scanner;
 
   }

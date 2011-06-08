@@ -28,31 +28,31 @@ import javax.inject.Inject;
  */
 @EntryPoint
 public class SimpleBean2 {
-    public static SimpleBean2 TEST_INSTANCE;
+  public static SimpleBean2 TEST_INSTANCE;
 
-    private final FooService svc;
-    private final BarService<String> bSvc;
+  private final FooService svc;
+  private final BarService<String> bSvc;
 
-    @Inject
-    public SimpleBean2(FooService svc, BarService<String> bSvc) {
-        this.svc = svc;
-        this.bSvc = bSvc;
-    }
+  @Inject
+  public SimpleBean2(FooService svc, BarService<String> bSvc) {
+    this.svc = svc;
+    this.bSvc = bSvc;
+  }
 
-    public String getMessage() {
-        return svc.getMessage().toUpperCase();
-    }
+  public String getMessage() {
+    return svc.getMessage().toUpperCase();
+  }
 
-    public FooService getSvc() {
-        return svc;
-    }
+  public FooService getSvc() {
+    return svc;
+  }
 
-    public BarService<String> getbSvc() {
-        return bSvc;
-    }
+  public BarService<String> getbSvc() {
+    return bSvc;
+  }
 
-    @PostConstruct
-    public void doPostConstruct() {
-        TEST_INSTANCE = this;
-    }
+  @PostConstruct
+  public void doPostConstruct() {
+    TEST_INSTANCE = this;
+  }
 }

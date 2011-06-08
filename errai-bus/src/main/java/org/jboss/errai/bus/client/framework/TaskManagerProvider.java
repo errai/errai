@@ -20,5 +20,5 @@ import org.jboss.errai.bus.client.api.TaskManager;
 
 
 public interface TaskManagerProvider {
-    public TaskManager get();
+  public TaskManager get();
 }

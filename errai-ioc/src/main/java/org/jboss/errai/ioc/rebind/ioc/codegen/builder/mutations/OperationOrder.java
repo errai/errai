@@ -24,18 +24,18 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.UnaryOperator;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public enum OperationOrder {
-    Postfix {
-        @Override
-        public String render(UnaryOperator operator, Statement value, Context context) {
-            return value.generate(context) + operator.getCanonicalString();
-        }
-    },
-    Prefix {
-        @Override
-        public String render(UnaryOperator operator, Statement value, Context context) {
-            return operator.getCanonicalString() + value.generate(context);
-        }
-    };
+  Postfix {
+    @Override
+    public String render(UnaryOperator operator, Statement value, Context context) {
+      return value.generate(context) + operator.getCanonicalString();
+    }
+  },
+  Prefix {
+    @Override
+    public String render(UnaryOperator operator, Statement value, Context context) {
+      return operator.getCanonicalString() + value.generate(context);
+    }
+  };
 
-    public abstract String render(UnaryOperator operator, Statement value, Context context);
+  public abstract String render(UnaryOperator operator, Statement value, Context context);
 }

@@ -28,33 +28,33 @@ import java.util.Map;
 import java.util.Set;
 
 public class ProcessorFactory {
-    private Map<Class<? extends Annotation>, AnnotationHandler> annotationHandlers;
-    private InjectorFactory injectorFactory;
+  private Map<Class<? extends Annotation>, AnnotationHandler> annotationHandlers;
+  private InjectorFactory injectorFactory;
 
-    public ProcessorFactory(InjectorFactory factory) {
-        this.annotationHandlers = new HashMap<Class<? extends Annotation>, AnnotationHandler>();
-        this.injectorFactory = factory;
-    }
+  public ProcessorFactory(InjectorFactory factory) {
+    this.annotationHandlers = new HashMap<Class<? extends Annotation>, AnnotationHandler>();
+    this.injectorFactory = factory;
+  }
 
-    public void registerHandler(Class<? extends Annotation> annotation, AnnotationHandler handler) {
-        annotationHandlers.put(annotation, handler);
-    }
+  public void registerHandler(Class<? extends Annotation> annotation, AnnotationHandler handler) {
+    annotationHandlers.put(annotation, handler);
+  }
 
-    @SuppressWarnings({"unchecked"})
-    public void process(MetaDataScanner scanner, ProcessingContext context) {
-        for (Class<? extends Annotation> aClass : annotationHandlers.keySet()) {
-            Set<Class<?>> classes = scanner.getTypesAnnotatedWith(aClass);
-            for (Class<?> clazz : classes) {
-                if (clazz.getPackage().getName().contains("server")) {
-                  //  System.out.println("Skip: " + clazz.getName());
-                    continue;
-                }
-
-                MetaClass type = MetaClassFactory.get(context.getOracle(), clazz);
-                injectorFactory.addType(type);
-                annotationHandlers.get(aClass).handle(type, type.getAnnotation(aClass), context);
-            }
+  @SuppressWarnings({"unchecked"})
+  public void process(MetaDataScanner scanner, ProcessingContext context) {
+    for (Class<? extends Annotation> aClass : annotationHandlers.keySet()) {
+      Set<Class<?>> classes = scanner.getTypesAnnotatedWith(aClass);
+      for (Class<?> clazz : classes) {
+        if (clazz.getPackage().getName().contains("server")) {
+          //  System.out.println("Skip: " + clazz.getName());
+          continue;
         }
+
+        MetaClass type = MetaClassFactory.get(context.getOracle(), clazz);
+        injectorFactory.addType(type);
+        annotationHandlers.get(aClass).handle(type, type.getAnnotation(aClass), context);
+      }
     }
+  }
 
 }

@@ -30,217 +30,209 @@ import java.util.concurrent.ConcurrentHashMap;
 import static org.mvel2.DataConversion.addConversionHandler;
 
 public class TypeDemarshallHelper {
-    static {
-        addConversionHandler(java.sql.Date.class, new ConversionHandler() {
-            public Object convertFrom(Object o) {
-                if (o instanceof String) o = Long.parseLong((String) o);
+  static {
+    addConversionHandler(java.sql.Date.class, new ConversionHandler() {
+      public Object convertFrom(Object o) {
+        if (o instanceof String) o = Long.parseLong((String) o);
 
-                return new java.sql.Date(((Number) o).longValue());
-            }
+        return new java.sql.Date(((Number) o).longValue());
+      }
 
-            public boolean canConvertFrom(Class aClass) {
-                return Number.class.isAssignableFrom(aClass);
-            }
-        });
+      public boolean canConvertFrom(Class aClass) {
+        return Number.class.isAssignableFrom(aClass);
+      }
+    });
 
-        addConversionHandler(java.util.Date.class, new ConversionHandler() {
-            public Object convertFrom(Object o) {
-                if (o instanceof String) o = Long.parseLong((String) o);
-                return new java.util.Date(((Number) o).longValue());
-            }
+    addConversionHandler(java.util.Date.class, new ConversionHandler() {
+      public Object convertFrom(Object o) {
+        if (o instanceof String) o = Long.parseLong((String) o);
+        return new java.util.Date(((Number) o).longValue());
+      }
 
-            public boolean canConvertFrom(Class aClass) {
-                return Number.class.isAssignableFrom(aClass);
-            }
-        });
-    }
+      public boolean canConvertFrom(Class aClass) {
+        return Number.class.isAssignableFrom(aClass);
+      }
+    });
+  }
 
-    private static final Map<Class, Map<String, Serializable>> MVELDencodingCache = new ConcurrentHashMap<Class, Map<String, Serializable>>();
-
-
-    public static Object demarshallAll(Object o, DecodingContext ctx) throws Exception {
-        try {
-            if (o instanceof String) {
-                return o;
-
-            } else if (o instanceof Collection) {
-                ArrayList newList = new ArrayList(((Collection) o).size());
-                Object dep;
-                for (Object o2 : ((Collection) o)) {
-                    if ((dep = demarshallAll(o2, ctx)) instanceof UnsatisfiedForwardLookup) {
-                        ctx.addUnsatisfiedDependency(o, (UnsatisfiedForwardLookup) dep);
-                    } else {
-                        newList.add(dep);
-                    }
-                }
-
-                if (ctx.hasUnsatisfiedDependency(o)) {
-                    ctx.swapDepReference(o, newList);
-                }
-
-                return newList;
-            } else if (o instanceof Map) {
-                Map<?, ?> oMap = (Map) o;
-                if (oMap.containsKey(SerializationParts.ENCODED_TYPE)) {
-                    String objId = (String) oMap.get(SerializationParts.OBJECT_ID);
-                    boolean ref = false;
-                    if (objId != null) {
-                        if (objId.charAt(0) == '$') {
-                            ref = true;
-                            objId = objId.substring(1);
-                        }
-
-                        if (ctx.hasObject(objId)) {
-                            return ctx.getObject(objId);
-                        } else if (ref) {
-                            return new UnsatisfiedForwardLookup(objId);
-                        }
-                    }
-
-                    Class clazz = Thread.currentThread().getContextClassLoader().loadClass((String) oMap.get(SerializationParts.ENCODED_TYPE));
-                    if (clazz.isEnum()) {
-                        return Enum.valueOf(clazz, (String) oMap.get("EnumStringValue"));
-                    }
-                    else if (java.util.Date.class.isAssignableFrom(clazz))
-                    {
-                        return new java.util.Date((Long) oMap.get("Value"));
-                    }
-                    else if (java.sql.Date.class.isAssignableFrom(clazz))
-                    {
-                        return new java.sql.Date((Long) oMap.get("Value"));
-                    }
-
-                    Object newInstance = clazz.newInstance();
-                    if (objId != null) ctx.putObject(objId, newInstance);
-
-                    if (ctx.hasUnsatisfiedDependency(o)) {
-                        ctx.swapDepReference(o, newInstance);
-                    }
-
-                    Map<String, Serializable> s = MVELDencodingCache.get(clazz);
-
-                    if (s == null) {
-                        synchronized (MVELDencodingCache) {
-                            s = MVELDencodingCache.get(newInstance.getClass());
-                            if (s == null) {
-                                s = new UHashMap<String, Serializable>();
-                                for (String key : (Set<String>) oMap.keySet()) {
-                                    if (SerializationParts.ENCODED_TYPE.equals(key) || SerializationParts.OBJECT_ID.equals(key))
-                                        continue;
-                                    s.put(key, compileSetExpression(key));
-                                }
-                            }
-                            MVELDencodingCache.put(newInstance.getClass(), s);
-                        }
-                    }
-
-                    Object v;
-                    for (Map.Entry<?, ?> entry : oMap.entrySet()) {
-                        if (SerializationParts.ENCODED_TYPE.equals(entry.getKey()) || SerializationParts.OBJECT_ID.equals(entry.getKey()))
-                            continue;
-                        final Serializable cachedSetExpr = s.get(entry.getKey());
-                        if (cachedSetExpr != null) {
-                            try {
-                                if ((v = demarshallAll(entry.getValue(), ctx)) instanceof UnsatisfiedForwardLookup) {
-                                    ((UnsatisfiedForwardLookup) v).setPath((String) entry.getKey());
-                                    ctx.addUnsatisfiedDependency(newInstance, (UnsatisfiedForwardLookup) v);
-                                } else {
-                                    MVEL.executeSetExpression(cachedSetExpr, newInstance, v);
-                                }
-                            }
-                            catch (Exception e) {
-                                e.printStackTrace();
-                                throw new RuntimeException(e);
-                            }
-                        } else {
-                            try {
-                                if ((v = demarshallAll(entry.getValue(), ctx)) instanceof UnsatisfiedForwardLookup) {
-                                    ((UnsatisfiedForwardLookup) v).setPath((String) entry.getKey());
-                                    ctx.addUnsatisfiedDependency(newInstance, (UnsatisfiedForwardLookup) v);
-                                } else {
-                                    setProperty(newInstance, String.valueOf(entry.getKey()),v );
-                                }
-                            }
-                            catch (Exception e) {
-                                e.printStackTrace();
-                                throw new RuntimeException(e);
-                            }
-                        }
-                    }
+  private static final Map<Class, Map<String, Serializable>> MVELDencodingCache = new ConcurrentHashMap<Class, Map<String, Serializable>>();
 
 
-                    return newInstance;
-                }
-            }
-            return o;
+  public static Object demarshallAll(Object o, DecodingContext ctx) throws Exception {
+    try {
+      if (o instanceof String) {
+        return o;
+
+      } else if (o instanceof Collection) {
+        ArrayList newList = new ArrayList(((Collection) o).size());
+        Object dep;
+        for (Object o2 : ((Collection) o)) {
+          if ((dep = demarshallAll(o2, ctx)) instanceof UnsatisfiedForwardLookup) {
+            ctx.addUnsatisfiedDependency(o, (UnsatisfiedForwardLookup) dep);
+          } else {
+            newList.add(dep);
+          }
         }
-        catch (Exception e) {
-            throw new RuntimeException("error demarshalling encoded object:\n" + o, e);
+
+        if (ctx.hasUnsatisfiedDependency(o)) {
+          ctx.swapDepReference(o, newList);
         }
-    }
 
-    @SuppressWarnings({"unchecked"})
-    public static void resolveDependencies(DecodingContext ctx) {
-        for (Map.Entry<Object, List<UnsatisfiedForwardLookup>> entry : ctx.getUnsatisfiedDependencies().entrySet()) {
-            Iterator<UnsatisfiedForwardLookup> iter = entry.getValue().iterator();
+        return newList;
+      } else if (o instanceof Map) {
+        Map<?, ?> oMap = (Map) o;
+        if (oMap.containsKey(SerializationParts.ENCODED_TYPE)) {
+          String objId = (String) oMap.get(SerializationParts.OBJECT_ID);
+          boolean ref = false;
+          if (objId != null) {
+            if (objId.charAt(0) == '$') {
+              ref = true;
+              objId = objId.substring(1);
+            }
 
-            if (entry.getKey() instanceof Collection) {
-                while (iter.hasNext()) {
-                    ((Collection<Object>) entry.getKey()).add(ctx.getObject(iter.next().getId()));
+            if (ctx.hasObject(objId)) {
+              return ctx.getObject(objId);
+            } else if (ref) {
+              return new UnsatisfiedForwardLookup(objId);
+            }
+          }
+
+          Class clazz = Thread.currentThread().getContextClassLoader().loadClass((String) oMap.get(SerializationParts.ENCODED_TYPE));
+          if (clazz.isEnum()) {
+            return Enum.valueOf(clazz, (String) oMap.get("EnumStringValue"));
+          } else if (java.util.Date.class.isAssignableFrom(clazz)) {
+            return new java.util.Date((Long) oMap.get("Value"));
+          } else if (java.sql.Date.class.isAssignableFrom(clazz)) {
+            return new java.sql.Date((Long) oMap.get("Value"));
+          }
+
+          Object newInstance = clazz.newInstance();
+          if (objId != null) ctx.putObject(objId, newInstance);
+
+          if (ctx.hasUnsatisfiedDependency(o)) {
+            ctx.swapDepReference(o, newInstance);
+          }
+
+          Map<String, Serializable> s = MVELDencodingCache.get(clazz);
+
+          if (s == null) {
+            synchronized (MVELDencodingCache) {
+              s = MVELDencodingCache.get(newInstance.getClass());
+              if (s == null) {
+                s = new UHashMap<String, Serializable>();
+                for (String key : (Set<String>) oMap.keySet()) {
+                  if (SerializationParts.ENCODED_TYPE.equals(key) || SerializationParts.OBJECT_ID.equals(key))
+                    continue;
+                  s.put(key, compileSetExpression(key));
                 }
-            } else if (entry.getKey() instanceof Map && !((Map) entry.getKey()).containsKey(SerializationParts.ENCODED_TYPE)) {
-                UnsatisfiedForwardLookup u1 = iter.next();
-                if (!iter.hasNext()) {
-                    if (u1.getKey() != null) {
-                        if (u1.getKey() instanceof UnsatisfiedForwardLookup) {
-                            ((Map<Object, Object>) entry.getKey()).put(ctx.getObject(((UnsatisfiedForwardLookup) u1.getKey()).getId()), ctx.getObject(u1.getId()));
-                        } else {
-                            ((Map<Object, Object>) entry.getKey()).put(u1.getKey(), ctx.getObject(u1.getId()));
-                        }
-                    } else if (u1.getVal() != null) {
-                        ((Map<Object, Object>) entry.getKey()).put(ctx.getObject(u1.getId()), u1.getVal());
-                    } else {
-                        throw new RuntimeException("error resolving dependencies in payload (Map Element): " + u1.getId());
-                    }
+              }
+              MVELDencodingCache.put(newInstance.getClass(), s);
+            }
+          }
+
+          Object v;
+          for (Map.Entry<?, ?> entry : oMap.entrySet()) {
+            if (SerializationParts.ENCODED_TYPE.equals(entry.getKey()) || SerializationParts.OBJECT_ID.equals(entry.getKey()))
+              continue;
+            final Serializable cachedSetExpr = s.get(entry.getKey());
+            if (cachedSetExpr != null) {
+              try {
+                if ((v = demarshallAll(entry.getValue(), ctx)) instanceof UnsatisfiedForwardLookup) {
+                  ((UnsatisfiedForwardLookup) v).setPath((String) entry.getKey());
+                  ctx.addUnsatisfiedDependency(newInstance, (UnsatisfiedForwardLookup) v);
                 } else {
-                    UnsatisfiedForwardLookup u2 = iter.next();
-                    ((Map<Object, Object>) entry.getKey()).put(ctx.getObject(u1.getId()), ctx.getObject(u2.getId()));
+                  MVEL.executeSetExpression(cachedSetExpr, newInstance, v);
                 }
-
+              } catch (Exception e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+              }
             } else {
-                UnsatisfiedForwardLookup ufl;
-                while (iter.hasNext()) {
-                    if ((ufl = iter.next()).getPath() == null) {
-                        throw new RuntimeException("cannot satisfy dependency in object graph (path unresolvable):" + ufl.getId());
-                    } else {
-                        setProperty(entry.getKey(), ufl.getPath(), ctx.getObject(ufl.getId()));
-
-                    }
-
+              try {
+                if ((v = demarshallAll(entry.getValue(), ctx)) instanceof UnsatisfiedForwardLookup) {
+                  ((UnsatisfiedForwardLookup) v).setPath((String) entry.getKey());
+                  ctx.addUnsatisfiedDependency(newInstance, (UnsatisfiedForwardLookup) v);
+                } else {
+                  setProperty(newInstance, String.valueOf(entry.getKey()), v);
                 }
+              } catch (Exception e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+              }
             }
+          }
 
-            if (entry.getKey() instanceof UHashMap)
-                ((UHashMap) entry.getKey()).normalHashMode();
+
+          return newInstance;
         }
+      }
+      return o;
+    } catch (Exception e) {
+      throw new RuntimeException("error demarshalling encoded object:\n" + o, e);
     }
+  }
 
+  @SuppressWarnings({"unchecked"})
+  public static void resolveDependencies(DecodingContext ctx) {
+    for (Map.Entry<Object, List<UnsatisfiedForwardLookup>> entry : ctx.getUnsatisfiedDependencies().entrySet()) {
+      Iterator<UnsatisfiedForwardLookup> iter = entry.getValue().iterator();
 
-
-    public static Serializable compileSetExpression(String s) {
-        return MVEL.compileSetExpression(ensureSafe(s));
-    }
-
-    public static void setProperty(Object i, String s, Object v) {
-        MVEL.setProperty(i, ensureSafe(s), v);
-    }
-
-    public static String ensureSafe(String s) {
-        for (int i = 0; i < s.length(); i++) {
-            if (!Character.isJavaIdentifierPart(s.charAt(i))) {
-                throw new RuntimeException("illegal character in property");
+      if (entry.getKey() instanceof Collection) {
+        while (iter.hasNext()) {
+          ((Collection<Object>) entry.getKey()).add(ctx.getObject(iter.next().getId()));
+        }
+      } else if (entry.getKey() instanceof Map && !((Map) entry.getKey()).containsKey(SerializationParts.ENCODED_TYPE)) {
+        UnsatisfiedForwardLookup u1 = iter.next();
+        if (!iter.hasNext()) {
+          if (u1.getKey() != null) {
+            if (u1.getKey() instanceof UnsatisfiedForwardLookup) {
+              ((Map<Object, Object>) entry.getKey()).put(ctx.getObject(((UnsatisfiedForwardLookup) u1.getKey()).getId()), ctx.getObject(u1.getId()));
+            } else {
+              ((Map<Object, Object>) entry.getKey()).put(u1.getKey(), ctx.getObject(u1.getId()));
             }
+          } else if (u1.getVal() != null) {
+            ((Map<Object, Object>) entry.getKey()).put(ctx.getObject(u1.getId()), u1.getVal());
+          } else {
+            throw new RuntimeException("error resolving dependencies in payload (Map Element): " + u1.getId());
+          }
+        } else {
+          UnsatisfiedForwardLookup u2 = iter.next();
+          ((Map<Object, Object>) entry.getKey()).put(ctx.getObject(u1.getId()), ctx.getObject(u2.getId()));
         }
-        return s;
+
+      } else {
+        UnsatisfiedForwardLookup ufl;
+        while (iter.hasNext()) {
+          if ((ufl = iter.next()).getPath() == null) {
+            throw new RuntimeException("cannot satisfy dependency in object graph (path unresolvable):" + ufl.getId());
+          } else {
+            setProperty(entry.getKey(), ufl.getPath(), ctx.getObject(ufl.getId()));
+
+          }
+
+        }
+      }
+
+      if (entry.getKey() instanceof UHashMap)
+        ((UHashMap) entry.getKey()).normalHashMode();
     }
+  }
+
+
+  public static Serializable compileSetExpression(String s) {
+    return MVEL.compileSetExpression(ensureSafe(s));
+  }
+
+  public static void setProperty(Object i, String s, Object v) {
+    MVEL.setProperty(i, ensureSafe(s), v);
+  }
+
+  public static String ensureSafe(String s) {
+    for (int i = 0; i < s.length(); i++) {
+      if (!Character.isJavaIdentifierPart(s.charAt(i))) {
+        throw new RuntimeException("illegal character in property");
+      }
+    }
+    return s;
+  }
 }

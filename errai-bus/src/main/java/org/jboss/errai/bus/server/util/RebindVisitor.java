@@ -28,15 +28,15 @@ import com.google.gwt.user.rebind.SourceWriter;
  */
 public interface RebindVisitor {
 
-    /**
-     * Visits the specified class and rebinds it according to the annotations present
-     *
-     * @param visit   - the class to be visited
-     * @param context - provides metadata to deferred binding generators
-     * @param logger  - log messages in deferred binding generators
-     * @param writer  - supports the source file regeneration
-     */
-    public void visit(JClassType visit, GeneratorContext context, TreeLogger logger, SourceWriter writer);
+  /**
+   * Visits the specified class and rebinds it according to the annotations present
+   *
+   * @param visit   - the class to be visited
+   * @param context - provides metadata to deferred binding generators
+   * @param logger  - log messages in deferred binding generators
+   * @param writer  - supports the source file regeneration
+   */
+  public void visit(JClassType visit, GeneratorContext context, TreeLogger logger, SourceWriter writer);
 
-    public void visitError(String className, Throwable t);
+  public void visitError(String className, Throwable t);
 }

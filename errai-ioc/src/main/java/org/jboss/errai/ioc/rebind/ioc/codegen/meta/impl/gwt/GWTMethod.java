@@ -32,115 +32,115 @@ import java.util.List;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class GWTMethod extends MetaMethod {
-    private JMethod method;
-    private Annotation[] annotations;
+  private JMethod method;
+  private Annotation[] annotations;
 
-    GWTMethod(JMethod method) {
-        this.method = method;
+  GWTMethod(JMethod method) {
+    this.method = method;
 
-        try {
-            Class<?> cls = Class.forName(method.getEnclosingType().getQualifiedSourceName(), false,
-                    Thread.currentThread().getContextClassLoader());
+    try {
+      Class<?> cls = Class.forName(method.getEnclosingType().getQualifiedSourceName(), false,
+              Thread.currentThread().getContextClassLoader());
 
-            Method meth = cls.getMethod(method.getName(), InjectUtil.jParmToClass(method.getParameters()));
+      Method meth = cls.getMethod(method.getName(), InjectUtil.jParmToClass(method.getParameters()));
 
-            annotations = meth.getAnnotations();
+      annotations = meth.getAnnotations();
 
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        }
+    } catch (ClassNotFoundException e) {
+      e.printStackTrace();
+    } catch (NoSuchMethodException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public String getName() {
+    return method.getName();
+  }
+
+  public MetaClass getReturnType() {
+    return MetaClassFactory.get(method.getReturnType());
+  }
+
+  public MetaParameter[] getParameters() {
+    List<MetaParameter> parameterList = new ArrayList<MetaParameter>();
+
+    for (JParameter jParameter : method.getParameters()) {
+      parameterList.add(new GWTParameter(jParameter, this));
     }
 
-    public String getName() {
-        return method.getName();
+    return parameterList.toArray(new MetaParameter[parameterList.size()]);
+  }
+
+  public Annotation[] getAnnotations() {
+    return annotations == null ? new Annotation[0] : annotations;
+  }
+
+  public final <A extends Annotation> A getAnnotation(Class<A> annotation) {
+    for (Annotation a : getAnnotations()) {
+      if (a.annotationType().equals(annotation)) return (A) a;
     }
+    return null;
+  }
 
-    public MetaClass getReturnType() {
-        return MetaClassFactory.get(method.getReturnType());
+  public boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
+    return getAnnotation(annotation) != null;
+  }
+
+  public MetaClass getDeclaringClass() {
+    return MetaClassFactory.get(method.getEnclosingType());
+  }
+
+  @Override
+  public MetaType getGenericReturnType() {
+    JGenericType type = method.getReturnType().isGenericType();
+    if (type != null) {
+      return new GWTGenericDeclaration(type);
     }
+    return null;
+  }
 
-    public MetaParameter[] getParameters() {
-        List<MetaParameter> parameterList = new ArrayList<MetaParameter>();
+  @Override
+  public MetaType[] getGenericParameterTypes() {
+    return null;
+  }
 
-        for (JParameter jParameter : method.getParameters()) {
-            parameterList.add(new GWTParameter(jParameter, this));
-        }
+  public boolean isAbstract() {
+    return method.isAbstract();
+  }
 
-        return parameterList.toArray(new MetaParameter[parameterList.size()]);
-    }
+  public boolean isPublic() {
+    return method.isPublic();
+  }
 
-    public Annotation[] getAnnotations() {
-        return annotations == null ? new Annotation[0] : annotations;
-    }
+  public boolean isPrivate() {
+    return method.isPrivate();
+  }
 
-    public final <A extends Annotation> A getAnnotation(Class<A> annotation) {
-        for (Annotation a : getAnnotations()) {
-            if (a.annotationType().equals(annotation)) return (A) a;
-        }
-        return null;
-    }
+  public boolean isProtected() {
+    return method.isProtected();
+  }
 
-    public boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
-        return getAnnotation(annotation) != null;
-    }
+  public boolean isFinal() {
+    return method.isFinal();
+  }
 
-    public MetaClass getDeclaringClass() {
-        return MetaClassFactory.get(method.getEnclosingType());
-    }
+  public boolean isStatic() {
+    return method.isStatic();
+  }
 
-    @Override
-    public MetaType getGenericReturnType() {
-        JGenericType type = method.getReturnType().isGenericType();
-        if (type != null) {
-            return new GWTGenericDeclaration(type);
-        }
-        return null;
-    }
+  public boolean isTransient() {
+    return false;
+  }
 
-    @Override
-    public MetaType[] getGenericParameterTypes() {
-        return null;
-    }
+  public boolean isSynthetic() {
+    return false;
+  }
 
-    public boolean isAbstract() {
-        return method.isAbstract();
-    }
+  public boolean isSynchronized() {
+    return false;
+  }
 
-    public boolean isPublic() {
-        return method.isPublic();
-    }
-
-    public boolean isPrivate() {
-        return method.isPrivate();
-    }
-
-    public boolean isProtected() {
-        return method.isProtected();
-    }
-
-    public boolean isFinal() {
-        return method.isFinal();
-    }
-
-    public boolean isStatic() {
-        return method.isStatic();
-    }
-
-    public boolean isTransient() {
-        return false;
-    }
-
-    public boolean isSynthetic() {
-        return false;
-    }
-
-    public boolean isSynchronized() {
-        return false;
-    }
-
-    public MetaTypeVariable[] getTypeParameters() {
-        return GWTUtil.fromTypeVariable(method.getTypeParameters());
-    }
+  public MetaTypeVariable[] getTypeParameters() {
+    return GWTUtil.fromTypeVariable(method.getTypeParameters());
+  }
 }

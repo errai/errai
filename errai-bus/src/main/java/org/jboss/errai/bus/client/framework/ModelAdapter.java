@@ -23,7 +23,7 @@ package org.jboss.errai.bus.client.framework;
  * @date: Jun 16, 2010
  */
 public interface ModelAdapter {
-    Object clone(Object entity);
+  Object clone(Object entity);
 
-    Object merge(Object dto);
+  Object merge(Object dto);
 }

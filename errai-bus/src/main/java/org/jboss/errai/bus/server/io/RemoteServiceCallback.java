@@ -31,30 +31,30 @@ import static java.util.Collections.unmodifiableSet;
  * functions for all endpoints specified
  */
 public class RemoteServiceCallback implements MessageCallback {
-    private final Map<String, MessageCallback> endpoints;
+  private final Map<String, MessageCallback> endpoints;
 
-    /**
-     * Initializes the <tt>RemoteServiceCallback</tt> with a set of endpoints and their callback functions
-     *
-     * @param endpoints - Map of endpoints to their callback function
-     */
-    public RemoteServiceCallback(Map<String, MessageCallback> endpoints) {
-        this.endpoints = Collections.unmodifiableMap(endpoints);
-    }
+  /**
+   * Initializes the <tt>RemoteServiceCallback</tt> with a set of endpoints and their callback functions
+   *
+   * @param endpoints - Map of endpoints to their callback function
+   */
+  public RemoteServiceCallback(Map<String, MessageCallback> endpoints) {
+    this.endpoints = Collections.unmodifiableMap(endpoints);
+  }
 
-    /**
-     * Invokes all callback functions that can be associated to the <tt>message</tt>
-     *
-     * @param message - the message in question
-     */
-    public void callback(Message message) {
-        if (!endpoints.containsKey(message.getCommandType())) {
-            throw new MessageDeliveryFailure("no such endpoint '" + message.getCommandType() + "' in service: " + message.getSubject());
-        }
-        endpoints.get(message.getCommandType()).callback(message);
+  /**
+   * Invokes all callback functions that can be associated to the <tt>message</tt>
+   *
+   * @param message - the message in question
+   */
+  public void callback(Message message) {
+    if (!endpoints.containsKey(message.getCommandType())) {
+      throw new MessageDeliveryFailure("no such endpoint '" + message.getCommandType() + "' in service: " + message.getSubject());
     }
+    endpoints.get(message.getCommandType()).callback(message);
+  }
 
-    public Set<String> getEndpoints() {
-        return unmodifiableSet(endpoints.keySet());
-    }
+  public Set<String> getEndpoints() {
+    return unmodifiableSet(endpoints.keySet());
+  }
 }

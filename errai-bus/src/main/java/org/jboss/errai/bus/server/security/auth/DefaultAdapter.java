@@ -24,26 +24,26 @@ import org.jboss.errai.bus.client.api.Message;
  * development purposes, if one wishes to avoid authentication for testing.
  */
 public class DefaultAdapter implements AuthenticationAdapter {
-    public DefaultAdapter() {
-        GWT.log("Warning: DefaultAdapter being used. This provides no security.", null);
-    }
+  public DefaultAdapter() {
+    GWT.log("Warning: DefaultAdapter being used. This provides no security.", null);
+  }
 
-    public void challenge(Message message) {
+  public void challenge(Message message) {
 
-    }
+  }
 
-    public void process(Message message) {
-    }
+  public void process(Message message) {
+  }
 
-    public boolean endSession(Message message) {
-        return false;
-    }
+  public boolean endSession(Message message) {
+    return false;
+  }
 
-    public boolean isAuthenticated(Message message) {
-        return true;
-    }
+  public boolean isAuthenticated(Message message) {
+    return true;
+  }
 
-    public boolean requiresAuthorization(Message message) {
-        return false;
-    }
+  public boolean requiresAuthorization(Message message) {
+    return false;
+  }
 }

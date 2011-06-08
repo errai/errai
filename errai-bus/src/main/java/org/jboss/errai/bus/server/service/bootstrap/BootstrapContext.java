@@ -31,46 +31,46 @@ import java.util.Stack;
  * @date: May 3, 2010
  */
 public class BootstrapContext {
-    private final ServerMessageBus bus;
-    private final ErraiServiceConfigurator config;
-    private final ErraiService service;
+  private final ServerMessageBus bus;
+  private final ErraiServiceConfigurator config;
+  private final ErraiService service;
 
-    private Stack<Runnable> deferredTasks = new Stack<Runnable>();
+  private Stack<Runnable> deferredTasks = new Stack<Runnable>();
 
-    private Logger log = LoggerFactory.getLogger(BootstrapContext.class);
+  private Logger log = LoggerFactory.getLogger(BootstrapContext.class);
 
-    public BootstrapContext(ErraiService service, ServerMessageBus bus, ErraiServiceConfigurator config) {
-        this.service = service;
-        this.bus = bus;
-        this.config = config;
+  public BootstrapContext(ErraiService service, ServerMessageBus bus, ErraiServiceConfigurator config) {
+    this.service = service;
+    this.bus = bus;
+    this.config = config;
+  }
+
+  public ServerMessageBus getBus() {
+    return bus;
+  }
+
+  public ErraiServiceConfigurator getConfig() {
+    return config;
+  }
+
+  public MetaDataScanner getScanner() {
+    return config.getMetaDataScanner();
+  }
+
+  public void defer(Runnable task) {
+    this.deferredTasks.push(task);
+  }
+
+  public ErraiService getService() {
+    return service;
+  }
+
+  void executeDeferred() {
+    log.info("Running deferred bootstrap tasks ...");
+
+    while (!deferredTasks.isEmpty()) {
+      Runnable task = deferredTasks.pop();
+      task.run();
     }
-
-    public ServerMessageBus getBus() {
-        return bus;
-    }
-
-    public ErraiServiceConfigurator getConfig() {
-        return config;
-    }
-
-    public MetaDataScanner getScanner() {
-        return config.getMetaDataScanner();
-    }
-
-    public void defer(Runnable task) {
-        this.deferredTasks.push(task);
-    }
-
-    public ErraiService getService() {
-        return service;
-    }
-
-    void executeDeferred() {
-        log.info("Running deferred bootstrap tasks ...");
-
-        while (!deferredTasks.isEmpty()) {
-            Runnable task = deferredTasks.pop();
-            task.run();
-        }
-    }
+  }
 }

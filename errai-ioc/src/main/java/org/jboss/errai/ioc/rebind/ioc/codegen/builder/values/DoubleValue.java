@@ -21,12 +21,12 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder.values;
  */
 public class DoubleValue extends LiteralValue<Double> {
 
-    public DoubleValue(Double value) {
-        super(value);
-    }
+  public DoubleValue(Double value) {
+    super(value);
+  }
 
-    @Override
-    public String getCanonicalString() {
-        return getValue().toString() + "d";
-    }
+  @Override
+  public String getCanonicalString() {
+    return getValue().toString() + "d";
+  }
 }

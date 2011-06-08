@@ -26,11 +26,11 @@ import org.jboss.errai.ioc.client.api.TypeProvider;
  */
 @IOCProvider
 public class FooServiceProvider implements TypeProvider<FooService> {
-    public FooService provide() {
-          return new FooService() {
-              public String getMessage() {
-                  return "foo";
-              }
-          };
-    }
+  public FooService provide() {
+    return new FooService() {
+      public String getMessage() {
+        return "foo";
+      }
+    };
+  }
 }

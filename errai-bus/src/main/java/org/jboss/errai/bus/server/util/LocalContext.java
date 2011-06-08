@@ -25,118 +25,118 @@ import java.util.Map;
 
 
 public class LocalContext implements Context {
-    private String context;
-    private SubContext ctx;
-    private QueueSession session;
+  private String context;
+  private SubContext ctx;
+  private QueueSession session;
 
-    public static LocalContext get(QueueSession session) {
-        return new LocalContext("<NoSession>", session);
+  public static LocalContext get(QueueSession session) {
+    return new LocalContext("<NoSession>", session);
+  }
+
+  public static LocalContext get(Message message) {
+    return new LocalContext(message.getSubject(), message.getResource(QueueSession.class, "Session"));
+  }
+
+  private LocalContext(String context, QueueSession session) {
+    if (session == null) {
+      throw new RuntimeException("no session");
+    }
+    this.context = createContextString(session.getSessionId() + "/" + context);
+    this.session = session;
+    this.ctx = getLocalContext();
+  }
+
+  public void setAttribute(Enum<?> key, Object value) {
+    ctx.setAttribute(key.toString(), value);
+  }
+
+  public void setAttribute(Class<?> typeIndexed, Object value) {
+    if (ctx.hasAttribute(typeIndexed.getName())) {
+      throw new IllegalStateException("The type-indexed property already exists: " + typeIndexed.getName());
     }
 
-    public static LocalContext get(Message message) {
-        return new LocalContext(message.getSubject(), message.getResource(QueueSession.class, "Session"));
+    ctx.setAttribute(typeIndexed.getName(), value);
+  }
+
+  public void setAttribute(String param, Object value) {
+    ctx.setAttribute(param, value);
+  }
+
+  public <T> T getAttribute(Class<T> type, Enum<?> key) {
+    return ctx.getAttribute(type, key.toString());
+  }
+
+  public <T> T getAttribute(Class<T> type, Class<?> typeIndexed) {
+    return ctx.getAttribute(type, typeIndexed.getName());
+  }
+
+  public <T> T getAttribute(Class<T> type) {
+    return getAttribute(type, type);
+  }
+
+  public <T> T getAttribute(Class<T> type, String param) {
+    return ctx.getAttribute(type, param);
+  }
+
+  public Collection<String> getAttributeNames() {
+    return ctx.getAttributeNames();
+  }
+
+  public boolean removeAttribute(Enum<?> key) {
+    return ctx.removeAttribute(key.toString());
+  }
+
+  public boolean removeAttribute(Class<?> typeIndexed) {
+    return ctx.removeAttribute(typeIndexed.getName());
+  }
+
+  public boolean removeAttribute(String param) {
+    return ctx.removeAttribute(param);
+  }
+
+  public QueueSession getSession() {
+    return session;
+  }
+
+  public void destroy() {
+    session.removeAttribute(context);
+  }
+
+  private SubContext getLocalContext() {
+    synchronized (this) {
+      SubContext ctx = session.getAttribute(SubContext.class, context);
+      if (ctx == null) {
+        session.setAttribute(context, ctx = new SubContext());
+      }
+      return ctx;
+    }
+  }
+
+  private static String createContextString(String context) {
+    return "LocalContext://" + context;
+  }
+
+  private static final class SubContext {
+    private Map<String, Object> contextAttributes = new HashMap<String, Object>();
+
+    public void setAttribute(String attribute, Object value) {
+      contextAttributes.put(attribute, value);
     }
 
-    private LocalContext(String context, QueueSession session) {
-        if (session == null) {
-            throw new RuntimeException("no session");
-        }
-        this.context = createContextString(session.getSessionId() + "/" + context);
-        this.session = session;
-        this.ctx = getLocalContext();
+    public <T> T getAttribute(Class<T> type, String attribute) {
+      return (T) contextAttributes.get(attribute);
     }
 
-    public void setAttribute(Enum<?> key, Object value) {
-        ctx.setAttribute(key.toString(), value);
+    public boolean hasAttribute(String attribute) {
+      return contextAttributes.containsKey(attribute);
     }
 
-    public void setAttribute(Class<?> typeIndexed, Object value) {
-        if (ctx.hasAttribute(typeIndexed.getName())) {
-            throw new IllegalStateException("The type-indexed property already exists: " + typeIndexed.getName());
-        }
-
-        ctx.setAttribute(typeIndexed.getName(), value);
-    }
-
-    public void setAttribute(String param, Object value) {
-        ctx.setAttribute(param, value);
-    }
-
-    public <T> T getAttribute(Class<T> type, Enum<?> key) {
-        return ctx.getAttribute(type, key.toString());
-    }
-
-    public <T> T getAttribute(Class<T> type, Class<?> typeIndexed) {
-        return ctx.getAttribute(type, typeIndexed.getName());
-    }
-
-    public <T> T getAttribute(Class<T> type) {
-        return getAttribute(type, type);
-    }
-
-    public <T> T getAttribute(Class<T> type, String param) {
-        return ctx.getAttribute(type, param);
+    public boolean removeAttribute(String attribute) {
+      return contextAttributes.remove(attribute) != null;
     }
 
     public Collection<String> getAttributeNames() {
-        return ctx.getAttributeNames();
+      return contextAttributes.keySet();
     }
-
-    public boolean removeAttribute(Enum<?> key) {
-        return ctx.removeAttribute(key.toString());
-    }
-
-    public boolean removeAttribute(Class<?> typeIndexed) {
-        return ctx.removeAttribute(typeIndexed.getName());
-    }
-
-    public boolean removeAttribute(String param) {
-        return ctx.removeAttribute(param);
-    }
-
-    public QueueSession getSession() {
-        return session;
-    }
-
-    public void destroy() {
-        session.removeAttribute(context);
-    }
-
-    private SubContext getLocalContext() {
-        synchronized (this) {
-            SubContext ctx = session.getAttribute(SubContext.class, context);
-            if (ctx == null) {
-                session.setAttribute(context, ctx = new SubContext());
-            }
-            return ctx;
-        }
-    }
-
-    private static String createContextString(String context) {
-        return "LocalContext://" + context;
-    }
-
-    private static final class SubContext {
-        private Map<String, Object> contextAttributes = new HashMap<String, Object>();
-
-        public void setAttribute(String attribute, Object value) {
-            contextAttributes.put(attribute, value);
-        }
-
-        public <T> T getAttribute(Class<T> type, String attribute) {
-            return (T) contextAttributes.get(attribute);
-        }
-
-        public boolean hasAttribute(String attribute) {
-            return contextAttributes.containsKey(attribute);
-        }
-
-        public boolean removeAttribute(String attribute) {
-            return contextAttributes.remove(attribute) != null;
-        }
-
-        public Collection<String> getAttributeNames() {
-            return contextAttributes.keySet();
-        }
-    }
+  }
 }

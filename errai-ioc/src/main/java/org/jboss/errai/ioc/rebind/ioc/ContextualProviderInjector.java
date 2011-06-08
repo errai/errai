@@ -22,79 +22,79 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.*;
 import java.lang.annotation.Annotation;
 
 public class ContextualProviderInjector extends TypeInjector {
-    private final Injector providerInjector;
+  private final Injector providerInjector;
 
-    public ContextualProviderInjector(MetaClass type, MetaClass providerType) {
-        super(type);
-        this.providerInjector = new TypeInjector(providerType);
+  public ContextualProviderInjector(MetaClass type, MetaClass providerType) {
+    super(type);
+    this.providerInjector = new TypeInjector(providerType);
+  }
+
+  @Override
+  public String getType(InjectionContext injectContext, InjectionPoint injectionPoint) {
+    injected = true;
+
+    MetaClass type = null;
+    MetaParameterizedType pType = null;
+
+    switch (injectionPoint.getTaskType()) {
+      case PrivateField:
+      case Field:
+        MetaField field = injectionPoint.getField();
+        type = field.getType();
+
+        pType = type.getParameterizedType();
+
+        break;
+
+      case Parameter:
+        MetaParameter parm = injectionPoint.getParm();
+        type = parm.getType();
+
+        pType = type.getParameterizedType();
+        break;
     }
 
-    @Override
-    public String getType(InjectionContext injectContext, InjectionPoint injectionPoint) {
-        injected = true;
+    StringBuilder sb = new StringBuilder();
 
-        MetaClass type = null;
-        MetaParameterizedType pType = null;
+    if (pType == null) {
+      sb.append(providerInjector.getType(injectContext, injectionPoint)).append(".provide(new Class[] {}");
+    } else {
+      MetaType[] typeArgs = pType.getTypeParameters();
+      sb.append("(").append(type.getFullyQualifedName()).append("<")
+              .append(typeArgs[0].toString()).append(">) ");
 
-        switch (injectionPoint.getTaskType()) {
-            case PrivateField:
-            case Field:
-                MetaField field = injectionPoint.getField();
-                type = field.getType();
+      sb.append(providerInjector.getType(injectContext, injectionPoint)).append(".provide(new Class[] {");
+      for (int i = 0; i < typeArgs.length; i++) {
+        sb.append(typeArgs[i].toString()).append(".class");
 
-                pType = type.getParameterizedType();
-
-                break;
-
-            case Parameter:
-                MetaParameter parm = injectionPoint.getParm();
-                type = parm.getType();
-
-                pType = type.getParameterizedType();
-                break;
+        if ((i + 1) < typeArgs.length) {
+          sb.append(", ");
         }
+      }
+      sb.append("}");
 
-        StringBuilder sb = new StringBuilder();
-
-        if (pType == null) {
-            sb.append(providerInjector.getType(injectContext, injectionPoint)).append(".provide(new Class[] {}");
-        } else {
-            MetaType[] typeArgs = pType.getTypeParameters();
-            sb.append("(").append(type.getFullyQualifedName()).append("<")
-                    .append(typeArgs[0].toString()).append(">) ");
-
-            sb.append(providerInjector.getType(injectContext, injectionPoint)).append(".provide(new Class[] {");
-            for (int i = 0; i < typeArgs.length; i++) {
-                sb.append(typeArgs[i].toString()).append(".class");
-
-                if ((i + 1) < typeArgs.length) {
-                    sb.append(", ");
-                }
-            }
-            sb.append("}");
-
-            Annotation[] qualifiers = injectionPoint.getQualifiers();
-            if (qualifiers.length != 0) {
-                sb.append(", new java.lang.annotation.Annotation[] {");
-                for (int i = 0; i < qualifiers.length; i++) {
-                    sb.append("\nnew java.lang.annotation.Annotation() {")
-                            .append("\npublic Class<? extends java.lang.annotation.Annotation> annotationType() {\n return ")
-                            .append(qualifiers[i].annotationType().getName()).append(".class").append(";\n}\n}");
-                    if ((i + 1) < qualifiers.length) sb.append(",");
-                }
-                sb.append("\n}");
-            } else {
-                sb.append(", null");
-            }
+      Annotation[] qualifiers = injectionPoint.getQualifiers();
+      if (qualifiers.length != 0) {
+        sb.append(", new java.lang.annotation.Annotation[] {");
+        for (int i = 0; i < qualifiers.length; i++) {
+          sb.append("\nnew java.lang.annotation.Annotation() {")
+                  .append("\npublic Class<? extends java.lang.annotation.Annotation> annotationType() {\n return ")
+                  .append(qualifiers[i].annotationType().getName()).append(".class").append(";\n}\n}");
+          if ((i + 1) < qualifiers.length) sb.append(",");
         }
-        sb.append(")");
-
-        return IOCGenerator.debugOutput(sb);
+        sb.append("\n}");
+      } else {
+        sb.append(", null");
+      }
     }
+    sb.append(")");
 
-    @Override
-    public String instantiateOnly(InjectionContext injectContext, InjectionPoint injectionPoint) {
-        injected = true;
-        return providerInjector.getType(injectContext, injectionPoint);
-    }
+    return IOCGenerator.debugOutput(sb);
+  }
+
+  @Override
+  public String instantiateOnly(InjectionContext injectContext, InjectionPoint injectionPoint) {
+    injected = true;
+    return providerInjector.getType(injectContext, injectionPoint);
+  }
 }

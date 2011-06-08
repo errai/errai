@@ -21,16 +21,16 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder.values;
  */
 public class ByteValue extends LiteralValue<Byte> {
 
-    public ByteValue(Byte value) {
-        super(value);
-    }
+  public ByteValue(Byte value) {
+    super(value);
+  }
 
-    public ByteValue(Integer value) {
-        super(value.byteValue());
-    }
+  public ByteValue(Integer value) {
+    super(value.byteValue());
+  }
 
-    @Override
-    public String getCanonicalString() {
-        return String.valueOf(getValue().intValue());
-    }
+  @Override
+  public String getCanonicalString() {
+    return String.valueOf(getValue().intValue());
+  }
 }

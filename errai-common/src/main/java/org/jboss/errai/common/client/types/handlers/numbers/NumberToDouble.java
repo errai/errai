@@ -20,7 +20,7 @@ import org.jboss.errai.common.client.types.DecodingContext;
 import org.jboss.errai.common.client.types.TypeHandler;
 
 public class NumberToDouble implements TypeHandler<Number, Double> {
-    public Double getConverted(Number in, DecodingContext ctx) {
-        return in.doubleValue();
-    }
+  public Double getConverted(Number in, DecodingContext ctx) {
+    return in.doubleValue();
+  }
 }

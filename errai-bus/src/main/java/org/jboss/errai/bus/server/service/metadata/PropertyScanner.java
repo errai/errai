@@ -26,17 +26,15 @@ import java.util.Properties;
 
 /**
  * Collects all property files and merges them under a single key
- * 
+ *
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Aug 10, 2010
  */
-public class PropertyScanner extends AbstractScanner
-{
+public class PropertyScanner extends AbstractScanner {
   Predicate<String> predicate;
   Map<String, Properties> properties = new HashMap<String, Properties>();
-    
-  public PropertyScanner(Predicate<String> predicate)
-  {
+
+  public PropertyScanner(Predicate<String> predicate) {
     this.predicate = predicate;
   }
 
@@ -47,27 +45,22 @@ public class PropertyScanner extends AbstractScanner
   public void scan(Vfs.File file) {
 
     String key = file.getName();
-    if(null==properties.get(key))
-    {
+    if (null == properties.get(key)) {
       properties.put(key, new Properties());
     }
 
-    try
-    {
+    try {
       properties.get(key).load(file.getInputStream());
-    }
-    catch (IOException e)
-    {
-      throw new RuntimeException("Failed to load properties: "+file.getFullPath(), e);
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to load properties: " + file.getFullPath(), e);
     }
   }
 
   public void scan(Object cls) {
     throw new UnsupportedOperationException(); //shouldn't get here
   }
-  
-  public Map<String, Properties> getProperties()
-  {
+
+  public Map<String, Properties> getProperties() {
     return properties;
   }
 }

@@ -20,17 +20,17 @@ package org.jboss.errai.bus.client.framework;
  * A simple interface for defining a message.
  */
 public interface MarshalledMessage {
-    /**
-     * The target subject
-     *
-     * @return -
-     */
-    public String getSubject();
+  /**
+   * The target subject
+   *
+   * @return -
+   */
+  public String getSubject();
 
-    /**
-     * The message data.
-     *
-     * @return -
-     */
-    public Object getMessage();
+  /**
+   * The message data.
+   *
+   * @return -
+   */
+  public Object getMessage();
 }

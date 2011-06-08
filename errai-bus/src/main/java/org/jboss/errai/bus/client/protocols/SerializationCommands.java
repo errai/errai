@@ -17,7 +17,7 @@
 package org.jboss.errai.bus.client.protocols;
 
 public enum SerializationCommands {
-    UpdateRemote,
-    GetLeaf,
-    Resync
+  UpdateRemote,
+  GetLeaf,
+  Resync
 }

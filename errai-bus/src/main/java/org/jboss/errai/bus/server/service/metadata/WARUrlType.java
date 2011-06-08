@@ -26,21 +26,21 @@ import java.net.URL;
  * An {@link org.reflections.vfs.Vfs.UrlType} for scanning web application archives.
  * It simply delegates to {@link org.reflections.vfs.SystemDir} and
  * {@link org.reflections.vfs.ZipDir} respectively
- * 
+ *
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Aug 9, 2010
  */
 public class WARUrlType implements Vfs.UrlType {
-    public boolean matches(URL url) {
-        return url.getProtocol().equals("file") && url.toExternalForm().endsWith(".war");
-    }
+  public boolean matches(URL url) {
+    return url.getProtocol().equals("file") && url.toExternalForm().endsWith(".war");
+  }
 
-    public Vfs.Dir createDir(URL url) {
-        File file = new File(url.toExternalForm());
+  public Vfs.Dir createDir(URL url) {
+    File file = new File(url.toExternalForm());
 
-        if (file.isDirectory())
-            return new SystemDir(url);
-        else
-            return new ZipDir(url);
-    }
+    if (file.isDirectory())
+      return new SystemDir(url);
+    else
+      return new ZipDir(url);
+  }
 }

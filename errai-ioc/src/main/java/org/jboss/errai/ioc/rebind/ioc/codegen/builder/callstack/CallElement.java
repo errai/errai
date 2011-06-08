@@ -25,11 +25,11 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface CallElement {
-    public void handleCall(CallWriter writer, Context context, Statement statement);
+  public void handleCall(CallWriter writer, Context context, Statement statement);
 
-    public void setNext(CallElement element);
+  public void setNext(CallElement element);
 
-    public CallElement getNext();
+  public CallElement getNext();
 
-    public MetaClass getResultType();
+  public MetaClass getResultType();
 }

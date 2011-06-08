@@ -25,10 +25,10 @@ package org.jboss.errai.bus.client.api;
  */
 public interface HasEncoded {
 
-    /**
-     * Gets the encoded JSON string
-     *
-     * @return the encoded JSON string
-     */
-    public String getEncoded();
+  /**
+   * Gets the encoded JSON string
+   *
+   * @return the encoded JSON string
+   */
+  public String getEncoded();
 }

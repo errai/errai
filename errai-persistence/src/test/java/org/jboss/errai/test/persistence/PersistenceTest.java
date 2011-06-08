@@ -33,36 +33,30 @@ import static org.junit.Assert.assertTrue;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Jun 11, 2010
  */
-public class PersistenceTest extends CommonTestSetup
-{
+public class PersistenceTest extends CommonTestSetup {
 
   @Test
-  public void testReadWriteEntity()
-  {
+  public void testReadWriteEntity() {
     Session session = sessionFactory.openSession();
     String userId = createTestUser(session);
 
     Transaction tx = session.beginTransaction();
 
-    try
-    {
+    try {
       User user = loadUser(session, userId);
 
       Query q2 = session.createQuery("from User");
       List<User> users = q2.list();
       assertEquals(1, users.size());
-      assertTrue(user.getOrders().size()==1);
-    }
-    catch (HibernateException e)
-    {
+      assertTrue(user.getOrders().size() == 1);
+    } catch (HibernateException e) {
       tx.rollback();
     }
 
   }
 
   @Test(expected = org.hibernate.LazyInitializationException.class)
-  public void testLazyWithoutPersistenceContext()
-  {
+  public void testLazyWithoutPersistenceContext() {
     Session session = sessionFactory.openSession();
     String userId = createTestUser(session);
     session.close();

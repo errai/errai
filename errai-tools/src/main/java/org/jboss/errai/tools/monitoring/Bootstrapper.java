@@ -19,26 +19,26 @@ package org.jboss.errai.tools.monitoring;
 import org.jboss.errai.bus.client.framework.MessageBus;
 
 public class Bootstrapper {
-    private MessageBus bus;
-    private ActivityProcessor processor;
-    private MainMonitorGUI mainMonitorGUI;
-    private Dataservice dataservice;
+  private MessageBus bus;
+  private ActivityProcessor processor;
+  private MainMonitorGUI mainMonitorGUI;
+  private Dataservice dataservice;
 
 
-    public Bootstrapper(ActivityProcessor processor, MessageBus bus) {
-        System.setProperty("apple.laf.useScreenMenuBar", "true");
+  public Bootstrapper(ActivityProcessor processor, MessageBus bus) {
+    System.setProperty("apple.laf.useScreenMenuBar", "true");
 
-        this.bus = bus;
-        this.processor = processor;
-        dataservice = new Dataservice();
+    this.bus = bus;
+    this.processor = processor;
+    dataservice = new Dataservice();
 
-        mainMonitorGUI = new MainMonitorGUI(dataservice, bus);
-    }
+    mainMonitorGUI = new MainMonitorGUI(dataservice, bus);
+  }
 
-    public void init() {
-        dataservice.attach(processor);
-        mainMonitorGUI.attach(processor);
+  public void init() {
+    dataservice.attach(processor);
+    mainMonitorGUI.attach(processor);
 
-        mainMonitorGUI.setVisible(true);
-    }
+    mainMonitorGUI.setVisible(true);
+  }
 }

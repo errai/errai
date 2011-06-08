@@ -20,68 +20,68 @@ import org.jboss.errai.bus.server.annotations.ExposeEntity;
 
 @ExposeEntity
 public class Stock {
-    private String ticker;
-    private String companyName;
-    private double openingPrice;
-    private double lastTrade;
-    private double volume;
-    private double volumeWeighting;
+  private String ticker;
+  private String companyName;
+  private double openingPrice;
+  private double lastTrade;
+  private double volume;
+  private double volumeWeighting;
 
-    public Stock() {
-    }
+  public Stock() {
+  }
 
-    public Stock(String ticker, String companyName, double lastTrade) {
-        this.ticker = ticker;
-        this.companyName = companyName;
-        this.openingPrice = this.lastTrade = lastTrade;
-        volumeWeighting = openingPrice / 300;
-    }
+  public Stock(String ticker, String companyName, double lastTrade) {
+    this.ticker = ticker;
+    this.companyName = companyName;
+    this.openingPrice = this.lastTrade = lastTrade;
+    volumeWeighting = openingPrice / 300;
+  }
 
-    public String getTicker() {
-        return ticker;
-    }
+  public String getTicker() {
+    return ticker;
+  }
 
-    public void setTicker(String ticker) {
-        this.ticker = ticker;
-    }
+  public void setTicker(String ticker) {
+    this.ticker = ticker;
+  }
 
-    public String getCompanyName() {
-        return companyName;
-    }
+  public String getCompanyName() {
+    return companyName;
+  }
 
-    public void setCompanyName(String companyName) {
-        this.companyName = companyName;
-    }
+  public void setCompanyName(String companyName) {
+    this.companyName = companyName;
+  }
 
-    public double getOpeningPrice() {
-        return openingPrice;
-    }
+  public double getOpeningPrice() {
+    return openingPrice;
+  }
 
-    public void setOpeningPrice(double openingPrice) {
-        this.openingPrice = openingPrice;
-    }
+  public void setOpeningPrice(double openingPrice) {
+    this.openingPrice = openingPrice;
+  }
 
-    public double getLastTrade() {
-        return lastTrade;
-    }
+  public double getLastTrade() {
+    return lastTrade;
+  }
 
-    public void setLastTrade(double lastTrade) {
-        this.lastTrade = lastTrade;
-    }
+  public void setLastTrade(double lastTrade) {
+    this.lastTrade = lastTrade;
+  }
 
-    public double getVolume() {
-        return volume;
-    }
+  public double getVolume() {
+    return volume;
+  }
 
-    public void setVolume(double volume) {
-        this.volume = volume;
-    }
+  public void setVolume(double volume) {
+    this.volume = volume;
+  }
 
-    public void setVolumeWeighting(double volumeWeighting) {
-        this.volumeWeighting = volumeWeighting;
-    }
+  public void setVolumeWeighting(double volumeWeighting) {
+    this.volumeWeighting = volumeWeighting;
+  }
 
-    public double getVolumeWeighting() {
-        return volumeWeighting;
-    }
+  public double getVolumeWeighting() {
+    return volumeWeighting;
+  }
 }

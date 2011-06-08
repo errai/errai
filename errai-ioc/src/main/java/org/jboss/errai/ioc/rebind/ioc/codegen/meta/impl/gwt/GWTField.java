@@ -67,7 +67,7 @@ public class GWTField extends MetaField {
   }
 
   public Annotation[] getAnnotations() {
-      return annotations == null ? new Annotation[0] : annotations;
+    return annotations == null ? new Annotation[0] : annotations;
   }
 
   public <A extends Annotation> A getAnnotation(Class<A> annotation) {

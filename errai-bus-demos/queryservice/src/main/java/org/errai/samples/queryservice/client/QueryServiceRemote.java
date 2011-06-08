@@ -20,6 +20,7 @@ import org.jboss.errai.bus.server.annotations.Remote;
 
 @Remote
 public interface QueryServiceRemote {
-    public String[] query(String queryString);
-    public String append(String... arg);
+  public String[] query(String queryString);
+
+  public String append(String... arg);
 }

@@ -19,120 +19,115 @@ package org.errai.samples.stockdemo.client;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Label;
-import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.api.base.MessageBuilder;
 
 public class EquityRenderer {
-    private FlexTable table;
-    private int row;
+  private FlexTable table;
+  private int row;
 
-    private String ticker;
-    private Label tickerLabel = new Label();
+  private String ticker;
+  private Label tickerLabel = new Label();
 
-    private String companyName;
-    private Label companyNameLabel = new Label();
+  private String companyName;
+  private Label companyNameLabel = new Label();
 
-    private double openingPrice;
-    private Label openingPriceLabel = new Label();
+  private double openingPrice;
+  private Label openingPriceLabel = new Label();
 
-    private double lastTrade;
-    private Label lastTradeLabel = new Label();
+  private double lastTrade;
+  private Label lastTradeLabel = new Label();
 
-    private double volume;
-    private Label volumeLabel = new Label();
+  private double volume;
+  private Label volumeLabel = new Label();
 
-    private Label changeLabel = new Label();
+  private Label changeLabel = new Label();
 
-    private NumberFormat format = NumberFormat.getFormat("###,###.##");
+  private NumberFormat format = NumberFormat.getFormat("###,###.##");
 
-    private EquityRenderer(FlexTable table, int row, String ticker, String companyName, double openingPrice, double lastTrade, double volume) {
-        this.table = table;
-        this.row = row;
-        setTicker(ticker);
-        setCompanyName(companyName);
-        setOpeningPrice(openingPrice);
-        setLastTrade(lastTrade);
-        setVolume(volume);
+  private EquityRenderer(FlexTable table, int row, String ticker, String companyName, double openingPrice, double lastTrade, double volume) {
+    this.table = table;
+    this.row = row;
+    setTicker(ticker);
+    setCompanyName(companyName);
+    setOpeningPrice(openingPrice);
+    setLastTrade(lastTrade);
+    setVolume(volume);
 
-        renderOut();
+    renderOut();
+  }
+
+  private void renderOut() {
+    table.setWidget(row, 0, tickerLabel);
+    table.setWidget(row, 1, companyNameLabel);
+    table.setWidget(row, 2, volumeLabel);
+    table.setWidget(row, 3, openingPriceLabel);
+    table.setWidget(row, 4, lastTradeLabel);
+    table.setWidget(row, 5, changeLabel);
+  }
+
+  public static EquityRenderer newEquity(FlexTable table, int row, String ticker) {
+    return new EquityRenderer(table, row, ticker, null, 0, 0, 0);
+  }
+
+  public String getTicker() {
+    return ticker;
+  }
+
+  public void setTicker(String ticker) {
+    this.ticker = ticker;
+    tickerLabel.setText(ticker);
+  }
+
+  public String getCompanyName() {
+    return companyName;
+  }
+
+  public void setCompanyName(String companyName) {
+    this.companyName = companyName;
+    companyNameLabel.setText(companyName);
+  }
+
+  public double getOpeningPrice() {
+    return openingPrice;
+  }
+
+  public void setOpeningPrice(double openingPrice) {
+    this.openingPrice = openingPrice;
+    openingPriceLabel.setText(format.format(openingPrice));
+  }
+
+  public double getLastTrade() {
+    return lastTrade;
+  }
+
+  public void setLastTrade(double lastTrade) {
+    if (lastTrade < this.lastTrade) {
+      lastTradeLabel.getElement().getStyle().setProperty("backgroundColor", "red");
+    } else if (lastTrade == this.lastTrade) {
+      lastTradeLabel.getElement().getStyle().setProperty("backgroundColor", "transparent");
+    } else {
+      lastTradeLabel.getElement().getStyle().setProperty("backgroundColor", "green");
     }
 
-    private void renderOut() {
-        table.setWidget(row, 0, tickerLabel);
-        table.setWidget(row, 1, companyNameLabel);
-        table.setWidget(row, 2, volumeLabel);
-        table.setWidget(row, 3, openingPriceLabel);
-        table.setWidget(row, 4, lastTradeLabel);
-        table.setWidget(row, 5, changeLabel);
+    this.lastTrade = lastTrade;
+    lastTradeLabel.setText(format.format(lastTrade));
+
+    double change = lastTrade - openingPrice;
+
+    if (change >= 0) {
+      changeLabel.getElement().getStyle().setProperty("color", "green");
+    } else {
+      changeLabel.getElement().getStyle().setProperty("color", "red");
     }
 
-    public static EquityRenderer newEquity(FlexTable table, int row, String ticker) {
-        return new EquityRenderer(table, row, ticker, null, 0, 0, 0);
-    }
+    changeLabel.setText(format.format(lastTrade - openingPrice));
+  }
 
-    public String getTicker() {
-        return ticker;
-    }
+  public double getVolume() {
+    return volume;
+  }
 
-    public void setTicker(String ticker) {
-        this.ticker = ticker;
-        tickerLabel.setText(ticker);
-    }
-
-    public String getCompanyName() {
-        return companyName;
-    }
-
-    public void setCompanyName(String companyName) {
-        this.companyName = companyName;
-        companyNameLabel.setText(companyName);
-    }
-
-    public double getOpeningPrice() {
-        return openingPrice;
-    }
-
-    public void setOpeningPrice(double openingPrice) {
-        this.openingPrice = openingPrice;
-        openingPriceLabel.setText(format.format(openingPrice));
-    }
-
-    public double getLastTrade() {
-        return lastTrade;
-    }
-
-    public void setLastTrade(double lastTrade) {
-        if (lastTrade < this.lastTrade) {
-            lastTradeLabel.getElement().getStyle().setProperty("backgroundColor", "red");
-        }
-        else if (lastTrade == this.lastTrade) {
-            lastTradeLabel.getElement().getStyle().setProperty("backgroundColor", "transparent");
-        }
-        else {
-            lastTradeLabel.getElement().getStyle().setProperty("backgroundColor", "green");
-        }
-
-        this.lastTrade = lastTrade;
-        lastTradeLabel.setText(format.format(lastTrade));
-
-        double change = lastTrade - openingPrice;
-
-        if (change >= 0) {
-            changeLabel.getElement().getStyle().setProperty("color", "green");
-        }
-        else {
-            changeLabel.getElement().getStyle().setProperty("color", "red");
-        }
-
-        changeLabel.setText(format.format(lastTrade - openingPrice));
-    }
-
-    public double getVolume() {
-        return volume;
-    }
-
-    public void setVolume(double volume) {
-        this.volume = volume;
-        volumeLabel.setText(format.format(volume));
-    }
+  public void setVolume(double volume) {
+    this.volume = volume;
+    volumeLabel.setText(format.format(volume));
+  }
 }

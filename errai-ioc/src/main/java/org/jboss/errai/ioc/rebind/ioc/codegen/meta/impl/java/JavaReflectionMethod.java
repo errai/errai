@@ -27,105 +27,105 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class JavaReflectionMethod extends MetaMethod {
-    private Method method;
-    private MetaParameter[] parameters;
-    private MetaClass declaringClass;
-    private MetaClass returnType;
+  private Method method;
+  private MetaParameter[] parameters;
+  private MetaClass declaringClass;
+  private MetaClass returnType;
 
-    JavaReflectionMethod(Method method) {
-        this.method = method;
+  JavaReflectionMethod(Method method) {
+    this.method = method;
 
-        List<MetaParameter> parmList = new ArrayList<MetaParameter>();
+    List<MetaParameter> parmList = new ArrayList<MetaParameter>();
 
-        for (int i = 0; i < method.getParameterTypes().length; i++) {
-            parmList.add(new JavaReflectionParameter(method.getParameterTypes()[i],
-                    method.getParameterAnnotations()[i], this));
-        }
-
-        parameters = parmList.toArray(new MetaParameter[parmList.size()]);
-
-        declaringClass = MetaClassFactory.get(method.getDeclaringClass());
-        returnType = MetaClassFactory.get(method.getReturnType());
+    for (int i = 0; i < method.getParameterTypes().length; i++) {
+      parmList.add(new JavaReflectionParameter(method.getParameterTypes()[i],
+              method.getParameterAnnotations()[i], this));
     }
 
-    public String getName() {
-        return method.getName();
-    }
+    parameters = parmList.toArray(new MetaParameter[parmList.size()]);
 
-    public MetaParameter[] getParameters() {
-        return parameters;
-    }
+    declaringClass = MetaClassFactory.get(method.getDeclaringClass());
+    returnType = MetaClassFactory.get(method.getReturnType());
+  }
 
-    public MetaClass getReturnType() {
-        return returnType;
-    }
+  public String getName() {
+    return method.getName();
+  }
 
-    @Override
-    public MetaType getGenericReturnType() {
-        return JavaReflectionUtil.fromType(method.getGenericReturnType());
-    }
+  public MetaParameter[] getParameters() {
+    return parameters;
+  }
 
-    @Override
-    public MetaType[] getGenericParameterTypes() {
-        return JavaReflectionUtil.fromTypeArray(method.getGenericParameterTypes());
-    }
+  public MetaClass getReturnType() {
+    return returnType;
+  }
 
-    public MetaTypeVariable[] getTypeParameters() {
-        return JavaReflectionUtil.fromTypeVariable(method.getTypeParameters());
-    }
+  @Override
+  public MetaType getGenericReturnType() {
+    return JavaReflectionUtil.fromType(method.getGenericReturnType());
+  }
 
-    public Annotation[] getAnnotations() {
-        return method.getAnnotations();
-    }
+  @Override
+  public MetaType[] getGenericParameterTypes() {
+    return JavaReflectionUtil.fromTypeArray(method.getGenericParameterTypes());
+  }
 
-    public final <A extends Annotation> A getAnnotation(Class<A> annotation) {
-        for (Annotation a : getAnnotations()) {
-            if (a.annotationType().equals(annotation)) return (A) a;
-        }
-        return null;
-    }
+  public MetaTypeVariable[] getTypeParameters() {
+    return JavaReflectionUtil.fromTypeVariable(method.getTypeParameters());
+  }
 
-    public boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
-        return getAnnotation(annotation) != null;
-    }
+  public Annotation[] getAnnotations() {
+    return method.getAnnotations();
+  }
 
-    public MetaClass getDeclaringClass() {
-        return declaringClass;
+  public final <A extends Annotation> A getAnnotation(Class<A> annotation) {
+    for (Annotation a : getAnnotations()) {
+      if (a.annotationType().equals(annotation)) return (A) a;
     }
+    return null;
+  }
 
-    public boolean isAbstract() {
-        return (method.getModifiers() & Modifier.ABSTRACT) != 0;
-    }
+  public boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
+    return getAnnotation(annotation) != null;
+  }
 
-    public boolean isPublic() {
-        return (method.getModifiers() & Modifier.PUBLIC) != 0;
-    }
+  public MetaClass getDeclaringClass() {
+    return declaringClass;
+  }
 
-    public boolean isPrivate() {
-        return (method.getModifiers() & Modifier.PRIVATE) != 0;
-    }
+  public boolean isAbstract() {
+    return (method.getModifiers() & Modifier.ABSTRACT) != 0;
+  }
 
-    public boolean isProtected() {
-        return (method.getModifiers() & Modifier.PROTECTED) != 0;
-    }
+  public boolean isPublic() {
+    return (method.getModifiers() & Modifier.PUBLIC) != 0;
+  }
 
-    public boolean isFinal() {
-        return (method.getModifiers() & Modifier.FINAL) != 0;
-    }
+  public boolean isPrivate() {
+    return (method.getModifiers() & Modifier.PRIVATE) != 0;
+  }
 
-    public boolean isStatic() {
-        return (method.getModifiers() & Modifier.STATIC) != 0;
-    }
+  public boolean isProtected() {
+    return (method.getModifiers() & Modifier.PROTECTED) != 0;
+  }
 
-    public boolean isTransient() {
-        return (method.getModifiers() & Modifier.TRANSIENT) != 0;
-    }
+  public boolean isFinal() {
+    return (method.getModifiers() & Modifier.FINAL) != 0;
+  }
 
-    public boolean isSynthetic() {
-        return method.isSynthetic();
-    }
+  public boolean isStatic() {
+    return (method.getModifiers() & Modifier.STATIC) != 0;
+  }
 
-    public boolean isSynchronized() {
-        return (method.getModifiers() & Modifier.SYNCHRONIZED) != 0;
-    }
+  public boolean isTransient() {
+    return (method.getModifiers() & Modifier.TRANSIENT) != 0;
+  }
+
+  public boolean isSynthetic() {
+    return method.isSynthetic();
+  }
+
+  public boolean isSynchronized() {
+    return (method.getModifiers() & Modifier.SYNCHRONIZED) != 0;
+  }
 }

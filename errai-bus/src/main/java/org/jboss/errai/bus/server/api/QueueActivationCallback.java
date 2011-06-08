@@ -21,10 +21,10 @@ package org.jboss.errai.bus.server.api;
  */
 public interface QueueActivationCallback {
 
-    /**
-     * This function is responsible for activating a queue. It starts the message transmission
-     *
-     * @param queue - the message queue to be activated
-     */
-    public void activate(MessageQueue queue);
+  /**
+   * This function is responsible for activating a queue. It starts the message transmission
+   *
+   * @param queue - the message queue to be activated
+   */
+  public void activate(MessageQueue queue);
 }

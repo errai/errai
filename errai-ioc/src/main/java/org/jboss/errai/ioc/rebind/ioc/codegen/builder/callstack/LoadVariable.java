@@ -25,19 +25,19 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class LoadVariable extends AbstractCallElement {
-    private String variableName;
+  private String variableName;
 
-    public LoadVariable(String variableName) {
-        this.variableName = variableName;
+  public LoadVariable(String variableName) {
+    this.variableName = variableName;
+  }
+
+  public void handleCall(CallWriter writer, Context context, Statement statement) {
+    VariableReference ref = context.getVariable(variableName);
+
+    if (ref == null) {
+      throw new OutOfScopeException(variableName);
     }
 
-    public void handleCall(CallWriter writer, Context context, Statement statement) {
-        VariableReference ref = context.getVariable(variableName);
-
-        if (ref == null) {
-            throw new OutOfScopeException(variableName);
-        }
-
-        nextOrReturn(writer, context, ref);
-    }
+    nextOrReturn(writer, context, ref);
+  }
 }

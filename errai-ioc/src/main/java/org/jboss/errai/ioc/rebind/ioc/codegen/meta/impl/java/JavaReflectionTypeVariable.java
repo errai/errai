@@ -26,23 +26,23 @@ import java.lang.reflect.TypeVariable;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class JavaReflectionTypeVariable implements MetaTypeVariable {
-    private TypeVariable variable;
-    private MetaGenericDeclaration declaration;
+  private TypeVariable variable;
+  private MetaGenericDeclaration declaration;
 
-    public JavaReflectionTypeVariable(TypeVariable variable) {
-        this.variable = variable;
-        this.declaration = new JavaReflectionGenericDeclaration(variable.getGenericDeclaration());
-    }
+  public JavaReflectionTypeVariable(TypeVariable variable) {
+    this.variable = variable;
+    this.declaration = new JavaReflectionGenericDeclaration(variable.getGenericDeclaration());
+  }
 
-    public MetaType[] getBounds() {
-        return JavaReflectionUtil.fromTypeArray(variable.getBounds());
-    }
+  public MetaType[] getBounds() {
+    return JavaReflectionUtil.fromTypeArray(variable.getBounds());
+  }
 
-    public MetaGenericDeclaration getGenericDeclaration() {
-        return declaration;
-    }
+  public MetaGenericDeclaration getGenericDeclaration() {
+    return declaration;
+  }
 
-    public String getName() {
-        return variable.getName();
-    }
+  public String getName() {
+    return variable.getName();
+  }
 }

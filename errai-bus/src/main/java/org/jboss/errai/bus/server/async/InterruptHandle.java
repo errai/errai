@@ -17,5 +17,5 @@
 package org.jboss.errai.bus.server.async;
 
 public interface InterruptHandle {
-    public void sendInterrupt();
+  public void sendInterrupt();
 }

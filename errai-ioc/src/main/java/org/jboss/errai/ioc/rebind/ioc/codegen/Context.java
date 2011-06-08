@@ -29,51 +29,51 @@ import java.util.Map;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class Context {
-    private Map<String, Variable> variables = new HashMap<String, Variable>();
-    private Context parent = null;
+  private Map<String, Variable> variables = new HashMap<String, Variable>();
+  private Context parent = null;
 
-    private Context() {
+  private Context() {
+  }
+
+  private Context(Context parent) {
+    this.parent = parent;
+  }
+
+  public static Context create() {
+    return new Context();
+  }
+
+  public static Context create(Context parent) {
+    return new Context(parent);
+  }
+
+  public void addVariable(Variable variable) {
+    variables.put(variable.getName(), variable);
+  }
+
+  public VariableReference getVariable(String name) {
+    Variable found = variables.get(name);
+
+    Context parent = this.parent;
+    while (found == null && parent != null) {
+      found = parent.variables.get(name);
+      parent = parent.parent;
     }
+    if (found == null)
+      throw new OutOfScopeException(name);
 
-    private Context(Context parent) {
-        this.parent = parent;
-    }
+    return found.getReference();
+  }
 
-    public static Context create() {
-        return new Context();
-    }
+  public boolean isScoped(Variable variable) {
+    Context ctx = this;
+    do {
+      if (ctx.variables.containsValue(variable)) return true;
+    } while ((ctx = ctx.parent) != null);
+    return false;
+  }
 
-    public static Context create(Context parent) {
-        return new Context(parent);
-    }
-
-    public void addVariable(Variable variable) {
-        variables.put(variable.getName(), variable);
-    }
-
-    public VariableReference getVariable(String name) {
-        Variable found = variables.get(name);
-
-        Context parent = this.parent;
-        while (found == null && parent != null) {
-            found = parent.variables.get(name);
-            parent = parent.parent;
-        }
-        if (found == null)
-            throw new OutOfScopeException(name);
-
-        return found.getReference();
-    }
-
-    public boolean isScoped(Variable variable) {
-        Context ctx = this;
-        do {
-            if (ctx.variables.containsValue(variable)) return true;
-        } while ((ctx = ctx.parent) != null);
-        return false;
-    }
-
-    public Collection<Variable> getDeclaredVariables() {
-        return variables.values();
-    }
+  public Collection<Variable> getDeclaredVariables() {
+    return variables.values();
+  }
 }

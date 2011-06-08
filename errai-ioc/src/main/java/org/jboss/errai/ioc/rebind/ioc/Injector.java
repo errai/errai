@@ -19,37 +19,37 @@ package org.jboss.errai.ioc.rebind.ioc;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 public abstract class Injector {
-    protected QualifyingMetadata qualifyingMetadata;
+  protected QualifyingMetadata qualifyingMetadata;
 
-    public abstract String instantiateOnly(InjectionContext injectContext, InjectionPoint injectionPoint);
+  public abstract String instantiateOnly(InjectionContext injectContext, InjectionPoint injectionPoint);
 
-    public String getType(InjectionPoint injectionPoint) {
-         return getType(injectionPoint.getInjectionContext(), injectionPoint);
-    }
+  public String getType(InjectionPoint injectionPoint) {
+    return getType(injectionPoint.getInjectionContext(), injectionPoint);
+  }
 
-    public abstract String getType(InjectionContext injectContext, InjectionPoint injectionPoint);
+  public abstract String getType(InjectionContext injectContext, InjectionPoint injectionPoint);
 
-    public abstract boolean isInjected();
+  public abstract boolean isInjected();
 
-    public abstract boolean isSingleton();
+  public abstract boolean isSingleton();
 
-    public abstract String getVarName();
+  public abstract String getVarName();
 
-    public abstract MetaClass getInjectedType();
+  public abstract MetaClass getInjectedType();
 
-    public boolean metadataMatches(Injector injector) {
-        return (injector == null && qualifyingMetadata == null) ||
-                (injector != null && injector.getQualifyingMetadata() != null
-                        && qualifyingMetadata != null
-                        && injector.getQualifyingMetadata().doesSatisfy(qualifyingMetadata));
-    }
+  public boolean metadataMatches(Injector injector) {
+    return (injector == null && qualifyingMetadata == null) ||
+            (injector != null && injector.getQualifyingMetadata() != null
+                    && qualifyingMetadata != null
+                    && injector.getQualifyingMetadata().doesSatisfy(qualifyingMetadata));
+  }
 
-    public QualifyingMetadata getQualifyingMetadata() {
-        return qualifyingMetadata;
-    }
+  public QualifyingMetadata getQualifyingMetadata() {
+    return qualifyingMetadata;
+  }
 
-    public void setQualifyingMetadata(QualifyingMetadata qualifyingMetadata) {
-        this.qualifyingMetadata = qualifyingMetadata;
-    }
+  public void setQualifyingMetadata(QualifyingMetadata qualifyingMetadata) {
+    this.qualifyingMetadata = qualifyingMetadata;
+  }
 }
 

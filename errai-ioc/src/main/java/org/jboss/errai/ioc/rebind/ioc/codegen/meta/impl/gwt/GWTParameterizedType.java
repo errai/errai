@@ -29,25 +29,25 @@ import java.util.List;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class GWTParameterizedType implements MetaParameterizedType {
-    private JParameterizedType parameterizedType;
+  private JParameterizedType parameterizedType;
 
-    public GWTParameterizedType(JParameterizedType parameterizedType) {
-        this.parameterizedType = parameterizedType;
-    }
+  public GWTParameterizedType(JParameterizedType parameterizedType) {
+    this.parameterizedType = parameterizedType;
+  }
 
-    public MetaType[] getTypeParameters() {
-        List<MetaType> types = new ArrayList<MetaType>();
-        for (JClassType parm : parameterizedType.getTypeArgs()) {
-            types.add(MetaClassFactory.get(parm));
-        }
-        return types.toArray(new MetaType[types.size()]);
+  public MetaType[] getTypeParameters() {
+    List<MetaType> types = new ArrayList<MetaType>();
+    for (JClassType parm : parameterizedType.getTypeArgs()) {
+      types.add(MetaClassFactory.get(parm));
     }
+    return types.toArray(new MetaType[types.size()]);
+  }
 
-    public MetaType getOwnerType() {
-        return MetaClassFactory.get(parameterizedType.getEnclosingType());
-    }
+  public MetaType getOwnerType() {
+    return MetaClassFactory.get(parameterizedType.getEnclosingType());
+  }
 
-    public MetaType getRawType() {
-        return MetaClassFactory.get(parameterizedType.getRawType());
-    }
+  public MetaType getRawType() {
+    return MetaClassFactory.get(parameterizedType.getRawType());
+  }
 }

@@ -23,7 +23,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public interface VariableReferenceContextualStatementBuilder extends ContextualStatementBuilder {
-    public Statement assignValue(Object statement);
+  public Statement assignValue(Object statement);
 
-    public Statement assignValue(AssignmentOperator operator, Object statement);
+  public Statement assignValue(AssignmentOperator operator, Object statement);
 }

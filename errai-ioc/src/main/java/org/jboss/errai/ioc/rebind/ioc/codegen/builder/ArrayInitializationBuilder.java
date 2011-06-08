@@ -24,5 +24,5 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.AbstractStatementBuil
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface ArrayInitializationBuilder extends Statement, Builder {
-    public AbstractStatementBuilder initialize(Object...values);
+  public AbstractStatementBuilder initialize(Object... values);
 }

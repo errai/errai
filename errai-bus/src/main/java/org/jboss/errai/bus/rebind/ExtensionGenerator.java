@@ -23,5 +23,5 @@ import com.google.gwt.user.rebind.SourceWriter;
 import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
 
 public interface ExtensionGenerator {
-    public void generate(GeneratorContext context, TreeLogger logger, SourceWriter writer, MetaDataScanner scanner, TypeOracle oracle);
+  public void generate(GeneratorContext context, TreeLogger logger, SourceWriter writer, MetaDataScanner scanner, TypeOracle oracle);
 }

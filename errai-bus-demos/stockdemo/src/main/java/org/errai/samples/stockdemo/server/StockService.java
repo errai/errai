@@ -2,7 +2,10 @@ package org.errai.samples.stockdemo.server;
 
 import com.google.inject.Inject;
 import org.errai.samples.stockdemo.client.Stock;
-import org.jboss.errai.bus.client.api.*;
+import org.jboss.errai.bus.client.api.AsyncTask;
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.ResourceProvider;
+import org.jboss.errai.bus.client.api.SubscribeListener;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.TimeUnit;
 import org.jboss.errai.bus.client.framework.MessageBus;
@@ -20,109 +23,109 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Service
 public class StockService {
 
-    private Map<String, Stock> stocks = new HashMap<String, Stock>();
-    private List<String> tickerList = new CopyOnWriteArrayList<String>();
-    private volatile AsyncTask task;
+  private Map<String, Stock> stocks = new HashMap<String, Stock>();
+  private List<String> tickerList = new CopyOnWriteArrayList<String>();
+  private volatile AsyncTask task;
 
-    @Inject
-    public StockService(final RequestDispatcher dispatcher, final MessageBus bus) {
-        loadDefault();
+  @Inject
+  public StockService(final RequestDispatcher dispatcher, final MessageBus bus) {
+    loadDefault();
 
-        bus.addSubscribeListener(new SubscribeListener() {
-            public void onSubscribe(SubscriptionEvent event) {
-                if (event.getSubject().equals("StockClient")) {
-                    if (task == null) {
-                        task = MessageBuilder.createMessage()
-                                .toSubject("StockClient")
-                                .command("PriceChange")
-                                .withProvided("Data", new ResourceProvider<String>() {
-                                    public String get() {
-                                        return simulateRandomChange();
-                                    }
-                                })
-                                .noErrorHandling()
-                                .sendRepeatingWith(dispatcher, TimeUnit.MILLISECONDS, 50);
-                    }
-                }
-            }
-        });
-    }
-
-    @Command("Start")
-    public void start(Message message) {
-        for (Stock stock : stocks.values()) {
-            MessageBuilder.createConversation(message)
+    bus.addSubscribeListener(new SubscribeListener() {
+      public void onSubscribe(SubscriptionEvent event) {
+        if (event.getSubject().equals("StockClient")) {
+          if (task == null) {
+            task = MessageBuilder.createMessage()
                     .toSubject("StockClient")
-                    .command("UpdateStockInfo")
-                    .with("Stock", stock)
-                    .noErrorHandling().reply();
+                    .command("PriceChange")
+                    .withProvided("Data", new ResourceProvider<String>() {
+                      public String get() {
+                        return simulateRandomChange();
+                      }
+                    })
+                    .noErrorHandling()
+                    .sendRepeatingWith(dispatcher, TimeUnit.MILLISECONDS, 50);
+          }
         }
+      }
+    });
+  }
+
+  @Command("Start")
+  public void start(Message message) {
+    for (Stock stock : stocks.values()) {
+      MessageBuilder.createConversation(message)
+              .toSubject("StockClient")
+              .command("UpdateStockInfo")
+              .with("Stock", stock)
+              .noErrorHandling().reply();
     }
+  }
 
 
-    @Command("GetStockInfo")
-    public void getStockInfo(Message message) {
-        Stock stock = stocks.get(message.get(String.class, "Ticker"));
+  @Command("GetStockInfo")
+  public void getStockInfo(Message message) {
+    Stock stock = stocks.get(message.get(String.class, "Ticker"));
 
-        MessageBuilder.createConversation(message)
-                .toSubject("StockClient")
-                .command("UpdateStockInfo")
-                .with("Stock", stock)
-                .noErrorHandling().reply();
-    }
+    MessageBuilder.createConversation(message)
+            .toSubject("StockClient")
+            .command("UpdateStockInfo")
+            .with("Stock", stock)
+            .noErrorHandling().reply();
+  }
 
-   public String simulateRandomChange() {
-        /**
-         * Randomly choose a stock to update.
-         */
-        final String ticker = tickerList.get((int) (Math.random() * 1000) % tickerList.size());
+  public String simulateRandomChange() {
+    /**
+     * Randomly choose a stock to update.
+     */
+    final String ticker = tickerList.get((int) (Math.random() * 1000) % tickerList.size());
 
-        final Stock stock = stocks.get(ticker);
+    final Stock stock = stocks.get(ticker);
 
+    if (Math.random() > 0.5d) {
+      double price = stock.getLastTrade();
+
+      if (Math.random() > 0.85d) {
+        price += Math.random() * 0.05;
+      } else if (Math.random() < 0.15d) {
+        price -= Math.random() * 0.05;
+      }
+
+      // bias Errai to grow, unfairly.
+      if ("ERR".equals(ticker)) {
         if (Math.random() > 0.5d) {
-            double price = stock.getLastTrade();
-
-            if (Math.random() > 0.85d) {
-                price += Math.random() * 0.05;
-            } else if (Math.random() < 0.15d) {
-                price -= Math.random() * 0.05;
-            }
-
-            // bias Errai to grow, unfairly. 
-            if ("ERR".equals(ticker)) {
-                if (Math.random() > 0.5d) {
-                    price += 0.01;
-                }
-            }
-
-            stock.setLastTrade(price);
+          price += 0.01;
         }
+      }
 
-        double volume = stock.getVolume();
-        volume += Math.random() * stock.getVolumeWeighting();
-        stock.setVolume(volume);
-
-
-        return ticker + ":" + stock.getLastTrade() + ":" + stock.getVolume();
+      stock.setLastTrade(price);
     }
 
-    public void addEquity(String ticker, String company, double lastTrade) {
-        stocks.put(ticker, new Stock(ticker, company, lastTrade));
-        tickerList.add(ticker);
-    }
+    double volume = stock.getVolume();
+    volume += Math.random() * stock.getVolumeWeighting();
+    stock.setVolume(volume);
 
-    public void loadDefault() {
-        addEquity("ERR", "Errai", 130);
-        addEquity("FUN", "FunCo", 10.28);
-        addEquity("FOO", "Foobar Worldco", 8.3);
-        addEquity("GWTC", "The GWT Company", 5.2);
-        addEquity("FGC", "Fun Gaming Corporation", 19.3);
-        addEquity("XXX", "Triple X", 40.2);
-        addEquity("XY", "Manco", 78.10);
-        addEquity("XX", "Womanco", 90.10);
-        addEquity("UXBR", "Ultimate X-Ray Bridgeco", 25.1);
-        addEquity("RD", "Red Dog Inc.", 9.10);
-        addEquity("JFN", "Java Financial Ltd", 90.2);
-    }
+
+    return ticker + ":" + stock.getLastTrade() + ":" + stock.getVolume();
+  }
+
+  public void addEquity(String ticker, String company, double lastTrade) {
+    stocks.put(ticker, new Stock(ticker, company, lastTrade));
+    tickerList.add(ticker);
+  }
+
+  public void loadDefault() {
+    addEquity("ERR", "Errai", 130);
+    addEquity("FUN", "FunCo", 10.28);
+    addEquity("FOO", "Foobar Worldco", 8.3);
+    addEquity("GWTC", "The GWT Company", 5.2);
+    addEquity("FGC", "Fun Gaming Corporation", 19.3);
+    addEquity("XXX", "Triple X", 40.2);
+    addEquity("XY", "Manco", 78.10);
+    addEquity("XX", "Womanco", 90.10);
+    addEquity("UXBR", "Ultimate X-Ray Bridgeco", 25.1);
+    addEquity("RD", "Red Dog Inc.", 9.10);
+    addEquity("JFN", "Java Financial Ltd", 90.2);
+  }
 
 }

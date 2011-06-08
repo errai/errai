@@ -28,19 +28,19 @@ import java.util.List;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class JavaReflectionGenericDeclaration implements MetaGenericDeclaration {
-    private GenericDeclaration genericDeclaration;
+  private GenericDeclaration genericDeclaration;
 
-    public JavaReflectionGenericDeclaration(GenericDeclaration genericDeclaration) {
-        this.genericDeclaration = genericDeclaration;
+  public JavaReflectionGenericDeclaration(GenericDeclaration genericDeclaration) {
+    this.genericDeclaration = genericDeclaration;
+  }
+
+  public MetaTypeVariable[] getTypeParameters() {
+    List<MetaTypeVariable> metaTypeVariableList = new ArrayList<MetaTypeVariable>();
+
+    for (TypeVariable<?> typeVariable : genericDeclaration.getTypeParameters()) {
+      metaTypeVariableList.add(new JavaReflectionTypeVariable(typeVariable));
     }
 
-    public MetaTypeVariable[] getTypeParameters() {
-        List<MetaTypeVariable> metaTypeVariableList = new ArrayList<MetaTypeVariable>();
-
-        for (TypeVariable<?> typeVariable : genericDeclaration.getTypeParameters()) {
-            metaTypeVariableList.add(new JavaReflectionTypeVariable(typeVariable));
-        }
-
-        return metaTypeVariableList.toArray(new MetaTypeVariable[metaTypeVariableList.size()]);
-    }
+    return metaTypeVariableList.toArray(new MetaTypeVariable[metaTypeVariableList.size()]);
+  }
 }

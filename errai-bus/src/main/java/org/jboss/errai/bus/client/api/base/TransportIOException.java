@@ -17,20 +17,20 @@
 package org.jboss.errai.bus.client.api.base;
 
 public class TransportIOException extends Exception {
-    private int errorCode;
-    private String errorMessage;
+  private int errorCode;
+  private String errorMessage;
 
-    public TransportIOException(String message, int errorCode, String errorMessage) {
-        super(message);
-        this.errorCode = errorCode;
-        this.errorMessage = errorMessage;
-    }
+  public TransportIOException(String message, int errorCode, String errorMessage) {
+    super(message);
+    this.errorCode = errorCode;
+    this.errorMessage = errorMessage;
+  }
 
-    public int getErrorCode() {
-        return errorCode;
-    }
+  public int getErrorCode() {
+    return errorCode;
+  }
 
-    public String getErrorMessage() {
-        return errorMessage;
-    }
+  public String getErrorMessage() {
+    return errorMessage;
+  }
 }

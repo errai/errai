@@ -29,45 +29,45 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public abstract class AbstractStatementBuilder implements Statement, Builder {
-    protected Context context = null;
-    protected CallElementBuilder callElementBuilder;
+  protected Context context = null;
+  protected CallElementBuilder callElementBuilder;
 
-    protected AbstractStatementBuilder(Context context, CallElementBuilder callElementBuilder) {
-        this(context);
-        this.callElementBuilder = callElementBuilder;
+  protected AbstractStatementBuilder(Context context, CallElementBuilder callElementBuilder) {
+    this(context);
+    this.callElementBuilder = callElementBuilder;
+  }
+
+  protected AbstractStatementBuilder(Context context) {
+    if (context == null) {
+      context = Context.create();
     }
 
-    protected AbstractStatementBuilder(Context context) {
-        if (context == null) {
-            context = Context.create();
-        }
+    this.context = context;
+    this.callElementBuilder = new CallElementBuilder();
+  }
 
-        this.context = context;
-        this.callElementBuilder = new CallElementBuilder();
-    }
+  public Context getContext() {
+    return context;
+  }
 
-    public Context getContext() {
-        return context;
-    }
+  public String generate(Context context) {
+    CallWriter writer = new CallWriter();
+    callElementBuilder.getRootElement().handleCall(writer, context, null);
+    return writer.getCallString();
+  }
 
-    public String generate(Context context) {
-        CallWriter writer = new CallWriter();
-        callElementBuilder.getRootElement().handleCall(writer, context, null);
-        return writer.getCallString();
-    }
+  public void appendCallElement(CallElement element) {
+    callElementBuilder.appendCallElement(element);
+  }
 
-    public void appendCallElement(CallElement element) {
-        callElementBuilder.appendCallElement(element);
-    }
+  public MetaClass getType() {
+    if (callElementBuilder.getCallElement() == null)
+      return null;
 
-    public MetaClass getType() {
-        if(callElementBuilder.getCallElement()==null)
-            return null;
+    return callElementBuilder.getCallElement().getResultType();
+  }
 
-        return callElementBuilder.getCallElement().getResultType();
-    }
-
-    public String toJavaString() {
-        return generate(context);
-    }
+  public String toJavaString() {
+    return generate(context);
+  }
 }

@@ -25,50 +25,50 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public abstract class LiteralValue<T> implements Statement {
-    private T value;
+  private T value;
 
-    public abstract String getCanonicalString();
+  public abstract String getCanonicalString();
 
-    protected LiteralValue(T value) {
-        this.value = value;
-    }
+  protected LiteralValue(T value) {
+    this.value = value;
+  }
 
-    public T getValue() {
-        return value;
-    }
+  public T getValue() {
+    return value;
+  }
 
-    public String generate(Context context) {
-        return getCanonicalString();
-    }
+  public String generate(Context context) {
+    return getCanonicalString();
+  }
 
-    public Context getContext() {
-        return null;
-    }
+  public Context getContext() {
+    return null;
+  }
 
-    public MetaClass getType() {
-        return Class.class.isAssignableFrom(value.getClass())
-                ? MetaClassFactory.get((Class<?>) value) : MetaClassFactory.get(value.getClass());
-    }
+  public MetaClass getType() {
+    return Class.class.isAssignableFrom(value.getClass())
+            ? MetaClassFactory.get((Class<?>) value) : MetaClassFactory.get(value.getClass());
+  }
 
-    @Override
-    public int hashCode() {
-        return (value == null) ? 0 : value.hashCode();
-    }
+  @Override
+  public int hashCode() {
+    return (value == null) ? 0 : value.hashCode();
+  }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        LiteralValue<?> other = (LiteralValue<?>) obj;
-        if (value == null) {
-            if (other.value != null)
-                return false;
-        } else if (!value.equals(other.value))
-            return false;
-        return true;
-    }
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    LiteralValue<?> other = (LiteralValue<?>) obj;
+    if (value == null) {
+      if (other.value != null)
+        return false;
+    } else if (!value.equals(other.value))
+      return false;
+    return true;
+  }
 }

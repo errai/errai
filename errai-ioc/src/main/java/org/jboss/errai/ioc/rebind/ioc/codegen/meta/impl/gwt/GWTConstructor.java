@@ -69,7 +69,7 @@ public class GWTConstructor extends MetaConstructor {
   }
 
   public Annotation[] getAnnotations() {
-      return annotations == null ? new Annotation[0] : annotations;
+    return annotations == null ? new Annotation[0] : annotations;
   }
 
   public final <A extends Annotation> A getAnnotation(Class<A> annotation) {

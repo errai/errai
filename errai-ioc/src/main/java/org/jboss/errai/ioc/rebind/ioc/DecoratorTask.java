@@ -25,58 +25,58 @@ import org.mvel2.util.StringAppender;
 import java.lang.annotation.Annotation;
 
 public class DecoratorTask extends InjectionTask {
-    private final IOCDecoratorExtension[] IOCExtensions;
+  private final IOCDecoratorExtension[] IOCExtensions;
 
-    public DecoratorTask(Injector injector, MetaClass type, IOCDecoratorExtension[] decs) {
-        super(injector, type);
-        this.IOCExtensions = decs;
+  public DecoratorTask(Injector injector, MetaClass type, IOCDecoratorExtension[] decs) {
+    super(injector, type);
+    this.IOCExtensions = decs;
+  }
+
+  public DecoratorTask(Injector injector, MetaField field, IOCDecoratorExtension[] decs) {
+    super(injector, field);
+    this.IOCExtensions = decs;
+  }
+
+  public DecoratorTask(Injector injector, MetaMethod method, IOCDecoratorExtension[] decs) {
+    super(injector, method);
+    this.IOCExtensions = decs;
+  }
+
+  public DecoratorTask(Injector injector, MetaParameter parm, IOCDecoratorExtension[] decs) {
+    super(injector, parm);
+    this.IOCExtensions = decs;
+  }
+
+  @SuppressWarnings({"unchecked"})
+  @Override
+  public String doTask(InjectionContext ctx) {
+    StringAppender appender = new StringAppender();
+    Annotation anno = null;
+
+    for (IOCDecoratorExtension<? extends Annotation> dec : IOCExtensions) {
+      switch (injectType) {
+        case PrivateField:
+        case Field:
+          anno = field.getAnnotation(dec.decoratesWith());
+          break;
+        case Method:
+          anno = method.getAnnotation(dec.decoratesWith());
+          if (anno == null && field != null) {
+            anno = field.getAnnotation(dec.decoratesWith());
+          } else if (anno == null && parm != null) {
+            anno = parm.getAnnotation(dec.decoratesWith());
+          }
+          break;
+        case Type:
+          anno = type.getAnnotation(dec.decoratesWith());
+          break;
+
+      }
+
+      appender.append(dec.generateDecorator(new InjectionPoint(anno, injectType, constructor, method, field, type, parm, injector, ctx)));
+
+      appender.append("\n");
     }
-
-    public DecoratorTask(Injector injector, MetaField field, IOCDecoratorExtension[] decs) {
-        super(injector, field);
-        this.IOCExtensions = decs;
-    }
-
-    public DecoratorTask(Injector injector, MetaMethod method, IOCDecoratorExtension[] decs) {
-        super(injector, method);
-        this.IOCExtensions = decs;
-    }
-
-    public DecoratorTask(Injector injector, MetaParameter parm, IOCDecoratorExtension[] decs) {
-        super(injector, parm);
-        this.IOCExtensions = decs;
-    }
-
-    @SuppressWarnings({"unchecked"})
-    @Override
-    public String doTask(InjectionContext ctx) {
-        StringAppender appender = new StringAppender();
-        Annotation anno = null;
-
-        for (IOCDecoratorExtension<? extends Annotation> dec : IOCExtensions) {
-            switch (injectType) {
-                case PrivateField:
-                case Field:
-                    anno = field.getAnnotation(dec.decoratesWith());
-                    break;
-                case Method:
-                    anno = method.getAnnotation(dec.decoratesWith());
-                    if (anno == null && field != null) {
-                        anno = field.getAnnotation(dec.decoratesWith());
-                    } else if (anno == null && parm != null) {
-                        anno = parm.getAnnotation(dec.decoratesWith());
-                    }
-                    break;
-                case Type:
-                    anno = type.getAnnotation(dec.decoratesWith());
-                    break;
-
-            }
-
-            appender.append(dec.generateDecorator(new InjectionPoint(anno, injectType, constructor, method, field, type, parm, injector, ctx)));
-
-            appender.append("\n");
-        }
-        return appender.toString();
-    }
+    return appender.toString();
+  }
 }

@@ -20,9 +20,9 @@ import org.jboss.errai.bus.client.api.AsyncTask;
 import org.jboss.errai.bus.client.api.base.TimeUnit;
 
 public interface MessageReplySendable extends MessageBuildSendableWithReply {
-    public void reply();
+  public void reply();
 
-    public AsyncTask replyRepeating(TimeUnit unit, int interval);
+  public AsyncTask replyRepeating(TimeUnit unit, int interval);
 
-    public AsyncTask replyDelayed(TimeUnit unit, int interval);
+  public AsyncTask replyDelayed(TimeUnit unit, int interval);
 }

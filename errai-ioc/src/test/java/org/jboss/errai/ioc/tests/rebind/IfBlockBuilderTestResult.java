@@ -21,84 +21,84 @@ package org.jboss.errai.ioc.tests.rebind;
  */
 public interface IfBlockBuilderTestResult {
 
-    public static final String EMPTY_IF_BLOCK_RESULT_NO_RHS =
-        "if (str.endsWith(\"abc\")) { }\n";
+  public static final String EMPTY_IF_BLOCK_RESULT_NO_RHS =
+          "if (str.endsWith(\"abc\")) { }\n";
 
-    public static final String EMPTY_IF_BLOCK_RESULT_LITERAL_RHS =
-        "if (n == 1) { }\n";
+  public static final String EMPTY_IF_BLOCK_RESULT_LITERAL_RHS =
+          "if (n == 1) { }\n";
 
-    public static final String EMPTY_IF_BLOCK_RESULT_INSTANCE_OF_RHS = 
-        "if (str instanceof java.lang.String) { }\n";
-    
-    public static final String IF_ELSE_BLOCK_RESULT_NO_RHS =
-        "if (str.endsWith(\"abc\")) { " +
-            "java.lang.Integer n = 0;\n" +
-        "} else {" +
-            "\njava.lang.Integer n = 1;\n" +
-        "}\n";
+  public static final String EMPTY_IF_BLOCK_RESULT_INSTANCE_OF_RHS =
+          "if (str instanceof java.lang.String) { }\n";
 
-    public static final String IF_ELSE_BLOCK_RESULT_RHS =
-        "if (n > m) { " +
-            "java.lang.Integer n = 0;\n" +
-        "} else {" +
-            "\njava.lang.Integer n = 1;\n" +
-        "}\n";
-    
-    public static final String IF_ELSEIF_BLOCK_RESULT_NO_RHS_NESTED =
-        "if (s.endsWith(\"abc\")) {\n" +
-            "n = 0;\n" +
-        "} else {\n" +
-            "if (s.startsWith(\"def\")) { " +
-                "n = 1;\n" +
-            "}\n;\n" +   
-        "}\n";
-    
-    public static final String IF_ELSEIF_BLOCK_RESULT_NO_RHS =
-        "if (s.endsWith(\"abc\")) {\n" +
-            "n = 0;\n" +
-        "} else if (s.startsWith(\"def\")) { " +
-            "n = 1;\n" +
-        "}\n";
+  public static final String IF_ELSE_BLOCK_RESULT_NO_RHS =
+          "if (str.endsWith(\"abc\")) { " +
+                  "java.lang.Integer n = 0;\n" +
+                  "} else {" +
+                  "\njava.lang.Integer n = 1;\n" +
+                  "}\n";
 
-    public static final String IF_ELSEIF_ELSE_BLOCK_RESULT_NO_RHS_NESTED =
-        "if (s.endsWith(\"abc\")) {\n" +
-            "n = 0;\n" +
-        "} else {\n" +
-            "if (s.startsWith(\"def\")) { " +
-                "n = 1;\n" +
-            "} else { " +
-                "n = 2;\n" +
-            "}\n;\n" +
-        "}\n";
-    
-    public static final String IF_ELSEIF_ELSE_BLOCK_RESULT_NO_RHS =
-        "if (s.endsWith(\"abc\")) {\n" +
-            "n = 0;\n" +
-        "} else if (s.startsWith(\"def\")) { " +
-            "n = 1;\n" +
-        "} else { " +
-            "n = 2;\n" +
-        "}\n";
+  public static final String IF_ELSE_BLOCK_RESULT_RHS =
+          "if (n > m) { " +
+                  "java.lang.Integer n = 0;\n" +
+                  "} else {" +
+                  "\njava.lang.Integer n = 1;\n" +
+                  "}\n";
 
-    public static final String IF_ELSEIF_ELSE_BLOCK_RESULT_RHS_NESTED =
-        "if (n > m) {\n" +
-            "n = 0;\n" +
-        "} else {\n" +
-            "if (m > n) { " +
-                "n = 1;\n" +
-            "} else { " +
-                "n = 2;\n" +
-            "}\n;\n" +
-        "}\n";
-    
-    public static final String IF_ELSEIF_ELSE_BLOCK_RESULT_RHS =
-        "if (n > m) {\n" +
-            "n = 0;\n" +
-        "} else if (m > n) { " +
-            "n = 1;\n" +
-        "} else if (m == n) { " +
-            "n = 2;\n" +
-        "} else { " +
-            "n = 3;\n" +
-        "}\n";
+  public static final String IF_ELSEIF_BLOCK_RESULT_NO_RHS_NESTED =
+          "if (s.endsWith(\"abc\")) {\n" +
+                  "n = 0;\n" +
+                  "} else {\n" +
+                  "if (s.startsWith(\"def\")) { " +
+                  "n = 1;\n" +
+                  "}\n;\n" +
+                  "}\n";
+
+  public static final String IF_ELSEIF_BLOCK_RESULT_NO_RHS =
+          "if (s.endsWith(\"abc\")) {\n" +
+                  "n = 0;\n" +
+                  "} else if (s.startsWith(\"def\")) { " +
+                  "n = 1;\n" +
+                  "}\n";
+
+  public static final String IF_ELSEIF_ELSE_BLOCK_RESULT_NO_RHS_NESTED =
+          "if (s.endsWith(\"abc\")) {\n" +
+                  "n = 0;\n" +
+                  "} else {\n" +
+                  "if (s.startsWith(\"def\")) { " +
+                  "n = 1;\n" +
+                  "} else { " +
+                  "n = 2;\n" +
+                  "}\n;\n" +
+                  "}\n";
+
+  public static final String IF_ELSEIF_ELSE_BLOCK_RESULT_NO_RHS =
+          "if (s.endsWith(\"abc\")) {\n" +
+                  "n = 0;\n" +
+                  "} else if (s.startsWith(\"def\")) { " +
+                  "n = 1;\n" +
+                  "} else { " +
+                  "n = 2;\n" +
+                  "}\n";
+
+  public static final String IF_ELSEIF_ELSE_BLOCK_RESULT_RHS_NESTED =
+          "if (n > m) {\n" +
+                  "n = 0;\n" +
+                  "} else {\n" +
+                  "if (m > n) { " +
+                  "n = 1;\n" +
+                  "} else { " +
+                  "n = 2;\n" +
+                  "}\n;\n" +
+                  "}\n";
+
+  public static final String IF_ELSEIF_ELSE_BLOCK_RESULT_RHS =
+          "if (n > m) {\n" +
+                  "n = 0;\n" +
+                  "} else if (m > n) { " +
+                  "n = 1;\n" +
+                  "} else if (m == n) { " +
+                  "n = 2;\n" +
+                  "} else { " +
+                  "n = 3;\n" +
+                  "}\n";
 }

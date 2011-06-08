@@ -24,29 +24,29 @@ import java.util.Map;
 
 @Service
 public class QueryService implements QueryServiceRemote {
-    private Map<String, String[]> dataMap;
+  private Map<String, String[]> dataMap;
 
-    public QueryService() {
-        setupMap();
-    }
+  public QueryService() {
+    setupMap();
+  }
 
-    private void setupMap() {
-        dataMap = new HashMap<String, String[]>();
-        dataMap.put("beer", new String[]{"Heineken", "Budweiser", "Hoogaarden"});
-        dataMap.put("fruit", new String[]{"Apples", "Oranges", "Grapes"});
-        dataMap.put("animals", new String[]{"Monkeys", "Giraffes", "Lions"});
-    }
+  private void setupMap() {
+    dataMap = new HashMap<String, String[]>();
+    dataMap.put("beer", new String[]{"Heineken", "Budweiser", "Hoogaarden"});
+    dataMap.put("fruit", new String[]{"Apples", "Oranges", "Grapes"});
+    dataMap.put("animals", new String[]{"Monkeys", "Giraffes", "Lions"});
+  }
 
-    public String[] query(String queryString) {
-        return dataMap.get(queryString);
-    }
+  public String[] query(String queryString) {
+    return dataMap.get(queryString);
+  }
 
-    public String append(String... arg) {
-        StringBuilder builder = new StringBuilder();
-        for (String s : arg) {
-            builder.append(s);
-        }
-        return builder.toString();
+  public String append(String... arg) {
+    StringBuilder builder = new StringBuilder();
+    for (String s : arg) {
+      builder.append(s);
     }
+    return builder.toString();
+  }
 }
 

@@ -19,13 +19,13 @@ package org.jboss.errai.bus.server.api;
 import org.jboss.errai.bus.client.framework.BusEvent;
 
 public class QueueCloseEvent extends BusEvent<QueueCloseEvent> {
-    private MessageQueue queue;
+  private MessageQueue queue;
 
-    public QueueCloseEvent(MessageQueue queue) {
-        this.queue = queue;
-    }
+  public QueueCloseEvent(MessageQueue queue) {
+    this.queue = queue;
+  }
 
-    public MessageQueue getQueue() {
-        return queue;
-    }
+  public MessageQueue getQueue() {
+    return queue;
+  }
 }

@@ -13,111 +13,109 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-                                                                          
+
 package org.errai.samples.serialization.client.model;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
 import org.jboss.errai.bus.server.annotations.ExposeEntity;
 
 import java.util.*;
 
 @ExposeEntity
 public class Record {
-    private int recordId;
-    private String name;
-    private float balance;
-    private Date accountOpened;
-    private RecordType type;
+  private int recordId;
+  private String name;
+  private float balance;
+  private Date accountOpened;
+  private RecordType type;
 
-    
 
-    private Set<Item> stuff;
-    private Map<String, String> properties;
+  private Set<Item> stuff;
+  private Map<String, String> properties;
 
-    public Record() {
+  public Record() {
+  }
+
+  public Record(int recordId, String name, float balance, Date accountOpened, RecordType type, Item[] stuff, String[][] properties) {
+    this.recordId = recordId;
+    this.name = name;
+    this.balance = balance;
+    this.accountOpened = accountOpened;
+
+    this.stuff = new HashSet<Item>();
+    this.stuff.addAll(Arrays.asList(stuff));
+
+    this.type = type;
+
+    this.properties = new HashMap<String, String>();
+    for (String[] s : properties) {
+      this.properties.put(s[0], s[1]);
     }
+  }
 
-    public Record(int recordId, String name, float balance, Date accountOpened, RecordType type,  Item[] stuff, String[][] properties) {
-        this.recordId = recordId;
-        this.name = name;
-        this.balance = balance;
-        this.accountOpened = accountOpened;
+  public int getRecordId() {
+    return recordId;
+  }
 
-        this.stuff = new HashSet<Item>();
-        this.stuff.addAll(Arrays.asList(stuff));
+  public void setRecordId(int recordId) {
+    this.recordId = recordId;
+  }
 
-        this.type = type;
+  public String getName() {
+    return name;
+  }
 
-        this.properties = new HashMap<String, String>();
-        for (String[] s : properties) {
-            this.properties.put(s[0], s[1]);
-        }
-    }
+  public void setName(String name) {
+    this.name = name;
+  }
 
-    public int getRecordId() {
-        return recordId;
-    }
+  public float getBalance() {
+    return balance;
+  }
 
-    public void setRecordId(int recordId) {
-        this.recordId = recordId;
-    }
+  public void setBalance(float balance) {
+    this.balance = balance;
+  }
 
-    public String getName() {
-        return name;
-    }
+  public Date getAccountOpened() {
+    return accountOpened;
+  }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+  public void setAccountOpened(Date accountOpened) {
+    this.accountOpened = accountOpened;
+  }
 
-    public float getBalance() {
-        return balance;
-    }
+  public RecordType getType() {
+    return type;
+  }
 
-    public void setBalance(float balance) {
-        this.balance = balance;
-    }
+  public void setType(RecordType type) {
+    this.type = type;
+  }
 
-    public Date getAccountOpened() {
-        return accountOpened;
-    }
+  public Set<Item> getStuff() {
+    return stuff;
+  }
 
-    public void setAccountOpened(Date accountOpened) {
-        this.accountOpened = accountOpened;
-    }
+  public void setStuff(Set<Item> stuff) {
+    this.stuff = stuff;
+  }
 
-    public RecordType getType() {
-        return type;
-    }
+  public Map<String, String> getProperties() {
+    return properties;
+  }
 
-    public void setType(RecordType type) {
-        this.type = type;
-    }
+  public void setProperties(Map<String, String> properties) {
+    this.properties = properties;
+  }
 
-    public Set<Item> getStuff() {
-        return stuff;
-    }
-
-    public void setStuff(Set<Item> stuff) {
-        this.stuff = stuff;
-    }
-
-    public Map<String, String> getProperties() {
-        return properties;
-    }
-
-    public void setProperties(Map<String, String> properties) {
-        this.properties = properties;
-    }
-
-    @Override
-    public String toString() {
-        return "Record{" +
-                "recordId=" + recordId +
-                ", name='" + name + '\'' +
-                ", balance=" + balance +
-                ", accountOpened=" + accountOpened +
-                ", stuff=" + stuff +
-                '}';
-    }
+  @Override
+  public String toString() {
+    return "Record{" +
+            "recordId=" + recordId +
+            ", name='" + name + '\'' +
+            ", balance=" + balance +
+            ", accountOpened=" + accountOpened +
+            ", stuff=" + stuff +
+            '}';
+  }
 }

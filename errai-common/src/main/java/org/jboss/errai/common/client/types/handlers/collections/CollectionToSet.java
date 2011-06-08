@@ -24,7 +24,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class CollectionToSet implements TypeHandler<Collection, Set> {
-    public Set getConverted(Collection in, DecodingContext ctx) {
-        return new HashSet(in);
-    }
+  public Set getConverted(Collection in, DecodingContext ctx) {
+    return new HashSet(in);
+  }
 }

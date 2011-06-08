@@ -31,41 +31,41 @@ import java.lang.annotation.Annotation;
  */
 @IOCProvider
 public class ConsumerProvider implements ContextualTypeProvider<Consumer<?>> {
-    public Consumer<?> provide(Class[] typeargs, Annotation[] qualifiers) {
-        return new Consumer<Object>() {
-            private RequestDispatcher requestDispatcher = ErraiBus.getDispatcher();
-            private String toSubject = null;
-            private String replyTo = null;
+  public Consumer<?> provide(Class[] typeargs, Annotation[] qualifiers) {
+    return new Consumer<Object>() {
+      private RequestDispatcher requestDispatcher = ErraiBus.getDispatcher();
+      private String toSubject = null;
+      private String replyTo = null;
 
-            public void consume(Object value) {
-                if (replyTo != null) {
-                    MessageBuilder.createMessage()
-                            .toSubject(toSubject)
-                            .with(MessageParts.ReplyTo, replyTo)
-                            .with(MessageParts.Value, value)
-                            .done().sendNowWith(requestDispatcher);
-                } else {
-                    MessageBuilder.createMessage()
-                            .toSubject(toSubject)
-                            .with(MessageParts.Value, value)
-                            .done().sendNowWith(requestDispatcher);
-                }
-            }
+      public void consume(Object value) {
+        if (replyTo != null) {
+          MessageBuilder.createMessage()
+                  .toSubject(toSubject)
+                  .with(MessageParts.ReplyTo, replyTo)
+                  .with(MessageParts.Value, value)
+                  .done().sendNowWith(requestDispatcher);
+        } else {
+          MessageBuilder.createMessage()
+                  .toSubject(toSubject)
+                  .with(MessageParts.Value, value)
+                  .done().sendNowWith(requestDispatcher);
+        }
+      }
 
-            public void setRequestDispatcher(RequestDispatcher dispatcher) {
-                if (requestDispatcher != null) throw new IllegalStateException("requestDispatcher is already set");
-                this.requestDispatcher = dispatcher;
-            }
+      public void setRequestDispatcher(RequestDispatcher dispatcher) {
+        if (requestDispatcher != null) throw new IllegalStateException("requestDispatcher is already set");
+        this.requestDispatcher = dispatcher;
+      }
 
-            public void setToSubject(String subjectName) {
-                if (this.toSubject != null) throw new IllegalStateException("toSubject is already set");
-                this.toSubject = subjectName;
-            }
+      public void setToSubject(String subjectName) {
+        if (this.toSubject != null) throw new IllegalStateException("toSubject is already set");
+        this.toSubject = subjectName;
+      }
 
-            public void setReplyTo(String subjectName) {
-                if (this.replyTo != null) throw new IllegalStateException("replyTo is already set");
-                this.replyTo = subjectName;
-            }
-        };
-    }
+      public void setReplyTo(String subjectName) {
+        if (this.replyTo != null) throw new IllegalStateException("replyTo is already set");
+        this.replyTo = subjectName;
+      }
+    };
+  }
 }

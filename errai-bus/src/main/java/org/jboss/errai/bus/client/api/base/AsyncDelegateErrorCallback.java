@@ -21,26 +21,26 @@ import org.jboss.errai.bus.client.api.HasAsyncTaskRef;
 import org.jboss.errai.bus.client.api.Message;
 
 public class AsyncDelegateErrorCallback implements ErrorCallback {
-    private HasAsyncTaskRef asyncTaskRef;
-    private ErrorCallback delegate;
+  private HasAsyncTaskRef asyncTaskRef;
+  private ErrorCallback delegate;
 
-    public AsyncDelegateErrorCallback(HasAsyncTaskRef ref, ErrorCallback delegate) {
-        this.asyncTaskRef = ref;
-        this.delegate = delegate;
+  public AsyncDelegateErrorCallback(HasAsyncTaskRef ref, ErrorCallback delegate) {
+    this.asyncTaskRef = ref;
+    this.delegate = delegate;
+  }
+
+  public boolean error(Message message, Throwable throwable) {
+    if (asyncTaskRef.getAsyncTask() == null) {
+      System.err.println("Unable to access async task reference! Cannot safely cancel task.");
+    } else {
+      asyncTaskRef.getAsyncTask().cancel(true);
     }
 
-    public boolean error(Message message, Throwable throwable) {
-        if (asyncTaskRef.getAsyncTask() == null) {
-            System.err.println("Unable to access async task reference! Cannot safely cancel task.");
-        } else {
-            asyncTaskRef.getAsyncTask().cancel(true);
-        }
-
-        if (delegate == null) {
-            throwable.printStackTrace();
-            return true;
-        } else {
-            return delegate.error(message, throwable);
-        }
+    if (delegate == null) {
+      throwable.printStackTrace();
+      return true;
+    } else {
+      return delegate.error(message, throwable);
     }
+  }
 }

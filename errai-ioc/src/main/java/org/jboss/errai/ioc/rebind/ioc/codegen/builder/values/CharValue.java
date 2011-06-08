@@ -21,12 +21,12 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder.values;
  */
 public class CharValue extends LiteralValue<Character> {
 
-    public CharValue(Character value) {
-        super(value);
-    }
+  public CharValue(Character value) {
+    super(value);
+  }
 
-    @Override
-    public String getCanonicalString() {
-        return getValue().toString();
-    }
+  @Override
+  public String getCanonicalString() {
+    return getValue().toString();
+  }
 }

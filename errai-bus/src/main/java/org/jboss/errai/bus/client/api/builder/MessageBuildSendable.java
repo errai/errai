@@ -16,10 +16,7 @@
 
 package org.jboss.errai.bus.client.api.builder;
 
-import org.jboss.errai.bus.client.api.AsyncTask;
-import org.jboss.errai.bus.client.api.base.TimeUnit;
 import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.client.framework.RequestDispatcher;
 
 
 /**
@@ -28,29 +25,28 @@ import org.jboss.errai.bus.client.framework.RequestDispatcher;
  */
 public interface MessageBuildSendable extends Sendable {
 
-    /**
-     * Sends the message with the specified <tt>MessageBus</tt>
-     *
-     * @param viaThis - the message bus to send the message with
-     */
-    public void sendNowWith(MessageBus viaThis);
+  /**
+   * Sends the message with the specified <tt>MessageBus</tt>
+   *
+   * @param viaThis - the message bus to send the message with
+   */
+  public void sendNowWith(MessageBus viaThis);
 
-    /**
-     * Sends the message with the specified <tt>MessageBus</tt>
-     *
-     * @param viaThis             - the message bus to send the message with
-     * @param fireMessageListener - true if the message listeners should be notified
-     */
-    public void sendNowWith(MessageBus viaThis, boolean fireMessageListener);
+  /**
+   * Sends the message with the specified <tt>MessageBus</tt>
+   *
+   * @param viaThis             - the message bus to send the message with
+   * @param fireMessageListener - true if the message listeners should be notified
+   */
+  public void sendNowWith(MessageBus viaThis, boolean fireMessageListener);
 
 
-    /**
-     * Sends the message globally with the specified <tt>MessageBus</tt>
-     *
-     * @param viaThis - the message bus to send the message with
-     */
-    public void sendGlobalWith(MessageBus viaThis);
-
+  /**
+   * Sends the message globally with the specified <tt>MessageBus</tt>
+   *
+   * @param viaThis - the message bus to send the message with
+   */
+  public void sendGlobalWith(MessageBus viaThis);
 
 
 }

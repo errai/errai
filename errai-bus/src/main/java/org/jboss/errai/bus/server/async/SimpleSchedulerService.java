@@ -30,178 +30,176 @@ import static java.lang.System.currentTimeMillis;
  * @author Mike Brock
  */
 public class SimpleSchedulerService implements Runnable, SchedulerService {
-    private volatile boolean running = false;
-    private boolean finished = false;
+  private volatile boolean running = false;
+  private boolean finished = false;
 
-    private long nextRunTime = 0;
-    private final TreeSet<TimedTask> tasks = new TreeSet<TimedTask>();
-    private boolean autoStartStop = false;
-    private Thread currentThread;
+  private long nextRunTime = 0;
+  private final TreeSet<TimedTask> tasks = new TreeSet<TimedTask>();
+  private boolean autoStartStop = false;
+  private Thread currentThread;
 
-    public SimpleSchedulerService() {
-        init();
+  public SimpleSchedulerService() {
+    init();
+  }
+
+  private void init() {
+    synchronized (this) {
+      if (!running) {
+        currentThread = new Thread(this);
+        currentThread.setDaemon(true);
+        currentThread.setPriority(Thread.MIN_PRIORITY);
+      }
+    }
+  }
+
+  public void run() {
+    synchronized (this) {
+      running = true;
+      finished = false;
     }
 
-    private void init() {
-        synchronized (this) {
-            if (!running) {
-                currentThread = new Thread(this);
-                currentThread.setDaemon(true);
-                currentThread.setPriority(Thread.MIN_PRIORITY);
-            }
-        }
-    }
-
-    public void run() {
-        synchronized (this) {
-            running = true;
-            finished = false;
-        }
-
-        long tm;
+    long tm;
+    while (running) {
+      try {
         while (running) {
-            try {
-                while (running) {
-                    if ((tm = nextRunTime - currentTimeMillis()) > 0) {
-                        Thread.sleep(tm);
-                    }
+          if ((tm = nextRunTime - currentTimeMillis()) > 0) {
+            Thread.sleep(tm);
+          }
 
-                    runAllDue();
-                }
-            }
-            catch (InterruptedException e) {
-                if (!running) return;
-            }
-            catch (Throwable t) {
-                requestStop();
-                throw new RuntimeException("scheduler interrupted by exception", t);
-            }
+          runAllDue();
         }
-
-        synchronized (this) {
-            finished = true;
-        }
-        if (autoStartStop) init();
+      } catch (InterruptedException e) {
+        if (!running) return;
+      } catch (Throwable t) {
+        requestStop();
+        throw new RuntimeException("scheduler interrupted by exception", t);
+      }
     }
 
-    public void start() {
+    synchronized (this) {
+      finished = true;
+    }
+    if (autoStartStop) init();
+  }
+
+  public void start() {
+    currentThread.start();
+  }
+
+  public void startIfTasks() {
+    synchronized (this) {
+      if (!tasks.isEmpty() && !running) {
+        init();
         currentThread.start();
+      }
     }
+  }
 
-    public void startIfTasks() {
-        synchronized (this) {
-            if (!tasks.isEmpty() && !running) {
-                init();
-                currentThread.start();
-            }
+  public void stopIfNoTasks() {
+    synchronized (this) {
+      if (running && tasks.isEmpty()) {
+        requestStop();
+      }
+    }
+  }
+
+  private void runAllDue() {
+    long n = 0;
+
+    synchronized (this) {
+      TimedTask task;
+      for (Iterator<TimedTask> iter = tasks.iterator(); iter.hasNext(); ) {
+        if ((task = iter.next()).runIfDue(n = currentTimeMillis())) {
+          if (task.nextRuntime() == -1) {
+            // if the next runtime is -1, that means this event
+            // is never scheduled to run again, so we remove it.
+            iter.remove();
+          } else {
+            // set the nextRuntime to the nextRuntim of this event
+            nextRunTime = task.nextRuntime();
+          }
+        } else if (task.nextRuntime() == -1) {
+          // this event is not scheduled to run.
+          iter.remove();
+        } else if (nextRunTime == 0 || task.nextRuntime() < nextRunTime) {
+          // this event occurs before the current nextRuntime,
+          // so we update nextRuntime.
+          nextRunTime = task.nextRuntime();
+        } else if (n > task.nextRuntime()) {
+          // Since the scheduled events are in the order of soonest to
+          // latest, we now know that all further events are in the future
+          // and we can therefore stop iterating.
+          return;
         }
+      }
+
+      if (autoStartStop) stopIfNoTasks();
     }
 
-    public void stopIfNoTasks() {
-        synchronized (this) {
-            if (running && tasks.isEmpty()) {
-                requestStop();
-            }
-        }
+    if (n == 0) nextRunTime = currentTimeMillis() + 10000;
+  }
+
+  /**
+   * Adds a task to be executed.  Note: In order to remove a task, you must maintain a
+   * reference to the <tt>TimedTask</tt> and set it's nextRuntime value to <tt>-1</tt>.
+   * This will cause the scheduler to automatically remove it.
+   *
+   * @param task
+   */
+  public AsyncTask addTask(final TimedTask task) {
+    synchronized (this) {
+      tasks.add(task);
+      if (nextRunTime == 0 || task.nextRuntime() < nextRunTime) {
+        nextRunTime = task.nextRuntime();
+        currentThread.interrupt();
+      }
+
+      if (autoStartStop) startIfTasks();
     }
 
-    private void runAllDue() {
-        long n = 0;
+    return new AsyncTask() {
+      private boolean finished = false;
 
-        synchronized (this) {
-            TimedTask task;
-            for (Iterator<TimedTask> iter = tasks.iterator(); iter.hasNext();) {
-                if ((task = iter.next()).runIfDue(n = currentTimeMillis())) {
-                    if (task.nextRuntime() == -1) {
-                        // if the next runtime is -1, that means this event
-                        // is never scheduled to run again, so we remove it.
-                        iter.remove();
-                    } else {
-                        // set the nextRuntime to the nextRuntim of this event
-                        nextRunTime = task.nextRuntime();
-                    }
-                } else if (task.nextRuntime() == -1) {
-                    // this event is not scheduled to run.
-                    iter.remove();
-                } else if (nextRunTime == 0 || task.nextRuntime() < nextRunTime) {
-                    // this event occurs before the current nextRuntime,
-                    // so we update nextRuntime.
-                    nextRunTime = task.nextRuntime();
-                } else if (n > task.nextRuntime()) {
-                    // Since the scheduled events are in the order of soonest to
-                    // latest, we now know that all further events are in the future
-                    // and we can therefore stop iterating.
-                    return;
-                }
-            }
+      public boolean cancel(boolean mayInterruptIfRunning) {
+        task.cancel(mayInterruptIfRunning);
+        return finished = true;
+      }
 
-            if (autoStartStop) stopIfNoTasks();
-        }
+      public void setExitHandler(Runnable runnable) {
 
-        if (n == 0) nextRunTime = currentTimeMillis() + 10000;
+      }
+
+      public boolean isCancelled() {
+        return finished;
+      }
+    };
+  }
+
+  public void setAutoStartStop(boolean autoStartStop) {
+    this.autoStartStop = autoStartStop;
+  }
+
+  public void requestStop() {
+    synchronized (this) {
+      currentThread.interrupt();
+      running = false;
     }
+  }
 
-    /**
-     * Adds a task to be executed.  Note: In order to remove a task, you must maintain a
-     * reference to the <tt>TimedTask</tt> and set it's nextRuntime value to <tt>-1</tt>.
-     * This will cause the scheduler to automatically remove it.
-     *
-     * @param task
-     */
-    public AsyncTask addTask(final TimedTask task) {
-        synchronized (this) {
-            tasks.add(task);
-            if (nextRunTime == 0 || task.nextRuntime() < nextRunTime) {
-                nextRunTime = task.nextRuntime();
-                currentThread.interrupt();
-            }
 
-            if (autoStartStop) startIfTasks();
-        }
-
-        return new AsyncTask() {
-            private boolean finished = false;
-
-            public boolean cancel(boolean mayInterruptIfRunning) {
-                task.cancel(mayInterruptIfRunning);
-                return finished = true;
-            }
-
-            public void setExitHandler(Runnable runnable) {
-
-            }
-
-            public boolean isCancelled() {
-                return finished;
-            }
-        };
+  public boolean isFinished() {
+    synchronized (this) {
+      return finished;
     }
+  }
 
-    public void setAutoStartStop(boolean autoStartStop) {
-        this.autoStartStop = autoStartStop;
+  public void visitAllTasks(TaskVisitor visitor) {
+    synchronized (this) {
+      for (TimedTask task : tasks) visitor.visit(task);
     }
+  }
 
-    public void requestStop() {
-        synchronized (this) {
-            currentThread.interrupt();
-            running = false;
-        }
-    }
-
-
-    public boolean isFinished() {
-        synchronized (this) {
-            return finished;
-        }
-    }
-
-    public void visitAllTasks(TaskVisitor visitor) {
-        synchronized (this) {
-            for (TimedTask task : tasks) visitor.visit(task);
-        }
-    }
-
-    public static interface TaskVisitor {
-        public void visit(TimedTask task);
-    }
+  public static interface TaskVisitor {
+    public void visit(TimedTask task);
+  }
 }

@@ -24,53 +24,53 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.values.LiteralFactory;
  */
 public class LiteralTest extends TestCase {
 
-    public void testIntegerLiteral() {
-        assertEquals("1234", LiteralFactory.getLiteral(1234).generate(null));
-    }
+  public void testIntegerLiteral() {
+    assertEquals("1234", LiteralFactory.getLiteral(1234).generate(null));
+  }
 
-    public void testShortLiteral() {
-        assertEquals("1234", LiteralFactory.getLiteral((short) 1234).generate(null));
-    }
+  public void testShortLiteral() {
+    assertEquals("1234", LiteralFactory.getLiteral((short) 1234).generate(null));
+  }
 
-    public void testLongLiteral() {
-        assertEquals("1234L", LiteralFactory.getLiteral(1234L).generate(null));
-    }
+  public void testLongLiteral() {
+    assertEquals("1234L", LiteralFactory.getLiteral(1234L).generate(null));
+  }
 
-    public void testDoubleLiteral() {
-        assertEquals("1234.567d", LiteralFactory.getLiteral(1234.567d).generate(null));
-    }
+  public void testDoubleLiteral() {
+    assertEquals("1234.567d", LiteralFactory.getLiteral(1234.567d).generate(null));
+  }
 
-    public void testFloatLiteral() {
-        assertEquals("1234.567f", LiteralFactory.getLiteral(1234.567f).generate(null));
-    }
+  public void testFloatLiteral() {
+    assertEquals("1234.567f", LiteralFactory.getLiteral(1234.567f).generate(null));
+  }
 
-    public void testByteLiteral() {
-        assertEquals("72", LiteralFactory.getLiteral((byte) 72).generate(null));
-    }
+  public void testByteLiteral() {
+    assertEquals("72", LiteralFactory.getLiteral((byte) 72).generate(null));
+  }
 
-    public void testBooleanLiteral() {
-        assertEquals("false", LiteralFactory.getLiteral(false).generate(null));
-    }
+  public void testBooleanLiteral() {
+    assertEquals("false", LiteralFactory.getLiteral(false).generate(null));
+  }
 
-    public void testStringLiteral() {
-        final String expected = "\"The quick brown fox said \\\"how do you do?\\\"\\nNew line.\\rCarriage Return!"
-                + "\\t and a tab\"";
+  public void testStringLiteral() {
+    final String expected = "\"The quick brown fox said \\\"how do you do?\\\"\\nNew line.\\rCarriage Return!"
+            + "\\t and a tab\"";
 
-        final String input = "The quick brown fox said \"how do you do?\"\nNew line.\rCarriage Return!"
-                + "\t and a tab";
+    final String input = "The quick brown fox said \"how do you do?\"\nNew line.\rCarriage Return!"
+            + "\t and a tab";
 
-        assertEquals(expected, LiteralFactory.getLiteral(input).generate(null));
-    }
+    assertEquals(expected, LiteralFactory.getLiteral(input).generate(null));
+  }
 
-    public void testStringArrayCreation() {
-        final String[][] input = new String[][]{{"Hello1", "Hello2"}, {"Hello3", "Hello4"}};
-        final String expected = "new java.lang.String[][] {{\"Hello1\", \"Hello2\"}, {\"Hello3\", \"Hello4\"}}";
+  public void testStringArrayCreation() {
+    final String[][] input = new String[][]{{"Hello1", "Hello2"}, {"Hello3", "Hello4"}};
+    final String expected = "new java.lang.String[][] {{\"Hello1\", \"Hello2\"}, {\"Hello3\", \"Hello4\"}}";
 
-        assertEquals(expected, LiteralFactory.getLiteral(input).generate(null));
-    }
+    assertEquals(expected, LiteralFactory.getLiteral(input).generate(null));
+  }
 
-    public void testClassLiteral() {
-        assertEquals("java.lang.String.class", LiteralFactory.getLiteral(String.class).generate(null));
-    }
+  public void testClassLiteral() {
+    assertEquals("java.lang.String.class", LiteralFactory.getLiteral(String.class).generate(null));
+  }
 
 }

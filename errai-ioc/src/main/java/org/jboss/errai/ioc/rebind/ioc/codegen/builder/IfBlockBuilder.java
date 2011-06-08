@@ -25,9 +25,9 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.BlockBuilder;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface IfBlockBuilder extends Statement, Builder {
-    BlockBuilder<ElseBlockBuilder> if_();
+  BlockBuilder<ElseBlockBuilder> if_();
 
-    BlockBuilder<ElseBlockBuilder> if_(BooleanOperator op, Statement rhs);
+  BlockBuilder<ElseBlockBuilder> if_(BooleanOperator op, Statement rhs);
 
-    BlockBuilder<ElseBlockBuilder> if_(BooleanOperator op, Object rhs);
+  BlockBuilder<ElseBlockBuilder> if_(BooleanOperator op, Object rhs);
 }

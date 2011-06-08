@@ -25,32 +25,31 @@ import java.awt.*;
 import java.util.Map;
 
 public class MessageCellRenderer extends DefaultTableCellRenderer {
-    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-        String txt = renderMessage(value);
-        setToolTipText(txt);
-        return super.getTableCellRendererComponent(table, txt, isSelected, hasFocus, row, column);
-    }
+  public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+    String txt = renderMessage(value);
+    setToolTipText(txt);
+    return super.getTableCellRendererComponent(table, txt, isSelected, hasFocus, row, column);
+  }
 
-    public static String renderMessage(Object value) {
+  public static String renderMessage(Object value) {
 
-        if (value instanceof Message) {
-            StringAppender appender = new StringAppender();
-            Map<String, Object> vars = ((Message) value).getParts();
+    if (value instanceof Message) {
+      StringAppender appender = new StringAppender();
+      Map<String, Object> vars = ((Message) value).getParts();
 
-            boolean first = true;
-            for (Map.Entry<String, Object> entry : vars.entrySet()) {
-                if (first) {
-                    first = false;
-                }
-                else {
-                    appender.append(", ");
-                }
-
-                appender.append(entry.getKey()).append('=').append(entry.getValue());
-            }
-
-            return appender.toString();
+      boolean first = true;
+      for (Map.Entry<String, Object> entry : vars.entrySet()) {
+        if (first) {
+          first = false;
+        } else {
+          appender.append(", ");
         }
-        return null;
+
+        appender.append(entry.getKey()).append('=').append(entry.getValue());
+      }
+
+      return appender.toString();
     }
+    return null;
+  }
 }

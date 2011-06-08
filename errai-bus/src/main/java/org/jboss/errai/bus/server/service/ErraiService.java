@@ -24,36 +24,36 @@ import org.jboss.errai.bus.server.api.ServerMessageBus;
  * obtain the server bus and configuration
  */
 public interface ErraiService<S> extends ServiceComposite<S> {
-    public static final String AUTHORIZATION_SVC_SUBJECT = "AuthenticationService";
-    public static final String SERVER_ECHO_SERVICE = "ServerEchoService";
-    public static final String AUTHORIZATION_SERVICE = "AuthorizationService";
+  public static final String AUTHORIZATION_SVC_SUBJECT = "AuthenticationService";
+  public static final String SERVER_ECHO_SERVICE = "ServerEchoService";
+  public static final String AUTHORIZATION_SERVICE = "AuthorizationService";
 
-    public static final String SESSION_AUTH_DATA = "ErraiAuthData";
+  public static final String SESSION_AUTH_DATA = "ErraiAuthData";
 
-    /**
-     * Stores the specified message
-     *
-     * @param message - the message to store
-     */
-    public void store(Message message);
+  /**
+   * Stores the specified message
+   *
+   * @param message - the message to store
+   */
+  public void store(Message message);
 
-    /**
-     * Retrieves the server message bus employed by this service
-     *
-     * @return the server message bus
-     */
-    public ServerMessageBus getBus();
+  /**
+   * Retrieves the server message bus employed by this service
+   *
+   * @return the server message bus
+   */
+  public ServerMessageBus getBus();
 
 
-    /**
-     * Gets the configuration used to initalize the service
-     *
-     * @return the errai service configurator
-     */
-    public ErraiServiceConfigurator getConfiguration();
+  /**
+   * Gets the configuration used to initalize the service
+   *
+   * @return the errai service configurator
+   */
+  public ErraiServiceConfigurator getConfiguration();
 
-    /**
-     * Shut down the entire Errai service.
-     */
-    public void stopService();
+  /**
+   * Shut down the entire Errai service.
+   */
+  public void stopService();
 }

@@ -31,95 +31,99 @@ import javax.inject.Inject;
 
 @EntryPoint
 public class SimpleBean {
-    public static SimpleBean TEST_INSTANCE;
+  public static SimpleBean TEST_INSTANCE;
 
-    @Inject public RequestDispatcher dispatcher;
-    @Inject public MessageBus bus;
+  @Inject
+  public RequestDispatcher dispatcher;
+  @Inject
+  public MessageBus bus;
 
-    @Inject private RequestDispatcher dispatcher2;
-    @Inject private MessageBus bus2;
+  @Inject
+  private RequestDispatcher dispatcher2;
+  @Inject
+  private MessageBus bus2;
 
-    private RequestDispatcher dispatcher3;
-    private MessageBus bus3;
+  private RequestDispatcher dispatcher3;
+  private MessageBus bus3;
 
-    private RequestDispatcher dispatcher4;
-    private MessageBus bus4;
+  private RequestDispatcher dispatcher4;
+  private MessageBus bus4;
 
-    @Inject
-    public SimpleBean(RequestDispatcher dispatcher3, MessageBus bus3) {
-        this.dispatcher3 = dispatcher3;
-        this.bus3 = bus3;
-    }
+  @Inject
+  public SimpleBean(RequestDispatcher dispatcher3, MessageBus bus3) {
+    this.dispatcher3 = dispatcher3;
+    this.bus3 = bus3;
+  }
 
-    public RequestDispatcher getDispatcher() {
-        return dispatcher;
-    }
+  public RequestDispatcher getDispatcher() {
+    return dispatcher;
+  }
 
-    public void setDispatcher(RequestDispatcher dispatcher) {
-        this.dispatcher = dispatcher;
-    }
+  public void setDispatcher(RequestDispatcher dispatcher) {
+    this.dispatcher = dispatcher;
+  }
 
-    public MessageBus getBus() {
-        return bus;
-    }
+  public MessageBus getBus() {
+    return bus;
+  }
 
-    public void setBus(MessageBus bus) {
-        this.bus = bus;
-    }
+  public void setBus(MessageBus bus) {
+    this.bus = bus;
+  }
 
-    public RequestDispatcher getDispatcher2() {
-        return dispatcher2;
-    }
+  public RequestDispatcher getDispatcher2() {
+    return dispatcher2;
+  }
 
-    public void setDispatcher2(RequestDispatcher dispatcher2) {
-        this.dispatcher2 = dispatcher2;
-    }
+  public void setDispatcher2(RequestDispatcher dispatcher2) {
+    this.dispatcher2 = dispatcher2;
+  }
 
-    public MessageBus getBus2() {
-        return bus2;
-    }
+  public MessageBus getBus2() {
+    return bus2;
+  }
 
-    public void setBus2(MessageBus bus2) {
-        this.bus2 = bus2;
-    }
+  public void setBus2(MessageBus bus2) {
+    this.bus2 = bus2;
+  }
 
-    public RequestDispatcher getDispatcher3() {
-        return dispatcher3;
-    }
+  public RequestDispatcher getDispatcher3() {
+    return dispatcher3;
+  }
 
-    public void setDispatcher3(RequestDispatcher dispatcher3) {
-        this.dispatcher3 = dispatcher3;
-    }
+  public void setDispatcher3(RequestDispatcher dispatcher3) {
+    this.dispatcher3 = dispatcher3;
+  }
 
-    public MessageBus getBus3() {
-        return bus3;
-    }
+  public MessageBus getBus3() {
+    return bus3;
+  }
 
-    public void setBus3(MessageBus bus3) {
-        this.bus3 = bus3;
-    }
+  public void setBus3(MessageBus bus3) {
+    this.bus3 = bus3;
+  }
 
 
-    public RequestDispatcher getDispatcher4() {
-        return dispatcher4;
-    }
+  public RequestDispatcher getDispatcher4() {
+    return dispatcher4;
+  }
 
-    @Inject
-    public void setDispatcher4(RequestDispatcher dispatcher4) {
-        this.dispatcher4 = dispatcher4;
-    }
+  @Inject
+  public void setDispatcher4(RequestDispatcher dispatcher4) {
+    this.dispatcher4 = dispatcher4;
+  }
 
-    public MessageBus getBus4() {
-        return bus4;
-    }
+  public MessageBus getBus4() {
+    return bus4;
+  }
 
-    @Inject
-    public void setBus4(MessageBus bus4) {
-        this.bus4 = bus4;
-    }
+  @Inject
+  public void setBus4(MessageBus bus4) {
+    this.bus4 = bus4;
+  }
 
-    @PostConstruct
-    public void doPostConstruct() {
-        TEST_INSTANCE = this;
-    }
+  @PostConstruct
+  public void doPostConstruct() {
+    TEST_INSTANCE = this;
+  }
 }

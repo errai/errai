@@ -20,9 +20,9 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.meta;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public interface MetaParameter extends HasAnnotations {
-    public String getName();
+  public String getName();
 
-    public MetaClass getType();
+  public MetaClass getType();
 
-    public MetaClassMember getDeclaringMember();
+  public MetaClassMember getDeclaringMember();
 }

@@ -24,11 +24,11 @@ import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
  * @date: Aug 4, 2010
  */
 public class ScannerSingleton {
-    private static MetaDataScanner scanner;
+  private static MetaDataScanner scanner;
 
-    public static MetaDataScanner getOrCreateInstance() {
-        if (null == scanner)
-            scanner = MetaDataScanner.createInstance();
-        return scanner;
-    }
+  public static MetaDataScanner getOrCreateInstance() {
+    if (null == scanner)
+      scanner = MetaDataScanner.createInstance();
+    return scanner;
+  }
 }

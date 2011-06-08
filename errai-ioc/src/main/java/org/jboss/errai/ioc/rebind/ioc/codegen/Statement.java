@@ -23,9 +23,9 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface Statement {
-    public String generate(Context context);
+  public String generate(Context context);
 
-    public MetaClass getType();
+  public MetaClass getType();
 
-    public Context getContext();
+  public Context getContext();
 }

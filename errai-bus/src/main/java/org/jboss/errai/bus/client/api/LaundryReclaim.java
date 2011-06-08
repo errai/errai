@@ -17,5 +17,5 @@
 package org.jboss.errai.bus.client.api;
 
 public interface LaundryReclaim {
-    public boolean reclaim();
+  public boolean reclaim();
 }

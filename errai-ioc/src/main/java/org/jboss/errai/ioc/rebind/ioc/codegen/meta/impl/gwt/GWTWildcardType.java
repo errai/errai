@@ -24,17 +24,17 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaWildcardType;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class GWTWildcardType implements MetaWildcardType {
-    private JWildcardType wildcardType;
+  private JWildcardType wildcardType;
 
-    public GWTWildcardType(JWildcardType wildcardType) {
-        this.wildcardType = wildcardType;
-    }
+  public GWTWildcardType(JWildcardType wildcardType) {
+    this.wildcardType = wildcardType;
+  }
 
-    public MetaType[] getLowerBounds() {
-        return GWTUtil.fromTypeArray(wildcardType.getLowerBounds());
-    }
+  public MetaType[] getLowerBounds() {
+    return GWTUtil.fromTypeArray(wildcardType.getLowerBounds());
+  }
 
-    public MetaType[] getUpperBounds() {
-        return GWTUtil.fromTypeArray(wildcardType.getUpperBounds());
-    }
+  public MetaType[] getUpperBounds() {
+    return GWTUtil.fromTypeArray(wildcardType.getUpperBounds());
+  }
 }

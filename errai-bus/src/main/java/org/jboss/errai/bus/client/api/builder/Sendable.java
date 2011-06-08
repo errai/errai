@@ -19,5 +19,5 @@ package org.jboss.errai.bus.client.api.builder;
 import org.jboss.errai.bus.client.api.Message;
 
 public interface Sendable {
-    public Message getMessage();
+  public Message getMessage();
 }

@@ -25,79 +25,79 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class TypeInjector extends Injector {
-    protected final MetaClass type;
-    protected boolean injected;
-    protected boolean singleton;
-    protected String varName;
+  protected final MetaClass type;
+  protected boolean injected;
+  protected boolean singleton;
+  protected String varName;
 
-    public TypeInjector(MetaClass type) {
-        this.type = type;
-        this.singleton = type.isAnnotationPresent(Singleton.class)
-                || type.isAnnotationPresent(com.google.inject.Singleton.class);
-        this.varName = InjectUtil.getNewVarName();
+  public TypeInjector(MetaClass type) {
+    this.type = type;
+    this.singleton = type.isAnnotationPresent(Singleton.class)
+            || type.isAnnotationPresent(com.google.inject.Singleton.class);
+    this.varName = InjectUtil.getNewVarName();
 
-        try {
-            Set<Annotation> qualifiers = new HashSet<Annotation>();
-            qualifiers.addAll(InjectUtil.extractQualifiersFromType(type));
+    try {
+      Set<Annotation> qualifiers = new HashSet<Annotation>();
+      qualifiers.addAll(InjectUtil.extractQualifiersFromType(type));
 
-            if (!qualifiers.isEmpty()) {
-                qualifyingMetadata = new JSR299QualifyingMetadata(qualifiers);
-            } else {
-                qualifyingMetadata = JSR299QualifyingMetadata.createDefaultQualifyingMetaData();
-            }
+      if (!qualifiers.isEmpty()) {
+        qualifyingMetadata = new JSR299QualifyingMetadata(qualifiers);
+      } else {
+        qualifyingMetadata = JSR299QualifyingMetadata.createDefaultQualifyingMetaData();
+      }
 
-        } catch (Throwable e) {
-            // ignore
-        }
+    } catch (Throwable e) {
+      // ignore
     }
+  }
 
-    @Override
-    public String getType(InjectionContext injectContext, InjectionPoint injectionPoint) {
-        if (isInjected()) {
-            if (isSingleton()) {
-                return varName;
-            } else {
-                varName = InjectUtil.getNewVarName();
-            }
-        }
-
-        ConstructionStrategy cs = InjectUtil.getConstructionStrategy(this, injectContext);
-
-        String generated = cs.generateConstructor();
-        injectContext.getProcessingContext().getWriter().print(generated);
-
-
-        injected = true;
-
+  @Override
+  public String getType(InjectionContext injectContext, InjectionPoint injectionPoint) {
+    if (isInjected()) {
+      if (isSingleton()) {
         return varName;
+      } else {
+        varName = InjectUtil.getNewVarName();
+      }
     }
 
-    @Override
-    public String instantiateOnly(InjectionContext injectContext, InjectionPoint injectionPoint) {
-        return getType(injectContext, injectionPoint);
-    }
+    ConstructionStrategy cs = InjectUtil.getConstructionStrategy(this, injectContext);
 
-    @Override
-    public boolean isInjected() {
-        return injected;
-    }
+    String generated = cs.generateConstructor();
+    injectContext.getProcessingContext().getWriter().print(generated);
 
-    @Override
-    public boolean isSingleton() {
-        return singleton;
-    }
 
-    public void setSingleton(boolean singleton) {
-        this.singleton = singleton;
-    }
+    injected = true;
 
-    @Override
-    public String getVarName() {
-        return varName;
-    }
+    return varName;
+  }
 
-    @Override
-    public MetaClass getInjectedType() {
-        return type;
-    }
+  @Override
+  public String instantiateOnly(InjectionContext injectContext, InjectionPoint injectionPoint) {
+    return getType(injectContext, injectionPoint);
+  }
+
+  @Override
+  public boolean isInjected() {
+    return injected;
+  }
+
+  @Override
+  public boolean isSingleton() {
+    return singleton;
+  }
+
+  public void setSingleton(boolean singleton) {
+    this.singleton = singleton;
+  }
+
+  @Override
+  public String getVarName() {
+    return varName;
+  }
+
+  @Override
+  public MetaClass getInjectedType() {
+    return type;
+  }
 }

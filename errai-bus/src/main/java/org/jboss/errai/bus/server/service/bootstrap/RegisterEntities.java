@@ -25,8 +25,8 @@ import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
  * @date: May 3, 2010
  */
 class RegisterEntities implements BootstrapExecution {
-    public void execute(BootstrapContext context) {
-        final ErraiServiceConfiguratorImpl config = (ErraiServiceConfiguratorImpl) context.getConfig();
-        JSONEncoder.setSerializableTypes(config.getSerializableTypes());
-    }
+  public void execute(BootstrapContext context) {
+    final ErraiServiceConfiguratorImpl config = (ErraiServiceConfiguratorImpl) context.getConfig();
+    JSONEncoder.setSerializableTypes(config.getSerializableTypes());
+  }
 }

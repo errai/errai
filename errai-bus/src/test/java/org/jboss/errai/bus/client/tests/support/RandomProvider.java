@@ -22,9 +22,13 @@ package org.jboss.errai.bus.client.tests.support;
  * Time: 11:13:10 PM
  */
 public interface RandomProvider {
-    public boolean nextBoolean();
-    public int nextInt(int upper);
-    public double nextDouble();
-    public char nextChar();
-    public String randString();
+  public boolean nextBoolean();
+
+  public int nextInt(int upper);
+
+  public double nextDouble();
+
+  public char nextChar();
+
+  public String randString();
 }

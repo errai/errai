@@ -22,62 +22,62 @@ package org.jboss.errai.bus.client.protocols;
  * As a general rule, you should avoid using the words reserved by this protocol.
  */
 public enum MessageParts {
-    /**
-     * Specifies the specific command within the service that is being requested.  This is an optional element,
-     * and is not required for signal-only services.  However it's use is encouraged for building multi-command
-     * services.  It is used as the underlying protocol representation in
-     * {@link org.jboss.errai.bus.client.api.base.CommandMessage#toSubject(String)}.  The <tt>CommandType</tt> is
-     * represented as a <tt>String</tt>.
-     */
-    CommandType,
+  /**
+   * Specifies the specific command within the service that is being requested.  This is an optional element,
+   * and is not required for signal-only services.  However it's use is encouraged for building multi-command
+   * services.  It is used as the underlying protocol representation in
+   * {@link org.jboss.errai.bus.client.api.base.CommandMessage#toSubject(String)}.  The <tt>CommandType</tt> is
+   * represented as a <tt>String</tt>.
+   */
+  CommandType,
 
-    /**
-     * Specifies a subject being referenced for use in an command.  This should not be confused with {@link #ToSubject},
-     * which is used for message routing.
-     */
-    Subject,
-
-
-    /**
-     * Default value payload. Used mostly for higher-level APIs.
-     */
-    Value,
+  /**
+   * Specifies a subject being referenced for use in an command.  This should not be confused with {@link #ToSubject},
+   * which is used for message routing.
+   */
+  Subject,
 
 
-    /**
-     * A unique identifier for identifying the session with which a message is associated.
-     */
-    SessionID,
+  /**
+   * Default value payload. Used mostly for higher-level APIs.
+   */
+  Value,
 
-    /**
-     * Specifies any specific message text to be communicated as part of the command being sent.
-     */
-    MessageText,
 
-    /**
-     * Specifies what subject which should be replied-to in response to the message being sent.  Usually handled
-     * automatically with conversations.
-     */
-    ReplyTo,
+  /**
+   * A unique identifier for identifying the session with which a message is associated.
+   */
+  SessionID,
 
-    /**
-     * Specifies the intended recipient queue for the message.
-     */
-    ToSubject,
+  /**
+   * Specifies any specific message text to be communicated as part of the command being sent.
+   */
+  MessageText,
 
-    /**
-     * Specifies error message test.
-     */
-    ErrorMessage,
+  /**
+   * Specifies what subject which should be replied-to in response to the message being sent.  Usually handled
+   * automatically with conversations.
+   */
+  ReplyTo,
 
-    /**
-     * Specifies stack trace data in String form.
-     */
-    StackTrace,
+  /**
+   * Specifies the intended recipient queue for the message.
+   */
+  ToSubject,
 
-    /**
-     * If this attribute is present, the bus should give priority to processing it and not subject it to
-     * window matching.
-     */
-    PriorityProcessing
+  /**
+   * Specifies error message test.
+   */
+  ErrorMessage,
+
+  /**
+   * Specifies stack trace data in String form.
+   */
+  StackTrace,
+
+  /**
+   * If this attribute is present, the bus should give priority to processing it and not subject it to
+   * window matching.
+   */
+  PriorityProcessing
 }

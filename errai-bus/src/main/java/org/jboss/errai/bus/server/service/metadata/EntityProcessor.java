@@ -52,7 +52,7 @@ public class EntityProcessor implements MetaDataProcessor {
 
       Iterator<Object> it = props.keySet().iterator();
       while (it.hasNext()) {
-        String key = (String)it.next();
+        String key = (String) it.next();
         if (key.equals(ErraiServiceConfigurator.CONFIG_ERRAI_SERIALIZABLE_TYPE)) {
           for (String s : props.getProperty(key).split(" ")) {
             try {
@@ -61,8 +61,7 @@ public class EntityProcessor implements MetaDataProcessor {
               config.getSerializableTypes().add(cls);
               markIfEnumType(cls);
 
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
               throw new ErraiBootstrapFailure(e);
             }
           }

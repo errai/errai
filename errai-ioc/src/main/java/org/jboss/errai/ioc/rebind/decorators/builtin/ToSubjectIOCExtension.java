@@ -28,17 +28,17 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
  */
 @CodeDecorator
 public class ToSubjectIOCExtension extends IOCDecoratorExtension<ToSubject> {
-    public ToSubjectIOCExtension(Class<ToSubject> decoratesWith) {
-        super(decoratesWith);
-    }
+  public ToSubjectIOCExtension(Class<ToSubject> decoratesWith) {
+    super(decoratesWith);
+  }
 
-    @Override
-    public String generateDecorator(InjectionPoint<ToSubject> injectionPoint) {
-        final InjectionContext ctx = injectionPoint.getInjectionContext();
+  @Override
+  public String generateDecorator(InjectionPoint<ToSubject> injectionPoint) {
+    final InjectionContext ctx = injectionPoint.getInjectionContext();
 
-        final MetaField field = injectionPoint.getField();
-        final ToSubject context = field.getAnnotation(ToSubject.class);
+    final MetaField field = injectionPoint.getField();
+    final ToSubject context = field.getAnnotation(ToSubject.class);
 
-        return injectionPoint.getValueExpression() + ".setToSubject(\"" + context.value() + "\");";
-    }
+    return injectionPoint.getValueExpression() + ".setToSubject(\"" + context.value() + "\");";
+  }
 }

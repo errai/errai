@@ -22,13 +22,13 @@ import org.jboss.errai.bus.client.security.Credential;
  * A basic name (or username) credential.
  */
 public class NameCredential implements Credential {
-    private String name;
+  private String name;
 
-    public void setName(String name) {
-        this.name = name;
-    }
+  public void setName(String name) {
+    this.name = name;
+  }
 
-    public String getValue() {
-        return name;
-    }
+  public String getValue() {
+    return name;
+  }
 }

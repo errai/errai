@@ -23,10 +23,10 @@ import org.jboss.errai.bus.client.api.Message;
  */
 public interface MessageBuild extends Sendable {
 
-    /**
-     * Gets the message created
-     *
-     * @return the message in question
-     */
-    Message getMessage();
+  /**
+   * Gets the message created
+   *
+   * @return the message in question
+   */
+  Message getMessage();
 }

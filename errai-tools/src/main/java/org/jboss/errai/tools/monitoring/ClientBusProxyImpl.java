@@ -24,46 +24,46 @@ import org.jboss.errai.bus.client.framework.BusMonitor;
 import org.jboss.errai.bus.client.framework.MessageBus;
 
 public class ClientBusProxyImpl implements MessageBus {
-    private MessageBus serverBus;
+  private MessageBus serverBus;
 
-    public ClientBusProxyImpl(MessageBus serverBus) {
-        this.serverBus = serverBus;
-    }
+  public ClientBusProxyImpl(MessageBus serverBus) {
+    this.serverBus = serverBus;
+  }
 
-    public void sendGlobal(org.jboss.errai.bus.client.api.Message message) {
-    }
+  public void sendGlobal(org.jboss.errai.bus.client.api.Message message) {
+  }
 
-    public void send(org.jboss.errai.bus.client.api.Message message) {
-    }
+  public void send(org.jboss.errai.bus.client.api.Message message) {
+  }
 
-    public void send(org.jboss.errai.bus.client.api.Message message, boolean fireListeners) {
-    }
+  public void send(org.jboss.errai.bus.client.api.Message message, boolean fireListeners) {
+  }
 
-    public void conversationWith(org.jboss.errai.bus.client.api.Message message, MessageCallback callback) {
-    }
+  public void conversationWith(org.jboss.errai.bus.client.api.Message message, MessageCallback callback) {
+  }
 
-    public void subscribe(String subject, MessageCallback receiver) {
-    }
+  public void subscribe(String subject, MessageCallback receiver) {
+  }
 
-    public void subscribeLocal(String subject, MessageCallback receiver) {
-    }
+  public void subscribeLocal(String subject, MessageCallback receiver) {
+  }
 
-    public void unsubscribeAll(String subject) {
-    }
+  public void unsubscribeAll(String subject) {
+  }
 
-    public boolean isSubscribed(String subject) {
-        return false;
-    }
+  public boolean isSubscribed(String subject) {
+    return false;
+  }
 
-    public void addGlobalListener(MessageListener listener) {
-    }
+  public void addGlobalListener(MessageListener listener) {
+  }
 
-    public void addSubscribeListener(SubscribeListener listener) {
-    }
+  public void addSubscribeListener(SubscribeListener listener) {
+  }
 
-    public void addUnsubscribeListener(UnsubscribeListener listener) {
-    }
+  public void addUnsubscribeListener(UnsubscribeListener listener) {
+  }
 
-    public void attachMonitor(BusMonitor monitor) {
-    }
+  public void attachMonitor(BusMonitor monitor) {
+  }
 }

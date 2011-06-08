@@ -26,5 +26,5 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public interface DeferredCallback {
-    public void doDeferred(CallWriter writer, Context context, Statement statement);
+  public void doDeferred(CallWriter writer, Context context, Statement statement);
 }

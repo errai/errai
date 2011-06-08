@@ -26,11 +26,11 @@ import java.lang.annotation.Annotation;
  */
 @IOCProvider
 public class BarServiceProviderContextual implements ContextualTypeProvider<BarService> {
-    public BarService provide(final Class[] typeargs, Annotation... qualifiers) {
-         return new BarService() {
-             public Object get() {
-                 return typeargs[0].getName();
-             }
-         };
-    }
+  public BarService provide(final Class[] typeargs, Annotation... qualifiers) {
+    return new BarService() {
+      public Object get() {
+        return typeargs[0].getName();
+      }
+    };
+  }
 }

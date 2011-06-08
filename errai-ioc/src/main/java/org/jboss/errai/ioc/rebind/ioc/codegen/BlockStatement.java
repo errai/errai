@@ -25,43 +25,43 @@ import java.util.List;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class BlockStatement extends AbstractStatement {
-    private List<Statement> statements = new ArrayList<Statement>();
+  private List<Statement> statements = new ArrayList<Statement>();
 
-    public BlockStatement(Statement... statements) {
-        if (statements != null) {
-            for (Statement statement : statements) {
-                if (statement != null)
-                    this.statements.add(statement);
-            }
-        }
-    }
-
-    public BlockStatement addStatement(Statement statement) {
+  public BlockStatement(Statement... statements) {
+    if (statements != null) {
+      for (Statement statement : statements) {
         if (statement != null)
-            statements.add(statement);
-        return this;
+          this.statements.add(statement);
+      }
     }
+  }
 
-    public String generate(Context context) {
-        StringBuilder buf = new StringBuilder();
+  public BlockStatement addStatement(Statement statement) {
+    if (statement != null)
+      statements.add(statement);
+    return this;
+  }
 
-        for (Statement statement : statements) {
-            if (buf.length() != 0)
-                buf.append("\n");
+  public String generate(Context context) {
+    StringBuilder buf = new StringBuilder();
 
-            buf.append(statement.generate(context));
+    for (Statement statement : statements) {
+      if (buf.length() != 0)
+        buf.append("\n");
 
-            if (!buf.toString().endsWith(";"))
-                buf.append(";");
-        }
-        return buf.toString();
+      buf.append(statement.generate(context));
+
+      if (!buf.toString().endsWith(";"))
+        buf.append(";");
     }
+    return buf.toString();
+  }
 
-    public List<Statement> getStatements() {
-        return statements;
-    }
+  public List<Statement> getStatements() {
+    return statements;
+  }
 
-    public boolean isEmpty() {
-        return statements.isEmpty();
-    }
+  public boolean isEmpty() {
+    return statements.isEmpty();
+  }
 }

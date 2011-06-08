@@ -26,33 +26,33 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class MethodCall extends AbstractCallElement {
-    private String methodName;
-    private Object[] parameters;
-    private boolean staticMethod;
+  private String methodName;
+  private Object[] parameters;
+  private boolean staticMethod;
 
-    public MethodCall(String methodName, Object[] parameters) {
-        this.methodName = methodName;
-        this.parameters = parameters;
-    }
-    
-    public MethodCall(String methodName, Object[] parameters, boolean staticMethod) {
-        this.methodName = methodName;
-        this.parameters = parameters;
-        this.staticMethod = staticMethod;
-    }
+  public MethodCall(String methodName, Object[] parameters) {
+    this.methodName = methodName;
+    this.parameters = parameters;
+  }
 
-    public void handleCall(CallWriter writer, Context context, Statement statement) {
-        CallParameters callParams = CallParameters.fromStatements(GenUtil.generateCallParameters(context, parameters));
+  public MethodCall(String methodName, Object[] parameters, boolean staticMethod) {
+    this.methodName = methodName;
+    this.parameters = parameters;
+    this.staticMethod = staticMethod;
+  }
 
-        MetaClass[] parameterTypes = callParams.getParameterTypes();
-        MetaMethod method = (staticMethod) ? statement.getType().getBestMatchingStaticMethod(methodName, parameterTypes) 
-                : statement.getType().getBestMatchingMethod(methodName, parameterTypes);
-        if (method == null)
-            throw new UndefinedMethodException(methodName, parameterTypes);
+  public void handleCall(CallWriter writer, Context context, Statement statement) {
+    CallParameters callParams = CallParameters.fromStatements(GenUtil.generateCallParameters(context, parameters));
 
-        callParams = CallParameters.fromStatements(GenUtil.generateCallParameters(method, context, parameters));
-        statement = new MethodInvocation(method, callParams);
+    MetaClass[] parameterTypes = callParams.getParameterTypes();
+    MetaMethod method = (staticMethod) ? statement.getType().getBestMatchingStaticMethod(methodName, parameterTypes)
+            : statement.getType().getBestMatchingMethod(methodName, parameterTypes);
+    if (method == null)
+      throw new UndefinedMethodException(methodName, parameterTypes);
 
-        nextOrReturn(writer, context, statement);
-    }
+    callParams = CallParameters.fromStatements(GenUtil.generateCallParameters(method, context, parameters));
+    statement = new MethodInvocation(method, callParams);
+
+    nextOrReturn(writer, context, statement);
+  }
 }

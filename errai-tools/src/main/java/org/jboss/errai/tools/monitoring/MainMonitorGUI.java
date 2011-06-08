@@ -26,90 +26,90 @@ import java.util.Map;
 import static java.lang.String.valueOf;
 
 public class MainMonitorGUI extends JFrame implements Attachable {
-    public static final String APPLICATION_NAME = "Errai Bus Monitor";
+  public static final String APPLICATION_NAME = "Errai Bus Monitor";
 
-    private JTabbedPane tabbedPane1;
-    private ServerMonitorPanel serverMonitorPanel;
-    private Map<Object, ServerMonitorPanel> remoteBuses;
-    private MessageBus serverBus;
+  private JTabbedPane tabbedPane1;
+  private ServerMonitorPanel serverMonitorPanel;
+  private Map<Object, ServerMonitorPanel> remoteBuses;
+  private MessageBus serverBus;
 
-    private Dataservice dataStore;
+  private Dataservice dataStore;
 
-    private ActivityProcessor processor;
+  private ActivityProcessor processor;
 
-    public MainMonitorGUI(Dataservice service, MessageBus serverBus) {
-        this.serverBus = serverBus;
-        this.dataStore = service;
+  public MainMonitorGUI(Dataservice service, MessageBus serverBus) {
+    this.serverBus = serverBus;
+    this.dataStore = service;
 
-        tabbedPane1 = new JTabbedPane();
+    tabbedPane1 = new JTabbedPane();
 
-        setTitle(APPLICATION_NAME);
+    setTitle(APPLICATION_NAME);
 
-        getContentPane().add(tabbedPane1);
-        pack();
+    getContentPane().add(tabbedPane1);
+    pack();
 
-        serverMonitorPanel = new ServerMonitorPanel(this, serverBus, "Server");
-        tabbedPane1.add("Server", serverMonitorPanel.getPanel());
-        remoteBuses = new HashMap<Object, ServerMonitorPanel>();
+    serverMonitorPanel = new ServerMonitorPanel(this, serverBus, "Server");
+    tabbedPane1.add("Server", serverMonitorPanel.getPanel());
+    remoteBuses = new HashMap<Object, ServerMonitorPanel>();
 
-        setMinimumSize(new Dimension(600, 500));
-        setSize(600, 500);
-        setLocation(150, 150);
+    setMinimumSize(new Dimension(600, 500));
+    setSize(600, 500);
+    setLocation(150, 150);
+  }
+
+  public ServerMonitorPanel getServerMonitorPanel() {
+    return serverMonitorPanel;
+  }
+
+  public void attachRemoteBus(Object id) {
+    if (remoteBuses.containsKey(id)) {
+      return;
     }
 
-    public ServerMonitorPanel getServerMonitorPanel() {
-        return serverMonitorPanel;
-    }
+    ServerMonitorPanel newServerMonitor = new ServerMonitorPanel(this, new ClientBusProxyImpl(serverBus), valueOf(id));
+    newServerMonitor.attach(processor);
 
-    public void attachRemoteBus(Object id) {
-        if (remoteBuses.containsKey(id)) {
-            return;
-        }
+    remoteBuses.put(id, newServerMonitor);
 
-        ServerMonitorPanel newServerMonitor = new ServerMonitorPanel(this, new ClientBusProxyImpl(serverBus), valueOf(id));
-        newServerMonitor.attach(processor);
+    tabbedPane1.add(valueOf(id), newServerMonitor.getPanel());
+  }
 
-        remoteBuses.put(id, newServerMonitor);
+  public ServerMonitorPanel getBus(Object id) {
+    return "Server".equals(id) ? serverMonitorPanel : remoteBuses.get(id);
+  }
 
-        tabbedPane1.add(valueOf(id), newServerMonitor.getPanel());
-    }
+  public Dataservice getDataStore() {
+    return dataStore;
+  }
 
-    public ServerMonitorPanel getBus(Object id) {
-        return "Server".equals(id) ? serverMonitorPanel : remoteBuses.get(id);
-    }
+  public void attach(ActivityProcessor proc) {
+    this.processor = proc;
 
-    public Dataservice getDataStore() {
-        return dataStore;
-    }
-
-    public void attach(ActivityProcessor proc) {
-        this.processor = proc;
-
-        proc.registerEvent(EventType.BUS_EVENT, new MessageMonitor() {
-            public void monitorEvent(MessageEvent event) {
-                switch (event.getSubType()) {
-                    case REMOTE_ATTACHED:
-                        attachRemoteBus(event.getFromBus());
-                        break;
-                    case SERVER_SUBSCRIBE:
-                    case REMOTE_SUBSCRIBE:
-                        if (!"Server".equals(event.getFromBus()) && !remoteBuses.containsKey(event.getFromBus())) {
-                            return;
-                        }
-
-                        getBus(event.getFromBus()).addServiceName(event.getSubject());
-                        break;
-                    case SERVER_UNSUBSCRIBE:
-                    case REMOTE_UNSUBSCRIBE:
-                        ServerMonitorPanel panel = getBus(event.getFromBus());
-                        if (panel != null) {
-                            panel.removeServiceName(event.getSubject());
-                        }
-                        break;
-                }
+    proc.registerEvent(EventType.BUS_EVENT, new MessageMonitor() {
+      public void monitorEvent(MessageEvent event) {
+        switch (event.getSubType()) {
+          case REMOTE_ATTACHED:
+            attachRemoteBus(event.getFromBus());
+            break;
+          case SERVER_SUBSCRIBE:
+          case REMOTE_SUBSCRIBE:
+            if (!"Server".equals(event.getFromBus()) && !remoteBuses.containsKey(event.getFromBus())) {
+              return;
             }
-        });
 
-        serverMonitorPanel.attach(proc);
-    }
+            getBus(event.getFromBus()).addServiceName(event.getSubject());
+            break;
+          case SERVER_UNSUBSCRIBE:
+          case REMOTE_UNSUBSCRIBE:
+            ServerMonitorPanel panel = getBus(event.getFromBus());
+            if (panel != null) {
+              panel.removeServiceName(event.getSubject());
+            }
+            break;
+        }
+      }
+    });
+
+    serverMonitorPanel.attach(proc);
+  }
 }

@@ -27,61 +27,60 @@ import java.util.LinkedList;
 
 public class LaundryListProviderFactory {
 
-    private static final Object lock = new Object();
-    private static volatile LaundryListProvider provider;
+  private static final Object lock = new Object();
+  private static volatile LaundryListProvider provider;
 
-    public static LaundryListProvider<?> get() {
-        synchronized (lock) {
-            if (provider == null) {
-                _initForClient();
-            }
-            return provider;
-        }
+  public static LaundryListProvider<?> get() {
+    synchronized (lock) {
+      if (provider == null) {
+        _initForClient();
+      }
+      return provider;
+    }
+  }
+
+  private static void _initForClient() {
+    provider = new LaundryListProvider<MessageBus>() {
+      public LaundryList getLaundryList(Object ref) {
+        return ClientLaundryList.INSTANCE;
+      }
+    };
+  }
+
+  private static class ClientLaundryList implements LaundryList {
+    static final LinkedList<Laundry> laundryList = new LinkedList<Laundry>();
+    static final ClientLaundryList INSTANCE = new ClientLaundryList();
+
+
+    public void cleanAll() {
+      Iterator<Laundry> iter = laundryList.iterator();
+      while (iter.hasNext()) {
+        iter.next().clean();
+        iter.remove();
+      }
     }
 
-    private static void _initForClient() {
-        provider = new LaundryListProvider<MessageBus>() {
-            public LaundryList getLaundryList(Object ref) {
-                return ClientLaundryList.INSTANCE;
-            }
-        };
+    public LaundryReclaim addToHamper(final Laundry laundry) {
+      laundryList.add(laundry);
+
+      return new LaundryReclaim() {
+        public boolean reclaim() {
+          return removeFromHamper(laundry);
+        }
+      };
     }
 
-    private static class ClientLaundryList implements LaundryList {
-        static final LinkedList<Laundry> laundryList = new LinkedList<Laundry>();
-        static final ClientLaundryList INSTANCE = new ClientLaundryList();
-
-
-        public void cleanAll() {
-            Iterator<Laundry> iter = laundryList.iterator();
-            while (iter.hasNext()) {
-                iter.next().clean();
-                iter.remove();
-            }
-        }
-
-        public LaundryReclaim addToHamper(final Laundry laundry) {
-            laundryList.add(laundry);
-
-            return new LaundryReclaim() {
-                public boolean reclaim() {
-                    return removeFromHamper(laundry);
-                }
-            };
-        }
-
-        public boolean removeFromHamper(Laundry laundry) {
-            return laundryList.remove(laundry);
-        }
+    public boolean removeFromHamper(Laundry laundry) {
+      return laundryList.remove(laundry);
     }
+  }
 
-    public static void setLaundryListProvider(LaundryListProvider p) {
-        synchronized (lock) {
-            if (provider == null)
-            {
-                // Attempt to initialize the laundrylist provider twice. Will be ignored
-                provider = p;
-            }
-        }
+  public static void setLaundryListProvider(LaundryListProvider p) {
+    synchronized (lock) {
+      if (provider == null) {
+        // Attempt to initialize the laundrylist provider twice. Will be ignored
+        provider = p;
+      }
     }
+  }
 }

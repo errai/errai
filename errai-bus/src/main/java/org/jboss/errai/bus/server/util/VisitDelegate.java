@@ -23,14 +23,14 @@ package org.jboss.errai.bus.server.util;
  */
 public interface VisitDelegate<T> {
 
-    /**
-     * A template function for visiting a class
-     *
-     * @param obj - the object to visit
-     */
-    public void visit(String fqnc);
+  /**
+   * A template function for visiting a class
+   *
+   * @param obj - the object to visit
+   */
+  public void visit(String fqnc);
 
-    public void visitError(String className, Throwable t);
+  public void visitError(String className, Throwable t);
 
-    public String getFileExtension();
+  public String getFileExtension();
 }

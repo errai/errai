@@ -21,12 +21,12 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder.values;
  */
 public class IntValue extends LiteralValue<Integer> {
 
-    public IntValue(Integer value) {
-        super(value);
-    }
+  public IntValue(Integer value) {
+    super(value);
+  }
 
-    @Override
-    public String getCanonicalString() {
-        return getValue().toString();
-    }
+  @Override
+  public String getCanonicalString() {
+    return getValue().toString();
+  }
 }

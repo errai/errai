@@ -16,8 +16,6 @@
 
 package org.errai.samples.serialization.client.model;
 
-import org.jboss.errai.bus.server.annotations.ExposeEntity;
-
 public enum RecordType {
-    Checking, Savings
+  Checking, Savings
 }
