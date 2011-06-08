@@ -31,12 +31,12 @@ public class AbstractStatementBuilderTest {
    * @param actual
    */
   protected static void assertEquals(String expected, String actual) {
-    org.junit.Assert.assertEquals(expected.replaceAll("\\s+", " "),
-        actual.replaceAll("\\s+", " "));
+    org.junit.Assert.assertEquals(expected.replaceAll("\\s+", " ").trim(),
+        actual.replaceAll("\\s+", " ").trim());
   }
 
   protected static void assertEquals(String message, String expected, String actual) {
-    org.junit.Assert.assertEquals(message, expected.replaceAll("\\s+", " "),
-        actual.replaceAll("\\s+", " "));
+    org.junit.Assert.assertEquals(message, expected.replaceAll("\\s+", " ").trim(),
+        actual.replaceAll("\\s+", " ").trim());
   }
 }

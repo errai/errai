@@ -81,7 +81,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
       fail("Expected InvalidTypeException");
     }
     catch (InvalidTypeException ive) {
-      //expected
+      // expected
       assertTrue(ive.getCause() instanceof NumberFormatException);
     }
   }
@@ -119,7 +119,8 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   public void testCreateAndInitializeArray() {
     try {
       StatementBuilder.create().newArray(Annotation.class)
-          .initialize("1", "2").toJavaString();
+          .initialize("1", "2")
+          .toJavaString();
       fail("Expected InvalidTypeException");
     }
     catch (InvalidTypeException oose) {
@@ -136,7 +137,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
     }
 
     String s = StatementBuilder.create().newArray(String.class).initialize("1", "2").toJavaString();
-    assertEquals("new java.lang.String[] {\"1\",\"2\"}", s);
+    assertEquals("new java.lang.String[]{\"1\",\"2\"}", s);
 
     Statement annotation1 = ObjectBuilder.newInstanceOf(Annotation.class)
         .extend()
@@ -156,28 +157,29 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
         .initialize(annotation1, annotation2)
         .toJavaString();
 
-    assertEquals("new java.lang.annotation.Annotation[] {" +
+    assertEquals("new java.lang.annotation.Annotation[]{" +
         "new java.lang.annotation.Annotation() {\n" +
-        "public java.lang.Class annotationType() {\n" +
-        "return javax.inject.Inject.class;\n" +
-        "}\n" +
+        " public java.lang.Class annotationType() {\n" +
+        "   return javax.inject.Inject.class;\n" +
+        " }\n" +
         "}\n" +
         ",new java.lang.annotation.Annotation() {\n" +
-        "public java.lang.Class annotationType() {\n" +
-        "return javax.annotation.PostConstruct.class;\n" +
-        "}\n" +
-        "}\n" +
+        "   public java.lang.Class annotationType() {\n" +
+        "     return javax.annotation.PostConstruct.class;\n" +
+        "   }\n" +
+        " }\n" +
         "}", s);
   }
 
   @Test
+  @SuppressWarnings(value = {"all"})
   public void testCreateAndInitializeMultiDimensionalArray() {
 
     String s = StatementBuilder.create().newArray(Integer.class)
         .initialize(new Integer[][]{{1, 2}, {3, 4}})
         .toJavaString();
 
-    assertEquals("Failed to generate two dimensional array", "new java.lang.Integer[][] {{1,2},{3,4}}", s);
+    assertEquals("Failed to generate two dimensional array", "new java.lang.Integer[][]{{1,2},{3,4}}", s);
 
     s = StatementBuilder.create().newArray(String.class)
         .initialize(new Statement[][]{
@@ -188,14 +190,24 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
         .toJavaString();
 
     assertEquals("Failed to generate two dimensional array using statements",
-        "new java.lang.String[][] {{java.lang.Integer.toString(1),java.lang.Integer.toString(2)}," +
+        "new java.lang.String[][]{{java.lang.Integer.toString(1),java.lang.Integer.toString(2)}," +
             "{java.lang.Integer.toString(3),java.lang.Integer.toString(4)}}", s);
+
+    s = StatementBuilder.create().newArray(String.class)
+        .initialize(new Object[][]{
+            {StatementBuilder.create().invokeStatic(Integer.class, "toString", 1), "2"},
+            {StatementBuilder.create().invokeStatic(Integer.class, "toString", 3), "4"}})
+        .toJavaString();
+
+    assertEquals("Failed to generate two dimensional array using statements and objects",
+        "new java.lang.String[][]{{java.lang.Integer.toString(1),\"2\"}," +
+            "{java.lang.Integer.toString(3),\"4\"}}", s);
 
     s = StatementBuilder.create().newArray(String.class)
         .initialize(new String[][][]{{{"1", "2"}, {"a", "b"}}, {{"3", "4"}, {"b", "c"}}})
         .toJavaString();
 
     assertEquals("Failed to generate three dimensional array",
-        "new java.lang.String[][][] {{{\"1\",\"2\"},{\"a\",\"b\"}},{{\"3\",\"4\"},{\"b\",\"c\"}}}", s);
+        "new java.lang.String[][][]{{{\"1\",\"2\"},{\"a\",\"b\"}},{{\"3\",\"4\"},{\"b\",\"c\"}}}", s);
   }
 }

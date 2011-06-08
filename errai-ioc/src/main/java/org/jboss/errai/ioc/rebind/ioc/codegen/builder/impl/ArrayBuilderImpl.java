@@ -61,8 +61,11 @@ public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayB
   public AbstractStatementBuilder initialize(Object... values) {
     generateArrayInstance();
 
-    int dim = 0;
+    boolean initializeFromArray = false;
+    int dim = 1;
     if (values.length == 1 && values[0].getClass().isArray()) {
+      dim = 0;
+      initializeFromArray = true;
       Class<?> type = values[0].getClass();
       while (type.isArray()) {
         dim++;
@@ -70,53 +73,40 @@ public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayB
       }
     }
 
-    if (dim == 0) dim++;
     for (int i = 0; i < dim; i++) {
       buf.append("[]");
     }
-    buf.append(" ");
 
-    return _initialize(values);
-  }
-
-  private AbstractStatementBuilder _initialize(Object... values) {
-    buf.append("{");
-
-    for (int i = 0; i < values.length; i++) {
-      if (values[i].getClass().isArray()) {
-        int length = Array.getLength(values[i]);
-        for (int j = 0; j < length; j++) {
-          Object element = Array.get(values[i], j);
-          if (element.getClass().isArray()) {
-            _initialize(element);
-          }
-          else {
-            _initializeValue(element);
-          }
-          if (j + 1 < length) {
-            buf.append(",");
-          }
-        }
-      }
-      else {
-        _initializeValue(values[i]);
-        if (i + 1 < values.length) {
-          buf.append(",");
-        }
-      }
+    if (initializeFromArray) {
+      generateInitialization(values[0]);
+    }
+    else {
+      generateInitialization(values);
     }
 
-    buf.append("}");
     initialized = true;
     return this;
   }
 
-  private void _initializeValue(Object value) {
-    Statement statement = GenUtil.generate(context, value);
-    // generate to internally set the type
-    statement.generate(context);
-    GenUtil.assertAssignableTypes(statement.getType(), componentType);
-    buf.append(statement.generate(context));
+  private void generateInitialization(Object values) {
+    buf.append("{");
+    int length = Array.getLength(values);
+    for (int i = 0; i < length; i++) {
+      Object element = Array.get(values, i);
+      if (element.getClass().isArray()) {
+        generateInitialization(element);
+      }
+      else {
+        Statement statement = GenUtil.generate(context, element);
+        String statementExpr = statement.generate(context);
+        GenUtil.assertAssignableTypes(statement.getType(), componentType);
+        buf.append(statementExpr);
+      }
+      if (i + 1 < length) {
+        buf.append(",");
+      }
+    }
+    buf.append("}");
   }
 
   public MetaClass getType() {

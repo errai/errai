@@ -88,8 +88,8 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements IfBl
   }
 
   public BlockBuilder<ElseBlockBuilder> elseif_(Statement lhs, BooleanOperator op, Statement rhs) {
-    // generate to internally set the type
-    lhs.generate(context);
+    if (lhs.getType() == null)
+      lhs.generate(context);
 
     lhs = validateOrConvertLhs(lhs);
 
