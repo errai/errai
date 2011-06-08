@@ -175,6 +175,18 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
         
         assertEquals("Failed to generate two dimensional array", "new java.lang.Integer[][] {{1,2},{3,4}}",s);
 
+         s = StatementBuilder.create().newArray(String.class)
+            .initialize(new Statement[][] {
+                    {StatementBuilder.create().invokeStatic(Integer.class, "toString", 1),
+                     StatementBuilder.create().invokeStatic(Integer.class, "toString", 2)},
+                    {StatementBuilder.create().invokeStatic(Integer.class, "toString", 3),
+                     StatementBuilder.create().invokeStatic(Integer.class, "toString", 4)}})
+            .toJavaString();
+        
+        assertEquals("Failed to generate two dimensional array using statements", 
+                "new java.lang.String[][] {{java.lang.Integer.toString(1),java.lang.Integer.toString(2)}," +
+                    "{java.lang.Integer.toString(3),java.lang.Integer.toString(4)}}",s);
+
         s = StatementBuilder.create().newArray(String.class)
             .initialize(new String[][][] {{{"1","2"},{"a","b"}},{{"3","4"},{"b","c"}}})
             .toJavaString();

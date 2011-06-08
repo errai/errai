@@ -111,6 +111,8 @@ public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayB
     
     private void _initializeValue(Object value) {
         Statement statement = GenUtil.generate(context, value);
+        // generate to internally set the type
+        statement.generate(context);
         GenUtil.assertAssignableTypes(statement.getType(), componentType);
         buf.append(statement.generate(context));
     }
