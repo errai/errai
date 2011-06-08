@@ -242,7 +242,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
     
     try {
       StatementBuilder.create()
-          .addVariable("twoDimArray", String.class)
+          .addVariable("twoDimArray", String[][].class)
           .addVariable("i", float.class)
           .addVariable("j", float.class)
           .loadVariable("twoDimArray")
