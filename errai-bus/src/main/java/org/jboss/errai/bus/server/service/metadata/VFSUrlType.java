@@ -42,8 +42,8 @@ public class VFSUrlType implements Vfs.UrlType {
 
   public boolean matches(URL url) {
     return url.getProtocol().equals(VFS)
-            || url.getProtocol().equals(VFSZIP)
-            || url.getProtocol().equals(VFSFILE);
+        || url.getProtocol().equals(VFSZIP)
+        || url.getProtocol().equals(VFSFILE);
   }
 
   public Vfs.Dir createDir(URL url) {
@@ -64,7 +64,8 @@ public class VFSUrlType implements Vfs.UrlType {
   private static URL toUrl(String s) {
     try {
       return new URL(s);
-    } catch (MalformedURLException e) {
+    }
+    catch (MalformedURLException e) {
       throw new RuntimeException("Invalid URL " + s, e);
     }
   }

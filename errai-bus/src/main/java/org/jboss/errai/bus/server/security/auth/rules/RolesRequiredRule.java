@@ -79,34 +79,35 @@ public class RolesRequiredRule implements BooleanRoutingRule {
         // TODO: This reside with the "AuthenticationService" listener, no
         // i.e. by forwarding to that subject. See ErraiServiceImpl
         createMessage()
-                .toSubject("LoginClient")
-                .command(SecurityCommands.SecurityChallenge)
-                .with(SecurityParts.CredentialsRequired, "Name,Password")
-                .with(MessageParts.ReplyTo, ErraiService.AUTHORIZATION_SVC_SUBJECT)
-                .with(SecurityParts.RejectedMessage, ServerBusUtils.encodeJSON(message.getParts()))
-                .copyResource("Session", message)
-                .errorsHandledBy(new ErrorCallback() {
-                  public boolean error(Message message, Throwable throwable) {
-                    ErrorHelper.sendClientError(bus, message, throwable.getMessage(), throwable);
-                    return false;
-                  }
-                })
-                .sendNowWith(bus, false);
+            .toSubject("LoginClient")
+            .command(SecurityCommands.SecurityChallenge)
+            .with(SecurityParts.CredentialsRequired, "Name,Password")
+            .with(MessageParts.ReplyTo, ErraiService.AUTHORIZATION_SVC_SUBJECT)
+            .with(SecurityParts.RejectedMessage, ServerBusUtils.encodeJSON(message.getParts()))
+            .copyResource("Session", message)
+            .errorsHandledBy(new ErrorCallback() {
+              public boolean error(Message message, Throwable throwable) {
+                ErrorHelper.sendClientError(bus, message, throwable.getMessage(), throwable);
+                return false;
+              }
+            })
+            .sendNowWith(bus, false);
 
         return false;
       }
 
       if (!subject.getRoles().containsAll(requiredRoles)) {
         createConversation(message)
-                .toSubject("ClientErrorService")
-                .with(MessageParts.ErrorMessage, "Access denied to service: "
-                        + message.get(String.class, MessageParts.ToSubject) +
-                        " (Required Roles: [" + getRequiredRolesString() + "])")
-                .noErrorHandling().sendNowWith(bus);
+            .toSubject("ClientErrorService")
+            .with(MessageParts.ErrorMessage, "Access denied to service: "
+                + message.get(String.class, MessageParts.ToSubject) +
+                " (Required Roles: [" + getRequiredRolesString() + "])")
+            .noErrorHandling().sendNowWith(bus);
 
         return false;
 
-      } else {
+      }
+      else {
         return true;
       }
     }

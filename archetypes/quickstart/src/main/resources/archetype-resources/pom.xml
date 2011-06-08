@@ -15,7 +15,8 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <name>Errai::Archetype</name>
     <groupId>${groupId}</groupId>
@@ -67,7 +68,7 @@
             <scope>provided</scope>
             <version>${gwt.version}</version>
         </dependency>
-        
+
     </dependencies>
 
     <profiles>
@@ -86,7 +87,7 @@
                     <exclusions>
                         <exclusion>
                             <groupId>dom4j</groupId>
-                            <artifactId>dom4j</artifactId>                            
+                            <artifactId>dom4j</artifactId>
                         </exclusion>
                         <exclusion>
                             <groupId>xml-apis</groupId>
@@ -130,7 +131,7 @@
                     <version>3.12.1.GA</version>
                     <scope>provided</scope>
                 </dependency>
-                
+
                 <dependency>
                     <groupId>org.jboss.errai</groupId>
                     <artifactId>errai-ioc</artifactId>
@@ -147,7 +148,7 @@
                     </exclusions>
                     <scope>provided</scope>
                 </dependency>
-                                                                                
+
             </dependencies>
         </profile>
     </profiles>
@@ -231,10 +232,10 @@
                                     the plugin and remove all GWT related artifacts that are required
                                     to run the hosted mode.
                                 -->
-                                <delete dir="war/WEB-INF/classes" />
-                                <delete dir="war/WEB-INF/lib" />
-                                <delete dir="war/app" />
-                                <delete dir="target" />
+                                <delete dir="war/WEB-INF/classes"/>
+                                <delete dir="war/WEB-INF/lib"/>
+                                <delete dir="war/app"/>
+                                <delete dir="target"/>
                             </tasks>
                         </configuration>
                         <goals>
@@ -243,9 +244,9 @@
                     </execution>
                 </executions>
             </plugin>
-          
+
         </plugins>
-                
+
     </build>
 
     <reporting>

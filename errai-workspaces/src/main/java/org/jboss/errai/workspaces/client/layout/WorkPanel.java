@@ -21,88 +21,88 @@ import com.google.gwt.user.client.ui.*;
 import java.util.Iterator;
 
 public class
-        WorkPanel extends Panel {
-    VerticalPanel vPanel = new VerticalPanel();
+    WorkPanel extends Panel {
+  VerticalPanel vPanel = new VerticalPanel();
 
-    private Label titleLabel = new Label("New WorkPanel");
-    private HorizontalPanel titleInternal = new HorizontalPanel();
-    private FlowPanel mainPanel = new FlowPanel();
+  private Label titleLabel = new Label("New WorkPanel");
+  private HorizontalPanel titleInternal = new HorizontalPanel();
+  private FlowPanel mainPanel = new FlowPanel();
 
-    private int h;
-    private int w;
+  private int h;
+  private int w;
 
-    public WorkPanel() {
-        setElement(vPanel.getElement());
+  public WorkPanel() {
+    setElement(vPanel.getElement());
 
-        vPanel.setWidth("100%");
+    vPanel.setWidth("100%");
 
-        SimplePanel title = new SimplePanel();
-        vPanel.add(title);
-        vPanel.add(mainPanel);
+    SimplePanel title = new SimplePanel();
+    vPanel.add(title);
+    vPanel.add(mainPanel);
 
-        title.setHeight("25px");
-        vPanel.setCellHeight(title, "25px");
+    title.setHeight("25px");
+    vPanel.setCellHeight(title, "25px");
 
-        titleLabel.setStyleName("WS-WorkPanel-title-label");
-        title.setStyleName("WS-WorkPanel-title");
-        vPanel.setStyleName("WS-WorkPanel-area");
+    titleLabel.setStyleName("WS-WorkPanel-title-label");
+    title.setStyleName("WS-WorkPanel-title");
+    vPanel.setStyleName("WS-WorkPanel-area");
 
-        titleInternal.add(titleLabel);
-        title.setWidget(titleInternal);
+    titleInternal.add(titleLabel);
+    title.setWidget(titleInternal);
 
-        getElement().getStyle().setProperty("overflow", "scroll");
-    }
-
-
-    public void setPixelSize(int width, int height) {
-        h = (height - titleInternal.getOffsetHeight());
-        w = width;
-
-        vPanel.setCellHeight(mainPanel, h + "px");
-        vPanel.setCellWidth(mainPanel, width + "px");
-
-        vPanel.setPixelSize(width, height);
-        super.setPixelSize(width, height);
-    }
-
-    public void add(Widget w) {
-        mainPanel.add(w);
-    }
-
-    public Iterator<Widget> iterator() {
-        return mainPanel.iterator();
-    }
+    getElement().getStyle().setProperty("overflow", "scroll");
+  }
 
 
-    public boolean remove(Widget child) {
-        return mainPanel.remove(child);
-    }
+  public void setPixelSize(int width, int height) {
+    h = (height - titleInternal.getOffsetHeight());
+    w = width;
 
-    public void addToTitlebar(Widget w) {
-        titleInternal.add(w);
-        titleInternal.setCellHorizontalAlignment(w, HasHorizontalAlignment.ALIGN_LEFT);
-    }
+    vPanel.setCellHeight(mainPanel, h + "px");
+    vPanel.setCellWidth(mainPanel, width + "px");
 
-    public int getPanelWidth() {
-        return w == 0 ? super.getOffsetWidth() : w;
-    }
+    vPanel.setPixelSize(width, height);
+    super.setPixelSize(width, height);
+  }
 
-    public int getPanelHeight() {
-        return h == 0 ? super.getOffsetHeight() - titleInternal.getOffsetHeight() : h;
-    }
+  public void add(Widget w) {
+    mainPanel.add(w);
+  }
 
-
-    public int getOffsetWidth() {
-        return getPanelWidth();
-    }
+  public Iterator<Widget> iterator() {
+    return mainPanel.iterator();
+  }
 
 
-    public int getOffsetHeight() {
-        return getPanelHeight();
-    }
+  public boolean remove(Widget child) {
+    return mainPanel.remove(child);
+  }
+
+  public void addToTitlebar(Widget w) {
+    titleInternal.add(w);
+    titleInternal.setCellHorizontalAlignment(w, HasHorizontalAlignment.ALIGN_LEFT);
+  }
+
+  public int getPanelWidth() {
+    return w == 0 ? super.getOffsetWidth() : w;
+  }
+
+  public int getPanelHeight() {
+    return h == 0 ? super.getOffsetHeight() - titleInternal.getOffsetHeight() : h;
+  }
 
 
-    public void setTitle(String s) {
-        titleLabel.setText(s);
-    }
+  public int getOffsetWidth() {
+    return getPanelWidth();
+  }
+
+
+  public int getOffsetHeight() {
+    return getPanelHeight();
+  }
+
+
+  public void setTitle(String s) {
+    titleLabel.setText(s);
+  }
 }

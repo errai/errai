@@ -26,17 +26,17 @@ public class AnnotationEncoder {
   public static String encode(Annotation annotation) {
     Class<? extends Annotation> annotationClass = annotation.annotationType();
     String str = ObjectBuilder.newInstanceOf(annotationClass)
-            //         { extend the class type
-            .extend()
-                    // override the annotationType() method.
-            .publicOverridesMethod("annotationType")
-                    //   {
-            .append(StatementBuilder.create().load(annotationClass).returnValue())
-                    //   }
-            .finish()
-                    // }
-            .finish()
-            .toJavaString();
+        //         { extend the class type
+        .extend()
+            // override the annotationType() method.
+        .publicOverridesMethod("annotationType")
+            //   {
+        .append(StatementBuilder.create().load(annotationClass).returnValue())
+            //   }
+        .finish()
+            // }
+        .finish()
+        .toJavaString();
 
     System.out.println(str);
 

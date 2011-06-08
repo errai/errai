@@ -39,9 +39,9 @@ class DiscoverServices implements BootstrapExecution {
 
       // setup processors which are applied to the meta data
       MetaDataProcessor[] processors = new MetaDataProcessor[]{
-              new ServiceProcessor(),
-              new EntityProcessor(),
-              new ApplicationCompProcessor()
+          new ServiceProcessor(),
+          new EntityProcessor(),
+          new ApplicationCompProcessor()
       };
 
       // execute meta data processing
@@ -49,7 +49,8 @@ class DiscoverServices implements BootstrapExecution {
         proc.process(context, scanner);
       }
 
-    } else {
+    }
+    else {
       log.info("auto-discovery of services disabled.");
     }
   }

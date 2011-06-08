@@ -58,7 +58,7 @@ public class MessageFactory {
     parts.remove(MessageParts.SessionID.name());
 
     Message msg = createWithParts(parts)
-            .setResource("Session", session);
+        .setResource("Session", session);
 
     // experimental feature. does this need to be cleaned?
     // any chance this leaks the CL?
@@ -77,8 +77,8 @@ public class MessageFactory {
     // Expose session and session id
     // CDI ext makes use of it to manage conversation contexts
     Message msg = createWithParts(parts)
-            .setResource("Session", session)
-            .setResource("SessionID", session.getSessionId());
+        .setResource("Session", session)
+        .setResource("SessionID", session.getSessionId());
 
     // experimental feature. does this need to be cleaned?
     // any chance this leaks the CL?

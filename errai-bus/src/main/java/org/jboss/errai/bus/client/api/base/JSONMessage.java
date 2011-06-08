@@ -499,7 +499,8 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
   protected void _sep() {
     if (first) {
       first = false;
-    } else {
+    }
+    else {
       buf.append(',');
     }
   }
@@ -513,7 +514,7 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
   protected void _addStringPart(String a, String b) {
     _sep();
     buf.append('\"').append(a).append('\"').append(':')
-            .append('\"').append(b).append("\"");
+        .append('\"').append(b).append("\"");
   }
 
   /**
@@ -525,6 +526,6 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
   protected void _addObjectPart(String a, Object b) {
     _sep();
     buf.append('\"').append(a).append('\"').append(':')
-            .append(new JSONEncoderCli().encode(b, encodingContext));
+        .append(new JSONEncoderCli().encode(b, encodingContext));
   }
 }

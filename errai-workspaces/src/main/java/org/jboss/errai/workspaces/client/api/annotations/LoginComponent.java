@@ -20,6 +20,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Deprecated 
+@Deprecated
 public @interface LoginComponent {
 }

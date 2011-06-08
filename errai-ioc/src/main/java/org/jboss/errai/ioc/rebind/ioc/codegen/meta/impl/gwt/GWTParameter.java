@@ -40,7 +40,7 @@ public class GWTParameter implements MetaParameter {
 
     try {
       Class<?> cls = Class.forName(parameter.getEnclosingMethod().getEnclosingType().getQualifiedSourceName(),
-              false, Thread.currentThread().getContextClassLoader());
+          false, Thread.currentThread().getContextClassLoader());
 
       JAbstractMethod jMethod = parameter.getEnclosingMethod();
 
@@ -54,16 +54,19 @@ public class GWTParameter implements MetaParameter {
       Method method = null;
       try {
         method = cls.getMethod(jMethod.getName(),
-                InjectUtil.jParmToClass(jMethod.getParameters()));
-      } catch (NoSuchMethodException e) {
+            InjectUtil.jParmToClass(jMethod.getParameters()));
+      }
+      catch (NoSuchMethodException e) {
         throw new RuntimeException(e);
-      } catch (ClassNotFoundException e) {
+      }
+      catch (ClassNotFoundException e) {
         throw new RuntimeException(e);
       }
 
       annotations = method.getParameterAnnotations()[index];
 
-    } catch (ClassNotFoundException e) {
+    }
+    catch (ClassNotFoundException e) {
       e.printStackTrace();
     }
   }
@@ -74,7 +77,7 @@ public class GWTParameter implements MetaParameter {
 
     try {
       Class<?> cls = Class.forName(parameter.getEnclosingMethod().getEnclosingType().getQualifiedSourceName(),
-              false, Thread.currentThread().getContextClassLoader());
+          false, Thread.currentThread().getContextClassLoader());
 
       JAbstractMethod jMethod = parameter.getEnclosingMethod();
 
@@ -88,13 +91,15 @@ public class GWTParameter implements MetaParameter {
       Constructor c = null;
       try {
         c = cls.getConstructor(InjectUtil.jParmToClass(jMethod.getParameters()));
-      } catch (NoSuchMethodException e) {
+      }
+      catch (NoSuchMethodException e) {
         throw new RuntimeException(e);
       }
 
       annotations = c.getParameterAnnotations()[index];
 
-    } catch (ClassNotFoundException e) {
+    }
+    catch (ClassNotFoundException e) {
       e.printStackTrace();
     }
   }

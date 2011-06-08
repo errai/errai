@@ -67,7 +67,8 @@ public abstract class AbstractErraiServlet extends HttpServlet {
       String phase = request.getHeader("phase");
       if ("connection".equals(phase)) {
         return ConnectionPhase.CONNECTING;
-      } else if ("disconnect".equals(phase)) {
+      }
+      else if ("disconnect".equals(phase)) {
         return ConnectionPhase.DISCONNECTING;
       }
 
@@ -92,10 +93,12 @@ public abstract class AbstractErraiServlet extends HttpServlet {
             Class<?> aClass = loader.loadClass(serviceLocatorClass);
             ServiceLocator locator = (ServiceLocator) aClass.newInstance();
             this.service = locator.locateService();
-          } catch (Exception e) {
+          }
+          catch (Exception e) {
             throw new RuntimeException("Failed to create service", e);
           }
-        } else {
+        }
+        else {
           // create a service instance manually
           this.service = buildService();
         }
@@ -103,18 +106,18 @@ public abstract class AbstractErraiServlet extends HttpServlet {
         contextClassLoader = Thread.currentThread().getContextClassLoader();
 
         service.getConfiguration().getResourceProviders()
-                .put("errai.experimental.classLoader", new ResourceProvider<ClassLoader>() {
-                  public ClassLoader get() {
-                    return contextClassLoader;
-                  }
-                });
+            .put("errai.experimental.classLoader", new ResourceProvider<ClassLoader>() {
+              public ClassLoader get() {
+                return contextClassLoader;
+              }
+            });
 
         service.getConfiguration().getResourceProviders()
-                .put("errai.experimental.servletContext", new ResourceProvider<ServletContext>() {
-                  public ServletContext get() {
-                    return context;
-                  }
-                });
+            .put("errai.experimental.servletContext", new ResourceProvider<ServletContext>() {
+              public ServletContext get() {
+                return context;
+              }
+            });
 
         // store it in servlet context
         config.getServletContext().setAttribute("errai", service);
@@ -155,7 +158,8 @@ public abstract class AbstractErraiServlet extends HttpServlet {
       stream.write('u');
       stream.write('l');
       stream.write('l');
-    } else {
+    }
+    else {
       for (byte b : ((String) m.getMessage()).getBytes()) {
         stream.write(b);
       }
@@ -166,7 +170,7 @@ public abstract class AbstractErraiServlet extends HttpServlet {
 
 
   protected void writeExceptionToOutputStream(HttpServletResponse httpServletResponse
-          , final
+      , final
   Throwable t) throws IOException {
     httpServletResponse.setHeader("Cache-Control", "no-cache");
     httpServletResponse.addHeader("Payload-Size", "1");
@@ -202,7 +206,7 @@ public abstract class AbstractErraiServlet extends HttpServlet {
 
       public Object getMessage() {
         return reason != null ? "{ToSubject:\"ClientBus\", CommandType:\"" + BusCommands.Disconnect + "\",Reason:\"" + reason + "\"}"
-                : "{CommandType:\"" + BusCommands.Disconnect + "\"}";
+            : "{CommandType:\"" + BusCommands.Disconnect + "\"}";
       }
     });
   }

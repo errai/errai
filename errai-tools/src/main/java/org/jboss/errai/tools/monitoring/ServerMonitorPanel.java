@@ -44,302 +44,305 @@ import static javax.swing.SwingUtilities.invokeLater;
 import static org.jboss.errai.tools.monitoring.UiHelper.getSwIcon;
 
 public class ServerMonitorPanel implements Attachable {
-    private MainMonitorGUI mainMonitorGUI;
-    private MessageBus messageBus;
-    private String busId;
+  private MainMonitorGUI mainMonitorGUI;
+  private MessageBus messageBus;
+  private String busId;
 
-    private JList busServices;
-    private JTree serviceExplorer;
+  private JList busServices;
+  private JTree serviceExplorer;
 
-    private final DefaultListModel busServicesModel;
+  private final DefaultListModel busServicesModel;
 
-    private JPanel rootPanel;
+  private JPanel rootPanel;
 
-    private String currentlySelectedService;
+  private String currentlySelectedService;
 
-    private ServerLogPanel logPanel;
+  private ServerLogPanel logPanel;
 
-    private ActivityProcessor processor;
+  private ActivityProcessor processor;
 
-    private Map<String, ServiceActivityMonitor> monitors = new HashMap<String, ServiceActivityMonitor>();
+  private Map<String, ServiceActivityMonitor> monitors = new HashMap<String, ServiceActivityMonitor>();
 
-    public ServerMonitorPanel(MainMonitorGUI gui, MessageBus bus, String busId) {
-        this.mainMonitorGUI = gui;
-        this.messageBus = bus;
-        this.busId = busId;
+  public ServerMonitorPanel(MainMonitorGUI gui, MessageBus bus, String busId) {
+    this.mainMonitorGUI = gui;
+    this.messageBus = bus;
+    this.busId = busId;
 
-        rootPanel = new JPanel();
-        rootPanel.setLayout(new BorderLayout());
+    rootPanel = new JPanel();
+    rootPanel.setLayout(new BorderLayout());
 
-        JButton activityConsoleButton = new JButton("Activity Console");
-        JButton monitorButton = new JButton("Monitor Service...");
-        JButton conversationsButton = new JButton("Conversations ...");
+    JButton activityConsoleButton = new JButton("Activity Console");
+    JButton monitorButton = new JButton("Monitor Service...");
+    JButton conversationsButton = new JButton("Conversations ...");
 
-        busServices = new JList();
-        busServices.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-        busServices.setModel(busServicesModel = new DefaultListModel());
-        busServices.setCellRenderer(new ServicesListCellRender());
+    busServices = new JList();
+    busServices.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+    busServices.setModel(busServicesModel = new DefaultListModel());
+    busServices.setCellRenderer(new ServicesListCellRender());
 
-        serviceExplorer = new JTree();
+    serviceExplorer = new JTree();
 
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-                new JScrollPane(busServices), new JScrollPane(serviceExplorer));
-        splitPane.setDividerLocation(150);
+    JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+        new JScrollPane(busServices), new JScrollPane(serviceExplorer));
+    splitPane.setDividerLocation(150);
 
-        rootPanel.add(splitPane, BorderLayout.CENTER);
+    rootPanel.add(splitPane, BorderLayout.CENTER);
 
-        JPanel southPanel = new JPanel();
-        southPanel.setLayout(new BorderLayout());
-        rootPanel.add(southPanel, BorderLayout.SOUTH);
+    JPanel southPanel = new JPanel();
+    southPanel.setLayout(new BorderLayout());
+    rootPanel.add(southPanel, BorderLayout.SOUTH);
 
-        southPanel.add(activityConsoleButton, BorderLayout.WEST);
+    southPanel.add(activityConsoleButton, BorderLayout.WEST);
 
-        JPanel southEastPanel = new JPanel();
-        southEastPanel.setLayout(new FlowLayout());
-        southEastPanel.add(conversationsButton);
-        southEastPanel.add(monitorButton);
+    JPanel southEastPanel = new JPanel();
+    southEastPanel.setLayout(new FlowLayout());
+    southEastPanel.add(conversationsButton);
+    southEastPanel.add(monitorButton);
 
-        southPanel.add(southEastPanel, BorderLayout.EAST);
+    southPanel.add(southEastPanel, BorderLayout.EAST);
 
-        busServices.addListSelectionListener(new ListSelectionListener() {
-            public void valueChanged(ListSelectionEvent e) {
-                currentlySelectedService = getCurrentServiceSelection();
-                generateServiceExplorer();
-            }
-        });
+    busServices.addListSelectionListener(new ListSelectionListener() {
+      public void valueChanged(ListSelectionEvent e) {
+        currentlySelectedService = getCurrentServiceSelection();
+        generateServiceExplorer();
+      }
+    });
 
-        busServices.addMouseListener(new MouseListener() {
-            Object lastComponent;
-            long lastClick;
+    busServices.addMouseListener(new MouseListener() {
+      Object lastComponent;
+      long lastClick;
 
-            public void mouseClicked(MouseEvent e) {
-                if (e.getButton() != MouseEvent.BUTTON1) return;
-                switch (e.getClickCount()) {
-                    case 1:
-                        lastClick = System.currentTimeMillis();
-                        lastComponent = e.getComponent();
-                        break;
-                    case 2:
-                        if (!e.isConsumed() && e.getComponent() == lastComponent &&
-                                (System.currentTimeMillis() - lastClick < 1000)) {
-                            e.consume();
-                            openActivityMonitor();
-                            break;
-                        }
-
-                    default:
-                        lastComponent = null;
-                        e.consume();
-                }
+      public void mouseClicked(MouseEvent e) {
+        if (e.getButton() != MouseEvent.BUTTON1) return;
+        switch (e.getClickCount()) {
+          case 1:
+            lastClick = System.currentTimeMillis();
+            lastComponent = e.getComponent();
+            break;
+          case 2:
+            if (!e.isConsumed() && e.getComponent() == lastComponent &&
+                (System.currentTimeMillis() - lastClick < 1000)) {
+              e.consume();
+              openActivityMonitor();
+              break;
             }
 
-            public void mousePressed(MouseEvent e) {
-            }
-
-            public void mouseReleased(MouseEvent e) {
-            }
-
-            public void mouseEntered(MouseEvent e) {
-            }
-
-            public void mouseExited(MouseEvent e) {
-            }
-        });
-
-        monitorButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                openActivityMonitor();
-            }
-        });
-
-        conversationsButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                openConversationMonitor();
-            }
-        });
-
-
-        activityConsoleButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                openServerLog();
-            }
-        });
-
-        DefaultTreeModel model = (DefaultTreeModel) serviceExplorer.getModel();
-        ((DefaultMutableTreeNode) serviceExplorer.getModel().getRoot()).removeAllChildren();
-        serviceExplorer.setRootVisible(false);
-
-        serviceExplorer.setCellRenderer(new MonitorTreeCellRenderer());
-
-        serviceExplorer.getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
-
-        model.reload();
-    }
-
-    public void attach(ActivityProcessor proc) {
-        this.processor = proc;
-    }
-
-    private void openActivityMonitor() {
-        if (monitors.containsKey(getCurrentServiceSelection())) {
-            monitors.get(currentlySelectedService).toFront();
-        } else {
-            ServiceActivityMonitor sam = new ServiceActivityMonitor(this, busId, currentlySelectedService);
-            sam.attach(processor);
-            monitors.put(currentlySelectedService, sam);
+          default:
+            lastComponent = null;
+            e.consume();
         }
+      }
+
+      public void mousePressed(MouseEvent e) {
+      }
+
+      public void mouseReleased(MouseEvent e) {
+      }
+
+      public void mouseEntered(MouseEvent e) {
+      }
+
+      public void mouseExited(MouseEvent e) {
+      }
+    });
+
+    monitorButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        openActivityMonitor();
+      }
+    });
+
+    conversationsButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        openConversationMonitor();
+      }
+    });
+
+
+    activityConsoleButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        openServerLog();
+      }
+    });
+
+    DefaultTreeModel model = (DefaultTreeModel) serviceExplorer.getModel();
+    ((DefaultMutableTreeNode) serviceExplorer.getModel().getRoot()).removeAllChildren();
+    serviceExplorer.setRootVisible(false);
+
+    serviceExplorer.setCellRenderer(new MonitorTreeCellRenderer());
+
+    serviceExplorer.getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
+
+    model.reload();
+  }
+
+  public void attach(ActivityProcessor proc) {
+    this.processor = proc;
+  }
+
+  private void openActivityMonitor() {
+    if (monitors.containsKey(getCurrentServiceSelection())) {
+      monitors.get(currentlySelectedService).toFront();
     }
+    else {
+      ServiceActivityMonitor sam = new ServiceActivityMonitor(this, busId, currentlySelectedService);
+      sam.attach(processor);
+      monitors.put(currentlySelectedService, sam);
+    }
+  }
 
-    public void openConversationMonitor() {
-        String key = currentlySelectedService + ":Conversations";
+  public void openConversationMonitor() {
+    String key = currentlySelectedService + ":Conversations";
 
-        if (monitors.containsKey(key)) {
-            monitors.get(key).toFront();
-        } else {
-            ServiceActivityMonitor sam = new ConversationActivityMonitor(this, busId, currentlySelectedService);
-            sam.attach(processor);
-            monitors.put(key, sam);
+    if (monitors.containsKey(key)) {
+      monitors.get(key).toFront();
+    }
+    else {
+      ServiceActivityMonitor sam = new ConversationActivityMonitor(this, busId, currentlySelectedService);
+      sam.attach(processor);
+      monitors.put(key, sam);
+    }
+  }
+
+  private void openServerLog() {
+    if (this.logPanel != null && this.logPanel.isVisible()) {
+      return;
+    }
+    this.logPanel = new ServerLogPanel(mainMonitorGUI);
+    this.logPanel.attach(processor);
+  }
+
+  void stopMonitor(String service) {
+    monitors.remove(service);
+  }
+
+  private String getCurrentServiceSelection() {
+    return valueOf(busServicesModel.get(busServices.getSelectedIndex()));
+  }
+
+  public void addServiceName(final String serviceName) {
+    synchronized (busServicesModel) {
+      if (busServicesModel.contains(serviceName)) return;
+
+      invokeLater(new Runnable() {
+        public void run() {
+          busServicesModel.addElement(serviceName);
         }
+      });
     }
+  }
 
-    private void openServerLog() {
-        if (this.logPanel != null && this.logPanel.isVisible()) {
-            return;
+  public void removeServiceName(final String serviceName) {
+    synchronized (busServicesModel) {
+      if (!busServicesModel.contains(serviceName)) return;
+
+      invokeLater(new Runnable() {
+        public void run() {
+          busServicesModel.removeElement(serviceName);
         }
-        this.logPanel = new ServerLogPanel(mainMonitorGUI);
-        this.logPanel.attach(processor);
+      });
     }
+  }
 
-    void stopMonitor(String service) {
-        monitors.remove(service);
-    }
+  public JPanel getPanel() {
+    return rootPanel;
+  }
 
-    private String getCurrentServiceSelection() {
-        return valueOf(busServicesModel.get(busServices.getSelectedIndex()));
-    }
+  private void generateServiceExplorer() {
+    DefaultMutableTreeNode node = (DefaultMutableTreeNode) serviceExplorer.getModel().getRoot();
 
-    public void addServiceName(final String serviceName) {
-        synchronized (busServicesModel) {
-            if (busServicesModel.contains(serviceName)) return;
+    node.setUserObject(new JLabel(currentlySelectedService + (BusTools.isReservedName(currentlySelectedService) ? " (Built-in)" : ""), getSwIcon("service.png"), SwingConstants.LEFT));
+    node.removeAllChildren();
 
-            invokeLater(new Runnable() {
-                public void run() {
-                    busServicesModel.addElement(serviceName);
-                }
-            });
-        }
-    }
+    serviceExplorer.setRootVisible(true);
 
-    public void removeServiceName(final String serviceName) {
-        synchronized (busServicesModel) {
-            if (!busServicesModel.contains(serviceName)) return;
-
-            invokeLater(new Runnable() {
-                public void run() {
-                    busServicesModel.removeElement(serviceName);
-                }
-            });
-        }
-    }
-
-    public JPanel getPanel() {
-        return rootPanel;
-    }
-
-    private void generateServiceExplorer() {
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode) serviceExplorer.getModel().getRoot();
-
-        node.setUserObject(new JLabel(currentlySelectedService + (BusTools.isReservedName(currentlySelectedService) ? " (Built-in)" : ""), getSwIcon("service.png"), SwingConstants.LEFT));
-        node.removeAllChildren();
-
-        serviceExplorer.setRootVisible(true);
-
-        DefaultTreeModel model = (DefaultTreeModel) serviceExplorer.getModel();
+    DefaultTreeModel model = (DefaultTreeModel) serviceExplorer.getModel();
 
 
-        if (messageBus instanceof ServerMessageBus) {
-            // this is the serverside bus.
-            ServerMessageBus smb = (ServerMessageBus) messageBus;
-            List<MessageCallback> receivers = smb.getReceivers(currentlySelectedService);
+    if (messageBus instanceof ServerMessageBus) {
+      // this is the serverside bus.
+      ServerMessageBus smb = (ServerMessageBus) messageBus;
+      List<MessageCallback> receivers = smb.getReceivers(currentlySelectedService);
 
-            DefaultMutableTreeNode receiversNode
-                    = new DefaultMutableTreeNode("Receivers (" + receivers.size() + ")", true);
+      DefaultMutableTreeNode receiversNode
+          = new DefaultMutableTreeNode("Receivers (" + receivers.size() + ")", true);
 
-            for (MessageCallback mc : receivers) {
-                receiversNode.add(new DefaultMutableTreeNode(mc.getClass().getName()));
+      for (MessageCallback mc : receivers) {
+        receiversNode.add(new DefaultMutableTreeNode(mc.getClass().getName()));
 
-                if (mc instanceof RuleDelegateMessageCallback) {
-                    RuleDelegateMessageCallback ruleDelegate = (RuleDelegateMessageCallback) mc;
-                    DefaultMutableTreeNode securityNode =
-                            new DefaultMutableTreeNode("Security");
+        if (mc instanceof RuleDelegateMessageCallback) {
+          RuleDelegateMessageCallback ruleDelegate = (RuleDelegateMessageCallback) mc;
+          DefaultMutableTreeNode securityNode =
+              new DefaultMutableTreeNode("Security");
 
-                    if (ruleDelegate.getRoutingRule() instanceof RolesRequiredRule) {
-                        RolesRequiredRule rule = (RolesRequiredRule) ruleDelegate.getRoutingRule();
+          if (ruleDelegate.getRoutingRule() instanceof RolesRequiredRule) {
+            RolesRequiredRule rule = (RolesRequiredRule) ruleDelegate.getRoutingRule();
 
-                        DefaultMutableTreeNode rolesNode =
-                                new DefaultMutableTreeNode(rule.getRoles().isEmpty() ? "Requires Authentication" : "Roles Required");
+            DefaultMutableTreeNode rolesNode =
+                new DefaultMutableTreeNode(rule.getRoles().isEmpty() ? "Requires Authentication" : "Roles Required");
 
-                        for (Object o : rule.getRoles()) {
-                            //     DefaultMutableTreeNode roleNode = new DefaultMutableTreeNode(String.valueOf(o));
+            for (Object o : rule.getRoles()) {
+              //     DefaultMutableTreeNode roleNode = new DefaultMutableTreeNode(String.valueOf(o));
 
-                            rolesNode.add(UiHelper.createIconEntry("key.png", valueOf(o)));
-                        }
-
-                        securityNode.add(rolesNode);
-                    }
-
-                    node.add(securityNode);
-                }
-                else if (mc instanceof RemoteServiceCallback) {
-                    RemoteServiceCallback remCB = (RemoteServiceCallback) mc;
-
-                    Set<String> endpoints = remCB.getEndpoints();
-
-                    DefaultMutableTreeNode remoteCPs =
-                            new DefaultMutableTreeNode("Callpoints (" + endpoints.size() + ")");
-
-                    for (String endpoint : endpoints) {
-                        String[] epParts = endpoint.split(":");
-
-                        StringAppender appender = new StringAppender(epParts[0]).append('(');
-                        for (int i = 1; i < epParts.length; i++) {
-                            appender.append(epParts[i]);
-                            if ((i + 1) < epParts.length) appender.append(", ");
-                        }
-
-                        remoteCPs.add(UiHelper.createIconEntry("database_connect.png", appender.append(')').toString()));
-                    }
-
-                    node.add(remoteCPs);
-                }
+              rolesNode.add(UiHelper.createIconEntry("key.png", valueOf(o)));
             }
 
-            node.add(receiversNode);
+            securityNode.add(rolesNode);
+          }
+
+          node.add(securityNode);
         }
+        else if (mc instanceof RemoteServiceCallback) {
+          RemoteServiceCallback remCB = (RemoteServiceCallback) mc;
 
-        model.reload();
+          Set<String> endpoints = remCB.getEndpoints();
 
-        for (int i = 0; i < serviceExplorer.getRowCount(); i++) {
-            serviceExplorer.expandRow(i);
-        }
-    }
+          DefaultMutableTreeNode remoteCPs =
+              new DefaultMutableTreeNode("Callpoints (" + endpoints.size() + ")");
 
-    public MainMonitorGUI getMainMonitorGUI() {
-        return mainMonitorGUI;
-    }
+          for (String endpoint : endpoints) {
+            String[] epParts = endpoint.split(":");
 
-    public class ServicesListCellRender extends DefaultListCellRenderer {
-        @Override
-        public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-            String v = valueOf(value);
-            if (v.endsWith(":RPC")) {
-                setIcon(getSwIcon("database_connect.png"));
-            } else {
-                setIcon(BusTools.isReservedName(v) ? getSwIcon("database_key.png") : getSwIcon("database.png"));
+            StringAppender appender = new StringAppender(epParts[0]).append('(');
+            for (int i = 1; i < epParts.length; i++) {
+              appender.append(epParts[i]);
+              if ((i + 1) < epParts.length) appender.append(", ");
             }
-            setToolTipText(v);
-            return this;
+
+            remoteCPs.add(UiHelper.createIconEntry("database_connect.png", appender.append(')').toString()));
+          }
+
+          node.add(remoteCPs);
         }
+      }
+
+      node.add(receiversNode);
     }
+
+    model.reload();
+
+    for (int i = 0; i < serviceExplorer.getRowCount(); i++) {
+      serviceExplorer.expandRow(i);
+    }
+  }
+
+  public MainMonitorGUI getMainMonitorGUI() {
+    return mainMonitorGUI;
+  }
+
+  public class ServicesListCellRender extends DefaultListCellRenderer {
+    @Override
+    public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+      super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+      String v = valueOf(value);
+      if (v.endsWith(":RPC")) {
+        setIcon(getSwIcon("database_connect.png"));
+      }
+      else {
+        setIcon(BusTools.isReservedName(v) ? getSwIcon("database_key.png") : getSwIcon("database.png"));
+      }
+      setToolTipText(v);
+      return this;
+    }
+  }
 }

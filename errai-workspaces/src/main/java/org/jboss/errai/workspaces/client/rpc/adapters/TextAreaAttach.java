@@ -21,8 +21,8 @@ import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.workspaces.client.rpc.Attachable;
 
 public class TextAreaAttach implements Attachable {
-    public void attach(final String id, final Widget widget, final String packet) {
-        final TextArea w = (TextArea) widget;
+  public void attach(final String id, final Widget widget, final String packet) {
+    final TextArea w = (TextArea) widget;
 
 //        w.addChangeListener(
 //                new ChangeListener() {
@@ -37,5 +37,5 @@ public class TextAreaAttach implements Attachable {
 //        if (val != null) {
 //            w.setText(val);
 //        }
-    }
+  }
 }

@@ -24,35 +24,36 @@ public class StockClient implements EntryPoint {
     loadDefault();
 
     ErraiBus.get().subscribe("StockClient",
-            new MessageCallback() {
-              public void callback(Message message) {
-                if ("PriceChange".equals(message.getCommandType())) {
-                  String[] data = message.get(String.class, "Data").split(":");
-                  EquityRenderer renderer = equities.get(data[0]);
+        new MessageCallback() {
+          public void callback(Message message) {
+            if ("PriceChange".equals(message.getCommandType())) {
+              String[] data = message.get(String.class, "Data").split(":");
+              EquityRenderer renderer = equities.get(data[0]);
 
-                  if (renderer != null) {
-                    renderer.setLastTrade(Double.parseDouble(data[1]));
-                    renderer.setVolume(Double.parseDouble(data[2]));
-                  }
-                } else if ("UpdateStockInfo".equals(message.getCommandType())) {
-                  Stock stock = message.get(Stock.class, "Stock");
-
-                  if (stock != null) {
-                    EquityRenderer renderer = equities.get(stock.getTicker());
-
-                    renderer.setCompanyName(stock.getCompanyName());
-                    renderer.setOpeningPrice(stock.getOpeningPrice());
-                    renderer.setLastTrade(stock.getLastTrade());
-                    renderer.setVolume(stock.getVolume());
-                  }
-                }
+              if (renderer != null) {
+                renderer.setLastTrade(Double.parseDouble(data[1]));
+                renderer.setVolume(Double.parseDouble(data[2]));
               }
-            });
+            }
+            else if ("UpdateStockInfo".equals(message.getCommandType())) {
+              Stock stock = message.get(Stock.class, "Stock");
+
+              if (stock != null) {
+                EquityRenderer renderer = equities.get(stock.getTicker());
+
+                renderer.setCompanyName(stock.getCompanyName());
+                renderer.setOpeningPrice(stock.getOpeningPrice());
+                renderer.setLastTrade(stock.getLastTrade());
+                renderer.setVolume(stock.getVolume());
+              }
+            }
+          }
+        });
 
     MessageBuilder.createMessage()
-            .toSubject("StockService")
-            .command("Start")
-            .noErrorHandling().sendNowWith(ErraiBus.getDispatcher());
+        .toSubject("StockService")
+        .command("Start")
+        .noErrorHandling().sendNowWith(ErraiBus.getDispatcher());
 
     RootPanel.get().add(table);
   }

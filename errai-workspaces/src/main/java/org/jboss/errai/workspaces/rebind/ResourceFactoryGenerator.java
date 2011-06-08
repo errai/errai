@@ -115,8 +115,7 @@ public class ResourceFactoryGenerator extends Generator {
      */
 
     Set<Class<?>> bundles = scanner.getTypesAnnotatedWith(DefaultBundle.class);
-    for(Class<?> clazz : bundles)
-    {
+    for (Class<?> clazz : bundles) {
       bundleClass = clazz.getAnnotation(DefaultBundle.class).value();
     }
 
@@ -125,8 +124,7 @@ public class ResourceFactoryGenerator extends Generator {
      * This will be used to reference the icon though the ResourceFactory
      */
     Set<Class<?>> tools = scanner.getTypesAnnotatedWith(LoadTool.class);
-    for(Class<?> tool : tools)
-    {
+    for (Class<?> tool : tools) {
       LoadTool lt = tool.getAnnotation(LoadTool.class);
       if (!"".equals(lt.icon()))
         tool2imageRes.put(lt.name(), lt.icon());
@@ -164,7 +162,8 @@ public class ResourceFactoryGenerator extends Generator {
         sourceWriter.println("mapping.put(\"" + tool + "\", bundle." + tool2imageRes.get(tool) + "() );");
       }
       sourceWriter.outdent();
-    } else {
+    }
+    else {
       logger.log(TreeLogger.Type.WARN, "\"@DefaultBundle not found. Make sure the EntryPoint refers to a valid default resource bundle.\"");
     }
 

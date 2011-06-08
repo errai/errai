@@ -21,8 +21,7 @@ import org.jboss.errai.workspaces.client.api.ProvisioningCallback;
 import org.jboss.errai.workspaces.client.api.Tool;
 import org.jboss.errai.workspaces.client.api.WidgetProvider;
 
-public class ToolImpl implements Tool
-{
+public class ToolImpl implements Tool {
   private String name;
   private String id;
   private boolean multipleAllowed;

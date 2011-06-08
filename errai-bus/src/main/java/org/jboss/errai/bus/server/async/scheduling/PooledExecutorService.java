@@ -91,7 +91,8 @@ public class PooledExecutorService implements TaskProvider {
       scheduledTasks.offer(task = new DelayedTask(runnable, unit.toMillis(interval)));
 
       return task;
-    } finally {
+    }
+    finally {
       mutex.unlock();
     }
   }
@@ -104,7 +105,8 @@ public class PooledExecutorService implements TaskProvider {
       scheduledTasks.offer(task = new RepeatingTimedTask(runnable, unit.toMillis(initial), unit.toMillis(interval)));
 
       return task;
-    } finally {
+    }
+    finally {
       mutex.unlock();
     }
   }
@@ -119,7 +121,8 @@ public class PooledExecutorService implements TaskProvider {
       schedulerThread.start();
 
       pool.startPool();
-    } finally {
+    }
+    finally {
       mutex.unlock();
     }
   }
@@ -130,7 +133,8 @@ public class PooledExecutorService implements TaskProvider {
       schedulerThread.requestStop();
       queue.clear();
       stopped = true;
-    } finally {
+    }
+    finally {
       mutex.unlock();
     }
   }
@@ -174,7 +178,8 @@ public class PooledExecutorService implements TaskProvider {
     if (queueSize == 0) return;
     else if (queueSize > (0.80d * maxQueueSize)) {
       pool.addWorker();
-    } else if (queueSize == 0) {
+    }
+    else if (queueSize == 0) {
       idleCount++;
     }
 
@@ -233,7 +238,8 @@ public class PooledExecutorService implements TaskProvider {
           try {
             if (runningOn != null)
               runningOn.interrupt();
-          } catch (NullPointerException e) {
+          }
+          catch (NullPointerException e) {
             // if runningOn is de-referenced, it means the task has completed
             // and no interrupt is necessary, so we ignore this exception.
           }
@@ -263,7 +269,8 @@ public class PooledExecutorService implements TaskProvider {
         try {
           runningOn = Thread.currentThread();
           runnable.run();
-        } finally {
+        }
+        finally {
           runningOn = null;
           if (exitHandler != null)
             exitHandler.run();
@@ -282,7 +289,8 @@ public class PooledExecutorService implements TaskProvider {
           try {
             if (runningOn != null)
               runningOn.interrupt();
-          } catch (NullPointerException e) {
+          }
+          catch (NullPointerException e) {
             // if runningOn is de-referenced, it means the task has completed
             // and no interrupt is necessary, so we ignore this exception.
           }
@@ -298,7 +306,8 @@ public class PooledExecutorService implements TaskProvider {
       try {
         runningOn = Thread.currentThread();
         runnable.run();
-      } finally {
+      }
+      finally {
         runningOn = null;
         if ((cancel || nextRuntime == -1) && exitHandler != null)
           exitHandler.run();
@@ -319,10 +328,12 @@ public class PooledExecutorService implements TaskProvider {
           while (running) {
             runAllDue();
           }
-        } catch (InterruptedException e) {
+        }
+        catch (InterruptedException e) {
           e.printStackTrace();
           // just fall through.
-        } catch (Throwable t) {
+        }
+        catch (Throwable t) {
           t.printStackTrace();
         }
       }

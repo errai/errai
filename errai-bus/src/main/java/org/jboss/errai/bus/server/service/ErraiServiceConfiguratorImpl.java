@@ -78,7 +78,8 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
         key = keys.nextElement();
         properties.put(key, erraiServiceConfig.getString(key));
       }
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       if (bundlePath == null) {
         // try to load the default service bundle -- used for testing, etc.
         System.setProperty("errai.service_config_prefix_path", "org.jboss.errai.bus");
@@ -134,7 +135,8 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
   public <T> T getResource(Class<? extends T> resourceClass) {
     if (extensionBindings.containsKey(resourceClass)) {
       return (T) extensionBindings.get(resourceClass).get();
-    } else {
+    }
+    else {
       return null;
     }
   }

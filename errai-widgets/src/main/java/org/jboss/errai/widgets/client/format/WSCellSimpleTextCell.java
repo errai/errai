@@ -26,77 +26,77 @@ import com.google.gwt.user.client.ui.TextBox;
 import org.jboss.errai.widgets.client.WSGrid;
 
 public class WSCellSimpleTextCell extends WSCellFormatter<String> {
-    private static TextBox textBox;
-    private static WSCellSimpleTextCell editCellReference;
+  private static TextBox textBox;
+  private static WSCellSimpleTextCell editCellReference;
 
-    static {
-        textBox = new TextBox();
-        textBox.setStylePrimaryName("WSCell-editbox");
-        textBox.setVisible(false);
+  static {
+    textBox = new TextBox();
+    textBox.setStylePrimaryName("WSCell-editbox");
+    textBox.setVisible(false);
 
-        RootPanel.get().add(textBox);
+    RootPanel.get().add(textBox);
 
-        textBox.addKeyPressHandler(new KeyPressHandler() {
-            public void onKeyPress(KeyPressEvent event) {
-                switch (event.getCharCode()) {
-                    case KeyCodes.KEY_ESCAPE:
-                        editCellReference.stopedit();
-                        wsCellReference.focus();
-                        break;
-                    case KeyCodes.KEY_TAB:
-                        editCellReference.stopedit();
-                        break;
-                    case KeyCodes.KEY_ENTER:
-                        editCellReference.stopedit();
-                        break;
-                }
-            }
-        });                                                                                                                                               
+    textBox.addKeyPressHandler(new KeyPressHandler() {
+      public void onKeyPress(KeyPressEvent event) {
+        switch (event.getCharCode()) {
+          case KeyCodes.KEY_ESCAPE:
+            editCellReference.stopedit();
+            wsCellReference.focus();
+            break;
+          case KeyCodes.KEY_TAB:
+            editCellReference.stopedit();
+            break;
+          case KeyCodes.KEY_ENTER:
+            editCellReference.stopedit();
+            break;
+        }
+      }
+    });
 
-    }
+  }
 
-    public WSCellSimpleTextCell(String value) {
-        this.html = new HTML(value);
-        this.html.setStyleName("WSCell-inner");
-    }
+  public WSCellSimpleTextCell(String value) {
+    this.html = new HTML(value);
+    this.html.setStyleName("WSCell-inner");
+  }
 
-    public WSCellSimpleTextCell(String value, boolean readonly) {
-        this.html = new HTML(value);
-        this.html.setStyleName("WSCell-inner");
-        
-        this.readonly = readonly;
-    }
+  public WSCellSimpleTextCell(String value, boolean readonly) {
+    this.html = new HTML(value);
+    this.html.setStyleName("WSCell-inner");
 
-    public boolean edit(WSGrid.WSCell element) {
-        if (readonly) return false;
-        
-        editCellReference = this;
-        wsCellReference = element;
+    this.readonly = readonly;
+  }
 
-        textBox.setText(getTextValue());
-        textBox.setVisible(true);
+  public boolean edit(WSGrid.WSCell element) {
+    if (readonly) return false;
 
-        Style s = textBox.getElement().getStyle();
+    editCellReference = this;
+    wsCellReference = element;
 
-        s.setProperty("left", element.getAbsoluteLeft() + "px");
-        s.setProperty("top", element.getAbsoluteTop() + "px");
+    textBox.setText(getTextValue());
+    textBox.setVisible(true);
 
-        textBox.setSize(element.getOffsetWidth() + "px", element.getOffsetHeight() + "px");
+    Style s = textBox.getElement().getStyle();
 
-        textBox.setCursorPos(textBox.getText().length());
-        textBox.setFocus(true);
+    s.setProperty("left", element.getAbsoluteLeft() + "px");
+    s.setProperty("top", element.getAbsoluteTop() + "px");
 
-        return true;
-    }
+    textBox.setSize(element.getOffsetWidth() + "px", element.getOffsetHeight() + "px");
 
-    public void stopedit() {
-        if (!readonly) setValue(textBox.getText());
-        textBox.setVisible(false);
-        wsCellReference.stopedit();
-    }
+    textBox.setCursorPos(textBox.getText().length());
+    textBox.setFocus(true);
 
-    @Override
-    public String getValue() {
-        return html.getText();
-    }
+    return true;
+  }
+
+  public void stopedit() {
+    if (!readonly) setValue(textBox.getText());
+    textBox.setVisible(false);
+    wsCellReference.stopedit();
+  }
+
+  @Override
+  public String getValue() {
+    return html.getText();
+  }
 }

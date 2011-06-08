@@ -56,9 +56,10 @@ public class Serialization {
 
       try {
         MessageBuilder.createMessage().toSubject("ObjectService")
-                .with("Recs", records)
-                .noErrorHandling().sendNowWith(dispatcher);
-      } catch (Throwable e) {
+            .with("Recs", records)
+            .noErrorHandling().sendNowWith(dispatcher);
+      }
+      catch (Throwable e) {
         e.printStackTrace();
       }
     }
@@ -71,9 +72,9 @@ public class Serialization {
     Button button = new Button("Load Objects", new ClickHandler() {
       public void onClick(ClickEvent clickEvent) {
         MessageBuilder.createMessage()
-                .toSubject("ObjectService")
-                .with(MessageParts.ReplyTo, "ClientEndpoint")
-                .done().sendNowWith(dispatcher);
+            .toSubject("ObjectService")
+            .with(MessageParts.ReplyTo, "ClientEndpoint")
+            .done().sendNowWith(dispatcher);
       }
     });
 

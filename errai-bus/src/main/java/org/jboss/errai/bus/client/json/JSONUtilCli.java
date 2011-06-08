@@ -59,7 +59,8 @@ public class JSONUtilCli {
       }
 
       return list;
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       System.out.println("JSONUtilCli.decodePayload=" + value);
       e.printStackTrace();
       return EMPTYLIST;
@@ -94,7 +95,8 @@ public class JSONUtilCli {
       }
 
       return map;
-    } catch (RuntimeException e) {
+    }
+    catch (RuntimeException e) {
       System.out.println("<<" + String.valueOf(value) + ">>");
 
       e.printStackTrace();

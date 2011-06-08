@@ -34,7 +34,7 @@ import static org.jboss.errai.bus.client.api.base.MessageBuilder.createMessage;
  * <pre>
  *  Shoutbox shoutbox = new Shoutbox(); // stateful
  *  shoutbox.submitOffer(PID, "demo.mailSender");
- * <p/>
+ *
  *  // provider becomes unavailable
  *  shoutbox.retractOffer(PID, "demo.mailSender");
  * </pre>
@@ -49,7 +49,7 @@ import static org.jboss.errai.bus.client.api.base.MessageBuilder.createMessage;
  *         {
  *           // provider becomes available
  *         }
- * <p/>
+ *
  *         public void offerRetracted(String providerId)
  *         {
  *            // provider retracted offer
@@ -57,74 +57,74 @@ import static org.jboss.errai.bus.client.api.base.MessageBuilder.createMessage;
  *         }
  *       }
  *  );
- * <p/>
+ *
  *  // client doesn't need the provider anymore
  *  shoutbox.retireOffer(CID, "demo.mailSender");
- * <p/>
+ *
  * </pre>
  *
  * @author Heiko Braun <hbraun@redhat.com>
  * @see ShoutboxModule
  */
 public class Shoutbox {
-    private final MessageBus bus = ErraiBus.get();
-    private ShoutboxCallback delegate;
+  private final MessageBus bus = ErraiBus.get();
+  private ShoutboxCallback delegate;
 
-    public void submitOffer(String provider, String subjectMatter) {
-        createMessage()
-                .toSubject(ShoutboxModule.INBOX)
-                .command(ShoutboxCmd.SUBMIT_OFFER)
-                .with(ShoutboxCmdParts.SUBJECT, subjectMatter)
-                .with(ShoutboxCmdParts.PROVIDER, provider)
-                .noErrorHandling().sendNowWith(bus);
-    }
+  public void submitOffer(String provider, String subjectMatter) {
+    createMessage()
+        .toSubject(ShoutboxModule.INBOX)
+        .command(ShoutboxCmd.SUBMIT_OFFER)
+        .with(ShoutboxCmdParts.SUBJECT, subjectMatter)
+        .with(ShoutboxCmdParts.PROVIDER, provider)
+        .noErrorHandling().sendNowWith(bus);
+  }
 
-    public void retractOffer(String provider, String subjectMatter) {
-        createMessage()
-                .toSubject(ShoutboxModule.INBOX)
-                .command(ShoutboxCmd.RETIRE_OFFER)
-                .with(ShoutboxCmdParts.SUBJECT, subjectMatter)
-                .with(ShoutboxCmdParts.PROVIDER, provider)
-                .noErrorHandling().sendNowWith(bus);
+  public void retractOffer(String provider, String subjectMatter) {
+    createMessage()
+        .toSubject(ShoutboxModule.INBOX)
+        .command(ShoutboxCmd.RETIRE_OFFER)
+        .with(ShoutboxCmdParts.SUBJECT, subjectMatter)
+        .with(ShoutboxCmdParts.PROVIDER, provider)
+        .noErrorHandling().sendNowWith(bus);
 
-    }
+  }
 
-    public void engageOffer(String client, String subject, ShoutboxCallback callback) {
-        this.delegate = callback;
+  public void engageOffer(String client, String subject, ShoutboxCallback callback) {
+    this.delegate = callback;
 
-        // shout box example
-        bus.subscribe(subject,
-                new MessageCallback() {
-                    public void callback(Message message) {
-                        System.out.println("Shoutbox client: " + message.getCommandType());
-                        switch (ShoutboxCmd.valueOf(message.getCommandType())) {
-                            case SUBMIT_OFFER: // provider enters the game
-                                delegate.offerSubmitted(message.get(String.class, ShoutboxCmdParts.PROVIDER));
-                                break;
-                            case RETRACT_OFFER:
-                                delegate.offerRetracted(message.get(String.class, ShoutboxCmdParts.PROVIDER));
-                        }
-                    }
-                }
-        );
+    // shout box example
+    bus.subscribe(subject,
+        new MessageCallback() {
+          public void callback(Message message) {
+            System.out.println("Shoutbox client: " + message.getCommandType());
+            switch (ShoutboxCmd.valueOf(message.getCommandType())) {
+              case SUBMIT_OFFER: // provider enters the game
+                delegate.offerSubmitted(message.get(String.class, ShoutboxCmdParts.PROVIDER));
+                break;
+              case RETRACT_OFFER:
+                delegate.offerRetracted(message.get(String.class, ShoutboxCmdParts.PROVIDER));
+            }
+          }
+        }
+    );
 
-        // engage an offer right away
-        MessageBuilder.createMessage()
-                .toSubject(ShoutboxModule.INBOX)
-                .command(ShoutboxCmd.ENGAGE_OFFER)
-                .with(ShoutboxCmdParts.SUBJECT, subject)
-                .with(ShoutboxCmdParts.CLIENT, client)
-                .noErrorHandling().sendNowWith(bus);
-    }
+    // engage an offer right away
+    MessageBuilder.createMessage()
+        .toSubject(ShoutboxModule.INBOX)
+        .command(ShoutboxCmd.ENGAGE_OFFER)
+        .with(ShoutboxCmdParts.SUBJECT, subject)
+        .with(ShoutboxCmdParts.CLIENT, client)
+        .noErrorHandling().sendNowWith(bus);
+  }
 
-    public void retireOffer(String client, String subjectMatter) {
+  public void retireOffer(String client, String subjectMatter) {
 
-        MessageBuilder.createMessage()
-                .toSubject(ShoutboxModule.INBOX)
-                .command(ShoutboxCmd.RETIRE_OFFER)
-                .with(ShoutboxCmdParts.SUBJECT, subjectMatter)
-                .with(ShoutboxCmdParts.CLIENT, client)
-                .noErrorHandling()
-                .sendNowWith(bus);
-    }
+    MessageBuilder.createMessage()
+        .toSubject(ShoutboxModule.INBOX)
+        .command(ShoutboxCmd.RETIRE_OFFER)
+        .with(ShoutboxCmdParts.SUBJECT, subjectMatter)
+        .with(ShoutboxCmdParts.CLIENT, client)
+        .noErrorHandling()
+        .sendNowWith(bus);
+  }
 }

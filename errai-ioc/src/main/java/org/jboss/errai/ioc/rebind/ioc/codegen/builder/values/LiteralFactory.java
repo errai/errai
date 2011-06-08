@@ -31,27 +31,37 @@ public class LiteralFactory {
 
     if (o instanceof String) {
       return new StringLiteral((String) o);
-    } else if (o instanceof Integer) {
+    }
+    else if (o instanceof Integer) {
       return new IntValue((Integer) o);
-    } else if (o instanceof Boolean) {
+    }
+    else if (o instanceof Boolean) {
       return new BooleanValue((Boolean) o);
-    } else if (o instanceof Short) {
+    }
+    else if (o instanceof Short) {
       return new ShortValue((Short) o);
-    } else if (o instanceof Long) {
+    }
+    else if (o instanceof Long) {
       return new LongValue((Long) o);
-    } else if (o instanceof Double) {
+    }
+    else if (o instanceof Double) {
       return new DoubleValue((Double) o);
-    } else if (o instanceof Float) {
+    }
+    else if (o instanceof Float) {
       return new FloatValue((Float) o);
-    } else if (o instanceof Byte) {
+    }
+    else if (o instanceof Byte) {
       return new ByteValue((Byte) o);
-    } else if (o instanceof Class) {
+    }
+    else if (o instanceof Class) {
       return new ClassLiteral((Class) o);
-    } else if (o.getClass().isArray()) {
+    }
+    else if (o.getClass().isArray()) {
       return new ArrayLiteral(o);
-    } else {
+    }
+    else {
       throw new IllegalArgumentException("type cannot be converted to a literal: "
-              + o.getClass().getName());
+          + o.getClass().getName());
     }
   }
 }

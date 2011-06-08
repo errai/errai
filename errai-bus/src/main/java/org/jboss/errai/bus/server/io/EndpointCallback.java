@@ -53,13 +53,14 @@ public class EndpointCallback implements MessageCallback {
 
     if ((parms == null && targetTypes.length != 0) || (parms.length != targetTypes.length)) {
       throw new MessageDeliveryFailure("wrong number of arguments sent to endpoint. (received: "
-              + (parms == null ? 0 : parms.length) + "; required: " + targetTypes.length + ")");
+          + (parms == null ? 0 : parms.length) + "; required: " + targetTypes.length + ")");
     }
     for (int i = 0; i < parms.length; i++) {
       if (parms[i] != null && !targetTypes[i].isAssignableFrom(parms[i].getClass())) {
         if (DataConversion.canConvert(targetTypes[i], parms[i].getClass())) {
           parms[i] = DataConversion.convert(parms[i], targetTypes[i]);
-        } else {
+        }
+        else {
           throw new MessageDeliveryFailure("type mismatch in method parameters");
         }
       }
@@ -67,7 +68,8 @@ public class EndpointCallback implements MessageCallback {
 
     try {
       method.invoke(genericSvc, parms);
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       throw new MessageDeliveryFailure("error invoking endpoint", e);
     }
   }

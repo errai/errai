@@ -1,6 +1,6 @@
-#set( $symbol_pound = '#' )
-#set( $symbol_dollar = '$' )
-#set( $symbol_escape = '\' )
+#set($symbol_pound='#')
+    #set($symbol_dollar='$')
+    #set($symbol_escape='\' )
 /*
  * Copyright 2009 JBoss, a divison Red Hat, Inc
  *
@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ${package}.client;
+    package ${package}.client;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -38,8 +38,7 @@ import javax.inject.Inject;
  * Main application entry point.
  */
 @EntryPoint
-public class App extends VerticalPanel implements MessageCallback
-{
+public class App extends VerticalPanel implements MessageCallback {
   private Button sayHello;
   private Label label;
 

@@ -478,7 +478,8 @@ public class CommandMessage implements Message {
   public void addResources(Map<String, ?> resources) {
     if (this.resources == null) {
       this.resources = new HashMap<String, Object>(resources);
-    } else {
+    }
+    else {
       this.resources.putAll(resources);
     }
   }
@@ -511,7 +512,8 @@ public class CommandMessage implements Message {
   public void sendNowWith(RequestDispatcher viaThis) {
     try {
       viaThis.dispatch(this);
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       throw new MessageDeliveryFailure("could not deliver message: " + e.getMessage(), e);
     }
   }

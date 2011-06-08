@@ -151,7 +151,8 @@ public final class MetaClassFactory {
   private static Class<?> load(String fullyQualifiedName) {
     try {
       return Class.forName(fullyQualifiedName, false, Thread.currentThread().getContextClassLoader());
-    } catch (ClassNotFoundException e) {
+    }
+    catch (ClassNotFoundException e) {
       throw new RuntimeException("Could not load class: " + fullyQualifiedName);
     }
   }
@@ -159,7 +160,8 @@ public final class MetaClassFactory {
   private static JClassType load(TypeOracle oracle, String fullyQualifiedName) {
     try {
       return oracle.getType(fullyQualifiedName);
-    } catch (NotFoundException e) {
+    }
+    catch (NotFoundException e) {
       throw new RuntimeException("Could not load class: " + fullyQualifiedName);
     }
   }

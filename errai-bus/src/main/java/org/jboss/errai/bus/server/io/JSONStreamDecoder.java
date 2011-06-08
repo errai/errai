@@ -55,9 +55,10 @@ public class JSONStreamDecoder {
     this.buffer = CharBuffer.allocate(25);
     try {
       this.reader = new BufferedReader(
-              new InputStreamReader(inStream, "UTF-8")
+          new InputStreamReader(inStream, "UTF-8")
       );
-    } catch (UnsupportedEncodingException e) {
+    }
+    catch (UnsupportedEncodingException e) {
       throw new Error("UTF-8 is not supported by this JVM?", e);
     }
   }
@@ -94,7 +95,8 @@ public class JSONStreamDecoder {
       }
 
       return v;
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       throw new RuntimeException(e);
     }
   }
@@ -118,10 +120,12 @@ public class JSONStreamDecoder {
             ctx.encodedType = false;
             try {
               return demarshallAll(ctx.record(collection, decodingContext), decodingContext);
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
               throw new RuntimeException("Could not demarshall object", e);
             }
-          } else {
+          }
+          else {
             return ctx.record(collection, decodingContext);
           }
 
@@ -165,7 +169,8 @@ public class JSONStreamDecoder {
           if (isValidNumberPart(c)) {
             ctx.addValue(parseNumber(c));
             break;
-          } else if (Character.isJavaIdentifierPart(c)) {
+          }
+          else if (Character.isJavaIdentifierPart(c)) {
             appender = new StringAppender().append(c);
 
             while (((c = read()) != 0) && Character.isJavaIdentifierPart(c)) {
@@ -177,11 +182,14 @@ public class JSONStreamDecoder {
             if (s.length() > 4) ctx.addValue(s);
             else if ("null".equals(s)) {
               ctx.addValue(null);
-            } else if ("true".equals(s)) {
+            }
+            else if ("true".equals(s)) {
               ctx.addValue(Boolean.TRUE);
-            } else if ("false".equals(s)) {
+            }
+            else if ("false".equals(s)) {
               ctx.addValue(Boolean.FALSE);
-            } else {
+            }
+            else {
               ctx.addValue(s);
             }
 
@@ -284,7 +292,8 @@ public class JSONStreamDecoder {
     }
     if (dbl) {
       return dVal + val;
-    } else {
+    }
+    else {
       return val;
     }
   }
@@ -320,7 +329,8 @@ public class JSONStreamDecoder {
     private Object addValue(Object val) {
       if (lhs == null) {
         return lhs = val;
-      } else {
+      }
+      else {
         return rhs = val;
       }
     }
@@ -328,7 +338,8 @@ public class JSONStreamDecoder {
     private Object getValue() {
       if (rhs != null) {
         return rhs;
-      } else {
+      }
+      else {
         return lhs;
       }
     }
@@ -336,7 +347,8 @@ public class JSONStreamDecoder {
     private void removeValue() {
       if (rhs != null) {
         rhs = null;
-      } else {
+      }
+      else {
         lhs = null;
       }
     }
@@ -367,21 +379,25 @@ public class JSONStreamDecoder {
             if (rec)
               ((Map) collection).put(lhs, rhs);
 
-          } else {
+          }
+          else {
             if (collection == null) return lhs;
 
             if (lhs instanceof UnsatisfiedForwardLookup) {
               ctx.addUnsatisfiedDependency(collection, (UnsatisfiedForwardLookup) lhs);
-            } else {
+            }
+            else {
               //noinspection unchecked
               ((Collection) collection).add(lhs);
             }
           }
         }
         return collection;
-      } catch (ClassCastException e) {
+      }
+      catch (ClassCastException e) {
         throw new RuntimeException("error building collection", e);
-      } finally {
+      }
+      finally {
         lhs = rhs = null;
       }
     }

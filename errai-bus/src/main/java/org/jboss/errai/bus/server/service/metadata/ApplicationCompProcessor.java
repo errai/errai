@@ -95,17 +95,19 @@ public class ApplicationCompProcessor implements MetaDataProcessor {
             String svcName = ((Service) annotation).value().equals("") ? m.getName() : ((Service) annotation).value();
             if (parmTypes.length == 1 && !Message.class.isAssignableFrom(parmTypes[0])) {
               context.getBus().subscribe(svcName, new MethodEndpointCallback(inst, m));
-            } else {
+            }
+            else {
               Class parmClass = parmTypes[0];
               if (!parmClass.isAnnotationPresent(ExposeEntity.class)) {
                 log.warn("method service-endpoint accepts a type which is not exposed to the Errai serializer: "
-                        + m.getDeclaringClass().getName() + "#" + m.getName());
+                    + m.getDeclaringClass().getName() + "#" + m.getName());
               }
 
               context.getBus().subscribe(svcName, new MethodEndpointDynamicParmCallback(inst, m, parms, parmTypes));
             }
 
-          } else {
+          }
+          else {
             int i = 0;
             for (Annotation[] annotations : m.getParameterAnnotations()) {
               Class parmType = parmTypes[i++];
@@ -126,7 +128,8 @@ public class ApplicationCompProcessor implements MetaDataProcessor {
             }
           }
         }
-      } catch (Throwable t) {
+      }
+      catch (Throwable t) {
         t.printStackTrace();
       }
     }

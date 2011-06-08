@@ -86,7 +86,7 @@ public class IOCGenerator extends Generator {
 
   @Override
   public String generate(TreeLogger logger, GeneratorContext context, String typeName)
-          throws UnableToCompleteException {
+      throws UnableToCompleteException {
     typeOracle = context.getTypeOracle();
 
     try {
@@ -100,7 +100,8 @@ public class IOCGenerator extends Generator {
 
       // Generate class source code
       generateIOCBootstrapClass(logger, context);
-    } catch (Throwable e) {
+    }
+    catch (Throwable e) {
       // record sendNowWith logger that Map generation threw an exception
       e.printStackTrace();
       logger.log(TreeLogger.ERROR, "Error generating extensions", e);
@@ -126,7 +127,7 @@ public class IOCGenerator extends Generator {
 
     // init composer, set class properties, create source writer
     ClassSourceFileComposerFactory composer = new ClassSourceFileComposerFactory(packageName,
-            className);
+        className);
 
     composer.addImplementedInterface(Bootstrapper.class.getName());
     composer.addImport(InterfaceInjectionContext.class.getName());
@@ -174,7 +175,8 @@ public class IOCGenerator extends Generator {
         configurator.configure(procContext, injectFactory, procFactory);
 
         extensionConfigurators.add(configurator);
-      } catch (Exception e) {
+      }
+      catch (Exception e) {
         throw new ErraiBootstrapFailure("unable to load IOC Extension Configurator: " + e.getMessage(), e);
       }
     }
@@ -203,7 +205,8 @@ public class IOCGenerator extends Generator {
         }
 
         injectFactory.getInjectionContext().registerDecorator(decoratorClass.getConstructor(new Class[]{Class.class}).newInstance(annoType));
-      } catch (Exception e) {
+      }
+      catch (Exception e) {
         throw new ErraiBootstrapFailure("unable to load code decorator: " + e.getMessage(), e);
       }
     }
@@ -225,7 +228,7 @@ public class IOCGenerator extends Generator {
 
           if (pType == null) {
             throw new InjectionFailure("could not determine the bind type for the IOCProvider class: "
-                    + type.getFullyQualifedName());
+                + type.getFullyQualifedName());
           }
 
           //todo: check for nested type parameters
@@ -244,7 +247,7 @@ public class IOCGenerator extends Generator {
 
           if (pType == null) {
             throw new InjectionFailure("could not determine the bind type for the IOCProvider class: "
-                    + type.getFullyQualifedName());
+                + type.getFullyQualifedName());
           }
 
           //todo: check for nested type parameters
@@ -254,7 +257,7 @@ public class IOCGenerator extends Generator {
 
       if (bindType == null) {
         throw new InjectionFailure("the annotated provider class does not appear to implement " +
-                TypeProvider.class.getName() + ": " + type.getFullyQualifedName());
+            TypeProvider.class.getName() + ": " + type.getFullyQualifedName());
       }
 
       final MetaClass finalBindType = bindType;
@@ -262,7 +265,8 @@ public class IOCGenerator extends Generator {
       if (contextual) {
         injectFactory.addInjector(new ContextualProviderInjector(finalBindType, type));
 
-      } else {
+      }
+      else {
         injectFactory.addInjector(new ProviderInjector(finalBindType, type));
       }
     }
@@ -279,7 +283,8 @@ public class IOCGenerator extends Generator {
 
       try {
         injectFactory.addInjector(new ContextualProviderInjector(type, getJClassType(injectorClass)));
-      } catch (Exception e) {
+      }
+      catch (Exception e) {
         throw new ErraiBootstrapFailure("could not load injector: " + e.getMessage(), e);
       }
     }
@@ -388,7 +393,8 @@ public class IOCGenerator extends Generator {
   public MetaClass getJClassType(Class cls) {
     try {
       return MetaClassFactory.get(typeOracle.getType(cls.getName()));
-    } catch (NotFoundException e) {
+    }
+    catch (NotFoundException e) {
       return null;
     }
   }
@@ -419,9 +425,10 @@ public class IOCGenerator extends Generator {
           });
 
 
-        } else {
+        }
+        else {
           throw new InjectionFailure("type declares @" + annotation.getClass().getSimpleName()
-                  + "  but does not extend type Widget: " + type.getFullyQualifedName());
+              + "  but does not extend type Widget: " + type.getFullyQualifedName());
         }
       }
     });
@@ -433,12 +440,13 @@ public class IOCGenerator extends Generator {
           addDeferred(new Runnable() {
             public void run() {
               context.getWriter().println("ctx.registerPanel(\"" + (annotation.value().equals("")
-                      ? type.getName() : annotation.value()) + "\", " + generateInjectors(type) + ");");
+                  ? type.getName() : annotation.value()) + "\", " + generateInjectors(type) + ");");
             }
           });
-        } else {
+        }
+        else {
           throw new InjectionFailure("type declares @" + annotation.getClass().getSimpleName()
-                  + "  but does not extend type Widget: " + type.getFullyQualifedName());
+              + "  but does not extend type Widget: " + type.getFullyQualifedName());
         }
       }
     });
@@ -450,12 +458,13 @@ public class IOCGenerator extends Generator {
           addDeferred(new Runnable() {
             public void run() {
               context.getWriter()
-                      .println("ctx.widgetToPanel(" + generateWithSingletonSemantics(type) + ", \"" + annotation.value() + "\");");
+                  .println("ctx.widgetToPanel(" + generateWithSingletonSemantics(type) + ", \"" + annotation.value() + "\");");
             }
           });
-        } else {
+        }
+        else {
           throw new InjectionFailure("type declares @" + annotation.getClass().getSimpleName()
-                  + "  but does not extend type Widget: " + type.getFullyQualifedName());
+              + "  but does not extend type Widget: " + type.getFullyQualifedName());
         }
       }
     });

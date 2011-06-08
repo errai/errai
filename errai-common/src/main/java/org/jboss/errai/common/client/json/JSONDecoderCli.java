@@ -42,9 +42,11 @@ public class JSONDecoderCli {
 
     if (value instanceof String) {
       v = _decode(JSONParser.parseStrict((String) value), ctx);
-    } else if (value instanceof JSONValue) {
+    }
+    else if (value instanceof JSONValue) {
       v = _decode((JSONValue) value, ctx);
-    } else if (value != null) {
+    }
+    else if (value != null) {
       throw new RuntimeException("could not decode type: " + value.getClass());
     }
 
@@ -58,9 +60,11 @@ public class JSONDecoderCli {
   public static Object decode(Object value, DecodingContext ctx) {
     if (value instanceof String) {
       return _decode(JSONParser.parseStrict((String) value), ctx);
-    } else if (value instanceof JSONValue) {
+    }
+    else if (value instanceof JSONValue) {
       return _decode((JSONValue) value, ctx);
-    } else if (value != null) {
+    }
+    else if (value != null) {
       throw new RuntimeException("could not decode type: " + value.getClass());
     }
 
@@ -70,17 +74,23 @@ public class JSONDecoderCli {
   private static Object _decode(JSONValue v, DecodingContext ctx) {
     if (v.isString() != null) {
       return v.isString().stringValue();
-    } else if (v.isNumber() != null) {
+    }
+    else if (v.isNumber() != null) {
       return v.isNumber().doubleValue();
-    } else if (v.isBoolean() != null) {
+    }
+    else if (v.isBoolean() != null) {
       return v.isBoolean().booleanValue();
-    } else if (v.isNull() != null) {
+    }
+    else if (v.isNull() != null) {
       return null;
-    } else if (v instanceof JSONObject) {
+    }
+    else if (v instanceof JSONObject) {
       return decodeObject(v.isObject(), ctx);
-    } else if (v instanceof JSONArray) {
+    }
+    else if (v instanceof JSONArray) {
       return decodeList(v.isArray(), ctx);
-    } else {
+    }
+    else {
       throw new RuntimeException("unknown encoding");
     }
   }
@@ -102,7 +112,8 @@ public class JSONDecoderCli {
 
           if (ctx.hasObject(objId)) {
             return ctx.getObject(objId);
-          } else if (ref) {
+          }
+          else if (ref) {
             return new UnsatisfiedForwardLookup(objId);
           }
         }
@@ -112,17 +123,20 @@ public class JSONDecoderCli {
             Object o = getDemarshaller(className).demarshall(eMap, ctx);
             if (objId == null) ctx.putObject(objId, o);
             return o;
-          } catch (Throwable t) {
+          }
+          catch (Throwable t) {
             t.printStackTrace();
             GWT.log("Failure decoding object", t);
             return null;
           }
-        } else {
+        }
+        else {
           GWT.log("Could not demartial class: " + className + "; There is no available demarshaller. " +
-                  "Ensure you have exposed the class with @ExposeEntity.", null);
+              "Ensure you have exposed the class with @ExposeEntity.", null);
           throw new RuntimeException("no available demarshaller: " + className);
         }
-      } else if (SerializationParts.MARSHALLED_TYPES.equals(key)) continue;
+      }
+      else if (SerializationParts.MARSHALLED_TYPES.equals(key)) continue;
 
       m.put(key, _decode(eMap.get(key), ctx));
     }
@@ -135,7 +149,8 @@ public class JSONDecoderCli {
     for (int i = 0; i < arr.size(); i++) {
       if ((o = _decode(arr.get(i), ctx)) instanceof UnsatisfiedForwardLookup) {
         ctx.addUnsatisfiedDependency(list, ((UnsatisfiedForwardLookup) o));
-      } else {
+      }
+      else {
         list.add(o);
       }
     }

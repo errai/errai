@@ -40,40 +40,41 @@ public class ContextBuilderTest extends AbstractStatementBuilderTest {
   @Test
   public void testDeclareVariable() {
     Statement declaration = ContextBuilder.create()
-            .declareVariable("n", Integer.class)
-            .initializeWith(10);
+        .declareVariable("n", Integer.class)
+        .initializeWith(10);
 
     assertEquals("failed to generate variable declaration using a literal initialization",
-            "java.lang.Integer n = 10;", declaration.generate(Context.create()));
+        "java.lang.Integer n = 10;", declaration.generate(Context.create()));
 
     declaration = ContextBuilder.create()
-            .declareVariable("n")
-            .initializeWith(10);
+        .declareVariable("n")
+        .initializeWith(10);
 
     assertEquals("failed to generate variable declaration using a literal initialization and type inference",
-            "java.lang.Integer n = 10;", declaration.generate(Context.create()));
+        "java.lang.Integer n = 10;", declaration.generate(Context.create()));
 
     declaration = ContextBuilder.create()
-            .declareVariable("n")
-            .initializeWith("10");
+        .declareVariable("n")
+        .initializeWith("10");
 
     assertEquals("failed to generate variable declaration using a literal initialization and type inference",
-            "java.lang.String n = \"10\";", declaration.generate(Context.create()));
+        "java.lang.String n = \"10\";", declaration.generate(Context.create()));
 
     declaration = ContextBuilder.create()
-            .declareVariable("n", Integer.class)
-            .initializeWith("10");
+        .declareVariable("n", Integer.class)
+        .initializeWith("10");
 
     assertEquals("failed to generate variable declaration using a literal initialization and type conversion",
-            "java.lang.Integer n = 10;", declaration.generate(Context.create()));
+        "java.lang.Integer n = 10;", declaration.generate(Context.create()));
 
     try {
       ContextBuilder.create()
-              .declareVariable("n", Integer.class)
-              .initializeWith("abc")
-              .generate(Context.create());
+          .declareVariable("n", Integer.class)
+          .initializeWith("abc")
+          .generate(Context.create());
       fail("Expected InvalidTypeException");
-    } catch (InvalidTypeException ive) {
+    }
+    catch (InvalidTypeException ive) {
       //expected
       assertTrue(ive.getCause() instanceof NumberFormatException);
     }
@@ -82,41 +83,43 @@ public class ContextBuilderTest extends AbstractStatementBuilderTest {
   @Test
   public void testDeclareVariableWithObjectInitialization() {
     Statement declaration = ContextBuilder.create()
-            .declareVariable("str", String.class)
-            .initializeWith(ObjectBuilder.newInstanceOf(String.class));
+        .declareVariable("str", String.class)
+        .initializeWith(ObjectBuilder.newInstanceOf(String.class));
 
     assertEquals("failed to generate variable declaration using an objectbuilder initialization",
-            "java.lang.String str = new java.lang.String();", declaration.generate(Context.create()));
+        "java.lang.String str = new java.lang.String();", declaration.generate(Context.create()));
 
     declaration = ContextBuilder.create()
-            .declareVariable("str", String.class)
-            .initializeWith(ObjectBuilder.newInstanceOf(String.class).withParameters("abc"));
+        .declareVariable("str", String.class)
+        .initializeWith(ObjectBuilder.newInstanceOf(String.class).withParameters("abc"));
 
     assertEquals("failed to generate variable declaration using an objectbuilder initialization with parameters",
-            "java.lang.String str = new java.lang.String(\"abc\");", declaration.generate(Context.create()));
+        "java.lang.String str = new java.lang.String(\"abc\");", declaration.generate(Context.create()));
 
     declaration = ContextBuilder.create()
-            .declareVariable("str", Object.class)
-            .initializeWith(ObjectBuilder.newInstanceOf(String.class).withParameters("abc"));
+        .declareVariable("str", Object.class)
+        .initializeWith(ObjectBuilder.newInstanceOf(String.class).withParameters("abc"));
 
     assertEquals("failed to generate variable declaration using an objectbuilder initialization with parameters",
-            "java.lang.Object str = new java.lang.String(\"abc\");", declaration.generate(Context.create()));
+        "java.lang.Object str = new java.lang.String(\"abc\");", declaration.generate(Context.create()));
 
     try {
       ContextBuilder.create()
-              .declareVariable("str", Integer.class)
-              .initializeWith(ObjectBuilder.newInstanceOf(String.class).withParameters("abc"));
+          .declareVariable("str", Integer.class)
+          .initializeWith(ObjectBuilder.newInstanceOf(String.class).withParameters("abc"));
       fail("Expected InvalidTypeException");
-    } catch (InvalidTypeException ive) {
+    }
+    catch (InvalidTypeException ive) {
       // expected
     }
 
     try {
       ContextBuilder.create()
-              .declareVariable("str", String.class)
-              .initializeWith(ObjectBuilder.newInstanceOf(Object.class));
+          .declareVariable("str", String.class)
+          .initializeWith(ObjectBuilder.newInstanceOf(Object.class));
       fail("Expected InvalidTypeException");
-    } catch (InvalidTypeException ive) {
+    }
+    catch (InvalidTypeException ive) {
       // expected
     }
   }
@@ -150,7 +153,8 @@ public class ContextBuilderTest extends AbstractStatementBuilderTest {
     try {
       ctx = ContextBuilder.create().addVariable("n", Integer.class, "abc").getContext();
       fail("Expected InvalidTypeException");
-    } catch (InvalidTypeException ive) {
+    }
+    catch (InvalidTypeException ive) {
       //expected
       assertTrue(ive.getCause() instanceof NumberFormatException);
     }
@@ -159,7 +163,7 @@ public class ContextBuilderTest extends AbstractStatementBuilderTest {
   @Test
   public void testAddVariableWithObjectInitialization() {
     Context ctx = ContextBuilder.create().addVariable("str", String.class,
-            ObjectBuilder.newInstanceOf(String.class)).getContext();
+        ObjectBuilder.newInstanceOf(String.class)).getContext();
 
     VariableReference str = ctx.getVariable("str");
     assertEquals("Wrong variable name", "str", str.getName());

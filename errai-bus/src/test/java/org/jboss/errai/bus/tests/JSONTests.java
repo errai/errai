@@ -72,15 +72,16 @@ public class JSONTests extends TestCase {
       Map<String, Object> decoded = (Map<String, Object>) JSONStreamDecoder.decode(instream);
       assertEquals(inputParts, decoded);
 
-    } catch (IOException e) {
+    }
+    catch (IOException e) {
       e.printStackTrace();
     }
   }
 
   public void testMarshalling() {
     String jsonData = "{\"SType\":{" + SerializationParts.ENCODED_TYPE + " :\"" + TType.class.getName()
-            + "\",startDate:1280250281006,fieldOne:\"One!\",active:true,endDate:1280251281006,fieldTwo:\"Two!!\"}," +
-            "\"ReplyTo\":\"ClientReceiver\",\"ToSubject\":\"TestService1\",__MarshalledTypes:\"SType\"}";
+        + "\",startDate:1280250281006,fieldOne:\"One!\",active:true,endDate:1280251281006,fieldTwo:\"Two!!\"}," +
+        "\"ReplyTo\":\"ClientReceiver\",\"ToSubject\":\"TestService1\",__MarshalledTypes:\"SType\"}";
 
     TType sType = new TType();
     sType.setActive(true);
@@ -97,14 +98,15 @@ public class JSONTests extends TestCase {
       TType sType1 = (TType) decoded.get("SType");
       assertTrue(sType.equals(sType1));
 
-    } catch (IOException e) {
+    }
+    catch (IOException e) {
       e.printStackTrace();
     }
   }
 
   public static class JavaRandomProvider implements RandomProvider {
     private static char[] CHARS = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q',
-            'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'};
+        'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'};
 
     private Random random = new Random(System.nanoTime());
 

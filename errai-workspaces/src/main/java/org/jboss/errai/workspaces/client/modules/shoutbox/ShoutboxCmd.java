@@ -19,7 +19,6 @@ package org.jboss.errai.workspaces.client.modules.shoutbox;
 /**
  * @author Heiko Braun <hbraun@redhat.com>
  */
-public enum ShoutboxCmd
-{
+public enum ShoutboxCmd {
   SUBMIT_OFFER, RETRACT_OFFER, ENGAGE_OFFER, RETIRE_OFFER
 }

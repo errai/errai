@@ -35,6 +35,6 @@ public class JSONMessageServer extends JSONMessage {
   protected void _addObjectPart(String a, Object b) {
     _sep();
     buf.append('\"').append(a).append('\"').append(':')
-            .append(JSONEncoder.encode(b));
+        .append(JSONEncoder.encode(b));
   }
 }

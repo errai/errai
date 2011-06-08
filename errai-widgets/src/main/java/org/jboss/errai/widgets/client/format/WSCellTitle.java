@@ -26,70 +26,70 @@ import org.jboss.errai.widgets.client.icons.ErraiWidgetsImageBundle;
 
 
 public class WSCellTitle extends WSCellFormatter<String> {
-    HorizontalPanel hPanel = new HorizontalPanel();
-    HTML label = new HTML();
-    Image img = new Image();
+  HorizontalPanel hPanel = new HorizontalPanel();
+  HTML label = new HTML();
+  Image img = new Image();
 
-    WSGrid.WSCell cell;
+  WSGrid.WSCell cell;
 
-    ErraiWidgetsImageBundle imageBundle = GWT.create(ErraiWidgetsImageBundle.class);
+  ErraiWidgetsImageBundle imageBundle = GWT.create(ErraiWidgetsImageBundle.class);
 
-    public WSCellTitle(WSGrid.WSCell cell, String title) {
-        this.cell = cell;
+  public WSCellTitle(WSGrid.WSCell cell, String title) {
+    this.cell = cell;
 
-        label.setHTML(title);
-        hPanel.add(label);
-        hPanel.add(img);
-        hPanel.setWidth("100%");
-        hPanel.setCellWidth(img, "16px");
+    label.setHTML(title);
+    hPanel.add(label);
+    hPanel.add(img);
+    hPanel.setWidth("100%");
+    hPanel.setCellWidth(img, "16px");
 
-        img.setVisible(false);
-        img.getElement().getStyle().setProperty("textAlign", "right");
+    img.setVisible(false);
+    img.getElement().getStyle().setProperty("textAlign", "right");
 
+  }
+
+  public void setValue(String value) {
+    label.setHTML(value);
+  }
+
+  @Override
+  public String getValue() {
+    return label.getText();
+  }
+
+  public String getTextValue() {
+    return label.getHTML();
+  }
+
+  public Widget getWidget(WSGrid wsGrid) {
+    if (wsGrid.getSortedColumnHeader() == cell) {
+
+      if (wsGrid.getColumnSortOrder(cell.getCol()))
+        img.setResource(imageBundle.sortDown());
+      else
+        img.setResource(imageBundle.sortUp());
+
+      img.setVisible(true);
+    }
+    else {
+      img.setVisible(false);
     }
 
-    public void setValue(String value) {
-        label.setHTML(value);
-    }
+    return hPanel;
+  }
 
-    @Override
-    public String getValue() {
-        return label.getText();
-    }
+  @Override
+  public void setHeight(String height) {
+  }
 
-    public String getTextValue() {
-        return label.getHTML();
-    }
+  @Override
+  public void setWidth(String width) {
+  }
 
-    public Widget getWidget(WSGrid wsGrid) {
-        if (wsGrid.getSortedColumnHeader() == cell) {
+  public boolean edit(WSGrid.WSCell element) {
+    return false;
+  }
 
-            if (wsGrid.getColumnSortOrder(cell.getCol()))
-                img.setResource(imageBundle.sortDown());
-            else
-                img.setResource(imageBundle.sortUp());
-
-            img.setVisible(true);
-        }
-        else {
-            img.setVisible(false);
-        }
-
-        return hPanel;
-    }
-
-    @Override
-    public void setHeight(String height) {
-    }
-
-    @Override
-    public void setWidth(String width) {
-    }
-
-    public boolean edit(WSGrid.WSCell element) {
-        return false;
-    }
-
-    public void stopedit() {
-    }
+  public void stopedit() {
+  }
 }

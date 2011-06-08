@@ -22,8 +22,8 @@ package org.jboss.errai.workspaces.client.modules;
  * Initialization of a module (i.e. registering message callbacks)
  * should be done in the {@link #start()} method.
  */
-public interface Module
-{
+public interface Module {
   void start();
+
   void stop();
 }

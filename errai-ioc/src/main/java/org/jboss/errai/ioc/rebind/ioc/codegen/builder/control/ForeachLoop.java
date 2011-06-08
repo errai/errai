@@ -42,9 +42,9 @@ public class ForeachLoop extends AbstractStatement {
     StringBuilder buf = new StringBuilder();
 
     buf.append("for (").append(loopVar.getType().getFullyQualifedName()).append(" ").append(loopVar.getName())
-            .append(" : ").append(collectionExpr).append(") {")
-            .append("\n\t").append(body.generate(context).replaceAll("\n", "\n\t"))
-            .append("\n}");
+        .append(" : ").append(collectionExpr).append(") {")
+        .append("\n\t").append(body.generate(context).replaceAll("\n", "\n\t"))
+        .append("\n}");
 
     return buf.toString();
   }

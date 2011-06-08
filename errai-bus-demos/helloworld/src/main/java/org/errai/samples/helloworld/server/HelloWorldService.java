@@ -9,8 +9,8 @@ import org.jboss.errai.bus.server.annotations.Service;
 public class HelloWorldService implements MessageCallback {
   public void callback(Message message) {
     MessageBuilder.createConversation(message)
-            .subjectProvided()
-            .withValue("Hello, World!")
-            .done().reply();
+        .subjectProvided()
+        .withValue("Hello, World!")
+        .done().reply();
   }
 }

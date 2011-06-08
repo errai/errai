@@ -48,17 +48,21 @@ public class JSONEncoder {
   private static String _encode(Object v, EncodingContext ctx) {
     if (v == null) {
       return "null";
-    } else if (v instanceof String) {
+    }
+    else if (v instanceof String) {
       return "\"" + ((String) v).replaceAll("\"", "\\\\\"") + "\"";
     }
     if (v instanceof Number || v instanceof Boolean) {
       return String.valueOf(v);
-    } else if (v instanceof Collection) {
+    }
+    else if (v instanceof Collection) {
       return encodeCollection((Collection) v, ctx);
-    } else if (v instanceof Map) {
+    }
+    else if (v instanceof Map) {
       //noinspection unchecked
       return encodeMap((Map) v, ctx);
-    } else if (v.getClass().isArray()) {
+    }
+    else if (v.getClass().isArray()) {
       return encodeArray(v, ctx);
 
       // CDI Integration: Loading entities after the service was initialized
@@ -69,9 +73,11 @@ public class JSONEncoder {
             return encodeObject(v);
         } else {
             throw new RuntimeException("cannot serialize type: " + v.getClass().getName());
-        }  */ else if (v instanceof Enum) {
+        }  */
+    else if (v instanceof Enum) {
       return encodeEnum((Enum) v, ctx);
-    } else {
+    }
+    else {
       return encodeObject(v, ctx);
     }
   }
@@ -112,7 +118,7 @@ public class JSONEncoder {
         int i = 0;
         for (Field f : fields) {
           if ((f.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
-                  || f.isSynthetic()) {
+              || f.isSynthetic()) {
             continue;
           }
           s[i++] = MVEL.compileExpression(f.getName());
@@ -128,9 +134,10 @@ public class JSONEncoder {
       if (first) build.append(',');
 
       if ((field.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
-              || field.isSynthetic()) {
+          || field.isSynthetic()) {
         continue;
-      } else if (!first) {
+      }
+      else if (!first) {
         build.append(',');
       }
 
@@ -138,7 +145,8 @@ public class JSONEncoder {
         Object v = MVEL.executeExpression(s[i++], o);
         build.append(write(ctx, '\"')).append(field.getName()).append(write(ctx, '\"')).append(':').append(_encode(v, ctx));
         first = false;
-      } catch (Throwable t) {
+      }
+      catch (Throwable t) {
         System.out.println("failed at encoding: " + field.getName());
         t.printStackTrace();
       }
@@ -167,11 +175,12 @@ public class JSONEncoder {
         ctx.unsetEscapeMode();
         mapBuild.append(write(ctx, '\"'));
         mapBuild.append(":")
-                .append(val);
+            .append(val);
 
-      } else {
+      }
+      else {
         mapBuild.append(_encode(entry.getKey(), ctx))
-                .append(':').append(val);
+            .append(':').append(val);
       }
 
       first = false;
@@ -206,7 +215,8 @@ public class JSONEncoder {
     String s = "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + enumer.getClass().getName() + "\", \"EnumStringValue\":\"" + enumer.name() + "\"}";
     if (ctx.isEscapeMode()) {
       return s.replaceAll("\"", "\\\\\"");
-    } else {
+    }
+    else {
       return s;
     }
   }
@@ -243,7 +253,8 @@ public class JSONEncoder {
   private static String write(EncodingContext ctx, String s) {
     if (ctx.isEscapeMode()) {
       return s.replaceAll("\"", "\\\\\"");
-    } else {
+    }
+    else {
       return s;
     }
   }
@@ -251,7 +262,8 @@ public class JSONEncoder {
   private static String write(EncodingContext ctx, char s) {
     if (ctx.isEscapeMode() && s == '\"') {
       return "\\\\\"";
-    } else {
+    }
+    else {
       return String.valueOf(s);
     }
   }

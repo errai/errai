@@ -31,28 +31,22 @@ import java.util.List;
  */
 
 
-public class ShoutboxModule implements Module
-{
+public class ShoutboxModule implements Module {
   public static final String INBOX = "errai.shoutbox.inbox";
-  
+
   private final MessageBus bus = ErraiBus.get();
 
   private List<Offer> offers = new ArrayList<Offer>();
 
 
-
-  public void start()
-  {
-      // listen for control messages
+  public void start() {
+    // listen for control messages
     bus.subscribe(INBOX,
-        new MessageCallback()
-        {
-          public void callback(Message message)
-          {
-            System.out.println("Shoutbox service: "+ message.getCommandType());
+        new MessageCallback() {
+          public void callback(Message message) {
+            System.out.println("Shoutbox service: " + message.getCommandType());
 
-            switch (ShoutboxCmd.valueOf(message.getCommandType()))
-            {
+            switch (ShoutboxCmd.valueOf(message.getCommandType())) {
               case SUBMIT_OFFER:
                 handleSubmitOffer(message);
                 break;
@@ -66,7 +60,7 @@ public class ShoutboxModule implements Module
                 handleRetireOffer(message);
                 break;
               default:
-                throw new IllegalArgumentException("Unknown command " +message.getCommandType());
+                throw new IllegalArgumentException("Unknown command " + message.getCommandType());
             }
 
             // validate/match all offers
@@ -74,9 +68,8 @@ public class ShoutboxModule implements Module
 
             int before = offers.size();
 
-            for(Offer o : offers)
-            {
-              if(!o.hasClients() && o.getProvider() == null)
+            for (Offer o : offers) {
+              if (!o.hasClients() && o.getProvider() == null)
                 toBeRemoved.add(o.getSubject());
 
               o.match();
@@ -84,69 +77,62 @@ public class ShoutboxModule implements Module
             }
 
             // cleanup
-            for(String s : toBeRemoved)
-            {
+            for (String s : toBeRemoved) {
               Offer o = containsOffer(s);
               offers.remove(o);
             }
 
-            System.out.println("Offers:  " +before+"/"+offers.size());
+            System.out.println("Offers:  " + before + "/" + offers.size());
           }
         }
     );
   }
 
 
-  public void stop()
-  {
-    
+  public void stop() {
+
   }
 
   /**
    * provider submits an offer
    */
-  private void handleSubmitOffer(Message message)
-  {
+  private void handleSubmitOffer(Message message) {
     String subjectMatter = message.get(String.class, ShoutboxCmdParts.SUBJECT);
     Offer offer = containsOffer(subjectMatter);
 
-    if(null==offer)
-    {
+    if (null == offer) {
       offer = new Offer(subjectMatter, Offer.State.OPEN);
       offers.add(offer);
     }
 
     // update/set provider
-    if(offer.getProvider()==null)
+    if (offer.getProvider() == null)
       offer.setProvider(message.get(String.class, ShoutboxCmdParts.PROVIDER));
-    
+
   }
 
   /**
-   * provider retracts an offer   
+   * provider retracts an offer
    */
-  private void handleRetractOffer(Message message)
-  {
+  private void handleRetractOffer(Message message) {
     String subjectMatter = message.get(String.class, ShoutboxCmdParts.SUBJECT);
     Offer offer = containsOffer(subjectMatter);
 
-    if(offer!=null)
-    {
+    if (offer != null) {
       offer.setProvider(null);
-    }  
+    }
   }
 
   /**
-   * client engages an offer   
+   * client engages an offer
    */
-  private void handleEngageOffer(Message message)
-  {
+  private void handleEngageOffer(Message message) {
     String subjectMatter = message.get(String.class, ShoutboxCmdParts.SUBJECT);
     String client = message.get(String.class, ShoutboxCmdParts.CLIENT);
 
     Offer offer = containsOffer(subjectMatter);
 
-    if(null==offer) // create a pending offer
+    if (null == offer) // create a pending offer
     {
       offer = new Offer(subjectMatter, Offer.State.PENDING);
       offers.add(offer);
@@ -158,29 +144,24 @@ public class ShoutboxModule implements Module
   }
 
   /**
-   * client retires an offer   
+   * client retires an offer
    */
-  private void handleRetireOffer(Message message)
-  {
+  private void handleRetireOffer(Message message) {
     String subjectMatter = message.get(String.class, ShoutboxCmdParts.SUBJECT);
     String client = message.get(String.class, ShoutboxCmdParts.CLIENT);
 
     Offer offer = containsOffer(subjectMatter);
 
-    if(offer!=null)
-    {
+    if (offer != null) {
       offer.removeClient(client);
-    }    
+    }
   }
 
-  private Offer containsOffer(String subjectMatter)
-  {
+  private Offer containsOffer(String subjectMatter) {
     Offer match = null;
-    for(Offer o : offers)
-    {
-      if(subjectMatter.equals(o.getSubject()))
-      {
-        match=o;
+    for (Offer o : offers) {
+      if (subjectMatter.equals(o.getSubject())) {
+        match = o;
         break;
       }
     }

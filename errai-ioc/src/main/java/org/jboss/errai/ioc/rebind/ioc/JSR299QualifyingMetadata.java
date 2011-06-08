@@ -43,10 +43,10 @@ public class JSR299QualifyingMetadata implements QualifyingMetadata {
       JSR299QualifyingMetadata comparable = (JSR299QualifyingMetadata) metadata;
 
       return ((comparable.qualifiers.size() == 1
-              && comparable.qualifiers.contains(ANY_INSTANCE))
-              || qualifiers.size() == 1
-              && qualifiers.contains(ANY_INSTANCE)
-              || comparable.qualifiers.containsAll(qualifiers));
+          && comparable.qualifiers.contains(ANY_INSTANCE))
+          || qualifiers.size() == 1
+          && qualifiers.contains(ANY_INSTANCE)
+          || comparable.qualifiers.containsAll(qualifiers));
     }
     return false;
   }
@@ -67,6 +67,6 @@ public class JSR299QualifyingMetadata implements QualifyingMetadata {
 
   public static JSR299QualifyingMetadata createDefaultQualifyingMetaData() {
     return new JSR299QualifyingMetadata(
-            Collections.<Annotation>singleton(ANY_INSTANCE));
+        Collections.<Annotation>singleton(ANY_INSTANCE));
   }
 }

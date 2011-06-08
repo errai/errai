@@ -20,23 +20,23 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import org.jboss.errai.widgets.client.WSGrid;
 
 public class CellChangeEvent extends ChangeEvent {
-    private WSGrid.WSCell cell;
-    private Object newValue;
+  private WSGrid.WSCell cell;
+  private Object newValue;
 
-    public CellChangeEvent(WSGrid.WSCell cell, Object newValue) {
-        this.cell = cell;
-        this.newValue = newValue;
-    }
+  public CellChangeEvent(WSGrid.WSCell cell, Object newValue) {
+    this.cell = cell;
+    this.newValue = newValue;
+  }
 
-    public WSGrid.WSCell getCell() {
-        return cell;
-    }
+  public WSGrid.WSCell getCell() {
+    return cell;
+  }
 
-    public Object getNewValue() {
-        return newValue;
-    }
+  public Object getNewValue() {
+    return newValue;
+  }
 
-    public Object getOldValue() {
-        return cell.getCellFormat().getValue();
-    }
+  public Object getOldValue() {
+    return cell.getCellFormat().getValue();
+  }
 }

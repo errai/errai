@@ -20,8 +20,7 @@ import java.lang.annotation.RetentionPolicy;
 
 
 @Retention(RetentionPolicy.RUNTIME)
-public @interface DefaultBundle
-{
+public @interface DefaultBundle {
   /* Default bundle class name (FQN)*/
   Class value();
 }

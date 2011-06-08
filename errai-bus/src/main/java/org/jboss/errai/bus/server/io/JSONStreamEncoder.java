@@ -54,7 +54,8 @@ public class JSONStreamEncoder {
     if (v == null) {
       outstream.write(NULL_BYTES);
       return;
-    } else if (v instanceof String) {
+    }
+    else if (v instanceof String) {
       outstream.write('\"');
       outstream.write(((String) v).replaceAll("\"", "\\\\\"").getBytes());
       outstream.write('\"');
@@ -62,12 +63,15 @@ public class JSONStreamEncoder {
     }
     if (v instanceof Number || v instanceof Boolean) {
       outstream.write(String.valueOf(v).getBytes());
-    } else if (v instanceof Collection) {
+    }
+    else if (v instanceof Collection) {
       encodeCollection((Collection) v, outstream, ctx);
-    } else if (v instanceof Map) {
+    }
+    else if (v instanceof Map) {
       //noinspection unchecked
       encodeMap((Map) v, outstream, ctx);
-    } else if (v.getClass().isArray()) {
+    }
+    else if (v.getClass().isArray()) {
       encodeArray(v, outstream, ctx);
 
       // CDI Integration: Loading entities after the service was initialized
@@ -78,9 +82,11 @@ public class JSONStreamEncoder {
             return encodeObject(v);
         } else {
             throw new RuntimeException("cannot serialize type: " + v.getClass().getName());
-        }  */ else if (v instanceof Enum) {
+        }  */
+    else if (v instanceof Enum) {
       encodeEnum((Enum) v, outstream, ctx);
-    } else {
+    }
+    else {
       encodeObject(v, outstream, ctx);
     }
   }
@@ -139,7 +145,7 @@ public class JSONStreamEncoder {
         int i = 0;
         for (Field f : fields) {
           if ((f.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
-                  || f.isSynthetic()) {
+              || f.isSynthetic()) {
             continue;
           }
           s[i++] = MVEL.compileExpression(f.getName());
@@ -153,9 +159,10 @@ public class JSONStreamEncoder {
     for (Field field : fields) {
 
       if ((field.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
-              || field.isSynthetic()) {
+          || field.isSynthetic()) {
         continue;
-      } else if (!first) {
+      }
+      else if (!first) {
         outstream.write(',');
       }
 
@@ -188,7 +195,8 @@ public class JSONStreamEncoder {
         _encode(entry.getKey(), outstream, ctx);
         ctx.unsetEscapeMode();
         write(outstream, ctx, '\"');
-      } else {
+      }
+      else {
         _encode(entry.getKey(), outstream, ctx);
       }
 
@@ -265,7 +273,8 @@ public class JSONStreamEncoder {
   private static void write(OutputStream stream, EncodingContext ctx, String s) throws IOException {
     if (ctx.isEscapeMode()) {
       stream.write(s.replaceAll("\"", "\\\\\"").getBytes());
-    } else {
+    }
+    else {
       stream.write(s.getBytes());
     }
   }
@@ -274,7 +283,8 @@ public class JSONStreamEncoder {
     if (ctx.isEscapeMode() && s == '\"') {
       stream.write("\\\\\"".getBytes());
 
-    } else {
+    }
+    else {
       stream.write(s);
     }
   }

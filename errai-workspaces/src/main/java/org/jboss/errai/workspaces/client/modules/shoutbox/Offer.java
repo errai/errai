@@ -39,162 +39,166 @@ import static org.jboss.errai.bus.client.api.base.MessageBuilder.createMessage;
  */
 class Offer {
 
-    public enum State {
-        PENDING, OPEN, USED
+  public enum State {
+    PENDING, OPEN, USED
+  }
+
+  private State currentState;
+  private String subject;
+
+  private String provider;
+  private List<String> matchedClients = new ArrayList<String>();
+  private List<String> pendingClients = new ArrayList<String>();
+
+  private final MessageBus bus = ErraiBus.get();
+
+  public Offer(String subject, State initialState) {
+    this.subject = subject;
+    this.currentState = initialState;
+  }
+
+  public boolean hasClients() {
+    return pendingClients.size() > 0 || matchedClients.size() > 0;
+  }
+
+  public String getSubject() {
+    return subject;
+  }
+
+  public String getProvider() {
+    return provider;
+  }
+
+  public void setProvider(String provider) {
+    this.provider = provider;
+  }
+
+  public void addClient(String client) {
+    this.pendingClients.add(client);
+  }
+
+  public void removeClient(String client) {
+    this.matchedClients.remove(client);
+  }
+
+  private void transitionTo(State nextState) {
+    if (currentState == nextState)
+      return; // ignore
+
+    switch (currentState) {
+      case PENDING:
+        leavePending(nextState);
+        break;
+      case OPEN:
+        leaveOpen(nextState);
+        break;
+      case USED:
+        leaveUsed(nextState);
+        break;
     }
 
-    private State currentState;
-    private String subject;
+    currentState = nextState;
+  }
 
-    private String provider;
-    private List<String> matchedClients = new ArrayList<String>();
-    private List<String> pendingClients = new ArrayList<String>();
+  /**
+   * PENDING can only transition to USED.
+   */
+  private void leavePending(State nextState) {
+    assert provider != null;
 
-    private final MessageBus bus = ErraiBus.get();
+    if (State.USED == nextState) {
+      notifyPendingClients();
+    }
+    else {
+      throw new IllegalTransition(nextState);
+    }
+  }
 
-    public Offer(String subject, State initialState) {
-        this.subject = subject;
-        this.currentState = initialState;
+  /**
+   * OPEN can only transition to USED
+   */
+  private void leaveOpen(State nextState) {
+    assert provider != null;
+
+    if (State.USED == nextState) {
+      notifyPendingClients();
+    }
+    else {
+      throw new IllegalTransition(nextState);
+    }
+  }
+
+  /**
+   * USED can transition either to OPEN (clients left)
+   * or PENDING (provider left).
+   *
+   * @param nextState
+   */
+  private void leaveUsed(State nextState) {
+    if (State.OPEN == nextState) {
+      // ignore for now, we don't need to notify providers
+    }
+    else if (State.PENDING == nextState) {
+      createMessage()
+          .toSubject(subject)
+          .command(ShoutboxCmd.RETRACT_OFFER)
+          .with(ShoutboxCmdParts.SUBJECT, subject)
+          .with(ShoutboxCmdParts.PROVIDER, provider)
+          .noErrorHandling()
+          .sendNowWith(bus);
+
+      pendingClients.addAll(matchedClients);
+      matchedClients.clear();
+    }
+    else {
+      throw new IllegalTransition(nextState);
+    }
+  }
+
+  public void match() {
+    System.out.println("< " + toString());
+
+    switch (currentState) {
+      case OPEN:
+        if (pendingClients.size() > 0) transitionTo(State.USED);
+        break;
+      case PENDING:
+        if (provider != null) transitionTo(State.USED);
+        break;
+      case USED:
+        if (pendingClients.size() > 0) notifyPendingClients();
+        else if (null == provider) transitionTo(State.PENDING);
     }
 
-    public boolean hasClients() {
-        return pendingClients.size() > 0 || matchedClients.size() > 0;
+    System.out.println("> " + toString());
+  }
+
+  private void notifyPendingClients() {
+    MessageBuilder.createMessage()
+        .toSubject(subject)
+        .command(ShoutboxCmd.SUBMIT_OFFER)
+        .with(ShoutboxCmdParts.SUBJECT, subject)
+        .with(ShoutboxCmdParts.PROVIDER, provider)
+        .noErrorHandling().sendNowWith(bus);
+
+    matchedClients.addAll(pendingClients);
+    pendingClients.clear();
+  }
+
+  public class IllegalTransition extends IllegalArgumentException {
+    public IllegalTransition(State next) {
+      super("Illegal transition from " + currentState + " to " + next);
     }
-
-    public String getSubject() {
-        return subject;
-    }
-
-    public String getProvider() {
-        return provider;
-    }
-
-    public void setProvider(String provider) {
-        this.provider = provider;
-    }
-
-    public void addClient(String client) {
-        this.pendingClients.add(client);
-    }
-
-    public void removeClient(String client) {
-        this.matchedClients.remove(client);
-    }
-
-    private void transitionTo(State nextState) {
-        if (currentState == nextState)
-            return; // ignore
-
-        switch (currentState) {
-            case PENDING:
-                leavePending(nextState);
-                break;
-            case OPEN:
-                leaveOpen(nextState);
-                break;
-            case USED:
-                leaveUsed(nextState);
-                break;
-        }
-
-        currentState = nextState;
-    }
-
-    /**
-     * PENDING can only transition to USED.
-     */
-    private void leavePending(State nextState) {
-        assert provider != null;
-
-        if (State.USED == nextState) {
-            notifyPendingClients();
-        } else {
-            throw new IllegalTransition(nextState);
-        }
-    }
-
-    /**
-     * OPEN can only transition to USED
-     */
-    private void leaveOpen(State nextState) {
-        assert provider != null;
-
-        if (State.USED == nextState) {
-            notifyPendingClients();
-        } else {
-            throw new IllegalTransition(nextState);
-        }
-    }
-
-    /**
-     * USED can transition either to OPEN (clients left)
-     * or PENDING (provider left).
-     *
-     * @param nextState
-     */
-    private void leaveUsed(State nextState) {
-        if (State.OPEN == nextState) {
-            // ignore for now, we don't need to notify providers
-        } else if (State.PENDING == nextState) {
-            createMessage()
-                    .toSubject(subject)
-                    .command(ShoutboxCmd.RETRACT_OFFER)
-                    .with(ShoutboxCmdParts.SUBJECT, subject)
-                    .with(ShoutboxCmdParts.PROVIDER, provider)
-                    .noErrorHandling()
-                    .sendNowWith(bus);
-
-            pendingClients.addAll(matchedClients);
-            matchedClients.clear();
-        } else {
-            throw new IllegalTransition(nextState);
-        }
-    }
-
-    public void match() {
-        System.out.println("< " + toString());
-
-        switch (currentState) {
-            case OPEN:
-                if (pendingClients.size() > 0) transitionTo(State.USED);
-                break;
-            case PENDING:
-                if (provider != null) transitionTo(State.USED);
-                break;
-            case USED:
-                if (pendingClients.size() > 0) notifyPendingClients();
-                else if (null == provider) transitionTo(State.PENDING);
-        }
-
-        System.out.println("> " + toString());
-    }
-
-    private void notifyPendingClients() {
-        MessageBuilder.createMessage()
-                .toSubject(subject)
-                .command(ShoutboxCmd.SUBMIT_OFFER)
-                .with(ShoutboxCmdParts.SUBJECT, subject)
-                .with(ShoutboxCmdParts.PROVIDER, provider)
-                .noErrorHandling().sendNowWith(bus);
-
-        matchedClients.addAll(pendingClients);
-        pendingClients.clear();
-    }
-
-    public class IllegalTransition extends IllegalArgumentException {
-        public IllegalTransition(State next) {
-            super("Illegal transition from " + currentState + " to " + next);
-        }
-    }
+  }
 
 
-    public String toString() {
-        return "Offer{" +
-                "currentState=" + currentState +
-                ", subject='" + subject + '\'' +
-                ", provider='" + provider + '\'' +
-                ", mc='" + matchedClients.size() + '\'' +
-                ", pc='" + pendingClients.size() + '\'' +
-                '}';
-    }
+  public String toString() {
+    return "Offer{" +
+        "currentState=" + currentState +
+        ", subject='" + subject + '\'' +
+        ", provider='" + provider + '\'' +
+        ", mc='" + matchedClients.size() + '\'' +
+        ", pc='" + pendingClients.size() + '\'' +
+        '}';
+  }
 }

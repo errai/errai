@@ -80,7 +80,7 @@ public class LoadExtensions implements BootstrapExecution {
         if (ErraiConfigExtension.class.isAssignableFrom(loadClass)) {
           // We have an annotated ErraiConfigExtension.  So let's configure it.
           final Class<? extends ErraiConfigExtension> clazz =
-                  loadClass.asSubclass(ErraiConfigExtension.class);
+              loadClass.asSubclass(ErraiConfigExtension.class);
 
 
           log.info("found extension " + clazz.getName());
@@ -103,19 +103,21 @@ public class LoadExtensions implements BootstrapExecution {
                   }
                 };
                 Guice.createInjector(module)
-                        .getInstance(ErraiConfigExtension.class)
-                        .configure(erraiConfig);
+                    .getInstance(ErraiConfigExtension.class)
+                    .configure(erraiConfig);
               }
             };
 
             try {
               create.run();
-            } catch (CreationException e) {
+            }
+            catch (CreationException e) {
               log.info("extension " + clazz.getName() + " cannot be bound yet, deferring ...");
               context.defer(create);
             }
 
-          } catch (Throwable e) {
+          }
+          catch (Throwable e) {
             throw new ErraiBootstrapFailure("could not initialize extension: " + loadClass.getName(), e);
           }
         }
@@ -127,7 +129,8 @@ public class LoadExtensions implements BootstrapExecution {
 
       log.info("total extension binding: " + config.getExtensionBindings().keySet().size());
 
-    } else {
+    }
+    else {
       log.info("auto-loading of extensions disabled.");
     }
   }

@@ -23,27 +23,27 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import java.util.List;
 
 public interface FieldMapperGenerator {
-    public String generateFieldMapperGenerator(
-            TypeOracle oracle,
-            JField targetWidgetField,
-            JType targetType,
-            JField targetEntityMember,
-            JField targetEntityField);
+  public String generateFieldMapperGenerator(
+      TypeOracle oracle,
+      JField targetWidgetField,
+      JType targetType,
+      JField targetEntityMember,
+      JField targetEntityField);
 
-    public String generateValueExtractorStatement(
-            TypeOracle oracle,
-            JField targetWidgetField,
-            JType targetType,
-            JField targetEntityMember,
-            JField targetEntityField);
+  public String generateValueExtractorStatement(
+      TypeOracle oracle,
+      JField targetWidgetField,
+      JType targetType,
+      JField targetEntityMember,
+      JField targetEntityField);
 
-    public String init(
-            TypeOracle oracle,
-            JField targetWidgetField,
-            JType targetType,
-            JField targetEntityMember,
-            JField targetEntityField,
-            String variable,
-            List<JField> fields);
+  public String init(
+      TypeOracle oracle,
+      JField targetWidgetField,
+      JType targetType,
+      JField targetEntityMember,
+      JField targetEntityField,
+      String variable,
+      List<JField> fields);
 
 }

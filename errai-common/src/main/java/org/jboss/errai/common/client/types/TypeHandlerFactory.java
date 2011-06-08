@@ -23,7 +23,7 @@ import java.util.*;
 
 public class TypeHandlerFactory {
   private static Map<Class, Map<Class, TypeHandler>> handlers =
-          new HashMap<Class, Map<Class, TypeHandler>>();
+      new HashMap<Class, Map<Class, TypeHandler>>();
 
   private static Map<Class, Class> inheritanceMap = new HashMap<Class, Class>();
 
@@ -119,7 +119,8 @@ public class TypeHandlerFactory {
            */
           addHandler(from, to, th);
           return val;
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
           /**
            * Definitely not an enum, so do nothing.
            */
@@ -143,7 +144,8 @@ public class TypeHandlerFactory {
       Map<Class, Boolean> assignableTable = assignableCache.get(from);
       if (assignableTable != null) {
         return assignableTable.get(to);
-      } else {
+      }
+      else {
         return null;
       }
     }

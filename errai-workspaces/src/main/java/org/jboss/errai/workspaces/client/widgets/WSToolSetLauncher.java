@@ -40,25 +40,22 @@ import org.jboss.errai.workspaces.client.protocols.LayoutParts;
 /**
  * A simple dock area to list and provide links to different tools.
  */
-public class WSToolSetLauncher extends LayoutPanel
-{
+public class WSToolSetLauncher extends LayoutPanel {
 
   ErraiImageBundle erraiImageBundle = GWT.create(ErraiImageBundle.class);
 
   private String toolSetId = null;
 
-  public WSToolSetLauncher(String id, final ToolSet toolSet)
-  {
+  public WSToolSetLauncher(String id, final ToolSet toolSet) {
     super(new BoxLayout(BoxLayout.Orientation.VERTICAL));
     setPadding(3);
 
 
-     // widget, if available
+    // widget, if available
     Widget w = toolSet.getWidget();
     this.toolSetId = id;
 
-    if (w != null)
-    {
+    if (w != null) {
       w.getElement().setId(toolSetId);
       this.add(w, new BoxLayoutData(BoxLayoutData.FillStyle.BOTH));
     }
@@ -72,8 +69,7 @@ public class WSToolSetLauncher extends LayoutPanel
 
   }
 
-  public void addLink(final String name, final Tool tool)
-  {
+  public void addLink(final String name, final Tool tool) {
     ResourceFactory resourceFactory = GWT.create(ResourceFactory.class);
     ErraiImageBundle erraiImageBundle = GWT.create(ErraiImageBundle.class);
     ImageResource resource = resourceFactory.createImage(tool.getName()) != null ?
@@ -81,11 +77,9 @@ public class WSToolSetLauncher extends LayoutPanel
 
     WSLaunchButton button = new WSLaunchButton(resource, name);
     button.addClickListener(
-        new ClickHandler()
-        {          
-          public void onClick(ClickEvent clickEvent)
-          {
-            Log.debug("ToolID: "+ tool.getId());
+        new ClickHandler() {
+          public void onClick(ClickEvent clickEvent) {
+            Log.debug("ToolID: " + tool.getId());
 
             MessageBuilder.createMessage()
                 .toSubject(Workspace.SUBJECT)

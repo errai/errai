@@ -79,7 +79,8 @@ public class JAASAdapter implements AuthenticationAdapter {
           for (Callback cb : callbacks) {
             if (password != null && cb instanceof PasswordCallback) {
               ((PasswordCallback) cb).setPassword(password.toCharArray());
-            } else if (name != null && cb instanceof NameCallback) {
+            }
+            else if (name != null && cb instanceof NameCallback) {
               ((NameCallback) cb).setName(name);
             }
           }
@@ -109,10 +110,10 @@ public class JAASAdapter implements AuthenticationAdapter {
        * been performed.
        */
       Message successfulMsg = MessageBuilder.createConversation(message)
-              .subjectProvided()
-              .command(SecurityCommands.SuccessfulAuth)
-              .with(SecurityParts.Roles, authSubject.toRolesString())
-              .with(SecurityParts.Name, name).getMessage();
+          .subjectProvided()
+          .command(SecurityCommands.SuccessfulAuth)
+          .with(SecurityParts.Roles, authSubject.toRolesString())
+          .with(SecurityParts.Name, name).getMessage();
 
       try {
         // TODO: Still used? Take a look at MetaDataScanner.getProperties() instead
@@ -125,7 +126,8 @@ public class JAASAdapter implements AuthenticationAdapter {
         if (motdText != null) {
           successfulMsg.set(MessageParts.MessageText, motdText);
         }
-      } catch (Exception e) {
+      }
+      catch (Exception e) {
         // do nothing.
       }
 
@@ -133,19 +135,21 @@ public class JAASAdapter implements AuthenticationAdapter {
        * Transmit the message back to the client.
        */
       successfulMsg.sendNowWith(bus);
-    } catch (LoginException e) {
+    }
+    catch (LoginException e) {
       /**
        * The login failed. How upsetting. Life must go on, and we must inform the client of the
        * unfortunate news.
        */
       MessageBuilder.createConversation(message)
-              .subjectProvided()
-              .command(SecurityCommands.FailedAuth)
-              .with(SecurityParts.Name, name)
-              .noErrorHandling().sendNowWith(bus);
+          .subjectProvided()
+          .command(SecurityCommands.FailedAuth)
+          .with(SecurityParts.Name, name)
+          .noErrorHandling().sendNowWith(bus);
 
       throw new AuthenticationFailedException(e.getMessage(), e);
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       e.printStackTrace();
     }
   }
@@ -166,7 +170,8 @@ public class JAASAdapter implements AuthenticationAdapter {
       getAuthDescriptor(message).remove(new SimpleRole(CredentialTypes.Authenticated.name()));
       message.getResource(QueueSession.class, "Session").removeAttribute(ErraiService.SESSION_AUTH_DATA);
       return true;
-    } else {
+    }
+    else {
       return false;
     }
   }

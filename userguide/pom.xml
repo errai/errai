@@ -11,7 +11,8 @@
 
 <!-- $Id: pom.xml 2693 2008-10-31 09:12:32Z tom.baeyens@jboss.com $ -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -93,7 +94,7 @@
                             <tasks>
 
                                 <copy todir="${project.build.directory}/docbook/publish/en/html_single/">
-                                    <fileset dir="${basedir}/src/js" includes="*.js" />
+                                    <fileset dir="${basedir}/src/js" includes="*.js"/>
                                 </copy>
 
                             </tasks>

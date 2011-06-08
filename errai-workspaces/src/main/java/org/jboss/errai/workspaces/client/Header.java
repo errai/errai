@@ -43,22 +43,18 @@ import java.util.Set;
 /**
  * Top header
  */
-public class Header extends LayoutPanel
-{
+public class Header extends LayoutPanel {
   private HTML username = new HTML("Unknown user");
   private Date loginDate;
 
-  public Header()
-  {
+  public Header() {
     super(new BoxLayout(BoxLayout.Orientation.HORIZONTAL));
     //this.setStyleName("bpm-header");
 
     createInfoPanel();
 
-    ErraiBus.get().subscribe("appContext.login", new MessageCallback()
-    {      
-      public void callback(Message message)
-      {
+    ErraiBus.get().subscribe("appContext.login", new MessageCallback() {
+      public void callback(Message message) {
         AuthenticationContext authContext =
             Registry.get(SecurityService.class).getAuthenticationContext();
         String userName = authContext.getName() != "" ?
@@ -69,9 +65,8 @@ public class Header extends LayoutPanel
       }
     });
   }
-  
-  private void createInfoPanel()
-  {
+
+  private void createInfoPanel() {
 
     // ----------- logo panel
     LayoutPanel logoPanel = new LayoutPanel(new BoxLayout());
@@ -91,19 +86,16 @@ public class Header extends LayoutPanel
     ErraiImageBundle icons = GWT.create(ErraiImageBundle.class);
     Image img = new Image(icons.user());
     img.addClickHandler(
-        new ClickHandler()
-        {
+        new ClickHandler() {
 
-          public void onClick(ClickEvent clickEvent)
-          {            
+          public void onClick(ClickEvent clickEvent) {
             String sessionId = Cookies.getCookie("JSESSIONID") != null ?
-                            Cookies.getCookie("JSESSIONID") : "";
+                Cookies.getCookie("JSESSIONID") : "";
             AuthenticationContext authContext = Registry.get(SecurityService.class).getAuthenticationContext();
             Set<Role> roleSet = authContext.getRoles();
 
             StringBuffer roles = new StringBuffer();
-            for(Role r : roleSet)
-            {
+            for (Role r : roleSet) {
               roles.append(r.getRoleName()).append(" ");
             }
 
@@ -116,8 +108,8 @@ public class Header extends LayoutPanel
 
             final LayoutPopupPanel popup = new LayoutPopupPanel(true);
             popup.setPopupPosition(
-                clickEvent.getRelativeElement().getAbsoluteLeft()-120,
-                clickEvent.getRelativeElement().getAbsoluteTop()+20
+                clickEvent.getRelativeElement().getAbsoluteLeft() - 120,
+                clickEvent.getRelativeElement().getAbsoluteTop() + 20
             );
             popup.setAnimationEnabled(true);
             popup.setSize("240px", "130px");
@@ -130,11 +122,9 @@ public class Header extends LayoutPanel
     );
 
 
-    Button btn = new Button("Logout", new ClickHandler()
-    {
+    Button btn = new Button("Logout", new ClickHandler() {
 
-      public void onClick(ClickEvent clickEvent)
-      {
+      public void onClick(ClickEvent clickEvent) {
         MessageBuilder.createMessage()
             .toSubject("AuthenticationService")
             .command(SecurityCommands.EndSession)
@@ -142,7 +132,7 @@ public class Header extends LayoutPanel
       }
     }
     );
-    
+
     infoPanel.add(img);
     infoPanel.add(username);
     infoPanel.add(btn);

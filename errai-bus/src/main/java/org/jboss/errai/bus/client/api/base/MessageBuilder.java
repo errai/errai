@@ -52,7 +52,8 @@ public class MessageBuilder {
     Message newMessage = provider.get();
     if (newMessage instanceof HasEncoded) {
       return new AbstractMessageBuilder<MessageReplySendable>(new HasEncodedConvMessageWrapper(message, newMessage)).start();
-    } else {
+    }
+    else {
       return new AbstractMessageBuilder<MessageReplySendable>(new ConversationMessageWrapper(message, newMessage)).start();
     }
   }

@@ -131,7 +131,8 @@ public class WorkerFactory {
   public void deliverGlobal(Message m) throws InterruptedException {
     if (messages.offer(m, 30, java.util.concurrent.TimeUnit.SECONDS)) {
       return;
-    } else {
+    }
+    else {
       switch (saturationPolicy) {
         case CallerRuns:
           svc.getBus().sendGlobal(m);
@@ -152,7 +153,8 @@ public class WorkerFactory {
     m.setFlag(RoutingFlags.NonGlobalRouting);
     if (messages.offer(m, 30, java.util.concurrent.TimeUnit.SECONDS)) {
       return;
-    } else {
+    }
+    else {
       switch (saturationPolicy) {
         case CallerRuns:
           svc.getBus().send(m);
@@ -166,7 +168,7 @@ public class WorkerFactory {
 
   private void sendDeliveryFailure(Message m) {
     MessageDeliveryFailure mdf
-            = new MessageDeliveryFailure("could not deliver message because the outgoing queue is full");
+        = new MessageDeliveryFailure("could not deliver message because the outgoing queue is full");
 
     if (m.getErrorCallback() == null || m.getErrorCallback().error(m, mdf)) {
       ErrorHelper.sendClientError(svc.getBus(), m, mdf.getMessage(), mdf);

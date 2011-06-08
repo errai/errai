@@ -27,8 +27,8 @@ import org.jboss.errai.bus.client.api.base.MessageBuilder;
 public class SimpleMessage {
   public static void send(Message message, String msgText) {
     MessageBuilder.createConversation(message)
-            .subjectProvided()
-            .with("Message", msgText).done().reply();
+        .subjectProvided()
+        .with("Message", msgText).done().reply();
   }
 
   public static String get(Message message) {

@@ -67,7 +67,8 @@ public class HibernateAdapter implements ModelAdapter {
     Object factory;
     try {
       factory = new InitialContext().lookup(jndiName);
-    } catch (NamingException e) {
+    }
+    catch (NamingException e) {
       logger.error("Cold not lookup : " + jndiName);
       e.printStackTrace();
       return;
@@ -76,13 +77,16 @@ public class HibernateAdapter implements ModelAdapter {
     if (useJbossUtil) {
       if (usingJpa) {
         util = new HibernateJBossUtil((EntityManagerFactory) factory);
-      } else {
+      }
+      else {
         util = new HibernateJBossUtil((SessionFactory) factory);
       }
-    } else {
+    }
+    else {
       if (usingJpa) {
         util = new HibernateJpaUtil((EntityManagerFactory) factory);
-      } else {
+      }
+      else {
         util = new HibernateUtil((SessionFactory) factory);
       }
     }

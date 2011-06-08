@@ -62,18 +62,20 @@ public class ConversationalEndpointCallback implements MessageCallback {
 
     if ((parms == null && targetTypes.length != 0) || (parms.length != targetTypes.length)) {
       throw new MessageDeliveryFailure("wrong number of arguments sent to endpoint. (received: "
-              + (parms == null ? 0 : parms.length) + "; required: " + targetTypes.length + ")");
+          + (parms == null ? 0 : parms.length) + "; required: " + targetTypes.length + ")");
     }
     for (int i = 0; i < parms.length; i++) {
       if (parms[i] != null && !targetTypes[i].isAssignableFrom(parms[i].getClass())) {
         if (canConvert(targetTypes[i], parms[i].getClass())) {
           parms[i] = convert(parms[i], targetTypes[i]);
-        } else if (targetTypes[i].isArray()) {
+        }
+        else if (targetTypes[i].isArray()) {
           if (parms[i] instanceof Collection) {
             Collection c = (Collection) parms[i];
             parms[i] = c.toArray((Object[]) Array.newInstance(targetTypes[i].getComponentType(), c.size()));
 
-          } else if (parms[i].getClass().isArray()) {
+          }
+          else if (parms[i].getClass().isArray()) {
 
             int length = Array.getLength(parms[i]);
             Class toComponentType = parms[i].getClass().getComponentType();
@@ -87,7 +89,8 @@ public class ConversationalEndpointCallback implements MessageCallback {
             parms[i] = newArray;
           }
 
-        } else {
+        }
+        else {
           throw new MessageDeliveryFailure("type mismatch in method parameters");
         }
       }
@@ -95,13 +98,15 @@ public class ConversationalEndpointCallback implements MessageCallback {
 
     try {
       createConversation(message)
-              .subjectProvided()
-              .with("MethodReply", method.invoke(genericSvc, parms))
-              .noErrorHandling().sendNowWith(bus);
+          .subjectProvided()
+          .with("MethodReply", method.invoke(genericSvc, parms))
+          .noErrorHandling().sendNowWith(bus);
 
-    } catch (MessageDeliveryFailure e) {
+    }
+    catch (MessageDeliveryFailure e) {
       throw e;
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       throw new MessageDeliveryFailure("error invoking endpoint", e);
     }
   }

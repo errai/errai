@@ -41,7 +41,8 @@ public class PackagingUtil {
   private static URL toUrl(String s) {
     try {
       return new URL(s);
-    } catch (MalformedURLException e) {
+    }
+    catch (MalformedURLException e) {
       throw new RuntimeException("Invalid URL " + s, e);
     }
   }
@@ -94,11 +95,13 @@ public class PackagingUtil {
               }
             }
           }
-        } finally {
+        }
+        finally {
           zipFile.close();
         }
       }
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       throw new RuntimeException("Failed to process nested zip", e);
     }
   }
@@ -130,7 +133,8 @@ public class PackagingUtil {
       newFile.getParentFile();
 
       return newFile;
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       throw new RuntimeException("Error reading from stream", e);
     }
   }

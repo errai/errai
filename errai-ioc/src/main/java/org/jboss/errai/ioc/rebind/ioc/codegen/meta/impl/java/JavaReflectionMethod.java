@@ -39,7 +39,7 @@ public class JavaReflectionMethod extends MetaMethod {
 
     for (int i = 0; i < method.getParameterTypes().length; i++) {
       parmList.add(new JavaReflectionParameter(method.getParameterTypes()[i],
-              method.getParameterAnnotations()[i], this));
+          method.getParameterAnnotations()[i], this));
     }
 
     parameters = parmList.toArray(new MetaParameter[parmList.size()]);

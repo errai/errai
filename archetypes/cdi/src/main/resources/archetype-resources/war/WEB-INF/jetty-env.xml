@@ -1,8 +1,8 @@
 #set( $symbol_pound = '#' )
-#set( $symbol_dollar = '$' )
-#set( $symbol_escape = '\' )
-<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure//EN"
-        "http://jetty.mortbay.org/configure.dtd">
+        #set( $symbol_dollar = '$' )
+        #set( $symbol_escape = '\' )
+        <!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure//EN"
+                "http://jetty.mortbay.org/configure.dtd">
 
 <Configure id="sample-weld" class="org.mortbay.jetty.webapp.WebAppContext">
 
@@ -14,7 +14,9 @@
     </Array>
 
     <New id="BeanManager" class="org.mortbay.jetty.plus.naming.Resource">
-        <Arg><Ref id="sample-weld"/></Arg>
+        <Arg>
+            <Ref id="sample-weld"/>
+        </Arg>
         <Arg>BeanManager</Arg>
         <Arg>
             <New class="javax.naming.Reference">
@@ -25,8 +27,10 @@
         </Arg>
     </New>
 
-     <New id="Errai" class="org.mortbay.jetty.plus.naming.Resource">
-        <Arg><Ref id="sample-weld"/></Arg>
+    <New id="Errai" class="org.mortbay.jetty.plus.naming.Resource">
+        <Arg>
+            <Ref id="sample-weld"/>
+        </Arg>
         <Arg>Errai</Arg>
         <Arg>
             <New class="javax.naming.Reference">

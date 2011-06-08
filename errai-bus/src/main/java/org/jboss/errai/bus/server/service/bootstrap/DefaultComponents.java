@@ -56,7 +56,7 @@ class DefaultComponents implements BootstrapExecution {
     if (config.hasProperty("errai.authentication_adapter")) {
       try {
         final Class<? extends AuthenticationAdapter> authAdapterClass = Class.forName(config.getProperty("errai.authentication_adapter"))
-                .asSubclass(AuthenticationAdapter.class);
+            .asSubclass(AuthenticationAdapter.class);
 
         log.info("authentication adapter configured: " + authAdapterClass.getName());
 
@@ -82,14 +82,17 @@ class DefaultComponents implements BootstrapExecution {
 
         try {
           create.run();
-        } catch (Throwable e) {
+        }
+        catch (Throwable e) {
           log.info("authentication adapter " + authAdapterClass.getName() + " cannot be bound yet, deferring ...");
           context.defer(create);
         }
 
-      } catch (ErraiBootstrapFailure e) {
+      }
+      catch (ErraiBootstrapFailure e) {
         throw e;
-      } catch (Exception e) {
+      }
+      catch (Exception e) {
         throw new ErraiBootstrapFailure("cannot configure authentication adapter", e);
       }
     }
@@ -106,8 +109,9 @@ class DefaultComponents implements BootstrapExecution {
         if (config.hasProperty(ErraiServiceConfigurator.ERRAI_DISPATCHER_IMPLEMENTATION)) {
           try {
             dispatcherImplementation = Class.forName(config.getProperty(ErraiServiceConfigurator.ERRAI_DISPATCHER_IMPLEMENTATION))
-                    .asSubclass(RequestDispatcher.class);
-          } catch (Exception e) {
+                .asSubclass(RequestDispatcher.class);
+          }
+          catch (Exception e) {
             throw new ErraiBootstrapFailure("could not load request dispatcher implementation class", e);
           }
         }
@@ -133,8 +137,9 @@ class DefaultComponents implements BootstrapExecution {
         if (config.hasProperty(ErraiServiceConfigurator.ERRAI_SESSION_PROVIDER_IMPLEMENTATION)) {
           try {
             sessionProviderImplementation = Class.forName(config.getProperty(ErraiServiceConfigurator.ERRAI_SESSION_PROVIDER_IMPLEMENTATION))
-                    .asSubclass(SessionProvider.class);
-          } catch (Exception e) {
+                .asSubclass(SessionProvider.class);
+          }
+          catch (Exception e) {
             throw new ErraiBootstrapFailure("could not load session provider implementation class", e);
           }
         }

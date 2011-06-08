@@ -21,10 +21,8 @@ import com.google.gwt.core.client.EntryPoint;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: May 18, 2010
  */
-public class SourceView implements EntryPoint
-{
-  public void onModuleLoad()
-  {
+public class SourceView implements EntryPoint {
+  public void onModuleLoad() {
     //To change body of implemented methods use File | Settings | File Templates.
   }
 }

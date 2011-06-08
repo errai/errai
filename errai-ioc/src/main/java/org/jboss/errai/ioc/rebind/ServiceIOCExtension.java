@@ -44,7 +44,7 @@ public class ServiceIOCExtension extends IOCDecoratorExtension<Service> {
      * Get an instance of the message bus.
      */
     final MetaClass busClass = MetaClassFactory.get(decContext.getInjectionContext()
-            .getProcessingContext().loadClassType(MessageBus.class));
+        .getProcessingContext().loadClassType(MessageBus.class));
 
     final String inj = ctx.getInjector(busClass).getType(ctx, decContext);
 
@@ -52,7 +52,7 @@ public class ServiceIOCExtension extends IOCDecoratorExtension<Service> {
      * Figure out the service name;
      */
     final String svcName = decContext.getAnnotation().value().equals("")
-            ? decContext.getMemberName() : decContext.getAnnotation().value();
+        ? decContext.getMemberName() : decContext.getAnnotation().value();
 
     return inj + ".subscribe(\"" + svcName + "\", " + decContext.getValueExpression() + ");\n";
   }

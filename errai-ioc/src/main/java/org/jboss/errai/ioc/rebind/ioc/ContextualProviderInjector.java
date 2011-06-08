@@ -58,10 +58,11 @@ public class ContextualProviderInjector extends TypeInjector {
 
     if (pType == null) {
       sb.append(providerInjector.getType(injectContext, injectionPoint)).append(".provide(new Class[] {}");
-    } else {
+    }
+    else {
       MetaType[] typeArgs = pType.getTypeParameters();
       sb.append("(").append(type.getFullyQualifedName()).append("<")
-              .append(typeArgs[0].toString()).append(">) ");
+          .append(typeArgs[0].toString()).append(">) ");
 
       sb.append(providerInjector.getType(injectContext, injectionPoint)).append(".provide(new Class[] {");
       for (int i = 0; i < typeArgs.length; i++) {
@@ -78,12 +79,13 @@ public class ContextualProviderInjector extends TypeInjector {
         sb.append(", new java.lang.annotation.Annotation[] {");
         for (int i = 0; i < qualifiers.length; i++) {
           sb.append("\nnew java.lang.annotation.Annotation() {")
-                  .append("\npublic Class<? extends java.lang.annotation.Annotation> annotationType() {\n return ")
-                  .append(qualifiers[i].annotationType().getName()).append(".class").append(";\n}\n}");
+              .append("\npublic Class<? extends java.lang.annotation.Annotation> annotationType() {\n return ")
+              .append(qualifiers[i].annotationType().getName()).append(".class").append(";\n}\n}");
           if ((i + 1) < qualifiers.length) sb.append(",");
         }
         sb.append("\n}");
-      } else {
+      }
+      else {
         sb.append(", null");
       }
     }

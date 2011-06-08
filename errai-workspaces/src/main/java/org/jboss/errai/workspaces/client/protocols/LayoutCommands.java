@@ -18,20 +18,20 @@ package org.jboss.errai.workspaces.client.protocols;
 
 
 public enum LayoutCommands {
-    OpenNewTab,
-    CloseTab,
-    RegisterWorkspaceEnvironment,
-    RegisterToolSet,
-    GetWidget,
-    DisposeWidget,
-    PublishTool,
-    ActivateTool,
-    GetActiveWidgets,
-    SizeHints,
-    Initialize,
-    GetInstances;
+  OpenNewTab,
+  CloseTab,
+  RegisterWorkspaceEnvironment,
+  RegisterToolSet,
+  GetWidget,
+  DisposeWidget,
+  PublishTool,
+  ActivateTool,
+  GetActiveWidgets,
+  SizeHints,
+  Initialize,
+  GetInstances;
 
-    public String getSubject() {
-        return "org.jboss.errai.WorkspaceLayout";
-    }
+  public String getSubject() {
+    return "org.jboss.errai.WorkspaceLayout";
+  }
 }

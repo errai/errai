@@ -17,8 +17,8 @@ public class TestService2 implements MessageCallback {
     System.out.println("user:" + user);
 
     MessageBuilder.createConversation(message)
-            .subjectProvided()
-            .copy("User", message)
-            .done().reply();
+        .subjectProvided()
+        .copy("User", message)
+        .done().reply();
   }
 }

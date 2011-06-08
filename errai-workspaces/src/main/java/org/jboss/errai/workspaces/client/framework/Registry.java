@@ -21,26 +21,22 @@ import java.util.Map;
 /**
  * Registry for application wide services
  */
-public class Registry
-{
-  private static Map<Class, Object> registry = new HashMap<Class,Object>();
+public class Registry {
+  private static Map<Class, Object> registry = new HashMap<Class, Object>();
 
-   public static void set(Class key, Object obj)
-   {
-     registry.put(key, obj);
-   }
+  public static void set(Class key, Object obj) {
+    registry.put(key, obj);
+  }
 
-   public static <T> T get(Class<T> key)
-   {
-     T t = (T) registry.get(key);
-     if(null==t)
-       throw new IllegalArgumentException(key + " not registered");
-     return t;
-   }
+  public static <T> T get(Class<T> key) {
+    T t = (T) registry.get(key);
+    if (null == t)
+      throw new IllegalArgumentException(key + " not registered");
+    return t;
+  }
 
-   public static boolean has(Class key)
-   {
-     return get(key)!=null;
-   }
-  
+  public static boolean has(Class key) {
+    return get(key) != null;
+  }
+
 }

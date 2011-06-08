@@ -45,10 +45,10 @@ public class DefaultBlockingServlet extends AbstractErraiServlet {
    */
   @Override
   protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
-          throws ServletException, IOException {
+      throws ServletException, IOException {
     pollForMessages(sessionProvider.getSession(httpServletRequest.getSession(),
-            httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER)),
-            httpServletRequest, httpServletResponse, ErraiServiceConfigurator.LONG_POLLING);
+        httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER)),
+        httpServletRequest, httpServletResponse, ErraiServiceConfigurator.LONG_POLLING);
   }
 
   /**
@@ -62,11 +62,11 @@ public class DefaultBlockingServlet extends AbstractErraiServlet {
    */
   @Override
   protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
-          throws ServletException, IOException {
+      throws ServletException, IOException {
 
 
     final QueueSession session = sessionProvider.getSession(httpServletRequest.getSession(),
-            httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
+        httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
 
     service.store(createCommandMessage(session, httpServletRequest.getInputStream()));
 
@@ -100,7 +100,8 @@ public class DefaultBlockingServlet extends AbstractErraiServlet {
       queue.poll(wait, httpServletResponse.getOutputStream());
 
       httpServletResponse.getOutputStream().close();
-    } catch (final Throwable t) {
+    }
+    catch (final Throwable t) {
       t.printStackTrace();
       writeExceptionToOutputStream(httpServletResponse, t);
     }

@@ -70,7 +70,8 @@ public class JSONDecoder {
   public Object parse() {
     try {
       return _parse(new Context(), null, false);
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       throw new RuntimeException(e);
     }
   }
@@ -95,10 +96,12 @@ public class JSONDecoder {
             ctx.encodedType = false;
             try {
               return demarshallAll(ctx.record(collection, decodingContext), decodingContext);
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
               throw new RuntimeException("Could not demarshall object", e);
             }
-          } else {
+          }
+          else {
             return ctx.record(collection, decodingContext);
           }
 
@@ -110,7 +113,7 @@ public class JSONDecoder {
         case '"':
         case '\'':
           ctx.addValue(handleStringEscapes(subArray(json, cursor + 1,
-                  cursor = (captureStringLiteral(json[cursor], json, cursor, length)))));
+              cursor = (captureStringLiteral(json[cursor], json, cursor, length)))));
           cursor++;
           break;
 
@@ -128,21 +131,25 @@ public class JSONDecoder {
 
             if (fp) {
               ctx.addValue(_parseDouble(json, start, cursor - start));
-            } else {
+            }
+            else {
               ctx.addValue(_parseLong(json, start, cursor - start));
             }
 
             break;
-          } else if (isJavaIdentifierPart(json[cursor])) {
+          }
+          else if (isJavaIdentifierPart(json[cursor])) {
             int start = cursor++;
             while ((cursor != length) && isJavaIdentifierPart(json[cursor])) cursor++;
 
             String s = new String(json, start, cursor - start);
             if ("true".equals(s) || "false".equals(s)) {
               ctx.addValue("true".equals(s) ? Boolean.TRUE : Boolean.FALSE);
-            } else if ("null".equals(s)) {
+            }
+            else if ("null".equals(s)) {
               ctx.addValue(null);
-            } else {
+            }
+            else {
               ctx.addValue(s);
             }
             continue;
@@ -277,7 +284,8 @@ public class JSONDecoder {
     private Object addValue(Object val) {
       if (lhs == null) {
         return lhs = val;
-      } else {
+      }
+      else {
         return rhs = val;
       }
     }
@@ -285,7 +293,8 @@ public class JSONDecoder {
     private Object getValue() {
       if (rhs != null) {
         return rhs;
-      } else {
+      }
+      else {
         return lhs;
       }
     }
@@ -293,7 +302,8 @@ public class JSONDecoder {
     private void removeValue() {
       if (rhs != null) {
         rhs = null;
-      } else {
+      }
+      else {
         lhs = null;
       }
     }
@@ -325,21 +335,25 @@ public class JSONDecoder {
             if (rec)
               ((Map) collection).put(lhs, rhs);
 
-          } else {
+          }
+          else {
             if (collection == null) return lhs;
 
             if (lhs instanceof UnsatisfiedForwardLookup) {
               ctx.addUnsatisfiedDependency(collection, (UnsatisfiedForwardLookup) lhs);
-            } else {
+            }
+            else {
               //noinspection unchecked
               ((Collection) collection).add(lhs);
             }
           }
         }
         return collection;
-      } catch (ClassCastException e) {
+      }
+      catch (ClassCastException e) {
         throw new RuntimeException("error building collection", e);
-      } finally {
+      }
+      finally {
         lhs = rhs = null;
       }
     }

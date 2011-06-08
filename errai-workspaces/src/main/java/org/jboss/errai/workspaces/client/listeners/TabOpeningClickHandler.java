@@ -54,10 +54,8 @@ public class TabOpeningClickHandler implements ClickHandler {
 
           try {
 
-            tool.provideWidget(new ProvisioningCallback()
-            {
-              public void onSuccess(final Widget instance)
-              {
+            tool.provideWidget(new ProvisioningCallback() {
+              public void onSuccess(final Widget instance) {
                 instance.getElement().setId(message.get(String.class, LayoutParts.DOMID));
 
                 RootPanel.get().add(instance);
@@ -74,8 +72,7 @@ public class TabOpeningClickHandler implements ClickHandler {
 
               }
 
-              public void onUnavailable()
-              {
+              public void onUnavailable() {
                 throw new RuntimeException("Failed to create component");
               }
             });
@@ -95,7 +92,7 @@ public class TabOpeningClickHandler implements ClickHandler {
        * Being capturing all message registration activity. This is necessary if you want to use the automatic
        * clean-up features and close the messaging channels when the tool instance closes.
        */
-      ((ClientMessageBus)bus).beginCapture();
+      ((ClientMessageBus) bus).beginCapture();
 
       createMessage()
           .toSubject("org.jboss.errai.WorkspaceLayout")

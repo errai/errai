@@ -21,12 +21,12 @@ import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 public class MapperUtil {
-    public static JClassType getType(TypeOracle oracle, Class cls) {
-        try {
-            return oracle.getType(cls.getName());
-        }
-        catch (NotFoundException e) {
-            throw new RuntimeException(e);
-        }
+  public static JClassType getType(TypeOracle oracle, Class cls) {
+    try {
+      return oracle.getType(cls.getName());
     }
+    catch (NotFoundException e) {
+      throw new RuntimeException(e);
+    }
+  }
 }

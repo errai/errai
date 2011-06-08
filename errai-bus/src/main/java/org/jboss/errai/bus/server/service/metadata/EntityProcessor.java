@@ -61,7 +61,8 @@ public class EntityProcessor implements MetaDataProcessor {
               config.getSerializableTypes().add(cls);
               markIfEnumType(cls);
 
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
               throw new ErraiBootstrapFailure(e);
             }
           }

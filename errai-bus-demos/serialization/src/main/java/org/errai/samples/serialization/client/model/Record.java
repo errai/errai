@@ -111,11 +111,11 @@ public class Record {
   @Override
   public String toString() {
     return "Record{" +
-            "recordId=" + recordId +
-            ", name='" + name + '\'' +
-            ", balance=" + balance +
-            ", accountOpened=" + accountOpened +
-            ", stuff=" + stuff +
-            '}';
+        "recordId=" + recordId +
+        ", name='" + name + '\'' +
+        ", balance=" + balance +
+        ", accountOpened=" + accountOpened +
+        ", stuff=" + stuff +
+        '}';
   }
 }

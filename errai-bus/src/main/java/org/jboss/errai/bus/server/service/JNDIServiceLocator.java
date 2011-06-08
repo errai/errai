@@ -48,12 +48,14 @@ public class JNDIServiceLocator implements ServiceLocator<HttpSession> {
     try {
       ctx = new InitialContext();
       errai = (ErraiService<HttpSession>) ctx.lookup(jndiName);
-    } catch (NamingException e) {
+    }
+    catch (NamingException e) {
       if (ctx != null) {
         try {
           // fallback in development mode
           errai = (ErraiService<HttpSession>) ctx.lookup("java:comp/env/Errai");
-        } catch (NamingException e1) {
+        }
+        catch (NamingException e1) {
         }
       }
 

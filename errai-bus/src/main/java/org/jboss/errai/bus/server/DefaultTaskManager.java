@@ -45,7 +45,8 @@ public class DefaultTaskManager implements TaskManager {
   public void execute(Runnable task) {
     try {
       service.execute(task);
-    } catch (InterruptedException e) {
+    }
+    catch (InterruptedException e) {
       throw new RuntimeException(e);
     }
   }

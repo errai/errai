@@ -52,17 +52,23 @@ public class JavaReflectionUtil {
   public static MetaType fromType(Type t) {
     if (t instanceof Class) {
       return (MetaClassFactory.get((Class) t));
-    } else if (t instanceof TypeVariable) {
+    }
+    else if (t instanceof TypeVariable) {
       return new JavaReflectionTypeVariable((TypeVariable) t);
-    } else if (t instanceof ParameterizedType) {
+    }
+    else if (t instanceof ParameterizedType) {
       return new JavaReflectionParameterizedType((ParameterizedType) t);
-    } else if (t instanceof GenericArrayType) {
+    }
+    else if (t instanceof GenericArrayType) {
       return new JavaReflectionGenericArrayType((GenericArrayType) t);
-    } else if (t instanceof GenericDeclaration) {
+    }
+    else if (t instanceof GenericDeclaration) {
       return new JavaReflectionGenericDeclaration((GenericDeclaration) t);
-    } else if (t instanceof WildcardType) {
+    }
+    else if (t instanceof WildcardType) {
       return new JavaReflectionWildcardType((WildcardType) t);
-    } else {
+    }
+    else {
       return null;
     }
   }

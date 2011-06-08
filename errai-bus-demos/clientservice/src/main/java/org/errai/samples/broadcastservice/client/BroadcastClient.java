@@ -41,9 +41,9 @@ public class BroadcastClient implements EntryPoint {
          * inputBox as the "BroadcastText" field.
          */
         MessageBuilder.createMessage()
-                .toSubject("BroadcastService")
-                .with("BroadcastText", inputBox.getText())
-                .noErrorHandling().sendNowWith(bus);
+            .toSubject("BroadcastService")
+            .with("BroadcastText", inputBox.getText())
+            .noErrorHandling().sendNowWith(bus);
       }
     });
 

@@ -1,19 +1,18 @@
-
 /*
- * Copyright 2010 JBoss, a divison Red Hat, Inc
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+* Copyright 2010 JBoss, a divison Red Hat, Inc
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 
 package org.jboss.errai.workspaces.client;
 
@@ -76,33 +75,27 @@ public class Application implements EntryPoint {
 
   private boolean isInitialized = false;
 
-  private LogAdapter logAdapter = new LogAdapter()
-  {
-    public void warn(String message)
-    {
+  private LogAdapter logAdapter = new LogAdapter() {
+    public void warn(String message) {
       Log.warn(message);
     }
 
-    public void info(String message)
-    {
+    public void info(String message) {
       Log.info(message);
     }
 
-    public void debug(String message)
-    {
+    public void debug(String message) {
       Log.debug(message);
     }
 
-    public void error(String message, Throwable t)
-    {
-      Log.error(message, t);     
+    public void error(String message, Throwable t) {
+      Log.error(message, t);
     }
   };
-  
-  public Application()
-  {
+
+  public Application() {
     bus.setLogAdapter(logAdapter);
-    
+
     authenticationModule = new AuthenticationModule();
     securityService = new SecurityService();
 
@@ -122,9 +115,8 @@ public class Application implements EntryPoint {
     });
   }
 
-  private void onModuleLoad2()
-  {
-    final ClientMessageBus bus = (ClientMessageBus)ErraiBus.get();
+  private void onModuleLoad2() {
+    final ClientMessageBus bus = (ClientMessageBus) ErraiBus.get();
 
     // Don't do any of this until the MessageBus is fully initialized.    
     bus.addPostInitTask(
@@ -144,25 +136,20 @@ public class Application implements EntryPoint {
                 }
             );
 
-            // The main workspace listener            
+            // The main workspace listener
             bus.subscribe(Workspace.SUBJECT, new MessageCallback() {
 
-              public void callback(Message message)
-              {
-                switch(LayoutCommands.valueOf(message.getCommandType()))
-                {
+              public void callback(Message message) {
+                switch (LayoutCommands.valueOf(message.getCommandType())) {
                   case Initialize:
 
                     GWT.runAsync(
-                        new RunAsyncCallback()
-                        {
-                          public void onFailure(Throwable throwable)
-                          {
+                        new RunAsyncCallback() {
+                          public void onFailure(Throwable throwable) {
                             GWT.log("Failed to load workspace", throwable);
                           }
 
-                          public void onSuccess()
-                          {
+                          public void onSuccess() {
                             initializeUI();
                           }
                         }
@@ -184,10 +171,8 @@ public class Application implements EntryPoint {
     deferredToken = History.getToken();
   }
 
-  private void initializeUI()
-  {
-    if(isInitialized)
-    {
+  private void initializeUI() {
+    if (isInitialized) {
       // TODO: https://jira.jboss.org/jira/browse/ERRAI-39
       GWT.log("Workspace already initialized", new IllegalArgumentException("Received init call on already bootstrapped workspace"));
       return;
@@ -221,16 +206,13 @@ public class Application implements EntryPoint {
 
     // show default toolset
     DeferredCommand.addCommand(
-        new Command()
-        {
-          public void execute()
-          {
+        new Command() {
+          public void execute() {
             String initialToolSet = null;
             String initialTool = null;
 
             // init by history token
-            if(deferredToken!=null && deferredToken.startsWith("errai_"))
-            {
+            if (deferredToken != null && deferredToken.startsWith("errai_")) {
               String[] token = Workspace.splitHistoryToken(deferredToken);
 
               initialToolSet = token[0];
@@ -238,30 +220,25 @@ public class Application implements EntryPoint {
             }
 
             // init by preferences
-            if(null==initialToolSet)
-            {
+            if (null == initialToolSet) {
               Preferences prefs = GWT.create(Preferences.class);
               String preferedTool = prefs.has(Preferences.DEFAULT_TOOL) ?
                   Workspace.encode(prefs.get(Preferences.DEFAULT_TOOL)) : null;
 
-              if(preferedTool!=null && workspace.hasToolSet(preferedTool))
-              {
+              if (preferedTool != null && workspace.hasToolSet(preferedTool)) {
                 initialToolSet = preferedTool;
               }
-              else
-              {
+              else {
                 // launch first available tool
                 List<ToolSet> toolSets = workspace.getToolsets();
-                if(toolSets.size()>0)
-                {
+                if (toolSets.size() > 0) {
                   initialToolSet = Workspace.encode(toolSets.get(0).getToolSetName());
                 }
               }
             }
 
             // activate default tool
-            if(initialToolSet!=null)
-            {
+            if (initialToolSet != null) {
               MessageBuilder.createMessage()
                   .toSubject(Workspace.SUBJECT)
                   .command(LayoutCommands.ActivateTool)
@@ -280,26 +257,20 @@ public class Application implements EntryPoint {
     isInitialized = true;
   }
 
-  private CaptionLayoutPanel createLogPanel(final WSLayoutPanel parent)
-  {
+  private CaptionLayoutPanel createLogPanel(final WSLayoutPanel parent) {
     final CaptionLayoutPanel messagePanel = new CaptionLayoutPanel("Messages");
     messagePanel.setPadding(0);
 
     // log panel
     // manually, otherwise it will appear on the login screen
     WorkspaceLogger logger = new WorkspaceLogger(
-        new WorkspaceLogger.ThresholdNotification()
-        {
-          public void onLogLevel(int level)
-          {
+        new WorkspaceLogger.ThresholdNotification() {
+          public void onLogLevel(int level) {
             // open the log panel on errors
-            if(level >= Log.LOG_LEVEL_ERROR)
-            {
+            if (level >= Log.LOG_LEVEL_ERROR) {
               DeferredCommand.addCommand(
-                  new Command()
-                  {
-                    public void execute()
-                    {
+                  new Command() {
+                    public void execute() {
                       parent.setCollapsed(messagePanel, false);
                       parent.invalidate();
                       parent.layout();
@@ -313,7 +284,7 @@ public class Application implements EntryPoint {
     Widget widget = logger.getWidget();
     widget.setVisible(true);
     Log.addLogger(logger);
-    
+
     messagePanel.add(widget);
 
     final ImageButton collapseBtn = new ImageButton(Caption.IMAGES.toolCollapseDown());
@@ -334,8 +305,7 @@ public class Application implements EntryPoint {
    * hack in order to correctly display widgets that have
    * been rendered hidden
    */
-  public void refreshView()
-  {
+  public void refreshView() {
     viewport.getLayoutPanel().layout();
   }
 
@@ -344,15 +314,15 @@ public class Application implements EntryPoint {
   }
 
   private native static void reload() /*-{
-       $wnd.location.reload();
-     }-*/;
+    $wnd.location.reload();
+  }-*/;
 
   private native static void _initAfterWSLoad() /*-{
-         try {
-             $wnd.initAfterWSLoad();
-         }
-         catch (e) {
-         }
-     }-*/;
+    try {
+      $wnd.initAfterWSLoad();
+    }
+    catch (e) {
+    }
+  }-*/;
 
 }

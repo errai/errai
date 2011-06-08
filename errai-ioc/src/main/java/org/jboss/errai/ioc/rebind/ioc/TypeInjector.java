@@ -33,7 +33,7 @@ public class TypeInjector extends Injector {
   public TypeInjector(MetaClass type) {
     this.type = type;
     this.singleton = type.isAnnotationPresent(Singleton.class)
-            || type.isAnnotationPresent(com.google.inject.Singleton.class);
+        || type.isAnnotationPresent(com.google.inject.Singleton.class);
     this.varName = InjectUtil.getNewVarName();
 
     try {
@@ -42,11 +42,13 @@ public class TypeInjector extends Injector {
 
       if (!qualifiers.isEmpty()) {
         qualifyingMetadata = new JSR299QualifyingMetadata(qualifiers);
-      } else {
+      }
+      else {
         qualifyingMetadata = JSR299QualifyingMetadata.createDefaultQualifyingMetaData();
       }
 
-    } catch (Throwable e) {
+    }
+    catch (Throwable e) {
       // ignore
     }
   }
@@ -56,7 +58,8 @@ public class TypeInjector extends Injector {
     if (isInjected()) {
       if (isSingleton()) {
         return varName;
-      } else {
+      }
+      else {
         varName = InjectUtil.getNewVarName();
       }
     }

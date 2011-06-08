@@ -66,7 +66,8 @@ public class ArrayLiteral extends LiteralValue<Object> {
       if (element.getClass().isArray()) {
         builder.append(renderInlineArrayLiteral(element));
 
-      } else {
+      }
+      else {
         builder.append(LiteralFactory.getLiteral(element).generate(null));
       }
 

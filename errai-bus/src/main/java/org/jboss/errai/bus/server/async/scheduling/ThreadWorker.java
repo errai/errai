@@ -65,7 +65,8 @@ public class ThreadWorker implements Runnable {
           }
           task.run();
         }
-      } catch (InterruptedException e) {
+      }
+      catch (InterruptedException e) {
         if (!active) {
           /**
            * If the thread has been marked inactive, terminate now.  Otherwise continue along
@@ -73,7 +74,8 @@ public class ThreadWorker implements Runnable {
            */
           return;
         }
-      } catch (Throwable t) {
+      }
+      catch (Throwable t) {
         if (task != null) {
           task.cancel(true);
         }
@@ -84,7 +86,8 @@ public class ThreadWorker implements Runnable {
            * just experienced.
            */
           errorCallback.error(null, t);
-        } else {
+        }
+        else {
           t.printStackTrace();
         }
       }

@@ -137,7 +137,7 @@ public class Variable extends AbstractStatement {
   @Override
   public boolean equals(Object o) {
     return o instanceof Variable
-            && hashString().equals(Variable.class.getName() + ":" + name + ":" + ((Variable) o).type.getFullyQualifedName());
+        && hashString().equals(Variable.class.getName() + ":" + name + ":" + ((Variable) o).type.getFullyQualifedName());
   }
 
   @Override

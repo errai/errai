@@ -48,7 +48,8 @@ public class PerformanceEntity extends JapexDriverBase {
       }
 
       tx.commit();
-    } catch (HibernateException e) {
+    }
+    catch (HibernateException e) {
       tx.rollback();
     }
   }

@@ -50,10 +50,10 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
    */
   @Override
   protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
-          throws ServletException, IOException {
+      throws ServletException, IOException {
     pollForMessages(sessionProvider.getSession(httpServletRequest.getSession(),
-            httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER)),
-            httpServletRequest, httpServletResponse, true);
+        httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER)),
+        httpServletRequest, httpServletResponse, true);
   }
 
   /**
@@ -68,14 +68,15 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
    */
   @Override
   protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
-          throws ServletException, IOException {
+      throws ServletException, IOException {
 
     final QueueSession session = sessionProvider.getSession(httpServletRequest.getSession(),
-            httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
+        httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
 
     try {
       service.store(createCommandMessage(session, httpServletRequest.getInputStream()));
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       if (!e.getMessage().contains("expired")) {
         writeExceptionToOutputStream(httpServletResponse, e);
         return;
@@ -118,7 +119,8 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
             if (!queue.messagesWaiting()) {
               cont.suspend(45 * 1000);
             }
-          } else {
+          }
+          else {
             queue.setActivationCallback(null);
           }
 
@@ -126,13 +128,15 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
 
         pollQueue(queue, stream, httpServletResponse);
       }
-    } catch (RetryRequest r) {
+    }
+    catch (RetryRequest r) {
       /**
        * This *must* be caught and re-thrown to work property with Jetty.
        */
 
       throw r;
-    } catch (final Throwable t) {
+    }
+    catch (final Throwable t) {
       t.printStackTrace();
 
       httpServletResponse.setHeader("Cache-Control", "no-cache");
@@ -150,7 +154,7 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
 
         public Object getMessage() {
           StringBuilder b = new StringBuilder("{Error" +
-                  "Message:\"").append(t.getMessage()).append("\",AdditionalDetails:\"");
+              "Message:\"").append(t.getMessage()).append("\",AdditionalDetails:\"");
           for (StackTraceElement e : t.getStackTrace()) {
             b.append(e.toString()).append("<br/>");
           }
@@ -160,7 +164,8 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
       });
 
       stream.write(']');
-    } finally {
+    }
+    finally {
       stream.close();
     }
   }

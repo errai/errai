@@ -89,14 +89,16 @@ public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayB
           Object element = Array.get(values[i], j);
           if (element.getClass().isArray()) {
             _initialize(element);
-          } else {
+          }
+          else {
             _initializeValue(element);
           }
           if (j + 1 < length) {
             buf.append(",");
           }
         }
-      } else {
+      }
+      else {
         _initializeValue(values[i]);
         if (i + 1 < values.length) {
           buf.append(",");

@@ -38,11 +38,11 @@ import org.gwt.mosaic.ui.client.layout.BorderLayoutData;
 
 /**
  * A slightly modified version of the orig div logger.
+ *
  * @author Fred Saur
  * @author Heiko Braun
  */
-public class WorkspaceLogger implements Logger
-{
+public class WorkspaceLogger implements Logger {
   // CHECKSTYLE_JAVADOC_OFF
 
   private static final int[] levels = {
@@ -64,8 +64,7 @@ public class WorkspaceLogger implements Logger
   private final ScrollLayoutPanel scrollPanel = new ScrollLayoutPanel();
   private final Timer timer;
 
-  public interface ThresholdNotification
-  {
+  public interface ThresholdNotification {
     void onLogLevel(int level);
   }
 
@@ -77,7 +76,7 @@ public class WorkspaceLogger implements Logger
   public WorkspaceLogger(ThresholdNotification notification) {
 
     this.notification = notification;
-    
+
     logDockPanel.addStyleName(LogClientBundle.INSTANCE.css().logPanel());
     logTextArea.addStyleName(LogClientBundle.INSTANCE.css().logTextArea());
     scrollPanel.addStyleName(LogClientBundle.INSTANCE.css().logScrollPanel());
@@ -100,8 +99,7 @@ public class WorkspaceLogger implements Logger
         logTextArea.setHTML(logTextArea.getHTML() + logText);
         logText = "";
         DeferredCommand.addCommand(
-            new Command()
-            {
+            new Command() {
               public void execute() {
                 scrollPanel.setScrollPosition(MAX_VERTICAL_SCROLL);
               }
@@ -109,7 +107,7 @@ public class WorkspaceLogger implements Logger
       }
     };
   }
-  
+
   public final void clear() {
     logTextArea.setHTML("");
   }
@@ -127,7 +125,7 @@ public class WorkspaceLogger implements Logger
   }
 
   public void log(LogRecord record) {
-    
+
     String text = record.getFormattedMessage().replaceAll("<", "&lt;").replaceAll(">", "&gt;");
     String title = makeTitle(record);
     Throwable throwable = record.getThrowable();
@@ -166,7 +164,8 @@ public class WorkspaceLogger implements Logger
     for (int i = 0; i < levels.length; i++) {
       if (levels[i] < Log.getLowestLogLevel()) {
         levelButtons[i].setEnabled(false);
-      } else {
+      }
+      else {
         String levelText = LogUtil.levelToString(levels[i]);
         boolean current = level == levels[i];
         levelButtons[i].setTitle(current ? "Current (runtime) log level is already '" + levelText
@@ -256,7 +255,7 @@ public class WorkspaceLogger implements Logger
 
     //masterPanel.add(titleLabel);
     masterPanel.add(buttonPanel);
-   
+
     return masterPanel;
   }
 
@@ -266,7 +265,8 @@ public class WorkspaceLogger implements Logger
     if (throwable != null) {
       if (throwable.getMessage() == null) {
         message = throwable.getClass().getName();
-      } else {
+      }
+      else {
         message = throwable.getMessage().replaceAll(
             throwable.getClass().getName().replaceAll("^(.+\\.).+$", "$1"), "");
       }

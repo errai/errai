@@ -20,20 +20,20 @@ import java.util.ArrayList;
 
 
 public class TestEntity {
-    private String name;
-    private ArrayList listOfFun = new ArrayList();
+  private String name;
+  private ArrayList listOfFun = new ArrayList();
 
-    public TestEntity(String name) {
-        this.name = name;
-        listOfFun.add(name.toUpperCase() + "1");
-        listOfFun.add(name.toUpperCase() + "2");
-    }
+  public TestEntity(String name) {
+    this.name = name;
+    listOfFun.add(name.toUpperCase() + "1");
+    listOfFun.add(name.toUpperCase() + "2");
+  }
 
-    public String getName() {
-        return name;
-    }
+  public String getName() {
+    return name;
+  }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+  public void setName(String name) {
+    this.name = name;
+  }
 }

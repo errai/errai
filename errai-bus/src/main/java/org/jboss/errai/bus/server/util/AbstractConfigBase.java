@@ -55,9 +55,11 @@ public abstract class AbstractConfigBase {
     if (start.getPath().endsWith(".svn")) return;
     if (start.isDirectory()) {
       loadFromDirectory(root, start, loadedTargets, visitor);
-    } else if (start.isFile()) {
+    }
+    else if (start.isFile()) {
       loadFromZippedResource(root, start, loadedTargets, visitor, null);
-    } else {
+    }
+    else {
       /**
        * This path is not directly resolvable to a directory or file target, which may mean that it's a
        * virtual path.  So in order to over-come this, we'll perform a brute-force reparsing of the URI
@@ -74,7 +76,7 @@ public abstract class AbstractConfigBase {
     String rootPath;
     do {
       start = new File((rootPath = start.getPath())
-              .substring(0, (pivotPoint = rootPath.lastIndexOf("/")) < 0 ? 0 : pivotPoint));
+          .substring(0, (pivotPoint = rootPath.lastIndexOf("/")) < 0 ? 0 : pivotPoint));
 
     } while (!start.isFile() && pivotPoint > 0);
 
@@ -94,7 +96,7 @@ public abstract class AbstractConfigBase {
 
   protected static String getCandidateFQCN(String rootFile, String fileName) {
     return fileName.replaceAll("(/|\\\\)", ".")
-            .substring(rootFile.length() + 1, fileName.lastIndexOf('.'));
+        .substring(rootFile.length() + 1, fileName.lastIndexOf('.'));
   }
 
   protected static void loadFromZippedResource(File root, File start, Set<String> loadedTargets, VisitDelegate visitor,
@@ -114,7 +116,8 @@ public abstract class AbstractConfigBase {
 
       if (endIdx == -1) {
         endIdx = pathToJar.length() - 1;
-      } else {
+      }
+      else {
         endIdx += 4;
       }
 
@@ -130,12 +133,15 @@ public abstract class AbstractConfigBase {
       }
       loadZipFromStream(jarName, inStream, loadedTargets, visitor, scanFilter);
 
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       log.warn("did not process '" + pathToJar + "' (probably non-fatal)", e);
-    } finally {
+    }
+    finally {
       try {
         if (inStream != null) inStream.close();
-      } catch (Exception e) {
+      }
+      catch (Exception e) {
         log.error("failed to close stream", e);
       }
     }
@@ -151,12 +157,13 @@ public abstract class AbstractConfigBase {
     boolean scanClass = ".class".equals(visitor.getFileExtension());
 
     if (activeCacheContexts != null && scanCache != null &&
-            activeCacheContexts.contains(ctx) && scanCache.containsKey(ctx)) {
+        activeCacheContexts.contains(ctx) && scanCache.containsKey(ctx)) {
       List<String> cache = scanCache.get(ctx);
       for (String loadClass : cache) {
         visitor.visit(loadClass);
       }
-    } else {
+    }
+    else {
       while ((zipEntry = zipFile.getNextEntry()) != null) {
         if (scanFilter != null && !zipEntry.getName().startsWith(scanFilter)) continue;
 
@@ -170,7 +177,8 @@ public abstract class AbstractConfigBase {
             int beginIdx = classEntry.indexOf(CLASS_RESOURCES_ROOT);
             if (beginIdx == -1) {
               beginIdx = 0;
-            } else {
+            }
+            else {
               beginIdx += CLASS_RESOURCES_ROOT.length();
             }
 
@@ -179,14 +187,16 @@ public abstract class AbstractConfigBase {
             visitor.visit(className);
             recordCache(ctx, className);
             cached = true;
-          } catch (Throwable e) {
+          }
+          catch (Throwable e) {
             if (!cached) {
               log.trace("Failed to load: " + className
-                      + "(" + e.getMessage() + ") -- Probably non-fatal.");
+                  + "(" + e.getMessage() + ") -- Probably non-fatal.");
             }
           }
 
-        } else if (zipEntry.getName().matches(".+\\.(zip|jar|war)$")) {
+        }
+        else if (zipEntry.getName().matches(".+\\.(zip|jar|war)$")) {
           /**
            * Let's decompress this to a temp dir so we can look at it:
            */
@@ -198,7 +208,8 @@ public abstract class AbstractConfigBase {
               File tmpFile = scanAreas.get(zipEntry.getName());
               tmpZipStream = new FileInputStream(tmpFile);
               loadZipFromStream(tmpFile.getName(), tmpZipStream, loadedTargets, visitor, null);
-            } else {
+            }
+            else {
               File tmpUnZip = expandZipEntry(zipFile, zipEntry);
 
               scanAreas.put(zipEntry.getName(), tmpUnZip);
@@ -207,7 +218,8 @@ public abstract class AbstractConfigBase {
 
               loadZipFromStream(tmpUnZip.getName(), tmpZipStream, loadedTargets, visitor, null);
             }
-          } finally {
+          }
+          finally {
             if (tmpZipStream != null) {
               tmpZipStream.close();
             }
@@ -244,7 +256,8 @@ public abstract class AbstractConfigBase {
       newFile.getParentFile().deleteOnExit();
 
       return newFile;
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       log.error("error reading from stream", e);
       return null;
     }
@@ -252,11 +265,12 @@ public abstract class AbstractConfigBase {
 
   protected static void loadFromDirectory(File root, File start, Set<String> loadedTargets, VisitDelegate visitor) {
     if (scanCache != null && activeCacheContexts != null && activeCacheContexts.contains(root.getPath())
-            && scanCache.containsKey(root.getPath())) {
+        && scanCache.containsKey(root.getPath())) {
       for (String loadClass : scanCache.get(root.getPath())) {
         visitor.visit(loadClass);
       }
-    } else {
+    }
+    else {
       for (File file : start.listFiles()) {
         if (file.isDirectory()) _traverseFiles(root, file, loadedTargets, visitor);
         if (file.getName().endsWith(".class")) {
@@ -264,7 +278,8 @@ public abstract class AbstractConfigBase {
           try {
             if (loadedTargets.contains(FQCN)) {
               return;
-            } else {
+            }
+            else {
               loadedTargets.add(FQCN);
             }
 
@@ -274,7 +289,8 @@ public abstract class AbstractConfigBase {
             visitor.visit(FQCN);
             recordCache(root.getPath(), FQCN);
 
-          } catch (Throwable t) {
+          }
+          catch (Throwable t) {
             cacheBlackList.add(root.getPath());
             if (scanCache != null) scanCache.remove(root.getPath());
             visitor.visitError(FQCN, t);

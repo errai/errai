@@ -45,7 +45,7 @@ public class InjectUtil {
   private static final Logger log = LoggerFactory.getLogger(InjectUtil.class);
 
   private static final Class[] injectionAnnotations
-          = {Inject.class, com.google.inject.Inject.class};
+      = {Inject.class, com.google.inject.Inject.class};
 
   private static final AtomicInteger counter = new AtomicInteger(0);
 
@@ -62,7 +62,7 @@ public class InjectUtil {
 
       if (constructorInjectionPoints.size() > 1) {
         throw new InjectionFailure("more than one constructor in "
-                + type.getFullyQualifedName() + " is marked as the injection point!");
+            + type.getFullyQualifedName() + " is marked as the injection point!");
       }
 
       final MetaConstructor constructor = constructorInjectionPoints.get(0);
@@ -79,9 +79,9 @@ public class InjectUtil {
           String[] vars = resolveInjectionDependencies(constructor.getParameters(), ctx, constructor);
 
           StringAppender appender = new StringAppender("final ").append(type.getFullyQualifedName())
-                  .append(' ').append(injector.getVarName()).append(" = new ")
-                  .append(type.getFullyQualifedName())
-                  .append('(').append(commaDelimitedList(vars)).append(");\n");
+              .append(' ').append(injector.getVarName()).append(" = new ")
+              .append(type.getFullyQualifedName())
+              .append('(').append(commaDelimitedList(vars)).append(");\n");
 
           handleInjectionTasks(appender, ctx, injectionTasks);
 
@@ -91,7 +91,8 @@ public class InjectUtil {
         }
       };
 
-    } else {
+    }
+    else {
       // field injection
       if (!hasDefaultConstructor(type))
         throw new InjectionFailure("there is no default constructor for type: " + type.getFullyQualifedName());
@@ -99,8 +100,8 @@ public class InjectUtil {
       return new ConstructionStrategy() {
         public String generateConstructor() {
           StringAppender appender = new StringAppender("final ").append(type.getFullyQualifedName())
-                  .append(' ').append(injector.getVarName()).append(" = new ")
-                  .append(type.getFullyQualifedName()).append("();\n");
+              .append(' ').append(injector.getVarName()).append(" = new ")
+              .append(type.getFullyQualifedName()).append("();\n");
 
           handleInjectionTasks(appender, ctx, injectionTasks);
 
@@ -124,7 +125,7 @@ public class InjectUtil {
     for (MetaMethod meth : postConstructTasks) {
       if (!meth.isPublic() || meth.getParameters().length != 0) {
         throw new InjectionFailure("PostConstruct method must be public and contain no parameters: "
-                + injector.getInjectedType().getFullyQualifedName() + "." + meth.getName());
+            + injector.getInjectedType().getFullyQualifedName() + "." + meth.getName());
       }
 
       appender.append(injector.getVarName()).append('.').append(meth.getName()).append("();\n");
@@ -145,18 +146,20 @@ public class InjectUtil {
       if (isInjectionPoint(field)) {
         if (!field.isPublic()) {
           MetaMethod meth = type.getMethod(ReflectionUtil.getSetter(field.getName()),
-                  field.getType());
+              field.getType());
 
           if (meth == null) {
             InjectionTask task = new InjectionTask(injector, field);
             accumulator.add(task);
-          } else {
+          }
+          else {
             InjectionTask task = new InjectionTask(injector, meth);
             task.setField(field);
             accumulator.add(task);
           }
 
-        } else {
+        }
+        else {
           accumulator.add(new InjectionTask(injector, field));
         }
       }
@@ -164,7 +167,7 @@ public class InjectUtil {
       ElementType[] elTypes;
       for (Class<? extends Annotation> a : decorators) {
         elTypes = a.isAnnotationPresent(Target.class) ? a.getAnnotation(Target.class).value()
-                : new ElementType[]{ElementType.FIELD};
+            : new ElementType[]{ElementType.FIELD};
 
         for (ElementType elType : elTypes) {
           switch (elType) {
@@ -186,7 +189,7 @@ public class InjectUtil {
       ElementType[] elTypes;
       for (Class<? extends Annotation> a : decorators) {
         elTypes = a.isAnnotationPresent(Target.class) ? a.getAnnotation(Target.class).value()
-                : new ElementType[]{ElementType.FIELD};
+            : new ElementType[]{ElementType.FIELD};
 
         for (ElementType elType : elTypes) {
           switch (elType) {
@@ -278,7 +281,7 @@ public class InjectUtil {
     for (int i = 0; i < parmTypes.length; i++) {
       Injector injector = ctx.getInjector(parmTypes[i]);
       InjectionPoint injectionPoint
-              = new InjectionPoint(null, TaskType.Parameter, constructor, null, null, null, parms[i], injector, ctx);
+          = new InjectionPoint(null, TaskType.Parameter, constructor, null, null, null, parms[i], injector, ctx);
 
       varNames[i] = injector.getType(ctx, injectionPoint);
     }
@@ -322,7 +325,7 @@ public class InjectUtil {
       qualifiersCache = new HashSet<Class<?>>();
 
       qualifiersCache.addAll(ScannerSingleton.getOrCreateInstance()
-              .getTypesAnnotatedWith(Qualifier.class));
+          .getTypesAnnotatedWith(Qualifier.class));
     }
 
     return qualifiersCache;
@@ -335,7 +338,7 @@ public class InjectUtil {
       ScannerSingleton.getOrCreateInstance();
 
       annotationsCache.addAll(ScannerSingleton.getOrCreateInstance()
-              .getTypesAnnotatedWith(Retention.class));
+          .getTypesAnnotatedWith(Retention.class));
     }
 
     return annotationsCache;
@@ -398,7 +401,8 @@ public class InjectUtil {
           qualifiers.add(observesMethod.getParameters()[eventParamIndex].getAnnotation(qualifier.asSubclass(Annotation.class)));
         }
       }
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       log.error("Problem reading qualifiersCache for " + parm.getDeclaringMember().getDeclaringClass(), e);
     }
 
@@ -417,7 +421,8 @@ public class InjectUtil {
           qualifiers.add(field.getAnnotation(qualifier.asSubclass(Annotation.class)));
         }
       }
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       log.error("Problem reading qualifiersCache for " + field, e);
     }
     return qualifiers;
@@ -431,7 +436,8 @@ public class InjectUtil {
           qualifiers.add(type.getAnnotation(qualifier.asSubclass(Annotation.class)));
         }
       }
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       log.error("Problem reading qualifiersCache for " + type, e);
     }
     return qualifiers;
@@ -442,9 +448,11 @@ public class InjectUtil {
   public static Class<?> loadClass(String name) {
     try {
       return Class.forName(name);
-    } catch (UnsupportedOperationException e) {
+    }
+    catch (UnsupportedOperationException e) {
       // ignore
-    } catch (Throwable e) {
+    }
+    catch (Throwable e) {
       // ignore
     }
     return null;
@@ -455,7 +463,8 @@ public class InjectUtil {
     if (cls == null) return null;
     try {
       return cls.getField(field.getName());
-    } catch (NoSuchFieldException e) {
+    }
+    catch (NoSuchFieldException e) {
     }
     return null;
   }
@@ -473,7 +482,8 @@ public class InjectUtil {
 
     try {
       return cls.getMethod(method.getName(), parms);
-    } catch (NoSuchMethodException e) {
+    }
+    catch (NoSuchMethodException e) {
       e.printStackTrace();
     }
     return null;

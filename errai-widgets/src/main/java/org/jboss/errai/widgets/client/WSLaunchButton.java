@@ -32,8 +32,7 @@ import java.util.List;
 import static com.google.gwt.user.client.Event.*;
 
 
-public class WSLaunchButton extends LayoutPanel
-{
+public class WSLaunchButton extends LayoutPanel {
   private static final String CSS_NAME = "WSLaunchButton";
 
 
@@ -49,7 +48,7 @@ public class WSLaunchButton extends LayoutPanel
 
     sinkEvents(Event.MOUSEEVENTS);
 
-    HTML html = new HTML( "&nbsp;&nbsp;" +AbstractImagePrototype.create(resource).getHTML() + "&nbsp;" + createButtonMarkup());    
+    HTML html = new HTML("&nbsp;&nbsp;" + AbstractImagePrototype.create(resource).getHTML() + "&nbsp;" + createButtonMarkup());
     this.add(html, new BoxLayoutData(BoxLayoutData.FillStyle.VERTICAL));
     this.setStylePrimaryName(CSS_NAME);
 

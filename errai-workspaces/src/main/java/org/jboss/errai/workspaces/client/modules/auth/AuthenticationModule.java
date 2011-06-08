@@ -1,19 +1,18 @@
-
 /*
- * Copyright 2010 JBoss, a divison Red Hat, Inc
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+* Copyright 2010 JBoss, a divison Red Hat, Inc
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 
 package org.jboss.errai.workspaces.client.modules.auth;
 
@@ -52,8 +51,7 @@ import static org.jboss.errai.bus.client.json.JSONUtilCli.decodeMap;
 /**
  * Listens as <code>'LoginClient'</code>
  */
-public class AuthenticationModule implements Module, MessageCallback
-{
+public class AuthenticationModule implements Module, MessageCallback {
   private Message deferredMessage;
   private Display display;
 
@@ -84,18 +82,17 @@ public class AuthenticationModule implements Module, MessageCallback
     }
   };
 
-  public AuthenticationModule()
-  {
+  public AuthenticationModule() {
     display = new AuthenticationDisplay();
     bindEventHandlers();
   }
 
   /**
    * replace default login display
+   *
    * @param display
    */
-  public AuthenticationModule(Display display)
-  {
+  public AuthenticationModule(Display display) {
     this.display = display;
     bindEventHandlers();
   }
@@ -108,7 +105,8 @@ public class AuthenticationModule implements Module, MessageCallback
     // negotiate login
     if (bus.isInitialized()) {
       negotiationTask.run();
-    } else {
+    }
+    else {
       bus.addPostInitTask(negotiationTask);
     }
   }
@@ -131,7 +129,8 @@ public class AuthenticationModule implements Module, MessageCallback
                         for (Credential c : credentials) {
                           if (c instanceof NameCredential) {
                             ((NameCredential) c).setName(display.getUsernameInput().getText());
-                          } else if (c instanceof PasswordCredential) {
+                          }
+                          else if (c instanceof PasswordCredential) {
                             ((PasswordCredential) c).setPassword(display.getPasswordInput().getText());
                           }
                         }
@@ -146,13 +145,12 @@ public class AuthenticationModule implements Module, MessageCallback
 
   /**
    * Listens as 'LoginClient'
+   *
    * @param message - a message forwarded from the SecurityService
    */
-  public void callback(Message message)
-  {
+  public void callback(Message message) {
     try {
-      switch (SecurityCommands.valueOf(message.getCommandType()))
-      {
+      switch (SecurityCommands.valueOf(message.getCommandType())) {
         case SecurityChallenge:
 
           // the first message send to the AuthorizationService
@@ -205,17 +203,15 @@ public class AuthenticationModule implements Module, MessageCallback
           break;
 
         default:
-          throw new IllegalArgumentException("Unknown command: "+message.getCommandType());
+          throw new IllegalArgumentException("Unknown command: " + message.getCommandType());
       }
     }
-    catch (Exception e)
-    {
+    catch (Exception e) {
       throw new RuntimeException("Failed to process message", e);
     }
   }
 
-  private void notifyWorkspace()
-  {
+  private void notifyWorkspace() {
     MessageBuilder.createMessage()
         .toSubject(Workspace.SUBJECT)
         .command(LayoutCommands.Initialize)
@@ -233,17 +229,14 @@ public class AuthenticationModule implements Module, MessageCallback
 
   }
 
-  private void performNegotiation()
-  {
-    if (deferredMessage != null)
-    {
+  private void performNegotiation() {
+    if (deferredMessage != null) {
       // Send the message that was originally rejected,
       // and prompted the authentication requirement.
       ErraiBus.get().send(deferredMessage);
       deferredMessage = null;
     }
-    else
-    {
+    else {
       // Send the standard negotiation because
       // no message was intercepted to resend       
       negotiationTask.run();

@@ -22,14 +22,14 @@ package org.jboss.errai.workspaces.client.api;
  * The callback allows for both synchronous and asynchronous creation of widgets
  * when needed.<p>
  * A typical pattern, leveraging the GWT 2.0 code spitting features looks like this:
- *
+ * <p/>
  * <pre>
  *
  * AT LoadTool(name="MyTool", group="MyToolsetGroup")
  * class MyModule implements WidgetProvider {
  *
  * private static Widget instance = null;
- *  
+ *
  * public void provideWidget(final ProvisioningCallback callback)
  * {
  *   GWT.runAsync(
@@ -55,5 +55,5 @@ package org.jboss.errai.workspaces.client.api;
  * </pre>
  */
 public interface WidgetProvider {
-    public void provideWidget(ProvisioningCallback callback);
+  public void provideWidget(ProvisioningCallback callback);
 }

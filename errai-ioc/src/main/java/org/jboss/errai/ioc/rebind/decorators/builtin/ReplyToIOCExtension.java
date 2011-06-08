@@ -40,6 +40,6 @@ public class ReplyToIOCExtension extends IOCDecoratorExtension<ReplyTo> {
     final ReplyTo context = field.getAnnotation(ReplyTo.class);
 
     return injectionPoint.getValueExpression()
-            + ".setReplyTo(\"" + context.value() + "\");";
+        + ".setReplyTo(\"" + context.value() + "\");";
   }
 }

@@ -23,21 +23,21 @@ import java.util.LinkedList;
 
 public class ExplorerTest {
 
-    public static void main(String[] args) {
-        JFrame frame = new JFrame();
+  public static void main(String[] args) {
+    JFrame frame = new JFrame();
 
-        ObjectExplorer explorer = new ObjectExplorer();
+    ObjectExplorer explorer = new ObjectExplorer();
 
-        LinkedList list = new LinkedList();
-        list.add(new TestEntity("foo"));
-        list.add(new TestEntity("bar"));
+    LinkedList list = new LinkedList();
+    list.add(new TestEntity("foo"));
+    list.add(new TestEntity("bar"));
 
-        explorer.setRoot(list);
+    explorer.setRoot(list);
 
-        frame.getContentPane().add(new JScrollPane(explorer));
-        explorer.buildTree();
+    frame.getContentPane().add(new JScrollPane(explorer));
+    explorer.buildTree();
 
-        frame.setSize(400,600);
-        frame.setVisible(true);
-    }
+    frame.setSize(400, 600);
+    frame.setVisible(true);
+  }
 }

@@ -74,7 +74,8 @@ public class ConfigUtil extends AbstractConfigBase {
       }
 
       return targets;
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       throw new ErraiBootstrapFailure("could not locate config target paths", e);
     }
   }
@@ -104,12 +105,15 @@ public class ConfigUtil extends AbstractConfigBase {
           FileInputStream stream = new FileInputStream(propertyFile);
           try {
             visitor.visit(new PropertyResourceBundle(stream));
-          } finally {
+          }
+          finally {
             stream.close();
           }
-        } catch (FileNotFoundException e) {
+        }
+        catch (FileNotFoundException e) {
           throw new RuntimeException(e);
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
           throw new RuntimeException(e);
         }
       }
@@ -132,7 +136,8 @@ public class ConfigUtil extends AbstractConfigBase {
           for (Class sc : c.getDeclaredClasses()) {
             visitor.visit(sc);
           }
-        } catch (ClassNotFoundException e) {
+        }
+        catch (ClassNotFoundException e) {
         }
       }
 

@@ -61,16 +61,20 @@ public class GenUtil {
   public static Statement generate(Context context, Object o) {
     if (o instanceof VariableReference) {
       return context.getVariable(((VariableReference) o).getName());
-    } else if (o instanceof Variable) {
+    }
+    else if (o instanceof Variable) {
       Variable v = (Variable) o;
       if (context.isScoped(v)) {
         return v.getReference();
-      } else {
+      }
+      else {
         throw new OutOfScopeException("variable cannot be referenced from this scope: " + v.getName());
       }
-    } else if (o instanceof Statement) {
+    }
+    else if (o instanceof Statement) {
       return (Statement) o;
-    } else {
+    }
+    else {
       return LiteralFactory.getLiteral(o);
     }
   }
@@ -85,7 +89,7 @@ public class GenUtil {
   public static void assertAssignableTypes(MetaClass from, MetaClass to) {
     if (!to.asBoxed().isAssignableFrom(from.asBoxed())) {
       throw new InvalidTypeException(to.getFullyQualifedName() + " is not assignable from "
-              + from.getFullyQualifedName());
+          + from.getFullyQualifedName());
     }
   }
 
@@ -93,9 +97,10 @@ public class GenUtil {
     try {
       if (input instanceof Statement) {
         if (input instanceof VariableReference
-                && (((VariableReference) input).getValue() instanceof LiteralValue)) {
+            && (((VariableReference) input).getValue() instanceof LiteralValue)) {
           input = ((LiteralValue<?>) ((VariableReference) input).getValue()).getValue();
-        } else {
+        }
+        else {
           assertAssignableTypes(((Statement) input).getType(), targetType);
           return (Statement) input;
         }
@@ -104,10 +109,12 @@ public class GenUtil {
       Class<?> targetClass = targetType.asBoxed().asClass();
       if (DataConversion.canConvert(targetClass, input.getClass())) {
         return generate(context, DataConversion.convert(input, targetClass));
-      } else {
+      }
+      else {
         throw new InvalidTypeException("cannot convert input to target type:" + targetClass.getName());
       }
-    } catch (Throwable t) {
+    }
+    catch (Throwable t) {
       throw new InvalidTypeException(t);
     }
   }

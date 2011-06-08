@@ -33,8 +33,8 @@ public abstract class AbstractErraiTest extends GWTTestCase {
 
   static {
     System.out.println("REMEMBER! Bus tests will not succeed if: \n" +
-            "1. You do not run the unit tests with the flag: -Dorg.jboss.errai.bus.do_long_poll=false \n" +
-            "2. You do not have the main and test source directories in the runtime classpath");
+        "1. You do not run the unit tests with the flag: -Dorg.jboss.errai.bus.do_long_poll=false \n" +
+        "2. You do not have the main and test source directories in the runtime classpath");
   }
 
   @Override
@@ -61,11 +61,13 @@ public abstract class AbstractErraiTest extends GWTTestCase {
           if (t != null) t.printStackTrace();
         }
       });
-    } else {
+    }
+    else {
       if (!bus.isInitialized()) {
         System.out.println("reinit-bus");
         bus.init();
-      } else {
+      }
+      else {
         System.out.println("bus-already-initialized");
       }
     }
@@ -84,7 +86,8 @@ public abstract class AbstractErraiTest extends GWTTestCase {
       public void run() {
         try {
           bus.addPostInitTask(r);
-        } catch (Throwable t) {
+        }
+        catch (Throwable t) {
           t.printStackTrace();
           fail();
         }

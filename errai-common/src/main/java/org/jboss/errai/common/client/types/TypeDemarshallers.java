@@ -31,7 +31,8 @@ public class TypeDemarshallers {
         String objId = o.get("__ObjectID").isString().stringValue();
         if (decodingContext.hasObject(objId)) {
           return decodingContext.getObject(objId);
-        } else {
+        }
+        else {
           java.util.Date decDate = new java.util.Date((long) o.get("Value").isNumber().doubleValue());
           decodingContext.putObject(objId, decDate);
           return decDate;
@@ -44,7 +45,8 @@ public class TypeDemarshallers {
         String objId = o.get("__ObjectID").isString().stringValue();
         if (decodingContext.hasObject(objId)) {
           return decodingContext.getObject(objId);
-        } else {
+        }
+        else {
           java.sql.Date decDate = new java.sql.Date((long) o.get("Value").isNumber().doubleValue());
           decodingContext.putObject(objId, decDate);
           return decDate;

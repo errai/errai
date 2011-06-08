@@ -75,7 +75,7 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
           }
 
           sendDisconnectWithReason(event.getHttpServletResponse().getOutputStream(),
-                  "There is no queue associated with this session.");
+              "There is no queue associated with this session.");
         }
 
         synchronized (activeEvents) {
@@ -83,7 +83,8 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
           if (post) {
             // do not pause incoming messages.
             break;
-          } else if (queue.messagesWaiting()) {
+          }
+          else if (queue.messagesWaiting()) {
             transmitMessages(event.getHttpServletResponse(), queue);
             event.close();
             break;
@@ -101,7 +102,8 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
 
           if (events.contains(event)) {
             event.close();
-          } else {
+          }
+          else {
             events.add(event);
           }
         }
@@ -140,7 +142,8 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
 
         if (event.getType() == HttpEvent.EventType.TIMEOUT) {
           if (queue != null) queue.heartBeat();
-        } else {
+        }
+        else {
           if (queue != null) {
             queueToSession.remove(queue);
             service.getBus().closeQueue(session.getSessionId());
@@ -221,11 +224,12 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
     }
 
     Message msg = createCommandMessage(sessionProvider.getSession(request.getSession(),
-            request.getHeader(REMOTE_QUEUE_ID_HEADER)), sb.toString());
+        request.getHeader(REMOTE_QUEUE_ID_HEADER)), sb.toString());
     if (msg != null) {
       try {
         service.store(msg);
-      } catch (Exception e) {
+      }
+      catch (Exception e) {
         if (!e.getMessage().contains("expired")) {
           writeExceptionToOutputStream(response, e);
           return 0;
@@ -233,7 +237,8 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
       }
 
       return 1;
-    } else {
+    }
+    else {
       return 0;
     }
   }
@@ -276,7 +281,8 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
             transmitMessages((et = iter.next()).getHttpServletResponse(), queue);
             iter.remove();
             et.close();
-          } catch (Exception e) {
+          }
+          catch (Exception e) {
             e.printStackTrace();
           }
         }
@@ -306,27 +312,27 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
 
 
   private static final String CONFIG_PROBLEM_TEXT =
-          "\n\n*************************************************************************************************\n"
-                  + "** PROBLEM!\n"
-                  + "** It appears something has been incorrectly configured. In order to use ErraiBus\n"
-                  + "** on JBoss, you must ensure that you are using the APR connector. Also make sure \n"
-                  + "** hat you have added these lines to your WEB-INF/web.xml file:\n"
-                  + "**                                              ---\n"
-                  + "**    <servlet>\n" +
-                  "**        <servlet-name>JBossErraiServlet</servlet-name>\n" +
-                  "**        <servlet-class>org.jboss.errai.bus.server.servlet.JBossCometServlet</servlet-class>\n" +
-                  "**        <load-on-startup>1</load-on-startup>\n" +
-                  "**    </servlet>\n" +
-                  "**\n" +
-                  "**    <servlet-mapping>\n" +
-                  "**        <servlet-name>JBossErraiServlet</servlet-name>\n" +
-                  "**        <url-pattern>*.erraiBus</url-pattern>\n" +
-                  "**    </servlet-mapping>\n"
-                  + "**                                              ---\n"
-                  + "** If you have the following lines in your WEB-INF/web.xml, you must comment or remove them:\n"
-                  + "**                                              ---\n"
-                  + "**    <listener>\n" +
-                  "**        <listener-class>org.jboss.errai.bus.server.ErraiServletConfig</listener-class>\n" +
-                  "**    </listener>\n"
-                  + "*************************************************************************************************\n\n";
+      "\n\n*************************************************************************************************\n"
+          + "** PROBLEM!\n"
+          + "** It appears something has been incorrectly configured. In order to use ErraiBus\n"
+          + "** on JBoss, you must ensure that you are using the APR connector. Also make sure \n"
+          + "** hat you have added these lines to your WEB-INF/web.xml file:\n"
+          + "**                                              ---\n"
+          + "**    <servlet>\n" +
+          "**        <servlet-name>JBossErraiServlet</servlet-name>\n" +
+          "**        <servlet-class>org.jboss.errai.bus.server.servlet.JBossCometServlet</servlet-class>\n" +
+          "**        <load-on-startup>1</load-on-startup>\n" +
+          "**    </servlet>\n" +
+          "**\n" +
+          "**    <servlet-mapping>\n" +
+          "**        <servlet-name>JBossErraiServlet</servlet-name>\n" +
+          "**        <url-pattern>*.erraiBus</url-pattern>\n" +
+          "**    </servlet-mapping>\n"
+          + "**                                              ---\n"
+          + "** If you have the following lines in your WEB-INF/web.xml, you must comment or remove them:\n"
+          + "**                                              ---\n"
+          + "**    <listener>\n" +
+          "**        <listener-class>org.jboss.errai.bus.server.ErraiServletConfig</listener-class>\n" +
+          "**    </listener>\n"
+          + "*************************************************************************************************\n\n";
 }

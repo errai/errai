@@ -29,15 +29,15 @@ public class HelloWorld extends VerticalPanel {
     button.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         MessageBuilder.createMessage()
-                .toSubject("HelloWorldService")
-                .withValue("Hello, There!")
-                .done()
-                .repliesTo(new MessageCallback() {
-                  public void callback(Message message) {
-                    Window.alert("From Server: " + message.get(String.class, MessageParts.Value));
-                  }
-                })
-                .sendNowWith(bus);
+            .toSubject("HelloWorldService")
+            .withValue("Hello, There!")
+            .done()
+            .repliesTo(new MessageCallback() {
+              public void callback(Message message) {
+                Window.alert("From Server: " + message.get(String.class, MessageParts.Value));
+              }
+            })
+            .sendNowWith(bus);
       }
     });
 

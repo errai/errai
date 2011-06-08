@@ -33,75 +33,75 @@ import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 
 class SourceViewWidget extends LayoutPanel {
-    private SourcePanel formatted;
-    private MessageBus bus = ErraiBus.get();
+  private SourcePanel formatted;
+  private MessageBus bus = ErraiBus.get();
 
-    public SourceViewWidget(boolean hasInput) {
-        super(new BoxLayout(BoxLayout.Orientation.VERTICAL));
+  public SourceViewWidget(boolean hasInput) {
+    super(new BoxLayout(BoxLayout.Orientation.VERTICAL));
 
-        if (hasInput) {
-            final TextBox sourceName = new TextBox();
+    if (hasInput) {
+      final TextBox sourceName = new TextBox();
 
-            this.add(sourceName);
-            this.add(new Button("View Source", new ClickHandler() {
-                public void onClick(ClickEvent clickEvent) {
-                    String text = sourceName.getText();
-                    requestSource(text);
-                }
-            }));
-
+      this.add(sourceName);
+      this.add(new Button("View Source", new ClickHandler() {
+        public void onClick(ClickEvent clickEvent) {
+          String text = sourceName.getText();
+          requestSource(text);
         }
+      }));
 
-        createSourcePanel(this);
-        setupListener();
     }
 
-    public SourceViewWidget(String[] sourceNames) {
-        super(new BoxLayout(BoxLayout.Orientation.VERTICAL));
+    createSourcePanel(this);
+    setupListener();
+  }
 
-        LayoutPanel toolbar = new LayoutPanel(new BoxLayout(BoxLayout.Orientation.HORIZONTAL));
-        final ListBox listBox = new ListBox();
-        for (String s : sourceNames)
-            listBox.addItem(s);
-        toolbar.add(listBox, new BoxLayoutData(BoxLayoutData.FillStyle.HORIZONTAL));
-        toolbar.add(new Button("View", new ClickHandler() {
-            public void onClick(ClickEvent clickEvent) {
-                requestSource(listBox.getItemText(listBox.getSelectedIndex()));
-            }
-        }));
+  public SourceViewWidget(String[] sourceNames) {
+    super(new BoxLayout(BoxLayout.Orientation.VERTICAL));
 
-        this.add(toolbar);
+    LayoutPanel toolbar = new LayoutPanel(new BoxLayout(BoxLayout.Orientation.HORIZONTAL));
+    final ListBox listBox = new ListBox();
+    for (String s : sourceNames)
+      listBox.addItem(s);
+    toolbar.add(listBox, new BoxLayoutData(BoxLayoutData.FillStyle.HORIZONTAL));
+    toolbar.add(new Button("View", new ClickHandler() {
+      public void onClick(ClickEvent clickEvent) {
+        requestSource(listBox.getItemText(listBox.getSelectedIndex()));
+      }
+    }));
 
-        listBox.addChangeHandler(new ChangeHandler() {
-            public void onChange(ChangeEvent changeEvent) {
-                requestSource(listBox.getItemText(listBox.getSelectedIndex()));
-            }
-        });
+    this.add(toolbar);
 
-        createSourcePanel(this);
-        setupListener();
-    }
+    listBox.addChangeHandler(new ChangeHandler() {
+      public void onChange(ChangeEvent changeEvent) {
+        requestSource(listBox.getItemText(listBox.getSelectedIndex()));
+      }
+    });
 
-    public void requestSource(String className) {
-        MessageBuilder.createMessage()
-                .toSubject("SourceViewService")
-                .with(MessageParts.ReplyTo, "SourceViewClient")
-                .with("className", className)
-                .noErrorHandling()
-                .sendNowWith(bus);
-    }
+    createSourcePanel(this);
+    setupListener();
+  }
 
-    private void setupListener() {
-        bus.subscribe("SourceViewClient", new MessageCallback() {
-            public void callback(Message message) {
-                String source = message.get(String.class, "source");
-                formatted.setSource(source);
-            }
-        });
-    }
+  public void requestSource(String className) {
+    MessageBuilder.createMessage()
+        .toSubject("SourceViewService")
+        .with(MessageParts.ReplyTo, "SourceViewClient")
+        .with("className", className)
+        .noErrorHandling()
+        .sendNowWith(bus);
+  }
 
-    private void createSourcePanel(LayoutPanel panel) {
-        formatted = new SourcePanel();
-        panel.add(formatted, new BoxLayoutData(BoxLayoutData.FillStyle.BOTH));
-    }
+  private void setupListener() {
+    bus.subscribe("SourceViewClient", new MessageCallback() {
+      public void callback(Message message) {
+        String source = message.get(String.class, "source");
+        formatted.setSource(source);
+      }
+    });
+  }
+
+  private void createSourcePanel(LayoutPanel panel) {
+    formatted = new SourcePanel();
+    panel.add(formatted, new BoxLayoutData(BoxLayoutData.FillStyle.BOTH));
+  }
 }

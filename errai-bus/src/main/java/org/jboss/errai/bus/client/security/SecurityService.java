@@ -78,10 +78,10 @@ public class SecurityService {
 
             // Create an authentication request and send the credentials
             Message challenge = createMessage()
-                    .toSubject("AuthenticationService")
-                    .command(SecurityCommands.AuthRequest)
-                    .with(MessageParts.ReplyTo, SUBJECT)
-                    .getMessage();
+                .toSubject("AuthenticationService")
+                .command(SecurityCommands.AuthRequest)
+                .with(MessageParts.ReplyTo, SUBJECT)
+                .getMessage();
 
             for (int i = 0; i < credentialNames.length; i++) {
               switch (CredentialTypes.valueOf(credentialNames[i])) {
@@ -117,20 +117,20 @@ public class SecurityService {
 
     // listener for the authorization assignment
     ErraiBus.get().subscribe("AuthorizationListener",
-            new MessageCallback() {
-              public void callback(Message message) {
+        new MessageCallback() {
+          public void callback(Message message) {
 
-                authenticationContext = createAuthContext(message);
+            authenticationContext = createAuthContext(message);
 
-                if (!deferredNotification) {
-                  MessageBuilder.createMessage()
-                          .toSubject("LoginClient")
-                          .command(SecurityCommands.HandshakeComplete)
-                          .noErrorHandling()
-                          .sendNowWith(ErraiBus.get());
-                }
-              }
-            });
+            if (!deferredNotification) {
+              MessageBuilder.createMessage()
+                  .toSubject("LoginClient")
+                  .command(SecurityCommands.HandshakeComplete)
+                  .noErrorHandling()
+                  .sendNowWith(ErraiBus.get());
+            }
+          }
+        });
   }
 
   private void notifyLoginClient(Message msg) {
@@ -172,10 +172,10 @@ public class SecurityService {
     DeferredCommand.addCommand(new Command() {
       public void execute() {
         MessageBuilder.createMessage()
-                .toSubject("AuthenticationService")
-                .command(SecurityCommands.AuthenticationScheme)
-                .with(MessageParts.ReplyTo, SUBJECT)
-                .noErrorHandling().sendNowWith(ErraiBus.get());
+            .toSubject("AuthenticationService")
+            .command(SecurityCommands.AuthenticationScheme)
+            .with(MessageParts.ReplyTo, SUBJECT)
+            .noErrorHandling().sendNowWith(ErraiBus.get());
       }
     });
   }

@@ -22,13 +22,13 @@ import com.google.gwt.user.client.ui.SimplePanel;
 
 public class ExtSimplePanel extends SimplePanel implements ProvidesResize, RequiresResize {
 
-    public void setPixelSize(int width, int height) {
-        super.setPixelSize(width, height);
-        getWidget().setPixelSize(width, height);
-    }
+  public void setPixelSize(int width, int height) {
+    super.setPixelSize(width, height);
+    getWidget().setPixelSize(width, height);
+  }
 
 
-    public void onResize() {
-        setPixelSize(getParent().getOffsetWidth(), getParent().getOffsetHeight());
-    }
+  public void onResize() {
+    setPixelSize(getParent().getOffsetWidth(), getParent().getOffsetHeight());
+  }
 }

@@ -45,11 +45,11 @@ public class HelloWorld extends VerticalPanel implements MessageCallback {
     sayHello.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         MessageBuilder.createMessage()
-                .toSubject("HelloWorldService")
-                .with(MessageParts.ReplyTo, "HelloWorld")
-                .with("TestLong", 1000l)
-                .with("TestDouble", 1500.55d)
-                .done().sendNowWith(bus);
+            .toSubject("HelloWorldService")
+            .with(MessageParts.ReplyTo, "HelloWorld")
+            .with("TestLong", 1000l)
+            .with("TestDouble", 1500.55d)
+            .done().sendNowWith(bus);
       }
     });
 

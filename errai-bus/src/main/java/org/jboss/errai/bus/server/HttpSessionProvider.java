@@ -141,7 +141,7 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
       SessionEndEvent event = new SessionEndEvent(this);
 
       LaundryListProviderFactory.get().getLaundryList(this)
-              .cleanAll();
+          .cleanAll();
 
       for (Iterator<SessionEndListener> iter = sessionEndListeners.iterator(); iter.hasNext(); ) {
         iter.next().onSessionEnd(event);

@@ -49,8 +49,8 @@ public class ForLoop extends AbstractBlockConditional {
     }
 
     builder.append(") {\n")
-            .append(getBlock().generate(context))
-            .append("\n}\n");
+        .append(getBlock().generate(context))
+        .append("\n}\n");
 
     return builder.toString();
   }

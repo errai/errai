@@ -56,7 +56,8 @@ public class RebindUtil extends AbstractConfigBase {
       public void visit(String fqcn) {
         try {
           doVisit(oracle.getType(fqcn), context, logger, writer, visitor);
-        } catch (NotFoundException e) {
+        }
+        catch (NotFoundException e) {
           visitor.visitError(fqcn, e);
         }
       }
@@ -87,7 +88,8 @@ public class RebindUtil extends AbstractConfigBase {
   public static boolean isAnnotated(JClassType clazz, Class<? extends Annotation> annotation, Class ofType, TypeOracle oracle) {
     try {
       return isAnnotated(clazz, annotation, oracle.getType(ofType.getName()));
-    } catch (NotFoundException e) {
+    }
+    catch (NotFoundException e) {
       return false;
     }
   }

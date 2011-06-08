@@ -53,19 +53,25 @@ public class GWTUtil {
   public static MetaType fromType(JType t) {
     if (t.isClassOrInterface() != null) {
       return MetaClassFactory.get(t.isClassOrInterface());
-    } else if (t.isTypeParameter() != null) {
+    }
+    else if (t.isTypeParameter() != null) {
       return new GWTTypeVariable(t.isTypeParameter());
-    } else if (t.isGenericType() != null) {
+    }
+    else if (t.isGenericType() != null) {
       if (t.isArray() != null) {
         return new GWTGenericArrayType(t.isGenericType());
-      } else {
+      }
+      else {
         return new GWTGenericDeclaration(t.isGenericType());
       }
-    } else if (t.isParameterized() != null) {
+    }
+    else if (t.isParameterized() != null) {
       return new GWTParameterizedType(t.isParameterized());
-    } else if (t.isWildcard() != null) {
+    }
+    else if (t.isWildcard() != null) {
       return new GWTWildcardType(t.isWildcard());
-    } else {
+    }
+    else {
       return null;
     }
   }

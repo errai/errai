@@ -59,16 +59,19 @@ public class AsyncDispatcher implements RequestDispatcher {
     if (message.hasPart(MessageParts.PriorityProcessing)) {
       try {
         service.getBus().sendGlobal(message);
-      } catch (Throwable t) {
+      }
+      catch (Throwable t) {
         if (message.getErrorCallback() != null) {
           if (!message.getErrorCallback().error(message, t)) {
             return;
           }
-        } else {
+        }
+        else {
           t.printStackTrace();
         }
       }
-    } else {
+    }
+    else {
       workerFactory.deliverGlobal(message);
     }
   }

@@ -176,7 +176,8 @@ public class PooledExecuterServiceTests extends TestCase {
             System.out.println("CHECK");
             assertEquals(baseline.getSum(), test.getSum());
             System.out.println("(A) GOOD!");
-          } catch (Throwable e) {
+          }
+          catch (Throwable e) {
             System.out.println("(A) ERR");
             e.printStackTrace();
           }
@@ -190,7 +191,8 @@ public class PooledExecuterServiceTests extends TestCase {
             System.out.println("CHECK2");
             assertEquals(baseline.getSum(), test2.getSum());
             System.out.println("(B) GOOD!");
-          } catch (Throwable e) {
+          }
+          catch (Throwable e) {
             System.out.println("(B) ERR");
             e.printStackTrace();
           }
@@ -253,7 +255,8 @@ public class PooledExecuterServiceTests extends TestCase {
 
         if (++loops == seconds) loop = false;
       } while (loop);
-    } catch (InterruptedException e) {
+    }
+    catch (InterruptedException e) {
       e.printStackTrace();
     }
   }

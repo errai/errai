@@ -42,7 +42,7 @@ import static java.lang.System.nanoTime;
 public class MessageQueueImpl implements MessageQueue {
   private static final long HEARTBEAT_PERIOD = secs(30);
   private static final long TIMEOUT = Boolean.getBoolean("org.jboss.errai.debugmode") ?
-          secs(360) : secs(30);
+      secs(360) : secs(30);
 
   private static final int MAXIMUM_PAYLOAD_SIZE = 10;
   private static final long DEFAULT_TRANSMISSION_WINDOW = millis(25);
@@ -135,30 +135,35 @@ public class MessageQueueImpl implements MessageQueue {
         if (wait) {
           m = queue.poll(45, TimeUnit.SECONDS);
 
-        } else {
+        }
+        else {
           m = queue.poll();
         }
 
         if (m instanceof HasEncoded) {
           outstream.write(((HasEncoded) m).getEncoded().getBytes());
-        } else if (m instanceof QueueStopMessage) {
+        }
+        else if (m instanceof QueueStopMessage) {
           JSONStreamEncoder.encode(m.getParts(), outstream);
           queueRunning = false;
           bus.closeQueue(this);
-        } else if (m != null) {
+        }
+        else if (m != null) {
           JSONStreamEncoder.encode(m.getParts(), outstream);
         }
 
         if (_windowPolling) {
           windowPolling = true;
           _windowPolling = false;
-        } else if (windowPolling) {
+        }
+        else if (windowPolling) {
           while (!queue.isEmpty() && payLoadSize < MAXIMUM_PAYLOAD_SIZE
-                  && !isWindowExceeded()) {
+              && !isWindowExceeded()) {
             outstream.write(',');
             if ((m = queue.poll()) instanceof HasEncoded) {
               outstream.write(((HasEncoded) m).getEncoded().getBytes());
-            } else {
+            }
+            else {
               JSONStreamEncoder.encode(m.getParts(), outstream);
             }
             payLoadSize++;
@@ -166,7 +171,8 @@ public class MessageQueueImpl implements MessageQueue {
             try {
               if (queue.isEmpty())
                 Thread.sleep(nanoTime() - endWindow);
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
               // just resume.
             }
           }
@@ -174,13 +180,15 @@ public class MessageQueueImpl implements MessageQueue {
           if (!throttleIncoming && queue.size() > lastQueueSize) {
             if (transmissionWindow < MAX_TRANSMISSION_WINDOW) {
               transmissionWindow += millis(50);
-            } else {
+            }
+            else {
               throttleIncoming = true;
               System.err.println("[Warning: A queue has become saturated and " +
-                      "performance is now being degraded.]");
+                  "performance is now being degraded.]");
             }
 
-          } else if (queue.isEmpty()) {
+          }
+          else if (queue.isEmpty()) {
             transmissionWindow = DEFAULT_TRANSMISSION_WINDOW;
             throttleIncoming = false;
           }
@@ -196,9 +204,11 @@ public class MessageQueueImpl implements MessageQueue {
         outstream.write(']');
         return;
 
-      } catch (InterruptedException e) {
+      }
+      catch (InterruptedException e) {
         e.printStackTrace();
-      } finally {
+      }
+      finally {
         lock.release();
       }
       if (m == null && isHeartbeatNeeded()) {
@@ -207,7 +217,8 @@ public class MessageQueueImpl implements MessageQueue {
         outstream.write(']');
       }
 
-    } else if (isHeartbeatNeeded()) {
+    }
+    else if (isHeartbeatNeeded()) {
       System.out.println("Server_send_heartbeat");
       outstream.write('[');
       outstream.write(heartBeatBytes);
@@ -232,19 +243,22 @@ public class MessageQueueImpl implements MessageQueue {
     activity();
     try {
       b = (throttleIncoming ? queue.offer(message, 1, TimeUnit.SECONDS) : queue.offer(message));
-    } catch (InterruptedException e) {
+    }
+    catch (InterruptedException e) {
       // fall-through.
     }
 
     if (!b) {
       queue.clear();
       throw new QueueOverloadedException(null, "too many undelievered messages in queue: cannot dispatch message.");
-    } else if (activationCallback != null) {
+    }
+    else if (activationCallback != null) {
       synchronized (activationLock) {
         if (isWindowExceeded()) {
           descheduleTask();
           if (activationCallback != null) activationCallback.activate(this);
-        } else if (task == null) {
+        }
+        else if (task == null) {
           scheduleActivation();
         }
       }
@@ -260,28 +274,28 @@ public class MessageQueueImpl implements MessageQueue {
   public void scheduleActivation() {
     synchronized (activationLock) {
       bus.getScheduler().addTask(
-              task = new TimedTask() {
-                {
-                  period = -1; // only fire once.
-                  nextRuntime = getEndOfWindow();
-                }
+          task = new TimedTask() {
+            {
+              period = -1; // only fire once.
+              nextRuntime = getEndOfWindow();
+            }
 
-                public void run() {
-                  if (activationCallback != null)
-                    activationCallback.activate(MessageQueueImpl.this);
+            public void run() {
+              if (activationCallback != null)
+                activationCallback.activate(MessageQueueImpl.this);
 
-                  task = null;
-                }
+              task = null;
+            }
 
-                public boolean isFinished() {
-                  return false;
-                }
+            public boolean isFinished() {
+              return false;
+            }
 
-                @Override
-                public String toString() {
-                  return "MessageResumer";
-                }
-              }
+            @Override
+            public String toString() {
+              return "MessageResumer";
+            }
+          }
       );
     }
   }

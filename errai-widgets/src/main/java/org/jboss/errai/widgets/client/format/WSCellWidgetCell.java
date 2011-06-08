@@ -22,40 +22,40 @@ import org.jboss.errai.widgets.client.WSGrid;
 
 public class WSCellWidgetCell extends WSCellFormatter<Widget> {
 
-    Widget widget = null;
+  Widget widget = null;
 
-    public WSCellWidgetCell(Widget widget) {
-        this.widget = widget;
-        this.readonly = false;
-    }
+  public WSCellWidgetCell(Widget widget) {
+    this.widget = widget;
+    this.readonly = false;
+  }
 
 
-    public boolean edit(WSGrid.WSCell element) {
-        return false;
-    }
+  public boolean edit(WSGrid.WSCell element) {
+    return false;
+  }
 
-    public void stopedit() {
-        // do nothing
-    }
+  public void stopedit() {
+    // do nothing
+  }
 
-    public String getTextValue() {
-        return widget.toString();
-    }
+  public String getTextValue() {
+    return widget.toString();
+  }
 
-    public Widget getWidget(WSGrid grid) {
-        return widget;
-    }
+  public Widget getWidget(WSGrid grid) {
+    return widget;
+  }
 
-    public void setHeight(String height) {
-        widget.setHeight(height);
-    }
+  public void setHeight(String height) {
+    widget.setHeight(height);
+  }
 
-    public void setWidth(String width) {
-        widget.setWidth(width);
-    }
+  public void setWidth(String width) {
+    widget.setWidth(width);
+  }
 
-    @Override
-    public Widget getValue() {
-        return widget;
-    }
+  @Override
+  public Widget getValue() {
+    return widget;
+  }
 }

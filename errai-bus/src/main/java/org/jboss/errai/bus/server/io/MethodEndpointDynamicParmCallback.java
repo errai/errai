@@ -49,9 +49,11 @@ public class MethodEndpointDynamicParmCallback implements MessageCallback {
     for (int i = 0; i < parmTypes.length; i++) {
       if (Message.class.isAssignableFrom(parmTypes[i])) {
         callPlan[i] = ParmType.Message;
-      } else if (Reply.class.isAssignableFrom(parmTypes[i])) {
+      }
+      else if (Reply.class.isAssignableFrom(parmTypes[i])) {
         callPlan[i] = ParmType.Conversation;
-      } else {
+      }
+      else {
         callPlan[i] = ParmType.Object;
       }
     }
@@ -94,7 +96,7 @@ public class MethodEndpointDynamicParmCallback implements MessageCallback {
 
               public void reply() {
                 replyMessage.sendNowWith((RequestDispatcher) message.getResource(ResourceProvider.class,
-                        RequestDispatcher.class.getName()).get());
+                    RequestDispatcher.class.getName()).get());
               }
             };
             break;
@@ -102,7 +104,8 @@ public class MethodEndpointDynamicParmCallback implements MessageCallback {
       }
 
       method.invoke(instance, parmValues);
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       throw new MessageDeliveryFailure(e);
     }
   }

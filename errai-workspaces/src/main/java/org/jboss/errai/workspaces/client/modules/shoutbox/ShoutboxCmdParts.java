@@ -19,7 +19,6 @@ package org.jboss.errai.workspaces.client.modules.shoutbox;
 /**
  * @author Heiko Braun <hbraun@redhat.com>
  */
-public enum ShoutboxCmdParts
-{
+public enum ShoutboxCmdParts {
   PROVIDER, CLIENT, SUBJECT
 }

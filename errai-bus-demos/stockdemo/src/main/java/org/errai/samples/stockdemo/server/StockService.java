@@ -36,15 +36,15 @@ public class StockService {
         if (event.getSubject().equals("StockClient")) {
           if (task == null) {
             task = MessageBuilder.createMessage()
-                    .toSubject("StockClient")
-                    .command("PriceChange")
-                    .withProvided("Data", new ResourceProvider<String>() {
-                      public String get() {
-                        return simulateRandomChange();
-                      }
-                    })
-                    .noErrorHandling()
-                    .sendRepeatingWith(dispatcher, TimeUnit.MILLISECONDS, 50);
+                .toSubject("StockClient")
+                .command("PriceChange")
+                .withProvided("Data", new ResourceProvider<String>() {
+                  public String get() {
+                    return simulateRandomChange();
+                  }
+                })
+                .noErrorHandling()
+                .sendRepeatingWith(dispatcher, TimeUnit.MILLISECONDS, 50);
           }
         }
       }
@@ -55,10 +55,10 @@ public class StockService {
   public void start(Message message) {
     for (Stock stock : stocks.values()) {
       MessageBuilder.createConversation(message)
-              .toSubject("StockClient")
-              .command("UpdateStockInfo")
-              .with("Stock", stock)
-              .noErrorHandling().reply();
+          .toSubject("StockClient")
+          .command("UpdateStockInfo")
+          .with("Stock", stock)
+          .noErrorHandling().reply();
     }
   }
 
@@ -68,10 +68,10 @@ public class StockService {
     Stock stock = stocks.get(message.get(String.class, "Ticker"));
 
     MessageBuilder.createConversation(message)
-            .toSubject("StockClient")
-            .command("UpdateStockInfo")
-            .with("Stock", stock)
-            .noErrorHandling().reply();
+        .toSubject("StockClient")
+        .command("UpdateStockInfo")
+        .with("Stock", stock)
+        .noErrorHandling().reply();
   }
 
   public String simulateRandomChange() {
@@ -87,7 +87,8 @@ public class StockService {
 
       if (Math.random() > 0.85d) {
         price += Math.random() * 0.05;
-      } else if (Math.random() < 0.15d) {
+      }
+      else if (Math.random() < 0.15d) {
         price -= Math.random() * 0.05;
       }
 

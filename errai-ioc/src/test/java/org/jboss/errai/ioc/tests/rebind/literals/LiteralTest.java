@@ -54,10 +54,10 @@ public class LiteralTest extends TestCase {
 
   public void testStringLiteral() {
     final String expected = "\"The quick brown fox said \\\"how do you do?\\\"\\nNew line.\\rCarriage Return!"
-            + "\\t and a tab\"";
+        + "\\t and a tab\"";
 
     final String input = "The quick brown fox said \"how do you do?\"\nNew line.\rCarriage Return!"
-            + "\t and a tab";
+        + "\t and a tab";
 
     assertEquals(expected, LiteralFactory.getLiteral(input).generate(null));
   }

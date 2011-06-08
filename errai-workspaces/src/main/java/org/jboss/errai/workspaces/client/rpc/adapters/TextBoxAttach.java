@@ -20,7 +20,7 @@ import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.workspaces.client.rpc.Attachable;
 
 public class TextBoxAttach implements Attachable {
-    public void attach(final String id, final Widget widget, final String instanceId) {
+  public void attach(final String id, final Widget widget, final String instanceId) {
 //        final TextBox w = (TextBox) widget;
 //
 //        w.addChangeListener(
@@ -36,5 +36,5 @@ public class TextBoxAttach implements Attachable {
 //        if (val != null) {
 //            w.setText(val);
 //        }
-    }
+  }
 }

@@ -40,15 +40,17 @@ public class GWTMethod extends MetaMethod {
 
     try {
       Class<?> cls = Class.forName(method.getEnclosingType().getQualifiedSourceName(), false,
-              Thread.currentThread().getContextClassLoader());
+          Thread.currentThread().getContextClassLoader());
 
       Method meth = cls.getMethod(method.getName(), InjectUtil.jParmToClass(method.getParameters()));
 
       annotations = meth.getAnnotations();
 
-    } catch (ClassNotFoundException e) {
+    }
+    catch (ClassNotFoundException e) {
       e.printStackTrace();
-    } catch (NoSuchMethodException e) {
+    }
+    catch (NoSuchMethodException e) {
       e.printStackTrace();
     }
   }

@@ -25,8 +25,8 @@ import org.junit.runners.Suite;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({AnnotationEncoderTest.class, ClassStructureBuilderTest.class, ContextBuilderTest.class,
-        IfBlockBuilderTest.class, InvocationBuilderTest.class, LiteralTest.class, LoopBuilderTest.class,
-        StatementBuilderTest.class})
+    IfBlockBuilderTest.class, InvocationBuilderTest.class, LiteralTest.class, LoopBuilderTest.class,
+    StatementBuilderTest.class})
 public class AllStatementBuilderTests {
 
 }

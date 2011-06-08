@@ -49,8 +49,9 @@ public class InjectionContext {
       for (Injector inj : injs) {
         if (metadata == null && inj.getQualifyingMetadata() == null) {
           return inj;
-        } else if (metadata != null && inj.getQualifyingMetadata() != null
-                && metadata.doesSatisfy(inj.getQualifyingMetadata())) {
+        }
+        else if (metadata != null && inj.getQualifyingMetadata() != null
+            && metadata.doesSatisfy(inj.getQualifyingMetadata())) {
           return inj;
         }
       }
@@ -70,8 +71,9 @@ public class InjectionContext {
     List<Injector> injectorList = injectors.get(erased);
     if (injectorList.size() > 1) {
       throw new InjectionFailure("ambiguous injection type (multiple injectors resolved): "
-              + erased.getFullyQualifedName());
-    } else if (injectorList.isEmpty()) {
+          + erased.getFullyQualifedName());
+    }
+    else if (injectorList.isEmpty()) {
       throw new InjectionFailure("could not resolve type for injection: " + erased.getFullyQualifedName());
     }
 
@@ -92,7 +94,8 @@ public class InjectionContext {
     List<Injector> injectorList = injectors.get(injector.getInjectedType());
     if (injectorList == null) {
       injectors.put(injector.getInjectedType(), injectorList = new ArrayList<Injector>());
-    } else {
+    }
+    else {
       for (Injector inj : injectorList) {
         if (inj.metadataMatches(injector)) {
           return;
@@ -127,7 +130,8 @@ public class InjectionContext {
     }
     if (decoratorsByElementType.containsKey(type)) {
       return Collections.unmodifiableSet(decoratorsByElementType.get(type));
-    } else {
+    }
+    else {
       return Collections.emptySet();
     }
   }

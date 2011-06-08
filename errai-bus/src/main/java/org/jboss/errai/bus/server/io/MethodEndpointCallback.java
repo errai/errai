@@ -39,7 +39,8 @@ public class MethodEndpointCallback implements MessageCallback {
   public void callback(Message message) {
     try {
       method.invoke(instance, message);
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       throw new MessageDeliveryFailure(e);
     }
   }

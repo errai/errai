@@ -18,8 +18,7 @@ package org.jboss.errai.workspaces.client.api;
 
 import com.google.gwt.user.client.ui.Image;
 
-public interface Tool extends WidgetProvider
-{
+public interface Tool extends WidgetProvider {
   public String getName();
 
   public String getId();

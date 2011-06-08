@@ -41,7 +41,7 @@ public class SourceViewService implements MessageCallback {
     String sourceClassName = message.get(String.class, "className");
 
     ClassLoader loader = message.getResource(ClassLoader.class, "errai.experimental.classLoader");
-    if(loader==null)
+    if (loader == null)
       loader = Thread.currentThread().getContextClassLoader();
 
     String rawSource = sourceAsString(sourceClassName, loader);
@@ -73,7 +73,8 @@ public class SourceViewService implements MessageCallback {
         while ((line = reader.readLine()) != null) {
           sb.append(line).append("\n");
         }
-      } finally {
+      }
+      finally {
         is.close();
       }
       return sb.toString();

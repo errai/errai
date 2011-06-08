@@ -39,12 +39,12 @@ import org.jboss.errai.bus.server.util.ServerLaundryList;
 class DefaultResources implements BootstrapExecution {
   public void execute(BootstrapContext context) {
     final ErraiServiceConfiguratorImpl config = (ErraiServiceConfiguratorImpl) context
-            .getConfig();
+        .getConfig();
 
     config.getResourceProviders().put(MessageBus.class.getName(),
-            new BusProvider(context.getBus()));
+        new BusProvider(context.getBus()));
     config.getResourceProviders().put(RequestDispatcher.class.getName(),
-            new DispatcherProvider(context.getService().getDispatcher()));
+        new DispatcherProvider(context.getService().getDispatcher()));
 
     // configure the server-side taskmanager
 
@@ -57,11 +57,11 @@ class DefaultResources implements BootstrapExecution {
     });
 
     LaundryListProviderFactory
-            .setLaundryListProvider(new LaundryListProvider() {
-              public LaundryList getLaundryList(Object ref) {
-                return ServerLaundryList.get((QueueSession) ref);
-              }
-            });
+        .setLaundryListProvider(new LaundryListProvider() {
+          public LaundryList getLaundryList(Object ref) {
+            return ServerLaundryList.get((QueueSession) ref);
+          }
+        });
   }
 
   private TaskManager resolveTaskManager(ErraiServiceConfigurator config) {
@@ -70,12 +70,14 @@ class DefaultResources implements BootstrapExecution {
     if (tmProp != null) {
       try {
         Class<?> tm = DefaultResources.class.getClassLoader().loadClass(
-                tmProp);
+            tmProp);
         result = (TaskManager) tm.newInstance();
-      } catch (Exception e) {
+      }
+      catch (Exception e) {
         throw new RuntimeException("Failed to load task manager", e);
       }
-    } else {
+    }
+    else {
       result = DefaultTaskManager.get();
     }
     return result;

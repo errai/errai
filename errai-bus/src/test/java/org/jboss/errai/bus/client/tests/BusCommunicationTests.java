@@ -48,9 +48,9 @@ public class BusCommunicationTests extends AbstractErraiTest {
         });
 
         MessageBuilder.createMessage()
-                .toSubject("ServerEchoService")
-                .with(MessageParts.ReplyTo, "MyTestService")
-                .done().sendNowWith(bus);
+            .toSubject("ServerEchoService")
+            .with(MessageParts.ReplyTo, "MyTestService")
+            .done().sendNowWith(bus);
       }
     });
 
@@ -58,7 +58,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
 
   public static class GWTRandomProvider implements RandomProvider {
     private static char[] CHARS = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q',
-            'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'};
+        'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'};
 
     public boolean nextBoolean() {
       return com.google.gwt.user.client.Random.nextBoolean();
@@ -107,7 +107,8 @@ public class BusCommunicationTests extends AbstractErraiTest {
                 System.out.println("**TEST PASSED**");
                 finishTest();
                 return;
-              } catch (Throwable e) {
+              }
+              catch (Throwable e) {
                 e.printStackTrace();
 
               }
@@ -116,11 +117,12 @@ public class BusCommunicationTests extends AbstractErraiTest {
           });
 
           MessageBuilder.createMessage()
-                  .toSubject("TestService1")
-                  .with("SType", sType1)
-                  .with(MessageParts.ReplyTo, "ClientReceiver")
-                  .done().sendNowWith(bus);
-        } catch (Throwable t) {
+              .toSubject("TestService1")
+              .with("SType", sType1)
+              .with(MessageParts.ReplyTo, "ClientReceiver")
+              .done().sendNowWith(bus);
+        }
+        catch (Throwable t) {
           t.printStackTrace(System.out);
         }
       }
@@ -145,7 +147,8 @@ public class BusCommunicationTests extends AbstractErraiTest {
 
               finishTest();
               return;
-            } catch (Throwable t) {
+            }
+            catch (Throwable t) {
               t.printStackTrace();
             }
             fail();
@@ -153,10 +156,10 @@ public class BusCommunicationTests extends AbstractErraiTest {
         });
 
         MessageBuilder.createMessage()
-                .toSubject("TestService2")
-                .with("User", user)
-                .with(MessageParts.ReplyTo, "ClientReceiver2")
-                .done().sendNowWith(bus);
+            .toSubject("TestService2")
+            .with("User", user)
+            .with(MessageParts.ReplyTo, "ClientReceiver2")
+            .done().sendNowWith(bus);
       }
     });
   }

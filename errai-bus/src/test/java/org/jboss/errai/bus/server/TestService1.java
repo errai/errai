@@ -34,8 +34,8 @@ public class TestService1 implements MessageCallback {
     System.out.println("SERVER: " + sType);
 
     MessageBuilder.createConversation(message)
-            .subjectProvided()
-            .with("SType", sType)
-            .done().reply();
+        .subjectProvided()
+        .with("SType", sType)
+        .done().reply();
   }
 }

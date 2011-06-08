@@ -50,7 +50,7 @@ public class ClassStructureBuilder implements Builder, Finishable<ObjectBuilder>
     return new BlockBuilder<ClassStructureBuilder>(new BuildCallback<ClassStructureBuilder>() {
       public ClassStructureBuilder callback(Statement statement) {
         buf.append("public ").append(toExtend.getFullyQualifedName())
-                .append(parameters.generate(context)).append(" {\n");
+            .append(parameters.generate(context)).append(" {\n");
         if (statement != null) {
           buf.append(statement.generate(Context.create(classContext))).append("\n");
         }
@@ -75,9 +75,9 @@ public class ClassStructureBuilder implements Builder, Finishable<ObjectBuilder>
         Context ctx = Context.create(context);
 
         buf.append("public ").append(method.getReturnType().getFullyQualifedName())
-                .append(" ")
-                .append(method.getName())
-                .append(parameters.generate(ctx)).append(" {\n");
+            .append(" ")
+            .append(method.getName())
+            .append(parameters.generate(ctx)).append(" {\n");
         if (statement != null) {
           buf.append(statement.generate(ctx)).append("\n");
         }

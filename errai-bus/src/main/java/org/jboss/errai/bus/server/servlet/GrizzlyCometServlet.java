@@ -61,18 +61,18 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
 
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
-          throws ServletException, IOException {
+      throws ServletException, IOException {
     pollForMessages(sessionProvider.getSession(request.getSession(),
-            request.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER)), request, response);
+        request.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER)), request, response);
   }
 
 
   @Override
   protected void doPost(HttpServletRequest request, HttpServletResponse response)
-          throws ServletException, IOException {
+      throws ServletException, IOException {
 
     final QueueSession session = sessionProvider.getSession(request.getSession(),
-            request.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
+        request.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
 
     BufferedReader reader = request.getReader();
     StringAppender sb = new StringAppender(request.getContentLength());
@@ -91,10 +91,11 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
     if (msg != null) {
       try {
         service.store(msg);
-      } catch (Exception e) {
+      }
+      catch (Exception e) {
         if (!e.getMessage().contains("expired")) {
           writeExceptionToOutputStream(response
-                  , e);
+              , e);
           return;
         }
       }
@@ -117,7 +118,7 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
         }
 
         sendDisconnectWithReason(httpServletResponse.getOutputStream(),
-                "There is no queue associated with this session.");
+            "There is no queue associated with this session.");
       }
 
       synchronized (queue) {
@@ -134,7 +135,8 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
               context.resumeCometHandler(handler);
               try {
                 context.notify(null, CometEvent.NOTIFY, handler);
-              } catch (IOException e) {
+              }
+              catch (IOException e) {
                 // Should never get here
               }
             }
@@ -143,13 +145,15 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
           if (!queue.messagesWaiting()) {
             context.setExpirationDelay(45 * 1000);
           }
-        } else {
+        }
+        else {
           queue.setActivationCallback(null);
         }
 
         pollQueue(queue, httpServletRequest, httpServletResponse);
       }
-    } catch (final Throwable t) {
+    }
+    catch (final Throwable t) {
       t.printStackTrace();
 
       httpServletResponse.setHeader("Cache-Control", "no-cache");

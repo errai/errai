@@ -40,44 +40,60 @@ public class JSONEncoderCli {
   public String _encode(Object v, EncodingContext ctx) {
     if (v == null) {
       return "null";
-    } else if (v instanceof String) {
+    }
+    else if (v instanceof String) {
       return "\"" + ((String) v).replaceAll("\\\\\"", "\\\\\\\\\"").replaceAll("\"", "\\\\\"") + "\"" +
-              "";
-    } else if (v instanceof Number || v instanceof Boolean) {
+          "";
+    }
+    else if (v instanceof Number || v instanceof Boolean) {
       return String.valueOf(v);
-    } else if (v instanceof Collection) {
+    }
+    else if (v instanceof Collection) {
       return encodeCollection((Collection) v, ctx);
-    } else if (v instanceof Map) {
+    }
+    else if (v instanceof Map) {
       return encodeMap((Map<Object, Object>) v, ctx);
-    } else if (v instanceof Object[]) {
+    }
+    else if (v instanceof Object[]) {
       return encodeArray((Object[]) v, ctx);
-    } else if (v.getClass().isArray()) {
+    }
+    else if (v.getClass().isArray()) {
       if (v instanceof char[]) {
         return encodeArray((char[]) v, ctx);
-      } else if (v instanceof int[]) {
+      }
+      else if (v instanceof int[]) {
         return encodeArray((int[]) v, ctx);
-      } else if (v instanceof double[]) {
+      }
+      else if (v instanceof double[]) {
         return encodeArray((double[]) v, ctx);
-      } else if (v instanceof long[]) {
+      }
+      else if (v instanceof long[]) {
         return encodeArray((long[]) v, ctx);
-      } else if (v instanceof boolean[]) {
+      }
+      else if (v instanceof boolean[]) {
         return encodeArray((boolean[]) v, ctx);
-      } else if (v instanceof byte[]) {
+      }
+      else if (v instanceof byte[]) {
         return encodeArray((byte[]) v, ctx);
-      } else if (v instanceof short[]) {
+      }
+      else if (v instanceof short[]) {
         return encodeArray((short[]) v, ctx);
-      } else if (v instanceof float[]) {
+      }
+      else if (v instanceof float[]) {
         return encodeArray((float[]) v, ctx);
       }
       return null;
-    } else if (hasMarshaller(v.getClass().getName())) {
+    }
+    else if (hasMarshaller(v.getClass().getName())) {
 
       Marshaller<Object> m = getMarshaller(marshall = v.getClass().getName());
       String enc = m.marshall(v, ctx);
       return enc;
-    } else if (v instanceof Enum) {
+    }
+    else if (v instanceof Enum) {
       return "\"" + v.toString() + "\"";
-    } else {
+    }
+    else {
       defer = true;
       return null;
     }
@@ -94,11 +110,12 @@ public class JSONEncoderCli {
           mapBuild.append(",");
         }
         mapBuild.append(_encode(entry.getKey(), ctx))
-                .append(":").append(val);
+            .append(":").append(val);
 
 
         first = false;
-      } else {
+      }
+      else {
         defer = false;
       }
     }

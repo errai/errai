@@ -60,40 +60,40 @@ public class InjectionTask {
   public String doTask(InjectionContext ctx) {
     StringAppender appender = new StringAppender();
     InjectionPoint<? extends Annotation> injectionPoint
-            = new InjectionPoint(null, injectType, constructor, method, field, type, parm, injector, ctx);
+        = new InjectionPoint(null, injectType, constructor, method, field, type, parm, injector, ctx);
 
     Injector inj;
 
     switch (injectType) {
       case Type:
         ctx.getQualifiedInjector(type,
-                JSR299QualifyingMetadata.createFromAnnotations(injectionPoint.getQualifiers()));
+            JSR299QualifyingMetadata.createFromAnnotations(injectionPoint.getQualifiers()));
         break;
 
       case PrivateField:
         inj = ctx.getQualifiedInjector(field.getType(),
-                JSR299QualifyingMetadata.createFromAnnotations(injectionPoint.getQualifiers()));
+            JSR299QualifyingMetadata.createFromAnnotations(injectionPoint.getQualifiers()));
 
         appender.append(InjectUtil.getPrivateFieldInjectorName(field)).append("(")
-                .append(injector.getVarName()).append(", ")
-                .append(inj.getType(ctx, injectionPoint))
-                .append(");\n");
+            .append(injector.getVarName()).append(", ")
+            .append(inj.getType(ctx, injectionPoint))
+            .append(");\n");
 
         ctx.getPrivateFieldsToExpose().add(field);
         break;
 
       case Field:
         inj = ctx.getQualifiedInjector(field.getType(),
-                JSR299QualifyingMetadata.createFromAnnotations(injectionPoint.getQualifiers()));
+            JSR299QualifyingMetadata.createFromAnnotations(injectionPoint.getQualifiers()));
 
         appender.append(injector.getVarName()).append('.').append(field.getName()).append(" = ")
-                .append(inj.getType(ctx, injectionPoint))
-                .append(";\n");
+            .append(inj.getType(ctx, injectionPoint))
+            .append(";\n");
         break;
 
       case Method:
         appender.append(injector.getVarName()).append('.')
-                .append(method.getName()).append('(');
+            .append(method.getName()).append('(');
 
         String[] vars = InjectUtil.resolveInjectionDependencies(method.getParameters(), ctx, injectionPoint);
 

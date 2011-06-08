@@ -26,79 +26,79 @@ import org.jboss.errai.workspaces.client.layout.WorkspaceLayout;
 
 public class WSLauncherPanel extends VerticalPanel {
 
-    private boolean armed;
-    private WorkspaceLayout workspaceLayout;
+  private boolean armed;
+  private WorkspaceLayout workspaceLayout;
 
-    Timer t = new Timer() {
-        public void run() {
-            if (armed) workspaceLayout.openNavPanel();
+  Timer t = new Timer() {
+    public void run() {
+      if (armed) workspaceLayout.openNavPanel();
+    }
+  };
+
+  int range = -1;
+
+  public WSLauncherPanel(WorkspaceLayout layout) {
+    super();
+
+    sinkEvents(Event.MOUSEEVENTS);
+
+    this.workspaceLayout = layout;
+
+    ErraiCommon.disableTextSelection(getElement(), true);
+  }
+
+
+  public void onBrowserEvent(Event event) {
+    if (!armed) return;
+
+    switch (event.getTypeInt()) {
+      case Event.ONMOUSEOVER:
+        break;
+      case Event.ONMOUSEUP:
+        if (range == -1) {
+          range = getAbsoluteTop() + 20;
         }
-    };
 
-    int range = -1;
-    
-    public WSLauncherPanel(WorkspaceLayout layout) {
-        super();
-
-        sinkEvents(Event.MOUSEEVENTS);
-
-        this.workspaceLayout = layout;
-
-        ErraiCommon.disableTextSelection(getElement(), true);
-    }
-
-
-    public void onBrowserEvent(Event event) {
-        if (!armed) return;
-
-        switch (event.getTypeInt()) {
-            case Event.ONMOUSEOVER:
-                break;
-            case Event.ONMOUSEUP:
-                if (range == -1) {
-                    range = getAbsoluteTop() + 20;
-                }
-
-                if (event.getClientY() > range) {
-                    t.cancel();
-                    workspaceLayout.openNavPanel();
-                }
-                break;
-
-            case Event.ONCLICK:
-                break;
-
-            case Event.ONMOUSEMOVE:
-
-                if (range == -1) {
-                    range = getAbsoluteTop() + 20;
-                }
-
-                if (event.getClientY() > range) {
-                    setStyleName("workspace-LeftNavArea-MouseOver");
-                    t.schedule(200);
-                }
-
-                break;
-
-
-            case Event.ONMOUSEOUT:
-                Element to = DOM.eventGetToElement(event);
-                if (to == null || !DOM.isOrHasChild(this.getElement(), to)) {
-                    setStyleName("workspace-LeftNavArea");
-                    t.cancel();
-                    workspaceLayout.collapseNavPanel();
-                }
-                break;
+        if (event.getClientY() > range) {
+          t.cancel();
+          workspaceLayout.openNavPanel();
         }
-    }
+        break;
+
+      case Event.ONCLICK:
+        break;
+
+      case Event.ONMOUSEMOVE:
+
+        if (range == -1) {
+          range = getAbsoluteTop() + 20;
+        }
+
+        if (event.getClientY() > range) {
+          setStyleName("workspace-LeftNavArea-MouseOver");
+          t.schedule(200);
+        }
+
+        break;
 
 
-    public boolean isArmed() {
-        return armed;
+      case Event.ONMOUSEOUT:
+        Element to = DOM.eventGetToElement(event);
+        if (to == null || !DOM.isOrHasChild(this.getElement(), to)) {
+          setStyleName("workspace-LeftNavArea");
+          t.cancel();
+          workspaceLayout.collapseNavPanel();
+        }
+        break;
     }
+  }
 
-    public void setArmed(boolean armed) {
-        this.armed = armed;
-    }
+
+  public boolean isArmed() {
+    return armed;
+  }
+
+  public void setArmed(boolean armed) {
+    this.armed = armed;
+  }
 }

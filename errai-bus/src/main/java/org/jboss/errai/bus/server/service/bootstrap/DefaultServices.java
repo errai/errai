@@ -41,7 +41,7 @@ class DefaultServices implements BootstrapExecution {
   public void execute(final BootstrapContext context) {
     final ServerMessageBus bus = context.getBus();
     final boolean authenticationConfigured =
-            context.getConfig().getResource(AuthenticationAdapter.class) != null;
+        context.getConfig().getResource(AuthenticationAdapter.class) != null;
 
     bus.subscribe(ErraiService.AUTHORIZATION_SVC_SUBJECT, new MessageCallback() {
       public void callback(Message message) {
@@ -55,16 +55,17 @@ class DefaultServices implements BootstrapExecution {
               //todo: we only support login/password for now
 
               createConversation(message)
-                      .subjectProvided()
-                      .command(SecurityCommands.AuthenticationScheme)
-                      .with(SecurityParts.CredentialsRequired, "Name,Password")
-                      .with(MessageParts.ReplyTo, ErraiService.AUTHORIZATION_SVC_SUBJECT)
-                      .noErrorHandling().sendNowWith(bus);
-            } else {
+                  .subjectProvided()
+                  .command(SecurityCommands.AuthenticationScheme)
+                  .with(SecurityParts.CredentialsRequired, "Name,Password")
+                  .with(MessageParts.ReplyTo, ErraiService.AUTHORIZATION_SVC_SUBJECT)
+                  .noErrorHandling().sendNowWith(bus);
+            }
+            else {
               createConversation(message)
-                      .subjectProvided()
-                      .command(SecurityCommands.AuthenticationNotRequired)
-                      .noErrorHandling().sendNowWith(bus);
+                  .subjectProvided()
+                  .command(SecurityCommands.AuthenticationNotRequired)
+                  .noErrorHandling().sendNowWith(bus);
             }
 
             break;
@@ -77,8 +78,9 @@ class DefaultServices implements BootstrapExecution {
             if (authenticationConfigured) {
               try {
                 context.getConfig().getResource(AuthenticationAdapter.class)
-                        .challenge(message);
-              } catch (AuthenticationFailedException a) {
+                    .challenge(message);
+              }
+              catch (AuthenticationFailedException a) {
               }
             }
             break;
@@ -86,15 +88,15 @@ class DefaultServices implements BootstrapExecution {
           case EndSession:
             if (authenticationConfigured) {
               context.getConfig().getResource(AuthenticationAdapter.class)
-                      .endSession(message);
+                  .endSession(message);
             }
 
             // reply in any case
             createConversation(message)
-                    .toSubject("LoginClient")
-                    .command(SecurityCommands.EndSession)
-                    .noErrorHandling()
-                    .sendNowWith(bus);
+                .toSubject("LoginClient")
+                .command(SecurityCommands.EndSession)
+                .noErrorHandling()
+                .sendNowWith(bus);
 
             break;
         }
@@ -107,15 +109,15 @@ class DefaultServices implements BootstrapExecution {
     bus.subscribe(ErraiService.SERVER_ECHO_SERVICE, new MessageCallback() {
       public void callback(Message c) {
         MessageBuilder.createConversation(c)
-                .subjectProvided().noErrorHandling()
-                .sendNowWith(bus);
+            .subjectProvided().noErrorHandling()
+            .sendNowWith(bus);
       }
     });
 
     bus.subscribe(ErraiService.AUTHORIZATION_SERVICE, new MessageCallback() {
       public void callback(Message message) {
         AuthSubject subject = message.getResource(QueueSession.class, "Session")
-                .getAttribute(AuthSubject.class, ErraiService.SESSION_AUTH_DATA);
+            .getAttribute(AuthSubject.class, ErraiService.SESSION_AUTH_DATA);
 
         Message reply = MessageBuilder.createConversation(message).getMessage();
 

@@ -75,14 +75,15 @@ public class AbstractMessageBuilder<R extends Sendable> {
       public void sendGlobalWith(RequestDispatcher viaThis) {
         try {
           viaThis.dispatchGlobal(message);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
           throw new MessageDeliveryFailure("unable to deliver message: " + e.getMessage(), e);
         }
       }
 
       public void reply() {
         RequestDispatcher dispatcher = (RequestDispatcher)
-                getIncomingMessage().getResource(ResourceProvider.class, RequestDispatcher.class.getName()).get();
+            getIncomingMessage().getResource(ResourceProvider.class, RequestDispatcher.class.getName()).get();
 
         if (dispatcher == null) {
           throw new IllegalStateException("Cannot reply.  Cannot find RequestDispatcher resource.");
@@ -97,7 +98,8 @@ public class AbstractMessageBuilder<R extends Sendable> {
 
         try {
           dispatcher.dispatch(message);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
           throw new MessageDeliveryFailure("unable to deliver message: " + e.getMessage(), e);
         }
       }
@@ -146,33 +148,36 @@ public class AbstractMessageBuilder<R extends Sendable> {
               if (incomingMsg.hasPart(MessageParts.ReplyTo)) {
                 sender = new Runnable() {
                   final String replyTo = incomingMsg
-                          .get(String.class, MessageParts.ReplyTo);
+                      .get(String.class, MessageParts.ReplyTo);
 
                   public void run() {
                     try {
                       MessageBuilder.getMessageProvider().get()
-                              .toSubject(replyTo)
-                              .copyResource("Session", incomingMsg)
-                              .addAllParts(message.getParts())
-                              .addAllProvidedParts(message.getProvidedParts())
-                              .errorsCall(errorCallback).sendNowWith(viaThis);
-                    } catch (Throwable t) {
+                          .toSubject(replyTo)
+                          .copyResource("Session", incomingMsg)
+                          .addAllParts(message.getParts())
+                          .addAllProvidedParts(message.getProvidedParts())
+                          .errorsCall(errorCallback).sendNowWith(viaThis);
+                    }
+                    catch (Throwable t) {
                       t.printStackTrace();
                       getAsyncTask().cancel(true);
                     }
                   }
                 };
-              } else {
+              }
+              else {
                 sender = new Runnable() {
 
                   public void run() {
                     try {
                       MessageBuilder.getMessageProvider().get()
-                              .copyResource("Session", incomingMsg)
-                              .addAllParts(message.getParts())
-                              .addAllProvidedParts(message.getProvidedParts())
-                              .errorsCall(errorCallback).sendNowWith(viaThis);
-                    } catch (Throwable t) {
+                          .copyResource("Session", incomingMsg)
+                          .addAllParts(message.getParts())
+                          .addAllProvidedParts(message.getProvidedParts())
+                          .errorsCall(errorCallback).sendNowWith(viaThis);
+                    }
+                    catch (Throwable t) {
                       t.printStackTrace();
                       getAsyncTask().cancel(true);
                     }
@@ -180,15 +185,17 @@ public class AbstractMessageBuilder<R extends Sendable> {
                   }
                 };
               }
-            } else {
+            }
+            else {
               sender = new Runnable() {
                 public void run() {
                   try {
                     viaThis.dispatchGlobal(MessageBuilder.getMessageProvider().get()
-                            .addAllParts(message.getParts())
-                            .addAllProvidedParts(message.getProvidedParts())
-                            .errorsCall(errorCallback));
-                  } catch (Throwable t) {
+                        .addAllParts(message.getParts())
+                        .addAllProvidedParts(message.getProvidedParts())
+                        .errorsCall(errorCallback));
+                  }
+                  catch (Throwable t) {
                     t.printStackTrace();
                     getAsyncTask().cancel(true);
                   }
@@ -217,12 +224,12 @@ public class AbstractMessageBuilder<R extends Sendable> {
 
         if (isConversational) {
           final LaundryReclaim reclaim =
-                  LaundryListProviderFactory.get().getLaundryList(((ConversationMessageWrapper) message).getIncomingMessage().getResource(Object.class, "Session"))
-                          .addToHamper(new Laundry() {
-                            public void clean() {
-                              task.cancel(true);
-                            }
-                          });
+              LaundryListProviderFactory.get().getLaundryList(((ConversationMessageWrapper) message).getIncomingMessage().getResource(Object.class, "Session"))
+                  .addToHamper(new Laundry() {
+                    public void clean() {
+                      task.cancel(true);
+                    }
+                  });
 
           task.setExitHandler(new Runnable() {
             public void run() {
@@ -239,7 +246,7 @@ public class AbstractMessageBuilder<R extends Sendable> {
         return TaskManagerFactory.get().schedule(unit, interval, new HasAsyncTaskRef() {
           AsyncTask task;
           AsyncDelegateErrorCallback errorCallback
-                  = new AsyncDelegateErrorCallback(this, message.getErrorCallback());
+              = new AsyncDelegateErrorCallback(this, message.getErrorCallback());
 
           public void setAsyncTask(AsyncTask task) {
             synchronized (this) {
@@ -256,10 +263,10 @@ public class AbstractMessageBuilder<R extends Sendable> {
 
           public void run() {
             MessageBuilder.getMessageProvider().get()
-                    .copyResource("Session", message)
-                    .addAllParts(message.getParts())
-                    .addAllProvidedParts(message.getProvidedParts())
-                    .errorsCall(errorCallback).sendNowWith(viaThis);
+                .copyResource("Session", message)
+                .addAllParts(message.getParts())
+                .addAllProvidedParts(message.getProvidedParts())
+                .errorsCall(errorCallback).sendNowWith(viaThis);
           }
         });
       }

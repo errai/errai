@@ -79,7 +79,8 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
     try {
       ctx = StatementBuilder.create().addVariable("n", Integer.class, "abc").getContext();
       fail("Expected InvalidTypeException");
-    } catch (InvalidTypeException ive) {
+    }
+    catch (InvalidTypeException ive) {
       //expected
       assertTrue(ive.getCause() instanceof NumberFormatException);
     }
@@ -89,7 +90,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   public void testAddVariableWithObjectInitialization() {
     Context ctx = Context.create();
     StatementBuilder.create().addVariable("str", String.class,
-            ObjectBuilder.newInstanceOf(String.class)).generate(ctx);
+        ObjectBuilder.newInstanceOf(String.class)).generate(ctx);
 
     VariableReference str = ctx.getVariable("str");
     assertEquals("Wrong variable name", "str", str.getName());
@@ -108,7 +109,8 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
     try {
       StatementBuilder.create().loadVariable("n").toJavaString();
       fail("Expected OutOfScopeException");
-    } catch (OutOfScopeException oose) {
+    }
+    catch (OutOfScopeException oose) {
       // expected
     }
   }
@@ -117,16 +119,18 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   public void testCreateAndInitializeArray() {
     try {
       StatementBuilder.create().newArray(Annotation.class)
-              .initialize("1", "2").toJavaString();
+          .initialize("1", "2").toJavaString();
       fail("Expected InvalidTypeException");
-    } catch (InvalidTypeException oose) {
+    }
+    catch (InvalidTypeException oose) {
       // expected
     }
 
     try {
       StatementBuilder.create().newArray(String.class).toJavaString();
       fail("Expected RuntimeException");
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       // expected
       assertEquals("Must provide either dimension expressions or an array initializer", e.getMessage());
     }
@@ -135,63 +139,63 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
     assertEquals("new java.lang.String[] {\"1\",\"2\"}", s);
 
     Statement annotation1 = ObjectBuilder.newInstanceOf(Annotation.class)
-            .extend()
-            .publicOverridesMethod("annotationType")
-            .append(StatementBuilder.create().load(Inject.class).returnValue())
-            .finish()
-            .finish();
+        .extend()
+        .publicOverridesMethod("annotationType")
+        .append(StatementBuilder.create().load(Inject.class).returnValue())
+        .finish()
+        .finish();
 
     Statement annotation2 = ObjectBuilder.newInstanceOf(Annotation.class)
-            .extend()
-            .publicOverridesMethod("annotationType")
-            .append(StatementBuilder.create().load(PostConstruct.class).returnValue())
-            .finish()
-            .finish();
+        .extend()
+        .publicOverridesMethod("annotationType")
+        .append(StatementBuilder.create().load(PostConstruct.class).returnValue())
+        .finish()
+        .finish();
 
     s = StatementBuilder.create().newArray(Annotation.class)
-            .initialize(annotation1, annotation2)
-            .toJavaString();
+        .initialize(annotation1, annotation2)
+        .toJavaString();
 
     assertEquals("new java.lang.annotation.Annotation[] {" +
-            "new java.lang.annotation.Annotation() {\n" +
-            "public java.lang.Class annotationType() {\n" +
-            "return javax.inject.Inject.class;\n" +
-            "}\n" +
-            "}\n" +
-            ",new java.lang.annotation.Annotation() {\n" +
-            "public java.lang.Class annotationType() {\n" +
-            "return javax.annotation.PostConstruct.class;\n" +
-            "}\n" +
-            "}\n" +
-            "}", s);
+        "new java.lang.annotation.Annotation() {\n" +
+        "public java.lang.Class annotationType() {\n" +
+        "return javax.inject.Inject.class;\n" +
+        "}\n" +
+        "}\n" +
+        ",new java.lang.annotation.Annotation() {\n" +
+        "public java.lang.Class annotationType() {\n" +
+        "return javax.annotation.PostConstruct.class;\n" +
+        "}\n" +
+        "}\n" +
+        "}", s);
   }
 
   @Test
   public void testCreateAndInitializeMultiDimensionalArray() {
 
     String s = StatementBuilder.create().newArray(Integer.class)
-            .initialize(new Integer[][]{{1, 2}, {3, 4}})
-            .toJavaString();
+        .initialize(new Integer[][]{{1, 2}, {3, 4}})
+        .toJavaString();
 
     assertEquals("Failed to generate two dimensional array", "new java.lang.Integer[][] {{1,2},{3,4}}", s);
 
     s = StatementBuilder.create().newArray(String.class)
-            .initialize(new Statement[][]{
-                    {StatementBuilder.create().invokeStatic(Integer.class, "toString", 1),
-                            StatementBuilder.create().invokeStatic(Integer.class, "toString", 2)},
-                    {StatementBuilder.create().invokeStatic(Integer.class, "toString", 3),
-                            StatementBuilder.create().invokeStatic(Integer.class, "toString", 4)}})
-            .toJavaString();
+        .initialize(new Statement[][]{
+            {StatementBuilder.create().invokeStatic(Integer.class, "toString", 1),
+                StatementBuilder.create().invokeStatic(Integer.class, "toString", 2)},
+            {StatementBuilder.create().invokeStatic(Integer.class, "toString", 3),
+                StatementBuilder.create().invokeStatic(Integer.class, "toString", 4)}})
+        .toJavaString();
 
     assertEquals("Failed to generate two dimensional array using statements",
-            "new java.lang.String[][] {{java.lang.Integer.toString(1),java.lang.Integer.toString(2)}," +
-                    "{java.lang.Integer.toString(3),java.lang.Integer.toString(4)}}", s);
+        "new java.lang.String[][] {{java.lang.Integer.toString(1),java.lang.Integer.toString(2)}," +
+            "{java.lang.Integer.toString(3),java.lang.Integer.toString(4)}}", s);
 
     s = StatementBuilder.create().newArray(String.class)
-            .initialize(new String[][][]{{{"1", "2"}, {"a", "b"}}, {{"3", "4"}, {"b", "c"}}})
-            .toJavaString();
+        .initialize(new String[][][]{{{"1", "2"}, {"a", "b"}}, {{"3", "4"}, {"b", "c"}}})
+        .toJavaString();
 
     assertEquals("Failed to generate three dimensional array",
-            "new java.lang.String[][][] {{{\"1\",\"2\"},{\"a\",\"b\"}},{{\"3\",\"4\"},{\"b\",\"c\"}}}", s);
+        "new java.lang.String[][][] {{{\"1\",\"2\"},{\"a\",\"b\"}},{{\"3\",\"4\"},{\"b\",\"c\"}}}", s);
   }
 }

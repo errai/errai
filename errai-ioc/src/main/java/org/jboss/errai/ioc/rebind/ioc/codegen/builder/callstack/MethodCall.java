@@ -46,7 +46,7 @@ public class MethodCall extends AbstractCallElement {
 
     MetaClass[] parameterTypes = callParams.getParameterTypes();
     MetaMethod method = (staticMethod) ? statement.getType().getBestMatchingStaticMethod(methodName, parameterTypes)
-            : statement.getType().getBestMatchingMethod(methodName, parameterTypes);
+        : statement.getType().getBestMatchingMethod(methodName, parameterTypes);
     if (method == null)
       throw new UndefinedMethodException(methodName, parameterTypes);
 

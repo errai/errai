@@ -86,11 +86,12 @@ public class Worker extends Thread {
 
     if (!isInterrupted() && workExpiry != 0) {
       log.info("failed to interrupt worker.");
-    } else {
+    }
+    else {
       workExpiry = 0;
       sendClientError(bus, message,
-              "Request for '" + message.getSubject() + "' timed out.",
-              "The process was terminated because it exceed the maximum timeout.");
+          "Request for '" + message.getSubject() + "' timed out.",
+          "The process was terminated because it exceed the maximum timeout.");
     }
   }
 
@@ -113,16 +114,21 @@ public class Worker extends Thread {
             return;
           }
         }
-      } catch (InterruptedException e) {
+      }
+      catch (InterruptedException e) {
         if (!active) return;
-      } catch (QueueOverloadedException e) {
+      }
+      catch (QueueOverloadedException e) {
         handleMessageDeliveryFailure(bus, message, "Queue has become saturated/overloaded", e, true);
-      } catch (QueueUnavailableException e) {
+      }
+      catch (QueueUnavailableException e) {
         e.printStackTrace();
         //  handleMessageDeliveryFailure(bus, message, "Queue is not available", e, true);
-      } catch (Throwable e) {
+      }
+      catch (Throwable e) {
         handleMessageDeliveryFailure(bus, message, "Error calling remote service: " + message.getSubject(), e, false);
-      } finally {
+      }
+      finally {
         workExpiry = 0;
       }
     }
@@ -132,7 +138,8 @@ public class Worker extends Thread {
   public static void deliverToBus(MessageBus bus, Message message) {
     if (message.isFlagSet(RoutingFlags.NonGlobalRouting)) {
       bus.send(message);
-    } else {
+    }
+    else {
       bus.sendGlobal(message);
     }
   }

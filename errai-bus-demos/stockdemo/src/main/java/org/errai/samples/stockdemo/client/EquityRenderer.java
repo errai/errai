@@ -102,9 +102,11 @@ public class EquityRenderer {
   public void setLastTrade(double lastTrade) {
     if (lastTrade < this.lastTrade) {
       lastTradeLabel.getElement().getStyle().setProperty("backgroundColor", "red");
-    } else if (lastTrade == this.lastTrade) {
+    }
+    else if (lastTrade == this.lastTrade) {
       lastTradeLabel.getElement().getStyle().setProperty("backgroundColor", "transparent");
-    } else {
+    }
+    else {
       lastTradeLabel.getElement().getStyle().setProperty("backgroundColor", "green");
     }
 
@@ -115,7 +117,8 @@ public class EquityRenderer {
 
     if (change >= 0) {
       changeLabel.getElement().getStyle().setProperty("color", "green");
-    } else {
+    }
+    else {
       changeLabel.getElement().getStyle().setProperty("color", "red");
     }
 

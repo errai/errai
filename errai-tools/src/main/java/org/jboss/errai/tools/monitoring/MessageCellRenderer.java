@@ -41,7 +41,8 @@ public class MessageCellRenderer extends DefaultTableCellRenderer {
       for (Map.Entry<String, Object> entry : vars.entrySet()) {
         if (first) {
           first = false;
-        } else {
+        }
+        else {
           appender.append(", ");
         }
 

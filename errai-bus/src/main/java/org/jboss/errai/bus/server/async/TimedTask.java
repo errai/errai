@@ -119,7 +119,8 @@ public abstract class TimedTask implements Runnable, Comparable<TimedTask>, Asyn
       if (!cancel && period != -1) {
         nextRuntime = currentTimeMillis() + period;
         return true;
-      } else {
+      }
+      else {
         nextRuntime = -1;
         return false;
       }

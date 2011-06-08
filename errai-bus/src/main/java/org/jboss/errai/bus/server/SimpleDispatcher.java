@@ -42,9 +42,11 @@ public class SimpleDispatcher implements RequestDispatcher {
   public void dispatchGlobal(Message message) {
     try {
       bus.sendGlobal(message);
-    } catch (QueueUnavailableException e) {
+    }
+    catch (QueueUnavailableException e) {
       handleMessageDeliveryFailure(bus, message, "Queue is not available", e, true);
-    } catch (Throwable e) {
+    }
+    catch (Throwable e) {
       handleMessageDeliveryFailure(bus, message, "Error calling remote service: " + message.getSubject(), e, false);
     }
   }
@@ -52,9 +54,11 @@ public class SimpleDispatcher implements RequestDispatcher {
   public void dispatch(Message message) {
     try {
       bus.send(message);
-    } catch (QueueUnavailableException e) {
+    }
+    catch (QueueUnavailableException e) {
       handleMessageDeliveryFailure(bus, message, "Queue is not available", e, true);
-    } catch (Throwable e) {
+    }
+    catch (Throwable e) {
       handleMessageDeliveryFailure(bus, message, "Error calling remote service: " + message.getSubject(), e, false);
     }
   }

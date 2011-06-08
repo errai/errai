@@ -1,7 +1,7 @@
-#set( $symbol_pound = '#' )
-#set( $symbol_dollar = '$' )
-#set( $symbol_escape = '\' )
-package ${package}.server;
+#set($symbol_pound='#')
+    #set($symbol_dollar='$')
+    #set($symbol_escape='\' )
+    package ${package}.server;
 
 import org.jboss.errai.bus.server.annotations.ExtensionComponent;
 import org.jboss.errai.bus.server.api.ErraiConfig;
@@ -28,10 +28,8 @@ import org.jboss.errai.bus.server.api.ErraiConfigExtension;
  * when the application is deployed, etc.
  */
 @ExtensionComponent
-public class AppConfigurator implements ErraiConfigExtension
-{
-  public void configure(ErraiConfig config)
-  {
+public class AppConfigurator implements ErraiConfigExtension {
+  public void configure(ErraiConfig config) {
     // provide extension points here
   }
 }

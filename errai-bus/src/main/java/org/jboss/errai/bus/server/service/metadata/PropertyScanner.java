@@ -51,7 +51,8 @@ public class PropertyScanner extends AbstractScanner {
 
     try {
       properties.get(key).load(file.getInputStream());
-    } catch (IOException e) {
+    }
+    catch (IOException e) {
       throw new RuntimeException("Failed to load properties: " + file.getFullPath(), e);
     }
   }

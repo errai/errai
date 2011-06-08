@@ -30,48 +30,48 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class UiHelper {
-    static {
-        // force classloading of this class for usage in the static reference below.
-        new UiHelper();
-    }
+  static {
+    // force classloading of this class for usage in the static reference below.
+    new UiHelper();
+  }
 
-    public static Icon getSwIcon(String name) {
-        ClassLoader cls = UiHelper.class.getClassLoader();
-        URL url = cls.getResource(name);
+  public static Icon getSwIcon(String name) {
+    ClassLoader cls = UiHelper.class.getClassLoader();
+    URL url = cls.getResource(name);
 
-        if (url == null) throw new RuntimeException("could not find: " + name);
+    if (url == null) throw new RuntimeException("could not find: " + name);
 
-        return new ImageIcon(url);
-    }
+    return new ImageIcon(url);
+  }
 
-    public static DefaultMutableTreeNode createIconEntry(String icon, String name) {
-        return new DefaultMutableTreeNode(new JLabel(name, getSwIcon(icon), SwingConstants.LEFT));
-    }
+  public static DefaultMutableTreeNode createIconEntry(String icon, String name) {
+    return new DefaultMutableTreeNode(new JLabel(name, getSwIcon(icon), SwingConstants.LEFT));
+  }
 
-    public static Message uglyReEncode(String message) {
-        if (message == null) return null;
-        Map<String, Object> parts = (Map<String, Object>) JSONDecoder.decode(message);
+  public static Message uglyReEncode(String message) {
+    if (message == null) return null;
+    Map<String, Object> parts = (Map<String, Object>) JSONDecoder.decode(message);
 
-        Message newMessage = CommandMessage.createWithParts(parts);
+    Message newMessage = CommandMessage.createWithParts(parts);
 //        if (parts.containsKey(SerializationParts.MARSHALLED_TYPES)) {
 //            TypeDemarshallHelper.demarshallAll((String) parts.get(SerializationParts.MARSHALLED_TYPES), newMessage);
 //        }
-        return newMessage;
-    }
+    return newMessage;
+  }
 
-    public static Message uglyReEncode(Message message) {
-        Map<String, Object> parts = (Map<String, Object>) JSONDecoder.decode(ServerBusUtils.encodeJSON(message.getParts()));
+  public static Message uglyReEncode(Message message) {
+    Map<String, Object> parts = (Map<String, Object>) JSONDecoder.decode(ServerBusUtils.encodeJSON(message.getParts()));
 
-        Message newMessage = CommandMessage.createWithParts(parts);
+    Message newMessage = CommandMessage.createWithParts(parts);
 //        if (parts.containsKey(SerializationParts.MARSHALLED_TYPES)) {
 //            TypeDemarshallHelper.demarshallAll((String) parts.get(SerializationParts.MARSHALLED_TYPES), newMessage);
 //        }
-        return newMessage;
-    }
+    return newMessage;
+  }
 
-    public static Message decodeAndDemarshall(String json) {
-        Map<String, Object> parts = (Map<String, Object>) JSONDecoder.decode(json);
-        if (parts == null) return CommandMessage.createWithParts(new HashMap());
-        return CommandMessage.createWithParts(parts);
-    }
+  public static Message decodeAndDemarshall(String json) {
+    Map<String, Object> parts = (Map<String, Object>) JSONDecoder.decode(json);
+    if (parts == null) return CommandMessage.createWithParts(new HashMap());
+    return CommandMessage.createWithParts(parts);
+  }
 }

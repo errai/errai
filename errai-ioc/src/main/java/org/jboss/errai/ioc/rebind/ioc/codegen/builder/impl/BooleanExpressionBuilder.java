@@ -68,8 +68,8 @@ public class BooleanExpressionBuilder implements Statement {
     }
 
     return ((lhs != null) ? lhs.generate(context) : lhsExpr)
-            + ((operator != null) ? (" " + operator.getCanonicalString()) : "")
-            + ((rhs != null) ? (" " + rhs.generate(context)) : "");
+        + ((operator != null) ? (" " + operator.getCanonicalString()) : "")
+        + ((rhs != null) ? (" " + rhs.generate(context)) : "");
   }
 
   public Context getContext() {

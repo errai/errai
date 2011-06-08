@@ -178,14 +178,14 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
     }
 
     for (Enumeration<String> keys = bundle.getKeys();
-         keys.hasMoreElements();) {
+         keys.hasMoreElements(); ) {
       String key = keys.nextElement();
 
       sourceWriter.println("new " + bundle.getString(key) + "().initModule(errai);");
     }
 
     iocGenerator.generateAllProviders();
-    
+
     final boolean applyFilter = in != null;
     MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
 
@@ -193,12 +193,10 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
      * LoadToolSet
      */
     Set<Class<?>> toolsets = scanner.getTypesAnnotatedWith(LoadToolSet.class);
-    for(Class<?> toolSetClass : toolsets)
-    {
+    for (Class<?> toolSetClass : toolsets) {
       MetaClass clazz = typeOracle.findType(toolSetClass.getName());
 
-      if ((!applyFilter || enabledTools.contains(clazz.getQualifiedSourceName())))
-      {
+      if ((!applyFilter || enabledTools.contains(clazz.getQualifiedSourceName()))) {
         iocGenerator.addType(clazz);
         String instance = iocGenerator.generateInjectors(clazz);
         sourceWriter.println("workspace.addToolSet(" + instance + ");");
@@ -210,12 +208,10 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
      * LoadTool
      */
     Set<Class<?>> tools = scanner.getTypesAnnotatedWith(LoadTool.class);
-    for(Class<?> toolClass : tools)
-    {
+    for (Class<?> toolClass : tools) {
       MetaClass clazz = typeOracle.findType(toolClass.getName());
 
-      if ((!applyFilter || enabledTools.contains(clazz.getQualifiedSourceName())))
-      {
+      if ((!applyFilter || enabledTools.contains(clazz.getQualifiedSourceName()))) {
 
         iocGenerator.addType(clazz);
         LoadTool loadTool = clazz.getAnnotation(LoadTool.class);
@@ -236,13 +232,13 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
 
           generateWidgetProvisioning(context, clazz.getQualifiedSourceName(), loadTool, rolesBuilder, logger, sourceWriter);
 
-        } else {
+        }
+        else {
           generateWidgetProvisioning(context, clazz.getQualifiedSourceName(), loadTool, null, logger, sourceWriter);
 
         }
       }
-      else if (clazz.isAnnotationPresent(LoginComponent.class))
-      {
+      else if (clazz.isAnnotationPresent(LoginComponent.class)) {
         sourceWriter.println("workspace.setLoginComponent(new " + clazz.getQualifiedSourceName() + "());");
       }
     }
@@ -251,8 +247,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
      * Group order
      */
     Set<Class<?>> groupOrderClasses = scanner.getTypesAnnotatedWith(GroupOrder.class);
-    for(Class<?> clazz : groupOrderClasses)
-    {
+    for (Class<?> clazz : groupOrderClasses) {
       GroupOrder groupOrder = clazz.getAnnotation(GroupOrder.class);
 
       if ("".equals(groupOrder.value().trim())) return;
@@ -278,7 +273,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
     sourceWriter.outdent();
     sourceWriter.println("}");
   }
-  
+
   public void generateWidgetProvisioning(final GeneratorContext context, String className, final LoadTool loadTool, final StringBuilder rolesBuilder, final TreeLogger logger, final SourceWriter writer) {
     MetaClass type;
     JClassType widgetType;
@@ -309,7 +304,8 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
       writer.println("};");
 
       providerName = "widgetProvider" + counter;
-    } else {
+    }
+    else {
       providerName = iocGenerator
           .generateInjectors(type);
     }
@@ -320,7 +316,8 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
 
     if (rolesBuilder == null) {
       writer.println(");");
-    } else {
+    }
+    else {
       writer.println(", " + rolesBuilder.toString() + ");");
     }
   }

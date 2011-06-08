@@ -50,10 +50,10 @@ public class WeblogicAsyncServlet extends AbstractErraiServlet {
    */
   @Override
   protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
-          throws ServletException, IOException {
+      throws ServletException, IOException {
     pollForMessages(sessionProvider.getSession(httpServletRequest.getSession(),
-            httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER)),
-            httpServletRequest, httpServletResponse);
+        httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER)),
+        httpServletRequest, httpServletResponse);
   }
 
   /**
@@ -67,10 +67,10 @@ public class WeblogicAsyncServlet extends AbstractErraiServlet {
    */
   @Override
   protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
-          throws ServletException, IOException {
+      throws ServletException, IOException {
 
     final QueueSession session = sessionProvider.getSession(httpServletRequest.getSession(),
-            httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
+        httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
 
     BufferedReader reader = httpServletRequest.getReader();
     StringAppender sb = new StringAppender(httpServletRequest.getContentLength());
@@ -89,7 +89,8 @@ public class WeblogicAsyncServlet extends AbstractErraiServlet {
     if (m != null) {
       try {
         service.store(m);
-      } catch (Exception e) {
+      }
+      catch (Exception e) {
         if (!e.getMessage().contains("expired")) {
           writeExceptionToOutputStream(httpServletResponse, e);
           return;
@@ -112,12 +113,13 @@ public class WeblogicAsyncServlet extends AbstractErraiServlet {
             return;
         }
         sendDisconnectWithReason(httpServletResponse.getOutputStream(),
-                "There is no queue associated with this session.");
+            "There is no queue associated with this session.");
       }
 
       pollQueue(queue, httpServletRequest, httpServletResponse);
 
-    } catch (final Throwable t) {
+    }
+    catch (final Throwable t) {
       t.printStackTrace();
 
       httpServletResponse.setHeader("Cache-Control", "no-cache");

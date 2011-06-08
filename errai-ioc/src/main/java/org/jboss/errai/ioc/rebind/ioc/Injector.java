@@ -39,9 +39,9 @@ public abstract class Injector {
 
   public boolean metadataMatches(Injector injector) {
     return (injector == null && qualifyingMetadata == null) ||
-            (injector != null && injector.getQualifyingMetadata() != null
-                    && qualifyingMetadata != null
-                    && injector.getQualifyingMetadata().doesSatisfy(qualifyingMetadata));
+        (injector != null && injector.getQualifyingMetadata() != null
+            && qualifyingMetadata != null
+            && injector.getQualifyingMetadata().doesSatisfy(qualifyingMetadata));
   }
 
   public QualifyingMetadata getQualifyingMetadata() {

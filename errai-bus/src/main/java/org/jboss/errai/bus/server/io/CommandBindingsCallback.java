@@ -38,15 +38,15 @@ public class CommandBindingsCallback implements MessageCallback {
       Class[] parmTypes = entry.getValue().getParameterTypes();
 
       if (parmTypes.length > 1 ||
-              (parmTypes.length == 1 && !Message.class.isAssignableFrom(parmTypes[0]))) {
+          (parmTypes.length == 1 && !Message.class.isAssignableFrom(parmTypes[0]))) {
         throw new IllegalStateException("method does not implement signature: " + entry.getValue().getName()
-                + "(" + Message.class.getName() + ")");
+            + "(" + Message.class.getName() + ")");
       }
 
       methodDispatchers.put(entry.getKey(),
-              parmTypes.length == 0 ?
-                      new NoParamMethodDispatcher(delegate, entry.getValue()) :
-                      new DefaultMethodDispatcher(delegate, entry.getValue()));
+          parmTypes.length == 0 ?
+              new NoParamMethodDispatcher(delegate, entry.getValue()) :
+              new DefaultMethodDispatcher(delegate, entry.getValue()));
     }
   }
 
@@ -55,13 +55,16 @@ public class CommandBindingsCallback implements MessageCallback {
     if (method == null) {
       if (defaultAction) {
         defaultCallback.callback(message);
-      } else {
+      }
+      else {
         throw new RuntimeException("no such command: " + message.getCommandType());
       }
-    } else {
+    }
+    else {
       try {
         method.dispatch(message);
-      } catch (Exception e) {
+      }
+      catch (Exception e) {
         throw new MessageDeliveryFailure(e);
       }
     }

@@ -49,7 +49,8 @@ public class PersistenceTest extends CommonTestSetup {
       List<User> users = q2.list();
       assertEquals(1, users.size());
       assertTrue(user.getOrders().size() == 1);
-    } catch (HibernateException e) {
+    }
+    catch (HibernateException e) {
       tx.rollback();
     }
 

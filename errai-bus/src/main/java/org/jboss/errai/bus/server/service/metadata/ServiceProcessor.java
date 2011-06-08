@@ -99,7 +99,8 @@ public class ServiceProcessor implements MetaDataProcessor {
       Class remoteImpl = getRemoteImplementation(loadClass);
       if (remoteImpl != null) {
         createRPCScaffolding(remoteImpl, loadClass, context);
-      } else if (MessageCallback.class.isAssignableFrom(loadClass)) {
+      }
+      else if (MessageCallback.class.isAssignableFrom(loadClass)) {
         final Class<? extends MessageCallback> clazz = loadClass.asSubclass(MessageCallback.class);
 
         //loadedComponents.add(loadClass.getName());
@@ -121,7 +122,8 @@ public class ServiceProcessor implements MetaDataProcessor {
               }
             }
           }).getInstance(MessageCallback.class);
-        } catch (Throwable t) {
+        }
+        catch (Throwable t) {
           t.printStackTrace();
         }
 
@@ -134,7 +136,8 @@ public class ServiceProcessor implements MetaDataProcessor {
         RolesRequiredRule rule = null;
         if (clazz.isAnnotationPresent(RequireRoles.class)) {
           rule = new RolesRequiredRule(clazz.getAnnotation(RequireRoles.class).value(), context.getBus());
-        } else if (clazz.isAnnotationPresent(RequireAuthentication.class)) {
+        }
+        else if (clazz.isAnnotationPresent(RequireAuthentication.class)) {
           rule = new RolesRequiredRule(new HashSet<Object>(), context.getBus());
         }
         if (rule != null) {
@@ -164,15 +167,16 @@ public class ServiceProcessor implements MetaDataProcessor {
       for (final Method method : loadClass.getDeclaredMethods()) {
         if (method.isAnnotationPresent(Endpoint.class)) {
           epts.put(method.getName(), method.getReturnType() == Void.class ?
-                  new EndpointCallback(svc, method) :
-                  new ConversationalEndpointCallback(svc, method, context.getBus()));
+              new EndpointCallback(svc, method) :
+              new ConversationalEndpointCallback(svc, method, context.getBus()));
         }
       }
 
       if (!epts.isEmpty()) {
         if (local) {
           context.getBus().subscribeLocal(loadClass.getSimpleName() + ":RPC", new RemoteServiceCallback(epts));
-        } else {
+        }
+        else {
           context.getBus().subscribe(loadClass.getSimpleName() + ":RPC", new RemoteServiceCallback(epts));
         }
       }
@@ -181,7 +185,8 @@ public class ServiceProcessor implements MetaDataProcessor {
         if (local) {
           context.getBus().subscribeLocal(svcName, new CommandBindingsCallback(commandPoints, svc));
 
-        } else {
+        }
+        else {
           context.getBus().subscribe(svcName, new CommandBindingsCallback(commandPoints, svc));
         }
       }
@@ -192,7 +197,8 @@ public class ServiceProcessor implements MetaDataProcessor {
     for (Class iface : type.getInterfaces()) {
       if (iface.isAnnotationPresent(Remote.class)) {
         return iface;
-      } else if (iface.getInterfaces().length != 0 && ((iface = getRemoteImplementation(iface)) != null)) {
+      }
+      else if (iface.getInterfaces().length != 0 && ((iface = getRemoteImplementation(iface)) != null)) {
         return iface;
       }
     }

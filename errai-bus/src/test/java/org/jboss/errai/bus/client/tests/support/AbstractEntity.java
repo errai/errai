@@ -133,7 +133,8 @@ private UserAssignment lastModifyUser;*/
         result += super.hashCode();
       else
         result += createDate.hashCode();
-    } else {
+    }
+    else {
       result += getPKhashCode().hashCode();
     }
     return result;

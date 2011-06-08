@@ -1,6 +1,6 @@
-#set( $symbol_pound = '#' )
-#set( $symbol_dollar = '$' )
-#set( $symbol_escape = '\' )
+#set($symbol_pound='#')
+    #set($symbol_dollar='$')
+    #set($symbol_escape='\' )
 /*
  * Copyright 2009 JBoss, a divison Red Hat, Inc
  *
@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ${package}.server;
+    package ${package}.server;
 
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
@@ -29,25 +29,23 @@ import javax.inject.Inject;
 
 /**
  * A very simple CDI sevice component.
- * 
+ *
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Jul 21, 2010
  */
 @ApplicationScoped
 @Service
-public class HelloWorldService implements MessageCallback
-{
+public class HelloWorldService implements MessageCallback {
   @Inject
   MessageBus bus;
 
-  public void callback(Message message)
-  {
+  public void callback(Message message) {
     System.out.println("Received " + message.get(String.class, "payload"));
 
     MessageBuilder.createConversation(message)
         .subjectProvided()
         .signalling()
-        .with("response", "Processed at "+ System.currentTimeMillis())
+        .with("response", "Processed at " + System.currentTimeMillis())
         .done().sendNowWith(bus);
   }
 }

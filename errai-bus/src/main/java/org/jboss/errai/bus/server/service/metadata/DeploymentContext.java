@@ -72,7 +72,8 @@ public class DeploymentContext {
       File unzipped = subContexts.get(it.next());
       try {
         superAndSubContexts.add(unzipped.toURI().toURL());
-      } catch (MalformedURLException e) {
+      }
+      catch (MalformedURLException e) {
         throw new RuntimeException(e);
       }
     }
@@ -102,7 +103,8 @@ public class DeploymentContext {
       for (int i = 0; i < files.length; i++) {
         if (files[i].isDirectory()) {
           deleteDirectory(files[i]);
-        } else {
+        }
+        else {
           files[i].delete();
         }
       }

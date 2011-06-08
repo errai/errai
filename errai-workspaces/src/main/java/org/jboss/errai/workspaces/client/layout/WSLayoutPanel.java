@@ -20,8 +20,7 @@ import org.gwt.mosaic.ui.client.layout.LayoutManager;
 import org.gwt.mosaic.ui.client.layout.LayoutPanel;
 import org.jboss.errai.workspaces.client.util.LayoutUtil;
 
-public class WSLayoutPanel extends LayoutPanel implements RequiresResize
-{
+public class WSLayoutPanel extends LayoutPanel implements RequiresResize {
   public WSLayoutPanel(LayoutManager layout) {
     super(layout);
   }

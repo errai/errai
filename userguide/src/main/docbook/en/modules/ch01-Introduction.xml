@@ -1,36 +1,48 @@
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook V4.2//EN" "../docbookV4.2/docbookx.dtd">
 <chapter id="introduction">
-  <title>Introduction</title>
+    <title>Introduction</title>
 
-   <section>
-    <title>What is it</title>
-    <para>Errai is a GWT-based framework for building rich web applications using next-generation web technologies. Built on-top of ErraiBus, the framework provides a unified federation and RPC infrastructure with true, uniform, asynchronous messaging across the client and server.</para>
-  </section>
-  <section>
-    <title>License and EULA</title>
-    <para>Errai is distributed under the terms of the the Apache License, Version 2.0. See <ulink url="http://www.apache.org/licenses/LICENSE-2.0">the full Apache license text</ulink>. </para>
-  </section>
-  <section>
-    <title>Downloads</title>
-    <para>The distribution packages can be downloaded from jboss.org </para>
-    <ulink url="http://jboss.org/errai/">http://jboss.org/errai/</ulink>
-  </section>
-  <section>
-    <title>Sources</title>
-    <para>The source code for this component can be found in the Errai SVN repository: </para>
-    <ulink url="http://anonsvn.jboss.org/repos/errai/trunk/">https://anonsvn.jboss.org/repos/errai/trunk/</ulink>
-  </section>
-  <section>
-    <title>Reporting problems</title>
-    <para>
-        If you run into trouble don't hesitate to get in touch with us:
+    <section>
+        <title>What is it</title>
+        <para>Errai is a GWT-based framework for building rich web applications using next-generation web technologies.
+            Built on-top of ErraiBus, the framework provides a unified federation and RPC infrastructure with true,
+            uniform, asynchronous messaging across the client and server.
+        </para>
+    </section>
+    <section>
+        <title>License and EULA</title>
+        <para>Errai is distributed under the terms of the the Apache License, Version 2.0. See<ulink
+                url="http://www.apache.org/licenses/LICENSE-2.0">the full Apache license text</ulink>.
+        </para>
+    </section>
+    <section>
+        <title>Downloads</title>
+        <para>The distribution packages can be downloaded from jboss.org</para>
+        <ulink url="http://jboss.org/errai/">http://jboss.org/errai/</ulink>
+    </section>
+    <section>
+        <title>Sources</title>
+        <para>The source code for this component can be found in the Errai SVN repository:</para>
+        <ulink url="http://anonsvn.jboss.org/repos/errai/trunk/">https://anonsvn.jboss.org/repos/errai/trunk/</ulink>
+    </section>
+    <section>
+        <title>Reporting problems</title>
+        <para>
+            If you run into trouble don't hesitate to get in touch with us:
 
-         <itemizedlist>
-            <listitem>User Forum: <ulink url="http://www.jboss.org/index.html?module=bb&amp;op=viewforum&amp;f=295">http://www.jboss.org/index.html?module=bb&amp;op=viewforum&amp;f=295</ulink> </listitem>
-            <listitem>Mailing List: <ulink url="http://jboss.org/errai/MailingLists.html">http://jboss.org/errai/MailingLists.html</ulink></listitem>
-            <listitem>IRC: irc://irc.freenode.net/errai</listitem>
-        </itemizedlist>
+            <itemizedlist>
+                <listitem>User Forum:
+                    <ulink url="http://www.jboss.org/index.html?module=bb&amp;op=viewforum&amp;f=295">
+                        http://www.jboss.org/index.html?module=bb&amp;op=viewforum&amp;f=295
+                    </ulink>
+                </listitem>
+                <listitem>Mailing List:
+                    <ulink url="http://jboss.org/errai/MailingLists.html">http://jboss.org/errai/MailingLists.html
+                    </ulink>
+                </listitem>
+                <listitem>IRC: irc://irc.freenode.net/errai</listitem>
+            </itemizedlist>
 
-    </para>
-  </section>
+        </para>
+    </section>
 </chapter>

@@ -51,25 +51,25 @@ public class MetaDataScanner extends Reflections {
   public static final String ERRAI_CONFIG_STUB_NAME = "ErraiApp.properties";
 
   private final PropertyScanner propScanner = new PropertyScanner(
-          new Predicate<String>() {
-            public boolean apply(String file) {
-              return file.endsWith(".properties");
-            }
-          }
+      new Predicate<String>() {
+        public boolean apply(String file) {
+          return file.endsWith(".properties");
+        }
+      }
   );
 
   MetaDataScanner(List<URL> urls) {
 
     configuration = new ConfigurationBuilder()
-            .setUrls(urls)
-                    //.filterInputsBy(new FilterBuilder().exclude(CLIENT_PKG_REGEX))
-            .setScanners(
-                    //new FieldAnnotationsScanner(),
-                    //new MethodAnnotationsScanner(),
-                    new TypeAnnotationsScanner(),
-                    //new SubTypesScanner(),
-                    propScanner
-            );
+        .setUrls(urls)
+            //.filterInputsBy(new FilterBuilder().exclude(CLIENT_PKG_REGEX))
+        .setScanners(
+            //new FieldAnnotationsScanner(),
+            //new MethodAnnotationsScanner(),
+            new TypeAnnotationsScanner(),
+            //new SubTypesScanner(),
+            propScanner
+        );
 
     store = new Store();
 
@@ -107,7 +107,7 @@ public class MetaDataScanner extends Reflections {
   }
 
   public Set<Class<?>> getTypesAnnotatedWithExcluding(
-          Class<? extends Annotation> annotation, String excludeRegex) {
+      Class<? extends Annotation> annotation, String excludeRegex) {
     Pattern p = Pattern.compile(excludeRegex);
     Set<String> result = new HashSet<String>();
 
@@ -130,7 +130,8 @@ public class MetaDataScanner extends Reflections {
         urls.add(new URL(URLDecoder.decode(urlString.substring(0, urlString.indexOf(ERRAI_CONFIG_STUB_NAME)), "utf-8")));
       }
       return urls;
-    } catch (IOException e) {
+    }
+    catch (IOException e) {
       throw new RuntimeException("Failed to scan configuration Url's", e);
     }
   }

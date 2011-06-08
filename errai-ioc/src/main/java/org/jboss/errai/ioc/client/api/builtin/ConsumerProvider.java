@@ -40,15 +40,16 @@ public class ConsumerProvider implements ContextualTypeProvider<Consumer<?>> {
       public void consume(Object value) {
         if (replyTo != null) {
           MessageBuilder.createMessage()
-                  .toSubject(toSubject)
-                  .with(MessageParts.ReplyTo, replyTo)
-                  .with(MessageParts.Value, value)
-                  .done().sendNowWith(requestDispatcher);
-        } else {
+              .toSubject(toSubject)
+              .with(MessageParts.ReplyTo, replyTo)
+              .with(MessageParts.Value, value)
+              .done().sendNowWith(requestDispatcher);
+        }
+        else {
           MessageBuilder.createMessage()
-                  .toSubject(toSubject)
-                  .with(MessageParts.Value, value)
-                  .done().sendNowWith(requestDispatcher);
+              .toSubject(toSubject)
+              .with(MessageParts.Value, value)
+              .done().sendNowWith(requestDispatcher);
         }
       }
 

@@ -26,27 +26,27 @@ import com.google.gwt.resources.client.ImageResource;
  * @author Heiko Braun <hbraun@redhat.com>
  */
 public interface ErraiImageBundle extends ClientBundle {
-    @Source("message_icon.png")
-    public ImageResource messageIcon();
+  @Source("message_icon.png")
+  public ImageResource messageIcon();
 
-    @Source("workspacelogo.png")
-    public ImageResource workspaceLogo();
+  @Source("workspacelogo.png")
+  public ImageResource workspaceLogo();
 
-    @Source("collapseleft.png")
-    public ImageResource collapseLeft();
+  @Source("collapseleft.png")
+  public ImageResource collapseLeft();
 
-    @Source("application.png")
-    public ImageResource application();
+  @Source("application.png")
+  public ImageResource application();
 
-    @Source("collapseright.png")
-    public ImageResource collapseRight();
+  @Source("collapseright.png")
+  public ImageResource collapseRight();
 
-    @Source("close-icon.png")
-    public ImageResource closeIcon();
+  @Source("close-icon.png")
+  public ImageResource closeIcon();
 
-    @Source("questioncube.png")
-    public ImageResource questionCube();
+  @Source("questioncube.png")
+  public ImageResource questionCube();
 
-    @Source("user.png")
-    public ImageResource user();
+  @Source("user.png")
+  public ImageResource user();
 }

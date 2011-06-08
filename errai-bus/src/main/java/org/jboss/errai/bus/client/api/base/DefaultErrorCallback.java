@@ -48,18 +48,19 @@ public class DefaultErrorCallback implements ErrorCallback {
       }
 
       createConversation(message)
-              .toSubject("ClientBusErrors")
-              .with("ErrorMessage", e.getMessage())
-              .with("AdditionalDetails", a.toString())
-              .noErrorHandling().reply();
+          .toSubject("ClientBusErrors")
+          .with("ErrorMessage", e.getMessage())
+          .with("AdditionalDetails", a.toString())
+          .noErrorHandling().reply();
 
 
-    } else {
+    }
+    else {
       createConversation(message)
-              .toSubject("ClientBusErrors")
-              .with("ErrorMessage", e.getMessage())
-              .with("AdditionalDetails", "No additional details")
-              .noErrorHandling().reply();
+          .toSubject("ClientBusErrors")
+          .with("ErrorMessage", e.getMessage())
+          .with("AdditionalDetails", "No additional details")
+          .noErrorHandling().reply();
     }
 
     return false;

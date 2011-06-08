@@ -30,12 +30,12 @@ public class ClassStructureBuilderTest extends AbstractStatementBuilderTest {
   public void testOverrideConstructor() {
 
     String src = ObjectBuilder.newInstanceOf(Retention.class)
-            .extend()
-            .publicOverridesMethod("annotationType")
-            .append(StatementBuilder.create().load("foo"))
-            .append(StatementBuilder.create().load("bar"))
-            .append(StatementBuilder.create().load("foobie"))
-            .finish().toJavaString();
+        .extend()
+        .publicOverridesMethod("annotationType")
+        .append(StatementBuilder.create().load("foo"))
+        .append(StatementBuilder.create().load("bar"))
+        .append(StatementBuilder.create().load("foobie"))
+        .finish().toJavaString();
 
     System.out.println("src=" + src);
   }

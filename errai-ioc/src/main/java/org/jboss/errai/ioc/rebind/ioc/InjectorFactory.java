@@ -41,7 +41,8 @@ public class InjectorFactory {
     ctx.registerInjector(i);
     if (i.isInjected()) {
       return i.getVarName();
-    } else {
+    }
+    else {
       return i.getType(ctx, null);
     }
   }

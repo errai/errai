@@ -83,35 +83,41 @@ public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
               throw new ErraiBootstrapFailure("@AuthUsernameField must annotated a String field");
             }
             userField = f.getName();
-          } else if (f.isAnnotationPresent(AuthPasswordField.class)) {
+          }
+          else if (f.isAnnotationPresent(AuthPasswordField.class)) {
             if (f.getType() != String.class) {
               System.out.println("Stopping B");
               throw new ErraiBootstrapFailure("@AuthPasswordField must annotated a String field");
             }
             passworldField = f.getName();
-          } else if (f.isAnnotationPresent(AuthRolesField.class)) {
+          }
+          else if (f.isAnnotationPresent(AuthRolesField.class)) {
             rolesField = f.getName();
           }
         }
       }
-    } catch (Throwable t) {
+    }
+    catch (Throwable t) {
       throw new ErraiBootstrapFailure("error configuring " + this.getClass().getSimpleName(), t);
     }
 
     if (userEntity == null) {
       throw new RuntimeException("You have not specified a @AuthUserEntity for the hibernate security extension.");
-    } else if (userField == null) {
+    }
+    else if (userField == null) {
       throw new RuntimeException("You must specify a @AuthUsernameField in the '" + userEntity.getName() + "' entity.");
-    } else if (passworldField == null) {
+    }
+    else if (passworldField == null) {
       throw new RuntimeException("You must specify a @AuthPasswordField in the '" + userEntity.getName() + "' entity.");
-    } else if (rolesField == null) {
+    }
+    else if (rolesField == null) {
       throw new RuntimeException("You must specify a @AuthRolesField in the '" + userEntity.getName() + "' entity.");
     }
 
     log.info("configured authentication entity: " + userEntity.getName());
 
     challengeQueryString = "from " + userEntity.getSimpleName() + " a where a." + userField + "=:name and "
-            + " a." + passworldField + "=:password";
+        + " a." + passworldField + "=:password";
 
     log.info("challenge query string: " + challengeQueryString);
   }
@@ -122,9 +128,9 @@ public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
     final String password = message.get(String.class, SecurityParts.Password);
 
     Object userObj = session.createQuery(challengeQueryString)
-            .setString("name", name)
-            .setString("password", password)
-            .uniqueResult();
+        .setString("name", name)
+        .setString("password", password)
+        .uniqueResult();
 
     if (userObj != null) {
       AuthSubject authSubject = new AuthSubject(name, name, (Collection) MVEL.getProperty(rolesField, userObj));
@@ -140,22 +146,23 @@ public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
        * been performed.
        */
       createConversation(message)
-              .subjectProvided()
-              .command(SecurityCommands.SuccessfulAuth)
-              .with(SecurityParts.Roles, authSubject.toRolesString())
-              .with(SecurityParts.Name, name)
-              .noErrorHandling()
-              .sendNowWith(bus);
-    } else {
+          .subjectProvided()
+          .command(SecurityCommands.SuccessfulAuth)
+          .with(SecurityParts.Roles, authSubject.toRolesString())
+          .with(SecurityParts.Name, name)
+          .noErrorHandling()
+          .sendNowWith(bus);
+    }
+    else {
       /**
        * The login failed. How upsetting. Life must go on, and we must inform the client of the
        * unfortunate news.
        */
       createConversation(message)
-              .subjectProvided()
-              .command(SecurityCommands.FailedAuth)
-              .with(SecurityParts.Name, name)
-              .noErrorHandling().sendNowWith(bus);
+          .subjectProvided()
+          .command(SecurityCommands.FailedAuth)
+          .with(SecurityParts.Name, name)
+          .noErrorHandling().sendNowWith(bus);
 
       throw new AuthenticationFailedException();
     }
@@ -175,7 +182,8 @@ public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
       getAuthDescriptor(message).remove(new SimpleRole(CredentialTypes.Authenticated.name()));
       message.getResource(QueueSession.class, "Session").removeAttribute(ErraiService.SESSION_AUTH_DATA);
       return true;
-    } else {
+    }
+    else {
       return false;
     }
   }

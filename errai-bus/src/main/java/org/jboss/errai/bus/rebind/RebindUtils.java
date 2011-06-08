@@ -32,7 +32,8 @@ public class RebindUtils {
   public static boolean isMethodInInterface(Class iface, Method member) {
     try {
       if (iface.getMethod(member.getName(), member.getParameterTypes()) != null) return true;
-    } catch (NoSuchMethodException e) {
+    }
+    catch (NoSuchMethodException e) {
     }
     return false;
   }

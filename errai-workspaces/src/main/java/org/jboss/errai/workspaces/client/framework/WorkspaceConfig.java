@@ -20,7 +20,6 @@ package org.jboss.errai.workspaces.client.framework;
  * Workspace configuration.
  * The implementation is automatically generated at compile-time.
  */
-public interface WorkspaceConfig
-{
-    public void configure(ToolContainer container);
+public interface WorkspaceConfig {
+  public void configure(ToolContainer container);
 }

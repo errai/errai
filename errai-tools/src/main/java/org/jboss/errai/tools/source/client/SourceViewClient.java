@@ -27,13 +27,13 @@ import org.jboss.errai.workspaces.client.api.annotations.LoadTool;
  */
 //@LoadTool(name = "SourceView", group = "Tools")
 public class SourceViewClient implements WidgetProvider {
-    private MessageBus bus = ErraiBus.get();
+  private MessageBus bus = ErraiBus.get();
 
-    public void provideWidget(ProvisioningCallback callback) {
-        SourceViewWidget viewWidget = new SourceViewWidget(
-                new String[]{"org/jboss/errai/demo/thestore/client/modules/domain/User.java"}
-        );
+  public void provideWidget(ProvisioningCallback callback) {
+    SourceViewWidget viewWidget = new SourceViewWidget(
+        new String[]{"org/jboss/errai/demo/thestore/client/modules/domain/User.java"}
+    );
 
-        callback.onSuccess(viewWidget);
-    }
+    callback.onSuccess(viewWidget);
+  }
 }

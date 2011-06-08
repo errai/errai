@@ -64,7 +64,8 @@ public class PropertyFileLoginModule implements LoginModule {
 
       loadRoles();
 
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       throw new RuntimeException("could not login", e);
     }
   }

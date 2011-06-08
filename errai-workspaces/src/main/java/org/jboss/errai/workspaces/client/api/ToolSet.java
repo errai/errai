@@ -18,9 +18,10 @@ package org.jboss.errai.workspaces.client.api;
 
 import com.google.gwt.user.client.ui.Widget;
 
-public interface ToolSet 
-{
-    public Tool[] getAllProvidedTools();
-    public String getToolSetName();
-    public Widget getWidget();
+public interface ToolSet {
+  public Tool[] getAllProvidedTools();
+
+  public String getToolSetName();
+
+  public Widget getWidget();
 }

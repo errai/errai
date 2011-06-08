@@ -55,295 +55,296 @@ import java.util.List;
  * @author Heiko.Braun <heiko.braun@jboss.com>
  */
 public class Workspace extends DeckLayoutPanel implements RequiresResize {
-    public static final String SUBJECT = "Workspace";
-    private Menu menu;
+  public static final String SUBJECT = "Workspace";
+  private Menu menu;
 
-    private static List<ToolSet> toolSets = new ArrayList<ToolSet>();
+  private static List<ToolSet> toolSets = new ArrayList<ToolSet>();
 
-    private static Workspace instance;
+  private static Workspace instance;
 
-    public static Workspace createInstance(Menu menu) {
-        if (null == instance)
-            instance = new Workspace(menu);
+  public static Workspace createInstance(Menu menu) {
+    if (null == instance)
+      instance = new Workspace(menu);
 
-        return instance;
-    }
+    return instance;
+  }
 
-    public static Workspace getInstance() {
-        return instance;
-    }
+  public static Workspace getInstance() {
+    return instance;
+  }
 
-    private Workspace(Menu menu) {
-        super();
+  private Workspace(Menu menu) {
+    super();
 
-        this.menu = menu;
-        this.setPadding(5);
+    this.menu = menu;
+    this.setPadding(5);
 
-        ErraiBus.get().subscribe(
-                Workspace.SUBJECT,
-                new MessageCallback() {
-                    public void callback(final Message message) {
-                        switch (LayoutCommands.valueOf(message.getCommandType())) {
-                            case ActivateTool:
-                                String toolsetId = message.get(String.class, LayoutParts.TOOLSET);
-                                String toolId = message.get(String.class, LayoutParts.TOOL);
+    ErraiBus.get().subscribe(
+        Workspace.SUBJECT,
+        new MessageCallback() {
+          public void callback(final Message message) {
+            switch (LayoutCommands.valueOf(message.getCommandType())) {
+              case ActivateTool:
+                String toolsetId = message.get(String.class, LayoutParts.TOOLSET);
+                String toolId = message.get(String.class, LayoutParts.TOOL);
 
-                                showToolSet(toolsetId, toolId);
+                showToolSet(toolsetId, toolId);
 
-                                // create browser history
-                                recordHistory(toolsetId, toolId);
+                // create browser history
+                recordHistory(toolsetId, toolId);
 
-                                break;
-                        }
-                    }
-                }
-        );
-
-        // handle browser history
-        History.addValueChangeHandler(
-                new ValueChangeHandler<String>() {
-                    public void onValueChange(ValueChangeEvent<String> event) {
-                        // avoid interference with other history tokens
-                        // example token: errai_Administration;Users.5
-
-                        String tokenString = event.getValue();
-                        if (tokenString.startsWith("errai_")) {
-                            String[] tokens = splitHistoryToken(tokenString);
-
-                            String toolsetId = tokens[0];
-                            String toolId = tokens[1].equals("none") ? null : tokens[1];
-
-                            showToolSet(toolsetId, toolId);
-
-                            // correlation id
-                            if (tokens.length > 2) {
-                                String corrId = tokens[3];
-                                // not used at the moment
-                            }
-                        }
-                    }
-                }
-        );
-    }
-
-    private void recordHistory(String toolsetId, String toolId) {
-        String toolToken = toolId != null ? toolId : "none";
-        String historyToken = "errai_" + toolsetId + ";" + toolToken;
-        History.newItem(historyToken, false);
-    }
-
-    public static String[] splitHistoryToken(String tokenString) {
-        String s = tokenString.substring(6, tokenString.length());
-        String[] token = s.split(";");
-        return token;
-    }
-
-    public void addToolSet(ToolSet toolSet) {
-
-        // register for lookup, late reference
-        toolSets.add(toolSet);
-        String toolSetId = encode(toolSet.getToolSetName());
-
-        // Menu
-        menu.addLauncher(new WSToolSetLauncher(toolSetId, toolSet), toolSet.getToolSetName());
-        menu.getStack().layout();
-
-        // ToolSet deck
-        ToolSetDeck deck = new ToolSetDeck(toolSetId, toolSet);
-        deck.index = this.getWidgetCount();
-        this.add(deck);
-    }
-
-    public boolean hasToolSet(String id) {
-        return findToolSet(id) != null;
-    }
-
-    public void showToolSet(final String id) {
-        showToolSet(id, null);  // opens the default tool
-    }
-
-    public void showToolSet(final String toolSetId, final String toolId) {
-        ToolSetDeck deck = findToolSet(toolSetId);
-        if (null == deck)
-            throw new IllegalArgumentException("No such toolSet: " + toolSetId);
-
-        // select tool
-        ToolSet selectedToolSet = deck.toolSet;
-        Tool selectedTool = null;
-        if (toolId != null)  // particular tool
-        {
-            for (Tool t : selectedToolSet.getAllProvidedTools()) {
-                if (toolId.equals(t.getId())) {
-                    selectedTool = t;
-                    break;
-                }
-            }
-        } else  // default tool, the first one
-        {
-            Tool[] availableTools = selectedToolSet.getAllProvidedTools();
-            if (availableTools == null || availableTools.length == 0)
-                throw new IllegalArgumentException("Empty toolset: " + toolSetId);
-
-            selectedTool = availableTools[0];
-        }
-
-        // is it already open?
-        boolean isOpen = false;
-        for (int i = 0; i < deck.tabLayout.getWidgetCount(); i++) {
-            ToolTabPanel toolTab = (ToolTabPanel) deck.tabLayout.getWidget(i);
-            if (toolTab.toolId.equals(selectedTool.getId())) {
-                isOpen = true;
-                deck.tabLayout.selectTab(i);
-            }
-        }
-
-        if (!isOpen) // & selectedTool.multipleAllowed()==false
-        {
-            final ToolTabPanel panelTool = new ToolTabPanel(toolSetId, selectedTool);
-            panelTool.invalidate();
-
-            ResourceFactory resourceFactory = GWT.create(ResourceFactory.class);
-            ErraiImageBundle erraiImageBundle = GWT.create(ErraiImageBundle.class);
-            ImageResource resource = resourceFactory.createImage(selectedTool.getName()) != null ?
-                    resourceFactory.createImage(selectedTool.getName()) : erraiImageBundle.application();
-
-            deck.tabLayout.add(
-                    panelTool,
-                    AbstractImagePrototype.create(resource).getHTML() + "&nbsp;" + selectedTool.getName(),
-                    true
-            );
-
-
-            deck.tabLayout.selectTab(
-                    deck.tabLayout.getWidgetCount() - 1
-            );
-
-            DeferredCommand.addCommand(new Command() {
-
-                public void execute() {
-                    panelTool.onResize();
-                }
-            });
-        }
-
-        // display toolset
-        this.showWidget(deck.index);
-        this.layout();
-
-        DeferredCommand.addCommand(new Command() {
-            public void execute() {
-                menu.toggle(toolSetId);
-            }
-        });
-    }
-
-    private ToolSetDeck findToolSet(String id) {
-        ToolSetDeck match = null;
-        for (int i = 0; i < this.getWidgetCount(); i++) {
-            ToolSetDeck deck = (ToolSetDeck) this.getWidget(i);
-            if (id.equals(deck.toolSetId)) {
-                match = deck;
                 break;
             }
+          }
         }
+    );
 
-        return match;
+    // handle browser history
+    History.addValueChangeHandler(
+        new ValueChangeHandler<String>() {
+          public void onValueChange(ValueChangeEvent<String> event) {
+            // avoid interference with other history tokens
+            // example token: errai_Administration;Users.5
+
+            String tokenString = event.getValue();
+            if (tokenString.startsWith("errai_")) {
+              String[] tokens = splitHistoryToken(tokenString);
+
+              String toolsetId = tokens[0];
+              String toolId = tokens[1].equals("none") ? null : tokens[1];
+
+              showToolSet(toolsetId, toolId);
+
+              // correlation id
+              if (tokens.length > 2) {
+                String corrId = tokens[3];
+                // not used at the moment
+              }
+            }
+          }
+        }
+    );
+  }
+
+  private void recordHistory(String toolsetId, String toolId) {
+    String toolToken = toolId != null ? toolId : "none";
+    String historyToken = "errai_" + toolsetId + ";" + toolToken;
+    History.newItem(historyToken, false);
+  }
+
+  public static String[] splitHistoryToken(String tokenString) {
+    String s = tokenString.substring(6, tokenString.length());
+    String[] token = s.split(";");
+    return token;
+  }
+
+  public void addToolSet(ToolSet toolSet) {
+
+    // register for lookup, late reference
+    toolSets.add(toolSet);
+    String toolSetId = encode(toolSet.getToolSetName());
+
+    // Menu
+    menu.addLauncher(new WSToolSetLauncher(toolSetId, toolSet), toolSet.getToolSetName());
+    menu.getStack().layout();
+
+    // ToolSet deck
+    ToolSetDeck deck = new ToolSetDeck(toolSetId, toolSet);
+    deck.index = this.getWidgetCount();
+    this.add(deck);
+  }
+
+  public boolean hasToolSet(String id) {
+    return findToolSet(id) != null;
+  }
+
+  public void showToolSet(final String id) {
+    showToolSet(id, null);  // opens the default tool
+  }
+
+  public void showToolSet(final String toolSetId, final String toolId) {
+    ToolSetDeck deck = findToolSet(toolSetId);
+    if (null == deck)
+      throw new IllegalArgumentException("No such toolSet: " + toolSetId);
+
+    // select tool
+    ToolSet selectedToolSet = deck.toolSet;
+    Tool selectedTool = null;
+    if (toolId != null)  // particular tool
+    {
+      for (Tool t : selectedToolSet.getAllProvidedTools()) {
+        if (toolId.equals(t.getId())) {
+          selectedTool = t;
+          break;
+        }
+      }
+    }
+    else  // default tool, the first one
+    {
+      Tool[] availableTools = selectedToolSet.getAllProvidedTools();
+      if (availableTools == null || availableTools.length == 0)
+        throw new IllegalArgumentException("Empty toolset: " + toolSetId);
+
+      selectedTool = availableTools[0];
     }
 
-    public List<ToolSet> getToolsets() {
-        /*List<ToolSetRef> result = new ArrayList<ToolSetRef>(this.getWidgetCount());
-       for(int i=0; i<this.getWidgetCount(); i++)
-       {
-         ToolSetDeck deck = (ToolSetDeck) this.provideWidget(i);
-         ToolSet toolSet = deck.toolSet;
-         result.add(new ToolSetRef(toolSet.getToolSetName(), editor.getEditorId()));
-       } */
-
-        return toolSets;
+    // is it already open?
+    boolean isOpen = false;
+    for (int i = 0; i < deck.tabLayout.getWidgetCount(); i++) {
+      ToolTabPanel toolTab = (ToolTabPanel) deck.tabLayout.getWidget(i);
+      if (toolTab.toolId.equals(selectedTool.getId())) {
+        isOpen = true;
+        deck.tabLayout.selectTab(i);
+      }
     }
 
-    public static String encode(String toolSetName) {
-        return "ToolSet_" + toolSetName.replace(" ", "_");
+    if (!isOpen) // & selectedTool.multipleAllowed()==false
+    {
+      final ToolTabPanel panelTool = new ToolTabPanel(toolSetId, selectedTool);
+      panelTool.invalidate();
+
+      ResourceFactory resourceFactory = GWT.create(ResourceFactory.class);
+      ErraiImageBundle erraiImageBundle = GWT.create(ErraiImageBundle.class);
+      ImageResource resource = resourceFactory.createImage(selectedTool.getName()) != null ?
+          resourceFactory.createImage(selectedTool.getName()) : erraiImageBundle.application();
+
+      deck.tabLayout.add(
+          panelTool,
+          AbstractImagePrototype.create(resource).getHTML() + "&nbsp;" + selectedTool.getName(),
+          true
+      );
+
+
+      deck.tabLayout.selectTab(
+          deck.tabLayout.getWidgetCount() - 1
+      );
+
+      DeferredCommand.addCommand(new Command() {
+
+        public void execute() {
+          panelTool.onResize();
+        }
+      });
     }
 
-    /**
-     * A group of tools that belong to the same context.
-     * In this case represented as a {@link org.gwt.mosaic.ui.client.TabLayoutPanel}.
-     */
-    private class ToolSetDeck extends LayoutPanel implements RequiresResize, ProvidesResize {
-        ToolSet toolSet;
-        int index;
-        String toolSetId;
+    // display toolset
+    this.showWidget(deck.index);
+    this.layout();
 
-        DecoratedTabLayoutPanel tabLayout;
+    DeferredCommand.addCommand(new Command() {
+      public void execute() {
+        menu.toggle(toolSetId);
+      }
+    });
+  }
 
-        public ToolSetDeck(String toolSetId, ToolSet toolSet) {
-            super();
-            this.toolSet = toolSet;
-            this.toolSetId = toolSetId;
-            this.tabLayout = new DecoratedTabLayoutPanel();
-
-            this.tabLayout.addSelectionHandler(new SelectionHandler<Integer>() {
-                public void onSelection(SelectionEvent<Integer> selectionEvent) {
-                    ToolTabPanel toolTab = (ToolTabPanel) tabLayout.getWidget(selectionEvent.getSelectedItem());
-                    recordHistory(toolTab.toolsetId, toolTab.toolId);
-                }
-            });
-
-            this.add(tabLayout);
-        }
-
-        public void onResize() {
-            setPixelSize(getParent().getOffsetWidth(), getParent().getOffsetHeight());
-            LayoutUtil.layoutHints(tabLayout);
-        }
+  private ToolSetDeck findToolSet(String id) {
+    ToolSetDeck match = null;
+    for (int i = 0; i < this.getWidgetCount(); i++) {
+      ToolSetDeck deck = (ToolSetDeck) this.getWidget(i);
+      if (id.equals(deck.toolSetId)) {
+        match = deck;
+        break;
+      }
     }
 
-    /**
-     * A tabpanel within a {@link org.jboss.errai.workspaces.client.Workspace.ToolSetDeck}
-     * that contains a single tool.
-     */
-    private class ToolTabPanel extends LayoutPanel implements RequiresResize, ProvidesResize {
-        String toolId;
-        String toolsetId;
+    return match;
+  }
 
-        ToolTabPanel(final String toolsetId, final Tool tool) {
-            this.toolsetId = toolsetId;
-            this.toolId = tool.getId();
-            tool.provideWidget(new ProvisioningCallback() {
-                public void onSuccess(Widget instance) {
-                    String baseRef = toolsetId + ";" + toolId;
-                    instance.getElement().setAttribute("baseRef", baseRef); // used by history management & perma links
-                    add(instance);
-                    WidgetHelper.invalidate(instance);
-                    layout();
-                }
+  public List<ToolSet> getToolsets() {
+    /*List<ToolSetRef> result = new ArrayList<ToolSetRef>(this.getWidgetCount());
+   for(int i=0; i<this.getWidgetCount(); i++)
+   {
+     ToolSetDeck deck = (ToolSetDeck) this.provideWidget(i);
+     ToolSet toolSet = deck.toolSet;
+     result.add(new ToolSetRef(toolSet.getToolSetName(), editor.getEditorId()));
+   } */
 
-                public void onUnavailable() {
-                    throw new RuntimeException("Failed to load tool: " + tool.getId());
-                }
-            });
+    return toolSets;
+  }
+
+  public static String encode(String toolSetName) {
+    return "ToolSet_" + toolSetName.replace(" ", "_");
+  }
+
+  /**
+   * A group of tools that belong to the same context.
+   * In this case represented as a {@link org.gwt.mosaic.ui.client.TabLayoutPanel}.
+   */
+  private class ToolSetDeck extends LayoutPanel implements RequiresResize, ProvidesResize {
+    ToolSet toolSet;
+    int index;
+    String toolSetId;
+
+    DecoratedTabLayoutPanel tabLayout;
+
+    public ToolSetDeck(String toolSetId, ToolSet toolSet) {
+      super();
+      this.toolSet = toolSet;
+      this.toolSetId = toolSetId;
+      this.tabLayout = new DecoratedTabLayoutPanel();
+
+      this.tabLayout.addSelectionHandler(new SelectionHandler<Integer>() {
+        public void onSelection(SelectionEvent<Integer> selectionEvent) {
+          ToolTabPanel toolTab = (ToolTabPanel) tabLayout.getWidget(selectionEvent.getSelectedItem());
+          recordHistory(toolTab.toolsetId, toolTab.toolId);
         }
+      });
 
-        public void onResize() {
-            setPixelSize(getParent().getOffsetWidth(), getParent().getOffsetHeight());
-            LayoutUtil.layoutHints(this);
-        }
+      this.add(tabLayout);
     }
 
     public void onResize() {
-        LayoutUtil.layoutHints(this);
+      setPixelSize(getParent().getOffsetWidth(), getParent().getOffsetHeight());
+      LayoutUtil.layoutHints(tabLayout);
+    }
+  }
+
+  /**
+   * A tabpanel within a {@link org.jboss.errai.workspaces.client.Workspace.ToolSetDeck}
+   * that contains a single tool.
+   */
+  private class ToolTabPanel extends LayoutPanel implements RequiresResize, ProvidesResize {
+    String toolId;
+    String toolsetId;
+
+    ToolTabPanel(final String toolsetId, final Tool tool) {
+      this.toolsetId = toolsetId;
+      this.toolId = tool.getId();
+      tool.provideWidget(new ProvisioningCallback() {
+        public void onSuccess(Widget instance) {
+          String baseRef = toolsetId + ";" + toolId;
+          instance.getElement().setAttribute("baseRef", baseRef); // used by history management & perma links
+          add(instance);
+          WidgetHelper.invalidate(instance);
+          layout();
+        }
+
+        public void onUnavailable() {
+          throw new RuntimeException("Failed to load tool: " + tool.getId());
+        }
+      });
     }
 
-    /*public final class ToolSetRef
-   {
-     String title;
-     String id;
+    public void onResize() {
+      setPixelSize(getParent().getOffsetWidth(), getParent().getOffsetHeight());
+      LayoutUtil.layoutHints(this);
+    }
+  }
 
-     public ToolSetRef(String title, String id)
-     {
-       this.title = title;
-       this.id = id;
-     }
-   } */
+  public void onResize() {
+    LayoutUtil.layoutHints(this);
+  }
+
+  /*public final class ToolSetRef
+ {
+   String title;
+   String id;
+
+   public ToolSetRef(String title, String id)
+   {
+     this.title = title;
+     this.id = id;
+   }
+ } */
 }

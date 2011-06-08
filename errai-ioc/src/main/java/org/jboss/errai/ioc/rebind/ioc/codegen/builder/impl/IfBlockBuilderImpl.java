@@ -114,7 +114,8 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements IfBl
   private Statement validateOrConvertLhs(Statement lhs) {
     if (ifBlock.getCondition().getOperator() == null) {
       lhs = GenUtil.convert(context, lhs, MetaClassFactory.get(Boolean.class));
-    } else {
+    }
+    else {
       ifBlock.getCondition().getOperator().assertCanBeApplied(lhs.getType());
     }
 

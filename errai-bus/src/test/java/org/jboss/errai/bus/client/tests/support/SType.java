@@ -236,14 +236,16 @@ public class SType extends STypeSuper {
       for (int i = 0; i < charArrayMulti.length; i++) {
         if (!Arrays.equals(charArrayMulti[i], sType.charArrayMulti[i])) return false;
       }
-    } else if (sType.charArrayMulti != null) return false;
+    }
+    else if (sType.charArrayMulti != null) return false;
 
 
     if (sTypeArray != null) {
       for (int i = 0; i < sTypeArray.length; i++) {
         if (!sTypeArray[i].equals(sType.sTypeArray[i])) return false;
       }
-    } else if (sType.sTypeArray != null) return false;
+    }
+    else if (sType.sTypeArray != null) return false;
 
 
     return true;
@@ -277,26 +279,26 @@ public class SType extends STypeSuper {
   @Override
   public String toString() {
     return new StringBuilder("{")
-            .append(" superValue: " + super.getSuperValue() + ",\n")
-            .append(" fieldOne: " + fieldOne + ",\n")
-            .append(" fieldTwo: " + fieldTwo + ",\n")
-            .append(" startDate: " + startDate + ",\n")
-            .append(" endDate:" + endDate + ",\n")
-            .append(" active: " + active + ",\n")
-            .append(" listOfStypes: " + listOfStypes + ",\n")
-            .append(" listOfDates: " + listOfDates + ",\n")
-            .append(" mapOfStypes: " + mapofStypes + ",\n")
-            .append(" place: " + place + ",\n")
-            .append(" longValue: " + longValue + ",\n")
-            .append(" shortValue: " + shortValue + ",\n")
-            .append(" doubleValue: " + doubleValue + ",\n")
-            .append(" floatValue: " + floatValue + ",\n")
-            .append(" byteValue: " + byteValue + ",\n")
-            .append(" charValue: " + charValue + ",\n")
-            .append(" charArray: " + Arrays.toString(charArray) + ",\n")
-            .append(" charArrayMulti: " + printMultiArray(charArrayMulti) + ", \n")
-            .append(" sTypeArray: " + Arrays.toString(sTypeArray) + "\n")
-            .append("}").toString();
+        .append(" superValue: " + super.getSuperValue() + ",\n")
+        .append(" fieldOne: " + fieldOne + ",\n")
+        .append(" fieldTwo: " + fieldTwo + ",\n")
+        .append(" startDate: " + startDate + ",\n")
+        .append(" endDate:" + endDate + ",\n")
+        .append(" active: " + active + ",\n")
+        .append(" listOfStypes: " + listOfStypes + ",\n")
+        .append(" listOfDates: " + listOfDates + ",\n")
+        .append(" mapOfStypes: " + mapofStypes + ",\n")
+        .append(" place: " + place + ",\n")
+        .append(" longValue: " + longValue + ",\n")
+        .append(" shortValue: " + shortValue + ",\n")
+        .append(" doubleValue: " + doubleValue + ",\n")
+        .append(" floatValue: " + floatValue + ",\n")
+        .append(" byteValue: " + byteValue + ",\n")
+        .append(" charValue: " + charValue + ",\n")
+        .append(" charArray: " + Arrays.toString(charArray) + ",\n")
+        .append(" charArrayMulti: " + printMultiArray(charArrayMulti) + ", \n")
+        .append(" sTypeArray: " + Arrays.toString(sTypeArray) + "\n")
+        .append("}").toString();
   }
 
   private static String printMultiArray(char[][] c) {

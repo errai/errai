@@ -81,7 +81,8 @@ public class ProcessingContext {
   public JClassType loadClassType(Class clazz) {
     try {
       return getOracle().getType(clazz.getName());
-    } catch (NotFoundException e) {
+    }
+    catch (NotFoundException e) {
       throw new RuntimeException(e);
     }
   }

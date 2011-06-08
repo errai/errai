@@ -33,7 +33,8 @@ public class DeclareAssignmentBuilder extends AssignmentBuilder {
   public String generate(Context context) {
     if (statement != null) {
       return reference.getType().getFullyQualifedName() + " " + super.generate(context);
-    } else {
+    }
+    else {
       return reference.getType().getFullyQualifedName() + " " + reference.getName();
     }
   }

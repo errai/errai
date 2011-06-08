@@ -55,15 +55,18 @@ public class UnboundedArrayBlockingQueue<E> implements BlockingQueue<E> {
 
       try {
         return blockingQueue.add(o);
-      } catch (IllegalStateException e) {
+      }
+      catch (IllegalStateException e) {
         if (e.getMessage().equals("Queue full")) {
           growQueue();
           return add(o);
-        } else {
+        }
+        else {
           throw e;
         }
       }
-    } finally {
+    }
+    finally {
       semaphore.release();
     }
   }
@@ -73,11 +76,13 @@ public class UnboundedArrayBlockingQueue<E> implements BlockingQueue<E> {
       semaphore.acquireUninterruptibly();
       if (blockingQueue.offer(o)) {
         return true;
-      } else {
+      }
+      else {
         growQueue();
         return offer(o);
       }
-    } finally {
+    }
+    finally {
       semaphore.release();
     }
   }
@@ -97,7 +102,8 @@ public class UnboundedArrayBlockingQueue<E> implements BlockingQueue<E> {
       ArrayBlockingQueue<E> newQueue = new ArrayBlockingQueue<E>(size *= 2);
       blockingQueue.drainTo(newQueue);
       blockingQueue = newQueue;
-    } finally {
+    }
+    finally {
       resizing = false;
       semaphore.release(999);
     }
@@ -112,11 +118,13 @@ public class UnboundedArrayBlockingQueue<E> implements BlockingQueue<E> {
       semaphore.acquireUninterruptibly();
       if (blockingQueue.offer(o, timeout, unit)) {
         return true;
-      } else {
+      }
+      else {
         growQueue();
         return offer(o);
       }
-    } finally {
+    }
+    finally {
       semaphore.release();
     }
   }

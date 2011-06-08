@@ -37,12 +37,11 @@ public class WSWindowPanel extends Composite {
   ErraiWidgetsImageBundle imageBundle = GWT.create(ErraiWidgetsImageBundle.class);
 
   private Image icon = new Image(imageBundle.blueFlag());
- 
+
   private WindowPanel windowPanel;
   private LayoutPanel layout;
 
-  public WSWindowPanel()
-  {
+  public WSWindowPanel() {
     windowPanel = new WindowPanel();
     windowPanel.setAnimationEnabled(true);
     layout = new LayoutPanel(new BoxLayout(BoxLayout.Orientation.VERTICAL));
@@ -59,7 +58,7 @@ public class WSWindowPanel extends Composite {
     windowPanel.hide();
   }
 
-  public void show() {    
+  public void show() {
     windowPanel.pack();
     windowPanel.center();
   }
@@ -68,8 +67,7 @@ public class WSWindowPanel extends Composite {
     show();
   }
 
-  public void add(Widget w)
-  {
+  public void add(Widget w) {
     layout.add(w);
   }
 
@@ -101,8 +99,7 @@ public class WSWindowPanel extends Composite {
     throw new RuntimeException("not implemented");
   }
 
-  public void center()
-  {
+  public void center() {
     windowPanel.center();
   }
 

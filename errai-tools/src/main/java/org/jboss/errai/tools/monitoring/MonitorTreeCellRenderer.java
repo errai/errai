@@ -22,16 +22,16 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import java.awt.*;
 
 public class MonitorTreeCellRenderer extends DefaultTreeCellRenderer {
-    @Override
-    public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
-        super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+  @Override
+  public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
+    super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
 
-        if (value instanceof DefaultMutableTreeNode && ((DefaultMutableTreeNode) value).getUserObject() instanceof JLabel) {
-            JLabel l =(JLabel) ((DefaultMutableTreeNode) value).getUserObject();
-            setIcon(l.getIcon());
-            setText(l.getText());
-        }
-        
-        return this;
+    if (value instanceof DefaultMutableTreeNode && ((DefaultMutableTreeNode) value).getUserObject() instanceof JLabel) {
+      JLabel l = (JLabel) ((DefaultMutableTreeNode) value).getUserObject();
+      setIcon(l.getIcon());
+      setText(l.getText());
     }
+
+    return this;
+  }
 }

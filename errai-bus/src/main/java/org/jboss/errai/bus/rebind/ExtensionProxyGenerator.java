@@ -48,7 +48,7 @@ public class ExtensionProxyGenerator extends Generator {
 
   @Override
   public String generate(TreeLogger logger, GeneratorContext context, String typeName)
-          throws UnableToCompleteException {
+      throws UnableToCompleteException {
     typeOracle = context.getTypeOracle();
 
     try {
@@ -63,7 +63,8 @@ public class ExtensionProxyGenerator extends Generator {
       // Generate class source code
       generateClass(logger, context);
 
-    } catch (Throwable e) {
+    }
+    catch (Throwable e) {
 
       // record that Map generation threw an exception
       e.printStackTrace();
@@ -92,7 +93,7 @@ public class ExtensionProxyGenerator extends Generator {
 
     // init composer, set class properties, create source writer
     ClassSourceFileComposerFactory composer = new ClassSourceFileComposerFactory(packageName,
-            className);
+        className);
 
     composer.addImplementedInterface(ExtensionsLoader.class.getName());
     composer.addImport(JSONValue.class.getName());
@@ -136,7 +137,8 @@ public class ExtensionProxyGenerator extends Generator {
 
           ExtensionGenerator generator = cls.asSubclass(ExtensionGenerator.class).newInstance();
           generator.generate(context, logger, sourceWriter, scanner, typeOracle);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
           throw new RuntimeException("Could not load extension generator: " + cls.getName(), e);
         }
       }

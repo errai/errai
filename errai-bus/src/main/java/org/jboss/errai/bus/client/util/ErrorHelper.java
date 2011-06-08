@@ -48,7 +48,8 @@ public class ErrorHelper {
       System.err.println("Details      : " + message.get(String.class, "AdditionalDetails").replaceAll("<br/>", "\n").replaceAll("&nbsp;", " "));
       //  System.err.println("---");
       //  e.printStackTrace(System.err);
-    } else {
+    }
+    else {
 
       if (e != null) {
         StringBuilder a = new StringBuilder("<tt><br/>").append(e.getClass().getName()).append(": ").append(e.getMessage()).append("<br/>");
@@ -75,7 +76,8 @@ public class ErrorHelper {
         }
         sendClientError(bus, message, errorMessage, a.append("</tt>").toString());
 
-      } else {
+      }
+      else {
         sendClientError(bus, message, errorMessage, "No additional details.");
       }
     }
@@ -99,24 +101,25 @@ public class ErrorHelper {
       System.err.println("Error Message: " + message.get(String.class, "ErrorMessage"));
       System.err.println("Details      : " + message.get(String.class, "AdditionalDetails").replaceAll("<br/>", "\n").replaceAll("&nbsp;", " "));
 
-    } else {
+    }
+    else {
 
       MessageBuilder.createConversation(message)
-              .toSubject("ClientBusErrors")
-              .with("ErrorMessage", errorMessage)
-              .with("AdditionalDetails", additionalDetails)
-              .noErrorHandling().sendNowWith(bus);
+          .toSubject("ClientBusErrors")
+          .with("ErrorMessage", errorMessage)
+          .with("AdditionalDetails", additionalDetails)
+          .noErrorHandling().sendNowWith(bus);
     }
 
   }
 
   public static void sendClientError(MessageBus bus, String queueId, String errorMessage, String additionalDetails) {
     MessageBuilder.createMessage()
-            .toSubject("ClientBusErrors")
-            .with("ErrorMessage", errorMessage)
-            .with("AdditionalDetails", additionalDetails)
-            .with(MessageParts.SessionID, queueId)
-            .noErrorHandling().sendNowWith(bus);
+        .toSubject("ClientBusErrors")
+        .with("ErrorMessage", errorMessage)
+        .with("AdditionalDetails", additionalDetails)
+        .with(MessageParts.SessionID, queueId)
+        .noErrorHandling().sendNowWith(bus);
   }
 
 
@@ -128,9 +131,9 @@ public class ErrorHelper {
    */
   public static void disconnectRemoteBus(MessageBus bus, Message message) {
     MessageBuilder.createConversation(message)
-            .toSubject("ClientBus")
-            .command(BusCommands.Disconnect)
-            .noErrorHandling().sendNowWith(bus);
+        .toSubject("ClientBus")
+        .command(BusCommands.Disconnect)
+        .noErrorHandling().sendNowWith(bus);
   }
 
   public static void handleMessageDeliveryFailure(MessageBus bus, String queueId, String errorMessage, Throwable e, boolean disconnect) {
@@ -156,7 +159,8 @@ public class ErrorHelper {
       sendClientError(bus, message, errorMessage, e);
 
       if (e != null) throw new MessageDeliveryFailure(e);
-    } finally {
+    }
+    finally {
       if (disconnect) disconnectRemoteBus(bus, message);
     }
   }

@@ -64,8 +64,8 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
   }
 
   public void generate(
-          GeneratorContext context, TreeLogger logger,
-          SourceWriter writer, MetaDataScanner scanner, final TypeOracle oracle) {
+      GeneratorContext context, TreeLogger logger,
+      SourceWriter writer, MetaDataScanner scanner, final TypeOracle oracle) {
 
     for (Class<?> entity : scanner.getTypesAnnotatedWith(ExposeEntity.class)) {
       generateMarshaller(loadType(oracle, entity), logger, writer);
@@ -75,11 +75,12 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
       JClassType type = loadType(oracle, remote);
       try {
         writer.print((String) execute(rpcProxyGenerator,
-                Make.Map.<String, Object>$()
-                        ._("implementationClassName", type.getName() + "Impl")
-                        ._("interfaceClass", Class.forName(type.getQualifiedSourceName()))
-                        ._()));
-      } catch (Throwable t) {
+            Make.Map.<String, Object>$()
+                ._("implementationClassName", type.getName() + "Impl")
+                ._("interfaceClass", Class.forName(type.getQualifiedSourceName()))
+                ._()));
+      }
+      catch (Throwable t) {
         throw new ErraiBootstrapFailure(t);
       }
     }
@@ -100,7 +101,8 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
           for (String s : props.getProperty(key).split(" ")) {
             try {
               generateMarshaller(oracle.getType(s.trim()), logger, writer);
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
               e.printStackTrace();
               throw new ErraiBootstrapFailure(e);
             }
@@ -114,14 +116,16 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
           for (String s : props.getProperty(key).split(" ")) {
             try {
               generateMarshaller(oracle.getType(s.trim()), logger, writer);
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
               e.printStackTrace();
               throw new ErraiBootstrapFailure(e);
             }
           }
         }
       }
-    } else {
+    }
+    else {
       // props not found
       log.warn("No modules found ot load. Unable to find ErraiApp.properties in the classpath");
     }
@@ -130,7 +134,8 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
   private JClassType loadType(TypeOracle oracle, Class<?> entity) {
     try {
       return oracle.getType(entity.getCanonicalName());
-    } catch (NotFoundException e) {
+    }
+    catch (NotFoundException e) {
       throw new RuntimeException("Failed to load type " + entity.getName(), e);
     }
   }
@@ -170,10 +175,12 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
 
               arrayConverters.put(c, depth);
 
-            } else {
+            }
+            else {
               types.put(f.getName(), c = ParseTools.unboxPrimitive(Class.forName(pType.getQualifiedBoxedSourceName())));
             }
-          } else {
+          }
+          else {
 
             types.put(f.getName(), Class.forName(type.getQualifiedBinaryName()));
           }
@@ -184,20 +191,24 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
           if (getterMeth == null) {
             if (f.isPublic()) {
               getters.put(f.getName(), new ValueExtractor(f));
-            } else if (visit == scan) {
+            }
+            else if (visit == scan) {
               throw new GenerationException("could not find a read accessor in class: " + visit.getQualifiedSourceName() + "; for field: " + f.getName() + "; should declare an accessor: " + ReflectionUtil.getGetter(f.getName()));
             }
-          } else {
+          }
+          else {
             getters.put(f.getName(), new ValueExtractor(getterMeth));
           }
 
           if (setterMeth == null) {
             if (f.isPublic()) {
               setters.put(f.getName(), new ValueBinder(f));
-            } else if (visit == scan) {
+            }
+            else if (visit == scan) {
               throw new GenerationException("could not find a write accessor in class: " + visit.getQualifiedSourceName() + "; for field: " + f.getName() + "; should declare an accessor: " + ReflectionUtil.getSetter(f.getName()));
             }
-          } else {
+          }
+          else {
             setters.put(f.getName(), new ValueBinder(setterMeth));
           }
 
@@ -206,28 +217,30 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
       }
       while ((scan = scan.getSuperclass()) != null && !scan.getQualifiedSourceName().equals("java.lang.Object"));
 
-    } catch (ClassNotFoundException e) {
+    }
+    catch (ClassNotFoundException e) {
       e.printStackTrace();
       throw new RuntimeException(e);
     }
 
     try {
       if (!enumType) visit.getConstructor(new JClassType[0]);
-    } catch (NotFoundException e) {
+    }
+    catch (NotFoundException e) {
       String errorMsg = "Type marked for serialization does not expose a default constructor: " + visit.getQualifiedSourceName();
       logger.log(TreeLogger.Type.ERROR, errorMsg, e);
       throw new GenerationException(errorMsg, e);
     }
 
     Map<String, Object> templateVars = Make.Map.<String, Object>$()
-            ._("className", visit.getQualifiedSourceName())
-            ._("canonicalClassName", visit.getQualifiedBinaryName())
-            ._("fields", types.keySet())
-            ._("targetTypes", types)
-            ._("getters", getters)
-            ._("setters", setters)
-            ._("arrayConverters", arrayConverters)
-            ._("enumType", enumType)._();
+        ._("className", visit.getQualifiedSourceName())
+        ._("canonicalClassName", visit.getQualifiedBinaryName())
+        ._("fields", types.keySet())
+        ._("targetTypes", types)
+        ._("getters", getters)
+        ._("setters", setters)
+        ._("arrayConverters", arrayConverters)
+        ._("enumType", enumType)._();
 
     String genStr;
 
@@ -317,7 +330,8 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
     do {
       try {
         return scan.getMethod(methName, new JType[0]);
-      } catch (NotFoundException e) {
+      }
+      catch (NotFoundException e) {
         //
       }
     } while ((scan = scan.getSuperclass()) != null && !scan.getQualifiedSourceName().equals("java.lang.Object"));
@@ -330,7 +344,8 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
 
       try {
         return scan.getMethod(methName, new JType[]{field});
-      } catch (NotFoundException e) {
+      }
+      catch (NotFoundException e) {
         //
       }
     } while ((scan = scan.getSuperclass()) != null && !scan.getQualifiedSourceName().equals("java.lang.Object"));
@@ -340,19 +355,26 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
   private String getInternalRep(String c) {
     if ("char".equals(c)) {
       return "C";
-    } else if ("byte".equals(c)) {
+    }
+    else if ("byte".equals(c)) {
       return "B";
-    } else if ("double".equals(c)) {
+    }
+    else if ("double".equals(c)) {
       return "D";
-    } else if ("float".equals(c)) {
+    }
+    else if ("float".equals(c)) {
       return "F";
-    } else if ("int".equals(c)) {
+    }
+    else if ("int".equals(c)) {
       return "I";
-    } else if ("long".equals(c)) {
+    }
+    else if ("long".equals(c)) {
       return "J";
-    } else if ("short".equals(c)) {
+    }
+    else if ("short".equals(c)) {
       return "S";
-    } else if ("boolean".equals(c)) {
+    }
+    else if ("boolean".equals(c)) {
       return "Z";
     }
     return "L" + c + ";";

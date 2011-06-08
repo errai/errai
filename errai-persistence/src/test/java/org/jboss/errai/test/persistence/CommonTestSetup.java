@@ -75,7 +75,8 @@ public class CommonTestSetup {
     try {
       session.save(user);
       tx.commit();
-    } catch (HibernateException e) {
+    }
+    catch (HibernateException e) {
       tx.rollback();
       throw new RuntimeException("Faile to save User", e);
     }
@@ -135,7 +136,8 @@ public class CommonTestSetup {
       query.executeUpdate();
 
       tx.commit();
-    } catch (HibernateException e) {
+    }
+    catch (HibernateException e) {
       tx.rollback();
       throw new RuntimeException("Failed to clean user table", e);
     }

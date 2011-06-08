@@ -26,52 +26,52 @@ import org.jboss.errai.workspaces.client.protocols.LayoutParts;
 import java.util.LinkedHashMap;
 
 public class LayoutHint {
-    private static LinkedHashMap<Widget, LayoutHintProvider> MANAGED_WIDGETS = new LinkedHashMap<Widget, LayoutHintProvider>();
-    private static LinkedHashMap<String, LayoutHintProvider> MANAGED_SUBJECTS = new LinkedHashMap<String, LayoutHintProvider>();
+  private static LinkedHashMap<Widget, LayoutHintProvider> MANAGED_WIDGETS = new LinkedHashMap<Widget, LayoutHintProvider>();
+  private static LinkedHashMap<String, LayoutHintProvider> MANAGED_SUBJECTS = new LinkedHashMap<String, LayoutHintProvider>();
 
-    private static int counter = 0;
+  private static int counter = 0;
 
-    public static void attach(final Widget w, LayoutHintProvider p) {
-        String subject = "local:org.jboss.errai.sizeHints:" + counter++;
+  public static void attach(final Widget w, LayoutHintProvider p) {
+    String subject = "local:org.jboss.errai.sizeHints:" + counter++;
 
-        ErraiBus.get().subscribe(subject,
-                new MessageCallback() {
-                    public void callback(Message message) {
-                        w.setPixelSize(message.get(Double.class, LayoutParts.Width).intValue(),
-                                message.get(Double.class, LayoutParts.Height).intValue());
-                    }
-                });
+    ErraiBus.get().subscribe(subject,
+        new MessageCallback() {
+          public void callback(Message message) {
+            w.setPixelSize(message.get(Double.class, LayoutParts.Width).intValue(),
+                message.get(Double.class, LayoutParts.Height).intValue());
+          }
+        });
 
 
-        MANAGED_WIDGETS.put(w, p);
-        MANAGED_SUBJECTS.put(subject, p);
+    MANAGED_WIDGETS.put(w, p);
+    MANAGED_SUBJECTS.put(subject, p);
+  }
+
+  public static LayoutHintProvider findProvider(Widget instance) {
+    return MANAGED_WIDGETS.get(instance);
+  }
+
+  public static LayoutHintProvider findProvider(String subject) {
+    return MANAGED_SUBJECTS.get(subject);
+  }
+
+  public static void hintAll() {
+    LayoutHintProvider p;
+    for (String s : MANAGED_SUBJECTS.keySet()) {
+      if ((p = findProvider(s)) != null && p.getWidthHint() > 0 && p.getHeightHint() > 0) {
+        MessageBuilder.createMessage()
+            .toSubject(s)
+            .with(LayoutParts.Width, p.getWidthHint())
+            .with(LayoutParts.Height, p.getHeightHint())
+            .noErrorHandling().sendNowWith(ErraiBus.get());
+      }
     }
 
-    public static LayoutHintProvider findProvider(Widget instance) {
-        return MANAGED_WIDGETS.get(instance);
+    for (Widget w : MANAGED_WIDGETS.keySet()) {
+      p = findProvider(w);
+      if (p != null && w.isAttached() && p.getWidthHint() > 0 && p.getHeightHint() > 0) {
+        w.setPixelSize(p.getWidthHint(), p.getHeightHint());
+      }
     }
-
-    public static LayoutHintProvider findProvider(String subject) {
-        return MANAGED_SUBJECTS.get(subject);
-    }
-
-    public static void hintAll() {
-        LayoutHintProvider p;
-        for (String s : MANAGED_SUBJECTS.keySet()) {
-            if ((p = findProvider(s)) != null && p.getWidthHint() > 0 && p.getHeightHint() > 0) {
-                MessageBuilder.createMessage()
-                        .toSubject(s)
-                        .with(LayoutParts.Width, p.getWidthHint())
-                        .with(LayoutParts.Height, p.getHeightHint())
-                        .noErrorHandling().sendNowWith(ErraiBus.get());
-            }
-        }
-
-        for (Widget w : MANAGED_WIDGETS.keySet()) {
-            p = findProvider(w);
-            if (p != null && w.isAttached() && p.getWidthHint() > 0 && p.getHeightHint() > 0) {
-                w.setPixelSize(p.getWidthHint(), p.getHeightHint());
-            }
-        }
-    }
+  }
 }

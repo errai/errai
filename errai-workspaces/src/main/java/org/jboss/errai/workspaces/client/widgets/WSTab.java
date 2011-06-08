@@ -34,134 +34,134 @@ import java.util.List;
  * A WorkspaceTab is the actual implementation of the rendered tabs along the top of the workspace.
  */
 public class WSTab extends Composite {
-    WSTabPanel panel;
-    Widget widgetRef;
+  WSTabPanel panel;
+  Widget widgetRef;
 
-    final Label label;
-    TabDropController tabDropController;
-    Image icon;
-    Image closeButton;
+  final Label label;
+  TabDropController tabDropController;
+  Image icon;
+  Image closeButton;
 
-    boolean modifiedFlag = false;
+  boolean modifiedFlag = false;
 
-    final HorizontalPanel hPanel = new HorizontalPanel();
+  final HorizontalPanel hPanel = new HorizontalPanel();
 
-    List<CloseHandler<WSTab>> tabCloseHandlers = new ArrayList<CloseHandler<WSTab>>();
+  List<CloseHandler<WSTab>> tabCloseHandlers = new ArrayList<CloseHandler<WSTab>>();
 
-    ErraiImageBundle erraiImageBundle = GWT.create(ErraiImageBundle.class);
+  ErraiImageBundle erraiImageBundle = GWT.create(ErraiImageBundle.class);
 
-    //todo: this widget is still tied sendNowWith the Workspace API -- bad!
-    public WSTab(String name, Widget widgetRef, Image tabIcon) {
-        this.widgetRef = widgetRef;
-        this.icon = tabIcon;
+  //todo: this widget is still tied sendNowWith the Workspace API -- bad!
+  public WSTab(String name, Widget widgetRef, Image tabIcon) {
+    this.widgetRef = widgetRef;
+    this.icon = tabIcon;
 
-        initWidget(hPanel);
+    initWidget(hPanel);
 
-        hPanel.add(tabIcon);
+    hPanel.add(tabIcon);
 
-        label = new Label(name);
-        label.setStylePrimaryName("workspace-TabLabelText");
+    label = new Label(name);
+    label.setStylePrimaryName("workspace-TabLabelText");
 
-        hPanel.add(label);
+    hPanel.add(label);
 
-        closeButton = new Image(erraiImageBundle.closeIcon());
-        closeButton.addStyleName("workspace-tabCloseButton");
-        closeButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                notifyCloseHandlers();
-            }
-        });
+    closeButton = new Image(erraiImageBundle.closeIcon());
+    closeButton.addStyleName("workspace-tabCloseButton");
+    closeButton.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        notifyCloseHandlers();
+      }
+    });
 
-        addTabCloseHandler(new CloseHandler<WSTab>() {
-            public void onClose(CloseEvent closeEvent) {
-                remove();
-            }
-        });
+    addTabCloseHandler(new CloseHandler<WSTab>() {
+      public void onClose(CloseEvent closeEvent) {
+        remove();
+      }
+    });
 
-        hPanel.add(closeButton);
+    hPanel.add(closeButton);
 
-        reset();
+    reset();
+  }
+
+  public boolean isModified() {
+    return modifiedFlag;
+  }
+
+  public void setModified(boolean modified) {
+    if (this.modifiedFlag = modified) decorateModified();
+  }
+
+  private void decorateModified() {
+    label.getElement().getStyle().setProperty("color", "darkblue");
+  }
+
+  public Widget getWidgetRef() {
+    return widgetRef;
+  }
+
+  public void setWidgetRef(Widget widgetRef) {
+    this.widgetRef = widgetRef;
+  }
+
+  public void reset() {
+    sinkEvents(Event.ONMOUSEOVER | Event.ONMOUSEOUT);
+  }
+
+
+  public String toString() {
+    return "WSTab:" + label.getText();
+  }
+
+  public TabDropController getTabDropController() {
+    return tabDropController;
+  }
+
+  public Label getLabel() {
+    return label;
+  }
+
+  public Image getIcon() {
+    return icon;
+  }
+
+  public boolean isActivated() {
+    return panel.getWidgetIndex(widgetRef) == panel.getActiveTab();
+  }
+
+  public void activate() {
+    panel.selectTab(panel.getWidgetIndex(widgetRef));
+  }
+
+  public int remove() {
+    int idx = panel.getWidgetIndex(widgetRef);
+    panel.remove(idx);
+    return idx;
+  }
+
+  public void setPanel(WSTabPanel panel) {
+    this.panel = panel;
+    this.tabDropController = new TabDropController(panel, this);
+  }
+
+  public void clearTabCloseHandlers() {
+    tabCloseHandlers.clear();
+  }
+
+  public void addTabCloseHandler(CloseHandler<WSTab> closeHandler) {
+    tabCloseHandlers.add(closeHandler);
+  }
+
+  private void notifyCloseHandlers() {
+    WSTabCloseEvent<WSTab> evt = new WSTabCloseEvent<WSTab>(this, false);
+    for (CloseHandler<WSTab> handler : tabCloseHandlers) {
+      handler.onClose(evt);
     }
+  }
 
-    public boolean isModified() {
-        return modifiedFlag;
+  public class WSTabCloseEvent<T> extends CloseEvent<T> {
+    protected WSTabCloseEvent(T target, boolean autoClosed) {
+      super(target, autoClosed);
     }
-
-    public void setModified(boolean modified) {
-        if (this.modifiedFlag = modified) decorateModified();
-    }
-
-    private void decorateModified() {
-        label.getElement().getStyle().setProperty("color", "darkblue");
-    }
-
-    public Widget getWidgetRef() {
-        return widgetRef;
-    }
-
-    public void setWidgetRef(Widget widgetRef) {
-        this.widgetRef = widgetRef;
-    }
-
-    public void reset() {
-        sinkEvents(Event.ONMOUSEOVER | Event.ONMOUSEOUT);
-    }
-
-
-    public String toString() {
-        return "WSTab:" + label.getText();
-    }
-
-    public TabDropController getTabDropController() {
-        return tabDropController;
-    }
-
-    public Label getLabel() {
-        return label;
-    }
-
-    public Image getIcon() {
-        return icon;
-    }
-
-    public boolean isActivated() {
-        return panel.getWidgetIndex(widgetRef) == panel.getActiveTab();
-    }
-
-    public void activate() {
-        panel.selectTab(panel.getWidgetIndex(widgetRef));
-    }
-
-    public int remove() {
-        int idx = panel.getWidgetIndex(widgetRef);
-        panel.remove(idx);
-        return idx;
-    }
-
-    public void setPanel(WSTabPanel panel) {
-        this.panel = panel;
-        this.tabDropController = new TabDropController(panel, this);
-    }
-
-    public void clearTabCloseHandlers() {
-        tabCloseHandlers.clear();
-    }
-
-    public void addTabCloseHandler(CloseHandler<WSTab> closeHandler) {
-        tabCloseHandlers.add(closeHandler);
-    }
-
-    private void notifyCloseHandlers()  {
-        WSTabCloseEvent<WSTab> evt = new WSTabCloseEvent<WSTab>(this, false);
-        for (CloseHandler<WSTab> handler : tabCloseHandlers) {
-            handler.onClose(evt);
-        }
-    }
-
-    public  class WSTabCloseEvent<T> extends CloseEvent<T> {
-        protected WSTabCloseEvent(T target, boolean autoClosed) {
-            super(target, autoClosed);
-        }
-    }
+  }
 
 }

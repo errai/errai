@@ -28,29 +28,29 @@ import static org.jboss.errai.bus.client.api.base.MessageBuilder.createMessage;
 
 
 public class TabCloseHandler implements CloseHandler<WSTab>, AcceptsCallback {
-    /**
-     * The reference to the tab.
-     */
-    private String instanceId;
+  /**
+   * The reference to the tab.
+   */
+  private String instanceId;
 
-    public TabCloseHandler(String instanceId) {
-        this.instanceId = instanceId;
-    }
+  public TabCloseHandler(String instanceId) {
+    this.instanceId = instanceId;
+  }
 
-    public void onClose(CloseEvent closeEvent) {
-        createMessage()
-                .toSubject("org.jboss.errai.WorkspaceLayout")
-                .command(LayoutCommands.CloseTab)
-                .with(LayoutParts.InstanceID, instanceId)
-                .noErrorHandling().sendNowWith(ErraiBus.get());
-    }
+  public void onClose(CloseEvent closeEvent) {
+    createMessage()
+        .toSubject("org.jboss.errai.WorkspaceLayout")
+        .command(LayoutCommands.CloseTab)
+        .with(LayoutParts.InstanceID, instanceId)
+        .noErrorHandling().sendNowWith(ErraiBus.get());
+  }
 
 
-    /**
-     * The callback receiver method for the warning dialog box.
-     *
-     * @param message
-     */
-    public void callback(Object message, Object data) {
-    }
+  /**
+   * The callback receiver method for the warning dialog box.
+   *
+   * @param message
+   */
+  public void callback(Object message, Object data) {
+  }
 }

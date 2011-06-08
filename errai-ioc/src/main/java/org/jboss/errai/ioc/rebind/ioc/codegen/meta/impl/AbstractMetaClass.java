@@ -105,7 +105,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     Class<?> cls = asClass();
 
     Method m = ParseTools.getBestCandidate(parameters, name, cls,
-            fromMetaMethod(getStaticMethods()), false);
+        fromMetaMethod(getStaticMethods()), false);
     if (m == null) return null;
 
     return getMethod(name, m.getParameterTypes());
@@ -148,7 +148,8 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
     try {
       return declaring.getMethod(method.getName(), parms);
-    } catch (NoSuchMethodException e) {
+    }
+    catch (NoSuchMethodException e) {
       return null;
     }
   }
@@ -264,7 +265,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   @Override
   public boolean equals(Object o) {
     return o instanceof MetaClass && hashString().equals(MetaClass.class.getName()
-            + ":" + ((MetaClass) o).getFullyQualifedName());
+        + ":" + ((MetaClass) o).getFullyQualifedName());
   }
 
   @Override
@@ -275,11 +276,13 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   public Class<?> asClass() {
     if (enclosedMetaObject instanceof Class) {
       return (Class<?>) enclosedMetaObject;
-    } else {
+    }
+    else {
       try {
         return Class.forName(((JClassType) enclosedMetaObject).getQualifiedSourceName(), false,
-                Thread.currentThread().getContextClassLoader());
-      } catch (ClassNotFoundException e) {
+            Thread.currentThread().getContextClassLoader());
+      }
+      catch (ClassNotFoundException e) {
         return null;
       }
     }

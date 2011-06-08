@@ -23,8 +23,7 @@ import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.workspaces.client.api.WidgetProvider;
 import org.jboss.errai.workspaces.client.api.ProvisioningCallback;
 
-public class WSLoginPanel implements WidgetProvider
-{
+public class WSLoginPanel implements WidgetProvider {
 
   private TextBox userNameInput = new TextBox();
   private TextBox passwordInput = new PasswordTextBox();
@@ -32,8 +31,7 @@ public class WSLoginPanel implements WidgetProvider
 
   private Composite widget;
 
-  public WSLoginPanel()
-  {
+  public WSLoginPanel() {
     this.widget = new Composite() {
       {
         VerticalPanel mainPanel = new VerticalPanel();
@@ -84,18 +82,15 @@ public class WSLoginPanel implements WidgetProvider
     };
   }
 
-  public Button getLoginButton()
-  {
+  public Button getLoginButton() {
     return loginButton;
   }
 
-  public TextBox getUserNameInput()
-  {
+  public TextBox getUserNameInput() {
     return userNameInput;
   }
 
-  public TextBox getPasswordInput()
-  {
+  public TextBox getPasswordInput() {
     return passwordInput;
   }
 

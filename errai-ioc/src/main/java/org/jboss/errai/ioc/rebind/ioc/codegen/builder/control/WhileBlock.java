@@ -29,7 +29,7 @@ public class WhileBlock extends AbstractBlockConditional {
 
   public String generate(Context context) {
     StringBuilder builder = new StringBuilder("while (")
-            .append(getCondition().generate(context)).append(") {\n");
+        .append(getCondition().generate(context)).append(") {\n");
 
     if (getBlock() != null) {
       builder.append(getBlock().generate(context));

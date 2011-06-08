@@ -28,7 +28,8 @@ public class CallElementBuilder {
   public void appendCallElement(CallElement element) {
     if (callElement == null) {
       rootElement = callElement = element;
-    } else {
+    }
+    else {
       callElement.setNext(element);
       callElement = element;
     }

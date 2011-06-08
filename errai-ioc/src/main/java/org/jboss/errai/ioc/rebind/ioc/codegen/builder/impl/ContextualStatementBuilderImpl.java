@@ -30,7 +30,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.MethodCall;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ContextualStatementBuilderImpl extends AbstractStatementBuilder implements ContextualStatementBuilder,
-        VariableReferenceContextualStatementBuilder {
+    VariableReferenceContextualStatementBuilder {
 
   protected ContextualStatementBuilderImpl(Context context, CallElementBuilder callElementBuilder) {
     super(context, callElementBuilder);

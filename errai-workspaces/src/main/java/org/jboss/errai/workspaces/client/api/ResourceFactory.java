@@ -20,7 +20,6 @@ import com.google.gwt.resources.client.ImageResource;
 /**
  * Loads resource declared in {@link org.jboss.errai.workspaces.client.api.annotations.DefaultBundle}
  */
-public interface ResourceFactory
-{
+public interface ResourceFactory {
   ImageResource createImage(String name);
 }
