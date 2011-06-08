@@ -155,7 +155,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
   public MetaClass[] getInterfaces() {
     List<MetaClass> metaClassList = new ArrayList<MetaClass>();
     for (JClassType type : getEnclosedMetaObject().isClassOrInterface()
-            .getImplementedInterfaces()) {
+        .getImplementedInterfaces()) {
 
       metaClassList.add(new GWTClass(type));
     }
@@ -188,11 +188,12 @@ public class GWTClass extends AbstractMetaClass<JType> {
     if (annotationsCache == null) {
       try {
         Class<?> cls = Class.forName(getEnclosedMetaObject().getQualifiedSourceName(), false,
-                Thread.currentThread().getContextClassLoader());
+            Thread.currentThread().getContextClassLoader());
 
         annotationsCache = cls.getAnnotations();
 
-      } catch (ClassNotFoundException e) {
+      }
+      catch (ClassNotFoundException e) {
         e.printStackTrace();
       }
     }
@@ -232,27 +233,27 @@ public class GWTClass extends AbstractMetaClass<JType> {
 
   public boolean isPublic() {
     return getEnclosedMetaObject().isClassOrInterface() != null &&
-            getEnclosedMetaObject().isClassOrInterface().isPublic();
+        getEnclosedMetaObject().isClassOrInterface().isPublic();
   }
 
   public boolean isPrivate() {
     return getEnclosedMetaObject().isClassOrInterface() != null &&
-            getEnclosedMetaObject().isClassOrInterface().isPrivate();
+        getEnclosedMetaObject().isClassOrInterface().isPrivate();
   }
 
   public boolean isProtected() {
-    return getEnclosedMetaObject().isClassOrInterface() != null && 
+    return getEnclosedMetaObject().isClassOrInterface() != null &&
         getEnclosedMetaObject().isClassOrInterface().isProtected();
   }
 
   public boolean isFinal() {
     return getEnclosedMetaObject().isClassOrInterface() != null &&
-            getEnclosedMetaObject().isClassOrInterface().isFinal();
+        getEnclosedMetaObject().isClassOrInterface().isFinal();
   }
 
   public boolean isStatic() {
     return getEnclosedMetaObject().isClassOrInterface() != null &&
-            getEnclosedMetaObject().isClassOrInterface().isStatic();
+        getEnclosedMetaObject().isClassOrInterface().isStatic();
   }
 
   public String toString() {

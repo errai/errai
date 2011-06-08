@@ -16,9 +16,18 @@
 
 package org.jboss.errai.ioc.tests.rebind;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.lang.annotation.Annotation;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.VariableReference;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
@@ -27,13 +36,6 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 import org.junit.Assert;
 import org.junit.Test;
-
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import java.lang.annotation.Annotation;
-
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Tests the {@link StatementBuilder} API.
@@ -190,8 +192,8 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
         .toJavaString();
 
     assertEquals("Failed to generate two dimensional array using statements",
-        "new java.lang.String[][]{{java.lang.Integer.toString(1),java.lang.Integer.toString(2)}," +
-            "{java.lang.Integer.toString(3),java.lang.Integer.toString(4)}}", s);
+            "new java.lang.String[][]{{java.lang.Integer.toString(1),java.lang.Integer.toString(2)}," +
+                "{java.lang.Integer.toString(3),java.lang.Integer.toString(4)}}", s);
 
     s = StatementBuilder.create().newArray(String.class)
         .initialize(new Object[][]{
@@ -209,5 +211,50 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
 
     assertEquals("Failed to generate three dimensional array",
         "new java.lang.String[][][]{{{\"1\",\"2\"},{\"a\",\"b\"}},{{\"3\",\"4\"},{\"b\",\"c\"}}}", s);
+  }
+
+  @Test
+  public void testAssignArrayVariable() {
+    String s = StatementBuilder.create()
+        .addVariable("twoDimArray", String[][].class)
+        .loadVariable("twoDimArray")
+        .assignArrayValue("test", 1, 2)
+        .toJavaString();
+
+    assertEquals("Failed to generate array assignment", "twoDimArray[1][2] = \"test\"", s);
+
+    s = StatementBuilder.create()
+        .addVariable("twoDimArray", String[][].class)
+        .addVariable("i", int.class)
+        .addVariable("j", int.class)
+        .loadVariable("twoDimArray")
+        .assignArrayValue("test", Variable.get("i"), Variable.get("j"))
+        .toJavaString();
+
+    assertEquals("Failed to generate array assignment", "twoDimArray[i][j] = \"test\"", s);
+
+    try {
+      StatementBuilder.create()
+          .addVariable("twoDimArray", String.class)
+          .loadVariable("twoDimArray")
+          .assignArrayValue("test", 1, 2)
+          .toJavaString();
+      fail("Expected InvalidTypeExcpetion");
+    } catch(InvalidTypeException ite) {
+      //Expected, variable is not an array.
+    }
+    
+    try {
+      StatementBuilder.create()
+          .addVariable("twoDimArray", String[][].class)
+          .addVariable("i", float.class)
+          .addVariable("j", float.class)
+          .loadVariable("twoDimArray")
+          .assignArrayValue("test", Variable.get("i"), Variable.get("j"))
+          .toJavaString();
+      fail("Expected InvalidTypeExcpetion");
+    } catch(InvalidTypeException ite) {
+      //Expected, indexes are no integers
+    }
   }
 }
