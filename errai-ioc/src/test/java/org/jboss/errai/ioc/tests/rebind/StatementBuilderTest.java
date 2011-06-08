@@ -124,16 +124,15 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
         }
         
         try {
-            StatementBuilder.create().newArray(String.class, 2)
-                .initialize("1", "2", "3").toJavaString();
+            StatementBuilder.create().newArray(String.class).toJavaString();
             fail("Expected RuntimeException");
         } catch (Exception e) {
             // expected
-            assertEquals("Too many values", e.getMessage());
+            assertEquals("Must provide either dimension expressions or an array initializer", e.getMessage());
         }
         
-        String s = StatementBuilder.create().newArray(String.class, 2).initialize("1", "2").toJavaString();
-        assertEquals("new java.lang.String[2] {\n\"1\", \"2\"\n}", s);
+        String s = StatementBuilder.create().newArray(String.class).initialize("1", "2").toJavaString();
+        assertEquals("new java.lang.String[] {\"1\",\"2\"}", s);
         
         Statement annotation1=ObjectBuilder.newInstanceOf(Annotation.class)
             .extend()
@@ -153,17 +152,34 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
             .initialize(annotation1, annotation2)
             .toJavaString();
         
-        assertEquals("new java.lang.annotation.Annotation[] {\n" +
+        assertEquals("new java.lang.annotation.Annotation[] {" +
             "new java.lang.annotation.Annotation() {\n" +
                 "public java.lang.Class annotationType() {\n" +
                     "return javax.inject.Inject.class;\n" +
                  "}\n" +
             "}\n" +
-            ", new java.lang.annotation.Annotation() {\n" +
+            ",new java.lang.annotation.Annotation() {\n" +
                 "public java.lang.Class annotationType() {\n" +
                     "return javax.annotation.PostConstruct.class;\n" +
                 "}\n" +
              "}\n" +
            "}", s);
+    }
+    
+    @Test
+    public void testCreateAndInitializeMultiDimensionalArray() {
+       
+        String s = StatementBuilder.create().newArray(Integer.class)
+            .initialize(new Integer[][] {{1,2},{3,4}})
+            .toJavaString();
+        
+        assertEquals("Failed to generate two dimensional array", "new java.lang.Integer[][] {{1,2},{3,4}}",s);
+
+        s = StatementBuilder.create().newArray(String.class)
+            .initialize(new String[][][] {{{"1","2"},{"a","b"}},{{"3","4"},{"b","c"}}})
+            .toJavaString();
+    
+        assertEquals("Failed to generate three dimensional array", 
+                "new java.lang.String[][][] {{{\"1\",\"2\"},{\"a\",\"b\"}},{{\"3\",\"4\"},{\"b\",\"c\"}}}",s);
     }
 }

@@ -17,19 +17,24 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
 
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import org.jboss.errai.ioc.rebind.ioc.codegen.*;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ArrayBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.CallParameters;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.GenUtil;
+import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BuildCallback;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedConstructorException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
 
+import com.google.gwt.core.ext.typeinfo.JClassType;
+
 /**
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class ObjectBuilder extends AbstractStatementBuilder implements ArrayBuilder {
+public class ObjectBuilder extends AbstractStatementBuilder {
     StringBuilder buf = new StringBuilder();
 
     private static final int CONSTRUCT_STATEMENT_COMPLETE = 1;
@@ -38,7 +43,6 @@ public class ObjectBuilder extends AbstractStatementBuilder implements ArrayBuil
 
     private MetaClass type;
     private int buildState;
-    private Integer length;
 
     ObjectBuilder(MetaClass type) {
         super(Context.create());
@@ -59,55 +63,6 @@ public class ObjectBuilder extends AbstractStatementBuilder implements ArrayBuil
 
     public static ObjectBuilder newInstanceOf(JClassType type) {
         return newInstanceOf(MetaClassFactory.get(type));
-    }
-    
-    public static ArrayBuilder newArrayOf(MetaClass type) {
-        return new ObjectBuilder(type).newArrayInstance(null);
-    }
-
-    public static ArrayBuilder newArrayOf(Class type) {
-        return newArrayOf(MetaClassFactory.get(type));
-    }
-
-    public static ArrayBuilder newArrayOf(JClassType type) {
-        return newArrayOf(MetaClassFactory.get(type));
-    }
-    
-    public static ArrayBuilder newArrayOf(MetaClass type, int length) {
-        return new ObjectBuilder(type).newArrayInstance(length);
-    }
-
-    public static ArrayBuilder newArrayOf(Class type, int length) {
-        return newArrayOf(MetaClassFactory.get(type), length);
-    }
-
-    public static ArrayBuilder newArrayOf(JClassType type, int length) {
-        return newArrayOf(MetaClassFactory.get(type), length);
-    }
-
-    private ArrayBuilder newArrayInstance(Integer length) {
-        this.length = length;
-        
-        buf.append("new ").append(type.getFullyQualifedName())
-           .append("[").append((length==null)?"":length).append("]");
-        buildState = FINISHED;
-        return this;
-    }
-    
-    public AbstractStatementBuilder initialize(Object... values) {
-        if (length!=null && values.length > length) throw new RuntimeException("Too many values");
-        
-        buf.append(" {\n");
-        for (int i=0; i<values.length; i++) {
-            Statement s = GenUtil.generate(context, values[i]);
-            GenUtil.assertAssignableTypes(s.getType(), type);
-            buf.append(s.generate(context));
-            if (i + 1 < values.length) {
-                buf.append(", ");
-            }
-        }
-        buf.append("\n}");
-        return this;
     }
     
     private ObjectBuilder newInstance() {
