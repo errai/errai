@@ -22,5 +22,5 @@ package org.jboss.errai.ioc.tests.client.res;
  * Time: 7:53:52 PM
  */
 public interface FooService {
-    public String getMessage();
+  public String getMessage();
 }

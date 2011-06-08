@@ -30,8 +30,7 @@ import static org.junit.Assert.assertNull;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Jun 12, 2010
  */
-public class MergingTest extends CommonTestSetup
-{
+public class MergingTest extends CommonTestSetup {
   /**
    * Export a detched entity with lazy relations.
    * These turn into null when exported outside persistent context.
@@ -39,8 +38,7 @@ public class MergingTest extends CommonTestSetup
    * a merge-load cycle
    */
   @Test
-  public void mergeEntity()
-  {
+  public void mergeEntity() {
     // create a clone
 
     Session session = sessionFactory.openSession();
@@ -51,15 +49,15 @@ public class MergingTest extends CommonTestSetup
     User user = loadUser(session, userId);
     session.close();
 
-    User exportedUser = (User)beanManager.clone(user);//mapper.map(user, User.class);
+    User exportedUser = (User) beanManager.clone(user);//mapper.map(user, User.class);
     assertNull(exportedUser.getOrders()); // lazy turns into null
-    
+
     // update clone and persist
-    
+
     session = sessionFactory.openSession();
     Transaction tx = session.beginTransaction();
     exportedUser.setName("Okieh");
-    User mergedUser = (User)beanManager.merge(exportedUser);
+    User mergedUser = (User) beanManager.merge(exportedUser);
     session.saveOrUpdate(mergedUser);   // TODO: Why explicit save?
     tx.commit();
 
@@ -67,7 +65,7 @@ public class MergingTest extends CommonTestSetup
     session.close();
 
     // verify updates
-    
+
     session = sessionFactory.openSession();
     User user2 = loadUser(session, userId);
     assertEquals("Okieh", user2.getName());
@@ -80,8 +78,7 @@ public class MergingTest extends CommonTestSetup
    * and then merge it back in.
    */
   @Test
-  public void mergeModifiedLazyRelation()
-  {
+  public void mergeModifiedLazyRelation() {
     // create a clone
 
     Session session = sessionFactory.openSession();
@@ -92,7 +89,7 @@ public class MergingTest extends CommonTestSetup
     User user = loadUser(session, userId);
     session.close();
 
-    User exportedUser = (User)beanManager.clone(user);//mapper.map(user, User.class);
+    User exportedUser = (User) beanManager.clone(user);//mapper.map(user, User.class);
     assertNull(exportedUser.getOrders()); // lazy turns into null
 
     // update clone and persist
@@ -103,7 +100,7 @@ public class MergingTest extends CommonTestSetup
     exportedUser.setOrders(new HashSet<Order>());
     exportedUser.getOrders().add(new Order());
 
-    User mergedUser = (User)beanManager.merge(exportedUser);
+    User mergedUser = (User) beanManager.merge(exportedUser);
     session.saveOrUpdate(mergedUser);
     tx.commit();
 

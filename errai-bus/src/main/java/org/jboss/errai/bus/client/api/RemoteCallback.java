@@ -23,10 +23,10 @@ package org.jboss.errai.bus.client.api;
  */
 public interface RemoteCallback<T> {
 
-    /**
-     * Callback function dispatched when the message it is attached to has been sent
-     *
-     * @param response - response of any particular type
-     */
-    public void callback(T response);
+  /**
+   * Callback function dispatched when the message it is attached to has been sent
+   *
+   * @param response - response of any particular type
+   */
+  public void callback(T response);
 }

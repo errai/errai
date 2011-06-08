@@ -21,10 +21,10 @@ package org.jboss.errai.bus.client.security;
  * credentials to be provided by the caller.
  */
 public interface AuthenticationHandler {
-    /**
-     * Called to request filling of the credentials.
-     *
-     * @param credentials - Array of required credentials.
-     */
-    public void doLogin(Credential[] credentials);
+  /**
+   * Called to request filling of the credentials.
+   *
+   * @param credentials - Array of required credentials.
+   */
+  public void doLogin(Credential[] credentials);
 }

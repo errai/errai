@@ -26,13 +26,13 @@ import java.io.Serializable;
  */
 public interface MessageProvider extends Serializable {
 
-    /**
-     * Gets the appropriate message
-     *
-     * @return the appropriate message
-     */
-    public Message get();
+  /**
+   * Gets the appropriate message
+   *
+   * @return the appropriate message
+   */
+  public Message get();
 
 
-    // public ModelAdapter getAdapter();
+  // public ModelAdapter getAdapter();
 }

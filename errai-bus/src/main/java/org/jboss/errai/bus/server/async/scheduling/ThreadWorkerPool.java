@@ -20,65 +20,65 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ThreadWorkerPool {
-    /**
-     * The worker pool.
-     */
-    private final List<ThreadWorker> workers;
-    private final TaskProvider provider;
+  /**
+   * The worker pool.
+   */
+  private final List<ThreadWorker> workers;
+  private final TaskProvider provider;
 
-    private int maximumPoolSize = Runtime.getRuntime().availableProcessors();
+  private int maximumPoolSize = Runtime.getRuntime().availableProcessors();
 
-    private volatile boolean stop = false;
+  private volatile boolean stop = false;
 
-    public ThreadWorkerPool(TaskProvider provider) {
-        this.workers = new CopyOnWriteArrayList<ThreadWorker>();
-        this.provider = provider;
+  public ThreadWorkerPool(TaskProvider provider) {
+    this.workers = new CopyOnWriteArrayList<ThreadWorker>();
+    this.provider = provider;
+  }
+
+  public ThreadWorkerPool(TaskProvider provider, int maximumPoolSize) {
+    this.workers = new CopyOnWriteArrayList<ThreadWorker>();
+    this.provider = provider;
+    this.maximumPoolSize = maximumPoolSize;
+  }
+
+  public void addWorker() {
+    synchronized (this) {
+      if (workers.size() == maximumPoolSize) return;
+
+      if (stop) {
+        return;
+      }
+
+      ThreadWorker worker = new ThreadWorker(provider);
+      workers.add(worker);
+      worker.start();
     }
+  }
 
-    public ThreadWorkerPool(TaskProvider provider, int maximumPoolSize) {
-        this.workers = new CopyOnWriteArrayList<ThreadWorker>();
-        this.provider = provider;
-        this.maximumPoolSize = maximumPoolSize;
+  public void removeWorker() {
+    synchronized (this) {
+      if (workers.size() <= 1) return;
+
+      if (stop) {
+        return;
+      }
+
+      ThreadWorker worker = workers.get(workers.size() - 1);
+      worker.requestStop();
+      workers.remove(worker);
     }
+  }
 
-    public void addWorker() {
-        synchronized (this) {
-            if (workers.size() == maximumPoolSize) return;
+  public void startPool() {
+    addWorker();
+  }
 
-            if (stop) {
-                return;
-            }
+  public void requestStopAll() {
+    synchronized (this) {
+      stop = true;
 
-            ThreadWorker worker = new ThreadWorker(provider);
-            workers.add(worker);
-            worker.start();
-        }
+      for (ThreadWorker worker : workers)
+        worker.requestStop();
     }
-
-    public void removeWorker() {
-        synchronized (this) {
-            if (workers.size() <= 1) return;
-
-            if (stop) {
-                return;
-            }
-
-            ThreadWorker worker = workers.get(workers.size() - 1);
-            worker.requestStop();
-            workers.remove(worker);
-        }
-    }
-
-    public void startPool() {
-        addWorker();
-    }
-
-    public void requestStopAll() {
-        synchronized (this) {
-            stop = true;
-
-            for (ThreadWorker worker : workers)
-                worker.requestStop();
-        }
-    }
+  }
 }

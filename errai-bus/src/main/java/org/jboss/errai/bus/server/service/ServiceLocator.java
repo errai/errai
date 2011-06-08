@@ -20,5 +20,5 @@ package org.jboss.errai.bus.server.service;
  * @date: Jul 19, 2010
  */
 public interface ServiceLocator<S> {
-    ErraiService<S> locateService();
+  ErraiService<S> locateService();
 }

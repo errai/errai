@@ -71,8 +71,7 @@ public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
 
       MetaDataScanner scanner = configurator.getMetaDataScanner();
       Set<Class<?>> userEntities = scanner.getTypesAnnotatedWith(AuthUserEntity.class);
-      for(Class<?> clazz : userEntities)
-      {
+      for (Class<?> clazz : userEntities) {
         if (userEntity != null) {
           throw new ErraiBootstrapFailure("More than one @AuthUserEntity defined in classpath (" + userEntity.getName() + " and " + clazz.getName() + " cannot co-exist)");
         }
@@ -95,8 +94,7 @@ public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
           }
         }
       }
-    }
-    catch (Throwable t) {
+    } catch (Throwable t) {
       throw new ErraiBootstrapFailure("error configuring " + this.getClass().getSimpleName(), t);
     }
 
@@ -113,7 +111,7 @@ public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
     log.info("configured authentication entity: " + userEntity.getName());
 
     challengeQueryString = "from " + userEntity.getSimpleName() + " a where a." + userField + "=:name and "
-        + " a." + passworldField + "=:password";
+            + " a." + passworldField + "=:password";
 
     log.info("challenge query string: " + challengeQueryString);
   }
@@ -124,9 +122,9 @@ public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
     final String password = message.get(String.class, SecurityParts.Password);
 
     Object userObj = session.createQuery(challengeQueryString)
-        .setString("name", name)
-        .setString("password", password)
-        .uniqueResult();
+            .setString("name", name)
+            .setString("password", password)
+            .uniqueResult();
 
     if (userObj != null) {
       AuthSubject authSubject = new AuthSubject(name, name, (Collection) MVEL.getProperty(rolesField, userObj));
@@ -142,22 +140,22 @@ public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
        * been performed.
        */
       createConversation(message)
-          .subjectProvided()
-          .command(SecurityCommands.SuccessfulAuth)
-          .with(SecurityParts.Roles, authSubject.toRolesString())
-          .with(SecurityParts.Name, name)
-          .noErrorHandling()
-          .sendNowWith(bus);
+              .subjectProvided()
+              .command(SecurityCommands.SuccessfulAuth)
+              .with(SecurityParts.Roles, authSubject.toRolesString())
+              .with(SecurityParts.Name, name)
+              .noErrorHandling()
+              .sendNowWith(bus);
     } else {
       /**
        * The login failed. How upsetting. Life must go on, and we must inform the client of the
        * unfortunate news.
        */
       createConversation(message)
-          .subjectProvided()
-          .command(SecurityCommands.FailedAuth)
-          .with(SecurityParts.Name, name)
-          .noErrorHandling().sendNowWith(bus);
+              .subjectProvided()
+              .command(SecurityCommands.FailedAuth)
+              .with(SecurityParts.Name, name)
+              .noErrorHandling().sendNowWith(bus);
 
       throw new AuthenticationFailedException();
     }

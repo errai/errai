@@ -16,12 +16,11 @@
 
 package org.jboss.errai.ioc.rebind;
 
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.NotFoundException;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import org.jboss.errai.bus.rebind.ProcessingContext;
 import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
 import org.jboss.errai.ioc.rebind.ioc.InjectorFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
@@ -29,41 +28,33 @@ import java.util.Map;
 import java.util.Set;
 
 public class ProcessorFactory {
-    private Map<Class<? extends Annotation>, AnnotationHandler> annotationHandlers;
-    private InjectorFactory injectorFactory;
+  private Map<Class<? extends Annotation>, AnnotationHandler> annotationHandlers;
+  private InjectorFactory injectorFactory;
 
-    public ProcessorFactory(InjectorFactory factory) {
-        this.annotationHandlers = new HashMap<Class<? extends Annotation>, AnnotationHandler>();
-        this.injectorFactory = factory;
-    }
+  public ProcessorFactory(InjectorFactory factory) {
+    this.annotationHandlers = new HashMap<Class<? extends Annotation>, AnnotationHandler>();
+    this.injectorFactory = factory;
+  }
 
-    public void registerHandler(Class<? extends Annotation> annotation, AnnotationHandler handler) {
-        annotationHandlers.put(annotation, handler);
-    }
+  public void registerHandler(Class<? extends Annotation> annotation, AnnotationHandler handler) {
+    annotationHandlers.put(annotation, handler);
+  }
 
-    @SuppressWarnings({"unchecked"})
-    public void process(MetaDataScanner scanner, ProcessingContext context) {
-        for (Class<? extends Annotation> aClass : annotationHandlers.keySet()) {
-            Set<Class<?>> classes = scanner.getTypesAnnotatedWith(aClass);
-            for (Class<?> clazz : classes) {
-                if (clazz.getPackage().getName().contains("server")) {
-                  //  System.out.println("Skip: " + clazz.getName());
-                    continue;
-                }
-
-                JClassType type = loadType(context.getOracle(), clazz);
-                injectorFactory.addType(type);
-                annotationHandlers.get(aClass).handle(type, type.getAnnotation(aClass), context);
-            }
+  @SuppressWarnings({"unchecked"})
+  public void process(MetaDataScanner scanner, ProcessingContext context) {
+    for (Class<? extends Annotation> aClass : annotationHandlers.keySet()) {
+      Set<Class<?>> classes = scanner.getTypesAnnotatedWith(aClass);
+      for (Class<?> clazz : classes) {
+        if (clazz.getPackage().getName().contains("server")) {
+          //  System.out.println("Skip: " + clazz.getName());
+          continue;
         }
-    }
 
-    private JClassType loadType(TypeOracle oracle, Class<?> clazz) {
-        try {
-            return oracle.getType(clazz.getName());
-        }
-        catch (NotFoundException e) {
-            throw new RuntimeException("Failed to load type " + clazz.getName(), e);
-        }
+        MetaClass type = MetaClassFactory.get(context.getOracle(), clazz);
+        injectorFactory.addType(type);
+        annotationHandlers.get(aClass).handle(type, type.getAnnotation(aClass), context);
+      }
     }
+  }
+
 }

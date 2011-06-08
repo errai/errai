@@ -22,10 +22,10 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class QueryClient implements EntryPoint {
-    public void onModuleLoad() {
-      VerticalPanel panel = new VerticalPanel();
-      panel.add(new HTML("(Try 'beer', 'fruit' or 'animals'):"));
-      panel.add(new QueryWidget());
-      RootPanel.get().add(panel);
-    }
+  public void onModuleLoad() {
+    VerticalPanel panel = new VerticalPanel();
+    panel.add(new HTML("(Try 'beer', 'fruit' or 'animals'):"));
+    panel.add(new QueryWidget());
+    RootPanel.get().add(panel);
+  }
 }

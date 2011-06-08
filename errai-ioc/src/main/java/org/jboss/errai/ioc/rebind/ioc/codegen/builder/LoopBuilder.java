@@ -24,7 +24,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.BlockBuilder;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface LoopBuilder extends Statement, Builder {
-    BlockBuilder<LoopBuilder> foreach(String loopVarName);
+  BlockBuilder<LoopBuilder> foreach(String loopVarName);
 
-    BlockBuilder<LoopBuilder> foreach(String loopVarName, Class<?> loopVarType);
+  BlockBuilder<LoopBuilder> foreach(String loopVarName, Class<?> loopVarType);
 }

@@ -1,49 +1,52 @@
 package org.jboss.errai.common.client.types;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class EncodingContext {
-    private Map<Object, String> alreadyEncoded;
-    private Set<String> refs;
-    private int escapeMode;
+  private Map<Object, String> alreadyEncoded;
+  private Set<String> refs;
+  private int escapeMode;
 
-    public EncodingContext() {
-        alreadyEncoded = new HashMap<Object, String>();
-    }
+  public EncodingContext() {
+    alreadyEncoded = new HashMap<Object, String>();
+  }
 
-    public boolean isEncoded(Object instance) {
-        return alreadyEncoded.containsKey(instance);
-    }
+  public boolean isEncoded(Object instance) {
+    return alreadyEncoded.containsKey(instance);
+  }
 
-    public void markEncoded(Object o) {
-        if (o instanceof Number || o instanceof Boolean || o instanceof Character) return;
-        
-        alreadyEncoded.put(o, String.valueOf(o.hashCode()));
-    }
+  public void markEncoded(Object o) {
+    if (o instanceof Number || o instanceof Boolean || o instanceof Character) return;
 
-    public String markRef(Object o) {
-        if (refs == null) refs = new HashSet<String>();
-        String ref = alreadyEncoded.get(o);
-        refs.add(ref);
-        return ref;      
-    }
+    alreadyEncoded.put(o, String.valueOf(o.hashCode()));
+  }
 
-    public Set<String> getRefs() {
-        return refs;
-    }
+  public String markRef(Object o) {
+    if (refs == null) refs = new HashSet<String>();
+    String ref = alreadyEncoded.get(o);
+    refs.add(ref);
+    return ref;
+  }
 
-    public boolean isEscapeMode() {
-        return escapeMode != 0;
-    }
+  public Set<String> getRefs() {
+    return refs;
+  }
 
-    public void setEscapeMode() {
-        escapeMode++;
-    }
+  public boolean isEscapeMode() {
+    return escapeMode != 0;
+  }
 
-    public void unsetEscapeMode() {
-        escapeMode--;
-    }
+  public void setEscapeMode() {
+    escapeMode++;
+  }
+
+  public void unsetEscapeMode() {
+    escapeMode--;
+  }
 }

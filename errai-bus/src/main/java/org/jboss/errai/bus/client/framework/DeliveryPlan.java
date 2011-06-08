@@ -20,45 +20,45 @@ import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 
 public class DeliveryPlan {
-    private final MessageCallback[] deliverTo;
+  private final MessageCallback[] deliverTo;
 
-    public DeliveryPlan() {
-        deliverTo = new MessageCallback[0];
+  public DeliveryPlan() {
+    deliverTo = new MessageCallback[0];
+  }
+
+  public DeliveryPlan(MessageCallback[] deliverTo) {
+    this.deliverTo = deliverTo;
+  }
+
+  public void deliver(Message m) {
+    for (MessageCallback callback : deliverTo) {
+      callback.callback(m);
     }
+  }
 
-    public DeliveryPlan(MessageCallback[] deliverTo) {
-        this.deliverTo = deliverTo;
+  public MessageCallback[] getDeliverTo() {
+    MessageCallback[] newArray = new MessageCallback[deliverTo.length];
+
+    //noinspection ManualArrayCopy
+    for (int i = 0; i < deliverTo.length; i++) {
+      newArray[i] = deliverTo[i];
     }
+    return newArray;
+  }
 
-    public void deliver(Message m) {
-        for (MessageCallback callback : deliverTo) {
-            callback.callback(m);
-        }
+  public int getTotalReceivers() {
+    return deliverTo.length;
+  }
+
+  public DeliveryPlan newDeliveryPlanWith(MessageCallback callback) {
+    MessageCallback[] newPlan = new MessageCallback[deliverTo.length + 1];
+
+    //noinspection ManualArrayCopy
+    for (int i = 0; i < deliverTo.length; i++) {
+      newPlan[i] = deliverTo[i];
     }
+    newPlan[newPlan.length - 1] = callback;
 
-    public MessageCallback[] getDeliverTo() {
-        MessageCallback[] newArray = new MessageCallback[deliverTo.length];
-
-        //noinspection ManualArrayCopy
-        for (int i = 0; i < deliverTo.length; i++) {
-            newArray[i] = deliverTo[i];
-        }
-        return newArray;
-    }
-
-    public int getTotalReceivers() {
-        return deliverTo.length;
-    }
-
-    public DeliveryPlan newDeliveryPlanWith(MessageCallback callback) {
-        MessageCallback[] newPlan = new MessageCallback[deliverTo.length + 1];
-
-        //noinspection ManualArrayCopy
-        for (int i = 0; i < deliverTo.length; i++) {
-            newPlan[i] = deliverTo[i];
-        }
-        newPlan[newPlan.length - 1] = callback;
-
-        return new DeliveryPlan(newPlan);
-    }
+    return new DeliveryPlan(newPlan);
+  }
 }

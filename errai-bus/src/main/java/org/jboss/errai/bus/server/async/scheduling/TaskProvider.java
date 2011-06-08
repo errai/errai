@@ -19,5 +19,5 @@ package org.jboss.errai.bus.server.async.scheduling;
 import org.jboss.errai.bus.server.async.TimedTask;
 
 public interface TaskProvider {
-    public TimedTask getNextTask() throws InterruptedException;
+  public TimedTask getNextTask() throws InterruptedException;
 }

@@ -17,9 +17,9 @@
 package org.jboss.errai.bus.client.api;
 
 public interface LaundryList {
-    public void cleanAll();
+  public void cleanAll();
 
-    public LaundryReclaim addToHamper(Laundry laundry);
+  public LaundryReclaim addToHamper(Laundry laundry);
 
-    public boolean removeFromHamper(Laundry laundry);
+  public boolean removeFromHamper(Laundry laundry);
 }

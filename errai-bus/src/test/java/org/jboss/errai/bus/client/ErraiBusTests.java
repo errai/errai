@@ -24,6 +24,6 @@ import com.google.gwt.core.client.EntryPoint;
  * Time: 3:41:20 PM
  */
 public class ErraiBusTests implements EntryPoint {
-    public void onModuleLoad() {
-    }
+  public void onModuleLoad() {
+  }
 }

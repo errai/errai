@@ -22,32 +22,30 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 /**
- * Verify detaching of entities 
- * 
+ * Verify detaching of entities
+ *
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Jun 11, 2010
  */
-public class DetachmentTest extends CommonTestSetup
-{
+public class DetachmentTest extends CommonTestSetup {
   /**
    * Exporting an entity within persitent context
    * shouldn't have any impact besides turning hibernate proxies
    * into their regular counterparts.
    */
   @Test
-  public void exportWithinPerstenceContext()
-  {
+  public void exportWithinPerstenceContext() {
     Session session = sessionFactory.openSession();
     String userId = createTestUser(session);
-    
+
     User user = loadUser(session, userId);
-    User exportedUser = (User)beanManager.clone(user);
+    User exportedUser = (User) beanManager.clone(user);
 
     assertEquals(user.getUserId(), exportedUser.getUserId());
     assertEquals(user.getOrders().size(), exportedUser.getOrders().size());  // lazy
 
     assertEquals(user.getOrders().getClass().getName(), "org.hibernate.collection.PersistentSet");
-    assertEquals(exportedUser.getOrders().getClass().getName(), "java.util.HashSet");        
+    assertEquals(exportedUser.getOrders().getClass().getName(), "java.util.HashSet");
   }
 
   /**
@@ -55,8 +53,7 @@ public class DetachmentTest extends CommonTestSetup
    * should turn hibernate proxies into null.
    */
   @Test
-  public void exportOutsidePersistenceContext()
-  {
+  public void exportOutsidePersistenceContext() {
     Session session = sessionFactory.openSession();
     String userId = createTestUser(session);
     session.close();
@@ -65,10 +62,10 @@ public class DetachmentTest extends CommonTestSetup
     session = sessionFactory.openSession();
     User user = loadUser(session, userId);
     session.close();
-        
-    User exportedUser = (User)beanManager.clone(user);
+
+    User exportedUser = (User) beanManager.clone(user);
 
     assertEquals(user.getUserId(), exportedUser.getUserId());
     assertNull("relation should be null", exportedUser.getOrders()); // not exported (null)   
-  }  
+  }
 }

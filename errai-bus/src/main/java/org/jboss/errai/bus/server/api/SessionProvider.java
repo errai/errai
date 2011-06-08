@@ -22,11 +22,11 @@ package org.jboss.errai.bus.server.api;
  */
 public interface SessionProvider<T> {
 
-    /**
-     * Gets an instance of <tt>QueueSession</tt> using the external session reference given.
-     *
-     * @param externSessRef - the external session reference
-     * @return an instance of <tt>QueueSession</tt>
-     */
-    public QueueSession getSession(T externSessRef, String remoteQueueId);
+  /**
+   * Gets an instance of <tt>QueueSession</tt> using the external session reference given.
+   *
+   * @param externSessRef - the external session reference
+   * @return an instance of <tt>QueueSession</tt>
+   */
+  public QueueSession getSession(T externSessRef, String remoteQueueId);
 }

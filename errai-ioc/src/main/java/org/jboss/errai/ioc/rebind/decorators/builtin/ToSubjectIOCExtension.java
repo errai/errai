@@ -16,29 +16,29 @@
 
 package org.jboss.errai.ioc.rebind.decorators.builtin;
 
-import com.google.gwt.core.ext.typeinfo.JField;
 import org.jboss.errai.bus.client.api.annotations.ToSubject;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.InjectionPoint;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
 
 /**
  * @author Mike Brock .
  */
 @CodeDecorator
 public class ToSubjectIOCExtension extends IOCDecoratorExtension<ToSubject> {
-    public ToSubjectIOCExtension(Class<ToSubject> decoratesWith) {
-        super(decoratesWith);
-    }
+  public ToSubjectIOCExtension(Class<ToSubject> decoratesWith) {
+    super(decoratesWith);
+  }
 
-    @Override
-    public String generateDecorator(InjectionPoint<ToSubject> injectionPoint) {
-        final InjectionContext ctx = injectionPoint.getInjectionContext();
+  @Override
+  public String generateDecorator(InjectionPoint<ToSubject> injectionPoint) {
+    final InjectionContext ctx = injectionPoint.getInjectionContext();
 
-        final JField field = injectionPoint.getField();
-        final ToSubject context = field.getAnnotation(ToSubject.class);
+    final MetaField field = injectionPoint.getField();
+    final ToSubject context = field.getAnnotation(ToSubject.class);
 
-        return injectionPoint.getValueExpression() + ".setToSubject(\"" + context.value() + "\");";
-    }
+    return injectionPoint.getValueExpression() + ".setToSubject(\"" + context.value() + "\");";
+  }
 }

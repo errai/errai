@@ -20,7 +20,7 @@ import org.jboss.errai.common.client.types.DecodingContext;
 import org.jboss.errai.common.client.types.TypeHandler;
 
 public class NumberToShort implements TypeHandler<Number, Short> {
-    public Short getConverted(Number in,  DecodingContext ctx) {
-        return in.shortValue();
-    }
+  public Short getConverted(Number in, DecodingContext ctx) {
+    return in.shortValue();
+  }
 }

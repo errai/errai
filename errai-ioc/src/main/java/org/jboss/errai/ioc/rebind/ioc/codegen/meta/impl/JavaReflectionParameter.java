@@ -28,31 +28,43 @@ import java.lang.annotation.Annotation;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class JavaReflectionParameter implements MetaParameter {
-    private String name;
-    private Class<?> type;
-    private Annotation[] annotations;
-    private MetaClassMember declaredBy;
+  private String name;
+  private Class<?> type;
+  private Annotation[] annotations;
+  private MetaClassMember declaredBy;
 
-    public JavaReflectionParameter(Class<?> type, Annotation[] annotations, MetaClassMember declaredBy) {
-        this.name = ReflectionUtil.getPropertyFromAccessor(type.getSimpleName());
-        this.type = type;
-        this.annotations = annotations;
-        this.declaredBy = declaredBy;
-    }
+  public JavaReflectionParameter(Class<?> type, Annotation[] annotations, MetaClassMember declaredBy) {
+    this.name = ReflectionUtil.getPropertyFromAccessor(type.getSimpleName());
+    this.type = type;
+    this.annotations = annotations;
+    this.declaredBy = declaredBy;
+  }
 
-    public String getName() {
-        return name;
-    }
+  public String getName() {
+    return name;
+  }
 
-    public MetaClass getType() {
-        return MetaClassFactory.get(type);
-    }
+  public MetaClass getType() {
+    return MetaClassFactory.get(type);
+  }
 
-    public Annotation[] getAnnotations() {
-        return annotations;
-    }
+  public Annotation[] getAnnotations() {
+    return annotations == null ? new Annotation[0] : annotations;
+  }
 
-    public MetaClassMember getDeclaringMember() {
-        return declaredBy;
+  public final <A extends Annotation> A getAnnotation(Class<A> annotation) {
+    for (Annotation a : getAnnotations()) {
+      if (a.annotationType().equals(annotation)) return (A) a;
     }
+    return null;
+  }
+
+  public final boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
+    return getAnnotation(annotation) != null;
+  }
+
+
+  public MetaClassMember getDeclaringMember() {
+    return declaredBy;
+  }
 }

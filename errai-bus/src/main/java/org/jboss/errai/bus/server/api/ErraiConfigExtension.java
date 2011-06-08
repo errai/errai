@@ -17,5 +17,5 @@
 package org.jboss.errai.bus.server.api;
 
 public interface ErraiConfigExtension {
-    public void configure(ErraiConfig config);
+  public void configure(ErraiConfig config);
 }

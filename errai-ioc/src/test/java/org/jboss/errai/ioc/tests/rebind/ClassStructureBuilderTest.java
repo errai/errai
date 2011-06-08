@@ -26,17 +26,17 @@ import java.lang.annotation.Retention;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class ClassStructureBuilderTest extends AbstractStatementBuilderTest {
-    @Test
-    public void testOverrideConstructor() {
+  @Test
+  public void testOverrideConstructor() {
 
-        String src = ObjectBuilder.newInstanceOf(Retention.class)
-                .extend()
-                .publicOverridesMethod("annotationType")
-                .append(StatementBuilder.create().load("foo"))
-                .append(StatementBuilder.create().load("bar"))
-                .append(StatementBuilder.create().load("foobie"))
-                .finish().toJavaString();
+    String src = ObjectBuilder.newInstanceOf(Retention.class)
+            .extend()
+            .publicOverridesMethod("annotationType")
+            .append(StatementBuilder.create().load("foo"))
+            .append(StatementBuilder.create().load("bar"))
+            .append(StatementBuilder.create().load("foobie"))
+            .finish().toJavaString();
 
-        System.out.println("src=" + src);
-    }
+    System.out.println("src=" + src);
+  }
 }

@@ -29,5 +29,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface GeneratedBy {
-    Class<? extends ContextualTypeProvider> value();
+  Class<? extends ContextualTypeProvider> value();
 }

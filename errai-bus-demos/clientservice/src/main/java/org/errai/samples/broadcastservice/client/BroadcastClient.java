@@ -20,54 +20,54 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.*;
-import org.jboss.errai.bus.client.*;
+import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.framework.MessageBus;
 
 public class BroadcastClient implements EntryPoint {
-    private MessageBus bus = ErraiBus.get();
+  private MessageBus bus = ErraiBus.get();
 
-    public void onModuleLoad() {
-        final VerticalPanel panel = new VerticalPanel();
-        final TextBox inputBox = new TextBox();
-        final Button sendBroadcast = new Button("Broadcast!");
-        
-        sendBroadcast.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                /**
-                 * Send a message to the BroadcastService with the contents of the
-                 * inputBox as the "BroadcastText" field.
-                 */
-                MessageBuilder.createMessage()
-                        .toSubject("BroadcastService")
-                        .with("BroadcastText", inputBox.getText())
-                        .noErrorHandling().sendNowWith(bus);
-            }
-        });
+  public void onModuleLoad() {
+    final VerticalPanel panel = new VerticalPanel();
+    final TextBox inputBox = new TextBox();
+    final Button sendBroadcast = new Button("Broadcast!");
 
-        final Label broadcastReceive = new Label();
-
+    sendBroadcast.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
         /**
-         * Declare a local service to receive messages on the subject
-         * "BroadCastReceiver".
+         * Send a message to the BroadcastService with the contents of the
+         * inputBox as the "BroadcastText" field.
          */
-        bus.subscribe("BroadcastReceiver", new MessageCallback() {
-            public void callback(Message message) {
-                /**
-                 * When a message arrives, extract the "BroadcastText" field and
-                 * update the broadcastReceive Label widget with the contents.
-                 */
-                String broadcastText = message.get(String.class, "BroadcastText");
-                broadcastReceive.setText(broadcastText);
-            }
-        });
+        MessageBuilder.createMessage()
+                .toSubject("BroadcastService")
+                .with("BroadcastText", inputBox.getText())
+                .noErrorHandling().sendNowWith(bus);
+      }
+    });
 
-        panel.add(inputBox);
-        panel.add(sendBroadcast);
-        panel.add(broadcastReceive);
+    final Label broadcastReceive = new Label();
 
-        RootPanel.get().add(panel);
-    }
+    /**
+     * Declare a local service to receive messages on the subject
+     * "BroadCastReceiver".
+     */
+    bus.subscribe("BroadcastReceiver", new MessageCallback() {
+      public void callback(Message message) {
+        /**
+         * When a message arrives, extract the "BroadcastText" field and
+         * update the broadcastReceive Label widget with the contents.
+         */
+        String broadcastText = message.get(String.class, "BroadcastText");
+        broadcastReceive.setText(broadcastText);
+      }
+    });
+
+    panel.add(inputBox);
+    panel.add(sendBroadcast);
+    panel.add(broadcastReceive);
+
+    RootPanel.get().add(panel);
+  }
 }

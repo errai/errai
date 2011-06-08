@@ -21,23 +21,23 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class BusTools {
-    public static final Set<String> RESERVED_SERVICES;
+  public static final Set<String> RESERVED_SERVICES;
 
-    static {
-        Set<String> s = new HashSet<String>();
+  static {
+    Set<String> s = new HashSet<String>();
 
-        s.add("ServerBus");
-        s.add("AuthorizationService");
-        s.add("AuthenticationService");
-        s.add("ServerEchoService");
+    s.add("ServerBus");
+    s.add("AuthorizationService");
+    s.add("AuthenticationService");
+    s.add("ServerEchoService");
 
-        s.add("ClientBus");
-        s.add("ClientBusErrors");
+    s.add("ClientBus");
+    s.add("ClientBusErrors");
 
-        RESERVED_SERVICES = Collections.unmodifiableSet(s);
-    }
+    RESERVED_SERVICES = Collections.unmodifiableSet(s);
+  }
 
-    public static boolean isReservedName(String name) {
-        return RESERVED_SERVICES.contains(name);
-    }
+  public static boolean isReservedName(String name) {
+    return RESERVED_SERVICES.contains(name);
+  }
 }

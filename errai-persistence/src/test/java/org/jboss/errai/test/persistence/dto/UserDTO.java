@@ -21,8 +21,7 @@ import java.util.Set;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Jun 16, 2010
  */
-public class UserDTO
-{
+public class UserDTO {
   private String userId;
 
   private String name;
@@ -45,13 +44,11 @@ public class UserDTO
     this.name = name;
   }
 
-  public Set<OrderDTO> getOrders()
-  {
+  public Set<OrderDTO> getOrders() {
     return orders;
   }
 
-  public void setOrders(Set<OrderDTO> orders)
-  {
+  public void setOrders(Set<OrderDTO> orders) {
     this.orders = orders;
   }
 }

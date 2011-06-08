@@ -24,39 +24,39 @@ import java.util.concurrent.BlockingQueue;
 
 
 public interface MessageQueue {
-    void poll(boolean wait, OutputStream stream) throws IOException;
+  void poll(boolean wait, OutputStream stream) throws IOException;
 
-    boolean offer(Message message);
+  boolean offer(Message message);
 
-    void scheduleActivation();
+  void scheduleActivation();
 
-    void activity();
+  void activity();
 
-    boolean messagesWaiting();
+  boolean messagesWaiting();
 
-    void setActivationCallback(QueueActivationCallback activationCallback);
+  void setActivationCallback(QueueActivationCallback activationCallback);
 
-    void setSessionControl(SessionControl sessionControl);
+  void setSessionControl(SessionControl sessionControl);
 
-    QueueActivationCallback getActivationCallback();
+  QueueActivationCallback getActivationCallback();
 
-    BlockingQueue<Message> getQueue();
+  BlockingQueue<Message> getQueue();
 
-    QueueSession getSession();
+  QueueSession getSession();
 
-    void finishInit();
+  void finishInit();
 
-    boolean isStale();
+  boolean isStale();
 
-    boolean isActive();
+  boolean isActive();
 
-    boolean isInitialized();
+  boolean isInitialized();
 
-    void heartBeat();
+  void heartBeat();
 
-    boolean isWindowPolling();
+  boolean isWindowPolling();
 
-    void setWindowPolling(boolean windowPolling);
+  void setWindowPolling(boolean windowPolling);
 
-    void stopQueue();
+  void stopQueue();
 }

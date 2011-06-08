@@ -22,17 +22,15 @@ import org.hibernate.cfg.AnnotationConfiguration;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Jun 11, 2010
  */
-public class Configuration
-{
+public class Configuration {
   private SessionFactory sessionFactory;
 
-  public Configuration()
-  {
+  public Configuration() {
     final AnnotationConfiguration cfg = new AnnotationConfiguration();
 
     String dbLocation = System.getProperty("user.home") + "/ErraiPersistenceDB";
 
-    System.out.println("DB Location: "+ dbLocation);
+    System.out.println("DB Location: " + dbLocation);
 
     cfg.setProperty("hibernate.connection.driver_class", "org.hsqldb.jdbcDriver");
     cfg.setProperty("hibernate.connection.url", "jdbc:hsqldb:file:" + dbLocation);

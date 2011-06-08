@@ -13,14 +13,14 @@ import org.jboss.errai.bus.server.api.ErraiConfigExtension;
 @ExtensionComponent
 public class AppConfigurator implements ErraiConfigExtension {
 
-    private MessageBus bus;
+  private MessageBus bus;
 
-    @Inject
-    public AppConfigurator(MessageBus bus) {
-        this.bus = bus;
-    }
+  @Inject
+  public AppConfigurator(MessageBus bus) {
+    this.bus = bus;
+  }
 
-    public void configure(ErraiConfig config) {
-        // provide extension points here
-    }
+  public void configure(ErraiConfig config) {
+    // provide extension points here
+  }
 }

@@ -17,5 +17,5 @@
 package org.jboss.errai.bus.client.api;
 
 public interface Laundry {
-    public void clean();
+  public void clean();
 }

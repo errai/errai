@@ -28,20 +28,19 @@ import java.lang.reflect.Method;
  * Time: 4:57:59 PM
  */
 public class MethodEndpointCallback implements MessageCallback {
-    private Object instance;
-    private Method method;
+  private Object instance;
+  private Method method;
 
-    public MethodEndpointCallback(Object instance, Method method) {
-        this.instance = instance;
-        this.method = method;
-    }
+  public MethodEndpointCallback(Object instance, Method method) {
+    this.instance = instance;
+    this.method = method;
+  }
 
-    public void callback(Message message) {
-        try {
-            method.invoke(instance, message);
-        }
-        catch (Exception e) {
-            throw new MessageDeliveryFailure(e);
-        }
+  public void callback(Message message) {
+    try {
+      method.invoke(instance, message);
+    } catch (Exception e) {
+      throw new MessageDeliveryFailure(e);
     }
+  }
 }

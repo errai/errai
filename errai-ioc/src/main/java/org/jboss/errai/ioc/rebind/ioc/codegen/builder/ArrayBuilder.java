@@ -23,6 +23,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface ArrayBuilder extends Statement, Builder {
-    public ArrayInitializationBuilder newArray(Class<?> componentType);
-    public ArrayInitializationBuilder newArray(Class<?> componentType, Integer... dimensions);
+  public ArrayInitializationBuilder newArray(Class<?> componentType);
+
+  public ArrayInitializationBuilder newArray(Class<?> componentType, Integer... dimensions);
 }

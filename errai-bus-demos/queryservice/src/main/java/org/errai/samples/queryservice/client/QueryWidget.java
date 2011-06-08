@@ -23,54 +23,52 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.uibinder.client.UiTemplate;
 import com.google.gwt.user.client.ui.*;
-import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.api.RemoteCallback;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
 
 public class QueryWidget extends Composite {
-    @SuppressWarnings({"GwtUiHandlerErrors"})
-    @UiHandler("sendQuery")
-    void doSubmit(ClickEvent event) {
+  @SuppressWarnings({"GwtUiHandlerErrors"})
+  @UiHandler("sendQuery")
+  void doSubmit(ClickEvent event) {
 
-        MessageBuilder.createCall(new RemoteCallback<String[]>() {
-            public void callback(String[] response) {
-                if (response == null) {
-                    response = new String[]{"No results."};
-                }
+    MessageBuilder.createCall(new RemoteCallback<String[]>() {
+      public void callback(String[] response) {
+        if (response == null) {
+          response = new String[]{"No results."};
+        }
 
-                /**
-                 * Build an HTML unordered list based on the results.
-                 */
-                StringBuffer buf = new StringBuffer("<ul>");
-                for (String result : response) {
-                    buf.append("<li>").append(result).append("</li>");
-                }
-                results.setHTML(buf.append("</ul>").toString());
-            }
-        }, QueryServiceRemote.class).query(queryBox.getText());
-    }
+        /**
+         * Build an HTML unordered list based on the results.
+         */
+        StringBuffer buf = new StringBuffer("<ul>");
+        for (String result : response) {
+          buf.append("<li>").append(result).append("</li>");
+        }
+        results.setHTML(buf.append("</ul>").toString());
+      }
+    }, QueryServiceRemote.class).query(queryBox.getText());
+  }
 
-    /**
-     * Do boilerplate for UIBinder
-     */
-    @UiTemplate("QueryWidget.ui.xml")
-    interface Binder extends UiBinder<Panel, QueryWidget> {
-    }
+  /**
+   * Do boilerplate for UIBinder
+   */
+  @UiTemplate("QueryWidget.ui.xml")
+  interface Binder extends UiBinder<Panel, QueryWidget> {
+  }
 
-    private static final Binder binder = GWT.create(Binder.class);
+  private static final Binder binder = GWT.create(Binder.class);
 
-    {
-        initWidget(binder.createAndBindUi(this));
-    }
+  {
+    initWidget(binder.createAndBindUi(this));
+  }
 
-    @UiField
-    TextBox queryBox;
+  @UiField
+  TextBox queryBox;
 
-    @UiField
-    HTML results;
-    @UiField
-    Button sendQuery;
+  @UiField
+  HTML results;
+  @UiField
+  Button sendQuery;
 }
 
 

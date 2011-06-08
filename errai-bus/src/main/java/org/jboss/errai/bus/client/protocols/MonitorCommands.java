@@ -17,5 +17,5 @@
 package org.jboss.errai.bus.client.protocols;
 
 public enum MonitorCommands {
-    SubscribeEvent, UnsubcribeEvent, IncomingMessage, OutgoingMessage, InBusMessage, MessageDeliveryFailure, SuccessfulAttach
+  SubscribeEvent, UnsubcribeEvent, IncomingMessage, OutgoingMessage, InBusMessage, MessageDeliveryFailure, SuccessfulAttach
 }

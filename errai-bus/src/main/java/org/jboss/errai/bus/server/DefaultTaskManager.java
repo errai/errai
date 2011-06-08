@@ -24,54 +24,53 @@ import org.jboss.errai.bus.server.api.QueueSession;
 import org.jboss.errai.bus.server.async.scheduling.PooledExecutorService;
 
 public class DefaultTaskManager implements TaskManager {
-    private QueueSession session;
-    private static final String ACTIVE_TASKS_KEY = DefaultTaskManager.class.getName() + "/ActiveAsyncTasks";
+  private QueueSession session;
+  private static final String ACTIVE_TASKS_KEY = DefaultTaskManager.class.getName() + "/ActiveAsyncTasks";
 
-    private final static DefaultTaskManager taskManager = new DefaultTaskManager(null);
-    private final static PooledExecutorService service = new PooledExecutorService(2000);
+  private final static DefaultTaskManager taskManager = new DefaultTaskManager(null);
+  private final static PooledExecutorService service = new PooledExecutorService(2000);
 
-    static {
-        service.start();
+  static {
+    service.start();
+  }
+
+  public static DefaultTaskManager get() {
+    return taskManager;
+  }
+
+  private DefaultTaskManager(QueueSession session) {
+    this.session = session;
+  }
+
+  public void execute(Runnable task) {
+    try {
+      service.execute(task);
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public AsyncTask scheduleRepeating(TimeUnit unit, int interval, Runnable task) {
+    AsyncTask t = service.scheduleRepeating(task, unit, 0, interval);
+
+    if (task instanceof HasAsyncTaskRef) {
+      ((HasAsyncTaskRef) task).setAsyncTask(t);
     }
 
-    public static DefaultTaskManager get() {
-        return taskManager;
+    return t;
+  }
+
+  public AsyncTask schedule(TimeUnit unit, int interval, Runnable task) {
+    AsyncTask t = service.schedule(task, unit, interval);
+
+    if (task instanceof HasAsyncTaskRef) {
+      ((HasAsyncTaskRef) task).setAsyncTask(t);
     }
 
-    private DefaultTaskManager(QueueSession session) {
-        this.session = session;
-    }
+    return t;
+  }
 
-    public void execute(Runnable task) {
-        try {
-            service.execute(task);
-        }
-        catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public AsyncTask scheduleRepeating(TimeUnit unit, int interval, Runnable task) {
-        AsyncTask t = service.scheduleRepeating(task, unit, 0, interval);
-
-        if (task instanceof HasAsyncTaskRef) {
-            ((HasAsyncTaskRef) task).setAsyncTask(t);
-        }
-
-        return t;
-    }
-
-    public AsyncTask schedule(TimeUnit unit, int interval, Runnable task) {
-        AsyncTask t = service.schedule(task, unit, interval);
-
-        if (task instanceof HasAsyncTaskRef) {
-            ((HasAsyncTaskRef) task).setAsyncTask(t);
-        }
-
-        return t;
-    }
-
-    public void requestStop() {
-        service.requestStop();
-    }
+  public void requestStop() {
+    service.requestStop();
+  }
 }

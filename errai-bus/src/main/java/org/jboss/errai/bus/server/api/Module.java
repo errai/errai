@@ -18,5 +18,5 @@ package org.jboss.errai.bus.server.api;
 
 @Deprecated
 public interface Module {
-    public void init();
+  public void init();
 }

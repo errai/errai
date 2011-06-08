@@ -23,10 +23,10 @@ package org.jboss.errai.bus.server.util;
  */
 public interface ConfigVisitor {
 
-    /**
-     * Visits the specified class and configures it accordingly
-     *
-     * @param clazz - the class to be visited
-     */
-    public void visit(Class<?> clazz);
+  /**
+   * Visits the specified class and configures it accordingly
+   *
+   * @param clazz - the class to be visited
+   */
+  public void visit(Class<?> clazz);
 }

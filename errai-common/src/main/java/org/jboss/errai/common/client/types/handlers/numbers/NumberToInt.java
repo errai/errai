@@ -20,7 +20,7 @@ import org.jboss.errai.common.client.types.DecodingContext;
 import org.jboss.errai.common.client.types.TypeHandler;
 
 public class NumberToInt implements TypeHandler<Number, Integer> {
-    public Integer getConverted(Number in, DecodingContext ctx) {
-        return in.intValue();
-    }
+  public Integer getConverted(Number in, DecodingContext ctx) {
+    return in.intValue();
+  }
 }

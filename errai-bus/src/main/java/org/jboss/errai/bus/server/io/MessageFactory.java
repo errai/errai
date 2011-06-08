@@ -32,60 +32,60 @@ import static org.jboss.errai.bus.client.api.base.CommandMessage.createWithParts
  */
 public class MessageFactory {
 
-    /**
-     * Decodes a JSON string to a map (string name -> object)
-     *
-     * @param in - JSON string
-     * @return map representing the string
-     */
-    public static Map<String, Object> decodeToMap(String in) {
-        //noinspection unchecked
-        return (Map<String, Object>) new JSONDecoder(in).parse();
-    }
+  /**
+   * Decodes a JSON string to a map (string name -> object)
+   *
+   * @param in - JSON string
+   * @return map representing the string
+   */
+  public static Map<String, Object> decodeToMap(String in) {
+    //noinspection unchecked
+    return (Map<String, Object>) new JSONDecoder(in).parse();
+  }
 
-    /**
-     * Creates the command message from the given JSON string and session. The message is constructed in
-     * parts depending on the string
-     *
-     * @param session - the queue session in which the message exists
-     * @param json    - the string representing the parts of the message
-     * @return the message array constructed using the JSON string
-     */
-    public static Message createCommandMessage(QueueSession session, String json) {
-        if (json.length() == 0) return null;
+  /**
+   * Creates the command message from the given JSON string and session. The message is constructed in
+   * parts depending on the string
+   *
+   * @param session - the queue session in which the message exists
+   * @param json    - the string representing the parts of the message
+   * @return the message array constructed using the JSON string
+   */
+  public static Message createCommandMessage(QueueSession session, String json) {
+    if (json.length() == 0) return null;
 
-        Map<String, Object> parts = decodeToMap(json);
-        parts.remove(MessageParts.SessionID.name());
+    Map<String, Object> parts = decodeToMap(json);
+    parts.remove(MessageParts.SessionID.name());
 
-        Message msg = createWithParts(parts)
-                .setResource("Session", session);
+    Message msg = createWithParts(parts)
+            .setResource("Session", session);
 
-        // experimental feature. does this need to be cleaned?
-        // any chance this leaks the CL?
-        //   msg.setResource("errai.experimental.classLoader", classLoader);
+    // experimental feature. does this need to be cleaned?
+    // any chance this leaks the CL?
+    //   msg.setResource("errai.experimental.classLoader", classLoader);
 
-        msg.setFlag(RoutingFlags.FromRemote);
+    msg.setFlag(RoutingFlags.FromRemote);
 
-        return msg;
+    return msg;
 
-    }
+  }
 
-    public static Message createCommandMessage(QueueSession session, InputStream stream) throws IOException {
-        Map<String, Object> parts = (Map<String, Object>) JSONStreamDecoder.decode(stream);
-        parts.remove(MessageParts.SessionID.name());
+  public static Message createCommandMessage(QueueSession session, InputStream stream) throws IOException {
+    Map<String, Object> parts = (Map<String, Object>) JSONStreamDecoder.decode(stream);
+    parts.remove(MessageParts.SessionID.name());
 
-        // Expose session and session id
-        // CDI ext makes use of it to manage conversation contexts
-        Message msg = createWithParts(parts)
-                .setResource("Session", session)
-                .setResource("SessionID", session.getSessionId());
+    // Expose session and session id
+    // CDI ext makes use of it to manage conversation contexts
+    Message msg = createWithParts(parts)
+            .setResource("Session", session)
+            .setResource("SessionID", session.getSessionId());
 
-        // experimental feature. does this need to be cleaned?
-        // any chance this leaks the CL?
-        //   msg.setResource("errai.experimental.classLoader", classLoader);
+    // experimental feature. does this need to be cleaned?
+    // any chance this leaks the CL?
+    //   msg.setResource("errai.experimental.classLoader", classLoader);
 
-        msg.setFlag(RoutingFlags.FromRemote);
+    msg.setFlag(RoutingFlags.FromRemote);
 
-        return msg;
-    }
+    return msg;
+  }
 }

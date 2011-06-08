@@ -21,12 +21,12 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder.values;
  */
 public class FloatValue extends LiteralValue<Float> {
 
-    public FloatValue(Float value) {
-        super(value);
-    }
+  public FloatValue(Float value) {
+    super(value);
+  }
 
-    @Override
-    public String getCanonicalString() {
-        return getValue().toString() + "f";
-    }
+  @Override
+  public String getCanonicalString() {
+    return getValue().toString() + "f";
+  }
 }

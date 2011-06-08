@@ -25,34 +25,34 @@ import java.util.LinkedList;
  * Time: 10:45:40 AM
  */
 public class EncodingUtil {
-    private static Field[] __getAllEncodingFields(Class cls) {
-        LinkedList<Field[]> heirarchy = new LinkedList<Field[]>();
-        int size = 0;
+  private static Field[] __getAllEncodingFields(Class cls) {
+    LinkedList<Field[]> heirarchy = new LinkedList<Field[]>();
+    int size = 0;
 
-        do {
-            Field[] f = cls.getDeclaredFields();
-            size += f.length;
-            heirarchy.add(f);
+    do {
+      Field[] f = cls.getDeclaredFields();
+      size += f.length;
+      heirarchy.add(f);
 
-        } while ((cls = cls.getSuperclass()) != Object.class);
+    } while ((cls = cls.getSuperclass()) != Object.class);
 
 
-        Field[] fields = new Field[size];
-        int i = 0;
-        for (Field[] fls : heirarchy) {
-            for (Field f : fls) {
-                fields[i++] = f;
-            }
-        }
-
-        return fields;
+    Field[] fields = new Field[size];
+    int i = 0;
+    for (Field[] fls : heirarchy) {
+      for (Field f : fls) {
+        fields[i++] = f;
+      }
     }
 
-    public static Field[] getAllEncodingFields(final Class cls) {
-          return EncodingCache.get(cls, new EncodingCache.ValueProvider<Field[]>() {
-              public Field[] get() {
-                  return __getAllEncodingFields(cls);
-              }
-          });
-    }
+    return fields;
+  }
+
+  public static Field[] getAllEncodingFields(final Class cls) {
+    return EncodingCache.get(cls, new EncodingCache.ValueProvider<Field[]>() {
+      public Field[] get() {
+        return __getAllEncodingFields(cls);
+      }
+    });
+  }
 }

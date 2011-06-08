@@ -19,27 +19,27 @@ package org.jboss.errai.ioc.rebind.ioc.codegen;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 public class Parameter extends AbstractStatement {
-    private MetaClass type;
-    private String name;
+  private MetaClass type;
+  private String name;
 
-    public Parameter(MetaClass type, String name) {
-        this.type = type;
-        this.name = name;
-    }
+  public Parameter(MetaClass type, String name) {
+    this.type = type;
+    this.name = name;
+  }
 
-    public static Parameter of(MetaClass type, String name) {
-        return new Parameter(type, name);
-    }
+  public static Parameter of(MetaClass type, String name) {
+    return new Parameter(type, name);
+  }
 
-    public String generate(Context context) {
-        return type.getFullyQualifedName() + " " + name;
-    }
+  public String generate(Context context) {
+    return type.getFullyQualifedName() + " " + name;
+  }
 
-    public MetaClass getType() {
-        return type;
-    }
+  public MetaClass getType() {
+    return type;
+  }
 
-    public String getName() {
-        return name;
-    }
+  public String getName() {
+    return name;
+  }
 }

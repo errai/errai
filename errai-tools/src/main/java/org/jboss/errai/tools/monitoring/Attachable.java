@@ -17,5 +17,5 @@
 package org.jboss.errai.tools.monitoring;
 
 public interface Attachable {
-    public void attach(ActivityProcessor proc);
+  public void attach(ActivityProcessor proc);
 }

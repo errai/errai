@@ -31,338 +31,338 @@ import static org.jboss.errai.bus.client.api.base.ConversationHelper.makeConvers
  */
 @SuppressWarnings({"unchecked", "ConstantConditions"})
 public class AbstractMessageBuilder<R extends Sendable> {
-    private final Message message;
+  private final Message message;
 
-    public AbstractMessageBuilder(Message message) {
-        this.message = message;
-    }
+  public AbstractMessageBuilder(Message message) {
+    this.message = message;
+  }
 
-    /**
-     * Implements, creates and returns an instance of <tt>MessageBuildSubject</tt>.
-     * This is called initially when a new message is created
-     *
-     * @return the <tt>MessageBuildSubject</tt> with the appropriate fields
-     *         and functions for the message builder
-     */
-    public MessageBuildSubject start() {
-        final Sendable sendable = new MessageReplySendable() {
-            boolean reply = false;
+  /**
+   * Implements, creates and returns an instance of <tt>MessageBuildSubject</tt>.
+   * This is called initially when a new message is created
+   *
+   * @return the <tt>MessageBuildSubject</tt> with the appropriate fields
+   *         and functions for the message builder
+   */
+  public MessageBuildSubject start() {
+    final Sendable sendable = new MessageReplySendable() {
+      boolean reply = false;
 
-            public MessageBuildSendable repliesTo(MessageCallback callback) {
-                reply = true;
-                makeConversational(message, callback);
-                return this;
-            }
+      public MessageBuildSendable repliesTo(MessageCallback callback) {
+        reply = true;
+        makeConversational(message, callback);
+        return this;
+      }
 
-            public void sendNowWith(MessageBus viaThis) {
-                if (reply) createConversationService(viaThis, message);
-                message.sendNowWith(viaThis);
-            }
+      public void sendNowWith(MessageBus viaThis) {
+        if (reply) createConversationService(viaThis, message);
+        message.sendNowWith(viaThis);
+      }
 
-            public void sendNowWith(MessageBus viaThis, boolean fireMessageListener) {
-                if (reply) createConversationService(viaThis, message);
-                viaThis.send(message, false);
-            }
+      public void sendNowWith(MessageBus viaThis, boolean fireMessageListener) {
+        if (reply) createConversationService(viaThis, message);
+        viaThis.send(message, false);
+      }
 
-            public void sendNowWith(RequestDispatcher viaThis) {
-                message.sendNowWith(viaThis);
-            }
+      public void sendNowWith(RequestDispatcher viaThis) {
+        message.sendNowWith(viaThis);
+      }
 
-            public void sendGlobalWith(MessageBus viaThis) {
-                viaThis.sendGlobal(message);
-            }
+      public void sendGlobalWith(MessageBus viaThis) {
+        viaThis.sendGlobal(message);
+      }
 
-            public void sendGlobalWith(RequestDispatcher viaThis) {
-                try {
-                    viaThis.dispatchGlobal(message);
-                } catch (Exception e) {
-                    throw new MessageDeliveryFailure("unable to deliver message: " + e.getMessage(), e);
-                }
-            }
+      public void sendGlobalWith(RequestDispatcher viaThis) {
+        try {
+          viaThis.dispatchGlobal(message);
+        } catch (Exception e) {
+          throw new MessageDeliveryFailure("unable to deliver message: " + e.getMessage(), e);
+        }
+      }
 
-            public void reply() {
-                RequestDispatcher dispatcher = (RequestDispatcher)
-                        getIncomingMessage().getResource(ResourceProvider.class, RequestDispatcher.class.getName()).get();
+      public void reply() {
+        RequestDispatcher dispatcher = (RequestDispatcher)
+                getIncomingMessage().getResource(ResourceProvider.class, RequestDispatcher.class.getName()).get();
 
-                if (dispatcher == null) {
-                    throw new IllegalStateException("Cannot reply.  Cannot find RequestDispatcher resource.");
-                }
+        if (dispatcher == null) {
+          throw new IllegalStateException("Cannot reply.  Cannot find RequestDispatcher resource.");
+        }
 
-                Message msg = getIncomingMessage();
+        Message msg = getIncomingMessage();
 //                if (message.getSubject() == null && msg.hasPart(MessageParts.ReplyTo)) {
 //                    message.copy(MessageParts.ReplyTo, msg);
 //                }
 
-                message.copyResource("Session", msg);
+        message.copyResource("Session", msg);
 
-                try {
-                    dispatcher.dispatch(message);
-                } catch (Exception e) {
-                    throw new MessageDeliveryFailure("unable to deliver message: " + e.getMessage(), e);
+        try {
+          dispatcher.dispatch(message);
+        } catch (Exception e) {
+          throw new MessageDeliveryFailure("unable to deliver message: " + e.getMessage(), e);
+        }
+      }
+
+      public AsyncTask replyRepeating(TimeUnit unit, int interval) {
+        Message msg = getIncomingMessage();
+        message.copyResource("Session", msg);
+        RequestDispatcher dispatcher = (RequestDispatcher) msg.getResource(ResourceProvider.class, RequestDispatcher.class.getName()).get();
+        return _sendRepeatingWith(message, dispatcher, unit, interval);
+      }
+
+      public AsyncTask replyDelayed(TimeUnit unit, int interval) {
+        Message msg = getIncomingMessage();
+        message.copyResource("Session", msg);
+        RequestDispatcher dispatcher = (RequestDispatcher) msg.getResource(ResourceProvider.class, RequestDispatcher.class.getName()).get();
+        return _sendDelayedWith(message, dispatcher, unit, interval);
+      }
+
+      private Message getIncomingMessage() {
+        return ((ConversationMessageWrapper) message).getIncomingMessage();
+      }
+
+      public AsyncTask sendRepeatingWith(final RequestDispatcher viaThis, TimeUnit unit, int interval) {
+        return _sendRepeatingWith(message, viaThis, unit, interval);
+      }
+
+      public AsyncTask sendDelayedWith(final RequestDispatcher viaThis, TimeUnit unit, int interval) {
+        return _sendDelayedWith(message, viaThis, unit, interval);
+      }
+
+      private AsyncTask _sendRepeatingWith(final Message message, final RequestDispatcher viaThis, TimeUnit unit, int interval) {
+        final boolean isConversational = message instanceof ConversationMessageWrapper;
+
+        final AsyncTask task = TaskManagerFactory.get().scheduleRepeating(unit, interval, new HasAsyncTaskRef() {
+          AsyncTask task;
+          AsyncDelegateErrorCallback errorCallback;
+
+          final Runnable sender;
+
+          {
+            errorCallback = new AsyncDelegateErrorCallback(this, message.getErrorCallback());
+
+            if (isConversational) {
+              final Message incomingMsg = ((ConversationMessageWrapper) message).getIncomingMessage();
+
+              if (incomingMsg.hasPart(MessageParts.ReplyTo)) {
+                sender = new Runnable() {
+                  final String replyTo = incomingMsg
+                          .get(String.class, MessageParts.ReplyTo);
+
+                  public void run() {
+                    try {
+                      MessageBuilder.getMessageProvider().get()
+                              .toSubject(replyTo)
+                              .copyResource("Session", incomingMsg)
+                              .addAllParts(message.getParts())
+                              .addAllProvidedParts(message.getProvidedParts())
+                              .errorsCall(errorCallback).sendNowWith(viaThis);
+                    } catch (Throwable t) {
+                      t.printStackTrace();
+                      getAsyncTask().cancel(true);
+                    }
+                  }
+                };
+              } else {
+                sender = new Runnable() {
+
+                  public void run() {
+                    try {
+                      MessageBuilder.getMessageProvider().get()
+                              .copyResource("Session", incomingMsg)
+                              .addAllParts(message.getParts())
+                              .addAllProvidedParts(message.getProvidedParts())
+                              .errorsCall(errorCallback).sendNowWith(viaThis);
+                    } catch (Throwable t) {
+                      t.printStackTrace();
+                      getAsyncTask().cancel(true);
+                    }
+
+                  }
+                };
+              }
+            } else {
+              sender = new Runnable() {
+                public void run() {
+                  try {
+                    viaThis.dispatchGlobal(MessageBuilder.getMessageProvider().get()
+                            .addAllParts(message.getParts())
+                            .addAllProvidedParts(message.getProvidedParts())
+                            .errorsCall(errorCallback));
+                  } catch (Throwable t) {
+                    t.printStackTrace();
+                    getAsyncTask().cancel(true);
+                  }
                 }
+              };
             }
+          }
 
-            public AsyncTask replyRepeating(TimeUnit unit, int interval) {
-                Message msg = getIncomingMessage();
-                message.copyResource("Session", msg);
-                RequestDispatcher dispatcher = (RequestDispatcher) msg.getResource(ResourceProvider.class, RequestDispatcher.class.getName()).get();
-                return _sendRepeatingWith(message, dispatcher, unit, interval);
+          public void setAsyncTask(AsyncTask task) {
+            synchronized (this) {
+              this.task = task;
             }
+          }
 
-            public AsyncTask replyDelayed(TimeUnit unit, int interval) {
-                Message msg = getIncomingMessage();
-                message.copyResource("Session", msg);
-                RequestDispatcher dispatcher = (RequestDispatcher) msg.getResource(ResourceProvider.class, RequestDispatcher.class.getName()).get();
-                return _sendDelayedWith(message, dispatcher, unit, interval);
+
+          public AsyncTask getAsyncTask() {
+            synchronized (this) {
+              return task;
             }
+          }
 
-            private Message getIncomingMessage() {
-                return ((ConversationMessageWrapper) message).getIncomingMessage();
-            }
+          public void run() {
+            sender.run();
+          }
+        });
 
-            public AsyncTask sendRepeatingWith(final RequestDispatcher viaThis, TimeUnit unit, int interval) {
-                return _sendRepeatingWith(message, viaThis, unit, interval);
-            }
-
-            public AsyncTask sendDelayedWith(final RequestDispatcher viaThis, TimeUnit unit, int interval) {
-                return _sendDelayedWith(message, viaThis, unit, interval);
-            }
-
-            private AsyncTask _sendRepeatingWith(final Message message, final RequestDispatcher viaThis, TimeUnit unit, int interval) {
-                final boolean isConversational = message instanceof ConversationMessageWrapper;
-
-                final AsyncTask task = TaskManagerFactory.get().scheduleRepeating(unit, interval, new HasAsyncTaskRef() {
-                    AsyncTask task;
-                    AsyncDelegateErrorCallback errorCallback;
-
-                    final Runnable sender;
-
-                    {
-                        errorCallback = new AsyncDelegateErrorCallback(this, message.getErrorCallback());
-
-                        if (isConversational) {
-                            final Message incomingMsg = ((ConversationMessageWrapper) message).getIncomingMessage();
-
-                            if (incomingMsg.hasPart(MessageParts.ReplyTo)) {
-                                sender = new Runnable() {
-                                    final String replyTo = incomingMsg
-                                            .get(String.class, MessageParts.ReplyTo);
-
-                                    public void run() {
-                                        try {
-                                            MessageBuilder.getMessageProvider().get()
-                                                    .toSubject(replyTo)
-                                                    .copyResource("Session", incomingMsg)
-                                                    .addAllParts(message.getParts())
-                                                    .addAllProvidedParts(message.getProvidedParts())
-                                                    .errorsCall(errorCallback).sendNowWith(viaThis);
-                                        } catch (Throwable t) {
-                                            t.printStackTrace();
-                                            getAsyncTask().cancel(true);
-                                        }
-                                    }
-                                };
-                            } else {
-                                sender = new Runnable() {
-
-                                    public void run() {
-                                        try {
-                                            MessageBuilder.getMessageProvider().get()
-                                                    .copyResource("Session", incomingMsg)
-                                                    .addAllParts(message.getParts())
-                                                    .addAllProvidedParts(message.getProvidedParts())
-                                                    .errorsCall(errorCallback).sendNowWith(viaThis);
-                                        } catch (Throwable t) {
-                                            t.printStackTrace();
-                                            getAsyncTask().cancel(true);
-                                        }
-
-                                    }
-                                };
+        if (isConversational) {
+          final LaundryReclaim reclaim =
+                  LaundryListProviderFactory.get().getLaundryList(((ConversationMessageWrapper) message).getIncomingMessage().getResource(Object.class, "Session"))
+                          .addToHamper(new Laundry() {
+                            public void clean() {
+                              task.cancel(true);
                             }
-                        } else {
-                            sender = new Runnable() {
-                                public void run() {
-                                    try {
-                                        viaThis.dispatchGlobal(MessageBuilder.getMessageProvider().get()
-                                                .addAllParts(message.getParts())
-                                                .addAllProvidedParts(message.getProvidedParts())
-                                                .errorsCall(errorCallback));
-                                    } catch (Throwable t) {
-                                        t.printStackTrace();
-                                        getAsyncTask().cancel(true);
-                                    }
-                                }
-                            };
-                        }
-                    }
+                          });
 
-                    public void setAsyncTask(AsyncTask task) {
-                        synchronized (this) {
-                            this.task = task;
-                        }
-                    }
-
-
-                    public AsyncTask getAsyncTask() {
-                        synchronized (this) {
-                            return task;
-                        }
-                    }
-
-                    public void run() {
-                        sender.run();
-                    }
-                });
-
-                if (isConversational) {
-                    final LaundryReclaim reclaim =
-                            LaundryListProviderFactory.get().getLaundryList(((ConversationMessageWrapper) message).getIncomingMessage().getResource(Object.class, "Session"))
-                                    .addToHamper(new Laundry() {
-                                        public void clean() {
-                                            task.cancel(true);
-                                        }
-                                    });
-
-                    task.setExitHandler(new Runnable() {
-                        public void run() {
-                            reclaim.reclaim();
-                        }
-                    });
-                }
-
-                return task;
+          task.setExitHandler(new Runnable() {
+            public void run() {
+              reclaim.reclaim();
             }
+          });
+        }
+
+        return task;
+      }
 
 
-            public AsyncTask _sendDelayedWith(final Message message, final RequestDispatcher viaThis, TimeUnit unit, int interval) {
-                return TaskManagerFactory.get().schedule(unit, interval, new HasAsyncTaskRef() {
-                    AsyncTask task;
-                    AsyncDelegateErrorCallback errorCallback
-                            = new AsyncDelegateErrorCallback(this, message.getErrorCallback());
+      public AsyncTask _sendDelayedWith(final Message message, final RequestDispatcher viaThis, TimeUnit unit, int interval) {
+        return TaskManagerFactory.get().schedule(unit, interval, new HasAsyncTaskRef() {
+          AsyncTask task;
+          AsyncDelegateErrorCallback errorCallback
+                  = new AsyncDelegateErrorCallback(this, message.getErrorCallback());
 
-                    public void setAsyncTask(AsyncTask task) {
-                        synchronized (this) {
-                            this.task = task;
-                        }
-                    }
-
-
-                    public AsyncTask getAsyncTask() {
-                        synchronized (this) {
-                            return task;
-                        }
-                    }
-
-                    public void run() {
-                        MessageBuilder.getMessageProvider().get()
-                                .copyResource("Session", message)
-                                .addAllParts(message.getParts())
-                                .addAllProvidedParts(message.getProvidedParts())
-                                .errorsCall(errorCallback).sendNowWith(viaThis);
-                    }
-                });
+          public void setAsyncTask(AsyncTask task) {
+            synchronized (this) {
+              this.task = task;
             }
+          }
 
 
-            public Message getMessage() {
-                return message;
+          public AsyncTask getAsyncTask() {
+            synchronized (this) {
+              return task;
             }
-        };
+          }
 
-        final MessageBuildCommand<R> parmBuilder = new MessageBuildCommand<R>() {
-            public MessageBuildParms<R> command(Enum command) {
-                message.command(command);
-                return this;
-            }
-
-            public MessageBuildParms<R> command(String command) {
-                message.command(command);
-                return this;
-            }
-
-            public MessageBuildParms<R> signalling() {
-                return this;
-            }
-
-            public MessageBuildParms<R> withValue(Object value) {
-                message.set(MessageParts.Value, value);
-                return this;
-            }
-
-            public MessageBuildParms<R> with(String part, Object value) {
-                message.set(part, value);
-                return this;
-            }
-
-            public MessageBuildParms<R> with(Enum part, Object value) {
-                message.set(part, value);
-                return this;
-            }
-
-            public MessageBuildParms<R> withProvided(String part, ResourceProvider provider) {
-                message.setProvidedPart(part, provider);
-                return this;
-            }
-
-            public MessageBuildParms<R> withProvided(Enum part, ResourceProvider provider) {
-                message.setProvidedPart(part, provider);
-                return this;
-            }
-
-            public MessageBuildParms<R> copy(String part, Message m) {
-                message.copy(part, m);
-                return this;
-            }
-
-            public MessageBuildParms<R> copy(Enum part, Message m) {
-                message.copy(part, m);
-                return this;
-            }
-
-            public MessageBuildParms<R> copyResource(String part, Message m) {
-                message.copyResource(part, m);
-                return this;
-            }
-
-            public R errorsHandledBy(ErrorCallback callback) {
-                message.errorsCall(callback);
-                return (R) sendable;
-
-            }
-
-            public R noErrorHandling() {
-                return (R) sendable;
-            }
-
-            public R defaultErrorHandling() {
-                message.errorsCall(DefaultErrorCallback.INSTANCE);
-                return (R) sendable;
-            }
-
-            public R done() {
-                return (R) sendable;
-            }
-
-            public Message getMessage() {
-                return message;
-            }
-        };
+          public void run() {
+            MessageBuilder.getMessageProvider().get()
+                    .copyResource("Session", message)
+                    .addAllParts(message.getParts())
+                    .addAllProvidedParts(message.getProvidedParts())
+                    .errorsCall(errorCallback).sendNowWith(viaThis);
+          }
+        });
+      }
 
 
-        return new MessageBuildSubject() {
-            public MessageBuildCommand<R> toSubject(String subject) {
-                message.toSubject(subject);
-                return parmBuilder;
-            }
+      public Message getMessage() {
+        return message;
+      }
+    };
 
-            public MessageBuildCommand<R> subjectProvided() {
-                return parmBuilder;
-            }
+    final MessageBuildCommand<R> parmBuilder = new MessageBuildCommand<R>() {
+      public MessageBuildParms<R> command(Enum command) {
+        message.command(command);
+        return this;
+      }
 
-            public Message getMessage() {
-                return message;
-            }
-        };
-    }
+      public MessageBuildParms<R> command(String command) {
+        message.command(command);
+        return this;
+      }
+
+      public MessageBuildParms<R> signalling() {
+        return this;
+      }
+
+      public MessageBuildParms<R> withValue(Object value) {
+        message.set(MessageParts.Value, value);
+        return this;
+      }
+
+      public MessageBuildParms<R> with(String part, Object value) {
+        message.set(part, value);
+        return this;
+      }
+
+      public MessageBuildParms<R> with(Enum part, Object value) {
+        message.set(part, value);
+        return this;
+      }
+
+      public MessageBuildParms<R> withProvided(String part, ResourceProvider provider) {
+        message.setProvidedPart(part, provider);
+        return this;
+      }
+
+      public MessageBuildParms<R> withProvided(Enum part, ResourceProvider provider) {
+        message.setProvidedPart(part, provider);
+        return this;
+      }
+
+      public MessageBuildParms<R> copy(String part, Message m) {
+        message.copy(part, m);
+        return this;
+      }
+
+      public MessageBuildParms<R> copy(Enum part, Message m) {
+        message.copy(part, m);
+        return this;
+      }
+
+      public MessageBuildParms<R> copyResource(String part, Message m) {
+        message.copyResource(part, m);
+        return this;
+      }
+
+      public R errorsHandledBy(ErrorCallback callback) {
+        message.errorsCall(callback);
+        return (R) sendable;
+
+      }
+
+      public R noErrorHandling() {
+        return (R) sendable;
+      }
+
+      public R defaultErrorHandling() {
+        message.errorsCall(DefaultErrorCallback.INSTANCE);
+        return (R) sendable;
+      }
+
+      public R done() {
+        return (R) sendable;
+      }
+
+      public Message getMessage() {
+        return message;
+      }
+    };
+
+
+    return new MessageBuildSubject() {
+      public MessageBuildCommand<R> toSubject(String subject) {
+        message.toSubject(subject);
+        return parmBuilder;
+      }
+
+      public MessageBuildCommand<R> subjectProvided() {
+        return parmBuilder;
+      }
+
+      public Message getMessage() {
+        return message;
+      }
+    };
+  }
 }

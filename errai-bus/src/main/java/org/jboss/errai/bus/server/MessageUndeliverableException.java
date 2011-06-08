@@ -17,7 +17,7 @@
 package org.jboss.errai.bus.server;
 
 public class MessageUndeliverableException extends RuntimeException {
-    public MessageUndeliverableException(String message) {
-        super(message);
-    }
+  public MessageUndeliverableException(String message) {
+    super(message);
+  }
 }

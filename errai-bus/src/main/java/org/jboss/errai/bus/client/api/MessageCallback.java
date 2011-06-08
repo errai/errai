@@ -20,10 +20,10 @@ package org.jboss.errai.bus.client.api;
  * A <tt>MessageCallback</tt> defines an interface for receiving messages on the bus.
  */
 public interface MessageCallback {
-    /**
-     * This method is called to handle the message.
-     *
-     * @param message -
-     */
-    public void callback(Message message);
+  /**
+   * This method is called to handle the message.
+   *
+   * @param message -
+   */
+  public void callback(Message message);
 }

@@ -22,9 +22,9 @@ import java.lang.annotation.Annotation;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public interface HasAnnotations {
-    public Annotation[] getAnnotations();
+  public Annotation[] getAnnotations();
 
-    public boolean isAnnotationPresent(Class<? extends Annotation> annotation);
+  public boolean isAnnotationPresent(Class<? extends Annotation> annotation);
 
-    public Annotation getAnnotation(Class<? extends Annotation> annotation);
+  public <A extends Annotation> A getAnnotation(Class<A> annotation);
 }

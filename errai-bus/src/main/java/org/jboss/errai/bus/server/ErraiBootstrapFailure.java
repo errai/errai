@@ -22,19 +22,19 @@ package org.jboss.errai.bus.server;
  */
 public class ErraiBootstrapFailure extends RuntimeException {
 
-    public ErraiBootstrapFailure() {
-        super();
-    }
+  public ErraiBootstrapFailure() {
+    super();
+  }
 
-    public ErraiBootstrapFailure(String message) {
-        super(message);
-    }
+  public ErraiBootstrapFailure(String message) {
+    super(message);
+  }
 
-    public ErraiBootstrapFailure(String message, Throwable cause) {
-        super(message, cause);
-    }
+  public ErraiBootstrapFailure(String message, Throwable cause) {
+    super(message, cause);
+  }
 
-    public ErraiBootstrapFailure(Throwable cause) {
-        super(cause);
-    }
+  public ErraiBootstrapFailure(Throwable cause) {
+    super(cause);
+  }
 }

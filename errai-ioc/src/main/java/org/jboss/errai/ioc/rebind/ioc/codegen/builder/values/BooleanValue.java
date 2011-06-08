@@ -21,12 +21,12 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder.values;
  */
 public class BooleanValue extends LiteralValue<Boolean> {
 
-    public BooleanValue(Boolean value) {
-        super(value);
-    }
+  public BooleanValue(Boolean value) {
+    super(value);
+  }
 
-    @Override
-    public String getCanonicalString() {
-        return getValue().toString();
-    }
+  @Override
+  public String getCanonicalString() {
+    return getValue().toString();
+  }
 }

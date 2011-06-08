@@ -26,7 +26,7 @@ import javax.inject.Singleton;
 @IOCProvider
 @Singleton
 public class RequestDispatcherProvider implements TypeProvider<RequestDispatcher> {
-    public RequestDispatcher provide() {
-        return ErraiBus.getDispatcher();
-    }
+  public RequestDispatcher provide() {
+    return ErraiBus.getDispatcher();
+  }
 }

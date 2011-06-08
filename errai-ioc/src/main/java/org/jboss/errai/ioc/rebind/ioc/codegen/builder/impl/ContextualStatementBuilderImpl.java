@@ -32,55 +32,55 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.MethodCall;
 public class ContextualStatementBuilderImpl extends AbstractStatementBuilder implements ContextualStatementBuilder,
         VariableReferenceContextualStatementBuilder {
 
-    protected ContextualStatementBuilderImpl(Context context, CallElementBuilder callElementBuilder) {
-        super(context, callElementBuilder);
-    }
+  protected ContextualStatementBuilderImpl(Context context, CallElementBuilder callElementBuilder) {
+    super(context, callElementBuilder);
+  }
 
-    // Invocation
-    public ContextualStatementBuilder invoke(String methodName, Object... parameters) {
-        appendCallElement(new MethodCall(methodName, parameters));
-        return this;
-    }
+  // Invocation
+  public ContextualStatementBuilder invoke(String methodName, Object... parameters) {
+    appendCallElement(new MethodCall(methodName, parameters));
+    return this;
+  }
 
-    public ContextualStatementBuilder invokeStatic(String methodName, Object... parameters) {
-        appendCallElement(new MethodCall(methodName, parameters, true));
-        return this;
-    }
+  public ContextualStatementBuilder invokeStatic(String methodName, Object... parameters) {
+    appendCallElement(new MethodCall(methodName, parameters, true));
+    return this;
+  }
 
-    // Looping
-    public BlockBuilder<LoopBuilder> foreach(String loopVarName) {
-        return new LoopBuilderImpl(context, callElementBuilder).foreach(loopVarName);
-    }
+  // Looping
+  public BlockBuilder<LoopBuilder> foreach(String loopVarName) {
+    return new LoopBuilderImpl(context, callElementBuilder).foreach(loopVarName);
+  }
 
-    public BlockBuilder<LoopBuilder> foreach(String loopVarName, Class<?> loopVarType) {
-        return new LoopBuilderImpl(context, callElementBuilder).foreach(loopVarName, loopVarType);
-    }
+  public BlockBuilder<LoopBuilder> foreach(String loopVarName, Class<?> loopVarType) {
+    return new LoopBuilderImpl(context, callElementBuilder).foreach(loopVarName, loopVarType);
+  }
 
-    // If-Then-Else
-    public BlockBuilder<ElseBlockBuilder> if_() {
-        return new IfBlockBuilderImpl(context, callElementBuilder).if_();
-    }
+  // If-Then-Else
+  public BlockBuilder<ElseBlockBuilder> if_() {
+    return new IfBlockBuilderImpl(context, callElementBuilder).if_();
+  }
 
-    public BlockBuilder<ElseBlockBuilder> if_(BooleanOperator op, Statement rhs) {
-        return new IfBlockBuilderImpl(context, callElementBuilder).if_(op, rhs);
-    }
+  public BlockBuilder<ElseBlockBuilder> if_(BooleanOperator op, Statement rhs) {
+    return new IfBlockBuilderImpl(context, callElementBuilder).if_(op, rhs);
+  }
 
-    public BlockBuilder<ElseBlockBuilder> if_(BooleanOperator op, Object rhs) {
-        return new IfBlockBuilderImpl(context, callElementBuilder).if_(op, rhs);
-    }
+  public BlockBuilder<ElseBlockBuilder> if_(BooleanOperator op, Object rhs) {
+    return new IfBlockBuilderImpl(context, callElementBuilder).if_(op, rhs);
+  }
 
-    // Value return
-    public Statement returnValue() {
-        return new StringStatement("return " + toJavaString() + ";");
-    }
+  // Value return
+  public Statement returnValue() {
+    return new StringStatement("return " + toJavaString() + ";");
+  }
 
-    // Assignments
-    public Statement assignValue(Object statement) {
-        return assignValue(AssignmentOperator.Assignment, statement);
-    }
+  // Assignments
+  public Statement assignValue(Object statement) {
+    return assignValue(AssignmentOperator.Assignment, statement);
+  }
 
-    public Statement assignValue(AssignmentOperator operator, Object statement) {
-        appendCallElement(new AssignVariable(operator, statement));
-        return this;
-    }
+  public Statement assignValue(AssignmentOperator operator, Object statement) {
+    appendCallElement(new AssignVariable(operator, statement));
+    return this;
+  }
 }

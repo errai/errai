@@ -75,95 +75,96 @@ import org.jboss.errai.bus.client.api.*;
  * </code></pre>
  */
 public interface MessageBus {
-    /**
-     * Transmits the message to all directly-peered buses (global in relation to this bus only).
-     *
-     * @param message - The message to be sent.
-     */
-    public void sendGlobal(Message message);
+  /**
+   * Transmits the message to all directly-peered buses (global in relation to this bus only).
+   *
+   * @param message - The message to be sent.
+   */
+  public void sendGlobal(Message message);
 
-    /**
-     * Transmits a message.
-     *
-     * @param message
-     */
-    public void send(Message message);
-
-
-    /**
-     * Transmits a message and may optionally supress message listeners from firing.  This is useful if you are
-     * modifying a message from within a listener itself, and wish to retransmit the message.
-     *
-     * @param message
-     * @param fireListeners
-     */
-    public void send(Message message, boolean fireListeners);
+  /**
+   * Transmits a message.
+   *
+   * @param message
+   */
+  public void send(Message message);
 
 
-    /**
-     * Have a conversation with a remote service.
-     *
-     * @param message
-     * @param callback
-     */
-    public void conversationWith(Message message, MessageCallback callback);
-
-    /**
-     * Subscribe a listener to the specified subject.
-     *
-     * @param subject
-     * @param receiver
-     */
-    public void subscribe(String subject, MessageCallback receiver);
+  /**
+   * Transmits a message and may optionally supress message listeners from firing.  This is useful if you are
+   * modifying a message from within a listener itself, and wish to retransmit the message.
+   *
+   * @param message
+   * @param fireListeners
+   */
+  public void send(Message message, boolean fireListeners);
 
 
-    /**
-     * Subscribe a listern locally, but do not advertise or make available the service to remote buses.
-     * @param subject
-     * @param receiver
-     */
-    public void subscribeLocal(String subject, MessageCallback receiver);
+  /**
+   * Have a conversation with a remote service.
+   *
+   * @param message
+   * @param callback
+   */
+  public void conversationWith(Message message, MessageCallback callback);
 
-    /*
-     * Unsubscribe all listeners registered for the specified subject.
-     */
+  /**
+   * Subscribe a listener to the specified subject.
+   *
+   * @param subject
+   * @param receiver
+   */
+  public void subscribe(String subject, MessageCallback receiver);
 
-    public void unsubscribeAll(String subject);
+
+  /**
+   * Subscribe a listern locally, but do not advertise or make available the service to remote buses.
+   *
+   * @param subject
+   * @param receiver
+   */
+  public void subscribeLocal(String subject, MessageCallback receiver);
+
+  /*
+  * Unsubscribe all listeners registered for the specified subject.
+  */
+
+  public void unsubscribeAll(String subject);
 
 
-    /**
-     * Returns true if there the specified subject has one or more listeners registered.
-     *
-     * @param subject
-     * @return
-     */
-    public boolean isSubscribed(String subject);
+  /**
+   * Returns true if there the specified subject has one or more listeners registered.
+   *
+   * @param subject
+   * @return
+   */
+  public boolean isSubscribed(String subject);
 
-    /**
-     * Registers a global listener, that can intercept all messages before they are transmitted.
-     *
-     * @param listener
-     */
-    public void addGlobalListener(MessageListener listener);
+  /**
+   * Registers a global listener, that can intercept all messages before they are transmitted.
+   *
+   * @param listener
+   */
+  public void addGlobalListener(MessageListener listener);
 
-    /**
-     * Registers a subscription listener, which is fired whenever a new subscription is created.
-     *
-     * @param listener
-     */
-    public void addSubscribeListener(SubscribeListener listener);
+  /**
+   * Registers a subscription listener, which is fired whenever a new subscription is created.
+   *
+   * @param listener
+   */
+  public void addSubscribeListener(SubscribeListener listener);
 
-    /**
-     * Registers an un-subscribe listener, which is fired whenever a subscription is cancelled.
-     *
-     * @param listener
-     */
-    public void addUnsubscribeListener(UnsubscribeListener listener);
+  /**
+   * Registers an un-subscribe listener, which is fired whenever a subscription is cancelled.
+   *
+   * @param listener
+   */
+  public void addUnsubscribeListener(UnsubscribeListener listener);
 
-    /**
-     * Attach a monitor to the bus.
-     *
-     * @param monitor
-     */
-    public void attachMonitor(BusMonitor monitor);
+  /**
+   * Attach a monitor to the bus.
+   *
+   * @param monitor
+   */
+  public void attachMonitor(BusMonitor monitor);
 }

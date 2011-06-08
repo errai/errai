@@ -20,54 +20,54 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TypeMarshallers {
-    private static final Map<String, Marshaller<Object>> classMap = new HashMap<String, Marshaller<Object>>();
-    private static final Map<Class, Marshaller<Object>> marshallers = new HashMap<Class, Marshaller<Object>>();
+  private static final Map<String, Marshaller<Object>> classMap = new HashMap<String, Marshaller<Object>>();
+  private static final Map<Class, Marshaller<Object>> marshallers = new HashMap<Class, Marshaller<Object>>();
 
-    static {
-        addMarshaller(java.sql.Date.class, new Marshaller<java.sql.Date>() {
-            public String marshall(java.sql.Date object, EncodingContext ctx) {
-                return "{__EncodedType:\"java.sql.Date\", __ObjectID:\"" + object.hashCode() + "\", Value:" + object.getTime() + "}";
-            }
-        });
+  static {
+    addMarshaller(java.sql.Date.class, new Marshaller<java.sql.Date>() {
+      public String marshall(java.sql.Date object, EncodingContext ctx) {
+        return "{__EncodedType:\"java.sql.Date\", __ObjectID:\"" + object.hashCode() + "\", Value:" + object.getTime() + "}";
+      }
+    });
 
-        addMarshaller(java.util.Date.class, new Marshaller<java.util.Date>() {
-            public String marshall(java.util.Date object, EncodingContext ctx) {
-                return "{__EncodedType:\"java.util.Date\", __ObjectID:\"" + object.hashCode() + "\", Value:" + object.getTime() + "}";
-            }
-        });
+    addMarshaller(java.util.Date.class, new Marshaller<java.util.Date>() {
+      public String marshall(java.util.Date object, EncodingContext ctx) {
+        return "{__EncodedType:\"java.util.Date\", __ObjectID:\"" + object.hashCode() + "\", Value:" + object.getTime() + "}";
+      }
+    });
 
-        addMarshaller(Byte.class, new Marshaller<Byte>() {
-            public String marshall(Byte object, EncodingContext ctx) {
-                return String.valueOf(object.intValue());
-            }
-        });
-        
-        addMarshaller(Character.class, new Marshaller<Character>() {
-            public String marshall(Character object, EncodingContext ctx) {
-                return "\"" + String.valueOf(object.charValue()) + "\"";
-            }
-        });
-    }
+    addMarshaller(Byte.class, new Marshaller<Byte>() {
+      public String marshall(Byte object, EncodingContext ctx) {
+        return String.valueOf(object.intValue());
+      }
+    });
 
-    public static void addMarshaller(Class type, Marshaller d) {
-        classMap.put(type.getName(), d);
-        marshallers.put(type, d);
-    }
+    addMarshaller(Character.class, new Marshaller<Character>() {
+      public String marshall(Character object, EncodingContext ctx) {
+        return "\"" + String.valueOf(object.charValue()) + "\"";
+      }
+    });
+  }
 
-    @SuppressWarnings({"unchecked"})
-    public static <T> Marshaller<T> getMarshaller(Class<? extends T> type) {
-        return (Marshaller<T>) marshallers.get(type);
-    }
+  public static void addMarshaller(Class type, Marshaller d) {
+    classMap.put(type.getName(), d);
+    marshallers.put(type, d);
+  }
 
-    public static Marshaller<Object> getMarshaller(String type) {
-        return classMap.get(type);
-    }
+  @SuppressWarnings({"unchecked"})
+  public static <T> Marshaller<T> getMarshaller(Class<? extends T> type) {
+    return (Marshaller<T>) marshallers.get(type);
+  }
 
-    public static boolean hasMarshaller(Class type) {
-        return marshallers.containsKey(type);
-    }
+  public static Marshaller<Object> getMarshaller(String type) {
+    return classMap.get(type);
+  }
 
-    public static boolean hasMarshaller(String type) {
-        return classMap.containsKey(type);
-    }
+  public static boolean hasMarshaller(Class type) {
+    return marshallers.containsKey(type);
+  }
+
+  public static boolean hasMarshaller(String type) {
+    return classMap.containsKey(type);
+  }
 }

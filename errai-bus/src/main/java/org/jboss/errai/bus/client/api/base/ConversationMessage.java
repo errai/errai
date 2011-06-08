@@ -44,71 +44,71 @@ import org.jboss.errai.bus.client.protocols.MessageParts;
  */
 public class ConversationMessage extends CommandMessage {
 
-    @Deprecated
-    static CommandMessage create(String commandType) {
-        throw new BadlyFormedMessageException("You must create a ConversationMessage by specifying an incoming message.");
+  @Deprecated
+  static CommandMessage create(String commandType) {
+    throw new BadlyFormedMessageException("You must create a ConversationMessage by specifying an incoming message.");
+  }
+
+  @Deprecated
+  static CommandMessage create(Enum commandType) {
+    throw new BadlyFormedMessageException("You must create a ConversationMessage by specifying an incoming message.");
+  }
+
+  /**
+   * Calling this method on this class will always result in a {@link org.jboss.errai.bus.client.api.BadlyFormedMessageException}.
+   * You must call {@link #create(Message)}.
+   *
+   * @return - this method will never return.
+   */
+  static CommandMessage create() {
+    throw new BadlyFormedMessageException("You must create a ConversationMessage by specifying an incoming message.");
+  }
+
+  /**
+   * Creates a <tt>ConversationMessage</tt> using an incoming message as a reference
+   *
+   * @param inReplyTo - incoming message
+   * @return newly created <tt>ConversationMessage</tt>
+   */
+  public static ConversationMessage create(Message inReplyTo) {
+    return new ConversationMessage(inReplyTo);
+  }
+
+  private ConversationMessage(Message inReplyTo) {
+    super();
+    if (inReplyTo.hasResource("Session")) {
+      setResource("Session", inReplyTo.getResource(Object.class, "Session"));
+    }
+    if (inReplyTo.hasPart(MessageParts.ReplyTo)) {
+      set(MessageParts.ToSubject, inReplyTo.get(String.class, MessageParts.ReplyTo));
     }
 
-    @Deprecated
-    static CommandMessage create(Enum commandType) {
-        throw new BadlyFormedMessageException("You must create a ConversationMessage by specifying an incoming message.");
+    if (!inReplyTo.hasResource("Session") && !inReplyTo.hasPart(MessageParts.ReplyTo)) {
+      if (!inReplyTo.hasResource("Session") && !inReplyTo.hasPart(MessageParts.ReplyTo)) {
+        throw new RuntimeException("cannot have a conversation. there is no session data or ReplyTo field. Are you sure you referenced an incoming message?");
+      }
     }
+  }
 
-    /**
-     * Calling this method on this class will always result in a {@link org.jboss.errai.bus.client.api.BadlyFormedMessageException}.
-     * You must call {@link #create(Message)}.
-     *
-     * @return - this method will never return.
-     */
-    static CommandMessage create() {
-        throw new BadlyFormedMessageException("You must create a ConversationMessage by specifying an incoming message.");
-    }
+  /**
+   * Constructs a <tt>ConversationMessage</tt> using a specified type and reference message.
+   *
+   * @param commandType - <tt>Enum</tt> command type
+   * @param inReplyTo   - message to reference
+   */
+  public ConversationMessage(Enum commandType, Message inReplyTo) {
+    this(inReplyTo);
+    command(commandType.name());
+  }
 
-    /**
-     * Creates a <tt>ConversationMessage</tt> using an incoming message as a reference
-     *
-     * @param inReplyTo - incoming message
-     * @return newly created <tt>ConversationMessage</tt>
-     */
-    public static ConversationMessage create(Message inReplyTo) {
-        return new ConversationMessage(inReplyTo);
-    }
-
-    private ConversationMessage(Message inReplyTo) {
-        super();
-        if (inReplyTo.hasResource("Session")) {
-            setResource("Session", inReplyTo.getResource(Object.class, "Session"));
-        }
-        if (inReplyTo.hasPart(MessageParts.ReplyTo)) {
-            set(MessageParts.ToSubject, inReplyTo.get(String.class, MessageParts.ReplyTo));
-        }
-
-        if (!inReplyTo.hasResource("Session") && !inReplyTo.hasPart(MessageParts.ReplyTo)) {
-            if (!inReplyTo.hasResource("Session") && !inReplyTo.hasPart(MessageParts.ReplyTo)) {
-                throw new RuntimeException("cannot have a conversation. there is no session data or ReplyTo field. Are you sure you referenced an incoming message?");
-            }
-        }
-    }
-
-    /**
-     * Constructs a <tt>ConversationMessage</tt> using a specified type and reference message.
-     *
-     * @param commandType - <tt>Enum</tt> command type
-     * @param inReplyTo   - message to reference
-     */
-    public ConversationMessage(Enum commandType, Message inReplyTo) {
-        this(inReplyTo);
-        command(commandType.name());
-    }
-
-    /**
-     * Constructs a <tt>ConversationMessage</tt> using a specified type and reference message.
-     *
-     * @param commandType - <tt>String</tt> command type
-     * @param inReplyTo   - message to reference
-     */
-    public ConversationMessage(String commandType, Message inReplyTo) {
-        this(inReplyTo);
-        command(commandType);
-    }
+  /**
+   * Constructs a <tt>ConversationMessage</tt> using a specified type and reference message.
+   *
+   * @param commandType - <tt>String</tt> command type
+   * @param inReplyTo   - message to reference
+   */
+  public ConversationMessage(String commandType, Message inReplyTo) {
+    this(inReplyTo);
+    command(commandType);
+  }
 }

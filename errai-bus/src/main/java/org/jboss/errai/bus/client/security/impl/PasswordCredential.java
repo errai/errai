@@ -22,13 +22,13 @@ import org.jboss.errai.bus.client.security.Credential;
  * A basic password credential.
  */
 public class PasswordCredential implements Credential {
-    public String password;
+  public String password;
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+  public void setPassword(String password) {
+    this.password = password;
+  }
 
-    public Object getValue() {
-        return password;
-    }
+  public Object getValue() {
+    return password;
+  }
 }

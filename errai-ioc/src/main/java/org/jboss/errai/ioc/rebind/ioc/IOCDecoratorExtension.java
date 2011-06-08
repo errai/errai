@@ -19,15 +19,15 @@ package org.jboss.errai.ioc.rebind.ioc;
 import java.lang.annotation.Annotation;
 
 public abstract class IOCDecoratorExtension<T extends Annotation> {
-    private final Class<T> decoratesWith;
+  private final Class<T> decoratesWith;
 
-    protected IOCDecoratorExtension(Class<T> decoratesWith) {
-        this.decoratesWith = decoratesWith;
-    }
+  protected IOCDecoratorExtension(Class<T> decoratesWith) {
+    this.decoratesWith = decoratesWith;
+  }
 
-    public Class<T> decoratesWith() {
-        return decoratesWith;
-    }
+  public Class<T> decoratesWith() {
+    return decoratesWith;
+  }
 
-    public abstract String generateDecorator(InjectionPoint<T> ctx);
+  public abstract String generateDecorator(InjectionPoint<T> ctx);
 }

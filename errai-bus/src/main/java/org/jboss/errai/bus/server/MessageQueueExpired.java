@@ -21,11 +21,11 @@ package org.jboss.errai.bus.server;
  * expired in some way
  */
 public class MessageQueueExpired extends RuntimeException {
-    public MessageQueueExpired(String message) {
-        super(message);
-    }
+  public MessageQueueExpired(String message) {
+    super(message);
+  }
 
-    public MessageQueueExpired(String message, Throwable cause) {
-        super(message, cause);
-    }
+  public MessageQueueExpired(String message, Throwable cause) {
+    super(message, cause);
+  }
 }

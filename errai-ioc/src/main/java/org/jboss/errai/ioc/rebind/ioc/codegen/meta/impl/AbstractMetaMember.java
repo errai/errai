@@ -24,16 +24,16 @@ import java.lang.annotation.Annotation;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public abstract class AbstractMetaMember implements MetaClassMember {
-    protected Annotation[] annotations;
+  protected Annotation[] annotations;
 
-    public final Annotation getAnnotation(Class<? extends Annotation> annotation) {
-        for (Annotation a : getAnnotations()) {
-            if (a.annotationType().equals(annotation)) return a;
-        }
-        return null;
+  public final <A extends Annotation> A getAnnotation(Class<A> annotation) {
+    for (Annotation a : getAnnotations()) {
+      if (a.annotationType().equals(annotation)) return (A) a;
     }
+    return null;
+  }
 
-    public final boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
-        return getAnnotation(annotation) != null;
-    }
+  public final boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
+    return getAnnotation(annotation) != null;
+  }
 }

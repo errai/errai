@@ -16,20 +16,16 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
-import javax.enterprise.util.TypeLiteral;
-
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ArrayInitializationBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementBegin;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.VariableReferenceContextualStatementBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DeclareVariable;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DynamicLoad;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadLiteral;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadVariable;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.StaticLoad;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+
+import javax.enterprise.util.TypeLiteral;
 
 /**
  * The root of our fluent StatementBuilder API.
@@ -39,87 +35,87 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
  */
 public class StatementBuilder extends AbstractStatementBuilder implements StatementBegin {
 
-    public StatementBuilder(Context context) {
-        super(context);
+  public StatementBuilder(Context context) {
+    super(context);
 
-        if (context != null) {
-            for (Variable v : context.getDeclaredVariables()) {
-                appendCallElement(new DeclareVariable(v));
-            }
-        }
-    }
-
-    public static StatementBegin create() {
-        return new StatementBuilder(null);
-    }
-
-    public static StatementBegin create(Context context) {
-        return new StatementBuilder(context);
-    }
-
-    public StatementBuilder addVariable(String name, Class<?> type) {
-        Variable v = Variable.create(name, type);
-        return addVariable(v);
-    }
-
-    public StatementBuilder addVariable(String name, TypeLiteral<?> type) {
-        Variable v = Variable.create(name, type);
-        return addVariable(v);
-    }
-
-    public StatementBuilder addVariable(String name, Object initialization) {
-        Variable v = Variable.create(name, initialization);
-        return addVariable(v);
-    }
-
-    public StatementBuilder addVariable(String name, Class<?> type, Object initialization) {
-        Variable v = Variable.create(name, type, initialization);
-        return addVariable(v);
-    }
-
-    public StatementBuilder addVariable(String name, TypeLiteral<?> type, Object initialization) {
-        Variable v = Variable.create(name, type, initialization);
-        return addVariable(v);
-    }
-
-    private StatementBuilder addVariable(Variable v) {
+    if (context != null) {
+      for (Variable v : context.getDeclaredVariables()) {
         appendCallElement(new DeclareVariable(v));
-        return this;
+      }
     }
+  }
 
-    public VariableReferenceContextualStatementBuilder loadVariable(String name) {
-        appendCallElement(new LoadVariable(name));
-        return new ContextualStatementBuilderImpl(context, callElementBuilder);
-    }
+  public static StatementBegin create() {
+    return new StatementBuilder(null);
+  }
 
-    public ContextualStatementBuilder loadLiteral(Object o) {
-        appendCallElement(new LoadLiteral(o));
-        return new ContextualStatementBuilderImpl(context, callElementBuilder);
-    }
+  public static StatementBegin create(Context context) {
+    return new StatementBuilder(context);
+  }
 
-    public ContextualStatementBuilder load(Object o) {
-        appendCallElement(new DynamicLoad(o));
-        return new ContextualStatementBuilderImpl(context, callElementBuilder);
-    }
+  public StatementBuilder addVariable(String name, Class<?> type) {
+    Variable v = Variable.create(name, type);
+    return addVariable(v);
+  }
 
-    public ContextualStatementBuilder invokeStatic(Class<?> clazz, String methodName, Object... parameters) {
-        appendCallElement(new StaticLoad(clazz));
-        return new ContextualStatementBuilderImpl(context, callElementBuilder).invokeStatic(methodName, parameters);
-    }
+  public StatementBuilder addVariable(String name, TypeLiteral<?> type) {
+    Variable v = Variable.create(name, type);
+    return addVariable(v);
+  }
 
-    public ObjectBuilder newObject(MetaClass type) {
-        return ObjectBuilder.newInstanceOf(type);
-    }
+  public StatementBuilder addVariable(String name, Object initialization) {
+    Variable v = Variable.create(name, initialization);
+    return addVariable(v);
+  }
 
-    public ObjectBuilder newObject(Class<?> type) {
-        return ObjectBuilder.newInstanceOf(type);
-    }
-    
-    public ArrayInitializationBuilder newArray(Class<?> componentType) {
-        return new ArrayBuilderImpl(context, callElementBuilder).newArray(componentType);
-    }
+  public StatementBuilder addVariable(String name, Class<?> type, Object initialization) {
+    Variable v = Variable.create(name, type, initialization);
+    return addVariable(v);
+  }
 
-    public ArrayInitializationBuilder newArray(Class<?> componentType, Integer... dimensions) {
-        return new ArrayBuilderImpl(context, callElementBuilder).newArray(componentType, dimensions);
-    }
+  public StatementBuilder addVariable(String name, TypeLiteral<?> type, Object initialization) {
+    Variable v = Variable.create(name, type, initialization);
+    return addVariable(v);
+  }
+
+  private StatementBuilder addVariable(Variable v) {
+    appendCallElement(new DeclareVariable(v));
+    return this;
+  }
+
+  public VariableReferenceContextualStatementBuilder loadVariable(String name) {
+    appendCallElement(new LoadVariable(name));
+    return new ContextualStatementBuilderImpl(context, callElementBuilder);
+  }
+
+  public ContextualStatementBuilder loadLiteral(Object o) {
+    appendCallElement(new LoadLiteral(o));
+    return new ContextualStatementBuilderImpl(context, callElementBuilder);
+  }
+
+  public ContextualStatementBuilder load(Object o) {
+    appendCallElement(new DynamicLoad(o));
+    return new ContextualStatementBuilderImpl(context, callElementBuilder);
+  }
+
+  public ContextualStatementBuilder invokeStatic(Class<?> clazz, String methodName, Object... parameters) {
+    appendCallElement(new StaticLoad(clazz));
+    return new ContextualStatementBuilderImpl(context, callElementBuilder).invokeStatic(methodName, parameters);
+  }
+
+  public ObjectBuilder newObject(MetaClass type) {
+    return ObjectBuilder.newInstanceOf(type);
+  }
+
+  public ObjectBuilder newObject(Class<?> type) {
+    return ObjectBuilder.newInstanceOf(type);
+  }
+
+  public ArrayInitializationBuilder newArray(Class<?> componentType) {
+    return new ArrayBuilderImpl(context, callElementBuilder).newArray(componentType);
+  }
+
+  public ArrayInitializationBuilder newArray(Class<?> componentType, Integer... dimensions) {
+    return new ArrayBuilderImpl(context, callElementBuilder).newArray(componentType, dimensions);
+  }
 }

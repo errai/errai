@@ -22,14 +22,10 @@ import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.util.ErrorHelper;
 import org.jboss.errai.bus.server.DefaultTaskManager;
-import org.jboss.errai.bus.server.QueueUnavailableException;
-import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.bus.server.api.SessionProvider;
 import org.jboss.errai.bus.server.service.bootstrap.BootstrapContext;
 import org.jboss.errai.bus.server.service.bootstrap.OrderedBootstrap;
-
-import java.lang.annotation.Annotation;
 
 /**
  * Default implementation of the ErraiBus server-side service.
@@ -37,99 +33,98 @@ import java.lang.annotation.Annotation;
 @Singleton
 public class ErraiServiceImpl<S> implements ErraiService<S> {
 
-    private ServerMessageBus bus;
-    private ErraiServiceConfigurator config;
+  private ServerMessageBus bus;
+  private ErraiServiceConfigurator config;
 
-    private SessionProvider<S> sessionProvider;
-    private RequestDispatcher dispatcher;
+  private SessionProvider<S> sessionProvider;
+  private RequestDispatcher dispatcher;
+
+  /**
+   * Initializes the errai service with a bus and configurator
+   *
+   * @param bus          - the bus to be associated with this service
+   * @param configurator - the configurator to take care of the configuration for the service
+   */
+  @Inject
+  public ErraiServiceImpl(final ServerMessageBus bus,
+                          final ErraiServiceConfigurator configurator) {
+    this.bus = bus;
+    this.config = configurator;
+
+    boostrap();
+  }
+
+  private void boostrap() {
+    BootstrapContext context = new BootstrapContext(this, bus, config);
+    new OrderedBootstrap().execute(context);
+  }
+
+  /**
+   * Passes off the message to the bus for handling
+   *
+   * @param message - the message to store/deliver
+   */
+  public void store(Message message) {
+    if (message == null) {
+      return;
+    }
+
+    message.addResources(config.getResourceProviders());
 
     /**
-     * Initializes the errai service with a bus and configurator
-     *
-     * @param bus          - the bus to be associated with this service
-     * @param configurator - the configurator to take care of the configuration for the service
+     * Pass the message off to the messaging bus for handling.
      */
-    @Inject
-    public ErraiServiceImpl(final ServerMessageBus bus,
-                            final ErraiServiceConfigurator configurator) {
-        this.bus = bus;
-        this.config = configurator;
-
-        boostrap();
+    try {
+      getDispatcher().dispatchGlobal(message);
+    } catch (Throwable t) {
+      t.printStackTrace();
+      ErrorHelper.sendClientError(bus, message, t.getMessage(), t);
     }
+  }
 
-    private void boostrap() {
-        BootstrapContext context = new BootstrapContext(this, bus, config);
-        new OrderedBootstrap().execute(context);
+
+  public void stopService() {
+    bus.stop();
+    DefaultTaskManager.get().requestStop();
+  }
+
+  /**
+   * Gets the bus associated with this service
+   *
+   * @return the bus associated with this service
+   */
+  public ServerMessageBus getBus() {
+    return bus;
+  }
+
+  /**
+   * Gets the configuration used to initalize the service
+   *
+   * @return the errai service configurator
+   */
+  public ErraiServiceConfigurator getConfiguration() {
+    return config;
+  }
+
+  public SessionProvider<S> getSessionProvider() {
+    return sessionProvider;
+  }
+
+  public void setSessionProvider(SessionProvider<S> sessionProvider) {
+    if (this.sessionProvider != null) {
+      throw new IllegalStateException("cannot set session provider more than once.");
     }
+    this.sessionProvider = sessionProvider;
+  }
 
-    /**
-     * Passes off the message to the bus for handling
-     *
-     * @param message - the message to store/deliver
-     */
-    public void store(Message message) {
-        if (message == null) {
-            return;
-        }
+  public RequestDispatcher getDispatcher() {
+    return dispatcher;
+  }
 
-        message.addResources(config.getResourceProviders());
-
-        /**
-         * Pass the message off to the messaging bus for handling.
-         */
-        try {
-            getDispatcher().dispatchGlobal(message);
-        }
-        catch (Throwable t) {
-            t.printStackTrace();
-            ErrorHelper.sendClientError(bus, message, t.getMessage(), t);
-        }
+  public void setDispatcher(RequestDispatcher dispatcher) {
+    if (this.sessionProvider != null) {
+      throw new IllegalStateException("cannot set dispatcher more than once.");
     }
-
-
-    public void stopService() {
-        bus.stop();
-        DefaultTaskManager.get().requestStop();
-    }
-
-    /**
-     * Gets the bus associated with this service
-     *
-     * @return the bus associated with this service
-     */
-    public ServerMessageBus getBus() {
-        return bus;
-    }
-
-    /**
-     * Gets the configuration used to initalize the service
-     *
-     * @return the errai service configurator
-     */
-    public ErraiServiceConfigurator getConfiguration() {
-        return config;
-    }
-
-    public SessionProvider<S> getSessionProvider() {
-        return sessionProvider;
-    }
-
-    public void setSessionProvider(SessionProvider<S> sessionProvider) {
-        if (this.sessionProvider != null) {
-            throw new IllegalStateException("cannot set session provider more than once.");
-        }
-        this.sessionProvider = sessionProvider;
-    }
-
-    public RequestDispatcher getDispatcher() {
-        return dispatcher;
-    }
-
-    public void setDispatcher(RequestDispatcher dispatcher) {
-        if (this.sessionProvider != null) {
-            throw new IllegalStateException("cannot set dispatcher more than once.");
-        }
-        this.dispatcher = dispatcher;
-    }
+    this.dispatcher = dispatcher;
+  }
 }

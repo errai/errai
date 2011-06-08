@@ -37,48 +37,47 @@ import org.jboss.errai.bus.server.util.ServerLaundryList;
  * @see org.jboss.errai.bus.client.api.ResourceProvider
  */
 class DefaultResources implements BootstrapExecution {
-    public void execute(BootstrapContext context) {
-        final ErraiServiceConfiguratorImpl config = (ErraiServiceConfiguratorImpl) context
-                .getConfig();
+  public void execute(BootstrapContext context) {
+    final ErraiServiceConfiguratorImpl config = (ErraiServiceConfiguratorImpl) context
+            .getConfig();
 
-        config.getResourceProviders().put(MessageBus.class.getName(),
-                new BusProvider(context.getBus()));
-        config.getResourceProviders().put(RequestDispatcher.class.getName(),
-                new DispatcherProvider(context.getService().getDispatcher()));
+    config.getResourceProviders().put(MessageBus.class.getName(),
+            new BusProvider(context.getBus()));
+    config.getResourceProviders().put(RequestDispatcher.class.getName(),
+            new DispatcherProvider(context.getService().getDispatcher()));
 
-        // configure the server-side taskmanager
+    // configure the server-side taskmanager
 
-        final TaskManager taskManager = resolveTaskManager(config);
+    final TaskManager taskManager = resolveTaskManager(config);
 
-        TaskManagerFactory.setTaskManagerProvider(new TaskManagerProvider() {
-            public TaskManager get() {
-                return taskManager;
-            }
-        });
+    TaskManagerFactory.setTaskManagerProvider(new TaskManagerProvider() {
+      public TaskManager get() {
+        return taskManager;
+      }
+    });
 
-        LaundryListProviderFactory
-                .setLaundryListProvider(new LaundryListProvider() {
-                    public LaundryList getLaundryList(Object ref) {
-                        return ServerLaundryList.get((QueueSession) ref);
-                    }
-                });
+    LaundryListProviderFactory
+            .setLaundryListProvider(new LaundryListProvider() {
+              public LaundryList getLaundryList(Object ref) {
+                return ServerLaundryList.get((QueueSession) ref);
+              }
+            });
+  }
+
+  private TaskManager resolveTaskManager(ErraiServiceConfigurator config) {
+    TaskManager result = null;
+    String tmProp = config.getProperty("errai.taskmanager_implementation");
+    if (tmProp != null) {
+      try {
+        Class<?> tm = DefaultResources.class.getClassLoader().loadClass(
+                tmProp);
+        result = (TaskManager) tm.newInstance();
+      } catch (Exception e) {
+        throw new RuntimeException("Failed to load task manager", e);
+      }
+    } else {
+      result = DefaultTaskManager.get();
     }
-
-    private TaskManager resolveTaskManager(ErraiServiceConfigurator config) {
-        TaskManager result = null;
-        String tmProp = config.getProperty("errai.taskmanager_implementation");
-        if (tmProp != null) {
-            try {
-                Class<?> tm = DefaultResources.class.getClassLoader().loadClass(
-                        tmProp);
-                result = (TaskManager) tm.newInstance();
-            }
-            catch (Exception e) {
-                throw new RuntimeException("Failed to load task manager", e);
-            }
-        } else {
-            result = DefaultTaskManager.get();
-        }
-        return result;
-    }
+    return result;
+  }
 }

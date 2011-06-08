@@ -23,13 +23,13 @@ import org.jboss.errai.bus.client.api.ResourceProvider;
  * @date: May 3, 2010
  */
 public class GuiceProviderProxy implements Provider {
-    private final ResourceProvider provider;
+  private final ResourceProvider provider;
 
-    public GuiceProviderProxy(ResourceProvider provider) {
-        this.provider = provider;
-    }
+  public GuiceProviderProxy(ResourceProvider provider) {
+    this.provider = provider;
+  }
 
-    public Object get() {
-        return provider.get();
-    }
+  public Object get() {
+    return provider.get();
+  }
 }

@@ -28,32 +28,32 @@ import org.jboss.errai.bus.client.framework.DeliveryPlan;
  * @see org.jboss.errai.bus.client.framework.BooleanRoutingRule
  */
 public class RuleDelegateMessageCallback extends DeliveryPlan {
-    private DeliveryPlan delegate;
-    private BooleanRoutingRule routingRule;
+  private DeliveryPlan delegate;
+  private BooleanRoutingRule routingRule;
 
-    /**
-     * Creates the <tt>RuleDelegateMessageCallback</tt> instance using a given delegate and a routing rule
-     *
-     * @param delegate - Message callback function
-     * @param rule     - indicates whether or not the message should be routed.
-     */
-    public RuleDelegateMessageCallback(DeliveryPlan delegate, BooleanRoutingRule rule) {
-        this.delegate = delegate;
-        this.routingRule = rule;
-    }
+  /**
+   * Creates the <tt>RuleDelegateMessageCallback</tt> instance using a given delegate and a routing rule
+   *
+   * @param delegate - Message callback function
+   * @param rule     - indicates whether or not the message should be routed.
+   */
+  public RuleDelegateMessageCallback(DeliveryPlan delegate, BooleanRoutingRule rule) {
+    this.delegate = delegate;
+    this.routingRule = rule;
+  }
 
-    /**
-     * Callback calls the delegate if the routing rule allows it
-     *
-     * @param message - message to pass to the delegate callback, if called
-     */
-    public void deliver(Message message) {
-        if (routingRule.decision(message)) {
-            this.delegate.deliver(message);
-        }
+  /**
+   * Callback calls the delegate if the routing rule allows it
+   *
+   * @param message - message to pass to the delegate callback, if called
+   */
+  public void deliver(Message message) {
+    if (routingRule.decision(message)) {
+      this.delegate.deliver(message);
     }
+  }
 
-    public BooleanRoutingRule getRoutingRule() {
-        return routingRule;
-    }
+  public BooleanRoutingRule getRoutingRule() {
+    return routingRule;
+  }
 }

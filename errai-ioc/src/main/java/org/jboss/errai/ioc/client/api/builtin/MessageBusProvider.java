@@ -26,7 +26,7 @@ import javax.inject.Singleton;
 @IOCProvider
 @Singleton
 public class MessageBusProvider implements TypeProvider<MessageBus> {
-    public MessageBus provide() {
-        return ErraiBus.get();
-    }
+  public MessageBus provide() {
+    return ErraiBus.get();
+  }
 }

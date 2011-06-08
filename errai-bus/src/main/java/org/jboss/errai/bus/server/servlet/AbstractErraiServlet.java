@@ -47,176 +47,176 @@ import java.io.OutputStream;
  * bus and the client buses.
  */
 public abstract class AbstractErraiServlet extends HttpServlet {
-    /* New and configured errai service */
-    protected ErraiService<HttpSession> service;
+  /* New and configured errai service */
+  protected ErraiService<HttpSession> service;
 
-    /* A default Http session provider */
-    protected SessionProvider<HttpSession> sessionProvider;
+  /* A default Http session provider */
+  protected SessionProvider<HttpSession> sessionProvider;
 
-    protected volatile ClassLoader contextClassLoader;
+  protected volatile ClassLoader contextClassLoader;
 
-    protected Logger log = LoggerFactory.getLogger(getClass());
+  protected Logger log = LoggerFactory.getLogger(getClass());
 
-    public enum ConnectionPhase {
-        NORMAL, CONNECTING, DISCONNECTING, UNKNOWN
+  public enum ConnectionPhase {
+    NORMAL, CONNECTING, DISCONNECTING, UNKNOWN
+  }
+
+  public static ConnectionPhase getConnectionPhase(HttpServletRequest request) {
+    if (request.getHeader("phase") == null) return ConnectionPhase.NORMAL;
+    else {
+      String phase = request.getHeader("phase");
+      if ("connection".equals(phase)) {
+        return ConnectionPhase.CONNECTING;
+      } else if ("disconnect".equals(phase)) {
+        return ConnectionPhase.DISCONNECTING;
+      }
+
+      return ConnectionPhase.UNKNOWN;
     }
-
-    public static ConnectionPhase getConnectionPhase(HttpServletRequest request) {
-        if (request.getHeader("phase") == null) return ConnectionPhase.NORMAL;
-        else {
-            String phase = request.getHeader("phase");
-            if ("connection".equals(phase)) {
-                return ConnectionPhase.CONNECTING;
-            } else if ("disconnect".equals(phase)) {
-                return ConnectionPhase.DISCONNECTING;
-            }
-
-            return ConnectionPhase.UNKNOWN;
-        }
-    }
+  }
 
 
-    @Override
-    public void init(ServletConfig config) throws ServletException {
+  @Override
+  public void init(ServletConfig config) throws ServletException {
 
-        final ServletContext context = config.getServletContext();
-        service = (ErraiService) context.getAttribute("errai");
-        if (null == service) {
-            synchronized (context) {
-                // Build or lookup service
-                String serviceLocatorClass = config.getInitParameter("service-locator");
-                if (serviceLocatorClass != null) {
-                    // locate externally created service instance, i.e. CDI
-                    try {
-                        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-                        Class<?> aClass = loader.loadClass(serviceLocatorClass);
-                        ServiceLocator locator = (ServiceLocator) aClass.newInstance();
-                        this.service = locator.locateService();
-                    } catch (Exception e) {
-                        throw new RuntimeException("Failed to create service", e);
-                    }
-                } else {
-                    // create a service instance manually
-                    this.service = buildService();
-                }
-
-                contextClassLoader = Thread.currentThread().getContextClassLoader();
-
-                service.getConfiguration().getResourceProviders()
-                        .put("errai.experimental.classLoader", new ResourceProvider<ClassLoader>() {
-                            public ClassLoader get() {
-                                return contextClassLoader;
-                            }
-                        });
-
-                service.getConfiguration().getResourceProviders()
-                        .put("errai.experimental.servletContext", new ResourceProvider<ServletContext>() {
-                            public ServletContext get() {
-                                return context;
-                            }
-                        });
-
-                // store it in servlet context
-                config.getServletContext().setAttribute("errai", service);
-            }
-        }
-
-        sessionProvider = service.getSessionProvider();
-    }
-
-    @SuppressWarnings({"unchecked"})
-    protected ErraiService<HttpSession> buildService() {
-        return (ErraiService<HttpSession>) Guice.createInjector(new AbstractModule() {
-            @SuppressWarnings({"unchecked"})
-            public void configure() {
-                bind(MessageBus.class).to(ServerMessageBusImpl.class);
-                bind(ServerMessageBus.class).to(ServerMessageBusImpl.class);
-                bind(ErraiServiceConfigurator.class).to(ErraiServiceConfiguratorImpl.class);
-                //  bind(new TypeLiteral<ErraiService<HttpSession>>() {}).to(new TypeLiteral<ErraiServiceImpl<HttpSession>>() {});
-                bind(ErraiService.class).to(ErraiServiceImpl.class);
-
-            }
-        }).getInstance(ErraiService.class);
-    }
-
-
-    /**
-     * Writes the message to the output stream
-     *
-     * @param stream - the stream to write to
-     * @param m      - the message to write to the stream
-     * @throws java.io.IOException - is thrown if any input/output errors occur while writing to the stream
-     */
-    public static void writeToOutputStream(OutputStream stream, MarshalledMessage m) throws IOException {
-        stream.write('[');
-
-        if (m.getMessage() == null) {
-            stream.write('n');
-            stream.write('u');
-            stream.write('l');
-            stream.write('l');
+    final ServletContext context = config.getServletContext();
+    service = (ErraiService) context.getAttribute("errai");
+    if (null == service) {
+      synchronized (context) {
+        // Build or lookup service
+        String serviceLocatorClass = config.getInitParameter("service-locator");
+        if (serviceLocatorClass != null) {
+          // locate externally created service instance, i.e. CDI
+          try {
+            ClassLoader loader = Thread.currentThread().getContextClassLoader();
+            Class<?> aClass = loader.loadClass(serviceLocatorClass);
+            ServiceLocator locator = (ServiceLocator) aClass.newInstance();
+            this.service = locator.locateService();
+          } catch (Exception e) {
+            throw new RuntimeException("Failed to create service", e);
+          }
         } else {
-            for (byte b : ((String) m.getMessage()).getBytes()) {
-                stream.write(b);
-            }
+          // create a service instance manually
+          this.service = buildService();
         }
-        stream.write(']');
 
+        contextClassLoader = Thread.currentThread().getContextClassLoader();
+
+        service.getConfiguration().getResourceProviders()
+                .put("errai.experimental.classLoader", new ResourceProvider<ClassLoader>() {
+                  public ClassLoader get() {
+                    return contextClassLoader;
+                  }
+                });
+
+        service.getConfiguration().getResourceProviders()
+                .put("errai.experimental.servletContext", new ResourceProvider<ServletContext>() {
+                  public ServletContext get() {
+                    return context;
+                  }
+                });
+
+        // store it in servlet context
+        config.getServletContext().setAttribute("errai", service);
+      }
     }
 
+    sessionProvider = service.getSessionProvider();
+  }
 
-    protected void writeExceptionToOutputStream(HttpServletResponse httpServletResponse
-            , final
-            Throwable t) throws IOException {
-        httpServletResponse.setHeader("Cache-Control", "no-cache");
-        httpServletResponse.addHeader("Payload-Size", "1");
-        httpServletResponse.setContentType("application/json");
-        OutputStream stream = httpServletResponse.getOutputStream();
+  @SuppressWarnings({"unchecked"})
+  protected ErraiService<HttpSession> buildService() {
+    return (ErraiService<HttpSession>) Guice.createInjector(new AbstractModule() {
+      @SuppressWarnings({"unchecked"})
+      public void configure() {
+        bind(MessageBus.class).to(ServerMessageBusImpl.class);
+        bind(ServerMessageBus.class).to(ServerMessageBusImpl.class);
+        bind(ErraiServiceConfigurator.class).to(ErraiServiceConfiguratorImpl.class);
+        //  bind(new TypeLiteral<ErraiService<HttpSession>>() {}).to(new TypeLiteral<ErraiServiceImpl<HttpSession>>() {});
+        bind(ErraiService.class).to(ErraiServiceImpl.class);
 
-        stream.write('[');
+      }
+    }).getInstance(ErraiService.class);
+  }
 
-        writeToOutputStream(stream, new MarshalledMessage() {
-            public String getSubject() {
-                return "ClientBusErrors";
-            }
 
-            public Object getMessage() {
-                StringBuilder b = new StringBuilder("{ErrorMessage:\"").append(t.getMessage()).append("\",AdditionalDetails:\"");
-                for (StackTraceElement e : t.getStackTrace()) {
-                    b.append(e.toString()).append("<br/>");
-                }
+  /**
+   * Writes the message to the output stream
+   *
+   * @param stream - the stream to write to
+   * @param m      - the message to write to the stream
+   * @throws java.io.IOException - is thrown if any input/output errors occur while writing to the stream
+   */
+  public static void writeToOutputStream(OutputStream stream, MarshalledMessage m) throws IOException {
+    stream.write('[');
 
-                return b.append("\"}").toString();
-            }
-        });
-
-        stream.write(']');
-        stream.close();
+    if (m.getMessage() == null) {
+      stream.write('n');
+      stream.write('u');
+      stream.write('l');
+      stream.write('l');
+    } else {
+      for (byte b : ((String) m.getMessage()).getBytes()) {
+        stream.write(b);
+      }
     }
+    stream.write(']');
 
-    protected void sendDisconnectWithReason(OutputStream stream, final String reason) throws IOException {
-        writeToOutputStream(stream, new MarshalledMessage() {
-            public String getSubject() {
-                return "ClientBus";
-            }
-
-            public Object getMessage() {
-                return reason != null ? "{ToSubject:\"ClientBus\", CommandType:\"" + BusCommands.Disconnect + "\",Reason:\"" + reason + "\"}"
-                        : "{CommandType:\"" + BusCommands.Disconnect + "\"}";
-            }
-        });
-    }
+  }
 
 
-    protected void sendDisconnectDueToSessionExpiry(OutputStream stream) throws IOException {
-        writeToOutputStream(stream, new MarshalledMessage() {
-            public String getSubject() {
-                return "ClientBus";
-            }
+  protected void writeExceptionToOutputStream(HttpServletResponse httpServletResponse
+          , final
+  Throwable t) throws IOException {
+    httpServletResponse.setHeader("Cache-Control", "no-cache");
+    httpServletResponse.addHeader("Payload-Size", "1");
+    httpServletResponse.setContentType("application/json");
+    OutputStream stream = httpServletResponse.getOutputStream();
 
-            public Object getMessage() {
-                return "{ToSubject:\"ClientBus\", CommandType:\"" + BusCommands.SessionExpired + "\"}";
-            }
-        });
-    }
+    stream.write('[');
+
+    writeToOutputStream(stream, new MarshalledMessage() {
+      public String getSubject() {
+        return "ClientBusErrors";
+      }
+
+      public Object getMessage() {
+        StringBuilder b = new StringBuilder("{ErrorMessage:\"").append(t.getMessage()).append("\",AdditionalDetails:\"");
+        for (StackTraceElement e : t.getStackTrace()) {
+          b.append(e.toString()).append("<br/>");
+        }
+
+        return b.append("\"}").toString();
+      }
+    });
+
+    stream.write(']');
+    stream.close();
+  }
+
+  protected void sendDisconnectWithReason(OutputStream stream, final String reason) throws IOException {
+    writeToOutputStream(stream, new MarshalledMessage() {
+      public String getSubject() {
+        return "ClientBus";
+      }
+
+      public Object getMessage() {
+        return reason != null ? "{ToSubject:\"ClientBus\", CommandType:\"" + BusCommands.Disconnect + "\",Reason:\"" + reason + "\"}"
+                : "{CommandType:\"" + BusCommands.Disconnect + "\"}";
+      }
+    });
+  }
+
+
+  protected void sendDisconnectDueToSessionExpiry(OutputStream stream) throws IOException {
+    writeToOutputStream(stream, new MarshalledMessage() {
+      public String getSubject() {
+        return "ClientBus";
+      }
+
+      public Object getMessage() {
+        return "{ToSubject:\"ClientBus\", CommandType:\"" + BusCommands.SessionExpired + "\"}";
+      }
+    });
+  }
 }

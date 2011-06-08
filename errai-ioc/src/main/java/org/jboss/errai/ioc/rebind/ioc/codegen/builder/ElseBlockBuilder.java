@@ -26,11 +26,11 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.BlockBuilder;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface ElseBlockBuilder extends Statement, Builder {
-    BlockBuilder<AbstractStatementBuilder> else_();
+  BlockBuilder<AbstractStatementBuilder> else_();
 
-    BlockBuilder<ElseBlockBuilder> elseif_(Statement lhs);
+  BlockBuilder<ElseBlockBuilder> elseif_(Statement lhs);
 
-    BlockBuilder<ElseBlockBuilder> elseif_(Statement lhs, BooleanOperator op, Statement rhs);
+  BlockBuilder<ElseBlockBuilder> elseif_(Statement lhs, BooleanOperator op, Statement rhs);
 
-    BlockBuilder<ElseBlockBuilder> elseif_(Statement lhs, BooleanOperator op, Object rhs);
+  BlockBuilder<ElseBlockBuilder> elseif_(Statement lhs, BooleanOperator op, Object rhs);
 }

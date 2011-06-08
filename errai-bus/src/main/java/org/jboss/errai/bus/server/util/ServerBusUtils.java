@@ -29,49 +29,49 @@ import java.util.Map;
  * static functions defined throughout the server bus
  */
 public class ServerBusUtils {
-    public static void main(String[] args) {
-        System.out.println("\"".replaceAll("\"", "\\\\\""));
-    }
+  public static void main(String[] args) {
+    System.out.println("\"".replaceAll("\"", "\\\\\""));
+  }
 
-    /**
-     * Decodes the object into a message object
-     *
-     * @param in - the object to decode
-     * @return the <tt>Message</tt> instance
-     */
-    public static Message decodeToCommandMessage(Object in) {
-        return CommandMessage.createWithParts(decodeMap(in));
-    }
+  /**
+   * Decodes the object into a message object
+   *
+   * @param in - the object to decode
+   * @return the <tt>Message</tt> instance
+   */
+  public static Message decodeToCommandMessage(Object in) {
+    return CommandMessage.createWithParts(decodeMap(in));
+  }
 
-    /**
-     * Decodes an object into a map, by determining the string value of the object. The string value of the object
-     * should be in JSON format.
-     *
-     * @param value - the object to be decoded
-     * @return an string->object map representing the object
-     */
-    public static Map<String, Object> decodeMap(Object value) {
-        return MessageFactory.decodeToMap(String.valueOf(value));
-    }
+  /**
+   * Decodes an object into a map, by determining the string value of the object. The string value of the object
+   * should be in JSON format.
+   *
+   * @param value - the object to be decoded
+   * @return an string->object map representing the object
+   */
+  public static Map<String, Object> decodeMap(Object value) {
+    return MessageFactory.decodeToMap(String.valueOf(value));
+  }
 
-    /**
-     * Encodes a given object into a JSON string
-     *
-     * @param value - the object to be encoded
-     * @return a JSON string representing the object given
-     */
-    public static String encodeJSON(Object value) {
-        return JSONEncoder.encode(value);
-    }
+  /**
+   * Encodes a given object into a JSON string
+   *
+   * @param value - the object to be encoded
+   * @return a JSON string representing the object given
+   */
+  public static String encodeJSON(Object value) {
+    return JSONEncoder.encode(value);
+  }
 
-    /**
-     * Extracts the String-based SessionID which is used to identify the message queue associated with any particular
-     * client. You may use this method to extract the SessionID from a message so that you may use it for routing.
-     *
-     * @param message - the message to get the session id of
-     * @return the string representation of the session id
-     */
-    public static String getSessionId(Message message) {
-        return message.getResource(QueueSession.class, "Session").getSessionId();
-    }
+  /**
+   * Extracts the String-based SessionID which is used to identify the message queue associated with any particular
+   * client. You may use this method to extract the SessionID from a message so that you may use it for routing.
+   *
+   * @param message - the message to get the session id of
+   * @return the string representation of the session id
+   */
+  public static String getSessionId(Message message) {
+    return message.getResource(QueueSession.class, "Session").getSessionId();
+  }
 }

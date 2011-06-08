@@ -34,51 +34,51 @@ import java.util.List;
 
 @EntryPoint
 public class Serialization {
-    @Inject
-    private RequestDispatcher dispatcher;
+  @Inject
+  private RequestDispatcher dispatcher;
 
-    private final FlexTable table = new FlexTable();
+  private final FlexTable table = new FlexTable();
 
-    @Service("ClientEndpoint")
-    public final MessageCallback clientEndpoint = new MessageCallback() {
-        public void callback(Message message) {
-            List<Record> records = message.get(List.class, "Records");
+  @Service("ClientEndpoint")
+  public final MessageCallback clientEndpoint = new MessageCallback() {
+    public void callback(Message message) {
+      List<Record> records = message.get(List.class, "Records");
 
-            int row = 0;
-            for (Record r : records) {
-                table.setWidget(row, 0, new HTML(String.valueOf(r.getRecordId())));
-                table.setWidget(row, 1, new HTML(r.getName()));
-                table.setWidget(row, 2, new HTML(String.valueOf(r.getBalance())));
-                table.setWidget(row, 3, new HTML(r.getAccountOpened().toString()));
-                table.setWidget(row, 4, new HTML(String.valueOf(r.getStuff())));
-                row++;
-            }
+      int row = 0;
+      for (Record r : records) {
+        table.setWidget(row, 0, new HTML(String.valueOf(r.getRecordId())));
+        table.setWidget(row, 1, new HTML(r.getName()));
+        table.setWidget(row, 2, new HTML(String.valueOf(r.getBalance())));
+        table.setWidget(row, 3, new HTML(r.getAccountOpened().toString()));
+        table.setWidget(row, 4, new HTML(String.valueOf(r.getStuff())));
+        row++;
+      }
 
-            try {
-                MessageBuilder.createMessage().toSubject("ObjectService")
-                        .with("Recs", records)
-                        .noErrorHandling().sendNowWith(dispatcher);
-            } catch (Throwable e) {
-                e.printStackTrace();
-            }
-        }
-    };
-
-    @PostConstruct
-    public void init() {
-        VerticalPanel p = new VerticalPanel();
-
-        Button button = new Button("Load Objects", new ClickHandler() {
-            public void onClick(ClickEvent clickEvent) {
-                MessageBuilder.createMessage()
-                        .toSubject("ObjectService")
-                        .with(MessageParts.ReplyTo, "ClientEndpoint")
-                        .done().sendNowWith(dispatcher);
-            }
-        });
-
-        p.add(table);
-        p.add(button);
-        RootPanel.get().add(p);
+      try {
+        MessageBuilder.createMessage().toSubject("ObjectService")
+                .with("Recs", records)
+                .noErrorHandling().sendNowWith(dispatcher);
+      } catch (Throwable e) {
+        e.printStackTrace();
+      }
     }
+  };
+
+  @PostConstruct
+  public void init() {
+    VerticalPanel p = new VerticalPanel();
+
+    Button button = new Button("Load Objects", new ClickHandler() {
+      public void onClick(ClickEvent clickEvent) {
+        MessageBuilder.createMessage()
+                .toSubject("ObjectService")
+                .with(MessageParts.ReplyTo, "ClientEndpoint")
+                .done().sendNowWith(dispatcher);
+      }
+    });
+
+    p.add(table);
+    p.add(button);
+    RootPanel.get().add(p);
+  }
 }

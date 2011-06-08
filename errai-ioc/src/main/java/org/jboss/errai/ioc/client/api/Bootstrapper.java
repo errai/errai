@@ -19,5 +19,5 @@ package org.jboss.errai.ioc.client.api;
 import org.jboss.errai.ioc.client.InterfaceInjectionContext;
 
 public interface Bootstrapper {
-    public InterfaceInjectionContext bootstrapContainer();
+  public InterfaceInjectionContext bootstrapContainer();
 }

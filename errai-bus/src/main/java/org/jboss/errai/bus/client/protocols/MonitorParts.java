@@ -17,6 +17,6 @@
 package org.jboss.errai.bus.client.protocols;
 
 public enum MonitorParts {
-    Time,
-    MessageContent
+  Time,
+  MessageContent
 }

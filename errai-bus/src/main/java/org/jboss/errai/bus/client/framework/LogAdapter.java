@@ -22,11 +22,11 @@ package org.jboss.errai.bus.client.framework;
  * @date: Mar 17, 2010
  */
 public interface LogAdapter {
-    void warn(String message);
+  void warn(String message);
 
-    void info(String message);
+  void info(String message);
 
-    void debug(String message);
+  void debug(String message);
 
-    void error(String message, Throwable t);
+  void error(String message, Throwable t);
 }

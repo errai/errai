@@ -28,41 +28,41 @@ import java.util.List;
  * Messages are always transmitted in the order the arrive for transmission.
  */
 public class Payload {
-    private List<MarshalledMessage> messages = new LinkedList<MarshalledMessage>();
+  private List<MarshalledMessage> messages = new LinkedList<MarshalledMessage>();
 
-    /**
-     * Creates a new <tt>Payload</tt> with a single initial {@link MarshalledMessage}.
-     *
-     * @param m a message
-     */
-    public Payload(MarshalledMessage m) {
-        messages.add(m);
-    }
+  /**
+   * Creates a new <tt>Payload</tt> with a single initial {@link MarshalledMessage}.
+   *
+   * @param m a message
+   */
+  public Payload(MarshalledMessage m) {
+    messages.add(m);
+  }
 
-    /**
-     * Adds a new message to the <tt>Payload</tt>.
-     *
-     * @param m a marshalled message.
-     */
-    public void addMessage(MarshalledMessage m) {
-        messages.add(m);
-    }
+  /**
+   * Adds a new message to the <tt>Payload</tt>.
+   *
+   * @param m a marshalled message.
+   */
+  public void addMessage(MarshalledMessage m) {
+    messages.add(m);
+  }
 
-    /**
-     * Return all messages within the <tt>Payload</tt>
-     *
-     * @return a list of all messages in the payload.
-     */
-    public List<MarshalledMessage> getMessages() {
-        return messages;
-    }
+  /**
+   * Return all messages within the <tt>Payload</tt>
+   *
+   * @return a list of all messages in the payload.
+   */
+  public List<MarshalledMessage> getMessages() {
+    return messages;
+  }
 
-    /**
-     * Returns true if there are any messages waiting to be transmitted
-     *
-     * @return true if there are messages waiting
-     */
-    public boolean waitingMessages() {
-        return messages.size() > 1 || !messages.get(0).getSubject().equals("HeartBeat");
-    }
+  /**
+   * Returns true if there are any messages waiting to be transmitted
+   *
+   * @return true if there are messages waiting
+   */
+  public boolean waitingMessages() {
+    return messages.size() > 1 || !messages.get(0).getSubject().equals("HeartBeat");
+  }
 }

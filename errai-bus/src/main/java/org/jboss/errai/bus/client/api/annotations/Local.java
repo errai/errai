@@ -10,7 +10,7 @@ import java.lang.annotation.RetentionPolicy;
  * be visible locally. If @Local is used on the client, then the service is only visible to other
  * client components. If @Local is used on the server, then the service is only visible to other
  * server components.</p>
- *
+ * <p/>
  * Note: Errai extensions that build on top of the bus and extend it's functionality should make
  * their best efforts to integrate this annotation and it's intended behaviour.</p>
  *

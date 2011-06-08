@@ -41,154 +41,151 @@ import java.util.Set;
  * property-file based authentication system and is still primarily for prototyping purposes.
  */
 public class JAASAdapter implements AuthenticationAdapter {
+  /**
+   * A simple token to add to a session to indicate successful authorization.
+   */
+
+
+  private MessageBus bus;
+
+  @Inject
+  public JAASAdapter(MessageBus bus) {
     /**
-     * A simple token to add to a session to indicate successful authorization.
+     * Try and find the default login.config file.
      */
-
-
-    private MessageBus bus;
-
-    @Inject
-    public JAASAdapter(MessageBus bus) {
-        /**
-         * Try and find the default login.config file.
-         */
-        URL url = Thread.currentThread().getContextClassLoader().getResource("login.config");
-        if (url == null) throw new RuntimeException("cannot find login.config file");
-
-        /**
-         * Override the JAAS configuration to point to our login config. Yes, this is really bad, and
-         * is for demonstration purposes only.  This will need to be removed at a later point.
-         */
-        System.setProperty("java.security.auth.login.config", url.toString());
-
-        this.bus = bus;
-    }
+    URL url = Thread.currentThread().getContextClassLoader().getResource("login.config");
+    if (url == null) throw new RuntimeException("cannot find login.config file");
 
     /**
-     * Send a challenge to the authentication system.
-     *
-     * @param message
+     * Override the JAAS configuration to point to our login config. Yes, this is really bad, and
+     * is for demonstration purposes only.  This will need to be removed at a later point.
      */
-    public void challenge(final Message message) {
-        final String name = message.get(String.class, SecurityParts.Name);
-        final String password = message.get(String.class, SecurityParts.Password);
-        try {
-            CallbackHandler callbackHandler = new CallbackHandler() {
-                public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
-                    for (Callback cb : callbacks) {
-                        if (password != null && cb instanceof PasswordCallback) {
-                            ((PasswordCallback) cb).setPassword(password.toCharArray());
-                        } else if (name != null && cb instanceof NameCallback) {
-                            ((NameCallback) cb).setName(name);
-                        }
-                    }
-                }
-            };
+    System.setProperty("java.security.auth.login.config", url.toString());
 
-            /**
-             * Load the default Login context.
-             */
-            LoginContext loginContext = new LoginContext("Login", callbackHandler);
+    this.bus = bus;
+  }
 
-            /**
-             * Attempt to login.
-             */
-            loginContext.login();
-
-            AuthSubject authSubject = new AuthSubject(name, name, (Set) loginContext.getSubject().getPrincipals());
-
-            /**
-             * If we got this far, then the authentication succeeded. So grab access to the Session and
-             * add the authorization token.
-             */
-            addAuthenticationToken(message, authSubject);
-
-            /**
-             * Prepare to send a message back to the client, informing it that a successful login has
-             * been performed.
-             */
-            Message successfulMsg = MessageBuilder.createConversation(message)
-                    .subjectProvided()
-                    .command(SecurityCommands.SuccessfulAuth)
-                    .with(SecurityParts.Roles, authSubject.toRolesString())
-                    .with(SecurityParts.Name, name).getMessage();
-
-            try {
-                // TODO: Still used? Take a look at MetaDataScanner.getProperties() instead
-                ResourceBundle bundle = ResourceBundle.getBundle("errai");
-                String motdText = bundle.getString("errai.login_motd");
-
-                /**
-                 * If the MOTD is configured, then add it to the message.
-                 */
-                if (motdText != null) {
-                    successfulMsg.set(MessageParts.MessageText, motdText);
-                }
+  /**
+   * Send a challenge to the authentication system.
+   *
+   * @param message
+   */
+  public void challenge(final Message message) {
+    final String name = message.get(String.class, SecurityParts.Name);
+    final String password = message.get(String.class, SecurityParts.Password);
+    try {
+      CallbackHandler callbackHandler = new CallbackHandler() {
+        public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
+          for (Callback cb : callbacks) {
+            if (password != null && cb instanceof PasswordCallback) {
+              ((PasswordCallback) cb).setPassword(password.toCharArray());
+            } else if (name != null && cb instanceof NameCallback) {
+              ((NameCallback) cb).setName(name);
             }
-            catch (Exception e) {
-                // do nothing.
-            }
-
-            /**
-             * Transmit the message back to the client.
-             */
-            successfulMsg.sendNowWith(bus);
+          }
         }
-        catch (LoginException e) {
-            /**
-             * The login failed. How upsetting. Life must go on, and we must inform the client of the
-             * unfortunate news.
-             */
-            MessageBuilder.createConversation(message)
-                    .subjectProvided()
-                    .command(SecurityCommands.FailedAuth)
-                    .with(SecurityParts.Name, name)
-                    .noErrorHandling().sendNowWith(bus);
+      };
 
-            throw new AuthenticationFailedException(e.getMessage(), e);
+      /**
+       * Load the default Login context.
+       */
+      LoginContext loginContext = new LoginContext("Login", callbackHandler);
+
+      /**
+       * Attempt to login.
+       */
+      loginContext.login();
+
+      AuthSubject authSubject = new AuthSubject(name, name, (Set) loginContext.getSubject().getPrincipals());
+
+      /**
+       * If we got this far, then the authentication succeeded. So grab access to the Session and
+       * add the authorization token.
+       */
+      addAuthenticationToken(message, authSubject);
+
+      /**
+       * Prepare to send a message back to the client, informing it that a successful login has
+       * been performed.
+       */
+      Message successfulMsg = MessageBuilder.createConversation(message)
+              .subjectProvided()
+              .command(SecurityCommands.SuccessfulAuth)
+              .with(SecurityParts.Roles, authSubject.toRolesString())
+              .with(SecurityParts.Name, name).getMessage();
+
+      try {
+        // TODO: Still used? Take a look at MetaDataScanner.getProperties() instead
+        ResourceBundle bundle = ResourceBundle.getBundle("errai");
+        String motdText = bundle.getString("errai.login_motd");
+
+        /**
+         * If the MOTD is configured, then add it to the message.
+         */
+        if (motdText != null) {
+          successfulMsg.set(MessageParts.MessageText, motdText);
         }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
+      } catch (Exception e) {
+        // do nothing.
+      }
+
+      /**
+       * Transmit the message back to the client.
+       */
+      successfulMsg.sendNowWith(bus);
+    } catch (LoginException e) {
+      /**
+       * The login failed. How upsetting. Life must go on, and we must inform the client of the
+       * unfortunate news.
+       */
+      MessageBuilder.createConversation(message)
+              .subjectProvided()
+              .command(SecurityCommands.FailedAuth)
+              .with(SecurityParts.Name, name)
+              .noErrorHandling().sendNowWith(bus);
+
+      throw new AuthenticationFailedException(e.getMessage(), e);
+    } catch (Exception e) {
+      e.printStackTrace();
     }
+  }
 
-    private void addAuthenticationToken(Message message, AuthSubject loginSubject) {
-        QueueSession session = message.getResource(QueueSession.class, "Session");
-        session.setAttribute(ErraiService.SESSION_AUTH_DATA, loginSubject);
+  private void addAuthenticationToken(Message message, AuthSubject loginSubject) {
+    QueueSession session = message.getResource(QueueSession.class, "Session");
+    session.setAttribute(ErraiService.SESSION_AUTH_DATA, loginSubject);
+  }
+
+  public boolean isAuthenticated(Message message) {
+    QueueSession session = message.getResource(QueueSession.class, "Session");
+    return session != null && session.hasAttribute(ErraiService.SESSION_AUTH_DATA);
+  }
+
+  public boolean endSession(Message message) {
+    boolean sessionEnded = isAuthenticated(message);
+    if (sessionEnded) {
+      getAuthDescriptor(message).remove(new SimpleRole(CredentialTypes.Authenticated.name()));
+      message.getResource(QueueSession.class, "Session").removeAttribute(ErraiService.SESSION_AUTH_DATA);
+      return true;
+    } else {
+      return false;
     }
+  }
 
-    public boolean isAuthenticated(Message message) {
-        QueueSession session = message.getResource(QueueSession.class, "Session");
-        return session != null && session.hasAttribute(ErraiService.SESSION_AUTH_DATA);
+  private Set getAuthDescriptor(Message message) {
+    Set credentials = message.get(Set.class, SecurityParts.Credentials);
+    if (credentials == null) {
+      message.set(SecurityParts.Credentials, credentials = new HashSet());
     }
+    return credentials;
+  }
 
-    public boolean endSession(Message message) {
-        boolean sessionEnded = isAuthenticated(message);
-        if (sessionEnded) {
-            getAuthDescriptor(message).remove(new SimpleRole(CredentialTypes.Authenticated.name()));
-            message.getResource(QueueSession.class, "Session").removeAttribute(ErraiService.SESSION_AUTH_DATA);
-            return true;
-        } else {
-            return false;
-        }
+
+  public void process(Message message) {
+    if (isAuthenticated(message)) {
+      //   getAuthDescriptor(message).add(new SimpleRole(CredentialTypes.Authenticated.name()));
+
     }
-
-    private Set getAuthDescriptor(Message message) {
-        Set credentials = message.get(Set.class, SecurityParts.Credentials);
-        if (credentials == null) {
-            message.set(SecurityParts.Credentials, credentials = new HashSet());
-        }
-        return credentials;
-    }
-
-
-    public void process(Message message) {
-        if (isAuthenticated(message)) {
-            //   getAuthDescriptor(message).add(new SimpleRole(CredentialTypes.Authenticated.name()));
-
-        }
-    }
+  }
 
 
 }

@@ -20,10 +20,10 @@
              xmlns:widgets='urn:import:org.jboss.errai.widgets.client'>
     <gwt:VerticalPanel>
         <gwt:HorizontalPanel>
-            <gwt:Label text="Query" />
-            <gwt:TextBox ui:field="queryBox" />
-            <gwt:Button ui:field="sendQuery" text="Submit" />
+            <gwt:Label text="Query"/>
+            <gwt:TextBox ui:field="queryBox"/>
+            <gwt:Button ui:field="sendQuery" text="Submit"/>
         </gwt:HorizontalPanel>
-        <gwt:HTML ui:field="results" />
+        <gwt:HTML ui:field="results"/>
     </gwt:VerticalPanel>
 </ui:UiBinder>

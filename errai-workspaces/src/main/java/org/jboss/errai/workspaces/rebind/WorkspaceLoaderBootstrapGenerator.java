@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 JBoss, a divison Red Hat, Inc
+ * Copyright 2011 JBoss, a divison Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.jboss.errai.bus.rebind.ScannerSingleton;
 import org.jboss.errai.bus.server.annotations.security.RequireRoles;
 import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
 import org.jboss.errai.ioc.rebind.IOCGenerator;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.workspaces.client.api.ProvisioningCallback;
 import org.jboss.errai.workspaces.client.api.WidgetProvider;
 import org.jboss.errai.workspaces.client.api.annotations.GroupOrder;
@@ -194,7 +195,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
     Set<Class<?>> toolsets = scanner.getTypesAnnotatedWith(LoadToolSet.class);
     for(Class<?> toolSetClass : toolsets)
     {
-      JClassType clazz = typeOracle.findType(toolSetClass.getName());
+      MetaClass clazz = typeOracle.findType(toolSetClass.getName());
 
       if ((!applyFilter || enabledTools.contains(clazz.getQualifiedSourceName())))
       {
@@ -211,7 +212,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
     Set<Class<?>> tools = scanner.getTypesAnnotatedWith(LoadTool.class);
     for(Class<?> toolClass : tools)
     {
-      JClassType clazz = typeOracle.findType(toolClass.getName());
+      MetaClass clazz = typeOracle.findType(toolClass.getName());
 
       if ((!applyFilter || enabledTools.contains(clazz.getQualifiedSourceName())))
       {
@@ -279,7 +280,7 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
   }
   
   public void generateWidgetProvisioning(final GeneratorContext context, String className, final LoadTool loadTool, final StringBuilder rolesBuilder, final TreeLogger logger, final SourceWriter writer) {
-    JClassType type;
+    MetaClass type;
     JClassType widgetType;
     try {
       type = typeOracle.getType(className);

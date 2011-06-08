@@ -22,20 +22,17 @@ import com.sun.japex.TestCase;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Jun 16, 2010
  */
-public class PerformanceSimpleType extends JapexDriverBase
-{
+public class PerformanceSimpleType extends JapexDriverBase {
   private CommonTestSetup testEnv;
   private String payload;
 
   @Override
-  public void initializeDriver()
-  {
+  public void initializeDriver() {
     testEnv = new CommonTestSetup();
   }
 
   @Override
-  public void run(TestCase testCase)
-  {
-    String clone = (String)testEnv.getBeanManager().clone(payload);
+  public void run(TestCase testCase) {
+    String clone = (String) testEnv.getBeanManager().clone(payload);
   }
 }
