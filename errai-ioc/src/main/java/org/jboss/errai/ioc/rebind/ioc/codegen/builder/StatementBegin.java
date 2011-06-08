@@ -16,17 +16,16 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
+import javax.enterprise.util.TypeLiteral;
+
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java.JavaReflectionClass;
-
-import javax.enterprise.util.TypeLiteral;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public interface StatementBegin {
+public interface StatementBegin extends ArrayBuilder {
 
     public StatementBuilder addVariable(String name, Class<?> type);
 
@@ -48,19 +47,5 @@ public interface StatementBegin {
 
     public ObjectBuilder newObject(MetaClass type);
 
-    public ObjectBuilder newObject(JavaReflectionClass type);
-
     public ObjectBuilder newObject(Class<?> type);
-    
-    public ArrayBuilder newArray(MetaClass type);
-
-    public ArrayBuilder newArray(JavaReflectionClass type);
-
-    public ArrayBuilder newArray(Class<?> type);
-    
-    public ArrayBuilder newArray(MetaClass type, int length);
-
-    public ArrayBuilder newArray(JavaReflectionClass type, int length);
-
-    public ArrayBuilder newArray(Class<?> type, int length);   
 }
