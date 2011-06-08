@@ -44,13 +44,13 @@ public class AssignmentBuilder implements Statement {
     operator.assertCanBeApplied(reference.getType());
     operator.assertCanBeApplied(statement.getType());
 
-    return reference.getName() + generateIndexes() + 
-      " " + operator.getCanonicalString() + " " + statement.generate(Context.create());
+    return reference.getName() + generateIndexes() +
+        " " + operator.getCanonicalString() + " " + statement.generate(Context.create());
   }
 
   private String generateIndexes() {
     if (indexes == null || indexes.length == 0) return "";
-      
+
     if (!reference.getType().isArray())
       throw new InvalidTypeException("Variable is not an array!");
 
@@ -60,7 +60,7 @@ public class AssignmentBuilder implements Statement {
     }
     return buf.toString();
   }
-  
+
   public MetaClass getType() {
     return reference.getType();
   }

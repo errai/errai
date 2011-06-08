@@ -25,6 +25,9 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ArrayInitializationBuilder
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * StatementBuilder to create and initialize Arrays.
@@ -57,6 +60,7 @@ public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayB
   private void generateArrayInstance() {
     buf.append("new ").append(componentType.getFullyQualifedName());
   }
+
 
   public AbstractStatementBuilder initialize(Object... values) {
     generateArrayInstance();

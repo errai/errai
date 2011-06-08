@@ -37,14 +37,14 @@ public class AssignVariable extends AbstractCallElement {
     this.value = value;
     this.indexes = indexes;
   }
-  
+
   public void handleCall(CallWriter writer, Context context, Statement statement) {
     Statement[] indexes = new Statement[this.indexes.length];
-    for (int i=0; i<indexes.length; i++) {
+    for (int i = 0; i < indexes.length; i++) {
       indexes[i] = GenUtil.generate(context, this.indexes[i]);
       indexes[i] = GenUtil.convert(context, indexes[i], MetaClassFactory.get(Integer.class));
     }
-    
+
     writer.reset();
     Statement s = new AssignmentBuilder(operator, (VariableReference) statement, GenUtil.generate(context, value), indexes);
     nextOrReturn(writer, context, s);

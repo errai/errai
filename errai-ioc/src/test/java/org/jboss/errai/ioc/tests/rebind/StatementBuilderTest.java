@@ -192,8 +192,8 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
         .toJavaString();
 
     assertEquals("Failed to generate two dimensional array using statements",
-            "new java.lang.String[][]{{java.lang.Integer.toString(1),java.lang.Integer.toString(2)}," +
-                "{java.lang.Integer.toString(3),java.lang.Integer.toString(4)}}", s);
+        "new java.lang.String[][]{{java.lang.Integer.toString(1),java.lang.Integer.toString(2)}," +
+            "{java.lang.Integer.toString(3),java.lang.Integer.toString(4)}}", s);
 
     s = StatementBuilder.create().newArray(String.class)
         .initialize(new Object[][]{
@@ -240,10 +240,11 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
           .assignArrayValue("test", 1, 2)
           .toJavaString();
       fail("Expected InvalidTypeExcpetion");
-    } catch(InvalidTypeException ite) {
+    }
+    catch (InvalidTypeException ite) {
       //Expected, variable is not an array.
     }
-    
+
     try {
       StatementBuilder.create()
           .addVariable("twoDimArray", String[][].class)
@@ -253,7 +254,8 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
           .assignArrayValue("test", Variable.get("i"), Variable.get("j"))
           .toJavaString();
       fail("Expected InvalidTypeExcpetion");
-    } catch(InvalidTypeException ite) {
+    }
+    catch (InvalidTypeException ite) {
       //Expected, indexes are no integers
     }
   }
