@@ -32,6 +32,7 @@ import org.jboss.errai.bus.rebind.ScannerSingleton;
 import org.jboss.errai.bus.server.annotations.security.RequireRoles;
 import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
 import org.jboss.errai.ioc.rebind.IOCGenerator;
+import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.workspaces.client.api.ProvisioningCallback;
 import org.jboss.errai.workspaces.client.api.WidgetProvider;
@@ -194,13 +195,13 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
      */
     Set<Class<?>> toolsets = scanner.getTypesAnnotatedWith(LoadToolSet.class);
     for (Class<?> toolSetClass : toolsets) {
-      MetaClass clazz = typeOracle.findType(toolSetClass.getName());
+      MetaClass clazz = MetaClassFactory.get(typeOracle, toolSetClass);
 
-      if ((!applyFilter || enabledTools.contains(clazz.getQualifiedSourceName()))) {
+      if ((!applyFilter || enabledTools.contains(clazz.getFullyQualifedName()))) {
         iocGenerator.addType(clazz);
         String instance = iocGenerator.generateInjectors(clazz);
         sourceWriter.println("workspace.addToolSet(" + instance + ");");
-        logger.log(TreeLogger.Type.INFO, "Adding Errai Toolset: " + clazz.getQualifiedSourceName());
+        logger.log(TreeLogger.Type.INFO, "Adding Errai Toolset: " + clazz.getFullyQualifedName());
       }
     }
 
@@ -209,14 +210,14 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
      */
     Set<Class<?>> tools = scanner.getTypesAnnotatedWith(LoadTool.class);
     for (Class<?> toolClass : tools) {
-      MetaClass clazz = typeOracle.findType(toolClass.getName());
+      MetaClass clazz = MetaClassFactory.get(typeOracle, toolClass);
 
-      if ((!applyFilter || enabledTools.contains(clazz.getQualifiedSourceName()))) {
+      if ((!applyFilter || enabledTools.contains(clazz.getFullyQualifedName()))) {
 
         iocGenerator.addType(clazz);
         LoadTool loadTool = clazz.getAnnotation(LoadTool.class);
 
-        logger.log(TreeLogger.Type.INFO, "Adding Errai Tool: " + clazz.getQualifiedSourceName());
+        logger.log(TreeLogger.Type.INFO, "Adding Errai Tool: " + clazz.getFullyQualifedName());
 
         if (clazz.isAnnotationPresent(RequireRoles.class)) {
           RequireRoles requireRoles = clazz.getAnnotation(RequireRoles.class);
@@ -230,16 +231,16 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
           }
           rolesBuilder.append("}");
 
-          generateWidgetProvisioning(context, clazz.getQualifiedSourceName(), loadTool, rolesBuilder, logger, sourceWriter);
+          generateWidgetProvisioning(context, clazz.getFullyQualifedName(), loadTool, rolesBuilder, logger, sourceWriter);
 
         }
         else {
-          generateWidgetProvisioning(context, clazz.getQualifiedSourceName(), loadTool, null, logger, sourceWriter);
+          generateWidgetProvisioning(context, clazz.getFullyQualifedName(), loadTool, null, logger, sourceWriter);
 
         }
       }
       else if (clazz.isAnnotationPresent(LoginComponent.class)) {
-        sourceWriter.println("workspace.setLoginComponent(new " + clazz.getQualifiedSourceName() + "());");
+        sourceWriter.println("workspace.setLoginComponent(new " + clazz.getFullyQualifedName() + "());");
       }
     }
 
@@ -276,13 +277,12 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
 
   public void generateWidgetProvisioning(final GeneratorContext context, String className, final LoadTool loadTool, final StringBuilder rolesBuilder, final TreeLogger logger, final SourceWriter writer) {
     MetaClass type;
-    JClassType widgetType;
-    try {
-      type = typeOracle.getType(className);
-      widgetType = typeOracle.getType(Widget.class.getName());
-    }
-    catch (NotFoundException e) {
-      throw new RuntimeException("error bootstrapping: " + className, e);
+    MetaClass widgetType;
+    type = MetaClassFactory.get(typeOracle, className);
+    widgetType = MetaClassFactory.get(typeOracle, Widget.class);
+
+    if (widgetType == null) {
+      throw new RuntimeException("error bootstrapping: " + className);
     }
 
     String providerName;
