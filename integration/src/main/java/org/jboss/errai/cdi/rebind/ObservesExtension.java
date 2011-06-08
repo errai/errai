@@ -57,7 +57,7 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
         final MetaMethod method = injectionPoint.getMethod();
         final MetaParameter parm = injectionPoint.getParm();
 
-        String parmClassName = parm.getType().getQualifiedSourceName();
+        String parmClassName = parm.getType().getFullyQualifedName();
         String varName = injectionPoint.getInjector().getVarName();
         
         // Get an instance of the message bus.

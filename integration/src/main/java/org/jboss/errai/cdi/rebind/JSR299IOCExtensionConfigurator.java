@@ -6,6 +6,7 @@ import org.jboss.errai.ioc.client.api.IOCExtension;
 import org.jboss.errai.ioc.rebind.AnnotationHandler;
 import org.jboss.errai.ioc.rebind.ProcessorFactory;
 import org.jboss.errai.ioc.rebind.ioc.*;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 import javax.enterprise.context.ApplicationScoped;
 
@@ -14,7 +15,7 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
     public void configure(final ProcessingContext context, final InjectorFactory injectorFactory, final ProcessorFactory procFactory) {
 
         procFactory.registerHandler(ApplicationScoped.class, new AnnotationHandler<ApplicationScoped>() {
-            public void handle(JClassType type, ApplicationScoped annotation, ProcessingContext context) {
+            public void handle(MetaClass type, ApplicationScoped annotation, ProcessingContext context) {
                 InjectionContext injectionContext = injectorFactory.getInjectionContext();
                 TypeInjector i = (TypeInjector) injectionContext.getInjector(type);
 

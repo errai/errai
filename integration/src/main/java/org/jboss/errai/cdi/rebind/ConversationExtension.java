@@ -24,8 +24,11 @@ import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.InjectionPoint;
+import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameterizedType;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaType;
 
 /**
  * @author Heiko Braun <hbraun@redhat.com>
@@ -40,25 +43,25 @@ public class ConversationExtension extends IOCDecoratorExtension<ConversationCon
     public String generateDecorator(InjectionPoint<ConversationContext> injectionPoint) {
         final InjectionContext ctx = injectionPoint.getInjectionContext();
 
-        final MetaClass eventClassType = injectionPoint.getInjectionContext()
-                .getProcessingContext().loadClassType(Event.class);
+        final MetaClass eventClassType = MetaClassFactory.get(injectionPoint.getInjectionContext()
+            .getProcessingContext().loadClassType(Event.class));
 
         final MetaField field = injectionPoint.getField();
 
-        if (!eventClassType.isAssignableFrom(field.getType().isClassOrInterface())) {
+        if (!eventClassType.isAssignableFrom(field.getType())) {
             throw new RuntimeException("@ConversationContext should be used with type Event");
         }
 
         final ConversationContext context = field.getAnnotation(ConversationContext.class);
 
-        JParameterizedType type = field.getType().isParameterized();
+        MetaParameterizedType type = field.getType().getParameterizedType();
         if (type == null) {
             throw new RuntimeException("Event<?> must be parameterized");
         }
 
-        JClassType typeParm = type.getTypeArgs()[0];
+        MetaClass typeParm = (MetaClass) type.getTypeParameters()[0];
 
-        String toSubject = CDI.getSubjectNameByType(typeParm.getQualifiedSourceName());
+        String toSubject = CDI.getSubjectNameByType(typeParm.getFullyQualifedName());
 
         String expression = injectionPoint.getValueExpression()
                 + ".registerConversation(" + CDI.class.getName() + ".createConversation(\"" + toSubject + "\"));";
