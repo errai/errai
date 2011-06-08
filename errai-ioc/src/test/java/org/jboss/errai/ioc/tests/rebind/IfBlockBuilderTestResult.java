@@ -31,11 +31,11 @@ public interface IfBlockBuilderTestResult {
           "if (str instanceof java.lang.String) { }\n";
 
   public static final String IF_ELSE_BLOCK_RESULT_NO_RHS =
-          "   if (str.endsWith(\"abc\")) { " +
-              " java.lang.Integer n = 0;\n" +
-              "} else {" +
-              " \njava.lang.Integer n = 1;\n" +
-              "}\n";
+        "   if (str.endsWith(\"abc\")) { " +
+            " java.lang.Integer n = 0;\n" +
+            "} else {" +
+            " \njava.lang.Integer n = 1;\n" +
+            "}\n";
 
   public static final String IF_ELSE_BLOCK_RESULT_RHS =
           "   if (n > m) { " +
