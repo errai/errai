@@ -18,7 +18,9 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
 import java.lang.reflect.Array;
 
+import net.sourceforge.htmlunit.corejs.javascript.tools.debugger.Dim;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.GenUtil;
 import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
@@ -32,12 +34,14 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayBuilder, ArrayInitializationBuilder {
-  StringBuilder buf = new StringBuilder();
 
   private MetaClass type;
   private MetaClass componentType;
   private Integer[] dimensions;
   private boolean initialized;
+
+  private int dim;
+  private Object[] values = new Object[0];
 
   protected ArrayBuilderImpl(Context context, CallElementBuilder callElementBuilder) {
     super(context, callElementBuilder);
@@ -54,49 +58,20 @@ public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayB
     return this;
   }
 
-  private void generateArrayInstance() {
-    buf.append("new ").append(componentType.getFullyQualifedName());
-  }
-
   public AbstractStatementBuilder initialize(Object... values) {
-    generateArrayInstance();
-
-    boolean initializeFromArray = false;
-    int dim = 1;
-    if (values.length == 1 && values[0].getClass().isArray()) {
-      dim = 0;
-      initializeFromArray = true;
-      Class<?> type = values[0].getClass();
-      while (type.isArray()) {
-        dim++;
-        type = type.getComponentType();
-      }
-    }
-
-    for (int i = 0; i < dim; i++) {
-      buf.append("[]");
-    }
-
-    buf.append(" ");
-
-    if (initializeFromArray) {
-      generateInitialization(values[0]);
-    }
-    else {
-      generateInitialization(values);
-    }
+    this.values = values;
 
     initialized = true;
     return this;
   }
 
-  private void generateInitialization(Object values) {
+  private void generateInitialization(StringBuilder buf, Object values) {
     buf.append("{");
     int length = Array.getLength(values);
     for (int i = 0; i < length; i++) {
       Object element = Array.get(values, i);
       if (element.getClass().isArray()) {
-        generateInitialization(element);
+        generateInitialization(buf, element);
       }
       else {
         Statement statement = GenUtil.generate(context, element);
@@ -116,9 +91,41 @@ public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayB
   }
 
   public String generate(Context context) {
-    if (!initialized) {
-      generateArrayInstance();
+    StringBuilder buf = new StringBuilder();
 
+    buf.append("new ").append(LoadClassReference.getClassReference(componentType, context));
+
+    boolean initializeFromArray = false;
+    if (values.length == 1 && values[0].getClass().isArray()) {
+      initializeFromArray = true;
+      Class<?> type = values[0].getClass();
+      while (type.isArray()) {
+        dim++;
+        type = type.getComponentType();
+      }
+    }
+    else {
+      Class<?> type = values.getClass();
+      while (type.isArray()) {
+        dim++;
+        type = type.getComponentType();
+      }
+    }
+
+    for (int i = 0; i < dim; i++) {
+      buf.append("[]");
+    }
+
+    buf.append(" ");
+
+    if (initializeFromArray) {
+      generateInitialization(buf, values[0]);
+    }
+    else {
+      generateInitialization(buf, values);
+    }
+
+    if (!initialized) {
       for (Integer dim : dimensions) {
         if (dim == null)
           throw new RuntimeException("Must provide either dimension expressions or an array initializer");

@@ -16,6 +16,8 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.values;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
@@ -27,7 +29,7 @@ public class NullLiteral extends LiteralValue<Object> {
   }
 
   @Override
-  public String getCanonicalString() {
+  public String getCanonicalString(Context context) {
     return "null";
   }
 }

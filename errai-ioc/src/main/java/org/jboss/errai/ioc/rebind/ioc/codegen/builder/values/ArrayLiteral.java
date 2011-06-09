@@ -16,6 +16,8 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.values;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+
 import java.lang.reflect.Array;
 
 /**
@@ -43,7 +45,7 @@ public class ArrayLiteral extends LiteralValue<Object> {
   }
 
   @Override
-  public String getCanonicalString() {
+  public String getCanonicalString(Context context) {
     StringBuilder buf = new StringBuilder("new " + arrayType.getCanonicalName());
 
     for (int i = 0; i < dimensions; i++) {

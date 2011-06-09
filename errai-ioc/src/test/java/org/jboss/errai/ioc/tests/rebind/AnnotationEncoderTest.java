@@ -33,7 +33,7 @@ public class AnnotationEncoderTest extends AbstractStatementBuilderTest {
     String enc = AnnotationEncoder.encode(PostConstruct.class.getAnnotation(Target.class));
 
     assertEquals("new java.lang.annotation.Target() {\n" +
-        "public java.lang.Class annotationType() {\n" +
+        "public Class annotationType() {\n" +
         "return java.lang.annotation.Target.class;\n" +
         "}\n" +
         "}\n", enc);

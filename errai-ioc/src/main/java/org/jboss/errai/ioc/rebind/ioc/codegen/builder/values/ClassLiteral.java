@@ -16,6 +16,10 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.values;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
+
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
@@ -25,7 +29,12 @@ public class ClassLiteral extends LiteralValue<Class<?>> {
   }
 
   @Override
-  public String getCanonicalString() {
-    return getValue().getCanonicalName() + ".class";
+  public String getCanonicalString(Context context) {
+    if (context == null) {
+      return getValue().getName() + ".class";
+    } else {
+      return LoadClassReference.getClassReference(MetaClassFactory.get(getValue()), context)
+              + ".class";
+    }
   }
 }

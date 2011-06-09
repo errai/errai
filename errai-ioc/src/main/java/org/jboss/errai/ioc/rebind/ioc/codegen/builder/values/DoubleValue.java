@@ -16,6 +16,8 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.values;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
@@ -26,7 +28,7 @@ public class DoubleValue extends LiteralValue<Double> {
   }
 
   @Override
-  public String getCanonicalString() {
+  public String getCanonicalString(Context context) {
     return getValue().toString() + "d";
   }
 }

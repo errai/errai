@@ -27,7 +27,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 public abstract class LiteralValue<T> implements Statement {
   private T value;
 
-  public abstract String getCanonicalString();
+  public abstract String getCanonicalString(Context context);
 
   protected LiteralValue(T value) {
     this.value = value;
@@ -38,7 +38,7 @@ public abstract class LiteralValue<T> implements Statement {
   }
 
   public String generate(Context context) {
-    return getCanonicalString();
+    return getCanonicalString(context);
   }
 
   public Context getContext() {

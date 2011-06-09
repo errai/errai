@@ -17,6 +17,10 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.values;
 
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
+
 /**
  * The literal factory provides a LiteralValue for
  * the specified object (if possible).
@@ -24,6 +28,20 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder.values;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class LiteralFactory {
+  public static LiteralValue<?> getLiteral(final Context context, final Object o) {
+    if (o instanceof Class) {
+      return new LiteralValue<Class>((Class<?>) o) {
+        @Override
+        public String getCanonicalString(Context context) {
+          return LoadClassReference.getClassReference(MetaClassFactory.get((Class<?>) o), context);
+        }
+      };
+    }
+    else {
+      return getLiteral(o);
+    }
+  }
+
   public static LiteralValue<?> getLiteral(Object o) {
     if (o == null) {
       return NullLiteral.INSTANCE;
