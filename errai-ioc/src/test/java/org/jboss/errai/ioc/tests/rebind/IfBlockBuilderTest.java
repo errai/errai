@@ -25,7 +25,6 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.util.Bool;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Refs;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 import org.junit.Test;
-import sun.tools.tree.BooleanExpression;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;

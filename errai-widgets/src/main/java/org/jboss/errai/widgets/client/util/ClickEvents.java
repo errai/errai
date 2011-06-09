@@ -16,7 +16,6 @@
 
 package org.jboss.errai.widgets.client.util;
 
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FocusWidget;
 import org.jboss.errai.bus.client.api.Message;
 

@@ -18,7 +18,6 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.AbstractStatement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.CallParameters;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 

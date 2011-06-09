@@ -18,7 +18,6 @@ package org.jboss.errai.tools.monitoring;
 
 import com.google.inject.Inject;
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.ResourceProvider;
 import org.jboss.errai.bus.client.framework.BusMonitor;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.SubscriptionEvent;
@@ -26,8 +25,6 @@ import org.jboss.errai.bus.server.ServerMessageBusImpl;
 import org.jboss.errai.bus.server.annotations.ExtensionComponent;
 import org.jboss.errai.bus.server.api.ErraiConfig;
 import org.jboss.errai.bus.server.api.ErraiConfigExtension;
-
-import java.util.Map;
 
 @ExtensionComponent
 public class MonitorExtension implements ErraiConfigExtension {

@@ -18,12 +18,12 @@ package org.jboss.errai.ioc.tests.rebind;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.Builder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.Refs;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ContextBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedMethodException;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.Refs;
 import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;

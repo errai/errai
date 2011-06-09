@@ -16,19 +16,7 @@
 
 package org.jboss.errai.ioc.tests.rebind;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.util.List;
-import java.util.Map;
-
-import javax.enterprise.util.TypeLiteral;
-
-import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Builder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.LoopBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ContextBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
@@ -37,6 +25,13 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.TypeNotIterableException;
 import org.junit.Test;
+
+import javax.enterprise.util.TypeLiteral;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Tests the generation of loops using the {@link StatementBuilder} API.

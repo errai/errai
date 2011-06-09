@@ -16,17 +16,16 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
-import java.lang.reflect.Array;
-
-import net.sourceforge.htmlunit.corejs.javascript.tools.debugger.Dim;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.GenUtil;
 import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ArrayBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ArrayInitializationBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.GenUtil;
+
+import java.lang.reflect.Array;
 
 /**
  * StatementBuilder to create and initialize Arrays.

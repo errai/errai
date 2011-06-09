@@ -15,8 +15,6 @@
  */
 package org.jboss.errai.tools.source.server;
 
-import org.jboss.errai.tools.source.server.JavaToHTML;
-
 /**
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Aug 16, 2010

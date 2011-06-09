@@ -19,7 +19,6 @@ import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.workspaces.client.api.ProvisioningCallback;
 import org.jboss.errai.workspaces.client.api.WidgetProvider;
-import org.jboss.errai.workspaces.client.api.annotations.LoadTool;
 
 /**
  * @author: Heiko Braun <hbraun@redhat.com>

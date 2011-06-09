@@ -16,20 +16,7 @@
 
 package org.jboss.errai.ioc.tests.rebind;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.lang.annotation.Annotation;
-
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-
-import org.jboss.errai.ioc.rebind.ioc.codegen.AssignmentOperator;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
-import org.jboss.errai.ioc.rebind.ioc.codegen.VariableReference;
+import org.jboss.errai.ioc.rebind.ioc.codegen.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.values.LiteralFactory;
@@ -37,6 +24,13 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 import org.junit.Assert;
 import org.junit.Test;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+import java.lang.annotation.Annotation;
+
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Tests the {@link StatementBuilder} API.

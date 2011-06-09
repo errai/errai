@@ -16,11 +16,7 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.util;
 
-import org.eclipse.jdt.internal.core.util.PublicScanner;
-import org.mvel2.ParserContext;
 import org.mvel2.util.ParseTools;
-
-import java.beans.ParameterDescriptor;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

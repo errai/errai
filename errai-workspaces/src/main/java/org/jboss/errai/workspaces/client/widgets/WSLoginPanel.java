@@ -20,8 +20,8 @@ import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.user.client.ui.*;
-import org.jboss.errai.workspaces.client.api.WidgetProvider;
 import org.jboss.errai.workspaces.client.api.ProvisioningCallback;
+import org.jboss.errai.workspaces.client.api.WidgetProvider;
 
 public class WSLoginPanel implements WidgetProvider {
 

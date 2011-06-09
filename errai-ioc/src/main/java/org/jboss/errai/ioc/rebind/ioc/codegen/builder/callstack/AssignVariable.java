@@ -16,13 +16,9 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.AssignmentOperator;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.GenUtil;
-import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.VariableReference;
+import org.jboss.errai.ioc.rebind.ioc.codegen.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.AssignmentBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.GenUtil;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>

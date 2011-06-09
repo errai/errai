@@ -25,7 +25,6 @@ import com.allen_sauer.gwt.log.client.impl.LogClientBundle;
 import com.allen_sauer.gwt.log.client.util.DOMUtil;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.DeferredCommand;
