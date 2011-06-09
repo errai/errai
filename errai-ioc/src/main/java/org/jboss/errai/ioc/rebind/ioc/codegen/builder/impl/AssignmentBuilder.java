@@ -41,7 +41,13 @@ public class AssignmentBuilder implements Statement {
   }
 
   public String generate(Context context) {
-    operator.assertCanBeApplied(reference.getType());
+    MetaClass referenceType = reference.getType();
+    for (int i=0; i<indexes.length; i++) {
+      if (!referenceType.isArray())
+        throw new InvalidTypeException("Variable is not a " + indexes.length + "-dimensional array!");
+      referenceType = referenceType.getComponentType();
+    } 
+    operator.assertCanBeApplied(referenceType);
     operator.assertCanBeApplied(statement.getType());
 
     return reference.getName() + generateIndexes() +
@@ -49,11 +55,8 @@ public class AssignmentBuilder implements Statement {
   }
 
   private String generateIndexes() {
-    if (indexes == null || indexes.length == 0) return "";
-
-    if (!reference.getType().isArray())
-      throw new InvalidTypeException("Variable is not an array!");
-
+    if (indexes.length == 0) return "";
+   
     StringBuilder buf = new StringBuilder();
     for (Statement index : indexes) {
       buf.append("[").append(index.generate(reference.getContext())).append("]");

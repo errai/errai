@@ -54,8 +54,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .newObject(Object.class);
 
     String foreachWithListOfStrings = StatementBuilder.create()
-        .addVariable("list", new TypeLiteral<List<String>>() {
-        })
+        .addVariable("list", new TypeLiteral<List<String>>() {})
         .loadVariable("list")
         .foreach("element")
         .finish().toJavaString();
@@ -102,8 +101,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   @Test
   public void testForeachLoopWithProvidedLoopVarType() throws Exception {
     Builder builder = StatementBuilder.create()
-        .addVariable("list", new TypeLiteral<List<String>>() {
-        })
+        .addVariable("list", new TypeLiteral<List<String>>() {})
         .loadVariable("list")
         .foreach("element", Object.class)
         .finish();
@@ -113,8 +111,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
 
     try {
       StatementBuilder.create()
-          .addVariable("list", new TypeLiteral<List<String>>() {
-          })
+          .addVariable("list", new TypeLiteral<List<String>>() {})
           .loadVariable("list")
           .foreach("element", Integer.class)
           .finish().toJavaString();
@@ -131,14 +128,12 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
     Statement createObject = StatementBuilder.create().newObject(String.class);
 
     Builder outerLoop = StatementBuilder.create()
-        .addVariable("list", new TypeLiteral<List<String>>() {
-        })
+        .addVariable("list", new TypeLiteral<List<String>>() {})
         .loadVariable("list")
         .foreach("element")
         .append(StatementBuilder.create(
             ContextBuilder.create().addVariable(Variable.create("anotherList",
-                new TypeLiteral<List<String>>() {
-                })).getContext())
+                new TypeLiteral<List<String>>() {})).getContext())
             .loadVariable("anotherList")
             .foreach("anotherElement")
             .append(createObject)
@@ -244,7 +239,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
           .append(StatementBuilder.create().loadVariable("b").assignValue(false))
         .finish().toJavaString();
 
-    assertEquals("failed to generate empty while loop", WHILE_RESULT_WITH_BODY, s);
+    assertEquals("failed to generate while loop with body", WHILE_RESULT_WITH_BODY, s);
 
     s = StatementBuilder.create()
         .addVariable("str", String.class)
@@ -253,6 +248,6 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .while_(BooleanOperator.GreaterThanOrEqual, 2)
         .finish().toJavaString();
 
-    assertEquals("failed to generate empty while loop", WHILE_RESULT_RHS_EMPTY, s);
+    assertEquals("failed to generate while loop with lhs invocation and body", WHILE_RESULT_RHS_EMPTY, s);
   }
 }

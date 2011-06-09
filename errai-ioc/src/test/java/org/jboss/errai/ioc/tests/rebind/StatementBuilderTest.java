@@ -24,6 +24,7 @@ import java.lang.annotation.Annotation;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.AssignmentOperator;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
@@ -39,7 +40,7 @@ import org.junit.Test;
 
 /**
  * Tests the {@link StatementBuilder} API.
- *
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class StatementBuilderTest extends AbstractStatementBuilderTest {
@@ -174,21 +175,21 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   }
 
   @Test
-  @SuppressWarnings(value = {"all"})
+  @SuppressWarnings(value = { "all" })
   public void testCreateAndInitializeMultiDimensionalArray() {
 
     String s = StatementBuilder.create().newArray(Integer.class)
-        .initialize(new Integer[][]{{1, 2}, {3, 4}})
+        .initialize(new Integer[][] { { 1, 2 }, { 3, 4 } })
         .toJavaString();
 
     assertEquals("Failed to generate two dimensional array", "new java.lang.Integer[][]{{1,2},{3,4}}", s);
 
     s = StatementBuilder.create().newArray(String.class)
-        .initialize(new Statement[][]{
-            {StatementBuilder.create().invokeStatic(Integer.class, "toString", 1),
-                StatementBuilder.create().invokeStatic(Integer.class, "toString", 2)},
-            {StatementBuilder.create().invokeStatic(Integer.class, "toString", 3),
-                StatementBuilder.create().invokeStatic(Integer.class, "toString", 4)}})
+        .initialize(new Statement[][] {
+            { StatementBuilder.create().invokeStatic(Integer.class, "toString", 1),
+                StatementBuilder.create().invokeStatic(Integer.class, "toString", 2) },
+            { StatementBuilder.create().invokeStatic(Integer.class, "toString", 3),
+                StatementBuilder.create().invokeStatic(Integer.class, "toString", 4) } })
         .toJavaString();
 
     assertEquals("Failed to generate two dimensional array using statements",
@@ -196,9 +197,9 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
             "{java.lang.Integer.toString(3),java.lang.Integer.toString(4)}}", s);
 
     s = StatementBuilder.create().newArray(String.class)
-        .initialize(new Object[][]{
-            {StatementBuilder.create().invokeStatic(Integer.class, "toString", 1), "2"},
-            {StatementBuilder.create().invokeStatic(Integer.class, "toString", 3), "4"}})
+        .initialize(new Object[][] {
+            { StatementBuilder.create().invokeStatic(Integer.class, "toString", 1), "2" },
+            { StatementBuilder.create().invokeStatic(Integer.class, "toString", 3), "4" } })
         .toJavaString();
 
     assertEquals("Failed to generate two dimensional array using statements and objects",
@@ -206,7 +207,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
             "{java.lang.Integer.toString(3),\"4\"}}", s);
 
     s = StatementBuilder.create().newArray(String.class)
-        .initialize(new String[][][]{{{"1", "2"}, {"a", "b"}}, {{"3", "4"}, {"b", "c"}}})
+        .initialize(new String[][][] { { { "1", "2" }, { "a", "b" } }, { { "3", "4" }, { "b", "c" } } })
         .toJavaString();
 
     assertEquals("Failed to generate three dimensional array",
@@ -222,6 +223,14 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
         .toJavaString();
 
     assertEquals("Failed to generate array assignment", "twoDimArray[1][2] = \"test\"", s);
+
+    s = StatementBuilder.create()
+        .addVariable("twoDimArray", String[][].class)
+        .loadVariable("twoDimArray")
+        .assignArrayValue(AssignmentOperator.PreIncrementAssign, "test", 1, 2)
+        .toJavaString();
+
+    assertEquals("Failed to generate array assignment", "twoDimArray[1][2] += \"test\"", s);
 
     s = StatementBuilder.create()
         .addVariable("twoDimArray", String[][].class)
@@ -242,7 +251,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
       fail("Expected InvalidTypeExcpetion");
     }
     catch (InvalidTypeException ite) {
-      //Expected, variable is not an array.
+      // Expected, variable is not an array.
     }
 
     try {
@@ -256,7 +265,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
       fail("Expected InvalidTypeExcpetion");
     }
     catch (InvalidTypeException ite) {
-      //Expected, indexes are no integers
+      // Expected, indexes are no integers
     }
   }
 }

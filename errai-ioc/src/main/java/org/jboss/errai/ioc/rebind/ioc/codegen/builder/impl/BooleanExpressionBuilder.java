@@ -31,8 +31,7 @@ public class BooleanExpressionBuilder implements Statement {
   private Statement rhs;
   private BooleanOperator operator;
 
-  public BooleanExpressionBuilder() {
-  }
+  public BooleanExpressionBuilder() {}
 
   public BooleanExpressionBuilder(Statement rhs, BooleanOperator operator) {
     this.rhs = rhs;
