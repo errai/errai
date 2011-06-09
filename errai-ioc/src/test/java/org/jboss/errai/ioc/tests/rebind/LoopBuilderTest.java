@@ -239,7 +239,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
           .append(StatementBuilder.create().loadVariable("b").assignValue(false))
         .finish().toJavaString();
 
-    assertEquals("failed to generate empty while loop", WHILE_RESULT_WITH_BODY, s);
+    assertEquals("failed to generate while loop with body", WHILE_RESULT_WITH_BODY, s);
 
     s = StatementBuilder.create()
         .addVariable("str", String.class)
@@ -248,6 +248,6 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .while_(BooleanOperator.GreaterThanOrEqual, 2)
         .finish().toJavaString();
 
-    assertEquals("failed to generate empty while loop", WHILE_RESULT_RHS_EMPTY, s);
+    assertEquals("failed to generate while loop with lhs invocation and body", WHILE_RESULT_RHS_EMPTY, s);
   }
 }
