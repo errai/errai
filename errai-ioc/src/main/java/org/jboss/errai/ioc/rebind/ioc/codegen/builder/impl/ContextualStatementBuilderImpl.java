@@ -17,10 +17,7 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.*;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ContextualStatementBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ElseBlockBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.LoopBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.VariableReferenceContextualStatementBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.AssignVariable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.MethodCall;
 

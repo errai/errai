@@ -25,6 +25,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DeferredCallElem
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DeferredCallback;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.control.IfBlock;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.values.NullLiteral;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.GenUtil;
 
 /**
  * StatementBuilder to generate if blocks.
@@ -44,12 +45,16 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements IfBl
   }
 
   public BlockBuilder<ElseBlockBuilder> if_() {
-    return _if_(new BooleanExpressionBuilder());
+    return doIfLHSChained(new BooleanExpressionBuilder());
+  }
+
+  public BlockBuilder<ElseBlockBuilder> if_(Statement booleanExpr) {
+    return doIfUnchained(booleanExpr);
   }
 
   public BlockBuilder<ElseBlockBuilder> if_(BooleanOperator op, Statement rhs) {
-    if (rhs==null) rhs = NullLiteral.INSTANCE;
-    return _if_(new BooleanExpressionBuilder(rhs, op));
+    if (rhs == null) rhs = NullLiteral.INSTANCE;
+    return doIfLHSChained(new BooleanExpressionBuilder(rhs, op));
   }
 
   public BlockBuilder<ElseBlockBuilder> if_(BooleanOperator op, Object rhs) {
@@ -57,9 +62,34 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements IfBl
     return if_(op, rhsStatement);
   }
 
-  private BlockBuilder<ElseBlockBuilder> _if_(final BooleanExpressionBuilder condition) {
+
+  private BlockBuilder<ElseBlockBuilder> doIfUnchained(final Statement condition) {
     ifBlock = new IfBlock(condition);
-    
+
+    appendCallElement(new DeferredCallElement(new DeferredCallback() {
+      public void doDeferred(CallWriter writer, Context context, Statement statement) {
+        writer.reset();
+        writer.append(ifBlock.generate(Context.create(context)));
+      }
+    }));
+
+    return new BlockBuilder<ElseBlockBuilder>(ifBlock.getBlock(), new BuildCallback<ElseBlockBuilder>() {
+      public ElseBlockBuilder callback(Statement statement) {
+        return IfBlockBuilderImpl.this;
+      }
+    });
+  }
+
+
+  /**
+   * The LHS value is on the current callstack. So we grab the value from there are generation time.
+   *
+   * @param condition
+   * @return
+   */
+  private BlockBuilder<ElseBlockBuilder> doIfLHSChained(final BooleanExpressionBuilder condition) {
+    ifBlock = new IfBlock(condition);
+
     appendCallElement(new DeferredCallElement(new DeferredCallback() {
       public void doDeferred(CallWriter writer, Context context, Statement statement) {
         condition.setLhs(statement);

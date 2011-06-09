@@ -21,7 +21,10 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ContextBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidExpressionException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.Bool;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 import org.junit.Test;
+import sun.tools.tree.BooleanExpression;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -262,7 +265,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
     assertEquals("Failed to generate empty if block using an instance of expression",
         EMPTY_IF_BLOCK_RESULT_INSTANCE_OF_RHS, s);
   }
-  
+
   @Test
   public void testIfBlockWithComplexExpression() {
     String s = StatementBuilder.create()
@@ -274,4 +277,18 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
 
     System.out.println(s);
   }
+
+  @Test
+  public void testIfBlockUnchained() {
+    String s = Stmt.create().doIf( Bool.expr(Bool.expr("foo", BooleanOperator.Equals, "bar"),
+                      BooleanOperator.Or,
+                                   Bool.expr(Bool.expr("cat", BooleanOperator.Equals, "dog"), BooleanOperator.And,
+                                       Bool.expr("girl", BooleanOperator.NotEquals, "boy"))))
+
+        .finish().toJavaString();
+
+
+    System.out.println(s);
+  }
+
 }

@@ -19,6 +19,7 @@ package org.jboss.errai.ioc.rebind.ioc.codegen;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.DeclareAssignmentBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.GenUtil;
 
 import javax.enterprise.util.TypeLiteral;
 

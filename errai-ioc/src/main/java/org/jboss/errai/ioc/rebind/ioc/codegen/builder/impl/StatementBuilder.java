@@ -17,11 +17,9 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ArrayInitializationBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ContextualStatementBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementBegin;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.VariableReferenceContextualStatementBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
@@ -117,5 +115,9 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
 
   public ArrayInitializationBuilder newArray(Class<?> componentType, Integer... dimensions) {
     return new ArrayBuilderImpl(context, callElementBuilder).newArray(componentType, dimensions);
+  }
+
+  public BlockBuilder<ElseBlockBuilder> doIf(Statement stmt) {
+    return new IfBlockBuilderImpl(context, callElementBuilder).if_(stmt);
   }
 }
