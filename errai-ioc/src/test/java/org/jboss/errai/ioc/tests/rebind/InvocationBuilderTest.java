@@ -30,8 +30,9 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
- * Tests the generation of method invocations using the {@link StatementBuilder} API.
- *
+ * Tests the generation of method invocations using the {@link StatementBuilder}
+ * API.
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class InvocationBuilderTest extends AbstractStatementBuilderTest {
@@ -76,7 +77,8 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
     Builder statement = StatementBuilder.create()
         .addVariable("n", Integer.class)
         .loadVariable("n")
-            // 1 will be inferred to LiteralValue<Integer>, equals(Integer.class) should match equals(Object.class)
+        // 1 will be inferred to LiteralValue<Integer>, equals(Integer.class)
+        // should match equals(Object.class)
         .invoke("equals", 1);
 
     assertEquals("failed to generate invocation on matched method", "n.equals(1)", statement.toJavaString());
@@ -94,7 +96,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
       fail("expected UndefinedMethodException");
     }
     catch (UndefinedMethodException udme) {
-      //expected
+      // expected
     }
 
     try {
@@ -109,7 +111,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
       fail("expected UndefinedMethodException");
     }
     catch (UndefinedMethodException udme) {
-      //expected
+      // expected
       assertEquals("Wrong exception thrown", udme.getMethodName(), "undefinedMethod");
     }
   }
@@ -125,7 +127,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
       fail("expected OutOfScopeException");
     }
     catch (OutOfScopeException oose) {
-      //expected
+      // expected
       assertTrue("Wrong exception thrown", oose.getMessage().contains("injector"));
     }
 
@@ -140,7 +142,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
       fail("expected OutOfScopeException");
     }
     catch (OutOfScopeException oose) {
-      //expected
+      // expected
       assertTrue(oose.getMessage().contains("param2"));
     }
   }
