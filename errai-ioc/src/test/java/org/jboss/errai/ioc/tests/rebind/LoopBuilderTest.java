@@ -16,6 +16,15 @@
 
 package org.jboss.errai.ioc.tests.rebind;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.enterprise.util.TypeLiteral;
+
+import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Builder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
@@ -23,20 +32,15 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.LoopBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ContextBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidExpressionException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.TypeNotIterableException;
 import org.junit.Test;
 
-import javax.enterprise.util.TypeLiteral;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.fail;
-
 /**
- * Tests the generation of loops using the {@link org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder} API.
- *
+ * Tests the generation of loops using the {@link StatementBuilder} API.
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class LoopBuilderTest extends AbstractStatementBuilderTest implements LoopBuilderTestResult {
@@ -50,7 +54,8 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .newObject(Object.class);
 
     String foreachWithListOfStrings = StatementBuilder.create()
-        .addVariable("list", new TypeLiteral<List<String>>() {})
+        .addVariable("list", new TypeLiteral<List<String>>() {
+        })
         .loadVariable("list")
         .foreach("element")
         .finish().toJavaString();
@@ -97,7 +102,8 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   @Test
   public void testForeachLoopWithProvidedLoopVarType() throws Exception {
     Builder builder = StatementBuilder.create()
-        .addVariable("list", new TypeLiteral<List<String>>() {})
+        .addVariable("list", new TypeLiteral<List<String>>() {
+        })
         .loadVariable("list")
         .foreach("element", Object.class)
         .finish();
@@ -107,7 +113,8 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
 
     try {
       StatementBuilder.create()
-          .addVariable("list", new TypeLiteral<List<String>>() {})
+          .addVariable("list", new TypeLiteral<List<String>>() {
+          })
           .loadVariable("list")
           .foreach("element", Integer.class)
           .finish().toJavaString();
@@ -124,12 +131,14 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
     Statement createObject = StatementBuilder.create().newObject(String.class);
 
     Builder outerLoop = StatementBuilder.create()
-        .addVariable("list", new TypeLiteral<List<String>>() {})
+        .addVariable("list", new TypeLiteral<List<String>>() {
+        })
         .loadVariable("list")
         .foreach("element")
         .append(StatementBuilder.create(
             ContextBuilder.create().addVariable(Variable.create("anotherList",
-                new TypeLiteral<List<String>>() {})).getContext())
+                new TypeLiteral<List<String>>() {
+                })).getContext())
             .loadVariable("anotherList")
             .foreach("anotherElement")
             .append(createObject)
@@ -172,23 +181,78 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   @Test
   public void testForeachLoopWithLiterals() throws Exception {
     LoopBuilder loopBuilder = StatementBuilder.create()
-        .loadLiteral(new String[]{"s1", "s2"})
+        .loadLiteral(new String[] { "s1", "s2" })
         .foreach("s")
         .append(StatementBuilder.create().loadVariable("s").invoke("getBytes"))
         .finish();
-
 
     assertEquals("failed to generate foreach loop using a literal String array",
         FOREACH_RESULT_LITERAL_STRING_ARRAY, loopBuilder.toJavaString());
 
     Context c = ContextBuilder.create().addVariable(Variable.create("s", String.class)).getContext();
     loopBuilder = StatementBuilder.create(c)
-        .loadLiteral(new String[]{"s1", "s2"})
+        .loadLiteral(new String[] { "s1", "s2" })
         .foreach("s")
         .append(StatementBuilder.create().loadVariable("s").invoke("getBytes"))
         .finish();
 
     assertEquals("failed to generate foreach loop using a literal String array",
         FOREACH_RESULT_LITERAL_STRING_ARRAY, loopBuilder.toJavaString());
+  }
+
+  @Test
+  public void testWhileLoopWithInvalidExpressions() {
+    try {
+      StatementBuilder.create()
+          .addVariable("n", Integer.class)
+          .loadVariable("n")
+          .while_().finish().toJavaString();
+      fail("Expected InvalidTypeException");
+    }
+    catch (InvalidTypeException ite) {
+      // expected
+    }
+
+    try {
+      StatementBuilder.create()
+          .addVariable("str", String.class)
+          .addVariable("str2", String.class)
+          .loadVariable("str")
+          .while_(BooleanOperator.GreaterThan, Variable.get("str2")).finish()
+          .toJavaString();
+
+      fail("Expected InvalidExpressionException");
+    }
+    catch (InvalidExpressionException e) {
+      assertTrue("Wrong exception thrown", e.getMessage().contains(String.class.getName()));
+    }
+  }
+
+  @Test
+  public void testWhileLoop() {
+    String s = StatementBuilder.create()
+        .addVariable("b", Boolean.class)
+        .loadVariable("b")
+        .while_().finish().toJavaString();
+
+    assertEquals("failed to generate empty while loop", WHILE_RESULT_EMPTY, s);
+
+    s = StatementBuilder.create()
+        .addVariable("b", Boolean.class)
+        .loadVariable("b")
+        .while_()
+          .append(StatementBuilder.create().loadVariable("b").assignValue(false))
+        .finish().toJavaString();
+
+    assertEquals("failed to generate empty while loop", WHILE_RESULT_WITH_BODY, s);
+
+    s = StatementBuilder.create()
+        .addVariable("str", String.class)
+        .loadVariable("str")
+        .invoke("length")
+        .while_(BooleanOperator.GreaterThanOrEqual, 2)
+        .finish().toJavaString();
+
+    assertEquals("failed to generate empty while loop", WHILE_RESULT_RHS_EMPTY, s);
   }
 }

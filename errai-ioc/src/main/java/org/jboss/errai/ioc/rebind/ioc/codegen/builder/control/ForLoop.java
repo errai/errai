@@ -16,6 +16,7 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.control;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.BlockStatement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 
@@ -26,11 +27,11 @@ public class ForLoop extends AbstractBlockConditional {
   private Statement initializer;
   private Statement afterBlock;
 
-  public ForLoop(Statement condition, Statement block) {
+  public ForLoop(Statement condition, BlockStatement block) {
     super(condition, block);
   }
 
-  public ForLoop(Statement condition, Statement block, Statement initializer, Statement afterBlock) {
+  public ForLoop(Statement condition, BlockStatement block, Statement initializer, Statement afterBlock) {
     super(condition, block);
     this.initializer = initializer;
     this.afterBlock = afterBlock;

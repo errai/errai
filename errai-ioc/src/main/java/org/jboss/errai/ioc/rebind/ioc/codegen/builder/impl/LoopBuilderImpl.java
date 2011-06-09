@@ -16,13 +16,20 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.*;
+import org.jboss.errai.ioc.rebind.ioc.codegen.BlockStatement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.GenUtil;
+import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BuildCallback;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.LoopBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.CallWriter;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DeferredCallElement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DeferredCallback;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.control.ForeachLoop;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.control.WhileLoop;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameterizedType;
 
@@ -51,23 +58,59 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements LoopBui
     appendCallElement(new DeferredCallElement(new DeferredCallback() {
       public void doDeferred(CallWriter writer, Context context, Statement statement) {
         GenUtil.assertIsIterable(statement);
-
-        Variable loopVar = createLoopVar(statement, loopVarName, loopVarType);
+        Variable loopVar = createForEachLoopVar(statement, loopVarName, loopVarType);
         String collection = writer.getCallString();
-        // destroy the buffer up until now.
         writer.reset();
         writer.append(new ForeachLoop(loopVar, collection, body).generate(Context.create(context)));
       }
     }));
 
+    return createLoopBody(body);
+  }
+
+  public BlockBuilder<LoopBuilder> while_() {
+    return _while_(new BooleanExpressionBuilder());
+  }
+ 
+  public BlockBuilder<LoopBuilder> while_(BooleanOperator op, Object rhs) {
+    return while_(op, GenUtil.generate(context, rhs));
+  }
+
+  public BlockBuilder<LoopBuilder> while_(final BooleanOperator op, final Statement rhs) {
+    return _while_(new BooleanExpressionBuilder(rhs, op));
+  }
+  
+  private BlockBuilder<LoopBuilder> _while_(final BooleanExpressionBuilder condition) {
+    final BlockStatement body = new BlockStatement();
+   
+    appendCallElement(new DeferredCallElement(new DeferredCallback() {
+      public void doDeferred(CallWriter writer, Context context, Statement lhs) {
+        if (condition.getOperator() == null) {
+          lhs = GenUtil.convert(context, lhs, MetaClassFactory.get(Boolean.class));
+        }
+        else {
+          condition.getOperator().assertCanBeApplied(lhs.getType());
+        }
+        
+        WhileLoop whileLoop = new WhileLoop(condition, body);
+        whileLoop.getCondition().setLhsExpr(writer.getCallString());
+        writer.reset();
+        writer.append(whileLoop.generate(Context.create(context)));
+      }
+    }));
+    
+    return createLoopBody(body);
+  }
+
+  private BlockBuilder<LoopBuilder> createLoopBody(BlockStatement body) {
     return new BlockBuilder<LoopBuilder>(body, new BuildCallback<LoopBuilder>() {
       public LoopBuilder callback(Statement statement) {
         return LoopBuilderImpl.this;
       }
-    });
+    });    
   }
-
-  private Variable createLoopVar(Statement collection, String loopVarName, MetaClass providedLoopVarType) {
+  
+  private Variable createForEachLoopVar(Statement collection, String loopVarName, MetaClass providedLoopVarType) {
     // infer the loop variable type
     MetaClass loopVarType = MetaClassFactory.get(Object.class);
     MetaParameterizedType parameterizedType = collection.getType().getParameterizedType();

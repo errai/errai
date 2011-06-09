@@ -34,9 +34,9 @@ public abstract class AbstractBlockConditional implements Statement {
     this.block = new BlockStatement();
   }
 
-  protected AbstractBlockConditional(Statement condition, Statement block) {
+  protected AbstractBlockConditional(Statement condition, BlockStatement block) {
     this.condition = condition;
-    this.block = new BlockStatement(block);
+    this.block = block;
   }
 
   public Statement getCondition() {

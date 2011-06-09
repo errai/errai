@@ -16,15 +16,25 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.control;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.BlockStatement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.BooleanExpressionBuilder;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class WhileBlock extends AbstractBlockConditional {
-  public WhileBlock(Statement condition, Statement block) {
+public class WhileLoop extends AbstractBlockConditional {
+  public WhileLoop(BooleanExpressionBuilder condition) {
+    super(condition);
+  }
+
+  public WhileLoop(BooleanExpressionBuilder condition, BlockStatement block) {
     super(condition, block);
+  }
+
+  public BooleanExpressionBuilder getCondition() {
+    return (BooleanExpressionBuilder) super.getCondition();
   }
 
   public String generate(Context context) {
@@ -35,7 +45,7 @@ public class WhileBlock extends AbstractBlockConditional {
       builder.append(getBlock().generate(context));
     }
 
-    builder.append("}\n");
+    builder.append("\n}\n");
 
     return builder.toString();
   }

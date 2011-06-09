@@ -16,6 +16,7 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Builder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.BlockBuilder;
@@ -25,6 +26,9 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.BlockBuilder;
  */
 public interface LoopBuilder extends Statement, Builder {
   BlockBuilder<LoopBuilder> foreach(String loopVarName);
-
   BlockBuilder<LoopBuilder> foreach(String loopVarName, Class<?> loopVarType);
+
+  BlockBuilder<LoopBuilder> while_();
+  BlockBuilder<LoopBuilder> while_(BooleanOperator op, Statement rhs);
+  BlockBuilder<LoopBuilder> while_(BooleanOperator op, Object rhs);
 }

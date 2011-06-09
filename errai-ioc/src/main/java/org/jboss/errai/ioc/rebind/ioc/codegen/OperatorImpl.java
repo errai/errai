@@ -63,7 +63,7 @@ public class OperatorImpl implements Operator {
     if (constraints.length == 0) return true;
 
     for (MetaClass mc : constraints) {
-      if (mc.isAssignableFrom(clazz)) return true;
+      if (mc.asBoxed().isAssignableFrom(clazz.asBoxed())) return true;
     }
 
     return false;

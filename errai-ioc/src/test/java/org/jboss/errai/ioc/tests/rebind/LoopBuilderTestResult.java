@@ -57,4 +57,13 @@ public interface LoopBuilderTestResult {
       "   for (java.lang.String s : new java.lang.String[] {\"s1\", \"s2\"}) {" +
           " \ns.getBytes();" +
           "\n}";
+  
+  public static final String WHILE_RESULT_EMPTY = 
+      "   while (b) { }";
+  
+  public static final String WHILE_RESULT_WITH_BODY = 
+      "   while (b) {\nb = false;\n}";
+  
+  public static final String WHILE_RESULT_RHS_EMPTY =
+      "   while (str.length() >= 2) { }";
 }

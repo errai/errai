@@ -17,7 +17,7 @@
 package org.jboss.errai.ioc.tests.rebind;
 
 /**
- * Base class for all {@link org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder} tests.
+ * Base class for all {@link StatementBuilder} tests.
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  */

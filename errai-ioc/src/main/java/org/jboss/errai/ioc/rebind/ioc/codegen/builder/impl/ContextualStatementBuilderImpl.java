@@ -55,6 +55,18 @@ public class ContextualStatementBuilderImpl extends AbstractStatementBuilder imp
   public BlockBuilder<LoopBuilder> foreach(String loopVarName, Class<?> loopVarType) {
     return new LoopBuilderImpl(context, callElementBuilder).foreach(loopVarName, loopVarType);
   }
+  
+  public BlockBuilder<LoopBuilder> while_() {
+    return new LoopBuilderImpl(context, callElementBuilder).while_();
+  }
+  
+  public BlockBuilder<LoopBuilder> while_(BooleanOperator op, Statement rhs) {
+    return new LoopBuilderImpl(context, callElementBuilder).while_(op, rhs);
+  }
+
+  public BlockBuilder<LoopBuilder> while_(BooleanOperator op, Object rhs) {
+    return new LoopBuilderImpl(context, callElementBuilder).while_(op, rhs);
+  }
 
   // If-Then-Else
   public BlockBuilder<ElseBlockBuilder> if_() {
