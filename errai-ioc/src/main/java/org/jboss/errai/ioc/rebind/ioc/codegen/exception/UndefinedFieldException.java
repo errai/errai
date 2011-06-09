@@ -17,32 +17,27 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.exception;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.GenUtil;
 
 /**
- * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Mike Brock <cbrock@redhat.com>
  */
-public class UndefinedMethodException extends RuntimeException {
-  private static final long serialVersionUID = 1L;
+public class UndefinedFieldException extends RuntimeException {
 
+  private String fieldName;
   private MetaClass declaringClass;
-  private String methodName;
-  private MetaClass[] parameterTypes;
 
-  public UndefinedMethodException() {
+  public UndefinedFieldException() {
     super();
   }
 
-  public UndefinedMethodException(String msg) {
+  public UndefinedFieldException(String msg) {
     super(msg);
   }
 
-  public UndefinedMethodException(MetaClass declaringClass, String methodName, MetaClass... parameterTypes) {
-    super("undefined method: " + methodName + "(" + GenUtil.classesAsStrings(parameterTypes) + "); in class: "
-        + declaringClass.getFullyQualifedName());
+  public UndefinedFieldException(String fieldName, MetaClass declaringClass) {
+    this("could not resolve field: " + fieldName + "; in class: " + declaringClass.getFullyQualifedName());
+    this.fieldName = fieldName;
     this.declaringClass = declaringClass;
-    this.methodName = methodName;
-    this.parameterTypes = parameterTypes;
   }
 
   @Override
@@ -50,15 +45,11 @@ public class UndefinedMethodException extends RuntimeException {
     return getMessage();
   }
 
+  public String getFieldName() {
+    return fieldName;
+  }
+
   public MetaClass getDeclaringClass() {
     return declaringClass;
-  }
-
-  public String getMethodName() {
-    return methodName;
-  }
-
-  public MetaClass[] getParameterTypes() {
-    return parameterTypes;
   }
 }

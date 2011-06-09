@@ -16,6 +16,7 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.util;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementBegin;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
 
@@ -25,5 +26,9 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
 public class Stmt {
   public static StatementBegin create() {
     return StatementBuilder.create();
+  }
+
+  public static StatementBegin create(Context ctx) {
+    return StatementBuilder.create(ctx);
   }
 }

@@ -20,6 +20,7 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import org.jboss.errai.ioc.rebind.ioc.codegen.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BuildCallback;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.CallParameters;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedConstructorException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;

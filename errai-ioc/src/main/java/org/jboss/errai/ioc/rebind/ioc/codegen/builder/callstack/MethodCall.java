@@ -17,6 +17,8 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.*;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.CallParameters;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.MethodInvocation;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedMethodException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
@@ -49,7 +51,7 @@ public class MethodCall extends AbstractCallElement {
     MetaMethod method = (staticMethod) ? statement.getType().getBestMatchingStaticMethod(methodName, parameterTypes)
         : statement.getType().getBestMatchingMethod(methodName, parameterTypes);
     if (method == null)
-      throw new UndefinedMethodException(methodName, parameterTypes);
+      throw new UndefinedMethodException(statement.getType(), methodName, parameterTypes);
 
     callParams = CallParameters.fromStatements(GenUtil.generateCallParameters(method, context, parameters));
     statement = new MethodInvocation(method, callParams);

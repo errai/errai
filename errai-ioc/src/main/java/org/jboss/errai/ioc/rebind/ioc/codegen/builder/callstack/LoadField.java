@@ -18,18 +18,41 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedFieldException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
- * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface CallElement {
-  public void handleCall(CallWriter writer, Context context, Statement statement);
+public class LoadField extends AbstractCallElement {
+  private String fieldName;
 
-  public CallElement setNext(CallElement element);
+  public LoadField(String fieldName) {
+    this.fieldName = fieldName;
+  }
 
-  public CallElement getNext();
+  public void handleCall(final CallWriter writer, final Context context, Statement statement) {
+    final MetaField field = statement.getType().getField(fieldName);
 
-  public MetaClass getResultType();
+    if (field == null) {
+      throw new UndefinedFieldException(fieldName, statement.getType());
+    }
+
+    statement = new Statement() {
+      public String generate(Context context) {
+        return field.getName();
+      }
+
+      public MetaClass getType() {
+        return field.getType();
+      }
+
+      public Context getContext() {
+        return context;
+      }
+    };
+
+    nextOrReturn(writer, context, statement);
+  }
 }

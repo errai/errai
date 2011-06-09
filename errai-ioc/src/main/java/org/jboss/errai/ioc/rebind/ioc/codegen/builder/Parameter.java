@@ -14,35 +14,34 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.rebind.ioc.codegen;
+package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.AbstractStatement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
-/**
- * @author Mike Brock <cbrock@redhat.com>
- */
-public abstract class Refs {
-  public static VariableReference get(final String name) {
-    return new VariableReference() {
-      public String getName() {
-        return name;
-      }
+public class Parameter extends AbstractStatement {
+  private MetaClass type;
+  private String name;
 
-      public String generate(Context context) {
-        return getName();
-      }
+  public Parameter(MetaClass type, String name) {
+    this.type = type;
+    this.name = name;
+  }
 
-      public MetaClass getType() {
-        return null;
-      }
+  public static Parameter of(MetaClass type, String name) {
+    return new Parameter(type, name);
+  }
 
-      public Context getContext() {
-        return null;
-      }
+  public String generate(Context context) {
+    return type.getFullyQualifedName() + " " + name;
+  }
 
-      public Statement getValue() {
-        return null;
-      }
-    };
+  public MetaClass getType() {
+    return type;
+  }
+
+  public String getName() {
+    return name;
   }
 }

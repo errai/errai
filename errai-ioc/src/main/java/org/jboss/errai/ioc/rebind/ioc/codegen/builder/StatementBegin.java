@@ -47,6 +47,8 @@ public interface StatementBegin extends ArrayBuilder {
 
   public ContextualStatementBuilder invokeStatic(Class<?> clazz, String methodName, Object... parameters);
 
+  public ContextualStatementBuilder loadStatic(Class<?> clazz, String fieldName);
+
   public ObjectBuilder newObject(MetaClass type);
 
   public ObjectBuilder newObject(Class<?> type);

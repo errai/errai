@@ -76,6 +76,8 @@ public class GenUtil {
       }
     }
     else if (o instanceof Statement) {
+      ((Statement) o).generate(context);
+
       return (Statement) o;
     }
     else {
@@ -121,5 +123,16 @@ public class GenUtil {
     catch (Throwable t) {
       throw new InvalidTypeException(t);
     }
+  }
+
+  public static String classesAsStrings(MetaClass... stmt) {
+    StringBuilder buf = new StringBuilder();
+    for (int i = 0; i < stmt.length; i++) {
+      buf.append(stmt[i].getFullyQualifedName());
+      if (i + 1 < stmt.length) {
+        buf.append(", ");
+      }
+    }
+    return buf.toString();
   }
 }

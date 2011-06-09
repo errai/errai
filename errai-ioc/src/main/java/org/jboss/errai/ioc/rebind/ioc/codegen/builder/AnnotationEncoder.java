@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.rebind.ioc.codegen;
+package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ObjectBuilder;

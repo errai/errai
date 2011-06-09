@@ -42,8 +42,8 @@ public abstract class AbstractCallElement implements CallElement {
     }
   }
 
-  public void setNext(CallElement next) {
-    this.next = next;
+  public CallElement setNext(CallElement next) {
+    return this.next = next;
   }
 
   public CallElement getNext() {

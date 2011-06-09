@@ -22,6 +22,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidExpressionException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Bool;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.Refs;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 import org.junit.Test;
 import sun.tools.tree.BooleanExpression;
@@ -280,11 +281,16 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
 
   @Test
   public void testIfBlockUnchained() {
-    String s = Stmt.create().doIf( Bool.expr(Bool.expr("foo", BooleanOperator.Equals, "bar"),
-                      BooleanOperator.Or,
-                                   Bool.expr(Bool.expr("cat", BooleanOperator.Equals, "dog"), BooleanOperator.And,
-                                       Bool.expr("girl", BooleanOperator.NotEquals, "boy"))))
+    Context ctx = Context.create().addVariable("a", boolean.class)
+        .addVariable("b", boolean.class);
 
+    String s = Stmt.create(ctx).doIf(Bool.expr(Bool.expr("foo", BooleanOperator.Equals, "bar"),
+        BooleanOperator.Or,
+        Bool.expr(Bool.expr("cat", BooleanOperator.Equals, "dog"), BooleanOperator.And,
+            Bool.expr("girl", BooleanOperator.NotEquals, "boy"))))
+
+        .finish().elseif_(Bool.expr(Stmt.create().loadVariable("a"), BooleanOperator.And, Stmt.create().loadVariable("b")))
+        .append(Stmt.create().loadStatic(System.class, "out").invoke("println", Refs.get("a")))
         .finish().toJavaString();
 
 

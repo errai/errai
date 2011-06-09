@@ -16,11 +16,11 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.values.CharValue;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import javax.enterprise.util.TypeLiteral;
+import java.util.*;
 
 /**
  * This class represents a {@link Statement} context. It has a reference to its
@@ -31,11 +31,14 @@ import java.util.Map;
 public class Context {
   private Map<String, Variable> variables = new HashMap<String, Variable>();
   private Context parent = null;
+  private Set<String> importedPackages = new HashSet<String>();
 
   private Context() {
+    importedPackages.add("java.lang");
   }
 
   private Context(Context parent) {
+    this();
     this.parent = parent;
   }
 
@@ -47,8 +50,39 @@ public class Context {
     return new Context(parent);
   }
 
-  public void addVariable(Variable variable) {
+  public Context addVariable(String name, Class<?> type) {
+    return addVariable(Variable.create(name, type));
+  }
+
+  public Context addVariable(String name, TypeLiteral<?> type) {
+    return addVariable(Variable.create(name, type));
+  }
+
+  public Context addVariable(Variable variable) {
     variables.put(variable.getName(), variable);
+    return this;
+  }
+
+  public Context addPackageImport(String packageName) {
+    if (packageName == null) return this;
+
+    String pkgName = packageName.trim();
+
+    if (pkgName.length() == 0) return this;
+
+    for (char c : pkgName.toCharArray()) {
+      if (c != '.' && !Character.isJavaIdentifierPart(c)) {
+        throw new RuntimeException("not a valid package name. (use format: foo.bar.pkg -- do not include '.*' at the end)");
+      }
+    }
+
+    importedPackages.add(pkgName);
+
+    return this;
+  }
+
+  public boolean hasPackageImport(String packageName) {
+    return importedPackages.contains(packageName);
   }
 
   public VariableReference getVariable(String name) {

@@ -19,6 +19,7 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 import org.jboss.errai.ioc.rebind.ioc.codegen.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.AssignVariable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadField;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.MethodCall;
 
 /**
@@ -39,8 +40,8 @@ public class ContextualStatementBuilderImpl extends AbstractStatementBuilder imp
     return this;
   }
 
-  public ContextualStatementBuilder invokeStatic(String methodName, Object... parameters) {
-    appendCallElement(new MethodCall(methodName, parameters, true));
+  public ContextualStatementBuilder getField(String fieldName) {
+    appendCallElement(new LoadField(fieldName));
     return this;
   }
 

@@ -30,8 +30,7 @@ public class CallElementBuilder {
       rootElement = callElement = element;
     }
     else {
-      callElement.setNext(element);
-      callElement = element;
+      callElement = callElement.setNext(element);
     }
   }
 

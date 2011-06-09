@@ -14,39 +14,38 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack;
+package org.jboss.errai.ioc.rebind.ioc.codegen.util;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.VariableReference;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
- * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Mike Brock <cbrock@redhat.com>
  */
-public class StaticLoad extends AbstractCallElement {
-  private final Class<?> type;
+public abstract class Refs {
+  public static VariableReference get(final String name) {
+    return new VariableReference() {
+      public String getName() {
+        return name;
+      }
 
-  public StaticLoad(Class<?> type) {
-    this.type = type;
-  }
-
-  public void handleCall(CallWriter writer, Context context, Statement statement) {
-    final MetaClass metaClass = MetaClassFactory.get(type);
-    statement = new Statement() {
       public String generate(Context context) {
-        return metaClass.getFullyQualifedName();
+        return getName();
       }
 
       public MetaClass getType() {
-        return metaClass;
+        return null;
       }
 
       public Context getContext() {
         return null;
       }
-    };
 
-    nextOrReturn(writer, context, statement);
+      public Statement getValue() {
+        return null;
+      }
+    };
   }
 }

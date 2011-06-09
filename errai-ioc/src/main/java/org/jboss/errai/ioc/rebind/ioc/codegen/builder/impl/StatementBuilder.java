@@ -97,8 +97,15 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
   }
 
   public ContextualStatementBuilder invokeStatic(Class<?> clazz, String methodName, Object... parameters) {
-    appendCallElement(new StaticLoad(clazz));
-    return new ContextualStatementBuilderImpl(context, callElementBuilder).invokeStatic(methodName, parameters);
+    appendCallElement(new LoadClassReference(clazz));
+    appendCallElement(new MethodCall(methodName, parameters, true));
+    return new ContextualStatementBuilderImpl(context, callElementBuilder);
+  }
+
+  public ContextualStatementBuilder loadStatic(Class<?> clazz, String fieldName) {
+    appendCallElement(new LoadClassReference(clazz));
+    appendCallElement(new LoadField(fieldName));
+    return new ContextualStatementBuilderImpl(context, callElementBuilder);
   }
 
   public ObjectBuilder newObject(MetaClass type) {

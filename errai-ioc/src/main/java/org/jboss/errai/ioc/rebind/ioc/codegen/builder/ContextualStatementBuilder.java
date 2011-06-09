@@ -25,7 +25,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 public interface ContextualStatementBuilder extends LoopBuilder, IfBlockBuilder {
   public ContextualStatementBuilder invoke(String methodName, Object... parameters);
 
-  public ContextualStatementBuilder invokeStatic(String methodName, Object... parameters);
+  public ContextualStatementBuilder getField(String methodName);
 
   public Statement returnValue();
 }
