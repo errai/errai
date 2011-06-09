@@ -30,6 +30,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DeferredCallElem
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DeferredCallback;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.control.ForeachLoop;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.control.WhileLoop;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.values.NullLiteral;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameterizedType;
 
@@ -76,7 +77,8 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements LoopBui
     return while_(op, GenUtil.generate(context, rhs));
   }
 
-  public BlockBuilder<LoopBuilder> while_(final BooleanOperator op, final Statement rhs) {
+  public BlockBuilder<LoopBuilder> while_(BooleanOperator op, Statement rhs) {
+    if (rhs==null) rhs = NullLiteral.INSTANCE;
     return _while_(new BooleanExpressionBuilder(rhs, op));
   }
   

@@ -24,6 +24,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.CallWriter;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DeferredCallElement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DeferredCallback;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.control.IfBlock;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.values.NullLiteral;
 
 /**
  * StatementBuilder to generate if blocks.
@@ -48,12 +49,14 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements IfBl
   }
 
   public BlockBuilder<ElseBlockBuilder> if_(BooleanOperator op, Statement rhs) {
+    if (rhs==null) rhs = NullLiteral.INSTANCE;
     ifBlock = new IfBlock(new BooleanExpressionBuilder(rhs, op));
     return _if_();
   }
 
   public BlockBuilder<ElseBlockBuilder> if_(BooleanOperator op, Object rhs) {
     Statement rhsStatement = GenUtil.generate(context, rhs);
+    ifBlock = new IfBlock(new BooleanExpressionBuilder(rhsStatement, op));
     return if_(op, rhsStatement);
   }
 

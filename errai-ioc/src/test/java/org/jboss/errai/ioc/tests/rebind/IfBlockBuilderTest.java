@@ -262,4 +262,16 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
     assertEquals("Failed to generate empty if block using an instance of expression",
         EMPTY_IF_BLOCK_RESULT_INSTANCE_OF_RHS, s);
   }
+  
+  @Test
+  public void testIfBlockWithComplexExpression() {
+    String s = StatementBuilder.create()
+        .addVariable("str", String.class)
+        .loadVariable("str")
+        .if_(BooleanOperator.NotEquals, null)
+        .finish()
+        .toJavaString();
+
+    System.out.println(s);
+  }
 }
