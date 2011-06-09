@@ -44,28 +44,26 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements IfBl
   }
 
   public BlockBuilder<ElseBlockBuilder> if_() {
-    ifBlock = new IfBlock(new BooleanExpressionBuilder());
-    return _if_();
+    return _if_(new BooleanExpressionBuilder());
   }
 
   public BlockBuilder<ElseBlockBuilder> if_(BooleanOperator op, Statement rhs) {
     if (rhs==null) rhs = NullLiteral.INSTANCE;
-    ifBlock = new IfBlock(new BooleanExpressionBuilder(rhs, op));
-    return _if_();
+    return _if_(new BooleanExpressionBuilder(rhs, op));
   }
 
   public BlockBuilder<ElseBlockBuilder> if_(BooleanOperator op, Object rhs) {
     Statement rhsStatement = GenUtil.generate(context, rhs);
-    ifBlock = new IfBlock(new BooleanExpressionBuilder(rhsStatement, op));
     return if_(op, rhsStatement);
   }
 
-  private BlockBuilder<ElseBlockBuilder> _if_() {
+  private BlockBuilder<ElseBlockBuilder> _if_(final BooleanExpressionBuilder condition) {
+    ifBlock = new IfBlock(condition);
+    
     appendCallElement(new DeferredCallElement(new DeferredCallback() {
       public void doDeferred(CallWriter writer, Context context, Statement statement) {
-        statement = validateOrConvertLhs(statement);
-
-        ifBlock.getCondition().setLhsExpr(writer.getCallString());
+        condition.setLhs(statement);
+        condition.setLhsExpr(writer.getCallString());
         writer.reset();
         writer.append(ifBlock.generate(Context.create(context)));
       }
@@ -94,8 +92,6 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements IfBl
     if (lhs.getType() == null)
       lhs.generate(context);
 
-    lhs = validateOrConvertLhs(lhs);
-
     IfBlock elseIfBlock = new IfBlock(new BooleanExpressionBuilder(lhs, rhs, op));
     ifBlock.setElseIfBlock(elseIfBlock);
     return _elseif_(elseIfBlock);
@@ -112,16 +108,5 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements IfBl
         return new IfBlockBuilderImpl(context, callElementBuilder, elseIfBlock);
       }
     });
-  }
-
-  private Statement validateOrConvertLhs(Statement lhs) {
-    if (ifBlock.getCondition().getOperator() == null) {
-      lhs = GenUtil.convert(context, lhs, MetaClassFactory.get(Boolean.class));
-    }
-    else {
-      ifBlock.getCondition().getOperator().assertCanBeApplied(lhs.getType());
-    }
-
-    return lhs;
   }
 }

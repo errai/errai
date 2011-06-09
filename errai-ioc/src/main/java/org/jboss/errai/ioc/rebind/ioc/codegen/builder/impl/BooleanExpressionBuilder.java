@@ -66,8 +66,11 @@ public class BooleanExpressionBuilder implements Statement {
       if (rhs != null)
         operator.assertCanBeApplied(GenUtil.generate(context, rhs).getType());
     }
+    else {
+      lhs = GenUtil.convert(context, lhs, MetaClassFactory.get(Boolean.class));
+    }
 
-    return ((lhs != null) ? lhs.generate(context) : lhsExpr)
+    return ((lhsExpr == null) ? lhs.generate(context) : lhsExpr)
         + ((operator != null) ? (" " + operator.getCanonicalString()) : "")
         + ((rhs != null) ? (" " + rhs.generate(context)) : "");
   }

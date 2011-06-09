@@ -87,15 +87,10 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements LoopBui
    
     appendCallElement(new DeferredCallElement(new DeferredCallback() {
       public void doDeferred(CallWriter writer, Context context, Statement lhs) {
-        if (condition.getOperator() == null) {
-          lhs = GenUtil.convert(context, lhs, MetaClassFactory.get(Boolean.class));
-        }
-        else {
-          condition.getOperator().assertCanBeApplied(lhs.getType());
-        }
-        
+        condition.setLhs(lhs);
+        condition.setLhsExpr(writer.getCallString());
+          
         WhileLoop whileLoop = new WhileLoop(condition, body);
-        whileLoop.getCondition().setLhsExpr(writer.getCallString());
         writer.reset();
         writer.append(whileLoop.generate(Context.create(context)));
       }
