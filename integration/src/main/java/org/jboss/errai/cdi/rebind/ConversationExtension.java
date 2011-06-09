@@ -41,7 +41,7 @@ public class ConversationExtension extends IOCDecoratorExtension<ConversationCon
     }
 
     public String generateDecorator(InjectionPoint<ConversationContext> injectionPoint) {
-        final InjectionContext ctx = injectionPoint.getInjectionContext();
+     //   final InjectionContext ctx = injectionPoint.getInjectionContext();
 
         final MetaClass eventClassType = MetaClassFactory.get(injectionPoint.getInjectionContext()
             .getProcessingContext().loadClassType(Event.class));
