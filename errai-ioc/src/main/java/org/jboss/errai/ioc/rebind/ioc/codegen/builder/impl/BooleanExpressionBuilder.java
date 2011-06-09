@@ -21,6 +21,8 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.values.LiteralFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.GenUtil;
 
+import java.util.IllegalFormatFlagsException;
+
 /**
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -31,7 +33,8 @@ public class BooleanExpressionBuilder implements Statement {
   private Statement rhs;
   private BooleanOperator operator;
 
-  public BooleanExpressionBuilder() {}
+  public BooleanExpressionBuilder() {
+  }
 
   public BooleanExpressionBuilder(Statement rhs, BooleanOperator operator) {
     this.rhs = rhs;
@@ -92,9 +95,36 @@ public class BooleanExpressionBuilder implements Statement {
       lhs = GenUtil.convert(context, lhs, MetaClassFactory.get(Boolean.class));
     }
 
-    return "(" + ((lhsExpr == null) ? lhs.generate(context) : lhsExpr)
-        + ((operator != null) ? (" " + operator.getCanonicalString()) : "")
-        + ((rhs != null) ? (" " + rhs.generate(context)) : "") + ")";
+    String lhsExpr = "";
+    String operExpr = "";
+    String rhsExpr = "";
+
+    if (this.lhsExpr != null) {
+      lhsExpr = this.lhsExpr;
+    }
+    else if (lhs != null) {
+      if (lhs instanceof BooleanExpressionBuilder && this.operator != null) {
+        lhsExpr = "(" + lhs.generate(context) + ")";
+      }
+      else {
+        lhsExpr = lhs.generate(context);
+      }
+    }
+
+    if (this.operator != null) {
+      operExpr = " " + this.operator.getCanonicalString() + " ";
+    }
+
+    if (rhs != null) {
+      if (rhs instanceof BooleanExpressionBuilder) {
+        rhsExpr = "(" + rhs.generate(context) + ")";
+      }
+      else {
+        rhsExpr = rhs.generate(context);
+      }
+    }
+
+    return lhsExpr + operExpr + rhsExpr;
   }
 
   public Context getContext() {

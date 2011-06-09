@@ -77,6 +77,8 @@ public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayB
       buf.append("[]");
     }
 
+    buf.append(" ");
+
     if (initializeFromArray) {
       generateInitialization(values[0]);
     }

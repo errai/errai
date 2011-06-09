@@ -212,7 +212,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
         .invokeStatic(Integer.class, "getInteger", "123");
 
     assertEquals("failed to generate static method invocation",
-        "java.lang.Integer.getInteger(\"123\")", invokeStatement.toJavaString());
+        "Integer.getInteger(\"123\")", invokeStatement.toJavaString());
   }
 
   @Test

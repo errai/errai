@@ -50,7 +50,7 @@ public interface IfBlockBuilderTestResult {
           "} else {\n" +
           " if (s.startsWith(\"def\")) { " +
           "   n = 1;\n" +
-          " }\n;\n" +
+          " };\n" +
           "}\n";
 
   public static final String IF_ELSEIF_BLOCK_RESULT_NO_RHS =
@@ -88,7 +88,7 @@ public interface IfBlockBuilderTestResult {
           "   n = 1;\n" +
           " } else { " +
           "   n = 2;\n" +
-          " }\n;\n" +
+          " };\n" +
           "}\n";
 
   public static final String IF_ELSEIF_ELSE_BLOCK_RESULT_RHS =
