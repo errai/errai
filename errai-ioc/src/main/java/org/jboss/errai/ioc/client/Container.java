@@ -27,14 +27,8 @@ import java.util.Map;
 public class Container implements EntryPoint {
   public void onModuleLoad() {
     final Bootstrapper bootstrapper = GWT.create(Bootstrapper.class);
-
-//        ((ClientMessageBus) get()).addInitializationListener(new InitializationListener() {
-//
-//
-//            public void onInitilization() {
     final RootPanel rootPanel = RootPanel.get();
     final InterfaceInjectionContext ctx = bootstrapper.bootstrapContainer();
-
 
     for (Widget w : ctx.getToRootPanel()) {
       rootPanel.add(w);
@@ -43,8 +37,5 @@ public class Container implements EntryPoint {
     for (Map.Entry<Widget, String> entry : ctx.getWidgetToPanel().entrySet()) {
       ctx.getPanels().get(entry.getValue()).add(entry.getKey());
     }
-//
-//            }
-//        });
   }
 }

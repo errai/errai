@@ -18,7 +18,6 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.*;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.JavaReflectionParameter;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
