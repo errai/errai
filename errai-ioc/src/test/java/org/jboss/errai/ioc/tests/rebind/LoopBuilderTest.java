@@ -256,6 +256,5 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
       .finish().toJavaString();
 
     assertEquals("failed to generate while loop with nested expression", WHILE_RESULT_NESTED_RHS_EMPTY, s);
-
   }
 }
