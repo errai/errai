@@ -244,5 +244,13 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .finish().toJavaString();
 
     assertEquals("failed to generate while loop with lhs invocation and body", WHILE_RESULT_RHS_EMPTY, s);
+    
+  /*  s = StatementBuilder.create()
+    .addVariable("str", String.class)
+    .whileLoop(BooleanOperator.NotEquals, null)
+    .finish().toJavaString();
+
+    assertEquals("failed to generate while loop with lhs invocation and body", WHILE_RESULT_NESTED_RHS_EMPTY, s);
+*/
   }
 }

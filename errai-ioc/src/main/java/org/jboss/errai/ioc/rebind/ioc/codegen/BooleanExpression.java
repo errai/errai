@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.rebind.ioc.codegen.util;
+package org.jboss.errai.ioc.rebind.ioc.codegen;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanExpression;
-import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.BooleanExpressionBuilder;
 
 /**
- * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class Bool {
-  public static BooleanExpression expr(Object lhs, BooleanOperator operator, Object rhs) {
-    return BooleanExpressionBuilder.create(lhs, operator, rhs);
-  }
+public interface BooleanExpression extends Statement {
+  
+  public Statement getLhs();
+  public void setLhs(Statement lhs);
+  
+  public String getLhsExpr();
+  public void setLhsExpr(String lhsExpr);
+  
+  public Statement getRhs();
+  public void setRhs(Statement rhs);
+  
+  public BooleanOperator getOperator();
+  public void setOperator(BooleanOperator operator);
 }

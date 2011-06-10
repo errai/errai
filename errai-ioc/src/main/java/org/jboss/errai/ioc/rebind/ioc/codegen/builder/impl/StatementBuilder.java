@@ -16,14 +16,25 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.*;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.*;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-
 import javax.enterprise.util.TypeLiteral;
+
+import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanExpression;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ArrayInitializationBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ContextualStatementBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ElseBlockBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.LoopBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementBegin;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.VariableReferenceContextualStatementBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DeclareVariable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DynamicLoad;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadField;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadLiteral;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadVariable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.MethodCall;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
  * The root of our fluent StatementBuilder API.
@@ -124,7 +135,11 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
     return new ArrayBuilderImpl(context, callElementBuilder).newArray(componentType, dimensions);
   }
 
-  public BlockBuilder<ElseBlockBuilder> doIf(Statement stmt) {
+  public BlockBuilder<ElseBlockBuilder> doIf(BooleanExpression stmt) {
     return new IfBlockBuilderImpl(context, callElementBuilder).if_(stmt);
+  }
+
+  public BlockBuilder<LoopBuilder> whileLoop(BooleanExpression stmt) {
+    return new LoopBuilderImpl(context, callElementBuilder).while_(stmt);
   }
 }
