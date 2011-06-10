@@ -17,29 +17,50 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.BlockBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ClassStructureBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.PrettyPrinter;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 public class AnnotationEncoder {
   public static String encode(Annotation annotation) {
     Class<? extends Annotation> annotationClass = annotation.annotationType();
-    String str = ObjectBuilder.newInstanceOf(annotationClass)
-        //         { extend the class type
-        .extend()
-            // override the annotationType() method.
-        .publicOverridesMethod("annotationType")
-            //   {
-        .append(StatementBuilder.create().load(annotationClass).returnValue())
-            //   }
-        .finish()
-            // }
-        .finish()
-        .toJavaString();
+    ClassStructureBuilder builder = ObjectBuilder.newInstanceOf(annotationClass)
+            //         { extend the class type
+            .extend()
+                    // override the annotationType() method.
+            .publicOverridesMethod("annotationType")
+                    //   {
+            .append(StatementBuilder.create().load(annotationClass).returnValue())
+                    //   }
+            .finish();
 
-    System.out.println(str);
+    Class<? extends Annotation> annoClass = annotation.getClass();
 
-    return str;
+    for (Method method : annoClass.getDeclaredMethods()) {
+      if (((method.getModifiers() & (Modifier.PRIVATE | Modifier.PROTECTED)) == 0)
+              && (!"equals".equals(method.getName()) && !"hashCode".equals(method.getName()))) {
+        try {
+          builder.publicOverridesMethod(method.getName())
+                  .append(Stmt.create().load(method.invoke(annotation)).returnValue()).finish();
+        }
+        catch (IllegalAccessException e) {
+          throw new RuntimeException("error generation annotation wrapper", e);
+        }
+        catch (InvocationTargetException e) {
+          throw new RuntimeException("error generation annotation wrapper", e);
+        }
+      }
+    }
+
+
+    return PrettyPrinter.prettyPrintJava(builder.finish().toJavaString());
   }
 }

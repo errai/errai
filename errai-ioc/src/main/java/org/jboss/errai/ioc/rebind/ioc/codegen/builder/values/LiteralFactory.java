@@ -19,7 +19,12 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder.values;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.AnnotationEncoder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
+
+import java.lang.annotation.Annotation;
+
+import static org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference.getClassReference;
 
 /**
  * The literal factory provides a LiteralValue for
@@ -33,7 +38,23 @@ public class LiteralFactory {
       return new LiteralValue<Class>((Class<?>) o) {
         @Override
         public String getCanonicalString(Context context) {
-          return LoadClassReference.getClassReference(MetaClassFactory.get((Class<?>) o), context);
+          return getClassReference(MetaClassFactory.get((Class<?>) o), context) + ".class";
+        }
+      };
+    }
+    else if (o instanceof Annotation) {
+      return new LiteralValue<Annotation>((Annotation) o)  {
+        @Override
+        public String getCanonicalString(Context context) {
+          return AnnotationEncoder.encode((Annotation) o);
+        }
+      };
+    }
+    else if (o instanceof Enum) {
+      return new LiteralValue<Enum>((Enum) o) {
+        @Override
+        public String getCanonicalString(Context context) {
+          return getClassReference(MetaClassFactory.get(o.getClass()), context) + "." + ((Enum) o).name();
         }
       };
     }

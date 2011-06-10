@@ -17,6 +17,8 @@
 package org.jboss.errai.ioc.tests.rebind;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.AnnotationEncoder;
+import org.jboss.errai.ioc.tests.rebind.model.MyBean;
+import org.jboss.errai.ioc.tests.rebind.model.MyTestAnnotation;
 import org.junit.Test;
 
 import javax.annotation.PostConstruct;
@@ -33,9 +35,17 @@ public class AnnotationEncoderTest extends AbstractStatementBuilderTest {
     String enc = AnnotationEncoder.encode(PostConstruct.class.getAnnotation(Target.class));
 
     assertEquals("new java.lang.annotation.Target() {\n" +
-        "public Class annotationType() {\n" +
-        "return java.lang.annotation.Target.class;\n" +
-        "}\n" +
-        "}\n", enc);
+            "public Class annotationType() {\n" +
+            "return java.lang.annotation.Target.class;\n" +
+            "}\n" +
+            "}\n", enc);
   }
+
+  @Test
+  public void testEncode2() {
+    String enc = AnnotationEncoder.encode(MyBean.class.getAnnotation(MyTestAnnotation.class));
+
+    System.out.println(enc);
+  }
+
 }

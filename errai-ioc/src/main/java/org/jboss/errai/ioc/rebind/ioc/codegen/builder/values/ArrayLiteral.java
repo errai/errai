@@ -52,12 +52,12 @@ public class ArrayLiteral extends LiteralValue<Object> {
       buf.append("[]");
     }
     buf.append(" ");
-    buf.append(renderInlineArrayLiteral(getValue()));
+    buf.append(renderInlineArrayLiteral(context, getValue()));
 
     return buf.toString();
   }
 
-  private static String renderInlineArrayLiteral(Object arrayInstance) {
+  private static String renderInlineArrayLiteral(Context context, Object arrayInstance) {
     StringBuilder builder = new StringBuilder("{");
 
     int length = Array.getLength(arrayInstance);
@@ -66,11 +66,11 @@ public class ArrayLiteral extends LiteralValue<Object> {
     for (int i = 0; i < length; i++) {
       element = Array.get(arrayInstance, i);
       if (element.getClass().isArray()) {
-        builder.append(renderInlineArrayLiteral(element));
+        builder.append(renderInlineArrayLiteral(context, element));
 
       }
       else {
-        builder.append(LiteralFactory.getLiteral(element).generate(null));
+        builder.append(LiteralFactory.getLiteral(context, element).generate(context));
       }
 
       if (i + 1 < length) {

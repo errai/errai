@@ -81,7 +81,7 @@ public class GenUtil {
       return (Statement) o;
     }
     else {
-      return LiteralFactory.getLiteral(o);
+      return LiteralFactory.getLiteral(context, o);
     }
   }
 

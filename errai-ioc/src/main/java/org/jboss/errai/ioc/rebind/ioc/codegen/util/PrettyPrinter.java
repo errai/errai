@@ -38,6 +38,7 @@ public class PrettyPrinter {
           writeToBuffer(out, lineBuffer, indentLevel++, statementIndent);
           lineBuffer = new StringBuilder();
           break;
+
         case '}':
           writeToBuffer(out, lineBuffer, --indentLevel, statementIndent);
           lineBuffer = new StringBuilder();
@@ -76,8 +77,13 @@ public class PrettyPrinter {
   }
 
   private static void writeToBuffer(StringBuilder out, StringBuilder lineBuffer, int indentLevel, int statementIndent) {
-    String lineBufTrimmed = lineBuffer.toString().trim();
-    out.append(pad((indentLevel + statementIndent) * 4)).append(lineBufTrimmed);
+    String trimmedLineBuffer = lineBuffer.toString().trim();
+
+    if (trimmedLineBuffer.length() == 0) {
+      return;
+    }
+
+    out.append(pad((indentLevel + statementIndent) * 4)).append(trimmedLineBuffer);
   }
 
   private static String pad(int amount) {
