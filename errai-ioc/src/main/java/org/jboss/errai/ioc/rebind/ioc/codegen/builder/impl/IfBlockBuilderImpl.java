@@ -64,7 +64,6 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements IfBl
     return if_(op, rhsStatement);
   }
 
-
   private BlockBuilder<ElseBlockBuilder> doIfUnchained(final Statement condition) {
     ifBlock = new IfBlock(condition);
 
@@ -82,12 +81,11 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements IfBl
     });
   }
 
-
   /**
-   * The LHS value is on the current callstack. So we grab the value from there are generation time.
+   * The LHS value is on the current callstack. So we grab the value from there at generation time.
    *
    * @param condition
-   * @return
+   * @return block builder
    */
   private BlockBuilder<ElseBlockBuilder> doIfLHSChained(final BooleanExpressionBuilder condition) {
     ifBlock = new IfBlock(condition);

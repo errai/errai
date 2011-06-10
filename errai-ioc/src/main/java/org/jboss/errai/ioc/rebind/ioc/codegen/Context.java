@@ -28,10 +28,10 @@ import java.util.*;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class Context {
+  private Set<String> importedPackages = new HashSet<String>();
   private Map<String, Variable> variables = new HashMap<String, Variable>();
   private Context parent = null;
-  private Set<String> importedPackages = new HashSet<String>();
-
+  
   private Context() {
     importedPackages.add("java.lang");
   }

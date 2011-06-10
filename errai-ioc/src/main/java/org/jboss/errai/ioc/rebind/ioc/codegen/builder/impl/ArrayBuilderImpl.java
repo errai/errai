@@ -33,14 +33,10 @@ import java.lang.reflect.Array;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayBuilder, ArrayInitializationBuilder {
-
   private MetaClass type;
   private MetaClass componentType;
   private Integer[] dimensions;
-  private boolean initialized;
-
-  private int dim;
-  private Object[] values = new Object[0];
+  private Object[] values = null;;
 
   protected ArrayBuilderImpl(Context context, CallElementBuilder callElementBuilder) {
     super(context, callElementBuilder);
@@ -59,11 +55,58 @@ public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayB
 
   public AbstractStatementBuilder initialize(Object... values) {
     this.values = values;
-
-    initialized = true;
     return this;
   }
 
+  public MetaClass getType() {
+    return type;
+  }
+
+  public String generate(Context context) {
+    StringBuilder buf = new StringBuilder();
+    buf.append("new ").append(LoadClassReference.getClassReference(componentType, context));
+
+    if (values!=null) {
+      generateWithInitialization(buf);
+    } else {
+      for (Integer dimension : dimensions) {
+        if (dimension == null)
+          throw new RuntimeException("Must provide either dimension expressions or an array initializer");
+
+        buf.append("[").append(dimension).append("]");
+      }
+    }
+
+    return buf.toString();
+  }
+  
+  private void generateWithInitialization(StringBuilder buf) {
+    int dim = 1;
+    boolean initializeFromArray = false;
+    if (values.length == 1 && values[0].getClass().isArray()) {
+      dim = 0;
+      initializeFromArray = true;
+      Class<?> type = values[0].getClass();
+      while (type.isArray()) {
+        dim++;
+        type = type.getComponentType();
+      }
+    }
+
+    for (int i = 0; i < dim; i++) {
+      buf.append("[]");
+    }
+
+    buf.append(" ");
+
+    if (initializeFromArray) {
+      generateInitialization(buf, values[0]);
+    }
+    else {
+      generateInitialization(buf, values);
+    }
+  }
+  
   private void generateInitialization(StringBuilder buf, Object values) {
     buf.append("{");
     int length = Array.getLength(values);
@@ -83,56 +126,5 @@ public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayB
       }
     }
     buf.append("}");
-  }
-
-  public MetaClass getType() {
-    return type;
-  }
-
-  public String generate(Context context) {
-    StringBuilder buf = new StringBuilder();
-
-    buf.append("new ").append(LoadClassReference.getClassReference(componentType, context));
-
-    boolean initializeFromArray = false;
-    if (values.length == 1 && values[0].getClass().isArray()) {
-      initializeFromArray = true;
-      Class<?> type = values[0].getClass();
-      while (type.isArray()) {
-        dim++;
-        type = type.getComponentType();
-      }
-    }
-    else {
-      Class<?> type = values.getClass();
-      while (type.isArray()) {
-        dim++;
-        type = type.getComponentType();
-      }
-    }
-
-    for (int i = 0; i < dim; i++) {
-      buf.append("[]");
-    }
-
-    buf.append(" ");
-
-    if (initializeFromArray) {
-      generateInitialization(buf, values[0]);
-    }
-    else {
-      generateInitialization(buf, values);
-    }
-
-    if (!initialized) {
-      for (Integer dim : dimensions) {
-        if (dim == null)
-          throw new RuntimeException("Must provide either dimension expressions or an array initializer");
-
-        buf.append("[").append(dim).append("]");
-      }
-    }
-
-    return buf.toString();
   }
 }

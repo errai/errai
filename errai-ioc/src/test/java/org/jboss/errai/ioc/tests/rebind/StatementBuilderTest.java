@@ -129,7 +129,6 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
       fail("Expected RuntimeException");
     }
     catch (Exception e) {
-      e.printStackTrace();
       // expected
       assertEquals("Must provide either dimension expressions or an array initializer", e.getMessage());
     }

@@ -34,18 +34,38 @@ public class AnnotationEncoderTest extends AbstractStatementBuilderTest {
   public void testEncode() {
     String enc = AnnotationEncoder.encode(PostConstruct.class.getAnnotation(Target.class));
 
-    assertEquals("new java.lang.annotation.Target() {\n" +
-            "public Class annotationType() {\n" +
-            "return java.lang.annotation.Target.class;\n" +
-            "}\n" +
-            "}\n", enc);
+    assertEquals("new java.lang.annotation.Target() { " +
+    		"public java.lang.annotation.ElementType[] value() { " +
+    		" return new java.lang.annotation.ElementType[] { " +
+    		" java.lang.annotation.ElementType.METHOD }; " +
+    		"} " +
+    		"public String toString() { " +
+    		" return \"@java.lang.annotation.Target(value=[METHOD])\"; " +
+    		"} " +
+    		"public Class annotationType() { " +
+    		" return java.lang.annotation.Target.class; " +
+    		"} " +
+    		"}", enc);
   }
 
   @Test
   public void testEncode2() {
     String enc = AnnotationEncoder.encode(MyBean.class.getAnnotation(MyTestAnnotation.class));
 
-    System.out.println(enc);
-  }
+    assertEquals("new org.jboss.errai.ioc.tests.rebind.model.MyTestAnnotation() { " +
+    "public String toString() { " +
+    "    return \"@org.jboss.errai.ioc.tests.rebind.model.MyTestAnnotation(foo=barfoo, testEum=FOURTH)\"; " +
+    "} " +
+    "public Class annotationType() { " +
+    "    return org.jboss.errai.ioc.tests.rebind.model.MyTestAnnotation.class; " +
+    "} " +
+    "public String foo() { " +
+    "    return \"barfoo\"; " +
+    "} " +
+    "public org.jboss.errai.ioc.tests.rebind.model.TestEnum testEum() { " +
+    "    return org.jboss.errai.ioc.tests.rebind.model.TestEnum.FOURTH; " +
+    "} " +
 
+    "}" ,enc);
+  }
 }
