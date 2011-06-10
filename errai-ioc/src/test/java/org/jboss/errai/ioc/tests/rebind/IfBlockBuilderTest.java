@@ -26,6 +26,8 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.util.Refs;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 import org.junit.Test;
 
+import java.util.HashMap;
+
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -294,6 +296,18 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
 
 
     System.out.println(s);
+  }
+
+  @Test
+  public void testBlah() {
+    System.out.println(Stmt.create()
+            .load("foo")
+            .invoke("substring", 1)
+            .if_(BooleanOperator.Equals, "foo")
+            .append(Stmt.create().loadStatic(System.class, "out").invoke("println", Stmt.create()
+                    .load(new Object[][]{{10.1f, 2}, {3, HashMap.class}})))
+            .finish()
+            .toJavaString());
   }
 
 }

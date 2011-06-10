@@ -17,7 +17,6 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.BlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ClassStructureBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
@@ -59,7 +58,6 @@ public class AnnotationEncoder {
         }
       }
     }
-
 
     return PrettyPrinter.prettyPrintJava(builder.finish().toJavaString());
   }
