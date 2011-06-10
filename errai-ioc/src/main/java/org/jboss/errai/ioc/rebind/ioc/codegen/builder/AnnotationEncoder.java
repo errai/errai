@@ -16,31 +16,20 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
-
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.BlockBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ClassStructureBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ObjectBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.PrettyPrinter;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ClassStructureBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ObjectBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.PrettyPrinter;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
+
 public class AnnotationEncoder {
   public static String encode(Annotation annotation) {
     Class<? extends Annotation> annotationClass = annotation.annotationType();
-    ClassStructureBuilder builder = ObjectBuilder.newInstanceOf(annotationClass)
-            //         { extend the class type
-            .extend()
-                    // override the annotationType() method.
-            .publicOverridesMethod("annotationType")
-                    //   {
-            .append(StatementBuilder.create().load(annotationClass).returnValue())
-                    //   }
-            .finish();
+    ClassStructureBuilder builder = ObjectBuilder.newInstanceOf(annotationClass).extend();
 
     Class<? extends Annotation> annoClass = annotation.getClass();
 
@@ -59,7 +48,6 @@ public class AnnotationEncoder {
         }
       }
     }
-
 
     return PrettyPrinter.prettyPrintJava(builder.finish().toJavaString());
   }

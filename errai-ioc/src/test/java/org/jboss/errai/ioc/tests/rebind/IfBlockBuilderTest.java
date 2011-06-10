@@ -267,7 +267,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
   }
 
   @Test
-  public void testIfBlockWithComplexExpression() {
+  public void testIfBlockWithNullCheck() {
     String s = StatementBuilder.create()
         .addVariable("str", String.class)
         .loadVariable("str")
@@ -275,25 +275,26 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
         .finish()
         .toJavaString();
 
-    System.out.println(s);
+    assertEquals("Failed to generate if block using a null rhs", EMPTY_IF_BLOCK_RESULT_NULL_RHS, s);
   }
 
   @Test
-  public void testIfBlockUnchained() {
+  public void testIfBlockUnchainedNestedExpresions() {
     Context ctx = Context.create().addVariable("a", boolean.class)
         .addVariable("b", boolean.class);
 
-    String s = Stmt.create(ctx).doIf(Bool.expr(Bool.expr("foo", BooleanOperator.Equals, "bar"),
-        BooleanOperator.Or,
-        Bool.expr(Bool.expr("cat", BooleanOperator.Equals, "dog"), BooleanOperator.And,
-            Bool.expr("girl", BooleanOperator.NotEquals, "boy"))))
-
-        .finish().elseif_(Bool.expr(Stmt.create().loadVariable("a"), BooleanOperator.And, Stmt.create().loadVariable("b")))
-        .append(Stmt.create().loadStatic(System.class, "out").invoke("println", Refs.get("a")))
-        .finish().toJavaString();
-
-
-    System.out.println(s);
+    String s = Stmt.create(ctx)
+        .doIf(Bool.expr(Bool.expr("foo", BooleanOperator.Equals, "bar"),
+            BooleanOperator.Or,
+            Bool.expr(Bool.expr("cat", BooleanOperator.Equals, "dog"), BooleanOperator.And,
+                Bool.expr("girl", BooleanOperator.NotEquals, "boy"))))
+        .finish()
+        .elseif_(Bool.expr(Stmt.create().loadVariable("a"), BooleanOperator.And, Stmt.create().loadVariable("b")))
+          .append(Stmt.create().loadStatic(System.class, "out").invoke("println", Refs.get("a")))
+        .finish()
+        .toJavaString();
+    
+    assertEquals("Failed to generate if block using nested boolean expressions", 
+        IF_ELSEIF_BLOCK_RESULT_UNCHAINED_NESTED_EXPRESSIONS, s);
   }
-
 }
