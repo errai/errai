@@ -16,19 +16,23 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.Builder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.VariableDeclaration;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 import javax.enterprise.util.TypeLiteral;
+import java.util.Map;
 
 /**
  * Builder for the {@link Context}.
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class ContextBuilder {
+public class ContextBuilder implements Builder {
   private Context context;
 
   protected ContextBuilder(Context context) {
@@ -99,6 +103,25 @@ public class ContextBuilder {
     return declareVariable(Variable.create(name, type));
   }
 
+
+  public String toJavaString() {
+    Map<String, Variable> vars = context.getVariables();
+    StringBuilder buf = new StringBuilder();
+
+    for (Map.Entry<String, Variable> entry : vars.entrySet()) {
+      buf.append(LoadClassReference.getClassReference(entry.getValue().getType(), context))
+      .append(" ")
+      .append(entry.getKey());
+
+      if (entry.getValue().getValue() != null) {
+        buf.append(entry.getValue().generate(context));
+      }
+      buf.append(';');
+      buf.append('\n');
+    }
+
+    return buf.toString();
+  }
 
   public Context getContext() {
     return context;

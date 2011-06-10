@@ -109,4 +109,8 @@ public class Context {
   public Collection<Variable> getDeclaredVariables() {
     return variables.values();
   }
+
+  public Map<String, Variable> getVariables() {
+    return Collections.unmodifiableMap(variables);
+  }
 }

@@ -26,6 +26,8 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.util.Refs;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 import org.junit.Test;
 
+import java.util.HashMap;
+
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -297,4 +299,5 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
     assertEquals("Failed to generate if block using nested boolean expressions", 
         IF_ELSEIF_BLOCK_RESULT_UNCHAINED_NESTED_EXPRESSIONS, s);
   }
+
 }
