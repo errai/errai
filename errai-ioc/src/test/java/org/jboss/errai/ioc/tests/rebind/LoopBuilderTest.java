@@ -24,6 +24,8 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidExpressionExcepti
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.TypeNotIterableException;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.Bool;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 import org.junit.Test;
 
 import javax.enterprise.util.TypeLiteral;
@@ -244,5 +246,16 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .finish().toJavaString();
 
     assertEquals("failed to generate while loop with lhs invocation and body", WHILE_RESULT_RHS_EMPTY, s);
+    
+    s = StatementBuilder.create()
+      .addVariable("str", String.class)
+      .whileLoop(Bool.expr(
+          Bool.expr(Variable.get("str"), BooleanOperator.NotEquals, null), 
+          BooleanOperator.And,
+          Bool.expr(Stmt.create().loadVariable("str").invoke("length"), BooleanOperator.GreaterThan, 0)))
+      .finish().toJavaString();
+
+    assertEquals("failed to generate while loop with nested expression", WHILE_RESULT_NESTED_RHS_EMPTY, s);
+
   }
 }

@@ -16,6 +16,7 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanExpression;
 import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
@@ -28,14 +29,13 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.util.GenUtil;
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class BooleanExpressionBuilder implements Statement {
+public class BooleanExpressionBuilder implements BooleanExpression {
   private Statement lhs;
   private String lhsExpr;
   private Statement rhs;
   private BooleanOperator operator;
 
-  public BooleanExpressionBuilder() {
-  }
+  public BooleanExpressionBuilder() {}
 
   public BooleanExpressionBuilder(Statement rhs, BooleanOperator operator) {
     this.rhs = rhs;
@@ -52,7 +52,7 @@ public class BooleanExpressionBuilder implements Statement {
     this.lhsExpr = lhsExpr;
   }
 
-  public static Statement create(Object lhs, BooleanOperator operator, Object rhs) {
+  public static BooleanExpression create(Object lhs, BooleanOperator operator, Object rhs) {
     Statement toLhs;
     Statement toRhs;
 
@@ -71,18 +71,6 @@ public class BooleanExpressionBuilder implements Statement {
     }
 
     return new BooleanExpressionBuilder(toLhs, toRhs, operator);
-  }
-
-  public BooleanOperator getOperator() {
-    return operator;
-  }
-
-  public void setLhs(Statement lhs) {
-    this.lhs = lhs;
-  }
-
-  public void setLhsExpr(String lhsExpr) {
-    this.lhsExpr = lhsExpr;
   }
 
   public String generate(Context context) {
@@ -134,5 +122,37 @@ public class BooleanExpressionBuilder implements Statement {
 
   public MetaClass getType() {
     return MetaClassFactory.get(boolean.class);
+  }
+
+  public Statement getLhs() {
+    return lhs;
+  }
+
+  public void setLhs(Statement lhs) {
+    this.lhs = lhs;
+  }
+  
+  public String getLhsExpr() {
+    return lhsExpr;
+  }
+
+  public void setLhsExpr(String lhsExpr) {
+    this.lhsExpr = lhsExpr;
+  }
+  
+  public Statement getRhs() {
+    return rhs;
+  }
+
+  public void setRhs(Statement rhs) {
+    this.rhs = rhs;
+  }
+
+  public BooleanOperator getOperator() {
+    return operator;
+  }
+  
+  public void setOperator(BooleanOperator operator) {
+    this.operator = operator;
   }
 }

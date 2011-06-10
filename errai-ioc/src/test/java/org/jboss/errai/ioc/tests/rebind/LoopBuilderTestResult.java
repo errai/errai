@@ -66,4 +66,7 @@ public interface LoopBuilderTestResult {
   
   public static final String WHILE_RESULT_RHS_EMPTY =
       "   while (str.length() >= 2) { }";
+  
+  public static final String WHILE_RESULT_NESTED_RHS_EMPTY =
+    "   while ((str != null) && (str.length() > 0)) { }";
 }

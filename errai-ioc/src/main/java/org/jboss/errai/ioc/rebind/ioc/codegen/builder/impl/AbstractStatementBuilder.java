@@ -16,15 +16,14 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
+import static org.jboss.errai.ioc.rebind.ioc.codegen.util.PrettyPrinter.prettyPrintJava;
+
 import org.jboss.errai.ioc.rebind.ioc.codegen.Builder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.CallElement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.CallWriter;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.PrettyPrinter;
-
-import static org.jboss.errai.ioc.rebind.ioc.codegen.util.PrettyPrinter.prettyPrintJava;
 
 /**
  * Base class of all {@link StatementBuilder}s

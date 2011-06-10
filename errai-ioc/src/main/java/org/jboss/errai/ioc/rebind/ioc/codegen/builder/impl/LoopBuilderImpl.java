@@ -67,7 +67,11 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements LoopBui
   public BlockBuilder<LoopBuilder> while_() {
     return _while_(new BooleanExpressionBuilder());
   }
- 
+
+  public BlockBuilder<LoopBuilder> while_(BooleanExpression stmt) {
+    return _while_(stmt);
+  }
+
   public BlockBuilder<LoopBuilder> while_(BooleanOperator op, Object rhs) {
     return while_(op, GenUtil.generate(context, rhs));
   }
@@ -77,14 +81,15 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements LoopBui
     return _while_(new BooleanExpressionBuilder(rhs, op));
   }
   
-  private BlockBuilder<LoopBuilder> _while_(final BooleanExpressionBuilder condition) {
+  private BlockBuilder<LoopBuilder> _while_(final BooleanExpression condition) {
     final BlockStatement body = new BlockStatement();
    
     appendCallElement(new DeferredCallElement(new DeferredCallback() {
       public void doDeferred(CallWriter writer, Context context, Statement lhs) {
-        condition.setLhs(lhs);
-        condition.setLhsExpr(writer.getCallString());
-          
+        if (lhs!=null) {
+          condition.setLhs(lhs);
+          condition.setLhsExpr(writer.getCallString());
+        }  
         WhileLoop whileLoop = new WhileLoop(condition, body);
         writer.reset();
         writer.append(whileLoop.generate(Context.create(context)));
@@ -93,7 +98,7 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements LoopBui
     
     return createLoopBody(body);
   }
-
+  
   private BlockBuilder<LoopBuilder> createLoopBody(BlockStatement body) {
     return new BlockBuilder<LoopBuilder>(body, new BuildCallback<LoopBuilder>() {
       public LoopBuilder callback(Statement statement) {

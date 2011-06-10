@@ -16,13 +16,13 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import javax.enterprise.util.TypeLiteral;
+
+import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanExpression;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.BlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-
-import javax.enterprise.util.TypeLiteral;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -53,5 +53,7 @@ public interface StatementBegin extends ArrayBuilder {
 
   public ObjectBuilder newObject(Class<?> type);
 
-  public BlockBuilder<ElseBlockBuilder> doIf(Statement stmt);
+  public BlockBuilder<ElseBlockBuilder> doIf(BooleanExpression stmt);
+  
+  public BlockBuilder<LoopBuilder> whileLoop(BooleanExpression stmt);
 }
