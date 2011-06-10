@@ -24,6 +24,8 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.CallWriter;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.PrettyPrinter;
 
+import static org.jboss.errai.ioc.rebind.ioc.codegen.util.PrettyPrinter.prettyPrintJava;
+
 /**
  * Base class of all {@link StatementBuilder}s
  *
@@ -54,7 +56,7 @@ public abstract class AbstractStatementBuilder implements Statement, Builder {
   public String generate(Context context) {
     CallWriter writer = new CallWriter();
     callElementBuilder.getRootElement().handleCall(writer, context, null);
-    return PrettyPrinter.prettyPrintJava(writer.getCallString());
+    return prettyPrintJava(writer.getCallString());
   }
 
   public void appendCallElement(CallElement element) {

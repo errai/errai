@@ -25,6 +25,8 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.GenUtil;
 
+import static org.jboss.errai.ioc.rebind.ioc.codegen.builder.CallParameters.fromStatements;
+
 /**
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -46,7 +48,7 @@ public class MethodCall extends AbstractCallElement {
   }
 
   public void handleCall(CallWriter writer, Context context, Statement statement) {
-    CallParameters callParams = CallParameters.fromStatements(GenUtil.generateCallParameters(context, parameters));
+    CallParameters callParams = fromStatements(GenUtil.generateCallParameters(context, parameters));
 
     MetaClass[] parameterTypes = callParams.getParameterTypes();
     MetaMethod method = (staticMethod) ? statement.getType().getBestMatchingStaticMethod(methodName, parameterTypes)
@@ -54,7 +56,7 @@ public class MethodCall extends AbstractCallElement {
     if (method == null)
       throw new UndefinedMethodException(statement.getType(), methodName, parameterTypes);
 
-    callParams = CallParameters.fromStatements(GenUtil.generateCallParameters(method, context, parameters));
+    callParams = fromStatements(GenUtil.generateCallParameters(method, context, parameters));
     statement = new MethodInvocation(method, callParams);
 
     nextOrReturn(writer, context, statement);
