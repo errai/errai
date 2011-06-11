@@ -22,9 +22,11 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ForLoop extends AbstractBlockConditional {
   private Statement initializer;
+  private String initializerExpr;
   private Statement afterBlock;
 
   public ForLoop(Statement condition, BlockStatement block) {
@@ -37,13 +39,25 @@ public class ForLoop extends AbstractBlockConditional {
     this.afterBlock = afterBlock;
   }
 
+  public ForLoop(Statement condition, BlockStatement block, String initializerExpr, Statement afterBlock) {
+    super(condition, block);
+    this.initializerExpr = initializerExpr;
+    this.afterBlock = afterBlock;
+  }
+
   public String generate(Context context) {
     StringBuilder builder = new StringBuilder("for (");
 
-    if (initializer != null) {
+    if (initializerExpr != null) {
+      builder.append(initializerExpr);
+    }
+    else if (initializer != null) {
       builder.append(initializer.generate(context));
     }
-    builder.append("; ").append(getCondition().generate(context)).append("; ");
+    if (!builder.toString().endsWith(";"))
+      builder.append(";");
+    
+    builder.append(" ").append(getCondition().generate(context)).append("; ");
 
     if (afterBlock != null) {
       builder.append(afterBlock.generate(context));

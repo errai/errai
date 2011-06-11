@@ -20,6 +20,7 @@ import javax.enterprise.util.TypeLiteral;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanExpression;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ArrayInitializationBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ContextualStatementBuilder;
@@ -141,5 +142,17 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
 
   public BlockBuilder<LoopBuilder> whileLoop(BooleanExpression stmt) {
     return new LoopBuilderImpl(context, callElementBuilder).while_(stmt);
+  }
+
+  public BlockBuilder<LoopBuilder> forLoop(BooleanExpression condition) {
+    return new LoopBuilderImpl(context, callElementBuilder).for_(condition);
+  }
+
+  public BlockBuilder<LoopBuilder> forLoop(Statement initializer, BooleanExpression condition) {
+    return new LoopBuilderImpl(context, callElementBuilder).for_(initializer, condition);
+  }
+
+  public BlockBuilder<LoopBuilder> forLoop(Statement initializer, BooleanExpression condition, Statement countingExpression) {
+    return new LoopBuilderImpl(context, callElementBuilder).for_(initializer, condition, countingExpression);
   }
 }

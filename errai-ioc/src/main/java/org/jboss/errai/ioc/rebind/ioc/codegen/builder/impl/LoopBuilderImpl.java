@@ -16,12 +16,19 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.*;
+import org.jboss.errai.ioc.rebind.ioc.codegen.BlockStatement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanExpression;
+import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BuildCallback;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.LoopBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.CallWriter;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DeferredCallElement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DeferredCallback;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.control.ForLoop;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.control.ForeachLoop;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.control.WhileLoop;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.values.NullLiteral;
@@ -96,6 +103,45 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements LoopBui
       }
     }));
     
+    return createLoopBody(body);
+  }
+  
+  public BlockBuilder<LoopBuilder> for_(BooleanExpression condition) {
+    return for_(condition, (Statement) null);
+  }
+
+  public BlockBuilder<LoopBuilder> for_(BooleanExpression condition, Statement countingExpression) {
+    return _for_(null, condition, countingExpression);
+  }
+  
+  public BlockBuilder<LoopBuilder> for_(Statement initializer, BooleanExpression condition) {
+    return for_(initializer, condition, null);
+  }
+  
+  public BlockBuilder<LoopBuilder> for_(Statement initializer, BooleanExpression condition, Statement countingExpression) {
+    return _for_(initializer, condition, countingExpression);
+  }
+  
+  private BlockBuilder<LoopBuilder> _for_(final Statement initializer, final BooleanExpression condition, 
+      final Statement countingExpression) {
+    final BlockStatement body = new BlockStatement();
+
+    appendCallElement(new DeferredCallElement(new DeferredCallback() {
+      public void doDeferred(CallWriter writer, Context context, Statement lhs) {
+        ForLoop forLoop = null;
+        if (initializer!=null) {
+          forLoop = new ForLoop(condition, body, initializer, countingExpression);
+          if (initializer instanceof Variable) {
+            context.addVariable((Variable) initializer);
+          }
+        } else {
+          forLoop = new ForLoop(condition, body, writer.getCallString(), countingExpression);
+        }
+        writer.reset();
+        writer.append(forLoop.generate(Context.create(context)));
+      }
+    }));
+
     return createLoopBody(body);
   }
   

@@ -16,16 +16,16 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
+import java.util.Map;
+
+import javax.enterprise.util.TypeLiteral;
+
 import org.jboss.errai.ioc.rebind.ioc.codegen.Builder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.VariableDeclaration;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-
-import javax.enterprise.util.TypeLiteral;
-import java.util.Map;
 
 /**
  * Builder for the {@link Context}.
@@ -78,6 +78,7 @@ public class ContextBuilder implements Builder {
   }
 
   public VariableDeclaration declareVariable(final Variable var) {
+    context.addVariable(var);
     return new VariableDeclaration() {
       public Statement initializeWith(Object initialization) {
         var.initialize(initialization);

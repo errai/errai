@@ -102,9 +102,8 @@ public class GenUtil {
   public static Statement convert(Context context, Object input, MetaClass targetType) {
     try {
       if (input instanceof Statement) {
-        if (input instanceof VariableReference
-            && (((VariableReference) input).getValue() instanceof LiteralValue)) {
-          input = ((LiteralValue<?>) ((VariableReference) input).getValue()).getValue();
+        if (input instanceof LiteralValue<?>) {
+          input = ((LiteralValue<?>) input).getValue();
         }
         else {
           assertAssignableTypes(((Statement) input).getType(), targetType);

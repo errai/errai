@@ -69,4 +69,23 @@ public interface LoopBuilderTestResult {
 
   public static final String WHILE_RESULT_NESTED_RHS_EMPTY =
       "   while ((str != null) && (str.length() > 0)) { }";
+
+  public static final String FOR_RESULT_NO_INITIALIZER_NO_COUNTING_EXP_EMPTY =
+      "     for (; i < 100; ) { }";
+
+  public static final String FOR_RESULT_INITIALIZER_NO_COUNTING_EXP_EMPTY =
+      "     for (i = 0; i < 100; ) { }";
+
+  public static final String FOR_RESULT_INITIALIZER_COUNTING_EXP_EMPTY =
+      "     for (i = 0; i < 100; i += 1) { }";
+
+  public static final String FOR_RESULT_CHAINED_INITIALIZER_NO_COUNTING_EXP_EMPTY =
+      "     for (i; i < 100; ) { }";
+
+  public static final String FOR_RESULT_CHAINED_INITIALIZER_COUNTING_EXP_EMPTY =
+      "     for (i; i < 100; i += 1) { }";
+
+  public static final String FOR_RESULT_DECLARE_INITIALIZER_COUNTING_EXP =
+      "     for (int i = 0; i < 100; i += 1) { System.out.println(i); }";
+
 }
