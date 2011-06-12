@@ -81,12 +81,18 @@ public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayB
   }
   
   private void generateWithInitialization(StringBuilder buf) {
-    int dim = 1;
+    int dim = 0;
     boolean initializeFromArray = false;
     if (values.length == 1 && values[0].getClass().isArray()) {
-      dim = 0;
       initializeFromArray = true;
       Class<?> type = values[0].getClass();
+      while (type.isArray()) {
+        dim++;
+        type = type.getComponentType();
+      }
+    }
+    else {
+      Class<?> type = values.getClass();
       while (type.isArray()) {
         dim++;
         type = type.getComponentType();
