@@ -19,6 +19,7 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 import javax.enterprise.util.TypeLiteral;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanExpression;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.BlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
@@ -53,7 +54,13 @@ public interface StatementBegin extends ArrayBuilder {
 
   public ObjectBuilder newObject(Class<?> type);
 
-  public BlockBuilder<ElseBlockBuilder> doIf(BooleanExpression stmt);
+  public BlockBuilder<ElseBlockBuilder> doIf(BooleanExpression condition);
   
-  public BlockBuilder<LoopBuilder> whileLoop(BooleanExpression stmt);
+  public BlockBuilder<LoopBuilder> whileLoop(BooleanExpression condition);
+  
+  public BlockBuilder<LoopBuilder> forLoop(BooleanExpression condition);
+  
+  public BlockBuilder<LoopBuilder> forLoop(Statement initializer, BooleanExpression condition);
+  
+  public BlockBuilder<LoopBuilder> forLoop(Statement initializer, BooleanExpression condition, Statement countingExpression);
 }

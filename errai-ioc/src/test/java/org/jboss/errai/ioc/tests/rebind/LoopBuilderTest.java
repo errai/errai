@@ -16,7 +16,20 @@
 
 package org.jboss.errai.ioc.tests.rebind;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.enterprise.util.TypeLiteral;
+
+import org.jboss.errai.ioc.rebind.ioc.codegen.AssignmentOperator;
+import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Builder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.LoopBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ContextBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
@@ -27,13 +40,6 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.exception.TypeNotIterableException
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Bool;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 import org.junit.Test;
-
-import javax.enterprise.util.TypeLiteral;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Tests the generation of loops using the {@link StatementBuilder} API.
@@ -246,16 +252,74 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .finish().toJavaString();
 
     assertEquals("failed to generate while loop with lhs invocation and body", WHILE_RESULT_RHS_EMPTY, s);
-    
+
     s = StatementBuilder.create()
-      .addVariable("str", String.class)
-      .whileLoop(Bool.expr(
-          Bool.expr(Variable.get("str"), BooleanOperator.NotEquals, null), 
-          BooleanOperator.And,
-          Bool.expr(Stmt.create().loadVariable("str").invoke("length"), BooleanOperator.GreaterThan, 0)))
-      .finish().toJavaString();
+        .addVariable("str", String.class)
+        .whileLoop(Bool.expr(
+            Bool.expr(Variable.get("str"), BooleanOperator.NotEquals, null),
+            BooleanOperator.And,
+            Bool.expr(Stmt.create().loadVariable("str").invoke("length"), BooleanOperator.GreaterThan, 0)))
+        .finish().toJavaString();
 
     assertEquals("failed to generate while loop with nested expression", WHILE_RESULT_NESTED_RHS_EMPTY, s);
+  }
 
+  @Test
+  public void testForLoop() {
+    String s = StatementBuilder.create()
+        .addVariable("i", Integer.class)
+        .forLoop(Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100))
+        .finish().toJavaString();
+
+    assertEquals("failed to generate for loop without initializer",
+        FOR_RESULT_NO_INITIALIZER_NO_COUNTING_EXP_EMPTY, s);
+
+    s = StatementBuilder.create()
+        .addVariable("i", Integer.class)
+        .forLoop(StatementBuilder.create().loadVariable("i").assignValue(0),
+            Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100))
+        .finish().toJavaString();
+
+    assertEquals("failed to generate for loop with initializer",
+        FOR_RESULT_INITIALIZER_NO_COUNTING_EXP_EMPTY, s);
+
+    s = StatementBuilder.create()
+        .addVariable("i", Integer.class)
+        .forLoop(StatementBuilder.create().loadVariable("i").assignValue(0),
+            Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100),
+            StatementBuilder.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
+        .finish().toJavaString();
+
+    assertEquals("failed to generate for loop with initializer and counting expression",
+        FOR_RESULT_INITIALIZER_COUNTING_EXP_EMPTY, s);
+
+    s = StatementBuilder.create()
+        .addVariable("i", Integer.class, 0)
+        .loadVariable("i")
+        .for_(Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100))
+        .finish().toJavaString();
+
+    assertEquals("failed to generate for loop with initializer and chained lhs",
+        FOR_RESULT_CHAINED_INITIALIZER_NO_COUNTING_EXP_EMPTY, s);
+
+    s = StatementBuilder.create()
+        .addVariable("i", Integer.class, 0)
+        .loadVariable("i")
+        .for_(Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100),
+            StatementBuilder.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
+        .finish().toJavaString();
+
+    assertEquals("failed to generate for loop with initializer, counting expression and chained lhs",
+        FOR_RESULT_CHAINED_INITIALIZER_COUNTING_EXP_EMPTY, s);
+
+    s = StatementBuilder.create()
+        .forLoop(ContextBuilder.create().declareVariable("i", int.class).initializeWith(0),
+            Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100),
+            StatementBuilder.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
+        .append(StatementBuilder.create().loadStatic(System.class, "out").invoke("println", Variable.get("i")))
+        .finish().toJavaString();
+
+    assertEquals("failed to generate for loop with declaring initializer and counting expression",
+        FOR_RESULT_DECLARE_INITIALIZER_COUNTING_EXP, s);
   }
 }

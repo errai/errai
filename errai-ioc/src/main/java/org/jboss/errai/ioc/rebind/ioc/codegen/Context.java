@@ -16,6 +16,7 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 
 import javax.enterprise.util.TypeLiteral;
@@ -57,6 +58,21 @@ public class Context {
     return addVariable(Variable.create(name, type));
   }
 
+  public Context addVariable(String name, Object initialization) {
+    Variable v = Variable.create(name, initialization);
+    return addVariable(v);
+  }
+
+  public Context addVariable(String name, Class<?> type, Object initialization) {
+    Variable v = Variable.create(name, type, initialization);
+    return addVariable(v);
+  }
+
+  public Context addVariable(String name, TypeLiteral<?> type, Object initialization) {
+    Variable v = Variable.create(name, type, initialization);
+    return addVariable(v);
+  }
+  
   public Context addVariable(Variable variable) {
     variables.put(variable.getName(), variable);
     return this;
@@ -112,5 +128,9 @@ public class Context {
 
   public Map<String, Variable> getVariables() {
     return Collections.unmodifiableMap(variables);
+  }
+  
+  public void setParent(Context parent) {
+    this.parent = parent;
   }
 }

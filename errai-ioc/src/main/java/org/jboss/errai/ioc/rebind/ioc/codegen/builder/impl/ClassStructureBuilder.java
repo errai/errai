@@ -16,7 +16,6 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
-
 import org.jboss.errai.ioc.rebind.ioc.codegen.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BuildCallback;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.DefParameters;
