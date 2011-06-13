@@ -36,7 +36,7 @@ public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayB
   private MetaClass type;
   private MetaClass componentType;
   private Integer[] dimensions;
-  private Object[] values = null;;
+  private Object values = null;;
 
   protected ArrayBuilderImpl(Context context, CallElementBuilder callElementBuilder) {
     super(context, callElementBuilder);
@@ -54,7 +54,15 @@ public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayB
   }
 
   public AbstractStatementBuilder initialize(Object... values) {
-    this.values = values;
+    if (values.length == 1 && values[0].getClass().isArray()
+        && values.getClass().getComponentType().equals(Object.class)) {
+      // this is a workaround for the jdt compiler which is coercing a multi-dimensional array
+      // into the first element of our vararg instead of flattening it out (like javac does).
+      this.values = values[0];
+    } else {
+      this.values = values;
+    }
+    
     return this;
   }
 
@@ -83,16 +91,7 @@ public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayB
 
   private void generateWithInitialization(StringBuilder buf) {
     int dim = 0;
-    Object vals = values;
     Class<?> type = values.getClass();
-    if (values.length == 1 && values[0].getClass().isArray()
-        && values.getClass().getComponentType().equals(Object.class)) {
-      // this is a workaround for the jdt compiler which is coercing a multi-dimensional array
-      // into the first element of our vararg instead of flattening it out (like javac does).
-      vals = values[0];
-      type = values[0].getClass();
-    }
-
     while (type.isArray()) {
       dim++;
       type = type.getComponentType();
@@ -103,7 +102,7 @@ public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayB
     }
     buf.append(" ");
 
-    generateInitialization(buf, vals);
+    generateInitialization(buf, values);
   }
 
   private void generateInitialization(StringBuilder buf, Object values) {
