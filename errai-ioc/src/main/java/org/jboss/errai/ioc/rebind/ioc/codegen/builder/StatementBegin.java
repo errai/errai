@@ -40,7 +40,7 @@ public interface StatementBegin extends ArrayBuilder {
 
   public StatementBuilder addVariable(String name, TypeLiteral<?> type, Object initialization);
 
-  public VariableReferenceContextualStatementBuilder loadVariable(String name);
+  public VariableReferenceContextualStatementBuilder loadVariable(String name, Object... indexes);
 
   public ContextualStatementBuilder loadLiteral(Object o);
 

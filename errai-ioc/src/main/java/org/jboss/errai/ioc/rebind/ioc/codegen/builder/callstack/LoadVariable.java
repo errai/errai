@@ -17,26 +17,40 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.VariableReference;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.GenUtil;
 
 /**
+ * {@link CallElement} to load {@link Variable}s. Indexes can be provided in case of an array.
+ * 
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class LoadVariable extends AbstractCallElement {
   private String variableName;
+  private Object[] indexes;
 
-  public LoadVariable(String variableName) {
+  public LoadVariable(String variableName, Object... indexes) {
     this.variableName = variableName;
+    this.indexes = indexes;
   }
 
   public void handleCall(CallWriter writer, Context context, Statement statement) {
     VariableReference ref = context.getVariable(variableName);
-
+    
     if (ref == null) {
       throw new OutOfScopeException(variableName);
     }
+    
+    Statement[] indexes = new Statement[this.indexes.length];
+    for (int i = 0; i < indexes.length; i++) {
+      indexes[i] = GenUtil.generate(context, this.indexes[i]);
+      indexes[i] = GenUtil.convert(context, indexes[i], MetaClassFactory.get(Integer.class));
+    }
+    ref.setIndexes(indexes);
 
     nextOrReturn(writer, context, ref);
   }

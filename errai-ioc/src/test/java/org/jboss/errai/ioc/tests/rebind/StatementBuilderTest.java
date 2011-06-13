@@ -224,16 +224,16 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   public void testAssignArrayVariable() {
     String s = StatementBuilder.create()
         .addVariable("twoDimArray", String[][].class)
-        .loadVariable("twoDimArray")
-        .assignArrayValue("test", 1, 2)
+        .loadVariable("twoDimArray", 1, 2)
+        .assignValue("test")
         .toJavaString();
 
     assertEquals("Failed to generate array assignment", "twoDimArray[1][2] = \"test\"", s);
 
     s = StatementBuilder.create()
         .addVariable("twoDimArray", String[][].class)
-        .loadVariable("twoDimArray")
-        .assignArrayValue(AssignmentOperator.PreIncrementAssign, "test", 1, 2)
+        .loadVariable("twoDimArray", 1, 2)
+        .assignValue(AssignmentOperator.PreIncrementAssign, "test")
         .toJavaString();
 
     assertEquals("Failed to generate array assignment", "twoDimArray[1][2] += \"test\"", s);
@@ -242,8 +242,8 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
         .addVariable("twoDimArray", String[][].class)
         .addVariable("i", int.class)
         .addVariable("j", int.class)
-        .loadVariable("twoDimArray")
-        .assignArrayValue("test", Variable.get("i"), Variable.get("j"))
+        .loadVariable("twoDimArray", Variable.get("i"), Variable.get("j"))
+        .assignValue("test")
         .toJavaString();
 
     assertEquals("Failed to generate array assignment", "twoDimArray[i][j] = \"test\"", s);
@@ -251,8 +251,8 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
     try {
       StatementBuilder.create()
           .addVariable("twoDimArray", String.class)
-          .loadVariable("twoDimArray")
-          .assignArrayValue("test", 1, 2)
+          .loadVariable("twoDimArray", 1, 2)
+          .assignValue("test")
           .toJavaString();
       fail("Expected InvalidTypeExcpetion");
     }
@@ -265,8 +265,8 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
           .addVariable("twoDimArray", String[][].class)
           .addVariable("i", float.class)
           .addVariable("j", float.class)
-          .loadVariable("twoDimArray")
-          .assignArrayValue("test", Variable.get("i"), Variable.get("j"))
+          .loadVariable("twoDimArray", Variable.get("i"), Variable.get("j"))
+          .assignValue("test")
           .toJavaString();
       fail("Expected InvalidTypeExcpetion");
     }

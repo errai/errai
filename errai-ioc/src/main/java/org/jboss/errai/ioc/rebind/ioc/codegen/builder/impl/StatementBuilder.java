@@ -93,8 +93,8 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
     return this;
   }
 
-  public VariableReferenceContextualStatementBuilder loadVariable(String name) {
-    appendCallElement(new LoadVariable(name));
+  public VariableReferenceContextualStatementBuilder loadVariable(String name, Object... indexes) {
+    appendCallElement(new LoadVariable(name, indexes));
     return new ContextualStatementBuilderImpl(context, callElementBuilder);
   }
 

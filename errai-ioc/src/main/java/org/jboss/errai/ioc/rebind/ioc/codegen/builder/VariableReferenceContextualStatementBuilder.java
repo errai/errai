@@ -25,10 +25,5 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.AbstractStatementBuil
  */
 public interface VariableReferenceContextualStatementBuilder extends ContextualStatementBuilder {
   public AbstractStatementBuilder assignValue(Object value);
-
   public AbstractStatementBuilder assignValue(AssignmentOperator operator, Object value);
-
-  public AbstractStatementBuilder assignArrayValue(Object value, Object... indexes);
-
-  public AbstractStatementBuilder assignArrayValue(AssignmentOperator operator, Object value, Object... indexes);
 }

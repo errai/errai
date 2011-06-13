@@ -24,6 +24,8 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
+ * {@link StatementBuilder} that generates {@link Variable} assignments.
+ * 
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -31,31 +33,32 @@ public class AssignmentBuilder implements Statement {
   protected AssignmentOperator operator;
   protected VariableReference reference;
   protected Statement statement;
-  protected Statement[] indexes;
 
-  public AssignmentBuilder(AssignmentOperator operator, VariableReference reference, Statement statement, Statement... indexes) {
+  public AssignmentBuilder(AssignmentOperator operator, VariableReference reference, Statement statement) {
     this.operator = operator;
     this.reference = reference;
     this.statement = statement;
-    this.indexes = indexes;
   }
 
   public String generate(Context context) {
     MetaClass referenceType = reference.getType();
-    for (int i=0; i<indexes.length; i++) {
-      if (!referenceType.isArray())
-        throw new InvalidTypeException("Variable is not a " + indexes.length + "-dimensional array!");
-      referenceType = referenceType.getComponentType();
-    } 
+    Statement[] indexes = reference.getIndexes();
+    if (indexes!=null) {
+      for (int i=0; i<indexes.length; i++) {
+        if (!referenceType.isArray())
+          throw new InvalidTypeException("Variable is not a " + indexes.length + "-dimensional array!");
+        referenceType = referenceType.getComponentType();
+      } 
+    }
     operator.assertCanBeApplied(referenceType);
     operator.assertCanBeApplied(statement.getType());
 
-    return reference.getName() + generateIndexes() +
+    return reference.getName() + generateIndexes(indexes) +
         " " + operator.getCanonicalString() + " " + statement.generate(Context.create());
   }
 
-  private String generateIndexes() {
-    if (indexes.length == 0) return "";
+  private String generateIndexes(Statement[] indexes) {
+    if (indexes==null || indexes.length == 0) return "";
    
     StringBuilder buf = new StringBuilder();
     for (Statement index : indexes) {
