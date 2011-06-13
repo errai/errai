@@ -29,7 +29,7 @@ import java.lang.reflect.Array;
 
 /**
  * StatementBuilder to create and initialize Arrays.
- *
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayBuilder, ArrayInitializationBuilder {
@@ -66,9 +66,10 @@ public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayB
     StringBuilder buf = new StringBuilder();
     buf.append("new ").append(LoadClassReference.getClassReference(componentType, context));
 
-    if (values!=null) {
+    if (values != null) {
       generateWithInitialization(buf);
-    } else {
+    }
+    else {
       for (Integer dimension : dimensions) {
         if (dimension == null)
           throw new RuntimeException("Must provide either dimension expressions or an array initializer");
@@ -79,40 +80,32 @@ public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayB
 
     return buf.toString();
   }
-  
+
   private void generateWithInitialization(StringBuilder buf) {
     int dim = 0;
-    boolean initializeFromArray = false;
-    if (values.length == 1 && values[0].getClass().isArray()) {
-      initializeFromArray = true;
-      Class<?> type = values[0].getClass();
-      while (type.isArray()) {
-        dim++;
-        type = type.getComponentType();
-      }
+    Object vals = values;
+    Class<?> type = values.getClass();
+    if (values.length == 1 && values[0].getClass().isArray()
+        && values.getClass().getComponentType().equals(Object.class)) {
+      // this is a workaround for the jdt compiler which is coercing a multi-dimensional array
+      // into the first element of our vararg instead of flattening it out (like javac does).
+      vals = values[0];
+      type = values[0].getClass();
     }
-    else {
-      Class<?> type = values.getClass();
-      while (type.isArray()) {
-        dim++;
-        type = type.getComponentType();
-      }
+
+    while (type.isArray()) {
+      dim++;
+      type = type.getComponentType();
     }
 
     for (int i = 0; i < dim; i++) {
       buf.append("[]");
     }
-
     buf.append(" ");
 
-    if (initializeFromArray) {
-      generateInitialization(buf, values[0]);
-    }
-    else {
-      generateInitialization(buf, values);
-    }
+    generateInitialization(buf, vals);
   }
-  
+
   private void generateInitialization(StringBuilder buf, Object values) {
     buf.append("{");
     int length = Array.getLength(values);
