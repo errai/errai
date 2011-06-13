@@ -20,6 +20,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.AssignmentOperator;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.VariableReference;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -31,11 +32,12 @@ public class DeclareAssignmentBuilder extends AssignmentBuilder {
 
   @Override
   public String generate(Context context) {
+    String type = LoadClassReference.getClassReference(reference.getType(), context);
     if (statement != null) {
-      return reference.getType().getFullyQualifedName() + " " + super.generate(context);
+      return type + " " + super.generate(context);
     }
     else {
-      return reference.getType().getFullyQualifedName() + " " + reference.getName();
+      return type + " " + reference.getName();
     }
   }
 }

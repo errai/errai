@@ -20,6 +20,8 @@ import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.JType;
 import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
+
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.gwt.GWTClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java.JavaReflectionClass;
@@ -62,7 +64,7 @@ public final class MetaClassFactory {
     final MetaClass metaClass = createOrGet(clazz);
     return new Statement() {
       public String generate(Context context) {
-        return metaClass.getFullyQualifedName();
+        return LoadClassReference.getClassReference(metaClass, context);
       }
 
       public MetaClass getType() {

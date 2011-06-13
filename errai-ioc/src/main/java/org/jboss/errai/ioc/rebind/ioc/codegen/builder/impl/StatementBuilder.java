@@ -35,7 +35,6 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadField;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadLiteral;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadVariable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.MethodCall;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
  * The root of our fluent StatementBuilder API.

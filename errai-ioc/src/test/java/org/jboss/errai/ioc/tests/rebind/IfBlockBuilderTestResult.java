@@ -31,20 +31,20 @@ public interface IfBlockBuilderTestResult {
       "if (str != null) { }\n";
 
   public static final String EMPTY_IF_BLOCK_RESULT_INSTANCE_OF_RHS =
-      "if (str instanceof java.lang.String) { }\n";
+      "if (str instanceof String) { }\n";
 
   public static final String IF_ELSE_BLOCK_RESULT_NO_RHS =
       "   if (str.endsWith(\"abc\")) { " +
-          " java.lang.Integer n = 0;\n" +
+          " Integer n = 0;\n" +
           "} else {" +
-          " \njava.lang.Integer n = 1;\n" +
+          " \nInteger n = 1;\n" +
           "}\n";
 
   public static final String IF_ELSE_BLOCK_RESULT_RHS =
       "   if (n > m) { " +
-          " java.lang.Integer n = 0;\n" +
+          " Integer n = 0;\n" +
           "} else {" +
-          " \njava.lang.Integer n = 1;\n" +
+          " \nInteger n = 1;\n" +
           "}\n";
 
   public static final String IF_ELSEIF_BLOCK_RESULT_NO_RHS_NESTED =

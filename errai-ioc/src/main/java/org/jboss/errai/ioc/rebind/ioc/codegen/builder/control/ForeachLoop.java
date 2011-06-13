@@ -20,6 +20,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.AbstractStatement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
 
 /**
  * Foreach statement (enhanced for loop).
@@ -41,7 +42,8 @@ public class ForeachLoop extends AbstractStatement {
   public String generate(Context context) {
     StringBuilder buf = new StringBuilder();
 
-    buf.append("for (").append(loopVar.getType().getFullyQualifedName()).append(" ").append(loopVar.getName())
+    buf.append("for (").append(LoadClassReference.getClassReference(loopVar.getType(), context))
+        .append(" ").append(loopVar.getName())
         .append(" : ").append(collectionExpr).append(") {")
         .append("\n\t").append(body.generate(context).replaceAll("\n", "\n\t"))
         .append("\n}");
