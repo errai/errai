@@ -26,8 +26,10 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import javax.annotation.PostConstruct;
+import javax.enterprise.util.TypeLiteral;
 import javax.inject.Inject;
 import java.lang.annotation.Annotation;
+import java.util.List;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -273,5 +275,11 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
     catch (InvalidTypeException ite) {
       // Expected, indexes are no integers
     }
+  }
+  
+  @Test
+  public void testObjectCreationWithParameterizedType() {
+    String s = StatementBuilder.create().newObject(new TypeLiteral<List<String>>() {}).toJavaString();
+    assertEquals("failed to generate new object with parameterized type", "new java.util.List<java.lang.String>()", s);
   }
 }

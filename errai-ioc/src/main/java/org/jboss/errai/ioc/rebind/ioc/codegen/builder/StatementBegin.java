@@ -23,7 +23,6 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.BlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -50,10 +49,10 @@ public interface StatementBegin extends ArrayBuilder {
 
   public ContextualStatementBuilder loadStatic(Class<?> clazz, String fieldName);
 
-  public ObjectBuilder newObject(MetaClass type);
-
   public ObjectBuilder newObject(Class<?> type);
 
+  public ObjectBuilder newObject(TypeLiteral<?> type);
+  
   public BlockBuilder<ElseBlockBuilder> doIf(BooleanExpression condition);
   
   public BlockBuilder<LoopBuilder> whileLoop(BooleanExpression condition);

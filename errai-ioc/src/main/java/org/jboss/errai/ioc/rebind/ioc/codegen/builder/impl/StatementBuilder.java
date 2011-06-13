@@ -120,14 +120,14 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
     return new ContextualStatementBuilderImpl(context, callElementBuilder);
   }
 
-  public ObjectBuilder newObject(MetaClass type) {
-    return ObjectBuilder.newInstanceOf(type);
-  }
-
   public ObjectBuilder newObject(Class<?> type) {
     return ObjectBuilder.newInstanceOf(type);
   }
 
+  public ObjectBuilder newObject(TypeLiteral<?> type) {
+    return ObjectBuilder.newInstanceOf(type);
+  }
+  
   public ArrayInitializationBuilder newArray(Class<?> componentType) {
     return new ArrayBuilderImpl(context, callElementBuilder).newArray(componentType);
   }

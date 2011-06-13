@@ -16,18 +16,23 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
+import javax.enterprise.util.TypeLiteral;
 
-import com.google.gwt.core.ext.typeinfo.JClassType;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BuildCallback;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.CallParameters;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedConstructorException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameterizedType;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaType;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.GenUtil;
+
+import com.google.gwt.core.ext.typeinfo.JClassType;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -56,7 +61,11 @@ public class ObjectBuilder extends AbstractStatementBuilder {
     return new ObjectBuilder(type).newInstance();
   }
 
-  public static ObjectBuilder newInstanceOf(Class type) {
+  public static ObjectBuilder newInstanceOf(Class<?> type) {
+    return newInstanceOf(MetaClassFactory.get(type));
+  }
+
+  public static ObjectBuilder newInstanceOf(TypeLiteral<?> type) {
     return newInstanceOf(MetaClassFactory.get(type));
   }
 
@@ -65,7 +74,20 @@ public class ObjectBuilder extends AbstractStatementBuilder {
   }
 
   private ObjectBuilder newInstance() {
-    buf.append("new ").append(type.getFullyQualifedName());
+    String parameterizedTypeExpr = "";
+    MetaParameterizedType parameterizedType = type.getParameterizedType();
+    if (parameterizedType != null && parameterizedType.getTypeParameters().length != 0) {
+      parameterizedTypeExpr = "<";
+      for (int i=0; i < parameterizedType.getTypeParameters().length; i++) {
+        parameterizedTypeExpr += ((MetaClass) parameterizedType.getTypeParameters()[i]).getFullyQualifedName();
+        if (i + 1 < parameterizedType.getTypeParameters().length)
+          parameterizedTypeExpr += ", ";
+      }
+
+      parameterizedTypeExpr += ">";
+    }
+
+    buf.append("new ").append(type.getFullyQualifedName()).append(parameterizedTypeExpr);
     return this;
   }
 
