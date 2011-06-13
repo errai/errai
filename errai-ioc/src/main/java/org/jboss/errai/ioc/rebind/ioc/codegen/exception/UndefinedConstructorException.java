@@ -44,9 +44,9 @@ public class UndefinedConstructorException extends RuntimeException {
   public String toString() {
     StringBuilder buf = new StringBuilder();
 
-    buf.append(super.toString()).append(": class:").append(type.getFullyQualifedName()).append(" parameterTypes:");
+    buf.append(super.toString()).append(": class:").append(type.getFullyQualifiedName()).append(" parameterTypes:");
     for (MetaClass type : parameterTypes) {
-      buf.append(type.getFullyQualifedName()).append(" ");
+      buf.append(type.getFullyQualifiedName()).append(" ");
     }
     return buf.toString();
   }

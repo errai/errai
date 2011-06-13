@@ -51,7 +51,7 @@ public class LoadClassReference extends AbstractCallElement {
   }
 
   public static String getClassReference(MetaClass metaClass, Context context) {
-    String fqcn = metaClass.getFullyQualifedName();
+    String fqcn = metaClass.getFullyQualifiedName();
     String pkg;
 
     int idx = fqcn.lastIndexOf('.');
@@ -63,6 +63,6 @@ public class LoadClassReference extends AbstractCallElement {
       }
     }
 
-    return metaClass.getFullyQualifedName();
+    return metaClass.getFullyQualifiedName();
   }
 }

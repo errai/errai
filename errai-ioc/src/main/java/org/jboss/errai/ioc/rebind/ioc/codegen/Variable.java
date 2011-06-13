@@ -130,7 +130,7 @@ public class Variable extends AbstractStatement {
 
   private String hashString() {
     if (hashString == null) {
-      hashString = Variable.class.getName() + ":" + name + ":" + type.getFullyQualifedName();
+      hashString = Variable.class.getName() + ":" + name + ":" + type.getFullyQualifiedName();
     }
     return hashString;
   }
@@ -138,7 +138,7 @@ public class Variable extends AbstractStatement {
   @Override
   public boolean equals(Object o) {
     return o instanceof Variable
-        && hashString().equals(Variable.class.getName() + ":" + name + ":" + ((Variable) o).type.getFullyQualifedName());
+        && hashString().equals(Variable.class.getName() + ":" + name + ":" + ((Variable) o).type.getFullyQualifiedName());
   }
 
   @Override

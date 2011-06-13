@@ -26,6 +26,8 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 
+import static org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference.getClassReference;
+
 public class ClassStructureBuilder implements Builder, Finishable<ObjectBuilder> {
   private MetaClass toExtend;
   private Context classContext;
@@ -51,7 +53,7 @@ public class ClassStructureBuilder implements Builder, Finishable<ObjectBuilder>
 
     return new BlockBuilder<ClassStructureBuilder>(new BuildCallback<ClassStructureBuilder>() {
       public ClassStructureBuilder callback(Statement statement) {
-        buf.append("public ").append(LoadClassReference.getClassReference(toExtend, classContext))
+        buf.append("public ").append(getClassReference(toExtend, classContext))
             .append(parameters.generate(context)).append(" {\n");
         if (statement != null) {
           buf.append(statement.generate(Context.create(classContext))).append("\n");
@@ -76,7 +78,7 @@ public class ClassStructureBuilder implements Builder, Finishable<ObjectBuilder>
 
         Context ctx = Context.create(context);
 
-        buf.append("public ").append(LoadClassReference.getClassReference(method.getReturnType(), classContext))
+        buf.append("public ").append(getClassReference(method.getReturnType(), classContext))
             .append(" ")
             .append(method.getName())
             .append(parameters.generate(ctx)).append(" {\n");

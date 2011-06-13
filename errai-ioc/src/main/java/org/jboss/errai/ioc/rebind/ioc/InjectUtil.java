@@ -62,7 +62,7 @@ public class InjectUtil {
 
       if (constructorInjectionPoints.size() > 1) {
         throw new InjectionFailure("more than one constructor in "
-            + type.getFullyQualifedName() + " is marked as the injection point!");
+            + type.getFullyQualifiedName() + " is marked as the injection point!");
       }
 
       final MetaConstructor constructor = constructorInjectionPoints.get(0);
@@ -78,9 +78,9 @@ public class InjectUtil {
         public String generateConstructor() {
           String[] vars = resolveInjectionDependencies(constructor.getParameters(), ctx, constructor);
 
-          StringAppender appender = new StringAppender("final ").append(type.getFullyQualifedName())
+          StringAppender appender = new StringAppender("final ").append(type.getFullyQualifiedName())
               .append(' ').append(injector.getVarName()).append(" = new ")
-              .append(type.getFullyQualifedName())
+              .append(type.getFullyQualifiedName())
               .append('(').append(commaDelimitedList(vars)).append(");\n");
 
           handleInjectionTasks(appender, ctx, injectionTasks);
@@ -95,13 +95,13 @@ public class InjectUtil {
     else {
       // field injection
       if (!hasDefaultConstructor(type))
-        throw new InjectionFailure("there is no default constructor for type: " + type.getFullyQualifedName());
+        throw new InjectionFailure("there is no default constructor for type: " + type.getFullyQualifiedName());
 
       return new ConstructionStrategy() {
         public String generateConstructor() {
-          StringAppender appender = new StringAppender("final ").append(type.getFullyQualifedName())
+          StringAppender appender = new StringAppender("final ").append(type.getFullyQualifiedName())
               .append(' ').append(injector.getVarName()).append(" = new ")
-              .append(type.getFullyQualifedName()).append("();\n");
+              .append(type.getFullyQualifiedName()).append("();\n");
 
           handleInjectionTasks(appender, ctx, injectionTasks);
 
@@ -125,7 +125,7 @@ public class InjectUtil {
     for (MetaMethod meth : postConstructTasks) {
       if (!meth.isPublic() || meth.getParameters().length != 0) {
         throw new InjectionFailure("PostConstruct method must be public and contain no parameters: "
-            + injector.getInjectedType().getFullyQualifedName() + "." + meth.getName());
+            + injector.getInjectedType().getFullyQualifiedName() + "." + meth.getName());
       }
 
       appender.append(injector.getVarName()).append('.').append(meth.getName()).append("();\n");

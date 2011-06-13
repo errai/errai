@@ -34,7 +34,7 @@ public class Parameter extends AbstractStatement {
   }
 
   public String generate(Context context) {
-    return type.getFullyQualifedName() + " " + name;
+    return type.getFullyQualifiedName() + " " + name;
   }
 
   public MetaClass getType() {

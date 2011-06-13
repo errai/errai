@@ -39,7 +39,7 @@ public class UndefinedMethodException extends RuntimeException {
 
   public UndefinedMethodException(MetaClass declaringClass, String methodName, MetaClass... parameterTypes) {
     super("undefined method: " + methodName + "(" + GenUtil.classesAsStrings(parameterTypes) + "); in class: "
-        + declaringClass.getFullyQualifedName());
+        + declaringClass.getFullyQualifiedName());
     this.declaringClass = declaringClass;
     this.methodName = methodName;
     this.parameterTypes = parameterTypes;

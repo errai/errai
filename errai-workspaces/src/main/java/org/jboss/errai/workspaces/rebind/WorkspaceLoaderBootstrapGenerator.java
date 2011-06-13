@@ -196,11 +196,11 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
     for (Class<?> toolSetClass : toolsets) {
       MetaClass clazz = MetaClassFactory.get(typeOracle, toolSetClass);
 
-      if ((!applyFilter || enabledTools.contains(clazz.getFullyQualifedName()))) {
+      if ((!applyFilter || enabledTools.contains(clazz.getFullyQualifiedName()))) {
         iocGenerator.addType(clazz);
         String instance = iocGenerator.generateInjectors(clazz);
         sourceWriter.println("workspace.addToolSet(" + instance + ");");
-        logger.log(TreeLogger.Type.INFO, "Adding Errai Toolset: " + clazz.getFullyQualifedName());
+        logger.log(TreeLogger.Type.INFO, "Adding Errai Toolset: " + clazz.getFullyQualifiedName());
       }
     }
 
@@ -211,12 +211,12 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
     for (Class<?> toolClass : tools) {
       MetaClass clazz = MetaClassFactory.get(typeOracle, toolClass);
 
-      if ((!applyFilter || enabledTools.contains(clazz.getFullyQualifedName()))) {
+      if ((!applyFilter || enabledTools.contains(clazz.getFullyQualifiedName()))) {
 
         iocGenerator.addType(clazz);
         LoadTool loadTool = clazz.getAnnotation(LoadTool.class);
 
-        logger.log(TreeLogger.Type.INFO, "Adding Errai Tool: " + clazz.getFullyQualifedName());
+        logger.log(TreeLogger.Type.INFO, "Adding Errai Tool: " + clazz.getFullyQualifiedName());
 
         if (clazz.isAnnotationPresent(RequireRoles.class)) {
           RequireRoles requireRoles = clazz.getAnnotation(RequireRoles.class);
@@ -230,16 +230,16 @@ public class WorkspaceLoaderBootstrapGenerator extends Generator {
           }
           rolesBuilder.append("}");
 
-          generateWidgetProvisioning(context, clazz.getFullyQualifedName(), loadTool, rolesBuilder, logger, sourceWriter);
+          generateWidgetProvisioning(context, clazz.getFullyQualifiedName(), loadTool, rolesBuilder, logger, sourceWriter);
 
         }
         else {
-          generateWidgetProvisioning(context, clazz.getFullyQualifedName(), loadTool, null, logger, sourceWriter);
+          generateWidgetProvisioning(context, clazz.getFullyQualifiedName(), loadTool, null, logger, sourceWriter);
 
         }
       }
       else if (clazz.isAnnotationPresent(LoginComponent.class)) {
-        sourceWriter.println("workspace.setLoginComponent(new " + clazz.getFullyQualifedName() + "());");
+        sourceWriter.println("workspace.setLoginComponent(new " + clazz.getFullyQualifiedName() + "());");
       }
     }
 

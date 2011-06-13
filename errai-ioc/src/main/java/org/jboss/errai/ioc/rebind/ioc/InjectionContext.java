@@ -56,7 +56,7 @@ public class InjectionContext {
         }
       }
     }
-    throw new InjectionFailure("could not resolve type for injection: " + erased.getFullyQualifedName());
+    throw new InjectionFailure("could not resolve type for injection: " + erased.getFullyQualifiedName());
   }
 
   public Injector getInjector(Class<?> injectorType) {
@@ -66,15 +66,15 @@ public class InjectionContext {
   public Injector getInjector(MetaClass type) {
     MetaClass erased = type;
     if (!injectors.containsKey(erased)) {
-      throw new InjectionFailure("could not resolve type for injection: " + erased.getFullyQualifedName());
+      throw new InjectionFailure("could not resolve type for injection: " + erased.getFullyQualifiedName());
     }
     List<Injector> injectorList = injectors.get(erased);
     if (injectorList.size() > 1) {
       throw new InjectionFailure("ambiguous injection type (multiple injectors resolved): "
-          + erased.getFullyQualifedName());
+          + erased.getFullyQualifiedName());
     }
     else if (injectorList.isEmpty()) {
-      throw new InjectionFailure("could not resolve type for injection: " + erased.getFullyQualifedName());
+      throw new InjectionFailure("could not resolve type for injection: " + erased.getFullyQualifiedName());
     }
 
     return injectorList.get(0);

@@ -61,7 +61,7 @@ public class ContextualProviderInjector extends TypeInjector {
     }
     else {
       MetaType[] typeArgs = pType.getTypeParameters();
-      sb.append("(").append(type.getFullyQualifedName()).append("<")
+      sb.append("(").append(type.getFullyQualifiedName()).append("<")
           .append(typeArgs[0].toString()).append(">) ");
 
       sb.append(providerInjector.getType(injectContext, injectionPoint)).append(".provide(new Class[] {");

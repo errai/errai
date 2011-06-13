@@ -35,7 +35,7 @@ public class UndefinedFieldException extends RuntimeException {
   }
 
   public UndefinedFieldException(String fieldName, MetaClass declaringClass) {
-    this("could not resolve field: " + fieldName + "; in class: " + declaringClass.getFullyQualifedName());
+    this("could not resolve field: " + fieldName + "; in class: " + declaringClass.getFullyQualifiedName());
     this.fieldName = fieldName;
     this.declaringClass = declaringClass;
   }

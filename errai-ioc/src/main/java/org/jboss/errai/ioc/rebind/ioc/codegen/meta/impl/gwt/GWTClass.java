@@ -51,7 +51,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
     return getEnclosedMetaObject().getSimpleSourceName();
   }
 
-  public String getFullyQualifedName() {
+  public String getFullyQualifiedName() {
     return getEnclosedMetaObject().getQualifiedSourceName();
   }
 
@@ -257,7 +257,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
   }
 
   public String toString() {
-    return getFullyQualifedName();
+    return getFullyQualifiedName();
   }
 
 }

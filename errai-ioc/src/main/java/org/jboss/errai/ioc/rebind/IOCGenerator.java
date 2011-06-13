@@ -221,14 +221,14 @@ public class IOCGenerator extends Generator {
 
       boolean contextual = false;
       for (MetaClass iface : type.getInterfaces()) {
-        if (iface.getFullyQualifedName().equals(ContextualTypeProvider.class.getName())) {
+        if (iface.getFullyQualifiedName().equals(ContextualTypeProvider.class.getName())) {
           contextual = true;
 
           MetaParameterizedType pType = iface.getParameterizedType();
 
           if (pType == null) {
             throw new InjectionFailure("could not determine the bind type for the IOCProvider class: "
-                + type.getFullyQualifedName());
+                + type.getFullyQualifiedName());
           }
 
           //todo: check for nested type parameters
@@ -247,7 +247,7 @@ public class IOCGenerator extends Generator {
 
           if (pType == null) {
             throw new InjectionFailure("could not determine the bind type for the IOCProvider class: "
-                + type.getFullyQualifedName());
+                + type.getFullyQualifiedName());
           }
 
           //todo: check for nested type parameters
@@ -257,7 +257,7 @@ public class IOCGenerator extends Generator {
 
       if (bindType == null) {
         throw new InjectionFailure("the annotated provider class does not appear to implement " +
-            TypeProvider.class.getName() + ": " + type.getFullyQualifedName());
+            TypeProvider.class.getName() + ": " + type.getFullyQualifiedName());
       }
 
       final MetaClass finalBindType = bindType;
@@ -325,7 +325,7 @@ public class IOCGenerator extends Generator {
       sourceWriter.print("private static native void ");
       sourceWriter.print(InjectUtil.getPrivateFieldInjectorName(f));
       sourceWriter.print("(");
-      sourceWriter.print(f.getDeclaringClass().getFullyQualifedName());
+      sourceWriter.print(f.getDeclaringClass().getFullyQualifiedName());
       sourceWriter.print(" instance, ");
       sourceWriter.print(f.getType().getCanonicalName());
       sourceWriter.print(" value) /*-{");
@@ -333,7 +333,7 @@ public class IOCGenerator extends Generator {
       sourceWriter.outdent();
       // begin JSNI call
       sourceWriter.print("instance.@");
-      sourceWriter.print(f.getDeclaringClass().getFullyQualifedName());
+      sourceWriter.print(f.getDeclaringClass().getFullyQualifiedName());
       sourceWriter.print("::");
       sourceWriter.print(f.getName());
       sourceWriter.print(" = ");
@@ -345,17 +345,17 @@ public class IOCGenerator extends Generator {
 
     for (MetaField f : privateFields) {
       sourceWriter.print("private static native ");
-      sourceWriter.print(f.getType().getFullyQualifedName());
+      sourceWriter.print(f.getType().getFullyQualifiedName());
       sourceWriter.print(" ");
       sourceWriter.print(InjectUtil.getPrivateFieldInjectorName(f));
       sourceWriter.print("(");
-      sourceWriter.print(f.getDeclaringClass().getFullyQualifedName());
+      sourceWriter.print(f.getDeclaringClass().getFullyQualifiedName());
       sourceWriter.print(" instance) /*-{");
       sourceWriter.println();
       sourceWriter.outdent();
       // begin JSNI call
       sourceWriter.print("return instance.@");
-      sourceWriter.print(f.getDeclaringClass().getFullyQualifedName());
+      sourceWriter.print(f.getDeclaringClass().getFullyQualifiedName());
       sourceWriter.print("::");
       sourceWriter.print(f.getName());
       sourceWriter.print(";");
@@ -423,12 +423,10 @@ public class IOCGenerator extends Generator {
               context.getWriter().println("ctx.addToRootPanel(" + generateWithSingletonSemantics(type) + ");");
             }
           });
-
-
         }
         else {
           throw new InjectionFailure("type declares @" + annotation.getClass().getSimpleName()
-              + "  but does not extend type Widget: " + type.getFullyQualifedName());
+              + "  but does not extend type Widget: " + type.getFullyQualifiedName());
         }
       }
     });
@@ -446,7 +444,7 @@ public class IOCGenerator extends Generator {
         }
         else {
           throw new InjectionFailure("type declares @" + annotation.getClass().getSimpleName()
-              + "  but does not extend type Widget: " + type.getFullyQualifedName());
+              + "  but does not extend type Widget: " + type.getFullyQualifiedName());
         }
       }
     });
@@ -464,7 +462,7 @@ public class IOCGenerator extends Generator {
         }
         else {
           throw new InjectionFailure("type declares @" + annotation.getClass().getSimpleName()
-              + "  but does not extend type Widget: " + type.getFullyQualifedName());
+              + "  but does not extend type Widget: " + type.getFullyQualifiedName());
         }
       }
     });

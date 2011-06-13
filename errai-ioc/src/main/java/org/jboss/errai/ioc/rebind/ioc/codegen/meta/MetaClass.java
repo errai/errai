@@ -24,7 +24,9 @@ import com.google.gwt.core.ext.typeinfo.JClassType;
 public abstract class MetaClass implements HasAnnotations, MetaType, MetaGenericDeclaration {
   public abstract String getName();
 
-  public abstract String getFullyQualifedName();
+  public abstract String getFullyQualifiedName();
+
+  public abstract String getFullyQualifiedNameWithTypeParms();
 
   public abstract String getCanonicalName();
 

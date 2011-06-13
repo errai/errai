@@ -42,6 +42,25 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     this.enclosedMetaObject = enclosedMetaObject;
   }
 
+  @Override
+  public String getFullyQualifiedNameWithTypeParms() {
+    MetaParameterizedType parameterizedType = getParameterizedType();
+    StringBuilder buf = new StringBuilder(getFullyQualifiedName());
+
+    if (parameterizedType != null && parameterizedType.getTypeParameters().length != 0) {
+      buf.append("<");
+      for (int i = 0; i < parameterizedType.getTypeParameters().length; i++) {
+        buf.append(((MetaClass) parameterizedType.getTypeParameters()[i]).getFullyQualifiedName());
+        if (i + 1 < parameterizedType.getTypeParameters().length)
+          buf.append(", ");
+      }
+
+      buf.append(">");
+    }
+
+    return buf.toString();
+  }
+
   protected static MetaMethod _getMethod(MetaMethod[] methods, String name, MetaClass... parmTypes) {
     Outer:
     for (MetaMethod method : methods) {
@@ -105,7 +124,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     Class<?> cls = asClass();
 
     Method m = ParseTools.getBestCandidate(parameters, name, cls,
-        fromMetaMethod(getStaticMethods()), false);
+            fromMetaMethod(getStaticMethods()), false);
     if (m == null) return null;
 
     return getMethod(name, m.getParameterTypes());
@@ -208,7 +227,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   private String hashString() {
     if (hashString == null) {
-      hashString = MetaClass.class.getName() + ":" + getFullyQualifedName();
+      hashString = MetaClass.class.getName() + ":" + getFullyQualifiedName();
     }
     return hashString;
   }
@@ -265,7 +284,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   @Override
   public boolean equals(Object o) {
     return o instanceof MetaClass && hashString().equals(MetaClass.class.getName()
-        + ":" + ((MetaClass) o).getFullyQualifedName());
+            + ":" + ((MetaClass) o).getFullyQualifiedName());
   }
 
   @Override
@@ -276,11 +295,10 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   public Class<?> asClass() {
     if (enclosedMetaObject instanceof Class) {
       return (Class<?>) enclosedMetaObject;
-    }
-    else {
+    } else {
       try {
         return Class.forName(((JClassType) enclosedMetaObject).getQualifiedSourceName(), false,
-            Thread.currentThread().getContextClassLoader());
+                Thread.currentThread().getContextClassLoader());
       }
       catch (ClassNotFoundException e) {
         return null;
