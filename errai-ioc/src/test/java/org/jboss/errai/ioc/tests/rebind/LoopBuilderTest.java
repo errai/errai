@@ -261,7 +261,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
             Bool.expr(Stmt.create().loadVariable("str").invoke("length"), BooleanOperator.GreaterThan, 0)))
         .finish().toJavaString();
 
-    assertEquals("failed to generate while loop with nested expression", WHILE_RESULT_NESTED_RHS_EMPTY, s);
+    assertEquals("failed to generate while loop with nested expression", WHILE_RESULT_NESTED_EMPTY, s);
   }
 
   @Test
@@ -332,8 +332,21 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .finish()
         .while_(Bool.expr(Variable.get("b")))
         .toJavaString();
-        
+
     assertEquals("failed to generate for do whileloop with simple expression",
         DOWHILE_RESULT_SIMPLE_EXPRESSION, s);
+
+    s = StatementBuilder.create()
+        .addVariable("str", String.class)
+        .do_()
+          .append(StatementBuilder.create().loadStatic(System.class, "out").invoke("println", Variable.get("str")))
+        .finish()
+        .while_(Bool.expr(
+            Bool.expr(Variable.get("str"), BooleanOperator.NotEquals, null),
+            BooleanOperator.And,
+            Bool.expr(Stmt.create().loadVariable("str").invoke("length"), BooleanOperator.GreaterThan, 0)))
+        .toJavaString();
+
+    assertEquals("failed to generate do while loop with nested expression", DOWHILE_RESULT_NESTED_EXPRESSION, s);
   }
 }
