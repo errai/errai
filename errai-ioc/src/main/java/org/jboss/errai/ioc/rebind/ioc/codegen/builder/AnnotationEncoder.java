@@ -21,7 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ClassStructureBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ExtendsClassStructureBuilderImpl;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.PrettyPrinter;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
@@ -29,7 +29,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 public class AnnotationEncoder {
   public static String encode(Annotation annotation) {
     Class<? extends Annotation> annotationClass = annotation.annotationType();
-    ClassStructureBuilder builder = ObjectBuilder.newInstanceOf(annotationClass).extend();
+    ExtendsClassStructureBuilderImpl builder = ObjectBuilder.newInstanceOf(annotationClass).extend();
 
     Class<? extends Annotation> annoClass = annotation.getClass();
 

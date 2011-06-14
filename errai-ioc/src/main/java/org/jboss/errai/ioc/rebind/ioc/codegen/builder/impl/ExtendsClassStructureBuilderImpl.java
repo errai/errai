@@ -21,38 +21,37 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BuildCallback;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.DefParameters;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.Finishable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.Parameter;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 
 import static org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference.getClassReference;
 
-public class ClassStructureBuilder implements Builder, Finishable<ObjectBuilder> {
+public class ExtendsClassStructureBuilderImpl implements Builder, Finishable<ObjectBuilder> {
   private MetaClass toExtend;
   private Context classContext;
   private StringBuilder buf = new StringBuilder();
   private BuildCallback<ObjectBuilder> callback;
 
-  ClassStructureBuilder(MetaClass toExtend, BuildCallback<ObjectBuilder> builderBuildCallback) {
-    this.toExtend = toExtend;
+  ExtendsClassStructureBuilderImpl(MetaClass clazz, BuildCallback<ObjectBuilder> builderBuildCallback) {
+    this.toExtend = clazz;
     this.classContext = Context.create();
 
-    for (MetaField field : toExtend.getFields()) {
+    for (MetaField field : clazz.getFields()) {
       this.classContext.addVariable(Variable.create(field.getName(), field.getType()));
     }
 
     this.callback = builderBuildCallback;
   }
 
-  public BlockBuilder<ClassStructureBuilder> publicConstructor(final DefParameters parameters) {
+  public BlockBuilder<ExtendsClassStructureBuilderImpl> publicConstructor(final DefParameters parameters) {
     final Context context = Context.create(classContext);
     for (Parameter parm : parameters.getParameters()) {
       context.addVariable(Variable.create(parm.getName(), parm.getType()));
     }
 
-    return new BlockBuilder<ClassStructureBuilder>(new BuildCallback<ClassStructureBuilder>() {
-      public ClassStructureBuilder callback(Statement statement) {
+    return new BlockBuilder<ExtendsClassStructureBuilderImpl>(new BuildCallback<ExtendsClassStructureBuilderImpl>() {
+      public ExtendsClassStructureBuilderImpl callback(Statement statement) {
         buf.append("public ").append(getClassReference(toExtend, classContext))
             .append(parameters.generate(context)).append(" {\n");
         if (statement != null) {
@@ -60,12 +59,12 @@ public class ClassStructureBuilder implements Builder, Finishable<ObjectBuilder>
         }
         buf.append("}\n");
 
-        return ClassStructureBuilder.this;
+        return ExtendsClassStructureBuilderImpl.this;
       }
     });
   }
 
-  public BlockBuilder<ClassStructureBuilder> publicOverridesMethod(final MetaMethod method) {
+  public BlockBuilder<ExtendsClassStructureBuilderImpl> publicOverridesMethod(final MetaMethod method) {
     final DefParameters parameters = DefParameters.from(method);
 
     final Context context = Context.create(classContext);
@@ -73,8 +72,8 @@ public class ClassStructureBuilder implements Builder, Finishable<ObjectBuilder>
       context.addVariable(Variable.create(parm.getName(), parm.getType()));
     }
 
-    return new BlockBuilder<ClassStructureBuilder>(new BuildCallback<ClassStructureBuilder>() {
-      public ClassStructureBuilder callback(Statement statement) {
+    return new BlockBuilder<ExtendsClassStructureBuilderImpl>(new BuildCallback<ExtendsClassStructureBuilderImpl>() {
+      public ExtendsClassStructureBuilderImpl callback(Statement statement) {
 
         Context ctx = Context.create(context);
 
@@ -87,12 +86,12 @@ public class ClassStructureBuilder implements Builder, Finishable<ObjectBuilder>
         }
         buf.append("}\n");
 
-        return ClassStructureBuilder.this;
+        return ExtendsClassStructureBuilderImpl.this;
       }
     });
   }
 
-  public BlockBuilder<ClassStructureBuilder> publicOverridesMethod(String name, Class... args) {
+  public BlockBuilder<ExtendsClassStructureBuilderImpl> publicOverridesMethod(String name, Class... args) {
     return publicOverridesMethod(toExtend.getBestMatchingMethod(name, args));
   }
 

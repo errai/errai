@@ -18,6 +18,7 @@ package org.jboss.errai.ioc.rebind.ioc.codegen;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 import javax.enterprise.util.TypeLiteral;
 import java.util.*;
@@ -30,6 +31,8 @@ import java.util.*;
  */
 public class Context {
   private Set<String> importedPackages = new HashSet<String>();
+  private Set<MetaClass> importedClasses = new HashSet<MetaClass>();
+
   private Map<String, Variable> variables = new HashMap<String, Variable>();
   private Context parent = null;
   
@@ -98,6 +101,11 @@ public class Context {
 
   public boolean hasPackageImport(String packageName) {
     return importedPackages.contains(packageName);
+  }
+
+  public Context addClassImport(MetaClass clazz) {
+    importedClasses.add(clazz);
+    return this;
   }
 
   public VariableReference getVariable(String name) {

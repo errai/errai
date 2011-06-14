@@ -86,7 +86,7 @@ public class IOCGenerator extends Generator {
 
   @Override
   public String generate(TreeLogger logger, GeneratorContext context, String typeName)
-      throws UnableToCompleteException {
+          throws UnableToCompleteException {
     typeOracle = context.getTypeOracle();
 
     try {
@@ -127,7 +127,7 @@ public class IOCGenerator extends Generator {
 
     // init composer, set class properties, create source writer
     ClassSourceFileComposerFactory composer = new ClassSourceFileComposerFactory(packageName,
-        className);
+            className);
 
     composer.addImplementedInterface(Bootstrapper.class.getName());
     composer.addImport(InterfaceInjectionContext.class.getName());
@@ -157,7 +157,8 @@ public class IOCGenerator extends Generator {
     context.commit(logger, printWriter);
   }
 
-  public void initializeProviders(final GeneratorContext context, final TreeLogger logger, final SourceWriter sourceWriter) {
+  public void initializeProviders(final GeneratorContext context, final TreeLogger logger,
+                                  final SourceWriter sourceWriter) {
 
     final MetaClass typeProviderCls = MetaClassFactory.get(typeOracle, TypeProvider.class);
     MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
@@ -197,14 +198,16 @@ public class IOCGenerator extends Generator {
 
         ParameterizedType pType = (ParameterizedType) t;
         if (IOCDecoratorExtension.class.equals(pType.getRawType())) {
-          if (pType.getActualTypeArguments().length == 0 || !Annotation.class.isAssignableFrom((Class) pType.getActualTypeArguments()[0])) {
+          if (pType.getActualTypeArguments().length == 0
+                  || !Annotation.class.isAssignableFrom((Class) pType.getActualTypeArguments()[0])) {
             throw new ErraiBootstrapFailure("code decorator must extend IOCDecoratorExtension<@AnnotationType>");
           }
 
           annoType = ((Class) pType.getActualTypeArguments()[0]).asSubclass(Annotation.class);
         }
 
-        injectFactory.getInjectionContext().registerDecorator(decoratorClass.getConstructor(new Class[]{Class.class}).newInstance(annoType));
+        injectFactory.getInjectionContext().registerDecorator(
+                decoratorClass.getConstructor(new Class[]{Class.class}).newInstance(annoType));
       }
       catch (Exception e) {
         throw new ErraiBootstrapFailure("unable to load code decorator: " + e.getMessage(), e);
@@ -228,7 +231,7 @@ public class IOCGenerator extends Generator {
 
           if (pType == null) {
             throw new InjectionFailure("could not determine the bind type for the IOCProvider class: "
-                + type.getFullyQualifiedName());
+                    + type.getFullyQualifiedName());
           }
 
           //todo: check for nested type parameters
@@ -247,7 +250,7 @@ public class IOCGenerator extends Generator {
 
           if (pType == null) {
             throw new InjectionFailure("could not determine the bind type for the IOCProvider class: "
-                + type.getFullyQualifiedName());
+                    + type.getFullyQualifiedName());
           }
 
           //todo: check for nested type parameters
@@ -257,7 +260,7 @@ public class IOCGenerator extends Generator {
 
       if (bindType == null) {
         throw new InjectionFailure("the annotated provider class does not appear to implement " +
-            TypeProvider.class.getName() + ": " + type.getFullyQualifiedName());
+                TypeProvider.class.getName() + ": " + type.getFullyQualifiedName());
       }
 
       final MetaClass finalBindType = bindType;
@@ -265,12 +268,10 @@ public class IOCGenerator extends Generator {
       if (contextual) {
         injectFactory.addInjector(new ContextualProviderInjector(finalBindType, type));
 
-      }
-      else {
+      } else {
         injectFactory.addInjector(new ProviderInjector(finalBindType, type));
       }
     }
-
 
     /**
      * GeneratedBy.class
@@ -294,7 +295,9 @@ public class IOCGenerator extends Generator {
     }
   }
 
-  private void generateExtensions(final GeneratorContext context, final TreeLogger logger, final SourceWriter sourceWriter) {
+  private void generateExtensions(final GeneratorContext context, final TreeLogger logger,
+                                  final SourceWriter sourceWriter) {
+
     // start constructor source generation
     sourceWriter.println("public " + className + "() { ");
     sourceWriter.indent();
@@ -423,10 +426,9 @@ public class IOCGenerator extends Generator {
               context.getWriter().println("ctx.addToRootPanel(" + generateWithSingletonSemantics(type) + ");");
             }
           });
-        }
-        else {
+        } else {
           throw new InjectionFailure("type declares @" + annotation.getClass().getSimpleName()
-              + "  but does not extend type Widget: " + type.getFullyQualifiedName());
+                  + "  but does not extend type Widget: " + type.getFullyQualifiedName());
         }
       }
     });
@@ -438,13 +440,12 @@ public class IOCGenerator extends Generator {
           addDeferred(new Runnable() {
             public void run() {
               context.getWriter().println("ctx.registerPanel(\"" + (annotation.value().equals("")
-                  ? type.getName() : annotation.value()) + "\", " + generateInjectors(type) + ");");
+                      ? type.getName() : annotation.value()) + "\", " + generateInjectors(type) + ");");
             }
           });
-        }
-        else {
+        } else {
           throw new InjectionFailure("type declares @" + annotation.getClass().getSimpleName()
-              + "  but does not extend type Widget: " + type.getFullyQualifiedName());
+                  + "  but does not extend type Widget: " + type.getFullyQualifiedName());
         }
       }
     });
@@ -456,13 +457,13 @@ public class IOCGenerator extends Generator {
           addDeferred(new Runnable() {
             public void run() {
               context.getWriter()
-                  .println("ctx.widgetToPanel(" + generateWithSingletonSemantics(type) + ", \"" + annotation.value() + "\");");
+                      .println("ctx.widgetToPanel(" + generateWithSingletonSemantics(type)
+                              + ", \"" + annotation.value() + "\");");
             }
           });
-        }
-        else {
+        } else {
           throw new InjectionFailure("type declares @" + annotation.getClass().getSimpleName()
-              + "  but does not extend type Widget: " + type.getFullyQualifiedName());
+                  + "  but does not extend type Widget: " + type.getFullyQualifiedName());
         }
       }
     });
@@ -475,5 +476,4 @@ public class IOCGenerator extends Generator {
     }
     return s.toString();
   }
-
 }
