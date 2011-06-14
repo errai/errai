@@ -53,13 +53,15 @@ public interface StatementBegin extends ArrayBuilder {
 
   public ObjectBuilder newObject(TypeLiteral<?> type);
   
-  public BlockBuilder<ElseBlockBuilder> doIf(BooleanExpression condition);
+  public BlockBuilder<WhileBuilder> do_();
   
-  public BlockBuilder<LoopBuilder> whileLoop(BooleanExpression condition);
+  public BlockBuilder<ElseBlockBuilder> if_(BooleanExpression condition);
   
-  public BlockBuilder<LoopBuilder> forLoop(BooleanExpression condition);
+  public BlockBuilder<LoopBuilder> while_(BooleanExpression condition);
   
-  public BlockBuilder<LoopBuilder> forLoop(Statement initializer, BooleanExpression condition);
+  public BlockBuilder<LoopBuilder> for_(BooleanExpression condition);
   
-  public BlockBuilder<LoopBuilder> forLoop(Statement initializer, BooleanExpression condition, Statement countingExpression);
+  public BlockBuilder<LoopBuilder> for_(Statement initializer, BooleanExpression condition);
+  
+  public BlockBuilder<LoopBuilder> for_(Statement initializer, BooleanExpression condition, Statement countingExpression);
 }

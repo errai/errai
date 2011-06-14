@@ -28,6 +28,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ElseBlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.LoopBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementBegin;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.VariableReferenceContextualStatementBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.WhileBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DeclareVariable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DynamicLoad;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
@@ -38,7 +39,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.MethodCall;
 
 /**
  * The root of our fluent StatementBuilder API.
- *
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock <cbrock@redhat.com>
  */
@@ -126,7 +127,7 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
   public ObjectBuilder newObject(TypeLiteral<?> type) {
     return ObjectBuilder.newInstanceOf(type);
   }
-  
+
   public ArrayInitializationBuilder newArray(Class<?> componentType) {
     return new ArrayBuilderImpl(context, callElementBuilder).newArray(componentType);
   }
@@ -135,23 +136,28 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
     return new ArrayBuilderImpl(context, callElementBuilder).newArray(componentType, dimensions);
   }
 
-  public BlockBuilder<ElseBlockBuilder> doIf(BooleanExpression stmt) {
+  public BlockBuilder<WhileBuilder> do_() {
+    return new LoopBuilderImpl(context, callElementBuilder).do_();
+  }
+
+  public BlockBuilder<ElseBlockBuilder> if_(BooleanExpression stmt) {
     return new IfBlockBuilderImpl(context, callElementBuilder).if_(stmt);
   }
 
-  public BlockBuilder<LoopBuilder> whileLoop(BooleanExpression stmt) {
+  public BlockBuilder<LoopBuilder> while_(BooleanExpression stmt) {
     return new LoopBuilderImpl(context, callElementBuilder).while_(stmt);
   }
 
-  public BlockBuilder<LoopBuilder> forLoop(BooleanExpression condition) {
+  public BlockBuilder<LoopBuilder> for_(BooleanExpression condition) {
     return new LoopBuilderImpl(context, callElementBuilder).for_(condition);
   }
 
-  public BlockBuilder<LoopBuilder> forLoop(Statement initializer, BooleanExpression condition) {
+  public BlockBuilder<LoopBuilder> for_(Statement initializer, BooleanExpression condition) {
     return new LoopBuilderImpl(context, callElementBuilder).for_(initializer, condition);
   }
 
-  public BlockBuilder<LoopBuilder> forLoop(Statement initializer, BooleanExpression condition, Statement countingExpression) {
+  public BlockBuilder<LoopBuilder> for_(Statement initializer, BooleanExpression condition,
+      Statement countingExpression) {
     return new LoopBuilderImpl(context, callElementBuilder).for_(initializer, condition, countingExpression);
   }
 }

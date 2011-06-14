@@ -14,22 +14,14 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.rebind.ioc.codegen.util;
+package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanExpression;
-import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.BooleanExpressionBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.AbstractStatementBuilder;
 
 /**
- * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class Bool {
-  public static BooleanExpression expr(Object lhs, BooleanOperator operator, Object rhs) {
-    return BooleanExpressionBuilder.create(lhs, operator, rhs);
-  }
-  
-  public static BooleanExpression expr(Statement lhs) {
-    return BooleanExpressionBuilder.create(lhs);
-  }
+public interface WhileBuilder {
+  AbstractStatementBuilder while_(BooleanExpression stmt);
 }

@@ -22,9 +22,10 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class DoWhileBlock extends AbstractBlockConditional {
-  public DoWhileBlock(Statement condition, BlockStatement block) {
+public class DoWhileLoop extends AbstractBlockConditional {
+  public DoWhileLoop(Statement condition, BlockStatement block) {
     super(condition, block);
   }
 
@@ -35,7 +36,7 @@ public class DoWhileBlock extends AbstractBlockConditional {
       builder.append(getBlock().generate(context));
     }
 
-    builder.append("} while (").append(getBlock().generate(context)).append(");\n");
+    builder.append("\n} while (").append(getCondition().generate(context)).append(");\n");
 
     return builder.toString();
   }

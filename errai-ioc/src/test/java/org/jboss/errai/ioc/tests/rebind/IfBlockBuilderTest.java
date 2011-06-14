@@ -288,7 +288,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
         .addVariable("b", boolean.class);
 
     String s = Stmt.create(ctx)
-        .doIf(Bool.expr(Bool.expr("foo", BooleanOperator.Equals, "bar"),
+        .if_(Bool.expr(Bool.expr("foo", BooleanOperator.Equals, "bar"),
             BooleanOperator.Or,
             Bool.expr(Bool.expr("cat", BooleanOperator.Equals, "dog"), BooleanOperator.And,
                 Bool.expr("girl", BooleanOperator.NotEquals, "boy"))))

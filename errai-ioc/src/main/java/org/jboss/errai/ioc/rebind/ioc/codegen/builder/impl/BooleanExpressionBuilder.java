@@ -52,6 +52,10 @@ public class BooleanExpressionBuilder implements BooleanExpression {
     this.lhsExpr = lhsExpr;
   }
 
+  public static BooleanExpression create(Statement lhs) {
+    return new BooleanExpressionBuilder(lhs, null, null);
+  }
+  
   public static BooleanExpression create(Object lhs, BooleanOperator operator, Object rhs) {
     Statement toLhs;
     Statement toRhs;
@@ -81,6 +85,7 @@ public class BooleanExpressionBuilder implements BooleanExpression {
         operator.assertCanBeApplied(GenUtil.generate(context, rhs).getType());
     }
     else {
+      lhs = GenUtil.generate(context, lhs);
       lhs = GenUtil.convert(context, lhs, MetaClassFactory.get(Boolean.class));
     }
 

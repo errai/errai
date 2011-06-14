@@ -25,9 +25,11 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BuildCallback;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.LoopBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.WhileBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.CallWriter;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DeferredCallElement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DeferredCallback;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.control.DoWhileLoop;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.control.ForLoop;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.control.ForeachLoop;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.control.WhileLoop;
@@ -47,6 +49,7 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements LoopBui
     super(context, callElementBuilder);
   }
 
+  // foreach loop
   public BlockBuilder<LoopBuilder> foreach(String loopVarName) {
     return foreach(loopVarName, (MetaClass) null);
   }
@@ -71,6 +74,29 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements LoopBui
     return createLoopBody(body);
   }
 
+  // do while loop
+  public BlockBuilder<WhileBuilder> do_() {
+    final BlockStatement body = new BlockStatement();
+
+    return new BlockBuilder<WhileBuilder>(body, new BuildCallback<WhileBuilder>() {
+      public WhileBuilder callback(Statement statement) {
+        return new WhileBuilder() {
+          
+          public AbstractStatementBuilder while_(final BooleanExpression condition) {
+            appendCallElement(new DeferredCallElement(new DeferredCallback() {
+              public void doDeferred(CallWriter writer, Context context, Statement lhs) {
+                writer.append(new DoWhileLoop(condition, body).generate(Context.create(context)));
+              }
+            }));
+            return LoopBuilderImpl.this;
+          }
+          
+        };
+      }
+    });
+  }
+  
+  // while loop
   public BlockBuilder<LoopBuilder> while_() {
     return _while_(new BooleanExpressionBuilder());
   }
@@ -106,6 +132,7 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements LoopBui
     return createLoopBody(body);
   }
   
+  // for loop
   public BlockBuilder<LoopBuilder> for_(BooleanExpression condition) {
     return for_(condition, (Statement) null);
   }

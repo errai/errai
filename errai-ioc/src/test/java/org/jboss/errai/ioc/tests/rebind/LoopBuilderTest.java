@@ -255,7 +255,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
 
     s = StatementBuilder.create()
         .addVariable("str", String.class)
-        .whileLoop(Bool.expr(
+        .while_(Bool.expr(
             Bool.expr(Variable.get("str"), BooleanOperator.NotEquals, null),
             BooleanOperator.And,
             Bool.expr(Stmt.create().loadVariable("str").invoke("length"), BooleanOperator.GreaterThan, 0)))
@@ -268,7 +268,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   public void testForLoop() {
     String s = StatementBuilder.create()
         .addVariable("i", Integer.class)
-        .forLoop(Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100))
+        .for_(Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100))
         .finish().toJavaString();
 
     assertEquals("failed to generate for loop without initializer",
@@ -276,7 +276,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
 
     s = StatementBuilder.create()
         .addVariable("i", Integer.class)
-        .forLoop(StatementBuilder.create().loadVariable("i").assignValue(0),
+        .for_(StatementBuilder.create().loadVariable("i").assignValue(0),
             Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100))
         .finish().toJavaString();
 
@@ -285,7 +285,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
 
     s = StatementBuilder.create()
         .addVariable("i", Integer.class)
-        .forLoop(StatementBuilder.create().loadVariable("i").assignValue(0),
+        .for_(StatementBuilder.create().loadVariable("i").assignValue(0),
             Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100),
             StatementBuilder.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
         .finish().toJavaString();
@@ -313,7 +313,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         FOR_RESULT_CHAINED_INITIALIZER_COUNTING_EXP_EMPTY, s);
 
     s = StatementBuilder.create()
-        .forLoop(ContextBuilder.create().declareVariable("i", int.class).initializeWith(0),
+        .for_(ContextBuilder.create().declareVariable("i", int.class).initializeWith(0),
             Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100),
             StatementBuilder.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
         .append(StatementBuilder.create().loadStatic(System.class, "out").invoke("println", Variable.get("i")))
@@ -321,5 +321,19 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
 
     assertEquals("failed to generate for loop with declaring initializer and counting expression",
         FOR_RESULT_DECLARE_INITIALIZER_COUNTING_EXP, s);
+  }
+
+  @Test
+  public void testDoWhileLoop() {
+    String s = StatementBuilder.create()
+        .addVariable("b", Boolean.class)
+        .do_()
+          .append(StatementBuilder.create().loadVariable("b").assignValue(false))
+        .finish()
+        .while_(Bool.expr(Variable.get("b")))
+        .toJavaString();
+        
+    assertEquals("failed to generate for do whileloop with simple expression",
+        DOWHILE_RESULT_SIMPLE_EXPRESSION, s);
   }
 }

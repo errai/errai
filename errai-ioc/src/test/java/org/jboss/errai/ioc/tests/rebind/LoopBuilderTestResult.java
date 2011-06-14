@@ -87,5 +87,8 @@ public interface LoopBuilderTestResult {
 
   public static final String FOR_RESULT_DECLARE_INITIALIZER_COUNTING_EXP =
       "     for (int i = 0; i < 100; i += 1) { System.out.println(i); }";
+  
+  public static final String DOWHILE_RESULT_SIMPLE_EXPRESSION =
+      "     do { b = false; } while (b);";
 
 }
