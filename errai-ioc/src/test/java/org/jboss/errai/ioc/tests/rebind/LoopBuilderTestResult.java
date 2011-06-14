@@ -64,6 +64,9 @@ public interface LoopBuilderTestResult {
   public static final String WHILE_RESULT_WITH_BODY =
       "   while (b) {\nb = false;\n}";
 
+  public static final String WHILE_RESULT_RHS_NULL_EMPTY =
+      "   while (str != null) { }";
+  
   public static final String WHILE_RESULT_RHS_EMPTY =
       "   while (str.length() >= 2) { }";
 

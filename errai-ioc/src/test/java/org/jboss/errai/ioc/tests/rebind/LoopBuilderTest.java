@@ -62,6 +62,9 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .foreach("element")
         .finish().toJavaString();
 
+    assertEquals("failed to generate foreach loop using a List<String>",
+        FOREACH_RESULT_STRING_IN_LIST, foreachWithListOfStrings);
+    
     String foreachWithStringArray = StatementBuilder.create()
         .addVariable("list", String[].class)
         .loadVariable("list")
@@ -70,6 +73,9 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .finish()
         .toJavaString();
 
+    assertEquals("failed to generate foreach loop using a String[]",
+        FOREACH_RESULT_STRING_IN_ARRAY_ONE_STATEMENT, foreachWithStringArray);
+    
     String foreachWithList = StatementBuilder.create()
         .addVariable("list", List.class)
         .loadVariable("list")
@@ -78,10 +84,6 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .append(createAnotherObject)
         .finish().toJavaString();
 
-    assertEquals("failed to generate foreach loop using a List<String>",
-        FOREACH_RESULT_STRING_IN_LIST, foreachWithListOfStrings);
-    assertEquals("failed to generate foreach loop using a String[]",
-        FOREACH_RESULT_STRING_IN_ARRAY_ONE_STATEMENT, foreachWithStringArray);
     assertEquals("failed to generate foreach loop using a List<?>",
         FOREACH_RESULT_OBJECT_IN_LIST_TWO_STATEMENTS, foreachWithList);
   }
@@ -247,11 +249,20 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
     s = StatementBuilder.create()
         .addVariable("str", String.class)
         .loadVariable("str")
+        .while_(BooleanOperator.NotEquals, null)
+        .finish().toJavaString();
+
+    assertEquals("failed to generate while loop with rhs (null check) and body", 
+        WHILE_RESULT_RHS_NULL_EMPTY, s);
+
+    s = StatementBuilder.create()
+        .addVariable("str", String.class)
+        .loadVariable("str")
         .invoke("length")
         .while_(BooleanOperator.GreaterThanOrEqual, 2)
         .finish().toJavaString();
 
-    assertEquals("failed to generate while loop with lhs invocation and body", WHILE_RESULT_RHS_EMPTY, s);
+    assertEquals("failed to generate while loop with rhs and body", WHILE_RESULT_RHS_EMPTY, s);
 
     s = StatementBuilder.create()
         .addVariable("str", String.class)
@@ -333,8 +344,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .while_(Bool.expr(Variable.get("b")))
         .toJavaString();
 
-    assertEquals("failed to generate for do whileloop with simple expression",
-        DOWHILE_RESULT_SIMPLE_EXPRESSION, s);
+    assertEquals("failed to generate for do whileloop with simple expression", DOWHILE_RESULT_SIMPLE_EXPRESSION, s);
 
     s = StatementBuilder.create()
         .addVariable("str", String.class)

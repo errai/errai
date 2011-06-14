@@ -17,6 +17,7 @@
 package org.errai.samples.asyncdemo.server;
 
 import org.jboss.errai.bus.client.api.AsyncTask;
+import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.ResourceProvider;
