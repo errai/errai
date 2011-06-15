@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
+package org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanExpression;
-import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.AbstractStatementBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.control.AbstractBlockConditional;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface WhileBuilder {
-  public AbstractStatementBuilder while_(BooleanExpression stmt);
-  public AbstractStatementBuilder while_();
-  public AbstractStatementBuilder while_(BooleanOperator op, Statement rhs);
-  public AbstractStatementBuilder while_(BooleanOperator op, Object rhs);
+public class DeferredConditionalBlock extends DeferredCallElement {
+
+  public DeferredConditionalBlock(AbstractBlockConditional conditionalBlock) {
+    super(new DeferredConditionalBlockCallback(conditionalBlock));
+  }
+  
 }

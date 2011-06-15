@@ -55,7 +55,7 @@ public class OperatorImpl implements Operator {
   public void assertCanBeApplied(MetaClass clazz) {
     if (!canBeApplied(clazz)) {
       throw new InvalidExpressionException("Not a valid type for operator '" +
-          canonicalString + "':" + clazz.getFullyQualifiedName());
+          canonicalString + "': " + clazz.getFullyQualifiedName());
     }
   }
 

@@ -16,11 +16,16 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import javax.enterprise.util.TypeLiteral;
-import java.util.*;
+
+import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 
 /**
  * This class represents a {@link Statement} context. It has a reference to its

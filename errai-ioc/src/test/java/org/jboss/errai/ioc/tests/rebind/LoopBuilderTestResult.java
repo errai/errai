@@ -66,7 +66,7 @@ public interface LoopBuilderTestResult {
 
   public static final String WHILE_RESULT_RHS_NULL_EMPTY =
       "   while (str != null) { }";
-  
+
   public static final String WHILE_RESULT_RHS_EMPTY =
       "   while (str.length() >= 2) { }";
 
@@ -90,11 +90,14 @@ public interface LoopBuilderTestResult {
 
   public static final String FOR_RESULT_DECLARE_INITIALIZER_COUNTING_EXP =
       "     for (int i = 0; i < 100; i += 1) { System.out.println(i); }";
-  
-  public static final String DOWHILE_RESULT_SIMPLE_EXPRESSION =
+
+  public static final String DOWHILE_RESULT_SIMPLE_EXPRESSION_NO_OP =
       "     do { b = false; } while (b);";
+
+  public static final String DOWHILE_RESULT_SIMPLE_EXPRESSION =
+      "     do { n = 1; } while (n >= 1);";
 
   public static final String DOWHILE_RESULT_NESTED_EXPRESSION =
       "     do { System.out.println(str); } while ((str != null) && (str.length() > 0));";
- 
+
 }

@@ -23,9 +23,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BuildCallback;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ElseBlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.IfBlockBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.CallWriter;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DeferredCallElement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DeferredCallback;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DeferredConditionalBlock;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.control.IfBlock;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.values.NullLiteral;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.GenUtil;
@@ -48,16 +46,13 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements IfBl
   }
 
   public BlockBuilder<ElseBlockBuilder> if_() {
-    return _if_(new BooleanExpressionBuilder());
+    return if_(new BooleanExpressionBuilder());
   }
 
-  public BlockBuilder<ElseBlockBuilder> if_(BooleanExpression booleanExpr) {
-    return _if_(booleanExpr);
-  }
-
-  public BlockBuilder<ElseBlockBuilder> if_(BooleanOperator op, Statement rhs) {
-    if (rhs == null) rhs = NullLiteral.INSTANCE;
-    return _if_(new BooleanExpressionBuilder(rhs, op));
+   public BlockBuilder<ElseBlockBuilder> if_(BooleanOperator op, Statement rhs) {
+    if (rhs == null) 
+      rhs = NullLiteral.INSTANCE;
+    return if_(new BooleanExpressionBuilder(rhs, op));
   }
 
   public BlockBuilder<ElseBlockBuilder> if_(BooleanOperator op, Object rhs) {
@@ -65,20 +60,9 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements IfBl
     return if_(op, rhsStatement);
   }
 
-  private BlockBuilder<ElseBlockBuilder> _if_(final BooleanExpression condition) {
+  public BlockBuilder<ElseBlockBuilder> if_(final BooleanExpression condition) {
     ifBlock = new IfBlock(condition);
-
-    appendCallElement(new DeferredCallElement(new DeferredCallback() {
-      public void doDeferred(CallWriter writer, Context context, Statement lhs) {
-        if (lhs != null) {
-          // The LHS value is on the current callstack. So we grab the value from there at generation time.
-          condition.setLhs(lhs);
-          condition.setLhsExpr(writer.getCallString());
-        }
-        writer.reset();
-        writer.append(ifBlock.generate(Context.create(context)));
-      }
-    }));
+    appendCallElement(new DeferredConditionalBlock(ifBlock));
 
     return new BlockBuilder<ElseBlockBuilder>(ifBlock.getBlock(), new BuildCallback<ElseBlockBuilder>() {
       public ElseBlockBuilder callback(Statement statement) {
@@ -105,7 +89,7 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements IfBl
 
     IfBlock elseIfBlock = new IfBlock(new BooleanExpressionBuilder(lhs, rhs, op));
     ifBlock.setElseIfBlock(elseIfBlock);
-    return _elseif_(elseIfBlock);
+    return elseif_(elseIfBlock);
   }
 
   public BlockBuilder<ElseBlockBuilder> elseif_(Statement lhs, BooleanOperator op, Object rhs) {
@@ -113,7 +97,7 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements IfBl
     return elseif_(lhs, op, rhsStatement);
   }
 
-  private BlockBuilder<ElseBlockBuilder> _elseif_(final IfBlock elseIfBlock) {
+  private BlockBuilder<ElseBlockBuilder> elseif_(final IfBlock elseIfBlock) {
     return new BlockBuilder<ElseBlockBuilder>(elseIfBlock.getBlock(), new BuildCallback<ElseBlockBuilder>() {
       public ElseBlockBuilder callback(Statement statement) {
         return new IfBlockBuilderImpl(context, callElementBuilder, elseIfBlock);
