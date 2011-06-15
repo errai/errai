@@ -16,13 +16,18 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.Builder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.*;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaConstructor;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -31,21 +36,30 @@ public class ClassBuilder extends AbstractStatementBuilder implements
         ClassDefinitionBuilderScope,
         ClassDefinitionBuilderAbstractOption,
         BaseClassStructureBuilder<BaseClassStructureBuilder> {
-  private String name;
+
+  private String className;
   private Scope scope;
   private MetaClass parent;
+
   private Set<MetaClass> interfaces = new HashSet<MetaClass>();
+
+  private Map<MetaConstructor, Builder> constructors = new HashMap<MetaConstructor, Builder>();
+  private Map<MetaField, Builder> fields = new HashMap<MetaField, Builder>();
+  private Map<MetaMethod, Builder> methods = new HashMap<MetaMethod, Builder>();
+
+  private StringBuilder buf = new StringBuilder();
+
   private boolean isAbstract;
 
-  ClassBuilder(String name, MetaClass parent, Context context, CallElementBuilder callElementBuilder) {
+  ClassBuilder(String className, MetaClass parent, Context context, CallElementBuilder callElementBuilder) {
     super(context, callElementBuilder);
-    this.name = name;
+    this.className = className;
     this.parent = parent;
   }
 
-  ClassBuilder(String name, MetaClass parent, Context context) {
+  ClassBuilder(String className, MetaClass parent, Context context) {
     super(context);
-    this.name = name;
+    this.className = className;
     this.parent = parent;
   }
 
@@ -55,6 +69,14 @@ public class ClassBuilder extends AbstractStatementBuilder implements
 
   public static ClassBuilder define(String fullQualifiedName, MetaClass parent) {
     return new ClassBuilder(fullQualifiedName, parent, Context.create());
+  }
+
+  private String getSimpleName() {
+    int idx = className.lastIndexOf('.');
+    if (idx != -1) {
+      return className.substring(idx+1);
+    }
+    return className;
   }
 
   public ClassBuilder abstractClass() {
@@ -105,7 +127,12 @@ public class ClassBuilder extends AbstractStatementBuilder implements
   }
 
   public BlockBuilder<BaseClassStructureBuilder> publicConstructor(MetaClass... parms) {
-    return null;
+    return new BlockBuilder<BaseClassStructureBuilder>(new BuildCallback<BaseClassStructureBuilder>() {
+      public BaseClassStructureBuilder callback(Statement statement) {
+        buf.append("public ").append(getSimpleName()) .append("(");
+
+      }
+    });
   }
 
   public BlockBuilder<BaseClassStructureBuilder> publicConstructor(Class<?>... parms) {

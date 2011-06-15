@@ -103,6 +103,10 @@ public class Context {
     return importedPackages.contains(packageName);
   }
 
+  public boolean hasClassImport(MetaClass clazz) {
+    return importedClasses.contains(clazz);
+  }
+
   public Context addClassImport(MetaClass clazz) {
     importedClasses.add(clazz);
     return this;

@@ -19,10 +19,12 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.AbstractStatement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaConstructor;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -53,6 +55,21 @@ public class DefParameters extends AbstractStatement {
 
   public static DefParameters fromStatements(Parameter... statements) {
     return new DefParameters(Arrays.asList(statements));
+  }
+
+  public static DefParameters fromTypeArray(MetaClass... types) {
+    return fromTypeArray("a", types);
+  }
+
+  public static DefParameters fromTypeArray(String prefix, MetaClass... types) {
+    List<Parameter> parms = new ArrayList<Parameter>();
+    int idx = 0;
+
+    for (MetaClass metaClass : types) {
+      parms.add(Parameter.of(metaClass, prefix + idx));
+    }
+
+    return new DefParameters(parms);
   }
 
   public static CallParameters none() {

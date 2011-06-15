@@ -58,7 +58,7 @@ public class LoadClassReference extends AbstractCallElement {
     if (idx != -1) {
       pkg = fqcn.substring(0, idx);
 
-      if (context.hasPackageImport(pkg)) {
+      if (context.hasPackageImport(pkg) || context.hasClassImport(metaClass)) {
         return fqcn.substring(idx + 1);
       }
     }

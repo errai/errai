@@ -24,7 +24,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
- * {@link StatementBuilder} that generates {@link Variable} assignments.
+ * {@link StatementBuilder} that generates {@link VariableReference} assignments.
  * 
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -44,7 +44,7 @@ public class AssignmentBuilder implements Statement {
     MetaClass referenceType = reference.getType();
     Statement[] indexes = reference.getIndexes();
     if (indexes!=null) {
-      for (int i=0; i<indexes.length; i++) {
+      for (Statement index : indexes) {
         if (!referenceType.isArray())
           throw new InvalidTypeException("Variable is not a " + indexes.length + "-dimensional array!");
         referenceType = referenceType.getComponentType();
