@@ -22,7 +22,6 @@ import static org.junit.Assert.fail;
 import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ContextBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
@@ -35,39 +34,37 @@ import org.junit.Test;
 
 /**
  * Tests the generation of if blocks using the {@link StatementBuilder} API.
- *
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements IfBlockBuilderTestResult {
 
   @Test
   public void testEmptyIfBlockUsingNoRhs() {
-    Statement s = StatementBuilder.create()
+    String s = StatementBuilder.create()
         .addVariable("str", String.class)
         .loadVariable("str")
         .invoke("endsWith", "abc")
         .if_()
-        .finish();
+        .finish().toJavaString();
 
-    assertEquals("Failed to generate empty if block using no rhs",
-        EMPTY_IF_BLOCK_RESULT_NO_RHS, s.generate(Context.create()));
+    assertEquals("Failed to generate empty if block using no rhs", EMPTY_IF_BLOCK_RESULT_NO_RHS, s);
   }
 
   @Test
   public void testEmptyIfBlockUsingLiteralRhs() {
-    Statement s = StatementBuilder.create()
+    String s = StatementBuilder.create()
         .addVariable("n", int.class)
         .loadVariable("n")
         .if_(BooleanOperator.Equals, 1)
-        .finish();
+        .finish().toJavaString();
 
-    assertEquals("Failed to generate empty if block using a literal rhs",
-        EMPTY_IF_BLOCK_RESULT_LITERAL_RHS, s.generate(Context.create()));
+    assertEquals("Failed to generate empty if block using a literal rhs", EMPTY_IF_BLOCK_RESULT_LITERAL_RHS, s);
   }
 
   @Test
   public void testIfElseBlockUsingNoRhs() {
-    Statement s = StatementBuilder.create()
+    String s = StatementBuilder.create()
         .addVariable("str", String.class)
         .loadVariable("str")
         .invoke("endsWith", "abc")
@@ -76,15 +73,14 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
         .finish()
         .else_()
           .append(ContextBuilder.create().declareVariable("n", Integer.class).initializeWith(1))
-        .finish();
+        .finish().toJavaString();
 
-    assertEquals("Failed to generate empty if block using no rhs",
-        IF_ELSE_BLOCK_RESULT_NO_RHS, s.generate(Context.create()));
+    assertEquals("Failed to generate empty if block using no rhs", IF_ELSE_BLOCK_RESULT_NO_RHS, s);
   }
 
   @Test
   public void testIfElseBlockUsingRhs() {
-    Statement s = StatementBuilder.create()
+    String s = StatementBuilder.create()
         .addVariable("n", Integer.class)
         .addVariable("m", Integer.class)
         .loadVariable("n")
@@ -93,17 +89,16 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
         .finish()
         .else_()
           .append(ContextBuilder.create().declareVariable("n", Integer.class).initializeWith(1))
-        .finish();
+        .finish().toJavaString();
 
-    assertEquals("Failed to generate empty if block using a rhs",
-        IF_ELSE_BLOCK_RESULT_RHS, s.generate(Context.create()));
+    assertEquals("Failed to generate empty if block using a rhs", IF_ELSE_BLOCK_RESULT_RHS, s);
   }
 
   @Test
   public void testNestedIfElseIfBlockUsingNoRhs() {
     Context c = ContextBuilder.create().addVariable("s", String.class).addVariable("n", Integer.class).getContext();
 
-    Statement s = StatementBuilder.create(c)
+    String s = StatementBuilder.create(c)
         .loadVariable("s")
         .invoke("endsWith", "abc")
         .if_()
@@ -111,17 +106,21 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
         .finish()
         .else_()
           .append(StatementBuilder.create(c).loadVariable("s")
-            .invoke("startsWith", "def")
-            .if_()
+              .invoke("startsWith", "def")
+              .if_()
               .append(StatementBuilder.create(c).loadVariable("n").assignValue(1))
-            .finish()
+              .finish()
         )
-        .finish();
+        .finish().toJavaString();
 
-    assertEquals("Failed to generate if - if - block using no rhs",
-        IF_ELSEIF_BLOCK_RESULT_NO_RHS_NESTED, s.generate(Context.create()));
+    assertEquals("Failed to generate if-else-if-block using no rhs", IF_ELSEIF_BLOCK_RESULT_NO_RHS_NESTED, s);
+  }
 
-    s = StatementBuilder.create(c)
+  @Test
+  public void testNestedIfElseIfElseBlockUsingNoRhs() {
+    Context c = ContextBuilder.create().addVariable("s", String.class).addVariable("n", Integer.class).getContext();
+
+    String s = StatementBuilder.create(c)
         .loadVariable("s")
         .invoke("endsWith", "abc")
         .if_()
@@ -129,49 +128,48 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
         .finish()
         .else_()
           .append(StatementBuilder.create(c).loadVariable("s")
-            .invoke("startsWith", "def")
-            .if_()
+              .invoke("startsWith", "def")
+              .if_()
               .append(StatementBuilder.create(c).loadVariable("n").assignValue(1))
-            .finish()
-            .else_()
+              .finish()
+              .else_()
               .append(StatementBuilder.create(c).loadVariable("n").assignValue(2))
-            .finish()
+              .finish()
         )
-        .finish();
+        .finish().toJavaString();
 
-    assertEquals("Failed to generate if - else if - else block using no rhs",
-        IF_ELSEIF_ELSE_BLOCK_RESULT_NO_RHS_NESTED, s.generate(Context.create()));
+    assertEquals("Failed to generate if-else-if-else block using no rhs",
+        IF_ELSEIF_ELSE_BLOCK_RESULT_NO_RHS_NESTED, s);
   }
 
   @Test
   public void testNestedIfElseIfBlockUsingRhs() {
     Context c = ContextBuilder.create().addVariable("n", Integer.class).addVariable("m", Integer.class).getContext();
 
-    Statement s = StatementBuilder.create(c)
+    String s = StatementBuilder.create(c)
         .loadVariable("n")
         .if_(BooleanOperator.GreaterThan, Variable.get("m"))
           .append(StatementBuilder.create(c).loadVariable("n").assignValue(0))
         .finish()
         .else_()
           .append(StatementBuilder.create(c).loadVariable("m")
-            .if_(BooleanOperator.GreaterThan, Variable.get("n"))
+              .if_(BooleanOperator.GreaterThan, Variable.get("n"))
               .append(StatementBuilder.create(c).loadVariable("n").assignValue(1))
-            .finish()
-            .else_()
+              .finish()
+              .else_()
               .append(StatementBuilder.create(c).loadVariable("n").assignValue(2))
-            .finish()
+              .finish()
         )
-        .finish();
+        .finish().toJavaString();
 
-    assertEquals("Failed to generate if - else if - else block using rhs",
-        IF_ELSEIF_ELSE_BLOCK_RESULT_RHS_NESTED, s.generate(Context.create()));
+    assertEquals("Failed to generate if-else-if-else block using rhs", IF_ELSEIF_ELSE_BLOCK_RESULT_RHS_NESTED, s);
   }
 
   @Test
   public void testIfElseIfBlockUsingNoRhsAndElseIfKeyword() {
     Context c = ContextBuilder.create().addVariable("s", String.class).addVariable("n", Integer.class).getContext();
 
-    Statement s = StatementBuilder.create(c)
+    String s = StatementBuilder.create(c)
         .loadVariable("s")
         .invoke("endsWith", "abc")
         .if_()
@@ -179,12 +177,16 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
         .finish()
         .elseif_(StatementBuilder.create(c).loadVariable("s").invoke("startsWith", "def"))
           .append(StatementBuilder.create(c).loadVariable("n").assignValue(1))
-        .finish();
+        .finish().toJavaString();
 
-    assertEquals("Failed to generate if - if - block using no rhs",
-        IF_ELSEIF_BLOCK_RESULT_NO_RHS, s.generate(Context.create()));
+    assertEquals("Failed to generate if-elseif block using no rhs", IF_ELSEIF_BLOCK_RESULT_NO_RHS, s);
+  }
 
-    s = StatementBuilder.create(c)
+  @Test
+  public void testIfElseIfElseBlockUsingNoRhsAndElseIfKeyword() {
+    Context c = ContextBuilder.create().addVariable("s", String.class).addVariable("n", Integer.class).getContext();
+
+    String s = StatementBuilder.create(c)
         .loadVariable("s")
         .invoke("endsWith", "abc")
         .if_()
@@ -195,17 +197,16 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
         .finish()
         .else_()
           .append(StatementBuilder.create(c).loadVariable("n").assignValue(2))
-        .finish();
+        .finish().toJavaString();
 
-    assertEquals("Failed to generate if - else if - else block using no rhs",
-        IF_ELSEIF_ELSE_BLOCK_RESULT_NO_RHS, s.generate(Context.create()));
+    assertEquals("Failed to generate if-elseif-else block using no rhs", IF_ELSEIF_ELSE_BLOCK_RESULT_NO_RHS, s);
   }
 
   @Test
   public void testIfElseIfBlockUsingRhsAndElseIfKeyword() {
     Context c = ContextBuilder.create().addVariable("n", Integer.class).addVariable("m", Integer.class).getContext();
 
-    Statement s = StatementBuilder.create(c)
+    String s = StatementBuilder.create(c)
         .loadVariable("n")
         .if_(BooleanOperator.GreaterThan, Variable.get("m"))
           .append(StatementBuilder.create(c).loadVariable("n").assignValue(0))
@@ -218,10 +219,9 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
         .finish()
         .else_()
           .append(StatementBuilder.create(c).loadVariable("n").assignValue(3))
-        .finish();
+        .finish().toJavaString();
 
-    assertEquals("Failed to generate if - else if - else block using rhs",
-        IF_ELSEIF_ELSE_BLOCK_RESULT_RHS, s.generate(Context.create()));
+    assertEquals("Failed to generate if - else if - else block using rhs", IF_ELSEIF_ELSE_BLOCK_RESULT_RHS, s);
   }
 
   @Test
@@ -297,9 +297,8 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
           .append(Stmt.create().loadStatic(System.class, "out").invoke("println", Refs.get("a")))
         .finish()
         .toJavaString();
-    
-    assertEquals("Failed to generate if block using nested boolean expressions", 
+
+    assertEquals("Failed to generate if block using nested boolean expressions",
         IF_ELSEIF_BLOCK_RESULT_UNCHAINED_NESTED_EXPRESSIONS, s);
   }
-
 }
