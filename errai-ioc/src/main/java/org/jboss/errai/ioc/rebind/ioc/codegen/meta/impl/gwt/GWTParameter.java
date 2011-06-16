@@ -53,7 +53,7 @@ public class GWTParameter implements MetaParameter {
 
       Method method = null;
       try {
-        method = cls.getMethod(jMethod.getName(),
+        method = cls.getDeclaredMethod(jMethod.getName(),
             InjectUtil.jParmToClass(jMethod.getParameters()));
       }
       catch (NoSuchMethodException e) {
