@@ -53,7 +53,7 @@ public class DefParameters extends AbstractStatement {
     return new DefParameters(parameters);
   }
 
-  public static DefParameters fromStatements(Parameter... statements) {
+  public static DefParameters fromParameters(Parameter... statements) {
     return new DefParameters(Arrays.asList(statements));
   }
 

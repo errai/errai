@@ -16,7 +16,22 @@
 
 package org.jboss.errai.ioc.tests.rebind;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.lang.annotation.Annotation;
+import java.util.List;
+
+import javax.annotation.PostConstruct;
+import javax.enterprise.util.TypeLiteral;
+import javax.inject.Inject;
+
+import org.jboss.errai.ioc.rebind.ioc.codegen.AssignmentOperator;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.VariableReference;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.values.LiteralFactory;
@@ -24,15 +39,6 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 import org.junit.Assert;
 import org.junit.Test;
-
-import javax.annotation.PostConstruct;
-import javax.enterprise.util.TypeLiteral;
-import javax.inject.Inject;
-import java.lang.annotation.Annotation;
-import java.util.List;
-
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Tests the {@link StatementBuilder} API.
@@ -42,7 +48,7 @@ import static org.junit.Assert.fail;
 public class StatementBuilderTest extends AbstractStatementBuilderTest {
 
   @Test
-  public void testAddVariableWithLiteralInitialization() {
+  public void testAddVariableWithExactTypeProvided() {
     Context ctx = Context.create();
     StatementBuilder.create().addVariable("n", Integer.class, 10).generate(ctx);
 
@@ -50,27 +56,36 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
     assertEquals("Wrong variable name", "n", n.getName());
     Assert.assertEquals("Wrong variable type", MetaClassFactory.get(Integer.class), n.getType());
     Assert.assertEquals("Wrong variable value", LiteralFactory.getLiteral(10), n.getValue());
+  }
 
-    ctx = Context.create();
+  @Test
+  public void testAddVariableWithIntegerTypeInference() {
+    Context ctx = Context.create();
     StatementBuilder.create().addVariable("n", 10).generate(ctx);
 
-    n = ctx.getVariable("n");
+    VariableReference n = ctx.getVariable("n");
     assertEquals("Wrong variable name", "n", n.getName());
     Assert.assertEquals("Wrong variable type", MetaClassFactory.get(Integer.class), n.getType());
     Assert.assertEquals("Wrong variable value", LiteralFactory.getLiteral(10), n.getValue());
+  }
 
-    ctx = Context.create();
+  @Test
+  public void testAddVariableWithStringTypeInference() {
+    Context ctx = Context.create();
     StatementBuilder.create().addVariable("n", "10").generate(ctx);
 
-    n = ctx.getVariable("n");
+    VariableReference n = ctx.getVariable("n");
     assertEquals("Wrong variable name", "n", n.getName());
     Assert.assertEquals("Wrong variable type", MetaClassFactory.get(String.class), n.getType());
     Assert.assertEquals("Wrong variable value", LiteralFactory.getLiteral("10"), n.getValue());
+  }
 
-    ctx = Context.create();
+  @Test
+  public void testAddVariableWithImplicitTypeConversion() {
+    Context ctx = Context.create();
     StatementBuilder.create().addVariable("n", Integer.class, "10").generate(ctx);
 
-    n = ctx.getVariable("n");
+    VariableReference n = ctx.getVariable("n");
     assertEquals("Wrong variable name", "n", n.getName());
     Assert.assertEquals("Wrong variable type", MetaClassFactory.get(Integer.class), n.getType());
     Assert.assertEquals("Wrong variable value", LiteralFactory.getLiteral(10), n.getValue());
@@ -86,7 +101,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   }
 
   @Test
-  public void testAddVariableWithObjectInitialization() {
+  public void testAddVariableWithObjectInitializationWithExactTypeProvided() {
     Context ctx = Context.create();
     StatementBuilder.create().addVariable("str", String.class,
         ObjectBuilder.newInstanceOf(String.class)).generate(ctx);
@@ -94,17 +109,20 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
     VariableReference str = ctx.getVariable("str");
     assertEquals("Wrong variable name", "str", str.getName());
     Assert.assertEquals("Wrong variable type", MetaClassFactory.get(String.class), str.getType());
+  }
 
-    ctx = Context.create();
+  @Test
+  public void testAddVariableWithObjectInitializationWithStringTypeInference() {
+    Context ctx = Context.create();
     StatementBuilder.create().addVariable("str", ObjectBuilder.newInstanceOf(String.class)).generate(ctx);
 
-    str = ctx.getVariable("str");
+    VariableReference str = ctx.getVariable("str");
     assertEquals("Wrong variable name", "str", str.getName());
     Assert.assertEquals("Wrong variable type", MetaClassFactory.get(String.class), str.getType());
   }
 
   @Test
-  public void testUndefinedVariable() {
+  public void testLoadUndefinedVariable() {
     try {
       StatementBuilder.create().loadVariable("n").toJavaString();
       fail("Expected OutOfScopeException");
@@ -116,6 +134,12 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
 
   @Test
   public void testCreateAndInitializeArray() {
+    String s = StatementBuilder.create().newArray(String.class).initialize("1", "2").toJavaString();
+    assertEquals("new String[] {\"1\",\"2\"}", s);
+  }
+
+  @Test
+  public void testCreateAndInitializeArrayWithInvalidInitialization() {
     try {
       StatementBuilder.create().newArray(Annotation.class)
           .initialize("1", "2")
@@ -125,7 +149,10 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
     catch (InvalidTypeException oose) {
       // expected
     }
+  }
 
+  @Test
+  public void testCreateAndInitializeArrayWithMissingInitializationAndDimensions() {
     try {
       StatementBuilder.create().newArray(String.class).toJavaString();
       fail("Expected RuntimeException");
@@ -134,10 +161,10 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
       // expected
       assertEquals("Must provide either dimension expressions or an array initializer", e.getMessage());
     }
+  }
 
-    String s = StatementBuilder.create().newArray(String.class).initialize("1", "2").toJavaString();
-    assertEquals("new String[] {\"1\",\"2\"}", s);
-
+  @Test
+  public void testCreateAndInitializeAnnotationArray() {
     Statement annotation1 = ObjectBuilder.newInstanceOf(Annotation.class)
         .extend()
         .publicOverridesMethod("annotationType")
@@ -152,7 +179,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
         .finish()
         .finish();
 
-    s = StatementBuilder.create().newArray(Annotation.class)
+    String s = StatementBuilder.create().newArray(Annotation.class)
         .initialize(annotation1, annotation2)
         .toJavaString();
 
@@ -172,27 +199,38 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
 
   @Test
   @SuppressWarnings(value = { "all" })
-  public void testCreateAndInitializeMultiDimensionalArray() {
-
+  public void testCreateAndInitializeTwoDimensionalArray() {
     String s = StatementBuilder.create().newArray(Integer.class)
         .initialize(new Integer[][] { { 1, 2 }, { 3, 4 } })
         .toJavaString();
 
     assertEquals("Failed to generate two dimensional array", "new Integer[][] {{1,2},{3,4}}", s);
+  }
 
-    s = StatementBuilder.create().newArray(Integer.class)
+  @Test
+  @SuppressWarnings(value = { "all" })
+  public void testCreateAndInitializeTwoDimensionalArrayWithSingleValue() {
+    String s = StatementBuilder.create().newArray(Integer.class)
         .initialize(new Object[][] { { 1, 2 } })
         .toJavaString();
 
     assertEquals("Failed to generate two dimensional array", "new Integer[][] {{1,2}}", s);
+  }
 
-    s = StatementBuilder.create().newArray(Object.class)
+  @Test
+  @SuppressWarnings(value = { "all" })
+  public void testCreateAndInitializeTwoDimensionalObjectArrayWithIntegers() {
+    String s = StatementBuilder.create().newArray(Object.class)
         .initialize(new Object[][] { { 1, 2 } })
         .toJavaString();
 
     assertEquals("Failed to generate two dimensional array", "new Object[][] {{1,2}}", s);
+  }
 
-    s = StatementBuilder.create().newArray(String.class)
+  @Test
+  @SuppressWarnings(value = { "all" })
+  public void testCreateAndInitializeTwoDimensionalArrayWithStatements() {
+    String s = StatementBuilder.create().newArray(String.class)
         .initialize(new Statement[][] {
             { StatementBuilder.create().invokeStatic(Integer.class, "toString", 1),
                 StatementBuilder.create().invokeStatic(Integer.class, "toString", 2) },
@@ -203,8 +241,12 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
     assertEquals("Failed to generate two dimensional array using statements",
         "new String[][] {{Integer.toString(1),Integer.toString(2)}," +
             "{Integer.toString(3),Integer.toString(4)}}", s);
+  }
 
-    s = StatementBuilder.create().newArray(String.class)
+  @Test
+  @SuppressWarnings(value = { "all" })
+  public void testCreateAndInitializeTwoDimensionalArrayWithStatementsAndLiterals() {
+    String s = StatementBuilder.create().newArray(String.class)
         .initialize(new Object[][] {
             { StatementBuilder.create().invokeStatic(Integer.class, "toString", 1), "2" },
             { StatementBuilder.create().invokeStatic(Integer.class, "toString", 3), "4" } })
@@ -213,8 +255,12 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
     assertEquals("Failed to generate two dimensional array using statements and objects",
         "new String[][] {{Integer.toString(1),\"2\"}," +
             "{Integer.toString(3),\"4\"}}", s);
+  }
 
-    s = StatementBuilder.create().newArray(String.class)
+  @Test
+  @SuppressWarnings(value = { "all" })
+  public void testCreateAndInitializeThreeDimensionalArray() {
+    String s = StatementBuilder.create().newArray(String.class)
         .initialize(new String[][][] { { { "1", "2" }, { "a", "b" } }, { { "3", "4" }, { "b", "c" } } })
         .toJavaString();
 
@@ -223,7 +269,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   }
 
   @Test
-  public void testAssignArrayVariable() {
+  public void testAssignArrayValue() {
     String s = StatementBuilder.create()
         .addVariable("twoDimArray", String[][].class)
         .loadVariable("twoDimArray", 1, 2)
@@ -231,16 +277,22 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
         .toJavaString();
 
     assertEquals("Failed to generate array assignment", "twoDimArray[1][2] = \"test\"", s);
+  }
 
-    s = StatementBuilder.create()
+  @Test
+  public void testAssignArrayValueWithPreIncrementAssignment() {
+    String s = StatementBuilder.create()
         .addVariable("twoDimArray", String[][].class)
         .loadVariable("twoDimArray", 1, 2)
         .assignValue(AssignmentOperator.PreIncrementAssign, "test")
         .toJavaString();
 
     assertEquals("Failed to generate array assignment", "twoDimArray[1][2] += \"test\"", s);
+  }
 
-    s = StatementBuilder.create()
+  @Test
+  public void testAssignArrayValueWithVariableIndexes() {
+    String s = StatementBuilder.create()
         .addVariable("twoDimArray", String[][].class)
         .addVariable("i", int.class)
         .addVariable("j", int.class)
@@ -249,7 +301,10 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
         .toJavaString();
 
     assertEquals("Failed to generate array assignment", "twoDimArray[i][j] = \"test\"", s);
+  }
 
+  @Test
+  public void testAssignArrayValueWithInvalidArray() {
     try {
       StatementBuilder.create()
           .addVariable("twoDimArray", String.class)
@@ -261,7 +316,10 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
     catch (InvalidTypeException ite) {
       // Expected, variable is not an array.
     }
+  }
 
+  @Test
+  public void testAssignArrayValueWithInvalidIndexType() {
     try {
       StatementBuilder.create()
           .addVariable("twoDimArray", String[][].class)
@@ -276,7 +334,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
       // Expected, indexes are no integers
     }
   }
-  
+
   @Test
   public void testObjectCreationWithParameterizedType() {
     String s = StatementBuilder.create().newObject(new TypeLiteral<List<String>>() {}).toJavaString();

@@ -21,7 +21,6 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.*;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaConstructor;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
@@ -74,7 +73,7 @@ public class ClassBuilder extends AbstractStatementBuilder implements
   private String getSimpleName() {
     int idx = className.lastIndexOf('.');
     if (idx != -1) {
-      return className.substring(idx+1);
+      return className.substring(idx + 1);
     }
     return className;
   }
@@ -127,40 +126,70 @@ public class ClassBuilder extends AbstractStatementBuilder implements
   }
 
   public BlockBuilder<BaseClassStructureBuilder> publicConstructor(MetaClass... parms) {
-    return new BlockBuilder<BaseClassStructureBuilder>(new BuildCallback<BaseClassStructureBuilder>() {
-      public BaseClassStructureBuilder callback(Statement statement) {
-        buf.append("public ").append(getSimpleName()) .append("(");
-
-      }
-    });
+    return genConstructor(Scope.Public, DefParameters.fromTypeArray(parms));
   }
 
   public BlockBuilder<BaseClassStructureBuilder> publicConstructor(Class<?>... parms) {
-    return null;
+    return publicConstructor(MetaClassFactory.fromClassArray(parms));
   }
 
+  public BlockBuilder<BaseClassStructureBuilder> publicConstructor(Parameter... parms) {
+    return genConstructor(Scope.Public, DefParameters.fromParameters(parms));
+  }
+
+
   public BlockBuilder<BaseClassStructureBuilder> privateConstructor(MetaClass... parms) {
-    return null;
+    return genConstructor(Scope.Private, DefParameters.fromTypeArray(parms));
   }
 
   public BlockBuilder<BaseClassStructureBuilder> privateConstructor(Class<?>... parms) {
-    return null;
+    return privateConstructor(MetaClassFactory.fromClassArray(parms));
   }
 
+  public BlockBuilder<BaseClassStructureBuilder> privateConstructor(Parameter... parms) {
+    return genConstructor(Scope.Private, DefParameters.fromParameters(parms));
+  }
+
+
   public BlockBuilder<BaseClassStructureBuilder> protectedConstructor(MetaClass... parms) {
-    return null;
+    return genConstructor(Scope.Protected, DefParameters.fromTypeArray(parms));
   }
 
   public BlockBuilder<BaseClassStructureBuilder> protectedConstructor(Class<?>... parms) {
-    return null;
+    return protectedConstructor(MetaClassFactory.fromClassArray(parms));
   }
 
+  public BlockBuilder<BaseClassStructureBuilder> protectedConstructor(Parameter... parms) {
+    return genConstructor(Scope.Protected, DefParameters.fromParameters(parms));
+  }
+
+
   public BlockBuilder<BaseClassStructureBuilder> packageConstructor(MetaClass... parms) {
-    return null;
+    return genConstructor(Scope.Package, DefParameters.fromTypeArray(parms));
   }
 
   public BlockBuilder<BaseClassStructureBuilder> packageConstructor(Class<?>... parms) {
-    return null;
+    return packageConstructor(MetaClassFactory.fromClassArray(parms));
+  }
+
+  public BlockBuilder<BaseClassStructureBuilder> packageConstructor(Parameter... parms) {
+    return genConstructor(Scope.Package, DefParameters.fromParameters(parms));
+  }
+
+
+  private BlockBuilder<BaseClassStructureBuilder> genConstructor(final Scope scope, final DefParameters
+          defParameters) {
+    return new BlockBuilder<BaseClassStructureBuilder>(new BuildCallback<BaseClassStructureBuilder>() {
+      public BaseClassStructureBuilder callback(Statement statement) {
+        buf.append(scope.getCanonicalName())
+                .append(" ")
+                .append(getSimpleName())
+                .append(defParameters.generate(context))
+                .append(" {\n").append(statement.generate(context)).append("\n}\n");
+
+        return ClassBuilder.this;
+      }
+    });
   }
 
   public BlockBuilder<BaseClassStructureBuilder> publicMethod(MetaClass returnType, String name, MetaClass... parms) {

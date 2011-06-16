@@ -28,20 +28,29 @@ public interface BaseClassStructureBuilder<T extends BaseClassStructureBuilder> 
 
   public BlockBuilder<T> publicConstructor(Class<?>... parms);
 
+  public BlockBuilder<T> publicConstructor(Parameter... parms);
+
 
   public BlockBuilder<T> privateConstructor(MetaClass... parms);
 
   public BlockBuilder<T> privateConstructor(Class<?>... parms);
+
+  public BlockBuilder<T> privateConstructor(Parameter... parms);
 
 
   public BlockBuilder<T> protectedConstructor(MetaClass... parms);
 
   public BlockBuilder<T> protectedConstructor(Class<?>... parms);
 
+  public BlockBuilder<T> protectedConstructor(Parameter... parms);
+
 
   public BlockBuilder<T> packageConstructor(MetaClass... parms);
 
   public BlockBuilder<T> packageConstructor(Class<?>... parms);
+
+  public BlockBuilder<T> packageConstructor(Parameter... parms);
+
 
 
   // --- //

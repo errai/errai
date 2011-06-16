@@ -17,15 +17,15 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.control;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.BlockStatement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanExpression;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class DoWhileLoop extends AbstractBlockConditional {
-  public DoWhileLoop(Statement condition, BlockStatement block) {
+  public DoWhileLoop(BooleanExpression condition, BlockStatement block) {
     super(condition, block);
   }
 

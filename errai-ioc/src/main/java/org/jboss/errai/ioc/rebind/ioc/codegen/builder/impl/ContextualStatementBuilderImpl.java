@@ -21,13 +21,14 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ContextualStatementBuilder
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ElseBlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.LoopBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.VariableReferenceContextualStatementBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.WhileBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.AssignVariable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadField;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.MethodCall;
 
 /**
  * Implementation of the {@link ContextualStatementBuilder}.
- *
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ContextualStatementBuilderImpl extends AbstractStatementBuilder implements ContextualStatementBuilder,
@@ -56,7 +57,7 @@ public class ContextualStatementBuilderImpl extends AbstractStatementBuilder imp
   public BlockBuilder<LoopBuilder> foreach(String loopVarName, Class<?> loopVarType) {
     return new LoopBuilderImpl(context, callElementBuilder).foreach(loopVarName, loopVarType);
   }
-  
+
   public BlockBuilder<LoopBuilder> for_(BooleanExpression condition) {
     return new LoopBuilderImpl(context, callElementBuilder).for_(condition);
   }
@@ -64,11 +65,15 @@ public class ContextualStatementBuilderImpl extends AbstractStatementBuilder imp
   public BlockBuilder<LoopBuilder> for_(BooleanExpression condition, Statement afterBlock) {
     return new LoopBuilderImpl(context, callElementBuilder).for_(condition, afterBlock);
   }
-  
+
+  public BlockBuilder<WhileBuilder> do_() {
+    return new LoopBuilderImpl(context, callElementBuilder).do_();
+  }
+
   public BlockBuilder<LoopBuilder> while_() {
     return new LoopBuilderImpl(context, callElementBuilder).while_();
   }
-  
+
   public BlockBuilder<LoopBuilder> while_(BooleanOperator op, Statement rhs) {
     return new LoopBuilderImpl(context, callElementBuilder).while_(op, rhs);
   }

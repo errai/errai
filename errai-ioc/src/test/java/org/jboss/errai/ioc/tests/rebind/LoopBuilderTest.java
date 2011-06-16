@@ -30,7 +30,6 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Builder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.LoopBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ContextBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidExpressionException;
@@ -49,18 +48,20 @@ import org.junit.Test;
 public class LoopBuilderTest extends AbstractStatementBuilderTest implements LoopBuilderTestResult {
 
   @Test
-  public void testForeachLoop() throws Exception {
-    Statement createObject = StatementBuilder.create()
-        .newObject(String.class);
-
-    Statement createAnotherObject = StatementBuilder.create()
-        .newObject(Object.class);
-
+  public void testForeachLoopWithStringInParameterizedList() {
     String foreachWithListOfStrings = StatementBuilder.create()
         .addVariable("list", new TypeLiteral<List<String>>() {})
         .loadVariable("list")
         .foreach("element")
         .finish().toJavaString();
+
+    assertEquals("failed to generate foreach loop using a List<String>",
+        FOREACH_RESULT_STRING_IN_LIST, foreachWithListOfStrings);
+  }
+
+  @Test
+  public void testForeachLoopWithStringInArray() {
+    Statement createObject = StatementBuilder.create().newObject(String.class);
 
     String foreachWithStringArray = StatementBuilder.create()
         .addVariable("list", String[].class)
@@ -70,6 +71,15 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .finish()
         .toJavaString();
 
+    assertEquals("failed to generate foreach loop using a String[]",
+        FOREACH_RESULT_STRING_IN_ARRAY_ONE_STATEMENT, foreachWithStringArray);
+  }
+
+  @Test
+  public void testForeachLoopWithStringInList() {
+    Statement createObject = StatementBuilder.create().newObject(String.class);
+    Statement createAnotherObject = StatementBuilder.create().newObject(Object.class);
+
     String foreachWithList = StatementBuilder.create()
         .addVariable("list", List.class)
         .loadVariable("list")
@@ -78,16 +88,12 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .append(createAnotherObject)
         .finish().toJavaString();
 
-    assertEquals("failed to generate foreach loop using a List<String>",
-        FOREACH_RESULT_STRING_IN_LIST, foreachWithListOfStrings);
-    assertEquals("failed to generate foreach loop using a String[]",
-        FOREACH_RESULT_STRING_IN_ARRAY_ONE_STATEMENT, foreachWithStringArray);
     assertEquals("failed to generate foreach loop using a List<?>",
         FOREACH_RESULT_OBJECT_IN_LIST_TWO_STATEMENTS, foreachWithList);
   }
 
   @Test
-  public void testForeachLoopWithUndefinedCollection() throws Exception {
+  public void testForeachLoopWithUndefinedCollection() {
     try {
       StatementBuilder.create()
           .loadVariable("list")
@@ -102,7 +108,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   }
 
   @Test
-  public void testForeachLoopWithProvidedLoopVarType() throws Exception {
+  public void testForeachLoopWithProvidedLoopVarType() {
     Builder builder = StatementBuilder.create()
         .addVariable("list", new TypeLiteral<List<String>>() {})
         .loadVariable("list")
@@ -127,7 +133,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   }
 
   @Test
-  public void testNestedForeachLoops() throws Exception {
+  public void testNestedForeachLoops() {
     Statement createObject = StatementBuilder.create().newObject(String.class);
 
     Builder outerLoop = StatementBuilder.create()
@@ -148,7 +154,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   }
 
   @Test
-  public void testForeachLoopWithInvalidCollectionType() throws Exception {
+  public void testForeachLoopWithInvalidCollectionType() {
 
     try {
       StatementBuilder.create()
@@ -165,7 +171,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   }
 
   @Test
-  public void testForeachLoopWithInvoke() throws Exception {
+  public void testForeachLoopWithInvoke() {
     Builder loop = StatementBuilder.create()
         .addVariable("map", Map.class)
         .loadVariable("map")
@@ -177,29 +183,32 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   }
 
   @Test
-  public void testForeachLoopWithLiterals() throws Exception {
-    LoopBuilder loopBuilder = StatementBuilder.create()
+  public void testForeachLoopWithLiterals() {
+    String s = StatementBuilder.create()
         .loadLiteral(new String[] { "s1", "s2" })
         .foreach("s")
         .append(StatementBuilder.create().loadVariable("s").invoke("getBytes"))
-        .finish();
+        .finish().toJavaString();
 
     assertEquals("failed to generate foreach loop using a literal String array",
-        FOREACH_RESULT_LITERAL_STRING_ARRAY, loopBuilder.toJavaString());
-
-    Context c = ContextBuilder.create().addVariable(Variable.create("s", String.class)).getContext();
-    loopBuilder = StatementBuilder.create(c)
-        .loadLiteral(new String[] { "s1", "s2" })
-        .foreach("s")
-        .append(StatementBuilder.create().loadVariable("s").invoke("getBytes"))
-        .finish();
-
-    assertEquals("failed to generate foreach loop using a literal String array",
-        FOREACH_RESULT_LITERAL_STRING_ARRAY, loopBuilder.toJavaString());
+        FOREACH_RESULT_LITERAL_STRING_ARRAY, s);
   }
 
   @Test
-  public void testWhileLoopWithInvalidExpressions() {
+  public void testForeachLoopWithProvidedContext() {
+    Context c = ContextBuilder.create().addVariable(Variable.create("s", String.class)).getContext();
+    String s = StatementBuilder.create(c)
+        .loadLiteral(new String[] { "s1", "s2" })
+        .foreach("s")
+        .append(StatementBuilder.create().loadVariable("s").invoke("getBytes"))
+        .finish().toJavaString();
+
+    assertEquals("failed to generate foreach loop using a literal String array",
+        FOREACH_RESULT_LITERAL_STRING_ARRAY, s);
+  }
+
+  @Test
+  public void testWhileLoopWithInvalidExpression() {
     try {
       StatementBuilder.create()
           .addVariable("n", Integer.class)
@@ -227,33 +236,64 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   }
 
   @Test
-  public void testWhileLoop() {
+  public void testWhileLoopChainedWithEmptyExpressionWithoutBody() {
     String s = StatementBuilder.create()
         .addVariable("b", Boolean.class)
         .loadVariable("b")
         .while_().finish().toJavaString();
 
-    assertEquals("failed to generate empty while loop", WHILE_RESULT_EMPTY, s);
+    assertEquals("failed to generate empty while loop with chained lhs", WHILE_RESULT_EMPTY, s);
+  }
 
-    s = StatementBuilder.create()
+  @Test
+  public void testWhileLoopChainedWithEmptyExpressionWithBody() {
+    String s = StatementBuilder.create()
         .addVariable("b", Boolean.class)
         .loadVariable("b")
         .while_()
           .append(StatementBuilder.create().loadVariable("b").assignValue(false))
         .finish().toJavaString();
 
-    assertEquals("failed to generate while loop with body", WHILE_RESULT_WITH_BODY, s);
+    assertEquals("failed to generate while loop with chained lhs and body", WHILE_RESULT_WITH_BODY, s);
+  }
 
-    s = StatementBuilder.create()
+  @Test
+  public void testWhileLoopChainedWithNullCheck() {
+    String s = StatementBuilder.create()
+        .addVariable("str", String.class)
+        .loadVariable("str")
+        .while_(BooleanOperator.NotEquals, null)
+        .finish().toJavaString();
+
+    assertEquals("failed to generate while loop with chained lhs, rhs (null check) and no body",
+        WHILE_RESULT_RHS_NULL_EMPTY, s);
+  }
+
+  @Test
+  public void testWhileLoopChainedWithExpression() {
+    String s = StatementBuilder.create()
         .addVariable("str", String.class)
         .loadVariable("str")
         .invoke("length")
         .while_(BooleanOperator.GreaterThanOrEqual, 2)
         .finish().toJavaString();
 
-    assertEquals("failed to generate while loop with lhs invocation and body", WHILE_RESULT_RHS_EMPTY, s);
+    assertEquals("failed to generate while loop with chained lhs, rhs and no body", WHILE_RESULT_RHS_EMPTY, s);
+  }
 
-    s = StatementBuilder.create()
+  @Test
+  public void testWhileLoopUnchainedWithExpression() {
+    Context ctx = Context.create().addVariable("str", String.class);
+    String s = StatementBuilder.create(ctx)
+        .while_(Bool.expr(Stmt.create().loadVariable("str").invoke("length"), BooleanOperator.GreaterThanOrEqual, 2))
+        .finish().toJavaString();
+
+    assertEquals("failed to generate while loop with rhs and no body", WHILE_RESULT_RHS_EMPTY, s);
+  }
+
+  @Test
+  public void testWhileLoopUnchainedWithNestedExpressions() {
+    String s = StatementBuilder.create()
         .addVariable("str", String.class)
         .while_(Bool.expr(
             Bool.expr(Variable.get("str"), BooleanOperator.NotEquals, null),
@@ -261,11 +301,11 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
             Bool.expr(Stmt.create().loadVariable("str").invoke("length"), BooleanOperator.GreaterThan, 0)))
         .finish().toJavaString();
 
-    assertEquals("failed to generate while loop with nested expression", WHILE_RESULT_NESTED_RHS_EMPTY, s);
+    assertEquals("failed to generate while loop with nested expression and no body", WHILE_RESULT_NESTED_EMPTY, s);
   }
 
   @Test
-  public void testForLoop() {
+  public void testForLoopUnchainedWithoutInitializer() {
     String s = StatementBuilder.create()
         .addVariable("i", Integer.class)
         .for_(Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100))
@@ -273,8 +313,23 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
 
     assertEquals("failed to generate for loop without initializer",
         FOR_RESULT_NO_INITIALIZER_NO_COUNTING_EXP_EMPTY, s);
+  }
+  
+  @Test
+  public void testForLoopChainedWithInitializer() {
+    String s = StatementBuilder.create()
+        .addVariable("i", Integer.class, 0)
+        .loadVariable("i")
+        .for_(Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100))
+        .finish().toJavaString();
 
-    s = StatementBuilder.create()
+    assertEquals("failed to generate for loop with initializer and chained lhs",
+        FOR_RESULT_CHAINED_INITIALIZER_NO_COUNTING_EXP_EMPTY, s);
+  }
+
+  @Test
+  public void testForLoopUnchainedWithInitializer() {
+    String s = StatementBuilder.create()
         .addVariable("i", Integer.class)
         .for_(StatementBuilder.create().loadVariable("i").assignValue(0),
             Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100))
@@ -282,8 +337,25 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
 
     assertEquals("failed to generate for loop with initializer",
         FOR_RESULT_INITIALIZER_NO_COUNTING_EXP_EMPTY, s);
+  }
 
-    s = StatementBuilder.create()
+
+  @Test
+  public void testForLoopChainedWithInitializerAndCountingExpression() {
+    String s = StatementBuilder.create()
+        .addVariable("i", Integer.class, 0)
+        .loadVariable("i")
+        .for_(Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100),
+            StatementBuilder.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
+        .finish().toJavaString();
+
+    assertEquals("failed to generate for loop with initializer and counting expression and chained lhs",
+        FOR_RESULT_CHAINED_INITIALIZER_COUNTING_EXP_EMPTY, s);
+  }
+
+  @Test
+  public void testForLoopUnchainedWithInitializerAndCountingExpression() {
+    String s = StatementBuilder.create()
         .addVariable("i", Integer.class)
         .for_(StatementBuilder.create().loadVariable("i").assignValue(0),
             Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100),
@@ -292,27 +364,11 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
 
     assertEquals("failed to generate for loop with initializer and counting expression",
         FOR_RESULT_INITIALIZER_COUNTING_EXP_EMPTY, s);
-
-    s = StatementBuilder.create()
-        .addVariable("i", Integer.class, 0)
-        .loadVariable("i")
-        .for_(Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100))
-        .finish().toJavaString();
-
-    assertEquals("failed to generate for loop with initializer and chained lhs",
-        FOR_RESULT_CHAINED_INITIALIZER_NO_COUNTING_EXP_EMPTY, s);
-
-    s = StatementBuilder.create()
-        .addVariable("i", Integer.class, 0)
-        .loadVariable("i")
-        .for_(Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100),
-            StatementBuilder.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
-        .finish().toJavaString();
-
-    assertEquals("failed to generate for loop with initializer, counting expression and chained lhs",
-        FOR_RESULT_CHAINED_INITIALIZER_COUNTING_EXP_EMPTY, s);
-
-    s = StatementBuilder.create()
+  }
+  
+  @Test
+  public void testForLoopUnchainedWithDeclaringInitializerAndCountingExpression() {
+    String s = StatementBuilder.create()
         .for_(ContextBuilder.create().declareVariable("i", int.class).initializeWith(0),
             Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100),
             StatementBuilder.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
@@ -324,7 +380,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   }
 
   @Test
-  public void testDoWhileLoop() {
+  public void testDoWhileLoopUnchainedWithoutOperator() {
     String s = StatementBuilder.create()
         .addVariable("b", Boolean.class)
         .do_()
@@ -332,8 +388,54 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .finish()
         .while_(Bool.expr(Variable.get("b")))
         .toJavaString();
-        
-    assertEquals("failed to generate for do whileloop with simple expression",
+
+    assertEquals("failed to generate do while loop with simple expression (no operator and rhs)",
+        DOWHILE_RESULT_SIMPLE_EXPRESSION_NO_OP, s);
+  }
+
+  @Test
+  public void testDoWhileLoopChainedWithoutOperator() {
+    String s = StatementBuilder.create()
+        .addVariable("b", Boolean.class)
+        .loadVariable("b")
+        .do_()
+          .append(StatementBuilder.create().loadVariable("b").assignValue(false))
+        .finish()
+        .while_()
+        .toJavaString();
+
+    assertEquals("failed to generate for do while loop with simple expression (no operator and rhs) and chained lhs",
+        DOWHILE_RESULT_SIMPLE_EXPRESSION_NO_OP, s);
+  }
+  
+  @Test
+  public void testDoWhileLoopChainedWithOperatorAndRhs() {
+    String s = StatementBuilder.create()
+        .addVariable("n", Integer.class)
+        .loadVariable("n")
+        .do_()
+          .append(StatementBuilder.create().loadVariable("n").assignValue(1))
+        .finish()
+        .while_(BooleanOperator.GreaterThanOrEqual, 1)
+        .toJavaString();
+
+    assertEquals("failed to generate for do while loop with simple expression (no operator and rhs) and chained lhs",
         DOWHILE_RESULT_SIMPLE_EXPRESSION, s);
+  }
+
+  @Test
+  public void testDoWhileLoopUnchainedWithNestedExpressions() {
+    String s = StatementBuilder.create()
+        .addVariable("str", String.class)
+        .do_()
+          .append(StatementBuilder.create().loadStatic(System.class, "out").invoke("println", Variable.get("str")))
+        .finish()
+        .while_(Bool.expr(
+            Bool.expr(Variable.get("str"), BooleanOperator.NotEquals, null),
+            BooleanOperator.And,
+            Bool.expr(Stmt.create().loadVariable("str").invoke("length"), BooleanOperator.GreaterThan, 0)))
+        .toJavaString();
+
+    assertEquals("failed to generate do while loop with nested expression", DOWHILE_RESULT_NESTED_EXPRESSION, s);
   }
 }

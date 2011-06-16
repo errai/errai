@@ -77,7 +77,6 @@ public class GenUtil {
     }
     else if (o instanceof Statement) {
       ((Statement) o).generate(context);
-
       return (Statement) o;
     }
     else {

@@ -16,6 +16,9 @@
 
 package org.jboss.errai.ioc.tests.rebind;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
@@ -27,46 +30,55 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 /**
- * Tests the {@link org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder} API.
- *
+ * Tests the {@link org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ContextBuilder} API.
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ContextBuilderTest extends AbstractStatementBuilderTest {
 
   @Test
-  public void testDeclareVariable() {
+  public void testDeclareVariableWithExactTypeProvided() {
     Statement declaration = ContextBuilder.create()
         .declareVariable("n", Integer.class)
         .initializeWith(10);
 
     assertEquals("failed to generate variable declaration using a literal initialization",
         "Integer n = 10;", declaration.generate(Context.create()));
+  }
 
-    declaration = ContextBuilder.create()
+  @Test
+  public void testDeclareVariableWithIntegerTypeInference() {
+    Statement declaration = ContextBuilder.create()
         .declareVariable("n")
         .initializeWith(10);
 
     assertEquals("failed to generate variable declaration using a literal initialization and type inference",
         "Integer n = 10;", declaration.generate(Context.create()));
+  }
 
-    declaration = ContextBuilder.create()
+  @Test
+  public void testDeclareVariableWithStringTypeInference() {
+    Statement declaration = ContextBuilder.create()
         .declareVariable("n")
         .initializeWith("10");
 
     assertEquals("failed to generate variable declaration using a literal initialization and type inference",
         "String n = \"10\";", declaration.generate(Context.create()));
+  }
 
-    declaration = ContextBuilder.create()
+  @Test
+  public void testDeclareVariableWithImplicitTypeConversion() {
+    Statement declaration = ContextBuilder.create()
         .declareVariable("n", Integer.class)
         .initializeWith("10");
 
     assertEquals("failed to generate variable declaration using a literal initialization and type conversion",
         "Integer n = 10;", declaration.generate(Context.create()));
+  }
 
+  @Test
+  public void testDeclareVariableWithInvalidInitialization() {
     try {
       ContextBuilder.create()
           .declareVariable("n", Integer.class)
@@ -75,7 +87,7 @@ public class ContextBuilderTest extends AbstractStatementBuilderTest {
       fail("Expected InvalidTypeException");
     }
     catch (InvalidTypeException ive) {
-      //expected
+      // expected
       assertTrue(ive.getCause() instanceof NumberFormatException);
     }
   }
@@ -88,15 +100,22 @@ public class ContextBuilderTest extends AbstractStatementBuilderTest {
 
     assertEquals("failed to generate variable declaration using an objectbuilder initialization",
         "String str = new java.lang.String();", declaration.generate(Context.create()));
-
-    declaration = ContextBuilder.create()
+  }
+  
+  @Test
+  public void testDeclareVariableWithObjectInitializationWithParameters() {
+    Statement declaration = ContextBuilder.create()
         .declareVariable("str", String.class)
         .initializeWith(ObjectBuilder.newInstanceOf(String.class).withParameters("abc"));
 
     assertEquals("failed to generate variable declaration using an objectbuilder initialization with parameters",
         "String str = new java.lang.String(\"abc\");", declaration.generate(Context.create()));
-
-    declaration = ContextBuilder.create()
+  }
+  
+  @Test
+  public void testDeclareVariableWithObjectInitializationUsingSuperClassType() {
+  
+    Statement declaration = ContextBuilder.create()
         .declareVariable("str", Object.class)
         .initializeWith(ObjectBuilder.newInstanceOf(String.class).withParameters("abc"));
 
@@ -112,7 +131,7 @@ public class ContextBuilderTest extends AbstractStatementBuilderTest {
     catch (InvalidTypeException ive) {
       // expected
     }
-
+    
     try {
       ContextBuilder.create()
           .declareVariable("str", String.class)
@@ -125,27 +144,40 @@ public class ContextBuilderTest extends AbstractStatementBuilderTest {
   }
 
   @Test
-  public void testAddVariableWithLiteralInitialization() {
+  public void testAddVariableWithExactTypeProvided() {
     Context ctx = ContextBuilder.create().addVariable("n", Integer.class, 10).getContext();
+
     VariableReference n = ctx.getVariable("n");
     assertEquals("Wrong variable name", "n", n.getName());
     Assert.assertEquals("Wrong variable type", MetaClassFactory.get(Integer.class), n.getType());
     Assert.assertEquals("Wrong variable value", LiteralFactory.getLiteral(10), n.getValue());
+  }
 
-    ctx = ContextBuilder.create().addVariable("n", 10).getContext();
-    n = ctx.getVariable("n");
+  @Test
+  public void testAddVariableWithIntegerTypeInference() {
+    Context ctx = ContextBuilder.create().addVariable("n", 10).getContext();
+
+    VariableReference n = ctx.getVariable("n");
     assertEquals("Wrong variable name", "n", n.getName());
     Assert.assertEquals("Wrong variable type", MetaClassFactory.get(Integer.class), n.getType());
     Assert.assertEquals("Wrong variable value", LiteralFactory.getLiteral(10), n.getValue());
+  }
 
-    ctx = ContextBuilder.create().addVariable("n", "10").getContext();
-    n = ctx.getVariable("n");
+  @Test
+  public void testAddVariableWithStringTypeInference() {
+    Context ctx = ContextBuilder.create().addVariable("n", "10").getContext();
+
+    VariableReference n = ctx.getVariable("n");
     assertEquals("Wrong variable name", "n", n.getName());
     Assert.assertEquals("Wrong variable type", MetaClassFactory.get(String.class), n.getType());
     Assert.assertEquals("Wrong variable value", LiteralFactory.getLiteral("10"), n.getValue());
+  }
 
-    ctx = ContextBuilder.create().addVariable("n", Integer.class, "10").getContext();
-    n = ctx.getVariable("n");
+  @Test
+  public void testAddVariableWithImplicitTypeConversion() {
+    Context ctx = ContextBuilder.create().addVariable("n", Integer.class, "10").getContext();
+
+    VariableReference n = ctx.getVariable("n");
     assertEquals("Wrong variable name", "n", n.getName());
     Assert.assertEquals("Wrong variable type", MetaClassFactory.get(Integer.class), n.getType());
     Assert.assertEquals("Wrong variable value", LiteralFactory.getLiteral(10), n.getValue());
@@ -155,23 +187,26 @@ public class ContextBuilderTest extends AbstractStatementBuilderTest {
       fail("Expected InvalidTypeException");
     }
     catch (InvalidTypeException ive) {
-      //expected
+      // expected
       assertTrue(ive.getCause() instanceof NumberFormatException);
     }
   }
 
   @Test
-  public void testAddVariableWithObjectInitialization() {
+  public void testAddVariableWithObjectInitializationWithExactTypeProvided() {
     Context ctx = ContextBuilder.create().addVariable("str", String.class,
         ObjectBuilder.newInstanceOf(String.class)).getContext();
 
     VariableReference str = ctx.getVariable("str");
     assertEquals("Wrong variable name", "str", str.getName());
     Assert.assertEquals("Wrong variable type", MetaClassFactory.get(String.class), str.getType());
+  }
 
-    ctx = ContextBuilder.create().addVariable("str", ObjectBuilder.newInstanceOf(String.class)).getContext();
+  @Test
+  public void testAddVariableWithObjectInitializationWithStringTypeInference() {
+    Context ctx = ContextBuilder.create().addVariable("str", ObjectBuilder.newInstanceOf(String.class)).getContext();
 
-    str = ctx.getVariable("str");
+    VariableReference str = ctx.getVariable("str");
     assertEquals("Wrong variable name", "str", str.getName());
     Assert.assertEquals("Wrong variable type", MetaClassFactory.get(String.class), str.getType());
   }

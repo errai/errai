@@ -26,13 +26,15 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.BlockBuilder;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface LoopBuilder extends Statement, Builder {
-  BlockBuilder<LoopBuilder> foreach(String loopVarName);
-  BlockBuilder<LoopBuilder> foreach(String loopVarName, Class<?> loopVarType);
+  public BlockBuilder<LoopBuilder> foreach(String loopVarName);
+  public BlockBuilder<LoopBuilder> foreach(String loopVarName, Class<?> loopVarType);
 
-  BlockBuilder<LoopBuilder> for_(BooleanExpression condition);
-  BlockBuilder<LoopBuilder> for_(BooleanExpression condition, Statement countingExpression);
+  public BlockBuilder<LoopBuilder> for_(BooleanExpression condition);
+  public BlockBuilder<LoopBuilder> for_(BooleanExpression condition, Statement countingExpression);
   
-  BlockBuilder<LoopBuilder> while_();
-  BlockBuilder<LoopBuilder> while_(BooleanOperator op, Statement rhs);
-  BlockBuilder<LoopBuilder> while_(BooleanOperator op, Object rhs);
+  public BlockBuilder<WhileBuilder> do_();
+  
+  public BlockBuilder<LoopBuilder> while_();
+  public BlockBuilder<LoopBuilder> while_(BooleanOperator op, Statement rhs);
+  public BlockBuilder<LoopBuilder> while_(BooleanOperator op, Object rhs);
 }
