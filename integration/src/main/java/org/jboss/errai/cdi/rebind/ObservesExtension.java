@@ -31,9 +31,8 @@ import org.jboss.errai.ioc.rebind.ioc.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.InjectionPoint;
-
-import com.google.gwt.core.ext.typeinfo.JMethod;
-import com.google.gwt.core.ext.typeinfo.JParameter;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
 
 /**
  *
@@ -57,10 +56,10 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
     public String generateDecorator(InjectionPoint<Observes> injectionPoint) {
         final InjectionContext ctx = injectionPoint.getInjectionContext();
 
-        final JMethod method = injectionPoint.getMethod();
-        final JParameter parm = injectionPoint.getParm();
+        final MetaMethod method = injectionPoint.getMethod();
+        final MetaParameter parm = injectionPoint.getParm();
 
-        String parmClassName = parm.getType().getQualifiedSourceName();
+        String parmClassName = parm.getType().getFullyQualifiedName();
         String varName = injectionPoint.getInjector().getVarName();
         
         // Get an instance of the message bus.
