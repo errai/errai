@@ -18,6 +18,7 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.Builder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.BlockBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.FieldBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
@@ -59,20 +60,28 @@ public interface BaseClassStructureBuilder<T extends BaseClassStructureBuilder> 
 
   public BlockBuilder<T> publicMethod(Class<?> returnType, String name, Class<?>... parms);
 
+  public BlockBuilder<T> publicMethod(MetaClass returnType, String name, Parameter... parms);
+
 
   public BlockBuilder<T> privateMethod(MetaClass returnType, String name, MetaClass... parms);
 
   public BlockBuilder<T> privateMethod(Class<?> returnType, String name, Class<?>... parms);
+
+  public BlockBuilder<T> privateMethod(MetaClass returnType, String name, Parameter... parms);
 
 
   public BlockBuilder<T> protectedMethod(MetaClass returnType, String name, MetaClass... parms);
 
   public BlockBuilder<T> protectedMethod(Class<?> returnType, String name, Class<?>... parms);
 
+  public BlockBuilder<T> protectedMethod(MetaClass returnType, String name, Parameter... parms);
+
 
   public BlockBuilder<T> packageMethod(MetaClass returnType, String name, MetaClass... parms);
 
   public BlockBuilder<T> packageMethod(Class<?> returnType, String name, Class<?>... parms);
+
+  public BlockBuilder<T> packageMethod(MetaClass returnType, String name, Parameter... parms);
 
 
   // -- //

@@ -16,8 +16,13 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public interface FieldBuilder<T> {
+public interface FieldBuildType<T> {
+  public FieldBuildName<T> typeOf(Class<?> type);
+
+  public FieldBuildName<T> typeOf(MetaClass type);
 }
