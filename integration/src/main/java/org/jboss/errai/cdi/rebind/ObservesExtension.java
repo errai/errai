@@ -73,13 +73,12 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
         
         String expr = messageBusInst + "." + subscribeType + "(\"" + subject + "\", new " + MessageCallback.class.getName() + "() {\n" +
                 "    public void callback(" + Message.class.getName() + " message) {\n" +
-                "        java.util.Set<String> methodQualifiers = new java.util.HashSet<String>() {{\n";
+                "        java.util.Set<String> methodQualifiers = new java.util.HashSet<String>();\n";
                             if(qualifierNames!=null) {
                                 for(String qualifierName : qualifierNames) expr+=
-	            "					 add(\""+qualifierName+"\");\n";
+	            "					 methodQualifiers.add(\""+qualifierName+"\");\n";
                 			}
                 			expr+=
-            	"        }};\n" + 
             	"        java.util.Set<String> qualifiers = message.get(java.util.Set.class," + CDIProtocol.class.getName() + "." + CDIProtocol.QUALIFIERS.name()+");\n" +
             	"        if(methodQualifiers.equals(qualifiers) || (qualifiers==null && methodQualifiers.isEmpty())) {\n" +
                 "            java.lang.Object response = message.get(" + parmClassName + ".class, " + CDIProtocol.class.getName() + "." + CDIProtocol.OBJECT_REF.name() + ");\n" +

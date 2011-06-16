@@ -85,7 +85,7 @@ public class ObservesExtensionTest implements ObservesExtensionTestResult {
     @Test
     public void testObservesExtensionForObserverWithQualifiers() {
         String s = new ObservesExtension(null).generateDecorator(getInjectionPoint(HasObserverWithQualifiers.class));
-        assertEquals("failed to generate observes extension for Observer without qualifiers", 
+        assertEquals("failed to generate observes extension for Observer with qualifiers", 
                 OBSERVES_EXTENSION_WITH_QUALIFIERS, s.replaceAll("inj[0-9]+", "inj"));
     }
     
