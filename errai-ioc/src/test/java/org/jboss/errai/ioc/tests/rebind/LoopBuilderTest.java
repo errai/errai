@@ -133,7 +133,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   }
 
   @Test
-  public void testNestedForeachLoops() {
+  public void testForeachLoopsNested() {
     Statement createObject = StatementBuilder.create().newObject(String.class);
 
     Builder outerLoop = StatementBuilder.create()
@@ -380,7 +380,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   }
 
   @Test
-  public void testDoWhileLoopUnchainedWithoutOperator() {
+  public void testDoWhileLoopUnchainedWithoutRhs() {
     String s = StatementBuilder.create()
         .addVariable("b", Boolean.class)
         .do_()
@@ -394,7 +394,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   }
 
   @Test
-  public void testDoWhileLoopChainedWithoutOperator() {
+  public void testDoWhileLoopChainedWithoutRhs() {
     String s = StatementBuilder.create()
         .addVariable("b", Boolean.class)
         .loadVariable("b")
@@ -409,7 +409,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   }
   
   @Test
-  public void testDoWhileLoopChainedWithOperatorAndRhs() {
+  public void testDoWhileLoopChainedWithRhs() {
     String s = StatementBuilder.create()
         .addVariable("n", Integer.class)
         .loadVariable("n")
