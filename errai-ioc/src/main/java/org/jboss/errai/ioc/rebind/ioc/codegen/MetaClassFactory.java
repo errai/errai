@@ -114,6 +114,10 @@ public final class MetaClassFactory {
   private static MetaClass createOrGet(JType type) {
     if (type == null) return null;
 
+    if (type.isParameterized() != null) {
+      return GWTClass.newUncachedInstance(type);
+    }
+
     if (!CLASS_CACHE.containsKey(type.isClassOrInterface().getName())) {
       MetaClass gwtClass = GWTClass.newUncachedInstance(type);
 
@@ -127,6 +131,10 @@ public final class MetaClassFactory {
 
   private static MetaClass createOrGet(Class cls) {
     if (cls == null) return null;
+
+    if (cls.getTypeParameters() != null) {
+      return JavaReflectionClass.newUncachedInstance(cls);
+    }
 
     if (!CLASS_CACHE.containsKey(cls.getName())) {
       MetaClass javaReflectionClass = JavaReflectionClass.newUncachedInstance(cls);
