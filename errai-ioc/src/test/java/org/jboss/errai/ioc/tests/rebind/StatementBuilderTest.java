@@ -135,7 +135,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   @Test
   public void testCreateAndInitializeArray() {
     String s = StatementBuilder.create().newArray(String.class).initialize("1", "2").toJavaString();
-    assertEquals("new String[] {\"1\",\"2\"}", s);
+    assertEquals("Failed to generate 1-dimensional String array", "new String[] {\"1\",\"2\"}", s);
   }
 
   @Test
@@ -159,7 +159,8 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
     }
     catch (Exception e) {
       // expected
-      assertEquals("Must provide either dimension expressions or an array initializer", e.getMessage());
+      assertEquals("Wrong exception details", 
+          "Must provide either dimension expressions or an array initializer", e.getMessage());
     }
   }
 
@@ -183,7 +184,8 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
         .initialize(annotation1, annotation2)
         .toJavaString();
 
-    assertEquals("new java.lang.annotation.Annotation[] {" +
+    assertEquals("failed to generate Annotation array",
+        "new java.lang.annotation.Annotation[] {" +
         "new java.lang.annotation.Annotation() {\n" +
         " public Class annotationType() {\n" +
         "   return javax.inject.Inject.class;\n" +

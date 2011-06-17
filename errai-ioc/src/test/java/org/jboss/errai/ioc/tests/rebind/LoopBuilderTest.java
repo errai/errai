@@ -55,7 +55,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .foreach("element")
         .finish().toJavaString();
 
-    assertEquals("failed to generate foreach loop using a List<String>",
+    assertEquals("Failed to generate foreach loop using a List<String>",
         FOREACH_RESULT_STRING_IN_LIST, foreachWithListOfStrings);
   }
 
@@ -70,7 +70,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .finish()
         .toJavaString();
 
-    assertEquals("failed to generate foreach loop using a String[]",
+    assertEquals("Failed to generate foreach loop using a String[]",
         FOREACH_RESULT_STRING_IN_ARRAY_ONE_STATEMENT, foreachWithStringArray);
   }
 
@@ -87,7 +87,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .append(createAnotherObject)
         .finish().toJavaString();
 
-    assertEquals("failed to generate foreach loop using a List<?>",
+    assertEquals("Failed to generate foreach loop using a List<?>",
         FOREACH_RESULT_OBJECT_IN_LIST_TWO_STATEMENTS, foreachWithList);
   }
 
@@ -114,7 +114,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .foreach("element", Object.class)
         .finish();
 
-    assertEquals("failed to generate foreach loop with provided loop var type",
+    assertEquals("Failed to generate foreach loop with provided loop var type",
         FOREACH_RESULT_OBJECT_IN_LIST, builder.toJavaString());
 
     try {
@@ -148,7 +148,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
             .finish()
         ).finish();
 
-    assertEquals("failed to generate nested foreach loops",
+    assertEquals("Failed to generate nested foreach loops",
         FOREACH_RESULT_NESTED_STRING_IN_LIST, outerLoop.toJavaString());
   }
 
@@ -177,7 +177,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .invoke("keySet")
         .foreach("key").finish();
 
-    assertEquals("failed to generate foreach loop using invoke()",
+    assertEquals("Failed to generate foreach loop using invoke()",
         FOREACH_RESULT_KEYSET_LOOP, loop.toJavaString());
   }
 
@@ -189,7 +189,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .append(StatementBuilder.create().loadVariable("s").invoke("getBytes"))
         .finish().toJavaString();
 
-    assertEquals("failed to generate foreach loop using a literal String array",
+    assertEquals("Failed to generate foreach loop using a literal String array",
         FOREACH_RESULT_LITERAL_STRING_ARRAY, s);
   }
 
@@ -202,7 +202,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .append(StatementBuilder.create().loadVariable("s").invoke("getBytes"))
         .finish().toJavaString();
 
-    assertEquals("failed to generate foreach loop using a literal String array",
+    assertEquals("Failed to generate foreach loop using a literal String array",
         FOREACH_RESULT_LITERAL_STRING_ARRAY, s);
   }
 
@@ -241,7 +241,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .loadVariable("b")
         .while_().finish().toJavaString();
 
-    assertEquals("failed to generate empty while loop with chained lhs", WHILE_RESULT_EMPTY, s);
+    assertEquals("Failed to generate empty while loop with chained lhs", WHILE_RESULT_EMPTY, s);
   }
 
   @Test
@@ -253,7 +253,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
           .append(StatementBuilder.create().loadVariable("b").assignValue(false))
         .finish().toJavaString();
 
-    assertEquals("failed to generate while loop with chained lhs and body", WHILE_RESULT_WITH_BODY, s);
+    assertEquals("Failed to generate while loop with chained lhs and body", WHILE_RESULT_WITH_BODY, s);
   }
 
   @Test
@@ -264,7 +264,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .while_(BooleanOperator.NotEquals, null)
         .finish().toJavaString();
 
-    assertEquals("failed to generate while loop with chained lhs, rhs (null check) and no body",
+    assertEquals("Failed to generate while loop with chained lhs, rhs (null check) and no body",
         WHILE_RESULT_RHS_NULL_EMPTY, s);
   }
 
@@ -277,7 +277,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .while_(BooleanOperator.GreaterThanOrEqual, 2)
         .finish().toJavaString();
 
-    assertEquals("failed to generate while loop with chained lhs, rhs and no body", WHILE_RESULT_RHS_EMPTY, s);
+    assertEquals("Failed to generate while loop with chained lhs, rhs and no body", WHILE_RESULT_RHS_EMPTY, s);
   }
 
   @Test
@@ -287,7 +287,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .while_(Bool.expr(Stmt.create().loadVariable("str").invoke("length"), BooleanOperator.GreaterThanOrEqual, 2))
         .finish().toJavaString();
 
-    assertEquals("failed to generate while loop with rhs and no body", WHILE_RESULT_RHS_EMPTY, s);
+    assertEquals("Failed to generate while loop with rhs and no body", WHILE_RESULT_RHS_EMPTY, s);
   }
 
   @Test
@@ -300,7 +300,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
             Bool.expr(Stmt.create().loadVariable("str").invoke("length"), BooleanOperator.GreaterThan, 0)))
         .finish().toJavaString();
 
-    assertEquals("failed to generate while loop with nested expression and no body", WHILE_RESULT_NESTED_EMPTY, s);
+    assertEquals("Failed to generate while loop with nested expression and no body", WHILE_RESULT_NESTED_EMPTY, s);
   }
 
   @Test
@@ -310,7 +310,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .for_(Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100))
         .finish().toJavaString();
 
-    assertEquals("failed to generate for loop without initializer",
+    assertEquals("Failed to generate for loop without initializer",
         FOR_RESULT_NO_INITIALIZER_NO_COUNTING_EXP_EMPTY, s);
   }
   
@@ -322,7 +322,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .for_(Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100))
         .finish().toJavaString();
 
-    assertEquals("failed to generate for loop with initializer and chained lhs",
+    assertEquals("Failed to generate for loop with initializer and chained lhs",
         FOR_RESULT_CHAINED_INITIALIZER_NO_COUNTING_EXP_EMPTY, s);
   }
 
@@ -334,7 +334,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
             Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100))
         .finish().toJavaString();
 
-    assertEquals("failed to generate for loop with initializer",
+    assertEquals("Failed to generate for loop with initializer",
         FOR_RESULT_INITIALIZER_NO_COUNTING_EXP_EMPTY, s);
   }
 
@@ -348,7 +348,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
             StatementBuilder.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
         .finish().toJavaString();
 
-    assertEquals("failed to generate for loop with initializer and counting expression and chained lhs",
+    assertEquals("Failed to generate for loop with initializer and counting expression and chained lhs",
         FOR_RESULT_CHAINED_INITIALIZER_COUNTING_EXP_EMPTY, s);
   }
 
@@ -361,7 +361,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
             StatementBuilder.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
         .finish().toJavaString();
 
-    assertEquals("failed to generate for loop with initializer and counting expression",
+    assertEquals("Failed to generate for loop with initializer and counting expression",
         FOR_RESULT_INITIALIZER_COUNTING_EXP_EMPTY, s);
   }
   
@@ -374,7 +374,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .append(StatementBuilder.create().loadStatic(System.class, "out").invoke("println", Variable.get("i")))
         .finish().toJavaString();
 
-    assertEquals("failed to generate for loop with declaring initializer and counting expression",
+    assertEquals("Failed to generate for loop with declaring initializer and counting expression",
         FOR_RESULT_DECLARE_INITIALIZER_COUNTING_EXP, s);
   }
 
@@ -388,7 +388,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .while_(Bool.expr(Variable.get("b")))
         .toJavaString();
 
-    assertEquals("failed to generate do while loop with simple expression (no operator and rhs)",
+    assertEquals("Failed to generate do while loop with simple expression (no operator and rhs)",
         DOWHILE_RESULT_SIMPLE_EXPRESSION_NO_OP, s);
   }
 
@@ -403,7 +403,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .while_()
         .toJavaString();
 
-    assertEquals("failed to generate for do while loop with simple expression (no operator and rhs) and chained lhs",
+    assertEquals("Failed to generate for do while loop with simple expression (no operator and rhs) and chained lhs",
         DOWHILE_RESULT_SIMPLE_EXPRESSION_NO_OP, s);
   }
   
@@ -418,7 +418,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .while_(BooleanOperator.GreaterThanOrEqual, 1)
         .toJavaString();
 
-    assertEquals("failed to generate for do while loop with simple expression (no operator and rhs) and chained lhs",
+    assertEquals("Failed to generate for do while loop with simple expression (no operator and rhs) and chained lhs",
         DOWHILE_RESULT_SIMPLE_EXPRESSION, s);
   }
 
@@ -435,6 +435,6 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
             Bool.expr(Stmt.create().loadVariable("str").invoke("length"), BooleanOperator.GreaterThan, 0)))
         .toJavaString();
 
-    assertEquals("failed to generate do while loop with nested expression", DOWHILE_RESULT_NESTED_EXPRESSION, s);
+    assertEquals("Failed to generate do while loop with nested expression", DOWHILE_RESULT_NESTED_EXPRESSION, s);
   }
 }

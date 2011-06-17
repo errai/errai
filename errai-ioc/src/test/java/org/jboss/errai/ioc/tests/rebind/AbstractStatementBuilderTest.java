@@ -17,15 +17,13 @@
 package org.jboss.errai.ioc.tests.rebind;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
-import org.junit.Ignore;
 
 /**
  * Base class for all {@link StatementBuilder} tests.
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@Ignore
-public class AbstractStatementBuilderTest {
+public abstract class AbstractStatementBuilderTest {
 
   /**
    * assertEquals, less sensitive to indentation differences.

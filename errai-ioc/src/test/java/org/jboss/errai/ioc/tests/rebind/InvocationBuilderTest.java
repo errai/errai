@@ -43,7 +43,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
         .invoke("toString")
         .toJavaString();
 
-    assertEquals("failed to generate invocation on variable", "obj.toString()", s);
+    assertEquals("Failed to generate invocation on variable", "obj.toString()", s);
   }
 
   @Test
@@ -57,7 +57,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
         .invoke("replaceAll", Variable.get("regex"), Variable.get("replacement"))
         .toJavaString();
 
-    assertEquals("failed to generate chained invocations on variable",
+    assertEquals("Failed to generate chained invocations on variable",
         "i.toString().replaceAll(regex, replacement)", s);
   }
 
@@ -66,7 +66,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
     String result = StatementBuilder.create().addVariable("s", String.class)
         .loadVariable("s").invoke("replaceAll", "foo", "foo\t\n").toJavaString();
 
-    assertEquals("failed to generate invocation using literal parameters",
+    assertEquals("Failed to generate invocation using literal parameters",
         "s.replaceAll(\"foo\", \"foo\\t\\n\")", result);
   }
 
@@ -74,7 +74,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
   public void testInvokeOnLiteral() {
     String result = StatementBuilder.create().loadLiteral("foo").invoke("toString").toJavaString();
 
-    assertEquals("failed to generate invocation using literal parameters",
+    assertEquals("Failed to generate invocation using literal parameters",
         "\"foo\".toString()", result);
   }
 
@@ -88,7 +88,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
         .invoke("equals", 1)
         .toJavaString();
 
-    assertEquals("failed to generate invocation on matched method", "n.equals(1)", s);
+    assertEquals("Failed to generate invocation on matched method", "n.equals(1)", s);
   }
 
   @Test
@@ -171,7 +171,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
         .load(Variable.get("s"))
         .invoke("toUpperCase").toJavaString();
 
-    assertEquals("failed using load() passing a variable reference", "s.toUpperCase()", s);
+    assertEquals("Failed using load() passing a variable reference", "s.toUpperCase()", s);
   }
 
   @Test
@@ -185,7 +185,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
         .load(v)
         .invoke("toUpperCase").toJavaString();
 
-    assertEquals("failed using load() passing a variable instance", "s.toUpperCase()", s);
+    assertEquals("Failed using load() passing a variable instance", "s.toUpperCase()", s);
   }
 
   @Test
@@ -194,7 +194,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
         .load("foo")
         .invoke("toUpperCase").toJavaString();
 
-    assertEquals("failed injecting literal with load()", "\"foo\".toUpperCase()", s);
+    assertEquals("Failed injecting literal with load()", "\"foo\".toUpperCase()", s);
   }
 
   @Test
@@ -205,7 +205,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
         .invoke("endsWith", 123)
         .toJavaString();
 
-    assertEquals("failed to generate invocation with parameter type conversion", "str.endsWith(\"123\")", s);
+    assertEquals("Failed to generate invocation with parameter type conversion", "str.endsWith(\"123\")", s);
   }
 
   @Test
@@ -216,7 +216,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
         .invoke("substring", "1", "3")
         .toJavaString();
 
-    assertEquals("failed to generate invocation with parameter type conversion", "str.substring(1, 3)", s);
+    assertEquals("Failed to generate invocation with parameter type conversion", "str.substring(1, 3)", s);
   }
 
   @Test
@@ -228,7 +228,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
         .invoke("endsWith", c.getVariable("n").getValue())
         .toJavaString();
 
-    assertEquals("failed to generate invocation with parameter type conversion of variable",
+    assertEquals("Failed to generate invocation with parameter type conversion of variable",
         "str.endsWith(\"123\")", s);
   }
 
@@ -238,7 +238,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
         .invokeStatic(Integer.class, "getInteger", "123")
         .toJavaString();
 
-    assertEquals("failed to generate static method invocation", "Integer.getInteger(\"123\")", s);
+    assertEquals("Failed to generate static method invocation", "Integer.getInteger(\"123\")", s);
   }
 
   @Test
@@ -250,7 +250,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
       fail("expected UndefinedMethodException");
     }
     catch (UndefinedMethodException udme) {
-      assertEquals(udme.getMethodName(), "intValue");
+      assertEquals("Wrong exception details", udme.getMethodName(), "intValue");
     }
   }
 
@@ -263,7 +263,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
       fail("expected UndefinedMethodException");
     }
     catch (UndefinedMethodException udme) {
-      assertEquals(udme.getMethodName(), "undefinedMethod");
+      assertEquals("Wrong exception details", udme.getMethodName(), "undefinedMethod");
     }
   }
 }

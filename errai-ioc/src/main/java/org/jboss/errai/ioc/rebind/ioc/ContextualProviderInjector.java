@@ -16,10 +16,16 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
-import org.jboss.errai.ioc.rebind.IOCGenerator;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.*;
-
 import java.lang.annotation.Annotation;
+
+import org.jboss.errai.ioc.rebind.IOCGenerator;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameterizedType;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaType;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java.JavaReflectionField;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java.JavaReflectionParameterizedType;
 
 public class ContextualProviderInjector extends TypeInjector {
   private final Injector providerInjector;
@@ -43,7 +49,10 @@ public class ContextualProviderInjector extends TypeInjector {
         type = field.getType();
 
         pType = type.getParameterizedType();
-
+        // TODO refactor!
+        if (pType == null && field instanceof JavaReflectionField) {
+          pType = (JavaReflectionParameterizedType) field.getGenericType();
+        }
         break;
 
       case Parameter:
@@ -53,7 +62,7 @@ public class ContextualProviderInjector extends TypeInjector {
         pType = type.getParameterizedType();
         break;
     }
-
+    
     StringBuilder sb = new StringBuilder();
 
     if (pType == null) {
