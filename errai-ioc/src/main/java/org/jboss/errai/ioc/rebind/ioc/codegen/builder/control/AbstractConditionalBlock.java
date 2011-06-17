@@ -27,16 +27,16 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public abstract class AbstractBlockConditional implements Statement {
+public abstract class AbstractConditionalBlock implements Statement {
   private BooleanExpression condition;
   private BlockStatement block;
 
-  protected AbstractBlockConditional(BooleanExpression condition) {
+  protected AbstractConditionalBlock(BooleanExpression condition) {
     this.condition = condition;
     this.block = new BlockStatement();
   }
 
-  protected AbstractBlockConditional(BooleanExpression condition, BlockStatement block) {
+  protected AbstractConditionalBlock(BooleanExpression condition, BlockStatement block) {
     this.condition = condition;
     this.block = block;
   }

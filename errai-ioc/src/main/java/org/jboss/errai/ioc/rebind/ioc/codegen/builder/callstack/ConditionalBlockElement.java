@@ -18,19 +18,22 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.control.AbstractBlockConditional;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.control.AbstractConditionalBlock;
 
 /**
+ * A {@link CallElement} for conditional blocks. It can only be the last
+ * element in a chain of calls.
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class DeferredConditionalBlockCallback implements DeferredCallback {
-  private AbstractBlockConditional conditionalBlock;
-
-  public DeferredConditionalBlockCallback(AbstractBlockConditional conditionalBlock) {
+public class ConditionalBlockElement extends AbstractCallElement {
+  private AbstractConditionalBlock conditionalBlock;
+  
+  public ConditionalBlockElement(final AbstractConditionalBlock conditionalBlock) {
     this.conditionalBlock = conditionalBlock;
   }
 
-  public void doDeferred(CallWriter writer, Context context, Statement lhs) {
+  public void handleCall(CallWriter writer, Context context, Statement lhs) {
     if (lhs != null) {
       // The LHS value is on the current callstack. So we grab the value from there at generation time.
       conditionalBlock.getCondition().setLhs(lhs);

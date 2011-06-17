@@ -25,7 +25,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class ForLoop extends AbstractBlockConditional {
+public class ForLoop extends AbstractConditionalBlock {
   private Statement initializer;
   private String initializerExpr;
   private Statement afterBlock;

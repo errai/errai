@@ -25,7 +25,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.BooleanExpressionBuil
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class WhileLoop extends AbstractBlockConditional {
+public class WhileLoop extends AbstractConditionalBlock {
   public WhileLoop(BooleanExpressionBuilder condition) {
     super(condition);
   }

@@ -24,7 +24,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class DoWhileLoop extends AbstractBlockConditional {
+public class DoWhileLoop extends AbstractConditionalBlock {
   public DoWhileLoop(BooleanExpression condition, BlockStatement block) {
     super(condition, block);
   }

@@ -29,7 +29,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.WhileBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.CallWriter;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DeferredCallElement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DeferredCallback;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DeferredConditionalBlock;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.ConditionalBlockElement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.control.DoWhileLoop;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.control.ForLoop;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.control.ForeachLoop;
@@ -84,7 +84,7 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements LoopBui
         return new WhileBuilder() {
 
           public AbstractStatementBuilder while_(final BooleanExpression condition) {
-            appendCallElement(new DeferredConditionalBlock(new DoWhileLoop(condition, body)));
+            appendCallElement(new ConditionalBlockElement(new DoWhileLoop(condition, body)));
             return LoopBuilderImpl.this;
           }
 
@@ -123,7 +123,7 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements LoopBui
 
   public BlockBuilder<LoopBuilder> while_(final BooleanExpression condition) {
     final BlockStatement body = new BlockStatement();
-    appendCallElement(new DeferredConditionalBlock(new WhileLoop(condition, body)));
+    appendCallElement(new ConditionalBlockElement(new WhileLoop(condition, body)));
     return createLoopBody(body);
   }
 

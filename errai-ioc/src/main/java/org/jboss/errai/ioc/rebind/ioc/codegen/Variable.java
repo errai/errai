@@ -16,12 +16,14 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen;
 
+import javax.enterprise.util.TypeLiteral;
+
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.DeclareAssignmentBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.values.LiteralFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.values.LiteralValue;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.GenUtil;
-
-import javax.enterprise.util.TypeLiteral;
 
 /**
  * This class represents a variable.
@@ -31,10 +33,9 @@ import javax.enterprise.util.TypeLiteral;
 public class Variable extends AbstractStatement {
   private String name;
   private MetaClass type;
+  private Statement value;
 
   private Object initialization;
-
-  private Statement value;
   private boolean classMember;
 
   private Variable(String name, MetaClass type) {
@@ -48,16 +49,24 @@ public class Variable extends AbstractStatement {
     this.classMember = classMember;
   }
 
-
   private Variable(String name, MetaClass type, Object initialization) {
     this(name, type);
-    this.initialization = initialization;
+    
+    LiteralValue<?> val = LiteralFactory.isLiteral(initialization);
+    if (val != null) {
+      this.type = (type == null) ? val.getType() : type;
+      this.value = GenUtil.convert(getContext(), initialization, this.type);
+    }
+    else {
+      // deferred initialization
+      this.initialization = initialization;
+    }
   }
 
   public void initialize(Object initializationValue) {
     this.initialization = initializationValue;
   }
-
+  
   private MetaClass inferType(Object initialization) {
     Statement initStatement = GenUtil.generate(getContext(), initialization);
     MetaClass inferredType = (initStatement != null) ? initStatement.getType() : null;
@@ -168,7 +177,7 @@ public class Variable extends AbstractStatement {
   public String generate(Context context) {
     if (initialization != null) {
       this.type = (type == null) ? inferType(initialization) : type;
-      value = GenUtil.convert(context, initialization, type);
+      this.value = GenUtil.convert(context, initialization, type);
     }
 
     return new DeclareAssignmentBuilder(getReference(), value).generate(context);

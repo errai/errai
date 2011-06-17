@@ -17,14 +17,13 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.values;
 
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.AnnotationEncoder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
+import static org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference.getClassReference;
 
 import java.lang.annotation.Annotation;
 
-import static org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference.getClassReference;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.AnnotationEncoder;
 
 /**
  * The literal factory provides a LiteralValue for
@@ -101,6 +100,15 @@ public class LiteralFactory {
     else {
       throw new IllegalArgumentException("type cannot be converted to a literal: "
           + o.getClass().getName());
+    }
+  }
+  
+  public static LiteralValue<?> isLiteral(Object o) {
+    try {
+        return getLiteral(null ,o);
+    } 
+    catch (IllegalArgumentException a) {
+      return null;
     }
   }
 }

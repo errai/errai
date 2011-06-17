@@ -151,7 +151,7 @@ public class ContextBuilderTest extends AbstractStatementBuilderTest {
     VariableReference n = ctx.getVariable("n");
     assertEquals("Wrong variable name", "n", n.getName());
     Assert.assertEquals("Wrong variable type", MetaClassFactory.get(Integer.class), n.getType());
-  //  Assert.assertEquals("Wrong variable value", LiteralFactory.getLiteral(10), n.getValue());
+    Assert.assertEquals("Wrong variable value", LiteralFactory.getLiteral(10), n.getValue());
   }
 
   @Test
@@ -160,8 +160,8 @@ public class ContextBuilderTest extends AbstractStatementBuilderTest {
 
     VariableReference n = ctx.getVariable("n");
     assertEquals("Wrong variable name", "n", n.getName());
-   // Assert.assertEquals("Wrong variable type", MetaClassFactory.get(Integer.class), n.getType());
- //   Assert.assertEquals("Wrong variable value", LiteralFactory.getLiteral(10), n.getValue());
+    Assert.assertEquals("Wrong variable type", MetaClassFactory.get(Integer.class), n.getType());
+    Assert.assertEquals("Wrong variable value", LiteralFactory.getLiteral(10), n.getValue());
   }
 
   @Test
@@ -170,8 +170,8 @@ public class ContextBuilderTest extends AbstractStatementBuilderTest {
 
     VariableReference n = ctx.getVariable("n");
     assertEquals("Wrong variable name", "n", n.getName());
-  //  Assert.assertEquals("Wrong variable type", MetaClassFactory.get(String.class), n.getType());
- //   Assert.assertEquals("Wrong variable value", LiteralFactory.getLiteral("10"), n.getValue());
+    Assert.assertEquals("Wrong variable type", MetaClassFactory.get(String.class), n.getType());
+    Assert.assertEquals("Wrong variable value", LiteralFactory.getLiteral("10"), n.getValue());
   }
 
   @Test
@@ -181,7 +181,7 @@ public class ContextBuilderTest extends AbstractStatementBuilderTest {
     VariableReference n = ctx.getVariable("n");
     assertEquals("Wrong variable name", "n", n.getName());
     Assert.assertEquals("Wrong variable type", MetaClassFactory.get(Integer.class), n.getType());
-  //  Assert.assertEquals("Wrong variable value", LiteralFactory.getLiteral(10), n.getValue());
+    Assert.assertEquals("Wrong variable value", LiteralFactory.getLiteral(10), n.getValue());
 
     try {
       Stmt.create(ContextBuilder.create().addVariable("n", Integer.class, "abc").getContext()).toJavaString();
@@ -209,6 +209,6 @@ public class ContextBuilderTest extends AbstractStatementBuilderTest {
 
     VariableReference str = ctx.getVariable("str");
     assertEquals("Wrong variable name", "str", str.getName());
- //   Assert.assertEquals("Wrong variable type", MetaClassFactory.get(String.class), str.getType());
+    // variable value cannot be verified before initialization statement was generated.
   }
 }

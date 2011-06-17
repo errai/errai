@@ -25,7 +25,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.BooleanExpressionBuil
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class IfBlock extends AbstractBlockConditional {
+public class IfBlock extends AbstractConditionalBlock {
   private BlockStatement elseBlock = new BlockStatement();
   private IfBlock elseIfBlock;
 
