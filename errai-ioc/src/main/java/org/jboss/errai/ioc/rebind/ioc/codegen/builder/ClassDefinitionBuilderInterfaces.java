@@ -26,5 +26,5 @@ public interface ClassDefinitionBuilderInterfaces {
 
   public ClassDefinitionBuilderInterfaces implementsInterface(Class<?> clazz);
 
-  public BaseClassStructureBuilder<BaseClassStructureBuilder> body();
+  public BaseClassStructureBuilder body();
 }

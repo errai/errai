@@ -144,4 +144,12 @@ public class Context {
   public void setParent(Context parent) {
     this.parent = parent;
   }
+
+  public Set<String> getImportedPackages() {
+    return importedPackages;
+  }
+
+  public Set<MetaClass> getImportedClasses() {
+    return importedClasses;
+  }
 }

@@ -16,13 +16,11 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.Builder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.PrettyPrinter;
 
 import java.util.*;
 
@@ -32,7 +30,7 @@ import java.util.*;
 public class ClassBuilder implements
         ClassDefinitionBuilderScope,
         ClassDefinitionBuilderAbstractOption,
-        BaseClassStructureBuilder<BaseClassStructureBuilder> {
+        BaseClassStructureBuilder {
 
   private Context context;
 
@@ -46,8 +44,6 @@ public class ClassBuilder implements
   private List<Builder> fields = new ArrayList<Builder>();
   private List<Builder> methods = new ArrayList<Builder>();
 
-  private StringBuilder buf = new StringBuilder();
-
   private boolean isAbstract;
 
   ClassBuilder(String className, MetaClass parent, Context context) {
@@ -56,13 +52,24 @@ public class ClassBuilder implements
     this.context = context;
   }
 
-  public static ClassBuilder define(String fullyQualifiedName) {
+  public static ClassDefinitionBuilderScope define(String fullyQualifiedName) {
     return new ClassBuilder(fullyQualifiedName, null, Context.create());
   }
 
-  public static ClassBuilder define(String fullQualifiedName, MetaClass parent) {
+  public static ClassDefinitionBuilderScope define(String fullQualifiedName, MetaClass parent) {
     return new ClassBuilder(fullQualifiedName, parent, Context.create());
   }
+
+  public static BaseClassStructureBuilder implement(MetaClass cls) {
+    return new ClassBuilder(cls.getFullyQualifiedName() + "Impl", null, Context.create())
+            .publicScope()
+            .implementsInterface(cls).body();
+  }
+
+  public static BaseClassStructureBuilder implement(Class<?> cls) {
+    return implement(MetaClassFactory.get(cls));
+  }
+
 
   private String getSimpleName() {
     int idx = className.lastIndexOf('.');
@@ -70,6 +77,14 @@ public class ClassBuilder implements
       return className.substring(idx + 1);
     }
     return className;
+  }
+
+  private String getPackageName() {
+    int idx = className.lastIndexOf(".");
+    if (idx != -1) {
+      return className.substring(0, idx);
+    }
+    return "";
   }
 
   public ClassBuilder abstractClass() {
@@ -91,12 +106,16 @@ public class ClassBuilder implements
   }
 
   public ClassDefinitionBuilderInterfaces implementsInterface(MetaClass clazz) {
+    if (!clazz.isInterface()) {
+      throw new RuntimeException("not an interface: " + clazz.getFullyQualifiedName());
+    }
+
     interfaces.add(clazz);
     return this;
   }
 
-  public BaseClassStructureBuilder<BaseClassStructureBuilder> body() {
-    return null;
+  public BaseClassStructureBuilder body() {
+    return this;
   }
 
   public ClassDefinitionBuilderAbstractOption publicScope() {
@@ -123,7 +142,7 @@ public class ClassBuilder implements
     return genConstructor(Scope.Public, DefParameters.fromTypeArray(parms));
   }
 
-  public BlockBuilder<BaseClassStructureBuilder> publicConstructor(Class<?>... parms) {
+  public  BlockBuilder<BaseClassStructureBuilder> publicConstructor(Class<?>... parms) {
     return publicConstructor(MetaClassFactory.fromClassArray(parms));
   }
 
@@ -266,54 +285,117 @@ public class ClassBuilder implements
     });
   }
 
-  public FieldBuilder<BaseClassStructureBuilder> publicField(String name, MetaClass type) {
-    return null;
+  public FieldBuildInitializer<BaseClassStructureBuilder> publicField(String name, MetaClass type) {
+    return genField(Scope.Public, name, type);
   }
 
-  public FieldBuilder<BaseClassStructureBuilder> publicField(String name, Class<?> type) {
-    return null;
+  public FieldBuildInitializer<BaseClassStructureBuilder> publicField(String name, Class<?> type) {
+    return publicField(name, MetaClassFactory.get(type));
   }
 
-  public FieldBuilder<BaseClassStructureBuilder> privateField(String name, MetaClass type) {
-    return null;
+  public FieldBuildInitializer<BaseClassStructureBuilder> privateField(String name, MetaClass type) {
+    return genField(Scope.Private, name, type);
   }
 
-  public FieldBuilder<BaseClassStructureBuilder> privateField(String name, Class<?> type) {
-    return null;
+  public FieldBuildInitializer<BaseClassStructureBuilder> privateField(String name, Class<?> type) {
+    return privateField(name, MetaClassFactory.get(type));
   }
 
-  public FieldBuilder<BaseClassStructureBuilder> protectedField(String name, MetaClass type) {
-    return null;
+  public FieldBuildInitializer<BaseClassStructureBuilder> protectedField(String name, MetaClass type) {
+    return genField(Scope.Protected, name, type);
   }
 
-  public FieldBuilder<BaseClassStructureBuilder> protectedField(String name, Class<?> type) {
-    return null;
+  public FieldBuildInitializer<BaseClassStructureBuilder> protectedField(String name, Class<?> type) {
+    return protectedField(name, MetaClassFactory.get(type));
   }
 
-  public FieldBuilder<BaseClassStructureBuilder> packageField(String name, MetaClass type) {
-    return null;
+  public FieldBuildInitializer<BaseClassStructureBuilder> packageField(String name, MetaClass type) {
+    return genField(Scope.Package, name, type);
   }
 
-  public FieldBuilder<BaseClassStructureBuilder> packageField(String name, Class<?> type) {
-    return null;
+  public FieldBuildInitializer<BaseClassStructureBuilder> packageField(String name, Class<?> type) {
+    return packageField(name, MetaClassFactory.get(type));
   }
 
-  private FieldBuilder<BaseClassStructureBuilder> genField(String name, MetaClass type) {
+  private FieldBuildInitializer<BaseClassStructureBuilder> genField(final Scope scope, final String name,
+                                                                   final MetaClass type) {
     return new FieldBuilder<BaseClassStructureBuilder>(new BuildCallback<BaseClassStructureBuilder>() {
       public BaseClassStructureBuilder callback(final Statement statement) {
         fields.add(new Builder() {
           public String toJavaString() {
+            context.addVariable(Variable.createClassMember(name, type));
+
             return statement.generate(context);
           }
         });
 
         return ClassBuilder.this;
       }
-    });
-
+    }, scope, type, name);
   }
 
   public String toJavaString() {
-    return null;
+    StringBuilder buf = new StringBuilder();
+
+    buf.append("package ").append(getPackageName()).append(";\n");
+
+    for (String pkgImports : context.getImportedPackages()) {
+      if (pkgImports.equals("java.lang")) continue;
+      buf.append("import ").append(pkgImports).append(".*;");
+    }
+
+    for (MetaClass cls : context.getImportedClasses()) {
+      buf.append("import ").append(cls.getName()).append(";");
+    }
+
+    buf.append("\n");
+
+    buf.append(scope.getCanonicalName());
+
+    if (isAbstract) {
+      buf.append(" abstract");
+    }
+
+    buf.append(" class ").append(getSimpleName());
+
+    if (parent != null) {
+      buf.append(" extends ").append(LoadClassReference.getClassReference(parent, context));
+    }
+
+    if (interfaces.size() != 0) {
+      buf.append(" implements ");
+
+      Iterator<MetaClass> iter = interfaces.iterator();
+      while (iter.hasNext()) {
+        buf.append(LoadClassReference.getClassReference(iter.next(), context));
+        if (iter.hasNext()) buf.append(" ");
+      }
+    }
+
+    buf.append(" {\n");
+
+    Iterator<Builder> iter = fields.iterator();
+    while (iter.hasNext()) {
+      buf.append(iter.next().toJavaString());
+      if (iter.hasNext()) buf.append("\n");
+    }
+
+    if (!fields.isEmpty()) buf.append("\n");
+
+    iter = constructors.iterator();
+    while (iter.hasNext()) {
+      buf.append(iter.next().toJavaString());
+      if (iter.hasNext()) buf.append("\n");
+    }
+
+    if (!constructors.isEmpty()) buf.append("\n");
+
+    iter = methods.iterator();
+    while (iter.hasNext()) {
+      buf.append(iter.next().toJavaString());
+      if (iter.hasNext()) buf.append("\n");
+    }
+
+    return PrettyPrinter.prettyPrintJava(buf.append("}\n").toString());
   }
 }

@@ -74,7 +74,7 @@ public interface LoopBuilderTestResult {
       "   while ((str != null) && (str.length() > 0)) { }";
 
   public static final String FOR_RESULT_NO_INITIALIZER_NO_COUNTING_EXP_EMPTY =
-      "     for (; i < 100; ) { }";
+      "     for (Integer i = 0; i < 100; ) { }";
 
   public static final String FOR_RESULT_INITIALIZER_NO_COUNTING_EXP_EMPTY =
       "     for (i = 0; i < 100; ) { }";

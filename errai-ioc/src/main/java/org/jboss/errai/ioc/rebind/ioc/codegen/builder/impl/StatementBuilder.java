@@ -29,13 +29,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.LoopBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementBegin;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.VariableReferenceContextualStatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.WhileBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DeclareVariable;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DynamicLoad;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadField;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadLiteral;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadVariable;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.MethodCall;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.*;
 
 /**
  * The root of our fluent StatementBuilder API.
@@ -52,6 +46,7 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
       for (Variable v : context.getDeclaredVariables()) {
         appendCallElement(new DeclareVariable(v));
       }
+      appendCallElement(new ResetElement());
     }
   }
 
