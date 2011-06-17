@@ -16,6 +16,9 @@
 
 package org.jboss.errai.ioc.tests.rebind;
 
+import org.jboss.errai.ioc.client.InterfaceInjectionContext;
+import org.jboss.errai.ioc.client.api.Bootstrapper;
+import org.jboss.errai.ioc.rebind.ioc.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 import org.junit.Test;
@@ -68,6 +71,18 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest {
             "        return this.name;\n" +
             "    }\n" +
             "}", cls);
+  }
+
+  @Test
+  public void testDefineClassB() {
+    String cls = ClassBuilder.implement(Bootstrapper.class)
+            .publicMethod(InterfaceInjectionContext.class, "bootstrapContainer")
+            .append(Stmt.create().addVariable("ctx", Stmt.create().newObject(InterfaceInjectionContext.class)))
+            .append(Stmt.create().loadVariable("ctx").returnValue())
+            .finish().toJavaString();
+
+    System.out.println(cls);
+
   }
 
 

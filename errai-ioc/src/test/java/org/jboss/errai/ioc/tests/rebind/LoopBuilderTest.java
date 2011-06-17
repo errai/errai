@@ -63,8 +63,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   public void testForeachLoopWithStringInArray() {
     Statement createObject = StatementBuilder.create().newObject(String.class);
 
-    String foreachWithStringArray = StatementBuilder.create()
-        .addVariable("list", String[].class)
+    String foreachWithStringArray = StatementBuilder.create(Context.create().addVariable("list", String[].class))
         .loadVariable("list")
         .foreach("element")
         .append(createObject)
@@ -307,7 +306,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   @Test
   public void testForLoopUnchainedWithoutInitializer() {
     String s = StatementBuilder.create()
-        .addVariable("i", Integer.class)
+        .addVariable("i", Integer.class, 0)
         .for_(Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100))
         .finish().toJavaString();
 

@@ -31,6 +31,9 @@ import javax.enterprise.util.TypeLiteral;
 public class Variable extends AbstractStatement {
   private String name;
   private MetaClass type;
+
+  private Object initialization;
+
   private Statement value;
   private boolean classMember;
 
@@ -48,12 +51,11 @@ public class Variable extends AbstractStatement {
 
   private Variable(String name, MetaClass type, Object initialization) {
     this(name, type);
-    initialize(initialization);
+    this.initialization = initialization;
   }
 
-  public void initialize(Object initialization) {
-    this.type = (type == null) ? inferType(initialization) : type;
-    value = GenUtil.convert(getContext(), initialization, type);
+  public void initialize(Object initializationValue) {
+    this.initialization = initializationValue;
   }
 
   private MetaClass inferType(Object initialization) {
@@ -164,6 +166,11 @@ public class Variable extends AbstractStatement {
   }
 
   public String generate(Context context) {
-    return new DeclareAssignmentBuilder(getReference(), value).generate(context) + ";";
+    if (initialization != null) {
+      this.type = (type == null) ? inferType(initialization) : type;
+      value = GenUtil.convert(context, initialization, type);
+    }
+
+    return new DeclareAssignmentBuilder(getReference(), value).generate(context);
   }
 }

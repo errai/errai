@@ -91,7 +91,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
     Assert.assertEquals("Wrong variable value", LiteralFactory.getLiteral(10), n.getValue());
 
     try {
-      ctx = StatementBuilder.create().addVariable("n", Integer.class, "abc").getContext();
+      StatementBuilder.create().addVariable("n", Integer.class, "abc").toJavaString();
       fail("Expected InvalidTypeException");
     }
     catch (InvalidTypeException ive) {

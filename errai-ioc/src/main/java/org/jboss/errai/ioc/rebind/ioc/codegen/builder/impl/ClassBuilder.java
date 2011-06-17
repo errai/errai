@@ -60,6 +60,17 @@ public class ClassBuilder implements
     return new ClassBuilder(fullQualifiedName, parent, Context.create());
   }
 
+  public static BaseClassStructureBuilder implement(MetaClass cls) {
+    return new ClassBuilder(cls.getFullyQualifiedName() + "Impl", null, Context.create())
+            .publicScope()
+            .implementsInterface(cls).body();
+  }
+
+  public static BaseClassStructureBuilder implement(Class<?> cls) {
+    return implement(MetaClassFactory.get(cls));
+  }
+
+
   private String getSimpleName() {
     int idx = className.lastIndexOf('.');
     if (idx != -1) {
@@ -95,6 +106,10 @@ public class ClassBuilder implements
   }
 
   public ClassDefinitionBuilderInterfaces implementsInterface(MetaClass clazz) {
+    if (!clazz.isInterface()) {
+      throw new RuntimeException("not an interface: " + clazz.getFullyQualifiedName());
+    }
+
     interfaces.add(clazz);
     return this;
   }

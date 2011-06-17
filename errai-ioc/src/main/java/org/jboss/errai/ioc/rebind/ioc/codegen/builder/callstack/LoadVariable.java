@@ -39,6 +39,8 @@ public class LoadVariable extends AbstractCallElement {
   }
 
   public void handleCall(CallWriter writer, Context context, Statement statement) {
+    writer.reset();
+
     VariableReference ref = context.getVariable(variableName);
     
     if (ref == null) {
