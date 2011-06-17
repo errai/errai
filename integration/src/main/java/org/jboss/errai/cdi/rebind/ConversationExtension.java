@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 JBoss, a divison Red Hat, Inc
+ * Copyright 2009 JBoss, a divison Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 package org.jboss.errai.cdi.rebind;
 
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.JParameterizedType;
 import org.jboss.errai.cdi.client.api.CDI;
 import org.jboss.errai.cdi.client.api.ConversationContext;
 import org.jboss.errai.cdi.client.api.Event;
@@ -28,7 +26,8 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameterizedType;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaType;
+
+import com.google.gwt.core.ext.typeinfo.JClassType;
 
 /**
  * @author Heiko Braun <hbraun@redhat.com>
@@ -41,14 +40,14 @@ public class ConversationExtension extends IOCDecoratorExtension<ConversationCon
     }
 
     public String generateDecorator(InjectionPoint<ConversationContext> injectionPoint) {
-     //   final InjectionContext ctx = injectionPoint.getInjectionContext();
+        final InjectionContext ctx = injectionPoint.getInjectionContext();
 
-        final MetaClass eventClassType = MetaClassFactory.get(injectionPoint.getInjectionContext()
-            .getProcessingContext().loadClassType(Event.class));
+        final JClassType eventClassType = injectionPoint.getInjectionContext()
+                .getProcessingContext().loadClassType(Event.class);
 
         final MetaField field = injectionPoint.getField();
 
-        if (!eventClassType.isAssignableFrom(field.getType())) {
+        if (!MetaClassFactory.get(eventClassType).isAssignableFrom(field.getType())) {
             throw new RuntimeException("@ConversationContext should be used with type Event");
         }
 
@@ -61,7 +60,7 @@ public class ConversationExtension extends IOCDecoratorExtension<ConversationCon
 
         MetaClass typeParm = (MetaClass) type.getTypeParameters()[0];
 
-        String toSubject = CDI.getSubjectNameByType(typeParm.getFullyQualifedName());
+        String toSubject = CDI.getSubjectNameByType(typeParm.getFullyQualifiedName());
 
         String expression = injectionPoint.getValueExpression()
                 + ".registerConversation(" + CDI.class.getName() + ".createConversation(\"" + toSubject + "\"));";

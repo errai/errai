@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 JBoss, a divison Red Hat, Inc
+ * Copyright 2009 JBoss, a divison Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,11 @@
  */
 package org.jboss.errai.cdi.rebind;
 
+import java.lang.annotation.Annotation;
+import java.util.Set;
+
+import javax.enterprise.event.Observes;
+
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.annotations.Local;
@@ -23,14 +28,11 @@ import org.jboss.errai.cdi.client.CDIProtocol;
 import org.jboss.errai.cdi.client.api.CDI;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.IOCDecoratorExtension;
+import org.jboss.errai.ioc.rebind.ioc.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.InjectionPoint;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
-
-import javax.enterprise.event.Observes;
-import java.lang.annotation.Annotation;
-import java.util.Set;
 
 /**
  *
@@ -57,7 +59,7 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
         final MetaMethod method = injectionPoint.getMethod();
         final MetaParameter parm = injectionPoint.getParm();
 
-        String parmClassName = parm.getType().getFullyQualifedName();
+        String parmClassName = parm.getType().getFullyQualifiedName();
         String varName = injectionPoint.getInjector().getVarName();
         
         // Get an instance of the message bus.
@@ -66,18 +68,17 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
         final String subscribeType = method.isAnnotationPresent(Local.class) ? "subscribeLocal" : "subscribe";
         
         final String subject = CDI.getSubjectNameByType(parmClassName);
-        final Annotation[] qualifiers = injectionPoint.getQualifiers();
+        final Annotation[] qualifiers = InjectUtil.extractQualifiers(injectionPoint).toArray(new Annotation[0]);
         final Set<String> qualifierNames = CDI.getQualifiersPart(qualifiers);
         
         String expr = messageBusInst + "." + subscribeType + "(\"" + subject + "\", new " + MessageCallback.class.getName() + "() {\n" +
                 "    public void callback(" + Message.class.getName() + " message) {\n" +
-                "        java.util.Set<String> methodQualifiers = new java.util.HashSet<String>() {{\n";
+                "        java.util.Set<String> methodQualifiers = new java.util.HashSet<String>();\n";
                             if(qualifierNames!=null) {
                                 for(String qualifierName : qualifierNames) expr+=
-	            "					 add(\""+qualifierName+"\");\n";
+	            "					 methodQualifiers.add(\""+qualifierName+"\");\n";
                 			}
                 			expr+=
-            	"        }};\n" + 
             	"        java.util.Set<String> qualifiers = message.get(java.util.Set.class," + CDIProtocol.class.getName() + "." + CDIProtocol.QUALIFIERS.name()+");\n" +
             	"        if(methodQualifiers.equals(qualifiers) || (qualifiers==null && methodQualifiers.isEmpty())) {\n" +
                 "            java.lang.Object response = message.get(" + parmClassName + ".class, " + CDIProtocol.class.getName() + "." + CDIProtocol.OBJECT_REF.name() + ");\n" +
@@ -87,5 +88,5 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
                 "});\n";
 
         return expr;
-    }
+    };
 }
