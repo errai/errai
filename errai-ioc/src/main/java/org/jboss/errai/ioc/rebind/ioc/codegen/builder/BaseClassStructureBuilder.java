@@ -24,86 +24,85 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public interface BaseClassStructureBuilder<T extends BaseClassStructureBuilder> extends Builder {
-  public BlockBuilder<T> publicConstructor(MetaClass... parms);
+public interface BaseClassStructureBuilder extends Builder {
+  public BlockBuilder<BaseClassStructureBuilder> publicConstructor(MetaClass... parms);
 
-  public BlockBuilder<T> publicConstructor(Class<?>... parms);
+  public BlockBuilder<BaseClassStructureBuilder> publicConstructor(Class<?>... parms);
 
-  public BlockBuilder<T> publicConstructor(Parameter... parms);
-
-
-  public BlockBuilder<T> privateConstructor(MetaClass... parms);
-
-  public BlockBuilder<T> privateConstructor(Class<?>... parms);
-
-  public BlockBuilder<T> privateConstructor(Parameter... parms);
+  public BlockBuilder<BaseClassStructureBuilder> publicConstructor(Parameter... parms);
 
 
-  public BlockBuilder<T> protectedConstructor(MetaClass... parms);
+  public BlockBuilder<BaseClassStructureBuilder> privateConstructor(MetaClass... parms);
 
-  public BlockBuilder<T> protectedConstructor(Class<?>... parms);
+  public BlockBuilder<BaseClassStructureBuilder> privateConstructor(Class<?>... parms);
 
-  public BlockBuilder<T> protectedConstructor(Parameter... parms);
+  public BlockBuilder<BaseClassStructureBuilder> privateConstructor(Parameter... parms);
 
 
-  public BlockBuilder<T> packageConstructor(MetaClass... parms);
+  public BlockBuilder<BaseClassStructureBuilder> protectedConstructor(MetaClass... parms);
 
-  public BlockBuilder<T> packageConstructor(Class<?>... parms);
+  public BlockBuilder<BaseClassStructureBuilder> protectedConstructor(Class<?>... parms);
 
-  public BlockBuilder<T> packageConstructor(Parameter... parms);
+  public BlockBuilder<BaseClassStructureBuilder> protectedConstructor(Parameter... parms);
 
+
+  public BlockBuilder<BaseClassStructureBuilder> packageConstructor(MetaClass... parms);
+
+  public BlockBuilder<BaseClassStructureBuilder> packageConstructor(Class<?>... parms);
+
+  public BlockBuilder<BaseClassStructureBuilder> packageConstructor(Parameter... parms);
 
 
   // --- //
 
-  public BlockBuilder<T> publicMethod(MetaClass returnType, String name, MetaClass... parms);
+  public BlockBuilder<BaseClassStructureBuilder> publicMethod(MetaClass returnType, String name, MetaClass... parms);
 
-  public BlockBuilder<T> publicMethod(Class<?> returnType, String name, Class<?>... parms);
+  public BlockBuilder<BaseClassStructureBuilder> publicMethod(Class<?> returnType, String name, Class<?>... parms);
 
-  public BlockBuilder<T> publicMethod(MetaClass returnType, String name, Parameter... parms);
-
-
-  public BlockBuilder<T> privateMethod(MetaClass returnType, String name, MetaClass... parms);
-
-  public BlockBuilder<T> privateMethod(Class<?> returnType, String name, Class<?>... parms);
-
-  public BlockBuilder<T> privateMethod(MetaClass returnType, String name, Parameter... parms);
+  public BlockBuilder<BaseClassStructureBuilder> publicMethod(MetaClass returnType, String name, Parameter... parms);
 
 
-  public BlockBuilder<T> protectedMethod(MetaClass returnType, String name, MetaClass... parms);
+  public BlockBuilder<BaseClassStructureBuilder> privateMethod(MetaClass returnType, String name, MetaClass... parms);
 
-  public BlockBuilder<T> protectedMethod(Class<?> returnType, String name, Class<?>... parms);
+  public BlockBuilder<BaseClassStructureBuilder> privateMethod(Class<?> returnType, String name, Class<?>... parms);
 
-  public BlockBuilder<T> protectedMethod(MetaClass returnType, String name, Parameter... parms);
+  public BlockBuilder<BaseClassStructureBuilder> privateMethod(MetaClass returnType, String name, Parameter... parms);
 
 
-  public BlockBuilder<T> packageMethod(MetaClass returnType, String name, MetaClass... parms);
+  public BlockBuilder<BaseClassStructureBuilder> protectedMethod(MetaClass returnType, String name, MetaClass... parms);
 
-  public BlockBuilder<T> packageMethod(Class<?> returnType, String name, Class<?>... parms);
+  public BlockBuilder<BaseClassStructureBuilder> protectedMethod(Class<?> returnType, String name, Class<?>... parms);
 
-  public BlockBuilder<T> packageMethod(MetaClass returnType, String name, Parameter... parms);
+  public BlockBuilder<BaseClassStructureBuilder>protectedMethod(MetaClass returnType, String name, Parameter... parms);
+
+
+  public BlockBuilder<BaseClassStructureBuilder> packageMethod(MetaClass returnType, String name, MetaClass... parms);
+
+  public BlockBuilder<BaseClassStructureBuilder> packageMethod(Class<?> returnType, String name, Class<?>... parms);
+
+  public BlockBuilder<BaseClassStructureBuilder> packageMethod(MetaClass returnType, String name, Parameter... parms);
 
 
   // -- //
 
-  public FieldBuildInitializer<T> publicField(String name, MetaClass type);
+  public FieldBuildInitializer<BaseClassStructureBuilder> publicField(String name, MetaClass type);
 
-  public FieldBuildInitializer<T> publicField(String name, Class<?> type);
-
-
-  public FieldBuildInitializer<T> privateField(String name, MetaClass type);
-
-  public FieldBuildInitializer<T> privateField(String name, Class<? > type);
+  public FieldBuildInitializer<BaseClassStructureBuilder> publicField(String name, Class<?> type);
 
 
-  public FieldBuildInitializer<T> protectedField(String name, MetaClass type);
+  public FieldBuildInitializer<BaseClassStructureBuilder> privateField(String name, MetaClass type);
 
-  public FieldBuildInitializer<T> protectedField(String name, Class<?> type);
+  public FieldBuildInitializer<BaseClassStructureBuilder> privateField(String name, Class<?> type);
 
 
-  public FieldBuildInitializer<T> packageField(String name, MetaClass type);
+  public FieldBuildInitializer<BaseClassStructureBuilder> protectedField(String name, MetaClass type);
 
-  public FieldBuildInitializer<T> packageField(String name, Class<?> type);
+  public FieldBuildInitializer<BaseClassStructureBuilder> protectedField(String name, Class<?> type);
+
+
+  public FieldBuildInitializer<BaseClassStructureBuilder> packageField(String name, MetaClass type);
+
+  public FieldBuildInitializer<BaseClassStructureBuilder> packageField(String name, Class<?> type);
 
 
 }

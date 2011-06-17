@@ -95,6 +95,7 @@ public class FieldBuilder<T> implements FieldBuildStart<T>, FieldBuildType<T>,
       return callback.callback(new Statement() {
         public String generate(Context context) {
           StringBuilder sbuf = new StringBuilder(scope.getCanonicalName())
+                  .append(scope == Scope.Package ? "" : " ")
                   .append(LoadClassReference.getClassReference(type, context))
                   .append(" ").append(name);
 

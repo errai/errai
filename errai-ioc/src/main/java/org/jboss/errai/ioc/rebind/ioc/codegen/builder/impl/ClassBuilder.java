@@ -16,13 +16,11 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.Builder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.PrettyPrinter;
 
 import java.util.*;
 
@@ -32,7 +30,7 @@ import java.util.*;
 public class ClassBuilder implements
         ClassDefinitionBuilderScope,
         ClassDefinitionBuilderAbstractOption,
-        BaseClassStructureBuilder<BaseClassStructureBuilder> {
+        BaseClassStructureBuilder {
 
   private Context context;
 
@@ -54,11 +52,11 @@ public class ClassBuilder implements
     this.context = context;
   }
 
-  public static ClassBuilder define(String fullyQualifiedName) {
+  public static ClassDefinitionBuilderScope define(String fullyQualifiedName) {
     return new ClassBuilder(fullyQualifiedName, null, Context.create());
   }
 
-  public static ClassBuilder define(String fullQualifiedName, MetaClass parent) {
+  public static ClassDefinitionBuilderScope define(String fullQualifiedName, MetaClass parent) {
     return new ClassBuilder(fullQualifiedName, parent, Context.create());
   }
 
@@ -101,8 +99,8 @@ public class ClassBuilder implements
     return this;
   }
 
-  public BaseClassStructureBuilder<BaseClassStructureBuilder> body() {
-    return null;
+  public BaseClassStructureBuilder body() {
+    return this;
   }
 
   public ClassDefinitionBuilderAbstractOption publicScope() {
@@ -129,7 +127,7 @@ public class ClassBuilder implements
     return genConstructor(Scope.Public, DefParameters.fromTypeArray(parms));
   }
 
-  public BlockBuilder<BaseClassStructureBuilder> publicConstructor(Class<?>... parms) {
+  public  BlockBuilder<BaseClassStructureBuilder> publicConstructor(Class<?>... parms) {
     return publicConstructor(MetaClassFactory.fromClassArray(parms));
   }
 
@@ -304,11 +302,14 @@ public class ClassBuilder implements
     return packageField(name, MetaClassFactory.get(type));
   }
 
-  private FieldBuildInitializer<BaseClassStructureBuilder> genField(Scope scope, String name, MetaClass type) {
+  private FieldBuildInitializer<BaseClassStructureBuilder> genField(final Scope scope, final String name,
+                                                                   final MetaClass type) {
     return new FieldBuilder<BaseClassStructureBuilder>(new BuildCallback<BaseClassStructureBuilder>() {
       public BaseClassStructureBuilder callback(final Statement statement) {
         fields.add(new Builder() {
           public String toJavaString() {
+            context.addVariable(Variable.createClassMember(name, type));
+
             return statement.generate(context);
           }
         });
@@ -322,9 +323,9 @@ public class ClassBuilder implements
     StringBuilder buf = new StringBuilder();
 
     buf.append("package ").append(getPackageName()).append(";\n");
-    buf.append("\n");
 
     for (String pkgImports : context.getImportedPackages()) {
+      if (pkgImports.equals("java.lang")) continue;
       buf.append("import ").append(pkgImports).append(".*;");
     }
 
@@ -358,24 +359,28 @@ public class ClassBuilder implements
 
     buf.append(" {\n");
 
-    for (Builder builder : fields) {
-      buf.append(builder.toJavaString()).append("\n");
+    Iterator<Builder> iter = fields.iterator();
+    while (iter.hasNext()) {
+      buf.append(iter.next().toJavaString());
+      if (iter.hasNext()) buf.append("\n");
     }
 
-    buf.append("\n");
+    if (!fields.isEmpty()) buf.append("\n");
 
-    for (Builder builder : constructors) {
-      buf.append(builder.toJavaString()).append("\n");
+    iter = constructors.iterator();
+    while (iter.hasNext()) {
+      buf.append(iter.next().toJavaString());
+      if (iter.hasNext()) buf.append("\n");
     }
 
-    buf.append("\n");
+    if (!constructors.isEmpty()) buf.append("\n");
 
-    for (Builder builder : methods) {
-      buf.append(builder.toJavaString()).append("\n");
+    iter = methods.iterator();
+    while (iter.hasNext()) {
+      buf.append(iter.next().toJavaString());
+      if (iter.hasNext()) buf.append("\n");
     }
 
-    buf.append("\n");
-
-    return buf.append("}\n").toString();
+    return PrettyPrinter.prettyPrintJava(buf.append("}\n").toString());
   }
 }

@@ -24,7 +24,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.GenUtil;
 
 /**
- * {@link CallElement} to load {@link Variable}s. Indexes can be provided in case of an array.
+ * {@link CallElement} to load {@link VariableReference}s. Indexes can be provided in case of an array.
  * 
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>

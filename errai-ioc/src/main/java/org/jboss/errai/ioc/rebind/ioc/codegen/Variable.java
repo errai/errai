@@ -32,11 +32,19 @@ public class Variable extends AbstractStatement {
   private String name;
   private MetaClass type;
   private Statement value;
+  private boolean classMember;
 
   private Variable(String name, MetaClass type) {
     this.name = name;
     this.type = type;
   }
+
+  private Variable(String name, MetaClass type, boolean classMember) {
+    this.name = name;
+    this.type = type;
+    this.classMember = classMember;
+  }
+
 
   private Variable(String name, MetaClass type, Object initialization) {
     this(name, type);
@@ -70,6 +78,10 @@ public class Variable extends AbstractStatement {
     return new Variable(name, type);
   }
 
+  public static Variable createClassMember(String name, MetaClass type) {
+    return new Variable(name, type, true);
+  }
+
   public static Variable create(String name, Object initialization) {
     return new Variable(name, null, initialization);
   }
@@ -101,7 +113,7 @@ public class Variable extends AbstractStatement {
   public VariableReference getReference() {
     return new VariableReference() {
       public String getName() {
-        return name;
+        return classMember ? "this." + name : name;
       }
 
       public MetaClass getType() {
@@ -138,7 +150,7 @@ public class Variable extends AbstractStatement {
   @Override
   public boolean equals(Object o) {
     return o instanceof Variable
-        && hashString().equals(Variable.class.getName() + ":" + name + ":" + ((Variable) o).type.getFullyQualifiedName());
+            && hashString().equals(Variable.class.getName() + ":" + name + ":" + ((Variable) o).type.getFullyQualifiedName());
   }
 
   @Override

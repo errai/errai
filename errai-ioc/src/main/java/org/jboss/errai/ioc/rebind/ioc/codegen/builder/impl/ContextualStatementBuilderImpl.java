@@ -25,6 +25,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.WhileBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.AssignVariable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadField;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.MethodCall;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.ReturnValue;
 
 /**
  * Implementation of the {@link ContextualStatementBuilder}.
@@ -97,7 +98,8 @@ public class ContextualStatementBuilderImpl extends AbstractStatementBuilder imp
 
   // Value return
   public Statement returnValue() {
-    return new StringStatement("return " + toJavaString() + ";");
+    appendCallElement(new ReturnValue());
+    return this;
   }
 
   // Assignments

@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
+package org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public interface ClassDefinitionBuilderInterfaces {
-  public ClassDefinitionBuilderInterfaces implementsInterface(MetaClass clazz);
+public class ReturnValue extends AbstractCallElement {
+  public void handleCall(CallWriter writer, Context context, Statement statement) {
+    String buf = writer.getCallString();
+    writer.reset();
 
-  public ClassDefinitionBuilderInterfaces implementsInterface(Class<?> clazz);
-
-  public BaseClassStructureBuilder body();
+    writer.append("return ").append(buf);
+  }
 }
