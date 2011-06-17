@@ -14,18 +14,10 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
-
-import org.jboss.errai.ioc.rebind.ioc.codegen.Builder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+package org.jboss.errai.ioc.tests.rebind;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public class AnnotationBuilder implements Builder {
-  public MetaClass type;
-
-  public String toJavaString() {
-    return null;
-  }
+public class ClassBuilderTest {
 }

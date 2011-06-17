@@ -86,24 +86,24 @@ public interface BaseClassStructureBuilder<T extends BaseClassStructureBuilder> 
 
   // -- //
 
-  public FieldBuilder<T> publicField(String name, MetaClass type);
+  public FieldBuildInitializer<T> publicField(String name, MetaClass type);
 
-  public FieldBuilder<T> publicField(String name, Class<?> type);
-
-
-  public FieldBuilder<T> privateField(String name, MetaClass type);
-
-  public FieldBuilder<T> privateField(String name, Class<? > type);
+  public FieldBuildInitializer<T> publicField(String name, Class<?> type);
 
 
-  public FieldBuilder<T> protectedField(String name, MetaClass type);
+  public FieldBuildInitializer<T> privateField(String name, MetaClass type);
 
-  public FieldBuilder<T> protectedField(String name, Class<?> type);
+  public FieldBuildInitializer<T> privateField(String name, Class<? > type);
 
 
-  public FieldBuilder<T> packageField(String name, MetaClass type);
+  public FieldBuildInitializer<T> protectedField(String name, MetaClass type);
 
-  public FieldBuilder<T> packageField(String name, Class<?> type);
+  public FieldBuildInitializer<T> protectedField(String name, Class<?> type);
+
+
+  public FieldBuildInitializer<T> packageField(String name, MetaClass type);
+
+  public FieldBuildInitializer<T> packageField(String name, Class<?> type);
 
 
 }

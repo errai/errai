@@ -38,6 +38,18 @@ public class FieldBuilder<T> implements FieldBuildStart<T>, FieldBuildType<T>,
     this.callback = callback;
   }
 
+  public FieldBuilder(BuildCallback<T> callback, Scope scope) {
+    this.callback = callback;
+    this.scope = scope;
+  }
+
+  public FieldBuilder(BuildCallback<T> callback, Scope scope, MetaClass type, String name) {
+    this.callback = callback;
+    this.scope = scope;
+    this.type = type;
+    this.name = name;
+  }
+
   public Finishable<T> initializesWith(Statement statement) {
     this.initializer = statement;
     return this;

@@ -46,8 +46,6 @@ public class ClassBuilder implements
   private List<Builder> fields = new ArrayList<Builder>();
   private List<Builder> methods = new ArrayList<Builder>();
 
-  private StringBuilder buf = new StringBuilder();
-
   private boolean isAbstract;
 
   ClassBuilder(String className, MetaClass parent, Context context) {
@@ -70,6 +68,14 @@ public class ClassBuilder implements
       return className.substring(idx + 1);
     }
     return className;
+  }
+
+  private String getPackageName() {
+    int idx = className.lastIndexOf(".");
+    if (idx != -1) {
+      return className.substring(0, idx);
+    }
+    return "";
   }
 
   public ClassBuilder abstractClass() {
@@ -266,39 +272,39 @@ public class ClassBuilder implements
     });
   }
 
-  public FieldBuilder<BaseClassStructureBuilder> publicField(String name, MetaClass type) {
-    return null;
+  public FieldBuildInitializer<BaseClassStructureBuilder> publicField(String name, MetaClass type) {
+    return genField(Scope.Public, name, type);
   }
 
-  public FieldBuilder<BaseClassStructureBuilder> publicField(String name, Class<?> type) {
-    return null;
+  public FieldBuildInitializer<BaseClassStructureBuilder> publicField(String name, Class<?> type) {
+    return publicField(name, MetaClassFactory.get(type));
   }
 
-  public FieldBuilder<BaseClassStructureBuilder> privateField(String name, MetaClass type) {
-    return null;
+  public FieldBuildInitializer<BaseClassStructureBuilder> privateField(String name, MetaClass type) {
+    return genField(Scope.Private, name, type);
   }
 
-  public FieldBuilder<BaseClassStructureBuilder> privateField(String name, Class<?> type) {
-    return null;
+  public FieldBuildInitializer<BaseClassStructureBuilder> privateField(String name, Class<?> type) {
+    return privateField(name, MetaClassFactory.get(type));
   }
 
-  public FieldBuilder<BaseClassStructureBuilder> protectedField(String name, MetaClass type) {
-    return null;
+  public FieldBuildInitializer<BaseClassStructureBuilder> protectedField(String name, MetaClass type) {
+    return genField(Scope.Protected, name, type);
   }
 
-  public FieldBuilder<BaseClassStructureBuilder> protectedField(String name, Class<?> type) {
-    return null;
+  public FieldBuildInitializer<BaseClassStructureBuilder> protectedField(String name, Class<?> type) {
+    return protectedField(name, MetaClassFactory.get(type));
   }
 
-  public FieldBuilder<BaseClassStructureBuilder> packageField(String name, MetaClass type) {
-    return null;
+  public FieldBuildInitializer<BaseClassStructureBuilder> packageField(String name, MetaClass type) {
+    return genField(Scope.Package, name, type);
   }
 
-  public FieldBuilder<BaseClassStructureBuilder> packageField(String name, Class<?> type) {
-    return null;
+  public FieldBuildInitializer<BaseClassStructureBuilder> packageField(String name, Class<?> type) {
+    return packageField(name, MetaClassFactory.get(type));
   }
 
-  private FieldBuilder<BaseClassStructureBuilder> genField(String name, MetaClass type) {
+  private FieldBuildInitializer<BaseClassStructureBuilder> genField(Scope scope, String name, MetaClass type) {
     return new FieldBuilder<BaseClassStructureBuilder>(new BuildCallback<BaseClassStructureBuilder>() {
       public BaseClassStructureBuilder callback(final Statement statement) {
         fields.add(new Builder() {
@@ -309,11 +315,67 @@ public class ClassBuilder implements
 
         return ClassBuilder.this;
       }
-    });
-
+    }, scope, type, name);
   }
 
   public String toJavaString() {
-    return null;
+    StringBuilder buf = new StringBuilder();
+
+    buf.append("package ").append(getPackageName()).append(";\n");
+    buf.append("\n");
+
+    for (String pkgImports : context.getImportedPackages()) {
+      buf.append("import ").append(pkgImports).append(".*;");
+    }
+
+    for (MetaClass cls : context.getImportedClasses()) {
+      buf.append("import ").append(cls.getName()).append(";");
+    }
+
+    buf.append("\n");
+
+    buf.append(scope.getCanonicalName());
+
+    if (isAbstract) {
+      buf.append(" abstract");
+    }
+
+    buf.append(" class ").append(getSimpleName());
+
+    if (parent != null) {
+      buf.append(" extends ").append(LoadClassReference.getClassReference(parent, context));
+    }
+
+    if (interfaces.size() != 0) {
+      buf.append(" implements ");
+
+      Iterator<MetaClass> iter = interfaces.iterator();
+      while (iter.hasNext()) {
+        buf.append(LoadClassReference.getClassReference(iter.next(), context));
+        if (iter.hasNext()) buf.append(" ");
+      }
+    }
+
+    buf.append(" {\n");
+
+    for (Builder builder : fields) {
+      buf.append(builder.toJavaString()).append("\n");
+    }
+
+    buf.append("\n");
+
+    for (Builder builder : constructors) {
+      buf.append(builder.toJavaString()).append("\n");
+    }
+
+    buf.append("\n");
+
+    for (Builder builder : methods) {
+      buf.append(builder.toJavaString()).append("\n");
+    }
+
+    buf.append("\n");
+
+    return buf.append("}\n").toString();
   }
 }
