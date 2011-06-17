@@ -33,7 +33,7 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest {
             .publicScope().implementsInterface(Serializable.class)
             .body()
             .publicMethod(String.class, "getName")
-            .append(Stmt.create().load("foobar").returnValue())
+              .append(Stmt.create().load("foobar").returnValue())
             .finish()
             .toJavaString();
 
@@ -49,15 +49,15 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest {
 
 
   @Test
-  public void testDefineClass1() {
+  public void testDefineClassA() {
     String cls = ClassBuilder.define("org.foo.Foo")
             .publicScope()
             .body()
             .privateField("name", String.class)
-            .initializesWith(Stmt.create().load("Mike Brock"))
+              .initializesWith(Stmt.create().load("Mike Brock"))
             .finish()
             .publicMethod(String.class, "getName")
-            .append(Stmt.create().loadVariable("name").returnValue())
+              .append(Stmt.create().loadVariable("name").returnValue())
             .finish().toJavaString();
 
     assertEquals("package org.foo;\n" +
@@ -69,5 +69,8 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest {
             "    }\n" +
             "}", cls);
   }
+
+
 }
+
 
