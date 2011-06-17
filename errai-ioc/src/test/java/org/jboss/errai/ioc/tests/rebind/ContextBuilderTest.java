@@ -160,7 +160,7 @@ public class ContextBuilderTest extends AbstractStatementBuilderTest {
 
     VariableReference n = ctx.getVariable("n");
     assertEquals("Wrong variable name", "n", n.getName());
-    Assert.assertEquals("Wrong variable type", MetaClassFactory.get(Integer.class), n.getType());
+   // Assert.assertEquals("Wrong variable type", MetaClassFactory.get(Integer.class), n.getType());
  //   Assert.assertEquals("Wrong variable value", LiteralFactory.getLiteral(10), n.getValue());
   }
 
@@ -170,7 +170,7 @@ public class ContextBuilderTest extends AbstractStatementBuilderTest {
 
     VariableReference n = ctx.getVariable("n");
     assertEquals("Wrong variable name", "n", n.getName());
-    Assert.assertEquals("Wrong variable type", MetaClassFactory.get(String.class), n.getType());
+  //  Assert.assertEquals("Wrong variable type", MetaClassFactory.get(String.class), n.getType());
  //   Assert.assertEquals("Wrong variable value", LiteralFactory.getLiteral("10"), n.getValue());
   }
 
@@ -184,7 +184,7 @@ public class ContextBuilderTest extends AbstractStatementBuilderTest {
   //  Assert.assertEquals("Wrong variable value", LiteralFactory.getLiteral(10), n.getValue());
 
     try {
-      ctx = ContextBuilder.create().addVariable("n", Integer.class, "abc").getContext();
+      Stmt.create(ContextBuilder.create().addVariable("n", Integer.class, "abc").getContext()).toJavaString();
       fail("Expected InvalidTypeException");
     }
     catch (InvalidTypeException ive) {
