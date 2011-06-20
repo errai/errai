@@ -50,7 +50,7 @@ public class WhileLoop extends AbstractConditionalBlock {
       builder.append(getBlock().generate(context));
     }
 
-    builder.append("\n}\n");
+    builder.append("\n}");
 
     return builder.toString();
   }

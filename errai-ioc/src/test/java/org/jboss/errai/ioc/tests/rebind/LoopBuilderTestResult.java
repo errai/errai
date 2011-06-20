@@ -73,6 +73,12 @@ public interface LoopBuilderTestResult {
   public static final String WHILE_RESULT_NESTED_EMPTY =
       "   while ((str != null) && (str.length() > 0)) { }";
 
+  public static final String WHILE_RESULT_NESTED_LOOPS =
+      "   while (str != null) { " +
+          " while (str2 != null) {" +
+          " };\n" +
+          "}";
+
   public static final String FOR_RESULT_NO_INITIALIZER_NO_COUNTING_EXP_EMPTY =
       "     for (Integer i = 0; i < 100; ) { }";
 

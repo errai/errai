@@ -299,8 +299,24 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
             BooleanOperator.And,
             Bool.expr(Stmt.create().loadVariable("str").invoke("length"), BooleanOperator.GreaterThan, 0)))
         .finish().toJavaString();
+    
+    assertEquals("Failed to generate while loop with nested expressions and no body", WHILE_RESULT_NESTED_EMPTY, s);
+  }
 
-    assertEquals("Failed to generate while loop with nested expression and no body", WHILE_RESULT_NESTED_EMPTY, s);
+  @Test
+  public void testWhileLoopsNested() {
+    Context c = Context.create().addVariable("str", String.class).addVariable("str2", String.class);
+    
+    String s = StatementBuilder.create(c)
+            .loadVariable("str")
+            .while_(BooleanOperator.NotEquals, null)
+            .append(
+                StatementBuilder.create(c)
+                  .while_(Bool.expr(Variable.get("str2"), BooleanOperator.NotEquals, null))
+                  .finish())
+            .finish().toJavaString();
+    
+    assertEquals("Failed to generate nested while loops", WHILE_RESULT_NESTED_LOOPS, s);
   }
 
   @Test
@@ -313,7 +329,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
     assertEquals("Failed to generate for loop without initializer",
         FOR_RESULT_NO_INITIALIZER_NO_COUNTING_EXP_EMPTY, s);
   }
-  
+
   @Test
   public void testForLoopChainedWithInitializer() {
     String s = StatementBuilder.create()
@@ -337,7 +353,6 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
     assertEquals("Failed to generate for loop with initializer",
         FOR_RESULT_INITIALIZER_NO_COUNTING_EXP_EMPTY, s);
   }
-
 
   @Test
   public void testForLoopChainedWithInitializerAndCountingExpression() {
@@ -364,7 +379,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
     assertEquals("Failed to generate for loop with initializer and counting expression",
         FOR_RESULT_INITIALIZER_COUNTING_EXP_EMPTY, s);
   }
-  
+
   @Test
   public void testForLoopUnchainedWithDeclaringInitializerAndCountingExpression() {
     String s = StatementBuilder.create()
@@ -406,7 +421,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
     assertEquals("Failed to generate for do while loop with simple expression (no operator and rhs) and chained lhs",
         DOWHILE_RESULT_SIMPLE_EXPRESSION_NO_OP, s);
   }
-  
+
   @Test
   public void testDoWhileLoopChainedWithRhs() {
     String s = StatementBuilder.create()
