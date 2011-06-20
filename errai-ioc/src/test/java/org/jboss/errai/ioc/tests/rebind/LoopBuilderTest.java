@@ -433,8 +433,6 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .while_(BooleanOperator.GreaterThanOrEqual, 1)
         .toJavaString();
 
-    System.out.println(s);
-
     assertEquals("Failed to generate for do while loop with simple expression (no operator and rhs) and chained lhs",
         DOWHILE_RESULT_SIMPLE_EXPRESSION, s);
   }
