@@ -54,7 +54,7 @@ public class AssignmentBuilder implements Statement {
     operator.assertCanBeApplied(statement.getType());
 
     return reference.getName() + generateIndexes(indexes) +
-        " " + operator.getCanonicalString() + " " + statement.generate(Context.create());
+        " " + operator.getCanonicalString() + " " + statement.generate(context);
   }
 
   private String generateIndexes(Statement[] indexes) {

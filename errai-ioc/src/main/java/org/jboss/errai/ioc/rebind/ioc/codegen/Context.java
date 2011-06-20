@@ -34,6 +34,8 @@ public class Context {
 
   private Map<String, Variable> variables = new HashMap<String, Variable>();
   private Context parent = null;
+
+  private boolean autoImports = false;
   
   private Context() {
     importedPackages.add("java.lang");
@@ -98,6 +100,11 @@ public class Context {
     return this;
   }
 
+  public Context autoImport() {
+    this.autoImports = true;
+    return this;
+  }
+
   public boolean hasPackageImport(String packageName) {
     return importedPackages.contains(packageName);
   }
@@ -151,5 +158,13 @@ public class Context {
 
   public Set<MetaClass> getImportedClasses() {
     return importedClasses;
+  }
+
+  public boolean isAutoImports() {
+    return autoImports;
+  }
+
+  public void setAutoImports(boolean autoImports) {
+    this.autoImports = autoImports;
   }
 }

@@ -53,15 +53,15 @@ public class ClassBuilder implements
   }
 
   public static ClassDefinitionBuilderScope define(String fullyQualifiedName) {
-    return new ClassBuilder(fullyQualifiedName, null, Context.create());
+    return new ClassBuilder(fullyQualifiedName, null, Context.create().autoImport());
   }
 
   public static ClassDefinitionBuilderScope define(String fullQualifiedName, MetaClass parent) {
-    return new ClassBuilder(fullQualifiedName, parent, Context.create());
+    return new ClassBuilder(fullQualifiedName, parent, Context.create().autoImport());
   }
 
   public static BaseClassStructureBuilder implement(MetaClass cls) {
-    return new ClassBuilder(cls.getFullyQualifiedName() + "Impl", null, Context.create())
+    return new ClassBuilder(cls.getFullyQualifiedName() + "Impl", null, Context.create().autoImport())
             .publicScope()
             .implementsInterface(cls).body();
   }
@@ -142,7 +142,7 @@ public class ClassBuilder implements
     return genConstructor(Scope.Public, DefParameters.fromTypeArray(parms));
   }
 
-  public  BlockBuilder<BaseClassStructureBuilder> publicConstructor(Class<?>... parms) {
+  public BlockBuilder<BaseClassStructureBuilder> publicConstructor(Class<?>... parms) {
     return publicConstructor(MetaClassFactory.fromClassArray(parms));
   }
 
@@ -318,7 +318,7 @@ public class ClassBuilder implements
   }
 
   private FieldBuildInitializer<BaseClassStructureBuilder> genField(final Scope scope, final String name,
-                                                                   final MetaClass type) {
+                                                                    final MetaClass type) {
     return new FieldBuilder<BaseClassStructureBuilder>(new BuildCallback<BaseClassStructureBuilder>() {
       public BaseClassStructureBuilder callback(final Statement statement) {
         fields.add(new Builder() {
@@ -337,16 +337,6 @@ public class ClassBuilder implements
   public String toJavaString() {
     StringBuilder buf = new StringBuilder();
 
-    buf.append("package ").append(getPackageName()).append(";\n");
-
-    for (String pkgImports : context.getImportedPackages()) {
-      if (pkgImports.equals("java.lang")) continue;
-      buf.append("import ").append(pkgImports).append(".*;");
-    }
-
-    for (MetaClass cls : context.getImportedClasses()) {
-      buf.append("import ").append(cls.getName()).append(";");
-    }
 
     buf.append("\n");
 
@@ -396,6 +386,26 @@ public class ClassBuilder implements
       if (iter.hasNext()) buf.append("\n");
     }
 
-    return PrettyPrinter.prettyPrintJava(buf.append("}\n").toString());
+    StringBuilder headerBuffer = new StringBuilder();
+
+    headerBuffer.append("package ").append(getPackageName()).append(";\n");
+
+    if (context.getImportedPackages().size() > 1)
+      headerBuffer.append("\n");
+
+    for (String pkgImports : context.getImportedPackages()) {
+      if (pkgImports.equals("java.lang")) continue;
+      headerBuffer.append("import ").append(pkgImports).append(".*;");
+    }
+
+    if (!context.getImportedClasses().isEmpty())
+      headerBuffer.append("\n");
+
+    for (MetaClass cls : context.getImportedClasses()) {
+      headerBuffer.append("import ").append(cls.getFullyQualifiedName()).append(";\n");
+    }
+
+
+    return PrettyPrinter.prettyPrintJava(headerBuffer.toString() + buf.append("}\n").toString());
   }
 }

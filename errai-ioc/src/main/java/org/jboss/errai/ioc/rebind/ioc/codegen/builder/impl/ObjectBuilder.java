@@ -24,6 +24,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BuildCallback;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.CallParameters;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedConstructorException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
@@ -36,7 +37,6 @@ import com.google.gwt.core.ext.typeinfo.JClassType;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ObjectBuilder extends AbstractStatementBuilder {
-  StringBuilder buf = new StringBuilder();
 
   private static final int CONSTRUCT_STATEMENT_COMPLETE = 1;
   private static final int SUBCLASSED = 2;
@@ -45,13 +45,20 @@ public class ObjectBuilder extends AbstractStatementBuilder {
   private MetaClass type;
   private int buildState;
 
-  ObjectBuilder(MetaClass type) {
-    super(Context.create());
+  private CallParameters callParameters;
+  private Statement extendsBlock;
+
+  ObjectBuilder(MetaClass type, Context context) {
+    super(context);
     this.type = type;
 
     for (MetaField field : type.getFields()) {
       context.addVariable(Variable.create(field.getName(), field.getType()));
     }
+  }
+
+  ObjectBuilder(MetaClass type) {
+    this(type, Context.create());
   }
 
   public static ObjectBuilder newInstanceOf(MetaClass type) {
@@ -70,8 +77,24 @@ public class ObjectBuilder extends AbstractStatementBuilder {
     return newInstanceOf(MetaClassFactory.get(type));
   }
 
+  public static ObjectBuilder newInstanceOf(MetaClass type, Context context) {
+    return new ObjectBuilder(type, context).newInstance();
+  }
+
+  public static ObjectBuilder newInstanceOf(Class<?> type, Context context) {
+    return newInstanceOf(MetaClassFactory.get(type), context);
+  }
+
+  public static ObjectBuilder newInstanceOf(TypeLiteral<?> type, Context context) {
+    return newInstanceOf(MetaClassFactory.get(type), context);
+  }
+
+  public static ObjectBuilder newInstanceOf(JClassType type, Context context) {
+    return newInstanceOf(MetaClassFactory.get(type), context);
+  }
+
+
   private ObjectBuilder newInstance() {
-    buf.append("new ").append(type.getFullyQualifiedNameWithTypeParms());
     return this;
   }
 
@@ -87,7 +110,8 @@ public class ObjectBuilder extends AbstractStatementBuilder {
     if (!type.isInterface() && type.getBestMatchingConstructor(parameters.getParameterTypes()) == null)
       throw new UndefinedConstructorException(type, parameters.getParameterTypes());
 
-    buf.append(parameters.generate(Context.create()));
+    callParameters = parameters;
+
     buildState |= CONSTRUCT_STATEMENT_COMPLETE;
     return this;
   }
@@ -96,7 +120,7 @@ public class ObjectBuilder extends AbstractStatementBuilder {
     return new ExtendsClassStructureBuilderImpl(type, new BuildCallback<ObjectBuilder>() {
       public ObjectBuilder callback(Statement statement) {
         finishConstructIfNecessary();
-        buf.append(" {\n").append(statement.generate(context)).append("\n}\n");
+        extendsBlock = statement;
         return ObjectBuilder.this;
       }
     });
@@ -113,6 +137,16 @@ public class ObjectBuilder extends AbstractStatementBuilder {
   }
 
   public String generate(Context context) {
+    StringBuilder buf = new StringBuilder();
+
+    buf.append("new ").append(LoadClassReference.getClassReference(type, context));
+    if (callParameters != null) {
+      buf.append(callParameters.generate(Context.create()));
+    }
+    if (extendsBlock != null) {
+      buf.append(" {\n").append(extendsBlock.generate(context)).append("\n}\n");
+    }
+
     finishConstructIfNecessary();
     return buf.toString();
   }
