@@ -37,7 +37,7 @@ public class LoadClassReference extends AbstractCallElement {
     final MetaClass metaClass = MetaClassFactory.get(type);
     statement = new Statement() {
       public String generate(Context context) {
-       return getClassReference(metaClass, context);
+        return getClassReference(metaClass, context);
       }
 
       public MetaClass getType() {
@@ -53,12 +53,18 @@ public class LoadClassReference extends AbstractCallElement {
   }
 
   public static String getClassReference(MetaClass metaClass, Context context) {
+
+
     String fqcn = metaClass.getFullyQualifiedName();
     String pkg;
 
     int idx = fqcn.lastIndexOf('.');
     if (idx != -1) {
       pkg = fqcn.substring(0, idx);
+
+      if (context.isAutoImports() && !context.hasClassImport(metaClass) && !context.hasPackageImport(pkg)) {
+        context.addClassImport(metaClass);
+      }
 
       if (context.hasPackageImport(pkg) || context.hasClassImport(metaClass)) {
         return fqcn.substring(idx + 1);

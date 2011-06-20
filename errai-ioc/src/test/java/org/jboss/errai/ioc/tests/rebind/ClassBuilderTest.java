@@ -36,14 +36,18 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest {
             .publicScope().implementsInterface(Serializable.class)
             .body()
             .publicMethod(String.class, "getName")
-              .append(Stmt.create().load("foobar").returnValue())
+            .append(Stmt.create().load("foobar").returnValue())
             .finish()
             .toJavaString();
 
 
+    System.out.println(cls);
+
     assertEquals("package org.foo;\n" +
             "\n" +
-            "public class Bar implements java.io.Serializable {\n" +
+            "import java.io.Serializable;\n" +
+            "\n" +
+            "public class Bar implements Serializable {\n" +
             "    public String getName() {\n" +
             "        return \"foobar\";\n" +
             "    }\n" +
@@ -57,10 +61,10 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest {
             .publicScope()
             .body()
             .privateField("name", String.class)
-              .initializesWith(Stmt.create().load("Mike Brock"))
+            .initializesWith(Stmt.create().load("Mike Brock"))
             .finish()
             .publicMethod(String.class, "getName")
-              .append(Stmt.create().loadVariable("name").returnValue())
+            .append(Stmt.create().loadVariable("name").returnValue())
             .finish().toJavaString();
 
     System.out.println(cls);
@@ -79,12 +83,21 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest {
   public void testDefineClassB() {
     String cls = ClassBuilder.implement(Bootstrapper.class)
             .publicMethod(InterfaceInjectionContext.class, "bootstrapContainer")
-               .append(Stmt.create().addVariable("ctx", Stmt.create().newObject(InterfaceInjectionContext.class)))
-               .append(Stmt.create().loadVariable("ctx").returnValue())
+            .append(Stmt.create().addVariable("ctx", Stmt.create().newObject(InterfaceInjectionContext.class)))
+            .append(Stmt.create().loadVariable("ctx").returnValue())
             .finish().toJavaString();
 
-    System.out.println(cls);
-
+    assertEquals("package org.jboss.errai.ioc.client.api;\n" +
+            "\n" +
+            "import org.jboss.errai.ioc.client.api.Bootstrapper;\n" +
+            "import org.jboss.errai.ioc.client.InterfaceInjectionContext;\n" +
+            "\n" +
+            "public class BootstrapperImpl implements Bootstrapper {\n" +
+            "    public InterfaceInjectionContext bootstrapContainer() {\n" +
+            "        InterfaceInjectionContext ctx = new InterfaceInjectionContext();\n" +
+            "        return ctx;\n" +
+            "    }\n" +
+            "}", cls);
   }
 
 

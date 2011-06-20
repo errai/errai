@@ -67,8 +67,8 @@ public class Variable extends AbstractStatement {
     this.initialization = initializationValue;
   }
   
-  private MetaClass inferType(Object initialization) {
-    Statement initStatement = GenUtil.generate(getContext(), initialization);
+  private MetaClass inferType(Context context, Object initialization) {
+    Statement initStatement = GenUtil.generate(context, initialization);
     MetaClass inferredType = (initStatement != null) ? initStatement.getType() : null;
     if (inferredType == null) {
       throw new InvalidTypeException("No type specified and no initialization provided to infer the type.");
@@ -176,7 +176,7 @@ public class Variable extends AbstractStatement {
 
   public String generate(Context context) {
     if (initialization != null) {
-      this.type = (type == null) ? inferType(initialization) : type;
+      this.type = (type == null) ? inferType(context, initialization) : type;
       this.value = GenUtil.convert(context, initialization, type);
     }
 
