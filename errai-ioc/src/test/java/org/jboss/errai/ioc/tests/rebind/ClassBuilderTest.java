@@ -63,6 +63,8 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest {
               .append(Stmt.create().loadVariable("name").returnValue())
             .finish().toJavaString();
 
+    System.out.println(cls);
+
     assertEquals("package org.foo;\n" +
             "\n" +
             "public class Foo {\n" +
@@ -77,8 +79,8 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest {
   public void testDefineClassB() {
     String cls = ClassBuilder.implement(Bootstrapper.class)
             .publicMethod(InterfaceInjectionContext.class, "bootstrapContainer")
-            .append(Stmt.create().addVariable("ctx", Stmt.create().newObject(InterfaceInjectionContext.class)))
-            .append(Stmt.create().loadVariable("ctx").returnValue())
+               .append(Stmt.create().addVariable("ctx", Stmt.create().newObject(InterfaceInjectionContext.class)))
+               .append(Stmt.create().loadVariable("ctx").returnValue())
             .finish().toJavaString();
 
     System.out.println(cls);
