@@ -21,8 +21,10 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BuildCallback;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ContextualIfBlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ElseBlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.IfBlockBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementEnd;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.ConditionalBlockElement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.control.IfBlock;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.values.NullLiteral;
@@ -33,7 +35,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.util.GenUtil;
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class IfBlockBuilderImpl extends AbstractStatementBuilder implements IfBlockBuilder, ElseBlockBuilder {
+public class IfBlockBuilderImpl extends AbstractStatementBuilder implements ContextualIfBlockBuilder, IfBlockBuilder, ElseBlockBuilder {
   private IfBlock ifBlock;
 
   protected IfBlockBuilderImpl(Context context, CallElementBuilder callElementBuilder) {
@@ -71,9 +73,9 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements IfBl
     });
   }
 
-  public BlockBuilder<AbstractStatementBuilder> else_() {
-    return new BlockBuilder<AbstractStatementBuilder>(ifBlock.getElseBlock(), new BuildCallback<AbstractStatementBuilder>() {
-      public AbstractStatementBuilder callback(Statement statement) {
+  public BlockBuilder<StatementEnd> else_() {
+    return new BlockBuilder<StatementEnd>(ifBlock.getElseBlock(), new BuildCallback<StatementEnd>() {
+      public StatementEnd callback(Statement statement) {
         return IfBlockBuilderImpl.this;
       }
     });

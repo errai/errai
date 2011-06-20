@@ -17,6 +17,7 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanExpression;
+import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Builder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.BlockBuilder;
@@ -24,13 +25,16 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.BlockBuilder;
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface LoopBuilder extends Statement, Builder {
-  public BlockBuilder<WhileBuilder> do_();
-
-  public BlockBuilder<StatementEnd> while_(BooleanExpression condition);
+public interface ContextualLoopBuilder extends Statement, Builder {
+  public BlockBuilder<StatementEnd> foreach(String loopVarName);
+  public BlockBuilder<StatementEnd> foreach(String loopVarName, Class<?> loopVarType);
 
   public BlockBuilder<StatementEnd> for_(BooleanExpression condition);
-  public BlockBuilder<StatementEnd> for_(Statement initializer, BooleanExpression condition);
-  public BlockBuilder<StatementEnd> for_(Statement initializer, BooleanExpression condition,
-      Statement countingExpression);
+  public BlockBuilder<StatementEnd> for_(BooleanExpression condition, Statement countingExpression);
+  
+  public BlockBuilder<WhileBuilder> do_();
+  
+  public BlockBuilder<StatementEnd> while_();
+  public BlockBuilder<StatementEnd> while_(BooleanOperator op, Statement rhs);
+  public BlockBuilder<StatementEnd> while_(BooleanOperator op, Object rhs);
 }

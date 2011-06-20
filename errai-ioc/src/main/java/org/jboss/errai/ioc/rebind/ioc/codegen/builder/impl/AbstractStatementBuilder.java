@@ -21,6 +21,7 @@ import static org.jboss.errai.ioc.rebind.ioc.codegen.util.PrettyPrinter.prettyPr
 import org.jboss.errai.ioc.rebind.ioc.codegen.Builder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementEnd;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.CallElement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.CallWriter;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
@@ -30,7 +31,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public abstract class AbstractStatementBuilder implements Statement, Builder {
+public abstract class AbstractStatementBuilder implements Statement, Builder, StatementEnd {
   protected Context context = null;
   protected CallElementBuilder callElementBuilder;
 

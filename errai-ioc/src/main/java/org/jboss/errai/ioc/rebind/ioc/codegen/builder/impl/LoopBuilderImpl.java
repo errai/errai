@@ -24,12 +24,14 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BuildCallback;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ContextualLoopBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.LoopBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementEnd;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.WhileBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.CallWriter;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.ConditionalBlockElement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DeferredCallElement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DeferredCallback;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.ConditionalBlockElement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.control.DoWhileLoop;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.control.ForLoop;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.control.ForeachLoop;
@@ -44,22 +46,22 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.util.GenUtil;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class LoopBuilderImpl extends AbstractStatementBuilder implements LoopBuilder {
+public class LoopBuilderImpl extends AbstractStatementBuilder implements ContextualLoopBuilder, LoopBuilder {
 
   protected LoopBuilderImpl(Context context, CallElementBuilder callElementBuilder) {
     super(context, callElementBuilder);
   }
 
   // foreach loop
-  public BlockBuilder<LoopBuilder> foreach(String loopVarName) {
+  public BlockBuilder<StatementEnd> foreach(String loopVarName) {
     return foreach(loopVarName, (MetaClass) null);
   }
 
-  public BlockBuilder<LoopBuilder> foreach(String loopVarName, Class<?> loopVarType) {
+  public BlockBuilder<StatementEnd> foreach(String loopVarName, Class<?> loopVarType) {
     return foreach(loopVarName, MetaClassFactory.get(loopVarType));
   }
 
-  private BlockBuilder<LoopBuilder> foreach(final String loopVarName, final MetaClass loopVarType) {
+  private BlockBuilder<StatementEnd> foreach(final String loopVarName, final MetaClass loopVarType) {
     final BlockStatement body = new BlockStatement();
 
     appendCallElement(new DeferredCallElement(new DeferredCallback() {
@@ -83,22 +85,22 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements LoopBui
       public WhileBuilder callback(Statement statement) {
         return new WhileBuilder() {
 
-          public AbstractStatementBuilder while_(final BooleanExpression condition) {
+          public StatementEnd while_(final BooleanExpression condition) {
             appendCallElement(new ConditionalBlockElement(new DoWhileLoop(condition, body)));
             return LoopBuilderImpl.this;
           }
 
-          public AbstractStatementBuilder while_() {
+          public StatementEnd while_() {
             while_(new BooleanExpressionBuilder());
             return LoopBuilderImpl.this;
           }
 
-          public AbstractStatementBuilder while_(BooleanOperator op, Statement rhs) {
+          public StatementEnd while_(BooleanOperator op, Statement rhs) {
             while_(new BooleanExpressionBuilder(rhs, op));
             return LoopBuilderImpl.this;
           }
 
-          public AbstractStatementBuilder while_(BooleanOperator op, Object rhs) {
+          public StatementEnd while_(BooleanOperator op, Object rhs) {
             return while_(op, GenUtil.generate(context, rhs));
           }
         };
@@ -107,40 +109,40 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements LoopBui
   }
 
   // while loop
-  public BlockBuilder<LoopBuilder> while_() {
+  public BlockBuilder<StatementEnd> while_() {
     return while_(new BooleanExpressionBuilder());
   }
 
-  public BlockBuilder<LoopBuilder> while_(BooleanOperator op, Object rhs) {
+  public BlockBuilder<StatementEnd> while_(BooleanOperator op, Object rhs) {
     return while_(op, GenUtil.generate(context, rhs));
   }
 
-  public BlockBuilder<LoopBuilder> while_(BooleanOperator op, Statement rhs) {
+  public BlockBuilder<StatementEnd> while_(BooleanOperator op, Statement rhs) {
     if (rhs == null)
       rhs = NullLiteral.INSTANCE;
     return while_(new BooleanExpressionBuilder(rhs, op));
   }
 
-  public BlockBuilder<LoopBuilder> while_(final BooleanExpression condition) {
+  public BlockBuilder<StatementEnd> while_(final BooleanExpression condition) {
     final BlockStatement body = new BlockStatement();
     appendCallElement(new ConditionalBlockElement(new WhileLoop(condition, body)));
     return createLoopBody(body);
   }
 
   // for loop
-  public BlockBuilder<LoopBuilder> for_(BooleanExpression condition) {
+  public BlockBuilder<StatementEnd> for_(BooleanExpression condition) {
     return for_(condition, (Statement) null);
   }
 
-  public BlockBuilder<LoopBuilder> for_(BooleanExpression condition, Statement countingExpression) {
+  public BlockBuilder<StatementEnd> for_(BooleanExpression condition, Statement countingExpression) {
     return for_(null, condition, countingExpression);
   }
 
-  public BlockBuilder<LoopBuilder> for_(Statement initializer, BooleanExpression condition) {
+  public BlockBuilder<StatementEnd> for_(Statement initializer, BooleanExpression condition) {
     return for_(initializer, condition, null);
   }
 
-  public  BlockBuilder<LoopBuilder> for_(final Statement initializer, final BooleanExpression condition,
+  public  BlockBuilder<StatementEnd> for_(final Statement initializer, final BooleanExpression condition,
       final Statement countingExpression) {
     final BlockStatement body = new BlockStatement();
 
@@ -164,9 +166,9 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements LoopBui
     return createLoopBody(body);
   }
 
-  private BlockBuilder<LoopBuilder> createLoopBody(BlockStatement body) {
-    return new BlockBuilder<LoopBuilder>(body, new BuildCallback<LoopBuilder>() {
-      public LoopBuilder callback(Statement statement) {
+  private BlockBuilder<StatementEnd> createLoopBody(BlockStatement body) {
+    return new BlockBuilder<StatementEnd>(body, new BuildCallback<StatementEnd>() {
+      public StatementEnd callback(Statement statement) {
         return LoopBuilderImpl.this;
       }
     });

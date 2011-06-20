@@ -19,14 +19,13 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanExpression;
 import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.AbstractStatementBuilder;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface WhileBuilder {
-  public AbstractStatementBuilder while_(BooleanExpression stmt);
-  public AbstractStatementBuilder while_();
-  public AbstractStatementBuilder while_(BooleanOperator op, Statement rhs);
-  public AbstractStatementBuilder while_(BooleanOperator op, Object rhs);
+  public StatementEnd while_(BooleanExpression stmt);
+  public StatementEnd while_();
+  public StatementEnd while_(BooleanOperator op, Statement rhs);
+  public StatementEnd while_(BooleanOperator op, Object rhs);
 }

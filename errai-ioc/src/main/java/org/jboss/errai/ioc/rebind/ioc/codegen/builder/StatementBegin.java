@@ -1,5 +1,4 @@
 /*
- * Copyright 2011 JBoss, a divison Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,50 +17,28 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
 import javax.enterprise.util.TypeLiteral;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanExpression;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.BlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface StatementBegin extends ArrayBuilder {
+public interface StatementBegin extends ArrayBuilder, LoopBuilder, IfBlockBuilder {
 
   public StatementBuilder addVariable(String name, Class<?> type);
-
   public StatementBuilder addVariable(String name, TypeLiteral<?> type);
-
   public StatementBuilder addVariable(String name, Object initialization);
-
   public StatementBuilder addVariable(String name, Class<?> type, Object initialization);
-
   public StatementBuilder addVariable(String name, TypeLiteral<?> type, Object initialization);
 
   public VariableReferenceContextualStatementBuilder loadVariable(String name, Object... indexes);
-
   public ContextualStatementBuilder loadLiteral(Object o);
-
   public ContextualStatementBuilder load(Object o);
 
   public ContextualStatementBuilder invokeStatic(Class<?> clazz, String methodName, Object... parameters);
-
   public ContextualStatementBuilder loadStatic(Class<?> clazz, String fieldName);
 
   public ObjectBuilder newObject(Class<?> type);
-
   public ObjectBuilder newObject(TypeLiteral<?> type);
-  
-  public BlockBuilder<WhileBuilder> do_();
-  
-  public BlockBuilder<ElseBlockBuilder> if_(BooleanExpression condition);
-  
-  public BlockBuilder<LoopBuilder> while_(BooleanExpression condition);
-  
-  public BlockBuilder<LoopBuilder> for_(BooleanExpression condition);
-  
-  public BlockBuilder<LoopBuilder> for_(Statement initializer, BooleanExpression condition);
-  
-  public BlockBuilder<LoopBuilder> for_(Statement initializer, BooleanExpression condition, Statement countingExpression);
 }

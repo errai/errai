@@ -16,10 +16,14 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.*;
+import org.jboss.errai.ioc.rebind.ioc.codegen.AssignmentOperator;
+import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanExpression;
+import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ElseBlockBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.LoopBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementEnd;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.VariableReferenceContextualStatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.WhileBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.AssignVariable;
@@ -51,19 +55,19 @@ public class ContextualStatementBuilderImpl extends AbstractStatementBuilder imp
   }
 
   // Looping
-  public BlockBuilder<LoopBuilder> foreach(String loopVarName) {
+  public BlockBuilder<StatementEnd> foreach(String loopVarName) {
     return new LoopBuilderImpl(context, callElementBuilder).foreach(loopVarName);
   }
 
-  public BlockBuilder<LoopBuilder> foreach(String loopVarName, Class<?> loopVarType) {
+  public BlockBuilder<StatementEnd> foreach(String loopVarName, Class<?> loopVarType) {
     return new LoopBuilderImpl(context, callElementBuilder).foreach(loopVarName, loopVarType);
   }
 
-  public BlockBuilder<LoopBuilder> for_(BooleanExpression condition) {
+  public BlockBuilder<StatementEnd> for_(BooleanExpression condition) {
     return new LoopBuilderImpl(context, callElementBuilder).for_(condition);
   }
 
-  public BlockBuilder<LoopBuilder> for_(BooleanExpression condition, Statement afterBlock) {
+  public BlockBuilder<StatementEnd> for_(BooleanExpression condition, Statement afterBlock) {
     return new LoopBuilderImpl(context, callElementBuilder).for_(condition, afterBlock);
   }
 
@@ -71,15 +75,15 @@ public class ContextualStatementBuilderImpl extends AbstractStatementBuilder imp
     return new LoopBuilderImpl(context, callElementBuilder).do_();
   }
 
-  public BlockBuilder<LoopBuilder> while_() {
+  public BlockBuilder<StatementEnd> while_() {
     return new LoopBuilderImpl(context, callElementBuilder).while_();
   }
 
-  public BlockBuilder<LoopBuilder> while_(BooleanOperator op, Statement rhs) {
+  public BlockBuilder<StatementEnd> while_(BooleanOperator op, Statement rhs) {
     return new LoopBuilderImpl(context, callElementBuilder).while_(op, rhs);
   }
 
-  public BlockBuilder<LoopBuilder> while_(BooleanOperator op, Object rhs) {
+  public BlockBuilder<StatementEnd> while_(BooleanOperator op, Object rhs) {
     return new LoopBuilderImpl(context, callElementBuilder).while_(op, rhs);
   }
 
