@@ -25,6 +25,7 @@ import javax.inject.Inject;
 import org.jboss.errai.bus.rebind.ProcessingContext;
 import org.jboss.errai.cdi.client.EventProvider;
 import org.jboss.errai.cdi.client.qualifier.A;
+import org.jboss.errai.cdi.client.qualifier.B;
 import org.jboss.errai.ioc.rebind.ioc.ContextualProviderInjector;
 import org.jboss.errai.ioc.rebind.ioc.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.InjectionPoint;
@@ -48,7 +49,7 @@ public class EventProviderTest extends AbstractErraiCDIRebindTest implements Eve
     }
 
     class HasEventWithQualifiers {
-        @Inject @A
+        @Inject @A @B
         private Event<String> event;
     }
 

@@ -14,7 +14,12 @@ public interface EventProviderTestResult {
                     " inj.provide(new Class[] {java.lang.String.class}, new java.lang.annotation.Annotation[] {" +
                     "     new java.lang.annotation.Annotation() {" +
                     "         public Class<? extends java.lang.annotation.Annotation> annotationType() {" +
-                    "             return org.jboss.errai.cdi.client.qualifier.A.class;" +
+                    "             return org.jboss.errai.cdi.client.qualifier.B.class;" +
+                    "         }" +
+                    "     }," +
+                    "     new java.lang.annotation.Annotation() {" +
+                    "         public Class<? extends java.lang.annotation.Annotation> annotationType() {" +
+                    "             return org.jboss.errai.cdi.client.qualifier.A.class;\n" +
                     "         }" +
                     "     }\n" +
                     "})";
