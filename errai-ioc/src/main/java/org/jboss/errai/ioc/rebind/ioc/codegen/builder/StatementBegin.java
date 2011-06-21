@@ -33,6 +33,7 @@ public interface StatementBegin extends ArrayBuilder, LoopBuilder, IfBlockBuilde
   public StatementBuilder addVariable(String name, TypeLiteral<?> type, Object initialization);
 
   public VariableReferenceContextualStatementBuilder loadVariable(String name, Object... indexes);
+  public VariableReferenceContextualStatementBuilder loadClassMember(String name, Object... indexes);
   public ContextualStatementBuilder loadLiteral(Object o);
   public ContextualStatementBuilder load(Object o);
 

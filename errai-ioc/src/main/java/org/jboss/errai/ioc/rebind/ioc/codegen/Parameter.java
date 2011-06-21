@@ -16,8 +16,14 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 
+/**
+ * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
+ */
 public class Parameter extends AbstractStatement {
   private MetaClass type;
   private String name;
@@ -31,8 +37,12 @@ public class Parameter extends AbstractStatement {
     return new Parameter(type, name);
   }
 
+  public static Parameter of(Class<?> type, String name) {
+    return new Parameter(MetaClassFactory.get(type), name);
+  }
+
   public String generate(Context context) {
-    return type.getFullyQualifiedName() + " " + name;
+    return LoadClassReference.getClassReference(type, context) + " " + name;
   }
 
   public MetaClass getType() {

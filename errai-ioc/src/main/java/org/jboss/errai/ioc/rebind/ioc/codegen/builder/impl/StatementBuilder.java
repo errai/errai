@@ -100,6 +100,11 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
     return new ContextualStatementBuilderImpl(context, callElementBuilder);
   }
 
+  public VariableReferenceContextualStatementBuilder loadClassMember(String name, Object... indexes) {
+    appendCallElement(new LoadVariable(name, true, indexes));
+    return new ContextualStatementBuilderImpl(context, callElementBuilder);
+  }
+  
   public ContextualStatementBuilder loadLiteral(Object o) {
     appendCallElement(new LoadLiteral(o));
     return new ContextualStatementBuilderImpl(context, callElementBuilder);
