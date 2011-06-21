@@ -61,8 +61,12 @@ public class ObjectBuilder extends AbstractStatementBuilder {
     this(type, Context.create());
   }
 
+  ObjectBuilder() {
+     super(Context.create());
+  }
+  
   public static ObjectBuilder newInstanceOf(MetaClass type) {
-    return new ObjectBuilder(type).newInstance();
+    return new ObjectBuilder(type);
   }
 
   public static ObjectBuilder newInstanceOf(Class<?> type) {
@@ -78,7 +82,7 @@ public class ObjectBuilder extends AbstractStatementBuilder {
   }
 
   public static ObjectBuilder newInstanceOf(MetaClass type, Context context) {
-    return new ObjectBuilder(type, context).newInstance();
+    return new ObjectBuilder(type, context);
   }
 
   public static ObjectBuilder newInstanceOf(Class<?> type, Context context) {
@@ -91,10 +95,6 @@ public class ObjectBuilder extends AbstractStatementBuilder {
 
   public static ObjectBuilder newInstanceOf(JClassType type, Context context) {
     return newInstanceOf(MetaClassFactory.get(type), context);
-  }
-
-  private ObjectBuilder newInstance() {
-    return this;
   }
 
   public ObjectBuilder withParameters(Object... parameters) {

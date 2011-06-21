@@ -123,11 +123,11 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
   }
 
   public ObjectBuilder newObject(Class<?> type) {
-    return ObjectBuilder.newInstanceOf(type);
+    return ObjectBuilder.newInstanceOf(type, context);
   }
 
   public ObjectBuilder newObject(TypeLiteral<?> type) {
-    return ObjectBuilder.newInstanceOf(type);
+    return ObjectBuilder.newInstanceOf(type, context);
   }
 
   public ArrayInitializationBuilder newArray(Class<?> componentType) {

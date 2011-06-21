@@ -20,6 +20,8 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameterizedType;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaType;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -55,7 +57,7 @@ public class LoadClassReference extends AbstractCallElement {
   public static String getClassReference(MetaClass metaClass, Context context) {
     return getClassReference(metaClass, context, false);
   }
-  
+
   public static String getClassReference(MetaClass metaClass, Context context, boolean typeParms) {
     String fqcn = metaClass.getFullyQualifiedName();
     String pkg;
@@ -69,10 +71,42 @@ public class LoadClassReference extends AbstractCallElement {
       }
 
       if (context.hasPackageImport(pkg) || context.hasClassImport(metaClass)) {
-        return fqcn.substring(idx + 1);
+        fqcn = fqcn.substring(idx + 1);
       }
     }
 
-    return (typeParms)?metaClass.getFullyQualifiedNameWithTypeParms():metaClass.getFullyQualifiedName();
+    StringBuilder buf = new StringBuilder(fqcn);
+    if (typeParms) {
+      buf.append(getClassReferencesForParameterizedTypes(metaClass.getParameterizedType(), context));
+    }
+
+    return buf.toString();
+  }
+
+  private static String getClassReferencesForParameterizedTypes(MetaParameterizedType parameterizedType, Context context) {
+    StringBuilder buf = new StringBuilder();
+
+    if (parameterizedType != null && parameterizedType.getTypeParameters().length != 0) {
+      buf.append("<");
+     
+      for (int i = 0; i < parameterizedType.getTypeParameters().length; i++) {
+        MetaType typeParameter = parameterizedType.getTypeParameters()[i];
+
+        if (typeParameter instanceof MetaParameterizedType) {
+          MetaParameterizedType parameterizedTypeParemeter = (MetaParameterizedType) typeParameter;
+          buf.append(getClassReference((MetaClass) parameterizedTypeParemeter.getRawType(), context));
+          buf.append(getClassReferencesForParameterizedTypes(parameterizedTypeParemeter, context));
+        }
+        else {
+          buf.append(getClassReference((MetaClass) typeParameter, context));
+        }
+       
+        if (i + 1 < parameterizedType.getTypeParameters().length)
+          buf.append(", ");
+      }
+      buf.append(">");
+    }
+
+    return buf.toString();
   }
 }

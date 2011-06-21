@@ -43,20 +43,34 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   @Override
   public String getFullyQualifiedNameWithTypeParms() {
-    MetaParameterizedType parameterizedType = getParameterizedType();
     StringBuilder buf = new StringBuilder(getFullyQualifiedName());
+    buf.append(getTypeParmsString(getParameterizedType()));
+    return buf.toString();
+  }
+  
+  private String getTypeParmsString(MetaParameterizedType parameterizedType) { 
+    StringBuilder buf = new StringBuilder();
 
     if (parameterizedType != null && parameterizedType.getTypeParameters().length != 0) {
       buf.append("<");
       for (int i = 0; i < parameterizedType.getTypeParameters().length; i++) {
-        buf.append(((MetaClass) parameterizedType.getTypeParameters()[i]).getFullyQualifiedName());
+        
+        MetaType typeParameter = parameterizedType.getTypeParameters()[i];
+        if (typeParameter instanceof MetaParameterizedType) {
+          MetaParameterizedType parameterizedTypeParemeter = (MetaParameterizedType) typeParameter;
+          buf.append(((MetaClass) parameterizedTypeParemeter.getRawType()).getFullyQualifiedName());
+          buf.append(getTypeParmsString(parameterizedTypeParemeter));
+        }
+        else {
+          buf.append(((MetaClass) typeParameter).getFullyQualifiedName());
+        }
+
         if (i + 1 < parameterizedType.getTypeParameters().length)
           buf.append(", ");
       }
 
       buf.append(">");
     }
-
     return buf.toString();
   }
 

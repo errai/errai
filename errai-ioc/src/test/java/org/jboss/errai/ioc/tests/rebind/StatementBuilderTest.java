@@ -20,7 +20,9 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.lang.annotation.Annotation;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.util.TypeLiteral;
@@ -159,7 +161,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
     }
     catch (Exception e) {
       // expected
-      assertEquals("Wrong exception details", 
+      assertEquals("Wrong exception details",
           "Must provide either dimension expressions or an array initializer", e.getMessage());
     }
   }
@@ -186,17 +188,17 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
 
     assertEquals("failed to generate Annotation array",
         "new java.lang.annotation.Annotation[] {" +
-        "new java.lang.annotation.Annotation() {\n" +
-        " public Class annotationType() {\n" +
-        "   return javax.inject.Inject.class;\n" +
-        " }\n" +
-        "}\n" +
-        ",new java.lang.annotation.Annotation() {\n" +
-        "   public Class annotationType() {\n" +
-        "     return javax.annotation.PostConstruct.class;\n" +
-        "   }\n" +
-        " }\n" +
-        "}", s);
+            "new java.lang.annotation.Annotation() {\n" +
+            " public Class annotationType() {\n" +
+            "   return javax.inject.Inject.class;\n" +
+            " }\n" +
+            "}\n" +
+            ",new java.lang.annotation.Annotation() {\n" +
+            "   public Class annotationType() {\n" +
+            "     return javax.annotation.PostConstruct.class;\n" +
+            "   }\n" +
+            " }\n" +
+            "}", s);
   }
 
   @Test
@@ -340,6 +342,38 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   @Test
   public void testObjectCreationWithParameterizedType() {
     String s = StatementBuilder.create().newObject(new TypeLiteral<List<String>>() {}).toJavaString();
-    assertEquals("failed to generate new object with parameterized type", "new java.util.List<java.lang.String>()", s);
+    assertEquals("failed to generate new object with parameterized type", "new java.util.List<String>()", s);
+  }
+
+  @Test
+  public void testObjectCreationWithAutoImportedParameterizedType() {
+    Context c = Context.create().autoImport();
+    String s = StatementBuilder.create(c).newObject(new TypeLiteral<List<Date>>() {}).toJavaString();
+    assertEquals("failed to generate new object with parameterized type", "new List<Date>()", s);
+  }
+
+  @Test
+  public void testObjectCreationWithParameterizedTypeAndClassImport() {
+    Context c = Context.create().addClassImport(MetaClassFactory.get(List.class));
+    String s = StatementBuilder.create(c).newObject(new TypeLiteral<List<String>>() {}).toJavaString();
+    assertEquals("failed to generate new object with parameterized type", "new List<String>()", s);
+  }
+
+  @Test
+  public void testObjectCreationWithFullyQualifiedParameterizedTypeAndClassImport() {
+    Context c = Context.create().addClassImport(MetaClassFactory.get(List.class));
+    String s = StatementBuilder.create(c).newObject(new TypeLiteral<List<Date>>() {}).toJavaString();
+    assertEquals("failed to generate new object with parameterized type", "new List<java.util.Date>()", s);
+  }
+  
+  @Test
+  public void testObjectCreationWithNestedParameterizedTypeAndClassImports() {
+    Context c = Context.create()
+        .addClassImport(MetaClassFactory.get(List.class))
+        .addClassImport(MetaClassFactory.get(Map.class));
+
+    String s = StatementBuilder.create(c)
+        .newObject(new TypeLiteral<List<List<Map<String, Integer>>>>() {}).toJavaString();
+    assertEquals("failed to generate new object with parameterized type", "new List<List<Map<String, Integer>>>()", s);
   }
 }
