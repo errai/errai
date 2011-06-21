@@ -19,10 +19,11 @@ package org.jboss.errai.ioc.rebind.ioc.codegen;
 import javax.enterprise.util.TypeLiteral;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.DeclareAssignmentBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.values.LiteralFactory;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.values.LiteralValue;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
+import org.jboss.errai.ioc.rebind.ioc.codegen.literal.LiteralFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.literal.LiteralValue;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.GenUtil;
 
 /**

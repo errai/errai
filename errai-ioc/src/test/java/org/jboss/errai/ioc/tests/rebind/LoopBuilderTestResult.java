@@ -29,13 +29,13 @@ public interface LoopBuilderTestResult {
 
   public static final String FOREACH_RESULT_STRING_IN_ARRAY_ONE_STATEMENT =
       "   for (String element : list) {" +
-          " \nnew java.lang.String();" +
+          " \nnew String();" +
           "\n}";
 
   public static final String FOREACH_RESULT_OBJECT_IN_LIST_TWO_STATEMENTS =
       "   for (Object element : list) {" +
-          " \nnew java.lang.String();" +
-          " \nnew java.lang.Object();" +
+          " \nnew String();" +
+          " \nnew Object();" +
           "\n}";
 
   public static final String FOREACH_RESULT_OBJECT_IN_LIST =
@@ -45,7 +45,7 @@ public interface LoopBuilderTestResult {
   public static final String FOREACH_RESULT_NESTED_STRING_IN_LIST =
       "     for (String element : list) {" +
           " \nfor (String anotherElement : anotherList) {" +
-          "   \nnew java.lang.String();" +
+          "   \nnew String();" +
           " \n};" +
           "\n}";
 
@@ -54,7 +54,7 @@ public interface LoopBuilderTestResult {
           "\n}";
 
   public static final String FOREACH_RESULT_LITERAL_STRING_ARRAY =
-      "   for (String s : new java.lang.String[] {\"s1\", \"s2\"}) {" +
+      "   for (String s : new String[] {\"s1\", \"s2\"}) {" +
           " \ns.getBytes();" +
           "\n}";
 

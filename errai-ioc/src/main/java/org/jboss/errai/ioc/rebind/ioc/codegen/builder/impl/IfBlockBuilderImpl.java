@@ -26,8 +26,8 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ElseBlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.IfBlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementEnd;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.ConditionalBlockElement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.control.IfBlock;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.values.NullLiteral;
+import org.jboss.errai.ioc.rebind.ioc.codegen.control.IfBlock;
+import org.jboss.errai.ioc.rebind.ioc.codegen.literal.NullLiteral;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.GenUtil;
 
 /**

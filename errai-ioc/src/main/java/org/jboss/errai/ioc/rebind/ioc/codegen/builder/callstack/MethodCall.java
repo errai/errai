@@ -16,16 +16,16 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack;
 
+import org.jboss.errai.ioc.rebind.ioc.CallParameters;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.MethodInvocation;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.CallParameters;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.MethodInvocation;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedMethodException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.GenUtil;
 
-import static org.jboss.errai.ioc.rebind.ioc.codegen.builder.CallParameters.fromStatements;
+import static org.jboss.errai.ioc.rebind.ioc.CallParameters.fromStatements;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

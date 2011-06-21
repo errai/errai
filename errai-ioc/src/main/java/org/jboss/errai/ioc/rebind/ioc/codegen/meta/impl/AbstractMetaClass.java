@@ -17,7 +17,6 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl;
 
 import com.google.gwt.core.ext.typeinfo.JClassType;
-import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.*;
 import org.mvel2.util.ParseTools;
 
@@ -28,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.jboss.errai.ioc.rebind.ioc.InjectUtil.classToMeta;
-import static org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory.asClassArray;
+import static org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory.asClassArray;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

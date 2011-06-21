@@ -17,8 +17,8 @@
 package org.jboss.errai.ioc.rebind.ioc;
 
 import org.jboss.errai.bus.rebind.ProcessingContext;
-import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
 
 import java.lang.annotation.Annotation;
