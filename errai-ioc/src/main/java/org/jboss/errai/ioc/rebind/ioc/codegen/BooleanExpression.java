@@ -16,8 +16,10 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen;
 
-
 /**
+ * This class represents a boolean expression. The LHS can either
+ * be a {@link Statement} or the generated {@link String} thereof.
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface BooleanExpression extends Statement {

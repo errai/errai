@@ -16,30 +16,43 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
-import com.google.gwt.core.ext.typeinfo.JField;
-import com.google.gwt.core.ext.typeinfo.JMethod;
-import com.google.gwt.core.ext.typeinfo.JParameter;
-import com.google.gwt.core.ext.typeinfo.JType;
-import org.jboss.errai.bus.rebind.ScannerSingleton;
-import org.jboss.errai.ioc.rebind.IOCGenerator;
-import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.*;
-import org.mvel2.util.ReflectionUtil;
-import org.mvel2.util.StringAppender;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import javax.inject.Qualifier;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+import javax.inject.Qualifier;
+
+import org.jboss.errai.bus.rebind.ScannerSingleton;
+import org.jboss.errai.ioc.rebind.IOCGenerator;
+import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassMember;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaConstructor;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
+import org.mvel2.util.ReflectionUtil;
+import org.mvel2.util.StringAppender;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.gwt.core.ext.typeinfo.JField;
+import com.google.gwt.core.ext.typeinfo.JMethod;
+import com.google.gwt.core.ext.typeinfo.JParameter;
+import com.google.gwt.core.ext.typeinfo.JType;
 
 public class InjectUtil {
   private static final Logger log = LoggerFactory.getLogger(InjectUtil.class);
@@ -322,7 +335,7 @@ public class InjectUtil {
 
   public static Set<Class<?>> getQualifiersCache() {
     if (qualifiersCache == null) {
-      qualifiersCache = new HashSet<Class<?>>();
+      qualifiersCache = new LinkedHashSet<Class<?>>();
 
       qualifiersCache.addAll(ScannerSingleton.getOrCreateInstance()
           .getTypesAnnotatedWith(Qualifier.class));
