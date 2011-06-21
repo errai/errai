@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ioc.tests.rebind;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.AnnotationEncoder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.AnnotationEncoder;
 import org.jboss.errai.ioc.tests.rebind.model.MyBean;
 import org.jboss.errai.ioc.tests.rebind.model.MyTestAnnotation;
 import org.junit.Test;

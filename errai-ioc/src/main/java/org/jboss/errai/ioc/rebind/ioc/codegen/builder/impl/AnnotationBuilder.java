@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.Builder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.Builder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**

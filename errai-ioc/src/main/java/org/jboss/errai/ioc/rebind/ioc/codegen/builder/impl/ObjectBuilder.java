@@ -18,15 +18,15 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
 import javax.enterprise.util.TypeLiteral;
 
+import org.jboss.errai.ioc.rebind.ioc.CallParameters;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BuildCallback;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.CallParameters;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedConstructorException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.GenUtil;
 
@@ -93,7 +93,6 @@ public class ObjectBuilder extends AbstractStatementBuilder {
     return newInstanceOf(MetaClassFactory.get(type), context);
   }
 
-
   private ObjectBuilder newInstance() {
     return this;
   }
@@ -137,17 +136,16 @@ public class ObjectBuilder extends AbstractStatementBuilder {
   }
 
   public String generate(Context context) {
+    finishConstructIfNecessary();
+    
     StringBuilder buf = new StringBuilder();
-
-    buf.append("new ").append(LoadClassReference.getClassReference(type, context));
+    buf.append("new ").append(LoadClassReference.getClassReference(type, context, true));
     if (callParameters != null) {
       buf.append(callParameters.generate(Context.create()));
     }
     if (extendsBlock != null) {
       buf.append(" {\n").append(extendsBlock.generate(context)).append("\n}\n");
     }
-
-    finishConstructIfNecessary();
     return buf.toString();
   }
 }

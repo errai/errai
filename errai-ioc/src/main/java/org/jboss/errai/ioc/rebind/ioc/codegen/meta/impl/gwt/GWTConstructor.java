@@ -19,7 +19,6 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.gwt;
 import com.google.gwt.core.ext.typeinfo.JConstructor;
 import com.google.gwt.core.ext.typeinfo.JParameter;
 import org.jboss.errai.ioc.rebind.ioc.InjectUtil;
-import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.*;
 
 import java.lang.annotation.Annotation;

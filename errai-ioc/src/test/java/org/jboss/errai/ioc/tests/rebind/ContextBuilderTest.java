@@ -20,13 +20,13 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.VariableReference;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ContextBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ObjectBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.values.LiteralFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
+import org.jboss.errai.ioc.rebind.ioc.codegen.literal.LiteralFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 import org.junit.Assert;
 import org.junit.Test;
@@ -100,7 +100,7 @@ public class ContextBuilderTest extends AbstractStatementBuilderTest {
         .initializeWith(ObjectBuilder.newInstanceOf(String.class));
 
     assertEquals("failed to generate variable declaration using an objectbuilder initialization",
-        "String str = new java.lang.String()", declaration.generate(Context.create()));
+        "String str = new String()", declaration.generate(Context.create()));
   }
   
   @Test
@@ -110,7 +110,7 @@ public class ContextBuilderTest extends AbstractStatementBuilderTest {
         .initializeWith(ObjectBuilder.newInstanceOf(String.class).withParameters("abc"));
 
     assertEquals("failed to generate variable declaration using an objectbuilder initialization with parameters",
-        "String str = new java.lang.String(\"abc\")", declaration.generate(Context.create()));
+        "String str = new String(\"abc\")", declaration.generate(Context.create()));
   }
   
   @Test
@@ -121,7 +121,7 @@ public class ContextBuilderTest extends AbstractStatementBuilderTest {
         .initializeWith(ObjectBuilder.newInstanceOf(String.class).withParameters("abc"));
 
     assertEquals("failed to generate variable declaration using an objectbuilder initialization with parameters",
-        "Object str = new java.lang.String(\"abc\")", declaration.generate(Context.create()));
+        "Object str = new String(\"abc\")", declaration.generate(Context.create()));
 
     try {
       Stmt.create()

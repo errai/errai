@@ -107,11 +107,11 @@ public class ContextualStatementBuilderImpl extends AbstractStatementBuilder imp
   }
 
   // Assignments
-  public AbstractStatementBuilder assignValue(Object statement) {
+  public StatementEnd assignValue(Object statement) {
     return assignValue(AssignmentOperator.Assignment, statement);
   }
 
-  public AbstractStatementBuilder assignValue(AssignmentOperator operator, Object statement) {
+  public StatementEnd assignValue(AssignmentOperator operator, Object statement) {
     appendCallElement(new AssignVariable(operator, statement));
     return this;
   }

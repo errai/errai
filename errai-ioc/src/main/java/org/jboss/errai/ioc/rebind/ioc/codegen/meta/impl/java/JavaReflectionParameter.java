@@ -16,8 +16,8 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassMember;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
 import org.mvel2.util.ReflectionUtil;

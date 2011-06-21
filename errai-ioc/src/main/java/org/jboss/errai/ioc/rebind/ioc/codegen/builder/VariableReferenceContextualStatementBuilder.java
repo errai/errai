@@ -17,13 +17,12 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.AssignmentOperator;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.AbstractStatementBuilder;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface VariableReferenceContextualStatementBuilder extends ContextualStatementBuilder {
-  public AbstractStatementBuilder assignValue(Object value);
-  public AbstractStatementBuilder assignValue(AssignmentOperator operator, Object value);
+  public StatementEnd assignValue(Object value);
+  public StatementEnd assignValue(AssignmentOperator operator, Object value);
 }
