@@ -54,7 +54,6 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest {
             "}", cls);
   }
 
-
   @Test
   public void testDefineClassA() {
     String cls = ClassBuilder.define("org.foo.Foo")
