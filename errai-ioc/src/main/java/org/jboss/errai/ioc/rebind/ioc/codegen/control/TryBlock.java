@@ -56,9 +56,10 @@ public class TryBlock {
 
     if (!catchBlocks.isEmpty()) {
       for (Variable exception : catchBlocks.keySet()) {
-        buf.append("catch (").append(exception.generate(context)).append(") ")
+        Context ctx = Context.create(context).addVariable(exception);
+        buf.append("catch (").append(exception.generate(ctx)).append(") ")
             .append("{\n")
-            .append(catchBlocks.get(exception).generate(context))
+            .append(catchBlocks.get(exception).generate(ctx))
             .append("\n} ");
       }
     }
@@ -67,7 +68,8 @@ public class TryBlock {
     }
 
     if (finallyBlock != null) {
-      buf.append(" finally {\n").append(finallyBlock.generate(context)).append("\n}\n");
+      Context ctx = Context.create(context);
+      buf.append(" finally {\n").append(finallyBlock.generate(ctx)).append("\n}\n");
     }
 
     return buf.toString();

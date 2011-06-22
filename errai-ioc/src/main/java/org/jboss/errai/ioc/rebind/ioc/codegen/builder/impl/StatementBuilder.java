@@ -177,8 +177,8 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
     return new TryBlockBuilderImpl(context, callElementBuilder).try_();
   }
 
-  public StatementEnd throw_(Class<? extends Throwable> throwableType) {
-    appendCallElement(new ThrowException(throwableType));
+  public StatementEnd throw_(Class<? extends Throwable> throwableType, Object... parameters) {
+    appendCallElement(new ThrowException(throwableType, parameters));
     return this;
   }
 

@@ -16,26 +16,32 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack;
 
+import org.jboss.errai.ioc.rebind.ioc.CallParameters;
 import org.jboss.errai.ioc.rebind.ioc.codegen.AbstractStatement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.VariableReference;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.GenUtil;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ThrowException extends AbstractCallElement {
   private String exceptionVariableName;
+  
   private Class<? extends Throwable> throwableType;
+  private Object[] parameters;
 
   public ThrowException(String exceptionVariableName) {
     this.exceptionVariableName = exceptionVariableName;
+    this.parameters = new Object[0];
   }
 
-  public ThrowException(Class<? extends Throwable> throwableType) {
+  public ThrowException(Class<? extends Throwable> throwableType, Object... parameters) {
     this.throwableType = throwableType;
+    this.parameters = parameters;
   }
 
   public void handleCall(CallWriter writer, Context context, Statement statement) {
@@ -44,7 +50,8 @@ public class ThrowException extends AbstractCallElement {
         StringBuilder buf = new StringBuilder();
         buf.append("throw ");
         if (throwableType != null) {
-          buf.append(ObjectBuilder.newInstanceOf(throwableType).generate(context));
+          CallParameters parms = CallParameters.fromStatements(GenUtil.generateCallParameters(context, parameters));
+          buf.append(ObjectBuilder.newInstanceOf(throwableType).withParameters(parms).generate(context));
         }
         else {
           VariableReference exceptionVar = context.getVariable(exceptionVariableName);

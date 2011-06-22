@@ -386,6 +386,14 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   }
   
   @Test
+  public void testThrowExceptionUsingNewInstanceWithParameters() {
+    Context c = Context.create().autoImport();
+    String s = StatementBuilder.create(c).throw_(InvalidTypeException.class, "message").toJavaString();
+    assertEquals("failed to generate throw statement using a new instance", 
+        "throw new InvalidTypeException(\"message\")", s);
+  }
+  
+  @Test
   public void testThrowExceptionUsingVariable() {
     String s = StatementBuilder.create().addVariable("t", Throwable.class).throw_("t").toJavaString();
     assertEquals("failed to generate throw statement using a variable", "throw t", s);

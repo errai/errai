@@ -16,7 +16,9 @@
 
 package org.jboss.errai.ioc.tests.rebind;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 import org.junit.Test;
 
 /**
@@ -88,5 +90,22 @@ public class TryBlockBuilderTest extends AbstractStatementBuilderTest implements
         .toJavaString();
 
     assertEquals("Failed to generate empty try catch finally block", EMPTY_TRY_MULTIPLE_CATCH_FINALLY_BLOCK, s);
+  }
+  
+  @Test
+  public void testTryCatchFinallyBlock() {
+    String s = StatementBuilder.create()
+        .try_()
+        .append(Stmt.create().throw_(Exception.class))
+        .finish()
+        .catch_(Exception.class, "e")
+        .append(Stmt.create().throw_(RuntimeException.class, Variable.get("e")))
+        .finish()
+        .finally_()
+        .append(Stmt.create().load(0).returnValue())
+        .finish()
+        .toJavaString();
+
+    assertEquals("Failed to generate try catch finally block", TRY_CATCH_FINALLY_BLOCK, s);
   }
 }

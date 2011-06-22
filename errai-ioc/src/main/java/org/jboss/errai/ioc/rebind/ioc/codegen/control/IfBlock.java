@@ -56,18 +56,18 @@ public class IfBlock extends AbstractConditionalBlock {
     builder.append("{\n");
 
     if (getBlock() != null) {
-      builder.append(getBlock().generate(context));
+      builder.append(getBlock().generate(Context.create(context)));
     }
 
     builder.append("\n} ");
 
     if (elseIfBlock != null) {
-      builder.append("else ").append(elseIfBlock.generate(context));
+      builder.append("else ").append(elseIfBlock.generate(Context.create(context)));
       return builder.toString();
     }
 
     if (elseBlock != null && !elseBlock.isEmpty()) {
-      builder.append("else { ").append(elseBlock.generate(context)).append("\n} ");
+      builder.append("else { ").append(elseBlock.generate(Context.create(context))).append("\n} ");
       return builder.toString();
     }
 

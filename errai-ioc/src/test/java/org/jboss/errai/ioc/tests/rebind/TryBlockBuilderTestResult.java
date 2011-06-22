@@ -50,4 +50,15 @@ public interface TryBlockBuilderTestResult {
           " }\n" +
           " finally {\n" +
           " }\n";
+  
+  public static final String TRY_CATCH_FINALLY_BLOCK =
+    "     try {\n" +
+        "   throw new Exception();" +
+        " } " +
+        " catch (Exception e) {\n" +
+        "   throw new RuntimeException(e);" +
+        " }\n" +
+        " finally {\n" +
+        "   return 0;" + 
+        " }\n";
 }
