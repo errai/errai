@@ -83,7 +83,8 @@ public class LoadClassReference extends AbstractCallElement {
     return buf.toString();
   }
 
-  private static String getClassReferencesForParameterizedTypes(MetaParameterizedType parameterizedType, Context context) {
+  private static String getClassReferencesForParameterizedTypes(MetaParameterizedType parameterizedType, 
+      Context context) {
     StringBuilder buf = new StringBuilder();
 
     if (parameterizedType != null && parameterizedType.getTypeParameters().length != 0) {

@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.tests.rebind;
+package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
-import org.jboss.errai.ioc.tests.rebind.literals.LiteralTest;
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.BlockBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@RunWith(Suite.class)
-@Suite.SuiteClasses({ AnnotationEncoderTest.class, ClassBuilderTest.class, ClassStructureBuilderTest.class,
-    ContextBuilderTest.class, IfBlockBuilderTest.class, InvocationBuilderTest.class, LiteralTest.class,
-    LoopBuilderTest.class, StatementBuilderTest.class, TryBlockBuilderTest.class })
-public class AllStatementBuilderTests {
+public interface CatchBlockBuilder extends Statement, Builder {
+  BlockBuilder<CatchBlockBuilder> catch_(Class<? extends Throwable> exceptionType, String variableName);
+  BlockBuilder<CatchBlockBuilder> catch_(MetaClass exceptionType, String variableName);
 
+  BlockBuilder<StatementEnd> finally_();
 }

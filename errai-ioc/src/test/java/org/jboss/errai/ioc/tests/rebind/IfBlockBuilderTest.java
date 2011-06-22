@@ -48,7 +48,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
         .if_()
         .finish().toJavaString();
 
-    assertEquals("Failed to generate empty if block using no rhs", EMPTY_IF_BLOCK_RESULT_NO_RHS, s);
+    assertEquals("Failed to generate empty if block using no rhs", EMPTY_IF_BLOCK_NO_RHS, s);
   }
 
   @Test
@@ -59,7 +59,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
         .if_(BooleanOperator.Equals, 1)
         .finish().toJavaString();
 
-    assertEquals("Failed to generate empty if block using a literal rhs", EMPTY_IF_BLOCK_RESULT_LITERAL_RHS, s);
+    assertEquals("Failed to generate empty if block using a literal rhs", EMPTY_IF_BLOCK_LITERAL_RHS, s);
   }
 
   @Test
@@ -75,7 +75,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
           .append(ContextBuilder.create().declareVariable("n", Integer.class).initializeWith(1))
         .finish().toJavaString();
 
-    assertEquals("Failed to generate empty if block using no rhs", IF_ELSE_BLOCK_RESULT_NO_RHS, s);
+    assertEquals("Failed to generate empty if block using no rhs", IF_ELSE_BLOCK_NO_RHS, s);
   }
 
   @Test
@@ -91,7 +91,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
           .append(ContextBuilder.create().declareVariable("n", Integer.class).initializeWith(1))
         .finish().toJavaString();
 
-    assertEquals("Failed to generate empty if block using a rhs", IF_ELSE_BLOCK_RESULT_RHS, s);
+    assertEquals("Failed to generate empty if block using a rhs", IF_ELSE_BLOCK_RHS, s);
   }
 
   @Test
@@ -113,7 +113,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
         )
         .finish().toJavaString();
 
-    assertEquals("Failed to generate if-else-if-block using no rhs", IF_ELSEIF_BLOCK_RESULT_NO_RHS_NESTED, s);
+    assertEquals("Failed to generate if-else-if-block using no rhs", IF_ELSEIF_BLOCK_NO_RHS_NESTED, s);
   }
 
   @Test
@@ -139,7 +139,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
         .finish().toJavaString();
 
     assertEquals("Failed to generate if-else-if-else block using no rhs",
-        IF_ELSEIF_ELSE_BLOCK_RESULT_NO_RHS_NESTED, s);
+        IF_ELSEIF_ELSE_BLOCK_NO_RHS_NESTED, s);
   }
 
   @Test
@@ -162,7 +162,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
         )
         .finish().toJavaString();
 
-    assertEquals("Failed to generate if-else-if-else block using rhs", IF_ELSEIF_ELSE_BLOCK_RESULT_RHS_NESTED, s);
+    assertEquals("Failed to generate if-else-if-else block using rhs", IF_ELSEIF_ELSE_BLOCK_RHS_NESTED, s);
   }
 
   @Test
@@ -179,7 +179,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
           .append(StatementBuilder.create(c).loadVariable("n").assignValue(1))
         .finish().toJavaString();
 
-    assertEquals("Failed to generate if-elseif block using no rhs", IF_ELSEIF_BLOCK_RESULT_NO_RHS, s);
+    assertEquals("Failed to generate if-elseif block using no rhs", IF_ELSEIF_BLOCK_NO_RHS, s);
   }
 
   @Test
@@ -199,7 +199,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
           .append(StatementBuilder.create(c).loadVariable("n").assignValue(2))
         .finish().toJavaString();
 
-    assertEquals("Failed to generate if-elseif-else block using no rhs", IF_ELSEIF_ELSE_BLOCK_RESULT_NO_RHS, s);
+    assertEquals("Failed to generate if-elseif-else block using no rhs", IF_ELSEIF_ELSE_BLOCK_NO_RHS, s);
   }
 
   @Test
@@ -221,7 +221,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
           .append(StatementBuilder.create(c).loadVariable("n").assignValue(3))
         .finish().toJavaString();
 
-    assertEquals("Failed to generate if - else if - else block using rhs", IF_ELSEIF_ELSE_BLOCK_RESULT_RHS, s);
+    assertEquals("Failed to generate if - else if - else block using rhs", IF_ELSEIF_ELSE_BLOCK_RHS, s);
   }
 
   @Test
@@ -267,7 +267,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
         .toJavaString();
 
     assertEquals("Failed to generate empty if block using an instance of expression",
-        EMPTY_IF_BLOCK_RESULT_INSTANCE_OF_RHS, s);
+        EMPTY_IF_BLOCK_INSTANCE_OF_RHS, s);
   }
 
   @Test
@@ -279,7 +279,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
         .finish()
         .toJavaString();
 
-    assertEquals("Failed to generate if block using a null rhs", EMPTY_IF_BLOCK_RESULT_NULL_RHS, s);
+    assertEquals("Failed to generate if block using a null rhs", EMPTY_IF_BLOCK_NULL_RHS, s);
   }
 
   @Test
@@ -299,6 +299,6 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
         .toJavaString();
 
     assertEquals("Failed to generate if block using nested boolean expressions",
-        IF_ELSEIF_BLOCK_RESULT_UNCHAINED_NESTED_EXPRESSIONS, s);
+        IF_ELSEIF_BLOCK_UNCHAINED_NESTED_EXPRESSIONS, s);
   }
 }

@@ -24,7 +24,8 @@ import java.util.*;
 
 /**
  * This class represents a {@link Statement} context. It has a reference to its parent context 
- * and holds a map of variables to represent a statement's scope.
+ * and holds a map of variables to represent a statement's scope. It further supports importing
+ * classes and packages to avoid the use of fully qualified class names.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */

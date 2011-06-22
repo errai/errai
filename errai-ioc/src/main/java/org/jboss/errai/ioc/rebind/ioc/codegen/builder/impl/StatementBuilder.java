@@ -23,6 +23,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ArrayInitializationBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.CatchBlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ElseBlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementBegin;
@@ -166,5 +167,9 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
   public BlockBuilder<StatementEnd> for_(Statement initializer, BooleanExpression condition,
       Statement countingExpression) {
     return new LoopBuilderImpl(context, callElementBuilder).for_(initializer, condition, countingExpression);
+  }
+
+  public BlockBuilder<CatchBlockBuilder> try_() {
+    return new TryBlockBuilderImpl(context, callElementBuilder).try_();
   }
 }

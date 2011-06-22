@@ -21,33 +21,33 @@ package org.jboss.errai.ioc.tests.rebind;
  */
 public interface IfBlockBuilderTestResult {
 
-  public static final String EMPTY_IF_BLOCK_RESULT_NO_RHS =
+  public static final String EMPTY_IF_BLOCK_NO_RHS =
       "if (str.endsWith(\"abc\")) { }\n";
 
-  public static final String EMPTY_IF_BLOCK_RESULT_LITERAL_RHS =
+  public static final String EMPTY_IF_BLOCK_LITERAL_RHS =
       "if (n == 1) { }\n";
 
-  public static final String EMPTY_IF_BLOCK_RESULT_NULL_RHS =
+  public static final String EMPTY_IF_BLOCK_NULL_RHS =
       "if (str != null) { }\n";
 
-  public static final String EMPTY_IF_BLOCK_RESULT_INSTANCE_OF_RHS =
+  public static final String EMPTY_IF_BLOCK_INSTANCE_OF_RHS =
       "if (str instanceof String) { }\n";
 
-  public static final String IF_ELSE_BLOCK_RESULT_NO_RHS =
+  public static final String IF_ELSE_BLOCK_NO_RHS =
       "   if (str.endsWith(\"abc\")) { " +
           " Integer n = 0;\n" +
           "} else {" +
           " \nInteger n = 1;\n" +
           "}\n";
 
-  public static final String IF_ELSE_BLOCK_RESULT_RHS =
+  public static final String IF_ELSE_BLOCK_RHS =
       "   if (n > m) { " +
           " Integer n = 0;\n" +
           "} else {" +
           " \nInteger n = 1;\n" +
           "}\n";
 
-  public static final String IF_ELSEIF_BLOCK_RESULT_NO_RHS_NESTED =
+  public static final String IF_ELSEIF_BLOCK_NO_RHS_NESTED =
       "   if (s.endsWith(\"abc\")) {\n" +
           " n = 0;\n" +
           "} else {\n" +
@@ -56,14 +56,14 @@ public interface IfBlockBuilderTestResult {
           " };\n" +
           "}\n";
 
-  public static final String IF_ELSEIF_BLOCK_RESULT_NO_RHS =
+  public static final String IF_ELSEIF_BLOCK_NO_RHS =
       "   if (s.endsWith(\"abc\")) {\n" +
           " n = 0;\n" +
           "} else if (s.startsWith(\"def\")) { " +
           " n = 1;\n" +
           "}\n";
 
-  public static final String IF_ELSEIF_ELSE_BLOCK_RESULT_NO_RHS_NESTED =
+  public static final String IF_ELSEIF_ELSE_BLOCK_NO_RHS_NESTED =
       "   if (s.endsWith(\"abc\")) {\n" +
           " n = 0;\n" +
           "} else {\n" +
@@ -74,7 +74,7 @@ public interface IfBlockBuilderTestResult {
           " };\n" +
           "}\n";
 
-  public static final String IF_ELSEIF_ELSE_BLOCK_RESULT_NO_RHS =
+  public static final String IF_ELSEIF_ELSE_BLOCK_NO_RHS =
       "   if (s.endsWith(\"abc\")) {\n" +
           " n = 0;\n" +
           "} else if (s.startsWith(\"def\")) { " +
@@ -83,7 +83,7 @@ public interface IfBlockBuilderTestResult {
           " n = 2;\n" +
           "}\n";
 
-  public static final String IF_ELSEIF_ELSE_BLOCK_RESULT_RHS_NESTED =
+  public static final String IF_ELSEIF_ELSE_BLOCK_RHS_NESTED =
       "   if (n > m) {\n" +
           " n = 0;\n" +
           "} else {\n" +
@@ -94,7 +94,7 @@ public interface IfBlockBuilderTestResult {
           " };\n" +
           "}\n";
 
-  public static final String IF_ELSEIF_ELSE_BLOCK_RESULT_RHS =
+  public static final String IF_ELSEIF_ELSE_BLOCK_RHS =
       "   if (n > m) {\n" +
           " n = 0;\n" +
           "} else if (m > n) { " +
@@ -105,7 +105,7 @@ public interface IfBlockBuilderTestResult {
           " n = 3;\n" +
           "}\n";
 
-  public static final String IF_ELSEIF_BLOCK_RESULT_UNCHAINED_NESTED_EXPRESSIONS =
+  public static final String IF_ELSEIF_BLOCK_UNCHAINED_NESTED_EXPRESSIONS =
       "   if ((\"foo\" == \"bar\") || ((\"cat\" == \"dog\") && (\"girl\" != \"boy\"))) { " +
           " } " +
           "else if (a && b) {" +
