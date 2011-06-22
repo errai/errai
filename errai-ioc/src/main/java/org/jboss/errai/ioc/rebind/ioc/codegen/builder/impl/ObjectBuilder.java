@@ -98,7 +98,7 @@ public class ObjectBuilder extends AbstractStatementBuilder {
   }
 
   public ObjectBuilder withParameters(Object... parameters) {
-    return withParameters(GenUtil.generateCallParameters(getContext(), parameters));
+    return withParameters(GenUtil.generateCallParameters(context, parameters));
   }
 
   public ObjectBuilder withParameters(Statement... parameters) {

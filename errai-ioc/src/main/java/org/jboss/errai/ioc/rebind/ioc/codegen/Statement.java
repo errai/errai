@@ -26,6 +26,4 @@ public interface Statement {
   public String generate(Context context);
 
   public MetaClass getType();
-
-  public Context getContext();
 }

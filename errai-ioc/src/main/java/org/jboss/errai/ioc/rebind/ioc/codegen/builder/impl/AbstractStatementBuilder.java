@@ -35,11 +35,6 @@ public abstract class AbstractStatementBuilder implements Statement, Builder, St
   protected Context context = null;
   protected CallElementBuilder callElementBuilder;
 
-  protected AbstractStatementBuilder(Context context, CallElementBuilder callElementBuilder) {
-    this(context);
-    this.callElementBuilder = callElementBuilder;
-  }
-
   protected AbstractStatementBuilder(Context context) {
     if (context == null) {
       context = Context.create();
@@ -48,9 +43,10 @@ public abstract class AbstractStatementBuilder implements Statement, Builder, St
     this.context = context;
     this.callElementBuilder = new CallElementBuilder();
   }
-
-  public Context getContext() {
-    return context;
+  
+  protected AbstractStatementBuilder(Context context, CallElementBuilder callElementBuilder) {
+    this(context);
+    this.callElementBuilder = callElementBuilder;
   }
 
   public String generate(Context context) {

@@ -56,7 +56,7 @@ public class Variable extends AbstractStatement {
     LiteralValue<?> val = LiteralFactory.isLiteral(initialization);
     if (val != null) {
       this.type = (type == null) ? val.getType() : type;
-      this.value = GenUtil.convert(getContext(), initialization, this.type);
+      this.value = GenUtil.convert(Context.create(), initialization, this.type);
     }
     else {
       // deferred initialization
