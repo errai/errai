@@ -42,4 +42,7 @@ public interface StatementBegin extends ArrayBuilder, LoopBuilder, IfBlockBuilde
 
   public ObjectBuilder newObject(Class<?> type);
   public ObjectBuilder newObject(TypeLiteral<?> type);
+  
+  public StatementEnd throw_(Class<? extends Throwable> throwableType);
+  public StatementEnd throw_(String exceptionVarName);
 }

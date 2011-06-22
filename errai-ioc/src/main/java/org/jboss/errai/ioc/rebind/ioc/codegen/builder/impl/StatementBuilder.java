@@ -38,6 +38,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadLiteral;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadVariable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.MethodCall;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.ResetElement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.ThrowException;
 
 /**
  * The root of our fluent StatementBuilder API.
@@ -174,5 +175,15 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
 
   public BlockBuilder<CatchBlockBuilder> try_() {
     return new TryBlockBuilderImpl(context, callElementBuilder).try_();
+  }
+
+  public StatementEnd throw_(Class<? extends Throwable> throwableType) {
+    appendCallElement(new ThrowException(throwableType));
+    return this;
+  }
+
+  public StatementEnd throw_(String exceptionVarName) {
+    appendCallElement(new ThrowException(exceptionVarName));
+    return this;
   }
 }

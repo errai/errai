@@ -376,4 +376,38 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
         .newObject(new TypeLiteral<List<List<Map<String, Integer>>>>() {}).toJavaString();
     assertEquals("failed to generate new object with parameterized type", "new List<List<Map<String, Integer>>>()", s);
   }
+  
+  @Test
+  public void testThrowExceptionUsingNewInstance() {
+    Context c = Context.create().autoImport();
+    String s = StatementBuilder.create(c).throw_(InvalidTypeException.class).toJavaString();
+    assertEquals("failed to generate throw statement using a new instance", 
+        "throw new InvalidTypeException()", s);
+  }
+  
+  @Test
+  public void testThrowExceptionUsingVariable() {
+    String s = StatementBuilder.create().addVariable("t", Throwable.class).throw_("t").toJavaString();
+    assertEquals("failed to generate throw statement using a variable", "throw t", s);
+  }
+  
+  @Test
+  public void testThrowExceptionUsingInvalidVariable() {
+    try {
+      StatementBuilder.create().addVariable("t", Integer.class).throw_("t").toJavaString();
+      fail("expected InvalidTypeException");
+    } catch(InvalidTypeException e) {
+      // expected
+    }
+  }
+  
+  @Test
+  public void testThrowExceptionUsingUndefinedVariable() {
+    try {
+      StatementBuilder.create().throw_("t").toJavaString();
+      fail("expected OutOfScopeException");
+    } catch(OutOfScopeException e) {
+      // expected
+    }
+  }
 }
