@@ -74,6 +74,10 @@ public class ClassBuilder implements
     return new ClassBuilder(fullQualifiedName, parent, Context.create().autoImport());
   }
 
+  public static ClassDefinitionBuilderScope define(String fullQualifiedName, Class<?> parent) {
+    return define(fullQualifiedName, MetaClassFactory.get(parent));
+  }
+
   public static BaseClassStructureBuilder implement(MetaClass cls) {
     return new ClassBuilder(cls.getFullyQualifiedName() + "Impl", null, Context.create().autoImport())
             .publicScope()

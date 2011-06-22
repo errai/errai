@@ -35,11 +35,11 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
   @Test
   public void testDefineClassImplementingInterface() {
     String cls = ClassBuilder.define("org.foo.Bar")
-            .publicScope().implementsInterface(Serializable.class)
-            .body()
-            .privateField("name", String.class)
-            .finish()
-            .toJavaString();
+        .publicScope().implementsInterface(Serializable.class)
+        .body()
+        .privateField("name", String.class)
+        .finish()
+        .toJavaString();
 
     assertEquals("failed to generate class definition implementing an interface", CLASS_IMPLEMENTING_INTERFACE, cls);
   }
@@ -47,60 +47,77 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
   @Test
   public void testDefineClassWithAccessorMethods() {
     String cls = ClassBuilder.define("org.foo.Foo")
-            .publicScope()
-            .body()
-            .privateField("name", String.class)
-            .initializesWith(Stmt.create().load("default"))
-            .finish()
-            .publicMethod(String.class, "getName")
-            .append(Stmt.create().loadVariable("name").returnValue())
-            .finish()
-            .publicMethod(void.class, "setName", Parameter.of(String.class, "name"))
-            .append(Stmt.create().loadClassMember("name").assignValue(Variable.get("name")))
-            .finish()
-            .toJavaString();
-    
+        .publicScope()
+        .body()
+        .privateField("name", String.class)
+        .initializesWith(Stmt.create().load("default"))
+        .finish()
+        .publicMethod(String.class, "getName")
+        .append(Stmt.create().loadVariable("name").returnValue())
+        .finish()
+        .publicMethod(void.class, "setName", Parameter.of(String.class, "name"))
+        .append(Stmt.create().loadClassMember("name").assignValue(Variable.get("name")))
+        .finish()
+        .toJavaString();
+
     assertEquals("failed to generate class definition with accessor methods", CLASS_WITH_ACCESSOR_METHODS, cls);
   }
 
   @Test
   public void testDefineClassWithAccessorMethodsUsingThisKeyword() {
     String cls = ClassBuilder
-            .define("org.foo.Foo")
-            .publicScope()
-            .body()
-            .privateField("name", String.class)
-            .initializesWith(Stmt.create().load("default"))
-            .finish()
-            .publicMethod(String.class, "getName")
-            .append(Stmt.create().loadVariable("name").returnValue())
-            .finish()
-            .publicMethod(void.class, "setName", Parameter.of(String.class, "name"))
-            .append(Stmt.create().loadVariable("this.name").assignValue(Variable.get("name")))
-            .finish()
-            .toJavaString();
-    
+        .define("org.foo.Foo")
+        .publicScope()
+        .body()
+        .privateField("name", String.class)
+        .initializesWith(Stmt.create().load("default"))
+        .finish()
+        .publicMethod(String.class, "getName")
+        .append(Stmt.create().loadVariable("name").returnValue())
+        .finish()
+        .publicMethod(void.class, "setName", Parameter.of(String.class, "name"))
+        .append(Stmt.create().loadVariable("this.name").assignValue(Variable.get("name")))
+        .finish()
+        .toJavaString();
+
     assertEquals("failed to generate class definition with accessor methods", CLASS_WITH_ACCESSOR_METHODS, cls);
   }
   
   @Test
+  public void testDefineClassWithParent() {
+    
+    String cls = ClassBuilder
+        .define("org.foo.Foo", String.class)
+        .publicScope()
+        .body()
+        .publicConstructor(Parameter.of(int.class, "i"))
+        .finish()
+        .toJavaString();
+
+    assertEquals("failed to generate class with parent", CLASS_WITH_PARENT, cls);
+  }
+
+  @Test
   public void testDefineClass() {
     String cls = ClassBuilder.implement(Bootstrapper.class)
-            .publicMethod(InterfaceInjectionContext.class, "bootstrapContainer")
-            .append(Stmt.create().addVariable("ctx", Stmt.create().newObject(InterfaceInjectionContext.class)))
-            .append(Stmt.create().loadVariable("ctx").returnValue())
-            .finish().toJavaString();
+        .publicMethod(InterfaceInjectionContext.class, "bootstrapContainer")
+        .append(Stmt.create().addVariable("ctx", Stmt.create().newObject(InterfaceInjectionContext.class)))
+        .append(Stmt.create().loadVariable("ctx").returnValue())
+        .finish().toJavaString();
 
     assertEquals("package org.jboss.errai.ioc.client.api;\n" +
-            "\n" +
-            "import org.jboss.errai.ioc.client.api.Bootstrapper;\n" +
-            "import org.jboss.errai.ioc.client.InterfaceInjectionContext;\n" +
-            "\n" +
-            "public class BootstrapperImpl implements Bootstrapper {\n" +
-            "    public InterfaceInjectionContext bootstrapContainer() {\n" +
-            "        InterfaceInjectionContext ctx = new InterfaceInjectionContext();\n" +
-            "        return ctx;\n" +
-            "    }\n" +
-            "}", cls);
+        "\n" +
+        "import org.jboss.errai.ioc.client.api.Bootstrapper;\n" +
+        "import org.jboss.errai.ioc.client.InterfaceInjectionContext;\n" +
+        "\n" +
+        "public class BootstrapperImpl implements Bootstrapper {\n" +
+        "    public InterfaceInjectionContext bootstrapContainer() {\n" +
+        "        InterfaceInjectionContext ctx = new InterfaceInjectionContext();\n" +
+        "        return ctx;\n" +
+        "    }\n" +
+        "}", cls);
   }
+  
+  //TODO throws delcarations?
+  //TODO call to super constructors?
 }

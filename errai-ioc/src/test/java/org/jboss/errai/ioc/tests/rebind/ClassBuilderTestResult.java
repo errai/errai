@@ -43,4 +43,11 @@ public interface ClassBuilderTestResult {
           "   }\n" +
           " }";
 
+  public static final String CLASS_WITH_PARENT =
+      "     package org.foo;\n" +
+          "\n" +
+          " public class Foo extends String {\n" +
+          "   public Foo(int i) {" +
+          "   }" + 
+          " }";
 }
