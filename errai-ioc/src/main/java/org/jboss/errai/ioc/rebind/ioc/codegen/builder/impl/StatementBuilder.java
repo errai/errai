@@ -97,6 +97,9 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
   }
 
   public VariableReferenceContextualStatementBuilder loadVariable(String name, Object... indexes) {
+    if (name.matches("(this.)(.)*"))
+      return loadClassMember(name.replaceFirst("(this.)", ""), indexes);
+    
     appendCallElement(new LoadVariable(name, indexes));
     return new ContextualStatementBuilderImpl(context, callElementBuilder);
   }

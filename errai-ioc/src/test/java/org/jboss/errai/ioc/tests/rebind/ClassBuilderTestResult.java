@@ -42,4 +42,5 @@ public interface ClassBuilderTestResult {
           "     this.name = name;\n" +
           "   }\n" +
           " }";
+
 }

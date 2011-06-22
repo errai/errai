@@ -59,10 +59,30 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
             .append(Stmt.create().loadClassMember("name").assignValue(Variable.get("name")))
             .finish()
             .toJavaString();
-
+    
     assertEquals("failed to generate class definition with accessor methods", CLASS_WITH_ACCESSOR_METHODS, cls);
   }
 
+  @Test
+  public void testDefineClassWithAccessorMethodsUsingThisKeyword() {
+    String cls = ClassBuilder
+            .define("org.foo.Foo")
+            .publicScope()
+            .body()
+            .privateField("name", String.class)
+            .initializesWith(Stmt.create().load("default"))
+            .finish()
+            .publicMethod(String.class, "getName")
+            .append(Stmt.create().loadVariable("name").returnValue())
+            .finish()
+            .publicMethod(void.class, "setName", Parameter.of(String.class, "name"))
+            .append(Stmt.create().loadVariable("this.name").assignValue(Variable.get("name")))
+            .finish()
+            .toJavaString();
+    
+    assertEquals("failed to generate class definition with accessor methods", CLASS_WITH_ACCESSOR_METHODS, cls);
+  }
+  
   @Test
   public void testDefineClass() {
     String cls = ClassBuilder.implement(Bootstrapper.class)
