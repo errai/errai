@@ -109,10 +109,6 @@ public class FieldBuilder<T> implements FieldBuildStart<T>, FieldBuildType<T>,
         public MetaClass getType() {
           return type;
         }
-
-        public Context getContext() {
-          return null;
-        }
       });
     }
     return null;

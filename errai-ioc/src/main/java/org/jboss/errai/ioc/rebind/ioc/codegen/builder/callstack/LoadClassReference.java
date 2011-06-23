@@ -45,10 +45,6 @@ public class LoadClassReference extends AbstractCallElement {
       public MetaClass getType() {
         return metaClass;
       }
-
-      public Context getContext() {
-        return null;
-      }
     };
 
     nextOrReturn(writer, context, statement);

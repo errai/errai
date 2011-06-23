@@ -52,8 +52,4 @@ public abstract class AbstractConditionalBlock implements Statement {
   public MetaClass getType() {
     return MetaClassFactory.get(void.class);
   }
-
-  public Context getContext() {
-    return null;
-  }
 }

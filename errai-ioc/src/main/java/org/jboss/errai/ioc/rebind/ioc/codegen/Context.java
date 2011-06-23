@@ -46,6 +46,7 @@ public class Context {
   private Context(Context parent) {
     this();
     this.parent = parent;
+    this.autoImports = parent.autoImports;
   }
 
   public static Context create() {

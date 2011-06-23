@@ -19,6 +19,7 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.control;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.AbstractStatement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.BlockStatement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
@@ -26,7 +27,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class TryBlock {
+public class TryBlock extends AbstractStatement {
   private BlockStatement block = new BlockStatement();
   private Map<Variable, BlockStatement> catchBlocks = new LinkedHashMap<Variable, BlockStatement>();
   private BlockStatement finallyBlock = null;

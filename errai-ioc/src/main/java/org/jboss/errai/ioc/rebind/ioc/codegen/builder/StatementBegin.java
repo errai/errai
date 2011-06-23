@@ -24,7 +24,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface StatementBegin extends ArrayBuilder, LoopBuilder, IfBlockBuilder, TryBlockBuilder {
+public interface StatementBegin extends ArrayBuilder, LoopBuilder, IfBlockBuilder, SwitchBlockBuilder, TryBlockBuilder {
 
   public StatementBuilder addVariable(String name, Class<?> type);
   public StatementBuilder addVariable(String name, TypeLiteral<?> type);

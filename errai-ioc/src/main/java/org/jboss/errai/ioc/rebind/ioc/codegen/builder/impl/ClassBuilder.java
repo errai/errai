@@ -223,7 +223,7 @@ public class ClassBuilder implements
   private BlockBuilder<BaseClassStructureBuilder> genConstructor(final Scope scope, final DefParameters
           defParameters) {
     
-    final Context context = Context.create(this.context).autoImport();
+    final Context context = Context.create(this.context);
     
     return new BlockBuilder<BaseClassStructureBuilder>(new BuildCallback<BaseClassStructureBuilder>() {
       public BaseClassStructureBuilder callback(final Statement statement) {
@@ -454,7 +454,7 @@ public class ClassBuilder implements
                                                             final ThrowsDeclaration throwsDeclaration,
                                                             final DefParameters defParameters) {
     
-    final Context context = Context.create(this.context).autoImport();
+    final Context context = Context.create(this.context);
     
     return new BlockBuilder<BaseClassStructureBuilder>(new BuildCallback<BaseClassStructureBuilder>() {
       public BaseClassStructureBuilder callback(final Statement statement) {

@@ -34,10 +34,6 @@ public abstract class VariableReference implements Statement {
     return null;
   }
 
-  public Context getContext() {
-    return null;
-  }
-
   public String generate(Context context) {
     return getName();
   }

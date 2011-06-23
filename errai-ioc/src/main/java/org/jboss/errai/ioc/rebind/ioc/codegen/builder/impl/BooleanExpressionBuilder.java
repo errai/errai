@@ -121,10 +121,6 @@ public class BooleanExpressionBuilder implements BooleanExpression {
     return lhsExpr + operExpr + rhsExpr;
   }
 
-  public Context getContext() {
-    return null;
-  }
-
   public MetaClass getType() {
     return MetaClassFactory.get(boolean.class);
   }

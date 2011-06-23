@@ -42,16 +42,12 @@ public class TryBlockBuilderImpl extends AbstractStatementBuilder implements Try
     super(context, callElementBuilder);
   }
 
-  protected TryBlockBuilderImpl(Context context, CallElementBuilder callElementBuilder, TryBlock tryBlock) {
-    super(context, callElementBuilder);
-    this.tryBlock = tryBlock;
-  }
-
   public BlockBuilder<CatchBlockBuilder> try_() {
     tryBlock = new TryBlock();
 
     appendCallElement(new DeferredCallElement(new DeferredCallback() {
       public void doDeferred(CallWriter writer, Context context, Statement statement) {
+        writer.reset();
         writer.append(tryBlock.generate(Context.create(context)));
       }
     }));
