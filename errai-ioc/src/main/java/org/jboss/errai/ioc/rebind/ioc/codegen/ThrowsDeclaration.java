@@ -1,0 +1,60 @@
+/*
+ * Copyright 2011 JBoss, a divison Red Hat, Inc
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.jboss.errai.ioc.rebind.ioc.codegen;
+
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
+
+/**
+ * @author Christian Sadilek <csadilek@redhat.com>
+ */
+public class ThrowsDeclaration extends AbstractStatement {
+  private MetaClass[] exceptionTypes;
+
+  private ThrowsDeclaration(MetaClass[] exceptionTypes) {
+    this.exceptionTypes = exceptionTypes;
+  }
+  
+  public static ThrowsDeclaration of(Class<?>... exceptionTypes) {
+    return new ThrowsDeclaration(MetaClassFactory.fromClassArray(exceptionTypes));
+  }
+
+  public static ThrowsDeclaration of(MetaClass... exceptionTypes) {
+    return new ThrowsDeclaration(exceptionTypes);
+  }
+  
+  public static ThrowsDeclaration none() {
+    return new ThrowsDeclaration(new MetaClass[0]);
+  }
+
+  public String generate(Context context) {
+    StringBuilder buf = new StringBuilder();
+    for (int i = 0; i < exceptionTypes.length; i++) {
+      if (i==0) {
+        buf.append("throws ");
+      }
+      
+      buf.append(LoadClassReference.getClassReference(exceptionTypes[i], context));
+
+      if (i + 1 < exceptionTypes.length) {
+        buf.append(", ");
+      }
+    }
+    return buf.toString();
+  }
+}

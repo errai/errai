@@ -18,7 +18,7 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
 import javax.enterprise.util.TypeLiteral;
 
-import org.jboss.errai.ioc.rebind.ioc.CallParameters;
+import org.jboss.errai.ioc.rebind.ioc.codegen.CallParameters;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;

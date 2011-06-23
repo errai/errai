@@ -21,6 +21,7 @@ import java.io.Serializable;
 import org.jboss.errai.ioc.client.InterfaceInjectionContext;
 import org.jboss.errai.ioc.client.api.Bootstrapper;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Parameter;
+import org.jboss.errai.ioc.rebind.ioc.codegen.ThrowsDeclaration;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
@@ -98,6 +99,35 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
   }
 
   @Test
+  public void testDefineAbstractClass() {
+    
+    String cls = ClassBuilder
+        .define("org.foo.Foo")
+        .publicScope()
+        .abstractClass()
+        .body()
+        .publicConstructor()
+        .finish()
+        .toJavaString();
+
+    assertEquals("failed to generate abstract class", ABSTRACT_CLASS, cls);
+  }
+  
+  @Test
+  public void testDefineClassWithMethodWithThrowsDeclaration() {
+    
+    String cls = ClassBuilder
+        .define("org.foo.Foo")
+        .publicScope()
+        .body()
+        .publicMethod(void.class, "initialize", ThrowsDeclaration.of(Exception.class, IllegalArgumentException.class))
+        .finish()
+        .toJavaString();
+
+    assertEquals("failed to generate abstract class", CLASS_WITH_METHOD_WITH_THROWS_DECLARATION, cls);
+  }
+  
+  @Test
   public void testDefineClass() {
     String cls = ClassBuilder.implement(Bootstrapper.class)
         .publicMethod(InterfaceInjectionContext.class, "bootstrapContainer")
@@ -117,7 +147,4 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
         "    }\n" +
         "}", cls);
   }
-  
-  //TODO throws delcarations?
-  //TODO call to super constructors?
 }

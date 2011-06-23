@@ -48,6 +48,22 @@ public interface ClassBuilderTestResult {
           "\n" +
           " public class Foo extends String {\n" +
           "   public Foo(int i) {" +
-          "   }" + 
+          "   }" +
+          " }";
+
+  public static final String ABSTRACT_CLASS =
+      "     package org.foo;\n" +
+          "\n" +
+          " public abstract class Foo {\n" +
+          "   public Foo() {" +
+          "   }" +
+          " }";
+
+  public static final String CLASS_WITH_METHOD_WITH_THROWS_DECLARATION =
+      "     package org.foo;\n" +
+          "\n" +
+          " public class Foo {\n" +
+          "   public void initialize() throws Exception, IllegalArgumentException {" +
+          "   }" +
           " }";
 }
