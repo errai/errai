@@ -32,7 +32,7 @@ import org.junit.Test;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ClassBuilderTest extends AbstractStatementBuilderTest implements ClassBuilderTestResult {
-
+  
   @Test
   public void testDefineClassImplementingInterface() {
     String cls = ClassBuilder.define("org.foo.Bar")
@@ -112,6 +112,21 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
 
     assertEquals("failed to generate abstract class", ABSTRACT_CLASS, cls);
   }
+  
+  /*@Test
+  public void testDefineClassWithConstructorCallingSuper() {
+    String cls = ClassBuilder
+        .define("org.foo.Foo")
+        .publicScope()
+        .abstractClass()
+        .body()
+        .publicConstructor()
+        //.append(Stmt.create().)
+        .finish()
+        .toJavaString();
+    
+    assertEquals("failed to generate abstract class", CLASS_WITH_CONSTRUCTOR_CALLING_SUPER, cls);
+  }*/
   
   @Test
   public void testDefineClassWithMethodWithThrowsDeclaration() {

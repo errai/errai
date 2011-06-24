@@ -56,7 +56,7 @@ public class SwitchBlock extends AbstractStatement {
   private Statement switchExprStmt;
   private String switchExpr;
   private Map<LiteralValue<?>, CaseBlock> caseBlocks = new LinkedHashMap<LiteralValue<?>, CaseBlock>();
-  private BlockStatement defaultCase;
+  private BlockStatement defaultBlock;
 
   public SwitchBlock() {}
 
@@ -76,11 +76,11 @@ public class SwitchBlock extends AbstractStatement {
     return caseBlocks.get(value).block;
   }
 
-  public BlockStatement getDefaultCaseBlock() {
-    if (defaultCase == null)
-      defaultCase = new BlockStatement();
+  public BlockStatement getDefaultBlock() {
+    if (defaultBlock == null)
+      defaultBlock = new BlockStatement();
 
-    return defaultCase;
+    return defaultBlock;
   }
 
   public void setSwitchExpr(Statement switchExprStmt) {
@@ -109,13 +109,12 @@ public class SwitchBlock extends AbstractStatement {
               value.generate(context) + " is not a valid value for " + switchExprStmt.getType().getFullyQualifiedName());
         }
         // case labels must be unqualified
-        Context ctx = Context.create(context);
         String val = value.generate(context);
         int idx = val.lastIndexOf('.');
         if (idx != -1) {
           val = val.substring(idx + 1);
         }
-        buf.append("case ").append(val).append(": ").append(caseBlocks.get(value).block.generate(ctx));
+        buf.append("case ").append(val).append(": ").append(getCaseBlock(value).generate(Context.create(context)));
 
         if (!caseBlocks.get(value).fallThrough) {
           buf.append(" break;");
@@ -123,13 +122,12 @@ public class SwitchBlock extends AbstractStatement {
         buf.append("\n");
       }
     }
-    else if (defaultCase == null) {
-      defaultCase = new BlockStatement();
+    else if (defaultBlock == null) {
+      defaultBlock = new BlockStatement();
     }
 
-    if (defaultCase != null) {
-      Context ctx = Context.create(context);
-      buf.append("default: ").append(defaultCase.generate(ctx)).append(" break;\n");
+    if (defaultBlock != null) {
+      buf.append("default: ").append(defaultBlock.generate(Context.create(context))).append(" break;\n");
     }
 
     return buf.append("}").toString();

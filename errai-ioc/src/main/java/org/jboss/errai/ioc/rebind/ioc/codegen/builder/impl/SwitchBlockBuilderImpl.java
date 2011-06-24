@@ -183,7 +183,7 @@ public class SwitchBlockBuilderImpl extends AbstractStatementBuilder implements 
   }
 
   public BlockBuilder<StatementEnd> default_() {
-    return new BlockBuilder<StatementEnd>(switchBlock.getDefaultCaseBlock(),
+    return new BlockBuilder<StatementEnd>(switchBlock.getDefaultBlock(),
         new BuildCallback<StatementEnd>() {
 
           public StatementEnd callback(Statement statement) {
