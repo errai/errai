@@ -16,7 +16,9 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.control;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.AbstractStatement;
@@ -24,7 +26,6 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.BlockStatement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
-import org.jboss.errai.ioc.rebind.ioc.codegen.literal.IntValue;
 import org.jboss.errai.ioc.rebind.ioc.codegen.literal.LiteralValue;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 
@@ -32,6 +33,15 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class SwitchBlock extends AbstractStatement {
+  private List<Class<?>> supportedTypes = new ArrayList<Class<?>>() {
+    {
+      add(Integer.class);
+      add(Character.class);
+      add(Short.class);
+      add(Byte.class);
+      add(Enum.class);
+    }
+  };
 
   private class CaseBlock {
     public CaseBlock(BlockStatement block, boolean fallThrough) {
@@ -43,27 +53,22 @@ public class SwitchBlock extends AbstractStatement {
     private boolean fallThrough;
   }
 
-  private Statement statement;
+  private Statement switchExprStmt;
+  private String switchExpr;
   private Map<LiteralValue<?>, CaseBlock> caseBlocks = new LinkedHashMap<LiteralValue<?>, CaseBlock>();
   private BlockStatement defaultCase;
 
-  public SwitchBlock(Statement statement) {
-    this.statement = statement;
+  public SwitchBlock() {}
+
+  public SwitchBlock(Statement switchExprStmt) {
+    this.switchExprStmt = switchExprStmt;
   }
 
-  public void addCase(IntValue value) {
+  public void addCase(LiteralValue<?> value) {
     addCase(value, false);
   }
 
-  public void addCase(IntValue value, boolean fallThrough) {
-    caseBlocks.put(value, new CaseBlock(new BlockStatement(), fallThrough));
-  }
-
-  public void addCase(LiteralValue<Enum<?>> value) {
-    addCase(value, false);
-  }
-
-  public void addCase(LiteralValue<Enum<?>> value, boolean fallThrough) {
+  public void addCase(LiteralValue<?> value, boolean fallThrough) {
     caseBlocks.put(value, new CaseBlock(new BlockStatement(), fallThrough));
   }
 
@@ -78,32 +83,39 @@ public class SwitchBlock extends AbstractStatement {
     return defaultCase;
   }
 
+  public void setSwitchExpr(Statement switchExprStmt) {
+    this.switchExprStmt = switchExprStmt;
+  }
+
+  public void setSwitchExpr(String expr) {
+    this.switchExpr = expr;
+  }
+
   public String generate(Context context) {
     StringBuilder buf = new StringBuilder("switch (");
-    buf.append(statement.generate(context)).append(") {\n ");
-
-    if (!MetaClassFactory.get(Integer.class).isAssignableFrom(statement.getType().asBoxed())
-        && !MetaClassFactory.get(Enum.class).isAssignableFrom(statement.getType())) {
-      throw new InvalidTypeException("Only int values or enum constants are permitted in switch statements");
+    if (switchExpr == null) {
+      buf.append(switchExprStmt.generate(context)).append(") {\n ");
     }
-    
+    else {
+      buf.append(switchExpr).append(") {\n ");
+    }
+
+    checkSwitchExprType();
+
     if (!caseBlocks.isEmpty()) {
       for (LiteralValue<?> value : caseBlocks.keySet()) {
-        if (!statement.getType().asBoxed().isAssignableFrom(value.getType())) {
+        if (!switchExprStmt.getType().asBoxed().isAssignableFrom(value.getType())) {
           throw new InvalidTypeException(
-              value.generate(context)+" is not a valid value for " + statement.getType().getFullyQualifiedName());
+              value.generate(context) + " is not a valid value for " + switchExprStmt.getType().getFullyQualifiedName());
         }
-        
         // case labels must be unqualified
         Context ctx = Context.create(context);
         String val = value.generate(context);
         int idx = val.lastIndexOf('.');
         if (idx != -1) {
-          val = val.substring(idx+1);
+          val = val.substring(idx + 1);
         }
-        
-        buf.append("case ").append(val).append(": ")
-            .append(caseBlocks.get(value).block.generate(ctx));
+        buf.append("case ").append(val).append(": ").append(caseBlocks.get(value).block.generate(ctx));
 
         if (!caseBlocks.get(value).fallThrough) {
           buf.append(" break;");
@@ -121,5 +133,18 @@ public class SwitchBlock extends AbstractStatement {
     }
 
     return buf.append("}").toString();
+  }
+
+  private void checkSwitchExprType() {
+    boolean validType = false;
+    for (Class<?> clazz : supportedTypes) {
+      if (MetaClassFactory.get(clazz).isAssignableFrom(switchExprStmt.getType().asBoxed())) {
+        validType = true;
+        break;
+      }
+    }
+    if (!validType)
+      throw new InvalidTypeException("Type not permitted in switch statements:" + 
+          switchExprStmt.getType().getFullyQualifiedName());
   }
 }

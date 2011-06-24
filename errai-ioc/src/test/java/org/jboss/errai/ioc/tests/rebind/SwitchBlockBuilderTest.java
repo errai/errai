@@ -35,7 +35,7 @@ public class SwitchBlockBuilderTest extends AbstractStatementBuilderTest impleme
   }
 
   @Test
-  public void testInvalidSwitchStatment() {
+  public void testSwitchBlockWithInvalidStatement() {
     try {
       StatementBuilder.create()
           .switch_(Stmt.create().loadStatic(System.class, "out"))
@@ -80,7 +80,7 @@ public class SwitchBlockBuilderTest extends AbstractStatementBuilderTest impleme
   }
 
   @Test
-  public void testEmptySwitchBlock() {
+  public void testSwitchBlockOnIntEmpty() {
     String s = StatementBuilder.create()
         .addVariable("n", int.class)
         .switch_(Stmt.create().loadVariable("n"))
@@ -90,7 +90,7 @@ public class SwitchBlockBuilderTest extends AbstractStatementBuilderTest impleme
   }
 
   @Test
-  public void testIntSwitchBlock() {
+  public void testSwitchBlockOnInt() {
     String s = StatementBuilder.create()
         .addVariable("n", int.class)
         .switch_(Stmt.create().loadVariable("n"))
@@ -108,23 +108,7 @@ public class SwitchBlockBuilderTest extends AbstractStatementBuilderTest impleme
   }
 
   @Test
-  public void testIntegerSwitchBlockWithoutDefault() {
-    String s = StatementBuilder.create()
-        .addVariable("n", Integer.class)
-        .switch_(Stmt.create().loadVariable("n"))
-        .case_(0)
-        .append(Stmt.create().loadStatic(System.class, "out").invoke("println", "0"))
-        .append(Stmt.create().loadStatic(System.class, "out").invoke("println", "break"))
-        .finish()
-        .case_(1)
-        .finish()
-        .toJavaString();
-
-    assertEquals("Failed to generate Integer switch block without default", SWITCH_BLOCK_INTEGER_NO_DEFAULT, s);
-  }
-
-  @Test
-  public void testEnumSwitchBlock() {
+  public void testSwitchBlockOnEnum() {
     Context c = Context.create().autoImport();
     String s = StatementBuilder.create(c)
         .addVariable("t", TestEnum.class)
@@ -141,6 +125,22 @@ public class SwitchBlockBuilderTest extends AbstractStatementBuilderTest impleme
 
     assertEquals("Failed to generate enum switch block", SWITCH_BLOCK_ENUM, s);
   }
+  
+  @Test
+  public void testSwitchBlockWithoutDefaultBlock() {
+    String s = StatementBuilder.create()
+        .addVariable("n", Integer.class)
+        .switch_(Stmt.create().loadVariable("n"))
+        .case_(0)
+        .append(Stmt.create().loadStatic(System.class, "out").invoke("println", "0"))
+        .append(Stmt.create().loadStatic(System.class, "out").invoke("println", "break"))
+        .finish()
+        .case_(1)
+        .finish()
+        .toJavaString();
+
+    assertEquals("Failed to generate Integer switch block without default", SWITCH_BLOCK_INTEGER_NO_DEFAULT, s);
+  }
 
   @Test
   public void testSwitchBlockWithFallThrough() {
@@ -150,11 +150,68 @@ public class SwitchBlockBuilderTest extends AbstractStatementBuilderTest impleme
         .caseFallThrough(0)
         .finish()
         .case_(1)
-        .append(Stmt.create().loadStatic(System.class, "out").invoke("println", "0"))
+        .append(Stmt.create().loadStatic(System.class, "out").invoke("println", "1"))
         .append(Stmt.create().loadStatic(System.class, "out").invoke("println", "break"))
         .finish()
         .toJavaString();
 
-    assertEquals("Failed to generate int switch block", SWITCH_BLOCK_INT_FALLTHROUGH, s);
+    assertEquals("Failed to generate int switch block with fallthrough", SWITCH_BLOCK_INT_FALLTHROUGH, s);
+  }
+  
+  @Test
+  public void testSwitchBlockChained() {
+    String s = StatementBuilder.create()
+        .addVariable("n", int.class)
+        .loadVariable("n")
+        .switch_()
+        .case_(0)
+        .append(Stmt.create().loadStatic(System.class, "out").invoke("println", "0"))
+        .append(Stmt.create().loadStatic(System.class, "out").invoke("println", "break"))
+        .finish()
+        .case_(1)
+        .finish()
+        .default_()
+        .finish()
+        .toJavaString();
+
+    assertEquals("Failed to generate chained switch block", SWITCH_BLOCK_INT, s);
+  }
+  
+  @Test
+  public void testSwitchBlockOnCharChained() {
+    String s = StatementBuilder.create()
+        .addVariable("c", char.class)
+        .loadVariable("c")
+        .switch_()
+        .case_('a')
+        .append(Stmt.create().loadStatic(System.class, "out").invoke("println", "a"))
+        .finish()
+        .case_('b')
+        .finish()
+        .default_()
+        .finish()
+        .toJavaString();
+    
+    assertEquals("Failed to generate char switch block", SWITCH_BLOCK_CHAR_CHAINED, s);
+  }
+  
+  @Test
+  public void testSwitchBlockChainedOnInvocation() {
+    String s = StatementBuilder.create()
+        .addVariable("str", String.class)
+        .loadVariable("str")
+        .invoke("length")
+        .switch_()
+        .case_(0)
+        .append(Stmt.create().loadStatic(System.class, "out").invoke("println", "0"))
+        .append(Stmt.create().loadStatic(System.class, "out").invoke("println", "break"))
+        .finish()
+        .case_(1)
+        .finish()
+        .default_()
+        .finish()
+        .toJavaString();
+    
+    assertEquals("Failed to generate switch block chained on invocation", SWITCH_BLOCK_CHAINED_INVOCATION, s);
   }
 }

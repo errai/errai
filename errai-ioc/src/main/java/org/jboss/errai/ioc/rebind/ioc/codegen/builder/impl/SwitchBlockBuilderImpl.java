@@ -20,33 +20,50 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BuildCallback;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.CaseBlockBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ContextualSwitchBlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementEnd;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.SwitchBlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.CallWriter;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DeferredCallElement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DeferredCallback;
 import org.jboss.errai.ioc.rebind.ioc.codegen.control.SwitchBlock;
+import org.jboss.errai.ioc.rebind.ioc.codegen.literal.ByteValue;
+import org.jboss.errai.ioc.rebind.ioc.codegen.literal.CharValue;
 import org.jboss.errai.ioc.rebind.ioc.codegen.literal.IntValue;
 import org.jboss.errai.ioc.rebind.ioc.codegen.literal.LiteralFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.literal.LiteralValue;
+import org.jboss.errai.ioc.rebind.ioc.codegen.literal.ShortValue;
 
 /**
  * StatementBuilder to generate switch blocks.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class SwitchBlockBuilderImpl extends AbstractStatementBuilder implements SwitchBlockBuilder, CaseBlockBuilder {
+public class SwitchBlockBuilderImpl extends AbstractStatementBuilder implements SwitchBlockBuilder,
+    ContextualSwitchBlockBuilder, CaseBlockBuilder {
+  
   private SwitchBlock switchBlock;
 
   protected SwitchBlockBuilderImpl(Context context, CallElementBuilder callElementBuilder) {
     super(context, callElementBuilder);
   }
 
+  public CaseBlockBuilder switch_() {
+    return switch_(new SwitchBlock());
+  }
+  
   public CaseBlockBuilder switch_(Statement statement) {
-    switchBlock = new SwitchBlock(statement);
+    return switch_(new SwitchBlock(statement));
+  }
 
+  private CaseBlockBuilder switch_(final SwitchBlock switchBlock) {
+    this.switchBlock = switchBlock;
     appendCallElement(new DeferredCallElement(new DeferredCallback() {
       public void doDeferred(CallWriter writer, Context context, Statement statement) {
+        if (statement != null) {
+          switchBlock.setSwitchExpr(statement);
+          switchBlock.setSwitchExpr(writer.getCallString());
+        }
         writer.reset();
         writer.append(switchBlock.generate(Context.create(context)));
       }
@@ -54,7 +71,7 @@ public class SwitchBlockBuilderImpl extends AbstractStatementBuilder implements 
 
     return this;
   }
-
+  
   public BlockBuilder<CaseBlockBuilder> case_(IntValue value) {
     switchBlock.addCase(value, false);
     return caseBlock(value);
@@ -62,6 +79,36 @@ public class SwitchBlockBuilderImpl extends AbstractStatementBuilder implements 
 
   public BlockBuilder<CaseBlockBuilder> case_(int value) {
     IntValue val = (IntValue) LiteralFactory.getLiteral(context, value);
+    return case_(val);
+  }
+
+  public BlockBuilder<CaseBlockBuilder> case_(CharValue value) {
+    switchBlock.addCase(value, false);
+    return caseBlock(value);
+  }
+  
+  public BlockBuilder<CaseBlockBuilder> case_(char value) {
+    CharValue val = (CharValue) LiteralFactory.getLiteral(context, value);
+    return case_(val);
+  }
+
+  public BlockBuilder<CaseBlockBuilder> case_(ByteValue value) {
+    switchBlock.addCase(value, false);
+    return caseBlock(value);
+  }
+  
+  public BlockBuilder<CaseBlockBuilder> case_(byte value) {
+    ByteValue val = (ByteValue) LiteralFactory.getLiteral(context, value);
+    return case_(val);
+  }
+
+  public BlockBuilder<CaseBlockBuilder> case_(ShortValue value) {
+    switchBlock.addCase(value, false);
+    return caseBlock(value);
+  }
+
+  public BlockBuilder<CaseBlockBuilder> case_(short value) {
+    ShortValue val = (ShortValue) LiteralFactory.getLiteral(context, value);
     return case_(val);
   }
 
@@ -74,14 +121,44 @@ public class SwitchBlockBuilderImpl extends AbstractStatementBuilder implements 
     LiteralValue<Enum<?>> val = (LiteralValue<Enum<?>>) LiteralFactory.getLiteral(context, value);
     return case_(val);
   }
-  
+
   public BlockBuilder<CaseBlockBuilder> caseFallThrough(IntValue value) {
     switchBlock.addCase(value, true);
     return caseBlock(value);
   }
 
   public BlockBuilder<CaseBlockBuilder> caseFallThrough(int value) {
-    IntValue val = (IntValue) LiteralFactory.getLiteral(value);
+    IntValue val = (IntValue) LiteralFactory.getLiteral(context, value);
+    return caseFallThrough(val);
+  }
+
+  public BlockBuilder<CaseBlockBuilder> caseFallThrough(CharValue value) {
+    switchBlock.addCase(value, true);
+    return caseBlock(value);
+  }
+  
+  public BlockBuilder<CaseBlockBuilder> caseFallThrough(char value) {
+    CharValue val = (CharValue) LiteralFactory.getLiteral(context, value);
+    return caseFallThrough(val);
+  }
+
+  public BlockBuilder<CaseBlockBuilder> caseFallThrough(ByteValue value) {
+    switchBlock.addCase(value, true);
+    return caseBlock(value);
+  }
+  
+  public BlockBuilder<CaseBlockBuilder> caseFallThrough(byte value) {
+    ByteValue val = (ByteValue) LiteralFactory.getLiteral(context, value);
+    return caseFallThrough(val);
+  }
+
+  public BlockBuilder<CaseBlockBuilder> caseFallThrough(ShortValue value) {
+    switchBlock.addCase(value, true);
+    return caseBlock(value);
+  }
+
+  public BlockBuilder<CaseBlockBuilder> caseFallThrough(short value) {
+    ShortValue val = (ShortValue) LiteralFactory.getLiteral(context, value);
     return caseFallThrough(val);
   }
 
@@ -91,10 +168,10 @@ public class SwitchBlockBuilderImpl extends AbstractStatementBuilder implements 
   }
 
   public BlockBuilder<CaseBlockBuilder> caseFallThrough(Enum<?> value) {
-    LiteralValue<Enum<?>> val = (LiteralValue<Enum<?>>) LiteralFactory.getLiteral(value);
+    LiteralValue<Enum<?>> val = (LiteralValue<Enum<?>>) LiteralFactory.getLiteral(context, value);
     return caseFallThrough(val);
   }
-  
+
   private BlockBuilder<CaseBlockBuilder> caseBlock(LiteralValue<?> value) {
     return new BlockBuilder<CaseBlockBuilder>(switchBlock.getCaseBlock(value),
         new BuildCallback<CaseBlockBuilder>() {

@@ -73,6 +73,9 @@ public class LiteralFactory {
     else if (o instanceof Integer) {
       return new IntValue((Integer) o);
     }
+    else if (o instanceof Character) {
+      return new CharValue((Character) o);
+    }
     else if (o instanceof Boolean) {
       return new BooleanValue((Boolean) o);
     }

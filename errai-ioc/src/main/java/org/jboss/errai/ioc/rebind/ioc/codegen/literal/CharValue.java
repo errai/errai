@@ -29,6 +29,6 @@ public class CharValue extends LiteralValue<Character> {
 
   @Override
   public String getCanonicalString(Context context) {
-    return getValue().toString();
+    return "'"+getValue().toString()+"'";
   }
 }

@@ -49,6 +49,20 @@ public interface SwitchBlockBuilderTestResult {
   public static final String SWITCH_BLOCK_INT_FALLTHROUGH =
       "     switch (n) {\n" +
           "   case 0:" +
-          "   case 1: System.out.println(\"0\"); System.out.println(\"break\"); break;" +
+          "   case 1: System.out.println(\"1\"); System.out.println(\"break\"); break;" +
           " } ";
+
+  public static final String SWITCH_BLOCK_CHAINED_INVOCATION =
+      "     switch (str.length()) {\n" +
+          "   case 0: System.out.println(\"0\"); System.out.println(\"break\"); break;" +
+          "   case 1: break;" +
+          "   default: break;" +
+          " } ";
+  
+  public static final String SWITCH_BLOCK_CHAR_CHAINED =
+    "     switch (c) {\n" +
+        "   case 'a': System.out.println(\"a\"); break;" +
+        "   case 'b': break;" +
+        "   default: break;" +
+        " } ";
 }

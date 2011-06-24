@@ -18,21 +18,38 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.BlockBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.literal.ByteValue;
+import org.jboss.errai.ioc.rebind.ioc.codegen.literal.CharValue;
 import org.jboss.errai.ioc.rebind.ioc.codegen.literal.IntValue;
 import org.jboss.errai.ioc.rebind.ioc.codegen.literal.LiteralValue;
+import org.jboss.errai.ioc.rebind.ioc.codegen.literal.ShortValue;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface CaseBlockBuilder extends Statement, Builder {
   BlockBuilder<CaseBlockBuilder> case_(int value);
+  BlockBuilder<CaseBlockBuilder> case_(byte value);
+  BlockBuilder<CaseBlockBuilder> case_(short value);
+  BlockBuilder<CaseBlockBuilder> case_(char value);
   BlockBuilder<CaseBlockBuilder> case_(Enum<?> value);
+  
   BlockBuilder<CaseBlockBuilder> case_(IntValue value);
+  BlockBuilder<CaseBlockBuilder> case_(ByteValue value);
+  BlockBuilder<CaseBlockBuilder> case_(ShortValue value);
+  BlockBuilder<CaseBlockBuilder> case_(CharValue value);
   BlockBuilder<CaseBlockBuilder> case_(LiteralValue<Enum<?>> value);
 
   BlockBuilder<CaseBlockBuilder> caseFallThrough(int value);
+  BlockBuilder<CaseBlockBuilder> caseFallThrough(byte value);
+  BlockBuilder<CaseBlockBuilder> caseFallThrough(short value);
+  BlockBuilder<CaseBlockBuilder> caseFallThrough(char value);
   BlockBuilder<CaseBlockBuilder> caseFallThrough(Enum<?> value);
+  
   BlockBuilder<CaseBlockBuilder> caseFallThrough(IntValue value);
+  BlockBuilder<CaseBlockBuilder> caseFallThrough(ByteValue value);
+  BlockBuilder<CaseBlockBuilder> caseFallThrough(ShortValue value);
+  BlockBuilder<CaseBlockBuilder> caseFallThrough(CharValue value);
   BlockBuilder<CaseBlockBuilder> caseFallThrough(LiteralValue<Enum<?>> value);
 
   BlockBuilder<StatementEnd> default_();
