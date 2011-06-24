@@ -64,15 +64,53 @@ public interface ClassBuilderTestResult {
           "\n" +
           " public abstract class Foo {\n" +
           "   public Foo() {" +
-          "     super()" +  
+          "     super()" +
           "   }" +
           " }";
 
-  public static final String CLASS_WITH_METHOD_WITH_THROWS_DECLARATION =
+  public static final String CLASS_WITH_METHOD_HAVING_THROWS_DECLARATION =
       "     package org.foo;\n" +
           "\n" +
           " public class Foo {\n" +
           "   public void initialize() throws Exception, IllegalArgumentException {" +
           "   }" +
           " }";
+
+  public static final String CLASS_WITH_METHODS_OF_ALL_SCOPES =
+      "     package org.foo;\n" +
+          "\n" +
+          " public class Foo {\n" +
+          "   public void publicMethod() {" +
+          "   }" +
+          "   protected void protectedMethod() {" +
+          "   }" +
+          "   void packagePrivateMethod() {" +
+          "   }" +
+          "   private void privateMethod() {" +
+          "   }" +
+          " }";
+
+  public static final String CLASS_WITH_FIELDS_OF_ALL_SCOPES =
+      "     package org.foo;\n" +
+          "\n" +
+          " public class Foo {\n" +
+          "   public int publicField;\n" +
+          "   protected int protectedField;\n" +
+          "   int packagePrivateField;\n" +
+          "   private int privateField;\n" +
+          " }";
+  
+  public static final String CLASS_WITH_CONSTRUCTORS_OF_ALL_SCOPES =
+    "     package org.foo;\n" +
+        "\n" +
+        " public class Foo {\n" +
+        "   public Foo() {" +
+        "   }" +
+        "   protected Foo() {" +
+        "   }" +
+        "   Foo() {" +
+        "   }" +
+        "   private Foo() {" +
+        "   }" +
+        " }";
 }

@@ -24,6 +24,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Parameter;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -31,7 +32,7 @@ import org.junit.Test;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ClassBuilderTest extends AbstractStatementBuilderTest implements ClassBuilderTestResult {
-  
+
   @Test
   public void testDefineClassImplementingInterface() {
     String cls = ClassBuilder.define("org.foo.Bar")
@@ -82,10 +83,10 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
 
     assertEquals("failed to generate class definition with accessor methods", CLASS_WITH_ACCESSOR_METHODS, cls);
   }
-  
+
   @Test
   public void testDefineClassWithParent() {
-    
+
     String cls = ClassBuilder
         .define("org.foo.Foo", String.class)
         .publicScope()
@@ -99,7 +100,7 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
 
   @Test
   public void testDefineAbstractClass() {
-    
+
     String cls = ClassBuilder
         .define("org.foo.Foo")
         .publicScope()
@@ -111,25 +112,25 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
 
     assertEquals("failed to generate abstract class", ABSTRACT_CLASS, cls);
   }
-  
-  /*@Test
-  public void testDefineClassWithConstructorCallingSuper() {
-    String cls = ClassBuilder
-        .define("org.foo.Foo")
+
+  @Ignore @Test 
+  public void testDefineClassWithConstructorCallingSuper() { 
+    String cls = ClassBuilder.define("org.foo.Foo")
         .publicScope()
         .abstractClass()
         .body()
-        .publicConstructor()
-        //.append(Stmt.create().)
+        .publicConstructor() 
+        .append(null)
         .finish()
         .toJavaString();
     
-    assertEquals("failed to generate abstract class", CLASS_WITH_CONSTRUCTOR_CALLING_SUPER, cls);
-  }*/
-  
+    assertEquals("failed to generate class with constructor calling super()", 
+        CLASS_WITH_CONSTRUCTOR_CALLING_SUPER, cls); 
+    }
+
   @Test
   public void testDefineClassWithMethodWithThrowsDeclaration() {
-    
+
     String cls = ClassBuilder
         .define("org.foo.Foo")
         .publicScope()
@@ -139,9 +140,71 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
         .finish()
         .toJavaString();
 
-    assertEquals("failed to generate abstract class", CLASS_WITH_METHOD_WITH_THROWS_DECLARATION, cls);
+    assertEquals("failed to generate class with method having throws declaration",
+        CLASS_WITH_METHOD_HAVING_THROWS_DECLARATION, cls);
+  }
+
+  @Test
+  public void testDefineClassWithMethodsOfAllScopes() {
+
+    String cls = ClassBuilder
+        .define("org.foo.Foo")
+        .publicScope()
+        .body()
+        .publicMethod(void.class, "publicMethod")
+        .finish()
+        .protectedMethod(void.class, "protectedMethod")
+        .finish()
+        .packageMethod(void.class, "packagePrivateMethod")
+        .finish()
+        .privateMethod(void.class, "privateMethod")
+        .finish()
+        .toJavaString();
+
+    assertEquals("failed to generate class with methods of all scopes", CLASS_WITH_METHODS_OF_ALL_SCOPES, cls);
+  }
+
+  @Test
+  public void testDefineClassWithFieldsOfAllScopes() {
+
+    String cls = ClassBuilder
+        .define("org.foo.Foo")
+        .publicScope()
+        .body()
+        .publicField("publicField", int.class)
+        .finish()
+        .protectedField("protectedField", int.class)
+        .finish()
+        .packageField("packagePrivateField", int.class)
+        .finish()
+        .privateField("privateField", int.class)
+        .finish()
+        .toJavaString();
+
+    assertEquals("failed to generate class with fields of all scopes", CLASS_WITH_FIELDS_OF_ALL_SCOPES, cls);
   }
   
+  @Test
+  public void testDefineClassWithConstructorsOfAllScopes() {
+
+    String cls = ClassBuilder
+        .define("org.foo.Foo")
+        .publicScope()
+        .body()
+        .publicConstructor()
+        .finish()
+        .protectedConstructor()
+        .finish()
+        .packageConstructor()
+        .finish()
+        .privateConstructor()
+        .finish()
+        .toJavaString();
+
+    assertEquals("failed to generate class with constructors of all scopes", 
+        CLASS_WITH_CONSTRUCTORS_OF_ALL_SCOPES, cls);
+  }
+
   @Test
   public void testDefineClass() {
     String cls = ClassBuilder.implement(Bootstrapper.class)
