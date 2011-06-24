@@ -17,8 +17,8 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.Parameter;
-import org.jboss.errai.ioc.rebind.ioc.codegen.ThrowsDeclaration;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.BlockBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.MethodBlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
@@ -47,57 +47,33 @@ public interface BaseClassStructureBuilder extends Builder {
   public BlockBuilder<BaseClassStructureBuilder> packageConstructor(Parameter... parms);
 
   // --- //
-  public BlockBuilder<BaseClassStructureBuilder> publicMethod(MetaClass returnType, String name);
-  public BlockBuilder<BaseClassStructureBuilder> publicMethod(Class<?> returnType, String name);
-  public BlockBuilder<BaseClassStructureBuilder> publicMethod(MetaClass returnType, String name, ThrowsDeclaration exceptions);
-  public BlockBuilder<BaseClassStructureBuilder> publicMethod(Class<?> returnType, String name, ThrowsDeclaration exceptions);
-  public BlockBuilder<BaseClassStructureBuilder> publicMethod(MetaClass returnType, String name, MetaClass... parms);
-  public BlockBuilder<BaseClassStructureBuilder> publicMethod(MetaClass returnType, String name, ThrowsDeclaration exceptions, MetaClass... parms);
-  public BlockBuilder<BaseClassStructureBuilder> publicMethod(Class<?> returnType, String name, Class<?>... parms);
-  public BlockBuilder<BaseClassStructureBuilder> publicMethod(Class<?> returnType, String name, ThrowsDeclaration exceptions, Class<?>... parms);
-  public BlockBuilder<BaseClassStructureBuilder> publicMethod(MetaClass returnType, String name, Parameter... parms);
-  public BlockBuilder<BaseClassStructureBuilder> publicMethod(MetaClass returnType, String name, ThrowsDeclaration exceptions, Parameter... parms);
-  public BlockBuilder<BaseClassStructureBuilder> publicMethod(Class<?> returnType, String name, Parameter... parms);
-  public BlockBuilder<BaseClassStructureBuilder> publicMethod(Class<?> returnType, String name, ThrowsDeclaration exceptions, Parameter... parms);
+  public MethodBlockBuilder<BaseClassStructureBuilder> publicMethod(MetaClass returnType, String name);
+  public MethodBlockBuilder<BaseClassStructureBuilder> publicMethod(Class<?> returnType, String name);
+  public MethodBlockBuilder<BaseClassStructureBuilder> publicMethod(MetaClass returnType, String name, MetaClass... parms);
+  public MethodBlockBuilder<BaseClassStructureBuilder> publicMethod(Class<?> returnType, String name, Class<?>... parms);
+  public MethodBlockBuilder<BaseClassStructureBuilder> publicMethod(MetaClass returnType, String name, Parameter... parms);
+  public MethodBlockBuilder<BaseClassStructureBuilder> publicMethod(Class<?> returnType, String name, Parameter... parms);
   
   public BlockBuilder<BaseClassStructureBuilder> privateMethod(MetaClass returnType, String name);
   public BlockBuilder<BaseClassStructureBuilder> privateMethod(Class<?> returnType, String name);
-  public BlockBuilder<BaseClassStructureBuilder> privateMethod(MetaClass returnType, String name, ThrowsDeclaration exceptions);
-  public BlockBuilder<BaseClassStructureBuilder> privateMethod(Class<?> returnType, String name, ThrowsDeclaration exceptions);
   public BlockBuilder<BaseClassStructureBuilder> privateMethod(MetaClass returnType, String name, MetaClass... parms);
-  public BlockBuilder<BaseClassStructureBuilder> privateMethod(MetaClass returnType, String name, ThrowsDeclaration exceptions, MetaClass... parms);
   public BlockBuilder<BaseClassStructureBuilder> privateMethod(Class<?> returnType, String name, Class<?>... parms);
-  public BlockBuilder<BaseClassStructureBuilder> privateMethod(Class<?> returnType, String name, ThrowsDeclaration exceptions, Class<?>... parms);
   public BlockBuilder<BaseClassStructureBuilder> privateMethod(MetaClass returnType, String name, Parameter... parms);
-  public BlockBuilder<BaseClassStructureBuilder> privateMethod(MetaClass returnType, String name, ThrowsDeclaration exceptions, Parameter... parms);
   public BlockBuilder<BaseClassStructureBuilder> privateMethod(Class<?> returnType, String name, Parameter... parms);
-  public BlockBuilder<BaseClassStructureBuilder> privateMethod(Class<?> returnType, String name, ThrowsDeclaration exceptions, Parameter... parms);
   
   public BlockBuilder<BaseClassStructureBuilder> protectedMethod(MetaClass returnType, String name);
   public BlockBuilder<BaseClassStructureBuilder> protectedMethod(Class<?> returnType, String name);
-  public BlockBuilder<BaseClassStructureBuilder> protectedMethod(MetaClass returnType, String name, ThrowsDeclaration exceptions);
-  public BlockBuilder<BaseClassStructureBuilder> protectedMethod(Class<?> returnType, String name, ThrowsDeclaration exceptions);
   public BlockBuilder<BaseClassStructureBuilder> protectedMethod(MetaClass returnType, String name, MetaClass... parms);
-  public BlockBuilder<BaseClassStructureBuilder> protectedMethod(MetaClass returnType, String name, ThrowsDeclaration exceptions, MetaClass... parms);
   public BlockBuilder<BaseClassStructureBuilder> protectedMethod(Class<?> returnType, String name, Class<?>... parms);
-  public BlockBuilder<BaseClassStructureBuilder> protectedMethod(Class<?> returnType, String name, ThrowsDeclaration exceptions, Class<?>... parms);
   public BlockBuilder<BaseClassStructureBuilder> protectedMethod(MetaClass returnType, String name, Parameter... parms);
-  public BlockBuilder<BaseClassStructureBuilder> protectedMethod(MetaClass returnType, String name, ThrowsDeclaration exceptions, Parameter... parms);
   public BlockBuilder<BaseClassStructureBuilder> protectedMethod(Class<?> returnType, String name, Parameter... parms);
-  public BlockBuilder<BaseClassStructureBuilder> protectedMethod(Class<?> returnType, String name, ThrowsDeclaration exceptions, Parameter... parms);
  
   public BlockBuilder<BaseClassStructureBuilder> packageMethod(MetaClass returnType, String name);
   public BlockBuilder<BaseClassStructureBuilder> packageMethod(Class<?> returnType, String name);
-  public BlockBuilder<BaseClassStructureBuilder> packageMethod(MetaClass returnType, String name, ThrowsDeclaration exceptions);
-  public BlockBuilder<BaseClassStructureBuilder> packageMethod(Class<?> returnType, String name, ThrowsDeclaration exceptions);
   public BlockBuilder<BaseClassStructureBuilder> packageMethod(MetaClass returnType, String name, MetaClass... parms);
-  public BlockBuilder<BaseClassStructureBuilder> packageMethod(MetaClass returnType, String name, ThrowsDeclaration exceptions, MetaClass... parms);
   public BlockBuilder<BaseClassStructureBuilder> packageMethod(Class<?> returnType, String name, Class<?>... parms);
-  public BlockBuilder<BaseClassStructureBuilder> packageMethod(Class<?> returnType, String name, ThrowsDeclaration exceptions, Class<?>... parms);
   public BlockBuilder<BaseClassStructureBuilder> packageMethod(MetaClass returnType, String name, Parameter... parms);
-  public BlockBuilder<BaseClassStructureBuilder> packageMethod(MetaClass returnType, String name, ThrowsDeclaration exceptions, Parameter... parms);
   public BlockBuilder<BaseClassStructureBuilder> packageMethod(Class<?> returnType, String name, Parameter... parms);
-  public BlockBuilder<BaseClassStructureBuilder> packageMethod(Class<?> returnType, String name, ThrowsDeclaration exceptions, Parameter... parms);
 
   // -- //
   public FieldBuildInitializer<BaseClassStructureBuilder> publicField(String name, MetaClass type);

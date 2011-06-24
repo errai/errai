@@ -25,8 +25,8 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.Finishable;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class BlockBuilder<T> implements Finishable<T> {
-  private BlockStatement blockStatement;
-  private BuildCallback<T> callback;
+  protected BlockStatement blockStatement;
+  protected BuildCallback<T> callback;
 
   public BlockBuilder() {
     this.blockStatement = new BlockStatement();

@@ -16,14 +16,30 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.*;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.DefParameters;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Parameter;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.ThrowsDeclaration;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BaseClassStructureBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BuildCallback;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.Builder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ClassDefinitionBuilderAbstractOption;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ClassDefinitionBuilderInterfaces;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ClassDefinitionBuilderScope;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.FieldBuildInitializer;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.MethodBuildCallback;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.PrettyPrinter;
-
-import java.util.*;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -244,93 +260,41 @@ public class ClassBuilder implements
   }
 
   // public method //
-  public BlockBuilder<BaseClassStructureBuilder> publicMethod(MetaClass returnType, String name) {
-    return genMethod(Scope.Public, returnType, name, ThrowsDeclaration.none(), DefParameters.none());
+  public MethodBlockBuilder<BaseClassStructureBuilder> publicMethod(MetaClass returnType, String name) {
+    return genMethod(Scope.Public, returnType, name, DefParameters.none());
   }
 
-  public BlockBuilder<BaseClassStructureBuilder> publicMethod(Class<?> returnType, String name) {
+  public MethodBlockBuilder<BaseClassStructureBuilder> publicMethod(Class<?> returnType, String name) {
     return publicMethod(MetaClassFactory.get(returnType), name);
   }
-
-  public BlockBuilder<BaseClassStructureBuilder> publicMethod(MetaClass returnType, String name,
-      ThrowsDeclaration exceptions) {
-    return genMethod(Scope.Public, returnType, name, exceptions, DefParameters.none());
-  }
-  
-  public BlockBuilder<BaseClassStructureBuilder> publicMethod(Class<?> returnType, String name,
-      ThrowsDeclaration exceptions) {
-    return publicMethod(MetaClassFactory.get(returnType), name, exceptions);
-  }
-  
-  public BlockBuilder<BaseClassStructureBuilder> publicMethod(MetaClass returnType, String name, ThrowsDeclaration exceptions, MetaClass... parms) {
-    return genMethod(Scope.Public, returnType, name, exceptions, DefParameters.fromTypeArray(parms));
+    
+  public MethodBlockBuilder<BaseClassStructureBuilder> publicMethod(MetaClass returnType, String name, MetaClass... parms) {
+    return genMethod(Scope.Public, returnType, name, DefParameters.fromTypeArray(parms));
   }
 
-  public BlockBuilder<BaseClassStructureBuilder> publicMethod(Class<?> returnType, String name, ThrowsDeclaration exceptions, Class<?>... parms) {
-    return publicMethod(MetaClassFactory.get(returnType), name, exceptions, MetaClassFactory.fromClassArray(parms));
-  }
-
-  public BlockBuilder<BaseClassStructureBuilder> publicMethod(MetaClass returnType, String name, ThrowsDeclaration exceptions, Parameter... parms) {
-    return genMethod(Scope.Public, returnType, name, exceptions, DefParameters.fromParameters(parms));
-  }
-
-  public BlockBuilder<BaseClassStructureBuilder> publicMethod(Class<?> returnType, String name, ThrowsDeclaration exceptions, Parameter... parms) {
-    return publicMethod(MetaClassFactory.get(returnType), name, exceptions, parms);
-  }
-  
-  public BlockBuilder<BaseClassStructureBuilder> publicMethod(MetaClass returnType, String name, MetaClass... parms) {
-    return genMethod(Scope.Public, returnType, name, ThrowsDeclaration.none(), DefParameters.fromTypeArray(parms));
-  }
-
-  public BlockBuilder<BaseClassStructureBuilder> publicMethod(Class<?> returnType, String name, Class<?>... parms) {
+  public MethodBlockBuilder<BaseClassStructureBuilder> publicMethod(Class<?> returnType, String name, Class<?>... parms) {
     return publicMethod(MetaClassFactory.get(returnType), name, MetaClassFactory.fromClassArray(parms));
   }
 
-  public BlockBuilder<BaseClassStructureBuilder> publicMethod(MetaClass returnType, String name, Parameter... parms) {
-    return genMethod(Scope.Public, returnType, name, ThrowsDeclaration.none(), DefParameters.fromParameters(parms));
+  public MethodBlockBuilder<BaseClassStructureBuilder> publicMethod(MetaClass returnType, String name, Parameter... parms) {
+    return genMethod(Scope.Public, returnType, name, DefParameters.fromParameters(parms));
   }
 
-  public BlockBuilder<BaseClassStructureBuilder> publicMethod(Class<?> returnType, String name, Parameter... parms) {
+  public MethodBlockBuilder<BaseClassStructureBuilder> publicMethod(Class<?> returnType, String name, Parameter... parms) {
     return publicMethod(MetaClassFactory.get(returnType), name, parms);
   }
   
   // private method //
   public BlockBuilder<BaseClassStructureBuilder> privateMethod(MetaClass returnType, String name) {
-    return genMethod(Scope.Private, returnType, name, ThrowsDeclaration.none(), DefParameters.none());
+    return genMethod(Scope.Private, returnType, name, DefParameters.none());
   }
 
   public BlockBuilder<BaseClassStructureBuilder> privateMethod(Class<?> returnType, String name) {
     return privateMethod(MetaClassFactory.get(returnType), name);
   }
 
-  public BlockBuilder<BaseClassStructureBuilder> privateMethod(MetaClass returnType, String name,
-      ThrowsDeclaration exceptions) {
-    return genMethod(Scope.Private, returnType, name, exceptions, DefParameters.none());
-  }
-  
-  public BlockBuilder<BaseClassStructureBuilder> privateMethod(Class<?> returnType, String name,
-      ThrowsDeclaration exceptions) {
-    return privateMethod(MetaClassFactory.get(returnType), name, exceptions);
-  }
-  
-  public BlockBuilder<BaseClassStructureBuilder> privateMethod(MetaClass returnType, String name, ThrowsDeclaration exceptions, MetaClass... parms) {
-    return genMethod(Scope.Private, returnType, name, exceptions, DefParameters.fromTypeArray(parms));
-  }
-
-  public BlockBuilder<BaseClassStructureBuilder> privateMethod(Class<?> returnType, String name, ThrowsDeclaration exceptions, Class<?>... parms) {
-    return privateMethod(MetaClassFactory.get(returnType), name, exceptions, MetaClassFactory.fromClassArray(parms));
-  }
-
-  public BlockBuilder<BaseClassStructureBuilder> privateMethod(MetaClass returnType, String name, ThrowsDeclaration exceptions, Parameter... parms) {
-    return genMethod(Scope.Private, returnType, name, exceptions, DefParameters.fromParameters(parms));
-  }
-
-  public BlockBuilder<BaseClassStructureBuilder> privateMethod(Class<?> returnType, String name, ThrowsDeclaration exceptions, Parameter... parms) {
-    return privateMethod(MetaClassFactory.get(returnType), name, exceptions, parms);
-  }
-  
   public BlockBuilder<BaseClassStructureBuilder> privateMethod(MetaClass returnType, String name, MetaClass... parms) {
-    return genMethod(Scope.Private, returnType, name, ThrowsDeclaration.none(), DefParameters.fromTypeArray(parms));
+    return genMethod(Scope.Private, returnType, name, DefParameters.fromTypeArray(parms));
   }
 
   public BlockBuilder<BaseClassStructureBuilder> privateMethod(Class<?> returnType, String name, Class<?>... parms) {
@@ -338,7 +302,7 @@ public class ClassBuilder implements
   }
 
   public BlockBuilder<BaseClassStructureBuilder> privateMethod(MetaClass returnType, String name, Parameter... parms) {
-    return genMethod(Scope.Private, returnType, name, ThrowsDeclaration.none(), DefParameters.fromParameters(parms));
+    return genMethod(Scope.Private, returnType, name, DefParameters.fromParameters(parms));
   }
 
   public BlockBuilder<BaseClassStructureBuilder> privateMethod(Class<?> returnType, String name, Parameter... parms) {
@@ -347,41 +311,15 @@ public class ClassBuilder implements
   
   // protected method //
   public BlockBuilder<BaseClassStructureBuilder> protectedMethod(MetaClass returnType, String name) {
-    return genMethod(Scope.Protected, returnType, name, ThrowsDeclaration.none(), DefParameters.none());
+    return genMethod(Scope.Protected, returnType, name, DefParameters.none());
   }
 
   public BlockBuilder<BaseClassStructureBuilder> protectedMethod(Class<?> returnType, String name) {
     return protectedMethod(MetaClassFactory.get(returnType), name);
   }
-
-  public BlockBuilder<BaseClassStructureBuilder> protectedMethod(MetaClass returnType, String name,
-      ThrowsDeclaration exceptions) {
-    return genMethod(Scope.Protected, returnType, name, exceptions, DefParameters.none());
-  }
-  
-  public BlockBuilder<BaseClassStructureBuilder> protectedMethod(Class<?> returnType, String name,
-      ThrowsDeclaration exceptions) {
-    return protectedMethod(MetaClassFactory.get(returnType), name, exceptions);
-  }
-  
-  public BlockBuilder<BaseClassStructureBuilder> protectedMethod(MetaClass returnType, String name, ThrowsDeclaration exceptions, MetaClass... parms) {
-    return genMethod(Scope.Protected, returnType, name, exceptions, DefParameters.fromTypeArray(parms));
-  }
-
-  public BlockBuilder<BaseClassStructureBuilder> protectedMethod(Class<?> returnType, String name, ThrowsDeclaration exceptions, Class<?>... parms) {
-    return protectedMethod(MetaClassFactory.get(returnType), name, exceptions, MetaClassFactory.fromClassArray(parms));
-  }
-
-  public BlockBuilder<BaseClassStructureBuilder> protectedMethod(MetaClass returnType, String name, ThrowsDeclaration exceptions, Parameter... parms) {
-    return genMethod(Scope.Protected, returnType, name, exceptions, DefParameters.fromParameters(parms));
-  }
-
-  public BlockBuilder<BaseClassStructureBuilder> protectedMethod(Class<?> returnType, String name, ThrowsDeclaration exceptions, Parameter... parms) {
-    return protectedMethod(MetaClassFactory.get(returnType), name, exceptions, parms);
-  }
   
   public BlockBuilder<BaseClassStructureBuilder> protectedMethod(MetaClass returnType, String name, MetaClass... parms) {
-    return genMethod(Scope.Protected, returnType, name, ThrowsDeclaration.none(), DefParameters.fromTypeArray(parms));
+    return genMethod(Scope.Protected, returnType, name, DefParameters.fromTypeArray(parms));
   }
 
   public BlockBuilder<BaseClassStructureBuilder> protectedMethod(Class<?> returnType, String name, Class<?>... parms) {
@@ -389,7 +327,7 @@ public class ClassBuilder implements
   }
 
   public BlockBuilder<BaseClassStructureBuilder> protectedMethod(MetaClass returnType, String name, Parameter... parms) {
-    return genMethod(Scope.Protected, returnType, name, ThrowsDeclaration.none(), DefParameters.fromParameters(parms));
+    return genMethod(Scope.Protected, returnType, name, DefParameters.fromParameters(parms));
   }
 
   public BlockBuilder<BaseClassStructureBuilder> protectedMethod(Class<?> returnType, String name, Parameter... parms) {
@@ -398,41 +336,15 @@ public class ClassBuilder implements
 
   // package-private method //
   public BlockBuilder<BaseClassStructureBuilder> packageMethod(MetaClass returnType, String name) {
-    return genMethod(Scope.Package, returnType, name, ThrowsDeclaration.none(), DefParameters.none());
+    return genMethod(Scope.Package, returnType, name, DefParameters.none());
   }
 
   public BlockBuilder<BaseClassStructureBuilder> packageMethod(Class<?> returnType, String name) {
     return packageMethod(MetaClassFactory.get(returnType), name);
   }
 
-  public BlockBuilder<BaseClassStructureBuilder> packageMethod(MetaClass returnType, String name,
-      ThrowsDeclaration exceptions) {
-    return genMethod(Scope.Package, returnType, name, exceptions, DefParameters.none());
-  }
-  
-  public BlockBuilder<BaseClassStructureBuilder> packageMethod(Class<?> returnType, String name,
-      ThrowsDeclaration exceptions) {
-    return packageMethod(MetaClassFactory.get(returnType), name, exceptions);
-  }
-  
-  public BlockBuilder<BaseClassStructureBuilder> packageMethod(MetaClass returnType, String name, ThrowsDeclaration exceptions, MetaClass... parms) {
-    return genMethod(Scope.Package, returnType, name, exceptions, DefParameters.fromTypeArray(parms));
-  }
-
-  public BlockBuilder<BaseClassStructureBuilder> packageMethod(Class<?> returnType, String name, ThrowsDeclaration exceptions, Class<?>... parms) {
-    return packageMethod(MetaClassFactory.get(returnType), name, exceptions, MetaClassFactory.fromClassArray(parms));
-  }
-
-  public BlockBuilder<BaseClassStructureBuilder> packageMethod(MetaClass returnType, String name, ThrowsDeclaration exceptions, Parameter... parms) {
-    return genMethod(Scope.Package, returnType, name, exceptions, DefParameters.fromParameters(parms));
-  }
-
-  public BlockBuilder<BaseClassStructureBuilder> packageMethod(Class<?> returnType, String name, ThrowsDeclaration exceptions, Parameter... parms) {
-    return packageMethod(MetaClassFactory.get(returnType), name, exceptions, parms);
-  }
-  
   public BlockBuilder<BaseClassStructureBuilder> packageMethod(MetaClass returnType, String name, MetaClass... parms) {
-    return genMethod(Scope.Package, returnType, name, ThrowsDeclaration.none(), DefParameters.fromTypeArray(parms));
+    return genMethod(Scope.Package, returnType, name, DefParameters.fromTypeArray(parms));
   }
 
   public BlockBuilder<BaseClassStructureBuilder> packageMethod(Class<?> returnType, String name, Class<?>... parms) {
@@ -440,24 +352,22 @@ public class ClassBuilder implements
   }
 
   public BlockBuilder<BaseClassStructureBuilder> packageMethod(MetaClass returnType, String name, Parameter... parms) {
-    return genMethod(Scope.Package, returnType, name, ThrowsDeclaration.none(), DefParameters.fromParameters(parms));
+    return genMethod(Scope.Package, returnType, name, DefParameters.fromParameters(parms));
   }
 
   public BlockBuilder<BaseClassStructureBuilder> packageMethod(Class<?> returnType, String name, Parameter... parms) {
     return packageMethod(MetaClassFactory.get(returnType), name, parms);
   }
 
-
-  private BlockBuilder<BaseClassStructureBuilder> genMethod(final Scope scope,
+  private MethodBlockBuilder<BaseClassStructureBuilder> genMethod(final Scope scope,
                                                             final MetaClass returnType,
                                                             final String name,
-                                                            final ThrowsDeclaration throwsDeclaration,
                                                             final DefParameters defParameters) {
     
     final Context context = Context.create(this.context);
     
-    return new BlockBuilder<BaseClassStructureBuilder>(new BuildCallback<BaseClassStructureBuilder>() {
-      public BaseClassStructureBuilder callback(final Statement statement) {
+    return new MethodBlockBuilder<BaseClassStructureBuilder>(new MethodBuildCallback<BaseClassStructureBuilder>() {
+      public BaseClassStructureBuilder callback(final Statement statement, final ThrowsDeclaration throwsDeclaration) {
         methods.add(new Builder() {
           public String toJavaString() {
             for(Parameter p : defParameters.getParameters()) {

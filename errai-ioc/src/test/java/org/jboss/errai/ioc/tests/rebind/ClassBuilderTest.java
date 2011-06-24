@@ -21,7 +21,6 @@ import java.io.Serializable;
 import org.jboss.errai.ioc.client.InterfaceInjectionContext;
 import org.jboss.errai.ioc.client.api.Bootstrapper;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Parameter;
-import org.jboss.errai.ioc.rebind.ioc.codegen.ThrowsDeclaration;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
@@ -135,7 +134,8 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
         .define("org.foo.Foo")
         .publicScope()
         .body()
-        .publicMethod(void.class, "initialize", ThrowsDeclaration.of(Exception.class, IllegalArgumentException.class))
+        .publicMethod(void.class, "initialize")
+        .throws_(Exception.class, IllegalArgumentException.class)
         .finish()
         .toJavaString();
 
