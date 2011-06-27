@@ -21,6 +21,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanExpression;
 import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.CaseBlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ElseBlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementEnd;
@@ -100,6 +101,9 @@ public class ContextualStatementBuilderImpl extends AbstractStatementBuilder imp
     return new IfBlockBuilderImpl(context, callElementBuilder).if_(op, rhs);
   }
 
+  public CaseBlockBuilder switch_() {
+    return new SwitchBlockBuilderImpl(context, callElementBuilder).switch_();
+  }
   // Value return
   public Statement returnValue() {
     appendCallElement(new ReturnValue());

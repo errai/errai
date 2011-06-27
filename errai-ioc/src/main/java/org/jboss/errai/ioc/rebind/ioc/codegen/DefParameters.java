@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.jboss.errai.ioc.rebind.ioc.CallParameters;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaConstructor;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
@@ -72,8 +71,8 @@ public class DefParameters extends AbstractStatement {
     return new DefParameters(parms);
   }
 
-  public static CallParameters none() {
-    return new CallParameters(Collections.<Statement>emptyList());
+  public static DefParameters none() {
+    return new DefParameters(Collections.<Parameter>emptyList());
   }
 
   public List<Parameter> getParameters() {

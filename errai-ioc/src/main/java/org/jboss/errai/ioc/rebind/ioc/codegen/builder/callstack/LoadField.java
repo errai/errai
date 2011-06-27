@@ -47,10 +47,6 @@ public class LoadField extends AbstractCallElement {
       public MetaClass getType() {
         return field.getType();
       }
-
-      public Context getContext() {
-        return context;
-      }
     };
 
     nextOrReturn(writer, context, statement);

@@ -62,16 +62,12 @@ public class AssignmentBuilder implements Statement {
    
     StringBuilder buf = new StringBuilder();
     for (Statement index : indexes) {
-      buf.append("[").append(index.generate(reference.getContext())).append("]");
+      buf.append("[").append(index.generate(null)).append("]");
     }
     return buf.toString();
   }
 
   public MetaClass getType() {
     return reference.getType();
-  }
-
-  public Context getContext() {
-    return reference.getContext();
   }
 }

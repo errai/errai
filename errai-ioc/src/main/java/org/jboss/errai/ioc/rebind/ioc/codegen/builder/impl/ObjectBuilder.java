@@ -18,7 +18,7 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
 import javax.enterprise.util.TypeLiteral;
 
-import org.jboss.errai.ioc.rebind.ioc.CallParameters;
+import org.jboss.errai.ioc.rebind.ioc.codegen.CallParameters;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
@@ -61,8 +61,12 @@ public class ObjectBuilder extends AbstractStatementBuilder {
     this(type, Context.create());
   }
 
+  ObjectBuilder() {
+     super(Context.create());
+  }
+  
   public static ObjectBuilder newInstanceOf(MetaClass type) {
-    return new ObjectBuilder(type).newInstance();
+    return new ObjectBuilder(type);
   }
 
   public static ObjectBuilder newInstanceOf(Class<?> type) {
@@ -78,7 +82,7 @@ public class ObjectBuilder extends AbstractStatementBuilder {
   }
 
   public static ObjectBuilder newInstanceOf(MetaClass type, Context context) {
-    return new ObjectBuilder(type, context).newInstance();
+    return new ObjectBuilder(type, context);
   }
 
   public static ObjectBuilder newInstanceOf(Class<?> type, Context context) {
@@ -93,12 +97,8 @@ public class ObjectBuilder extends AbstractStatementBuilder {
     return newInstanceOf(MetaClassFactory.get(type), context);
   }
 
-  private ObjectBuilder newInstance() {
-    return this;
-  }
-
   public ObjectBuilder withParameters(Object... parameters) {
-    return withParameters(GenUtil.generateCallParameters(getContext(), parameters));
+    return withParameters(GenUtil.generateCallParameters(context, parameters));
   }
 
   public ObjectBuilder withParameters(Statement... parameters) {

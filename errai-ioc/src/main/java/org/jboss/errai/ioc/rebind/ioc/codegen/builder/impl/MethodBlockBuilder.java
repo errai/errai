@@ -17,39 +17,39 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.BlockStatement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BuildCallback;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.Finishable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.ThrowsDeclaration;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.MethodBuildCallback;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
- * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class BlockBuilder<T> implements Finishable<T> {
-  protected BlockStatement blockStatement;
-  protected BuildCallback<T> callback;
+public class MethodBlockBuilder<T> extends BlockBuilder<T> {
+  private ThrowsDeclaration throwsDeclaration = ThrowsDeclaration.none();
+  private MethodBuildCallback<T> callback;
 
-  public BlockBuilder() {
-    this.blockStatement = new BlockStatement();
-  }
-
-  public BlockBuilder(BuildCallback<T> callback) {
-    this();
+  public MethodBlockBuilder(MethodBuildCallback<T> callback) {
     this.callback = callback;
   }
-
-  public BlockBuilder(BlockStatement blockStatement, BuildCallback<T> callback) {
+  
+  public MethodBlockBuilder(BlockStatement blockStatement, MethodBuildCallback<T> callback) {
     this.blockStatement = blockStatement;
     this.callback = callback;
   }
 
-  public BlockBuilder<T> append(Statement statement) {
-    blockStatement.addStatement(statement);
+  public BlockBuilder<T> throws_(Class<? extends Throwable>... exceptionTypes) {
+    throwsDeclaration = ThrowsDeclaration.of(exceptionTypes);
     return this;
   }
 
+  public BlockBuilder<T> throws_(MetaClass... exceptions) {
+    throwsDeclaration = ThrowsDeclaration.of(exceptions);
+    return this;
+  }
+  
   public T finish() {
     if (callback != null) {
-      return callback.callback(blockStatement);
+      return callback.callback(blockStatement, throwsDeclaration);
     }
     return null;
   }

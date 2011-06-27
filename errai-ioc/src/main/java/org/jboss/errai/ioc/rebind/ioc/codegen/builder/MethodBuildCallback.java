@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.rebind.ioc.codegen.control;
+package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
+
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.ThrowsDeclaration;
 
 /**
- * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class SwitchCase {
+public interface MethodBuildCallback<T> {
+  public T callback(Statement statement, ThrowsDeclaration throwsDeclaration);
 }

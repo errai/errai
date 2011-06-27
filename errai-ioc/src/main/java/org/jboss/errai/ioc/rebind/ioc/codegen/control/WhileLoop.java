@@ -54,8 +54,4 @@ public class WhileLoop extends AbstractConditionalBlock {
 
     return builder.toString();
   }
-
-  public Context getContext() {
-    return null;
-  }
 }

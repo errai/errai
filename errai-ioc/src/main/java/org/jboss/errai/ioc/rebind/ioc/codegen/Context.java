@@ -23,9 +23,11 @@ import javax.enterprise.util.TypeLiteral;
 import java.util.*;
 
 /**
- * This class represents a {@link Statement} context. It has a reference to its
- * parent context and holds a map of variables to represent a statement's scope.
- *
+ * This class represents a context in which {@link Statement}s are generated. 
+ * It has a reference to its parent context and holds a map of variables to represent 
+ * a {@link Statement}'s scope. It further supports importing classes and packages to avoid 
+ * the use of fully qualified class names.
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class Context {
@@ -36,7 +38,7 @@ public class Context {
   private Context parent = null;
 
   private boolean autoImports = false;
-  
+
   private Context() {
     importedPackages.add("java.lang");
   }
@@ -44,6 +46,7 @@ public class Context {
   private Context(Context parent) {
     this();
     this.parent = parent;
+    this.autoImports = parent.autoImports;
   }
 
   public static Context create() {
@@ -76,27 +79,27 @@ public class Context {
     Variable v = Variable.create(name, type, initialization);
     return addVariable(v);
   }
-  
+
   public Context addVariable(Variable variable) {
     variables.put(variable.getName(), variable);
     return this;
   }
 
   public Context addPackageImport(String packageName) {
-    if (packageName == null) return this;
+    if (packageName == null)
+      return this;
 
     String pkgName = packageName.trim();
-
-    if (pkgName.length() == 0) return this;
+    if (pkgName.length() == 0)
+      return this;
 
     for (char c : pkgName.toCharArray()) {
       if (c != '.' && !Character.isJavaIdentifierPart(c)) {
-        throw new RuntimeException("not a valid package name. (use format: foo.bar.pkg -- do not include '.*' at the end)");
+        throw new RuntimeException("not a valid package name. " +
+            "(use format: foo.bar.pkg -- do not include '.*' at the end)");
       }
     }
-
     importedPackages.add(pkgName);
-
     return this;
   }
 
@@ -119,13 +122,25 @@ public class Context {
   }
 
   public VariableReference getVariable(String name) {
-    Variable found = variables.get(name);
+    return getVariable(name, false);
+  }
 
-    Context parent = this.parent;
-    while (found == null && parent != null) {
-      found = parent.variables.get(name);
-      parent = parent.parent;
+  public VariableReference getClassMember(String name) {
+    return getVariable(name, true);
+  }
+
+  private VariableReference getVariable(String name, boolean mustBeClassMember) {
+    Variable found = null;
+    Context ctx = this;
+    do {
+      found = ctx.variables.get(name);
+      if (mustBeClassMember && found!=null && !found.isClassMember()) {
+        found = null;
+      }
+      ctx = ctx.parent;
     }
+    while (found == null && ctx != null);
+
     if (found == null)
       throw new OutOfScopeException(name);
 
@@ -135,8 +150,10 @@ public class Context {
   public boolean isScoped(Variable variable) {
     Context ctx = this;
     do {
-      if (ctx.variables.containsValue(variable)) return true;
-    } while ((ctx = ctx.parent) != null);
+      if (ctx.variables.containsValue(variable))
+        return true;
+    }
+    while ((ctx = ctx.parent) != null);
     return false;
   }
 
@@ -147,24 +164,31 @@ public class Context {
   public Map<String, Variable> getVariables() {
     return Collections.unmodifiableMap(variables);
   }
-  
-  public void setParent(Context parent) {
-    this.parent = parent;
-  }
 
   public Set<String> getImportedPackages() {
-    return importedPackages;
+    Set<String> allImportedPackages = new HashSet<String>();
+    Context ctx = this;
+    
+    do {
+      allImportedPackages.addAll(ctx.importedPackages);
+    }
+    while ((ctx = ctx.parent) != null);
+    
+    return allImportedPackages;
   }
 
   public Set<MetaClass> getImportedClasses() {
-    return importedClasses;
+    Set<MetaClass> allImportedClasses = new HashSet<MetaClass>();
+    Context ctx = this;
+    do {
+      allImportedClasses.addAll(ctx.importedClasses);
+    }
+    while ((ctx = ctx.parent) != null);
+    
+    return allImportedClasses;
   }
-
+  
   public boolean isAutoImports() {
     return autoImports;
-  }
-
-  public void setAutoImports(boolean autoImports) {
-    this.autoImports = autoImports;
   }
 }

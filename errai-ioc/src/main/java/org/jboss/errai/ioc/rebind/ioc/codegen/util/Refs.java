@@ -39,10 +39,6 @@ public abstract class Refs {
         return null;
       }
 
-      public Context getContext() {
-        return null;
-      }
-
       public Statement getValue() {
         return null;
       }

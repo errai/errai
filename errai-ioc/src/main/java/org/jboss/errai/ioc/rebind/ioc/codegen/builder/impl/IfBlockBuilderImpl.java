@@ -32,10 +32,12 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.util.GenUtil;
 
 /**
  * StatementBuilder to generate if blocks.
- *
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class IfBlockBuilderImpl extends AbstractStatementBuilder implements ContextualIfBlockBuilder, IfBlockBuilder, ElseBlockBuilder {
+public class IfBlockBuilderImpl extends AbstractStatementBuilder implements ContextualIfBlockBuilder, IfBlockBuilder,
+    ElseBlockBuilder {
+  
   private IfBlock ifBlock;
 
   protected IfBlockBuilderImpl(Context context, CallElementBuilder callElementBuilder) {
@@ -51,8 +53,8 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements Cont
     return if_(new BooleanExpressionBuilder());
   }
 
-   public BlockBuilder<ElseBlockBuilder> if_(BooleanOperator op, Statement rhs) {
-    if (rhs == null) 
+  public BlockBuilder<ElseBlockBuilder> if_(BooleanOperator op, Statement rhs) {
+    if (rhs == null)
       rhs = NullLiteral.INSTANCE;
     return if_(new BooleanExpressionBuilder(rhs, op));
   }

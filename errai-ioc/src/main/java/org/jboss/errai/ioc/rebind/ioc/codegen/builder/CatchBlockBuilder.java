@@ -14,27 +14,18 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack;
+package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.BlockBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
- * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class DeclareVariable extends AbstractCallElement {
-  private Variable variable;
+public interface CatchBlockBuilder extends Statement, Builder {
+  BlockBuilder<CatchBlockBuilder> catch_(Class<? extends Throwable> exceptionType, String variableName);
+  BlockBuilder<CatchBlockBuilder> catch_(MetaClass exceptionType, String variableName);
 
-  public DeclareVariable(Variable variable) {
-    this.variable = variable;
-  }
-
-  public void handleCall(CallWriter writer, Context context, Statement statement) {
-    context.addVariable(variable);
-
-    writer.append(variable.generate(context));
-
-    nextOrReturn(writer, context, null);
-  }
+  BlockBuilder<StatementEnd> finally_();
 }

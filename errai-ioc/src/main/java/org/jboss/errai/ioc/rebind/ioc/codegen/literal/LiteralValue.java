@@ -41,10 +41,6 @@ public abstract class LiteralValue<T> implements Statement {
     return getCanonicalString(context);
   }
 
-  public Context getContext() {
-    return null;
-  }
-
   public MetaClass getType() {
     if(value==null) return MetaClassFactory.get(Object.class);
     

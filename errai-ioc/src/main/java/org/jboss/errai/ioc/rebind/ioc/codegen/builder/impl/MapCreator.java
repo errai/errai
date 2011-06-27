@@ -52,8 +52,4 @@ public class MapCreator implements Statement {
   public MetaClass getType() {
     return null;
   }
-
-  public Context getContext() {
-    return null;
-  }
 }

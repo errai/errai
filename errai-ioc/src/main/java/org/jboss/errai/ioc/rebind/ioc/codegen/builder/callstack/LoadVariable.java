@@ -19,7 +19,6 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.VariableReference;
-import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.GenUtil;
 
@@ -32,20 +31,22 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.util.GenUtil;
 public class LoadVariable extends AbstractCallElement {
   private String variableName;
   private Object[] indexes;
+  private boolean classMember;
 
   public LoadVariable(String variableName, Object... indexes) {
     this.variableName = variableName;
     this.indexes = indexes;
   }
 
+  public LoadVariable(String variableName, boolean classMember, Object... indexes) {
+    this(variableName, indexes);
+    this.classMember = classMember;
+  }
+  
   public void handleCall(CallWriter writer, Context context, Statement statement) {
     writer.reset();
 
-    VariableReference ref = context.getVariable(variableName);
-    
-    if (ref == null) {
-      throw new OutOfScopeException(variableName);
-    }
+    VariableReference ref = (classMember)?context.getClassMember(variableName):context.getVariable(variableName);
     
     Statement[] indexes = new Statement[this.indexes.length];
     for (int i = 0; i < indexes.length; i++) {

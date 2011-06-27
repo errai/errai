@@ -56,7 +56,7 @@ public class Variable extends AbstractStatement {
     LiteralValue<?> val = LiteralFactory.isLiteral(initialization);
     if (val != null) {
       this.type = (type == null) ? val.getType() : type;
-      this.value = GenUtil.convert(getContext(), initialization, this.type);
+      this.value = GenUtil.convert(Context.create(), initialization, this.type);
     }
     else {
       // deferred initialization
@@ -150,6 +150,10 @@ public class Variable extends AbstractStatement {
     return value;
   }
 
+  public boolean isClassMember() {
+    return classMember;
+  }
+  
   private String hashString;
 
   private String hashString() {
@@ -172,7 +176,7 @@ public class Variable extends AbstractStatement {
 
   @Override
   public String toString() {
-    return "Variable [name=" + name + ", type=" + type + "]";
+    return "Variable [name=" + name + ", type=" + type + ", classMember=" + classMember + "]";
   }
 
   public String generate(Context context) {

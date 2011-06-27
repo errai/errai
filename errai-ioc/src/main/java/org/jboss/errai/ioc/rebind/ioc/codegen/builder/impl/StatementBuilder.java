@@ -23,6 +23,8 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ArrayInitializationBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.CaseBlockBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.CatchBlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ElseBlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementBegin;
@@ -37,6 +39,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadLiteral;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadVariable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.MethodCall;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.ResetElement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.ThrowException;
 
 /**
  * The root of our fluent StatementBuilder API.
@@ -96,10 +99,18 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
   }
 
   public VariableReferenceContextualStatementBuilder loadVariable(String name, Object... indexes) {
+    if (name.matches("(this.)(.)*"))
+      return loadClassMember(name.replaceFirst("(this.)", ""), indexes);
+    
     appendCallElement(new LoadVariable(name, indexes));
     return new ContextualStatementBuilderImpl(context, callElementBuilder);
   }
 
+  public VariableReferenceContextualStatementBuilder loadClassMember(String name, Object... indexes) {
+    appendCallElement(new LoadVariable(name, true, indexes));
+    return new ContextualStatementBuilderImpl(context, callElementBuilder);
+  }
+  
   public ContextualStatementBuilder loadLiteral(Object o) {
     appendCallElement(new LoadLiteral(o));
     return new ContextualStatementBuilderImpl(context, callElementBuilder);
@@ -123,11 +134,11 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
   }
 
   public ObjectBuilder newObject(Class<?> type) {
-    return ObjectBuilder.newInstanceOf(type);
+    return ObjectBuilder.newInstanceOf(type, context);
   }
 
   public ObjectBuilder newObject(TypeLiteral<?> type) {
-    return ObjectBuilder.newInstanceOf(type);
+    return ObjectBuilder.newInstanceOf(type, context);
   }
 
   public ArrayInitializationBuilder newArray(Class<?> componentType) {
@@ -161,5 +172,23 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
   public BlockBuilder<StatementEnd> for_(Statement initializer, BooleanExpression condition,
       Statement countingExpression) {
     return new LoopBuilderImpl(context, callElementBuilder).for_(initializer, condition, countingExpression);
+  }
+
+  public CaseBlockBuilder switch_(Statement statement) {
+    return new SwitchBlockBuilderImpl(context, callElementBuilder).switch_(statement);
+  }
+  
+  public BlockBuilder<CatchBlockBuilder> try_() {
+    return new TryBlockBuilderImpl(context, callElementBuilder).try_();
+  }
+
+  public StatementEnd throw_(Class<? extends Throwable> throwableType, Object... parameters) {
+    appendCallElement(new ThrowException(throwableType, parameters));
+    return this;
+  }
+
+  public StatementEnd throw_(String exceptionVarName) {
+    appendCallElement(new ThrowException(exceptionVarName));
+    return this;
   }
 }
