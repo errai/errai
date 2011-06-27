@@ -25,7 +25,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ContextualIfBlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ElseBlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.IfBlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementEnd;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.ConditionalBlockElement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.ConditionalBlockCallElement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.control.IfBlock;
 import org.jboss.errai.ioc.rebind.ioc.codegen.literal.NullLiteral;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.GenUtil;
@@ -66,7 +66,7 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements Cont
 
   public BlockBuilder<ElseBlockBuilder> if_(final BooleanExpression condition) {
     ifBlock = new IfBlock(condition);
-    appendCallElement(new ConditionalBlockElement(ifBlock));
+    appendCallElement(new ConditionalBlockCallElement(ifBlock));
 
     return new BlockBuilder<ElseBlockBuilder>(ifBlock.getBlock(), new BuildCallback<ElseBlockBuilder>() {
       public ElseBlockBuilder callback(Statement statement) {

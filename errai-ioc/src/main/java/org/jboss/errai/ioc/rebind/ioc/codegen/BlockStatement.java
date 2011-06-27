@@ -51,7 +51,7 @@ public class BlockStatement extends AbstractStatement {
 
       buf.append(statement.generate(context));
 
-      if (!buf.toString().endsWith(";"))
+      if (!buf.toString().endsWith(";") && !buf.toString().endsWith(":"))
         buf.append(";");
     }
     return buf.toString();

@@ -28,7 +28,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.LoopBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementEnd;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.WhileBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.CallWriter;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.ConditionalBlockElement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.ConditionalBlockCallElement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DeferredCallElement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DeferredCallback;
 import org.jboss.errai.ioc.rebind.ioc.codegen.control.DoWhileLoop;
@@ -86,7 +86,7 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements Context
         return new WhileBuilder() {
 
           public StatementEnd while_(final BooleanExpression condition) {
-            appendCallElement(new ConditionalBlockElement(new DoWhileLoop(condition, body)));
+            appendCallElement(new ConditionalBlockCallElement(new DoWhileLoop(condition, body)));
             return LoopBuilderImpl.this;
           }
 
@@ -125,44 +125,24 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements Context
 
   public BlockBuilder<StatementEnd> while_(final BooleanExpression condition) {
     final BlockStatement body = new BlockStatement();
-    appendCallElement(new ConditionalBlockElement(new WhileLoop(condition, body)));
+    appendCallElement(new ConditionalBlockCallElement(new WhileLoop(condition, body)));
     return createLoopBody(body);
   }
 
   // for loop
   public BlockBuilder<StatementEnd> for_(BooleanExpression condition) {
-    return for_(condition, (Statement) null);
-  }
-
-  public BlockBuilder<StatementEnd> for_(BooleanExpression condition, Statement countingExpression) {
-    return for_(null, condition, countingExpression);
+    return for_((Statement) null, condition);
   }
 
   public BlockBuilder<StatementEnd> for_(Statement initializer, BooleanExpression condition) {
     return for_(initializer, condition, null);
   }
 
-  public  BlockBuilder<StatementEnd> for_(final Statement initializer, final BooleanExpression condition,
+  public BlockBuilder<StatementEnd> for_(final Statement initializer, final BooleanExpression condition,
       final Statement countingExpression) {
+    
     final BlockStatement body = new BlockStatement();
-
-    appendCallElement(new DeferredCallElement(new DeferredCallback() {
-      public void doDeferred(CallWriter writer, Context context, Statement lhs) {
-        ForLoop forLoop = null;
-        if (initializer != null) {
-          forLoop = new ForLoop(condition, body, initializer, countingExpression);
-          if (initializer instanceof Variable) {
-            context.addVariable((Variable) initializer);
-          }
-        }
-        else {
-          forLoop = new ForLoop(condition, body, writer.getCallString(), countingExpression);
-        }
-        writer.reset();
-        writer.append(forLoop.generate(Context.create(context)));
-      }
-    }));
-
+    appendCallElement(new ConditionalBlockCallElement(new ForLoop(condition, body, initializer, countingExpression)));
     return createLoopBody(body);
   }
 

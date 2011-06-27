@@ -20,11 +20,45 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 
 /**
- * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class ResetElement extends AbstractCallElement {
+public class BranchCallElement extends AbstractCallElement {
+  public enum Type {
+    CONTINUE {
+      @Override
+      public String asString() {
+        return "continue";
+      }
+    },
+    BREAK {
+      @Override
+      public String asString() {
+        return "break";
+      }
+    };    
+    public abstract String asString();
+  };
+
+  private String label;
+  private Type type;
+  
+  public BranchCallElement(Type type) {
+    this.type = type;
+  }
+  
+  public BranchCallElement(Type type, String label) {
+    this.type = type;
+    this.label = label;
+  }
+
   public void handleCall(CallWriter writer, Context context, Statement statement) {
-    writer.reset();
-    nextOrReturn(writer, context, null);
+    
+    writer.append(type.asString());
+    
+    if (label != null) {
+      writer.append(" ").append(label);
+    }
+    
+    nextOrReturn(writer, context, statement);
   }
 }

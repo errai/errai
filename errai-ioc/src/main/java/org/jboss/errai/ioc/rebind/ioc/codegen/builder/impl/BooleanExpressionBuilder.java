@@ -56,15 +56,21 @@ public class BooleanExpressionBuilder implements BooleanExpression {
     return new BooleanExpressionBuilder(lhs, null, null);
   }
   
+  public static BooleanExpression create(BooleanOperator operator, Object rhs) {
+    return create(null, operator, rhs);
+  }
+  
   public static BooleanExpression create(Object lhs, BooleanOperator operator, Object rhs) {
-    Statement toLhs;
-    Statement toRhs;
+    Statement toLhs = null;
+    Statement toRhs = null;
 
-    if (lhs instanceof Statement) {
-      toLhs = (Statement) lhs;
-    }
-    else {
-      toLhs = LiteralFactory.getLiteral(lhs);
+    if (lhs != null) {
+      if (lhs instanceof Statement) {
+        toLhs = (Statement) lhs;
+      }
+      else {
+        toLhs = LiteralFactory.getLiteral(lhs);
+      }
     }
 
     if (rhs instanceof Statement) {

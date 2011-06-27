@@ -73,7 +73,7 @@ public class SwitchBlockBuilderImpl extends AbstractStatementBuilder implements 
   }
   
   public BlockBuilder<CaseBlockBuilder> case_(IntValue value) {
-    switchBlock.addCase(value, false);
+    switchBlock.addCase(value);
     return caseBlock(value);
   }
 
@@ -83,7 +83,7 @@ public class SwitchBlockBuilderImpl extends AbstractStatementBuilder implements 
   }
 
   public BlockBuilder<CaseBlockBuilder> case_(CharValue value) {
-    switchBlock.addCase(value, false);
+    switchBlock.addCase(value);
     return caseBlock(value);
   }
   
@@ -93,7 +93,7 @@ public class SwitchBlockBuilderImpl extends AbstractStatementBuilder implements 
   }
 
   public BlockBuilder<CaseBlockBuilder> case_(ByteValue value) {
-    switchBlock.addCase(value, false);
+    switchBlock.addCase(value);
     return caseBlock(value);
   }
   
@@ -103,7 +103,7 @@ public class SwitchBlockBuilderImpl extends AbstractStatementBuilder implements 
   }
 
   public BlockBuilder<CaseBlockBuilder> case_(ShortValue value) {
-    switchBlock.addCase(value, false);
+    switchBlock.addCase(value);
     return caseBlock(value);
   }
 
@@ -113,7 +113,7 @@ public class SwitchBlockBuilderImpl extends AbstractStatementBuilder implements 
   }
 
   public BlockBuilder<CaseBlockBuilder> case_(LiteralValue<Enum<?>> value) {
-    switchBlock.addCase(value, false);
+    switchBlock.addCase(value);
     return caseBlock(value);
   }
 
@@ -121,57 +121,7 @@ public class SwitchBlockBuilderImpl extends AbstractStatementBuilder implements 
     LiteralValue<Enum<?>> val = (LiteralValue<Enum<?>>) LiteralFactory.getLiteral(context, value);
     return case_(val);
   }
-
-  public BlockBuilder<CaseBlockBuilder> caseFallThrough(IntValue value) {
-    switchBlock.addCase(value, true);
-    return caseBlock(value);
-  }
-
-  public BlockBuilder<CaseBlockBuilder> caseFallThrough(int value) {
-    IntValue val = (IntValue) LiteralFactory.getLiteral(context, value);
-    return caseFallThrough(val);
-  }
-
-  public BlockBuilder<CaseBlockBuilder> caseFallThrough(CharValue value) {
-    switchBlock.addCase(value, true);
-    return caseBlock(value);
-  }
   
-  public BlockBuilder<CaseBlockBuilder> caseFallThrough(char value) {
-    CharValue val = (CharValue) LiteralFactory.getLiteral(context, value);
-    return caseFallThrough(val);
-  }
-
-  public BlockBuilder<CaseBlockBuilder> caseFallThrough(ByteValue value) {
-    switchBlock.addCase(value, true);
-    return caseBlock(value);
-  }
-  
-  public BlockBuilder<CaseBlockBuilder> caseFallThrough(byte value) {
-    ByteValue val = (ByteValue) LiteralFactory.getLiteral(context, value);
-    return caseFallThrough(val);
-  }
-
-  public BlockBuilder<CaseBlockBuilder> caseFallThrough(ShortValue value) {
-    switchBlock.addCase(value, true);
-    return caseBlock(value);
-  }
-
-  public BlockBuilder<CaseBlockBuilder> caseFallThrough(short value) {
-    ShortValue val = (ShortValue) LiteralFactory.getLiteral(context, value);
-    return caseFallThrough(val);
-  }
-
-  public BlockBuilder<CaseBlockBuilder> caseFallThrough(LiteralValue<Enum<?>> value) {
-    switchBlock.addCase(value, true);
-    return caseBlock(value);
-  }
-
-  public BlockBuilder<CaseBlockBuilder> caseFallThrough(Enum<?> value) {
-    LiteralValue<Enum<?>> val = (LiteralValue<Enum<?>>) LiteralFactory.getLiteral(context, value);
-    return caseFallThrough(val);
-  }
-
   private BlockBuilder<CaseBlockBuilder> caseBlock(LiteralValue<?> value) {
     return new BlockBuilder<CaseBlockBuilder>(switchBlock.getCaseBlock(value),
         new BuildCallback<CaseBlockBuilder>() {

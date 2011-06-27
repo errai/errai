@@ -31,14 +31,16 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementBegin;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementEnd;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.VariableReferenceContextualStatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.WhileBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.BranchCallElement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DeclareVariable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DynamicLoad;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LabelCallElement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadField;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadLiteral;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadVariable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.MethodCall;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.ResetElement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.ResetCallElement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.ThrowException;
 
 /**
@@ -56,7 +58,7 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
       for (Variable v : context.getDeclaredVariables()) {
         appendCallElement(new DeclareVariable(v));
       }
-      appendCallElement(new ResetElement());
+      appendCallElement(new ResetCallElement());
     }
   }
 
@@ -189,6 +191,31 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
 
   public StatementEnd throw_(String exceptionVarName) {
     appendCallElement(new ThrowException(exceptionVarName));
+    return this;
+  }
+
+  public StatementEnd label(final String name) {
+    appendCallElement(new LabelCallElement(name));
+    return this;
+  }
+
+  public StatementEnd break_() {
+    appendCallElement(new BranchCallElement(BranchCallElement.Type.BREAK));
+    return this;
+  }
+
+  public StatementEnd break_(final String label) {
+    appendCallElement(new BranchCallElement(BranchCallElement.Type.BREAK, label));
+    return this;
+  }
+
+  public StatementEnd continue_() {
+    appendCallElement(new BranchCallElement(BranchCallElement.Type.CONTINUE));
+    return this;
+  }
+
+  public StatementEnd continue_(final String label) {
+    appendCallElement(new BranchCallElement(BranchCallElement.Type.CONTINUE, label));
     return this;
   }
 }

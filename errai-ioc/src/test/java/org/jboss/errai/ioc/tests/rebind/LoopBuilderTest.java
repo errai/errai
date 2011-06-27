@@ -320,7 +320,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   }
 
   @Test
-  public void testForLoopUnchainedWithoutInitializer() {
+  public void testForLoopUnchainedWithoutInitializerAndCountingExpression() {
     String s = StatementBuilder.create()
         .addVariable("i", Integer.class, 0)
         .for_(Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100))
@@ -331,11 +331,11 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   }
 
   @Test
-  public void testForLoopChainedWithInitializer() {
+  public void testForLoopChainedWithoutCountingExpression() {
     String s = StatementBuilder.create()
         .addVariable("i", Integer.class, 0)
         .loadVariable("i")
-        .for_(Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100))
+        .for_(Stmt.create().loadVariable("i").assignValue(0), Bool.expr(BooleanOperator.LessThan, 100))
         .finish().toJavaString();
 
     assertEquals("Failed to generate for loop with initializer and chained lhs",
@@ -355,11 +355,11 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   }
 
   @Test
-  public void testForLoopChainedWithInitializerAndCountingExpression() {
+  public void testForLoopChainedWithCountingExpression() {
     String s = StatementBuilder.create()
         .addVariable("i", Integer.class, 0)
         .loadVariable("i")
-        .for_(Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100),
+        .for_(Stmt.create().loadVariable("i").assignValue(0), Bool.expr(BooleanOperator.LessThan, 100),
             StatementBuilder.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
         .finish().toJavaString();
 
@@ -451,5 +451,91 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .toJavaString();
 
     assertEquals("Failed to generate do while loop with nested expression", DOWHILE_NESTED_EXPRESSION, s);
+  }
+  
+  @Test
+  public void testLoopWithContinue() {
+    String s = StatementBuilder.create()
+    .addVariable("i", Integer.class, 0)
+    .loadVariable("i")
+    .if_(BooleanOperator.GreaterThan, 100)
+    .append(Stmt.create()
+        .for_(Stmt.create().loadVariable("i").assignValue(0), 
+            Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100),
+            StatementBuilder.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
+        .append(Stmt.create()
+            .if_(Bool.expr(Variable.get("i"), BooleanOperator.Equals, 50))
+            .append(Stmt.create().continue_())
+            .finish())
+        .finish())
+    .finish()
+    .toJavaString();
+    
+    assertEquals("Failed to generate loop with continue", LOOP_WITH_CONTINUE, s);
+  }
+  
+  @Test
+  public void testLoopWithContinueAndLabel() {
+    String s = StatementBuilder.create()
+    .addVariable("i", Integer.class, 0)
+    .loadVariable("i")
+    .if_(BooleanOperator.GreaterThan, 100)
+    .append(Stmt.create().label("label"))
+    .append(Stmt.create()
+        .for_(Stmt.create().loadVariable("i").assignValue(0), 
+            Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100),
+            StatementBuilder.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
+        .append(Stmt.create()
+            .if_(Bool.expr(Variable.get("i"), BooleanOperator.Equals, 50))
+            .append(Stmt.create().continue_("label"))
+            .finish())
+        .finish())
+    .finish()
+    .toJavaString();
+    
+    assertEquals("Failed to generate loop with continue and label", LOOP_WITH_CONTINUE_AND_LABEL, s);
+  }
+  
+  @Test
+  public void testLoopWithBreak() {
+    String s = StatementBuilder.create()
+    .addVariable("i", Integer.class, 0)
+    .loadVariable("i")
+    .if_(BooleanOperator.GreaterThan, 100)
+    .append(Stmt.create()
+        .for_(Stmt.create().loadVariable("i").assignValue(0), 
+            Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100),
+            StatementBuilder.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
+        .append(Stmt.create()
+            .if_(Bool.expr(Variable.get("i"), BooleanOperator.Equals, 50))
+            .append(Stmt.create().break_())
+            .finish())
+        .finish())
+    .finish()
+    .toJavaString();
+    
+    assertEquals("Failed to generate loop with continue", LOOP_WITH_BREAK, s);
+  }
+  
+  @Test
+  public void testLoopWithBreakAndLabel() {
+    String s = StatementBuilder.create()
+    .addVariable("i", Integer.class, 0)
+    .loadVariable("i")
+    .if_(BooleanOperator.GreaterThan, 100)
+    .append(Stmt.create().label("label"))
+    .append(Stmt.create()
+        .for_(Stmt.create().loadVariable("i").assignValue(0), 
+            Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100),
+            StatementBuilder.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
+        .append(Stmt.create()
+            .if_(Bool.expr(Variable.get("i"), BooleanOperator.Equals, 50))
+            .append(Stmt.create().break_("label"))
+            .finish())
+        .finish())
+    .finish()
+    .toJavaString();
+   
+    assertEquals("Failed to generate loop with continue and label", LOOP_WITH_BREAK_AND_LABEL, s);
   }
 }

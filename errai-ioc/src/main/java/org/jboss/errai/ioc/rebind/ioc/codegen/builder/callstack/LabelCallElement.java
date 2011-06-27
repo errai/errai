@@ -17,29 +17,22 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Label;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.control.AbstractConditionalBlock;
 
 /**
- * A {@link CallElement} for conditional blocks. It can only be the last
- * element in a chain of calls.
- * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class ConditionalBlockElement extends AbstractCallElement {
-  private AbstractConditionalBlock conditionalBlock;
+public class LabelCallElement extends AbstractCallElement {
   
-  public ConditionalBlockElement(final AbstractConditionalBlock conditionalBlock) {
-    this.conditionalBlock = conditionalBlock;
+  private String name;
+  
+  public LabelCallElement(String name) {
+    this.name = name;
   }
-
-  public void handleCall(CallWriter writer, Context context, Statement lhs) {
-    if (lhs != null) {
-      // The LHS value is on the current callstack. So we grab the value from there at generation time.
-      conditionalBlock.getCondition().setLhs(lhs);
-      conditionalBlock.getCondition().setLhsExpr(writer.getCallString());
-    }
+  
+  public void handleCall(CallWriter writer, Context context, Statement statement) {
     writer.reset();
-    writer.append(conditionalBlock.generate(Context.create(context)));
+    nextOrReturn(writer, context, new Label(name));
   }
 }
