@@ -218,11 +218,12 @@
             </plugin>
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.6</version>
                 <executions>
                     <execution>
                         <phase>integration-test</phase>
                         <configuration>
-                            <tasks>
+                            <target unless="persistence.test.skip" >
                                 <!-- Trick: Japex (but not the test itself)
                                     needs ant.jar and that's part of antrun-Plugin:-).
                                     So we just pass maven.plugin.classpath.
@@ -236,7 +237,7 @@
                                 <ant antfile="${basedir}/build.xml">
                                     <target name="run"/>
                                 </ant>
-                            </tasks>
+                            </target>
                         </configuration>
                         <goals>
                             <goal>run</goal>
