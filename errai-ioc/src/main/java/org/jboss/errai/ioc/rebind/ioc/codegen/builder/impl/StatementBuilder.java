@@ -47,7 +47,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.control.branch.ContinueStatement;
 
 /**
  * The root of our fluent StatementBuilder API.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock <cbrock@redhat.com>
  */
@@ -58,6 +58,7 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
 
     if (context != null) {
       for (Variable v : context.getDeclaredVariables()) {
+        if (v.getName().matches("(this|super)")) continue;
         appendCallElement(new DeclareVariable(v));
       }
       appendCallElement(new ResetCallElement());
@@ -111,7 +112,7 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
   public VariableReferenceContextualStatementBuilder loadVariable(String name, Object... indexes) {
     if (name.matches("(this.)(.)*"))
       return loadClassMember(name.replaceFirst("(this.)", ""), indexes);
-    
+
     appendCallElement(new LoadVariable(name, indexes));
     return new ContextualStatementBuilderImpl(context, callElementBuilder);
   }
@@ -121,7 +122,7 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
     appendCallElement(new LoadVariable(name, true, indexes));
     return new ContextualStatementBuilderImpl(context, callElementBuilder);
   }
-  
+
   @Override
   public ContextualStatementBuilder loadLiteral(Object o) {
     appendCallElement(new LoadLiteral(o));
@@ -195,7 +196,7 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
 
   @Override
   public BlockBuilderImpl<StatementEnd> for_(Statement initializer, BooleanExpression condition,
-      Statement countingExpression) {
+                                             Statement countingExpression) {
     return new LoopBuilderImpl(context, callElementBuilder).for_(initializer, condition, countingExpression);
   }
 
@@ -203,7 +204,7 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
   public CaseBlockBuilder switch_(Statement statement) {
     return new SwitchBlockBuilderImpl(context, callElementBuilder).switch_(statement);
   }
-  
+
   @Override
   public BlockBuilderImpl<CatchBlockBuilder> try_() {
     return new TryBlockBuilderImpl(context, callElementBuilder).try_();
