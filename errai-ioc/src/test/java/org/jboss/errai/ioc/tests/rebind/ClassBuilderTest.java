@@ -145,84 +145,27 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
   }
 
   @Test
-  public void testDefineClassWithMethodsOfAllScopes() {
-
-    String cls = ClassBuilder
-        .define("org.foo.Foo")
-        .publicScope()
-        .body()
-        .publicMethod(void.class, "publicMethod")
-        .finish()
-        .protectedMethod(void.class, "protectedMethod")
-        .finish()
-        .packageMethod(void.class, "packagePrivateMethod")
-        .finish()
-        .privateMethod(void.class, "privateMethod")
-        .finish()
-        .toJavaString();
-
-    assertEquals("failed to generate class with methods of all scopes", CLASS_WITH_METHODS_OF_ALL_SCOPES, cls);
-  }
-
-  @Test
-  public void testDefineClassWithFieldsOfAllScopes() {
-
-    String cls = ClassBuilder
-        .define("org.foo.Foo")
-        .publicScope()
-        .body()
-        .publicField("publicField", int.class)
-        .finish()
-        .protectedField("protectedField", int.class)
-        .finish()
-        .packageField("packagePrivateField", int.class)
-        .finish()
-        .privateField("privateField", int.class)
-        .finish()
-        .toJavaString();
-
-    assertEquals("failed to generate class with fields of all scopes", CLASS_WITH_FIELDS_OF_ALL_SCOPES, cls);
-  }
-  
-  @Test
-  public void testDefineClassWithConstructorsOfAllScopes() {
-
-    String cls = ClassBuilder
-        .define("org.foo.Foo")
-        .publicScope()
-        .body()
-        .publicConstructor()
-        .finish()
-        .protectedConstructor()
-        .finish()
-        .packageConstructor()
-        .finish()
-        .privateConstructor()
-        .finish()
-        .toJavaString();
-
-    assertEquals("failed to generate class with constructors of all scopes", 
-        CLASS_WITH_CONSTRUCTORS_OF_ALL_SCOPES, cls);
-  }
-
-  @Test
-  public void testDefineClass() {
+  public void testDefineClassB() {
     String cls = ClassBuilder.implement(Bootstrapper.class)
-        .publicMethod(InterfaceInjectionContext.class, "bootstrapContainer")
-        .append(Stmt.create().addVariable("ctx", Stmt.create().newObject(InterfaceInjectionContext.class)))
-        .append(Stmt.create().loadVariable("ctx").returnValue())
-        .finish().toJavaString();
+            .publicMethod(InterfaceInjectionContext.class, "bootstrapContainer")
+            .append(Stmt.create().addVariable("ctx", Stmt.create().newObject(InterfaceInjectionContext.class)))
+            .append(Stmt.create().loadVariable("ctx").returnValue())
+            .finish().toJavaString();
 
     assertEquals("package org.jboss.errai.ioc.client.api;\n" +
-        "\n" +
-        "import org.jboss.errai.ioc.client.api.Bootstrapper;\n" +
-        "import org.jboss.errai.ioc.client.InterfaceInjectionContext;\n" +
-        "\n" +
-        "public class BootstrapperImpl implements Bootstrapper {\n" +
-        "    public InterfaceInjectionContext bootstrapContainer() {\n" +
-        "        InterfaceInjectionContext ctx = new InterfaceInjectionContext();\n" +
-        "        return ctx;\n" +
-        "    }\n" +
-        "}", cls);
+            "\n" +
+            "import org.jboss.errai.ioc.client.api.Bootstrapper;\n" +
+            "import org.jboss.errai.ioc.client.InterfaceInjectionContext;\n" +
+            "\n" +
+            "public class BootstrapperImpl implements Bootstrapper {\n" +
+            "    public InterfaceInjectionContext bootstrapContainer() {\n" +
+            "        InterfaceInjectionContext ctx = new InterfaceInjectionContext();\n" +
+            "        return ctx;\n" +
+            "    }\n" +
+            "}", cls);
   }
+
+
 }
+
+
