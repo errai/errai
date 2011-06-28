@@ -88,7 +88,8 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     if (idx != -1) {
       return className.substring(0, idx);
     }
-    return "";  }
+    return "";
+  }
 
   @Override
   public MetaMethod[] getMethods() {
@@ -288,9 +289,8 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   }
 
 
-
   public String toJavaString() {
-      StringBuilder buf = new StringBuilder();
+    StringBuilder buf = new StringBuilder();
 
     buf.append("\n");
 
@@ -315,6 +315,11 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
         if (iter.hasNext())
           buf.append(" ");
       }
+    }
+
+    context.addVariable("this", this);
+    if (superClass != null) {
+      context.addVariable("super", superClass);
     }
 
     buf.append(" {\n");
