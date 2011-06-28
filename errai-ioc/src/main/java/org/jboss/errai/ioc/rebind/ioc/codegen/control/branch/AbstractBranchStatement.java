@@ -33,8 +33,7 @@ public abstract class AbstractBranchStatement extends AbstractStatement {
 
   public String generateLabelReference(Context context) {
     if (label != null)
-      // TODO verify if label exists in scope?
-      return " " + label;
+      return " " + context.getLabel(label).generate(context);
 
     return "";
   }

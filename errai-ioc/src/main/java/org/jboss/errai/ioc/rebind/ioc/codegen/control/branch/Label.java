@@ -40,4 +40,8 @@ public class Label extends AbstractStatement {
   public String generate(Context context) {
     return name+":";
   }
+  
+  public LabelReference getReference() {
+    return new LabelReference(name);
+  }
 }

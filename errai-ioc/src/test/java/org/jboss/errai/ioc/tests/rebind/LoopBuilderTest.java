@@ -299,23 +299,23 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
             BooleanOperator.And,
             Bool.expr(Stmt.create().loadVariable("str").invoke("length"), BooleanOperator.GreaterThan, 0)))
         .finish().toJavaString();
-    
+
     assertEquals("Failed to generate while loop with nested expressions and no body", WHILE_NESTED_EMPTY, s);
   }
 
   @Test
   public void testWhileLoopsNested() {
     Context c = Context.create().addVariable("str", String.class).addVariable("str2", String.class);
-    
+
     String s = StatementBuilder.create(c)
             .loadVariable("str")
             .while_(BooleanOperator.NotEquals, null)
             .append(
                 StatementBuilder.create(c)
-                  .while_(Bool.expr(Variable.get("str2"), BooleanOperator.NotEquals, null))
-                  .finish())
+                    .while_(Bool.expr(Variable.get("str2"), BooleanOperator.NotEquals, null))
+                    .finish())
             .finish().toJavaString();
-    
+
     assertEquals("Failed to generate nested while loops", WHILE_NESTED_LOOPS, s);
   }
 
@@ -452,90 +452,113 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
 
     assertEquals("Failed to generate do while loop with nested expression", DOWHILE_NESTED_EXPRESSION, s);
   }
-  
+
   @Test
   public void testLoopWithContinue() {
     String s = StatementBuilder.create()
-    .addVariable("i", Integer.class, 0)
-    .loadVariable("i")
-    .if_(BooleanOperator.GreaterThan, 100)
-    .append(Stmt.create()
-        .for_(Stmt.create().loadVariable("i").assignValue(0), 
-            Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100),
-            StatementBuilder.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
+        .addVariable("i", Integer.class, 0)
+        .loadVariable("i")
+        .if_(BooleanOperator.GreaterThan, 100)
         .append(Stmt.create()
-            .if_(Bool.expr(Variable.get("i"), BooleanOperator.Equals, 50))
-            .append(Stmt.create().continue_())
+            .for_(Stmt.create().loadVariable("i").assignValue(0),
+                Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100),
+                StatementBuilder.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
+            .append(Stmt.create()
+                .if_(Bool.expr(Variable.get("i"), BooleanOperator.Equals, 50))
+                .append(Stmt.create().continue_())
+                .finish())
             .finish())
-        .finish())
-    .finish()
-    .toJavaString();
-    
+        .finish()
+        .toJavaString();
+
     assertEquals("Failed to generate loop with continue", LOOP_WITH_CONTINUE, s);
   }
-  
+
   @Test
   public void testLoopWithContinueAndLabel() {
     String s = StatementBuilder.create()
-    .addVariable("i", Integer.class, 0)
-    .loadVariable("i")
-    .if_(BooleanOperator.GreaterThan, 100)
-    .append(Stmt.create().label("label"))
-    .append(Stmt.create()
-        .for_(Stmt.create().loadVariable("i").assignValue(0), 
-            Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100),
-            StatementBuilder.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
+        .addVariable("i", Integer.class, 0)
+        .loadVariable("i")
+        .if_(BooleanOperator.GreaterThan, 100)
+        .append(Stmt.create().label("label"))
         .append(Stmt.create()
-            .if_(Bool.expr(Variable.get("i"), BooleanOperator.Equals, 50))
-            .append(Stmt.create().continue_("label"))
+            .for_(Stmt.create().loadVariable("i").assignValue(0),
+                Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100),
+                StatementBuilder.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
+            .append(Stmt.create()
+                .if_(Bool.expr(Variable.get("i"), BooleanOperator.Equals, 50))
+                .append(Stmt.create().continue_("label"))
+                .finish())
             .finish())
-        .finish())
-    .finish()
-    .toJavaString();
-    
+        .finish()
+        .toJavaString();
+
     assertEquals("Failed to generate loop with continue and label", LOOP_WITH_CONTINUE_AND_LABEL, s);
   }
-  
+
   @Test
   public void testLoopWithBreak() {
     String s = StatementBuilder.create()
-    .addVariable("i", Integer.class, 0)
-    .loadVariable("i")
-    .if_(BooleanOperator.GreaterThan, 100)
-    .append(Stmt.create()
-        .for_(Stmt.create().loadVariable("i").assignValue(0), 
-            Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100),
-            StatementBuilder.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
+        .addVariable("i", Integer.class, 0)
+        .loadVariable("i")
+        .if_(BooleanOperator.GreaterThan, 100)
         .append(Stmt.create()
-            .if_(Bool.expr(Variable.get("i"), BooleanOperator.Equals, 50))
-            .append(Stmt.create().break_())
+            .for_(Stmt.create().loadVariable("i").assignValue(0),
+                Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100),
+                StatementBuilder.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
+            .append(Stmt.create()
+                .if_(Bool.expr(Variable.get("i"), BooleanOperator.Equals, 50))
+                .append(Stmt.create().break_())
+                .finish())
             .finish())
-        .finish())
-    .finish()
-    .toJavaString();
-    
+        .finish()
+        .toJavaString();
+
     assertEquals("Failed to generate loop with continue", LOOP_WITH_BREAK, s);
   }
-  
+
   @Test
   public void testLoopWithBreakAndLabel() {
     String s = StatementBuilder.create()
-    .addVariable("i", Integer.class, 0)
-    .loadVariable("i")
-    .if_(BooleanOperator.GreaterThan, 100)
-    .append(Stmt.create().label("label"))
-    .append(Stmt.create()
-        .for_(Stmt.create().loadVariable("i").assignValue(0), 
-            Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100),
-            StatementBuilder.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
+        .addVariable("i", Integer.class, 0)
+        .loadVariable("i")
+        .if_(BooleanOperator.GreaterThan, 100)
+        .append(Stmt.create().label("label"))
         .append(Stmt.create()
-            .if_(Bool.expr(Variable.get("i"), BooleanOperator.Equals, 50))
-            .append(Stmt.create().break_("label"))
+            .for_(Stmt.create().loadVariable("i").assignValue(0),
+                Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100),
+                StatementBuilder.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
+            .append(Stmt.create()
+                .if_(Bool.expr(Variable.get("i"), BooleanOperator.Equals, 50))
+                .append(Stmt.create().break_("label"))
+                .finish())
             .finish())
-        .finish())
-    .finish()
-    .toJavaString();
-   
+        .finish()
+        .toJavaString();
+
     assertEquals("Failed to generate loop with continue and label", LOOP_WITH_BREAK_AND_LABEL, s);
+  }
+
+  @Test
+  public void testLoopWithInvalidLabel() {
+    try {
+      StatementBuilder.create()
+          .addVariable("i", Integer.class, 0)
+          .loadVariable("i")
+          .if_(BooleanOperator.GreaterThan, 100)
+          .append(Stmt.create().label("label"))
+          .append(Stmt.create()
+              .for_(Stmt.create().loadVariable("i").assignValue(0),
+                  Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100),
+                  StatementBuilder.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
+              .append(Stmt.create().continue_("undefinedlabel"))
+              .finish())
+          .finish()
+          .toJavaString();
+      fail("expected OutOfScopeException");
+    }
+    catch (OutOfScopeException e) {
+      // expected
+    }
   }
 }

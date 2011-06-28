@@ -32,7 +32,10 @@ public class DefineLabel extends AbstractCallElement {
   }
   
   public void handleCall(CallWriter writer, Context context, Statement statement) {
+    Label label = Label.create(name);
+    context.addLabel(label);
+    
     writer.reset();
-    writer.append(Label.create(name).generate(context));
+    writer.append(label.generate(context));
   }
 }
