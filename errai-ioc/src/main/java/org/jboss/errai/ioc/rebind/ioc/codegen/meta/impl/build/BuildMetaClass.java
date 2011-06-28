@@ -289,7 +289,6 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     typeVariables.add(typeVariable);
   }
 
-
   public String toJavaString() {
     StringBuilder buf = new StringBuilder();
 
