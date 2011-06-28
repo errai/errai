@@ -19,12 +19,16 @@ package org.jboss.errai.ioc.rebind.ioc.codegen;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassMember;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
+
+import java.lang.annotation.Annotation;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class Parameter extends AbstractStatement {
+public class Parameter extends AbstractStatement implements MetaParameter {
   private MetaClass type;
   private String name;
 
@@ -51,5 +55,21 @@ public class Parameter extends AbstractStatement {
 
   public String getName() {
     return name;
+  }
+
+  public MetaClassMember getDeclaringMember() {
+    return null;
+  }
+
+  public Annotation[] getAnnotations() {
+    return new Annotation[0];
+  }
+
+  public boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
+    return false;
+  }
+
+  public <A extends Annotation> A getAnnotation(Class<A> annotation) {
+    return null;
   }
 }

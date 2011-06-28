@@ -32,6 +32,8 @@ public abstract class MetaClass implements HasAnnotations, MetaType, MetaGeneric
 
   public abstract String getInternalName();
 
+  public abstract String getPackageName();
+
   public abstract MetaMethod[] getMethods();
 
   public abstract MetaMethod[] getDeclaredMethods();

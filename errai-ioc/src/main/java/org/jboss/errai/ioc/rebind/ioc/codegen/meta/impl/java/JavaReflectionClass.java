@@ -78,6 +78,11 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     return getEnclosedMetaObject().getName();
   }
 
+  @Override
+  public String getPackageName() {
+    return getEnclosedMetaObject().getPackage().getName();
+  }
+
   private static MetaMethod[] fromMethodArray(Method[] methods) {
     List<MetaMethod> methodList = new ArrayList<MetaMethod>();
 

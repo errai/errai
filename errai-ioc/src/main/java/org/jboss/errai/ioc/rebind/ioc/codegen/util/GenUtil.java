@@ -16,6 +16,7 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.util;
 
+import javassist.expr.NewArray;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
@@ -28,7 +29,12 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.literal.LiteralFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.literal.LiteralValue;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
 import org.mvel2.DataConversion;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -132,5 +138,13 @@ public class GenUtil {
       }
     }
     return buf.toString();
+  }
+
+  public static MetaClass[] fromParameters(MetaParameter... parms) {
+    List<MetaClass> parameters = new ArrayList<MetaClass>();
+    for (MetaParameter metaParameter : parms) {
+      parameters.add(metaParameter.getType());
+    }
+    return parameters.toArray(new MetaClass[parameters.size()]);
   }
 }
