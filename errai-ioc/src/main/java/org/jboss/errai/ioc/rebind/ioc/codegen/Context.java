@@ -26,6 +26,7 @@ import java.util.Set;
 import javax.enterprise.util.TypeLiteral;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.control.branch.Label;
+import org.jboss.errai.ioc.rebind.ioc.codegen.control.branch.LabelReference;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
@@ -169,7 +170,7 @@ public class Context {
     return found.getReference();
   }
 
-  public Statement getLabel(String name) {
+  public LabelReference getLabel(String name) {
     Label found = null;
     Context ctx = this;
     do {
