@@ -16,14 +16,12 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public interface ConstructorBlockBuilder<T> extends BlockBuilder<T> {
   public BlockBuilder<T> callSuper();
-  public BlockBuilder<T> callSuper(Statement... statements);
+  public BlockBuilder<T> callSuper(Object... parameters);
 
-  public BlockBuilder<T> callThis(Statement... statements);
+  public BlockBuilder<T> callThis(Object... parameters);
 }

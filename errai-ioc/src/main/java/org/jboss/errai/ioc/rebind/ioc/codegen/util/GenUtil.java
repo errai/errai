@@ -16,7 +16,9 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.util;
 
-import javassist.expr.NewArray;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
@@ -31,10 +33,6 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
 import org.mvel2.DataConversion;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

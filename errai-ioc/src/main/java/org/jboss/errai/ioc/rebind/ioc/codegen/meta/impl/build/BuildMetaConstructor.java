@@ -18,7 +18,9 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.build;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.DefParameters;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Parameter;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.Builder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.Scope;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.*;
@@ -154,6 +156,10 @@ public class BuildMetaConstructor extends MetaConstructor implements Builder {
   }
 
   public String toJavaString() {
+    for (Parameter p : defParameters.getParameters()) {
+      context.addVariable(Variable.create(p.getName(), p.getType()));
+    }
+    
     return new StringBuilder().append(scope.getCanonicalName())
             .append(" ")
             .append(declaringClass.getName())

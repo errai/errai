@@ -16,18 +16,21 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.*;
+import org.jboss.errai.ioc.rebind.ioc.codegen.AbstractStatement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.BlockStatement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.CallParameters;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.StringStatement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BuildCallback;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ConstructorBlockBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.GenUtil;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class ConstructorBlockBuilderImpl<T> extends BlockBuilderImpl<T> implements ConstructorBlockBuilder<T> {
-  public ConstructorBlockBuilderImpl(BlockStatement blockStatement, BuildCallback<T>
-                                             tBuildCallback) {
+  public ConstructorBlockBuilderImpl(BlockStatement blockStatement, BuildCallback<T> tBuildCallback) {
     super(blockStatement, tBuildCallback);
   }
 
@@ -42,16 +45,12 @@ public class ConstructorBlockBuilderImpl<T> extends BlockBuilderImpl<T> implemen
   }
 
   @Override
-  public BlockBuilder<T> callSuper(final Statement... statements) {
-    append(new Statement() {
+  public BlockBuilder<T> callSuper(final Object... parameters) {
+    append(new AbstractStatement() {
       @Override
       public String generate(Context context) {
-        return "super" + CallParameters.fromStatements(statements).generate(context);
-      }
-
-      @Override
-      public MetaClass getType() {
-        return null;
+        return "super" + 
+          CallParameters.fromStatements(GenUtil.generateCallParameters(context, parameters)).generate(context);
       }
     });
 
@@ -59,16 +58,12 @@ public class ConstructorBlockBuilderImpl<T> extends BlockBuilderImpl<T> implemen
   }
 
   @Override
-  public BlockBuilder<T> callThis(final Statement... statements) {
-    append(new Statement() {
+  public BlockBuilder<T> callThis(final Object... parameters) {
+    append(new AbstractStatement() {
       @Override
       public String generate(Context context) {
-        return "this" + CallParameters.fromStatements(statements).generate(context);
-      }
-
-      @Override
-      public MetaClass getType() {
-        return null;
+        return "this" + 
+          CallParameters.fromStatements(GenUtil.generateCallParameters(context, parameters)).generate(context);
       }
     });
 

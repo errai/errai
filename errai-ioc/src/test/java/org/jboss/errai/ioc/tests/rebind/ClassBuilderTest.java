@@ -16,15 +16,16 @@
 
 package org.jboss.errai.ioc.tests.rebind;
 
+import java.io.Serializable;
+
 import org.jboss.errai.ioc.client.InterfaceInjectionContext;
 import org.jboss.errai.ioc.client.api.Bootstrapper;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Parameter;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ClassBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.literal.LiteralFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 import org.junit.Test;
-
-import java.io.Serializable;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -116,7 +117,6 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
   public void testDefineClassWithConstructorCallingSuper() { 
     String cls = ClassBuilder.define("org.foo.Foo")
         .publicScope()
-        .abstractClass()
         .body()
         .publicConstructor()
         .callSuper()
@@ -125,6 +125,25 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
     
     assertEquals("failed to generate class with constructor calling super()", 
         CLASS_WITH_CONSTRUCTOR_CALLING_SUPER, cls); 
+    }
+
+  @Test
+  public void testDefineClassWithConstructorCallingThis() { 
+    String cls = ClassBuilder.define("org.foo.Foo")
+        .publicScope()
+        .body()
+        .privateField("b", boolean.class)
+        .finish()
+        .publicConstructor()
+        .callThis(false)
+        .finish()
+        .publicConstructor(Parameter.of(boolean.class, "b"))
+        .append(Stmt.create().loadClassMember("b").assignValue(Variable.get("b")))
+        .finish()
+        .toJavaString();
+    
+    assertEquals("failed to generate class with constructor calling this()", 
+        CLASS_WITH_CONSTRUCTOR_CALLING_THIS, cls); 
     }
 
   @Test
