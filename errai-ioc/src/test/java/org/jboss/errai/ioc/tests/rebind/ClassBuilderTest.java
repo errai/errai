@@ -16,16 +16,15 @@
 
 package org.jboss.errai.ioc.tests.rebind;
 
-import java.io.Serializable;
-
 import org.jboss.errai.ioc.client.InterfaceInjectionContext;
 import org.jboss.errai.ioc.client.api.Bootstrapper;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Parameter;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
-import org.junit.Ignore;
 import org.junit.Test;
+
+import java.io.Serializable;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

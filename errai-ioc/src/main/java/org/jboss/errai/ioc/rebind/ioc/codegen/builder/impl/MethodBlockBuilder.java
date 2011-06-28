@@ -18,6 +18,7 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.BlockStatement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.ThrowsDeclaration;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.MethodBuildCallback;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
@@ -37,12 +38,12 @@ public class MethodBlockBuilder<T> extends BlockBuilderImpl<T> {
     this.callback = callback;
   }
 
-  public BlockBuilderImpl<T> throws_(Class<? extends Throwable>... exceptionTypes) {
+  public BlockBuilder<T> throws_(Class<? extends Throwable>... exceptionTypes) {
     throwsDeclaration = ThrowsDeclaration.of(exceptionTypes);
     return this;
   }
 
-  public BlockBuilderImpl<T> throws_(MetaClass... exceptions) {
+  public BlockBuilder<T> throws_(MetaClass... exceptions) {
     throwsDeclaration = ThrowsDeclaration.of(exceptions);
     return this;
   }
