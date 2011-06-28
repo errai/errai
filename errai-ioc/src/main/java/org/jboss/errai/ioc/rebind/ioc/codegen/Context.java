@@ -16,12 +16,7 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.enterprise.util.TypeLiteral;
 
@@ -31,11 +26,11 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
- * This class represents a context in which {@link Statement}s are generated. 
- * It references its parent context and holds a map of variables to represent 
- * a {@link Statement}'s scope. It further supports importing classes and packages 
+ * This class represents a context in which {@link Statement}s are generated.
+ * It references its parent context and holds a map of variables to represent
+ * a {@link Statement}'s scope. It further supports importing classes and packages
  * to avoid the use of fully qualified class names.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class Context {
@@ -57,6 +52,8 @@ public class Context {
     this();
     this.parent = parent;
     this.autoImports = parent.autoImports;
+    this.importedPackages = parent.importedPackages;
+    this.importedClasses = parent.importedClasses;
   }
 
   public static Context create() {
@@ -117,7 +114,7 @@ public class Context {
     for (char c : pkgName.toCharArray()) {
       if (c != '.' && !Character.isJavaIdentifierPart(c)) {
         throw new RuntimeException("not a valid package name. " +
-            "(use format: foo.bar.pkg -- do not include '.*' at the end)");
+                "(use format: foo.bar.pkg -- do not include '.*' at the end)");
       }
     }
     importedPackages.add(pkgName);
@@ -128,10 +125,24 @@ public class Context {
     return importedPackages != null && importedPackages.contains(packageName);
   }
 
-  public Context addClassImport(MetaClass clazz) {
-    if (importedClasses == null)
-      importedClasses = new HashSet<MetaClass>();
+  private void initImportedClass() {
+    if (importedClasses == null) {
+      Context c = this;
+      while (c.parent != null) {
+        c = c.parent;
+      }
 
+      if (c.importedClasses == null) {
+        c.importedClasses = importedClasses = new LinkedHashSet<MetaClass>();
+      }
+      else {
+        importedClasses = c.importedClasses;
+      }
+    }
+  }
+
+  public Context addClassImport(MetaClass clazz) {
+    initImportedClass();
     importedClasses.add(clazz);
     return this;
   }
@@ -197,16 +208,16 @@ public class Context {
   }
 
   public Collection<Variable> getDeclaredVariables() {
-    if (variables == null) 
-      return Collections.<Variable> emptyList();
-    
+    if (variables == null)
+      return Collections.<Variable>emptyList();
+
     return variables.values();
   }
 
   public Map<String, Variable> getVariables() {
-    if (variables == null) 
-      return Collections.<String, Variable> emptyMap();
-    
+    if (variables == null)
+      return Collections.<String, Variable>emptyMap();
+
     return Collections.unmodifiableMap(variables);
   }
 

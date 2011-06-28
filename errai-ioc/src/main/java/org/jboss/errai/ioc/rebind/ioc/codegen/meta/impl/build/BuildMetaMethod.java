@@ -53,6 +53,7 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
                          DefParameters defParameters,
                          ThrowsDeclaration throwsDeclaration) {
 
+    this.context = Context.create(declaringClass.getContext());
     this.declaringClass = declaringClass;
     this.body = body;
     this.scope = scope;
