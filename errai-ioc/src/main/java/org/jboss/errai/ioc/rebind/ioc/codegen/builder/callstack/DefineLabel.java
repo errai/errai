@@ -33,6 +33,6 @@ public class DefineLabel extends AbstractCallElement {
   
   public void handleCall(CallWriter writer, Context context, Statement statement) {
     writer.reset();
-    nextOrReturn(writer, context, Label.create(name));
+    writer.append(Label.create(name).generate(context));
   }
 }

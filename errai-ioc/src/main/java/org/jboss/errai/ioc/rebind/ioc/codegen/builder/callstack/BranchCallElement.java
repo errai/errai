@@ -32,6 +32,5 @@ public class BranchCallElement extends AbstractCallElement {
   
   public void handleCall(CallWriter writer, Context context, Statement statement) {
     writer.append(branchStatement.generate(context));
-    nextOrReturn(writer, context, statement);
   }
 }

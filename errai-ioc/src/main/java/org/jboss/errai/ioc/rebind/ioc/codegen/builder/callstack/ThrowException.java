@@ -64,6 +64,6 @@ public class ThrowException extends AbstractCallElement {
       }
     };
     writer.reset();
-    nextOrReturn(writer, context, statement);
+    writer.append(statement.generate(context));
   }
 }
