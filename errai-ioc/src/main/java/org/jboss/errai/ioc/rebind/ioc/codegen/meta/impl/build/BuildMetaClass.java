@@ -17,6 +17,7 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.build;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.Builder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.Scope;
@@ -317,9 +318,9 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
       }
     }
 
-    context.addVariable("this", this);
+    context.addVariable(Variable.create("this", this));
     if (superClass != null) {
-      context.addVariable("super", superClass);
+      context.addVariable(Variable.create("super", superClass));
     }
 
     buf.append(" {\n");
