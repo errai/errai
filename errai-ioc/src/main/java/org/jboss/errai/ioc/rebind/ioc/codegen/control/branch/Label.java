@@ -14,24 +14,30 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack;
+package org.jboss.errai.ioc.rebind.ioc.codegen.control.branch;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.AbstractStatement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.control.branch.AbstractBranchStatement;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class BranchCallElement extends AbstractCallElement {
-  private AbstractBranchStatement branchStatement;
-  
-  public BranchCallElement(AbstractBranchStatement branchStatement) {
-    this.branchStatement = branchStatement;
+public class Label extends AbstractStatement {
+  private final String name;
+
+  public static Label create(String name) {
+    return new Label(name);
   }
   
-  public void handleCall(CallWriter writer, Context context, Statement statement) {
-    writer.append(branchStatement.generate(context));
-    nextOrReturn(writer, context, statement);
+  private Label(String name) {
+    this.name = name;
+  }
+
+  public String getName() {
+    return name;
+  }
+  
+  public String generate(Context context) {
+    return name+":";
   }
 }

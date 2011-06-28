@@ -34,7 +34,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.WhileBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.BranchCallElement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DeclareVariable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DynamicLoad;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LabelCallElement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DefineLabel;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadField;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadLiteral;
@@ -42,6 +42,8 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadVariable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.MethodCall;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.ResetCallElement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.ThrowException;
+import org.jboss.errai.ioc.rebind.ioc.codegen.control.branch.BreakStatement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.control.branch.ContinueStatement;
 
 /**
  * The root of our fluent StatementBuilder API.
@@ -194,28 +196,28 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
     return this;
   }
 
-  public StatementEnd label(final String name) {
-    appendCallElement(new LabelCallElement(name));
+  public StatementEnd label(final String label) {
+    appendCallElement(new DefineLabel(label));
     return this;
   }
 
   public StatementEnd break_() {
-    appendCallElement(new BranchCallElement(BranchCallElement.Type.BREAK));
+    appendCallElement(new BranchCallElement(new BreakStatement()));
     return this;
   }
 
-  public StatementEnd break_(final String label) {
-    appendCallElement(new BranchCallElement(BranchCallElement.Type.BREAK, label));
+  public StatementEnd break_(String label) {
+    appendCallElement(new BranchCallElement(new BreakStatement(label)));
     return this;
   }
 
   public StatementEnd continue_() {
-    appendCallElement(new BranchCallElement(BranchCallElement.Type.CONTINUE));
+    appendCallElement(new BranchCallElement(new ContinueStatement()));
     return this;
   }
 
-  public StatementEnd continue_(final String label) {
-    appendCallElement(new BranchCallElement(BranchCallElement.Type.CONTINUE, label));
+  public StatementEnd continue_(String label) {
+    appendCallElement(new BranchCallElement(new ContinueStatement(label)));
     return this;
   }
 }

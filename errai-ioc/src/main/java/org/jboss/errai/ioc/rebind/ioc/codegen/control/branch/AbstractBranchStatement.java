@@ -14,25 +14,28 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack;
+package org.jboss.errai.ioc.rebind.ioc.codegen.control.branch;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.AbstractStatement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Label;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class LabelCallElement extends AbstractCallElement {
-  
-  private String name;
-  
-  public LabelCallElement(String name) {
-    this.name = name;
+public abstract class AbstractBranchStatement extends AbstractStatement {
+  protected String label;
+
+  public AbstractBranchStatement() {}
+
+  public AbstractBranchStatement(String label) {
+    this.label = label;
   }
-  
-  public void handleCall(CallWriter writer, Context context, Statement statement) {
-    writer.reset();
-    nextOrReturn(writer, context, new Label(name));
+
+  public String generateLabelReference(Context context) {
+    if (label != null)
+      // TODO verify if label exists in scope?
+      return " " + label;
+
+    return "";
   }
 }
