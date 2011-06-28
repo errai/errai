@@ -46,10 +46,12 @@ public class GWTClass extends AbstractMetaClass<JType> {
     return new GWTClass(type);
   }
 
+  @Override
   public String getName() {
     return getEnclosedMetaObject().getSimpleSourceName();
   }
 
+  @Override
   public String getFullyQualifiedName() {
     return getEnclosedMetaObject().getQualifiedSourceName();
   }
@@ -74,6 +76,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
     return methodList.toArray(new MetaMethod[methodList.size()]);
   }
 
+  @Override
   public MetaMethod[] getMethods() {
     JClassType type = getEnclosedMetaObject().isClassOrInterface();
     if (type == null) {
@@ -83,6 +86,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
     return fromMethodArray(type.getMethods());
   }
 
+  @Override
   public MetaMethod[] getDeclaredMethods() {
     return getMethods();
   }
@@ -97,6 +101,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
     return methodList.toArray(new MetaField[methodList.size()]);
   }
 
+  @Override
   public MetaField[] getFields() {
     JClassType type = getEnclosedMetaObject().isClassOrInterface();
     if (type == null) {
@@ -105,10 +110,12 @@ public class GWTClass extends AbstractMetaClass<JType> {
     return fromFieldArray(type.getFields());
   }
 
+  @Override
   public MetaField[] getDeclaredFields() {
     return getFields();
   }
 
+  @Override
   public MetaField getField(String name) {
     JClassType type = getEnclosedMetaObject().isClassOrInterface();
     if (type == null) {
@@ -124,6 +131,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
     return new GWTField(field);
   }
 
+  @Override
   public MetaField getDeclaredField(String name) {
     return getField(name);
   }
@@ -138,6 +146,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
     return constructorList.toArray(new MetaConstructor[constructorList.size()]);
   }
 
+  @Override
   public MetaConstructor[] getConstructors() {
     JClassType type = getEnclosedMetaObject().isClassOrInterface();
     if (type == null) {
@@ -147,10 +156,12 @@ public class GWTClass extends AbstractMetaClass<JType> {
     return fromMethodArray(type.getConstructors());
   }
 
+  @Override
   public MetaConstructor[] getDeclaredConstructors() {
     return getConstructors();
   }
 
+  @Override
   public MetaClass[] getInterfaces() {
     List<MetaClass> metaClassList = new ArrayList<MetaClass>();
     for (JClassType type : getEnclosedMetaObject().isClassOrInterface()
@@ -162,10 +173,12 @@ public class GWTClass extends AbstractMetaClass<JType> {
     return metaClassList.toArray(new MetaClass[metaClassList.size()]);
   }
 
+  @Override
   public boolean isArray() {
     return getEnclosedMetaObject().isArray() != null;
   }
 
+  @Override
   public MetaClass getSuperClass() {
     JClassType type = getEnclosedMetaObject().isClassOrInterface();
     if (type == null) {
@@ -175,6 +188,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
     return MetaClassFactory.get(type.getEnclosingType());
   }
 
+  @Override
   public MetaClass getComponentType() {
     JArrayType type = getEnclosedMetaObject().isArray();
     if (type == null) {
@@ -183,6 +197,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
     return MetaClassFactory.get(type.getComponentType());
   }
 
+  @Override
   public Annotation[] getAnnotations() {
     if (annotationsCache == null) {
       try {
@@ -200,6 +215,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
     return annotationsCache;
   }
 
+  @Override
   public MetaTypeVariable[] getTypeParameters() {
     List<MetaTypeVariable> typeVariables = new ArrayList<MetaTypeVariable>();
     JGenericType genericType = getEnclosedMetaObject().isGenericType();
@@ -213,48 +229,58 @@ public class GWTClass extends AbstractMetaClass<JType> {
     return typeVariables.toArray(new MetaTypeVariable[typeVariables.size()]);
   }
 
+  @Override
   public boolean isInterface() {
     return getEnclosedMetaObject().isInterface() != null;
   }
 
+  @Override
   public boolean isAbstract() {
     return getEnclosedMetaObject().isClass() != null && getEnclosedMetaObject().isClass().isAbstract();
   }
 
 
+  @Override
   public boolean isEnum() {
     return getEnclosedMetaObject().isEnum() != null;
   }
 
+  @Override
   public boolean isAnnotation() {
     return getEnclosedMetaObject().isAnnotation() != null;
   }
 
+  @Override
   public boolean isPublic() {
     return getEnclosedMetaObject().isClassOrInterface() != null &&
         getEnclosedMetaObject().isClassOrInterface().isPublic();
   }
 
+  @Override
   public boolean isPrivate() {
     return getEnclosedMetaObject().isClassOrInterface() != null &&
         getEnclosedMetaObject().isClassOrInterface().isPrivate();
   }
 
+  @Override
   public boolean isProtected() {
     return getEnclosedMetaObject().isClassOrInterface() != null &&
         getEnclosedMetaObject().isClassOrInterface().isProtected();
   }
 
+  @Override
   public boolean isFinal() {
     return getEnclosedMetaObject().isClassOrInterface() != null &&
         getEnclosedMetaObject().isClassOrInterface().isFinal();
   }
 
+  @Override
   public boolean isStatic() {
     return getEnclosedMetaObject().isClassOrInterface() != null &&
         getEnclosedMetaObject().isClassOrInterface().isStatic();
   }
 
+  @Override
   public String toString() {
     return getFullyQualifiedName();
   }

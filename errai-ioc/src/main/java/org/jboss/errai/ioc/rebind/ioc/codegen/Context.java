@@ -32,9 +32,9 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
  * This class represents a context in which {@link Statement}s are generated. 
- * It has a reference to its parent context and holds a map of variables to represent 
- * a {@link Statement}'s scope. It further supports importing classes and packages to avoid 
- * the use of fully qualified class names.
+ * It references its parent context and holds a map of variables to represent 
+ * a {@link Statement}'s scope. It further supports importing classes and packages 
+ * to avoid the use of fully qualified class names.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */

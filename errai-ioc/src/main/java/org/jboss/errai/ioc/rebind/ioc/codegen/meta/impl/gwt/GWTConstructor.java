@@ -55,6 +55,7 @@ public class GWTConstructor extends MetaConstructor {
     }
   }
 
+  @Override
   public MetaParameter[] getParameters() {
     List<MetaParameter> parameterList = new ArrayList<MetaParameter>();
 
@@ -65,14 +66,17 @@ public class GWTConstructor extends MetaConstructor {
     return parameterList.toArray(new MetaParameter[parameterList.size()]);
   }
 
+  @Override
   public MetaClass getDeclaringClass() {
     return declaringClass;
   }
 
+  @Override
   public Annotation[] getAnnotations() {
     return annotations == null ? new Annotation[0] : annotations;
   }
 
+  @Override
   public final <A extends Annotation> A getAnnotation(Class<A> annotation) {
     for (Annotation a : getAnnotations()) {
       if (a.annotationType().equals(annotation)) return (A) a;
@@ -80,6 +84,7 @@ public class GWTConstructor extends MetaConstructor {
     return null;
   }
 
+  @Override
   public final boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
     return getAnnotation(annotation) != null;
   }
@@ -94,42 +99,52 @@ public class GWTConstructor extends MetaConstructor {
     return constructor.isVarArgs();
   }
 
+  @Override
   public boolean isAbstract() {
     return false;
   }
 
+  @Override
   public boolean isPublic() {
     return constructor.isPublic();
   }
 
+  @Override
   public boolean isPrivate() {
     return constructor.isPrivate();
   }
 
+  @Override
   public boolean isProtected() {
     return constructor.isProtected();
   }
 
+  @Override
   public boolean isFinal() {
     return false;
   }
 
+  @Override
   public boolean isStatic() {
     return false;
   }
 
+  @Override
   public boolean isTransient() {
     return false;
   }
 
+  @Override
   public boolean isSynthetic() {
     return false;
   }
 
+  @Override
   public boolean isSynchronized() {
     return false;
   }
 
+  @Override
   public MetaTypeVariable[] getTypeParameters() {
     return GWTUtil.fromTypeVariable(constructor.getTypeParameters());
   }

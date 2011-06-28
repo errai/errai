@@ -47,6 +47,7 @@ public class BlockBuilder<T> implements Finishable<T> {
     return this;
   }
 
+  @Override
   public T finish() {
     if (callback != null) {
       return callback.callback(blockStatement);

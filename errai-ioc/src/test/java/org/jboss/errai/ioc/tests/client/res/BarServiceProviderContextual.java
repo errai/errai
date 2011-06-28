@@ -26,8 +26,10 @@ import java.lang.annotation.Annotation;
  */
 @IOCProvider
 public class BarServiceProviderContextual implements ContextualTypeProvider<BarService> {
+  @Override
   public BarService provide(final Class[] typeargs, Annotation... qualifiers) {
     return new BarService() {
+      @Override
       public Object get() {
         return typeargs[0].getName();
       }

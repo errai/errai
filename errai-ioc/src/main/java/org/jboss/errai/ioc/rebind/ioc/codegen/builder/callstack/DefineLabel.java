@@ -31,6 +31,7 @@ public class DefineLabel extends AbstractCallElement {
     this.name = name;
   }
   
+  @Override
   public void handleCall(CallWriter writer, Context context, Statement statement) {
     Label label = Label.create(name);
     context.addLabel(label);

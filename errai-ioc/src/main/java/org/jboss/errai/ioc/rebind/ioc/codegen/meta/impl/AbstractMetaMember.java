@@ -26,6 +26,7 @@ import java.lang.annotation.Annotation;
 public abstract class AbstractMetaMember implements MetaClassMember {
   protected Annotation[] annotations;
 
+  @Override
   public final <A extends Annotation> A getAnnotation(Class<A> annotation) {
     for (Annotation a : getAnnotations()) {
       if (a.annotationType().equals(annotation)) return (A) a;
@@ -33,6 +34,7 @@ public abstract class AbstractMetaMember implements MetaClassMember {
     return null;
   }
 
+  @Override
   public final boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
     return getAnnotation(annotation) != null;
   }

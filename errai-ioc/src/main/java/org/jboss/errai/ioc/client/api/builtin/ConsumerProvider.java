@@ -31,12 +31,14 @@ import java.lang.annotation.Annotation;
  */
 @IOCProvider
 public class ConsumerProvider implements ContextualTypeProvider<Consumer<?>> {
+  @Override
   public Consumer<?> provide(Class[] typeargs, Annotation[] qualifiers) {
     return new Consumer<Object>() {
       private RequestDispatcher requestDispatcher = ErraiBus.getDispatcher();
       private String toSubject = null;
       private String replyTo = null;
 
+      @Override
       public void consume(Object value) {
         if (replyTo != null) {
           MessageBuilder.createMessage()
@@ -58,11 +60,13 @@ public class ConsumerProvider implements ContextualTypeProvider<Consumer<?>> {
         this.requestDispatcher = dispatcher;
       }
 
+      @Override
       public void setToSubject(String subjectName) {
         if (this.toSubject != null) throw new IllegalStateException("toSubject is already set");
         this.toSubject = subjectName;
       }
 
+      @Override
       public void setReplyTo(String subjectName) {
         if (this.replyTo != null) throw new IllegalStateException("replyTo is already set");
         this.replyTo = subjectName;

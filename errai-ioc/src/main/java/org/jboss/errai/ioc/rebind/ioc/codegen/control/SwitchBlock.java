@@ -77,6 +77,7 @@ public class SwitchBlock extends AbstractStatement {
     this.switchExpr = expr;
   }
 
+  @Override
   public String generate(Context context) {
     StringBuilder buf = new StringBuilder("switch (");
     if (switchExpr == null) {

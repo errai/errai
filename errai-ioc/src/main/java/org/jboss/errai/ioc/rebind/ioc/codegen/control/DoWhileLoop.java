@@ -29,6 +29,7 @@ public class DoWhileLoop extends AbstractConditionalBlock {
     super(condition, block);
   }
 
+  @Override
   public String generate(Context context) {
     StringBuilder builder = new StringBuilder("do {\n");
 

@@ -112,10 +112,12 @@ public class Variable extends AbstractStatement {
 
   public static VariableReference get(final String name) {
     return new VariableReference() {
+      @Override
       public String getName() {
         return name;
       }
 
+      @Override
       public Statement getValue() {
         return null;
       }
@@ -124,14 +126,17 @@ public class Variable extends AbstractStatement {
 
   public VariableReference getReference() {
     return new VariableReference() {
+      @Override
       public String getName() {
         return classMember ? "this." + name : name;
       }
 
+      @Override
       public MetaClass getType() {
         return type;
       }
 
+      @Override
       public Statement getValue() {
         return value;
       }
@@ -142,6 +147,7 @@ public class Variable extends AbstractStatement {
     return name;
   }
 
+  @Override
   public MetaClass getType() {
     return type;
   }
@@ -179,6 +185,7 @@ public class Variable extends AbstractStatement {
     return "Variable [name=" + name + ", type=" + type + ", classMember=" + classMember + "]";
   }
 
+  @Override
   public String generate(Context context) {
     if (initialization != null) {
       this.type = (type == null) ? inferType(context, initialization) : type;

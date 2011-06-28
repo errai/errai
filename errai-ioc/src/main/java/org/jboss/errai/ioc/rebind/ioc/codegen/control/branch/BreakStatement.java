@@ -29,6 +29,7 @@ public class BreakStatement extends AbstractBranchStatement {
     super(label);
   }
 
+  @Override
   public String generate(Context context) {
     return "break" + generateLabelReference(context);
   }  

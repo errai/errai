@@ -30,6 +30,7 @@ public class GWTGenericArrayType implements MetaGenericArrayType {
     this.genericType = genericType;
   }
 
+  @Override
   public MetaType getGenericComponentType() {
     return GWTUtil.fromType(genericType.getErasedType());
   }

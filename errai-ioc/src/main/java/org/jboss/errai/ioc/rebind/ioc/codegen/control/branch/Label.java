@@ -37,6 +37,7 @@ public class Label extends AbstractStatement {
     return name;
   }
   
+  @Override
   public String generate(Context context) {
     return name+":";
   }

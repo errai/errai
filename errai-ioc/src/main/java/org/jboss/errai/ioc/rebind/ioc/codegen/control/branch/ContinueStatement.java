@@ -29,6 +29,7 @@ public class ContinueStatement extends AbstractBranchStatement {
     super(label);
   }
 
+  @Override
   public String generate(Context context) {
     return "continue" + generateLabelReference(context);
   }

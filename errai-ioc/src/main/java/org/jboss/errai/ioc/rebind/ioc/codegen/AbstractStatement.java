@@ -22,6 +22,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public abstract class AbstractStatement implements Statement {
+  @Override
   public MetaClass getType() {
     return null;
   }

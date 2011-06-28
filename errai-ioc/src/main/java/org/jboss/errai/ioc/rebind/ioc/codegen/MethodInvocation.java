@@ -33,12 +33,14 @@ public class MethodInvocation extends AbstractStatement {
     this.parameters = parameters;
   }
 
+  @Override
   public String generate(Context context) {
     StringBuilder buf = new StringBuilder();
     buf.append(method.getName()).append(parameters.generate(context));
     return buf.toString();
   }
 
+  @Override
   public MetaClass getType() {
     return method.getReturnType();
   }

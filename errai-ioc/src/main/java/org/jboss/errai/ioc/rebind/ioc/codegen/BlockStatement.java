@@ -42,6 +42,7 @@ public class BlockStatement extends AbstractStatement {
     return this;
   }
 
+  @Override
   public String generate(Context context) {
     StringBuilder buf = new StringBuilder();
 

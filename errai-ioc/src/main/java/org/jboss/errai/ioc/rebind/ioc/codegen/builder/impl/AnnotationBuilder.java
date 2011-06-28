@@ -25,6 +25,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 public class AnnotationBuilder implements Builder {
   public MetaClass type;
 
+  @Override
   public String toJavaString() {
     return null;
   }

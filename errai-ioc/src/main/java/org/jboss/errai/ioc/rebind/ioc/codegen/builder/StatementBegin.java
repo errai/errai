@@ -17,7 +17,6 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
 import javax.enterprise.util.TypeLiteral;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
 

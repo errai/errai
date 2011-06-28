@@ -103,18 +103,22 @@ public class GWTParameter implements MetaParameter {
     }
   }
 
+  @Override
   public String getName() {
     return parameter.getName();
   }
 
+  @Override
   public MetaClass getType() {
     return MetaClassFactory.get(parameter.getType());
   }
 
+  @Override
   public Annotation[] getAnnotations() {
     return annotations == null ? new Annotation[0] : annotations;
   }
 
+  @Override
   public final <A extends Annotation> A getAnnotation(Class<A> annotation) {
     for (Annotation a : getAnnotations()) {
       if (a.annotationType().equals(annotation)) return (A) a;
@@ -122,10 +126,12 @@ public class GWTParameter implements MetaParameter {
     return null;
   }
 
+  @Override
   public final boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
     return getAnnotation(annotation) != null;
   }
 
+  @Override
   public MetaClassMember getDeclaringMember() {
     return declaredBy;
   }

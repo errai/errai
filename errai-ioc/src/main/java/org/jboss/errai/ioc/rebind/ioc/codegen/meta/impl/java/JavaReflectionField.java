@@ -32,18 +32,22 @@ public class JavaReflectionField extends MetaField {
     this.field = field;
   }
 
+  @Override
   public String getName() {
     return field.getName();
   }
 
+  @Override
   public MetaClass getType() {
     return MetaClassFactory.get(field.getType());
   }
 
+  @Override
   public Annotation[] getAnnotations() {
     return field.getAnnotations();
   }
 
+  @Override
   public final <A extends Annotation> A getAnnotation(Class<A> annotation) {
     for (Annotation a : getAnnotations()) {
       if (a.annotationType().equals(annotation)) return (A) a;
@@ -51,6 +55,7 @@ public class JavaReflectionField extends MetaField {
     return null;
   }
 
+  @Override
   public boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
     return getAnnotation(annotation) != null;
   }
@@ -60,42 +65,52 @@ public class JavaReflectionField extends MetaField {
     return JavaReflectionUtil.fromType(field.getGenericType());
   }
 
+  @Override
   public MetaClass getDeclaringClass() {
     return MetaClassFactory.get(field.getDeclaringClass());
   }
 
+  @Override
   public boolean isAbstract() {
     return (field.getModifiers() & Modifier.ABSTRACT) != 0;
   }
 
+  @Override
   public boolean isPublic() {
     return (field.getModifiers() & Modifier.PUBLIC) != 0;
   }
 
+  @Override
   public boolean isPrivate() {
     return (field.getModifiers() & Modifier.PRIVATE) != 0;
   }
 
+  @Override
   public boolean isProtected() {
     return (field.getModifiers() & Modifier.PROTECTED) != 0;
   }
 
+  @Override
   public boolean isFinal() {
     return (field.getModifiers() & Modifier.FINAL) != 0;
   }
 
+  @Override
   public boolean isStatic() {
     return (field.getModifiers() & Modifier.STATIC) != 0;
   }
 
+  @Override
   public boolean isTransient() {
     return (field.getModifiers() & Modifier.TRANSIENT) != 0;
   }
 
+  @Override
   public boolean isSynthetic() {
     return field.isSynthetic();
   }
 
+  @Override
   public boolean isSynchronized() {
     return (field.getModifiers() & Modifier.SYNCHRONIZED) != 0;
   }

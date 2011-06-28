@@ -31,10 +31,12 @@ public class GWTTypeVariable implements MetaTypeVariable {
     this.typeParameter = typeParameter;
   }
 
+  @Override
   public MetaType[] getBounds() {
     return GWTUtil.fromTypeArray(typeParameter.getBounds());
   }
 
+  @Override
   public MetaGenericDeclaration getGenericDeclaration() {
     if (typeParameter.isGenericType() != null) {
       return new GWTGenericDeclaration(typeParameter.isGenericType());
@@ -42,6 +44,7 @@ public class GWTTypeVariable implements MetaTypeVariable {
     return null;
   }
 
+  @Override
   public String getName() {
     return typeParameter.getName();
   }

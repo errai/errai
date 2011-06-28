@@ -48,10 +48,12 @@ public class SwitchBlockBuilderImpl extends AbstractStatementBuilder implements 
     super(context, callElementBuilder);
   }
 
+  @Override
   public CaseBlockBuilder switch_() {
     return switch_(new SwitchBlock());
   }
   
+  @Override
   public CaseBlockBuilder switch_(Statement statement) {
     return switch_(new SwitchBlock(statement));
   }
@@ -59,6 +61,7 @@ public class SwitchBlockBuilderImpl extends AbstractStatementBuilder implements 
   private CaseBlockBuilder switch_(final SwitchBlock switchBlock) {
     this.switchBlock = switchBlock;
     appendCallElement(new DeferredCallElement(new DeferredCallback() {
+      @Override
       public void doDeferred(CallWriter writer, Context context, Statement statement) {
         if (statement != null) {
           switchBlock.setSwitchExpr(statement);
@@ -72,51 +75,61 @@ public class SwitchBlockBuilderImpl extends AbstractStatementBuilder implements 
     return this;
   }
   
+  @Override
   public BlockBuilder<CaseBlockBuilder> case_(IntValue value) {
     switchBlock.addCase(value);
     return caseBlock(value);
   }
 
+  @Override
   public BlockBuilder<CaseBlockBuilder> case_(int value) {
     IntValue val = (IntValue) LiteralFactory.getLiteral(context, value);
     return case_(val);
   }
 
+  @Override
   public BlockBuilder<CaseBlockBuilder> case_(CharValue value) {
     switchBlock.addCase(value);
     return caseBlock(value);
   }
   
+  @Override
   public BlockBuilder<CaseBlockBuilder> case_(char value) {
     CharValue val = (CharValue) LiteralFactory.getLiteral(context, value);
     return case_(val);
   }
 
+  @Override
   public BlockBuilder<CaseBlockBuilder> case_(ByteValue value) {
     switchBlock.addCase(value);
     return caseBlock(value);
   }
   
+  @Override
   public BlockBuilder<CaseBlockBuilder> case_(byte value) {
     ByteValue val = (ByteValue) LiteralFactory.getLiteral(context, value);
     return case_(val);
   }
 
+  @Override
   public BlockBuilder<CaseBlockBuilder> case_(ShortValue value) {
     switchBlock.addCase(value);
     return caseBlock(value);
   }
 
+  @Override
   public BlockBuilder<CaseBlockBuilder> case_(short value) {
     ShortValue val = (ShortValue) LiteralFactory.getLiteral(context, value);
     return case_(val);
   }
 
+  @Override
   public BlockBuilder<CaseBlockBuilder> case_(LiteralValue<Enum<?>> value) {
     switchBlock.addCase(value);
     return caseBlock(value);
   }
 
+  @Override
   public BlockBuilder<CaseBlockBuilder> case_(Enum<?> value) {
     LiteralValue<Enum<?>> val = (LiteralValue<Enum<?>>) LiteralFactory.getLiteral(context, value);
     return case_(val);
@@ -126,16 +139,19 @@ public class SwitchBlockBuilderImpl extends AbstractStatementBuilder implements 
     return new BlockBuilder<CaseBlockBuilder>(switchBlock.getCaseBlock(value),
         new BuildCallback<CaseBlockBuilder>() {
 
+          @Override
           public CaseBlockBuilder callback(Statement statement) {
             return SwitchBlockBuilderImpl.this;
           }
         });
   }
 
+  @Override
   public BlockBuilder<StatementEnd> default_() {
     return new BlockBuilder<StatementEnd>(switchBlock.getDefaultBlock(),
         new BuildCallback<StatementEnd>() {
 
+          @Override
           public StatementEnd callback(Statement statement) {
             return SwitchBlockBuilderImpl.this;
           }

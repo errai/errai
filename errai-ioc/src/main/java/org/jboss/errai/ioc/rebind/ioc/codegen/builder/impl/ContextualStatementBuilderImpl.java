@@ -45,78 +45,95 @@ public class ContextualStatementBuilderImpl extends AbstractStatementBuilder imp
   }
 
   // Invocation
+  @Override
   public ContextualStatementBuilder invoke(String methodName, Object... parameters) {
     appendCallElement(new MethodCall(methodName, parameters));
     return this;
   }
 
+  @Override
   public ContextualStatementBuilder getField(String fieldName) {
     appendCallElement(new LoadField(fieldName));
     return this;
   }
 
   // Looping
+  @Override
   public BlockBuilder<StatementEnd> foreach(String loopVarName) {
     return new LoopBuilderImpl(context, callElementBuilder).foreach(loopVarName);
   }
 
+  @Override
   public BlockBuilder<StatementEnd> foreach(String loopVarName, Class<?> loopVarType) {
     return new LoopBuilderImpl(context, callElementBuilder).foreach(loopVarName, loopVarType);
   }
 
+  @Override
   public BlockBuilder<StatementEnd> for_(Statement initializer, BooleanExpression condition) {
     return new LoopBuilderImpl(context, callElementBuilder).for_(initializer, condition);
   }
 
+  @Override
   public BlockBuilder<StatementEnd> for_(Statement initializer, BooleanExpression condition, Statement afterBlock) {
     return new LoopBuilderImpl(context, callElementBuilder).for_(initializer, condition, afterBlock);
   }
 
+  @Override
   public BlockBuilder<WhileBuilder> do_() {
     return new LoopBuilderImpl(context, callElementBuilder).do_();
   }
 
+  @Override
   public BlockBuilder<StatementEnd> while_() {
     return new LoopBuilderImpl(context, callElementBuilder).while_();
   }
 
+  @Override
   public BlockBuilder<StatementEnd> while_(BooleanOperator op, Statement rhs) {
     return new LoopBuilderImpl(context, callElementBuilder).while_(op, rhs);
   }
 
+  @Override
   public BlockBuilder<StatementEnd> while_(BooleanOperator op, Object rhs) {
     return new LoopBuilderImpl(context, callElementBuilder).while_(op, rhs);
   }
 
   // If-Then-Else
+  @Override
   public BlockBuilder<ElseBlockBuilder> if_() {
     return new IfBlockBuilderImpl(context, callElementBuilder).if_();
   }
 
+  @Override
   public BlockBuilder<ElseBlockBuilder> if_(BooleanOperator op, Statement rhs) {
     return new IfBlockBuilderImpl(context, callElementBuilder).if_(op, rhs);
   }
 
+  @Override
   public BlockBuilder<ElseBlockBuilder> if_(BooleanOperator op, Object rhs) {
     return new IfBlockBuilderImpl(context, callElementBuilder).if_(op, rhs);
   }
 
   // Switch
+  @Override
   public CaseBlockBuilder switch_() {
     return new SwitchBlockBuilderImpl(context, callElementBuilder).switch_();
   }
   
   // Value return
+  @Override
   public Statement returnValue() {
     appendCallElement(new ReturnValue());
     return this;
   }
 
   // Assignments
+  @Override
   public StatementEnd assignValue(Object statement) {
     return assignValue(AssignmentOperator.Assignment, statement);
   }
 
+  @Override
   public StatementEnd assignValue(AssignmentOperator operator, Object statement) {
     appendCallElement(new AssignVariable(operator, statement));
     return this;

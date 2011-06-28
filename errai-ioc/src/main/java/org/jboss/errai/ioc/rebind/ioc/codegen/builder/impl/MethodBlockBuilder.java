@@ -47,6 +47,7 @@ public class MethodBlockBuilder<T> extends BlockBuilder<T> {
     return this;
   }
   
+  @Override
   public T finish() {
     if (callback != null) {
       return callback.callback(blockStatement, throwsDeclaration);

@@ -23,6 +23,7 @@ public class StringStatement extends AbstractStatement {
     this.statement = statement;
   }
 
+  @Override
   public String generate(Context context) {
     return statement;
   }

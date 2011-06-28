@@ -42,10 +42,12 @@ public class TryBlockBuilderImpl extends AbstractStatementBuilder implements Try
     super(context, callElementBuilder);
   }
 
+  @Override
   public BlockBuilder<CatchBlockBuilder> try_() {
     tryBlock = new TryBlock();
 
     appendCallElement(new DeferredCallElement(new DeferredCallback() {
+      @Override
       public void doDeferred(CallWriter writer, Context context, Statement statement) {
         writer.reset();
         writer.append(tryBlock.generate(Context.create(context)));
@@ -53,31 +55,36 @@ public class TryBlockBuilderImpl extends AbstractStatementBuilder implements Try
     }));
 
     return new BlockBuilder<CatchBlockBuilder>(tryBlock.getBlock(), new BuildCallback<CatchBlockBuilder>() {
+      @Override
       public CatchBlockBuilder callback(Statement statement) {
         return TryBlockBuilderImpl.this;
       }
     });
   }
 
+  @Override
   public BlockBuilder<CatchBlockBuilder> catch_(Class<? extends Throwable> exceptionType, String variableName) {
     return catch_(MetaClassFactory.get(exceptionType), variableName);
   }
 
+  @Override
   public BlockBuilder<CatchBlockBuilder> catch_(MetaClass exceptionType, String variableName) {
     Variable exceptionVar = Variable.create(variableName, exceptionType);
     tryBlock.addCatchBlock(exceptionVar);
 
     return new BlockBuilder<CatchBlockBuilder>(tryBlock.getCatchBlock(exceptionVar),
         new BuildCallback<CatchBlockBuilder>() {
-
+          @Override
           public CatchBlockBuilder callback(Statement statement) {
             return TryBlockBuilderImpl.this;
           }
         });
   }
 
+  @Override
   public BlockBuilder<StatementEnd> finally_() {
     return new BlockBuilder<StatementEnd>(tryBlock.getFinallyBlock(), new BuildCallback<StatementEnd>() {
+      @Override
       public StatementEnd callback(Statement statement) {
         return TryBlockBuilderImpl.this;
       }

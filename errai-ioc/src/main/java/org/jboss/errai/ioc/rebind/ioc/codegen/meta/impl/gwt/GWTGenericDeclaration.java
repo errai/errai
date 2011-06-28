@@ -34,6 +34,7 @@ public class GWTGenericDeclaration implements MetaGenericDeclaration {
     this.genericType = genericType;
   }
 
+  @Override
   public MetaTypeVariable[] getTypeParameters() {
     List<MetaTypeVariable> typeVariables = new ArrayList<MetaTypeVariable>();
 

@@ -41,10 +41,12 @@ public class Parameter extends AbstractStatement {
     return new Parameter(MetaClassFactory.get(type), name);
   }
 
+  @Override
   public String generate(Context context) {
     return LoadClassReference.getClassReference(type, context) + " " + name;
   }
 
+  @Override
   public MetaClass getType() {
     return type;
   }

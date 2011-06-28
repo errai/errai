@@ -104,22 +104,27 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return null;
   }
 
+  @Override
   public MetaMethod getMethod(String name, Class... parmTypes) {
     return _getMethod(getMethods(), name, classToMeta(parmTypes));
   }
 
+  @Override
   public MetaMethod getMethod(String name, MetaClass... parameters) {
     return _getMethod(getMethods(), name, parameters);
   }
 
+  @Override
   public MetaMethod getDeclaredMethod(String name, Class... parmTypes) {
     return _getMethod(getDeclaredMethods(), name, classToMeta(parmTypes));
   }
 
+  @Override
   public MetaMethod getDeclaredMethod(String name, MetaClass... parmTypes) {
     return _getMethod(getDeclaredMethods(), name, parmTypes);
   }
 
+  @Override
   public MetaMethod getBestMatchingMethod(String name, Class... parameters) {
     Class<?> cls = asClass();
     Method m = ParseTools.getBestCandidate(parameters, name, cls, cls.getMethods(), false);
@@ -128,6 +133,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return getMethod(name, m.getParameterTypes());
   }
 
+  @Override
   public MetaMethod getBestMatchingMethod(String name, MetaClass... parameters) {
     return getBestMatchingMethod(name, asClassArray(parameters));
   }
@@ -196,6 +202,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return parmTypes.toArray(new Class<?>[parmTypes.size()]);
   }
 
+  @Override
   public MetaConstructor getBestMatchingConstructor(Class... parameters) {
     Class<?> cls = asClass();
     Constructor c = ParseTools.getBestConstructorCandidate(parameters, cls, false);
@@ -205,22 +212,27 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return metaClass.getConstructor(c.getParameterTypes());
   }
 
+  @Override
   public MetaConstructor getBestMatchingConstructor(MetaClass... parameters) {
     return getBestMatchingConstructor(asClassArray(parameters));
   }
 
+  @Override
   public MetaConstructor getConstructor(Class... parameters) {
     return _getConstructor(getConstructors(), classToMeta(parameters));
   }
 
+  @Override
   public MetaConstructor getConstructor(MetaClass... parameters) {
     return _getConstructor(getConstructors(), parameters);
   }
 
+  @Override
   public MetaConstructor getDeclaredConstructor(Class... parameters) {
     return _getConstructor(getDeclaredConstructors(), classToMeta(parameters));
   }
 
+  @Override
   public final <A extends Annotation> A getAnnotation(Class<A> annotation) {
     for (Annotation a : getAnnotations()) {
       if (a.annotationType().equals(annotation)) return (A) a;
@@ -228,6 +240,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return null;
   }
 
+  @Override
   public final boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
     return getAnnotation(annotation) != null;
   }
@@ -245,6 +258,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return hashString;
   }
 
+  @Override
   public boolean isAssignableFrom(MetaClass clazz) {
     MetaClass cls = clazz;
     do {
@@ -254,6 +268,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return _hasInterface(clazz.getInterfaces(), this);
   }
 
+  @Override
   public boolean isAssignableTo(MetaClass clazz) {
     MetaClass cls = this;
     do {
@@ -273,18 +288,22 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return false;
   }
 
+  @Override
   public boolean isAssignableFrom(Class clazz) {
     return isAssignableFrom(MetaClassFactory.get(clazz));
   }
 
+  @Override
   public boolean isAssignableTo(Class clazz) {
     return isAssignableTo(MetaClassFactory.get(clazz));
   }
 
+  @Override
   public boolean isAssignableTo(JClassType clazz) {
     return isAssignableFrom(MetaClassFactory.get(clazz));
   }
 
+  @Override
   public boolean isAssignableFrom(JClassType clazz) {
     return isAssignableTo(MetaClassFactory.get(clazz));
   }
@@ -305,6 +324,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return hashString().hashCode();
   }
 
+  @Override
   public Class<?> asClass() {
     if (enclosedMetaObject instanceof Class) {
       return (Class<?>) enclosedMetaObject;

@@ -28,6 +28,7 @@ public abstract class VariableReference extends AbstractStatement {
 
   protected Statement[] indexes;
 
+  @Override
   public String generate(Context context) {
     return getName();
   }

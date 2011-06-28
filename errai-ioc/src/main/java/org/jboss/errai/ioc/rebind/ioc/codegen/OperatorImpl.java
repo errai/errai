@@ -36,23 +36,28 @@ public class OperatorImpl implements Operator {
     this.constraints = MetaClassFactory.fromClassArray(constraints);
   }
 
+  @Override
   public String getCanonicalString() {
     return canonicalString;
   }
 
+  @Override
   public int getOperatorPrecedence() {
     return operatorPrecedence;
   }
 
+  @Override
   public boolean isHigherPrecedenceThan(Operator operator) {
     return operator.getOperatorPrecedence() < getOperatorPrecedence();
   }
 
+  @Override
   public boolean isEqualOrHigherPrecedenceThan(Operator operator) {
     return operator.getOperatorPrecedence() <= getOperatorPrecedence();
   }
 
 
+  @Override
   public void assertCanBeApplied(MetaClass clazz) {
     if (!canBeApplied(clazz)) {
       throw new InvalidExpressionException("Not a valid type for operator '" +
@@ -60,6 +65,7 @@ public class OperatorImpl implements Operator {
     }
   }
 
+  @Override
   public boolean canBeApplied(MetaClass clazz) {
     if (constraints.length == 0) return true;
 

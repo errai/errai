@@ -30,6 +30,7 @@ public class LoadLiteral extends AbstractCallElement {
     this.literalValue = literalValue;
   }
 
+  @Override
   public void handleCall(CallWriter writer, Context context, Statement statement) {
     writer.reset();
     nextOrReturn(writer, context, LiteralFactory.getLiteral(context, literalValue));

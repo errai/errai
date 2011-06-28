@@ -30,6 +30,7 @@ public class DeclareVariable extends AbstractCallElement {
     this.variable = variable;
   }
 
+  @Override
   public void handleCall(CallWriter writer, Context context, Statement statement) {
     context.addVariable(variable);
     writer.append(variable.generate(context));

@@ -25,10 +25,12 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.VariableReference;
 public abstract class Refs {
   public static VariableReference get(final String name) {
     return new VariableReference() {
+      @Override
       public String getName() {
         return name;
       }
 
+      @Override
       public Statement getValue() {
         return null;
       }

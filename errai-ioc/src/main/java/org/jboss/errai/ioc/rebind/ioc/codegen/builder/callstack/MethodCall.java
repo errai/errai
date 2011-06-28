@@ -47,6 +47,7 @@ public class MethodCall extends AbstractCallElement {
     this.staticMethod = staticMethod;
   }
 
+  @Override
   public void handleCall(CallWriter writer, Context context, Statement statement) {
     CallParameters callParams = fromStatements(GenUtil.generateCallParameters(context, parameters));
 

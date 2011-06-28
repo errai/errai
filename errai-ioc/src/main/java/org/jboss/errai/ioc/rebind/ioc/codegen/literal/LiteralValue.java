@@ -37,10 +37,12 @@ public abstract class LiteralValue<T> implements Statement {
     return value;
   }
 
+  @Override
   public String generate(Context context) {
     return getCanonicalString(context);
   }
 
+  @Override
   public MetaClass getType() {
     if(value==null) return MetaClassFactory.get(Object.class);
     

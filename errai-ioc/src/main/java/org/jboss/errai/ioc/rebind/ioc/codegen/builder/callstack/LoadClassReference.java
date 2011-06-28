@@ -33,15 +33,18 @@ public class LoadClassReference extends AbstractCallElement {
     this.type = type;
   }
 
+  @Override
   public void handleCall(CallWriter writer, Context context, Statement statement) {
     writer.reset();
 
     final MetaClass metaClass = MetaClassFactory.get(type);
     statement = new Statement() {
+      @Override
       public String generate(Context context) {
         return getClassReference(metaClass, context);
       }
 
+      @Override
       public MetaClass getType() {
         return metaClass;
       }

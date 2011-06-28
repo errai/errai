@@ -38,10 +38,12 @@ public class WhileLoop extends AbstractConditionalBlock {
     super(condition, block);
   }
 
+  @Override
   public BooleanExpressionBuilder getCondition() {
     return (BooleanExpressionBuilder) super.getCondition();
   }
 
+  @Override
   public String generate(Context context) {
     StringBuilder builder = new StringBuilder("while (")
         .append(getCondition().generate(context)).append(") {\n");

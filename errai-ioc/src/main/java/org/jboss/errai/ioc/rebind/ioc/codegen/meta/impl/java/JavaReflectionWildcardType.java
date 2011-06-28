@@ -31,10 +31,12 @@ public class JavaReflectionWildcardType implements MetaWildcardType {
     this.wildcardType = wildcardType;
   }
 
+  @Override
   public MetaType[] getLowerBounds() {
     return JavaReflectionUtil.fromTypeArray(wildcardType.getLowerBounds());
   }
 
+  @Override
   public MetaType[] getUpperBounds() {
     return JavaReflectionUtil.fromTypeArray(wildcardType.getUpperBounds());
   }

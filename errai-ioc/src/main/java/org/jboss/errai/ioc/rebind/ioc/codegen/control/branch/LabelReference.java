@@ -29,6 +29,7 @@ public class LabelReference extends AbstractStatement {
     this.name = name;
   }
 
+  @Override
   public String generate(Context context) {
     return name;
   }

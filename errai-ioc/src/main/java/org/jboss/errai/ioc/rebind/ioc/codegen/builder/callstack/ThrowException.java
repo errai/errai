@@ -44,8 +44,10 @@ public class ThrowException extends AbstractCallElement {
     this.parameters = parameters;
   }
 
+  @Override
   public void handleCall(CallWriter writer, Context context, Statement statement) {
     statement = new AbstractStatement() {
+      @Override
       public String generate(Context context) {
         StringBuilder buf = new StringBuilder();
         buf.append("throw ");

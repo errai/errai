@@ -33,6 +33,7 @@ public class IfBlock extends AbstractConditionalBlock {
     super(condition);
   }
 
+  @Override
   public BooleanExpressionBuilder getCondition() {
     return (BooleanExpressionBuilder) super.getCondition();
   }
@@ -49,6 +50,7 @@ public class IfBlock extends AbstractConditionalBlock {
     this.elseIfBlock = elseIfBlock;
   }
 
+  @Override
   public String generate(Context context) {
     StringBuilder builder = new StringBuilder("if ");
     builder.append("(").append(getCondition().generate(context)).append(") ");

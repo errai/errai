@@ -83,6 +83,7 @@ public class BooleanExpressionBuilder implements BooleanExpression {
     return new BooleanExpressionBuilder(toLhs, toRhs, operator);
   }
 
+  @Override
   public String generate(Context context) {
     if (operator != null) {
       if (lhs != null)
@@ -127,38 +128,47 @@ public class BooleanExpressionBuilder implements BooleanExpression {
     return lhsExpr + operExpr + rhsExpr;
   }
 
+  @Override
   public MetaClass getType() {
     return MetaClassFactory.get(boolean.class);
   }
 
+  @Override
   public Statement getLhs() {
     return lhs;
   }
 
+  @Override
   public void setLhs(Statement lhs) {
     this.lhs = lhs;
   }
   
+  @Override
   public String getLhsExpr() {
     return lhsExpr;
   }
 
+  @Override
   public void setLhsExpr(String lhsExpr) {
     this.lhsExpr = lhsExpr;
   }
   
+  @Override
   public Statement getRhs() {
     return rhs;
   }
 
+  @Override
   public void setRhs(Statement rhs) {
     this.rhs = rhs;
   }
 
+  @Override
   public BooleanOperator getOperator() {
     return operator;
   }
   
+  @Override
   public void setOperator(BooleanOperator operator) {
     this.operator = operator;
   }

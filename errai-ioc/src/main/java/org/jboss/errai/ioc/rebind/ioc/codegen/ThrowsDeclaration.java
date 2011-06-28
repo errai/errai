@@ -42,6 +42,7 @@ public class ThrowsDeclaration extends AbstractStatement {
     return new ThrowsDeclaration(new MetaClass[0]);
   }
 
+  @Override
   public String generate(Context context) {
     StringBuilder buf = new StringBuilder();
     for (int i = 0; i < exceptionTypes.length; i++) {

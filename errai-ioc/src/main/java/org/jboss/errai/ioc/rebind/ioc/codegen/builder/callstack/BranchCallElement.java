@@ -30,6 +30,7 @@ public class BranchCallElement extends AbstractCallElement {
     this.branchStatement = branchStatement;
   }
   
+  @Override
   public void handleCall(CallWriter writer, Context context, Statement statement) {
     writer.append(branchStatement.generate(context));
   }

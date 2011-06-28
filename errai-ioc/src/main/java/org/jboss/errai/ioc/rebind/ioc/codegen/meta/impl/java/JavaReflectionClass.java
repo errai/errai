@@ -60,10 +60,12 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     return new JavaReflectionClass(type);
   }
 
+  @Override
   public String getName() {
     return getEnclosedMetaObject().getSimpleName();
   }
 
+  @Override
   public String getFullyQualifiedName() {
     return getCanonicalName();
   }
@@ -88,10 +90,12 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     return methodList.toArray(new MetaMethod[methodList.size()]);
   }
 
+  @Override
   public MetaMethod[] getMethods() {
     return fromMethodArray(getEnclosedMetaObject().getMethods());
   }
 
+  @Override
   public MetaMethod[] getDeclaredMethods() {
     return fromMethodArray(getEnclosedMetaObject().getDeclaredMethods());
   }
@@ -106,14 +110,17 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     return methodList.toArray(new MetaField[methodList.size()]);
   }
 
+  @Override
   public MetaField[] getFields() {
     return fromFieldArray(getEnclosedMetaObject().getFields());
   }
 
+  @Override
   public MetaField[] getDeclaredFields() {
     return fromFieldArray(getEnclosedMetaObject().getDeclaredFields());
   }
 
+  @Override
   public MetaField getField(String name) {
     try {
       return new JavaReflectionField(getEnclosedMetaObject().getField(name));
@@ -123,6 +130,7 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     }
   }
 
+  @Override
   public MetaField getDeclaredField(String name) {
     try {
       return new JavaReflectionField(getEnclosedMetaObject().getDeclaredField(name));
@@ -132,6 +140,7 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     }
   }
 
+  @Override
   public MetaConstructor[] getConstructors() {
     List<MetaConstructor> constructorList = new ArrayList<MetaConstructor>();
 
@@ -142,6 +151,7 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     return constructorList.toArray(new MetaConstructor[constructorList.size()]);
   }
 
+  @Override
   public MetaConstructor[] getDeclaredConstructors() {
     List<MetaConstructor> constructorList = new ArrayList<MetaConstructor>();
 
@@ -152,6 +162,7 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     return constructorList.toArray(new MetaConstructor[constructorList.size()]);
   }
 
+  @Override
   public MetaConstructor getConstructor(Class... parameters) {
     try {
       return new JavaReflectionConstructor(getEnclosedMetaObject().getConstructor(parameters));
@@ -161,6 +172,7 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     }
   }
 
+  @Override
   public MetaConstructor getDeclaredConstructor(Class... parameters) {
     try {
       return new JavaReflectionConstructor(getEnclosedMetaObject().getDeclaredConstructor(parameters));
@@ -170,6 +182,7 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     }
   }
 
+  @Override
   public MetaClass[] getInterfaces() {
     List<MetaClass> metaClassList = new ArrayList<MetaClass>();
     for (Class<?> type : getEnclosedMetaObject().getInterfaces()) {
@@ -180,14 +193,17 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     return metaClassList.toArray(new MetaClass[metaClassList.size()]);
   }
 
+  @Override
   public MetaClass getSuperClass() {
     return MetaClassFactory.get(getEnclosedMetaObject().getSuperclass());
   }
 
+  @Override
   public MetaClass getComponentType() {
     return MetaClassFactory.get(getEnclosedMetaObject().getComponentType());
   }
 
+  @Override
   public Annotation[] getAnnotations() {
     if (annotationsCache == null) {
       annotationsCache = getEnclosedMetaObject().getAnnotations();
@@ -195,50 +211,62 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     return annotationsCache;
   }
 
+  @Override
   public MetaTypeVariable[] getTypeParameters() {
     return JavaReflectionUtil.fromTypeVariable(getEnclosedMetaObject().getTypeParameters());
   }
 
+  @Override
   public boolean isInterface() {
     return getEnclosedMetaObject().isInterface();
   }
 
+  @Override
   public boolean isAbstract() {
     return (getEnclosedMetaObject().getModifiers() & Modifier.ABSTRACT) != 0;
   }
 
+  @Override
   public boolean isArray() {
     return getEnclosedMetaObject().isArray();
   }
 
+  @Override
   public boolean isEnum() {
     return getEnclosedMetaObject().isEnum();
   }
 
+  @Override
   public boolean isAnnotation() {
     return getEnclosedMetaObject().isAnnotation();
   }
 
+  @Override
   public boolean isPublic() {
     return (getEnclosedMetaObject().getModifiers() & Modifier.PUBLIC) != 0;
   }
 
+  @Override
   public boolean isPrivate() {
     return (getEnclosedMetaObject().getModifiers() & Modifier.PRIVATE) != 0;
   }
 
+  @Override
   public boolean isProtected() {
     return (getEnclosedMetaObject().getModifiers() & Modifier.PROTECTED) != 0;
   }
 
+  @Override
   public boolean isFinal() {
     return (getEnclosedMetaObject().getModifiers() & Modifier.FINAL) != 0;
   }
 
+  @Override
   public boolean isStatic() {
     return (getEnclosedMetaObject().getModifiers() & Modifier.STATIC) != 0;
   }
 
+  @Override
   public String toString() {
     return getFullyQualifiedName();
   }
