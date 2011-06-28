@@ -45,6 +45,17 @@
                  and it breaks deployment on JBoss AS and Tomcat -->
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+            <classifier>sources</classifier>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>
