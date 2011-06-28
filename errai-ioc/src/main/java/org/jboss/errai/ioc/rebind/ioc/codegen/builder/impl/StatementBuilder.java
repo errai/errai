@@ -169,32 +169,32 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
   }
 
   @Override
-  public BlockBuilder<WhileBuilder> do_() {
+  public BlockBuilderImpl<WhileBuilder> do_() {
     return new LoopBuilderImpl(context, callElementBuilder).do_();
   }
 
   @Override
-  public BlockBuilder<ElseBlockBuilder> if_(BooleanExpression stmt) {
+  public BlockBuilderImpl<ElseBlockBuilder> if_(BooleanExpression stmt) {
     return new IfBlockBuilderImpl(context, callElementBuilder).if_(stmt);
   }
 
   @Override
-  public BlockBuilder<StatementEnd> while_(BooleanExpression stmt) {
+  public BlockBuilderImpl<StatementEnd> while_(BooleanExpression stmt) {
     return new LoopBuilderImpl(context, callElementBuilder).while_(stmt);
   }
 
   @Override
-  public BlockBuilder<StatementEnd> for_(BooleanExpression condition) {
+  public BlockBuilderImpl<StatementEnd> for_(BooleanExpression condition) {
     return new LoopBuilderImpl(context, callElementBuilder).for_(condition);
   }
 
   @Override
-  public BlockBuilder<StatementEnd> for_(Statement initializer, BooleanExpression condition) {
+  public BlockBuilderImpl<StatementEnd> for_(Statement initializer, BooleanExpression condition) {
     return new LoopBuilderImpl(context, callElementBuilder).for_(initializer, condition);
   }
 
   @Override
-  public BlockBuilder<StatementEnd> for_(Statement initializer, BooleanExpression condition,
+  public BlockBuilderImpl<StatementEnd> for_(Statement initializer, BooleanExpression condition,
       Statement countingExpression) {
     return new LoopBuilderImpl(context, callElementBuilder).for_(initializer, condition, countingExpression);
   }
@@ -205,7 +205,7 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
   }
   
   @Override
-  public BlockBuilder<CatchBlockBuilder> try_() {
+  public BlockBuilderImpl<CatchBlockBuilder> try_() {
     return new TryBlockBuilderImpl(context, callElementBuilder).try_();
   }
 

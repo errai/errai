@@ -113,14 +113,14 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
     assertEquals("failed to generate abstract class", ABSTRACT_CLASS, cls);
   }
 
-  @Ignore @Test 
+  @Test
   public void testDefineClassWithConstructorCallingSuper() { 
     String cls = ClassBuilder.define("org.foo.Foo")
         .publicScope()
         .abstractClass()
         .body()
-        .publicConstructor() 
-        .append(null)
+        .publicConstructor()
+        .callSuper()
         .finish()
         .toJavaString();
     

@@ -16,15 +16,11 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.BlockBuilderImpl;
 
 /**
- * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Mike Brock <cbrock@redhat.com>
  */
-public interface ContextualIfBlockBuilder extends Statement, Builder {
-  BlockBuilderImpl<ElseBlockBuilder> if_();
-  BlockBuilderImpl<ElseBlockBuilder> if_(BooleanOperator op, Statement rhs);
-  BlockBuilderImpl<ElseBlockBuilder> if_(BooleanOperator op, Object rhs);
+public interface BlockBuilder<T> extends Finishable<T> {
+  public BlockBuilder<T> append(Statement stmt);
 }

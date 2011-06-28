@@ -54,16 +54,16 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements Context
 
   // foreach loop
   @Override
-  public BlockBuilder<StatementEnd> foreach(String loopVarName) {
+  public BlockBuilderImpl<StatementEnd> foreach(String loopVarName) {
     return foreach(loopVarName, (MetaClass) null);
   }
 
   @Override
-  public BlockBuilder<StatementEnd> foreach(String loopVarName, Class<?> loopVarType) {
+  public BlockBuilderImpl<StatementEnd> foreach(String loopVarName, Class<?> loopVarType) {
     return foreach(loopVarName, MetaClassFactory.get(loopVarType));
   }
 
-  private BlockBuilder<StatementEnd> foreach(final String loopVarName, final MetaClass loopVarType) {
+  private BlockBuilderImpl<StatementEnd> foreach(final String loopVarName, final MetaClass loopVarType) {
     final BlockStatement body = new BlockStatement();
 
     appendCallElement(new DeferredCallElement(new DeferredCallback() {
@@ -82,10 +82,10 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements Context
 
   // do while loop
   @Override
-  public BlockBuilder<WhileBuilder> do_() {
+  public BlockBuilderImpl<WhileBuilder> do_() {
     final BlockStatement body = new BlockStatement();
 
-    return new BlockBuilder<WhileBuilder>(body, new BuildCallback<WhileBuilder>() {
+    return new BlockBuilderImpl<WhileBuilder>(body, new BuildCallback<WhileBuilder>() {
       @Override
       public WhileBuilder callback(Statement statement) {
         return new WhileBuilder() {
@@ -119,24 +119,24 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements Context
 
   // while loop
   @Override
-  public BlockBuilder<StatementEnd> while_() {
+  public BlockBuilderImpl<StatementEnd> while_() {
     return while_(new BooleanExpressionBuilder());
   }
 
   @Override
-  public BlockBuilder<StatementEnd> while_(BooleanOperator op, Object rhs) {
+  public BlockBuilderImpl<StatementEnd> while_(BooleanOperator op, Object rhs) {
     return while_(op, GenUtil.generate(context, rhs));
   }
 
   @Override
-  public BlockBuilder<StatementEnd> while_(BooleanOperator op, Statement rhs) {
+  public BlockBuilderImpl<StatementEnd> while_(BooleanOperator op, Statement rhs) {
     if (rhs == null)
       rhs = NullLiteral.INSTANCE;
     return while_(new BooleanExpressionBuilder(rhs, op));
   }
 
   @Override
-  public BlockBuilder<StatementEnd> while_(final BooleanExpression condition) {
+  public BlockBuilderImpl<StatementEnd> while_(final BooleanExpression condition) {
     final BlockStatement body = new BlockStatement();
     appendCallElement(new ConditionalBlockCallElement(new WhileLoop(condition, body)));
     return createLoopBody(body);
@@ -144,17 +144,17 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements Context
 
   // for loop
   @Override
-  public BlockBuilder<StatementEnd> for_(BooleanExpression condition) {
+  public BlockBuilderImpl<StatementEnd> for_(BooleanExpression condition) {
     return for_((Statement) null, condition);
   }
 
   @Override
-  public BlockBuilder<StatementEnd> for_(Statement initializer, BooleanExpression condition) {
+  public BlockBuilderImpl<StatementEnd> for_(Statement initializer, BooleanExpression condition) {
     return for_(initializer, condition, null);
   }
 
   @Override
-  public BlockBuilder<StatementEnd> for_(final Statement initializer, final BooleanExpression condition,
+  public BlockBuilderImpl<StatementEnd> for_(final Statement initializer, final BooleanExpression condition,
       final Statement countingExpression) {
     
     final BlockStatement body = new BlockStatement();
@@ -162,8 +162,8 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements Context
     return createLoopBody(body);
   }
 
-  private BlockBuilder<StatementEnd> createLoopBody(BlockStatement body) {
-    return new BlockBuilder<StatementEnd>(body, new BuildCallback<StatementEnd>() {
+  private BlockBuilderImpl<StatementEnd> createLoopBody(BlockStatement body) {
+    return new BlockBuilderImpl<StatementEnd>(body, new BuildCallback<StatementEnd>() {
       @Override
       public StatementEnd callback(Statement statement) {
         return LoopBuilderImpl.this;

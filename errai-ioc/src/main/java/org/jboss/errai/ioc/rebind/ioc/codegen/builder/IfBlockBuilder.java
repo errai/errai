@@ -18,11 +18,11 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanExpression;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.BlockBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.BlockBuilderImpl;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface IfBlockBuilder extends Statement, Builder {
-  public BlockBuilder<ElseBlockBuilder> if_(BooleanExpression condition);
+  public BlockBuilderImpl<ElseBlockBuilder> if_(BooleanExpression condition);
 }

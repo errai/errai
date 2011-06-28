@@ -64,7 +64,7 @@ public interface ClassBuilderTestResult {
           "\n" +
           " public abstract class Foo {\n" +
           "   public Foo() {" +
-          "     super()" +
+          "     super();" +
           "   }" +
           " }";
 

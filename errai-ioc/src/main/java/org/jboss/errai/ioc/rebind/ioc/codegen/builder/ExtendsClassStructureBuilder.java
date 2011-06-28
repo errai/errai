@@ -16,60 +16,60 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.BlockBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.BlockBuilderImpl;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public interface ExtendsClassStructureBuilder extends BaseClassStructureBuilder {
-  public BlockBuilder<ExtendsClassStructureBuilder> publicOverridesConstructor(MetaClass... parms);
+  public BlockBuilderImpl<ExtendsClassStructureBuilder> publicOverridesConstructor(MetaClass... parms);
 
-  public BlockBuilder<ExtendsClassStructureBuilder> publicOverridesConstructor(Class<?>... parms);
-
-
-  public BlockBuilder<ExtendsClassStructureBuilder> privateOverridesConstructor(MetaClass... parms);
-
-  public BlockBuilder<ExtendsClassStructureBuilder> privateOverridesConstructor(Class<?>... parms);
+  public BlockBuilderImpl<ExtendsClassStructureBuilder> publicOverridesConstructor(Class<?>... parms);
 
 
-  public BlockBuilder<ExtendsClassStructureBuilder> protectedOverridesConstructor(MetaClass... parms);
+  public BlockBuilderImpl<ExtendsClassStructureBuilder> privateOverridesConstructor(MetaClass... parms);
 
-  public BlockBuilder<ExtendsClassStructureBuilder> protectedOverridesConstructor(Class<?>... parms);
+  public BlockBuilderImpl<ExtendsClassStructureBuilder> privateOverridesConstructor(Class<?>... parms);
 
 
-  public BlockBuilder<ExtendsClassStructureBuilder> packageOverridesConstructor(MetaClass... parms);
+  public BlockBuilderImpl<ExtendsClassStructureBuilder> protectedOverridesConstructor(MetaClass... parms);
 
-  public BlockBuilder<ExtendsClassStructureBuilder> packageOverridesConstructor(Class<?>... parms);
+  public BlockBuilderImpl<ExtendsClassStructureBuilder> protectedOverridesConstructor(Class<?>... parms);
+
+
+  public BlockBuilderImpl<ExtendsClassStructureBuilder> packageOverridesConstructor(MetaClass... parms);
+
+  public BlockBuilderImpl<ExtendsClassStructureBuilder> packageOverridesConstructor(Class<?>... parms);
 
 
   // -- //
 
-  public BlockBuilder<ExtendsClassStructureBuilder> publicOverridesMethod(MetaClass returnType, String name,
+  public BlockBuilderImpl<ExtendsClassStructureBuilder> publicOverridesMethod(MetaClass returnType, String name,
                                                                           MetaClass... parms);
 
-  public BlockBuilder<ExtendsClassStructureBuilder> publicOverridesMethod(Class<?> returnType, String name,
+  public BlockBuilderImpl<ExtendsClassStructureBuilder> publicOverridesMethod(Class<?> returnType, String name,
                                                                           Class<?>... parms);
 
 
-  public BlockBuilder<ExtendsClassStructureBuilder> privateOverridesMethod(MetaClass returnType, String name,
+  public BlockBuilderImpl<ExtendsClassStructureBuilder> privateOverridesMethod(MetaClass returnType, String name,
                                                                            MetaClass... parms);
 
-  public BlockBuilder<ExtendsClassStructureBuilder> privateOverridesMethod(Class<?> returnType,  String name,
+  public BlockBuilderImpl<ExtendsClassStructureBuilder> privateOverridesMethod(Class<?> returnType,  String name,
                                                                            Class<?>... parms);
 
 
-  public BlockBuilder<ExtendsClassStructureBuilder> protectedOverridesMethod(MetaClass returnType, String name,
+  public BlockBuilderImpl<ExtendsClassStructureBuilder> protectedOverridesMethod(MetaClass returnType, String name,
                                                                              MetaClass... parms);
 
-  public BlockBuilder<ExtendsClassStructureBuilder> protectedOverridesMethod(Class<?> returnType,  String name,
+  public BlockBuilderImpl<ExtendsClassStructureBuilder> protectedOverridesMethod(Class<?> returnType,  String name,
                                                                              Class<?>... parms);
 
 
-  public BlockBuilder<ExtendsClassStructureBuilder> packageOverridesMethod(MetaClass returnType, String name,
+  public BlockBuilderImpl<ExtendsClassStructureBuilder> packageOverridesMethod(MetaClass returnType, String name,
                                                                            MetaClass... parms);
 
-  public BlockBuilder<ExtendsClassStructureBuilder> packageOverridesMethod(Class<?> returnType,  String name,
+  public BlockBuilderImpl<ExtendsClassStructureBuilder> packageOverridesMethod(Class<?> returnType,  String name,
                                                                            Class<?>... parms);
 
   // -- //

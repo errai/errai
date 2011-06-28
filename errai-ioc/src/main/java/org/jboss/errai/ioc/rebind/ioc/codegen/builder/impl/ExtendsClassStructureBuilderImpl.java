@@ -43,13 +43,13 @@ public class ExtendsClassStructureBuilderImpl implements Builder, Finishable<Obj
     this.callback = builderBuildCallback;
   }
 
-  public BlockBuilder<ExtendsClassStructureBuilderImpl> publicConstructor(final DefParameters parameters) {
+  public BlockBuilderImpl<ExtendsClassStructureBuilderImpl> publicConstructor(final DefParameters parameters) {
     final Context context = Context.create(classContext);
     for (Parameter parm : parameters.getParameters()) {
       context.addVariable(Variable.create(parm.getName(), parm.getType()));
     }
 
-    return new BlockBuilder<ExtendsClassStructureBuilderImpl>(new BuildCallback<ExtendsClassStructureBuilderImpl>() {
+    return new BlockBuilderImpl<ExtendsClassStructureBuilderImpl>(new BuildCallback<ExtendsClassStructureBuilderImpl>() {
       @Override
       public ExtendsClassStructureBuilderImpl callback(Statement statement) {
         buf.append("public ").append(getClassReference(toExtend, classContext))
@@ -64,7 +64,7 @@ public class ExtendsClassStructureBuilderImpl implements Builder, Finishable<Obj
     });
   }
 
-  public BlockBuilder<ExtendsClassStructureBuilderImpl> publicOverridesMethod(final MetaMethod method) {
+  public BlockBuilderImpl<ExtendsClassStructureBuilderImpl> publicOverridesMethod(final MetaMethod method) {
     final DefParameters parameters = DefParameters.from(method);
 
     final Context context = Context.create(classContext);
@@ -72,7 +72,7 @@ public class ExtendsClassStructureBuilderImpl implements Builder, Finishable<Obj
       context.addVariable(Variable.create(parm.getName(), parm.getType()));
     }
 
-    return new BlockBuilder<ExtendsClassStructureBuilderImpl>(new BuildCallback<ExtendsClassStructureBuilderImpl>() {
+    return new BlockBuilderImpl<ExtendsClassStructureBuilderImpl>(new BuildCallback<ExtendsClassStructureBuilderImpl>() {
       @Override
       public ExtendsClassStructureBuilderImpl callback(Statement statement) {
 
@@ -92,7 +92,7 @@ public class ExtendsClassStructureBuilderImpl implements Builder, Finishable<Obj
     });
   }
 
-  public BlockBuilder<ExtendsClassStructureBuilderImpl> publicOverridesMethod(String name, Class... args) {
+  public BlockBuilderImpl<ExtendsClassStructureBuilderImpl> publicOverridesMethod(String name, Class... args) {
     return publicOverridesMethod(toExtend.getBestMatchingMethod(name, args));
   }
 

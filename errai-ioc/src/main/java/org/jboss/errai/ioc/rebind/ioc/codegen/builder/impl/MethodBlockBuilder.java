@@ -24,7 +24,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class MethodBlockBuilder<T> extends BlockBuilder<T> {
+public class MethodBlockBuilder<T> extends BlockBuilderImpl<T> {
   private ThrowsDeclaration throwsDeclaration = ThrowsDeclaration.none();
   private MethodBuildCallback<T> callback;
 
@@ -37,12 +37,12 @@ public class MethodBlockBuilder<T> extends BlockBuilder<T> {
     this.callback = callback;
   }
 
-  public BlockBuilder<T> throws_(Class<? extends Throwable>... exceptionTypes) {
+  public BlockBuilderImpl<T> throws_(Class<? extends Throwable>... exceptionTypes) {
     throwsDeclaration = ThrowsDeclaration.of(exceptionTypes);
     return this;
   }
 
-  public BlockBuilder<T> throws_(MetaClass... exceptions) {
+  public BlockBuilderImpl<T> throws_(MetaClass... exceptions) {
     throwsDeclaration = ThrowsDeclaration.of(exceptions);
     return this;
   }
