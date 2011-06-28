@@ -217,25 +217,26 @@
             </plugin>
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.6</version>
                 <executions>
                     <execution>
                         <phase>integration-test</phase>
                         <configuration>
-                            <tasks>
+                            <target unless="persistence.test.skip" >
                                 <!-- Trick: Japex (but not the test itself)
                                     needs ant.jar and that's part of antrun-Plugin:-).
                                     So we just pass maven.plugin.classpath.
                                 -->
-                                <property name="maven.plugin.classpath" refid="maven.plugin.classpath" />
-                                <property name="japexConfig" location="${japexConfig}" />
+                                <property name="maven.plugin.classpath" refid="maven.plugin.classpath"/>
+                                <property name="japexConfig" location="${japexConfig}"/>
 
                                 <!-- important -->
-                                <delete file="target/dependency/gwt-dev-2.0.3.jar" />
+                                <delete file="target/dependency/gwt-dev-2.0.3.jar"/>
 
                                 <ant antfile="${basedir}/build.xml">
-                                    <target name="run" />
+                                    <target name="run"/>
                                 </ant>
-                            </tasks>
+                            </target>
                         </configuration>
                         <goals>
                             <goal>run</goal>
