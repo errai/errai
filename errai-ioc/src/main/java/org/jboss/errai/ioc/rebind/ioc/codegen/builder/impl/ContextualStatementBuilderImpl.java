@@ -101,9 +101,11 @@ public class ContextualStatementBuilderImpl extends AbstractStatementBuilder imp
     return new IfBlockBuilderImpl(context, callElementBuilder).if_(op, rhs);
   }
 
+  // Switch
   public CaseBlockBuilder switch_() {
     return new SwitchBlockBuilderImpl(context, callElementBuilder).switch_();
   }
+  
   // Value return
   public Statement returnValue() {
     appendCallElement(new ReturnValue());

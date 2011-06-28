@@ -196,7 +196,7 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
     return this;
   }
 
-  public StatementEnd label(final String label) {
+  public StatementEnd label(String label) {
     appendCallElement(new DefineLabel(label));
     return this;
   }

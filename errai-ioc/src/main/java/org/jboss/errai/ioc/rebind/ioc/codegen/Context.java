@@ -39,7 +39,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
  */
 public class Context {
   private Context parent = null;
-  
+
   private Map<String, Variable> variables;
   private Map<String, Label> labels;
 
@@ -92,19 +92,19 @@ public class Context {
   public Context addVariable(Variable variable) {
     if (variables == null)
       variables = new HashMap<String, Variable>();
-    
+
     variables.put(variable.getName(), variable);
     return this;
   }
-  
+
   public Context addLabel(Label label) {
     if (labels == null)
       labels = new HashMap<String, Label>();
-    
+
     labels.put(label.getName(), label);
     return this;
   }
-  
+
   public Context addPackageImport(String packageName) {
     if (packageName == null)
       return this;
@@ -124,19 +124,19 @@ public class Context {
   }
 
   public boolean hasPackageImport(String packageName) {
-    return importedPackages!=null && importedPackages.contains(packageName);
+    return importedPackages != null && importedPackages.contains(packageName);
   }
 
   public Context addClassImport(MetaClass clazz) {
     if (importedClasses == null)
       importedClasses = new HashSet<MetaClass>();
-    
+
     importedClasses.add(clazz);
     return this;
   }
 
   public boolean hasClassImport(MetaClass clazz) {
-    return importedClasses!=null && importedClasses.contains(clazz);
+    return importedClasses != null && importedClasses.contains(clazz);
   }
 
   public Context autoImport() {
@@ -157,10 +157,8 @@ public class Context {
     Context ctx = this;
     do {
       if (ctx.variables != null) {
-        found = ctx.variables.get(name);
-      }
-      if (mustBeClassMember && found!=null && !found.isClassMember()) {
-        found = null;
+        Variable var = ctx.variables.get(name);
+        found = (mustBeClassMember && !var.isClassMember()) ? null : var;
       }
     }
     while (found == null && (ctx = ctx.parent) != null);
@@ -170,7 +168,7 @@ public class Context {
 
     return found.getReference();
   }
-  
+
   public Statement getLabel(String name) {
     Label found = null;
     Context ctx = this;
@@ -182,7 +180,7 @@ public class Context {
     while (found == null && (ctx = ctx.parent) != null);
 
     if (found == null)
-      throw new OutOfScopeException("Label not found:" + name);
+      throw new OutOfScopeException("Label not found: " + name);
 
     return found.getReference();
   }
@@ -190,7 +188,7 @@ public class Context {
   public boolean isScoped(Variable variable) {
     Context ctx = this;
     do {
-      if (ctx.variables!=null && ctx.variables.containsValue(variable))
+      if (ctx.variables != null && ctx.variables.containsValue(variable))
         return true;
     }
     while ((ctx = ctx.parent) != null);
@@ -198,30 +196,29 @@ public class Context {
   }
 
   public Collection<Variable> getDeclaredVariables() {
-    if (variables == null) {
-      return Collections.<Variable>emptyList();
-    }
+    if (variables == null) 
+      return Collections.<Variable> emptyList();
+    
     return variables.values();
   }
 
   public Map<String, Variable> getVariables() {
-    if (variables == null) {
-      return Collections.<String, Variable>emptyMap();
-    }
+    if (variables == null) 
+      return Collections.<String, Variable> emptyMap();
+    
     return Collections.unmodifiableMap(variables);
   }
 
   public Set<String> getImportedPackages() {
     Set<String> allImportedPackages = new HashSet<String>();
     Context ctx = this;
-    
     do {
-      if (ctx.importedPackages !=null) {
+      if (ctx.importedPackages != null) {
         allImportedPackages.addAll(ctx.importedPackages);
       }
     }
     while ((ctx = ctx.parent) != null);
-    
+
     return allImportedPackages;
   }
 
@@ -229,15 +226,15 @@ public class Context {
     Set<MetaClass> allImportedClasses = new HashSet<MetaClass>();
     Context ctx = this;
     do {
-      if (ctx.importedClasses !=null) {
+      if (ctx.importedClasses != null) {
         allImportedClasses.addAll(ctx.importedClasses);
       }
     }
     while ((ctx = ctx.parent) != null);
-    
+
     return allImportedClasses;
   }
-  
+
   public boolean isAutoImports() {
     return autoImports;
   }
