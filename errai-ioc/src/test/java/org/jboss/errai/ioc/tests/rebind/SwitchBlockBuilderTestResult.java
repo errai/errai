@@ -23,7 +23,6 @@ public interface SwitchBlockBuilderTestResult {
 
   public static final String SWITCH_BLOCK_EMPTY =
       "     switch (n) {\n" +
-          "   default: break;" +
           " } ";
 
   public static final String SWITCH_BLOCK_INT =

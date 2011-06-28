@@ -26,13 +26,14 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.control.AbstractConditionalBlock;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class ConditionalBlockElement extends AbstractCallElement {
+public class ConditionalBlockCallElement extends AbstractCallElement {
   private AbstractConditionalBlock conditionalBlock;
   
-  public ConditionalBlockElement(final AbstractConditionalBlock conditionalBlock) {
+  public ConditionalBlockCallElement(final AbstractConditionalBlock conditionalBlock) {
     this.conditionalBlock = conditionalBlock;
   }
 
+  @Override
   public void handleCall(CallWriter writer, Context context, Statement lhs) {
     if (lhs != null) {
       // The LHS value is on the current callstack. So we grab the value from there at generation time.

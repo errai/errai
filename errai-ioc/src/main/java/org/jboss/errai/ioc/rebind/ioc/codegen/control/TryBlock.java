@@ -51,6 +51,7 @@ public class TryBlock extends AbstractStatement {
     return finallyBlock;
   }
 
+  @Override
   public String generate(Context context) {
     StringBuilder buf = new StringBuilder("try {\n");
     buf.append(block.generate(context)).append("\n} ");

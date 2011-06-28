@@ -45,4 +45,12 @@ public interface StatementBegin extends ArrayBuilder, LoopBuilder, IfBlockBuilde
   
   public StatementEnd throw_(Class<? extends Throwable> throwableType, Object... parameters);
   public StatementEnd throw_(String exceptionVarName);
+  
+  public StatementEnd label(String label);
+  
+  public StatementEnd break_();
+  public StatementEnd break_(String label);
+  
+  public StatementEnd continue_();
+  public StatementEnd continue_(String label);
 }

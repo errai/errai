@@ -30,10 +30,12 @@ public class GWTWildcardType implements MetaWildcardType {
     this.wildcardType = wildcardType;
   }
 
+  @Override
   public MetaType[] getLowerBounds() {
     return GWTUtil.fromTypeArray(wildcardType.getLowerBounds());
   }
 
+  @Override
   public MetaType[] getUpperBounds() {
     return GWTUtil.fromTypeArray(wildcardType.getUpperBounds());
   }

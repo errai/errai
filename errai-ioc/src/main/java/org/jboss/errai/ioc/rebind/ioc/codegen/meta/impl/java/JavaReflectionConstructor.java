@@ -47,10 +47,12 @@ public class JavaReflectionConstructor extends MetaConstructor {
     declaringClass = MetaClassFactory.get(c.getDeclaringClass());
   }
 
+  @Override
   public MetaParameter[] getParameters() {
     return parameters;
   }
 
+  @Override
   public MetaClass getDeclaringClass() {
     return declaringClass;
   }
@@ -60,10 +62,12 @@ public class JavaReflectionConstructor extends MetaConstructor {
     return JavaReflectionUtil.fromTypeArray(constructor.getGenericParameterTypes());
   }
 
+  @Override
   public MetaTypeVariable[] getTypeParameters() {
     return JavaReflectionUtil.fromTypeVariable(constructor.getTypeParameters());
   }
 
+  @Override
   public Annotation[] getAnnotations() {
     if (annotationsCache == null) {
       annotationsCache = constructor.getAnnotations();
@@ -72,6 +76,7 @@ public class JavaReflectionConstructor extends MetaConstructor {
   }
 
 
+  @Override
   public final <A extends Annotation> A getAnnotation(Class<A> annotation) {
     for (Annotation a : getAnnotations()) {
       if (a.annotationType().equals(annotation)) return (A) a;
@@ -79,42 +84,52 @@ public class JavaReflectionConstructor extends MetaConstructor {
     return null;
   }
 
+  @Override
   public final boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
     return getAnnotation(annotation) != null;
   }
 
+  @Override
   public boolean isAbstract() {
     return (constructor.getModifiers() & Modifier.ABSTRACT) != 0;
   }
 
+  @Override
   public boolean isPublic() {
     return (constructor.getModifiers() & Modifier.PUBLIC) != 0;
   }
 
+  @Override
   public boolean isPrivate() {
     return (constructor.getModifiers() & Modifier.PRIVATE) != 0;
   }
 
+  @Override
   public boolean isProtected() {
     return (constructor.getModifiers() & Modifier.PROTECTED) != 0;
   }
 
+  @Override
   public boolean isFinal() {
     return (constructor.getModifiers() & Modifier.FINAL) != 0;
   }
 
+  @Override
   public boolean isStatic() {
     return (constructor.getModifiers() & Modifier.STATIC) != 0;
   }
 
+  @Override
   public boolean isTransient() {
     return (constructor.getModifiers() & Modifier.TRANSIENT) != 0;
   }
 
+  @Override
   public boolean isSynchronized() {
     return (constructor.getModifiers() & Modifier.SYNCHRONIZED) != 0;
   }
 
+  @Override
   public boolean isSynthetic() {
     return constructor.isSynthetic();
   }

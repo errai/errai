@@ -408,8 +408,10 @@ public class IOCGenerator extends Generator {
     final MetaClass messageBusType = getJClassType(MessageBus.class);
 
     procFactory.registerHandler(EntryPoint.class, new AnnotationHandler<EntryPoint>() {
+      @Override
       public void handle(final MetaClass type, EntryPoint annotation, ProcessingContext context) {
         addDeferred(new Runnable() {
+          @Override
           public void run() {
             generateWithSingletonSemantics(type);
           }
@@ -418,10 +420,12 @@ public class IOCGenerator extends Generator {
     });
 
     procFactory.registerHandler(ToRootPanel.class, new AnnotationHandler<ToRootPanel>() {
+      @Override
       public void handle(final MetaClass type, final ToRootPanel annotation, final ProcessingContext context) {
         if (widgetType.isAssignableFrom(type)) {
 
           addDeferred(new Runnable() {
+            @Override
             public void run() {
               context.getWriter().println("ctx.addToRootPanel(" + generateWithSingletonSemantics(type) + ");");
             }
@@ -434,10 +438,12 @@ public class IOCGenerator extends Generator {
     });
 
     procFactory.registerHandler(CreatePanel.class, new AnnotationHandler<CreatePanel>() {
+      @Override
       public void handle(final MetaClass type, final CreatePanel annotation, final ProcessingContext context) {
         if (widgetType.isAssignableFrom(type)) {
 
           addDeferred(new Runnable() {
+            @Override
             public void run() {
               context.getWriter().println("ctx.registerPanel(\"" + (annotation.value().equals("")
                       ? type.getName() : annotation.value()) + "\", " + generateInjectors(type) + ");");
@@ -451,10 +457,12 @@ public class IOCGenerator extends Generator {
     });
 
     procFactory.registerHandler(ToPanel.class, new AnnotationHandler<ToPanel>() {
+      @Override
       public void handle(final MetaClass type, final ToPanel annotation, final ProcessingContext context) {
         if (widgetType.isAssignableFrom(type)) {
 
           addDeferred(new Runnable() {
+            @Override
             public void run() {
               context.getWriter()
                       .println("ctx.widgetToPanel(" + generateWithSingletonSemantics(type)

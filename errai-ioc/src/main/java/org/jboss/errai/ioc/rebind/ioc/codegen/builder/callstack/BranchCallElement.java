@@ -14,26 +14,24 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.rebind.ioc.codegen.util;
+package org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.VariableReference;
+import org.jboss.errai.ioc.rebind.ioc.codegen.control.branch.AbstractBranchStatement;
 
 /**
- * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
-public abstract class Refs {
-  public static VariableReference get(final String name) {
-    return new VariableReference() {
-      @Override
-      public String getName() {
-        return name;
-      }
-
-      @Override
-      public Statement getValue() {
-        return null;
-      }
-    };
+public class BranchCallElement extends AbstractCallElement {
+  private AbstractBranchStatement branchStatement;
+  
+  public BranchCallElement(AbstractBranchStatement branchStatement) {
+    this.branchStatement = branchStatement;
+  }
+  
+  @Override
+  public void handleCall(CallWriter writer, Context context, Statement statement) {
+    writer.append(branchStatement.generate(context));
   }
 }

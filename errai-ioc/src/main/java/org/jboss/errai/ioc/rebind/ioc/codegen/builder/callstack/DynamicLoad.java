@@ -30,6 +30,7 @@ public class DynamicLoad extends AbstractCallElement {
     this.value = value;
   }
 
+  @Override
   public void handleCall(CallWriter writer, Context context, Statement statement) {
     nextOrReturn(writer, context, GenUtil.generate(context, value));
   }

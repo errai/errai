@@ -28,7 +28,11 @@ public class Bool {
   public static BooleanExpression expr(Object lhs, BooleanOperator operator, Object rhs) {
     return BooleanExpressionBuilder.create(lhs, operator, rhs);
   }
-  
+
+  public static BooleanExpression expr(BooleanOperator operator, Object rhs) {
+    return BooleanExpressionBuilder.create(operator, rhs);
+  }
+
   public static BooleanExpression expr(Statement lhs) {
     return BooleanExpressionBuilder.create(lhs);
   }

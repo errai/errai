@@ -31,14 +31,17 @@ public class JavaReflectionParameterizedType implements MetaParameterizedType {
     this.parameterizedType = parameterizedType;
   }
 
+  @Override
   public MetaType[] getTypeParameters() {
     return JavaReflectionUtil.fromTypeArray(parameterizedType.getActualTypeArguments());
   }
 
+  @Override
   public MetaType getOwnerType() {
     return JavaReflectionUtil.fromType(parameterizedType.getOwnerType());
   }
 
+  @Override
   public MetaType getRawType() {
     return JavaReflectionUtil.fromType(parameterizedType.getRawType());
   }

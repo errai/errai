@@ -43,6 +43,7 @@ public class LoadVariable extends AbstractCallElement {
     this.classMember = classMember;
   }
   
+  @Override
   public void handleCall(CallWriter writer, Context context, Statement statement) {
     writer.reset();
 

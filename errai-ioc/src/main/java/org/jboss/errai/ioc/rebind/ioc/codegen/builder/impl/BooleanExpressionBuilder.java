@@ -56,15 +56,21 @@ public class BooleanExpressionBuilder implements BooleanExpression {
     return new BooleanExpressionBuilder(lhs, null, null);
   }
   
+  public static BooleanExpression create(BooleanOperator operator, Object rhs) {
+    return create(null, operator, rhs);
+  }
+  
   public static BooleanExpression create(Object lhs, BooleanOperator operator, Object rhs) {
-    Statement toLhs;
-    Statement toRhs;
+    Statement toLhs = null;
+    Statement toRhs = null;
 
-    if (lhs instanceof Statement) {
-      toLhs = (Statement) lhs;
-    }
-    else {
-      toLhs = LiteralFactory.getLiteral(lhs);
+    if (lhs != null) {
+      if (lhs instanceof Statement) {
+        toLhs = (Statement) lhs;
+      }
+      else {
+        toLhs = LiteralFactory.getLiteral(lhs);
+      }
     }
 
     if (rhs instanceof Statement) {
@@ -77,6 +83,7 @@ public class BooleanExpressionBuilder implements BooleanExpression {
     return new BooleanExpressionBuilder(toLhs, toRhs, operator);
   }
 
+  @Override
   public String generate(Context context) {
     if (operator != null) {
       if (lhs != null)
@@ -121,38 +128,47 @@ public class BooleanExpressionBuilder implements BooleanExpression {
     return lhsExpr + operExpr + rhsExpr;
   }
 
+  @Override
   public MetaClass getType() {
     return MetaClassFactory.get(boolean.class);
   }
 
+  @Override
   public Statement getLhs() {
     return lhs;
   }
 
+  @Override
   public void setLhs(Statement lhs) {
     this.lhs = lhs;
   }
   
+  @Override
   public String getLhsExpr() {
     return lhsExpr;
   }
 
+  @Override
   public void setLhsExpr(String lhsExpr) {
     this.lhsExpr = lhsExpr;
   }
   
+  @Override
   public Statement getRhs() {
     return rhs;
   }
 
+  @Override
   public void setRhs(Statement rhs) {
     this.rhs = rhs;
   }
 
+  @Override
   public BooleanOperator getOperator() {
     return operator;
   }
   
+  @Override
   public void setOperator(BooleanOperator operator) {
     this.operator = operator;
   }

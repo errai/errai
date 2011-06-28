@@ -42,10 +42,12 @@ public abstract class AbstractCallElement implements CallElement {
     }
   }
 
+  @Override
   public CallElement setNext(CallElement next) {
     return this.next = next;
   }
 
+  @Override
   public CallElement getNext() {
     return next;
   }
@@ -57,6 +59,7 @@ public abstract class AbstractCallElement implements CallElement {
     el.setNext(last);
   }
 
+  @Override
   public MetaClass getResultType() {
     return resultType;
   }

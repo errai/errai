@@ -39,26 +39,32 @@ public enum BooleanOperator implements Operator {
     operator = new OperatorImpl(canonicalString, operatorPrecedence, constraints);
   }
 
+  @Override
   public String getCanonicalString() {
     return operator.getCanonicalString();
   }
 
+  @Override
   public int getOperatorPrecedence() {
     return operator.getOperatorPrecedence();
   }
 
+  @Override
   public boolean isHigherPrecedenceThan(Operator operator) {
     return operator.getOperatorPrecedence() < getOperatorPrecedence();
   }
 
+  @Override
   public boolean isEqualOrHigherPrecedenceThan(Operator operator) {
     return operator.getOperatorPrecedence() <= getOperatorPrecedence();
   }
 
+  @Override
   public boolean canBeApplied(MetaClass clazz) {
     return operator.canBeApplied(clazz);
   }
 
+  @Override
   public void assertCanBeApplied(MetaClass clazz) {
     operator.assertCanBeApplied(clazz);
   }

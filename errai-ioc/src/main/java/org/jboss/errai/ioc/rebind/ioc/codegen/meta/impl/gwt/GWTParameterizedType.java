@@ -36,6 +36,7 @@ public class GWTParameterizedType implements MetaParameterizedType {
     this.parameterizedType = parameterizedType;
   }
 
+  @Override
   public MetaType[] getTypeParameters() {
     List<MetaType> types = new ArrayList<MetaType>();
     for (JClassType parm : parameterizedType.getTypeArgs()) {
@@ -44,10 +45,12 @@ public class GWTParameterizedType implements MetaParameterizedType {
     return types.toArray(new MetaType[types.size()]);
   }
 
+  @Override
   public MetaType getOwnerType() {
     return MetaClassFactory.get(parameterizedType.getEnclosingType());
   }
 
+  @Override
   public MetaType getRawType() {
     return MetaClassFactory.get(parameterizedType.getRawType());
   }

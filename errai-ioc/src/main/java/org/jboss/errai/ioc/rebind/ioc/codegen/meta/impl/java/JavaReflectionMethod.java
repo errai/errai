@@ -46,14 +46,17 @@ public class JavaReflectionMethod extends MetaMethod {
     returnType = MetaClassFactory.get(method.getReturnType());
   }
 
+  @Override
   public String getName() {
     return method.getName();
   }
 
+  @Override
   public MetaParameter[] getParameters() {
     return parameters;
   }
 
+  @Override
   public MetaClass getReturnType() {
     return returnType;
   }
@@ -68,14 +71,17 @@ public class JavaReflectionMethod extends MetaMethod {
     return JavaReflectionUtil.fromTypeArray(method.getGenericParameterTypes());
   }
 
+  @Override
   public MetaTypeVariable[] getTypeParameters() {
     return JavaReflectionUtil.fromTypeVariable(method.getTypeParameters());
   }
 
+  @Override
   public Annotation[] getAnnotations() {
     return method.getAnnotations();
   }
 
+  @Override
   public final <A extends Annotation> A getAnnotation(Class<A> annotation) {
     for (Annotation a : getAnnotations()) {
       if (a.annotationType().equals(annotation)) return (A) a;
@@ -83,46 +89,57 @@ public class JavaReflectionMethod extends MetaMethod {
     return null;
   }
 
+  @Override
   public boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
     return getAnnotation(annotation) != null;
   }
 
+  @Override
   public MetaClass getDeclaringClass() {
     return declaringClass;
   }
 
+  @Override
   public boolean isAbstract() {
     return (method.getModifiers() & Modifier.ABSTRACT) != 0;
   }
 
+  @Override
   public boolean isPublic() {
     return (method.getModifiers() & Modifier.PUBLIC) != 0;
   }
 
+  @Override
   public boolean isPrivate() {
     return (method.getModifiers() & Modifier.PRIVATE) != 0;
   }
 
+  @Override
   public boolean isProtected() {
     return (method.getModifiers() & Modifier.PROTECTED) != 0;
   }
 
+  @Override
   public boolean isFinal() {
     return (method.getModifiers() & Modifier.FINAL) != 0;
   }
 
+  @Override
   public boolean isStatic() {
     return (method.getModifiers() & Modifier.STATIC) != 0;
   }
 
+  @Override
   public boolean isTransient() {
     return (method.getModifiers() & Modifier.TRANSIENT) != 0;
   }
 
+  @Override
   public boolean isSynthetic() {
     return method.isSynthetic();
   }
 
+  @Override
   public boolean isSynchronized() {
     return (method.getModifiers() & Modifier.SYNCHRONIZED) != 0;
   }

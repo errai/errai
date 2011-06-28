@@ -42,10 +42,12 @@ public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayB
     super(context, callElementBuilder);
   }
 
+  @Override
   public ArrayInitializationBuilder newArray(Class<?> componentType) {
     return newArray(componentType, new Integer[1]);
   }
 
+  @Override
   public ArrayInitializationBuilder newArray(Class<?> componentType, Integer... dimensions) {
     this.type = MetaClassFactory.get(Array.newInstance(componentType, 0).getClass());
     this.componentType = MetaClassFactory.get(componentType);
@@ -53,6 +55,7 @@ public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayB
     return this;
   }
 
+  @Override
   public AbstractStatementBuilder initialize(Object... values) {
     if (values.length == 1 && values[0].getClass().isArray()
         && values.getClass().getComponentType().equals(Object.class)) {
@@ -66,10 +69,12 @@ public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayB
     return this;
   }
 
+  @Override
   public MetaClass getType() {
     return type;
   }
 
+  @Override
   public String generate(Context context) {
     StringBuilder buf = new StringBuilder();
     buf.append("new ").append(LoadClassReference.getClassReference(componentType, context));

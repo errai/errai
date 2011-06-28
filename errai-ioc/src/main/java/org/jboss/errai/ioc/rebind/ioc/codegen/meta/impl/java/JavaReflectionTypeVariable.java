@@ -34,14 +34,17 @@ public class JavaReflectionTypeVariable implements MetaTypeVariable {
     this.declaration = new JavaReflectionGenericDeclaration(variable.getGenericDeclaration());
   }
 
+  @Override
   public MetaType[] getBounds() {
     return JavaReflectionUtil.fromTypeArray(variable.getBounds());
   }
 
+  @Override
   public MetaGenericDeclaration getGenericDeclaration() {
     return declaration;
   }
 
+  @Override
   public String getName() {
     return variable.getName();
   }

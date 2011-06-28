@@ -97,10 +97,13 @@ public class SwitchBlockBuilderTest extends AbstractStatementBuilderTest impleme
         .case_(0)
         .append(Stmt.create().loadStatic(System.class, "out").invoke("println", "0"))
         .append(Stmt.create().loadStatic(System.class, "out").invoke("println", "break"))
+        .append(Stmt.create().break_())
         .finish()
         .case_(1)
+        .append(Stmt.create().break_())
         .finish()
         .default_()
+        .append(Stmt.create().break_())
         .finish()
         .toJavaString();
 
@@ -116,10 +119,13 @@ public class SwitchBlockBuilderTest extends AbstractStatementBuilderTest impleme
         .case_(TestEnum.A)
         .append(Stmt.create().loadStatic(System.class, "out").invoke("println", "A"))
         .append(Stmt.create().loadStatic(System.class, "out").invoke("println", "break"))
+        .append(Stmt.create().break_())
         .finish()
         .case_(TestEnum.B)
+        .append(Stmt.create().break_())
         .finish()
         .default_()
+        .append(Stmt.create().break_())
         .finish()
         .toJavaString();
 
@@ -134,8 +140,10 @@ public class SwitchBlockBuilderTest extends AbstractStatementBuilderTest impleme
         .case_(0)
         .append(Stmt.create().loadStatic(System.class, "out").invoke("println", "0"))
         .append(Stmt.create().loadStatic(System.class, "out").invoke("println", "break"))
+        .append(Stmt.create().break_())
         .finish()
         .case_(1)
+        .append(Stmt.create().break_())
         .finish()
         .toJavaString();
 
@@ -147,11 +155,12 @@ public class SwitchBlockBuilderTest extends AbstractStatementBuilderTest impleme
     String s = StatementBuilder.create()
         .addVariable("n", int.class)
         .switch_(Stmt.create().loadVariable("n"))
-        .caseFallThrough(0)
+        .case_(0)
         .finish()
         .case_(1)
         .append(Stmt.create().loadStatic(System.class, "out").invoke("println", "1"))
         .append(Stmt.create().loadStatic(System.class, "out").invoke("println", "break"))
+        .append(Stmt.create().break_())
         .finish()
         .toJavaString();
 
@@ -167,10 +176,13 @@ public class SwitchBlockBuilderTest extends AbstractStatementBuilderTest impleme
         .case_(0)
         .append(Stmt.create().loadStatic(System.class, "out").invoke("println", "0"))
         .append(Stmt.create().loadStatic(System.class, "out").invoke("println", "break"))
+        .append(Stmt.create().break_())
         .finish()
         .case_(1)
+        .append(Stmt.create().break_())
         .finish()
         .default_()
+        .append(Stmt.create().break_())
         .finish()
         .toJavaString();
 
@@ -185,10 +197,13 @@ public class SwitchBlockBuilderTest extends AbstractStatementBuilderTest impleme
         .switch_()
         .case_('a')
         .append(Stmt.create().loadStatic(System.class, "out").invoke("println", "a"))
+        .append(Stmt.create().break_())
         .finish()
         .case_('b')
+        .append(Stmt.create().break_())
         .finish()
         .default_()
+        .append(Stmt.create().break_())
         .finish()
         .toJavaString();
     
@@ -205,10 +220,13 @@ public class SwitchBlockBuilderTest extends AbstractStatementBuilderTest impleme
         .case_(0)
         .append(Stmt.create().loadStatic(System.class, "out").invoke("println", "0"))
         .append(Stmt.create().loadStatic(System.class, "out").invoke("println", "break"))
+        .append(Stmt.create().break_())
         .finish()
         .case_(1)
+        .append(Stmt.create().break_())
         .finish()
         .default_()
+        .append(Stmt.create().break_())
         .finish()
         .toJavaString();
     

@@ -80,7 +80,7 @@ public interface LoopBuilderTestResult {
           "}";
 
   public static final String FOR_NO_INITIALIZER_NO_COUNTING_EXP_EMPTY =
-      "     for (Integer i = 0; i < 100; ) { }";
+      "     for (; i < 100; ) { }";
 
   public static final String FOR_INITIALIZER_NO_COUNTING_EXP_EMPTY =
       "     for (i = 0; i < 100; ) { }";
@@ -89,10 +89,10 @@ public interface LoopBuilderTestResult {
       "     for (i = 0; i < 100; i += 1) { }";
 
   public static final String FOR_CHAINED_INITIALIZER_NO_COUNTING_EXP_EMPTY =
-      "     for (i; i < 100; ) { }";
+      "     for (i = 0; i < 100; ) { }";
 
   public static final String FOR_CHAINED_INITIALIZER_COUNTING_EXP_EMPTY =
-      "     for (i; i < 100; i += 1) { }";
+      "     for (i = 0; i < 100; i += 1) { }";
 
   public static final String FOR_DECLARE_INITIALIZER_COUNTING_EXP =
       "     for (int i = 0; i < 100; i += 1) { System.out.println(i); }";
@@ -106,4 +106,41 @@ public interface LoopBuilderTestResult {
   public static final String DOWHILE_NESTED_EXPRESSION =
       "     do { System.out.println(str); } while ((str != null) && (str.length() > 0));";
 
+  public static final String LOOP_WITH_CONTINUE =
+      "     if (i > 100) {" +
+          "   for (i = 0; i < 100; i += 1) { " +
+          "     if (i == 50) {" +
+          "       continue;" +
+          "     };"+ 
+          "   }\n;" +
+          "\n}";
+  
+  public static final String LOOP_WITH_CONTINUE_AND_LABEL =
+    "     if (i > 100) {" +
+        " label:" +
+        "   for (i = 0; i < 100; i += 1) { " +
+        "     if (i == 50) {" +
+        "       continue label;" +
+        "     };"+ 
+        "   }\n;" +
+        "\n}";
+  
+  public static final String LOOP_WITH_BREAK =
+    "     if (i > 100) {" +
+        "   for (i = 0; i < 100; i += 1) { " +
+        "     if (i == 50) {" +
+        "       break;" +
+        "     };"+ 
+        "   }\n;" +
+        "\n}";
+
+public static final String LOOP_WITH_BREAK_AND_LABEL =
+  "     if (i > 100) {" +
+      " label:" +
+      "   for (i = 0; i < 100; i += 1) { " +
+      "     if (i == 50) {" +
+      "       break label;" +
+      "     };"+ 
+      "   }\n;" +
+      "\n}";
 }

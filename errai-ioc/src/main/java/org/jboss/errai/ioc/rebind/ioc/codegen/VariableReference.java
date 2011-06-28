@@ -16,24 +16,19 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-
 /**
  * {@link Statement} thats represents a reference to a {@link Variable}.
  * 
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public abstract class VariableReference implements Statement {
+public abstract class VariableReference extends AbstractStatement {
   public abstract String getName();
   public abstract Statement getValue();
 
   protected Statement[] indexes;
-  
-  public MetaClass getType() {
-    return null;
-  }
 
+  @Override
   public String generate(Context context) {
     return getName();
   }

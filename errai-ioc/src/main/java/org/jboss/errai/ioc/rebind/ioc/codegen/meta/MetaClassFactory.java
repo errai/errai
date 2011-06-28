@@ -64,10 +64,12 @@ public final class MetaClassFactory {
   public static Statement getAsStatement(Class<?> clazz) {
     final MetaClass metaClass = createOrGet(clazz);
     return new Statement() {
+      @Override
       public String generate(Context context) {
         return LoadClassReference.getClassReference(metaClass, context);
       }
 
+      @Override
       public MetaClass getType() {
         return MetaClassFactory.get(Class.class);
       }

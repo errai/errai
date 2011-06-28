@@ -16,17 +16,15 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.control;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.AbstractStatement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.BlockStatement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanExpression;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public abstract class AbstractConditionalBlock implements Statement {
+public abstract class AbstractConditionalBlock extends AbstractStatement {
   private BooleanExpression condition;
   private BlockStatement block;
 
@@ -46,9 +44,5 @@ public abstract class AbstractConditionalBlock implements Statement {
 
   public BlockStatement getBlock() {
     return block;
-  }
-
-  public MetaClass getType() {
-    return MetaClassFactory.get(void.class);
   }
 }

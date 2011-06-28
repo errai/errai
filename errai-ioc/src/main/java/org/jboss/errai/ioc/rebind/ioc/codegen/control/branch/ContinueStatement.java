@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack;
+package org.jboss.errai.ioc.rebind.ioc.codegen.control.branch;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 
 /**
- * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class ResetElement extends AbstractCallElement {
-  public void handleCall(CallWriter writer, Context context, Statement statement) {
-    writer.reset();
-    nextOrReturn(writer, context, null);
+public class ContinueStatement extends AbstractBranchStatement {
+
+  public ContinueStatement() {}
+  
+  public ContinueStatement(String label) {
+    super(label);
+  }
+
+  @Override
+  public String generate(Context context) {
+    return "continue" + generateLabelReference(context);
   }
 }

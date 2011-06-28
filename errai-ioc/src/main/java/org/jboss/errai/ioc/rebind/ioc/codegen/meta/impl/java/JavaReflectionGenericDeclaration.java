@@ -34,6 +34,7 @@ public class JavaReflectionGenericDeclaration implements MetaGenericDeclaration 
     this.genericDeclaration = genericDeclaration;
   }
 
+  @Override
   public MetaTypeVariable[] getTypeParameters() {
     List<MetaTypeVariable> metaTypeVariableList = new ArrayList<MetaTypeVariable>();
 

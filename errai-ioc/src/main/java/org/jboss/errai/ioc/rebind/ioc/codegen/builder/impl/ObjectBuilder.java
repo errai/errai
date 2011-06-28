@@ -117,6 +117,7 @@ public class ObjectBuilder extends AbstractStatementBuilder {
 
   public ExtendsClassStructureBuilderImpl extend() {
     return new ExtendsClassStructureBuilderImpl(type, new BuildCallback<ObjectBuilder>() {
+      @Override
       public ObjectBuilder callback(Statement statement) {
         finishConstructIfNecessary();
         extendsBlock = statement;
@@ -131,10 +132,12 @@ public class ObjectBuilder extends AbstractStatementBuilder {
     }
   }
 
+  @Override
   public MetaClass getType() {
     return type;
   }
 
+  @Override
   public String generate(Context context) {
     finishConstructIfNecessary();
     

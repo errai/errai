@@ -40,18 +40,22 @@ public class JavaReflectionParameter implements MetaParameter {
     this.declaredBy = declaredBy;
   }
 
+  @Override
   public String getName() {
     return name;
   }
 
+  @Override
   public MetaClass getType() {
     return MetaClassFactory.get(type);
   }
 
+  @Override
   public Annotation[] getAnnotations() {
     return annotations == null ? new Annotation[0] : annotations;
   }
 
+  @Override
   public final <A extends Annotation> A getAnnotation(Class<A> annotation) {
     for (Annotation a : getAnnotations()) {
       if (a.annotationType().equals(annotation)) return (A) a;
@@ -59,11 +63,13 @@ public class JavaReflectionParameter implements MetaParameter {
     return null;
   }
 
+  @Override
   public final boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
     return getAnnotation(annotation) != null;
   }
 
 
+  @Override
   public MetaClassMember getDeclaringMember() {
     return declaredBy;
   }

@@ -58,7 +58,6 @@
             <groupId>javax.enterprise</groupId>
             <artifactId>cdi-api</artifactId>
             <version>1.0-SP4</version>
-            <scope>provided</scope>
         </dependency>
 
 

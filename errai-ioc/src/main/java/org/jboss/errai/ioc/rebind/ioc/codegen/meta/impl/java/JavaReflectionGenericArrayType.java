@@ -31,6 +31,7 @@ public class JavaReflectionGenericArrayType implements MetaGenericArrayType {
     this.type = type;
   }
 
+  @Override
   public MetaType getGenericComponentType() {
     return JavaReflectionUtil.fromType(type.getGenericComponentType());
   }

@@ -40,6 +40,7 @@ public class AssignmentBuilder implements Statement {
     this.statement = statement;
   }
 
+  @Override
   public String generate(Context context) {
     MetaClass referenceType = reference.getType();
     Statement[] indexes = reference.getIndexes();
@@ -67,6 +68,7 @@ public class AssignmentBuilder implements Statement {
     return buf.toString();
   }
 
+  @Override
   public MetaClass getType() {
     return reference.getType();
   }

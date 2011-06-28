@@ -20,6 +20,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.BlockStatement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanExpression;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -27,7 +28,6 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
  */
 public class ForLoop extends AbstractConditionalBlock {
   private Statement initializer;
-  private String initializerExpr;
   private Statement afterBlock;
 
   public ForLoop(BooleanExpression condition, BlockStatement block) {
@@ -40,21 +40,17 @@ public class ForLoop extends AbstractConditionalBlock {
     this.afterBlock = afterBlock;
   }
 
-  public ForLoop(BooleanExpression condition, BlockStatement block, String initializerExpr, Statement afterBlock) {
-    super(condition, block);
-    this.initializerExpr = initializerExpr;
-    this.afterBlock = afterBlock;
-  }
-
+  @Override
   public String generate(Context context) {
     StringBuilder builder = new StringBuilder("for (");
 
-    if (initializerExpr != null) {
-      builder.append(initializerExpr);
-    }
-    else if (initializer != null) {
+    if (initializer != null) {
       builder.append(initializer.generate(context));
+      if (initializer instanceof Variable) {
+        context.addVariable((Variable) initializer);
+      }
     }
+    
     if (!builder.toString().endsWith(";"))
       builder.append(";");
     
@@ -65,7 +61,7 @@ public class ForLoop extends AbstractConditionalBlock {
     }
 
     builder.append(") {\n")
-        .append(getBlock().generate(context))
+        .append(getBlock().generate(Context.create(context)))
         .append("\n}\n");
 
     return builder.toString();

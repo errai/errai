@@ -16,30 +16,40 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import javax.enterprise.util.TypeLiteral;
+
+import org.jboss.errai.ioc.rebind.ioc.codegen.control.branch.Label;
+import org.jboss.errai.ioc.rebind.ioc.codegen.control.branch.LabelReference;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
-import javax.enterprise.util.TypeLiteral;
-import java.util.*;
-
 /**
  * This class represents a context in which {@link Statement}s are generated. 
- * It has a reference to its parent context and holds a map of variables to represent 
- * a {@link Statement}'s scope. It further supports importing classes and packages to avoid 
- * the use of fully qualified class names.
+ * It references its parent context and holds a map of variables to represent 
+ * a {@link Statement}'s scope. It further supports importing classes and packages 
+ * to avoid the use of fully qualified class names.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class Context {
-  private Set<String> importedPackages = new HashSet<String>();
-  private Set<MetaClass> importedClasses = new HashSet<MetaClass>();
-
-  private Map<String, Variable> variables = new HashMap<String, Variable>();
   private Context parent = null;
 
+  private Map<String, Variable> variables;
+  private Map<String, Label> labels;
+
+  private Set<String> importedPackages;
+  private Set<MetaClass> importedClasses;
   private boolean autoImports = false;
 
   private Context() {
+    importedPackages = new HashSet<String>();
     importedPackages.add("java.lang");
   }
 
@@ -81,7 +91,18 @@ public class Context {
   }
 
   public Context addVariable(Variable variable) {
+    if (variables == null)
+      variables = new HashMap<String, Variable>();
+
     variables.put(variable.getName(), variable);
+    return this;
+  }
+
+  public Context addLabel(Label label) {
+    if (labels == null)
+      labels = new HashMap<String, Label>();
+
+    labels.put(label.getName(), label);
     return this;
   }
 
@@ -103,21 +124,24 @@ public class Context {
     return this;
   }
 
-  public Context autoImport() {
-    this.autoImports = true;
-    return this;
-  }
-
   public boolean hasPackageImport(String packageName) {
-    return importedPackages.contains(packageName);
-  }
-
-  public boolean hasClassImport(MetaClass clazz) {
-    return importedClasses.contains(clazz);
+    return importedPackages != null && importedPackages.contains(packageName);
   }
 
   public Context addClassImport(MetaClass clazz) {
+    if (importedClasses == null)
+      importedClasses = new HashSet<MetaClass>();
+
     importedClasses.add(clazz);
+    return this;
+  }
+
+  public boolean hasClassImport(MetaClass clazz) {
+    return importedClasses != null && importedClasses.contains(clazz);
+  }
+
+  public Context autoImport() {
+    this.autoImports = true;
     return this;
   }
 
@@ -133,13 +157,12 @@ public class Context {
     Variable found = null;
     Context ctx = this;
     do {
-      found = ctx.variables.get(name);
-      if (mustBeClassMember && found!=null && !found.isClassMember()) {
-        found = null;
+      if (ctx.variables != null) {
+        Variable var = ctx.variables.get(name);
+        found = (mustBeClassMember && !var.isClassMember()) ? null : var;
       }
-      ctx = ctx.parent;
     }
-    while (found == null && ctx != null);
+    while (found == null && (ctx = ctx.parent) != null);
 
     if (found == null)
       throw new OutOfScopeException(name);
@@ -147,10 +170,26 @@ public class Context {
     return found.getReference();
   }
 
+  public LabelReference getLabel(String name) {
+    Label found = null;
+    Context ctx = this;
+    do {
+      if (ctx.labels != null) {
+        found = ctx.labels.get(name);
+      }
+    }
+    while (found == null && (ctx = ctx.parent) != null);
+
+    if (found == null)
+      throw new OutOfScopeException("Label not found: " + name);
+
+    return found.getReference();
+  }
+
   public boolean isScoped(Variable variable) {
     Context ctx = this;
     do {
-      if (ctx.variables.containsValue(variable))
+      if (ctx.variables != null && ctx.variables.containsValue(variable))
         return true;
     }
     while ((ctx = ctx.parent) != null);
@@ -158,22 +197,29 @@ public class Context {
   }
 
   public Collection<Variable> getDeclaredVariables() {
+    if (variables == null) 
+      return Collections.<Variable> emptyList();
+    
     return variables.values();
   }
 
   public Map<String, Variable> getVariables() {
+    if (variables == null) 
+      return Collections.<String, Variable> emptyMap();
+    
     return Collections.unmodifiableMap(variables);
   }
 
   public Set<String> getImportedPackages() {
     Set<String> allImportedPackages = new HashSet<String>();
     Context ctx = this;
-    
     do {
-      allImportedPackages.addAll(ctx.importedPackages);
+      if (ctx.importedPackages != null) {
+        allImportedPackages.addAll(ctx.importedPackages);
+      }
     }
     while ((ctx = ctx.parent) != null);
-    
+
     return allImportedPackages;
   }
 
@@ -181,13 +227,15 @@ public class Context {
     Set<MetaClass> allImportedClasses = new HashSet<MetaClass>();
     Context ctx = this;
     do {
-      allImportedClasses.addAll(ctx.importedClasses);
+      if (ctx.importedClasses != null) {
+        allImportedClasses.addAll(ctx.importedClasses);
+      }
     }
     while ((ctx = ctx.parent) != null);
-    
+
     return allImportedClasses;
   }
-  
+
   public boolean isAutoImports() {
     return autoImports;
   }

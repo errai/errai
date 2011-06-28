@@ -49,6 +49,7 @@ public abstract class AbstractStatementBuilder implements Statement, Builder, St
     this.callElementBuilder = callElementBuilder;
   }
 
+  @Override
   public String generate(Context context) {
     CallWriter writer = new CallWriter();
     callElementBuilder.getRootElement().handleCall(writer, context, null);
@@ -59,6 +60,7 @@ public abstract class AbstractStatementBuilder implements Statement, Builder, St
     callElementBuilder.appendCallElement(element);
   }
 
+  @Override
   public MetaClass getType() {
     if (callElementBuilder.getCallElement() == null)
       return null;
@@ -66,6 +68,7 @@ public abstract class AbstractStatementBuilder implements Statement, Builder, St
     return callElementBuilder.getCallElement().getResultType();
   }
 
+  @Override
   public String toJavaString() {
     return generate(context);
   }

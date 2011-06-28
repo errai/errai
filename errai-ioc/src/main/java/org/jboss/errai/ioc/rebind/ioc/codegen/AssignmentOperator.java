@@ -35,26 +35,32 @@ public enum AssignmentOperator implements Operator {
     operator = new OperatorImpl(canonicalString, operatorPrecedence, constraints);
   }
 
+  @Override
   public String getCanonicalString() {
     return operator.getCanonicalString();
   }
 
+  @Override
   public int getOperatorPrecedence() {
     return operator.getOperatorPrecedence();
   }
 
+  @Override
   public boolean isHigherPrecedenceThan(Operator op) {
     return op.getOperatorPrecedence() < getOperatorPrecedence();
   }
 
+  @Override
   public boolean isEqualOrHigherPrecedenceThan(Operator op) {
     return op.getOperatorPrecedence() <= getOperatorPrecedence();
   }
 
+  @Override
   public boolean canBeApplied(MetaClass clazz) {
     return operator.canBeApplied(clazz);
   }
 
+  @Override
   public void assertCanBeApplied(MetaClass clazz) {
     operator.assertCanBeApplied(clazz);
   }

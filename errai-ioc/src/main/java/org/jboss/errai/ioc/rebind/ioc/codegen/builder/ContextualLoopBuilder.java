@@ -28,8 +28,8 @@ public interface ContextualLoopBuilder extends Statement, Builder {
   public BlockBuilder<StatementEnd> foreach(String loopVarName);
   public BlockBuilder<StatementEnd> foreach(String loopVarName, Class<?> loopVarType);
 
-  public BlockBuilder<StatementEnd> for_(BooleanExpression condition);
-  public BlockBuilder<StatementEnd> for_(BooleanExpression condition, Statement countingExpression);
+  public BlockBuilder<StatementEnd> for_(Statement initializer, BooleanExpression condition);
+  public BlockBuilder<StatementEnd> for_(Statement initializer, BooleanExpression condition, Statement countingExpression);
   
   public BlockBuilder<WhileBuilder> do_();
   

@@ -50,49 +50,59 @@ public class FieldBuilder<T> implements FieldBuildStart<T>, FieldBuildType<T>,
     this.name = name;
   }
 
+  @Override
   public Finishable<T> initializesWith(Statement statement) {
     this.initializer = statement;
     return this;
   }
 
+  @Override
   public FieldBuildType<T> publicScope() {
     scope = Scope.Public;
     return this;
   }
 
+  @Override
   public FieldBuildType<T> privateScope() {
     scope = Scope.Private;
     return this;
   }
 
+  @Override
   public FieldBuildType<T> protectedScope() {
     scope = Scope.Protected;
     return this;
   }
 
+  @Override
   public FieldBuildType<T> packageScope() {
     scope = Scope.Package;
     return this;
   }
 
+  @Override
   public FieldBuildName<T> typeOf(Class<?> type) {
     this.type = MetaClassFactory.get(type);
     return this;
   }
 
+  @Override
   public FieldBuildName<T> typeOf(MetaClass type) {
     this.type = type;
     return this;
   }
 
+  @Override
   public FieldBuildInitializer<T> named(String name) {
     this.name = name;
     return this;
   }
 
+  @Override
   public T finish() {
     if (callback != null) {
       return callback.callback(new Statement() {
+        @Override
         public String generate(Context context) {
           StringBuilder sbuf = new StringBuilder(scope.getCanonicalName())
                   .append(scope == Scope.Package ? "" : " ")
@@ -106,6 +116,7 @@ public class FieldBuilder<T> implements FieldBuildStart<T>, FieldBuildType<T>,
           return sbuf.append(";").toString();
         }
 
+        @Override
         public MetaClass getType() {
           return type;
         }

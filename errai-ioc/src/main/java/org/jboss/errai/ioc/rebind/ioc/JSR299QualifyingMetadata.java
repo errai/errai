@@ -29,6 +29,7 @@ import java.util.Set;
 public class JSR299QualifyingMetadata implements QualifyingMetadata {
   private Set<Annotation> qualifiers;
   private static Any ANY_INSTANCE = new Any() {
+    @Override
     public Class<? extends Annotation> annotationType() {
       return Any.class;
     }
@@ -38,6 +39,7 @@ public class JSR299QualifyingMetadata implements QualifyingMetadata {
     this.qualifiers = qualifiers;
   }
 
+  @Override
   public boolean doesSatisfy(QualifyingMetadata metadata) {
     if (metadata instanceof JSR299QualifyingMetadata) {
       JSR299QualifyingMetadata comparable = (JSR299QualifyingMetadata) metadata;

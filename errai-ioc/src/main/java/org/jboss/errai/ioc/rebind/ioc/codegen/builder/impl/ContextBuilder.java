@@ -80,11 +80,13 @@ public class ContextBuilder implements Builder {
   public VariableDeclaration declareVariable(final Variable var) {
     context.addVariable(var);
     return new VariableDeclaration() {
+      @Override
       public Statement initializeWith(Object initialization) {
         var.initialize(initialization);
         return var;
       }
 
+      @Override
       public Statement initializeWith(Statement initialization) {
         var.initialize(initialization);
         return var;
@@ -105,6 +107,7 @@ public class ContextBuilder implements Builder {
   }
 
 
+  @Override
   public String toJavaString() {
     Map<String, Variable> vars = context.getVariables();
     StringBuilder buf = new StringBuilder();

@@ -61,18 +61,22 @@ public class GWTField extends MetaField {
     }
   }
 
+  @Override
   public MetaClass getType() {
     return MetaClassFactory.get(field.getType());
   }
 
+  @Override
   public String getName() {
     return field.getName();
   }
 
+  @Override
   public Annotation[] getAnnotations() {
     return annotations == null ? new Annotation[0] : annotations;
   }
 
+  @Override
   public <A extends Annotation> A getAnnotation(Class<A> annotation) {
     for (Annotation a : getAnnotations()) {
       if (a.annotationType().equals(annotation)) return (A) a;
@@ -80,6 +84,7 @@ public class GWTField extends MetaField {
     return null;
   }
 
+  @Override
   public boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
     return getAnnotation(annotation) != null;
   }
@@ -94,42 +99,52 @@ public class GWTField extends MetaField {
   }
 
 
+  @Override
   public MetaClass getDeclaringClass() {
     return MetaClassFactory.get(field.getEnclosingType());
   }
 
+  @Override
   public boolean isAbstract() {
     return false;
   }
 
+  @Override
   public boolean isPublic() {
     return field.isPublic();
   }
 
+  @Override
   public boolean isPrivate() {
     return field.isPrivate();
   }
 
+  @Override
   public boolean isProtected() {
     return field.isProtected();
   }
 
+  @Override
   public boolean isFinal() {
     return field.isFinal();
   }
 
+  @Override
   public boolean isStatic() {
     return field.isStatic();
   }
 
+  @Override
   public boolean isTransient() {
     return field.isTransient();
   }
 
+  @Override
   public boolean isSynthetic() {
     return false;
   }
 
+  @Override
   public boolean isSynchronized() {
     return false;
   }

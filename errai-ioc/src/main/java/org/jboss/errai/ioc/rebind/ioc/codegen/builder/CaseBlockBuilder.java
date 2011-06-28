@@ -40,17 +40,5 @@ public interface CaseBlockBuilder extends Statement, Builder {
   BlockBuilder<CaseBlockBuilder> case_(CharValue value);
   BlockBuilder<CaseBlockBuilder> case_(LiteralValue<Enum<?>> value);
 
-  BlockBuilder<CaseBlockBuilder> caseFallThrough(int value);
-  BlockBuilder<CaseBlockBuilder> caseFallThrough(byte value);
-  BlockBuilder<CaseBlockBuilder> caseFallThrough(short value);
-  BlockBuilder<CaseBlockBuilder> caseFallThrough(char value);
-  BlockBuilder<CaseBlockBuilder> caseFallThrough(Enum<?> value);
-  
-  BlockBuilder<CaseBlockBuilder> caseFallThrough(IntValue value);
-  BlockBuilder<CaseBlockBuilder> caseFallThrough(ByteValue value);
-  BlockBuilder<CaseBlockBuilder> caseFallThrough(ShortValue value);
-  BlockBuilder<CaseBlockBuilder> caseFallThrough(CharValue value);
-  BlockBuilder<CaseBlockBuilder> caseFallThrough(LiteralValue<Enum<?>> value);
-
   BlockBuilder<StatementEnd> default_();
 }

@@ -14,26 +14,23 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.rebind.ioc.codegen.util;
+package org.jboss.errai.ioc.rebind.ioc.codegen.control.branch;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.VariableReference;
+import org.jboss.errai.ioc.rebind.ioc.codegen.AbstractStatement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 
 /**
- * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
-public abstract class Refs {
-  public static VariableReference get(final String name) {
-    return new VariableReference() {
-      @Override
-      public String getName() {
-        return name;
-      }
+public class LabelReference extends AbstractStatement {
+  private final String name;
 
-      @Override
-      public Statement getValue() {
-        return null;
-      }
-    };
+  public LabelReference(String name) {
+    this.name = name;
+  }
+
+  @Override
+  public String generate(Context context) {
+    return name;
   }
 }

@@ -32,6 +32,7 @@ public class LoadField extends AbstractCallElement {
     this.fieldName = fieldName;
   }
 
+  @Override
   public void handleCall(final CallWriter writer, final Context context, Statement statement) {
     final MetaField field = statement.getType().getField(fieldName);
 
@@ -40,10 +41,12 @@ public class LoadField extends AbstractCallElement {
     }
 
     statement = new Statement() {
+      @Override
       public String generate(Context context) {
         return field.getName();
       }
 
+      @Override
       public MetaClass getType() {
         return field.getType();
       }

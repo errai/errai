@@ -50,6 +50,7 @@ public class ExtendsClassStructureBuilderImpl implements Builder, Finishable<Obj
     }
 
     return new BlockBuilder<ExtendsClassStructureBuilderImpl>(new BuildCallback<ExtendsClassStructureBuilderImpl>() {
+      @Override
       public ExtendsClassStructureBuilderImpl callback(Statement statement) {
         buf.append("public ").append(getClassReference(toExtend, classContext))
             .append(parameters.generate(context)).append(" {\n");
@@ -72,6 +73,7 @@ public class ExtendsClassStructureBuilderImpl implements Builder, Finishable<Obj
     }
 
     return new BlockBuilder<ExtendsClassStructureBuilderImpl>(new BuildCallback<ExtendsClassStructureBuilderImpl>() {
+      @Override
       public ExtendsClassStructureBuilderImpl callback(Statement statement) {
 
         Context ctx = Context.create(context);
@@ -94,6 +96,7 @@ public class ExtendsClassStructureBuilderImpl implements Builder, Finishable<Obj
     return publicOverridesMethod(toExtend.getBestMatchingMethod(name, args));
   }
 
+  @Override
   public ObjectBuilder finish() {
     if (callback != null) {
       return callback.callback(new StringStatement(toJavaString()));
@@ -102,6 +105,7 @@ public class ExtendsClassStructureBuilderImpl implements Builder, Finishable<Obj
     return null;
   }
 
+  @Override
   public String toJavaString() {
     return buf.toString();
   }

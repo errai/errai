@@ -14,26 +14,29 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.rebind.ioc.codegen.util;
+package org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.VariableReference;
+import org.jboss.errai.ioc.rebind.ioc.codegen.control.branch.Label;
 
 /**
- * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
-public abstract class Refs {
-  public static VariableReference get(final String name) {
-    return new VariableReference() {
-      @Override
-      public String getName() {
-        return name;
-      }
-
-      @Override
-      public Statement getValue() {
-        return null;
-      }
-    };
+public class DefineLabel extends AbstractCallElement {
+  
+  private String name;
+  
+  public DefineLabel(String name) {
+    this.name = name;
+  }
+  
+  @Override
+  public void handleCall(CallWriter writer, Context context, Statement statement) {
+    Label label = Label.create(name);
+    context.addLabel(label);
+    
+    writer.reset();
+    writer.append(label.generate(context));
   }
 }

@@ -43,19 +43,9 @@ public class SwitchBlock extends AbstractStatement {
     }
   };
 
-  private class CaseBlock {
-    public CaseBlock(BlockStatement block, boolean fallThrough) {
-      this.block = block;
-      this.fallThrough = fallThrough;
-    }
-
-    private BlockStatement block;
-    private boolean fallThrough;
-  }
-
   private Statement switchExprStmt;
   private String switchExpr;
-  private Map<LiteralValue<?>, CaseBlock> caseBlocks = new LinkedHashMap<LiteralValue<?>, CaseBlock>();
+  private Map<LiteralValue<?>, BlockStatement> caseBlocks = new LinkedHashMap<LiteralValue<?>, BlockStatement>();
   private BlockStatement defaultBlock;
 
   public SwitchBlock() {}
@@ -65,15 +55,11 @@ public class SwitchBlock extends AbstractStatement {
   }
 
   public void addCase(LiteralValue<?> value) {
-    addCase(value, false);
-  }
-
-  public void addCase(LiteralValue<?> value, boolean fallThrough) {
-    caseBlocks.put(value, new CaseBlock(new BlockStatement(), fallThrough));
+    caseBlocks.put(value, new BlockStatement());
   }
 
   public BlockStatement getCaseBlock(LiteralValue<?> value) {
-    return caseBlocks.get(value).block;
+    return caseBlocks.get(value);
   }
 
   public BlockStatement getDefaultBlock() {
@@ -91,6 +77,7 @@ public class SwitchBlock extends AbstractStatement {
     this.switchExpr = expr;
   }
 
+  @Override
   public String generate(Context context) {
     StringBuilder buf = new StringBuilder("switch (");
     if (switchExpr == null) {
@@ -114,20 +101,13 @@ public class SwitchBlock extends AbstractStatement {
         if (idx != -1) {
           val = val.substring(idx + 1);
         }
-        buf.append("case ").append(val).append(": ").append(getCaseBlock(value).generate(Context.create(context)));
-
-        if (!caseBlocks.get(value).fallThrough) {
-          buf.append(" break;");
-        }
-        buf.append("\n");
+        buf.append("case ").append(val).append(": ").append(getCaseBlock(value).generate(Context.create(context)))
+            .append("\n");
       }
-    }
-    else if (defaultBlock == null) {
-      defaultBlock = new BlockStatement();
     }
 
     if (defaultBlock != null) {
-      buf.append("default: ").append(defaultBlock.generate(Context.create(context))).append(" break;\n");
+      buf.append("default: ").append(defaultBlock.generate(Context.create(context))).append("\n");
     }
 
     return buf.append("}").toString();

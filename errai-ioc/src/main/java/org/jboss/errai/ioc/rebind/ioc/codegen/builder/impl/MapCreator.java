@@ -19,8 +19,6 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,6 +32,7 @@ public class MapCreator implements Statement {
     this.modelMap = modelMap;
   }
 
+  @Override
   public String generate(Context context) {
     StringBuffer buf = new StringBuffer();
     ContextBuilder ctx = ContextBuilder.create(context);
@@ -49,6 +48,7 @@ public class MapCreator implements Statement {
     return buf.toString();
   }
 
+  @Override
   public MetaClass getType() {
     return null;
   }

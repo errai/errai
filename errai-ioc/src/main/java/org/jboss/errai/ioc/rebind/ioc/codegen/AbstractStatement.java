@@ -17,13 +17,13 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public abstract class AbstractStatement implements Statement {
+  @Override
   public MetaClass getType() {
-    return MetaClassFactory.get(Void.class);
+    return null;
   }
 }

@@ -88,6 +88,7 @@ public class InjectUtil {
       }
 
       return new ConstructionStrategy() {
+        @Override
         public String generateConstructor() {
           String[] vars = resolveInjectionDependencies(constructor.getParameters(), ctx, constructor);
 
@@ -111,6 +112,7 @@ public class InjectUtil {
         throw new InjectionFailure("there is no default constructor for type: " + type.getFullyQualifiedName());
 
       return new ConstructionStrategy() {
+        @Override
         public String generateConstructor() {
           StringAppender appender = new StringAppender("final ").append(type.getFullyQualifiedName())
               .append(' ').append(injector.getVarName()).append(" = new ")
