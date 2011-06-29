@@ -403,6 +403,7 @@ public class ClassBuilder implements
 
   private FieldBuildInitializer<BaseClassStructureBuilder> genField(final Scope scope, final String name,
                                                                     final MetaClass type) {
+
     return new FieldBuilder<BaseClassStructureBuilder>(new BuildCallback<BaseClassStructureBuilder>() {
       @Override
       public BaseClassStructureBuilder callback(final Statement statement) {
@@ -410,7 +411,6 @@ public class ClassBuilder implements
                 = new BuildMetaField(classDefinition, statement, scope, type, name);
 
         classDefinition.addField(buildMetaField);
-
 
         return ClassBuilder.this;
       }
