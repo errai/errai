@@ -218,33 +218,18 @@ public class Context {
     if (variables == null)
       return Collections.<String, Variable>emptyMap();
 
-    return Collections.unmodifiableMap(variables);
+    return Collections.<String, Variable>unmodifiableMap(variables);
   }
 
   public Set<String> getImportedPackages() {
-    Set<String> allImportedPackages = new HashSet<String>();
-    Context ctx = this;
-    do {
-      if (ctx.importedPackages != null) {
-        allImportedPackages.addAll(ctx.importedPackages);
-      }
-    }
-    while ((ctx = ctx.parent) != null);
-
-    return allImportedPackages;
+    return importedPackages;
   }
 
   public Set<MetaClass> getImportedClasses() {
-    Set<MetaClass> allImportedClasses = new HashSet<MetaClass>();
-    Context ctx = this;
-    do {
-      if (ctx.importedClasses != null) {
-        allImportedClasses.addAll(ctx.importedClasses);
-      }
-    }
-    while ((ctx = ctx.parent) != null);
-
-    return allImportedClasses;
+    if (importedClasses == null)
+      return Collections.<MetaClass>emptySet();
+    
+    return importedClasses;
   }
 
   public boolean isAutoImports() {
