@@ -16,6 +16,8 @@
 
 package org.jboss.errai.ioc.tests.rebind;
 
+import static org.junit.Assert.fail;
+
 import java.io.Serializable;
 
 import org.jboss.errai.ioc.client.InterfaceInjectionContext;
@@ -23,7 +25,7 @@ import org.jboss.errai.ioc.client.api.Bootstrapper;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Parameter;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ClassBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.literal.LiteralFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedMethodException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 import org.junit.Test;
 
@@ -114,7 +116,7 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
   }
 
   @Test
-  public void testDefineClassWithConstructorCallingSuper() { 
+  public void testDefineClassWithConstructorCallingSuper() {
     String cls = ClassBuilder.define("org.foo.Foo")
         .publicScope()
         .body()
@@ -122,13 +124,13 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
         .callSuper()
         .finish()
         .toJavaString();
-    
-    assertEquals("failed to generate class with constructor calling super()", 
-        CLASS_WITH_CONSTRUCTOR_CALLING_SUPER, cls); 
-    }
+
+    assertEquals("failed to generate class with constructor calling super()",
+        CLASS_WITH_CONSTRUCTOR_CALLING_SUPER, cls);
+  }
 
   @Test
-  public void testDefineClassWithConstructorCallingThis() { 
+  public void testDefineClassWithConstructorCallingThis() {
     String cls = ClassBuilder.define("org.foo.Foo")
         .publicScope()
         .body()
@@ -141,11 +143,86 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
         .append(Stmt.create().loadClassMember("b").assignValue(Variable.get("b")))
         .finish()
         .toJavaString();
-    
-    assertEquals("failed to generate class with constructor calling this()", 
-        CLASS_WITH_CONSTRUCTOR_CALLING_THIS, cls); 
-    }
 
+    assertEquals("failed to generate class with constructor calling this()",
+        CLASS_WITH_CONSTRUCTOR_CALLING_THIS, cls);
+  }
+
+  @Test
+  public void testDefineClassWithMethodCallingMethodOnThis() {
+    String cls = ClassBuilder.define("org.foo.Foo")
+        .publicScope()
+        .body()
+        .publicMethod(void.class, "bar")
+        .append(Stmt.create().loadVariable("this").invoke("foo"))
+        .finish()
+        .publicMethod(String.class, "foo")
+        .append(Stmt.create().load(null).returnValue())
+        .finish()
+        .toJavaString();
+
+    assertEquals("failed to generate class with method calling method on this",
+        CLASS_WITH_METHOD_CALLING_METHOD_ON_THIS, cls);
+  }
+
+  @Test
+  public void testDefineClassWithMethodCallingInvalidMethodOnThis() {
+    try {
+      ClassBuilder.define("org.foo.Foo")
+          .publicScope()
+          .body()
+          .publicMethod(void.class, "bar")
+          .append(Stmt.create().loadVariable("this").invoke("foo", "invalidParam"))
+          .finish()
+          .publicMethod(String.class, "foo")
+          .append(Stmt.create().load(null).returnValue())
+          .finish()
+          .toJavaString();
+      fail("exprected UndefinedMethodException");
+    }
+    catch (UndefinedMethodException udme) {
+      // expected
+      assertEquals("Wrong exception thrown", udme.getMethodName(), "foo");
+    }
+  }
+
+  @Test
+  public void testDefineClassWithMethodCallingMethodOnSuper() {
+    String cls = ClassBuilder.define("org.foo.Foo")
+        .publicScope()
+        .body()
+        .publicMethod(void.class, "bar")
+        .append(Stmt.create().loadVariable("this").invoke("foo"))
+        .finish()
+        .publicMethod(String.class, "foo")
+        .append(Stmt.create().loadVariable("super").invoke("toString").returnValue())
+        .finish()
+        .toJavaString();
+
+    assertEquals("failed to generate class with method calling method on this",
+        CLASS_WITH_METHOD_CALLING_METHOD_ON_SUPER, cls);
+  }
+
+  @Test
+  public void testDefineClassWithMethodCallingInvalidMethodOnSuper() {
+    try {
+      ClassBuilder.define("org.foo.Foo")
+          .publicScope()
+          .body()
+          .publicMethod(void.class, "bar")
+          .append(Stmt.create().loadVariable("this").invoke("foo"))
+          .finish()
+          .publicMethod(String.class, "foo")
+          .append(Stmt.create().loadVariable("super").invoke("undefinedMethod"))
+          .finish()
+          .toJavaString();
+      fail("exprected UndefinedMethodException");
+    }
+    catch (UndefinedMethodException udme) {
+      // expected
+      assertEquals("Wrong exception thrown", udme.getMethodName(), "undefinedMethod");
+    }
+  }
   @Test
   public void testDefineClassWithMethodWithThrowsDeclaration() {
 
@@ -201,7 +278,7 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
 
     assertEquals("failed to generate class with fields of all scopes", CLASS_WITH_FIELDS_OF_ALL_SCOPES, cls);
   }
-  
+
   @Test
   public void testDefineClassWithConstructorsOfAllScopes() {
 
@@ -219,7 +296,7 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
         .finish()
         .toJavaString();
 
-    assertEquals("failed to generate class with constructors of all scopes", 
+    assertEquals("failed to generate class with constructors of all scopes",
         CLASS_WITH_CONSTRUCTORS_OF_ALL_SCOPES, cls);
   }
 

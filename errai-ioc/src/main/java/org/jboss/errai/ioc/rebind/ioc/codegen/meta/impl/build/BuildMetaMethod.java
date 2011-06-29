@@ -39,7 +39,6 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
   private MetaClass returnType;
   private DefParameters defParameters;
 
-  private List<MetaParameter> metaParameters;
   private MetaType genericReturnType;
   private List<MetaType> genericParameterTypes;
 
@@ -85,7 +84,12 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
 
   @Override
   public MetaParameter[] getParameters() {
-    return metaParameters.toArray(new MetaParameter[metaParameters.size()]);
+    List<Parameter> parameters = defParameters.getParameters();
+    if (parameters != null) {
+      return defParameters.getParameters().toArray(new MetaParameter[defParameters.getParameters().size()]);      
+    } else {
+      return new MetaParameter[0];
+    }
   }
 
   public MetaClass getDeclaringClass() {
@@ -162,10 +166,6 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
 
   public void setReturnType(MetaClass returnType) {
     this.returnType = returnType;
-  }
-
-  public void setMetaParameters(List<MetaParameter> metaParameters) {
-    this.metaParameters = metaParameters;
   }
 
   public void setGenericReturnType(MetaType genericReturnType) {
