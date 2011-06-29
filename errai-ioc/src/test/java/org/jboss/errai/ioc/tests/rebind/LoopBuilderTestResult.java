@@ -111,36 +111,36 @@ public interface LoopBuilderTestResult {
           "   for (i = 0; i < 100; i += 1) { " +
           "     if (i == 50) {" +
           "       continue;" +
-          "     };"+ 
+          "     };" +
           "   }\n;" +
           "\n}";
-  
-  public static final String LOOP_WITH_CONTINUE_AND_LABEL =
-    "     if (i > 100) {" +
-        " label:" +
-        "   for (i = 0; i < 100; i += 1) { " +
-        "     if (i == 50) {" +
-        "       continue label;" +
-        "     };"+ 
-        "   }\n;" +
-        "\n}";
-  
-  public static final String LOOP_WITH_BREAK =
-    "     if (i > 100) {" +
-        "   for (i = 0; i < 100; i += 1) { " +
-        "     if (i == 50) {" +
-        "       break;" +
-        "     };"+ 
-        "   }\n;" +
-        "\n}";
 
-public static final String LOOP_WITH_BREAK_AND_LABEL =
-  "     if (i > 100) {" +
-      " label:" +
-      "   for (i = 0; i < 100; i += 1) { " +
-      "     if (i == 50) {" +
-      "       break label;" +
-      "     };"+ 
-      "   }\n;" +
-      "\n}";
+  public static final String LOOP_WITH_CONTINUE_AND_LABEL =
+      "     if (i > 100) {" +
+          " label:" +
+          "   for (i = 0; i < 100; i += 1) { " +
+          "     if (i == 50) {" +
+          "       continue label;" +
+          "     };" +
+          "   }\n;" +
+          "\n}";
+
+  public static final String LOOP_WITH_BREAK =
+      "     if (i > 100) {" +
+          "   for (i = 0; i < 100; i += 1) { " +
+          "     if (i == 50) {" +
+          "       break;" +
+          "     };" +
+          "   }\n;" +
+          "\n}";
+
+  public static final String LOOP_WITH_BREAK_AND_LABEL =
+      "     if (i > 100) {" +
+          " label:" +
+          "   for (i = 0; i < 100; i += 1) { " +
+          "     if (i == 50) {" +
+          "       break label;" +
+          "     };" +
+          "   }\n;" +
+          "\n}";
 }

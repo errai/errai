@@ -71,50 +71,62 @@ public class BuildMetaField extends MetaField implements Builder {
     return new Annotation[0];
   }
 
+  @Override
   public MetaClass getDeclaringClass() {
     return declaringClass;
   }
 
+  @Override
   public boolean isAbstract() {
     return false;
   }
 
+  @Override
   public boolean isPublic() {
     return scope == Scope.Public;
   }
 
+  @Override
   public boolean isPrivate() {
     return scope == Scope.Private;
   }
 
+  @Override
   public boolean isProtected() {
     return scope == Scope.Protected;
   }
 
+  @Override
   public boolean isFinal() {
     return isFinal;
   }
 
+  @Override
   public boolean isStatic() {
     return isStatic;
   }
 
+  @Override
   public boolean isTransient() {
     return isTransient;
   }
 
+  @Override
   public boolean isSynthetic() {
     return false;
   }
 
+  @Override
   public boolean isSynchronized() {
     return false;
   }
 
+  @Override
   public boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
     return false;
   }
 
+  @Override
   public <A extends Annotation> A getAnnotation(Class<A> annotation) {
     return null;
   }
@@ -155,6 +167,7 @@ public class BuildMetaField extends MetaField implements Builder {
     this.statement = statement;
   }
 
+  @Override
   public String toJavaString() {
     declaringClass.getContext().addVariable(Variable.createClassMember(name, type));
 

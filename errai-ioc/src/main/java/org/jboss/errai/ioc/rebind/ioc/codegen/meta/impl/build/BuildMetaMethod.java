@@ -92,58 +92,72 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
     }
   }
 
+  @Override
   public MetaClass getDeclaringClass() {
     return declaringClass;
   }
 
+  @Override
   public boolean isAbstract() {
     return false;
   }
 
+  @Override
   public boolean isPublic() {
     return scope == Scope.Public;
   }
 
+  @Override
   public boolean isPrivate() {
     return scope == Scope.Private;
   }
 
+  @Override
   public boolean isProtected() {
     return scope == Scope.Protected;
   }
 
+  @Override
   public boolean isFinal() {
     return false;
   }
 
+  @Override
   public boolean isStatic() {
     return false;
   }
 
+  @Override
   public boolean isTransient() {
     return false;
   }
 
+  @Override
   public boolean isSynthetic() {
     return false;
   }
 
+  @Override
   public boolean isSynchronized() {
     return false;
   }
 
+  @Override
   public Annotation[] getAnnotations() {
     return new Annotation[0];
   }
 
+  @Override
   public boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
     return false;
   }
 
+  @Override
   public <A extends Annotation> A getAnnotation(Class<A> annotation) {
     return null;
   }
 
+  @Override
   public MetaTypeVariable[] getTypeParameters() {
     return new MetaTypeVariable[0];
   }
@@ -188,6 +202,7 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
     this.throwsDeclaration = throwsDeclaration;
   }
 
+  @Override
   public String toJavaString() {
     for (Parameter p : defParameters.getParameters()) {
       context.addVariable(Variable.create(p.getName(), p.getType()));

@@ -49,7 +49,7 @@ public class AnnotationEncoderTest extends AbstractStatementBuilderTest {
   }
 
   @Test
-  public void testEncode2() {
+  public void testEncodeComplexAnnotation() {
     String enc = AnnotationEncoder.encode(MyBean.class.getAnnotation(MyTestAnnotation.class));
 
     assertEquals("new org.jboss.errai.ioc.tests.rebind.model.MyTestAnnotation() { " +

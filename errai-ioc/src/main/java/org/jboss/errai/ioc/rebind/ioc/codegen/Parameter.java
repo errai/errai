@@ -55,22 +55,27 @@ public class Parameter extends AbstractStatement implements MetaParameter {
     return type;
   }
 
+  @Override
   public String getName() {
     return name;
   }
 
+  @Override
   public MetaClassMember getDeclaringMember() {
     return null;
   }
 
+  @Override
   public Annotation[] getAnnotations() {
     return new Annotation[0];
   }
 
+  @Override
   public boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
     return false;
   }
 
+  @Override
   public <A extends Annotation> A getAnnotation(Class<A> annotation) {
     return null;
   }
