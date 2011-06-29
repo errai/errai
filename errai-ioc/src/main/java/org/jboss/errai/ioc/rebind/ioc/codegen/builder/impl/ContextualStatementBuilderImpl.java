@@ -21,6 +21,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanExpression;
 import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.CaseBlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ElseBlockBuilder;
@@ -59,58 +60,58 @@ public class ContextualStatementBuilderImpl extends AbstractStatementBuilder imp
 
   // Looping
   @Override
-  public BlockBuilderImpl<StatementEnd> foreach(String loopVarName) {
+  public BlockBuilder<StatementEnd> foreach(String loopVarName) {
     return new LoopBuilderImpl(context, callElementBuilder).foreach(loopVarName);
   }
 
   @Override
-  public BlockBuilderImpl<StatementEnd> foreach(String loopVarName, Class<?> loopVarType) {
+  public BlockBuilder<StatementEnd> foreach(String loopVarName, Class<?> loopVarType) {
     return new LoopBuilderImpl(context, callElementBuilder).foreach(loopVarName, loopVarType);
   }
 
   @Override
-  public BlockBuilderImpl<StatementEnd> for_(Statement initializer, BooleanExpression condition) {
+  public BlockBuilder<StatementEnd> for_(Statement initializer, BooleanExpression condition) {
     return new LoopBuilderImpl(context, callElementBuilder).for_(initializer, condition);
   }
 
   @Override
-  public BlockBuilderImpl<StatementEnd> for_(Statement initializer, BooleanExpression condition, Statement afterBlock) {
+  public BlockBuilder<StatementEnd> for_(Statement initializer, BooleanExpression condition, Statement afterBlock) {
     return new LoopBuilderImpl(context, callElementBuilder).for_(initializer, condition, afterBlock);
   }
 
   @Override
-  public BlockBuilderImpl<WhileBuilder> do_() {
+  public BlockBuilder<WhileBuilder> do_() {
     return new LoopBuilderImpl(context, callElementBuilder).do_();
   }
 
   @Override
-  public BlockBuilderImpl<StatementEnd> while_() {
+  public BlockBuilder<StatementEnd> while_() {
     return new LoopBuilderImpl(context, callElementBuilder).while_();
   }
 
   @Override
-  public BlockBuilderImpl<StatementEnd> while_(BooleanOperator op, Statement rhs) {
+  public BlockBuilder<StatementEnd> while_(BooleanOperator op, Statement rhs) {
     return new LoopBuilderImpl(context, callElementBuilder).while_(op, rhs);
   }
 
   @Override
-  public BlockBuilderImpl<StatementEnd> while_(BooleanOperator op, Object rhs) {
+  public BlockBuilder<StatementEnd> while_(BooleanOperator op, Object rhs) {
     return new LoopBuilderImpl(context, callElementBuilder).while_(op, rhs);
   }
 
   // If-Then-Else
   @Override
-  public BlockBuilderImpl<ElseBlockBuilder> if_() {
+  public BlockBuilder<ElseBlockBuilder> if_() {
     return new IfBlockBuilderImpl(context, callElementBuilder).if_();
   }
 
   @Override
-  public BlockBuilderImpl<ElseBlockBuilder> if_(BooleanOperator op, Statement rhs) {
+  public BlockBuilder<ElseBlockBuilder> if_(BooleanOperator op, Statement rhs) {
     return new IfBlockBuilderImpl(context, callElementBuilder).if_(op, rhs);
   }
 
   @Override
-  public BlockBuilderImpl<ElseBlockBuilder> if_(BooleanOperator op, Object rhs) {
+  public BlockBuilder<ElseBlockBuilder> if_(BooleanOperator op, Object rhs) {
     return new IfBlockBuilderImpl(context, callElementBuilder).if_(op, rhs);
   }
 

@@ -23,6 +23,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ArrayInitializationBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.CaseBlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.CatchBlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ContextualStatementBuilder;
@@ -33,8 +34,8 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.VariableReferenceContextua
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.WhileBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.BranchCallElement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DeclareVariable;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DynamicLoad;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DefineLabel;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DynamicLoad;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadField;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadLiteral;
@@ -74,36 +75,36 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
   }
 
   @Override
-  public StatementBuilder addVariable(String name, Class<?> type) {
+  public StatementBuilder declareVariable(String name, Class<?> type) {
     Variable v = Variable.create(name, type);
-    return addVariable(v);
+    return declareVariable(v);
   }
 
   @Override
-  public StatementBuilder addVariable(String name, TypeLiteral<?> type) {
+  public StatementBuilder declareVariable(String name, TypeLiteral<?> type) {
     Variable v = Variable.create(name, type);
-    return addVariable(v);
+    return declareVariable(v);
   }
 
   @Override
-  public StatementBuilder addVariable(String name, Object initialization) {
+  public StatementBuilder declareVariable(String name, Object initialization) {
     Variable v = Variable.create(name, initialization);
-    return addVariable(v);
+    return declareVariable(v);
   }
 
   @Override
-  public StatementBuilder addVariable(String name, Class<?> type, Object initialization) {
+  public StatementBuilder declareVariable(String name, Class<?> type, Object initialization) {
     Variable v = Variable.create(name, type, initialization);
-    return addVariable(v);
+    return declareVariable(v);
   }
 
   @Override
-  public StatementBuilder addVariable(String name, TypeLiteral<?> type, Object initialization) {
+  public StatementBuilder declareVariable(String name, TypeLiteral<?> type, Object initialization) {
     Variable v = Variable.create(name, type, initialization);
-    return addVariable(v);
+    return declareVariable(v);
   }
 
-  private StatementBuilder addVariable(Variable v) {
+  private StatementBuilder declareVariable(Variable v) {
     appendCallElement(new DeclareVariable(v));
     return this;
   }
@@ -170,32 +171,32 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
   }
 
   @Override
-  public BlockBuilderImpl<WhileBuilder> do_() {
+  public BlockBuilder<WhileBuilder> do_() {
     return new LoopBuilderImpl(context, callElementBuilder).do_();
   }
 
   @Override
-  public BlockBuilderImpl<ElseBlockBuilder> if_(BooleanExpression stmt) {
+  public BlockBuilder<ElseBlockBuilder> if_(BooleanExpression stmt) {
     return new IfBlockBuilderImpl(context, callElementBuilder).if_(stmt);
   }
 
   @Override
-  public BlockBuilderImpl<StatementEnd> while_(BooleanExpression stmt) {
+  public BlockBuilder<StatementEnd> while_(BooleanExpression stmt) {
     return new LoopBuilderImpl(context, callElementBuilder).while_(stmt);
   }
 
   @Override
-  public BlockBuilderImpl<StatementEnd> for_(BooleanExpression condition) {
+  public BlockBuilder<StatementEnd> for_(BooleanExpression condition) {
     return new LoopBuilderImpl(context, callElementBuilder).for_(condition);
   }
 
   @Override
-  public BlockBuilderImpl<StatementEnd> for_(Statement initializer, BooleanExpression condition) {
+  public BlockBuilder<StatementEnd> for_(Statement initializer, BooleanExpression condition) {
     return new LoopBuilderImpl(context, callElementBuilder).for_(initializer, condition);
   }
 
   @Override
-  public BlockBuilderImpl<StatementEnd> for_(Statement initializer, BooleanExpression condition,
+  public BlockBuilder<StatementEnd> for_(Statement initializer, BooleanExpression condition,
                                              Statement countingExpression) {
     return new LoopBuilderImpl(context, callElementBuilder).for_(initializer, condition, countingExpression);
   }
@@ -206,7 +207,7 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
   }
 
   @Override
-  public BlockBuilderImpl<CatchBlockBuilder> try_() {
+  public BlockBuilder<CatchBlockBuilder> try_() {
     return new TryBlockBuilderImpl(context, callElementBuilder).try_();
   }
 

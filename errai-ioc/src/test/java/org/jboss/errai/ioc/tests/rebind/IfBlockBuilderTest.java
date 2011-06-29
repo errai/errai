@@ -42,7 +42,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
   @Test
   public void testEmptyIfBlockUsingNoRhs() {
     String s = StatementBuilder.create()
-        .addVariable("str", String.class)
+        .declareVariable("str", String.class)
         .loadVariable("str")
         .invoke("endsWith", "abc")
         .if_()
@@ -54,7 +54,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
   @Test
   public void testEmptyIfBlockUsingLiteralRhs() {
     String s = StatementBuilder.create()
-        .addVariable("n", int.class)
+        .declareVariable("n", int.class)
         .loadVariable("n")
         .if_(BooleanOperator.Equals, 1)
         .finish().toJavaString();
@@ -65,7 +65,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
   @Test
   public void testIfElseBlockUsingNoRhs() {
     String s = StatementBuilder.create()
-        .addVariable("str", String.class)
+        .declareVariable("str", String.class)
         .loadVariable("str")
         .invoke("endsWith", "abc")
         .if_()
@@ -81,8 +81,8 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
   @Test
   public void testIfElseBlockUsingRhs() {
     String s = StatementBuilder.create()
-        .addVariable("n", Integer.class)
-        .addVariable("m", Integer.class)
+        .declareVariable("n", Integer.class)
+        .declareVariable("m", Integer.class)
         .loadVariable("n")
         .if_(BooleanOperator.GreaterThan, Variable.get("m"))
           .append(ContextBuilder.create().declareVariable("n", Integer.class).initializeWith(0))
@@ -228,7 +228,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
   public void testIfBlockWithInvalidBooleanExpression() {
     try {
       StatementBuilder.create()
-          .addVariable("str", String.class)
+          .declareVariable("str", String.class)
           .loadVariable("str")
           .invoke("compareTo", "asd")
           .if_().finish()
@@ -245,8 +245,8 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
   public void testIfBlockWithInvalidExpression() {
     try {
       StatementBuilder.create()
-          .addVariable("str", String.class)
-          .addVariable("str2", String.class)
+          .declareVariable("str", String.class)
+          .declareVariable("str2", String.class)
           .loadVariable("str")
           .if_(BooleanOperator.GreaterThan, Variable.get("str2")).finish()
           .toJavaString();
@@ -261,7 +261,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
   @Test
   public void testIfBlockWithInstanceOfExpression() {
     String s = StatementBuilder.create()
-        .addVariable("str", String.class)
+        .declareVariable("str", String.class)
         .loadVariable("str")
         .if_(BooleanOperator.InstanceOf, MetaClassFactory.getAsStatement(String.class)).finish()
         .toJavaString();
@@ -273,7 +273,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
   @Test
   public void testIfBlockWithNullCheck() {
     String s = StatementBuilder.create()
-        .addVariable("str", String.class)
+        .declareVariable("str", String.class)
         .loadVariable("str")
         .if_(BooleanOperator.NotEquals, null)
         .finish()

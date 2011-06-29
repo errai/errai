@@ -52,7 +52,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   @Test
   public void testAddVariableWithExactTypeProvided() {
     Context ctx = Context.create();
-    StatementBuilder.create().addVariable("n", Integer.class, 10).generate(ctx);
+    StatementBuilder.create().declareVariable("n", Integer.class, 10).generate(ctx);
 
     VariableReference n = ctx.getVariable("n");
     assertEquals("Wrong variable name", "n", n.getName());
@@ -63,7 +63,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   @Test
   public void testAddVariableWithIntegerTypeInference() {
     Context ctx = Context.create();
-    StatementBuilder.create().addVariable("n", 10).generate(ctx);
+    StatementBuilder.create().declareVariable("n", 10).generate(ctx);
 
     VariableReference n = ctx.getVariable("n");
     assertEquals("Wrong variable name", "n", n.getName());
@@ -74,7 +74,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   @Test
   public void testAddVariableWithStringTypeInference() {
     Context ctx = Context.create();
-    StatementBuilder.create().addVariable("n", "10").generate(ctx);
+    StatementBuilder.create().declareVariable("n", "10").generate(ctx);
 
     VariableReference n = ctx.getVariable("n");
     assertEquals("Wrong variable name", "n", n.getName());
@@ -85,7 +85,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   @Test
   public void testAddVariableWithImplicitTypeConversion() {
     Context ctx = Context.create();
-    StatementBuilder.create().addVariable("n", Integer.class, "10").generate(ctx);
+    StatementBuilder.create().declareVariable("n", Integer.class, "10").generate(ctx);
 
     VariableReference n = ctx.getVariable("n");
     assertEquals("Wrong variable name", "n", n.getName());
@@ -93,7 +93,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
     Assert.assertEquals("Wrong variable value", LiteralFactory.getLiteral(10), n.getValue());
 
     try {
-      StatementBuilder.create().addVariable("n", Integer.class, "abc").toJavaString();
+      StatementBuilder.create().declareVariable("n", Integer.class, "abc").toJavaString();
       fail("Expected InvalidTypeException");
     }
     catch (InvalidTypeException ive) {
@@ -105,7 +105,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   @Test
   public void testAddVariableWithObjectInitializationWithExactTypeProvided() {
     Context ctx = Context.create();
-    StatementBuilder.create().addVariable("str", String.class,
+    StatementBuilder.create().declareVariable("str", String.class,
         ObjectBuilder.newInstanceOf(String.class)).generate(ctx);
 
     VariableReference str = ctx.getVariable("str");
@@ -116,7 +116,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   @Test
   public void testAddVariableWithObjectInitializationWithStringTypeInference() {
     Context ctx = Context.create();
-    StatementBuilder.create().addVariable("str", ObjectBuilder.newInstanceOf(String.class)).generate(ctx);
+    StatementBuilder.create().declareVariable("str", ObjectBuilder.newInstanceOf(String.class)).generate(ctx);
 
     VariableReference str = ctx.getVariable("str");
     assertEquals("Wrong variable name", "str", str.getName());
@@ -275,7 +275,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   @Test
   public void testAssignArrayValue() {
     String s = StatementBuilder.create()
-        .addVariable("twoDimArray", String[][].class)
+        .declareVariable("twoDimArray", String[][].class)
         .loadVariable("twoDimArray", 1, 2)
         .assignValue("test")
         .toJavaString();
@@ -286,7 +286,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   @Test
   public void testAssignArrayValueWithPreIncrementAssignment() {
     String s = StatementBuilder.create()
-        .addVariable("twoDimArray", String[][].class)
+        .declareVariable("twoDimArray", String[][].class)
         .loadVariable("twoDimArray", 1, 2)
         .assignValue(AssignmentOperator.PreIncrementAssign, "test")
         .toJavaString();
@@ -297,9 +297,9 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   @Test
   public void testAssignArrayValueWithVariableIndexes() {
     String s = StatementBuilder.create()
-        .addVariable("twoDimArray", String[][].class)
-        .addVariable("i", int.class)
-        .addVariable("j", int.class)
+        .declareVariable("twoDimArray", String[][].class)
+        .declareVariable("i", int.class)
+        .declareVariable("j", int.class)
         .loadVariable("twoDimArray", Variable.get("i"), Variable.get("j"))
         .assignValue("test")
         .toJavaString();
@@ -311,7 +311,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   public void testAssignArrayValueWithInvalidArray() {
     try {
       StatementBuilder.create()
-          .addVariable("twoDimArray", String.class)
+          .declareVariable("twoDimArray", String.class)
           .loadVariable("twoDimArray", 1, 2)
           .assignValue("test")
           .toJavaString();
@@ -326,9 +326,9 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   public void testAssignArrayValueWithInvalidIndexType() {
     try {
       StatementBuilder.create()
-          .addVariable("twoDimArray", String[][].class)
-          .addVariable("i", float.class)
-          .addVariable("j", float.class)
+          .declareVariable("twoDimArray", String[][].class)
+          .declareVariable("i", float.class)
+          .declareVariable("j", float.class)
           .loadVariable("twoDimArray", Variable.get("i"), Variable.get("j"))
           .assignValue("test")
           .toJavaString();
@@ -395,14 +395,14 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   
   @Test
   public void testThrowExceptionUsingVariable() {
-    String s = StatementBuilder.create().addVariable("t", Throwable.class).throw_("t").toJavaString();
+    String s = StatementBuilder.create().declareVariable("t", Throwable.class).throw_("t").toJavaString();
     assertEquals("failed to generate throw statement using a variable", "throw t", s);
   }
   
   @Test
   public void testThrowExceptionUsingInvalidVariable() {
     try {
-      StatementBuilder.create().addVariable("t", Integer.class).throw_("t").toJavaString();
+      StatementBuilder.create().declareVariable("t", Integer.class).throw_("t").toJavaString();
       fail("expected InvalidTypeException");
     } catch(InvalidTypeException e) {
       // expected

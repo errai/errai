@@ -18,18 +18,17 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanExpression;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.BlockBuilderImpl;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface LoopBuilder extends Statement, Builder {
-  public BlockBuilderImpl<WhileBuilder> do_();
+  public BlockBuilder<WhileBuilder> do_();
 
-  public BlockBuilderImpl<StatementEnd> while_(BooleanExpression condition);
+  public BlockBuilder<StatementEnd> while_(BooleanExpression condition);
 
-  public BlockBuilderImpl<StatementEnd> for_(BooleanExpression condition);
-  public BlockBuilderImpl<StatementEnd> for_(Statement initializer, BooleanExpression condition);
-  public BlockBuilderImpl<StatementEnd> for_(Statement initializer, BooleanExpression condition,
+  public BlockBuilder<StatementEnd> for_(BooleanExpression condition);
+  public BlockBuilder<StatementEnd> for_(Statement initializer, BooleanExpression condition);
+  public BlockBuilder<StatementEnd> for_(Statement initializer, BooleanExpression condition,
       Statement countingExpression);
 }

@@ -19,6 +19,7 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BuildCallback;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.CatchBlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementEnd;
@@ -43,7 +44,7 @@ public class TryBlockBuilderImpl extends AbstractStatementBuilder implements Try
   }
 
   @Override
-  public BlockBuilderImpl<CatchBlockBuilder> try_() {
+  public BlockBuilder<CatchBlockBuilder> try_() {
     tryBlock = new TryBlock();
 
     appendCallElement(new DeferredCallElement(new DeferredCallback() {
@@ -63,12 +64,12 @@ public class TryBlockBuilderImpl extends AbstractStatementBuilder implements Try
   }
 
   @Override
-  public BlockBuilderImpl<CatchBlockBuilder> catch_(Class<? extends Throwable> exceptionType, String variableName) {
+  public BlockBuilder<CatchBlockBuilder> catch_(Class<? extends Throwable> exceptionType, String variableName) {
     return catch_(MetaClassFactory.get(exceptionType), variableName);
   }
 
   @Override
-  public BlockBuilderImpl<CatchBlockBuilder> catch_(MetaClass exceptionType, String variableName) {
+  public BlockBuilder<CatchBlockBuilder> catch_(MetaClass exceptionType, String variableName) {
     Variable exceptionVar = Variable.create(variableName, exceptionType);
     tryBlock.addCatchBlock(exceptionVar);
 
@@ -82,7 +83,7 @@ public class TryBlockBuilderImpl extends AbstractStatementBuilder implements Try
   }
 
   @Override
-  public BlockBuilderImpl<StatementEnd> finally_() {
+  public BlockBuilder<StatementEnd> finally_() {
     return new BlockBuilderImpl<StatementEnd>(tryBlock.getFinallyBlock(), new BuildCallback<StatementEnd>() {
       @Override
       public StatementEnd callback(Statement statement) {

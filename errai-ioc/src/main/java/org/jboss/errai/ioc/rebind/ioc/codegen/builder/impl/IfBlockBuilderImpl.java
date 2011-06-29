@@ -20,6 +20,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanExpression;
 import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BuildCallback;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ContextualIfBlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ElseBlockBuilder;
@@ -50,25 +51,25 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements Cont
   }
 
   @Override
-  public BlockBuilderImpl<ElseBlockBuilder> if_() {
+  public BlockBuilder<ElseBlockBuilder> if_() {
     return if_(new BooleanExpressionBuilder());
   }
 
   @Override
-  public BlockBuilderImpl<ElseBlockBuilder> if_(BooleanOperator op, Statement rhs) {
+  public BlockBuilder<ElseBlockBuilder> if_(BooleanOperator op, Statement rhs) {
     if (rhs == null)
       rhs = NullLiteral.INSTANCE;
     return if_(new BooleanExpressionBuilder(rhs, op));
   }
 
   @Override
-  public BlockBuilderImpl<ElseBlockBuilder> if_(BooleanOperator op, Object rhs) {
+  public BlockBuilder<ElseBlockBuilder> if_(BooleanOperator op, Object rhs) {
     Statement rhsStatement = GenUtil.generate(context, rhs);
     return if_(op, rhsStatement);
   }
 
   @Override
-  public BlockBuilderImpl<ElseBlockBuilder> if_(final BooleanExpression condition) {
+  public BlockBuilder<ElseBlockBuilder> if_(final BooleanExpression condition) {
     ifBlock = new IfBlock(condition);
     appendCallElement(new ConditionalBlockCallElement(ifBlock));
 
@@ -81,7 +82,7 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements Cont
   }
 
   @Override
-  public BlockBuilderImpl<StatementEnd> else_() {
+  public BlockBuilder<StatementEnd> else_() {
     return new BlockBuilderImpl<StatementEnd>(ifBlock.getElseBlock(), new BuildCallback<StatementEnd>() {
       @Override
       public StatementEnd callback(Statement statement) {
@@ -91,12 +92,12 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements Cont
   }
 
   @Override
-  public BlockBuilderImpl<ElseBlockBuilder> elseif_(Statement lhs) {
+  public BlockBuilder<ElseBlockBuilder> elseif_(Statement lhs) {
     return elseif_(lhs, null, null);
   }
 
   @Override
-  public BlockBuilderImpl<ElseBlockBuilder> elseif_(Statement lhs, BooleanOperator op, Statement rhs) {
+  public BlockBuilder<ElseBlockBuilder> elseif_(Statement lhs, BooleanOperator op, Statement rhs) {
     if (lhs.getType() == null)
       lhs.generate(context);
 
@@ -106,12 +107,12 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements Cont
   }
 
   @Override
-  public BlockBuilderImpl<ElseBlockBuilder> elseif_(Statement lhs, BooleanOperator op, Object rhs) {
+  public BlockBuilder<ElseBlockBuilder> elseif_(Statement lhs, BooleanOperator op, Object rhs) {
     Statement rhsStatement = GenUtil.generate(context, rhs);
     return elseif_(lhs, op, rhsStatement);
   }
 
-  private BlockBuilderImpl<ElseBlockBuilder> elseif_(final IfBlock elseIfBlock) {
+  private BlockBuilder<ElseBlockBuilder> elseif_(final IfBlock elseIfBlock) {
     return new BlockBuilderImpl<ElseBlockBuilder>(elseIfBlock.getBlock(), new BuildCallback<ElseBlockBuilder>() {
       @Override
       public ElseBlockBuilder callback(Statement statement) {

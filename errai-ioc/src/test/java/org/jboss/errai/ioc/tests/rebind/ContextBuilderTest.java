@@ -125,7 +125,7 @@ public class ContextBuilderTest extends AbstractStatementBuilderTest {
 
     try {
       Stmt.create()
-          .addVariable("str", Integer.class, ObjectBuilder.newInstanceOf(String.class).withParameters("abc"))
+          .declareVariable("str", Integer.class, ObjectBuilder.newInstanceOf(String.class).withParameters("abc"))
           .toJavaString();
       fail("Expected InvalidTypeException");
     }
@@ -135,7 +135,7 @@ public class ContextBuilderTest extends AbstractStatementBuilderTest {
     
     try {
       Stmt.create()
-          .addVariable("str", String.class, ObjectBuilder.newInstanceOf(Object.class))
+          .declareVariable("str", String.class, ObjectBuilder.newInstanceOf(Object.class))
           .toJavaString();
       fail("Expected InvalidTypeException");
     }

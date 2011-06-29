@@ -38,7 +38,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
   @Test
   public void testSingleInvocation() {
     String s = StatementBuilder.create()
-        .addVariable("obj", Object.class)
+        .declareVariable("obj", Object.class)
         .loadVariable("obj")
         .invoke("toString")
         .toJavaString();
@@ -49,9 +49,9 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
   @Test
   public void testChainedInvocations() {
     String s = StatementBuilder.create()
-        .addVariable("i", Integer.class)
-        .addVariable("regex", String.class)
-        .addVariable("replacement", String.class)
+        .declareVariable("i", Integer.class)
+        .declareVariable("regex", String.class)
+        .declareVariable("replacement", String.class)
         .loadVariable("i")
         .invoke("toString")
         .invoke("replaceAll", Variable.get("regex"), Variable.get("replacement"))
@@ -63,7 +63,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
 
   @Test
   public void testInvokeWithLiteralParameters() {
-    String result = StatementBuilder.create().addVariable("s", String.class)
+    String result = StatementBuilder.create().declareVariable("s", String.class)
         .loadVariable("s").invoke("replaceAll", "foo", "foo\t\n").toJavaString();
 
     assertEquals("Failed to generate invocation using literal parameters",
@@ -81,7 +81,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
   @Test
   public void testInvokeOnBestMatchingMethod() {
     String s = StatementBuilder.create()
-        .addVariable("n", Integer.class)
+        .declareVariable("n", Integer.class)
         .loadVariable("n")
         // 1 will be inferred to LiteralValue<Integer>, equals(Integer.class)
         // should be matched equals(Object.class)
@@ -95,8 +95,8 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
   public void testInvokeUndefinedMethodOnVariable() {
     try {
       StatementBuilder.create()
-          .addVariable("obj", Object.class)
-          .addVariable("param", String.class)
+          .declareVariable("obj", Object.class)
+          .declareVariable("param", String.class)
           .loadVariable("obj")
           .invoke("undefinedMethod", Variable.get("param"))
           .toJavaString();
@@ -112,9 +112,9 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
   public void testInvokeChainedUndefinedMethod() {
     try {
       StatementBuilder.create()
-          .addVariable("s", String.class)
-          .addVariable("regex", String.class)
-          .addVariable("replacement", String.class)
+          .declareVariable("s", String.class)
+          .declareVariable("regex", String.class)
+          .declareVariable("replacement", String.class)
           .loadVariable("s")
           .invoke("replaceAll", Variable.get("regex"), Variable.get("replacement"))
           .invoke("undefinedMethod", Variable.get("regex"), Variable.get("replacement"))
@@ -148,8 +148,8 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
     try {
       // param2 undefined
       StatementBuilder.create()
-          .addVariable("obj", Object.class)
-          .addVariable("param", String.class)
+          .declareVariable("obj", Object.class)
+          .declareVariable("param", String.class)
           .loadVariable("obj")
           .invoke("undefinedMethod", Variable.get("param"), Variable.get("param2"))
           .toJavaString();
@@ -200,7 +200,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
   @Test
   public void testInvokeWithParameterTypeConversionOfIntegerToString() {
     String s = StatementBuilder.create()
-        .addVariable("str", String.class)
+        .declareVariable("str", String.class)
         .loadVariable("str")
         .invoke("endsWith", 123)
         .toJavaString();
@@ -211,7 +211,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
   @Test
   public void testInvokeWithParameterTypeConversionOfStringToInteger() {
     String s = StatementBuilder.create()
-        .addVariable("str", String.class)
+        .declareVariable("str", String.class)
         .loadVariable("str")
         .invoke("substring", "1", "3")
         .toJavaString();
@@ -223,7 +223,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
   public void testInvokeWithParameterTypeConversionOfVariable() {
     Context c = Context.create().addVariable("n", Integer.class, 123);
     String s = StatementBuilder.create(c)
-        .addVariable("str", String.class)
+        .declareVariable("str", String.class)
         .loadVariable("str")
         .invoke("endsWith", c.getVariable("n").getValue())
         .toJavaString();

@@ -82,7 +82,7 @@ public class SwitchBlockBuilderTest extends AbstractStatementBuilderTest impleme
   @Test
   public void testSwitchBlockOnIntEmpty() {
     String s = StatementBuilder.create()
-        .addVariable("n", int.class)
+        .declareVariable("n", int.class)
         .switch_(Stmt.create().loadVariable("n"))
         .toJavaString();
 
@@ -92,7 +92,7 @@ public class SwitchBlockBuilderTest extends AbstractStatementBuilderTest impleme
   @Test
   public void testSwitchBlockOnInt() {
     String s = StatementBuilder.create()
-        .addVariable("n", int.class)
+        .declareVariable("n", int.class)
         .switch_(Stmt.create().loadVariable("n"))
         .case_(0)
         .append(Stmt.create().loadStatic(System.class, "out").invoke("println", "0"))
@@ -114,7 +114,7 @@ public class SwitchBlockBuilderTest extends AbstractStatementBuilderTest impleme
   public void testSwitchBlockOnEnum() {
     Context c = Context.create().autoImport();
     String s = StatementBuilder.create(c)
-        .addVariable("t", TestEnum.class)
+        .declareVariable("t", TestEnum.class)
         .switch_(Stmt.create().loadVariable("t"))
         .case_(TestEnum.A)
         .append(Stmt.create().loadStatic(System.class, "out").invoke("println", "A"))
@@ -135,7 +135,7 @@ public class SwitchBlockBuilderTest extends AbstractStatementBuilderTest impleme
   @Test
   public void testSwitchBlockWithoutDefaultBlock() {
     String s = StatementBuilder.create()
-        .addVariable("n", Integer.class)
+        .declareVariable("n", Integer.class)
         .switch_(Stmt.create().loadVariable("n"))
         .case_(0)
         .append(Stmt.create().loadStatic(System.class, "out").invoke("println", "0"))
@@ -153,7 +153,7 @@ public class SwitchBlockBuilderTest extends AbstractStatementBuilderTest impleme
   @Test
   public void testSwitchBlockWithFallThrough() {
     String s = StatementBuilder.create()
-        .addVariable("n", int.class)
+        .declareVariable("n", int.class)
         .switch_(Stmt.create().loadVariable("n"))
         .case_(0)
         .finish()
@@ -170,7 +170,7 @@ public class SwitchBlockBuilderTest extends AbstractStatementBuilderTest impleme
   @Test
   public void testSwitchBlockChained() {
     String s = StatementBuilder.create()
-        .addVariable("n", int.class)
+        .declareVariable("n", int.class)
         .loadVariable("n")
         .switch_()
         .case_(0)
@@ -192,7 +192,7 @@ public class SwitchBlockBuilderTest extends AbstractStatementBuilderTest impleme
   @Test
   public void testSwitchBlockOnCharChained() {
     String s = StatementBuilder.create()
-        .addVariable("c", char.class)
+        .declareVariable("c", char.class)
         .loadVariable("c")
         .switch_()
         .case_('a')
@@ -213,7 +213,7 @@ public class SwitchBlockBuilderTest extends AbstractStatementBuilderTest impleme
   @Test
   public void testSwitchBlockChainedOnInvocation() {
     String s = StatementBuilder.create()
-        .addVariable("str", String.class)
+        .declareVariable("str", String.class)
         .loadVariable("str")
         .invoke("length")
         .switch_()

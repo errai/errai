@@ -304,7 +304,7 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
   public void testDefineClass() {
     String cls = ClassBuilder.implement(Bootstrapper.class)
         .publicMethod(InterfaceInjectionContext.class, "bootstrapContainer")
-        .append(Stmt.create().addVariable("ctx", Stmt.create().newObject(InterfaceInjectionContext.class)))
+        .append(Stmt.create().declareVariable("ctx", Stmt.create().newObject(InterfaceInjectionContext.class)))
         .append(Stmt.create().loadVariable("ctx").returnValue())
         .finish().toJavaString();
 

@@ -50,7 +50,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   @Test
   public void testForeachLoopWithStringInParameterizedList() {
     String foreachWithListOfStrings = StatementBuilder.create()
-        .addVariable("list", new TypeLiteral<List<String>>() {})
+        .declareVariable("list", new TypeLiteral<List<String>>() {})
         .loadVariable("list")
         .foreach("element")
         .finish().toJavaString();
@@ -80,7 +80,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
     Statement createAnotherObject = StatementBuilder.create().newObject(Object.class);
 
     String foreachWithList = StatementBuilder.create()
-        .addVariable("list", List.class)
+        .declareVariable("list", List.class)
         .loadVariable("list")
         .foreach("element")
         .append(createObject)
@@ -109,7 +109,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   @Test
   public void testForeachLoopWithProvidedLoopVarType() {
     Builder builder = StatementBuilder.create()
-        .addVariable("list", new TypeLiteral<List<String>>() {})
+        .declareVariable("list", new TypeLiteral<List<String>>() {})
         .loadVariable("list")
         .foreach("element", Object.class)
         .finish();
@@ -119,7 +119,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
 
     try {
       StatementBuilder.create()
-          .addVariable("list", new TypeLiteral<List<String>>() {})
+          .declareVariable("list", new TypeLiteral<List<String>>() {})
           .loadVariable("list")
           .foreach("element", Integer.class)
           .finish().toJavaString();
@@ -136,7 +136,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
     Statement createObject = StatementBuilder.create().newObject(String.class);
 
     Builder outerLoop = StatementBuilder.create()
-        .addVariable("list", new TypeLiteral<List<String>>() {})
+        .declareVariable("list", new TypeLiteral<List<String>>() {})
         .loadVariable("list")
         .foreach("element")
         .append(StatementBuilder.create(
@@ -157,7 +157,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
 
     try {
       StatementBuilder.create()
-          .addVariable("list", String.class)
+          .declareVariable("list", String.class)
           .loadVariable("list")
           .foreach("element")
           .finish().toJavaString();
@@ -172,7 +172,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   @Test
   public void testForeachLoopWithInvoke() {
     Builder loop = StatementBuilder.create()
-        .addVariable("map", Map.class)
+        .declareVariable("map", Map.class)
         .loadVariable("map")
         .invoke("keySet")
         .foreach("key").finish();
@@ -210,7 +210,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   public void testWhileLoopWithInvalidExpression() {
     try {
       StatementBuilder.create()
-          .addVariable("n", Integer.class)
+          .declareVariable("n", Integer.class)
           .loadVariable("n")
           .while_().finish().toJavaString();
       fail("Expected InvalidTypeException");
@@ -221,8 +221,8 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
 
     try {
       StatementBuilder.create()
-          .addVariable("str", String.class)
-          .addVariable("str2", String.class)
+          .declareVariable("str", String.class)
+          .declareVariable("str2", String.class)
           .loadVariable("str")
           .while_(BooleanOperator.GreaterThan, Variable.get("str2")).finish()
           .toJavaString();
@@ -237,7 +237,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   @Test
   public void testWhileLoopChainedWithEmptyExpressionWithoutBody() {
     String s = StatementBuilder.create()
-        .addVariable("b", Boolean.class)
+        .declareVariable("b", Boolean.class)
         .loadVariable("b")
         .while_().finish().toJavaString();
 
@@ -247,7 +247,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   @Test
   public void testWhileLoopChainedWithEmptyExpressionWithBody() {
     String s = StatementBuilder.create()
-        .addVariable("b", Boolean.class)
+        .declareVariable("b", Boolean.class)
         .loadVariable("b")
         .while_()
           .append(StatementBuilder.create().loadVariable("b").assignValue(false))
@@ -259,7 +259,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   @Test
   public void testWhileLoopChainedWithNullCheck() {
     String s = StatementBuilder.create()
-        .addVariable("str", String.class)
+        .declareVariable("str", String.class)
         .loadVariable("str")
         .while_(BooleanOperator.NotEquals, null)
         .finish().toJavaString();
@@ -271,7 +271,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   @Test
   public void testWhileLoopChainedWithExpression() {
     String s = StatementBuilder.create()
-        .addVariable("str", String.class)
+        .declareVariable("str", String.class)
         .loadVariable("str")
         .invoke("length")
         .while_(BooleanOperator.GreaterThanOrEqual, 2)
@@ -293,7 +293,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   @Test
   public void testWhileLoopUnchainedWithNestedExpressions() {
     String s = StatementBuilder.create()
-        .addVariable("str", String.class)
+        .declareVariable("str", String.class)
         .while_(Bool.expr(
             Bool.expr(Variable.get("str"), BooleanOperator.NotEquals, null),
             BooleanOperator.And,
@@ -322,7 +322,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   @Test
   public void testForLoopUnchainedWithoutInitializerAndCountingExpression() {
     String s = StatementBuilder.create()
-        .addVariable("i", Integer.class, 0)
+        .declareVariable("i", Integer.class, 0)
         .for_(Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100))
         .finish().toJavaString();
 
@@ -333,7 +333,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   @Test
   public void testForLoopChainedWithoutCountingExpression() {
     String s = StatementBuilder.create()
-        .addVariable("i", Integer.class, 0)
+        .declareVariable("i", Integer.class, 0)
         .loadVariable("i")
         .for_(Stmt.create().loadVariable("i").assignValue(0), Bool.expr(BooleanOperator.LessThan, 100))
         .finish().toJavaString();
@@ -345,7 +345,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   @Test
   public void testForLoopUnchainedWithInitializer() {
     String s = StatementBuilder.create()
-        .addVariable("i", Integer.class)
+        .declareVariable("i", Integer.class)
         .for_(StatementBuilder.create().loadVariable("i").assignValue(0),
             Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100))
         .finish().toJavaString();
@@ -357,7 +357,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   @Test
   public void testForLoopChainedWithCountingExpression() {
     String s = StatementBuilder.create()
-        .addVariable("i", Integer.class, 0)
+        .declareVariable("i", Integer.class, 0)
         .loadVariable("i")
         .for_(Stmt.create().loadVariable("i").assignValue(0), Bool.expr(BooleanOperator.LessThan, 100),
             StatementBuilder.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
@@ -370,7 +370,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   @Test
   public void testForLoopUnchainedWithInitializerAndCountingExpression() {
     String s = StatementBuilder.create()
-        .addVariable("i", Integer.class)
+        .declareVariable("i", Integer.class)
         .for_(StatementBuilder.create().loadVariable("i").assignValue(0),
             Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100),
             StatementBuilder.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
@@ -396,7 +396,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   @Test
   public void testDoWhileLoopUnchainedWithoutRhs() {
     String s = StatementBuilder.create()
-        .addVariable("b", Boolean.class)
+        .declareVariable("b", Boolean.class)
         .do_()
           .append(StatementBuilder.create().loadVariable("b").assignValue(false))
         .finish()
@@ -410,7 +410,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   @Test
   public void testDoWhileLoopChainedWithoutRhs() {
     String s = StatementBuilder.create()
-        .addVariable("b", Boolean.class)
+        .declareVariable("b", Boolean.class)
         .loadVariable("b")
         .do_()
           .append(StatementBuilder.create().loadVariable("b").assignValue(false))
@@ -425,7 +425,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   @Test
   public void testDoWhileLoopChainedWithRhs() {
     String s = StatementBuilder.create()
-        .addVariable("n", Integer.class)
+        .declareVariable("n", Integer.class)
         .loadVariable("n")
         .do_()
           .append(StatementBuilder.create().loadVariable("n").assignValue(1))
@@ -440,7 +440,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   @Test
   public void testDoWhileLoopUnchainedWithNestedExpressions() {
     String s = StatementBuilder.create()
-        .addVariable("str", String.class)
+        .declareVariable("str", String.class)
         .do_()
           .append(StatementBuilder.create().loadStatic(System.class, "out").invoke("println", Variable.get("str")))
         .finish()
@@ -456,7 +456,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   @Test
   public void testLoopWithContinue() {
     String s = StatementBuilder.create()
-        .addVariable("i", Integer.class, 0)
+        .declareVariable("i", Integer.class, 0)
         .loadVariable("i")
         .if_(BooleanOperator.GreaterThan, 100)
         .append(Stmt.create()
@@ -477,7 +477,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   @Test
   public void testLoopWithContinueAndLabel() {
     String s = StatementBuilder.create()
-        .addVariable("i", Integer.class, 0)
+        .declareVariable("i", Integer.class, 0)
         .loadVariable("i")
         .if_(BooleanOperator.GreaterThan, 100)
         .append(Stmt.create().label("label"))
@@ -499,7 +499,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   @Test
   public void testLoopWithBreak() {
     String s = StatementBuilder.create()
-        .addVariable("i", Integer.class, 0)
+        .declareVariable("i", Integer.class, 0)
         .loadVariable("i")
         .if_(BooleanOperator.GreaterThan, 100)
         .append(Stmt.create()
@@ -520,7 +520,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   @Test
   public void testLoopWithBreakAndLabel() {
     String s = StatementBuilder.create()
-        .addVariable("i", Integer.class, 0)
+        .declareVariable("i", Integer.class, 0)
         .loadVariable("i")
         .if_(BooleanOperator.GreaterThan, 100)
         .append(Stmt.create().label("label"))
@@ -543,7 +543,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   public void testLoopWithInvalidLabel() {
     try {
       StatementBuilder.create()
-          .addVariable("i", Integer.class, 0)
+          .declareVariable("i", Integer.class, 0)
           .loadVariable("i")
           .if_(BooleanOperator.GreaterThan, 100)
           .append(Stmt.create().label("label"))

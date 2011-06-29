@@ -17,7 +17,6 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.BlockBuilderImpl;
 import org.jboss.errai.ioc.rebind.ioc.codegen.literal.ByteValue;
 import org.jboss.errai.ioc.rebind.ioc.codegen.literal.CharValue;
 import org.jboss.errai.ioc.rebind.ioc.codegen.literal.IntValue;
@@ -28,17 +27,17 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.literal.ShortValue;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface CaseBlockBuilder extends Statement, Builder {
-  BlockBuilderImpl<CaseBlockBuilder> case_(int value);
-  BlockBuilderImpl<CaseBlockBuilder> case_(byte value);
-  BlockBuilderImpl<CaseBlockBuilder> case_(short value);
-  BlockBuilderImpl<CaseBlockBuilder> case_(char value);
-  BlockBuilderImpl<CaseBlockBuilder> case_(Enum<?> value);
+  BlockBuilder<CaseBlockBuilder> case_(int value);
+  BlockBuilder<CaseBlockBuilder> case_(byte value);
+  BlockBuilder<CaseBlockBuilder> case_(short value);
+  BlockBuilder<CaseBlockBuilder> case_(char value);
+  BlockBuilder<CaseBlockBuilder> case_(Enum<?> value);
   
-  BlockBuilderImpl<CaseBlockBuilder> case_(IntValue value);
-  BlockBuilderImpl<CaseBlockBuilder> case_(ByteValue value);
-  BlockBuilderImpl<CaseBlockBuilder> case_(ShortValue value);
-  BlockBuilderImpl<CaseBlockBuilder> case_(CharValue value);
-  BlockBuilderImpl<CaseBlockBuilder> case_(LiteralValue<Enum<?>> value);
+  BlockBuilder<CaseBlockBuilder> case_(IntValue value);
+  BlockBuilder<CaseBlockBuilder> case_(ByteValue value);
+  BlockBuilder<CaseBlockBuilder> case_(ShortValue value);
+  BlockBuilder<CaseBlockBuilder> case_(CharValue value);
+  BlockBuilder<CaseBlockBuilder> case_(LiteralValue<Enum<?>> value);
 
-  BlockBuilderImpl<StatementEnd> default_();
+  BlockBuilder<StatementEnd> default_();
 }

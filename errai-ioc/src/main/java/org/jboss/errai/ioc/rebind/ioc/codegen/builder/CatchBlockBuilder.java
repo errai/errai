@@ -17,15 +17,14 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.BlockBuilderImpl;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface CatchBlockBuilder extends Statement, Builder {
-  BlockBuilderImpl<CatchBlockBuilder> catch_(Class<? extends Throwable> exceptionType, String variableName);
-  BlockBuilderImpl<CatchBlockBuilder> catch_(MetaClass exceptionType, String variableName);
+  BlockBuilder<CatchBlockBuilder> catch_(Class<? extends Throwable> exceptionType, String variableName);
+  BlockBuilder<CatchBlockBuilder> catch_(MetaClass exceptionType, String variableName);
 
-  BlockBuilderImpl<StatementEnd> finally_();
+  BlockBuilder<StatementEnd> finally_();
 }

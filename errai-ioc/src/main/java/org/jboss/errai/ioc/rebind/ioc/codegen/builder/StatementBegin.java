@@ -26,11 +26,11 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
  */
 public interface StatementBegin extends ArrayBuilder, LoopBuilder, IfBlockBuilder, SwitchBlockBuilder, TryBlockBuilder {
 
-  public StatementBuilder addVariable(String name, Class<?> type);
-  public StatementBuilder addVariable(String name, TypeLiteral<?> type);
-  public StatementBuilder addVariable(String name, Object initialization);
-  public StatementBuilder addVariable(String name, Class<?> type, Object initialization);
-  public StatementBuilder addVariable(String name, TypeLiteral<?> type, Object initialization);
+  public StatementBuilder declareVariable(String name, Class<?> type);
+  public StatementBuilder declareVariable(String name, TypeLiteral<?> type);
+  public StatementBuilder declareVariable(String name, Object initialization);
+  public StatementBuilder declareVariable(String name, Class<?> type, Object initialization);
+  public StatementBuilder declareVariable(String name, TypeLiteral<?> type, Object initialization);
 
   public VariableReferenceContextualStatementBuilder loadVariable(String name, Object... indexes);
   public VariableReferenceContextualStatementBuilder loadClassMember(String name, Object... indexes);
