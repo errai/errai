@@ -224,7 +224,7 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
     }
   }
   @Test
-  public void testDefineClassWithMethodWithThrowsDeclaration() {
+  public void testDefineClassWithMethodHavingThrowsDeclaration() {
 
     String cls = ClassBuilder
         .define("org.foo.Foo")

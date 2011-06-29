@@ -69,6 +69,7 @@ public class ClassBuilder implements
     return implement(MetaClassFactory.get(cls));
   }
 
+  @Override
   public ClassBuilder abstractClass() {
     classDefinition.setAbstract(true);
     return this;
@@ -132,6 +133,7 @@ public class ClassBuilder implements
     return genConstructor(Scope.Public, DefParameters.none());
   }
   
+  @Override
   public ConstructorBlockBuilder<BaseClassStructureBuilder> publicConstructor(MetaClass... parms) {
     return genConstructor(Scope.Public, DefParameters.fromTypeArray(parms));
   }
@@ -151,6 +153,7 @@ public class ClassBuilder implements
     return genConstructor(Scope.Private, DefParameters.none());
   }
   
+  @Override
   public ConstructorBlockBuilder<BaseClassStructureBuilder> privateConstructor(MetaClass... parms) {
     return genConstructor(Scope.Private, DefParameters.fromTypeArray(parms));
   }
@@ -170,6 +173,7 @@ public class ClassBuilder implements
     return genConstructor(Scope.Protected, DefParameters.none());
   }
   
+  @Override
   public ConstructorBlockBuilder<BaseClassStructureBuilder> protectedConstructor(MetaClass... parms) {
     return genConstructor(Scope.Protected, DefParameters.fromTypeArray(parms));
   }
@@ -189,6 +193,7 @@ public class ClassBuilder implements
     return genConstructor(Scope.Package, DefParameters.none());
   }
   
+  @Override
   public ConstructorBlockBuilder<BaseClassStructureBuilder> packageConstructor(MetaClass... parms) {
     return genConstructor(Scope.Package, DefParameters.fromTypeArray(parms));
   }
@@ -232,6 +237,7 @@ public class ClassBuilder implements
     return publicMethod(MetaClassFactory.get(returnType), name);
   }
     
+  @Override
   public MethodBlockBuilder<BaseClassStructureBuilder> publicMethod(MetaClass returnType, String name, MetaClass... parms) {
     return genMethod(Scope.Public, returnType, name, DefParameters.fromTypeArray(parms));
   }
@@ -293,6 +299,7 @@ public class ClassBuilder implements
     return protectedMethod(MetaClassFactory.get(returnType), name);
   }
   
+  @Override
   public BlockBuilderImpl<BaseClassStructureBuilder> protectedMethod(MetaClass returnType, String name, MetaClass... parms) {
     return genMethod(Scope.Protected, returnType, name, DefParameters.fromTypeArray(parms));
   }

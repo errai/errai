@@ -20,7 +20,6 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.BlockStatement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BuildCallback;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.Finishable;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -43,6 +42,7 @@ public class BlockBuilderImpl<T> implements BlockBuilder<T> {
     this.callback = callback;
   }
 
+  @Override
   public BlockBuilder<T> append(Statement statement) {
     blockStatement.addStatement(statement);
     return this;

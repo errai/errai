@@ -221,10 +221,12 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     return isStatic;
   }
 
+  @Override
   public Annotation[] getAnnotations() {
     return new Annotation[0];
   }
 
+  @Override
   public MetaTypeVariable[] getTypeParameters() {
     return typeVariables.toArray(new MetaTypeVariable[typeVariables.size()]);
   }
@@ -290,6 +292,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   }
 
 
+  @Override
   public String toJavaString() {
     StringBuilder buf = new StringBuilder();
 
