@@ -69,18 +69,42 @@ public interface ClassBuilderTestResult {
           " }";
 
   public static final String CLASS_WITH_CONSTRUCTOR_CALLING_THIS =
-    "     package org.foo;\n" +
-        "\n" +
-        " public class Foo {\n" +
-        "   private boolean b;" +
-        "   public Foo() {" +
-        "     this(false);" +
-        "   }" +
-        "   public Foo(boolean b) {" +
-        "     this.b = b;" +
-        "   }" +
-        " }";
-  
+      "     package org.foo;\n" +
+          "\n" +
+          " public class Foo {\n" +
+          "   private boolean b;" +
+          "   public Foo() {" +
+          "     this(false);" +
+          "   }" +
+          "   public Foo(boolean b) {" +
+          "     this.b = b;" +
+          "   }" +
+          " }";
+
+  public static final String CLASS_WITH_METHOD_CALLING_METHOD_ON_THIS =
+      "     package org.foo;\n" +
+          "\n" +
+          " public class Foo {\n" +
+          "   public void bar() {" +
+          "     this.foo();" +
+          "   }" +
+          "   public String foo() {" +
+          "     return null;" +
+          "   }" +
+          " }";
+
+  public static final String CLASS_WITH_METHOD_CALLING_METHOD_ON_SUPER =
+      "     package org.foo;\n" +
+          "\n" +
+          " public class Foo {\n" +
+          "   public void bar() {" +
+          "     this.foo();" +
+          "   }" +
+          "   public String foo() {" +
+          "     return super.toString();" +
+          "   }" +
+          " }";
+
   public static final String CLASS_WITH_METHOD_HAVING_THROWS_DECLARATION =
       "     package org.foo;\n" +
           "\n" +
@@ -112,18 +136,18 @@ public interface ClassBuilderTestResult {
           "   int packagePrivateField;\n" +
           "   private int privateField;\n" +
           " }";
-  
+
   public static final String CLASS_WITH_CONSTRUCTORS_OF_ALL_SCOPES =
-    "     package org.foo;\n" +
-        "\n" +
-        " public class Foo {\n" +
-        "   public Foo() {" +
-        "   }" +
-        "   protected Foo() {" +
-        "   }" +
-        "   Foo() {" +
-        "   }" +
-        "   private Foo() {" +
-        "   }" +
-        " }";
+      "     package org.foo;\n" +
+          "\n" +
+          " public class Foo {\n" +
+          "   public Foo() {" +
+          "   }" +
+          "   protected Foo() {" +
+          "   }" +
+          "   Foo() {" +
+          "   }" +
+          "   private Foo() {" +
+          "   }" +
+          " }";
 }

@@ -319,9 +319,9 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     }
 
     context.addVariable(Variable.create("this", this));
-    if (superClass != null) {
-      context.addVariable(Variable.create("super", superClass));
-    }
+    
+    superClass = (superClass != null)?superClass:MetaClassFactory.get(Object.class);
+    context.addVariable(Variable.create("super", superClass));
 
     buf.append(" {\n");
 
