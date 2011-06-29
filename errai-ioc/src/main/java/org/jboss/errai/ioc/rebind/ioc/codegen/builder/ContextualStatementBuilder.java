@@ -17,6 +17,7 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -24,10 +25,12 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
  */
 public interface ContextualStatementBuilder extends ContextualLoopBuilder, ContextualIfBlockBuilder,
     ContextualSwitchBlockBuilder {
-  
+
+  public ContextualStatementBuilder invoke(MetaMethod method, Object... parameters);
+
   public ContextualStatementBuilder invoke(String methodName, Object... parameters);
 
-  public ContextualStatementBuilder getField(String methodName);
+  public ContextualStatementBuilder getField(String fieldName);
 
   public Statement returnValue();
 }

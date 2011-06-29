@@ -16,10 +16,16 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
+import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.*;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.Refs;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 import org.mvel2.util.StringAppender;
 
 import java.lang.annotation.Annotation;
+
+import static org.jboss.errai.ioc.rebind.ioc.InjectUtil.getPrivateFieldInjectorName;
+import static org.jboss.errai.ioc.rebind.ioc.InjectUtil.resolveInjectionDependencies;
 
 public class InjectionTask {
   protected final TaskType injectType;
@@ -57,8 +63,9 @@ public class InjectionTask {
   }
 
   @SuppressWarnings({"unchecked"})
-  public String doTask(InjectionContext ctx) {
-    StringAppender appender = new StringAppender();
+  public void doTask(InjectionContext ctx) {
+    IOCProcessingContext processingContext = ctx.getProcessingContext();
+
     InjectionPoint<? extends Annotation> injectionPoint
         = new InjectionPoint(null, injectType, constructor, method, field, type, parm, injector, ctx);
 
@@ -74,10 +81,11 @@ public class InjectionTask {
         inj = ctx.getQualifiedInjector(field.getType(),
             JSR299QualifyingMetadata.createFromAnnotations(injectionPoint.getQualifiers()));
 
-        appender.append(InjectUtil.getPrivateFieldInjectorName(field)).append("(")
-            .append(injector.getVarName()).append(", ")
-            .append(inj.getType(ctx, injectionPoint))
-            .append(");\n");
+        processingContext.append(
+            Stmt.create()
+                    .invokeStatic(processingContext.getBootStrapClass(), getPrivateFieldInjectorName(field),
+                            Refs.get(injector.getVarName()), inj.getType(ctx, injectionPoint))
+        );
 
         ctx.getPrivateFieldsToExpose().add(field);
         break;
@@ -86,22 +94,25 @@ public class InjectionTask {
         inj = ctx.getQualifiedInjector(field.getType(),
             JSR299QualifyingMetadata.createFromAnnotations(injectionPoint.getQualifiers()));
 
-        appender.append(injector.getVarName()).append('.').append(field.getName()).append(" = ")
-            .append(inj.getType(ctx, injectionPoint))
-            .append(";\n");
+
+        processingContext.append(
+                Stmt.create().
+                        loadVariable(injector.getVarName()).assignValue(inj.getType(ctx, injectionPoint))
+        );
+
         break;
 
       case Method:
-        appender.append(injector.getVarName()).append('.')
-            .append(method.getName()).append('(');
 
-        String[] vars = InjectUtil.resolveInjectionDependencies(method.getParameters(), ctx, injectionPoint);
+        processingContext.append(
+                Stmt.create()
+                .loadVariable(injector.getVarName()).invoke(method,
+                        resolveInjectionDependencies(method.getParameters(), ctx, injectionPoint))
+        );
 
-        appender.append(InjectUtil.commaDelimitedList(vars)).append(");\n");
         break;
     }
 
-    return appender.toString();
   }
 
   public TaskType getInjectType() {

@@ -30,11 +30,15 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class AssignmentBuilder implements Statement {
+  protected boolean isFinal;
+
   protected AssignmentOperator operator;
   protected VariableReference reference;
   protected Statement statement;
 
-  public AssignmentBuilder(AssignmentOperator operator, VariableReference reference, Statement statement) {
+  public AssignmentBuilder(boolean isFinal, AssignmentOperator operator, VariableReference reference,
+                           Statement statement) {
+    this.isFinal = isFinal;
     this.operator = operator;
     this.reference = reference;
     this.statement = statement;
@@ -54,7 +58,7 @@ public class AssignmentBuilder implements Statement {
     operator.assertCanBeApplied(referenceType);
     operator.assertCanBeApplied(statement.getType());
 
-    return reference.getName() + generateIndexes(indexes) +
+    return  reference.getName() + generateIndexes(indexes) +
         " " + operator.getCanonicalString() + " " + statement.generate(context);
   }
 

@@ -30,13 +30,12 @@ import java.util.Map;
 import java.util.Set;
 
 public class ProcessingContext {
-  private Map<JClassType, Generated> processedAnnotations;
-  private TreeLogger treeLogger;
-  private GeneratorContext context;
+  protected Map<JClassType, Generated> processedAnnotations;
+  protected TreeLogger treeLogger;
+  protected GeneratorContext context;
 
-  private SourceWriter writer;
-  private TypeOracle oracle;
-
+  protected SourceWriter writer;
+  protected TypeOracle oracle;
 
   public ProcessingContext(TreeLogger treeLogger, GeneratorContext context, SourceWriter writer, TypeOracle oracle) {
     this.treeLogger = treeLogger;
@@ -51,7 +50,7 @@ public class ProcessingContext {
     return treeLogger;
   }
 
-  public GeneratorContext getContext() {
+  public GeneratorContext getGeneratorContext() {
     return context;
   }
 

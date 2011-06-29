@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.rebind;
+package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
-import org.jboss.errai.bus.rebind.ProcessingContext;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-
-import java.lang.annotation.Annotation;
-
-public interface AnnotationHandler<T extends Annotation> {
-  public void handle(MetaClass type, T annotation, IOCProcessingContext context);
+/**
+ * @author Mike Brock <cbrock@redhat.com>
+ */
+public interface VariableDeclarationNamed<T> extends VariableDeclarationInitializer<T> {
+  public VariableDeclarationInitializer<T> named(String name);
 }

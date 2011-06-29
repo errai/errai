@@ -39,6 +39,8 @@ public class Variable extends AbstractStatement {
   private Object initialization;
   private boolean classMember;
 
+  private boolean isFinal;
+
   private Variable(String name, MetaClass type) {
     this.name = name;
     this.type = type;
@@ -78,6 +80,16 @@ public class Variable extends AbstractStatement {
     return inferredType;
   }
 
+  public static Variable createFinal(String name, Class<?> type) {
+    return createFinal(name, MetaClassFactory.get(type));
+  }
+
+  public static Variable createFinal(String name, MetaClass type) {
+    Variable variable = create(name, type);
+    variable.isFinal = true;
+    return variable;
+  }
+
   public static Variable create(String name, Class<?> type) {
     return new Variable(name, MetaClassFactory.get(type));
   }
@@ -96,6 +108,16 @@ public class Variable extends AbstractStatement {
 
   public static Variable create(String name, Object initialization) {
     return new Variable(name, null, initialization);
+  }
+
+  public static Variable createFinal(String name, Class<?> type, Object initialization) {
+    return createFinal(name, MetaClassFactory.get(type), initialization);
+  }
+
+  public static Variable createFinal(String name, MetaClass type, Object initialization) {
+    Variable variable = create(name, type, initialization);
+    variable.isFinal = true;
+    return variable;
   }
 
   public static Variable create(String name, Class<?> type, Object initialization) {
@@ -192,6 +214,6 @@ public class Variable extends AbstractStatement {
       this.value = GenUtil.convert(context, initialization, type);
     }
 
-    return new DeclareAssignmentBuilder(getReference(), value).generate(context);
+    return new DeclareAssignmentBuilder(isFinal, getReference(), value).generate(context);
   }
 }

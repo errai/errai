@@ -17,7 +17,9 @@
 package org.jboss.errai.ioc.rebind.ioc;
 
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.Refs;
 
 import javax.inject.Singleton;
 import java.lang.annotation.Annotation;
@@ -54,29 +56,25 @@ public class TypeInjector extends Injector {
   }
 
   @Override
-  public String getType(InjectionContext injectContext, InjectionPoint injectionPoint) {
+  public Statement getType(InjectionContext injectContext, InjectionPoint injectionPoint) {
     if (isInjected()) {
       if (isSingleton()) {
-        return varName;
+        return Refs.get(varName);
       }
       else {
         varName = InjectUtil.getNewVarName();
       }
     }
 
-    ConstructionStrategy cs = InjectUtil.getConstructionStrategy(this, injectContext);
-
-    String generated = cs.generateConstructor();
-    injectContext.getProcessingContext().getWriter().print(generated);
-
+    InjectUtil.getConstructionStrategy(this, injectContext).generateConstructor();
 
     injected = true;
 
-    return varName;
+    return Refs.get(varName);
   }
 
   @Override
-  public String instantiateOnly(InjectionContext injectContext, InjectionPoint injectionPoint) {
+  public Statement instantiateOnly(InjectionContext injectContext, InjectionPoint injectionPoint) {
     return getType(injectContext, injectionPoint);
   }
 

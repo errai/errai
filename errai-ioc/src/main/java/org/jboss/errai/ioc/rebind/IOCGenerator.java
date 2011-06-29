@@ -37,10 +37,19 @@ import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
 import org.jboss.errai.ioc.client.InterfaceInjectionContext;
 import org.jboss.errai.ioc.client.api.*;
 import org.jboss.errai.ioc.rebind.ioc.*;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BaseClassStructureBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BlockBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameterizedType;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.build.BuildMetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
+import org.jboss.errai.ioc.tests.rebind.ClassStructureBuilderTest;
+import sun.jvm.hotspot.debugger.cdbg.BaseClass;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
@@ -64,7 +73,7 @@ public class IOCGenerator extends Generator {
 
   private TypeOracle typeOracle;
 
-  private ProcessingContext procContext;
+  private IOCProcessingContext procContext;
   private InjectorFactory injectFactory;
   private ProcessorFactory procFactory;
 
@@ -75,7 +84,7 @@ public class IOCGenerator extends Generator {
   public IOCGenerator() {
   }
 
-  public IOCGenerator(ProcessingContext processingContext) {
+  public IOCGenerator(IOCProcessingContext processingContext) {
     this();
     this.procContext = processingContext;
     this.typeOracle = processingContext.getOracle();
@@ -125,6 +134,27 @@ public class IOCGenerator extends Generator {
 
     if (printWriter == null) return;
 
+
+    BaseClassStructureBuilder classStructureBuilder = ClassBuilder.define(packageName + "." + className)
+            .publicScope()
+            .implementsInterface(Bootstrapper.class)
+            .body();
+
+
+    BuildMetaClass bootStrapClass = classStructureBuilder.getClassDefinition();
+    Context buildContext = bootStrapClass.getContext();
+
+
+    // implement default constructor
+    classStructureBuilder.publicConstructor()
+            .callSuper()
+            .finish();
+
+
+    BlockBuilder<BaseClassStructureBuilder> blockBuilder =
+            classStructureBuilder.publicMethod(InterfaceInjectionContext.class, "bootstrapContainer");
+
+
     // init composer, set class properties, create source writer
     ClassSourceFileComposerFactory composer = new ClassSourceFileComposerFactory(packageName,
             className);
@@ -141,14 +171,15 @@ public class IOCGenerator extends Generator {
 
     SourceWriter sourceWriter = composer.createSourceWriter(context, printWriter);
 
-    procContext = new ProcessingContext(logger, context, sourceWriter, typeOracle);
+    procContext = new IOCProcessingContext(logger, context, sourceWriter, typeOracle, buildContext, bootStrapClass,
+            blockBuilder);
     injectFactory = new InjectorFactory(procContext);
     procFactory = new ProcessorFactory(injectFactory);
     defaultConfigureProcessor();
 
     // generator constructor source code
-    initializeProviders(context, logger, sourceWriter);
-    generateExtensions(context, logger, sourceWriter);
+    initializeProviders();
+    generateExtensions(sourceWriter, blockBuilder);
     // close generated class
     sourceWriter.outdent();
     sourceWriter.println("}");
@@ -157,8 +188,7 @@ public class IOCGenerator extends Generator {
     context.commit(logger, printWriter);
   }
 
-  public void initializeProviders(final GeneratorContext context, final TreeLogger logger,
-                                  final SourceWriter sourceWriter) {
+  public void initializeProviders() {
 
     final MetaClass typeProviderCls = MetaClassFactory.get(typeOracle, TypeProvider.class);
     MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
@@ -295,8 +325,14 @@ public class IOCGenerator extends Generator {
     }
   }
 
-  private void generateExtensions(final GeneratorContext context, final TreeLogger logger,
-                                  final SourceWriter sourceWriter) {
+  private void generateExtensions(SourceWriter sourceWriter, BlockBuilder<BaseClassStructureBuilder> blockBuilder) {
+
+
+    // InterfaceInjectionContext ctx = new InterfaceInjectionContext()
+    blockBuilder.append(Stmt.create().declareVariable("ctx", InterfaceInjectionContext.class,
+            Stmt.create().newObject(InterfaceInjectionContext.class)));
+
+
 
     // start constructor source generation
     sourceWriter.println("public " + className + "() { ");
@@ -372,11 +408,11 @@ public class IOCGenerator extends Generator {
     injectFactory.addType(type);
   }
 
-  public String generateWithSingletonSemantics(final MetaClass visit) {
+  public Statement generateWithSingletonSemantics(final MetaClass visit) {
     return injectFactory.generateSingleton(visit);
   }
 
-  public String generateInjectors(final MetaClass visit) {
+  public Statement generateInjectors(final MetaClass visit) {
     return injectFactory.generate(visit);
   }
 
@@ -409,7 +445,7 @@ public class IOCGenerator extends Generator {
 
     procFactory.registerHandler(EntryPoint.class, new AnnotationHandler<EntryPoint>() {
       @Override
-      public void handle(final MetaClass type, EntryPoint annotation, ProcessingContext context) {
+      public void handle(final MetaClass type, EntryPoint annotation, IOCProcessingContext context) {
         addDeferred(new Runnable() {
           @Override
           public void run() {
@@ -421,7 +457,7 @@ public class IOCGenerator extends Generator {
 
     procFactory.registerHandler(ToRootPanel.class, new AnnotationHandler<ToRootPanel>() {
       @Override
-      public void handle(final MetaClass type, final ToRootPanel annotation, final ProcessingContext context) {
+      public void handle(final MetaClass type, final ToRootPanel annotation, final IOCProcessingContext context) {
         if (widgetType.isAssignableFrom(type)) {
 
           addDeferred(new Runnable() {
@@ -439,7 +475,7 @@ public class IOCGenerator extends Generator {
 
     procFactory.registerHandler(CreatePanel.class, new AnnotationHandler<CreatePanel>() {
       @Override
-      public void handle(final MetaClass type, final CreatePanel annotation, final ProcessingContext context) {
+      public void handle(final MetaClass type, final CreatePanel annotation, final IOCProcessingContext context) {
         if (widgetType.isAssignableFrom(type)) {
 
           addDeferred(new Runnable() {
@@ -458,7 +494,7 @@ public class IOCGenerator extends Generator {
 
     procFactory.registerHandler(ToPanel.class, new AnnotationHandler<ToPanel>() {
       @Override
-      public void handle(final MetaClass type, final ToPanel annotation, final ProcessingContext context) {
+      public void handle(final MetaClass type, final ToPanel annotation, final IOCProcessingContext context) {
         if (widgetType.isAssignableFrom(type)) {
 
           addDeferred(new Runnable() {

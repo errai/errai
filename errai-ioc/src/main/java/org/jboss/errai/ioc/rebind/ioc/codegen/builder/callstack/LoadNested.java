@@ -16,29 +16,32 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.*;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.AssignmentBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.GenUtil;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
- * {@link CallElement} to assign a value to a variable.
- * 
- * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Mike Brock <cbrock@redhat.com>
  */
-public class AssignVariable extends AbstractCallElement {
-  private AssignmentOperator operator;
-  private Object value;
+public class LoadNested extends AbstractCallElement {
+  private Statement statement;
 
-  public AssignVariable(AssignmentOperator operator, Object value) {
-    this.operator = operator;
-    this.value = value;
+  public LoadNested(final Statement statement) {
+    this.statement = new Statement() {
+      @Override
+      public String generate(Context context) {
+        return "(" + statement.generate(context) + ")";
+      }
+
+      @Override
+      public MetaClass getType() {
+        return statement.getType();
+      }
+    };
   }
 
   @Override
   public void handleCall(CallWriter writer, Context context, Statement statement) {
-    writer.reset();
-    Statement s = new AssignmentBuilder(false, operator, (VariableReference) statement, GenUtil.generate(context,
-            value));
-    nextOrReturn(writer, context, s);
+    nextOrReturn(writer, context, this.statement);
   }
 }

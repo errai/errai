@@ -424,6 +424,10 @@ public class ClassBuilder implements
     }, scope, type, name);
   }
 
+  public BuildMetaClass getClassDefinition() {
+    return classDefinition;
+  }
+
   @Override
   public String toJavaString() {
     return classDefinition.toJavaString();

@@ -27,17 +27,17 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaType;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class LoadClassReference extends AbstractCallElement {
-  private final Class<?> type;
+  private final MetaClass metaClass;
 
-  public LoadClassReference(Class<?> type) {
-    this.type = type;
+  public LoadClassReference(MetaClass type) {
+    this.metaClass = type;
   }
 
   @Override
   public void handleCall(CallWriter writer, Context context, Statement statement) {
     writer.reset();
 
-    final MetaClass metaClass = MetaClassFactory.get(type);
+  //  final MetaClass metaClass = MetaClassFactory.get(type);
     statement = new Statement() {
       @Override
       public String generate(Context context) {

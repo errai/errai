@@ -21,7 +21,9 @@ import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.InjectionPoint;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 
 /**
  * @author Mike Brock .
@@ -33,12 +35,13 @@ public class ToSubjectIOCExtension extends IOCDecoratorExtension<ToSubject> {
   }
 
   @Override
-  public String generateDecorator(InjectionPoint<ToSubject> injectionPoint) {
+  public Statement generateDecorator(InjectionPoint<ToSubject> injectionPoint) {
     final InjectionContext ctx = injectionPoint.getInjectionContext();
 
     final MetaField field = injectionPoint.getField();
     final ToSubject context = field.getAnnotation(ToSubject.class);
 
-    return injectionPoint.getValueExpression() + ".setToSubject(\"" + context.value() + "\");";
+    return Stmt.create().nestedCall(injectionPoint.getValueExpression())
+            .invoke("setToSubject", context.value());
   }
 }

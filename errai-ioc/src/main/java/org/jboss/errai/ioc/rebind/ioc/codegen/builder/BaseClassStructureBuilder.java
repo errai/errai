@@ -19,6 +19,7 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Parameter;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.MethodBlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.build.BuildMetaClass;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -86,4 +87,6 @@ public interface BaseClassStructureBuilder extends Builder {
 
   public FieldBuildInitializer<BaseClassStructureBuilder> packageField(String name, MetaClass type);
   public FieldBuildInitializer<BaseClassStructureBuilder> packageField(String name, Class<?> type);
+
+  public BuildMetaClass getClassDefinition();
 }

@@ -16,18 +16,19 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 public abstract class Injector {
   protected QualifyingMetadata qualifyingMetadata;
 
-  public abstract String instantiateOnly(InjectionContext injectContext, InjectionPoint injectionPoint);
+  public abstract Statement instantiateOnly(InjectionContext injectContext, InjectionPoint injectionPoint);
 
-  public String getType(InjectionPoint injectionPoint) {
+  public Statement getType(InjectionPoint injectionPoint) {
     return getType(injectionPoint.getInjectionContext(), injectionPoint);
   }
 
-  public abstract String getType(InjectionContext injectContext, InjectionPoint injectionPoint);
+  public abstract Statement getType(InjectionContext injectContext, InjectionPoint injectionPoint);
 
   public abstract boolean isInjected();
 

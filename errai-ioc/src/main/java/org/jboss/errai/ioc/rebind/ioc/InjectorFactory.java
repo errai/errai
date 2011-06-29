@@ -17,14 +17,17 @@
 package org.jboss.errai.ioc.rebind.ioc;
 
 import org.jboss.errai.bus.rebind.ProcessingContext;
+import org.jboss.errai.ioc.rebind.IOCProcessingContext;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.Refs;
 
 import java.util.List;
 
 public class InjectorFactory {
   private final InjectionContext ctx;
 
-  public InjectorFactory(ProcessingContext ctx) {
+  public InjectorFactory(IOCProcessingContext ctx) {
     this.ctx = new InjectionContext(ctx);
   }
 
@@ -32,15 +35,15 @@ public class InjectorFactory {
     return ctx;
   }
 
-  public String generate(MetaClass type) {
+  public Statement generate(MetaClass type) {
     return ctx.getInjector(type).getType(ctx, null);
   }
 
-  public String generateSingleton(MetaClass type) {
+  public Statement generateSingleton(MetaClass type) {
     Injector i = ctx.getInjector(type);
     ctx.registerInjector(i);
     if (i.isInjected()) {
-      return i.getVarName();
+      return Refs.get(i.getVarName());
     }
     else {
       return i.getType(ctx, null);
