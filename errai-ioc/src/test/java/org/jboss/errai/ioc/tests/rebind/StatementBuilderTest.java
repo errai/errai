@@ -50,9 +50,12 @@ import org.junit.Test;
 public class StatementBuilderTest extends AbstractStatementBuilderTest {
 
   @Test
-  public void testAddVariableWithExactTypeProvided() {
+  public void testDeclareVariableWithExactTypeProvided() {
     Context ctx = Context.create();
-    StatementBuilder.create().declareVariable("n", Integer.class, 10).generate(ctx);
+    String s = StatementBuilder.create().declareVariable("n", Integer.class, 10).generate(ctx);
+
+    assertEquals("failed to generate variable declaration with type provided",
+        "Integer n = 10", s);
 
     VariableReference n = ctx.getVariable("n");
     assertEquals("Wrong variable name", "n", n.getName());
@@ -61,9 +64,12 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   }
 
   @Test
-  public void testAddVariableWithIntegerTypeInference() {
+  public void testDeclareVariableWithIntegerTypeInference() {
     Context ctx = Context.create();
-    StatementBuilder.create().declareVariable("n", 10).generate(ctx);
+    String s = StatementBuilder.create().declareVariable("n", 10).generate(ctx);
+
+    assertEquals("failed to generate variable declaration with Integers type inference",
+        "Integer n = 10", s);
 
     VariableReference n = ctx.getVariable("n");
     assertEquals("Wrong variable name", "n", n.getName());
@@ -72,9 +78,12 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   }
 
   @Test
-  public void testAddVariableWithStringTypeInference() {
+  public void testDeclareVariableWithStringTypeInference() {
     Context ctx = Context.create();
-    StatementBuilder.create().declareVariable("n", "10").generate(ctx);
+    String s = StatementBuilder.create().declareVariable("n", "10").generate(ctx);
+
+    assertEquals("failed to generate variable declaration with =String type inference",
+        "String n = \"10\"", s);
 
     VariableReference n = ctx.getVariable("n");
     assertEquals("Wrong variable name", "n", n.getName());
@@ -83,9 +92,12 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   }
 
   @Test
-  public void testAddVariableWithImplicitTypeConversion() {
+  public void testDeclareVariableWithImplicitTypeConversion() {
     Context ctx = Context.create();
-    StatementBuilder.create().declareVariable("n", Integer.class, "10").generate(ctx);
+    String s = StatementBuilder.create().declareVariable("n", Integer.class, "10").generate(ctx);
+
+    assertEquals("failed to generate variable declaration with implicit type conversion",
+        "Integer n = 10", s);
 
     VariableReference n = ctx.getVariable("n");
     assertEquals("Wrong variable name", "n", n.getName());
@@ -103,10 +115,13 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   }
 
   @Test
-  public void testAddVariableWithObjectInitializationWithExactTypeProvided() {
+  public void testDeclareVariableWithObjectInitializationWithExactTypeProvided() {
     Context ctx = Context.create();
-    StatementBuilder.create().declareVariable("str", String.class,
+    String s = StatementBuilder.create().declareVariable("str", String.class,
         ObjectBuilder.newInstanceOf(String.class)).generate(ctx);
+
+    assertEquals("failed to generate variable declaration with object initialization and type provided",
+        "String str = new String()", s);
 
     VariableReference str = ctx.getVariable("str");
     assertEquals("Wrong variable name", "str", str.getName());
@@ -114,12 +129,30 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   }
 
   @Test
-  public void testAddVariableWithObjectInitializationWithStringTypeInference() {
+  public void testDeclareVariableWithObjectInitializationWithStringTypeInference() {
     Context ctx = Context.create();
-    StatementBuilder.create().declareVariable("str", ObjectBuilder.newInstanceOf(String.class)).generate(ctx);
+    String s = StatementBuilder.create(ctx)
+        .declareVariable("str", ObjectBuilder.newInstanceOf(String.class)).toJavaString();
 
+    assertEquals("failed to generate variable declaration with object initialization and string type inference",
+        "String str = new String()", s);
+    
     VariableReference str = ctx.getVariable("str");
     assertEquals("Wrong variable name", "str", str.getName());
+    Assert.assertEquals("Wrong variable type", MetaClassFactory.get(String.class), str.getType());
+  }
+
+  @Test
+  public void testDeclareFinalVariable() {
+    Context ctx = Context.create();
+    String s = StatementBuilder.create(ctx)
+        .declareVariable(String.class).asFinal().named("str").initializeWith("10").toJavaString();
+
+    assertEquals("failed to generate final variable declaration", "final String str = \"10\"", s);
+    
+    VariableReference str = ctx.getVariable("str");
+    assertEquals("Wrong variable name", "str", str.getName());
+    Assert.assertTrue("Variable should be final", ctx.getVariables().get("str").isFinal());
     Assert.assertEquals("Wrong variable type", MetaClassFactory.get(String.class), str.getType());
   }
 
@@ -417,5 +450,17 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
     } catch(OutOfScopeException e) {
       // expected
     }
+  }
+  
+  @Test
+  public void testNestedCall() {
+    String s = 
+      StatementBuilder.create()
+          .nestedCall(
+              StatementBuilder.create().declareVariable("n", Integer.class).loadVariable("n").invoke("toString"))
+          .invoke("getBytes")
+          .toJavaString();
+      
+    assertEquals("failed to generate nested call", "(n.toString()).getBytes()", s);
   }
 }
