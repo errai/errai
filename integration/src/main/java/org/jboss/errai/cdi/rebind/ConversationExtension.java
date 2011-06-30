@@ -22,12 +22,14 @@ import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.InjectionPoint;
-import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameterizedType;
 
 import com.google.gwt.core.ext.typeinfo.JClassType;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 
 /**
  * @author Heiko Braun <hbraun@redhat.com>
@@ -35,36 +37,34 @@ import com.google.gwt.core.ext.typeinfo.JClassType;
  */
 @CodeDecorator
 public class ConversationExtension extends IOCDecoratorExtension<ConversationContext> {
-    public ConversationExtension(Class<ConversationContext> decoratesWith) {
-        super(decoratesWith);
+  public ConversationExtension(Class<ConversationContext> decoratesWith) {
+    super(decoratesWith);
+  }
+
+  public Statement generateDecorator(InjectionPoint<ConversationContext> injectionPoint) {
+    final InjectionContext ctx = injectionPoint.getInjectionContext();
+
+    final JClassType eventClassType = injectionPoint.getInjectionContext()
+            .getProcessingContext().loadClassType(Event.class);
+
+    final MetaField field = injectionPoint.getField();
+
+    if (!MetaClassFactory.get(eventClassType).isAssignableFrom(field.getType())) {
+      throw new RuntimeException("@ConversationContext should be used with type Event");
     }
 
-    public String generateDecorator(InjectionPoint<ConversationContext> injectionPoint) {
-        final InjectionContext ctx = injectionPoint.getInjectionContext();
+    final ConversationContext context = field.getAnnotation(ConversationContext.class);
 
-        final JClassType eventClassType = injectionPoint.getInjectionContext()
-                .getProcessingContext().loadClassType(Event.class);
-
-        final MetaField field = injectionPoint.getField();
-
-        if (!MetaClassFactory.get(eventClassType).isAssignableFrom(field.getType())) {
-            throw new RuntimeException("@ConversationContext should be used with type Event");
-        }
-
-        final ConversationContext context = field.getAnnotation(ConversationContext.class);
-
-        MetaParameterizedType type = field.getType().getParameterizedType();
-        if (type == null) {
-            throw new RuntimeException("Event<?> must be parameterized");
-        }
-
-        MetaClass typeParm = (MetaClass) type.getTypeParameters()[0];
-
-        String toSubject = CDI.getSubjectNameByType(typeParm.getFullyQualifiedName());
-
-        String expression = injectionPoint.getValueExpression()
-                + ".registerConversation(" + CDI.class.getName() + ".createConversation(\"" + toSubject + "\"));";
-                
-        return expression;
+    MetaParameterizedType type = field.getType().getParameterizedType();
+    if (type == null) {
+      throw new RuntimeException("Event<?> must be parameterized");
     }
+
+    MetaClass typeParm = (MetaClass) type.getTypeParameters()[0];
+
+    String toSubject = CDI.getSubjectNameByType(typeParm.getFullyQualifiedName());
+
+    return Stmt.create().nestedCall(injectionPoint.getValueExpression())
+            .invoke("registerConversation", Stmt.create().invokeStatic(CDI.class, "createConversation", toSubject));
+  }
 }
