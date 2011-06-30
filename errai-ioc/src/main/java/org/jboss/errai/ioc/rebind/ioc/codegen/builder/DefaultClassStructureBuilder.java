@@ -16,15 +16,14 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
- * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface ClassDefinitionBuilderInterfaces<T extends ClassStructureBuilder<T>> {
-  public ClassDefinitionBuilderInterfaces<T> implementsInterface(MetaClass clazz);
+public interface DefaultClassStructureBuilder extends
+    ClassStructureBuilder<DefaultClassStructureBuilder>,
+    ClassConstructorBuilder<DefaultClassStructureBuilder>,
+    ClassFieldBuilder<DefaultClassStructureBuilder>,
+    Builder {
 
-  public ClassDefinitionBuilderInterfaces<T> implementsInterface(Class<?> clazz);
-
-  public T body();
 }

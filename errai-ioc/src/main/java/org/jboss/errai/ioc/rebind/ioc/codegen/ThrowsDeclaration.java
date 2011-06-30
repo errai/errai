@@ -30,7 +30,7 @@ public class ThrowsDeclaration extends AbstractStatement {
     this.exceptionTypes = exceptionTypes;
   }
   
-  public static ThrowsDeclaration of(Class<?>... exceptionTypes) {
+  public static ThrowsDeclaration of(Class<? extends Throwable>... exceptionTypes) {
     return new ThrowsDeclaration(MetaClassFactory.fromClassArray(exceptionTypes));
   }
 

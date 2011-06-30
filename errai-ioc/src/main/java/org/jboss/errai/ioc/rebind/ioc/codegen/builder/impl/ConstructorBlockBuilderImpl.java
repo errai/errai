@@ -30,7 +30,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.util.GenUtil;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public class ConstructorBlockBuilderImpl<T extends ClassStructureBuilder> extends BlockBuilderImpl<T> implements ConstructorBlockBuilder<T> {
+public class ConstructorBlockBuilderImpl<T extends ClassStructureBuilder<T>> extends BlockBuilderImpl<T> implements ConstructorBlockBuilder<T> {
   public ConstructorBlockBuilderImpl(BlockStatement blockStatement, BuildCallback<T> tBuildCallback) {
     super(blockStatement, tBuildCallback);
   }

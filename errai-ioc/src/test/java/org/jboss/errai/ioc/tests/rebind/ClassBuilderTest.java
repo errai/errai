@@ -116,24 +116,24 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
   }
 
   @Test
-  public void testDefineAbstractClassWithAbstractMethod() {
+  public void testDefineAbstractClassWithAbstractMethods() {
 
     String cls = ClassBuilder
         .define("org.foo.Foo")
         .publicScope()
         .abstractClass()
         .body()
-        .publicAbstractMethod(void.class, "foo")
-        .finish()
-        .publicAbstractMethod(void.class, "foo")
-        .finish()
         .publicConstructor()
         .finish()
         .publicAbstractMethod(void.class, "foo")
         .finish()
+        .publicAbstractMethod(void.class, "bar")
+        .finish()
+        .publicMethod(void.class, "baz")
+        .finish()
         .toJavaString();
 
-    assertEquals("failed to generate abstract class with abstract method", ABSTRACT_CLASS_WITH_ABSTRACT_METHOD, cls);
+    assertEquals("failed to generate abstract class with abstract method", ABSTRACT_CLASS_WITH_ABSTRACT_METHODS, cls);
   }
   
   @Test

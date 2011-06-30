@@ -23,15 +23,15 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface ClassFieldBuilder<T extends ClassStructureBuilder> extends Builder {
-  public FieldBuildInitializer<ClassStructureBuilder<T>> publicField(String name, MetaClass type);
-  public FieldBuildInitializer<ClassStructureBuilder<T>> publicField(String name, Class<?> type);
+  public FieldBuildInitializer<T> publicField(String name, MetaClass type);
+  public FieldBuildInitializer<T> publicField(String name, Class<?> type);
 
-  public FieldBuildInitializer<ClassStructureBuilder<T>> privateField(String name, MetaClass type);
-  public FieldBuildInitializer<ClassStructureBuilder<T>> privateField(String name, Class<?> type);
+  public FieldBuildInitializer<T> privateField(String name, MetaClass type);
+  public FieldBuildInitializer<T> privateField(String name, Class<?> type);
 
-  public FieldBuildInitializer<ClassStructureBuilder<T>> protectedField(String name, MetaClass type);
-  public FieldBuildInitializer<ClassStructureBuilder<T>> protectedField(String name, Class<?> type);
+  public FieldBuildInitializer<T> protectedField(String name, MetaClass type);
+  public FieldBuildInitializer<T> protectedField(String name, Class<?> type);
 
-  public FieldBuildInitializer<ClassStructureBuilder<T>> packageField(String name, MetaClass type);
-  public FieldBuildInitializer<ClassStructureBuilder<T>> packageField(String name, Class<?> type);
+  public FieldBuildInitializer<T> packageField(String name, MetaClass type);
+  public FieldBuildInitializer<T> packageField(String name, Class<?> type);
 }

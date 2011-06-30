@@ -16,64 +16,11 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.Parameter;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.MethodBlockBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-
 /**
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface ClassStructureBuilder<T extends ClassStructureBuilder> extends ClassConstructorBuilder<T>,
-    ClassFieldBuilder<T>, Builder {
+public interface ClassStructureBuilder<T extends ClassStructureBuilder<T>> extends ClassMethodBuilder<T>,
+    ClassConstructorBuilder<T>, ClassFieldBuilder<T>, Builder {
 
-  public MethodBlockBuilder<ClassStructureBuilder<T>> publicMethod(MetaClass returnType, String name);
-
-  public MethodBlockBuilder<ClassStructureBuilder<T>> publicMethod(Class<?> returnType, String name);
-
-  public MethodBlockBuilder<ClassStructureBuilder<T>> publicMethod(MetaClass returnType, String name, MetaClass... parms);
-
-  public MethodBlockBuilder<ClassStructureBuilder<T>> publicMethod(Class<?> returnType, String name, Class<?>... parms);
-
-  public MethodBlockBuilder<ClassStructureBuilder<T>> publicMethod(MetaClass returnType, String name, Parameter... parms);
-
-  public MethodBlockBuilder<ClassStructureBuilder<T>> publicMethod(Class<?> returnType, String name, Parameter... parms);
-
-  public MethodBlockBuilder<ClassStructureBuilder<T>> privateMethod(MetaClass returnType, String name);
-
-  public MethodBlockBuilder<ClassStructureBuilder<T>> privateMethod(Class<?> returnType, String name);
-
-  public MethodBlockBuilder<ClassStructureBuilder<T>> privateMethod(MetaClass returnType, String name, MetaClass... parms);
-
-  public MethodBlockBuilder<ClassStructureBuilder<T>> privateMethod(Class<?> returnType, String name, Class<?>... parms);
-
-  public MethodBlockBuilder<ClassStructureBuilder<T>> privateMethod(MetaClass returnType, String name, Parameter... parms);
-
-  public MethodBlockBuilder<ClassStructureBuilder<T>> privateMethod(Class<?> returnType, String name, Parameter... parms);
-
-  public MethodBlockBuilder<ClassStructureBuilder<T>> protectedMethod(MetaClass returnType, String name);
-
-  public MethodBlockBuilder<ClassStructureBuilder<T>> protectedMethod(Class<?> returnType, String name);
-
-  public MethodBlockBuilder<ClassStructureBuilder<T>> protectedMethod(MetaClass returnType, String name,
-      MetaClass... parms);
-
-  public MethodBlockBuilder<ClassStructureBuilder<T>> protectedMethod(Class<?> returnType, String name, Class<?>... parms);
-
-  public MethodBlockBuilder<ClassStructureBuilder<T>> protectedMethod(MetaClass returnType, String name,
-      Parameter... parms);
-
-  public MethodBlockBuilder<ClassStructureBuilder<T>> protectedMethod(Class<?> returnType, String name, Parameter... parms);
-
-  public MethodBlockBuilder<ClassStructureBuilder<T>> packageMethod(MetaClass returnType, String name);
-
-  public MethodBlockBuilder<ClassStructureBuilder<T>> packageMethod(Class<?> returnType, String name);
-
-  public MethodBlockBuilder<ClassStructureBuilder<T>> packageMethod(MetaClass returnType, String name, MetaClass... parms);
-
-  public MethodBlockBuilder<ClassStructureBuilder<T>> packageMethod(Class<?> returnType, String name, Class<?>... parms);
-
-  public MethodBlockBuilder<ClassStructureBuilder<T>> packageMethod(MetaClass returnType, String name, Parameter... parms);
-
-  public MethodBlockBuilder<ClassStructureBuilder<T>> packageMethod(Class<?> returnType, String name, Parameter... parms);
 }

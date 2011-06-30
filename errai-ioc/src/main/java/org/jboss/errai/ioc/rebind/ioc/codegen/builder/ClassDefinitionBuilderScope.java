@@ -19,12 +19,12 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public interface ClassDefinitionBuilderScope<T extends ClassStructureBuilder> {
-  public ClassDefinitionBuilderAbstractOption<ClassStructureBuilder<T>> publicScope();
+public interface ClassDefinitionBuilderScope<T extends ClassStructureBuilder<T>> {
+  public ClassDefinitionBuilderAbstractOption<T> publicScope();
 
-  public ClassDefinitionBuilderAbstractOption<ClassStructureBuilder<T>> privateScope();
+  public ClassDefinitionBuilderAbstractOption<T> privateScope();
 
-  public ClassDefinitionBuilderAbstractOption<ClassStructureBuilder<T>> protectedScope();
+  public ClassDefinitionBuilderAbstractOption<T> protectedScope();
 
-  public ClassDefinitionBuilderAbstractOption<ClassStructureBuilder<T>> packageScope();
+  public ClassDefinitionBuilderAbstractOption<T> packageScope();
 }
