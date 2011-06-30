@@ -23,17 +23,19 @@ import java.lang.reflect.Modifier;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ExtendsClassStructureBuilderImpl;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ObjectBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.PrettyPrinter;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 
 public class AnnotationEncoder {
-  public static String encode(Annotation annotation) {
+  public static Statement encode(Annotation annotation) {
     return encode(annotation, Context.create());
   }
 
-  public static String encode(Annotation annotation, Context context) {
-    Class<? extends Annotation> annotationClass = annotation.annotationType();
-    ExtendsClassStructureBuilderImpl builder = ObjectBuilder.newInstanceOf(annotationClass, context).extend();
+  public static Statement encode(Annotation annotation, Context context) {
+    final Class<? extends Annotation> annotationClass = annotation.annotationType();
+    final ExtendsClassStructureBuilderImpl builder = ObjectBuilder.newInstanceOf(annotationClass, context).extend();
 
     Class<? extends Annotation> annoClass = annotation.getClass();
 
@@ -53,6 +55,24 @@ public class AnnotationEncoder {
       }
     }
 
-    return PrettyPrinter.prettyPrintJava(builder.finish().toJavaString());
+    return new Statement() {
+      @Override
+      public String generate(Context context) {
+        return PrettyPrinter.prettyPrintJava(builder.finish().toJavaString());
+      }
+
+      @Override
+      public MetaClass getType() {
+        return MetaClassFactory.get(annotationClass);
+      }
+    };
+  }
+
+  public static Statement[] encode(Annotation[] annotations) {
+    Statement[] statements = new Statement[annotations.length];
+    for (int i = 0; i < annotations.length; i++) {
+      statements[i] = encode(annotations[i]);
+    }
+    return statements;
   }
 }

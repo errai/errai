@@ -22,8 +22,10 @@ import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.InjectionPoint;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 
 @CodeDecorator
 public class ServiceIOCExtension extends IOCDecoratorExtension<Service> {
@@ -32,7 +34,7 @@ public class ServiceIOCExtension extends IOCDecoratorExtension<Service> {
   }
 
   @Override
-  public String generateDecorator(InjectionPoint<Service> decContext) {
+  public Statement generateDecorator(InjectionPoint<Service> decContext) {
     final InjectionContext ctx = decContext.getInjectionContext();
 
     /**
@@ -44,16 +46,17 @@ public class ServiceIOCExtension extends IOCDecoratorExtension<Service> {
      * Get an instance of the message bus.
      */
     final MetaClass busClass = MetaClassFactory.get(decContext.getInjectionContext()
-        .getProcessingContext().loadClassType(MessageBus.class));
+            .getProcessingContext().loadClassType(MessageBus.class));
 
-    final String inj = ctx.getInjector(busClass).getType(ctx, decContext);
+    final Statement busHandle = ctx.getInjector(busClass).getType(ctx, decContext);
 
     /**
      * Figure out the service name;
      */
     final String svcName = decContext.getAnnotation().value().equals("")
-        ? decContext.getMemberName() : decContext.getAnnotation().value();
+            ? decContext.getMemberName() : decContext.getAnnotation().value();
 
-    return inj + ".subscribe(\"" + svcName + "\", " + decContext.getValueExpression() + ");\n";
+    return Stmt.create().nestedCall(busHandle)
+            .invoke("subscribe", svcName, decContext.getValueExpression());
   }
 }

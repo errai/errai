@@ -16,6 +16,8 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+
 public interface ConstructionStrategy {
-  public String generateConstructor();
+  public void generateConstructor();
 }

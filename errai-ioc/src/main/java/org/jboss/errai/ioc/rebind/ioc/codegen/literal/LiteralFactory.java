@@ -23,7 +23,9 @@ import java.lang.annotation.Annotation;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.AnnotationEncoder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaType;
 
 /**
  * The literal factory provides a LiteralValue for
@@ -41,11 +43,19 @@ public class LiteralFactory {
         }
       };
     }
-    else if (o instanceof Annotation) {
-      return new LiteralValue<Annotation>((Annotation) o)  {
+    else if (o instanceof MetaType) {
+      return new LiteralValue<MetaType>((MetaType) o) {
         @Override
         public String getCanonicalString(Context context) {
-          return AnnotationEncoder.encode((Annotation) o);
+          return getClassReference((MetaClass) o, context) + ".class";
+        }
+      };
+    }
+    else if (o instanceof Annotation) {
+      return new LiteralValue<Annotation>((Annotation) o) {
+        @Override
+        public String getCanonicalString(Context context) {
+          return AnnotationEncoder.encode((Annotation) o).generate(context);
         }
       };
     }
@@ -102,14 +112,14 @@ public class LiteralFactory {
     }
     else {
       throw new IllegalArgumentException("type cannot be converted to a literal: "
-          + o.getClass().getName());
+              + o.getClass().getName());
     }
   }
-  
+
   public static LiteralValue<?> isLiteral(Object o) {
     try {
-        return getLiteral(null ,o);
-    } 
+      return getLiteral(null, o);
+    }
     catch (IllegalArgumentException a) {
       return null;
     }

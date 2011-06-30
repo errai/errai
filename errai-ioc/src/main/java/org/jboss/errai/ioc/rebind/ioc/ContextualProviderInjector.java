@@ -19,6 +19,9 @@ package org.jboss.errai.ioc.rebind.ioc;
 import java.lang.annotation.Annotation;
 
 import org.jboss.errai.ioc.rebind.IOCGenerator;
+import org.jboss.errai.ioc.rebind.IOCProcessingContext;
+import org.jboss.errai.ioc.rebind.ioc.codegen.AnnotationEncoder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
@@ -26,6 +29,8 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaType;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java.JavaReflectionField;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java.JavaReflectionParameterizedType;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.Refs;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 
 public class ContextualProviderInjector extends TypeInjector {
   private final Injector providerInjector;
@@ -36,7 +41,7 @@ public class ContextualProviderInjector extends TypeInjector {
   }
 
   @Override
-  public String getType(InjectionContext injectContext, InjectionPoint injectionPoint) {
+  public Statement getType(InjectionContext injectContext, InjectionPoint injectionPoint) {
     injected = true;
 
     MetaClass type = null;
@@ -62,49 +67,39 @@ public class ContextualProviderInjector extends TypeInjector {
         pType = type.getParameterizedType();
         break;
     }
-    
-    StringBuilder sb = new StringBuilder();
+
+    IOCProcessingContext processingContext = injectContext.getProcessingContext();
 
     if (pType == null) {
-      sb.append(providerInjector.getType(injectContext, injectionPoint)).append(".provide(new Class[] {}");
+      processingContext.append(
+              Stmt.create().nestedCall(providerInjector.getType(injectContext, injectionPoint))
+                      .invoke("provide", new Class[0])
+      );
     }
     else {
       MetaType[] typeArgs = pType.getTypeParameters();
-      sb.append("(").append(type.getFullyQualifiedName()).append("<")
-          .append(typeArgs[0].toString()).append(">) ");
-
-      sb.append(providerInjector.getType(injectContext, injectionPoint)).append(".provide(new Class[] {");
-      for (int i = 0; i < typeArgs.length; i++) {
-        sb.append(typeArgs[i].toString()).append(".class");
-
-        if ((i + 1) < typeArgs.length) {
-          sb.append(", ");
-        }
-      }
-      sb.append("}");
 
       Annotation[] qualifiers = injectionPoint.getQualifiers();
       if (qualifiers.length != 0) {
-        sb.append(", new java.lang.annotation.Annotation[] {");
-        for (int i = 0; i < qualifiers.length; i++) {
-          sb.append("\nnew java.lang.annotation.Annotation() {")
-              .append("\npublic Class<? extends java.lang.annotation.Annotation> annotationType() {\n return ")
-              .append(qualifiers[i].annotationType().getName()).append(".class").append(";\n}\n}");
-          if ((i + 1) < qualifiers.length) sb.append(",");
-        }
-        sb.append("\n}");
+
+        processingContext.append(
+                Stmt.create().nestedCall(providerInjector.getType(injectContext, injectionPoint))
+                        .invoke("provide", typeArgs, qualifiers)
+        );
       }
       else {
-        sb.append(", null");
+        processingContext.append(
+                Stmt.create().nestedCall(providerInjector.getType(injectContext, injectionPoint))
+                        .invoke("provide", typeArgs, null)
+        );
       }
     }
-    sb.append(")");
 
-    return IOCGenerator.debugOutput(sb);
+    return Refs.get(varName);
   }
 
   @Override
-  public String instantiateOnly(InjectionContext injectContext, InjectionPoint injectionPoint) {
+  public Statement instantiateOnly(InjectionContext injectContext, InjectionPoint injectionPoint) {
     injected = true;
     return providerInjector.getType(injectContext, injectionPoint);
   }

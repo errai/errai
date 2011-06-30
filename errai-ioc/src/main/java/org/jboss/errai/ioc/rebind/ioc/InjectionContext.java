@@ -17,6 +17,7 @@
 package org.jboss.errai.ioc.rebind.ioc;
 
 import org.jboss.errai.bus.rebind.ProcessingContext;
+import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
@@ -27,13 +28,13 @@ import java.lang.annotation.Target;
 import java.util.*;
 
 public class InjectionContext {
-  private ProcessingContext processingContext;
+  private IOCProcessingContext processingContext;
   private Map<MetaClass, List<Injector>> injectors = new LinkedHashMap<MetaClass, List<Injector>>();
   private Map<Class<? extends Annotation>, List<IOCDecoratorExtension>> decorators = new LinkedHashMap<Class<? extends Annotation>, List<IOCDecoratorExtension>>();
   private Map<ElementType, Set<Class<? extends Annotation>>> decoratorsByElementType = new LinkedHashMap<ElementType, Set<Class<? extends Annotation>>>();
   private List<MetaField> privateFieldsToExpose = new ArrayList<MetaField>();
 
-  public InjectionContext(ProcessingContext processingContext) {
+  public InjectionContext(IOCProcessingContext processingContext) {
     this.processingContext = processingContext;
   }
 
@@ -161,7 +162,7 @@ public class InjectionContext {
     return privateFieldsToExpose;
   }
 
-  public ProcessingContext getProcessingContext() {
+  public IOCProcessingContext getProcessingContext() {
     return processingContext;
   }
 }

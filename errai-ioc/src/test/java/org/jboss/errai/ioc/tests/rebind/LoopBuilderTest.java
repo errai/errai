@@ -383,7 +383,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   @Test
   public void testForLoopUnchainedWithDeclaringInitializerAndCountingExpression() {
     String s = StatementBuilder.create()
-        .for_(ContextBuilder.create().declareVariable("i", int.class).initializeWith(0),
+        .for_(Stmt.create().declareVariable(int.class).named("i").initializeWith(0),
             Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100),
             StatementBuilder.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
         .append(StatementBuilder.create().loadStatic(System.class, "out").invoke("println", Variable.get("i")))

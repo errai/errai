@@ -16,7 +16,9 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 
 public class ProviderInjector extends TypeInjector {
   private final Injector providerInjector;
@@ -27,13 +29,15 @@ public class ProviderInjector extends TypeInjector {
   }
 
   @Override
-  public String getType(InjectionContext injectContext, InjectionPoint injectionPoint) {
+  public Statement getType(InjectionContext injectContext, InjectionPoint injectionPoint) {
     injected = true;
-    return providerInjector.getType(injectContext, injectionPoint) + ".provide()";
+
+    return Stmt.create().nestedCall(providerInjector.getType(injectContext, injectionPoint))
+                    .invoke("provide");
   }
 
   @Override
-  public String instantiateOnly(InjectionContext injectContext, InjectionPoint injectionPoint) {
+  public Statement instantiateOnly(InjectionContext injectContext, InjectionPoint injectionPoint) {
     injected = true;
     return providerInjector.getType(injectContext, injectionPoint);
   }

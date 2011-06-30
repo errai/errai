@@ -24,7 +24,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.Builder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.VariableDeclaration;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.VariableDeclarationInitializer;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
 
 /**
@@ -77,32 +77,39 @@ public class ContextBuilder implements Builder {
     return this;
   }
 
-  public VariableDeclaration declareVariable(final Variable var) {
+  public VariableDeclarationInitializer declareVariable(final Variable var) {
     context.addVariable(var);
-    return new VariableDeclaration() {
+    return new VariableDeclarationInitializer<ContextBuilder>() {
+
+
       @Override
-      public Statement initializeWith(Object initialization) {
+      public ContextBuilder initializeWith(Object initialization) {
         var.initialize(initialization);
-        return var;
+        return ContextBuilder.this;
       }
 
       @Override
-      public Statement initializeWith(Statement initialization) {
+      public ContextBuilder initializeWith(Statement initialization) {
         var.initialize(initialization);
-        return var;
+        return ContextBuilder.this;
+      }
+
+      @Override
+      public ContextBuilder finish() {
+        return ContextBuilder.this;
       }
     };
   }
 
-  public VariableDeclaration declareVariable(String name) {
+  public VariableDeclarationInitializer declareVariable(String name) {
     return declareVariable(Variable.create(name, (Class<?>) null));
   }
 
-  public VariableDeclaration declareVariable(String name, Class<?> type) {
+  public VariableDeclarationInitializer declareVariable(String name, Class<?> type) {
     return declareVariable(Variable.create(name, type));
   }
 
-  public VariableDeclaration declareVariable(String name, TypeLiteral<?> type) {
+  public VariableDeclarationInitializer declareVariable(String name, TypeLiteral<?> type) {
     return declareVariable(Variable.create(name, type));
   }
 

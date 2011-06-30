@@ -22,29 +22,12 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanExpression;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ArrayInitializationBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BlockBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.CaseBlockBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.CatchBlockBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ContextualStatementBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ElseBlockBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementBegin;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementEnd;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.VariableReferenceContextualStatementBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.WhileBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.BranchCallElement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DeclareVariable;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DefineLabel;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DynamicLoad;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadField;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadLiteral;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadVariable;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.MethodCall;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.ResetCallElement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.ThrowException;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.*;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.control.branch.BreakStatement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.control.branch.ContinueStatement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 
 /**
  * The root of our fluent StatementBuilder API.
@@ -72,6 +55,56 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
 
   public static StatementBegin create(Context context) {
     return new StatementBuilder(context);
+  }
+
+  @Override
+  public VariableDeclarationStart declareVariable(Class<?> type) {
+    return declareVariable(MetaClassFactory.get(type));
+  }
+
+  @Override
+  public VariableDeclarationStart declareVariable(final MetaClass type) {
+    return new VariableDeclarationStart<StatementBuilder>() {
+      boolean isFinal;
+      String name;
+      Object initialization;
+
+      @Override
+      public VariableDeclarationNamed<StatementBuilder> asFinal() {
+        isFinal = true;
+        return this;
+      }
+
+      @Override
+      public VariableDeclarationInitializer<StatementBuilder> named(String name) {
+        this.name = name;
+        return this;
+      }
+
+      @Override
+      public StatementBuilder initializeWith(Object initialization) {
+        this.initialization = initialization;
+        return finish();
+      }
+
+      @Override
+      public StatementBuilder initializeWith(Statement initialization) {
+        this.initialization = initialization;
+        return finish();
+      }
+
+      @Override
+      public StatementBuilder finish() {
+        if (initialization == null) {
+          declareVariable(isFinal ? Variable.createFinal(name, type) : Variable.create(name, type));
+        }
+        else {
+          declareVariable(isFinal ? Variable.createFinal(name, type, initialization) : Variable.create(name, type,
+                  initialization));
+        }
+        return StatementBuilder.this;
+      }
+    };
   }
 
   @Override
@@ -136,22 +169,44 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
     return new ContextualStatementBuilderImpl(context, callElementBuilder);
   }
 
+
   @Override
-  public ContextualStatementBuilder invokeStatic(Class<?> clazz, String methodName, Object... parameters) {
+  public ContextualStatementBuilder invokeStatic(MetaClass clazz, String methodName, Object... parameters) {
     appendCallElement(new LoadClassReference(clazz));
     appendCallElement(new MethodCall(methodName, parameters, true));
     return new ContextualStatementBuilderImpl(context, callElementBuilder);
   }
 
   @Override
+  public ContextualStatementBuilder invokeStatic(Class<?> clazz, String methodName, Object... parameters) {
+    return invokeStatic(MetaClassFactory.get(clazz), methodName, parameters);
+  }
+
+  @Override
   public ContextualStatementBuilder loadStatic(Class<?> clazz, String fieldName) {
+    return loadStatic(MetaClassFactory.get(clazz), fieldName);
+  }
+
+  @Override
+  public ContextualStatementBuilder loadStatic(MetaClass clazz, String fieldName) {
     appendCallElement(new LoadClassReference(clazz));
     appendCallElement(new LoadField(fieldName));
     return new ContextualStatementBuilderImpl(context, callElementBuilder);
   }
 
   @Override
+  public ContextualStatementBuilder nestedCall(Statement statement) {
+    appendCallElement(new LoadNested(statement));
+    return new ContextualStatementBuilderImpl(context, callElementBuilder);
+  }
+
+  @Override
   public ObjectBuilder newObject(Class<?> type) {
+    return ObjectBuilder.newInstanceOf(type, context);
+  }
+
+  @Override
+  public ObjectBuilder newObject(MetaClass type) {
     return ObjectBuilder.newInstanceOf(type, context);
   }
 
@@ -197,7 +252,7 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
 
   @Override
   public BlockBuilder<StatementEnd> for_(Statement initializer, BooleanExpression condition,
-                                             Statement countingExpression) {
+                                         Statement countingExpression) {
     return new LoopBuilderImpl(context, callElementBuilder).for_(initializer, condition, countingExpression);
   }
 

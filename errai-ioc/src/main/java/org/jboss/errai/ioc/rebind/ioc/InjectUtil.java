@@ -37,6 +37,9 @@ import javax.inject.Qualifier;
 
 import org.jboss.errai.bus.rebind.ScannerSingleton;
 import org.jboss.errai.ioc.rebind.IOCGenerator;
+import org.jboss.errai.ioc.rebind.IOCProcessingContext;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassMember;
@@ -44,6 +47,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaConstructor;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 import org.mvel2.util.ReflectionUtil;
 import org.mvel2.util.StringAppender;
 import org.slf4j.Logger;
@@ -58,7 +62,7 @@ public class InjectUtil {
   private static final Logger log = LoggerFactory.getLogger(InjectUtil.class);
 
   private static final Class[] injectionAnnotations
-      = {Inject.class, com.google.inject.Inject.class};
+          = {Inject.class, com.google.inject.Inject.class};
 
   private static final AtomicInteger counter = new AtomicInteger(0);
 
@@ -75,7 +79,7 @@ public class InjectUtil {
 
       if (constructorInjectionPoints.size() > 1) {
         throw new InjectionFailure("more than one constructor in "
-            + type.getFullyQualifiedName() + " is marked as the injection point!");
+                + type.getFullyQualifiedName() + " is marked as the injection point!");
       }
 
       final MetaConstructor constructor = constructorInjectionPoints.get(0);
@@ -89,19 +93,24 @@ public class InjectUtil {
 
       return new ConstructionStrategy() {
         @Override
-        public String generateConstructor() {
-          String[] vars = resolveInjectionDependencies(constructor.getParameters(), ctx, constructor);
+        public void generateConstructor() {
+          Statement[] vars = resolveInjectionDependencies(constructor.getParameters(), ctx, constructor);
 
-          StringAppender appender = new StringAppender("final ").append(type.getFullyQualifiedName())
-              .append(' ').append(injector.getVarName()).append(" = new ")
-              .append(type.getFullyQualifiedName())
-              .append('(').append(commaDelimitedList(vars)).append(");\n");
+          IOCProcessingContext processingContext = ctx.getProcessingContext();
 
-          handleInjectionTasks(appender, ctx, injectionTasks);
+          processingContext.append(
+                  Stmt.create()
+                          .declareVariable(type)
+                          .asFinal()
+                          .named(injector.getVarName())
+                          .initializeWith(Stmt.create()
+                                  .newObject(type)
+                                  .withParameters(vars))
+          );
 
-          doPostConstruct(appender, injector, postConstructTasks);
+          handleInjectionTasks(ctx, injectionTasks);
 
-          return IOCGenerator.debugOutput(appender.toString());
+          doPostConstruct(ctx, injector, postConstructTasks);
         }
       };
 
@@ -113,37 +122,50 @@ public class InjectUtil {
 
       return new ConstructionStrategy() {
         @Override
-        public String generateConstructor() {
-          StringAppender appender = new StringAppender("final ").append(type.getFullyQualifiedName())
-              .append(' ').append(injector.getVarName()).append(" = new ")
-              .append(type.getFullyQualifiedName()).append("();\n");
+        public void generateConstructor() {
+          IOCProcessingContext processingContext = ctx.getProcessingContext();
 
-          handleInjectionTasks(appender, ctx, injectionTasks);
+          processingContext.append(
+                  Stmt.create()
+                          .declareVariable(type)
+                          .asFinal()
+                          .named(injector.getVarName())
+                          .initializeWith(Stmt.create()
+                                  .newObject(type))
 
-          doPostConstruct(appender, injector, postConstructTasks);
+          );
 
-          return IOCGenerator.debugOutput(appender.toString());
+
+          handleInjectionTasks(ctx, injectionTasks);
+
+          doPostConstruct(ctx, injector, postConstructTasks);
         }
       };
     }
   }
 
-  private static void handleInjectionTasks(StringAppender appender, InjectionContext ctx,
+  private static void handleInjectionTasks(InjectionContext ctx,
                                            List<InjectionTask> tasks) {
     for (InjectionTask task : tasks) {
-      appender.append(task.doTask(ctx));
+      task.doTask(ctx);
     }
   }
 
-  private static void doPostConstruct(StringAppender appender, Injector injector,
+  private static void doPostConstruct(InjectionContext ctx,
+                                      Injector injector,
                                       List<MetaMethod> postConstructTasks) {
+
+    IOCProcessingContext processingContext = ctx.getProcessingContext();
+
     for (MetaMethod meth : postConstructTasks) {
       if (!meth.isPublic() || meth.getParameters().length != 0) {
         throw new InjectionFailure("PostConstruct method must be public and contain no parameters: "
-            + injector.getInjectedType().getFullyQualifiedName() + "." + meth.getName());
+                + injector.getInjectedType().getFullyQualifiedName() + "." + meth.getName());
       }
 
-      appender.append(injector.getVarName()).append('.').append(meth.getName()).append("();\n");
+      processingContext.append(
+              Stmt.create().loadVariable(injector.getVarName()).invoke(meth.getName())
+      );
     }
   }
 
@@ -161,7 +183,7 @@ public class InjectUtil {
       if (isInjectionPoint(field)) {
         if (!field.isPublic()) {
           MetaMethod meth = type.getMethod(ReflectionUtil.getSetter(field.getName()),
-              field.getType());
+                  field.getType());
 
           if (meth == null) {
             InjectionTask task = new InjectionTask(injector, field);
@@ -182,7 +204,7 @@ public class InjectUtil {
       ElementType[] elTypes;
       for (Class<? extends Annotation> a : decorators) {
         elTypes = a.isAnnotationPresent(Target.class) ? a.getAnnotation(Target.class).value()
-            : new ElementType[]{ElementType.FIELD};
+                : new ElementType[]{ElementType.FIELD};
 
         for (ElementType elType : elTypes) {
           switch (elType) {
@@ -204,7 +226,7 @@ public class InjectUtil {
       ElementType[] elTypes;
       for (Class<? extends Annotation> a : decorators) {
         elTypes = a.isAnnotationPresent(Target.class) ? a.getAnnotation(Target.class).value()
-            : new ElementType[]{ElementType.FIELD};
+                : new ElementType[]{ElementType.FIELD};
 
         for (ElementType elType : elTypes) {
           switch (elType) {
@@ -289,36 +311,37 @@ public class InjectUtil {
     return newArray;
   }
 
-  public static String[] resolveInjectionDependencies(MetaParameter[] parms, InjectionContext ctx, MetaConstructor constructor) {
+  public static Statement[] resolveInjectionDependencies(MetaParameter[] parms, InjectionContext ctx,
+                                                         MetaConstructor constructor) {
     MetaClass[] parmTypes = parametersToClassTypeArray(parms);
-    String[] varNames = new String[parmTypes.length];
+    Statement[] parmValues = new Statement[parmTypes.length];
 
     for (int i = 0; i < parmTypes.length; i++) {
       Injector injector = ctx.getInjector(parmTypes[i]);
       InjectionPoint injectionPoint
-          = new InjectionPoint(null, TaskType.Parameter, constructor, null, null, null, parms[i], injector, ctx);
+              = new InjectionPoint(null, TaskType.Parameter, constructor, null, null, null, parms[i], injector, ctx);
 
-      varNames[i] = injector.getType(ctx, injectionPoint);
+      parmValues[i] = injector.getType(ctx, injectionPoint);
     }
 
-    return varNames;
+    return parmValues;
   }
 
-  public static String[] resolveInjectionDependencies(MetaParameter[] parms, InjectionContext ctx, InjectionPoint injectionPoint) {
+  public static Statement[] resolveInjectionDependencies(MetaParameter[] parms, InjectionContext ctx, InjectionPoint injectionPoint) {
     MetaClass[] parmTypes = parametersToClassTypeArray(parms);
-    String[] varNames = new String[parmTypes.length];
+    Statement[] parmValues = new Statement[parmTypes.length];
 
     for (int i = 0; i < parmTypes.length; i++) {
-      varNames[i] = ctx.getInjector(parmTypes[i]).getType(ctx, injectionPoint);
+      parmValues[i] = ctx.getInjector(parmTypes[i]).getType(ctx, injectionPoint);
     }
 
-    return varNames;
+    return parmValues;
   }
 
-  public static String commaDelimitedList(String[] parts) {
+  public static String commaDelimitedList(Context context, Statement[] parts) {
     StringAppender appender = new StringAppender();
     for (int i = 0; i < parts.length; i++) {
-      appender.append(parts[i]);
+      appender.append(parts[i].generate(context));
       if ((i + 1) < parts.length) appender.append(", ");
     }
     return appender.toString();
@@ -340,7 +363,7 @@ public class InjectUtil {
       qualifiersCache = new LinkedHashSet<Class<?>>();
 
       qualifiersCache.addAll(ScannerSingleton.getOrCreateInstance()
-          .getTypesAnnotatedWith(Qualifier.class));
+              .getTypesAnnotatedWith(Qualifier.class));
     }
 
     return qualifiersCache;
@@ -353,7 +376,7 @@ public class InjectUtil {
       ScannerSingleton.getOrCreateInstance();
 
       annotationsCache.addAll(ScannerSingleton.getOrCreateInstance()
-          .getTypesAnnotatedWith(Retention.class));
+              .getTypesAnnotatedWith(Retention.class));
     }
 
     return annotationsCache;

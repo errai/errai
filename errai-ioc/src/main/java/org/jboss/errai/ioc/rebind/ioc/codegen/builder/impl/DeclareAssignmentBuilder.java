@@ -26,18 +26,18 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReferen
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class DeclareAssignmentBuilder extends AssignmentBuilder {
-  public DeclareAssignmentBuilder(VariableReference reference, Statement statement) {
-    super(AssignmentOperator.Assignment, reference, statement);
+  public DeclareAssignmentBuilder(boolean isFinal, VariableReference reference, Statement statement) {
+    super(isFinal, AssignmentOperator.Assignment, reference, statement);
   }
 
   @Override
   public String generate(Context context) {
     String type = LoadClassReference.getClassReference(reference.getType(), context);
     if (statement != null) {
-      return type + " " + super.generate(context);
+      return (isFinal ? "final " : "") + type + " " + super.generate(context);
     }
     else {
-      return type + " " + reference.getName();
+      return (isFinal ? "final " : "") + type + " " + reference.getName();
     }
   }
 }

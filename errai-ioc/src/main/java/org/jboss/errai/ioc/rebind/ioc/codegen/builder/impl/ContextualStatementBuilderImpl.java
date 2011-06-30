@@ -32,11 +32,13 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.AssignVariable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadField;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.MethodCall;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.ReturnValue;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 
 /**
  * Implementation of the {@link ContextualStatementBuilder}.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Mike Brock <cbrock@redhat.com>
  */
 public class ContextualStatementBuilderImpl extends AbstractStatementBuilder implements ContextualStatementBuilder,
     VariableReferenceContextualStatementBuilder {
@@ -46,6 +48,11 @@ public class ContextualStatementBuilderImpl extends AbstractStatementBuilder imp
   }
 
   // Invocation
+  @Override
+  public ContextualStatementBuilder invoke(MetaMethod method, Object... parameters) {
+    return invoke(method.getName(), parameters);
+  }
+
   @Override
   public ContextualStatementBuilder invoke(String methodName, Object... parameters) {
     appendCallElement(new MethodCall(methodName, parameters));

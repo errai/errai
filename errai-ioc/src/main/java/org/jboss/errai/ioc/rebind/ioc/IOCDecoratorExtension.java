@@ -16,6 +16,8 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+
 import java.lang.annotation.Annotation;
 
 public abstract class IOCDecoratorExtension<T extends Annotation> {
@@ -29,5 +31,5 @@ public abstract class IOCDecoratorExtension<T extends Annotation> {
     return decoratesWith;
   }
 
-  public abstract String generateDecorator(InjectionPoint<T> ctx);
+  public abstract Statement generateDecorator(InjectionPoint<T> ctx);
 }

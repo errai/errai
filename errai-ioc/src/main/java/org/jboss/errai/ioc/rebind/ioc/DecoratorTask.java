@@ -49,8 +49,8 @@ public class DecoratorTask extends InjectionTask {
 
   @SuppressWarnings({"unchecked"})
   @Override
-  public String doTask(InjectionContext ctx) {
-    StringAppender appender = new StringAppender();
+  public void doTask(InjectionContext ctx) {
+  //  StringAppender appender = new StringAppender();
     Annotation anno = null;
 
     for (IOCDecoratorExtension<? extends Annotation> dec : IOCExtensions) {
@@ -74,10 +74,7 @@ public class DecoratorTask extends InjectionTask {
 
       }
 
-      appender.append(dec.generateDecorator(new InjectionPoint(anno, injectType, constructor, method, field, type, parm, injector, ctx)));
-
-      appender.append("\n");
+      dec.generateDecorator(new InjectionPoint(anno, injectType, constructor, method, field, type, parm, injector, ctx));
     }
-    return appender.toString();
   }
 }

@@ -16,14 +16,9 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.build.BuildMetaClass;
-
 /**
  * @author Mike Brock <cbrock@redhat.com>
- * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface ClassStructureBuilder<T extends ClassStructureBuilder<T>> extends ClassMethodBuilder<T>,
-    ClassConstructorBuilder<T>, ClassFieldBuilder<T>, Builder {
-
-  public BuildMetaClass getClassDefinition();
+public interface VariableDeclarationStart<T> extends VariableDeclarationNamed<T> {
+  public VariableDeclarationNamed<T> asFinal();
 }

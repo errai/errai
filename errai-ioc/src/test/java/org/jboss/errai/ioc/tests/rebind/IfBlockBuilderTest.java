@@ -69,10 +69,10 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
         .loadVariable("str")
         .invoke("endsWith", "abc")
         .if_()
-          .append(ContextBuilder.create().declareVariable("n", Integer.class).initializeWith(0))
+          .append(Stmt.create().declareVariable(Integer.class).named("n").initializeWith(0))
         .finish()
         .else_()
-          .append(ContextBuilder.create().declareVariable("n", Integer.class).initializeWith(1))
+          .append(Stmt.create().declareVariable(Integer.class).named("n").initializeWith(1))
         .finish().toJavaString();
 
     assertEquals("Failed to generate empty if block using no rhs", IF_ELSE_BLOCK_NO_RHS, s);
@@ -85,10 +85,10 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
         .declareVariable("m", Integer.class)
         .loadVariable("n")
         .if_(BooleanOperator.GreaterThan, Variable.get("m"))
-          .append(ContextBuilder.create().declareVariable("n", Integer.class).initializeWith(0))
+          .append(Stmt.create().declareVariable(Integer.class).named("n").initializeWith(0))
         .finish()
         .else_()
-          .append(ContextBuilder.create().declareVariable("n", Integer.class).initializeWith(1))
+          .append(Stmt.create().declareVariable(Integer.class).named("n").initializeWith(1))
         .finish().toJavaString();
 
     assertEquals("Failed to generate empty if block using a rhs", IF_ELSE_BLOCK_RHS, s);

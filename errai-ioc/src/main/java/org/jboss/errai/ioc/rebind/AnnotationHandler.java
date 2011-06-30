@@ -22,5 +22,5 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import java.lang.annotation.Annotation;
 
 public interface AnnotationHandler<T extends Annotation> {
-  public void handle(MetaClass type, T annotation, ProcessingContext context);
+  public void handle(MetaClass type, T annotation, IOCProcessingContext context);
 }

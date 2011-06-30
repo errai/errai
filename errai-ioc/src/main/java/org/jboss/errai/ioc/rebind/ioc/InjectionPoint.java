@@ -16,7 +16,11 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.literal.LiteralFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.*;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.Refs;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -91,23 +95,24 @@ public class InjectionPoint<T extends Annotation> {
     }
   }
 
-  public String getValueExpression() {
+  public Statement getValueExpression() {
     switch (taskType) {
       case PrivateField:
-        return getPrivateFieldInjectorName(field) + "(" + injector.getVarName() + ")";
+        return Stmt.create().invokeStatic(injectionContext.getProcessingContext().getBootStrapClass(),
+                getPrivateFieldInjectorName(field), Refs.get(injector.getVarName()));
 
       case Field:
-        return injector.getVarName() + "." + field.getName();
+        return Stmt.create().loadVariable(injector.getVarName()).getField(field.getName());
 
       case Method:
-        return injector.getVarName() + "." + method.getName() + "()";
+        return Stmt.create().loadVariable(injector.getVarName()).invoke(method);
 
       case Parameter:
       case Type:
-        return injector.getVarName();
+        return Refs.get(injector.getVarName());
 
       default:
-        return null;
+        return LiteralFactory.getLiteral(null);
     }
   }
 

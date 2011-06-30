@@ -436,6 +436,10 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
     }, scope, type, name);
   }
 
+  public BuildMetaClass getClassDefinition() {
+    return classDefinition;
+  }
+
   @Override
   public String toJavaString() {
     return classDefinition.toJavaString();
