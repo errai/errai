@@ -22,7 +22,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface ClassFieldBuilder<T extends ClassStructureBuilder> extends Builder {
+public interface ClassFieldBuilder<T extends ClassStructureBuilder<T>> extends Builder {
   public FieldBuildInitializer<T> publicField(String name, MetaClass type);
   public FieldBuildInitializer<T> publicField(String name, Class<?> type);
 

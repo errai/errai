@@ -29,7 +29,7 @@ public class ThrowsDeclaration extends AbstractStatement {
   private ThrowsDeclaration(MetaClass[] exceptionTypes) {
     this.exceptionTypes = exceptionTypes;
   }
-  
+
   public static ThrowsDeclaration of(Class<? extends Throwable>... exceptionTypes) {
     return new ThrowsDeclaration(MetaClassFactory.fromClassArray(exceptionTypes));
   }
@@ -37,19 +37,23 @@ public class ThrowsDeclaration extends AbstractStatement {
   public static ThrowsDeclaration of(MetaClass... exceptionTypes) {
     return new ThrowsDeclaration(exceptionTypes);
   }
-  
+
   public static ThrowsDeclaration none() {
     return new ThrowsDeclaration(new MetaClass[0]);
+  }
+
+  public boolean isEmpty() {
+    return (exceptionTypes == null) || (exceptionTypes.length == 0);
   }
 
   @Override
   public String generate(Context context) {
     StringBuilder buf = new StringBuilder();
     for (int i = 0; i < exceptionTypes.length; i++) {
-      if (i==0) {
+      if (i == 0) {
         buf.append("throws ");
       }
-      
+
       buf.append(LoadClassReference.getClassReference(exceptionTypes[i], context));
 
       if (i + 1 < exceptionTypes.length) {

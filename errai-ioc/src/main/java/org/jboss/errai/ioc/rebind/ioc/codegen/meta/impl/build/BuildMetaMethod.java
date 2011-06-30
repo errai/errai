@@ -221,10 +221,13 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
     buf.append(LoadClassReference.getClassReference(returnType, context))
         .append(" ")
         .append(name)
-        .append(defParameters.generate(context))
-        .append(" ")
-        .append(throwsDeclaration.generate(context));
+        .append(defParameters.generate(context));
         
+    if (!throwsDeclaration.isEmpty()) {    
+      buf.append(" ")
+          .append(throwsDeclaration.generate(context));
+    }
+    
      if (isAbstract) {  
        buf.append(";");
      } else {

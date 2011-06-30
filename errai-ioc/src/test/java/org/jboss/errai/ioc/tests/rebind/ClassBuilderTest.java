@@ -127,7 +127,7 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
         .finish()
         .publicAbstractMethod(void.class, "foo")
         .finish()
-        .publicAbstractMethod(void.class, "bar")
+        .protectedAbstractMethod(void.class, "bar")
         .finish()
         .publicMethod(void.class, "baz")
         .finish()

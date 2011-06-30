@@ -26,5 +26,5 @@ public interface ClassDefinitionBuilderInterfaces<T extends ClassStructureBuilde
 
   public ClassDefinitionBuilderInterfaces<T> implementsInterface(Class<?> clazz);
 
-  public T body();
+  public ClassStructureBuilder<T> body();
 }

@@ -47,24 +47,6 @@ public interface ClassStructureBuilderAbstractMethodOption extends
   public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> publicAbstractMethod(
       Class<?> returnType, String name, Parameter... parms);
 
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> privateAbstractMethod(
-      MetaClass returnType, String name);
-
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> privateAbstractMethod(
-      Class<?> returnType, String name);
-
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> privateAbstractMethod(
-      MetaClass returnType, String name, MetaClass... parms);
-
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> privateAbstractMethod(
-      Class<?> returnType, String name, Class<?>... parms);
-
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> privateAbstractMethod(
-      MetaClass returnType, String name, Parameter... parms);
-
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> privateAbstractMethod(
-      Class<?> returnType, String name, Parameter... parms);
-
   public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> protectedAbstractMethod(
       MetaClass returnType, String name);
 

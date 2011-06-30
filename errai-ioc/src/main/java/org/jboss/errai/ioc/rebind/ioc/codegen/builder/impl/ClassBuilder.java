@@ -71,7 +71,7 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
     return define(fullQualifiedName, MetaClassFactory.get(parent));
   }
 
-  public static ClassStructureBuilder<DefaultClassStructureBuilder> implement(MetaClass cls) {
+  public static ClassStructureBuilder<?> implement(MetaClass cls) {
     return new ClassBuilder<DefaultClassStructureBuilder>(cls.getFullyQualifiedName() + "Impl", null, Context.create()
         .autoImport())
         .publicScope()
@@ -114,7 +114,7 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
 
   @Override
   public T body() {
-    return (T)this;
+    return (T) this;
   }
 
   @Override
@@ -234,7 +234,7 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
 
         classDefinition.addConstructor(buildMetaConstructor);
 
-        return (T)ClassBuilder.this;
+        return (T) ClassBuilder.this;
       }
     });
   }
@@ -375,7 +375,7 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
             returnType, defParameters, throwsDeclaration, false);
  
         classDefinition.addMethod(buildMetaMethod);
-        return (T)ClassBuilder.this;
+        return (T) ClassBuilder.this;
       }
     });
   }
@@ -431,7 +431,7 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
 
         classDefinition.addField(buildMetaField);
 
-        return (T)ClassBuilder.this;
+        return (T) ClassBuilder.this;
       }
     }, scope, type, name);
   }

@@ -31,7 +31,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.build.BuildMetaMethod;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ClassBuilderAbstractMethodOption extends ClassBuilder<ClassStructureBuilderAbstractMethodOption> 
-  implements ClassStructureBuilderAbstractMethodOption {
+    implements ClassStructureBuilderAbstractMethodOption {
 
   ClassBuilderAbstractMethodOption(ClassBuilder that, Context context) {
     super(that, context);
@@ -71,42 +71,6 @@ public class ClassBuilderAbstractMethodOption extends ClassBuilder<ClassStructur
   public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> publicAbstractMethod(
       Class<?> returnType, String name, Parameter... parms) {
     return publicAbstractMethod(MetaClassFactory.get(returnType), name, parms);
-  }
-
-  @Override
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> privateAbstractMethod(
-      MetaClass returnType, String name) {
-    return genMethod(Scope.Private, returnType, name, DefParameters.none());
-  }
-
-  @Override
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> privateAbstractMethod(
-      Class<?> returnType, String name) {
-    return privateAbstractMethod(MetaClassFactory.get(returnType), name);
-  }
-
-  @Override
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> privateAbstractMethod(
-      MetaClass returnType, String name, MetaClass... parms) {
-    return genMethod(Scope.Private, returnType, name, DefParameters.fromTypeArray(parms));
-  }
-
-  @Override
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> privateAbstractMethod(
-      Class<?> returnType, String name, Class<?>... parms) {
-    return privateAbstractMethod(MetaClassFactory.get(returnType), name, MetaClassFactory.fromClassArray(parms));
-  }
-
-  @Override
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> privateAbstractMethod(
-      MetaClass returnType, String name, Parameter... parms) {
-    return genMethod(Scope.Private, returnType, name, DefParameters.fromParameters(parms));
-  }
-
-  @Override
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> privateAbstractMethod(
-      Class<?> returnType, String name, Parameter... parms) {
-    return privateAbstractMethod(MetaClassFactory.get(returnType), name, parms);
   }
 
   @Override

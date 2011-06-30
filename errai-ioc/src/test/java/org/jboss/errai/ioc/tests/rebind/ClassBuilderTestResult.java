@@ -65,8 +65,8 @@ public interface ClassBuilderTestResult {
         " public abstract class Foo {\n" +
         "   public Foo() {" +
         "   }" +
-        "   public abstract void foo() ;" +
-        "   public abstract void bar() ;" +
+        "   public abstract void foo();" +
+        "   protected abstract void bar();" +
         "   public void baz() {" +
         "   }" +
         " }";
