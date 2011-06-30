@@ -21,7 +21,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public interface ExtendsClassStructureBuilder extends BaseClassStructureBuilder {
+public interface ExtendsClassStructureBuilder extends ClassStructureBuilder {
   public BlockBuilder<ExtendsClassStructureBuilder> publicOverridesConstructor(MetaClass... parms);
 
   public BlockBuilder<ExtendsClassStructureBuilder> publicOverridesConstructor(Class<?>... parms);

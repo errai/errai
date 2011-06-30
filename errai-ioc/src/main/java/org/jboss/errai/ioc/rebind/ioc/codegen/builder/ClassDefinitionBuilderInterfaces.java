@@ -21,10 +21,10 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public interface ClassDefinitionBuilderInterfaces {
-  public ClassDefinitionBuilderInterfaces implementsInterface(MetaClass clazz);
+public interface ClassDefinitionBuilderInterfaces<T extends ClassStructureBuilder> {
+  public ClassDefinitionBuilderInterfaces<T> implementsInterface(MetaClass clazz);
 
-  public ClassDefinitionBuilderInterfaces implementsInterface(Class<?> clazz);
+  public ClassDefinitionBuilderInterfaces<T> implementsInterface(Class<?> clazz);
 
-  public BaseClassStructureBuilder body();
+  public T body();
 }

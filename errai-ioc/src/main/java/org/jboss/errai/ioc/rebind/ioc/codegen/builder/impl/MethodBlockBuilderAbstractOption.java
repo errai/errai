@@ -16,42 +16,35 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.BlockStatement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.ThrowsDeclaration;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.MethodBuildCallback;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class MethodBlockBuilder<T> extends BlockBuilderImpl<T> {
+public class MethodBlockBuilderAbstractOption<T> extends BlockBuilderImpl<T> {
   protected ThrowsDeclaration throwsDeclaration = ThrowsDeclaration.none();
   protected MethodBuildCallback<T> callback;
 
-  public MethodBlockBuilder(MethodBuildCallback<T> callback) {
+  public MethodBlockBuilderAbstractOption(MethodBuildCallback<T> callback) {
     this.callback = callback;
   }
   
-  public MethodBlockBuilder(BlockStatement blockStatement, MethodBuildCallback<T> callback) {
-    this.blockStatement = blockStatement;
-    this.callback = callback;
-  }
-  
-  public BlockBuilder<T> throws_(Class<? extends Throwable>... exceptionTypes) {
+  public T throws_(Class<? extends Throwable>... exceptionTypes) {
     throwsDeclaration = ThrowsDeclaration.of(exceptionTypes);
-    return this;
+    return callback.callback(null, throwsDeclaration);
   }
 
-  public BlockBuilder<T> throws_(MetaClass... exceptions) {
+  public T throws_(MetaClass... exceptions) {
     throwsDeclaration = ThrowsDeclaration.of(exceptions);
-    return this;
+    return callback.callback(null, throwsDeclaration);
   }
   
   @Override
   public T finish() {
     if (callback != null) {
-      return callback.callback(blockStatement, throwsDeclaration);
+      return callback.callback(null, throwsDeclaration);
     }
     return null;
   }

@@ -59,6 +59,15 @@ public interface ClassBuilderTestResult {
           "   }" +
           " }";
 
+  public static final String ABSTRACT_CLASS_WITH_ABSTRACT_METHOD =
+    "     package org.foo;\n" +
+        "\n" +
+        " public abstract class Foo {\n" +
+        "   public Foo() {" +
+        "   }" +
+        "   public abstract void foo() ;" +
+        " }";
+  
   public static final String CLASS_WITH_CONSTRUCTOR_CALLING_SUPER =
       "     package org.foo;\n" +
           "\n" +

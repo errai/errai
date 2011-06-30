@@ -17,8 +17,10 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
 /**
- * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface ClassDefinitionBuilderAbstractOption extends ClassDefinitionBuilderInterfaces {
-  public ClassDefinitionBuilderInterfaces abstractClass();
+public interface ClassDefinitionBuilderAbstractOption<T extends ClassStructureBuilder>
+    extends ClassDefinitionBuilderInterfaces<T> {
+  
+  public ClassDefinitionBuilderInterfaces<ClassStructureBuilderAbstractMethodOption> abstractClass();
 }
