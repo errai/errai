@@ -98,7 +98,7 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
   }
 
   @Override
-  public ClassDefinitionBuilderInterfaces<T> implementsInterface(Class clazz) {
+  public ClassDefinitionBuilderInterfaces<T> implementsInterface(Class<?> clazz) {
     return implementsInterface(MetaClassFactory.get(clazz));
   }
 
@@ -113,8 +113,8 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
   }
 
   @Override
-  public T body() {
-    return (T) this;
+  public ClassStructureBuilder<T> body() {
+    return this;
   }
 
   @Override
