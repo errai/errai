@@ -53,26 +53,26 @@ public interface BaseClassStructureBuilder extends Builder {
   public MethodBlockBuilder<BaseClassStructureBuilder> publicMethod(MetaClass returnType, String name, Parameter... parms);
   public MethodBlockBuilder<BaseClassStructureBuilder> publicMethod(Class<?> returnType, String name, Parameter... parms);
   
-  public BlockBuilder<BaseClassStructureBuilder> privateMethod(MetaClass returnType, String name);
-  public BlockBuilder<BaseClassStructureBuilder> privateMethod(Class<?> returnType, String name);
-  public BlockBuilder<BaseClassStructureBuilder> privateMethod(MetaClass returnType, String name, MetaClass... parms);
-  public BlockBuilder<BaseClassStructureBuilder> privateMethod(Class<?> returnType, String name, Class<?>... parms);
-  public BlockBuilder<BaseClassStructureBuilder> privateMethod(MetaClass returnType, String name, Parameter... parms);
-  public BlockBuilder<BaseClassStructureBuilder> privateMethod(Class<?> returnType, String name, Parameter... parms);
+  public MethodBlockBuilder<BaseClassStructureBuilder> privateMethod(MetaClass returnType, String name);
+  public MethodBlockBuilder<BaseClassStructureBuilder> privateMethod(Class<?> returnType, String name);
+  public MethodBlockBuilder<BaseClassStructureBuilder> privateMethod(MetaClass returnType, String name, MetaClass... parms);
+  public MethodBlockBuilder<BaseClassStructureBuilder> privateMethod(Class<?> returnType, String name, Class<?>... parms);
+  public MethodBlockBuilder<BaseClassStructureBuilder> privateMethod(MetaClass returnType, String name, Parameter... parms);
+  public MethodBlockBuilder<BaseClassStructureBuilder> privateMethod(Class<?> returnType, String name, Parameter... parms);
   
-  public BlockBuilder<BaseClassStructureBuilder> protectedMethod(MetaClass returnType, String name);
-  public BlockBuilder<BaseClassStructureBuilder> protectedMethod(Class<?> returnType, String name);
-  public BlockBuilder<BaseClassStructureBuilder> protectedMethod(MetaClass returnType, String name, MetaClass... parms);
-  public BlockBuilder<BaseClassStructureBuilder> protectedMethod(Class<?> returnType, String name, Class<?>... parms);
-  public BlockBuilder<BaseClassStructureBuilder> protectedMethod(MetaClass returnType, String name, Parameter... parms);
-  public BlockBuilder<BaseClassStructureBuilder> protectedMethod(Class<?> returnType, String name, Parameter... parms);
+  public MethodBlockBuilder<BaseClassStructureBuilder> protectedMethod(MetaClass returnType, String name);
+  public MethodBlockBuilder<BaseClassStructureBuilder> protectedMethod(Class<?> returnType, String name);
+  public MethodBlockBuilder<BaseClassStructureBuilder> protectedMethod(MetaClass returnType, String name, MetaClass... parms);
+  public MethodBlockBuilder<BaseClassStructureBuilder> protectedMethod(Class<?> returnType, String name, Class<?>... parms);
+  public MethodBlockBuilder<BaseClassStructureBuilder> protectedMethod(MetaClass returnType, String name, Parameter... parms);
+  public MethodBlockBuilder<BaseClassStructureBuilder> protectedMethod(Class<?> returnType, String name, Parameter... parms);
  
-  public BlockBuilder<BaseClassStructureBuilder> packageMethod(MetaClass returnType, String name);
-  public BlockBuilder<BaseClassStructureBuilder> packageMethod(Class<?> returnType, String name);
-  public BlockBuilder<BaseClassStructureBuilder> packageMethod(MetaClass returnType, String name, MetaClass... parms);
-  public BlockBuilder<BaseClassStructureBuilder> packageMethod(Class<?> returnType, String name, Class<?>... parms);
-  public BlockBuilder<BaseClassStructureBuilder> packageMethod(MetaClass returnType, String name, Parameter... parms);
-  public BlockBuilder<BaseClassStructureBuilder> packageMethod(Class<?> returnType, String name, Parameter... parms);
+  public MethodBlockBuilder<BaseClassStructureBuilder> packageMethod(MetaClass returnType, String name);
+  public MethodBlockBuilder<BaseClassStructureBuilder> packageMethod(Class<?> returnType, String name);
+  public MethodBlockBuilder<BaseClassStructureBuilder> packageMethod(MetaClass returnType, String name, MetaClass... parms);
+  public MethodBlockBuilder<BaseClassStructureBuilder> packageMethod(Class<?> returnType, String name, Class<?>... parms);
+  public MethodBlockBuilder<BaseClassStructureBuilder> packageMethod(MetaClass returnType, String name, Parameter... parms);
+  public MethodBlockBuilder<BaseClassStructureBuilder> packageMethod(Class<?> returnType, String name, Parameter... parms);
 
   // -- //
   public FieldBuildInitializer<BaseClassStructureBuilder> publicField(String name, MetaClass type);
