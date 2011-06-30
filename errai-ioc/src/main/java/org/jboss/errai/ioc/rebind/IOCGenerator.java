@@ -332,8 +332,6 @@ public class IOCGenerator extends Generator {
     blockBuilder.append(Stmt.create().declareVariable("ctx", InterfaceInjectionContext.class,
             Stmt.create().newObject(InterfaceInjectionContext.class)));
 
-
-
     // start constructor source generation
     sourceWriter.println("public " + className + "() { ");
     sourceWriter.indent();
