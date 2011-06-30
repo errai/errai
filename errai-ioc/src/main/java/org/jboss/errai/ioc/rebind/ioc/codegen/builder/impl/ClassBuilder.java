@@ -29,7 +29,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.build.BuildMetaMethod;
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class  ClassBuilder implements
+public class ClassBuilder implements
         ClassDefinitionBuilderScope,
         ClassDefinitionBuilderAbstractOption,
         BaseClassStructureBuilder {
