@@ -259,94 +259,94 @@ public class ClassBuilder implements
 
   // private method //
   @Override
-  public BlockBuilder<BaseClassStructureBuilder> privateMethod(MetaClass returnType, String name) {
+  public MethodBlockBuilder<BaseClassStructureBuilder> privateMethod(MetaClass returnType, String name) {
     return genMethod(Scope.Private, returnType, name, DefParameters.none());
   }
 
   @Override
-  public BlockBuilder<BaseClassStructureBuilder> privateMethod(Class<?> returnType, String name) {
+  public MethodBlockBuilder<BaseClassStructureBuilder> privateMethod(Class<?> returnType, String name) {
     return privateMethod(MetaClassFactory.get(returnType), name);
   }
 
   @Override
-  public BlockBuilder<BaseClassStructureBuilder> privateMethod(MetaClass returnType, String name, MetaClass... parms) {
+  public MethodBlockBuilder<BaseClassStructureBuilder> privateMethod(MetaClass returnType, String name, MetaClass... parms) {
     return genMethod(Scope.Private, returnType, name, DefParameters.fromTypeArray(parms));
   }
 
   @Override
-  public BlockBuilder<BaseClassStructureBuilder> privateMethod(Class<?> returnType, String name, Class<?>... parms) {
+  public MethodBlockBuilder<BaseClassStructureBuilder> privateMethod(Class<?> returnType, String name, Class<?>... parms) {
     return privateMethod(MetaClassFactory.get(returnType), name, MetaClassFactory.fromClassArray(parms));
   }
 
   @Override
-  public BlockBuilder<BaseClassStructureBuilder> privateMethod(MetaClass returnType, String name, Parameter... parms) {
+  public MethodBlockBuilder<BaseClassStructureBuilder> privateMethod(MetaClass returnType, String name, Parameter... parms) {
     return genMethod(Scope.Private, returnType, name, DefParameters.fromParameters(parms));
   }
 
   @Override
-  public BlockBuilder<BaseClassStructureBuilder> privateMethod(Class<?> returnType, String name, Parameter... parms) {
+  public MethodBlockBuilder<BaseClassStructureBuilder> privateMethod(Class<?> returnType, String name, Parameter... parms) {
     return privateMethod(MetaClassFactory.get(returnType), name, parms);
   }
 
   // protected method //
   @Override
-  public BlockBuilder<BaseClassStructureBuilder> protectedMethod(MetaClass returnType, String name) {
+  public MethodBlockBuilder<BaseClassStructureBuilder> protectedMethod(MetaClass returnType, String name) {
     return genMethod(Scope.Protected, returnType, name, DefParameters.none());
   }
 
   @Override
-  public BlockBuilder<BaseClassStructureBuilder> protectedMethod(Class<?> returnType, String name) {
+  public MethodBlockBuilder<BaseClassStructureBuilder> protectedMethod(Class<?> returnType, String name) {
     return protectedMethod(MetaClassFactory.get(returnType), name);
   }
   
   @Override
-  public BlockBuilder<BaseClassStructureBuilder> protectedMethod(MetaClass returnType, String name, MetaClass... parms) {
+  public MethodBlockBuilder<BaseClassStructureBuilder> protectedMethod(MetaClass returnType, String name, MetaClass... parms) {
     return genMethod(Scope.Protected, returnType, name, DefParameters.fromTypeArray(parms));
   }
 
   @Override
-  public BlockBuilder<BaseClassStructureBuilder> protectedMethod(Class<?> returnType, String name, Class<?>... parms) {
+  public MethodBlockBuilder<BaseClassStructureBuilder> protectedMethod(Class<?> returnType, String name, Class<?>... parms) {
     return protectedMethod(MetaClassFactory.get(returnType), name, MetaClassFactory.fromClassArray(parms));
   }
 
   @Override
-  public BlockBuilder<BaseClassStructureBuilder> protectedMethod(MetaClass returnType, String name, Parameter... parms) {
+  public MethodBlockBuilder<BaseClassStructureBuilder> protectedMethod(MetaClass returnType, String name, Parameter... parms) {
     return genMethod(Scope.Protected, returnType, name, DefParameters.fromParameters(parms));
   }
 
   @Override
-  public BlockBuilder<BaseClassStructureBuilder> protectedMethod(Class<?> returnType, String name, Parameter... parms) {
+  public MethodBlockBuilder<BaseClassStructureBuilder> protectedMethod(Class<?> returnType, String name, Parameter... parms) {
     return protectedMethod(MetaClassFactory.get(returnType), name, parms);
   }
 
   // package-private method //
   @Override
-  public BlockBuilder<BaseClassStructureBuilder> packageMethod(MetaClass returnType, String name) {
+  public MethodBlockBuilder<BaseClassStructureBuilder> packageMethod(MetaClass returnType, String name) {
     return genMethod(Scope.Package, returnType, name, DefParameters.none());
   }
 
   @Override
-  public BlockBuilder<BaseClassStructureBuilder> packageMethod(Class<?> returnType, String name) {
+  public MethodBlockBuilder<BaseClassStructureBuilder> packageMethod(Class<?> returnType, String name) {
     return packageMethod(MetaClassFactory.get(returnType), name);
   }
 
   @Override
-  public BlockBuilder<BaseClassStructureBuilder> packageMethod(MetaClass returnType, String name, MetaClass... parms) {
+  public MethodBlockBuilder<BaseClassStructureBuilder> packageMethod(MetaClass returnType, String name, MetaClass... parms) {
     return genMethod(Scope.Package, returnType, name, DefParameters.fromTypeArray(parms));
   }
 
   @Override
-  public BlockBuilder<BaseClassStructureBuilder> packageMethod(Class<?> returnType, String name, Class<?>... parms) {
+  public MethodBlockBuilder<BaseClassStructureBuilder> packageMethod(Class<?> returnType, String name, Class<?>... parms) {
     return packageMethod(MetaClassFactory.get(returnType), name, MetaClassFactory.fromClassArray(parms));
   }
 
   @Override
-  public BlockBuilder<BaseClassStructureBuilder> packageMethod(MetaClass returnType, String name, Parameter... parms) {
+  public MethodBlockBuilder<BaseClassStructureBuilder> packageMethod(MetaClass returnType, String name, Parameter... parms) {
     return genMethod(Scope.Package, returnType, name, DefParameters.fromParameters(parms));
   }
 
   @Override
-  public BlockBuilder<BaseClassStructureBuilder> packageMethod(Class<?> returnType, String name, Parameter... parms) {
+  public MethodBlockBuilder<BaseClassStructureBuilder> packageMethod(Class<?> returnType, String name, Parameter... parms) {
     return packageMethod(MetaClassFactory.get(returnType), name, parms);
   }
 

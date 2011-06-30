@@ -23,6 +23,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BuildCallback;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementEnd;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedConstructorException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
@@ -97,15 +98,15 @@ public class ObjectBuilder extends AbstractStatementBuilder {
     return newInstanceOf(MetaClassFactory.get(type), context);
   }
 
-  public ObjectBuilder withParameters(Object... parameters) {
+  public StatementEnd withParameters(Object... parameters) {
     return withParameters(GenUtil.generateCallParameters(context, parameters));
   }
 
-  public ObjectBuilder withParameters(Statement... parameters) {
+  public StatementEnd withParameters(Statement... parameters) {
     return withParameters(CallParameters.fromStatements(parameters));
   }
 
-  public ObjectBuilder withParameters(CallParameters parameters) {
+  public StatementEnd withParameters(CallParameters parameters) {
     if (!type.isInterface() && type.getBestMatchingConstructor(parameters.getParameterTypes()) == null)
       throw new UndefinedConstructorException(type, parameters.getParameterTypes());
 
