@@ -20,7 +20,6 @@ import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Refs;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
-import org.mvel2.util.StringAppender;
 
 import java.lang.annotation.Annotation;
 
@@ -83,7 +82,7 @@ public class InjectionTask {
 
         processingContext.append(
             Stmt.create()
-                    .invokeStatic(processingContext.getBootStrapClass(), getPrivateFieldInjectorName(field),
+                    .invokeStatic(processingContext.getBootstrapClass(), getPrivateFieldInjectorName(field),
                             Refs.get(injector.getVarName()), inj.getType(ctx, injectionPoint))
         );
 

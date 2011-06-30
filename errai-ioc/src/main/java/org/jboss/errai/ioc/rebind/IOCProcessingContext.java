@@ -32,7 +32,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
  */
 public class IOCProcessingContext extends ProcessingContext {
   protected Context context;
-  protected MetaClass bootStrapClass;
+  protected MetaClass bootstrapClass;
   protected BlockBuilder<BaseClassStructureBuilder> blockBuilder;
 
   public IOCProcessingContext(TreeLogger treeLogger,
@@ -40,21 +40,21 @@ public class IOCProcessingContext extends ProcessingContext {
                               SourceWriter writer,
                               TypeOracle oracle,
                               Context context,
-                              MetaClass bootStrapClass,
+                              MetaClass bootstrapClass,
                               BlockBuilder<BaseClassStructureBuilder> blockBuilder) {
     super(treeLogger, generatorContext, writer, oracle);
     this.context = context;
-    this.bootStrapClass = bootStrapClass;
+    this.bootstrapClass = bootstrapClass;
     this.blockBuilder = blockBuilder;
   }
 
   public IOCProcessingContext(ProcessingContext ctx,
                               Context context,
-                              MetaClass bootStrapClass,
+                              MetaClass bootstrapClass,
                               BlockBuilder<BaseClassStructureBuilder> blockBuilder) {
     super(ctx.getTreeLogger(), ctx.getGeneratorContext(), ctx.getWriter(), ctx.getOracle());
     this.context = context;
-    this.bootStrapClass = bootStrapClass;
+    this.bootstrapClass = bootstrapClass;
     this.blockBuilder = blockBuilder;
   }
 
@@ -66,8 +66,8 @@ public class IOCProcessingContext extends ProcessingContext {
     return blockBuilder.append(statement);
   }
 
-  public MetaClass getBootStrapClass() {
-    return bootStrapClass;
+  public MetaClass getBootstrapClass() {
+    return bootstrapClass;
   }
 
   public Context getContext() {

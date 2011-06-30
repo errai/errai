@@ -98,7 +98,7 @@ public class InjectionPoint<T extends Annotation> {
   public Statement getValueExpression() {
     switch (taskType) {
       case PrivateField:
-        return Stmt.create().invokeStatic(injectionContext.getProcessingContext().getBootStrapClass(),
+        return Stmt.create().invokeStatic(injectionContext.getProcessingContext().getBootstrapClass(),
                 getPrivateFieldInjectorName(field), Refs.get(injector.getVarName()));
 
       case Field:

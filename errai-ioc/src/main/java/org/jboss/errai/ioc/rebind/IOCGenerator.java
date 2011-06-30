@@ -30,7 +30,6 @@ import com.google.gwt.user.rebind.SourceWriter;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.rebind.ProcessingContext;
 import org.jboss.errai.bus.rebind.ScannerSingleton;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
@@ -48,8 +47,6 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
-import org.jboss.errai.ioc.tests.rebind.ClassStructureBuilderTest;
-import sun.jvm.hotspot.debugger.cdbg.BaseClass;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
@@ -331,17 +328,6 @@ public class IOCGenerator extends Generator {
     // InterfaceInjectionContext ctx = new InterfaceInjectionContext()
     blockBuilder.append(Stmt.create().declareVariable("ctx", InterfaceInjectionContext.class,
             Stmt.create().newObject(InterfaceInjectionContext.class)));
-
-    // start constructor source generation
-    sourceWriter.println("public " + className + "() { ");
-    sourceWriter.indent();
-    sourceWriter.println("super();");
-    sourceWriter.outdent();
-    sourceWriter.println("}");
-
-    sourceWriter.println("public InterfaceInjectionContext bootstrapContainer() { ");
-    sourceWriter.outdent();
-    sourceWriter.println("InterfaceInjectionContext ctx = new InterfaceInjectionContext();");
 
     MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
     procFactory.process(scanner, procContext);
