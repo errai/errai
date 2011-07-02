@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
-import java.util.Map;
+import java.util.Collection;
 
 import javax.enterprise.util.TypeLiteral;
 
@@ -25,7 +25,6 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.Builder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.VariableDeclarationInitializer;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
 
 /**
  * Builder for the {@link Context}.
@@ -77,10 +76,9 @@ public class ContextBuilder implements Builder {
     return this;
   }
 
-  public VariableDeclarationInitializer declareVariable(final Variable var) {
+  public VariableDeclarationInitializer<ContextBuilder> declareVariable(final Variable var) {
     context.addVariable(var);
     return new VariableDeclarationInitializer<ContextBuilder>() {
-
 
       @Override
       public ContextBuilder initializeWith(Object initialization) {
@@ -101,34 +99,26 @@ public class ContextBuilder implements Builder {
     };
   }
 
-  public VariableDeclarationInitializer declareVariable(String name) {
+  public VariableDeclarationInitializer<ContextBuilder> declareVariable(String name) {
     return declareVariable(Variable.create(name, (Class<?>) null));
   }
 
-  public VariableDeclarationInitializer declareVariable(String name, Class<?> type) {
+  public VariableDeclarationInitializer<ContextBuilder> declareVariable(String name, Class<?> type) {
     return declareVariable(Variable.create(name, type));
   }
 
-  public VariableDeclarationInitializer declareVariable(String name, TypeLiteral<?> type) {
+  public VariableDeclarationInitializer<ContextBuilder> declareVariable(String name, TypeLiteral<?> type) {
     return declareVariable(Variable.create(name, type));
   }
 
 
   @Override
   public String toJavaString() {
-    Map<String, Variable> vars = context.getVariables();
+    Collection<Variable> vars = context.getDeclaredVariables();
     StringBuilder buf = new StringBuilder();
 
-    for (Map.Entry<String, Variable> entry : vars.entrySet()) {
-      buf.append(LoadClassReference.getClassReference(entry.getValue().getType(), context))
-      .append(" ")
-      .append(entry.getKey());
-
-      if (entry.getValue().getValue() != null) {
-        buf.append(entry.getValue().generate(context));
-      }
-      buf.append(';');
-      buf.append('\n');
+    for (Variable var : vars) {
+      buf.append(var.generate(context)).append(";\n");
     }
 
     return buf.toString();

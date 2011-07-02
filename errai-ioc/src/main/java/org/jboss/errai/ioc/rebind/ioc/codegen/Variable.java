@@ -182,6 +182,10 @@ public class Variable extends AbstractStatement {
     return classMember;
   }
   
+  public boolean isFinal() {
+    return isFinal;
+  }
+  
   private String hashString;
 
   private String hashString() {
