@@ -23,13 +23,14 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.StringStatement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BuildCallback;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ConstructorBlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.GenUtil;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public class ConstructorBlockBuilderImpl<T> extends BlockBuilderImpl<T> implements ConstructorBlockBuilder<T> {
+public class ConstructorBlockBuilderImpl<T extends ClassStructureBuilder<T>> extends BlockBuilderImpl<T> implements ConstructorBlockBuilder<T> {
   public ConstructorBlockBuilderImpl(BlockStatement blockStatement, BuildCallback<T> tBuildCallback) {
     super(blockStatement, tBuildCallback);
   }

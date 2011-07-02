@@ -43,6 +43,7 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
   private List<MetaType> genericParameterTypes;
 
   private ThrowsDeclaration throwsDeclaration;
+  private boolean isAbstract;
 
   public BuildMetaMethod(BuildMetaClass declaringClass,
                          Statement body,
@@ -50,7 +51,8 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
                          String name,
                          MetaClass returnType,
                          DefParameters defParameters,
-                         ThrowsDeclaration throwsDeclaration) {
+                         ThrowsDeclaration throwsDeclaration,
+                         boolean isAbstract) {
 
     this.context = Context.create(declaringClass.getContext());
     this.declaringClass = declaringClass;
@@ -60,6 +62,7 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
     this.returnType = returnType;
     this.defParameters = defParameters;
     this.throwsDeclaration = throwsDeclaration;
+    this.isAbstract = isAbstract;
   }
 
   @Override
@@ -86,8 +89,9 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
   public MetaParameter[] getParameters() {
     List<Parameter> parameters = defParameters.getParameters();
     if (parameters != null) {
-      return defParameters.getParameters().toArray(new MetaParameter[defParameters.getParameters().size()]);      
-    } else {
+      return defParameters.getParameters().toArray(new MetaParameter[defParameters.getParameters().size()]);
+    }
+    else {
       return new MetaParameter[0];
     }
   }
@@ -207,15 +211,29 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
     for (Parameter p : defParameters.getParameters()) {
       context.addVariable(Variable.create(p.getName(), p.getType()));
     }
-    return new StringBuilder().append(scope.getCanonicalName())
-            .append(" ")
-            .append(LoadClassReference.getClassReference(returnType, context))
-            .append(" ")
-            .append(name)
-            .append(defParameters.generate(context))
-            .append(" ")
-            .append(throwsDeclaration.generate(context))
-            .append(" {\n").append(body.generate(context)).append("\n}\n")
-            .toString();
+    StringBuilder buf = new StringBuilder().append(scope.getCanonicalName())
+            .append(" ");
+
+    if (isAbstract) {
+      buf.append("abstract ");
+    }
+
+    buf.append(LoadClassReference.getClassReference(returnType, context))
+        .append(" ")
+        .append(name)
+        .append(defParameters.generate(context));
+        
+    if (!throwsDeclaration.isEmpty()) {    
+      buf.append(" ")
+          .append(throwsDeclaration.generate(context));
+    }
+    
+     if (isAbstract) {  
+       buf.append(";");
+     } else {
+       buf.append(" {\n").append(body.generate(context)).append("\n}\n");
+     }
+
+    return buf.toString();
   }
 }

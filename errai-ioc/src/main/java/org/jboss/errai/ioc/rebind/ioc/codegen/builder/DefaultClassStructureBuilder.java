@@ -16,11 +16,14 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
+
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface ClassDefinitionBuilderAbstractOption<T extends ClassStructureBuilder<T>>
-    extends ClassDefinitionBuilderInterfaces<T> {
-  
-  public ClassDefinitionBuilderInterfaces<ClassStructureBuilderAbstractMethodOption> abstractClass();
+public interface DefaultClassStructureBuilder extends
+    ClassStructureBuilder<DefaultClassStructureBuilder>,
+    ClassConstructorBuilder<DefaultClassStructureBuilder>,
+    ClassFieldBuilder<DefaultClassStructureBuilder>,
+    Builder {
+
 }

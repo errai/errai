@@ -16,32 +16,34 @@
 
 package org.jboss.errai.ioc.rebind;
 
+import org.jboss.errai.bus.rebind.ProcessingContext;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BlockBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ClassStructureBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.MethodBlockBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.user.rebind.SourceWriter;
-import org.jboss.errai.bus.rebind.ProcessingContext;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BaseClassStructureBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BlockBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class IOCProcessingContext extends ProcessingContext {
   protected Context context;
-  protected MetaClass bootstrapClass;
-  protected BlockBuilder<BaseClassStructureBuilder> blockBuilder;
+  protected MetaClass bootStrapClass;
+  protected BlockBuilder<?> blockBuilder;
 
   public IOCProcessingContext(TreeLogger treeLogger,
                               GeneratorContext generatorContext,
                               SourceWriter writer,
                               TypeOracle oracle,
                               Context context,
-                              MetaClass bootstrapClass,
-                              BlockBuilder<BaseClassStructureBuilder> blockBuilder) {
+                              MetaClass bootStrapClass,
+                              BlockBuilder<?> blockBuilder) {
     super(treeLogger, generatorContext, writer, oracle);
     this.context = context;
     this.bootstrapClass = bootstrapClass;
@@ -50,19 +52,19 @@ public class IOCProcessingContext extends ProcessingContext {
 
   public IOCProcessingContext(ProcessingContext ctx,
                               Context context,
-                              MetaClass bootstrapClass,
-                              BlockBuilder<BaseClassStructureBuilder> blockBuilder) {
+                              MetaClass bootStrapClass,
+                              BlockBuilder<?> blockBuilder) {
     super(ctx.getTreeLogger(), ctx.getGeneratorContext(), ctx.getWriter(), ctx.getOracle());
     this.context = context;
     this.bootstrapClass = bootstrapClass;
     this.blockBuilder = blockBuilder;
   }
 
-  public BlockBuilder<BaseClassStructureBuilder> getBlockBuilder() {
+  public BlockBuilder<?> getBlockBuilder() {
     return blockBuilder;
   }
 
-  public BlockBuilder<BaseClassStructureBuilder> append(Statement statement) {
+  public BlockBuilder<?> append(Statement statement) {
     return blockBuilder.append(statement);
   }
 

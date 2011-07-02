@@ -85,7 +85,7 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
 
     assertEquals("failed to generate class definition with accessor methods", CLASS_WITH_ACCESSOR_METHODS, cls);
   }
-
+  
   @Test
   public void testDefineClassWithParent() {
 
@@ -115,6 +115,27 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
     assertEquals("failed to generate abstract class", ABSTRACT_CLASS, cls);
   }
 
+  @Test
+  public void testDefineAbstractClassWithAbstractMethods() {
+
+    String cls = ClassBuilder
+        .define("org.foo.Foo")
+        .publicScope()
+        .abstractClass()
+        .body()
+        .publicConstructor()
+        .finish()
+        .publicAbstractMethod(void.class, "foo")
+        .finish()
+        .protectedAbstractMethod(void.class, "bar")
+        .finish()
+        .publicMethod(void.class, "baz")
+        .finish()
+        .toJavaString();
+
+    assertEquals("failed to generate abstract class with abstract method", ABSTRACT_CLASS_WITH_ABSTRACT_METHODS, cls);
+  }
+  
   @Test
   public void testDefineClassWithConstructorCallingSuper() {
     String cls = ClassBuilder.define("org.foo.Foo")

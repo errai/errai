@@ -20,11 +20,18 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface ClassDefinitionBuilderInterfaces<T extends ClassStructureBuilder<T>> {
-  public ClassDefinitionBuilderInterfaces<T> implementsInterface(MetaClass clazz);
+public interface ClassFieldBuilder<T extends ClassStructureBuilder<T>> extends Builder {
+  public FieldBuildInitializer<T> publicField(String name, MetaClass type);
+  public FieldBuildInitializer<T> publicField(String name, Class<?> type);
 
-  public ClassDefinitionBuilderInterfaces<T> implementsInterface(Class<?> clazz);
+  public FieldBuildInitializer<T> privateField(String name, MetaClass type);
+  public FieldBuildInitializer<T> privateField(String name, Class<?> type);
 
-  public ClassStructureBuilder<T> body();
+  public FieldBuildInitializer<T> protectedField(String name, MetaClass type);
+  public FieldBuildInitializer<T> protectedField(String name, Class<?> type);
+
+  public FieldBuildInitializer<T> packageField(String name, MetaClass type);
+  public FieldBuildInitializer<T> packageField(String name, Class<?> type);
 }

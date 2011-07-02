@@ -16,11 +16,14 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.build.BuildMetaClass;
+
 /**
+ * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface ClassDefinitionBuilderAbstractOption<T extends ClassStructureBuilder<T>>
-    extends ClassDefinitionBuilderInterfaces<T> {
-  
-  public ClassDefinitionBuilderInterfaces<ClassStructureBuilderAbstractMethodOption> abstractClass();
+public interface ClassStructureBuilder<T extends ClassStructureBuilder<T>> extends ClassMethodBuilder<T>,
+    ClassConstructorBuilder<T>, ClassFieldBuilder<T>, Builder {
+
+  public BuildMetaClass getClassDefinition();
 }
