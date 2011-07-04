@@ -21,7 +21,6 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.UnaryOperator;
-import org.jboss.errai.ioc.rebind.ioc.codegen.literal.LiteralFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.GenUtil;
@@ -30,30 +29,23 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.util.GenUtil;
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class BooleanExpressionBuilder implements BooleanExpression {
-  private Statement lhs;
-  private String lhsExpr;
-  private Statement rhs;
-  private BooleanOperator operator;
+public class BooleanExpressionBuilder extends ExpressionBuilder<BooleanOperator> implements BooleanExpression {
   private boolean negated;
 
   public BooleanExpressionBuilder() {}
 
   public BooleanExpressionBuilder(Statement rhs, BooleanOperator operator) {
-    this.rhs = rhs;
-    this.operator = operator;
+    super(rhs, operator);
   }
 
   public BooleanExpressionBuilder(Statement lhs, Statement rhs, BooleanOperator operator) {
-    this(rhs, operator);
-    this.lhs = lhs;
+    super(lhs, rhs, operator);
   }
 
-  public BooleanExpressionBuilder(String lhsExpr, Statement rhs, BooleanOperator operator) {
-    this(rhs, operator);
-    this.lhsExpr = lhsExpr;
+  public BooleanExpressionBuilder(Object lhs, Object rhs, BooleanOperator operator) {
+    super(lhs, rhs, operator);
   }
-
+  
   public static BooleanExpression create(Statement lhs) {
     return new BooleanExpressionBuilder(lhs, null, null);
   }
@@ -63,120 +55,28 @@ public class BooleanExpressionBuilder implements BooleanExpression {
   }
 
   public static BooleanExpression create(Object lhs, BooleanOperator operator, Object rhs) {
-    Statement toLhs = null;
-    Statement toRhs = null;
-
-    if (lhs != null) {
-      if (lhs instanceof Statement) {
-        toLhs = (Statement) lhs;
-      }
-      else {
-        toLhs = LiteralFactory.getLiteral(lhs);
-      }
-    }
-
-    if (rhs instanceof Statement) {
-      toRhs = (Statement) rhs;
-    }
-    else {
-      toRhs = LiteralFactory.getLiteral(rhs);
-    }
-
-    return new BooleanExpressionBuilder(toLhs, toRhs, operator);
+    return new BooleanExpressionBuilder(lhs, rhs, operator);
   }
 
   @Override
   public String generate(Context context) {
-    if (operator != null) {
-      if (lhs != null)
-        operator.assertCanBeApplied(GenUtil.generate(context, lhs).getType());
-      if (rhs != null)
-        operator.assertCanBeApplied(GenUtil.generate(context, rhs).getType());
-    }
-    else {
+    if (operator == null) {
       lhs = GenUtil.generate(context, lhs);
       lhs = GenUtil.convert(context, lhs, MetaClassFactory.get(Boolean.class));
     }
 
-    String lhsExpr = "";
-    String operExpr = "";
-    String rhsExpr = "";
+    String expr = super.generate(context);
 
-    if (this.lhsExpr != null) {
-      lhsExpr = this.lhsExpr;
-    }
-    else if (lhs != null) {
-      if (lhs instanceof BooleanExpressionBuilder && this.operator != null) {
-        lhsExpr = "(" + lhs.generate(context) + ")";
-      }
-      else {
-        lhsExpr = lhs.generate(context);
-      }
-    }
-
-    if (this.operator != null) {
-      operExpr = " " + this.operator.getCanonicalString() + " ";
-    }
-
-    if (rhs != null) {
-      if (rhs instanceof BooleanExpressionBuilder) {
-        rhsExpr = "(" + rhs.generate(context) + ")";
-      }
-      else {
-        rhsExpr = rhs.generate(context);
-      }
-    }
-
-    String expr = lhsExpr + operExpr + rhsExpr;
     if (negated) {
-      return UnaryOperator.Negate.getCanonicalString()  + "(" + expr + ")";
+      return UnaryOperator.Complement.getCanonicalString()  + "(" + expr + ")";
     }
+    
     return expr;
   }
 
   @Override
   public MetaClass getType() {
     return MetaClassFactory.get(boolean.class);
-  }
-
-  @Override
-  public Statement getLhs() {
-    return lhs;
-  }
-
-  @Override
-  public void setLhs(Statement lhs) {
-    this.lhs = lhs;
-  }
-
-  @Override
-  public String getLhsExpr() {
-    return lhsExpr;
-  }
-
-  @Override
-  public void setLhsExpr(String lhsExpr) {
-    this.lhsExpr = lhsExpr;
-  }
-
-  @Override
-  public Statement getRhs() {
-    return rhs;
-  }
-
-  @Override
-  public void setRhs(Statement rhs) {
-    this.rhs = rhs;
-  }
-
-  @Override
-  public BooleanOperator getOperator() {
-    return operator;
-  }
-
-  @Override
-  public void setOperator(BooleanOperator operator) {
-    this.operator = operator;
   }
 
   @Override

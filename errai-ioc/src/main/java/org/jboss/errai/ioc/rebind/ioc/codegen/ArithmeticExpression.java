@@ -17,11 +17,10 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen;
 
 /**
- * Represents a boolean expression. 
+ * Represents an arithmetic expression. 
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface BooleanExpression extends Expression<BooleanOperator>, Statement {
+public interface ArithmeticExpression extends Expression<ArithmeticOperator>, Statement {
   
-  public BooleanExpression negate();
 }

@@ -19,6 +19,7 @@ package org.jboss.errai.ioc.tests.rebind;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.ArithmeticOperator;
 import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
@@ -27,6 +28,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidExpressionException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.Arithmetic;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Bool;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Refs;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
@@ -50,7 +52,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
 
     assertEquals("Failed to generate empty if block using no rhs", EMPTY_IF_BLOCK_NO_RHS, s);
   }
-  
+
   @Test
   public void testEmptyIfBlockUsingNoRhsAndNegation() {
     String s = StatementBuilder.create()
@@ -251,7 +253,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
     catch (InvalidTypeException e) {
       // expected
     }
-    
+
     try {
       StatementBuilder.create()
           .declareVariable("str", String.class)
@@ -327,25 +329,46 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
     assertEquals("Failed to generate if block using nested boolean expressions",
         IF_ELSEIF_BLOCK_UNCHAINED_NESTED_EXPRESSIONS, s);
   }
-  
- 
+
   @Test
-  public void testIfBlockUnchainedWithNestedExpressionsUsingNegation() {
+  public void testIfBlockUnchainedExpressionUsingNegation() {
     Context ctx = Context.create().addVariable("a", boolean.class)
         .addVariable("b", boolean.class);
 
-    String s = Stmt.create(ctx)
-        .if_(Bool.expr(Bool.expr("foo", BooleanOperator.Equals, "bar"),
-            BooleanOperator.Or,
-            Bool.expr(Bool.expr("cat", BooleanOperator.Equals, "dog"), BooleanOperator.And,
-                Bool.expr("girl", BooleanOperator.NotEquals, "boy"))))
-        .finish()
-        .elseif_(Bool.expr(Stmt.create().loadVariable("a"), BooleanOperator.And, Bool.expr(Stmt.create().loadVariable("b")).negate()))
-          .append(Stmt.create().loadStatic(System.class, "out").invoke("println", Refs.get("a")))
-        .finish()
-        .toJavaString();
-    
+    String s =
+        Stmt.create(ctx)
+            .if_(Bool.expr(Stmt.create().loadVariable("a"), BooleanOperator.And, 
+                  Bool.expr(Stmt.create().loadVariable("b")).negate()))
+            .append(Stmt.create().loadStatic(System.class, "out").invoke("println", Refs.get("a")))
+            .finish()
+            .toJavaString();
+
     assertEquals("Failed to generate if block using nested boolean expressions",
-        IF_ELSEIF_BLOCK_UNCHAINED_NESTED_EXPRESSIONS_USING_NEGATION, s);
+        IF_BLOCK_UNCHAINED_WITH_EXPRESSION_USING_NEGATION, s);
+  }
+  
+  @Test
+  public void testIfBlockUnchainedExpressionUsingArithmetics() {
+    Context ctx = Context.create()
+        .addVariable("a", Integer.class)
+        .addVariable("b", Integer.class)
+        .addVariable("c", Float.class);
+
+    String s =
+        Stmt.create(ctx)
+            .if_(Bool.expr(
+                Arithmetic.expr(
+                  Arithmetic.expr(Stmt.create().loadVariable("a"), ArithmeticOperator.Addition, 
+                    Stmt.create().loadVariable("b")), 
+                  ArithmeticOperator.Division, 
+                  Arithmetic.expr(Stmt.create().loadVariable("c")))
+                , BooleanOperator.GreaterThan, 1)
+                )
+            .append(Stmt.create().loadStatic(System.class, "out").invoke("println", Refs.get("a")))
+            .finish()
+            .toJavaString();
+
+    assertEquals("Failed to generate if block using nested boolean expressions",
+        IF_BLOCK_UNCHAINED_WITH_EXPRESSION_USING_ARITHMETICS, s);
   }
 }
