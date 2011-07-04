@@ -28,7 +28,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidExpressionException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.Arithmetic;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.Arith;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Bool;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Refs;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
@@ -337,7 +337,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
 
     String s =
         Stmt.create(ctx)
-            .if_(Bool.expr(Stmt.create().loadVariable("a"), BooleanOperator.And, 
+            .if_(Bool.expr(Stmt.create().loadVariable("a"), BooleanOperator.And,
                   Bool.expr(Stmt.create().loadVariable("b")).negate()))
             .append(Stmt.create().loadStatic(System.class, "out").invoke("println", Refs.get("a")))
             .finish()
@@ -346,7 +346,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
     assertEquals("Failed to generate if block using nested boolean expressions",
         IF_BLOCK_UNCHAINED_WITH_EXPRESSION_USING_NEGATION, s);
   }
-  
+
   @Test
   public void testIfBlockUnchainedExpressionUsingArithmetics() {
     Context ctx = Context.create()
@@ -357,18 +357,17 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
     String s =
         Stmt.create(ctx)
             .if_(Bool.expr(
-                Arithmetic.expr(
-                  Arithmetic.expr(Stmt.create().loadVariable("a"), ArithmeticOperator.Addition, 
-                    Stmt.create().loadVariable("b")), 
-                  ArithmeticOperator.Division, 
-                  Arithmetic.expr(Stmt.create().loadVariable("c")))
-                , BooleanOperator.GreaterThan, 1)
-                )
+                    Arith.expr(
+                        Arith.expr(Stmt.create().loadVariable("a"), ArithmeticOperator.Addition,
+                            Stmt.create().loadVariable("b")),
+                        ArithmeticOperator.Division,
+                        Stmt.create().loadVariable("c")),
+                 BooleanOperator.GreaterThan, 1))
             .append(Stmt.create().loadStatic(System.class, "out").invoke("println", Refs.get("a")))
             .finish()
             .toJavaString();
 
-    assertEquals("Failed to generate if block using nested boolean expressions",
+    assertEquals("Failed to generate if block using arithmetic expressions",
         IF_BLOCK_UNCHAINED_WITH_EXPRESSION_USING_ARITHMETICS, s);
   }
 }

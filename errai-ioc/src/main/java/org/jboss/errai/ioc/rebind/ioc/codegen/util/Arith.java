@@ -24,7 +24,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ArithmeticExpressionB
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class Arithmetic {
+public class Arith {
 
   public static ArithmeticExpression expr(Object lhs, ArithmeticOperator operator, Object rhs) {
     return ArithmeticExpressionBuilder.create(lhs, operator, rhs);
