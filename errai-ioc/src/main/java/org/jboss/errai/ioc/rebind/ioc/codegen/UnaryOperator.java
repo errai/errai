@@ -25,7 +25,8 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 public enum UnaryOperator implements Operator {
   New("new", 0),
   Increment("++", 0),
-  Decrement("--", 0);
+  Decrement("--", 0),
+  Negate("!", 0);
 
   private final Operator operator;
 

@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
 public class AnnotationEncoderTest extends AbstractStatementBuilderTest {
 
   @Test
-  public void testEncode() {
+  public void testEncodeAnnotation() {
     String enc = AnnotationEncoder.encode(PostConstruct.class.getAnnotation(Target.class)).generate(null);
 
     assertEquals("new java.lang.annotation.Target() { " +
@@ -49,7 +49,7 @@ public class AnnotationEncoderTest extends AbstractStatementBuilderTest {
   }
 
   @Test
-  public void testEncodeComplexAnnotation() {
+  public void testEncodeAnnotationWithMultipleProperties() {
     String enc = AnnotationEncoder.encode(MyBean.class.getAnnotation(MyTestAnnotation.class)).generate(null);
 
     assertEquals("new org.jboss.errai.ioc.tests.rebind.model.MyTestAnnotation() { " +

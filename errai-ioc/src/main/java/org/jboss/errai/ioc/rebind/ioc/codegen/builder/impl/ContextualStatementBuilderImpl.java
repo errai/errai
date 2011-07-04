@@ -122,6 +122,11 @@ public class ContextualStatementBuilderImpl extends AbstractStatementBuilder imp
     return new IfBlockBuilderImpl(context, callElementBuilder).if_(op, rhs);
   }
 
+  @Override
+  public BlockBuilder<ElseBlockBuilder> ifNot() {
+    return new IfBlockBuilderImpl(context, callElementBuilder).ifNot();
+  }
+  
   // Switch
   @Override
   public CaseBlockBuilder switch_() {

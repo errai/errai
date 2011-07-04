@@ -26,4 +26,6 @@ public interface ContextualIfBlockBuilder extends Statement, Builder {
   BlockBuilder<ElseBlockBuilder> if_();
   BlockBuilder<ElseBlockBuilder> if_(BooleanOperator op, Statement rhs);
   BlockBuilder<ElseBlockBuilder> if_(BooleanOperator op, Object rhs);
+  
+  BlockBuilder<ElseBlockBuilder> ifNot();
 }

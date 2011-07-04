@@ -20,6 +20,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanExpression;
 import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.UnaryOperator;
 import org.jboss.errai.ioc.rebind.ioc.codegen.literal.LiteralFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
@@ -34,6 +35,7 @@ public class BooleanExpressionBuilder implements BooleanExpression {
   private String lhsExpr;
   private Statement rhs;
   private BooleanOperator operator;
+  private boolean negated;
 
   public BooleanExpressionBuilder() {}
 
@@ -55,11 +57,11 @@ public class BooleanExpressionBuilder implements BooleanExpression {
   public static BooleanExpression create(Statement lhs) {
     return new BooleanExpressionBuilder(lhs, null, null);
   }
-  
+
   public static BooleanExpression create(BooleanOperator operator, Object rhs) {
     return create(null, operator, rhs);
   }
-  
+
   public static BooleanExpression create(Object lhs, BooleanOperator operator, Object rhs) {
     Statement toLhs = null;
     Statement toRhs = null;
@@ -125,7 +127,11 @@ public class BooleanExpressionBuilder implements BooleanExpression {
       }
     }
 
-    return lhsExpr + operExpr + rhsExpr;
+    String expr = lhsExpr + operExpr + rhsExpr;
+    if (negated) {
+      return UnaryOperator.Negate.getCanonicalString()  + "(" + expr + ")";
+    }
+    return expr;
   }
 
   @Override
@@ -142,7 +148,7 @@ public class BooleanExpressionBuilder implements BooleanExpression {
   public void setLhs(Statement lhs) {
     this.lhs = lhs;
   }
-  
+
   @Override
   public String getLhsExpr() {
     return lhsExpr;
@@ -152,7 +158,7 @@ public class BooleanExpressionBuilder implements BooleanExpression {
   public void setLhsExpr(String lhsExpr) {
     this.lhsExpr = lhsExpr;
   }
-  
+
   @Override
   public Statement getRhs() {
     return rhs;
@@ -167,9 +173,15 @@ public class BooleanExpressionBuilder implements BooleanExpression {
   public BooleanOperator getOperator() {
     return operator;
   }
-  
+
   @Override
   public void setOperator(BooleanOperator operator) {
     this.operator = operator;
+  }
+
+  @Override
+  public BooleanExpression negate() {
+    this.negated = !negated;
+    return this;
   }
 }

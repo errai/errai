@@ -48,7 +48,7 @@ public class SwitchBlockBuilderTest extends AbstractStatementBuilderTest impleme
   }
 
   @Test
-  public void testSwitchBlockWithInvalidCaseValueWithEnumForInt() {
+  public void testSwitchBlockWithInvalidCaseValueUsingEnumForInt() {
     try {
       Context c = Context.create().addVariable("n", int.class);
       StatementBuilder.create(c)
@@ -64,7 +64,7 @@ public class SwitchBlockBuilderTest extends AbstractStatementBuilderTest impleme
   }
 
   @Test
-  public void testSwitchBlockWithInvalidCaseValueWithIntForEnum() {
+  public void testSwitchBlockWithInvalidCaseValueUsingIntForEnum() {
     try {
       Context c = Context.create().addVariable("t", TestEnum.class);
       StatementBuilder.create(c)
@@ -190,7 +190,7 @@ public class SwitchBlockBuilderTest extends AbstractStatementBuilderTest impleme
   }
   
   @Test
-  public void testSwitchBlockOnCharChained() {
+  public void testSwitchBlockChainedOnChar() {
     String s = StatementBuilder.create()
         .declareVariable("c", char.class)
         .loadVariable("c")

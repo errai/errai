@@ -39,7 +39,7 @@ public class TryBlockBuilderTest extends AbstractStatementBuilderTest implements
   }
   
   @Test
-  public void testEmptyTryFinallyBlock() {
+  public void testTryFinallyBlock() {
     String s = StatementBuilder.create()
         .try_()
         .finish()
@@ -51,7 +51,7 @@ public class TryBlockBuilderTest extends AbstractStatementBuilderTest implements
   }
   
   @Test
-  public void testEmptyTryCatchBlock() {
+  public void testTryCatchBlock() {
     String s = StatementBuilder.create()
         .try_()
         .finish()
@@ -63,7 +63,7 @@ public class TryBlockBuilderTest extends AbstractStatementBuilderTest implements
   }
   
   @Test
-  public void testEmptyTryCatchFinallyBlock() {
+  public void testTryCatchFinallyBlockEmpty() {
     String s = StatementBuilder.create()
         .try_()
         .finish()
@@ -77,7 +77,7 @@ public class TryBlockBuilderTest extends AbstractStatementBuilderTest implements
   }
   
   @Test
-  public void testEmptyTryMultipleCatchFinallyBlock() {
+  public void testTryMultipleCatchFinallyBlock() {
     String s = StatementBuilder.create()
         .try_()
         .finish()

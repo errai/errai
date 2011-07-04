@@ -462,7 +462,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .append(Stmt.create()
             .for_(Stmt.create().loadVariable("i").assignValue(0),
                 Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100),
-                StatementBuilder.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
+                Stmt.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
             .append(Stmt.create()
                 .if_(Bool.expr(Variable.get("i"), BooleanOperator.Equals, 50))
                 .append(Stmt.create().continue_())
@@ -484,7 +484,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .append(Stmt.create()
             .for_(Stmt.create().loadVariable("i").assignValue(0),
                 Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100),
-                StatementBuilder.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
+                Stmt.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
             .append(Stmt.create()
                 .if_(Bool.expr(Variable.get("i"), BooleanOperator.Equals, 50))
                 .append(Stmt.create().continue_("label"))
@@ -505,7 +505,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .append(Stmt.create()
             .for_(Stmt.create().loadVariable("i").assignValue(0),
                 Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100),
-                StatementBuilder.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
+                Stmt.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
             .append(Stmt.create()
                 .if_(Bool.expr(Variable.get("i"), BooleanOperator.Equals, 50))
                 .append(Stmt.create().break_())
@@ -527,7 +527,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .append(Stmt.create()
             .for_(Stmt.create().loadVariable("i").assignValue(0),
                 Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100),
-                StatementBuilder.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
+                Stmt.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
             .append(Stmt.create()
                 .if_(Bool.expr(Variable.get("i"), BooleanOperator.Equals, 50))
                 .append(Stmt.create().break_("label"))
@@ -550,7 +550,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
           .append(Stmt.create()
               .for_(Stmt.create().loadVariable("i").assignValue(0),
                   Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100),
-                  StatementBuilder.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
+                  Stmt.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
               .append(Stmt.create().continue_("undefinedlabel"))
               .finish())
           .finish()

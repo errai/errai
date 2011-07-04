@@ -16,10 +16,12 @@
 
 package org.jboss.errai.ioc.tests.rebind;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.VariableReference;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ContextBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ObjectBuilder;
@@ -207,6 +209,11 @@ public class ContextBuilderTest extends AbstractStatementBuilderTest {
     VariableReference str = ctx.getVariable("str");
     assertEquals("Wrong variable name", "str", str.getName());
     Assert.assertEquals("Wrong variable type", MetaClassFactory.get(String.class), str.getType());
+    
+    // variable value cannot be verified before initialization statement was generated.
+    Variable v = ctx.getVariables().get("str");
+    v.generate(ctx);
+    assertNotNull("Value could not be generated", v.getValue());
   }
 
   @Test
@@ -215,6 +222,11 @@ public class ContextBuilderTest extends AbstractStatementBuilderTest {
 
     VariableReference str = ctx.getVariable("str");
     assertEquals("Wrong variable name", "str", str.getName());
-    // variable value cannot be verified before initialization statement was generated.
+    
+    // variable type and value cannot be verified before initialization statement was generated.
+    Variable v = ctx.getVariables().get("str");
+    v.generate(ctx);
+    assertNotNull("Value could not be generated", v.getValue());
+    Assert.assertEquals("Wrong variable type", MetaClassFactory.get(String.class), v.getType());
   }
 }
