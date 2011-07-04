@@ -16,54 +16,6 @@
 
 package org.jboss.errai.ioc.rebind;
 
-import java.io.PrintWriter;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.rebind.ScannerSingleton;
-import org.jboss.errai.bus.server.ErraiBootstrapFailure;
-import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
-import org.jboss.errai.ioc.client.InterfaceInjectionContext;
-import org.jboss.errai.ioc.client.api.Bootstrapper;
-import org.jboss.errai.ioc.client.api.CodeDecorator;
-import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
-import org.jboss.errai.ioc.client.api.CreatePanel;
-import org.jboss.errai.ioc.client.api.EntryPoint;
-import org.jboss.errai.ioc.client.api.GeneratedBy;
-import org.jboss.errai.ioc.client.api.IOCProvider;
-import org.jboss.errai.ioc.client.api.ToPanel;
-import org.jboss.errai.ioc.client.api.ToRootPanel;
-import org.jboss.errai.ioc.client.api.TypeProvider;
-import org.jboss.errai.ioc.rebind.ioc.ContextualProviderInjector;
-import org.jboss.errai.ioc.rebind.ioc.IOCDecoratorExtension;
-import org.jboss.errai.ioc.rebind.ioc.IOCExtensionConfigurator;
-import org.jboss.errai.ioc.rebind.ioc.InjectUtil;
-import org.jboss.errai.ioc.rebind.ioc.InjectionFailure;
-import org.jboss.errai.ioc.rebind.ioc.InjectorFactory;
-import org.jboss.errai.ioc.rebind.ioc.ProviderInjector;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BlockBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ClassStructureBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ClassBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.MethodBlockBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameterizedType;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.build.BuildMetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
-
 import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
@@ -75,6 +27,32 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
+import org.jboss.errai.bus.client.ErraiBus;
+import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.rebind.ScannerSingleton;
+import org.jboss.errai.bus.server.ErraiBootstrapFailure;
+import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
+import org.jboss.errai.ioc.client.InterfaceInjectionContext;
+import org.jboss.errai.ioc.client.api.*;
+import org.jboss.errai.ioc.rebind.ioc.*;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BlockBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ClassStructureBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ClassBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameterizedType;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.build.BuildMetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
+
+import java.io.PrintWriter;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.*;
 
 /**
  * The main generator class for the errai-ioc framework.
@@ -345,8 +323,6 @@ public class IOCGenerator extends Generator {
   }
 
   private void generateExtensions(SourceWriter sourceWriter, BlockBuilder<?> blockBuilder) {
-
-
     // InterfaceInjectionContext ctx = new InterfaceInjectionContext()
     blockBuilder.append(Stmt.create().declareVariable("ctx", InterfaceInjectionContext.class,
             Stmt.create().newObject(InterfaceInjectionContext.class)));

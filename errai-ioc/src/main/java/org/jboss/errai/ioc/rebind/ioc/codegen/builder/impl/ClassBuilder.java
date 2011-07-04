@@ -223,7 +223,6 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
 
   private ConstructorBlockBuilder<T> genConstructor(final Scope scope, final DefParameters
           defParameters) {
-
     return new ConstructorBlockBuilderImpl<T>(new BuildCallback<T>() {
 
       @Override
@@ -234,6 +233,7 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
 
         classDefinition.addConstructor(buildMetaConstructor);
 
+        //noinspection unchecked
         return (T) ClassBuilder.this;
       }
     });
@@ -375,6 +375,7 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
             returnType, defParameters, throwsDeclaration, false);
  
         classDefinition.addMethod(buildMetaMethod);
+        //noinspection unchecked
         return (T) ClassBuilder.this;
       }
     });
@@ -431,6 +432,7 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
 
         classDefinition.addField(buildMetaField);
 
+        //noinspection unchecked
         return (T) ClassBuilder.this;
       }
     }, scope, type, name);

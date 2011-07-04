@@ -19,7 +19,7 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public interface ConstructorBlockBuilder<T> extends BlockBuilder<T> {
+public interface ConstructorBlockBuilder<T extends Builder> extends BlockBuilder<T> {
   public BlockBuilder<T> callSuper();
   public BlockBuilder<T> callSuper(Object... parameters);
 
