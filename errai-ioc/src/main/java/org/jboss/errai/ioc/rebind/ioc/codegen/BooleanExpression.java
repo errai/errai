@@ -35,4 +35,6 @@ public interface BooleanExpression extends Statement {
   
   public BooleanOperator getOperator();
   public void setOperator(BooleanOperator operator);
+  
+  public BooleanExpression negate();
 }

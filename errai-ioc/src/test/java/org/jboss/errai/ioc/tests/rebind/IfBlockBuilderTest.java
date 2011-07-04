@@ -50,6 +50,18 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
 
     assertEquals("Failed to generate empty if block using no rhs", EMPTY_IF_BLOCK_NO_RHS, s);
   }
+  
+  @Test
+  public void testEmptyIfBlockUsingNoRhsAndNegation() {
+    String s = StatementBuilder.create()
+        .declareVariable("str", String.class)
+        .loadVariable("str")
+        .invoke("endsWith", "abc")
+        .ifNot()
+        .finish().toJavaString();
+
+    assertEquals("Failed to generate empty if block using no rhs", EMPTY_IF_BLOCK_NO_RHS_AND_NEGATION, s);
+  }
 
   @Test
   public void testEmptyIfBlockUsingLiteralRhs() {
@@ -166,7 +178,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
   }
 
   @Test
-  public void testIfElseIfBlockUsingNoRhsAndElseIfKeyword() {
+  public void testIfElseIfBlockUsingNoRhsAndElseifKeyword() {
     Context c = ContextBuilder.create().addVariable("s", String.class).addVariable("n", Integer.class).getContext();
 
     String s = StatementBuilder.create(c)
@@ -183,7 +195,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
   }
 
   @Test
-  public void testIfElseIfElseBlockUsingNoRhsAndElseIfKeyword() {
+  public void testIfElseIfElseBlockUsingNoRhsAndElseifKeyword() {
     Context c = ContextBuilder.create().addVariable("s", String.class).addVariable("n", Integer.class).getContext();
 
     String s = StatementBuilder.create(c)
@@ -199,11 +211,11 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
           .append(StatementBuilder.create(c).loadVariable("n").assignValue(2))
         .finish().toJavaString();
 
-    assertEquals("Failed to generate if-elseif-else block using no rhs", IF_ELSEIF_ELSE_BLOCK_NO_RHS, s);
+    assertEquals("Failed to generate if - elseif - else block using no rhs", IF_ELSEIF_ELSE_BLOCK_NO_RHS, s);
   }
 
   @Test
-  public void testIfElseIfBlockUsingRhsAndElseIfKeyword() {
+  public void testIfElseIfBlockUsingRhsAndElseifKeyword() {
     Context c = ContextBuilder.create().addVariable("n", Integer.class).addVariable("m", Integer.class).getContext();
 
     String s = StatementBuilder.create(c)
@@ -225,13 +237,27 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
   }
 
   @Test
-  public void testIfBlockWithInvalidBooleanExpression() {
+  public void testIfBlockWithInvalidNonBooleanExpression() {
     try {
       StatementBuilder.create()
           .declareVariable("str", String.class)
           .loadVariable("str")
           .invoke("compareTo", "asd")
           .if_().finish()
+          .toJavaString();
+
+      fail("Expected InvalidTypeException");
+    }
+    catch (InvalidTypeException e) {
+      // expected
+    }
+    
+    try {
+      StatementBuilder.create()
+          .declareVariable("str", String.class)
+          .loadVariable("str")
+          .ifNot()
+          .finish()
           .toJavaString();
 
       fail("Expected InvalidTypeException");
@@ -283,7 +309,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
   }
 
   @Test
-  public void testIfBlockUnchainedNestedExpresions() {
+  public void testIfBlockUnchainedWithNestedExpressions() {
     Context ctx = Context.create().addVariable("a", boolean.class)
         .addVariable("b", boolean.class);
 
@@ -300,5 +326,26 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
 
     assertEquals("Failed to generate if block using nested boolean expressions",
         IF_ELSEIF_BLOCK_UNCHAINED_NESTED_EXPRESSIONS, s);
+  }
+  
+ 
+  @Test
+  public void testIfBlockUnchainedWithNestedExpressionsUsingNegation() {
+    Context ctx = Context.create().addVariable("a", boolean.class)
+        .addVariable("b", boolean.class);
+
+    String s = Stmt.create(ctx)
+        .if_(Bool.expr(Bool.expr("foo", BooleanOperator.Equals, "bar"),
+            BooleanOperator.Or,
+            Bool.expr(Bool.expr("cat", BooleanOperator.Equals, "dog"), BooleanOperator.And,
+                Bool.expr("girl", BooleanOperator.NotEquals, "boy"))))
+        .finish()
+        .elseif_(Bool.expr(Stmt.create().loadVariable("a"), BooleanOperator.And, Bool.expr(Stmt.create().loadVariable("b")).negate()))
+          .append(Stmt.create().loadStatic(System.class, "out").invoke("println", Refs.get("a")))
+        .finish()
+        .toJavaString();
+    
+    assertEquals("Failed to generate if block using nested boolean expressions",
+        IF_ELSEIF_BLOCK_UNCHAINED_NESTED_EXPRESSIONS_USING_NEGATION, s);
   }
 }

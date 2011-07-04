@@ -79,7 +79,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
   }
 
   @Test
-  public void testInvokeOnBestMatchingMethod() {
+  public void testInvokeBestMatchingMethod() {
     String s = StatementBuilder.create()
         .declareVariable("n", Integer.class)
         .loadVariable("n")
