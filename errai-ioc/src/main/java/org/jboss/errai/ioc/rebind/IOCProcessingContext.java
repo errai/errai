@@ -34,7 +34,7 @@ import com.google.gwt.user.rebind.SourceWriter;
  */
 public class IOCProcessingContext extends ProcessingContext {
   protected Context context;
-  protected MetaClass bootStrapClass;
+  protected MetaClass bootstrapClass;
   protected BlockBuilder<?> blockBuilder;
 
   public IOCProcessingContext(TreeLogger treeLogger,
@@ -42,7 +42,7 @@ public class IOCProcessingContext extends ProcessingContext {
                               SourceWriter writer,
                               TypeOracle oracle,
                               Context context,
-                              MetaClass bootStrapClass,
+                              MetaClass bootstrapClass,
                               BlockBuilder<?> blockBuilder) {
     super(treeLogger, generatorContext, writer, oracle);
     this.context = context;
@@ -52,7 +52,7 @@ public class IOCProcessingContext extends ProcessingContext {
 
   public IOCProcessingContext(ProcessingContext ctx,
                               Context context,
-                              MetaClass bootStrapClass,
+                              MetaClass bootstrapClass,
                               BlockBuilder<?> blockBuilder) {
     super(ctx.getTreeLogger(), ctx.getGeneratorContext(), ctx.getWriter(), ctx.getOracle());
     this.context = context;

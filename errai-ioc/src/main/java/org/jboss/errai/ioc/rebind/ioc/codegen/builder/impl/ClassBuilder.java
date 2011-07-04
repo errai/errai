@@ -16,11 +16,7 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.DefParameters;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Parameter;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.ThrowsDeclaration;
+import org.jboss.errai.ioc.rebind.ioc.codegen.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BuildCallback;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ClassDefinitionBuilderAbstractOption;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ClassDefinitionBuilderInterfaces;
@@ -368,9 +364,10 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
                                           final String name,
                                           final DefParameters defParameters) {
 
-    return new MethodBlockBuilder<T>(new MethodBuildCallback<T>() {
+    return new MethodBlockBuilderImpl<T>(new MethodBuildCallback<T>() {
       @Override
-      public T callback(final Statement statement, final ThrowsDeclaration throwsDeclaration) {
+      public T callback(final Statement statement, final DefModifiers modifies, final ThrowsDeclaration
+              throwsDeclaration) {
         BuildMetaMethod buildMetaMethod = new BuildMetaMethod(classDefinition, statement, scope, name, 
             returnType, defParameters, throwsDeclaration, false);
  

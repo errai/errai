@@ -25,7 +25,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface ClassMethodBuilder<T extends ClassStructureBuilder<T>> extends ClassConstructorBuilder<T>,
-    ClassFieldBuilder<T>, Builder {
+                                                                                ClassFieldBuilder<T>, Builder {
 
   public MethodBlockBuilder<T> publicMethod(MetaClass returnType, String name);
 
@@ -56,12 +56,12 @@ public interface ClassMethodBuilder<T extends ClassStructureBuilder<T>> extends 
   public MethodBlockBuilder<T> protectedMethod(Class<?> returnType, String name);
 
   public MethodBlockBuilder<T> protectedMethod(MetaClass returnType, String name,
-      MetaClass... parms);
+                                               MetaClass... parms);
 
   public MethodBlockBuilder<T> protectedMethod(Class<?> returnType, String name, Class<?>... parms);
 
   public MethodBlockBuilder<T> protectedMethod(MetaClass returnType, String name,
-      Parameter... parms);
+                                               Parameter... parms);
 
   public MethodBlockBuilder<T> protectedMethod(Class<?> returnType, String name, Parameter... parms);
 

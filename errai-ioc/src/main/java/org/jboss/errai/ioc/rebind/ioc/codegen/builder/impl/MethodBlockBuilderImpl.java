@@ -16,52 +16,72 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.BlockStatement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.DefModifiers;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Modifier;
 import org.jboss.errai.ioc.rebind.ioc.codegen.ThrowsDeclaration;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BlockBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.MethodBlockModifiers;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.MethodBuildCallback;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Mike Brock <cbrock@redhat.com>
  */
-public class MethodBlockBuilderAbstractOption<T> extends BlockBuilderImpl<T>
-        implements MethodBlockModifiers<MethodBlockBuilderAbstractOption<T>, T> {
+public class MethodBlockBuilderImpl<T> extends BlockBuilderImpl<T>
+        implements MethodBlockBuilder<T> {
+
   protected ThrowsDeclaration throwsDeclaration = ThrowsDeclaration.none();
   protected MethodBuildCallback<T> callback;
-  protected DefModifiers modifiers = new DefModifiers(Modifier.Abstract);
+  protected DefModifiers modifiers = new DefModifiers();
 
-  public MethodBlockBuilderAbstractOption(MethodBuildCallback<T> callback) {
+  public MethodBlockBuilderImpl(MethodBuildCallback<T> callback) {
     this.callback = callback;
   }
 
-  public T throws_(Class<? extends Throwable>... exceptionTypes) {
-    throwsDeclaration = ThrowsDeclaration.of(exceptionTypes);
-    return callback.callback(null, modifiers, throwsDeclaration);
-  }
-
-  public T throws_(MetaClass... exceptions) {
-    throwsDeclaration = ThrowsDeclaration.of(exceptions);
-    return callback.callback(null, modifiers, throwsDeclaration);
+  public MethodBlockBuilderImpl(BlockStatement blockStatement, MethodBuildCallback<T> callback) {
+    this.blockStatement = blockStatement;
+    this.callback = callback;
   }
 
   @Override
-  public MethodBlockBuilderAbstractOption<T> modifiers(Modifier... modifiers) {
-    this.modifiers.addModifiers(modifiers);
+  public BlockBuilder<T> throws_(Class<? extends Throwable>... exceptionTypes) {
+    throwsDeclaration = ThrowsDeclaration.of(exceptionTypes);
+    return this;
+  }
+
+  @Override
+  public BlockBuilder<T> throws_(MetaClass... exceptions) {
+    throwsDeclaration = ThrowsDeclaration.of(exceptions);
+    return this;
+  }
+
+
+  @Override
+  public MethodBlockBuilder<T> modifiers(Modifier... modifiers) {
+    for (Modifier m : modifiers) {
+      switch (m) {
+        case Transient:
+        case Volatile:
+          throw new RuntimeException("illegal modifier for method: " + m);
+
+        default:
+          this.modifiers.addModifiers(m);
+      }
+    }
+
     return this;
   }
 
   @Override
   public BlockBuilder<T> body() {
-    return null;
+    return this;
   }
 
   @Override
   public T finish() {
     if (callback != null) {
-      return callback.callback(null, modifiers, throwsDeclaration);
+      return callback.callback(blockStatement, modifiers, throwsDeclaration);
     }
     return null;
   }
