@@ -348,10 +348,17 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
     String cls = ClassBuilder.define("my.test.Clazz")
             .publicScope().body()
             .publicMethod(void.class, "test").modifiers(Modifier.Static)
-              .body().append(Stmt.create().loadStatic(System.class, "out").invoke("println", "Hello, World!"))
+              .body()
+                .append(Stmt.create().loadStatic(System.class, "out").invoke("println", "Hello, World!"))
             .finish()
             .toJavaString();
-    System.out.println(cls);
 
+    assertEquals("package my.test;\n" +
+            "\n" +
+            "public class Clazz {\n" +
+            "    public static void test() {\n" +
+            "        System.out.println(\"Hello, World!\");\n" +
+            "    }\n" +
+            "}", cls);
   }
 }
