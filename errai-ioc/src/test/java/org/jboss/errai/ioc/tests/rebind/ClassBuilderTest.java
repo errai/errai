@@ -116,7 +116,7 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
 
     assertEquals("failed to generate abstract class", ABSTRACT_CLASS, cls);
   }
-
+  
   @Test
   public void testDefineAbstractClassWithAbstractMethods() {
 

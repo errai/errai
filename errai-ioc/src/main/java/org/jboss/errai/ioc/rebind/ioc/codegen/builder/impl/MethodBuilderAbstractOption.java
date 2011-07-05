@@ -17,17 +17,18 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.ThrowsDeclaration;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.Finishable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.MethodBuildCallback;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class MethodBlockBuilderAbstractOption<T> extends BlockBuilderImpl<T> {
+public class MethodBuilderAbstractOption<T> implements Finishable<T> {
   protected ThrowsDeclaration throwsDeclaration = ThrowsDeclaration.none();
   protected MethodBuildCallback<T> callback;
 
-  public MethodBlockBuilderAbstractOption(MethodBuildCallback<T> callback) {
+  public MethodBuilderAbstractOption(MethodBuildCallback<T> callback) {
     this.callback = callback;
   }
   

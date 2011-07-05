@@ -17,7 +17,7 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.Parameter;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.MethodBlockBuilderAbstractOption;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.MethodBuilderAbstractOption;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
@@ -29,57 +29,57 @@ public interface ClassStructureBuilderAbstractMethodOption extends
     ClassFieldBuilder<ClassStructureBuilderAbstractMethodOption>,
     Builder {
 
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> publicAbstractMethod(
+  public MethodBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> publicAbstractMethod(
       MetaClass returnType, String name);
 
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> publicAbstractMethod(
+  public MethodBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> publicAbstractMethod(
       Class<?> returnType, String name);
 
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> publicAbstractMethod(
+  public MethodBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> publicAbstractMethod(
       MetaClass returnType, String name, MetaClass... parms);
 
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> publicAbstractMethod(
+  public MethodBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> publicAbstractMethod(
       Class<?> returnType, String name, Class<?>... parms);
 
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> publicAbstractMethod(
+  public MethodBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> publicAbstractMethod(
       MetaClass returnType, String name, Parameter... parms);
 
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> publicAbstractMethod(
+  public MethodBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> publicAbstractMethod(
       Class<?> returnType, String name, Parameter... parms);
 
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> protectedAbstractMethod(
+  public MethodBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> protectedAbstractMethod(
       MetaClass returnType, String name);
 
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> protectedAbstractMethod(
+  public MethodBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> protectedAbstractMethod(
       Class<?> returnType, String name);
 
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> protectedAbstractMethod(
+  public MethodBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> protectedAbstractMethod(
       MetaClass returnType, String name, MetaClass... parms);
 
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> protectedAbstractMethod(
+  public MethodBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> protectedAbstractMethod(
       Class<?> returnType, String name, Class<?>... parms);
 
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> protectedAbstractMethod(
+  public MethodBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> protectedAbstractMethod(
       MetaClass returnType, String name, Parameter... parms);
 
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> protectedAbstractMethod(
+  public MethodBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> protectedAbstractMethod(
       Class<?> returnType, String name, Parameter... parms);
 
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> packageAbstractMethod(
+  public MethodBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> packageAbstractMethod(
       MetaClass returnType, String name);
 
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> packageAbstractMethod(
+  public MethodBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> packageAbstractMethod(
       Class<?> returnType, String name);
 
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> packageAbstractMethod(
+  public MethodBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> packageAbstractMethod(
       MetaClass returnType, String name, MetaClass... parms);
 
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> packageAbstractMethod(
+  public MethodBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> packageAbstractMethod(
       Class<?> returnType, String name, Class<?>... parms);
 
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> packageAbstractMethod(
+  public MethodBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> packageAbstractMethod(
       MetaClass returnType, String name, Parameter... parms);
 
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> packageAbstractMethod(
+  public MethodBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> packageAbstractMethod(
       Class<?> returnType, String name, Parameter... parms);
 }

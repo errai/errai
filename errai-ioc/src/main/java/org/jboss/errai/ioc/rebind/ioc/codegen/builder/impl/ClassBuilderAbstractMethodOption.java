@@ -38,119 +38,119 @@ public class ClassBuilderAbstractMethodOption extends ClassBuilder<ClassStructur
   }
 
   @Override
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> publicAbstractMethod(
+  public MethodBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> publicAbstractMethod(
       MetaClass returnType, String name) {
     return genMethod(Scope.Public, returnType, name, DefParameters.none());
   }
 
   @Override
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> publicAbstractMethod(
+  public MethodBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> publicAbstractMethod(
       Class<?> returnType, String name) {
     return publicAbstractMethod(MetaClassFactory.get(returnType), name);
   }
 
   @Override
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> publicAbstractMethod(
+  public MethodBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> publicAbstractMethod(
       MetaClass returnType, String name, MetaClass... parms) {
     return genMethod(Scope.Public, returnType, name, DefParameters.fromTypeArray(parms));
   }
 
   @Override
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> publicAbstractMethod(
+  public MethodBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> publicAbstractMethod(
       Class<?> returnType, String name, Class<?>... parms) {
     return publicAbstractMethod(MetaClassFactory.get(returnType), name, MetaClassFactory.fromClassArray(parms));
   }
 
   @Override
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> publicAbstractMethod(
+  public MethodBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> publicAbstractMethod(
       MetaClass returnType, String name, Parameter... parms) {
     return genMethod(Scope.Public, returnType, name, DefParameters.fromParameters(parms));
   }
 
   @Override
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> publicAbstractMethod(
+  public MethodBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> publicAbstractMethod(
       Class<?> returnType, String name, Parameter... parms) {
     return publicAbstractMethod(MetaClassFactory.get(returnType), name, parms);
   }
 
   @Override
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> protectedAbstractMethod(
+  public MethodBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> protectedAbstractMethod(
       MetaClass returnType, String name) {
     return genMethod(Scope.Protected, returnType, name, DefParameters.none());
   }
 
   @Override
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> protectedAbstractMethod(
+  public MethodBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> protectedAbstractMethod(
       Class<?> returnType, String name) {
     return protectedAbstractMethod(MetaClassFactory.get(returnType), name);
   }
 
   @Override
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> protectedAbstractMethod(
+  public MethodBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> protectedAbstractMethod(
       MetaClass returnType, String name, MetaClass... parms) {
     return genMethod(Scope.Protected, returnType, name, DefParameters.fromTypeArray(parms));
   }
 
   @Override
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> protectedAbstractMethod(
+  public MethodBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> protectedAbstractMethod(
       Class<?> returnType, String name, Class<?>... parms) {
     return protectedAbstractMethod(MetaClassFactory.get(returnType), name, MetaClassFactory.fromClassArray(parms));
   }
 
   @Override
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> protectedAbstractMethod(
+  public MethodBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> protectedAbstractMethod(
       MetaClass returnType, String name, Parameter... parms) {
     return genMethod(Scope.Protected, returnType, name, DefParameters.fromParameters(parms));
   }
 
   @Override
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> protectedAbstractMethod(
+  public MethodBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> protectedAbstractMethod(
       Class<?> returnType, String name, Parameter... parms) {
     return protectedAbstractMethod(MetaClassFactory.get(returnType), name, parms);
   }
 
   @Override
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> packageAbstractMethod(
+  public MethodBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> packageAbstractMethod(
       MetaClass returnType, String name) {
     return genMethod(Scope.Package, returnType, name, DefParameters.none());
   }
 
   @Override
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> packageAbstractMethod(
+  public MethodBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> packageAbstractMethod(
       Class<?> returnType, String name) {
     return packageAbstractMethod(MetaClassFactory.get(returnType), name);
   }
 
   @Override
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> packageAbstractMethod(
+  public MethodBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> packageAbstractMethod(
       MetaClass returnType, String name, MetaClass... parms) {
     return genMethod(Scope.Package, returnType, name, DefParameters.fromTypeArray(parms));
   }
 
   @Override
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> packageAbstractMethod(
+  public MethodBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> packageAbstractMethod(
       Class<?> returnType, String name, Class<?>... parms) {
     return packageAbstractMethod(MetaClassFactory.get(returnType), name, MetaClassFactory.fromClassArray(parms));
   }
 
   @Override
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> packageAbstractMethod(
+  public MethodBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> packageAbstractMethod(
       MetaClass returnType, String name, Parameter... parms) {
     return genMethod(Scope.Package, returnType, name, DefParameters.fromParameters(parms));
   }
 
   @Override
-  public MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> packageAbstractMethod(
+  public MethodBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> packageAbstractMethod(
       Class<?> returnType, String name, Parameter... parms) {
     return packageAbstractMethod(MetaClassFactory.get(returnType), name, parms);
   }
 
-  private MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> genMethod(final Scope scope,
+  private MethodBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption> genMethod(final Scope scope,
       final MetaClass returnType,
       final String name,
       final DefParameters defParameters) {
 
-    return new MethodBlockBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption>(new MethodBuildCallback<ClassStructureBuilderAbstractMethodOption>() {
+    return new MethodBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption>(new MethodBuildCallback<ClassStructureBuilderAbstractMethodOption>() {
       @Override
       public ClassStructureBuilderAbstractMethodOption callback(final Statement statement, final ThrowsDeclaration throwsDeclaration) {
         BuildMetaMethod buildMetaMethod = new BuildMetaMethod(classDefinition, statement, scope, name,
