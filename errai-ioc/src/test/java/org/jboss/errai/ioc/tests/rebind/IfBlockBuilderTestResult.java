@@ -121,7 +121,7 @@ public interface IfBlockBuilderTestResult {
             "} ";
 
   public static final String IF_BLOCK_UNCHAINED_WITH_EXPRESSION_USING_ARITHMETICS =
-      "   if (((a + b) / (c)) > 1) {" +
+      "   if (((a + b) / c) > 1) {" +
           " System.out.println(a); " +
           "} ";
 }

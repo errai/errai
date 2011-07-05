@@ -122,7 +122,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
           .append(StatementBuilder.create(c).loadVariable("s")
               .invoke("startsWith", "def")
               .if_()
-              .append(StatementBuilder.create(c).loadVariable("n").assignValue(1))
+                .append(StatementBuilder.create(c).loadVariable("n").assignValue(1))
               .finish()
         )
         .finish().toJavaString();
@@ -144,10 +144,10 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
           .append(StatementBuilder.create(c).loadVariable("s")
               .invoke("startsWith", "def")
               .if_()
-              .append(StatementBuilder.create(c).loadVariable("n").assignValue(1))
+                .append(StatementBuilder.create(c).loadVariable("n").assignValue(1))
               .finish()
               .else_()
-              .append(StatementBuilder.create(c).loadVariable("n").assignValue(2))
+                .append(StatementBuilder.create(c).loadVariable("n").assignValue(2))
               .finish()
         )
         .finish().toJavaString();
@@ -168,10 +168,10 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
         .else_()
           .append(StatementBuilder.create(c).loadVariable("m")
               .if_(BooleanOperator.GreaterThan, Variable.get("n"))
-              .append(StatementBuilder.create(c).loadVariable("n").assignValue(1))
+                .append(StatementBuilder.create(c).loadVariable("n").assignValue(1))
               .finish()
               .else_()
-              .append(StatementBuilder.create(c).loadVariable("n").assignValue(2))
+                .append(StatementBuilder.create(c).loadVariable("n").assignValue(2))
               .finish()
         )
         .finish().toJavaString();
@@ -316,10 +316,13 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
         .addVariable("b", boolean.class);
 
     String s = Stmt.create(ctx)
-        .if_(Bool.expr(Bool.expr("foo", BooleanOperator.Equals, "bar"),
-            BooleanOperator.Or,
-            Bool.expr(Bool.expr("cat", BooleanOperator.Equals, "dog"), BooleanOperator.And,
-                Bool.expr("girl", BooleanOperator.NotEquals, "boy"))))
+        .if_(Bool.expr(
+              Bool.expr("foo", BooleanOperator.Equals, "bar"), 
+              BooleanOperator.Or,
+              Bool.expr(
+                  Bool.expr("cat", BooleanOperator.Equals, "dog"), 
+                  BooleanOperator.And, 
+                  Bool.expr("girl", BooleanOperator.NotEquals, "boy"))))
         .finish()
         .elseif_(Bool.expr(Stmt.create().loadVariable("a"), BooleanOperator.And, Stmt.create().loadVariable("b")))
           .append(Stmt.create().loadStatic(System.class, "out").invoke("println", Refs.get("a")))
@@ -331,7 +334,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
   }
 
   @Test
-  public void testIfBlockUnchainedExpressionUsingNegation() {
+  public void testIfBlockUnchainedWithExpressionUsingNegation() {
     Context ctx = Context.create().addVariable("a", boolean.class)
         .addVariable("b", boolean.class);
 
@@ -348,7 +351,7 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
   }
 
   @Test
-  public void testIfBlockUnchainedExpressionUsingArithmetics() {
+  public void testIfBlockUnchainedWithExpressionUsingArithmetics() {
     Context ctx = Context.create()
         .addVariable("a", Integer.class)
         .addVariable("b", Integer.class)
@@ -357,11 +360,11 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
     String s =
         Stmt.create(ctx)
             .if_(Bool.expr(
-                    Arith.expr(
-                        Arith.expr(Stmt.create().loadVariable("a"), ArithmeticOperator.Addition,
-                            Stmt.create().loadVariable("b")),
-                        ArithmeticOperator.Division,
-                        Stmt.create().loadVariable("c")),
+                Arith.expr(
+                    Arith.expr(Stmt.create().loadVariable("a"), ArithmeticOperator.Addition, 
+                        Stmt.create().loadVariable("b")),
+                    ArithmeticOperator.Division,
+                    Stmt.create().loadVariable("c")),
                  BooleanOperator.GreaterThan, 1))
             .append(Stmt.create().loadStatic(System.class, "out").invoke("println", Refs.get("a")))
             .finish()
