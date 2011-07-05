@@ -17,11 +17,24 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen;
 
 /**
- * Represents a boolean expression. 
+ * Represents an expression. The LHS can either be a {@link Statement} 
+ * or the generated {@link String} thereof.
+ * 
+ * @param <T> the type of operator to be used for the expression.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface BooleanExpression extends Expression<BooleanOperator>, Statement {
+public interface Expression<T extends Operator> extends Statement {
   
-  public BooleanExpression negate();
+  public Statement getLhs();
+  public void setLhs(Statement lhs);
+  
+  public String getLhsExpr();
+  public void setLhsExpr(String lhsExpr);
+  
+  public Statement getRhs();
+  public void setRhs(Statement rhs);
+  
+  public T getOperator();
+  public void setOperator(T operator);
 }

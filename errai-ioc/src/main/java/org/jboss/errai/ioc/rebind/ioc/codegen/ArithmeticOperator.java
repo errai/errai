@@ -19,19 +19,19 @@ package org.jboss.errai.ioc.rebind.ioc.codegen;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
- * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public enum UnaryOperator implements Operator {
-  New("new", 0),
-  Increment("++", 0),
-  Decrement("--", 0),
-  Complement("!", 0);
-
+public enum ArithmeticOperator implements Operator {
+  Addition("+", 0, Number.class),
+  Subtraction("-", 0, Number.class),
+  Multiplication("*", 1, Number.class),
+  Division("/", 1, Number.class),
+  Remainder("%", 1, Number.class);
+  
   private final Operator operator;
 
-  UnaryOperator(String canonicalString, int operatorPrecedence) {
-    operator = new OperatorImpl(canonicalString, operatorPrecedence);
+  ArithmeticOperator(String canonicalString, int operatorPrecedence, Class<?>... constraints) {
+    operator = new OperatorImpl(canonicalString, operatorPrecedence, constraints);
   }
 
   @Override

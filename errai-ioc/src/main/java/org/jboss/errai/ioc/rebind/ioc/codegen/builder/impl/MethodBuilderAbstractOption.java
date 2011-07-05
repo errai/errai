@@ -27,13 +27,13 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class MethodBlockBuilderAbstractOption<T> extends BlockBuilderImpl<T>
-        implements MethodBlockModifiers<MethodBlockBuilderAbstractOption<T>, T> {
+public class MethodBuilderAbstractOption<T> extends BlockBuilderImpl<T>
+        implements MethodBlockModifiers<MethodBuilderAbstractOption<T>, T> {
   protected ThrowsDeclaration throwsDeclaration = ThrowsDeclaration.none();
   protected MethodBuildCallback<T> callback;
   protected DefModifiers modifiers = new DefModifiers(Modifier.Abstract);
 
-  public MethodBlockBuilderAbstractOption(MethodBuildCallback<T> callback) {
+  public MethodBuilderAbstractOption(MethodBuildCallback<T> callback) {
     this.callback = callback;
   }
 
@@ -48,7 +48,7 @@ public class MethodBlockBuilderAbstractOption<T> extends BlockBuilderImpl<T>
   }
 
   @Override
-  public MethodBlockBuilderAbstractOption<T> modifiers(Modifier... modifiers) {
+  public MethodBuilderAbstractOption<T> modifiers(Modifier... modifiers) {
     this.modifiers.addModifiers(modifiers);
     return this;
   }

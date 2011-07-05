@@ -16,26 +16,25 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.util;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanExpression;
-import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
+import org.jboss.errai.ioc.rebind.ioc.codegen.ArithmeticExpression;
+import org.jboss.errai.ioc.rebind.ioc.codegen.ArithmeticOperator;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.BooleanExpressionBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ArithmeticExpressionBuilder;
 
 /**
- * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class Bool {
+public class Arith {
 
-  public static BooleanExpression expr(Object lhs, BooleanOperator operator, Object rhs) {
-    return BooleanExpressionBuilder.create(lhs, operator, rhs);
+  public static ArithmeticExpression expr(Object lhs, ArithmeticOperator operator, Object rhs) {
+    return ArithmeticExpressionBuilder.create(lhs, operator, rhs);
   }
 
-  public static BooleanExpression expr(BooleanOperator operator, Object rhs) {
-    return BooleanExpressionBuilder.create(operator, rhs);
+  public static ArithmeticExpression expr(ArithmeticOperator operator, Object rhs) {
+    return ArithmeticExpressionBuilder.create(operator, rhs);
   }
 
-  public static BooleanExpression expr(Statement lhs) {
-    return BooleanExpressionBuilder.create(lhs);
+  public static ArithmeticExpression expr(Statement lhs) {
+    return ArithmeticExpressionBuilder.create(lhs);
   }
 }

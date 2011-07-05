@@ -28,6 +28,9 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.util.GenUtil;
 
 /**
  * This class represents a variable.
+ * 
+ * Note that initialization using {@link LiteralValue}s takes effect immediately,
+ * initialization using {@ link Statement}s needs to be deferred to generation time.
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  */

@@ -31,6 +31,8 @@ import java.io.Serializable;
 import static org.junit.Assert.fail;
 
 /**
+ * Tests the {@link ClassBuilder} API.
+ * 
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -115,7 +117,7 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
 
     assertEquals("failed to generate abstract class", ABSTRACT_CLASS, cls);
   }
-
+  
   @Test
   public void testDefineAbstractClassWithAbstractMethods() {
 

@@ -25,8 +25,8 @@ public interface IfBlockBuilderTestResult {
       "if (str.endsWith(\"abc\")) { }\n";
 
   public static final String EMPTY_IF_BLOCK_NO_RHS_AND_NEGATION =
-    "if (!(str.endsWith(\"abc\"))) { }\n";
-  
+      "if (!(str.endsWith(\"abc\"))) { }\n";
+
   public static final String EMPTY_IF_BLOCK_LITERAL_RHS =
       "if (n == 1) { }\n";
 
@@ -114,11 +114,14 @@ public interface IfBlockBuilderTestResult {
           "else if (a && b) {" +
           " System.out.println(a); " +
           "} ";
-  
-  public static final String IF_ELSEIF_BLOCK_UNCHAINED_NESTED_EXPRESSIONS_USING_NEGATION =
-    "   if ((\"foo\" == \"bar\") || ((\"cat\" == \"dog\") && (\"girl\" != \"boy\"))) { " +
-        " } " +
-        "else if (a && (!(b))) {" +
-        " System.out.println(a); " +
-        "} ";
+
+  public static final String IF_BLOCK_UNCHAINED_WITH_EXPRESSION_USING_NEGATION =
+      "   if (a && (!(b))) {" +
+            " System.out.println(a); " +
+            "} ";
+
+  public static final String IF_BLOCK_UNCHAINED_WITH_EXPRESSION_USING_ARITHMETICS =
+      "   if (((a + b) / c) > 1) {" +
+          " System.out.println(a); " +
+          "} ";
 }
