@@ -366,10 +366,10 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
 
     return new MethodBlockBuilderImpl<T>(new MethodBuildCallback<T>() {
       @Override
-      public T callback(final Statement statement, final DefModifiers modifies, final ThrowsDeclaration
+      public T callback(final Statement statement, final DefModifiers modifiers, final ThrowsDeclaration
               throwsDeclaration) {
-        BuildMetaMethod buildMetaMethod = new BuildMetaMethod(classDefinition, statement, scope, name, 
-            returnType, defParameters, throwsDeclaration, false);
+        BuildMetaMethod buildMetaMethod = new BuildMetaMethod(classDefinition, statement, scope,
+                modifiers, name, returnType, defParameters, throwsDeclaration);
  
         classDefinition.addMethod(buildMetaMethod);
         //noinspection unchecked

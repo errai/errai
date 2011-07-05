@@ -34,6 +34,7 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
   private Statement body;
 
   private Scope scope;
+  private DefModifiers modifiers;
 
   private String name;
   private MetaClass returnType;
@@ -43,26 +44,26 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
   private List<MetaType> genericParameterTypes;
 
   private ThrowsDeclaration throwsDeclaration;
-  private boolean isAbstract;
 
   public BuildMetaMethod(BuildMetaClass declaringClass,
                          Statement body,
                          Scope scope,
+                         DefModifiers modifiers,
                          String name,
                          MetaClass returnType,
                          DefParameters defParameters,
-                         ThrowsDeclaration throwsDeclaration,
-                         boolean isAbstract) {
+                         ThrowsDeclaration throwsDeclaration
+                         ) {
 
     this.context = Context.create(declaringClass.getContext());
     this.declaringClass = declaringClass;
     this.body = body;
+    this.modifiers = modifiers;
     this.scope = scope;
     this.name = name;
     this.returnType = returnType;
     this.defParameters = defParameters;
     this.throwsDeclaration = throwsDeclaration;
-    this.isAbstract = isAbstract;
   }
 
   @Override
@@ -214,9 +215,7 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
     StringBuilder buf = new StringBuilder().append(scope.getCanonicalName())
             .append(" ");
 
-    if (isAbstract) {
-      buf.append("abstract ");
-    }
+    buf.append(modifiers.toJavaString()).append(" ");
 
     buf.append(LoadClassReference.getClassReference(returnType, context))
         .append(" ")
@@ -228,7 +227,7 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
           .append(throwsDeclaration.generate(context));
     }
     
-     if (isAbstract) {  
+     if (modifiers.hasModifier(Modifier.Abstract)) {
        buf.append(";");
      } else {
        buf.append(" {\n").append(body.generate(context)).append("\n}\n");

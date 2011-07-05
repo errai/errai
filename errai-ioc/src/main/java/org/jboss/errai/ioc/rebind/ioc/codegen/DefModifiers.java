@@ -8,7 +8,7 @@ import java.util.*;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class DefModifiers implements Builder {
-  private Set<Modifier> modifiers = new HashSet<Modifier>();
+  private Set<Modifier> modifiers = new TreeSet<Modifier>();
 
   public DefModifiers() {
   }
@@ -22,29 +22,16 @@ public class DefModifiers implements Builder {
     return this;
   }
 
+  public boolean hasModifier(Modifier modifier) {
+    return modifiers.contains(modifier);
+  }
 
   @Override
   public String toJavaString() {
     StringBuilder sbuf = new StringBuilder();
 
-    if (modifiers.contains(Modifier.Synchronized)) {
-      sbuf.append("synchronized ");
-    }
-
-    if (modifiers.contains(Modifier.Transient)) {
-      sbuf.append("transient ");
-    }
-
-    if (modifiers.contains(Modifier.Abstract)) {
-      sbuf.append("abstract ");
-    }
-
-    if (modifiers.contains(Modifier.Static)) {
-      sbuf.append("static ");
-    }
-
-    if (modifiers.contains(Modifier.Final)) {
-      sbuf.append("final ");
+    for (Modifier m : modifiers) {
+      sbuf.append(m.getCanonicalString()).append(" ");
     }
 
     return sbuf.toString().trim();

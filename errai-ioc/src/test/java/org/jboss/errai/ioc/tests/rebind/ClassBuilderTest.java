@@ -16,18 +16,19 @@
 
 package org.jboss.errai.ioc.tests.rebind;
 
-import static org.junit.Assert.fail;
-
-import java.io.Serializable;
-
 import org.jboss.errai.ioc.client.InterfaceInjectionContext;
 import org.jboss.errai.ioc.client.api.Bootstrapper;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Modifier;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Parameter;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedMethodException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 import org.junit.Test;
+
+import java.io.Serializable;
+
+import static org.junit.Assert.fail;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -85,7 +86,7 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
 
     assertEquals("failed to generate class definition with accessor methods", CLASS_WITH_ACCESSOR_METHODS, cls);
   }
-  
+
   @Test
   public void testDefineClassWithParent() {
 
@@ -135,7 +136,7 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
 
     assertEquals("failed to generate abstract class with abstract method", ABSTRACT_CLASS_WITH_ABSTRACT_METHODS, cls);
   }
-  
+
   @Test
   public void testDefineClassWithConstructorCallingSuper() {
     String cls = ClassBuilder.define("org.foo.Foo")
@@ -340,5 +341,17 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
         "        return ctx;\n" +
         "    }\n" +
         "}", cls);
+  }
+
+  @Test
+  public void testDefineStaticMethods() {
+    String cls = ClassBuilder.define("my.test.Clazz")
+            .publicScope().body()
+            .publicMethod(void.class, "test").modifiers(Modifier.Static)
+              .body().append(Stmt.create().loadStatic(System.class, "out").invoke("println", "Hello, World!"))
+            .finish()
+            .toJavaString();
+    System.out.println(cls);
+
   }
 }
