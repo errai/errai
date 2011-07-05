@@ -53,7 +53,7 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
                          MetaClass returnType,
                          DefParameters defParameters,
                          ThrowsDeclaration throwsDeclaration
-                         ) {
+  ) {
 
     this.context = Context.create(declaringClass.getContext());
     this.declaringClass = declaringClass;
@@ -218,20 +218,24 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
     buf.append(modifiers.toJavaString()).append(" ");
 
     buf.append(LoadClassReference.getClassReference(returnType, context))
-        .append(" ")
-        .append(name)
-        .append(defParameters.generate(context));
-        
-    if (!throwsDeclaration.isEmpty()) {    
+            .append(" ")
+            .append(name)
+            .append(defParameters.generate(context));
+
+    if (!throwsDeclaration.isEmpty()) {
       buf.append(" ")
-          .append(throwsDeclaration.generate(context));
+              .append(throwsDeclaration.generate(context));
     }
-    
-     if (modifiers.hasModifier(Modifier.Abstract)) {
-       buf.append(";");
-     } else {
-       buf.append(" {\n").append(body.generate(context)).append("\n}\n");
-     }
+
+    if (modifiers.hasModifier(Modifier.Abstract)) {
+      buf.append(";");
+    }
+    else if (modifiers.hasModifier(Modifier.JSNI)) {
+      buf.append(" /*-{\n").append(body.generate(context)).append("\n}-*/;\n");
+    }
+    else {
+      buf.append(" {\n").append(body.generate(context)).append("\n}\n");
+    }
 
     return buf.toString();
   }

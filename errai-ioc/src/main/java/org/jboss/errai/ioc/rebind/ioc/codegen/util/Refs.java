@@ -16,8 +16,12 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.util;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.VariableReference;
+import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -25,6 +29,9 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.VariableReference;
 public abstract class Refs {
   public static VariableReference get(final String name) {
     return new VariableReference() {
+      private MetaClass type;
+
+
       @Override
       public String getName() {
         return name;
@@ -32,8 +39,38 @@ public abstract class Refs {
 
       @Override
       public Statement getValue() {
-        return null;
+        return new Statement() {
+
+          @Override
+          public String generate(Context context) {
+            VariableReference var = context.getVariable(name);
+
+            if (var == null) {
+              throw new OutOfScopeException("could not access variable: " + name);
+            }
+
+            type = var.getType();
+
+            return name;
+          }
+
+          @Override
+          public MetaClass getType() {
+            return type;
+          }
+        };
+      }
+
+      @Override
+      public String generate(Context context) {
+        return getValue().generate(context);
+      }
+
+      @Override
+      public MetaClass getType() {
+        return type;
       }
     };
+
   }
 }

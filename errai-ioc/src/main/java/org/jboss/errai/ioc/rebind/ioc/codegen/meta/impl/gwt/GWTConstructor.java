@@ -67,6 +67,21 @@ public class GWTConstructor extends MetaConstructor {
   }
 
   @Override
+  public String getName() {
+    return "";
+  }
+
+  @Override
+  public MetaClass getReturnType() {
+    return declaringClass;
+  }
+
+  @Override
+  public MetaType getGenericReturnType() {
+    return declaringClass;
+  }
+
+  @Override
   public MetaClass getDeclaringClass() {
     return declaringClass;
   }

@@ -68,13 +68,27 @@ public class JavaReflectionConstructor extends MetaConstructor {
   }
 
   @Override
+  public String getName() {
+    return "";
+  }
+
+  @Override
+  public MetaClass getReturnType() {
+    return declaringClass;
+  }
+
+  @Override
+  public MetaType getGenericReturnType() {
+    return declaringClass;
+  }
+
+  @Override
   public Annotation[] getAnnotations() {
     if (annotationsCache == null) {
       annotationsCache = constructor.getAnnotations();
     }
     return annotationsCache;
   }
-
 
   @Override
   public final <A extends Annotation> A getAnnotation(Class<A> annotation) {

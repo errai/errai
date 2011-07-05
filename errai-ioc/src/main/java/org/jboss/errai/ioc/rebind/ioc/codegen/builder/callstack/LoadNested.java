@@ -28,14 +28,20 @@ public class LoadNested extends AbstractCallElement {
 
   public LoadNested(final Statement statement) {
     this.statement = new Statement() {
+      MetaClass type;
+
       @Override
       public String generate(Context context) {
-        return "(" + statement.generate(context) + ")";
+        String res = statement.generate(context);
+
+        type = statement.getType();
+
+        return "(" + res + ")";
       }
 
       @Override
       public MetaClass getType() {
-        return statement.getType();
+        return type;
       }
     };
   }

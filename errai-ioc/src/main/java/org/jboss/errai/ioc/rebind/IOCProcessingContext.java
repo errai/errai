@@ -20,8 +20,6 @@ import org.jboss.errai.bus.rebind.ProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BlockBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ClassStructureBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.MethodBlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 import com.google.gwt.core.ext.GeneratorContext;

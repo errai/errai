@@ -94,7 +94,7 @@ public class InjectUtil {
       return new ConstructionStrategy() {
         @Override
         public void generateConstructor() {
-          Statement[] vars = resolveInjectionDependencies(constructor.getParameters(), ctx, constructor);
+          Statement[] parameterStatements = resolveInjectionDependencies(constructor.getParameters(), ctx, constructor);
 
           IOCProcessingContext processingContext = ctx.getProcessingContext();
 
@@ -105,7 +105,7 @@ public class InjectUtil {
                           .named(injector.getVarName())
                           .initializeWith(Stmt.create()
                                   .newObject(type)
-                                  .withParameters(vars))
+                                  .withParameters(parameterStatements))
           );
 
           handleInjectionTasks(ctx, injectionTasks);

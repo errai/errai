@@ -22,8 +22,31 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanExpression;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.*;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.*;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ArrayInitializationBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BlockBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.CaseBlockBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.CatchBlockBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ContextualStatementBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ElseBlockBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementBegin;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementEnd;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.VariableDeclarationInitializer;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.VariableDeclarationNamed;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.VariableDeclarationStart;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.VariableReferenceContextualStatementBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.WhileBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.BranchCallElement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DeclareVariable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DefineLabel;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DynamicLoad;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadField;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadLiteral;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadNested;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadVariable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.MethodCall;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.ResetCallElement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.ThrowException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.control.branch.BreakStatement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.control.branch.ContinueStatement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
@@ -202,17 +225,17 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
 
   @Override
   public ObjectBuilder newObject(Class<?> type) {
-    return ObjectBuilder.newInstanceOf(type, context);
+    return ObjectBuilder.newInstanceOf(type, context, callElementBuilder);
   }
 
   @Override
   public ObjectBuilder newObject(MetaClass type) {
-    return ObjectBuilder.newInstanceOf(type, context);
+    return ObjectBuilder.newInstanceOf(type, context, callElementBuilder);
   }
 
   @Override
   public ObjectBuilder newObject(TypeLiteral<?> type) {
-    return ObjectBuilder.newInstanceOf(type, context);
+    return ObjectBuilder.newInstanceOf(type, context, callElementBuilder);
   }
 
   @Override

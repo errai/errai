@@ -51,6 +51,8 @@ public class MethodCall extends AbstractCallElement {
   public void handleCall(CallWriter writer, Context context, Statement statement) {
     CallParameters callParams = fromStatements(GenUtil.generateCallParameters(context, parameters));
 
+    statement.generate(context);
+
     MetaClass[] parameterTypes = callParams.getParameterTypes();
     MetaMethod method = (staticMethod) ? statement.getType().getBestMatchingStaticMethod(methodName, parameterTypes)
         : statement.getType().getBestMatchingMethod(methodName, parameterTypes);

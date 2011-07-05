@@ -36,8 +36,7 @@ import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
 import org.jboss.errai.ioc.client.InterfaceInjectionContext;
 import org.jboss.errai.ioc.client.api.*;
 import org.jboss.errai.ioc.rebind.ioc.*;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ClassBuilder;
@@ -46,6 +45,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.build.BuildMetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.JSNIUtil;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 
 import java.io.PrintWriter;
@@ -147,10 +147,8 @@ public class IOCGenerator extends Generator {
             .callSuper()
             .finish();
 
-
     BlockBuilder<?> blockBuilder =
             classStructureBuilder.publicMethod(InterfaceInjectionContext.class, "bootstrapContainer");
-
 
     // init composer, set class properties, create source writer
     ClassSourceFileComposerFactory composer = new ClassSourceFileComposerFactory(packageName,
@@ -168,15 +166,16 @@ public class IOCGenerator extends Generator {
 
     SourceWriter sourceWriter = composer.createSourceWriter(context, printWriter);
 
-    procContext = new IOCProcessingContext(logger, context, sourceWriter, typeOracle, buildContext, bootStrapClass,
-            blockBuilder);
+    procContext = new IOCProcessingContext(logger, context, sourceWriter,
+            typeOracle, buildContext, bootStrapClass, blockBuilder);
+
     injectFactory = new InjectorFactory(procContext);
     procFactory = new ProcessorFactory(injectFactory);
     defaultConfigureProcessor();
 
     // generator constructor source code
     initializeProviders();
-    generateExtensions(sourceWriter, blockBuilder);
+    generateExtensions(sourceWriter, classStructureBuilder, blockBuilder);
     // close generated class
     sourceWriter.outdent();
     sourceWriter.println("}");
@@ -322,7 +321,8 @@ public class IOCGenerator extends Generator {
     }
   }
 
-  private void generateExtensions(SourceWriter sourceWriter, BlockBuilder<?> blockBuilder) {
+  private void generateExtensions(SourceWriter sourceWriter, ClassStructureBuilder<?> classBuilder,
+                                  BlockBuilder<?> blockBuilder) {
     // InterfaceInjectionContext ctx = new InterfaceInjectionContext()
     blockBuilder.append(Stmt.create().declareVariable("ctx", InterfaceInjectionContext.class,
             Stmt.create().newObject(InterfaceInjectionContext.class)));
@@ -332,58 +332,32 @@ public class IOCGenerator extends Generator {
 
     runAllDeferred();
 
-    sourceWriter.println("return ctx;");
-    sourceWriter.outdent();
-    sourceWriter.println("}");
+    blockBuilder.append(Stmt.create().loadVariable("ctx").returnValue());
 
     List<MetaField> privateFields = injectFactory.getInjectionContext().getPrivateFieldsToExpose();
-
-    if (!privateFields.isEmpty()) {
-      sourceWriter.println();
-    }
-
     for (MetaField f : privateFields) {
-      sourceWriter.print("private static native void ");
-      sourceWriter.print(InjectUtil.getPrivateFieldInjectorName(f));
-      sourceWriter.print("(");
-      sourceWriter.print(f.getDeclaringClass().getFullyQualifiedName());
-      sourceWriter.print(" instance, ");
-      sourceWriter.print(f.getType().getCanonicalName());
-      sourceWriter.print(" value) /*-{");
-      sourceWriter.println();
-      sourceWriter.outdent();
-      // begin JSNI call
-      sourceWriter.print("instance.@");
-      sourceWriter.print(f.getDeclaringClass().getFullyQualifiedName());
-      sourceWriter.print("::");
-      sourceWriter.print(f.getName());
-      sourceWriter.print(" = ");
-      sourceWriter.print("value;");
-      sourceWriter.println();
-      sourceWriter.outdent();
-      sourceWriter.println("}-*/;\n");
+      classBuilder.privateMethod(void.class, InjectUtil.getPrivateFieldInjectorName(f))
+              .parameters(DefParameters.fromParameters(Parameter.of(f.getType(), "value")))
+              .modifiers(Modifier.JSNI)
+              .body()
+                .append(new StringStatement(JSNIUtil.fieldAccess(f) + " = value"))
+              .finish();
+
+      classBuilder.privateMethod(f.getType(), InjectUtil.getPrivateFieldInjectorName(f))
+              .modifiers(Modifier.JSNI)
+              .body()
+                .append(new StringStatement("return " + JSNIUtil.fieldAccess(f)))
+              .finish();
+
     }
 
-    for (MetaField f : privateFields) {
-      sourceWriter.print("private static native ");
-      sourceWriter.print(f.getType().getFullyQualifiedName());
-      sourceWriter.print(" ");
-      sourceWriter.print(InjectUtil.getPrivateFieldInjectorName(f));
-      sourceWriter.print("(");
-      sourceWriter.print(f.getDeclaringClass().getFullyQualifiedName());
-      sourceWriter.print(" instance) /*-{");
-      sourceWriter.println();
-      sourceWriter.outdent();
-      // begin JSNI call
-      sourceWriter.print("return instance.@");
-      sourceWriter.print(f.getDeclaringClass().getFullyQualifiedName());
-      sourceWriter.print("::");
-      sourceWriter.print(f.getName());
-      sourceWriter.print(";");
-      sourceWriter.println();
-      sourceWriter.outdent();
-      sourceWriter.println("}-*/;\n");
-    }
+    blockBuilder.finish();
+
+    System.out.println("----Emitting Class--->\n\n");
+    System.out.println(classBuilder.toJavaString());
+    System.out.println("<---Emitting Class----");
+
+    sourceWriter.print(classBuilder.toJavaString());
   }
 
   public void addType(final MetaClass type) {
