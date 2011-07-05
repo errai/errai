@@ -173,15 +173,15 @@ public interface ClassBuilderTestResult {
           " }";
 
   public static final String CLASS_DEFINITION_BY_IMPLEMENTING_INTERFACE =
-      "package org.jboss.errai.ioc.client.api;\n" +
+      "     package org.jboss.errai.ioc.client.api;\n" +
           "\n" +
-          "import org.jboss.errai.ioc.client.api.Bootstrapper;\n" +
-          "import org.jboss.errai.ioc.client.InterfaceInjectionContext;\n" +
+          " import org.jboss.errai.ioc.client.api.Bootstrapper;\n" +
+          " import org.jboss.errai.ioc.client.InterfaceInjectionContext;\n" +
           "\n" +
-          "public class BootstrapperImpl implements Bootstrapper {\n" +
-          "    public InterfaceInjectionContext bootstrapContainer() {\n" +
-          "        InterfaceInjectionContext ctx = new InterfaceInjectionContext();\n" +
-          "        return ctx;\n" +
-          "    }\n" +
-          "}";
+          " public class BootstrapperImpl implements Bootstrapper {\n" +
+          "     public InterfaceInjectionContext bootstrapContainer() {\n" +
+          "         InterfaceInjectionContext ctx = new InterfaceInjectionContext();\n" +
+          "         return ctx;\n" +
+          "     }\n" +
+          " }";
 }

@@ -117,7 +117,7 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
 
     assertEquals("failed to generate abstract class", ABSTRACT_CLASS, cls);
   }
-  
+
   @Test
   public void testDefineAbstractClassWithAbstractMethods() {
 
@@ -247,6 +247,7 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
       assertEquals("Wrong exception thrown", udme.getMethodName(), "undefinedMethod");
     }
   }
+
   @Test
   public void testDefineClassWithMethodHavingThrowsDeclaration() {
 
@@ -332,19 +333,19 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
         .append(Stmt.create().loadVariable("ctx").returnValue())
         .finish().toJavaString();
 
-    assertEquals("failed to generate class by implementing an interface", 
+    assertEquals("failed to generate class by implementing an interface",
         CLASS_DEFINITION_BY_IMPLEMENTING_INTERFACE, cls);
   }
 
   @Test
   public void testDefineStaticMethod() {
     String cls = ClassBuilder.define("my.test.Clazz")
-            .publicScope().body()
-            .publicMethod(void.class, "test").modifiers(Modifier.Static)
-              .body()
-                .append(Stmt.create().loadStatic(System.class, "out").invoke("println", "Hello, World!"))
-            .finish()
-            .toJavaString();
+        .publicScope().body()
+        .publicMethod(void.class, "test").modifiers(Modifier.Static)
+          .body()
+            .append(Stmt.create().loadStatic(System.class, "out").invoke("println", "Hello, World!"))
+        .finish()
+        .toJavaString();
 
     assertEquals("failed to generate class with static method", CLASS_WITH_STATIC_METHOD, cls);
   }
