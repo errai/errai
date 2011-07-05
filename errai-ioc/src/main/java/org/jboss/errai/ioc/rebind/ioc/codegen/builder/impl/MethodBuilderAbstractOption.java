@@ -19,49 +19,35 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 import org.jboss.errai.ioc.rebind.ioc.codegen.DefModifiers;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Modifier;
 import org.jboss.errai.ioc.rebind.ioc.codegen.ThrowsDeclaration;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BlockBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.MethodBlockModifiers;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.Finishable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.MethodBuildCallback;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class MethodBuilderAbstractOption<T> extends BlockBuilderImpl<T>
-        implements MethodBlockModifiers<MethodBuilderAbstractOption<T>, T> {
+public class MethodBuilderAbstractOption<T> implements Finishable<T> {
   protected ThrowsDeclaration throwsDeclaration = ThrowsDeclaration.none();
   protected MethodBuildCallback<T> callback;
-  protected DefModifiers modifiers = new DefModifiers(Modifier.Abstract);
 
   public MethodBuilderAbstractOption(MethodBuildCallback<T> callback) {
     this.callback = callback;
   }
-
+  
   public T throws_(Class<? extends Throwable>... exceptionTypes) {
     throwsDeclaration = ThrowsDeclaration.of(exceptionTypes);
-    return callback.callback(null, modifiers, throwsDeclaration);
+    return callback.callback(null, new DefModifiers(Modifier.Abstract), throwsDeclaration);
   }
 
   public T throws_(MetaClass... exceptions) {
     throwsDeclaration = ThrowsDeclaration.of(exceptions);
-    return callback.callback(null, modifiers, throwsDeclaration);
+    return callback.callback(null, new DefModifiers(Modifier.Abstract), throwsDeclaration);
   }
-
-  @Override
-  public MethodBuilderAbstractOption<T> modifiers(Modifier... modifiers) {
-    this.modifiers.addModifiers(modifiers);
-    return this;
-  }
-
-  @Override
-  public BlockBuilder<T> body() {
-    return null;
-  }
-
+  
   @Override
   public T finish() {
     if (callback != null) {
-      return callback.callback(null, modifiers, throwsDeclaration);
+      return callback.callback(null, new DefModifiers(Modifier.Abstract), throwsDeclaration);
     }
     return null;
   }

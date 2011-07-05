@@ -228,8 +228,6 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
         buildMetaConstructor.setScope(scope);
 
         classDefinition.addConstructor(buildMetaConstructor);
-
-        //noinspection unchecked
         return (T) ClassBuilder.this;
       }
     });
@@ -372,7 +370,6 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
                 modifiers, name, returnType, defParameters, throwsDeclaration);
  
         classDefinition.addMethod(buildMetaMethod);
-        //noinspection unchecked
         return (T) ClassBuilder.this;
       }
     });
