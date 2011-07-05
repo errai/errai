@@ -60,17 +60,17 @@ public interface ClassBuilderTestResult {
           " }";
 
   public static final String ABSTRACT_CLASS_WITH_ABSTRACT_METHODS =
-    "     package org.foo;\n" +
-        "\n" +
-        " public abstract class Foo {\n" +
-        "   public Foo() {" +
-        "   }" +
-        "   public abstract void foo();" +
-        "   protected abstract void bar();" +
-        "   public void baz() {" +
-        "   }" +
-        " }";
-  
+      "     package org.foo;\n" +
+          "\n" +
+          " public abstract class Foo {\n" +
+          "   public Foo() {" +
+          "   }" +
+          "   public abstract void foo();" +
+          "   protected abstract void bar();" +
+          "   public void baz() {" +
+          "   }" +
+          " }";
+
   public static final String CLASS_WITH_CONSTRUCTOR_CALLING_SUPER =
       "     package org.foo;\n" +
           "\n" +
@@ -162,4 +162,26 @@ public interface ClassBuilderTestResult {
           "   private Foo() {" +
           "   }" +
           " }";
+
+  public static final String CLASS_WITH_STATIC_METHOD =
+      "     package my.test;\n" +
+          "\n" +
+          " public class Clazz {\n" +
+          "    public static void test() {\n" +
+          "        System.out.println(\"Hello, World!\");\n" +
+          "    }\n" +
+          " }";
+
+  public static final String CLASS_DEFINITION_BY_IMPLEMENTING_INTERFACE =
+      "package org.jboss.errai.ioc.client.api;\n" +
+          "\n" +
+          "import org.jboss.errai.ioc.client.api.Bootstrapper;\n" +
+          "import org.jboss.errai.ioc.client.InterfaceInjectionContext;\n" +
+          "\n" +
+          "public class BootstrapperImpl implements Bootstrapper {\n" +
+          "    public InterfaceInjectionContext bootstrapContainer() {\n" +
+          "        InterfaceInjectionContext ctx = new InterfaceInjectionContext();\n" +
+          "        return ctx;\n" +
+          "    }\n" +
+          "}";
 }
