@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta;
 
-public abstract class MetaConstructor implements MetaClassMember, MetaGenericDeclaration {
+public abstract class MetaConstructor extends MetaMethod implements MetaClassMember, MetaGenericDeclaration {
   public abstract MetaParameter[] getParameters();
 
   public abstract MetaType[] getGenericParameterTypes();

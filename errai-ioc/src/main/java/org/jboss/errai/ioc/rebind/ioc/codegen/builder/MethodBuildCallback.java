@@ -17,6 +17,7 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.DefModifiers;
+import org.jboss.errai.ioc.rebind.ioc.codegen.DefParameters;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.ThrowsDeclaration;
 
@@ -24,5 +25,6 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.ThrowsDeclaration;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface MethodBuildCallback<T> {
-  public T callback(Statement statement, DefModifiers modifiers, ThrowsDeclaration throwsDeclaration);
+  public T callback(Statement statement, DefParameters parms, DefModifiers modifiers,
+                    ThrowsDeclaration throwsDeclaration);
 }

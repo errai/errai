@@ -17,15 +17,7 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.*;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BuildCallback;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ClassDefinitionBuilderAbstractOption;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ClassDefinitionBuilderInterfaces;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ClassDefinitionBuilderScope;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ClassStructureBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ConstructorBlockBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.DefaultClassStructureBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.FieldBuildInitializer;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.MethodBuildCallback;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.build.BuildMetaClass;
@@ -366,10 +358,22 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
 
     return new MethodBlockBuilderImpl<T>(new MethodBuildCallback<T>() {
       @Override
-      public T callback(final Statement statement, final DefModifiers modifiers, final ThrowsDeclaration
-              throwsDeclaration) {
+      public T callback(final Statement statement,
+                        final DefParameters parameters,
+                        final DefModifiers modifiers,
+                        final ThrowsDeclaration throwsDeclaration) {
+
+        DefParameters dParameters;
+
+        if (defParameters != null) {
+          dParameters = defParameters;
+        }
+        else {
+          dParameters = parameters;
+        }
+
         BuildMetaMethod buildMetaMethod = new BuildMetaMethod(classDefinition, statement, scope,
-                modifiers, name, returnType, defParameters, throwsDeclaration);
+                modifiers, name, returnType, dParameters, throwsDeclaration);
  
         classDefinition.addMethod(buildMetaMethod);
         //noinspection unchecked
@@ -420,7 +424,6 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
 
   private FieldBuildInitializer<T> genField(final Scope scope, final String name,
                                                                     final MetaClass type) {
-
     return new FieldBuilder<T>(new BuildCallback<T>() {
       @Override
       public T callback(final Statement statement) {

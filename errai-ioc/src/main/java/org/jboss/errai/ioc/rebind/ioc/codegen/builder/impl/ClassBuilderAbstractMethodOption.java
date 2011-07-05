@@ -150,6 +150,7 @@ public class ClassBuilderAbstractMethodOption extends ClassBuilder<ClassStructur
             new MethodBuildCallback<ClassStructureBuilderAbstractMethodOption>() {
       @Override
       public ClassStructureBuilderAbstractMethodOption callback(final Statement statement,
+                                                                final DefParameters parameters,
                                                                 final DefModifiers modifiers,
                                                                 final ThrowsDeclaration throwsDeclaration) {
         BuildMetaMethod buildMetaMethod = new BuildMetaMethod(classDefinition, statement, scope, modifiers, name,

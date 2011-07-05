@@ -107,11 +107,7 @@ public class ObjectBuilder extends AbstractStatementBuilder {
   }
 
   public StatementEnd withParameters(CallParameters parameters) {
-    if (!type.isInterface() && type.getBestMatchingConstructor(parameters.getParameterTypes()) == null)
-      throw new UndefinedConstructorException(type, parameters.getParameterTypes());
-
     callParameters = parameters;
-
     buildState |= CONSTRUCT_STATEMENT_COMPLETE;
     return this;
   }
@@ -141,6 +137,10 @@ public class ObjectBuilder extends AbstractStatementBuilder {
   @Override
   public String generate(Context context) {
     finishConstructIfNecessary();
+
+    if (!type.isInterface() && type.getBestMatchingConstructor(callParameters.getParameterTypes()) == null)
+      throw new UndefinedConstructorException(type, callParameters.getParameterTypes());
+
     
     StringBuilder buf = new StringBuilder();
     buf.append("new ").append(LoadClassReference.getClassReference(type, context, true));

@@ -16,13 +16,13 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.BlockStatement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.DefModifiers;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Modifier;
-import org.jboss.errai.ioc.rebind.ioc.codegen.ThrowsDeclaration;
+import org.jboss.errai.ioc.rebind.ioc.codegen.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BlockBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.MethodBlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.MethodBuildCallback;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -33,7 +33,9 @@ public class MethodBlockBuilderImpl<T> extends BlockBuilderImpl<T>
 
   protected ThrowsDeclaration throwsDeclaration = ThrowsDeclaration.none();
   protected MethodBuildCallback<T> callback;
+  protected DefParameters defParameters;
   protected DefModifiers modifiers = new DefModifiers();
+
 
   public MethodBlockBuilderImpl(MethodBuildCallback<T> callback) {
     this.callback = callback;
@@ -74,6 +76,24 @@ public class MethodBlockBuilderImpl<T> extends BlockBuilderImpl<T>
   }
 
   @Override
+  public MethodBlockBuilder<T> parameters(DefParameters parms) {
+    defParameters = parms;
+    return this;
+  }
+
+  @Override
+  public MethodBlockBuilder<T> parameters(Class<T>... parms) {
+    defParameters = DefParameters.fromTypeArray(MetaClassFactory.fromClassArray(parms)) ;
+    return this;
+  }
+
+  @Override
+  public MethodBlockBuilder<T> parameters(MetaClass... parms) {
+    defParameters = DefParameters.fromTypeArray(parms);
+    return null;
+  }
+
+  @Override
   public BlockBuilder<T> body() {
     return this;
   }
@@ -81,7 +101,7 @@ public class MethodBlockBuilderImpl<T> extends BlockBuilderImpl<T>
   @Override
   public T finish() {
     if (callback != null) {
-      return callback.callback(blockStatement, modifiers, throwsDeclaration);
+      return callback.callback(blockStatement, defParameters, modifiers, throwsDeclaration);
     }
     return null;
   }

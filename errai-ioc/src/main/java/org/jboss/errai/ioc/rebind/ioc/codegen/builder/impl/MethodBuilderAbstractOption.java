@@ -39,12 +39,12 @@ public class MethodBuilderAbstractOption<T> extends BlockBuilderImpl<T>
 
   public T throws_(Class<? extends Throwable>... exceptionTypes) {
     throwsDeclaration = ThrowsDeclaration.of(exceptionTypes);
-    return callback.callback(null, modifiers, throwsDeclaration);
+    return callback.callback(null, null, modifiers, throwsDeclaration);
   }
 
   public T throws_(MetaClass... exceptions) {
     throwsDeclaration = ThrowsDeclaration.of(exceptions);
-    return callback.callback(null, modifiers, throwsDeclaration);
+    return callback.callback(null, null, modifiers, throwsDeclaration);
   }
 
   @Override
@@ -61,7 +61,7 @@ public class MethodBuilderAbstractOption<T> extends BlockBuilderImpl<T>
   @Override
   public T finish() {
     if (callback != null) {
-      return callback.callback(null, modifiers, throwsDeclaration);
+      return callback.callback(null, null, modifiers, throwsDeclaration);
     }
     return null;
   }

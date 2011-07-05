@@ -170,6 +170,21 @@ public class BuildMetaConstructor extends MetaConstructor implements Builder {
   }
 
   @Override
+  public String getName() {
+    return "";
+  }
+
+  @Override
+  public MetaClass getReturnType() {
+    return this.declaringClass;
+  }
+
+  @Override
+  public MetaType getGenericReturnType() {
+    return this.declaringClass;
+  }
+
+  @Override
   public String toJavaString() {
     for (Parameter p : defParameters.getParameters()) {
       context.addVariable(Variable.create(p.getName(), p.getType()));
