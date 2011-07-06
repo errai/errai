@@ -21,20 +21,79 @@ import com.google.gwt.core.ext.typeinfo.JType;
 import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
+import org.apache.commons.beanutils.ConversionException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.gwt.GWTClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java.JavaReflectionClass;
+import org.mvel2.ConversionHandler;
+import org.mvel2.DataConversion;
+import org.w3c.flute.parser.selectors.ElementSelectorImpl;
 
 import javax.enterprise.util.TypeLiteral;
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.mvel2.DataConversion.addConversionHandler;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public final class MetaClassFactory {
+  static {
+
+    DataConversion.addConversionHandler(Class.class, new ConversionHandler() {
+      @Override
+      public Object convertFrom(Object in) {
+        if (MetaClass.class.isAssignableFrom(in.getClass())) {
+          return ((MetaClass) in).asClass();
+        }
+        else {
+          throw new RuntimeException("cannot convert from " + in.getClass() + "; to " + Class.class.getName());
+        }
+      }
+
+      @Override
+      public boolean canConvertFrom(Class cls) {
+        return MetaType.class.isAssignableFrom(cls);
+      }
+    });
+
+    DataConversion.addConversionHandler(Class[].class, new ConversionHandler() {
+      @Override
+      public Object convertFrom(Object in) {
+        int length = Array.getLength(in);
+
+        Class[] cls = new Class[length];
+        for (int i = 0; i < length; i++) {
+          Object el = Array.get(in, i);
+
+          if (el instanceof MetaClass) {
+            cls[i] = ((MetaClass) el).asClass();
+          }
+          else if (el != null && el.getClass().isArray()) {
+            cls[i] = (Class) convertFrom(el);
+          }
+          else {
+            cls[i] = null;
+          }
+        }
+        return cls;
+      }
+
+      @Override
+      public boolean canConvertFrom(Class cls) {
+        while (cls.isArray()) {
+          cls = cls.getComponentType();
+        }
+        return MetaClass.class.isAssignableFrom(cls) || MetaType.class.isAssignableFrom(cls);
+      }
+    });
+  }
+
   private static final Map<String, MetaClass> CLASS_CACHE = new HashMap<String, MetaClass>();
 
   public static MetaClass get(String fullyQualifiedClassName) {
@@ -128,7 +187,7 @@ public final class MetaClassFactory {
       return gwtClass;
     }
 
-    return CLASS_CACHE.get(type.isClassOrInterface().getName());
+    return CLASS_CACHE.get(type.getQualifiedSourceName());
   }
 
 

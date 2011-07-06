@@ -60,7 +60,7 @@ public class ContextualStatementBuilderImpl extends AbstractStatementBuilder imp
   }
 
   @Override
-  public ContextualStatementBuilder getField(String fieldName) {
+  public VariableReferenceContextualStatementBuilder getField(String fieldName) {
     appendCallElement(new LoadField(fieldName));
     return this;
   }

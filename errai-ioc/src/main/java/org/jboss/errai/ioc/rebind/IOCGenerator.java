@@ -20,6 +20,7 @@ import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
+import com.google.gwt.core.ext.linker.Artifact;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
@@ -27,6 +28,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
+import com.google.gwt.user.rebind.StringSourceWriter;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.framework.MessageBus;
@@ -131,40 +133,18 @@ public class IOCGenerator extends Generator {
 
     if (printWriter == null) return;
 
-
     ClassStructureBuilder<?> classStructureBuilder = ClassBuilder.define(packageName + "." + className)
             .publicScope()
             .implementsInterface(Bootstrapper.class)
             .body();
 
-
     BuildMetaClass bootStrapClass = classStructureBuilder.getClassDefinition();
     Context buildContext = bootStrapClass.getContext();
-
-
-    // implement default constructor
-    classStructureBuilder.publicConstructor()
-            .callSuper()
-            .finish();
 
     BlockBuilder<?> blockBuilder =
             classStructureBuilder.publicMethod(InterfaceInjectionContext.class, "bootstrapContainer");
 
-    // init composer, set class properties, create source writer
-    ClassSourceFileComposerFactory composer = new ClassSourceFileComposerFactory(packageName,
-            className);
-
-    composer.addImplementedInterface(Bootstrapper.class.getName());
-    composer.addImport(InterfaceInjectionContext.class.getName());
-    composer.addImport(Widget.class.getName());
-    composer.addImport(List.class.getName());
-    composer.addImport(ArrayList.class.getName());
-    composer.addImport(Map.class.getName());
-    composer.addImport(HashMap.class.getName());
-    composer.addImport(com.google.gwt.user.client.ui.Panel.class.getName());
-    composer.addImport(ErraiBus.class.getName());
-
-    SourceWriter sourceWriter = composer.createSourceWriter(context, printWriter);
+    SourceWriter sourceWriter = new StringSourceWriter();
 
     procContext = new IOCProcessingContext(logger, context, sourceWriter,
             typeOracle, buildContext, bootStrapClass, blockBuilder);
@@ -177,11 +157,12 @@ public class IOCGenerator extends Generator {
     initializeProviders();
     generateExtensions(sourceWriter, classStructureBuilder, blockBuilder);
     // close generated class
-    sourceWriter.outdent();
-    sourceWriter.println("}");
 
+
+    printWriter.append(sourceWriter.toString());
     // commit generated class
     context.commit(logger, printWriter);
+
   }
 
   public void initializeProviders() {
@@ -467,13 +448,5 @@ public class IOCGenerator extends Generator {
         }
       }
     });
-  }
-
-  public static String debugOutput(CharSequence s) {
-    if (isDebugCompile) {
-      String debugStmt = Window.class.getName() + ".alert(" + s.toString().replaceAll("\"", "\\\"") + ");\n";
-      return debugStmt + s.toString();
-    }
-    return s.toString();
   }
 }

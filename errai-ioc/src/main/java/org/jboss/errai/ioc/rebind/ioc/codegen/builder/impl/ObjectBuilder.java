@@ -139,7 +139,7 @@ public class ObjectBuilder extends AbstractStatementBuilder {
   }
 
   @Override
-  public String generate(Context context) {
+  public String generate(final Context context) {
     
     appendCallElement(new DeferredCallElement(new DeferredCallback() {
       @Override
@@ -155,7 +155,7 @@ public class ObjectBuilder extends AbstractStatementBuilder {
          StringBuilder buf = new StringBuilder();
          buf.append("new ").append(LoadClassReference.getClassReference(type, context, true));
          if (callParameters != null) {
-           buf.append(callParameters.generate(Context.create()));
+           buf.append(callParameters.generate(Context.create(context)));
          }
          if (extendsBlock != null) {
            buf.append(" {\n").append(extendsBlock.generate(context)).append("\n}\n");

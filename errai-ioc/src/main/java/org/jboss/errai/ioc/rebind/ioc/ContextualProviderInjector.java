@@ -42,7 +42,6 @@ public class ContextualProviderInjector extends TypeInjector {
 
   @Override
   public Statement getType(InjectionContext injectContext, InjectionPoint injectionPoint) {
-    injected = true;
 
     MetaClass type = null;
     MetaParameterizedType pType = null;
@@ -70,11 +69,11 @@ public class ContextualProviderInjector extends TypeInjector {
 
     IOCProcessingContext processingContext = injectContext.getProcessingContext();
 
+    Statement statement;
+
     if (pType == null) {
-      processingContext.append(
-              Stmt.create().nestedCall(providerInjector.getType(injectContext, injectionPoint))
-                      .invoke("provide", new Class[0])
-      );
+      statement = Stmt.create().nestedCall(providerInjector.getType(injectContext, injectionPoint))
+              .invoke("provide", new Class[0]);
     }
     else {
       MetaType[] typeArgs = pType.getTypeParameters();
@@ -82,20 +81,27 @@ public class ContextualProviderInjector extends TypeInjector {
       Annotation[] qualifiers = injectionPoint.getQualifiers();
       if (qualifiers.length != 0) {
 
-        processingContext.append(
-                Stmt.create().nestedCall(providerInjector.getType(injectContext, injectionPoint))
-                        .invoke("provide", typeArgs, qualifiers)
-        );
+        statement = Stmt.create().nestedCall(providerInjector.getType(injectContext, injectionPoint))
+                .invoke("provide", typeArgs, qualifiers);
       }
       else {
-        processingContext.append(
-                Stmt.create().nestedCall(providerInjector.getType(injectContext, injectionPoint))
-                        .invoke("provide", typeArgs, null)
-        );
+        statement = Stmt.create().nestedCall(providerInjector.getType(injectContext, injectionPoint))
+                .invoke("provide", typeArgs, null);
+
       }
     }
 
-    return Refs.get(varName);
+    if (singleton) {
+      if (!injected) {
+         injectContext.getProcessingContext().append(Stmt.create().declareVariable(type).named(varName)
+                .initializeWith(statement));
+      }
+      statement = Refs.get(varName);
+    }
+
+    injected = true;
+
+    return statement;
   }
 
   @Override

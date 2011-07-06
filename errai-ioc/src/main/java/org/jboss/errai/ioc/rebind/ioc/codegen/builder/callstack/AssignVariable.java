@@ -37,6 +37,7 @@ public class AssignVariable extends AbstractCallElement {
   @Override
   public void handleCall(CallWriter writer, Context context, Statement statement) {
     writer.reset();
+
     Statement s = new AssignmentBuilder(false, operator, (VariableReference) statement, GenUtil.generate(context,
             value));
     nextOrReturn(writer, context, s);
