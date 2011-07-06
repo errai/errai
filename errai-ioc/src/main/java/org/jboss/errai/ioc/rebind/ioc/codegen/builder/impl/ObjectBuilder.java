@@ -146,12 +146,8 @@ public class ObjectBuilder extends AbstractStatementBuilder {
       public void doDeferred(CallWriter writer, Context context, Statement statement) {
         writer.reset();
         
-        CallParameters callParameters;
-        if (parameters != null) {
-          callParameters = fromStatements(GenUtil.generateCallParameters(context, parameters));
-         } else {
-           callParameters = CallParameters.none();
-         }
+        CallParameters callParameters = (parameters != null) ? 
+            fromStatements(GenUtil.generateCallParameters(context, parameters)) : CallParameters.none();
          
          if (!type.isInterface() && type.getBestMatchingConstructor(callParameters.getParameterTypes()) == null)
            throw new UndefinedConstructorException(type, callParameters.getParameterTypes());
