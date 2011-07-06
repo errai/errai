@@ -31,7 +31,6 @@ public abstract class Refs {
     return new VariableReference() {
       private MetaClass type;
 
-
       @Override
       public String getName() {
         return name;
