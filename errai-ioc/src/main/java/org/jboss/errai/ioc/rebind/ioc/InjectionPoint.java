@@ -102,7 +102,7 @@ public class InjectionPoint<T extends Annotation> {
                 getPrivateFieldInjectorName(field), Refs.get(injector.getVarName()));
 
       case Field:
-        return Stmt.create().loadVariable(injector.getVarName()).getField(field.getName());
+        return Stmt.create().loadVariable(injector.getVarName()).loadField(field.getName());
 
       case Method:
         return Stmt.create().loadVariable(injector.getVarName()).invoke(method);
