@@ -30,7 +30,7 @@ public interface ContextualStatementBuilder extends ContextualLoopBuilder, Conte
 
   public ContextualStatementBuilder invoke(String methodName, Object... parameters);
 
-  public ContextualStatementBuilder getField(String fieldName);
+  public VariableReferenceContextualStatementBuilder getField(String fieldName);
 
   public Statement returnValue();
 }

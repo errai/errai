@@ -114,12 +114,14 @@ public class GenUtil {
         }
       }
 
+      Class<?> inputClass = input == null ? Object.class : input.getClass();
       Class<?> targetClass = targetType.asBoxed().asClass();
-      if (DataConversion.canConvert(targetClass, input.getClass())) {
+      if (DataConversion.canConvert(targetClass, inputClass)) {
         return generate(context, DataConversion.convert(input, targetClass));
       }
       else {
-        throw new InvalidTypeException("cannot convert input to target type:" + targetClass.getName());
+        return generate(context, input);
+      //  throw new InvalidTypeException("cannot convert input to target type:" + targetClass.getName());
       }
     }
     catch (Throwable t) {

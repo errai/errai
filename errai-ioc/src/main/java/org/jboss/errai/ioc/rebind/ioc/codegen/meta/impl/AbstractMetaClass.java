@@ -23,6 +23,7 @@ import org.mvel2.util.ParseTools;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -341,7 +342,36 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   public Class<?> asClass() {
     Class<?> cls = null;
 
-    if (enclosedMetaObject instanceof Class) {
+    if (isArray()) {
+      try {
+        MetaClass type = getComponentType();
+        int dim = 1;
+        while (type.isArray()) {
+          dim++;
+          type = type.getComponentType();
+        }
+
+//        if (MetaClassFactory.get(MetaClass.class).isAssignableFrom(type)) {
+//          type = MetaClassFactory.get(Class.class);
+//        }
+//        else if (MetaClassFactory.get(MetaType.class).isAssignableFrom(type)) {
+//          type = MetaClassFactory.get(Type.class);
+//        }
+
+        String dimString = "";
+        for (int i = 0; i < dim; i++) {
+          dimString += "[";
+        }
+
+        cls = Class.forName(dimString + "L" + type.getFullyQualifiedName() + ";", false,
+                Thread.currentThread().getContextClassLoader());
+      }
+      catch (ClassNotFoundException e) {
+        e.printStackTrace();
+        cls = null;
+      }
+    }
+    else if (enclosedMetaObject instanceof Class) {
       cls = (Class<?>) enclosedMetaObject;
     }
     else if (enclosedMetaObject != null) {
@@ -350,33 +380,10 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
                 Thread.currentThread().getContextClassLoader());
       }
       catch (ClassNotFoundException e) {
-        //
+
       }
     }
 
-    if (cls != null && cls.isArray() && MetaType.class.isAssignableFrom(cls.getComponentType())) {
-      try {
-
-        Class<?> type = cls.getClass();
-        int dim = 1;
-        while (type.isArray()) {
-          dim++;
-          type = type.getComponentType();
-        }
-
-        String dimString = "";
-        for (int i = 0; i < dim; i++) {
-          dimString += "[";
-        }
-
-        cls = Class.forName(dimString + "L" + type.getName() + ";", false,
-                Thread.currentThread().getContextClassLoader());
-      }
-      catch (ClassNotFoundException e) {
-        e.printStackTrace();
-        cls = null;
-      }
-    }
 
     return cls;
   }

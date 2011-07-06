@@ -96,7 +96,8 @@ public class InjectionTask {
 
         processingContext.append(
                 Stmt.create().
-                        loadVariable(injector.getVarName()).assignValue(inj.getType(ctx, injectionPoint))
+                        loadVariable(injector.getVarName()).getField(field.getName()).assignValue(inj.getType(ctx,
+                        injectionPoint))
         );
 
         break;

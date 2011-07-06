@@ -58,7 +58,7 @@ public class AssignmentBuilder implements Statement {
     operator.assertCanBeApplied(referenceType);
     operator.assertCanBeApplied(statement.getType());
 
-    return  reference.getName() + generateIndexes(indexes) +
+    return  reference.generate(context) + generateIndexes(indexes) +
         " " + operator.getCanonicalString() + " " + statement.generate(context);
   }
 

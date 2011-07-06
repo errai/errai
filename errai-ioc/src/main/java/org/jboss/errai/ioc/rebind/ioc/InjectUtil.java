@@ -348,7 +348,8 @@ public class InjectUtil {
   }
 
   public static String getNewVarName() {
-    return "inj" + counter.addAndGet(1);
+    String var = "inj" + counter.addAndGet(1);
+    return var;
   }
 
   public static String getPrivateFieldInjectorName(MetaField field) {
