@@ -373,6 +373,20 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   }
 
   @Test
+  public void testObjectCreationWithLiteralParameter() {
+    String s = StatementBuilder.create().newObject(String.class).withParameters("original").toJavaString();
+    assertEquals("failed to generate new object with parameters", "new String(\"original\")", s);
+  }
+  
+  @Test
+  public void testObjectCreationWithVariableParameter() {
+    String s = StatementBuilder.create()
+      .declareVariable("original", String.class)
+      .newObject(String.class).withParameters(Variable.get("original")).toJavaString();
+    assertEquals("failed to generate new object with parameters", "new String(original)", s);
+  }
+
+  @Test
   public void testObjectCreationWithParameterizedType() {
     String s = StatementBuilder.create().newObject(new TypeLiteral<List<String>>() {}).toJavaString();
     assertEquals("failed to generate new object with parameterized type", "new java.util.List<String>()", s);

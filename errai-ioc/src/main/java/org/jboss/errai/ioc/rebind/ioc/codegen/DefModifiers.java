@@ -17,6 +17,10 @@ public class DefModifiers implements Builder {
     addModifiers(modifiers);
   }
 
+  public static DefModifiers none() {
+    return new DefModifiers();
+  }
+  
   public DefModifiers addModifiers(Modifier... modifier) {
     modifiers.addAll(Arrays.asList(modifier));
     return this;

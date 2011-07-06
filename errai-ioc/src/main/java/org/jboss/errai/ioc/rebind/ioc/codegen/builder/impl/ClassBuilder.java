@@ -220,8 +220,6 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
         buildMetaConstructor.setScope(scope);
 
         classDefinition.addConstructor(buildMetaConstructor);
-
-        //noinspection unchecked
         return (T) ClassBuilder.this;
       }
     });
@@ -376,7 +374,6 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
                 modifiers, name, returnType, dParameters, throwsDeclaration);
  
         classDefinition.addMethod(buildMetaMethod);
-        //noinspection unchecked
         return (T) ClassBuilder.this;
       }
     });
@@ -431,8 +428,6 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
                 = new BuildMetaField(classDefinition, statement, scope, type, name);
 
         classDefinition.addField(buildMetaField);
-
-        //noinspection unchecked
         return (T) ClassBuilder.this;
       }
     }, scope, type, name);

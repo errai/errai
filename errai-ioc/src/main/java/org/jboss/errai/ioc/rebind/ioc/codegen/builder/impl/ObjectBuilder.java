@@ -16,6 +16,8 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
+import static org.jboss.errai.ioc.rebind.ioc.codegen.CallParameters.fromStatements;
+
 import javax.enterprise.util.TypeLiteral;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.CallParameters;
@@ -24,6 +26,9 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BuildCallback;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementEnd;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.CallWriter;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DeferredCallElement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.DeferredCallback;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedConstructorException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
@@ -39,18 +44,13 @@ import com.google.gwt.core.ext.typeinfo.JClassType;
  */
 public class ObjectBuilder extends AbstractStatementBuilder {
 
-  private static final int CONSTRUCT_STATEMENT_COMPLETE = 1;
-  private static final int SUBCLASSED = 2;
-  private static final int FINISHED = 3;
-
   private MetaClass type;
-  private int buildState;
-
-  private CallParameters callParameters;
+  private Object[] parameters;
+  
   private Statement extendsBlock;
 
-  ObjectBuilder(MetaClass type, Context context) {
-    super(context);
+  ObjectBuilder(MetaClass type, Context context, CallElementBuilder callElementBuilder) {
+    super(context, callElementBuilder);
     this.type = type;
 
     for (MetaField field : type.getFields()) {
@@ -58,8 +58,12 @@ public class ObjectBuilder extends AbstractStatementBuilder {
     }
   }
 
+  ObjectBuilder(MetaClass type, Context context) {
+    this(type, context, new CallElementBuilder());
+  }
+  
   ObjectBuilder(MetaClass type) {
-    this(type, Context.create());
+    this(type, Context.create(), new CallElementBuilder());
   }
 
   ObjectBuilder() {
@@ -97,18 +101,25 @@ public class ObjectBuilder extends AbstractStatementBuilder {
   public static ObjectBuilder newInstanceOf(JClassType type, Context context) {
     return newInstanceOf(MetaClassFactory.get(type), context);
   }
+  
+  public static ObjectBuilder newInstanceOf(MetaClass type, Context context, CallElementBuilder callElementBuilder) {
+    return new ObjectBuilder(type, context, callElementBuilder);
+  }
+
+  public static ObjectBuilder newInstanceOf(Class<?> type, Context context, CallElementBuilder callElementBuilder) {
+    return newInstanceOf(MetaClassFactory.get(type), context, callElementBuilder);
+  }
+
+  public static ObjectBuilder newInstanceOf(TypeLiteral<?> type, Context context, CallElementBuilder callElementBuilder) {
+    return newInstanceOf(MetaClassFactory.get(type), context, callElementBuilder);
+  }
+
+  public static ObjectBuilder newInstanceOf(JClassType type, Context context, CallElementBuilder callElementBuilder) {
+    return newInstanceOf(MetaClassFactory.get(type), context, callElementBuilder);
+  }
 
   public StatementEnd withParameters(Object... parameters) {
-    return withParameters(GenUtil.generateCallParameters(context, parameters));
-  }
-
-  public StatementEnd withParameters(Statement... parameters) {
-    return withParameters(CallParameters.fromStatements(parameters));
-  }
-
-  public StatementEnd withParameters(CallParameters parameters) {
-    callParameters = parameters;
-    buildState |= CONSTRUCT_STATEMENT_COMPLETE;
+    this.parameters = parameters;
     return this;
   }
 
@@ -116,17 +127,10 @@ public class ObjectBuilder extends AbstractStatementBuilder {
     return new ExtendsClassStructureBuilderImpl(type, new BuildCallback<ObjectBuilder>() {
       @Override
       public ObjectBuilder callback(Statement statement) {
-        finishConstructIfNecessary();
         extendsBlock = statement;
         return ObjectBuilder.this;
       }
     });
-  }
-
-  private void finishConstructIfNecessary() {
-    if ((buildState & CONSTRUCT_STATEMENT_COMPLETE) == 0) {
-      withParameters(CallParameters.none());
-    }
   }
 
   @Override
@@ -136,20 +140,34 @@ public class ObjectBuilder extends AbstractStatementBuilder {
 
   @Override
   public String generate(Context context) {
-    finishConstructIfNecessary();
-
-    if (!type.isInterface() && type.getBestMatchingConstructor(callParameters.getParameterTypes()) == null)
-      throw new UndefinedConstructorException(type, callParameters.getParameterTypes());
-
     
-    StringBuilder buf = new StringBuilder();
-    buf.append("new ").append(LoadClassReference.getClassReference(type, context, true));
-    if (callParameters != null) {
-      buf.append(callParameters.generate(Context.create()));
-    }
-    if (extendsBlock != null) {
-      buf.append(" {\n").append(extendsBlock.generate(context)).append("\n}\n");
-    }
-    return buf.toString();
+    appendCallElement(new DeferredCallElement(new DeferredCallback() {
+      @Override
+      public void doDeferred(CallWriter writer, Context context, Statement statement) {
+        writer.reset();
+        
+        CallParameters callParameters;
+        if (parameters != null) {
+          callParameters = fromStatements(GenUtil.generateCallParameters(context, parameters));
+         } else {
+           callParameters = CallParameters.none();
+         }
+         
+         if (!type.isInterface() && type.getBestMatchingConstructor(callParameters.getParameterTypes()) == null)
+           throw new UndefinedConstructorException(type, callParameters.getParameterTypes());
+
+         StringBuilder buf = new StringBuilder();
+         buf.append("new ").append(LoadClassReference.getClassReference(type, context, true));
+         if (callParameters != null) {
+           buf.append(callParameters.generate(Context.create()));
+         }
+         if (extendsBlock != null) {
+           buf.append(" {\n").append(extendsBlock.generate(context)).append("\n}\n");
+         }
+         writer.append(buf.toString());
+      }
+    }));
+    
+    return super.generate(context);
   }
 }

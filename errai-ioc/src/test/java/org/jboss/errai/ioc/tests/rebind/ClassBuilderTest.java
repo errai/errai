@@ -117,7 +117,7 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
 
     assertEquals("failed to generate abstract class", ABSTRACT_CLASS, cls);
   }
-  
+
   @Test
   public void testDefineAbstractClassWithAbstractMethods() {
 
@@ -247,6 +247,7 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
       assertEquals("Wrong exception thrown", udme.getMethodName(), "undefinedMethod");
     }
   }
+
   @Test
   public void testDefineClassWithMethodHavingThrowsDeclaration() {
 
@@ -325,42 +326,27 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
   }
 
   @Test
-  public void testDefineClass() {
+  public void testDefineClassByImplementingInterface() {
     String cls = ClassBuilder.implement(Bootstrapper.class)
         .publicMethod(InterfaceInjectionContext.class, "bootstrapContainer")
         .append(Stmt.create().declareVariable("ctx", Stmt.create().newObject(InterfaceInjectionContext.class)))
         .append(Stmt.create().loadVariable("ctx").returnValue())
         .finish().toJavaString();
 
-    assertEquals("package org.jboss.errai.ioc.client.api;\n" +
-        "\n" +
-        "import org.jboss.errai.ioc.client.api.Bootstrapper;\n" +
-        "import org.jboss.errai.ioc.client.InterfaceInjectionContext;\n" +
-        "\n" +
-        "public class BootstrapperImpl implements Bootstrapper {\n" +
-        "    public InterfaceInjectionContext bootstrapContainer() {\n" +
-        "        InterfaceInjectionContext ctx = new InterfaceInjectionContext();\n" +
-        "        return ctx;\n" +
-        "    }\n" +
-        "}", cls);
+    assertEquals("failed to generate class by implementing an interface",
+        CLASS_DEFINITION_BY_IMPLEMENTING_INTERFACE, cls);
   }
 
   @Test
-  public void testDefineStaticMethods() {
+  public void testDefineStaticMethod() {
     String cls = ClassBuilder.define("my.test.Clazz")
-            .publicScope().body()
-            .publicMethod(void.class, "test").modifiers(Modifier.Static)
-              .body()
-                .append(Stmt.create().loadStatic(System.class, "out").invoke("println", "Hello, World!"))
-            .finish()
-            .toJavaString();
+        .publicScope().body()
+        .publicMethod(void.class, "test").modifiers(Modifier.Static)
+          .body()
+            .append(Stmt.create().loadStatic(System.class, "out").invoke("println", "Hello, World!"))
+        .finish()
+        .toJavaString();
 
-    assertEquals("package my.test;\n" +
-            "\n" +
-            "public class Clazz {\n" +
-            "    public static void test() {\n" +
-            "        System.out.println(\"Hello, World!\");\n" +
-            "    }\n" +
-            "}", cls);
+    assertEquals("failed to generate class with static method", CLASS_WITH_STATIC_METHOD, cls);
   }
 }
