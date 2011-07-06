@@ -121,7 +121,7 @@ public final class MetaClassFactory {
       return GWTClass.newUncachedInstance(type);
     }
 
-    if (!CLASS_CACHE.containsKey(type.isClassOrInterface().getName())) {
+    if (!CLASS_CACHE.containsKey(type.getQualifiedSourceName())) {
       MetaClass gwtClass = GWTClass.newUncachedInstance(type);
 
       addLookups(type, gwtClass);
@@ -158,7 +158,7 @@ public final class MetaClassFactory {
   }
 
   private static void addLookups(JType cls, MetaClass metaClass) {
-    CLASS_CACHE.put(cls.isClassOrInterface().getName(), metaClass);
+    CLASS_CACHE.put(cls.getQualifiedSourceName(), metaClass);
   }
 
   private static Class<?> load(String fullyQualifiedName) {

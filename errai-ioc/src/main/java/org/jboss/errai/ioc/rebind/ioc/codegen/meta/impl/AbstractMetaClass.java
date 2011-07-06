@@ -75,7 +75,8 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   protected static MetaMethod _getMethod(MetaMethod[] methods, String name, MetaClass... parmTypes) {
-    Outer: for (MetaMethod method : methods) {
+    Outer:
+    for (MetaMethod method : methods) {
       if (method.getName().equals(name) && method.getParameters().length == parmTypes.length) {
         for (int i = 0; i < parmTypes.length; i++) {
           if (!method.getParameters()[i].getType().equals(parmTypes[i])) {
@@ -89,7 +90,8 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   protected static MetaConstructor _getConstructor(MetaConstructor[] constructors, MetaClass... parmTypes) {
-    Outer: for (MetaConstructor constructor : constructors) {
+    Outer:
+    for (MetaConstructor constructor : constructors) {
       if (constructor.getParameters().length == parmTypes.length) {
         for (int i = 0; i < parmTypes.length; i++) {
           if (!constructor.getParameters()[i].getType().equals(parmTypes[i])) {
@@ -337,17 +339,46 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   @Override
   public Class<?> asClass() {
+    Class<?> cls = null;
+
     if (enclosedMetaObject instanceof Class) {
-      return (Class<?>) enclosedMetaObject;
+      cls = (Class<?>) enclosedMetaObject;
     }
-   else if (enclosedMetaObject != null) {
+    else if (enclosedMetaObject != null) {
       try {
-        return Class.forName(((JClassType) enclosedMetaObject).getQualifiedSourceName(), false,
+        cls = Class.forName(((JClassType) enclosedMetaObject).getQualifiedSourceName(), false,
                 Thread.currentThread().getContextClassLoader());
       }
-      catch (ClassNotFoundException e) {}
+      catch (ClassNotFoundException e) {
+        //
+      }
     }
-    return null;
+
+    if (cls != null && cls.isArray() && MetaType.class.isAssignableFrom(cls.getComponentType())) {
+      try {
+
+        Class<?> type = cls.getClass();
+        int dim = 1;
+        while (type.isArray()) {
+          dim++;
+          type = type.getComponentType();
+        }
+
+        String dimString = "";
+        for (int i = 0; i < dim; i++) {
+          dimString += "[";
+        }
+
+        cls = Class.forName(dimString + "L" + type.getName() + ";", false,
+                Thread.currentThread().getContextClassLoader());
+      }
+      catch (ClassNotFoundException e) {
+        e.printStackTrace();
+        cls = null;
+      }
+    }
+
+    return cls;
   }
 
   @Override
