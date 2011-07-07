@@ -121,7 +121,6 @@ public class GenUtil {
       }
       else {
         return generate(context, input);
-      //  throw new InvalidTypeException("cannot convert input to target type:" + targetClass.getName());
       }
     }
     catch (Throwable t) {
