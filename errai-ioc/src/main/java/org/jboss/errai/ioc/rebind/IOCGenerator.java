@@ -362,9 +362,6 @@ public class IOCGenerator extends Generator {
 
     sourceWriter.print(classBuilder.toJavaString());
   }
-  public native static void Test() /*-{
-    
-  }-*/;
   
   public void addType(final MetaClass type) {
     injectFactory.addType(type);
