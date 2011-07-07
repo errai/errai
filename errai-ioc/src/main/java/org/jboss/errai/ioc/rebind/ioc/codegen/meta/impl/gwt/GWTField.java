@@ -16,15 +16,16 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.gwt;
 
-import com.google.gwt.core.ext.typeinfo.JField;
-import com.google.gwt.core.ext.typeinfo.JGenericType;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaType;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
+import com.google.gwt.core.ext.typeinfo.JField;
+import com.google.gwt.core.ext.typeinfo.JGenericType;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

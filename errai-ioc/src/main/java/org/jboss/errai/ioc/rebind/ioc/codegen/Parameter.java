@@ -16,13 +16,13 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen;
 
+import java.lang.annotation.Annotation;
+
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassMember;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
-
-import java.lang.annotation.Annotation;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

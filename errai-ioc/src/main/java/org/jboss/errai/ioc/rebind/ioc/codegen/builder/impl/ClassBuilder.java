@@ -16,8 +16,22 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.*;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.*;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.DefModifiers;
+import org.jboss.errai.ioc.rebind.ioc.codegen.DefParameters;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Parameter;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.ThrowsDeclaration;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BuildCallback;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ClassDefinitionBuilderAbstractOption;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ClassDefinitionBuilderInterfaces;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ClassDefinitionBuilderScope;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ClassStructureBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ConstructorBlockBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.DefaultClassStructureBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.FieldBuildInitializer;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.MethodBlockBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.MethodBuildCallback;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.build.BuildMetaClass;
@@ -363,11 +377,11 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
 
         DefParameters dParameters;
 
-        if (defParameters != null) {
-          dParameters = defParameters;
+        if (parameters != null) {
+          dParameters = parameters;
         }
         else {
-          dParameters = parameters;
+          dParameters = defParameters;          
         }
 
         BuildMetaMethod buildMetaMethod = new BuildMetaMethod(classDefinition, statement, scope,

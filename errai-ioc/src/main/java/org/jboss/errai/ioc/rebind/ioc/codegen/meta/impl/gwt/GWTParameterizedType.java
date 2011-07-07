@@ -16,15 +16,15 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.gwt;
 
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.JParameterizedType;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaType;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.JParameterizedType;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

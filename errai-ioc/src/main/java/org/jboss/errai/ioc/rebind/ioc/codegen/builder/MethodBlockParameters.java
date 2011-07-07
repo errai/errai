@@ -2,7 +2,6 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.DefParameters;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

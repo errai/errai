@@ -16,19 +16,25 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl;
 
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.*;
-import org.mvel2.util.ParseTools;
+import static org.jboss.errai.ioc.rebind.ioc.InjectUtil.classToMeta;
+import static org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory.asClassArray;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.jboss.errai.ioc.rebind.ioc.InjectUtil.classToMeta;
-import static org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory.asClassArray;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaConstructor;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameterizedType;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaType;
+import org.mvel2.util.ParseTools;
+
+import com.google.gwt.core.ext.typeinfo.JClassType;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -76,8 +82,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   protected static MetaMethod _getMethod(MetaMethod[] methods, String name, MetaClass... parmTypes) {
-    Outer:
-    for (MetaMethod method : methods) {
+    Outer: for (MetaMethod method : methods) {
       if (method.getName().equals(name) && method.getParameters().length == parmTypes.length) {
         for (int i = 0; i < parmTypes.length; i++) {
           if (!method.getParameters()[i].getType().equals(parmTypes[i])) {
@@ -91,8 +96,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   protected static MetaConstructor _getConstructor(MetaConstructor[] constructors, MetaClass... parmTypes) {
-    Outer:
-    for (MetaConstructor constructor : constructors) {
+    Outer: for (MetaConstructor constructor : constructors) {
       if (constructor.getParameters().length == parmTypes.length) {
         for (int i = 0; i < parmTypes.length; i++) {
           if (!constructor.getParameters()[i].getType().equals(parmTypes[i])) {
@@ -127,16 +131,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   @Override
   public MetaMethod getBestMatchingMethod(String name, Class... parameters) {
-    Class<?> cls = asClass();
-    if (cls != null) {
-      Method m = ParseTools.getBestCandidate(parameters, name, cls, cls.getMethods(), false);
-      if (m == null)
-        return null;
-      return getMethod(name, m.getParameterTypes());
-    }
-    else {
-      return getMethod(name, parameters);
-    }
+   return getBestMatchingMethod(null, name, parameters);
   }
 
   @Override
@@ -146,14 +141,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   @Override
   public MetaMethod getBestMatchingStaticMethod(String name, Class... parameters) {
-    Class<?> cls = asClass();
-
-    Method m = ParseTools.getBestCandidate(parameters, name, cls,
-            fromMetaMethod(getStaticMethods()), false);
-    if (m == null)
-      return null;
-
-    return getMethod(name, m.getParameterTypes());
+    return getBestMatchingMethod(fromMetaMethod(getStaticMethods()), name, parameters);
   }
 
   @Override
@@ -161,6 +149,22 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return getBestMatchingStaticMethod(name, asClassArray(parameters));
   }
 
+  private MetaMethod getBestMatchingMethod(Method[] methods, String name, Class... parameters) {
+    Class<?> cls = asClass();
+
+    if (cls != null) {
+      methods = (methods == null) ? cls.getMethods() : methods;
+      Method m = ParseTools.getBestCandidate(parameters, name, cls, methods, false);
+      if (m == null)
+        return null;
+
+      return getMethod(name, m.getParameterTypes());
+    }
+    else {
+      return getMethod(name, parameters);
+    }
+  }
+  
   private MetaMethod[] getStaticMethods() {
     List<MetaMethod> methods = new ArrayList<MetaMethod>();
 
@@ -351,12 +355,12 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
           type = type.getComponentType();
         }
 
-//        if (MetaClassFactory.get(MetaClass.class).isAssignableFrom(type)) {
-//          type = MetaClassFactory.get(Class.class);
-//        }
-//        else if (MetaClassFactory.get(MetaType.class).isAssignableFrom(type)) {
-//          type = MetaClassFactory.get(Type.class);
-//        }
+        // if (MetaClassFactory.get(MetaClass.class).isAssignableFrom(type)) {
+        // type = MetaClassFactory.get(Class.class);
+        // }
+        // else if (MetaClassFactory.get(MetaType.class).isAssignableFrom(type)) {
+        // type = MetaClassFactory.get(Type.class);
+        // }
 
         String dimString = "";
         for (int i = 0; i < dim; i++) {
@@ -383,7 +387,6 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
       }
     }
-
 
     return cls;
   }

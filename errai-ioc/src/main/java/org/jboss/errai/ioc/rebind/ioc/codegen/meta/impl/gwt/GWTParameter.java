@@ -16,14 +16,20 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.gwt;
 
-import com.google.gwt.core.ext.typeinfo.JAbstractMethod;
-import com.google.gwt.core.ext.typeinfo.JParameter;
-import org.jboss.errai.ioc.rebind.ioc.InjectUtil;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.*;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+
+import org.jboss.errai.ioc.rebind.ioc.InjectUtil;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassMember;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaConstructor;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
+
+import com.google.gwt.core.ext.typeinfo.JAbstractMethod;
+import com.google.gwt.core.ext.typeinfo.JParameter;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

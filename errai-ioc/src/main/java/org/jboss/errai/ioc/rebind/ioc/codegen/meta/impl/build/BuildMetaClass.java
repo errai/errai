@@ -16,21 +16,26 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.build;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.Builder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.Scope;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.*;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.AbstractMetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.GenUtil;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.PrettyPrinter;
-
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.Builder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.Scope;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaConstructor;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaTypeVariable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.AbstractMetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.GenUtil;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.PrettyPrinter;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

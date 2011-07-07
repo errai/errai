@@ -16,10 +16,10 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java;
 
+import java.lang.reflect.ParameterizedType;
+
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaType;
-
-import java.lang.reflect.ParameterizedType;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

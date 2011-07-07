@@ -16,11 +16,11 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java;
 
+import java.lang.reflect.TypeVariable;
+
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaGenericDeclaration;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaType;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaTypeVariable;
-
-import java.lang.reflect.TypeVariable;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

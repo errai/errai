@@ -16,6 +16,10 @@
 
 package org.jboss.errai.ioc.tests.rebind;
 
+import static org.junit.Assert.fail;
+
+import java.io.Serializable;
+
 import org.jboss.errai.ioc.client.InterfaceInjectionContext;
 import org.jboss.errai.ioc.client.api.Bootstrapper;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Modifier;
@@ -25,10 +29,6 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedMethodException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 import org.junit.Test;
-
-import java.io.Serializable;
-
-import static org.junit.Assert.fail;
 
 /**
  * Tests the {@link ClassBuilder} API.

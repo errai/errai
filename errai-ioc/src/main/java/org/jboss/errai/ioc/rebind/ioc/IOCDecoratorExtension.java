@@ -16,9 +16,9 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-
 import java.lang.annotation.Annotation;
+
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 
 public abstract class IOCDecoratorExtension<T extends Annotation> {
   private final Class<T> decoratesWith;

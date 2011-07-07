@@ -16,15 +16,19 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
-import org.jboss.errai.ioc.rebind.IOCProcessingContext;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.*;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.Refs;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
+import static org.jboss.errai.ioc.rebind.ioc.InjectUtil.getPrivateFieldInjectorName;
+import static org.jboss.errai.ioc.rebind.ioc.InjectUtil.resolveInjectionDependencies;
 
 import java.lang.annotation.Annotation;
 
-import static org.jboss.errai.ioc.rebind.ioc.InjectUtil.getPrivateFieldInjectorName;
-import static org.jboss.errai.ioc.rebind.ioc.InjectUtil.resolveInjectionDependencies;
+import org.jboss.errai.ioc.rebind.IOCProcessingContext;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaConstructor;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.Refs;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 
 public class InjectionTask {
   protected final TaskType injectType;
@@ -96,7 +100,7 @@ public class InjectionTask {
 
         processingContext.append(
                 Stmt.create().
-                        loadVariable(injector.getVarName()).getField(field.getName()).assignValue(inj.getType(ctx,
+                        loadVariable(injector.getVarName()).loadField(field.getName()).assignValue(inj.getType(ctx,
                         injectionPoint))
         );
 

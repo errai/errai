@@ -1,8 +1,10 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.Builder;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.TreeSet;
 
-import java.util.*;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.Builder;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

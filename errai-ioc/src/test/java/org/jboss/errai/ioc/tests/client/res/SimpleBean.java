@@ -16,12 +16,12 @@
 
 package org.jboss.errai.ioc.tests.client.res;
 
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.ioc.client.api.EntryPoint;
-
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
 
 /**
  * User: christopherbrock

@@ -16,12 +16,13 @@
 
 package org.jboss.errai.ioc.tests.client;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.junit.client.GWTTestCase;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.ioc.client.api.Bootstrapper;
 import org.jboss.errai.ioc.tests.client.res.SimpleBean;
 import org.jboss.errai.ioc.tests.client.res.SimpleBean2;
+
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.junit.client.GWTTestCase;
 
 /**
  * User: christopherbrock

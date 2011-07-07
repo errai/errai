@@ -16,10 +16,10 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java;
 
+import java.lang.reflect.WildcardType;
+
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaType;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaWildcardType;
-
-import java.lang.reflect.WildcardType;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

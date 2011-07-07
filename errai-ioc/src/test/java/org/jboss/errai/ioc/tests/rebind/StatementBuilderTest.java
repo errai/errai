@@ -39,6 +39,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.literal.LiteralFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.PrettyPrinter;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 import org.jboss.errai.ioc.tests.rebind.model.Foo;
 import org.junit.Assert;
@@ -46,7 +47,7 @@ import org.junit.Test;
 
 /**
  * Tests the {@link StatementBuilder} API.
- *
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class StatementBuilderTest extends AbstractStatementBuilderTest {
@@ -237,44 +238,44 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   }
 
   @Test
-  @SuppressWarnings(value = {"all"})
+  @SuppressWarnings(value = { "all" })
   public void testCreateAndInitializeTwoDimensionalArray() {
     String s = StatementBuilder.create().newArray(Integer.class)
-            .initialize(new Integer[][]{{1, 2}, {3, 4}})
+            .initialize(new Integer[][] { { 1, 2 }, { 3, 4 } })
             .toJavaString();
 
     assertEquals("Failed to generate two dimensional array", "new Integer[][] {{1,2},{3,4}}", s);
   }
 
   @Test
-  @SuppressWarnings(value = {"all"})
+  @SuppressWarnings(value = { "all" })
   public void testCreateAndInitializeTwoDimensionalArrayWithSingleValue() {
     String s = StatementBuilder.create().newArray(Integer.class)
-            .initialize(new Object[][]{{1, 2}})
+            .initialize(new Object[][] { { 1, 2 } })
             .toJavaString();
 
     assertEquals("Failed to generate two dimensional array", "new Integer[][] {{1,2}}", s);
   }
 
   @Test
-  @SuppressWarnings(value = {"all"})
+  @SuppressWarnings(value = { "all" })
   public void testCreateAndInitializeTwoDimensionalObjectArrayWithIntegers() {
     String s = StatementBuilder.create().newArray(Object.class)
-            .initialize(new Object[][]{{1, 2}})
+            .initialize(new Object[][] { { 1, 2 } })
             .toJavaString();
 
     assertEquals("Failed to generate two dimensional array", "new Object[][] {{1,2}}", s);
   }
 
   @Test
-  @SuppressWarnings(value = {"all"})
+  @SuppressWarnings(value = { "all" })
   public void testCreateAndInitializeTwoDimensionalArrayWithStatements() {
     String s = StatementBuilder.create().newArray(String.class)
-            .initialize(new Statement[][]{
-                    {StatementBuilder.create().invokeStatic(Integer.class, "toString", 1),
-                            StatementBuilder.create().invokeStatic(Integer.class, "toString", 2)},
-                    {StatementBuilder.create().invokeStatic(Integer.class, "toString", 3),
-                            StatementBuilder.create().invokeStatic(Integer.class, "toString", 4)}})
+            .initialize(new Statement[][] {
+                    { StatementBuilder.create().invokeStatic(Integer.class, "toString", 1),
+                            StatementBuilder.create().invokeStatic(Integer.class, "toString", 2) },
+                    { StatementBuilder.create().invokeStatic(Integer.class, "toString", 3),
+                            StatementBuilder.create().invokeStatic(Integer.class, "toString", 4) } })
             .toJavaString();
 
     assertEquals("Failed to generate two dimensional array using statements",
@@ -283,12 +284,12 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   }
 
   @Test
-  @SuppressWarnings(value = {"all"})
+  @SuppressWarnings(value = { "all" })
   public void testCreateAndInitializeTwoDimensionalArrayWithStatementsAndLiterals() {
     String s = StatementBuilder.create().newArray(String.class)
-            .initialize(new Object[][]{
-                    {StatementBuilder.create().invokeStatic(Integer.class, "toString", 1), "2"},
-                    {StatementBuilder.create().invokeStatic(Integer.class, "toString", 3), "4"}})
+            .initialize(new Object[][] {
+                    { StatementBuilder.create().invokeStatic(Integer.class, "toString", 1), "2" },
+                    { StatementBuilder.create().invokeStatic(Integer.class, "toString", 3), "4" } })
             .toJavaString();
 
     assertEquals("Failed to generate two dimensional array using statements and objects",
@@ -297,10 +298,10 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   }
 
   @Test
-  @SuppressWarnings(value = {"all"})
+  @SuppressWarnings(value = { "all" })
   public void testCreateAndInitializeThreeDimensionalArray() {
     String s = StatementBuilder.create().newArray(String.class)
-            .initialize(new String[][][]{{{"1", "2"}, {"a", "b"}}, {{"3", "4"}, {"b", "c"}}})
+            .initialize(new String[][][] { { { "1", "2" }, { "a", "b" } }, { { "3", "4" }, { "b", "c" } } })
             .toJavaString();
 
     assertEquals("Failed to generate three dimensional array",
@@ -472,22 +473,22 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
 
   @Test
   public void testNestedCall() {
-    String s =
-            StatementBuilder.create()
-                    .nestedCall(
-                            StatementBuilder.create().declareVariable("n", Integer.class).loadVariable("n").invoke("toString"))
-                    .invoke("getBytes")
-                    .toJavaString();
+    String s = StatementBuilder.create()
+        .nestedCall(
+                StatementBuilder.create().declareVariable("n", Integer.class).loadVariable("n").invoke(
+                    "toString"))
+        .invoke("getBytes")
+        .toJavaString();
 
     assertEquals("failed to generate nested call", "(n.toString()).getBytes()", s);
   }
 
   @Test
   public void testAssignField() {
-    String s = Stmt.create().nestedCall(Stmt.create()
-            .newObject(Foo.class)).getField("bar").getField("name").assignValue("test").toJavaString();
+    String s = Stmt.create(Context.create().autoImport()).nestedCall(Stmt.create()
+            .newObject(Foo.class)).loadField("bar").loadField("name").assignValue("test").toJavaString();
 
-    System.out.println(s);
+    assertEquals("failed to generate nested field assignment", 
+        "(new Foo()).bar.name = \"test\"", s);
   }
-
 }

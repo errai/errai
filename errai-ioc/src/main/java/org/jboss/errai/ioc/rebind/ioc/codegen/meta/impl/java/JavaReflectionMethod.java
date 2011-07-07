@@ -16,13 +16,18 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.*;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaType;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaTypeVariable;
 
 public class JavaReflectionMethod extends MetaMethod {
   private Method method;

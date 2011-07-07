@@ -16,13 +16,14 @@
 
 package org.jboss.errai.ioc.tests.rebind;
 
+import java.lang.annotation.Target;
+
+import javax.annotation.PostConstruct;
+
 import org.jboss.errai.ioc.rebind.ioc.codegen.AnnotationEncoder;
 import org.jboss.errai.ioc.tests.rebind.model.MyBean;
 import org.jboss.errai.ioc.tests.rebind.model.MyTestAnnotation;
 import org.junit.Test;
-
-import javax.annotation.PostConstruct;
-import java.lang.annotation.Target;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

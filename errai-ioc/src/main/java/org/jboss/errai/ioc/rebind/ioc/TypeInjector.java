@@ -17,14 +17,15 @@
 package org.jboss.errai.ioc.rebind.ioc;
 
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.Refs;
-
-import javax.inject.Singleton;
 import java.lang.annotation.Annotation;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.inject.Singleton;
+
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.Refs;
 
 public class TypeInjector extends Injector {
   protected final MetaClass type;

@@ -16,11 +16,11 @@
 
 package org.jboss.errai.ioc.tests.rebind;
 
+import java.lang.annotation.Retention;
+
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
 import org.junit.Test;
-
-import java.lang.annotation.Retention;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

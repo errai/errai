@@ -18,7 +18,12 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.*;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BuildCallback;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.FieldBuildInitializer;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.FieldBuildName;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.FieldBuildStart;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.FieldBuildType;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.Finishable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;

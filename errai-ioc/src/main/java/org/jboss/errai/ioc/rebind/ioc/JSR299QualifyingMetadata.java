@@ -16,12 +16,13 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
-import javax.enterprise.inject.Any;
-import javax.inject.Qualifier;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.enterprise.inject.Any;
+import javax.inject.Qualifier;
 
 /**
  * @author Mike Brock .

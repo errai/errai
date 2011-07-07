@@ -2,8 +2,6 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.util;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
 
-import java.lang.reflect.Field;
-
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
