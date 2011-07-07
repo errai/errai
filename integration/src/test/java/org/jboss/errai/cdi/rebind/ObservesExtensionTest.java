@@ -12,7 +12,7 @@ import org.jboss.errai.ioc.rebind.ioc.InjectionPoint;
 import org.jboss.errai.ioc.rebind.ioc.Injector;
 import org.jboss.errai.ioc.rebind.ioc.TaskType;
 import org.jboss.errai.ioc.rebind.ioc.TypeInjector;
-import org.jboss.errai.ioc.rebind.ioc.codegen.MetaClassFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 import org.junit.Test;
@@ -22,7 +22,7 @@ import org.junit.Test;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class ObservesExtensionTest implements ObservesExtensionTestResult {
+public class ObservesExtensionTest extends AbstractErraiCDIRebindTest implements ObservesExtensionTestResult {
     interface HasObserverWithoutQualifiers {
         public void withoutQualifiers(@Observes BusReadyEvent event);
     }
@@ -69,7 +69,7 @@ public class ObservesExtensionTest implements ObservesExtensionTestResult {
         }
     };
 
-    private InjectionContext ctx = new InjectionContext(null) {
+    private InjectionContext mockContext = new InjectionContext(null) {
         public Injector getInjector(Class<?> injectorType) {
             return new MockInjector();
         }
@@ -94,13 +94,8 @@ public class ObservesExtensionTest implements ObservesExtensionTestResult {
         MetaMethod method = type.getMethods()[0];
       
         InjectionPoint injectionPoint = new InjectionPoint (observes, TaskType.Parameter, null, method, null,
-                type, method.getParameters()[0], new TypeInjector(type), ctx);
+                type, method.getParameters()[0], new TypeInjector(type), mockContext);
         
         return injectionPoint;
-    }
-
-    protected static void assertEquals(String message, String expected, String actual) {
-        org.junit.Assert.assertEquals(message, expected.replaceAll("\\s+", " ").trim(), 
-                actual.replaceAll("\\s+", " ").trim());
     }
 }

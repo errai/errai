@@ -49,8 +49,8 @@ public class ProducerTestModule {
     
     @Produces @C 
     public Integer produceNumberC() {
-        numberB = new Random().nextInt();
-        return numberB;
+        numberC = new Random().nextInt();
+        return numberC;
     }
     
     public Integer getInjectedNumberA() {
