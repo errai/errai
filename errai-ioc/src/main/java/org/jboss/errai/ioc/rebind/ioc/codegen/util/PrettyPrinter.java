@@ -110,9 +110,8 @@ public class PrettyPrinter {
             switch (expr[cursor + 1]) {
               case '/':
                 expr[cursor++] = ' ';
-                while (cursor != expr.length && expr[cursor] != '\n') expr[cursor++] = ' ';
-                if (cursor != expr.length) expr[cursor++] = ' ';
-
+                while (cursor != expr.length && expr[cursor] != '\n') cursor++;
+                if (cursor != expr.length) cursor++;
 
                 continue;
 
@@ -120,10 +119,9 @@ public class PrettyPrinter {
                 int len = expr.length - 1;
                 expr[cursor++] = ' ';
                 while (cursor != len && !(expr[cursor] == '*' && expr[cursor + 1] == '/')) {
-
-                  expr[cursor++] = ' ';
+                   cursor++;
                 }
-                if (cursor != len) expr[cursor++] = expr[cursor++] = ' ';
+                if (cursor != len) cursor += 2;
                 continue;
 
               default:
