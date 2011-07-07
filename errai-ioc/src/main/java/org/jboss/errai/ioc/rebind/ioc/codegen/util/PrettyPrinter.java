@@ -117,14 +117,16 @@ public class PrettyPrinter {
                 continue;
 
               case '*':
-                int len = expr.length - 1;
-                expr[cursor++] = ' ';
-                while (cursor != len && !(expr[cursor] == '*' && expr[cursor + 1] == '/')) {
-
+                if (expr[cursor+2] != '-') {
+                  int len = expr.length - 1;
                   expr[cursor++] = ' ';
+                  while (cursor != len && !(expr[cursor] == '*' && expr[cursor + 1] == '/')) {
+  
+                    expr[cursor++] = ' ';
+                  }
+                  if (cursor != len) expr[cursor++] = expr[cursor++] = ' ';
+                  continue;
                 }
-                if (cursor != len) expr[cursor++] = expr[cursor++] = ' ';
-                continue;
 
               default:
                 break Skip;
