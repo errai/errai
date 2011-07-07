@@ -16,6 +16,8 @@
 
 package org.jboss.errai.ioc.client.api.builtin;
 
+import java.lang.annotation.Annotation;
+
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Consumer;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
@@ -23,8 +25,6 @@ import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.IOCProvider;
-
-import java.lang.annotation.Annotation;
 
 /**
  * @author Mike Brock .

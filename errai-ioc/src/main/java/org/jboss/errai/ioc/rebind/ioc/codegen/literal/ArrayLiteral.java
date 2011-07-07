@@ -16,11 +16,11 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.literal;
 
+import java.lang.reflect.Array;
+
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
-
-import java.lang.reflect.Array;
 
 /**
  * Renders an array back to it's canonical Java-based literal representation, assuming the contents

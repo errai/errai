@@ -16,11 +16,12 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

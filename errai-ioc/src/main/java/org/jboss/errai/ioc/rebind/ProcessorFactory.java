@@ -16,16 +16,15 @@
 
 package org.jboss.errai.ioc.rebind;
 
-import org.jboss.errai.bus.rebind.ProcessingContext;
-import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
-import org.jboss.errai.ioc.rebind.ioc.InjectorFactory;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
-
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
+import org.jboss.errai.ioc.rebind.ioc.InjectorFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 
 public class ProcessorFactory {
   private Map<Class<? extends Annotation>, AnnotationHandler> annotationHandlers;

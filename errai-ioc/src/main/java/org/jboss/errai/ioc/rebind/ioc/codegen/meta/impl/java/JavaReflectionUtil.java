@@ -16,13 +16,18 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java;
 
+import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.GenericDeclaration;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaType;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaTypeVariable;
-
-import java.lang.reflect.*;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

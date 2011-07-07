@@ -16,9 +16,9 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassMember;
-
 import java.lang.annotation.Annotation;
+
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassMember;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

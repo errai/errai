@@ -16,13 +16,13 @@
 
 package org.jboss.errai.ioc.client;
 
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
 
 public class InterfaceInjectionContext {
   private List<Widget> toRootPanel;

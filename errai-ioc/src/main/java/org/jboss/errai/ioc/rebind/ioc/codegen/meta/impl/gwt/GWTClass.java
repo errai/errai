@@ -16,13 +16,27 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.gwt;
 
-import com.google.gwt.core.ext.typeinfo.*;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.*;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.AbstractMetaClass;
-
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaConstructor;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaTypeVariable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.AbstractMetaClass;
+
+import com.google.gwt.core.ext.typeinfo.JArrayType;
+import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.JConstructor;
+import com.google.gwt.core.ext.typeinfo.JField;
+import com.google.gwt.core.ext.typeinfo.JGenericType;
+import com.google.gwt.core.ext.typeinfo.JMethod;
+import com.google.gwt.core.ext.typeinfo.JParameterizedType;
+import com.google.gwt.core.ext.typeinfo.JType;
+import com.google.gwt.core.ext.typeinfo.JTypeParameter;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

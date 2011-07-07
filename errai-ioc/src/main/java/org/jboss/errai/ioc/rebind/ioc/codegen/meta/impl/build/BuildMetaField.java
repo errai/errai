@@ -16,6 +16,8 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.build;
 
+import java.lang.annotation.Annotation;
+
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.Builder;
@@ -23,8 +25,6 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.Scope;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaType;
-
-import java.lang.annotation.Annotation;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

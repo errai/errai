@@ -16,10 +16,10 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java;
 
+import java.lang.reflect.GenericArrayType;
+
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaGenericArrayType;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaType;
-
-import java.lang.reflect.GenericArrayType;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

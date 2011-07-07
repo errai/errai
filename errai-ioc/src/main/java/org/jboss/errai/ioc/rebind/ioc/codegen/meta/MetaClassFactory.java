@@ -16,12 +16,12 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta;
 
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.JType;
-import com.google.gwt.core.ext.typeinfo.NotFoundException;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import java.lang.reflect.Array;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.apache.commons.beanutils.ConversionException;
+import javax.enterprise.util.TypeLiteral;
+
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
@@ -29,15 +29,11 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.gwt.GWTClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java.JavaReflectionClass;
 import org.mvel2.ConversionHandler;
 import org.mvel2.DataConversion;
-import org.w3c.flute.parser.selectors.ElementSelectorImpl;
 
-import javax.enterprise.util.TypeLiteral;
-import java.lang.reflect.Array;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.mvel2.DataConversion.addConversionHandler;
+import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.JType;
+import com.google.gwt.core.ext.typeinfo.NotFoundException;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

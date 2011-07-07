@@ -16,13 +16,12 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
-import org.jboss.errai.bus.rebind.ProcessingContext;
+import java.util.List;
+
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Refs;
-
-import java.util.List;
 
 public class InjectorFactory {
   private final InjectionContext ctx;

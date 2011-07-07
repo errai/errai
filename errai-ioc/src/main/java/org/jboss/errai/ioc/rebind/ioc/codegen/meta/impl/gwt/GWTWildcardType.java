@@ -16,9 +16,10 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.gwt;
 
-import com.google.gwt.core.ext.typeinfo.JWildcardType;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaType;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaWildcardType;
+
+import com.google.gwt.core.ext.typeinfo.JWildcardType;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

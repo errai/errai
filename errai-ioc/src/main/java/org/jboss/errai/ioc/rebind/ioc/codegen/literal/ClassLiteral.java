@@ -16,10 +16,10 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.literal;
 
+import static org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference.getClassReference;
+
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
-
-import static org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference.getClassReference;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

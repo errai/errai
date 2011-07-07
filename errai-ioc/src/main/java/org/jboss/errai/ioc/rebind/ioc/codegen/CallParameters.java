@@ -16,12 +16,12 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

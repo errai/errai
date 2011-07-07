@@ -36,7 +36,6 @@ import javax.inject.Inject;
 import javax.inject.Qualifier;
 
 import org.jboss.errai.bus.rebind.ScannerSingleton;
-import org.jboss.errai.ioc.rebind.IOCGenerator;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;

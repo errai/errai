@@ -16,13 +16,16 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.*;
+import org.jboss.errai.ioc.rebind.ioc.codegen.BlockStatement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.DefModifiers;
+import org.jboss.errai.ioc.rebind.ioc.codegen.DefParameters;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Modifier;
+import org.jboss.errai.ioc.rebind.ioc.codegen.ThrowsDeclaration;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.MethodBlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.MethodBuildCallback;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
