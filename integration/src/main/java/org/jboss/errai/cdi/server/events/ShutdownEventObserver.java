@@ -15,13 +15,10 @@
  */
 package org.jboss.errai.cdi.server.events;
 
-import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.cdi.client.api.CDI;
-import org.jboss.errai.cdi.server.EventDispatcher;
-import org.jboss.errai.cdi.server.TypeRegistry;
-import org.jboss.errai.cdi.server.Util;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Reception;
@@ -29,10 +26,13 @@ import javax.enterprise.event.TransactionPhase;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.ObserverMethod;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-import java.util.HashSet;
-import java.util.Set;
+
+import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.cdi.client.api.CDI;
+import org.jboss.errai.cdi.server.TypeRegistry;
+import org.jboss.errai.cdi.server.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Observes CDI {@link javax.enterprise.inject.spi.BeforeShutdown} events and unsubcribes
@@ -41,67 +41,58 @@ import java.util.Set;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Sep 15, 2010
  */
-@ApplicationScoped
-public class ShutdownEventObserver implements ObserverMethod {
+@ApplicationScoped public class ShutdownEventObserver implements ObserverMethod {
 
-    private static final Logger log = LoggerFactory.getLogger(ShutdownEventObserver.class);
+  private static final Logger log = LoggerFactory.getLogger(ShutdownEventObserver.class);
 
-    private TypeRegistry managedTypes;
-    private MessageBus bus;
-    private String uuid;
+  private TypeRegistry managedTypes;
+  private MessageBus bus;
+  private String uuid;
 
-    public ShutdownEventObserver(TypeRegistry managedTypes, MessageBus bus, String uuid) {
-        this.managedTypes = managedTypes;
-        this.bus = bus;
-        this.uuid = uuid;
+  public ShutdownEventObserver(TypeRegistry managedTypes, MessageBus bus, String uuid) {
+    this.managedTypes = managedTypes;
+    this.bus = bus;
+    this.uuid = uuid;
+  }
+
+  public Class<?> getBeanClass() {
+    return ShutdownEventObserver.class;
+  }
+
+  public Type getObservedType() {
+    return BeforeShutdown.class;
+  }
+
+  public Set<Annotation> getObservedQualifiers() {
+    Set<Annotation> qualifiers = new HashSet<Annotation>();
+    return qualifiers;
+  }
+
+  public Reception getReception() {
+    return Reception.ALWAYS;
+  }
+
+  public TransactionPhase getTransactionPhase() {
+    return null;
+  }
+
+  public void notify(Object o) {
+    log.info("Shutdown Errai-CDI context: " + uuid);
+
+    // unsubscribe bean endpoints        
+    for (AnnotatedType<?> svc : managedTypes.getServiceEndpoints()) {
+      String subject = Util.resolveServiceName(svc.getJavaClass());
+      log.debug("Unsubscribe: " + subject);
+      bus.unsubscribeAll(subject);
     }
 
-    public Class<?> getBeanClass()
-    {
-        return ShutdownEventObserver.class;
+    for (Class<?> rpcIntf : managedTypes.getRpcEndpoints().keySet()) {
+      String rpcSubjectName = rpcIntf.getName() + ":RPC";
+      log.debug("Unsubscribe: " + rpcSubjectName);
+      bus.unsubscribeAll(rpcSubjectName);
     }
 
-    public Type getObservedType()
-    {
-        return BeforeShutdown.class;
-    }
-
-    public Set<Annotation> getObservedQualifiers()
-    {
-        Set<Annotation> qualifiers = new HashSet<Annotation>();
-        return qualifiers;
-    }
-
-    public Reception getReception()
-    {
-        return Reception.ALWAYS;
-    }
-
-    public TransactionPhase getTransactionPhase()
-    {
-        return null;
-    }
-
-    public void notify(Object o)
-    {
-        log.info("Shutdown Errai-CDI context: " + uuid);
-        
-        // unsubscribe bean endpoints        
-        for(AnnotatedType<?> svc : managedTypes.getServiceEndpoints())
-        {
-            String subject = Util.resolveServiceName(svc.getJavaClass());
-            log.debug("Unsubscribe: "+subject);
-            bus.unsubscribeAll(subject);
-        }
-
-        for(Class<?> rpcIntf : managedTypes.getRpcEndpoints().keySet())
-        {
-            String rpcSubjectName = rpcIntf.getName() + ":RPC";
-            log.debug("Unsubscribe: "+rpcSubjectName);
-            bus.unsubscribeAll(rpcSubjectName);
-        }
-
-        // unsubscribe event dispatcher endpoint
-        bus.unsubscribeAll(CDI.DISPATCHER_SUBJECT);
-    }
+    // unsubscribe event dispatcher endpoint
+    bus.unsubscribeAll(CDI.DISPATCHER_SUBJECT);
+  }
 }

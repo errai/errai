@@ -15,6 +15,30 @@
  */
 package com.google.gwt.junit;
 
+import java.io.File;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import junit.framework.AssertionFailedError;
+import junit.framework.TestCase;
+import junit.framework.TestResult;
+
+import org.jboss.errai.cdi.server.gwt.JettyLauncher;
+import org.mortbay.jetty.Server;
+import org.mortbay.jetty.webapp.WebAppContext;
+
 import com.google.gwt.core.ext.Linker;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.TreeLogger.Type;
@@ -33,7 +57,20 @@ import com.google.gwt.dev.cfg.Property;
 import com.google.gwt.dev.javac.CompilationState;
 import com.google.gwt.dev.javac.CompilationUnit;
 import com.google.gwt.dev.shell.CheckForUpdates;
-import com.google.gwt.dev.util.arg.*;
+import com.google.gwt.dev.util.arg.ArgHandlerDisableAggressiveOptimization;
+import com.google.gwt.dev.util.arg.ArgHandlerDisableCastChecking;
+import com.google.gwt.dev.util.arg.ArgHandlerDisableClassMetadata;
+import com.google.gwt.dev.util.arg.ArgHandlerDisableRunAsync;
+import com.google.gwt.dev.util.arg.ArgHandlerDraftCompile;
+import com.google.gwt.dev.util.arg.ArgHandlerEnableAssertions;
+import com.google.gwt.dev.util.arg.ArgHandlerExtraDir;
+import com.google.gwt.dev.util.arg.ArgHandlerGenDir;
+import com.google.gwt.dev.util.arg.ArgHandlerLocalWorkers;
+import com.google.gwt.dev.util.arg.ArgHandlerLogLevel;
+import com.google.gwt.dev.util.arg.ArgHandlerMaxPermsPerPrecompile;
+import com.google.gwt.dev.util.arg.ArgHandlerScriptStyle;
+import com.google.gwt.dev.util.arg.ArgHandlerWarDir;
+import com.google.gwt.dev.util.arg.ArgHandlerWorkDirOptional;
 import com.google.gwt.junit.JUnitMessageQueue.ClientStatus;
 import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.junit.client.TimeoutException;
@@ -42,23 +79,6 @@ import com.google.gwt.junit.client.impl.JUnitResult;
 import com.google.gwt.util.tools.ArgHandlerFlag;
 import com.google.gwt.util.tools.ArgHandlerInt;
 import com.google.gwt.util.tools.ArgHandlerString;
-import junit.framework.AssertionFailedError;
-import junit.framework.TestCase;
-import junit.framework.TestResult;
-import org.jboss.errai.cdi.server.gwt.JettyLauncher;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.webapp.WebAppContext;
-
-import java.io.File;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * This class is responsible for hosting JUnit test case execution. There are
@@ -106,17 +126,15 @@ public class JUnitShell extends DevMode {
 
   class ArgProcessor extends ArgProcessorBase {
 
-    @SuppressWarnings("deprecation")
-    public ArgProcessor() {
+    @SuppressWarnings("deprecation") public ArgProcessor() {
       /*
        * ----- Options from DevModeBase -------
        */
       // DISABLE: ArgHandlerNoServerFlag.
       registerHandler(new ArgHandlerPort(options) {
-        @Override
-        public String[] getDefaultArgs() {
+        @Override public String[] getDefaultArgs() {
           // Override port to auto by default.
-          return new String[]{"-port", "auto"};
+          return new String[]{"-port","auto"};
         }
       });
       registerHandler(new ArgHandlerWhitelist());
@@ -126,10 +144,9 @@ public class JUnitShell extends DevMode {
       registerHandler(new ArgHandlerGenDir(options));
       // DISABLE: ArgHandlerBindAddress.
       registerHandler(new ArgHandlerCodeServerPort(options) {
-        @Override
-        public String[] getDefaultArgs() {
+        @Override public String[] getDefaultArgs() {
           // Override code server port to auto by default.
-          return new String[]{this.getTag(), "auto"};
+          return new String[]{this.getTag(),"auto"};
         }
       });
       // DISABLE: ArgHandlerRemoteUI.
@@ -142,8 +159,7 @@ public class JUnitShell extends DevMode {
       // DISABLE: ArgHandlerStartupURLs
       //registerHandler(new ArgHandlerServer(options));
       registerHandler(new ArgHandlerWarDir(options) {
-        @Override
-        public String[] getDefaultArgs() {
+        @Override public String[] getDefaultArgs() {
           // If an outDir was already specified, don't clobber it.
           if (options.getOutDir() != null) {
             return null;
@@ -166,7 +182,7 @@ public class JUnitShell extends DevMode {
       registerHandler(new ArgHandlerDisableCastChecking(options));
       registerHandler(new ArgHandlerDisableRunAsync(options));
       registerHandler(new ArgHandlerDraftCompile(options));
-     // registerHandler(new ArgHandlerEnableGeneratorResultCaching(options));
+      // registerHandler(new ArgHandlerEnableGeneratorResultCaching(options));
       registerHandler(new ArgHandlerMaxPermsPerPrecompile(options));
       registerHandler(new ArgHandlerLocalWorkers(options));
 
@@ -176,121 +192,100 @@ public class JUnitShell extends DevMode {
 
       // Override log level to set WARN by default..
       registerHandler(new ArgHandlerLogLevel(options) {
-        @Override
-        protected Type getDefaultLogLevel() {
+        @Override protected Type getDefaultLogLevel() {
           return TreeLogger.WARN;
         }
       });
 
       registerHandler(new ArgHandlerFlag() {
-        @Override
-        public String getPurpose() {
+        @Override public String getPurpose() {
           return "Synonym for -prod (deprecated)";
         }
 
-        @Override
-        public String getTag() {
+        @Override public String getTag() {
           return "-web";
         }
 
-        @Override
-        public boolean isUndocumented() {
+        @Override public boolean isUndocumented() {
           return true;
         }
 
-        @Override
-        public boolean setFlag() {
+        @Override public boolean setFlag() {
           developmentMode = false;
           return true;
         }
       });
 
       registerHandler(new ArgHandlerFlag() {
-        @Override
-        public String getPurpose() {
+        @Override public String getPurpose() {
           return "Causes your test to run in production (compiled) mode (defaults to development mode)";
         }
 
-        @Override
-        public String getTag() {
+        @Override public String getTag() {
           return "-prod";
         }
 
-        @Override
-        public boolean setFlag() {
+        @Override public boolean setFlag() {
           developmentMode = false;
           return true;
         }
       });
 
       registerHandler(new ArgHandlerInt() {
-        @Override
-        public String[] getDefaultArgs() {
-          return new String[]{getTag(), "5"};
+        @Override public String[] getDefaultArgs() {
+          return new String[]{getTag(),"5"};
         }
 
-        @Override
-        public String getPurpose() {
+        @Override public String getPurpose() {
           return "Set the test method timeout, in minutes";
         }
 
-        @Override
-        public String getTag() {
+        @Override public String getTag() {
           return "-testMethodTimeout";
         }
 
-        @Override
-        public String[] getTagArgs() {
+        @Override public String[] getTagArgs() {
           return new String[]{"minutes"};
         }
 
-        @Override
-        public boolean isUndocumented() {
+        @Override public boolean isUndocumented() {
           return false;
         }
 
-        @Override
-        public void setInt(int minutes) {
+        @Override public void setInt(int minutes) {
           baseTestMethodTimeoutMillis = minutes * 60 * 1000;
         }
       });
 
       registerHandler(new ArgHandlerInt() {
-        @Override
-        public String[] getDefaultArgs() {
-          return new String[]{getTag(), String.valueOf(DEFAULT_BEGIN_TIMEOUT_MINUTES)};
+        @Override public String[] getDefaultArgs() {
+          return new String[]{getTag(),String.valueOf(DEFAULT_BEGIN_TIMEOUT_MINUTES)};
         }
 
-        @Override
-        public String getPurpose() {
+        @Override public String getPurpose() {
           return "Set the test begin timeout (time for clients to contact "
               + "server), in minutes";
         }
 
-        @Override
-        public String getTag() {
+        @Override public String getTag() {
           return "-testBeginTimeout";
         }
 
-        @Override
-        public String[] getTagArgs() {
+        @Override public String[] getTagArgs() {
           return new String[]{"minutes"};
         }
 
-        @Override
-        public boolean isUndocumented() {
+        @Override public boolean isUndocumented() {
           return false;
         }
 
-        @Override
-        public void setInt(int minutes) {
+        @Override public void setInt(int minutes) {
           baseTestBeginTimeoutMillis = minutes * 60 * 1000;
         }
       });
 
       registerHandler(new ArgHandlerString() {
-        @Override
-        public String getPurpose() {
+        @Override public String getPurpose() {
           return "Selects the runstyle to use for this test.  The name is "
               + "a suffix of com.google.gwt.junit.RunStyle or is a fully "
               + "qualified class name, and may be followed with a colon and "
@@ -298,51 +293,42 @@ public class JUnitShell extends DevMode {
               + "extend RunStyle.";
         }
 
-        @Override
-        public String getTag() {
+        @Override public String getTag() {
           return "-runStyle";
         }
 
-        @Override
-        public String[] getTagArgs() {
+        @Override public String[] getTagArgs() {
           return new String[]{"runstyle[:args]"};
         }
 
-        @Override
-        public boolean isUndocumented() {
+        @Override public boolean isUndocumented() {
           return false;
         }
 
-        @Override
-        public boolean setString(String runStyleArg) {
+        @Override public boolean setString(String runStyleArg) {
           runStyleName = runStyleArg;
           return true;
         }
       });
 
       registerHandler(new ArgHandlerString() {
-        @Override
-        public String getPurpose() {
+        @Override public String getPurpose() {
           return "Configure batch execution of tests";
         }
 
-        @Override
-        public String getTag() {
+        @Override public String getTag() {
           return "-batch";
         }
 
-        @Override
-        public String[] getTagArgs() {
+        @Override public String[] getTagArgs() {
           return new String[]{"none|class|module"};
         }
 
-        @Override
-        public boolean isUndocumented() {
+        @Override public boolean isUndocumented() {
           return true;
         }
 
-        @Override
-        public boolean setString(String str) {
+        @Override public boolean setString(String str) {
           if (str.equals("none")) {
             batchingStrategy = new NoBatchingStrategy();
           } else if (str.equals("class")) {
@@ -357,46 +343,38 @@ public class JUnitShell extends DevMode {
       });
 
       registerHandler(new ArgHandlerFlag() {
-        @Override
-        public String getPurpose() {
+        @Override public String getPurpose() {
           return "Causes the log window and browser windows to be displayed; useful for debugging";
         }
 
-        @Override
-        public String getTag() {
+        @Override public String getTag() {
           return "-notHeadless";
         }
 
-        @Override
-        public boolean setFlag() {
+        @Override public boolean setFlag() {
           JUnitShell.this.setHeadless(false);
           return true;
         }
       });
 
       registerHandler(new ArgHandlerString() {
-        @Override
-        public String getPurpose() {
+        @Override public String getPurpose() {
           return "Precompile modules as tests are running (speeds up remote tests but requires more memory)";
         }
 
-        @Override
-        public String getTag() {
+        @Override public String getTag() {
           return "-precompile";
         }
 
-        @Override
-        public String[] getTagArgs() {
+        @Override public String[] getTagArgs() {
           return new String[]{"simple|all|parallel"};
         }
 
-        @Override
-        public boolean isUndocumented() {
+        @Override public boolean isUndocumented() {
           return true;
         }
 
-        @Override
-        public boolean setString(String str) {
+        @Override public boolean setString(String str) {
           if (str.equals("simple")) {
             compileStrategy = new SimpleCompileStrategy(JUnitShell.this);
           } else if (str.equals("all")) {
@@ -411,74 +389,61 @@ public class JUnitShell extends DevMode {
       });
 
       registerHandler(new ArgHandlerFlag() {
-        @Override
-        public String getPurpose() {
+        @Override public String getPurpose() {
           return "Use CSS standards mode (rather than quirks mode) for the hosting page";
         }
 
-        @Override
-        public String getTag() {
+        @Override public String getTag() {
           return "-standardsMode";
         }
 
-        @Override
-        public boolean setFlag() {
+        @Override public boolean setFlag() {
           setStandardsMode(true);
           return true;
         }
       });
 
       registerHandler(new ArgHandlerInt() {
-        @Override
-        public String getPurpose() {
+        @Override public String getPurpose() {
           return "EXPERIMENTAL: Sets the maximum number of attempts for running each test method";
         }
 
-        @Override
-        public String getTag() {
+        @Override public String getTag() {
           return "-Xtries";
         }
 
-        @Override
-        public String[] getTagArgs() {
+        @Override public String[] getTagArgs() {
           return new String[]{"1"};
         }
 
-        @Override
-        public boolean isRequired() {
+        @Override public boolean isRequired() {
           return false;
         }
 
-        @Override
-        public boolean isUndocumented() {
+        @Override public boolean isUndocumented() {
           return false;
         }
 
-        @Override
-        public void setInt(int value) {
+        @Override public void setInt(int value) {
           tries = value;
         }
       });
 
       registerHandler(new ArgHandlerString() {
-        @Override
-        public String getPurpose() {
+        @Override public String getPurpose() {
           return "Specify the user agents to reduce the number of permutations for remote browser tests;"
               + " e.g. ie6,ie8,safari,gecko1_8,opera";
         }
 
-        @Override
-        public String getTag() {
+        @Override public String getTag() {
           return "-userAgents";
         }
 
-        @Override
-        public String[] getTagArgs() {
+        @Override public String[] getTagArgs() {
           return new String[]{"userAgents"};
         }
 
-        @Override
-        public boolean setString(String str) {
+        @Override public boolean setString(String str) {
           remoteUserAgents = str.split(",");
           for (int i = 0; i < remoteUserAgents.length; i++) {
             remoteUserAgents[i] = remoteUserAgents[i].trim();
@@ -488,8 +453,7 @@ public class JUnitShell extends DevMode {
       });
     }
 
-    @Override
-    protected String getName() {
+    @Override protected String getName() {
       return JUnitShell.class.getName();
     }
   }
@@ -499,8 +463,7 @@ public class JUnitShell extends DevMode {
     /**
      * Adds in special JUnit stuff.
      */
-    @Override
-    protected JettyServletContainer createServletContainer(TreeLogger logger,
+    @Override protected JettyServletContainer createServletContainer(TreeLogger logger,
         File appRootDir, Server server, WebAppContext wac, int localPort) {
       // Don't bother shutting down cleanly.
       server.setStopAtShutdown(false);
@@ -515,9 +478,7 @@ public class JUnitShell extends DevMode {
      * system classloader to dominate. This makes JUnitHostImpl live in the
      * right classloader (mine).
      */
-    @SuppressWarnings("unchecked")
-    @Override
-    protected WebAppContext createWebAppContext(TreeLogger logger,
+    @SuppressWarnings("unchecked") @Override protected WebAppContext createWebAppContext(TreeLogger logger,
         File appRootDir) {
       return new WebAppContext(appRootDir.getAbsolutePath(), "/") {
         {
@@ -617,8 +578,7 @@ public class JUnitShell extends DevMode {
    * 
    * @deprecated use {@link #runTest(GWTTestCase, TestResult)} instead
    */
-  @Deprecated
-  public static void runTest(String moduleName, TestCase testCase,
+  @Deprecated public static void runTest(String moduleName, TestCase testCase,
       TestResult testResult) throws UnableToCompleteException {
     runTest(moduleName, testCase, testResult,
         ((GWTTestCase) testCase).getStrategy());
@@ -627,8 +587,7 @@ public class JUnitShell extends DevMode {
   /**
    * @deprecated use {@link #runTest(GWTTestCase, TestResult)} instead
    */
-  @Deprecated
-  public static void runTest(String moduleName, TestCase testCase,
+  @Deprecated public static void runTest(String moduleName, TestCase testCase,
       TestResult testResult, Strategy strategy)
       throws UnableToCompleteException {
     GWTTestCase gwtTestCase = (GWTTestCase) testCase;
@@ -798,8 +757,7 @@ public class JUnitShell extends DevMode {
    * kills the {@link com.google.gwt.junit.server.JUnitHostImpl} servlet. If the
    * servlet dies, the client browsers will be unable to transition.
    */
-  @SuppressWarnings("unused")
-  private ModuleDef lastModule;
+  @SuppressWarnings("unused") private ModuleDef lastModule;
 
   /**
    * Records what servlets have been loaded at which paths.
@@ -890,13 +848,11 @@ public class JUnitShell extends DevMode {
   /**
    * Check for updates once a minute.
    */
-  @Override
-  protected long checkForUpdatesInterval() {
+  @Override protected long checkForUpdatesInterval() {
     return CheckForUpdates.ONE_MINUTE;
   }
 
-  @Override
-  protected boolean doStartup() {
+  @Override protected boolean doStartup() {
     if (!super.doStartup()) {
       return false;
     }
@@ -921,21 +877,18 @@ public class JUnitShell extends DevMode {
     return true;
   }
 
-  @Override
-  protected void ensureCodeServerListener() {
+  @Override protected void ensureCodeServerListener() {
     if (developmentMode) {
       super.ensureCodeServerListener();
       listener.setIgnoreRemoteDeath(true);
     }
   }
 
-  @Override
-  protected void inferStartupUrls() {
+  @Override protected void inferStartupUrls() {
     // do nothing -- JUnitShell isn't expected to have startup URLs
   }
 
-  @Override
-  protected ModuleDef loadModule(TreeLogger logger, String moduleName,
+  @Override protected ModuleDef loadModule(TreeLogger logger, String moduleName,
       boolean refresh) throws UnableToCompleteException {
     // Never refresh modules in JUnit.
     return super.loadModule(logger, moduleName, false);
@@ -1041,8 +994,7 @@ public class JUnitShell extends DevMode {
     return true;
   }
 
-  @Override
-  protected void warnAboutNoStartupUrls() {
+  @Override protected void warnAboutNoStartupUrls() {
     // do nothing -- JUnitShell isn't expected to have startup URLs
   }
 
@@ -1087,12 +1039,12 @@ public class JUnitShell extends DevMode {
       try {
         Linker l = module.getActivePrimaryLinker().newInstance();
         StandardLinkerContext context =
-          new StandardLinkerContext(getTopLogger(), module, null);
-       //if (!l.supportsDevModeInJunit(context)) {
-          if (module.getLinker("std") != null) {
-            // TODO: unfortunately, this could be race condition between dev/prod
-            module.addLinker("std");
-          }
+            new StandardLinkerContext(getTopLogger(), module, null);
+        //if (!l.supportsDevModeInJunit(context)) {
+        if (module.getLinker("std") != null) {
+          // TODO: unfortunately, this could be race condition between dev/prod
+          module.addLinker("std");
+        }
         //}
       } catch (Exception e) {
         getTopLogger().log(TreeLogger.WARN, "Failed to instantiate linker: " + e);
@@ -1106,9 +1058,7 @@ public class JUnitShell extends DevMode {
   /**
    * @deprecated TODO(fabbott) delete me
    */
-  @Deprecated
-  @SuppressWarnings("unused")
-  void setNumClients(int numClients) {
+  @Deprecated @SuppressWarnings("unused") void setNumClients(int numClients) {
     throw new UnsupportedOperationException("This method should be deleted.");
   }
 

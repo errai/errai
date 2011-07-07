@@ -15,7 +15,6 @@
  */
 package org.jboss.errai.cdi.client;
 
-public enum CDIProtocol
-{
+public enum CDIProtocol {
   TYPE, QUALIFIERS, OBJECT_REF
 }

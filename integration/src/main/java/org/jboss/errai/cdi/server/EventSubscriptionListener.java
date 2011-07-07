@@ -18,8 +18,6 @@ package org.jboss.errai.cdi.server;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
@@ -34,36 +32,37 @@ import org.jboss.errai.cdi.server.events.EventObserverMethod;
  * @author Mike Brock
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@ApplicationScoped
-public class EventSubscriptionListener implements SubscribeListener {
-    private MessageBus bus;
-    private AfterBeanDiscovery abd;
-    private ContextManager mgr;
-    private Map<String, List<Annotation[]>> observedEvents;
+@ApplicationScoped public class EventSubscriptionListener implements SubscribeListener {
+  private MessageBus bus;
+  private AfterBeanDiscovery abd;
+  private ContextManager mgr;
+  private Map<String, List<Annotation[]>> observedEvents;
 
-    public EventSubscriptionListener(AfterBeanDiscovery abd, MessageBus bus, ContextManager mgr, Map<String, List<Annotation[]>> observedEvents) {
-        this.abd = abd;
-        this.bus = bus;
-        this.mgr = mgr;
-        this.observedEvents = observedEvents;
-    }
+  public EventSubscriptionListener(AfterBeanDiscovery abd, MessageBus bus, ContextManager mgr,
+      Map<String, List<Annotation[]>> observedEvents) {
+    this.abd = abd;
+    this.bus = bus;
+    this.mgr = mgr;
+    this.observedEvents = observedEvents;
+  }
 
-    public void onSubscribe(SubscriptionEvent event) {
-        if (event.isLocalOnly() || !event.isRemote() || !event.getSubject().startsWith("cdi.event:")) return;
+  public void onSubscribe(SubscriptionEvent event) {
+    if (event.isLocalOnly() || !event.isRemote() || !event.getSubject().startsWith("cdi.event:"))
+      return;
 
-        String name = event.getSubject().substring("cdi.event:".length());
-        try {
-            if (observedEvents.containsKey(name) && event.getCount() == 1 && event.isNew()) {
-                final Class<?> type = this.getClass().getClassLoader().loadClass(name);
-                abd.addObserverMethod(new EventObserverMethod(type, bus, mgr));
-                if(observedEvents!=null) {
-	                for(Annotation[] qualifiers : observedEvents.get(name)) {
-	                	abd.addObserverMethod(new EventObserverMethod(type, bus, mgr, qualifiers));	
-	                }
-                }
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+    String name = event.getSubject().substring("cdi.event:".length());
+    try {
+      if (observedEvents.containsKey(name) && event.getCount() == 1 && event.isNew()) {
+        final Class<?> type = this.getClass().getClassLoader().loadClass(name);
+        abd.addObserverMethod(new EventObserverMethod(type, bus, mgr));
+        if (observedEvents != null) {
+          for (Annotation[] qualifiers : observedEvents.get(name)) {
+            abd.addObserverMethod(new EventObserverMethod(type, bus, mgr, qualifiers));
+          }
         }
+      }
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
+  }
 }

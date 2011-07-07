@@ -18,8 +18,7 @@ import javax.inject.Inject;
  */
 @ApplicationScoped
 @Service
-public class SMTPService implements MessageCallback
-{
+public class SMTPService implements MessageCallback {
 
   private static final Logger log =
       LoggerFactory.getLogger(SMTPService.class);
@@ -36,9 +35,8 @@ public class SMTPService implements MessageCallback
       return false;
     }
   };
-  
-  public void callback(Message message)
-  {
-    log.info("Processing: "+message.get(String.class, "body"));
-  }  
+
+  public void callback(Message message) {
+    log.info("Processing: " + message.get(String.class, "body"));
+  }
 }

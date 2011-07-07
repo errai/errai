@@ -27,6 +27,6 @@ import java.io.Serializable;
 
 @ExposeEntity
 public class AccountActivity implements Serializable {
-    public AccountActivity() {
-    }
+  public AccountActivity() {
+  }
 }

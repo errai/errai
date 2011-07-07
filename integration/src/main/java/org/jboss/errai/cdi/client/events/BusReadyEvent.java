@@ -5,6 +5,4 @@ import org.jboss.errai.bus.server.annotations.ExposeEntity;
 /**
  * @author Mike Brock .
  */
-@ExposeEntity
-public class BusReadyEvent {
-}
+@ExposeEntity public class BusReadyEvent {}

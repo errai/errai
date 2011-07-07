@@ -40,100 +40,101 @@ import org.jboss.errai.cdi.client.CDIProtocol;
  * Includes marshalling/unmarshalling of event types.
  */
 public class EventDispatcher implements MessageCallback {
-    private BeanManager beanManager;
-    private MessageBus bus;
-    private ContextManager ctxMgr;
+  private BeanManager beanManager;
+  private MessageBus bus;
+  private ContextManager ctxMgr;
 
-    private Map<Class<?>, Class<?>> conversationalEvents = new HashMap<Class<?>, Class<?>>();
-    private Set<Class<?>> conversationalServices = new HashSet<Class<?>>();
+  private Map<Class<?>, Class<?>> conversationalEvents = new HashMap<Class<?>, Class<?>>();
+  private Set<Class<?>> conversationalServices = new HashSet<Class<?>>();
 
-    private Set<String> observedEvents;
-    private Map<String, Annotation> allQualifiers;
-    
-    public EventDispatcher(BeanManager beanManager, MessageBus bus, ContextManager ctxMgr, Set<String> observedEvents,
-    		Map<String, Annotation> qualifiers) {
-        this.beanManager = beanManager;
-        this.bus = bus;
-        this.ctxMgr = ctxMgr;
-        this.observedEvents = observedEvents;
-        this.allQualifiers = qualifiers;
-    }
+  private Set<String> observedEvents;
+  private Map<String, Annotation> allQualifiers;
 
-    // Invoked by Errai
-    public void callback(final Message message) {
+  public EventDispatcher(BeanManager beanManager, MessageBus bus, ContextManager ctxMgr, Set<String> observedEvents,
+        Map<String, Annotation> qualifiers) {
+    this.beanManager = beanManager;
+    this.bus = bus;
+    this.ctxMgr = ctxMgr;
+    this.observedEvents = observedEvents;
+    this.allQualifiers = qualifiers;
+  }
+
+  // Invoked by Errai
+  public void callback(final Message message) {
+    try {
+      /**
+       * If the message didn't not come from a remote, we don't handle it.
+       */
+      if (!message.isFlagSet(RoutingFlags.FromRemote))
+        return;
+
+      switch (CDICommands.valueOf(message.getCommandType())) {
+      case CDIEvent:
+        String type = message.get(String.class, CDIProtocol.TYPE);
+        final Class clazz = Thread.currentThread().getContextClassLoader().loadClass(type);
+        final Object o = message.get(Object.class, CDIProtocol.OBJECT_REF);
+
         try {
-            /**
-             * If the message didn't not come from a remote, we don't handle it.
-             */
-            if (!message.isFlagSet(RoutingFlags.FromRemote)) return;
+          ctxMgr.activateRequestContext();
+          ctxMgr.activateRequestContextStore();
+          ctxMgr.activateSessionContext(message);
 
-            switch (CDICommands.valueOf(message.getCommandType())) {
-                case CDIEvent:
-                    String type = message.get(String.class, CDIProtocol.TYPE);
-                    final Class clazz = Thread.currentThread().getContextClassLoader().loadClass(type);
-                    final Object o = message.get(Object.class, CDIProtocol.OBJECT_REF);
+          Map<String, Object> store = ctxMgr.getRequestContextStore();
 
-                    try {
-                        ctxMgr.activateRequestContext();
-                        ctxMgr.activateRequestContextStore();
-                        ctxMgr.activateSessionContext(message);
+          if (conversationalServices.contains(clazz)) {
+            store.put(MessageParts.SessionID.name(), Util.getSessionId(message));
+          }
 
-                        Map<String,Object> store = ctxMgr.getRequestContextStore();
+          store.put(CDIProtocol.OBJECT_REF.name(), o);
 
-                        if (conversationalServices.contains(clazz)) {
-                            store.put(MessageParts.SessionID.name(), Util.getSessionId(message));
-                        }
+          Set<String> qualifierNames = message.get(Set.class, CDIProtocol.QUALIFIERS);
+          List<Annotation> qualifiers = null;
+          if (qualifierNames != null) {
+            for (String qualifierName : qualifierNames) {
+              if (qualifiers == null) {
+                qualifiers = new ArrayList<Annotation>();
+              }
+              Annotation qualifier = allQualifiers.get(qualifierName);
+              if (qualifier != null) {
+                qualifiers.add(qualifier);
+              }
+            }
+          }
 
-                        store.put(CDIProtocol.OBJECT_REF.name(), o);
+          if (qualifiers != null) {
+            beanManager.fireEvent(o, qualifiers.toArray(new Annotation[qualifiers.size()]));
+          } else {
+            beanManager.fireEvent(o);
+          }
 
-                        Set<String> qualifierNames = message.get(Set.class, CDIProtocol.QUALIFIERS);
-                        List<Annotation> qualifiers = null;
-                        if(qualifierNames!=null) {
-	                        for(String qualifierName : qualifierNames) {
-                        		if(qualifiers==null) {
-                        			qualifiers = new ArrayList<Annotation>();
-                        		}
-                        		Annotation qualifier = allQualifiers.get(qualifierName);
-                        		if(qualifier!=null) {
-                        			qualifiers.add(qualifier);
-                        		}
-	                        }
-                        }
-                        
-                        if(qualifiers!=null) {
-                        	beanManager.fireEvent(o, qualifiers.toArray(new Annotation[qualifiers.size()]));	
-                        } else {
-                        	beanManager.fireEvent(o);
-                        }
-                        
-                    } finally {
-                        ctxMgr.deactivateRequestContext();
-                    }
+        } finally {
+          ctxMgr.deactivateRequestContext();
+        }
 
-                    break;
+        break;
 
-                case AttachRemote:
-                    MessageBuilder.createConversation(message)
+      case AttachRemote:
+        MessageBuilder.createConversation(message)
                             .toSubject("cdi.event:ClientDispatcher")
                             .command(BusCommands.RemoteSubscribe)
                             .with(MessageParts.Value, observedEvents.toArray(new String[observedEvents.size()]))
                             .done().reply();
 
-                    break;
-                default:
-                    throw new IllegalArgumentException(
+        break;
+      default:
+        throw new IllegalArgumentException(
                             "Unknown command type " + message.getCommandType());
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to dispatch CDI Event", e);
-        }
+      }
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to dispatch CDI Event", e);
     }
+  }
 
-    public void registerConversationEvent(Class<?> clientEvent, Class<?> serverEvent) {
-        conversationalEvents.put(clientEvent, serverEvent);
-    }
+  public void registerConversationEvent(Class<?> clientEvent, Class<?> serverEvent) {
+    conversationalEvents.put(clientEvent, serverEvent);
+  }
 
-    public void registerConversationalService(Class<?> conversational) {
-        conversationalServices.add(conversational);
-    }
+  public void registerConversationalService(Class<?> conversational) {
+    conversationalServices.add(conversational);
+  }
 }
