@@ -18,6 +18,7 @@ package org.jboss.errai.ioc.rebind.ioc;
 
 import java.lang.annotation.Annotation;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
@@ -49,7 +50,6 @@ public class DecoratorTask extends InjectionTask {
   @SuppressWarnings({"unchecked"})
   @Override
   public void doTask(InjectionContext ctx) {
-  //  StringAppender appender = new StringAppender();
     Annotation anno = null;
 
     for (IOCDecoratorExtension<? extends Annotation> dec : IOCExtensions) {
@@ -73,7 +73,10 @@ public class DecoratorTask extends InjectionTask {
 
       }
 
-      dec.generateDecorator(new InjectionPoint(anno, injectType, constructor, method, field, type, parm, injector, ctx));
+      Statement stmt = dec.generateDecorator(new InjectionPoint(anno, injectType, constructor, method, field, type,
+              parm, injector, ctx));
+
+      ctx.getProcessingContext().append(stmt);
     }
   }
 }
