@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.core.ext.typeinfo.JType;
 import org.jboss.errai.ioc.rebind.ioc.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
@@ -115,7 +116,12 @@ public class GWTMethod extends MetaMethod {
 
   @Override
   public MetaType[] getGenericParameterTypes() {
-    return null;
+    List<MetaType> typeList = new ArrayList<MetaType>();
+    for (JType type : method.getParameterTypes()) {
+        typeList.add(MetaClassFactory.get(type));
+    }
+
+    return typeList.toArray(new MetaType[typeList.size()]);
   }
 
   @Override
