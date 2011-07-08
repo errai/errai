@@ -118,6 +118,7 @@
 					<scope>provided</scope>
 				</dependency>
 
+
 				<dependency>
 					<groupId>junit</groupId>
 					<artifactId>junit</artifactId>
@@ -213,7 +214,7 @@
 					<groupId>junit</groupId>
 					<artifactId>junit</artifactId>
 					<version>4.8.1</version>
-					<scope>provided</scope>
+					<scope>compile</scope>
 				</dependency>
 				<dependency>
 					<groupId>org.jboss.ejb3</groupId>
@@ -302,27 +303,27 @@
 					<groupId>com.google.gwt</groupId>
 					<artifactId>gwt-user</artifactId>
 					<version>${gwt.version}</version>
-					<scope>provided</scope>
+					<scope>compile</scope>
 				</dependency>
 				
 				<dependency>
 					<groupId>com.google.gwt</groupId>
 					<artifactId>gwt-dev</artifactId>
 					<version>${gwt.version}</version>
-					<scope>provided</scope>
+					<scope>compile</scope>
 				</dependency>
 				
 				<dependency>
 					<groupId>javax.validation</groupId>
 					<artifactId>validation-api</artifactId>
-					<scope>provided</scope>
+					<scope>compile</scope>
 				</dependency>
 				
 				<dependency>
 					<groupId>javax.validation</groupId>
 					<artifactId>validation-api</artifactId>
 					<classifier>sources</classifier>
-					<scope>provided</scope>
+					<scope>compile</scope>
 				</dependency>
 
 				<!-- Runtime / Container dependencies -->
