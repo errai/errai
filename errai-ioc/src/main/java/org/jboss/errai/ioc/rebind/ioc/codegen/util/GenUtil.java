@@ -109,6 +109,7 @@ public class GenUtil {
           input = ((LiteralValue<?>) input).getValue();
         }
         else {
+          ((Statement)input).generate(context);
           assertAssignableTypes(((Statement) input).getType(), targetType);
           return (Statement) input;
         }
@@ -121,7 +122,6 @@ public class GenUtil {
       }
       else {
         return generate(context, input);
-      //  throw new InvalidTypeException("cannot convert input to target type:" + targetClass.getName());
       }
     }
     catch (Throwable t) {

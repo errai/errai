@@ -24,8 +24,10 @@ import org.junit.Test;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ClassStructureBuilderTest extends AbstractStatementBuilderTest {
+  
   @Test
   public void testOverrideConstructor() {
 
@@ -35,8 +37,17 @@ public class ClassStructureBuilderTest extends AbstractStatementBuilderTest {
         .append(StatementBuilder.create().load("foo"))
         .append(StatementBuilder.create().load("bar"))
         .append(StatementBuilder.create().load("foobie"))
-        .finish().toJavaString();
+        .finish()
+        .finish()
+        .toJavaString();
 
-    System.out.println("src=" + src);
+    assertEquals("failed to generate anonymous class with overloaded construct", 
+        "new java.lang.annotation.Retention() {\n" +
+          "public Class annotationType() {\n" +
+            "\"foo\";\n" +
+            "\"bar\";\n" +
+            "\"foobie\";\n" +
+        "}\n" +
+      "}", src);
   }
 }
