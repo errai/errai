@@ -82,7 +82,8 @@ import com.google.inject.Provider;
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@ApplicationScoped public class CDIExtensionPoints implements Extension {
+@ApplicationScoped 
+public class CDIExtensionPoints implements Extension {
   private static final Logger log = LoggerFactory.getLogger(CDIExtensionPoints.class);
 
   private TypeRegistry managedTypes = null;
@@ -515,8 +516,7 @@ import com.google.inject.Provider;
 
     public Object getInvocationTarget() {
       if (null == invocationTarget) {
-        invocationTarget =
-                        Util.lookupCallbackBean(beanManager, type.getJavaClass());
+        invocationTarget = Util.lookupCallbackBean(beanManager, type.getJavaClass());
       }
       return invocationTarget;
     }

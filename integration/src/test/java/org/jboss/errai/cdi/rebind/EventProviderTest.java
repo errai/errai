@@ -46,11 +46,13 @@ import com.google.gwt.user.rebind.StringSourceWriter;
  */
 public class EventProviderTest extends AbstractErraiCDIRebindTest implements EventProviderTestResult {
   class HasEventWithoutQualifiers {
-    @Inject private Event<String> event;
+    @Inject 
+    private Event<String> event;
   }
 
   class HasEventWithQualifiers {
-    @Inject @A @B private Event<String> event;
+    @Inject @A @B 
+    private Event<String> event;
   }
 
   private Annotation observes = new Annotation() {
