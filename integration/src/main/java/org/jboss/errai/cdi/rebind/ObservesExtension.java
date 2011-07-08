@@ -34,10 +34,12 @@ import org.jboss.errai.ioc.rebind.ioc.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.InjectionPoint;
 import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Parameter;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ExtendsClassStructureBuilderImpl;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ObjectBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.literal.LiteralFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Bool;
@@ -94,7 +96,7 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
     BlockBuilder<ExtendsClassStructureBuilderImpl> callBackBlock = 
       ObjectBuilder.newInstanceOf(MessageCallback.class)
         .extend()
-        .publicOverridesMethod("callback", Message.class)
+        .publicOverridesMethod("callback", Parameter.of(Message.class, "message"))
         .append(Stmt.create().declareVariable("methodQualifiers", new TypeLiteral<Set<String>>() {}, 
             Stmt.create().newObject(new TypeLiteral<HashSet<String>>() {})));
     
