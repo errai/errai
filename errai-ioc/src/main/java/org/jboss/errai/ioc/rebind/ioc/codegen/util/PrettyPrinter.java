@@ -105,34 +105,30 @@ public class PrettyPrinter {
         case '\r':
           cursor++;
           continue;
-        case '/':
-          if (cursor + 1 != expr.length) {
-            switch (expr[cursor + 1]) {
-              case '/':
-                expr[cursor++] = ' ';
-                while (cursor != expr.length && expr[cursor] != '\n') expr[cursor++] = ' ';
-                if (cursor != expr.length) expr[cursor++] = ' ';
-
-
-                continue;
-
-              case '*':
-                if (expr[cursor+2] != '-') {
-                  int len = expr.length - 1;
-                  expr[cursor++] = ' ';
-                  while (cursor != len && !(expr[cursor] == '*' && expr[cursor + 1] == '/')) {
-  
-                    expr[cursor++] = ' ';
-                  }
-                  if (cursor != len) expr[cursor++] = expr[cursor++] = ' ';
-                  continue;
-                }
-
-              default:
-                break Skip;
-
-            }
-          }
+//        case '/':
+//          if (cursor + 1 != expr.length) {
+//            switch (expr[cursor + 1]) {
+//              case '/':
+//                cursor++;
+//                while (cursor != expr.length && expr[cursor] != '\n') cursor++;
+//                if (cursor != expr.length) cursor++;
+//
+//                continue;
+//
+//              case '*':
+//                int len = expr.length - 1;
+//                cursor++;
+//                while (cursor != len && !(expr[cursor] == '*' && expr[cursor + 1] == '/')) {
+//                   cursor++;
+//                }
+//                if (cursor != len) cursor += 2;
+//                continue;
+//
+//              default:
+//                break Skip;
+//
+//            }
+//          }
         default:
           if (!Character.isWhitespace(expr[cursor])) break Skip;
 
