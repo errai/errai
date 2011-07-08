@@ -38,7 +38,7 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
       public void run() {
         Map<String, List<String>> actualEvents = EventObserverTestModule.getInstance().getReceivedEvents();
 
-        // assert that the client received all events
+        // assert that client received all events
         EventObserverIntegrationTest.this.verifyEvents(actualEvents);
         finishTest();
       }
