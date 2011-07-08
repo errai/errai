@@ -317,7 +317,8 @@ public class InjectUtil {
 
     for (int i = 0; i < parmTypes.length; i++) {
       Injector injector = ctx.getInjector(parmTypes[i]);
-      InjectionPoint injectionPoint
+
+      @SuppressWarnings({"unchecked"}) InjectionPoint injectionPoint
               = new InjectionPoint(null, TaskType.Parameter, constructor, null, null, null, parms[i], injector, ctx);
 
       parmValues[i] = injector.getType(ctx, injectionPoint);
@@ -326,7 +327,8 @@ public class InjectUtil {
     return parmValues;
   }
 
-  public static Statement[] resolveInjectionDependencies(MetaParameter[] parms, InjectionContext ctx, InjectionPoint injectionPoint) {
+  public static Statement[] resolveInjectionDependencies(MetaParameter[] parms,
+                                                         InjectionContext ctx, InjectionPoint injectionPoint) {
     MetaClass[] parmTypes = parametersToClassTypeArray(parms);
     Statement[] parmValues = new Statement[parmTypes.length];
 
@@ -414,7 +416,6 @@ public class InjectUtil {
     return qualifiers;
   }
 
-
   public static List<Annotation> extractQualifiersFromParameter(final MetaParameter parm) {
     List<Annotation> qualifiers = new ArrayList<Annotation>();
 
@@ -435,8 +436,10 @@ public class InjectUtil {
       MetaMethod observesMethod = jType.getMethod(method.getName(), jMethodParms);
 
       for (Class<?> qualifier : getQualifiersCache()) {
-        if (observesMethod.getParameters()[eventParamIndex].isAnnotationPresent(qualifier.asSubclass(Annotation.class))) {
-          qualifiers.add(observesMethod.getParameters()[eventParamIndex].getAnnotation(qualifier.asSubclass(Annotation.class)));
+        if (observesMethod.getParameters()[eventParamIndex]
+                .isAnnotationPresent(qualifier.asSubclass(Annotation.class))) {
+          qualifiers.add(observesMethod.getParameters()[eventParamIndex]
+                  .getAnnotation(qualifier.asSubclass(Annotation.class)));
         }
       }
     }
@@ -482,7 +485,6 @@ public class InjectUtil {
 
   }
 
-
   public static Class<?> loadClass(String name) {
     try {
       return Class.forName(name);
@@ -527,7 +529,6 @@ public class InjectUtil {
     return null;
   }
 
-
   public static Class<?>[] jParmToClass(JParameter[] parms) throws ClassNotFoundException {
     Class<?>[] classes = new Class<?>[parms.length];
     JType type;
@@ -546,5 +547,4 @@ public class InjectUtil {
     }
     return metaClasses;
   }
-
 }
