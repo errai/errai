@@ -20,6 +20,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.enterprise.util.TypeLiteral;
 
@@ -273,7 +274,19 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
   }
   
   @Test
-  public void testInvokeMethodUsingParameterizedListAndVariableReturnType() {
+  public void testInvokeUsingVariableReturnType() {
+    String s = 
+      StatementBuilder.create(Context.create().autoImport())
+        .declareVariable("s", String.class)
+        .declareVariable("str", String.class,
+          StatementBuilder.create().invokeStatic(Foo.class, "foo", Variable.get("s")))
+        .toJavaString();
+
+    assertEquals("Failed to generate method invocation using generics", "String str = Foo.foo(s)", s);
+  }
+  
+  @Test
+  public void testInvokeUsingParameterizedListAndVariableReturnType() {
     String s = 
       StatementBuilder.create(Context.create().autoImport())
         .declareVariable("list", new TypeLiteral<List<String>>(){})
@@ -285,13 +298,13 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
   }
   
   @Test
-  public void testInvokeMethodUsingParameterizedClassAndVariableReturnType() {
+  public void testInvokeUsingParameterizedClassAndVariableReturnType() {
     String s = 
       StatementBuilder.create(Context.create().autoImport())
-        .declareVariable("str", String.class,
-          StatementBuilder.create().invokeStatic(Foo.class, "baz", String.class))
+        .declareVariable("set", Set.class,
+          StatementBuilder.create().invokeStatic(Foo.class, "baz", Set.class))
         .toJavaString();
 
-    assertEquals("Failed to generate method invocation using generics", "String str = Foo.baz(String.class)", s);
+    assertEquals("Failed to generate method invocation using generics", "Set set = Foo.baz(Set.class)", s);
   }
 }

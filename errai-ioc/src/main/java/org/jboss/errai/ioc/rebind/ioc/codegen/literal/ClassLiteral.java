@@ -18,8 +18,6 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.literal;
 
 import static org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference.getClassReference;
 
-import javax.enterprise.util.TypeLiteral;
-
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
@@ -44,6 +42,10 @@ public class ClassLiteral extends LiteralValue<Class<?>> {
   
   @Override
   public MetaClass getType() {
-    return MetaClassFactory.get(new TypeLiteral<Class<String>>(){});
+    return MetaClassFactory.get(Class.class);
+  }
+  
+  public MetaClass getActualType() {
+    return super.getType();
   }
 }

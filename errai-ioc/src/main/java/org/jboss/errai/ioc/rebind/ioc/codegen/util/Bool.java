@@ -38,4 +38,40 @@ public class Bool {
   public static BooleanExpression expr(Statement lhs) {
     return BooleanExpressionBuilder.create(lhs);
   }
+  
+  public static BooleanExpression equals(Object lhs, Object rhs) {
+    return BooleanExpressionBuilder.create(lhs, BooleanOperator.Equals, rhs);
+  }
+  
+  public static BooleanExpression notEquals(Object lhs, Object rhs) {
+    return BooleanExpressionBuilder.create(lhs, BooleanOperator.NotEquals, rhs);
+  }
+  
+  public static BooleanExpression or(Object lhs, Object rhs) {
+    return BooleanExpressionBuilder.create(lhs, BooleanOperator.Or, rhs);
+  }
+  
+  public static BooleanExpression and(Object lhs, Object rhs) {
+    return BooleanExpressionBuilder.create(lhs, BooleanOperator.And, rhs);
+  }
+  
+  public static BooleanExpression instanceOf(Object lhs, Object rhs) {
+    return BooleanExpressionBuilder.create(lhs, BooleanOperator.InstanceOf, rhs);
+  }
+  
+  public static BooleanExpression greaterThanOrEqual(Object lhs, Object rhs) {
+    return BooleanExpressionBuilder.create(lhs, BooleanOperator.GreaterThanOrEqual, rhs);
+  }
+  
+  public static BooleanExpression greaterThan(Object lhs, Object rhs) {
+    return BooleanExpressionBuilder.create(lhs, BooleanOperator.GreaterThan, rhs);
+  }
+  
+  public static BooleanExpression lessThanOrEqual(Object lhs, Object rhs) {
+    return BooleanExpressionBuilder.create(lhs, BooleanOperator.LessThanOrEqual, rhs);
+  }
+  
+  public static BooleanExpression lessThan(Object lhs, Object rhs) {
+    return BooleanExpressionBuilder.create(lhs, BooleanOperator.LessThan, rhs);
+  }
 }

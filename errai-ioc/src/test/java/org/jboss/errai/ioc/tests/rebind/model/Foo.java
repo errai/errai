@@ -8,6 +8,10 @@ import java.util.List;
 public class Foo {
   public Bar bar;
   
+  public static <T> T foo(T t) {
+    return t;
+  }
+  
   public static <T> T bar(List<T> list) {
     return list.get(0);
   }

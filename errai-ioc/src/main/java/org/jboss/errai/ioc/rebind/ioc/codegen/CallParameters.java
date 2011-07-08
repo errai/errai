@@ -57,6 +57,10 @@ public class CallParameters extends AbstractStatement {
     }
     return parameterTypes;
   }
+  
+  public List<Statement> getParameters() {
+    return parameters;
+  }
 
   @Override
   public String generate(Context context) {
