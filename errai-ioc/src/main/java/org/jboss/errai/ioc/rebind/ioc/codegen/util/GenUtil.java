@@ -109,6 +109,7 @@ public class GenUtil {
           input = ((LiteralValue<?>) input).getValue();
         }
         else {
+          ((Statement)input).generate(context);
           assertAssignableTypes(((Statement) input).getType(), targetType);
           return (Statement) input;
         }

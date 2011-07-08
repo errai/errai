@@ -130,7 +130,7 @@ public class ObjectBuilder extends AbstractStatementBuilder {
         extendsBlock = statement;
         return ObjectBuilder.this;
       }
-    });
+    }, context);
   }
 
   @Override

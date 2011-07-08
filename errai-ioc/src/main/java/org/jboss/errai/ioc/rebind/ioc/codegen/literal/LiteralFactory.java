@@ -16,34 +16,28 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.literal;
 
-
 import static org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference.getClassReference;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.ParameterizedType;
+
+import javax.enterprise.util.TypeLiteral;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.AnnotationEncoder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaType;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java.JavaReflectionParameterizedType;
 
 /**
- * The literal factory provides a LiteralValue for
- * the specified object (if possible).
- *
+ * The literal factory provides a LiteralValue for the specified object (if possible).
+ * 
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class LiteralFactory {
   public static LiteralValue<?> getLiteral(final Context context, final Object o) {
-    if (o instanceof Class) {
-      return new LiteralValue<Class>((Class<?>) o) {
-        @Override
-        public String getCanonicalString(Context context) {
-          return getClassReference(MetaClassFactory.get((Class<?>) o), context) + ".class";
-        }
-      };
-    }
-    else if (o instanceof MetaType) {
+    if (o instanceof MetaType) {
       return new LiteralValue<MetaType>((MetaType) o) {
         @Override
         public String getCanonicalString(Context context) {

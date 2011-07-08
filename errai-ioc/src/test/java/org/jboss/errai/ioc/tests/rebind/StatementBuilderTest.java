@@ -39,7 +39,6 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.literal.LiteralFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.PrettyPrinter;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 import org.jboss.errai.ioc.tests.rebind.model.Foo;
 import org.junit.Assert;
@@ -116,7 +115,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
       assertTrue(ive.getCause() instanceof NumberFormatException);
     }
   }
-
+  
   @Test
   public void testDeclareVariableWithObjectInitializationWithExactTypeProvided() {
     Context ctx = Context.create();
@@ -139,6 +138,21 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
 
     assertEquals("failed to generate variable declaration with object initialization and string type inference",
             "String str = new String()", s);
+
+    VariableReference str = ctx.getVariable("str");
+    assertEquals("Wrong variable name", "str", str.getName());
+    Assert.assertEquals("Wrong variable type", MetaClassFactory.get(String.class), str.getType());
+  }
+  
+  @Test
+  public void testDeclareVariableWithStatementInitialization() {
+    Context ctx = Context.create();
+    String s = Stmt.create().declareVariable("str", String.class,
+                Stmt.create().nestedCall(Stmt.create().newObject(Integer.class).withParameters(2)).invoke("toString"))
+        .generate(ctx);
+
+    assertEquals("failed to generate variable declaration with statement initialization",
+            "String str = (new Integer(2)).toString()", s);
 
     VariableReference str = ctx.getVariable("str");
     assertEquals("Wrong variable name", "str", str.getName());
