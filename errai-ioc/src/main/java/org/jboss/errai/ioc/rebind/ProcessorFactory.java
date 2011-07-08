@@ -45,7 +45,7 @@ public class ProcessorFactory {
       Set<Class<?>> classes = scanner.getTypesAnnotatedWith(aClass);
       for (Class<?> clazz : classes) {
         if (clazz.getPackage().getName().contains("server")) {
-          //  System.out.println("Skip: " + clazz.getName());
+          continue;
         }
 
         MetaClass type = MetaClassFactory.get(context.getOracle(), clazz);

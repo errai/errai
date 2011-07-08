@@ -20,13 +20,9 @@ import static org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClass
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.DefParameters;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Parameter;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.StringStatement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BuildCallback;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.Builder;
@@ -38,8 +34,9 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 public class ExtendsClassStructureBuilderImpl implements Builder, Finishable<ObjectBuilder> {
   private MetaClass toExtend;
   private Context classContext;
-  private StringBuilder buf = new StringBuilder();
   private BuildCallback<ObjectBuilder> callback;
+
+  private List<Callable<String>> callables = new ArrayList<Callable<String>>();
 
   ExtendsClassStructureBuilderImpl(MetaClass clazz, BuildCallback<ObjectBuilder> builderBuildCallback, Context parent) {
     this.toExtend = clazz;
@@ -60,13 +57,21 @@ public class ExtendsClassStructureBuilderImpl implements Builder, Finishable<Obj
 
     return new BlockBuilderImpl<ExtendsClassStructureBuilderImpl>(new BuildCallback<ExtendsClassStructureBuilderImpl>() {
       @Override
-      public ExtendsClassStructureBuilderImpl callback(Statement statement) {
-        buf.append("public ").append(getClassReference(toExtend, classContext))
-            .append(parameters.generate(context)).append(" {\n");
-        if (statement != null) {
-          buf.append(statement.generate(context)).append("\n");
-        }
-        buf.append("}\n");
+      public ExtendsClassStructureBuilderImpl callback(final Statement statement) {
+        addCallable(new Callable<String>() {
+          @Override
+          public String call() throws Exception {
+            StringBuilder buf = new StringBuilder();
+            buf.append("public ").append(getClassReference(toExtend, classContext))
+                    .append(parameters.generate(context)).append(" {\n");
+            if (statement != null) {
+              buf.append(statement.generate(context)).append("\n");
+            }
+            buf.append("}\n");
+            return buf.toString();
+          }
+        });
+
 
         return ExtendsClassStructureBuilderImpl.this;
       }
@@ -82,16 +87,26 @@ public class ExtendsClassStructureBuilderImpl implements Builder, Finishable<Obj
 
     return new BlockBuilderImpl<ExtendsClassStructureBuilderImpl>(new BuildCallback<ExtendsClassStructureBuilderImpl>() {
       @Override
-      public ExtendsClassStructureBuilderImpl callback(Statement statement) {
+      public ExtendsClassStructureBuilderImpl callback(final Statement statement) {
 
-        buf.append("public ").append(getClassReference(method.getReturnType(), classContext))
-            .append(" ")
-            .append(method.getName())
-            .append(parameters.generate(context)).append(" {\n");
-        if (statement != null) {
-          buf.append(statement.generate(context)).append("\n");
-        }
-        buf.append("}\n");
+        addCallable(new Callable<String>() {
+          @Override
+          public String call() throws Exception {
+            StringBuilder buf = new StringBuilder();
+            buf.append("public ").append(getClassReference(method.getReturnType(), classContext))
+                    .append(" ")
+                    .append(method.getName())
+                    .append(parameters.generate(context)).append(" {\n");
+            if (statement != null) {
+              buf.append(statement.generate(context)).append("\n");
+            }
+            buf.append("}\n");
+
+            return buf.toString();
+          }
+
+        });
+
 
         return ExtendsClassStructureBuilderImpl.this;
       }
@@ -103,22 +118,42 @@ public class ExtendsClassStructureBuilderImpl implements Builder, Finishable<Obj
     for (Parameter arg : args) {
       types.add(arg.getType());
     }
-    
+
     return publicOverridesMethod(toExtend.getBestMatchingMethod(name,
-        types.toArray(new MetaClass[args.length])), DefParameters.fromParameters(args));
+            types.toArray(new MetaClass[args.length])), DefParameters.fromParameters(args));
   }
 
   @Override
   public ObjectBuilder finish() {
     if (callback != null) {
-      return callback.callback(new StringStatement(toJavaString()));
+      return callback.callback(new AbstractStatement() {
+        @Override
+        public String generate(Context context) {
+          return toJavaString();
+        }
+      });
     }
 
     return null;
   }
 
+  private void addCallable(Callable<String> callable) {
+    callables.add(callable);
+  }
+
   @Override
   public String toJavaString() {
-    return buf.toString();
+    try {
+      if (callables == null) return null;
+
+      StringBuilder buf = new StringBuilder();
+      for (Callable<String> c : callables) {
+        buf.append(c.call());
+      }
+      return buf.toString();
+    }
+    catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 }
