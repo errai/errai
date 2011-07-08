@@ -31,83 +31,77 @@ import org.jboss.errai.bus.client.api.base.MessageBuilder;
  */
 public class Conversation {
 
-    private String id;
-    private String subject;
+  private String id;
+  private String subject;
 
-    private boolean hasBegun, hasEnded = false;
+  private boolean hasBegun, hasEnded = false;
 
-    Conversation(String id, String subject) {
-        this.id = id;
-        this.subject = subject;
-    }
+  Conversation(String id, String subject) {
+    this.id = id;
+    this.subject = subject;
+  }
 
-    public String getSubject() {
-        return subject;
-    }
+  public String getSubject() {
+    return subject;
+  }
 
-    public String getId() {
-        return id;
-    }
+  public String getId() {
+    return id;
+  }
 
-    public void begin()
-    {
-        assertBegun();
-        
-        // register client side conversation state globally
-        // so that the message builder picks it
-        // Once that's done we don't need to wrap the message builder calls
+  public void begin() {
+    assertBegun();
 
-        CDI.getActiveConversations().put(id, this);
-        hasBegun = true;
-    }
+    // register client side conversation state globally
+    // so that the message builder picks it
+    // Once that's done we don't need to wrap the message builder calls
 
-    public boolean isActive()
-    {
-        return hasBegun;
-    }
+    CDI.getActiveConversations().put(id, this);
+    hasBegun = true;
+  }
 
-    /**
-     * Explicitly end a conversation
-     */
-    public void end()
-    {
-        assertEnded();
-        
-        MessageBuilder.createMessage()
-                .toSubject("cdi.conversation:Manager,conversation="+id)
-                .command("end")                
+  public boolean isActive() {
+    return hasBegun;
+  }
+
+  /**
+   * Explicitly end a conversation
+   */
+  public void end() {
+    assertEnded();
+
+    MessageBuilder.createMessage()
+                .toSubject("cdi.conversation:Manager,conversation=" + id)
+                .command("end")
                 .with("cdi.conversation.id", id)
                 .with("cdi.internal", true) // will be excluded in interceptor
-                .done().sendNowWith(ErraiBus.get());
+        .done().sendNowWith(ErraiBus.get());
 
-        CDI.getActiveConversations().remove(id);
-        
-        hasEnded = true;
-    }
+    CDI.getActiveConversations().remove(id);
 
-    public boolean hasEnded()
-    {
-        // might be a server side component ends the conversation
-        // in that case this instance needs to be terminated to reflect the
-        // server side state change
-        return hasEnded;
-    }
+    hasEnded = true;
+  }
 
-    private void assertEnded()
-    {
-        if(hasEnded)
-            throw new IllegalStateException("Converation already ended: "+ id);
-    }
+  public boolean hasEnded() {
+    // might be a server side component ends the conversation
+    // in that case this instance needs to be terminated to reflect the
+    // server side state change
+    return hasEnded;
+  }
 
-    private void assertBegun()
-    {
-        if(hasBegun)
-            throw new IllegalStateException("Converation already begun: "+ id);
-    }
+  private void assertEnded() {
+    if (hasEnded)
+      throw new IllegalStateException("Converation already ended: " + id);
+  }
 
-    public void reset() {        
-        id = CDI.generateId();
-        hasBegun= false;
-        hasEnded = false;
-    }
+  private void assertBegun() {
+    if (hasBegun)
+      throw new IllegalStateException("Converation already begun: " + id);
+  }
+
+  public void reset() {
+    id = CDI.generateId();
+    hasBegun = false;
+    hasEnded = false;
+  }
 }

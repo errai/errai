@@ -11,79 +11,77 @@ import org.jboss.errai.cdi.client.qualifier.A;
 import org.jboss.errai.cdi.client.qualifier.B;
 import org.jboss.errai.cdi.client.qualifier.C;
 
-@ApplicationScoped
-public class EventProducerTestService {
-    
-    @Inject
-    private Event<String> event;
+@ApplicationScoped public class CDITestEventProducerService {
 
-    @Inject @A
-    private Event<String> eventA;
+  @Inject 
+  private Event<String> event;
 
-    @Inject @B
-    private Event<String> eventB;
+  @Inject @A 
+  private Event<String> eventA;
 
-    @Inject @C
-    private Event<String> eventC;
+  @Inject @B 
+  private Event<String> eventB;
 
-    @Inject @A @B
-    private Event<String> eventAB;
+  @Inject @C 
+  private Event<String> eventC;
 
-    @Inject @B @C
-    private Event<String> eventBC;
+  @Inject @A @B 
+  private Event<String> eventAB;
 
-    @Inject @A @C
-    private Event<String> eventAC;
-    
-    @Inject @A @B @C
-    private Event<String> eventABC;
-    
-    @Conversational
-    public void start(@Observes StartEvent event) {
-        System.out.println("Start ^_^");
-        fireAll();
-    }
-    
-    public void fireAll() {
-        fire();
-        fireA();
-        fireB();
-        fireC();
-        fireAB();
-        fireAC();
-        fireBC();
-        fireABC();
-    }
-    
-    public void fire() {
-        event.fire("");
-    }
-    
-    public void fireA() {
-        eventA.fire("A");
-    }
-    
-    public void fireB() {
-        eventB.fire("B");
-    }
-    
-    public void fireC() {
-        eventC.fire("C");
-    }
-    
-    public void fireAB() {
-        eventAB.fire("AB");
-    }
-    
-    public void fireBC() {
-        eventBC.fire("BC");
-    }
-    
-    public void fireAC() {
-        eventAC.fire("AC");
-    }
-    
-    public void fireABC() {
-        eventABC.fire("ABC");
-    }
+  @Inject @B @C 
+  private Event<String> eventBC;
+
+  @Inject @A @C 
+  private Event<String> eventAC;
+
+  @Inject @A @B @C 
+  private Event<String> eventABC;
+
+  @Conversational 
+  public void start(@Observes StartEvent event) {
+    fireAll();
+  }
+
+  public void fireAll() {
+    fire();
+    fireA();
+    fireB();
+    fireC();
+    fireAB();
+    fireAC();
+    fireBC();
+    fireABC();
+  }
+
+  public void fire() {
+    event.fire("");
+  }
+
+  public void fireA() {
+    eventA.fire("A");
+  }
+
+  public void fireB() {
+    eventB.fire("B");
+  }
+
+  public void fireC() {
+    eventC.fire("C");
+  }
+
+  public void fireAB() {
+    eventAB.fire("AB");
+  }
+
+  public void fireBC() {
+    eventBC.fire("BC");
+  }
+
+  public void fireAC() {
+    eventAC.fire("AC");
+  }
+
+  public void fireABC() {
+    eventABC.fire("ABC");
+  }
 }

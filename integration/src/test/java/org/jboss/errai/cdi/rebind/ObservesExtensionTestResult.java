@@ -5,7 +5,7 @@ package org.jboss.errai.cdi.rebind;
  */
 public interface ObservesExtensionTestResult {
 
-    public static final String OBSERVES_EXTENSION_WITHOUT_QUALIFIERS = ""
+  public static final String OBSERVES_EXTENSION_WITHOUT_QUALIFIERS = ""
             + "bus.subscribe(\"cdi.event:org.jboss.errai.cdi.client.events.BusReadyEvent\", "
             + "   new org.jboss.errai.bus.client.api.MessageCallback() {"
             + "       public void callback(org.jboss.errai.bus.client.api.Message message) {"
@@ -19,9 +19,9 @@ public interface ObservesExtensionTestResult {
             + "               inj.withoutQualifiers((org.jboss.errai.cdi.client.events.BusReadyEvent) response);"
             + "           }"
             + "       }"
-            +"   });";
+            + "   });";
 
-    public static final String OBSERVES_EXTENSION_WITH_QUALIFIERS = ""
+  public static final String OBSERVES_EXTENSION_WITH_QUALIFIERS = ""
             + "bus.subscribe(\"cdi.event:org.jboss.errai.cdi.client.events.BusReadyEvent\", "
             + "   new org.jboss.errai.bus.client.api.MessageCallback() {"
             + "       public void callback(org.jboss.errai.bus.client.api.Message message) {"
@@ -35,7 +35,7 @@ public interface ObservesExtensionTestResult {
             + "                   message.get(org.jboss.errai.cdi.client.events.BusReadyEvent.class, "
             + "                               org.jboss.errai.cdi.client.CDIProtocol.OBJECT_REF); "
             + "               inj.withQualifiers((org.jboss.errai.cdi.client.events.BusReadyEvent) response);"
-            + "           }" 
-            + "       }" 
+            + "           }"
+            + "       }"
             + "   });";
 }

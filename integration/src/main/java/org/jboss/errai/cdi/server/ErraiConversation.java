@@ -15,10 +15,10 @@
  */
 package org.jboss.errai.cdi.server;
 
+import javax.enterprise.context.Conversation;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.enterprise.context.Conversation;
 
 /**
  * Acts as a bridge between an externally managed conversation handle
@@ -33,51 +33,48 @@ import javax.enterprise.context.Conversation;
  */
 public class ErraiConversation implements Conversation {
 
-    private static final Logger log = LoggerFactory.getLogger(ErraiConversation.class);
+  private static final Logger log = LoggerFactory.getLogger(ErraiConversation.class);
 
-    private Conversation delegate;
-    private ContextManager contextManager;
+  private Conversation delegate;
+  private ContextManager contextManager;
 
-    public ErraiConversation(Conversation delegate, ContextManager contextManager) {
-        this.delegate = delegate;
-        this.contextManager = contextManager;
+  public ErraiConversation(Conversation delegate, ContextManager contextManager) {
+    this.delegate = delegate;
+    this.contextManager = contextManager;
+  }
+
+  public void begin() {
+    String id = contextManager.getThreadContextId();
+    if (id != null) {
+      log.debug("Begin conversation:  " + id);
+      delegate.begin(id);
+    } else {
+      delegate.begin();
     }
+  }
 
-    public void begin() {
-        String id = contextManager.getThreadContextId();
-        if(id!=null)
-        {
-            log.debug("Begin conversation:  " + id);
-            delegate.begin(id);
-        }
-        else
-        {
-            delegate.begin();
-        }
-    }
+  public void begin(String id) {
+    throw new IllegalArgumentException("An Errai managed conversation doesn't allow custom conversation ID's");
+  }
 
-    public void begin(String id) {
-        throw new IllegalArgumentException("An Errai managed conversation doesn't allow custom conversation ID's");
-    }
+  public void end() {
+    log.debug("End conversation: " + delegate.getId());
+    delegate.end();
+  }
 
-    public void end() {
-        log.debug("End conversation: " + delegate.getId());
-        delegate.end();
-    }
+  public String getId() {
+    return delegate.getId();
+  }
 
-    public String getId() {
-        return delegate.getId();
-    }
+  public long getTimeout() {
+    return delegate.getTimeout();
+  }
 
-    public long getTimeout() {
-        return delegate.getTimeout();
-    }
+  public void setTimeout(long milliseconds) {
+    delegate.setTimeout(milliseconds);
+  }
 
-    public void setTimeout(long milliseconds) {
-        delegate.setTimeout(milliseconds);
-    }
-
-    public boolean isTransient() {
-        return delegate.isTransient();
-    }
+  public boolean isTransient() {
+    return delegate.isTransient();
+  }
 }

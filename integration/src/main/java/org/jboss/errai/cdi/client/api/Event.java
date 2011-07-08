@@ -26,9 +26,11 @@ public interface Event<T> {
   public void fire(T event);
 
   public Event<T> select(Annotation... qualifiers);
+
   public <U extends T> Event<U> select(Class<U> subtype, Annotation... qualifiers);
 
   public Class getEventType();
+
   public Annotation[] getQualifiers();
 
   public void registerConversation(Conversation conversation);

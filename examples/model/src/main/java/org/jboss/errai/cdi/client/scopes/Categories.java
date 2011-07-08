@@ -26,6 +26,5 @@ import java.util.List;
 @Remote
 public interface Categories {
 
-    List<String> getAllCategories();
+  List<String> getAllCategories();
 }
-

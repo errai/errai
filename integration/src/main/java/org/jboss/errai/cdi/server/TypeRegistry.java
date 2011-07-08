@@ -15,12 +15,13 @@
  */
 package org.jboss.errai.cdi.server;
 
-import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.AnnotatedType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
 
 /**
  * Holds references to the types discovered when CDI bootraps.
@@ -32,38 +33,35 @@ import java.util.Map;
  */
 public class TypeRegistry {
 
-    private List<AnnotatedType> serviceEndpoints = new ArrayList<AnnotatedType>();
-    private Map<AnnotatedType, List<AnnotatedMethod>> serviceMethods
-            = new HashMap<AnnotatedType, List<AnnotatedMethod>>();
-    private Map<Class<?>, AnnotatedType> rpcEndpoints = new HashMap<Class<?>, AnnotatedType>();
+  private List<AnnotatedType> serviceEndpoints = new ArrayList<AnnotatedType>();
+  private Map<AnnotatedType, List<AnnotatedMethod>> serviceMethods = new HashMap<AnnotatedType, List<AnnotatedMethod>>();
+  private Map<Class<?>, AnnotatedType> rpcEndpoints = new HashMap<Class<?>, AnnotatedType>();
 
-    public void addServiceEndpoint(AnnotatedType service)
-    {
-        serviceEndpoints.add(service);
-    }
+  public void addServiceEndpoint(AnnotatedType service) {
+    serviceEndpoints.add(service);
+  }
 
-    public void addServiceMethod(AnnotatedType service, AnnotatedMethod method) {
-        if (!serviceMethods.containsKey(service)) {
-            serviceMethods.put(service, new ArrayList<AnnotatedMethod>());
-        }
-        serviceMethods.get(service).add(method);
+  public void addServiceMethod(AnnotatedType service, AnnotatedMethod method) {
+    if (!serviceMethods.containsKey(service)) {
+      serviceMethods.put(service, new ArrayList<AnnotatedMethod>());
     }
+    serviceMethods.get(service).add(method);
+  }
 
-    public void addRPCEndpoint(Class<?> intf, AnnotatedType endpoint)
-    {
-        rpcEndpoints.put(intf, endpoint);
-    }
+  public void addRPCEndpoint(Class<?> intf, AnnotatedType endpoint) {
+    rpcEndpoints.put(intf, endpoint);
+  }
 
-    public List<AnnotatedType> getServiceEndpoints() {
-        return serviceEndpoints;
-    }
+  public List<AnnotatedType> getServiceEndpoints() {
+    return serviceEndpoints;
+  }
 
-    public Map<AnnotatedType, List<AnnotatedMethod>> getServiceMethods() {
-        return serviceMethods;
-    }
+  public Map<AnnotatedType, List<AnnotatedMethod>> getServiceMethods() {
+    return serviceMethods;
+  }
 
-    public Map<Class<?>, AnnotatedType> getRpcEndpoints() {
-        return rpcEndpoints;
-    }
+  public Map<Class<?>, AnnotatedType> getRpcEndpoints() {
+    return rpcEndpoints;
+  }
 
 }

@@ -19,8 +19,7 @@ package org.jboss.errai.cdi.client;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Apr 9, 2010
  */
-public abstract class EventHandler<T>
-{
+public abstract class EventHandler<T> {
   public abstract void handleEvent(T event);
-  
+
 }

@@ -11,10 +11,12 @@ import java.util.List;
  * @date: Apr 6, 2010
  */
 @Remote
-public interface AccountManager
-{
+public interface AccountManager {
   void createAccount(Account account);
+
   Account getAccount(String id);
+
   List<Account> getAllAccounts();
+
   void deleteAccount(String id);
 }

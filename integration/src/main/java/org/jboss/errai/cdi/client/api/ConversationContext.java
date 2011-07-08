@@ -15,20 +15,17 @@
  */
 package org.jboss.errai.cdi.client.api;
 
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-
-import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Oct 29, 2010
  */
-@Target({ FIELD })
-@Retention(RUNTIME)
-@Documented
-public @interface ConversationContext {
-    String value() default "";
+@Target({FIELD}) @Retention(RUNTIME) @Documented public @interface ConversationContext {
+  String value() default "";
 }

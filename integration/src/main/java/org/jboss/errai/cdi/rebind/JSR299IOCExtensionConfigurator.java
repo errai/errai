@@ -13,24 +13,25 @@ import org.jboss.errai.ioc.rebind.ioc.InjectorFactory;
 import org.jboss.errai.ioc.rebind.ioc.TypeInjector;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
-@IOCExtension
-public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator {
-    public void configure(final ProcessingContext context, final InjectorFactory injectorFactory, final ProcessorFactory procFactory) {
-        procFactory.registerHandler(ApplicationScoped.class, new AnnotationHandler<ApplicationScoped>() {
-            public void handle(MetaClass type, ApplicationScoped annotation, IOCProcessingContext context) {
-                InjectionContext injectionContext = injectorFactory.getInjectionContext();
-                TypeInjector i = (TypeInjector) injectionContext.getInjector(type);
+@IOCExtension public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator {
+  public void configure(final ProcessingContext context, final InjectorFactory injectorFactory,
+      final ProcessorFactory procFactory) {
 
-                if (!i.isInjected()) {
-                    // instantiate the bean.
-                    i.setSingleton(true);
-                    i.getType(injectionContext, null);
-                    injectionContext.registerInjector(i);
-                }
-            }
-        });
-    }
+    procFactory.registerHandler(ApplicationScoped.class, new AnnotationHandler<ApplicationScoped>() {
+      public void handle(MetaClass type, ApplicationScoped annotation, IOCProcessingContext context) {
+        InjectionContext injectionContext = injectorFactory.getInjectionContext();
+        TypeInjector i = (TypeInjector) injectionContext.getInjector(type);
 
-    public void afterInitialization(ProcessingContext context, InjectorFactory injectorFactory, ProcessorFactory procFactory) {
-    }
+        if (!i.isInjected()) {
+          // instantiate the bean.
+          i.setSingleton(true);
+          i.getType(injectionContext, null);
+          injectionContext.registerInjector(i);
+        }
+      }
+    });
+  }
+
+  public void afterInitialization(ProcessingContext context, InjectorFactory injectorFactory,
+      ProcessorFactory procFactory) {}
 }

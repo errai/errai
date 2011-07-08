@@ -25,13 +25,13 @@ import javax.inject.Named;
 public class NamedQualifier extends AnnotationLiteral<Named>
        implements Named {
 
-    String value;
+  String value;
 
-    public NamedQualifier(String value) {
-        this.value = value;
-    }
+  public NamedQualifier(String value) {
+    this.value = value;
+  }
 
-    public String value() {
-        return value;  
-    }
+  public String value() {
+    return value;
+  }
 }

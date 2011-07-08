@@ -15,11 +15,11 @@
  */
 package org.jboss.errai.container;
 
+import javax.naming.NamingException;
+
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.naming.NamingException;
 
 /**
  * Service wrapper to bootstrap Errai within JBoss AS.
@@ -27,32 +27,28 @@ import javax.naming.NamingException;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Apr 23, 2010
  */
-public class JBossService
-{
+public class JBossService {
   private static final Logger log = LoggerFactory.getLogger("Errai");
 
   protected ErraiService service;
-  
+
   private String jndiName;
-  
-  public void start()
-  {
+
+  public void start() {
     log.info("Starting Errai Service");
 
     this.service = ServiceFactory.create();
-      
+
     JBossJNDI.rebind(jndiName, service);
   }
 
-  public void stop()
-  {
+  public void stop() {
     log.info("Shutdown Errai Service");
     JBossJNDI.unbind(jndiName);
   }
 
-  public void setJndiName(String jndiName) throws NamingException
-  {
-    this.jndiName = jndiName;  
+  public void setJndiName(String jndiName) throws NamingException {
+    this.jndiName = jndiName;
   }
 
 }

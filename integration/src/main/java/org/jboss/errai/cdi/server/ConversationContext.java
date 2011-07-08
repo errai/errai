@@ -15,10 +15,10 @@
  */
 package org.jboss.errai.cdi.server;
 
-import org.jboss.weld.context.bound.BoundRequest;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import org.jboss.weld.context.bound.BoundRequest;
 
 /**
  * <p>
@@ -35,34 +35,34 @@ import java.util.Map;
  */
 public class ConversationContext implements BoundRequest {
 
-    private Map<String, Object> requestMap = new HashMap<String, Object>();
-    private Map<String, Object> sessionMap = new HashMap<String, Object>();
+  private Map<String, Object> requestMap = new HashMap<String, Object>();
+  private Map<String, Object> sessionMap = new HashMap<String, Object>();
 
-    /**
-     * Get the current request map.
-     * @return
-     */
-    public Map<String, Object> getRequestMap() {
-        return requestMap;
-    }
+  /**
+   * Get the current request map.
+   * @return
+   */
+  public Map<String, Object> getRequestMap() {
+    return requestMap;
+  }
 
-    /**
-    * <p>
-    * Get the current session map.
-    * </p>
-    *
-    * <p>
-    * A {@link BoundRequest} may be backed by a data store that only creates
-    * sessions on demand. It is recommended that if the session is not created
-    * on demand, or that the session has already been created (but is not
-    * required by this access) that the session is returned as it allows the
-    * conversation context to work more efficiently.
-    * </p>
-    *
-    * @param create if true, then a session must be created
-    * @return the session map; null may be returned if create is false
-    */
-    public Map<String, Object> getSessionMap(boolean create) {
-        return sessionMap;
-    }
+  /**
+  * <p>
+  * Get the current session map.
+  * </p>
+  *
+  * <p>
+  * A {@link BoundRequest} may be backed by a data store that only creates
+  * sessions on demand. It is recommended that if the session is not created
+  * on demand, or that the session has already been created (but is not
+  * required by this access) that the session is returned as it allows the
+  * conversation context to work more efficiently.
+  * </p>
+  *
+  * @param create if true, then a session must be created
+  * @return the session map; null may be returned if create is false
+  */
+  public Map<String, Object> getSessionMap(boolean create) {
+    return sessionMap;
+  }
 }

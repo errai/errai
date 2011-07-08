@@ -36,21 +36,17 @@ import java.util.Hashtable;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: May 7, 2010
  */
-public class ServiceObjectFactory implements ObjectFactory
-{
+public class ServiceObjectFactory implements ObjectFactory {
   private static final Logger log = LoggerFactory.getLogger(ServiceObjectFactory.class);
 
   private static ErraiService serviceSingleton = null;
 
-  public ServiceObjectFactory()
-  {
+  public ServiceObjectFactory() {
     createService();
   }
 
-  public void createService()
-  {
-    if(null==serviceSingleton)
-    {
+  public void createService() {
+    if (null == serviceSingleton) {
       this.serviceSingleton =
           Guice.createInjector(new AbstractModule() {
             public void configure() {
@@ -61,13 +57,11 @@ public class ServiceObjectFactory implements ObjectFactory
             }
           }).getInstance(ErraiService.class);
 
-      log.info("Creating service instance for development mode: "+ serviceSingleton);      
+      log.info("Creating service instance for development mode: " + serviceSingleton);
     }
   }
 
-
-  public Object getObjectInstance(Object obj, Name name, Context nameCtx, Hashtable<?, ?> environment) throws Exception
-  {
+  public Object getObjectInstance(Object obj, Name name, Context nameCtx, Hashtable<?, ?> environment) throws Exception {
     return serviceSingleton;
   }
 }
