@@ -19,6 +19,11 @@ package org.jboss.errai.ioc.tests.rebind;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.List;
+import java.util.Set;
+
+import javax.enterprise.util.TypeLiteral;
+
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ContextBuilder;
@@ -26,6 +31,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedMethodException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Refs;
+import org.jboss.errai.ioc.tests.rebind.model.Foo;
 import org.junit.Test;
 
 /**
@@ -265,5 +271,40 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
     catch (UndefinedMethodException udme) {
       assertEquals("Wrong exception details", udme.getMethodName(), "undefinedMethod");
     }
+  }
+  
+  @Test
+  public void testInvokeUsingVariableReturnType() {
+    String s = 
+      StatementBuilder.create(Context.create().autoImport())
+        .declareVariable("s", String.class)
+        .declareVariable("str", String.class,
+          StatementBuilder.create().invokeStatic(Foo.class, "foo", Variable.get("s")))
+        .toJavaString();
+
+    assertEquals("Failed to generate method invocation using generics", "String str = Foo.foo(s)", s);
+  }
+  
+  @Test
+  public void testInvokeUsingParameterizedListAndVariableReturnType() {
+    String s = 
+      StatementBuilder.create(Context.create().autoImport())
+        .declareVariable("list", new TypeLiteral<List<String>>(){})
+        .declareVariable("str", String.class,
+          StatementBuilder.create().invokeStatic(Foo.class, "bar", Variable.get("list")))
+        .toJavaString();
+
+    assertEquals("Failed to generate method invocation using generics", "String str = Foo.bar(list)", s);
+  }
+  
+  @Test
+  public void testInvokeUsingParameterizedClassAndVariableReturnType() {
+    String s = 
+      StatementBuilder.create(Context.create().autoImport())
+        .declareVariable("set", Set.class,
+          StatementBuilder.create().invokeStatic(Foo.class, "baz", Set.class))
+        .toJavaString();
+
+    assertEquals("Failed to generate method invocation using generics", "Set set = Foo.baz(Set.class)", s);
   }
 }

@@ -172,6 +172,15 @@ public interface ClassBuilderTestResult {
           "    }\n" +
           " }";
 
+  public static final String CLASS_WITH_JSNI_METHOD =
+    "     package my.test;\n" +
+        "\n" +
+        " public class Clazz {\n" +
+        "    public native void test() /*-{\n" +
+        "        System.out.println(\"Hello, World!\");\n" +
+        "    }-*/;\n" +
+        " }";
+  
   public static final String CLASS_DEFINITION_BY_IMPLEMENTING_INTERFACE =
       "     package org.jboss.errai.ioc.client.api;\n" +
           "\n" +

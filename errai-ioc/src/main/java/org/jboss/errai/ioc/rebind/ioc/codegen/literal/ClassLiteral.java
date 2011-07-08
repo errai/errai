@@ -26,6 +26,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class ClassLiteral extends LiteralValue<Class<?>> {
+  
   public ClassLiteral(Class<?> value) {
     super(value);
   }
@@ -42,5 +43,9 @@ public class ClassLiteral extends LiteralValue<Class<?>> {
   @Override
   public MetaClass getType() {
     return MetaClassFactory.get(Class.class);
+  }
+  
+  public MetaClass getActualType() {
+    return super.getType();
   }
 }

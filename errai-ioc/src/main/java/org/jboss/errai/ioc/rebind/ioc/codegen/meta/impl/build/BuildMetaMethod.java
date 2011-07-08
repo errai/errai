@@ -17,6 +17,7 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.build;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
@@ -94,6 +95,9 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
 
   @Override
   public MetaType[] getGenericParameterTypes() {
+    if (genericParameterTypes == null)
+      return new MetaType[0];
+    
     return genericParameterTypes.toArray(new MetaType[genericParameterTypes.size()]);
   }
 

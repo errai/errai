@@ -32,6 +32,7 @@ public class DeclareVariable extends AbstractCallElement {
 
   @Override
   public void handleCall(CallWriter writer, Context context, Statement statement) {
+    writer.reset();
     context.addVariable(variable);
     writer.append(variable.generate(context));
     nextOrReturn(writer, context, null);

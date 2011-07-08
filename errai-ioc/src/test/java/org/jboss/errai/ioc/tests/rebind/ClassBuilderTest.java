@@ -338,7 +338,7 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
   }
 
   @Test
-  public void testDefineStaticMethod() {
+  public void testDefineClassWithStaticMethod() {
     String cls = ClassBuilder.define("my.test.Clazz")
         .publicScope().body()
         .publicMethod(void.class, "test").modifiers(Modifier.Static)
@@ -348,5 +348,18 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
         .toJavaString();
 
     assertEquals("failed to generate class with static method", CLASS_WITH_STATIC_METHOD, cls);
+  }
+  
+  @Test
+  public void testDefineClassWithJSNIMethod() {
+    String cls = ClassBuilder.define("my.test.Clazz")
+        .publicScope().body()
+        .publicMethod(void.class, "test").modifiers(Modifier.JSNI)
+          .body()
+            .append(Stmt.create().loadStatic(System.class, "out").invoke("println", "Hello, World!"))
+        .finish()
+        .toJavaString();
+    
+    assertEquals("failed to generate class with JSNI method", CLASS_WITH_JSNI_METHOD, cls);
   }
 }

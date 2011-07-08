@@ -20,10 +20,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -46,8 +43,6 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 import org.jboss.errai.ioc.tests.rebind.model.Foo;
 import org.junit.Assert;
 import org.junit.Test;
-import org.mvel2.MVEL;
-import org.mvel2.ParserContext;
 
 /**
  * Tests the {@link StatementBuilder} API.
