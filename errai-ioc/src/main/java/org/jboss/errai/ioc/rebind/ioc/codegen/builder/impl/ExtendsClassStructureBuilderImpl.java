@@ -31,41 +31,42 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 
-public class ExtendsClassStructureBuilderImpl implements Builder, Finishable<ObjectBuilder> {
+public class ExtendsClassStructureBuilderImpl implements Finishable<ObjectBuilder> {
   private MetaClass toExtend;
-  private Context classContext;
   private BuildCallback<ObjectBuilder> callback;
 
-  private List<Callable<String>> callables = new ArrayList<Callable<String>>();
+  private List<DeferredGenerateCallback> callables = new ArrayList<DeferredGenerateCallback>();
 
-  ExtendsClassStructureBuilderImpl(MetaClass clazz, BuildCallback<ObjectBuilder> builderBuildCallback, Context parent) {
+  ExtendsClassStructureBuilderImpl(MetaClass clazz, BuildCallback<ObjectBuilder> builderBuildCallback) {
     this.toExtend = clazz;
-    this.classContext = Context.create(parent);
 
-    for (MetaField field : clazz.getFields()) {
-      this.classContext.addVariable(Variable.create(field.getName(), field.getType()));
-    }
+//    for (MetaField field : clazz.getFields()) {
+//      this.classContext.addVariable(Variable.create(field.getName(), field.getType()));
+//    }
 
     this.callback = builderBuildCallback;
   }
 
   public BlockBuilder<ExtendsClassStructureBuilderImpl> publicConstructor(final DefParameters parameters) {
-    final Context context = Context.create(classContext);
-    for (Parameter parm : parameters.getParameters()) {
-      context.addVariable(Variable.create(parm.getName(), parm.getType()));
-    }
+//    final Context context = Context.create(classContext);
 
     return new BlockBuilderImpl<ExtendsClassStructureBuilderImpl>(new BuildCallback<ExtendsClassStructureBuilderImpl>() {
       @Override
       public ExtendsClassStructureBuilderImpl callback(final Statement statement) {
-        addCallable(new Callable<String>() {
+        addCallable(new DeferredGenerateCallback() {
           @Override
-          public String call() throws Exception {
+          public String doGenerate(Context context) {
+            Context subContext = Context.create(context);
+
+            for (Parameter parm : parameters.getParameters()) {
+              subContext.addVariable(Variable.create(parm.getName(), parm.getType()));
+            }
+
             StringBuilder buf = new StringBuilder();
-            buf.append("public ").append(getClassReference(toExtend, classContext))
+            buf.append("public ").append(getClassReference(toExtend, context))
                     .append(parameters.generate(context)).append(" {\n");
             if (statement != null) {
-              buf.append(statement.generate(context)).append("\n");
+              buf.append(statement.generate(subContext)).append("\n");
             }
             buf.append("}\n");
             return buf.toString();
@@ -80,30 +81,32 @@ public class ExtendsClassStructureBuilderImpl implements Builder, Finishable<Obj
 
   private BlockBuilder<ExtendsClassStructureBuilderImpl> publicOverridesMethod(final MetaMethod method, final DefParameters parameters) {
 
-    final Context context = Context.create(classContext);
-    for (Parameter parm : parameters.getParameters()) {
-      context.addVariable(Variable.create(parm.getName(), parm.getType()));
-    }
 
     return new BlockBuilderImpl<ExtendsClassStructureBuilderImpl>(new BuildCallback<ExtendsClassStructureBuilderImpl>() {
       @Override
       public ExtendsClassStructureBuilderImpl callback(final Statement statement) {
 
-        addCallable(new Callable<String>() {
+        addCallable(new DeferredGenerateCallback() {
           @Override
-          public String call() throws Exception {
+          public String doGenerate(Context context) {
+            Context subContext = Context.create(context);
+            for (Parameter parm : parameters.getParameters()) {
+              subContext.addVariable(Variable.create(parm.getName(), parm.getType()));
+            }
+
             StringBuilder buf = new StringBuilder();
-            buf.append("public ").append(getClassReference(method.getReturnType(), classContext))
+            buf.append("public ").append(getClassReference(method.getReturnType(), context))
                     .append(" ")
                     .append(method.getName())
                     .append(parameters.generate(context)).append(" {\n");
             if (statement != null) {
-              buf.append(statement.generate(context)).append("\n");
+              buf.append(statement.generate(subContext)).append("\n");
             }
             buf.append("}\n");
 
             return buf.toString();
           }
+
 
         });
 
@@ -129,7 +132,7 @@ public class ExtendsClassStructureBuilderImpl implements Builder, Finishable<Obj
       return callback.callback(new AbstractStatement() {
         @Override
         public String generate(Context context) {
-          return toJavaString();
+          return doGenerate(context);
         }
       });
     }
@@ -137,23 +140,26 @@ public class ExtendsClassStructureBuilderImpl implements Builder, Finishable<Obj
     return null;
   }
 
-  private void addCallable(Callable<String> callable) {
+  private void addCallable(DeferredGenerateCallback callable) {
     callables.add(callable);
   }
 
-  @Override
-  public String toJavaString() {
+  private String doGenerate(Context context) {
     try {
       if (callables == null) return null;
 
       StringBuilder buf = new StringBuilder();
-      for (Callable<String> c : callables) {
-        buf.append(c.call());
+      for (DeferredGenerateCallback c : callables) {
+        buf.append(c.doGenerate(context));
       }
       return buf.toString();
     }
     catch (Exception e) {
       throw new RuntimeException(e);
     }
+  }
+
+  public static interface DeferredGenerateCallback {
+    public String doGenerate(Context context);
   }
 }

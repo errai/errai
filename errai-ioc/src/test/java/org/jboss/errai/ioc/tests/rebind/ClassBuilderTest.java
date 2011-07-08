@@ -16,6 +16,8 @@
 
 package org.jboss.errai.ioc.tests.rebind;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import java.io.Serializable;
@@ -30,9 +32,10 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedMethodException
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 import org.junit.Test;
 
+
 /**
  * Tests the {@link ClassBuilder} API.
- * 
+ *
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -41,11 +44,11 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
   @Test
   public void testDefineClassImplementingInterface() {
     String cls = ClassBuilder.define("org.foo.Bar")
-        .publicScope().implementsInterface(Serializable.class)
-        .body()
-        .privateField("name", String.class)
-        .finish()
-        .toJavaString();
+            .publicScope().implementsInterface(Serializable.class)
+            .body()
+            .privateField("name", String.class)
+            .finish()
+            .toJavaString();
 
     assertEquals("failed to generate class definition implementing an interface", CLASS_IMPLEMENTING_INTERFACE, cls);
   }
@@ -53,18 +56,18 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
   @Test
   public void testDefineClassWithAccessorMethods() {
     String cls = ClassBuilder.define("org.foo.Foo")
-        .publicScope()
-        .body()
-        .privateField("name", String.class)
-        .initializesWith(Stmt.create().load("default"))
-        .finish()
-        .publicMethod(String.class, "getName")
-        .append(Stmt.create().loadVariable("name").returnValue())
-        .finish()
-        .publicMethod(void.class, "setName", Parameter.of(String.class, "name"))
-        .append(Stmt.create().loadClassMember("name").assignValue(Variable.get("name")))
-        .finish()
-        .toJavaString();
+            .publicScope()
+            .body()
+            .privateField("name", String.class)
+            .initializesWith(Stmt.create().load("default"))
+            .finish()
+            .publicMethod(String.class, "getName")
+            .append(Stmt.create().loadVariable("name").returnValue())
+            .finish()
+            .publicMethod(void.class, "setName", Parameter.of(String.class, "name"))
+            .append(Stmt.create().loadClassMember("name").assignValue(Variable.get("name")))
+            .finish()
+            .toJavaString();
 
     assertEquals("failed to generate class definition with accessor methods", CLASS_WITH_ACCESSOR_METHODS, cls);
   }
@@ -72,19 +75,19 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
   @Test
   public void testDefineClassWithAccessorMethodsUsingThisKeyword() {
     String cls = ClassBuilder
-        .define("org.foo.Foo")
-        .publicScope()
-        .body()
-        .privateField("name", String.class)
-        .initializesWith(Stmt.create().load("default"))
-        .finish()
-        .publicMethod(String.class, "getName")
-        .append(Stmt.create().loadVariable("name").returnValue())
-        .finish()
-        .publicMethod(void.class, "setName", Parameter.of(String.class, "name"))
-        .append(Stmt.create().loadVariable("this.name").assignValue(Variable.get("name")))
-        .finish()
-        .toJavaString();
+            .define("org.foo.Foo")
+            .publicScope()
+            .body()
+            .privateField("name", String.class)
+            .initializesWith(Stmt.create().load("default"))
+            .finish()
+            .publicMethod(String.class, "getName")
+            .append(Stmt.create().loadVariable("name").returnValue())
+            .finish()
+            .publicMethod(void.class, "setName", Parameter.of(String.class, "name"))
+            .append(Stmt.create().loadVariable("this.name").assignValue(Variable.get("name")))
+            .finish()
+            .toJavaString();
 
     assertEquals("failed to generate class definition with accessor methods", CLASS_WITH_ACCESSOR_METHODS, cls);
   }
@@ -93,12 +96,12 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
   public void testDefineClassWithParent() {
 
     String cls = ClassBuilder
-        .define("org.foo.Foo", String.class)
-        .publicScope()
-        .body()
-        .publicConstructor(Parameter.of(int.class, "i"))
-        .finish()
-        .toJavaString();
+            .define("org.foo.Foo", String.class)
+            .publicScope()
+            .body()
+            .publicConstructor(Parameter.of(int.class, "i"))
+            .finish()
+            .toJavaString();
 
     assertEquals("failed to generate class with parent", CLASS_WITH_PARENT, cls);
   }
@@ -107,13 +110,13 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
   public void testDefineAbstractClass() {
 
     String cls = ClassBuilder
-        .define("org.foo.Foo")
-        .publicScope()
-        .abstractClass()
-        .body()
-        .publicConstructor()
-        .finish()
-        .toJavaString();
+            .define("org.foo.Foo")
+            .publicScope()
+            .abstractClass()
+            .body()
+            .publicConstructor()
+            .finish()
+            .toJavaString();
 
     assertEquals("failed to generate abstract class", ABSTRACT_CLASS, cls);
   }
@@ -122,19 +125,19 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
   public void testDefineAbstractClassWithAbstractMethods() {
 
     String cls = ClassBuilder
-        .define("org.foo.Foo")
-        .publicScope()
-        .abstractClass()
-        .body()
-        .publicConstructor()
-        .finish()
-        .publicAbstractMethod(void.class, "foo")
-        .finish()
-        .protectedAbstractMethod(void.class, "bar")
-        .finish()
-        .publicMethod(void.class, "baz")
-        .finish()
-        .toJavaString();
+            .define("org.foo.Foo")
+            .publicScope()
+            .abstractClass()
+            .body()
+            .publicConstructor()
+            .finish()
+            .publicAbstractMethod(void.class, "foo")
+            .finish()
+            .protectedAbstractMethod(void.class, "bar")
+            .finish()
+            .publicMethod(void.class, "baz")
+            .finish()
+            .toJavaString();
 
     assertEquals("failed to generate abstract class with abstract method", ABSTRACT_CLASS_WITH_ABSTRACT_METHODS, cls);
   }
@@ -142,66 +145,66 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
   @Test
   public void testDefineClassWithConstructorCallingSuper() {
     String cls = ClassBuilder.define("org.foo.Foo")
-        .publicScope()
-        .body()
-        .publicConstructor()
-        .callSuper()
-        .finish()
-        .toJavaString();
+            .publicScope()
+            .body()
+            .publicConstructor()
+            .callSuper()
+            .finish()
+            .toJavaString();
 
     assertEquals("failed to generate class with constructor calling super()",
-        CLASS_WITH_CONSTRUCTOR_CALLING_SUPER, cls);
+            CLASS_WITH_CONSTRUCTOR_CALLING_SUPER, cls);
   }
 
   @Test
   public void testDefineClassWithConstructorCallingThis() {
     String cls = ClassBuilder.define("org.foo.Foo")
-        .publicScope()
-        .body()
-        .privateField("b", boolean.class)
-        .finish()
-        .publicConstructor()
-        .callThis(false)
-        .finish()
-        .publicConstructor(Parameter.of(boolean.class, "b"))
-        .append(Stmt.create().loadClassMember("b").assignValue(Variable.get("b")))
-        .finish()
-        .toJavaString();
+            .publicScope()
+            .body()
+            .privateField("b", boolean.class)
+            .finish()
+            .publicConstructor()
+            .callThis(false)
+            .finish()
+            .publicConstructor(Parameter.of(boolean.class, "b"))
+            .append(Stmt.create().loadClassMember("b").assignValue(Variable.get("b")))
+            .finish()
+            .toJavaString();
 
     assertEquals("failed to generate class with constructor calling this()",
-        CLASS_WITH_CONSTRUCTOR_CALLING_THIS, cls);
+            CLASS_WITH_CONSTRUCTOR_CALLING_THIS, cls);
   }
 
   @Test
   public void testDefineClassWithMethodCallingMethodOnThis() {
     String cls = ClassBuilder.define("org.foo.Foo")
-        .publicScope()
-        .body()
-        .publicMethod(void.class, "bar")
-        .append(Stmt.create().loadVariable("this").invoke("foo"))
-        .finish()
-        .publicMethod(String.class, "foo")
-        .append(Stmt.create().load(null).returnValue())
-        .finish()
-        .toJavaString();
+            .publicScope()
+            .body()
+            .publicMethod(void.class, "bar")
+            .append(Stmt.create().loadVariable("this").invoke("foo"))
+            .finish()
+            .publicMethod(String.class, "foo")
+            .append(Stmt.create().load(null).returnValue())
+            .finish()
+            .toJavaString();
 
     assertEquals("failed to generate class with method calling method on this",
-        CLASS_WITH_METHOD_CALLING_METHOD_ON_THIS, cls);
+            CLASS_WITH_METHOD_CALLING_METHOD_ON_THIS, cls);
   }
 
   @Test
   public void testDefineClassWithMethodCallingInvalidMethodOnThis() {
     try {
       ClassBuilder.define("org.foo.Foo")
-          .publicScope()
-          .body()
-          .publicMethod(void.class, "bar")
-          .append(Stmt.create().loadVariable("this").invoke("foo", "invalidParam"))
-          .finish()
-          .publicMethod(String.class, "foo")
-          .append(Stmt.create().load(null).returnValue())
-          .finish()
-          .toJavaString();
+              .publicScope()
+              .body()
+              .publicMethod(void.class, "bar")
+              .append(Stmt.create().loadVariable("this").invoke("foo", "invalidParam"))
+              .finish()
+              .publicMethod(String.class, "foo")
+              .append(Stmt.create().load(null).returnValue())
+              .finish()
+              .toJavaString();
       fail("exprected UndefinedMethodException");
     }
     catch (UndefinedMethodException udme) {
@@ -213,33 +216,33 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
   @Test
   public void testDefineClassWithMethodCallingMethodOnSuper() {
     String cls = ClassBuilder.define("org.foo.Foo")
-        .publicScope()
-        .body()
-        .publicMethod(void.class, "bar")
-        .append(Stmt.create().loadVariable("this").invoke("foo"))
-        .finish()
-        .publicMethod(String.class, "foo")
-        .append(Stmt.create().loadVariable("super").invoke("toString").returnValue())
-        .finish()
-        .toJavaString();
+            .publicScope()
+            .body()
+            .publicMethod(void.class, "bar")
+            .append(Stmt.create().loadVariable("this").invoke("foo"))
+            .finish()
+            .publicMethod(String.class, "foo")
+            .append(Stmt.create().loadVariable("super").invoke("toString").returnValue())
+            .finish()
+            .toJavaString();
 
     assertEquals("failed to generate class with method calling method on this",
-        CLASS_WITH_METHOD_CALLING_METHOD_ON_SUPER, cls);
+            CLASS_WITH_METHOD_CALLING_METHOD_ON_SUPER, cls);
   }
 
   @Test
   public void testDefineClassWithMethodCallingInvalidMethodOnSuper() {
     try {
       ClassBuilder.define("org.foo.Foo")
-          .publicScope()
-          .body()
-          .publicMethod(void.class, "bar")
-          .append(Stmt.create().loadVariable("this").invoke("foo"))
-          .finish()
-          .publicMethod(String.class, "foo")
-          .append(Stmt.create().loadVariable("super").invoke("undefinedMethod"))
-          .finish()
-          .toJavaString();
+              .publicScope()
+              .body()
+              .publicMethod(void.class, "bar")
+              .append(Stmt.create().loadVariable("this").invoke("foo"))
+              .finish()
+              .publicMethod(String.class, "foo")
+              .append(Stmt.create().loadVariable("super").invoke("undefinedMethod"))
+              .finish()
+              .toJavaString();
       fail("exprected UndefinedMethodException");
     }
     catch (UndefinedMethodException udme) {
@@ -252,34 +255,34 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
   public void testDefineClassWithMethodHavingThrowsDeclaration() {
 
     String cls = ClassBuilder
-        .define("org.foo.Foo")
-        .publicScope()
-        .body()
-        .publicMethod(void.class, "initialize")
-        .throws_(Exception.class, IllegalArgumentException.class)
-        .finish()
-        .toJavaString();
+            .define("org.foo.Foo")
+            .publicScope()
+            .body()
+            .publicMethod(void.class, "initialize")
+            .throws_(Exception.class, IllegalArgumentException.class)
+            .finish()
+            .toJavaString();
 
     assertEquals("failed to generate class with method having throws declaration",
-        CLASS_WITH_METHOD_HAVING_THROWS_DECLARATION, cls);
+            CLASS_WITH_METHOD_HAVING_THROWS_DECLARATION, cls);
   }
 
   @Test
   public void testDefineClassWithMethodsOfAllScopes() {
 
     String cls = ClassBuilder
-        .define("org.foo.Foo")
-        .publicScope()
-        .body()
-        .publicMethod(void.class, "publicMethod")
-        .finish()
-        .protectedMethod(void.class, "protectedMethod")
-        .finish()
-        .packageMethod(void.class, "packagePrivateMethod")
-        .finish()
-        .privateMethod(void.class, "privateMethod")
-        .finish()
-        .toJavaString();
+            .define("org.foo.Foo")
+            .publicScope()
+            .body()
+            .publicMethod(void.class, "publicMethod")
+            .finish()
+            .protectedMethod(void.class, "protectedMethod")
+            .finish()
+            .packageMethod(void.class, "packagePrivateMethod")
+            .finish()
+            .privateMethod(void.class, "privateMethod")
+            .finish()
+            .toJavaString();
 
     assertEquals("failed to generate class with methods of all scopes", CLASS_WITH_METHODS_OF_ALL_SCOPES, cls);
   }
@@ -288,18 +291,18 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
   public void testDefineClassWithFieldsOfAllScopes() {
 
     String cls = ClassBuilder
-        .define("org.foo.Foo")
-        .publicScope()
-        .body()
-        .publicField("publicField", int.class)
-        .finish()
-        .protectedField("protectedField", int.class)
-        .finish()
-        .packageField("packagePrivateField", int.class)
-        .finish()
-        .privateField("privateField", int.class)
-        .finish()
-        .toJavaString();
+            .define("org.foo.Foo")
+            .publicScope()
+            .body()
+            .publicField("publicField", int.class)
+            .finish()
+            .protectedField("protectedField", int.class)
+            .finish()
+            .packageField("packagePrivateField", int.class)
+            .finish()
+            .privateField("privateField", int.class)
+            .finish()
+            .toJavaString();
 
     assertEquals("failed to generate class with fields of all scopes", CLASS_WITH_FIELDS_OF_ALL_SCOPES, cls);
   }
@@ -308,58 +311,59 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
   public void testDefineClassWithConstructorsOfAllScopes() {
 
     String cls = ClassBuilder
-        .define("org.foo.Foo")
-        .publicScope()
-        .body()
-        .publicConstructor()
-        .finish()
-        .protectedConstructor()
-        .finish()
-        .packageConstructor()
-        .finish()
-        .privateConstructor()
-        .finish()
-        .toJavaString();
+            .define("org.foo.Foo")
+            .publicScope()
+            .body()
+            .publicConstructor()
+            .finish()
+            .protectedConstructor()
+            .finish()
+            .packageConstructor()
+            .finish()
+            .privateConstructor()
+            .finish()
+            .toJavaString();
 
     assertEquals("failed to generate class with constructors of all scopes",
-        CLASS_WITH_CONSTRUCTORS_OF_ALL_SCOPES, cls);
+            CLASS_WITH_CONSTRUCTORS_OF_ALL_SCOPES, cls);
   }
 
   @Test
   public void testDefineClassByImplementingInterface() {
     String cls = ClassBuilder.implement(Bootstrapper.class)
-        .publicMethod(InterfaceInjectionContext.class, "bootstrapContainer")
-        .append(Stmt.create().declareVariable("ctx", Stmt.create().newObject(InterfaceInjectionContext.class)))
-        .append(Stmt.create().loadVariable("ctx").returnValue())
-        .finish().toJavaString();
+            .publicMethod(InterfaceInjectionContext.class, "bootstrapContainer")
+            .append(Stmt.create().declareVariable("ctx", Stmt.create().newObject(InterfaceInjectionContext.class)))
+            .append(Stmt.create().loadVariable("ctx").returnValue())
+            .finish().toJavaString();
 
     assertEquals("failed to generate class by implementing an interface",
-        CLASS_DEFINITION_BY_IMPLEMENTING_INTERFACE, cls);
+            CLASS_DEFINITION_BY_IMPLEMENTING_INTERFACE, cls);
   }
 
   @Test
   public void testDefineClassWithStaticMethod() {
     String cls = ClassBuilder.define("my.test.Clazz")
-        .publicScope().body()
-        .publicMethod(void.class, "test").modifiers(Modifier.Static)
-          .body()
+            .publicScope().body()
+            .publicMethod(void.class, "test").modifiers(Modifier.Static)
+            .body()
             .append(Stmt.create().loadStatic(System.class, "out").invoke("println", "Hello, World!"))
-        .finish()
-        .toJavaString();
+            .finish()
+            .toJavaString();
 
     assertEquals("failed to generate class with static method", CLASS_WITH_STATIC_METHOD, cls);
   }
-  
+
   @Test
   public void testDefineClassWithJSNIMethod() {
     String cls = ClassBuilder.define("my.test.Clazz")
-        .publicScope().body()
-        .publicMethod(void.class, "test").modifiers(Modifier.JSNI)
-          .body()
+            .publicScope().body()
+            .publicMethod(void.class, "test").modifiers(Modifier.JSNI)
+            .body()
             .append(Stmt.create().loadStatic(System.class, "out").invoke("println", "Hello, World!"))
-        .finish()
-        .toJavaString();
-    
+            .finish()
+            .toJavaString();
+
     assertEquals("failed to generate class with JSNI method", CLASS_WITH_JSNI_METHOD, cls);
   }
+
 }

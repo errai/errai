@@ -37,4 +37,8 @@ public class DeclareVariable extends AbstractCallElement {
     writer.append(variable.generate(context));
     nextOrReturn(writer, context, null);
   }
+
+  public String toString() {
+    return "DeclareVariable:" + variable;
+  }
 }

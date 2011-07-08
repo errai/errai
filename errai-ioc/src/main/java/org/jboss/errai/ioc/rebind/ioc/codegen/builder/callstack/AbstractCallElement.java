@@ -63,4 +63,5 @@ public abstract class AbstractCallElement implements CallElement {
   public MetaClass getResultType() {
     return resultType;
   }
+
 }
