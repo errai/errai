@@ -20,7 +20,10 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -43,6 +46,8 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 import org.jboss.errai.ioc.tests.rebind.model.Foo;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mvel2.MVEL;
+import org.mvel2.ParserContext;
 
 /**
  * Tests the {@link StatementBuilder} API.
@@ -148,7 +153,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   public void testDeclareVariableWithStatementInitialization() {
     Context ctx = Context.create();
     String s = Stmt.create().declareVariable("str", String.class,
-                Stmt.create().nestedCall(Stmt.create().newObject(Integer.class).withParameters(2)).invoke("toString"))
+            Stmt.create().nestedCall(Stmt.create().newObject(Integer.class).withParameters(2)).invoke("toString"))
         .generate(ctx);
 
     assertEquals("failed to generate variable declaration with statement initialization",
