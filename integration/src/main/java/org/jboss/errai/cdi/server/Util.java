@@ -64,7 +64,8 @@ public class Util {
 
   }
 
-  @Deprecated public static MessageBus lookupMessageBus() {
+  @Deprecated
+  public static MessageBus lookupMessageBus() {
     InitialContext ctx = null;
     ErraiService errai = null;
 

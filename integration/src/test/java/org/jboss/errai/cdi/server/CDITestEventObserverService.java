@@ -11,13 +11,15 @@ import org.jboss.errai.cdi.client.qualifier.A;
 import org.jboss.errai.cdi.client.qualifier.B;
 import org.jboss.errai.cdi.client.qualifier.C;
 
-@ApplicationScoped public class CDITestEventObserverService {
+@ApplicationScoped
+public class CDITestEventObserverService {
   private static CDITestEventObserverService instance;
 
-  @Inject// we use this event to report received events back to the client for easier testability
+  @Inject
+  // we use this event to report received events back to the client for easier testability
   private Event<ReceivedEvent> receivedEvent;
 
-  @PostConstruct 
+  @PostConstruct
   public void doPostConstruct() {
     instance = this;
   }

@@ -22,7 +22,6 @@ import javax.enterprise.util.AnnotationLiteral;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Jul 20, 2010
  */
-public abstract class ProducesQualifier extends AnnotationLiteral<Produces>
-       implements Produces {
+public abstract class ProducesQualifier extends AnnotationLiteral<Produces> implements Produces {
 
 }

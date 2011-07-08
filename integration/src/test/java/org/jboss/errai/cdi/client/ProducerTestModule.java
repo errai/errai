@@ -15,13 +15,15 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@EntryPoint public class ProducerTestModule {
+@EntryPoint
+public class ProducerTestModule {
   private static ProducerTestModule instance;
 
   //@Inject @A
   private Integer injectedNumberA;
 
-  @Produces @A 
+  @Produces
+  @A
   private Integer numberA = new Random().nextInt();
 
   //@Inject @B
@@ -29,7 +31,8 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
 
   private Integer numberB;
 
-  @Produces @B 
+  @Produces
+  @B
   public Integer produceNumberB() {
     numberB = new Random().nextInt();
     return numberB;
@@ -38,14 +41,15 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
   //@Inject
   private String injectedString;
 
-  @Produces 
+  @Produces
   public String produceString(@C Integer number) {
     return new Integer(number).toString();
   }
 
   private Integer numberC;
 
-  @Produces @C 
+  @Produces
+  @C
   public Integer produceNumberC() {
     numberC = new Random().nextInt();
     return numberC;
@@ -75,7 +79,7 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
     return numberC;
   }
 
-  @PostConstruct 
+  @PostConstruct
   public void doPostConstruct() {
     instance = this;
   }

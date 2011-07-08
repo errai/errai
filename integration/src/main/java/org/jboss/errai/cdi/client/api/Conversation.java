@@ -70,11 +70,8 @@ public class Conversation {
   public void end() {
     assertEnded();
 
-    MessageBuilder.createMessage()
-                .toSubject("cdi.conversation:Manager,conversation=" + id)
-                .command("end")
-                .with("cdi.conversation.id", id)
-                .with("cdi.internal", true) // will be excluded in interceptor
+    MessageBuilder.createMessage().toSubject("cdi.conversation:Manager,conversation=" + id).command("end")
+        .with("cdi.conversation.id", id).with("cdi.internal", true) // will be excluded in interceptor
         .done().sendNowWith(ErraiBus.get());
 
     CDI.getActiveConversations().remove(id);

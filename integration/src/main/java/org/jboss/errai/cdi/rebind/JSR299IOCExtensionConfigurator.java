@@ -13,7 +13,8 @@ import org.jboss.errai.ioc.rebind.ioc.InjectorFactory;
 import org.jboss.errai.ioc.rebind.ioc.TypeInjector;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
-@IOCExtension public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator {
+@IOCExtension
+public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator {
   public void configure(final ProcessingContext context, final InjectorFactory injectorFactory,
       final ProcessorFactory procFactory) {
 

@@ -82,7 +82,7 @@ import com.google.inject.Provider;
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@ApplicationScoped 
+@ApplicationScoped
 public class CDIExtensionPoints implements Extension {
   private static final Logger log = LoggerFactory.getLogger(CDIExtensionPoints.class);
 
@@ -153,8 +153,7 @@ public class CDIExtensionPoints implements Extension {
     // veto on client side implementations that contain CDI annotations
     // (i.e. @Observes) Otherwise Weld might try to invoke on them
     if (vetoClasses.contains(type.getJavaClass().getName())
-                || (type.getJavaClass().getPackage().getName().contains("client")
-                && !type.getJavaClass().isInterface())) {
+        || (type.getJavaClass().getPackage().getName().contains("client") && !type.getJavaClass().isInterface())) {
       event.veto();
       //    log.info("Veto " + type);
     }
@@ -246,8 +245,8 @@ public class CDIExtensionPoints implements Extension {
     }
 
     if (isExposedEntityType(type)) {
-      Annotation[] methodQualifiers = (Annotation[]) processObserverMethod.getObserverMethod().
-                    getObservedQualifiers().toArray(new Annotation[0]);
+      Annotation[] methodQualifiers = (Annotation[]) processObserverMethod.getObserverMethod().getObservedQualifiers()
+          .toArray(new Annotation[0]);
       for (Annotation qualifier : methodQualifiers) {
         eventQualifiers.put(qualifier.annotationType().getName(), qualifier);
       }
@@ -279,10 +278,8 @@ public class CDIExtensionPoints implements Extension {
     this.contextManager = new ContextManager(uuid, bm, bus, sessionContext);
 
     // Custom Reply
-    abd.addBean(new ConversationMetaData(bm, new ErraiConversation(
-                (Conversation) Util.lookupCallbackBean(bm, Conversation.class),
-                this.contextManager
-        )));
+    abd.addBean(new ConversationMetaData(bm, new ErraiConversation((Conversation) Util.lookupCallbackBean(bm,
+        Conversation.class), this.contextManager)));
 
     // event dispatcher
     EventDispatcher eventDispatcher = new EventDispatcher(bm, bus, this.contextManager, observableEvents.keySet(),
@@ -447,10 +444,11 @@ public class CDIExtensionPoints implements Extension {
   }
 
   private void createRPCScaffolding(final Class remoteIface, final Class<?> type, final MessageBus bus,
-                                      final ResourceProvider resourceProvider) {
+      final ResourceProvider resourceProvider) {
 
     final Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override protected void configure() {
+      @Override
+      protected void configure() {
         bind(MessageBus.class).toInstance(bus);
         //bind(RequestDispatcher.class).toInstance(context.getService().getDispatcher());
 
@@ -470,8 +468,7 @@ public class CDIExtensionPoints implements Extension {
     for (Class<?> intf : svc.getClass().getInterfaces()) {
       for (final Method method : intf.getDeclaredMethods()) {
         if (RebindUtils.isMethodInInterface(remoteIface, method)) {
-          epts.put(RebindUtils.createCallSignature(method),
-                            new ConversationalEndpointCallback(svc, method, bus));
+          epts.put(RebindUtils.createCallSignature(method), new ConversationalEndpointCallback(svc, method, bus));
         }
       }
     }

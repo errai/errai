@@ -79,32 +79,37 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
         .newInstanceOf(MessageCallback.class, ctx)
         .extend()
         .publicOverridesMethod("callback", Parameter.of(Message.class, "message"))
-        .append(Stmt.create().declareVariable("methodQualifiers", new TypeLiteral<Set<String>>() {}, 
-            Stmt.create().newObject(new TypeLiteral<HashSet<String>>() {})));
+        .append(
+            Stmt.create().declareVariable("methodQualifiers", new TypeLiteral<Set<String>>() {},
+                Stmt.create().newObject(new TypeLiteral<HashSet<String>>() {})));
 
     if (qualifierNames != null) {
       for (String qualifierName : qualifierNames) {
         callBackBlock.append(Stmt.create().loadVariable("methodQualifiers").invoke("add", qualifierName));
       }
     }
-    callBackBlock.append(Stmt.create().declareVariable("qualifiers", new TypeLiteral<Set<String>>() {},
-        Stmt.create()
-            .loadVariable("message")
+    callBackBlock.append(Stmt.create().declareVariable("qualifiers",new TypeLiteral<Set<String>>() {},
+        Stmt.create().loadVariable("message")
             .invoke("get", Set.class, CDIProtocol.class.getName() + "." + CDIProtocol.QUALIFIERS.name())));
 
-    callBackBlock.append(Stmt.create()
+    callBackBlock.append(Stmt
+        .create()
         .loadVariable("methodQualifiers")
         .invoke("equals", Cast.to(HashSet.class, Refs.get("qualifiers")))
-        .if_(BooleanOperator.Or,
-            Bool.and(
-                Bool.equals(Refs.get("qualifiers"), null),
+        .if_(
+            BooleanOperator.Or,
+            Bool.and(Bool.equals(Refs.get("qualifiers"), null),
                 Stmt.create().loadVariable("methodQualifiers").invoke("isEmpty")))
-        .append(Stmt.create().declareVariable("response", Object.class,
-                  Stmt.create()
+        .append(
+            Stmt.create().declareVariable(
+                "response",
+                Object.class,
+                Stmt.create()
                     .loadVariable("message")
-                    .invoke("get", parm.getType().asClass(), 
+                    .invoke("get", parm.getType().asClass(),
                         CDIProtocol.class.getName() + "." + CDIProtocol.OBJECT_REF.name())))
-        .append(Stmt.create().loadVariable(injectionPoint.getInjector().getVarName())
+        .append(
+            Stmt.create().loadVariable(injectionPoint.getInjector().getVarName())
                 .invoke(method.getName(), Cast.to(parm.getType(), Refs.get("response")))).finish());
 
     Statement messageCallback = callBackBlock.finish().finish();

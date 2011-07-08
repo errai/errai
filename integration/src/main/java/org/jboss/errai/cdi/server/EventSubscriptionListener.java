@@ -32,7 +32,8 @@ import org.jboss.errai.cdi.server.events.EventObserverMethod;
  * @author Mike Brock
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@ApplicationScoped public class EventSubscriptionListener implements SubscribeListener {
+@ApplicationScoped
+public class EventSubscriptionListener implements SubscribeListener {
   private MessageBus bus;
   private AfterBeanDiscovery abd;
   private ContextManager mgr;

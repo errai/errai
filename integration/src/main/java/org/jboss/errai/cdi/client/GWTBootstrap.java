@@ -40,10 +40,8 @@ public class GWTBootstrap implements EntryPoint {
 
     final Runnable busReadyEvent = new Runnable() {
       public void run() {
-        MessageBuilder.createMessage()
-                        .toSubject("cdi.event:Dispatcher")
-                        .command(CDICommands.AttachRemote)
-                        .done().sendNowWith(bus);
+        MessageBuilder.createMessage().toSubject("cdi.event:Dispatcher").command(CDICommands.AttachRemote).done()
+            .sendNowWith(bus);
 
         CDI.fireEvent(new BusReadyEvent());
       }
@@ -69,12 +67,12 @@ public class GWTBootstrap implements EntryPoint {
       public void callback(Message message) {
         switch (BusCommands.valueOf(message.getCommandType())) {
         case RemoteSubscribe:
-                        CDI.addRemoteEventTypes(message.get(String[].class, MessageParts.Value));
-                        CDI.activate();
-                        break;
+          CDI.addRemoteEventTypes(message.get(String[].class, MessageParts.Value));
+          CDI.activate();
+          break;
 
-                      }
-                    }
+        }
+      }
     });
   }
 }

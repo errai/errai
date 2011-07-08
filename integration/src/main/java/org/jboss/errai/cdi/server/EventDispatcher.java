@@ -51,7 +51,7 @@ public class EventDispatcher implements MessageCallback {
   private Map<String, Annotation> allQualifiers;
 
   public EventDispatcher(BeanManager beanManager, MessageBus bus, ContextManager ctxMgr, Set<String> observedEvents,
-        Map<String, Annotation> qualifiers) {
+      Map<String, Annotation> qualifiers) {
     this.beanManager = beanManager;
     this.bus = bus;
     this.ctxMgr = ctxMgr;
@@ -114,16 +114,13 @@ public class EventDispatcher implements MessageCallback {
         break;
 
       case AttachRemote:
-        MessageBuilder.createConversation(message)
-                            .toSubject("cdi.event:ClientDispatcher")
-                            .command(BusCommands.RemoteSubscribe)
-                            .with(MessageParts.Value, observedEvents.toArray(new String[observedEvents.size()]))
-                            .done().reply();
+        MessageBuilder.createConversation(message).toSubject("cdi.event:ClientDispatcher")
+            .command(BusCommands.RemoteSubscribe)
+            .with(MessageParts.Value, observedEvents.toArray(new String[observedEvents.size()])).done().reply();
 
         break;
       default:
-        throw new IllegalArgumentException(
-                            "Unknown command type " + message.getCommandType());
+        throw new IllegalArgumentException("Unknown command type " + message.getCommandType());
       }
     } catch (Exception e) {
       throw new RuntimeException("Failed to dispatch CDI Event", e);

@@ -26,6 +26,9 @@ import java.lang.annotation.Target;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Oct 29, 2010
  */
-@Target({FIELD}) @Retention(RUNTIME) @Documented public @interface ConversationContext {
+@Target({FIELD})
+@Retention(RUNTIME)
+@Documented
+public @interface ConversationContext {
   String value() default "";
 }

@@ -56,7 +56,8 @@ public class QueueSessionContext extends AbstractManagedContext implements Sessi
     }
   }
 
-  @Override protected BeanStore getBeanStore() {
+  @Override
+  protected BeanStore getBeanStore() {
     return sessionContextThreadLocal.get().getAttribute(BeanStore.class, BEAN_STORE_ID);
   }
 
@@ -68,7 +69,8 @@ public class QueueSessionContext extends AbstractManagedContext implements Sessi
     return SessionScoped.class;
   }
 
-  @Override public boolean isActive() {
+  @Override
+  public boolean isActive() {
     return true;
   }
 }

@@ -22,15 +22,16 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@EntryPoint public class EventObserverTestModule {
+@EntryPoint
+public class EventObserverTestModule {
   private int busReadyEventsReceived = 0;
   private static EventObserverTestModule instance;
   private Map<String, List<String>> receivedEvents = new HashMap<String, List<String>>();
 
-  @Inject 
+  @Inject
   private Event<StartEvent> startEvent;
 
-  @PostConstruct 
+  @PostConstruct
   public void doPostConstruct() {
     instance = this;
   }

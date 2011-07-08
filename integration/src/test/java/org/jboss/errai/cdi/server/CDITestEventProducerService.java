@@ -11,33 +11,46 @@ import org.jboss.errai.cdi.client.qualifier.A;
 import org.jboss.errai.cdi.client.qualifier.B;
 import org.jboss.errai.cdi.client.qualifier.C;
 
-@ApplicationScoped public class CDITestEventProducerService {
+@ApplicationScoped
+public class CDITestEventProducerService {
 
-  @Inject 
+  @Inject
   private Event<String> event;
 
-  @Inject @A 
+  @Inject
+  @A
   private Event<String> eventA;
 
-  @Inject @B 
+  @Inject
+  @B
   private Event<String> eventB;
 
-  @Inject @C 
+  @Inject
+  @C
   private Event<String> eventC;
 
-  @Inject @A @B 
+  @Inject
+  @A
+  @B
   private Event<String> eventAB;
 
-  @Inject @B @C 
+  @Inject
+  @B
+  @C
   private Event<String> eventBC;
 
-  @Inject @A @C 
+  @Inject
+  @A
+  @C
   private Event<String> eventAC;
 
-  @Inject @A @B @C 
+  @Inject
+  @A
+  @B
+  @C
   private Event<String> eventABC;
 
-  @Conversational 
+  @Conversational
   public void start(@Observes StartEvent event) {
     fireAll();
   }

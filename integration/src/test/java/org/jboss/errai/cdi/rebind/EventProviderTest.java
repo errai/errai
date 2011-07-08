@@ -46,12 +46,14 @@ import com.google.gwt.user.rebind.StringSourceWriter;
  */
 public class EventProviderTest extends AbstractErraiCDIRebindTest implements EventProviderTestResult {
   class HasEventWithoutQualifiers {
-    @Inject 
+    @Inject
     private Event<String> event;
   }
 
   class HasEventWithQualifiers {
-    @Inject @A @B 
+    @Inject
+    @A
+    @B
     private Event<String> event;
   }
 
@@ -62,7 +64,8 @@ public class EventProviderTest extends AbstractErraiCDIRebindTest implements Eve
   };
 
   private InjectionContext mockContext = new InjectionContext(null) {
-    @Override public IOCProcessingContext getProcessingContext() {
+    @Override
+    public IOCProcessingContext getProcessingContext() {
       return new IOCProcessingContext(null, null, null, null) {
         public SourceWriter getWriter() {
           return new StringSourceWriter();
@@ -71,32 +74,34 @@ public class EventProviderTest extends AbstractErraiCDIRebindTest implements Eve
     }
   };
 
-  @Test public void testEventProviderWithoutQualifiers() {
+  @Test
+  public void testEventProviderWithoutQualifiers() {
     Statement stmt = new ContextualProviderInjector(MetaClassFactory.get(HasEventWithoutQualifiers.class),
-                    MetaClassFactory.get(EventProvider.class))
-                .getType(mockContext, getInjectionPoint(HasEventWithoutQualifiers.class));
+        MetaClassFactory.get(EventProvider.class)).getType(mockContext,
+        getInjectionPoint(HasEventWithoutQualifiers.class));
 
     String s = stmt.generate(Context.create());
     assertEquals("failed to generate observes extension for Observer without qualifiers",
-                EVENT_PROVIDER_FOR_STRING_WITHOUT_QUALIFIERS, s.replaceAll("inj[0-9]+", "inj"));
+        EVENT_PROVIDER_FOR_STRING_WITHOUT_QUALIFIERS, s.replaceAll("inj[0-9]+", "inj"));
   }
 
-  @Test public void testEventProviderWithQualifiers() {
+  @Test
+  public void testEventProviderWithQualifiers() {
     Statement stmt = new ContextualProviderInjector(MetaClassFactory.get(HasEventWithQualifiers.class),
-                MetaClassFactory.get(EventProvider.class))
-                .getType(mockContext, getInjectionPoint(HasEventWithQualifiers.class));
+        MetaClassFactory.get(EventProvider.class))
+        .getType(mockContext, getInjectionPoint(HasEventWithQualifiers.class));
 
     String s = stmt.generate(Context.create());
     assertEquals("failed to generate observes extension for Observer with qualifiers",
-                EVENT_PROVIDER_FOR_STRING_WITH_QUALIFIERS, s.replaceAll("inj[0-9]+", "inj"));
+        EVENT_PROVIDER_FOR_STRING_WITH_QUALIFIERS, s.replaceAll("inj[0-9]+", "inj"));
   }
 
   private InjectionPoint getInjectionPoint(Class<?> clazz) {
     MetaClass type = MetaClassFactory.get(clazz);
     MetaField field = type.getDeclaredField("event");
 
-    InjectionPoint injectionPoint = new InjectionPoint(observes, TaskType.Field, null, null, field,
-                field.getType(), null, new TypeInjector(type), mockContext);
+    InjectionPoint injectionPoint = new InjectionPoint(observes, TaskType.Field, null, null, field, field.getType(),
+        null, new TypeInjector(type), mockContext);
     return injectionPoint;
   }
 }

@@ -22,8 +22,7 @@ import javax.inject.Named;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Oct 5, 2010
  */
-public class NamedQualifier extends AnnotationLiteral<Named>
-       implements Named {
+public class NamedQualifier extends AnnotationLiteral<Named> implements Named {
 
   String value;
 

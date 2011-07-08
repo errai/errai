@@ -10,7 +10,8 @@ import java.util.Map;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@SuppressWarnings("serial") public abstract class AbstractEventIntegrationTest extends AbstractErraiCDITest {
+@SuppressWarnings("serial")
+public abstract class AbstractEventIntegrationTest extends AbstractErraiCDITest {
 
   /**
    * The following table describes the events being fired (left column) 

@@ -14,15 +14,16 @@ import com.google.gwt.user.client.Timer;
  */
 public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
 
-  @Override public String getModuleName() {
+  @Override
+  public String getModuleName() {
     return "org.jboss.errai.cdi.EventObserverTestModule";
   }
 
   public void testBusReadyEventObserver() {
     Timer timer = new Timer() {
       public void run() {
-        assertEquals("Wrong number of BusReadyEvents received:", 1,
-                        EventObserverTestModule.getInstance().getBusReadyEventsReceived());
+        assertEquals("Wrong number of BusReadyEvents received:", 1, EventObserverTestModule.getInstance()
+            .getBusReadyEventsReceived());
         finishTest();
       }
     };

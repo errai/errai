@@ -68,7 +68,8 @@ public class DevModeCDIBootstrap extends ForwardingServletListener {
     }
   }
 
-  @Override public void contextDestroyed(ServletContextEvent sce) {
+  @Override
+  public void contextDestroyed(ServletContextEvent sce) {
     bootstrap.shutdown();
     try {
       Reflections.classForName("org.apache.AnnotationProcessor");
@@ -81,23 +82,21 @@ public class DevModeCDIBootstrap extends ForwardingServletListener {
     super.contextDestroyed(sce);
   }
 
-  @Override public void contextInitialized(ServletContextEvent sce) {
+  @Override
+  public void contextInitialized(ServletContextEvent sce) {
     // Make Javassist always use the TCCL to load classes
-    ProxyFactory.classLoaderProvider = new ClassLoaderProvider()
-        {
+    ProxyFactory.classLoaderProvider = new ClassLoaderProvider() {
 
-          public ClassLoader get(ProxyFactory pf)
-            {
-              return Thread.currentThread().getContextClassLoader();
-            }
+      public ClassLoader get(ProxyFactory pf) {
+        return Thread.currentThread().getContextClassLoader();
+      }
 
-        };
+    };
 
     ServletDeployment deployment = new ServletDeployment(sce.getServletContext(), bootstrap);
     try {
-      deployment.getWebAppBeanDeploymentArchive().getServices().add(
-                    ResourceInjectionServices.class, new ServletResourceInjectionServices() {
-                    });
+      deployment.getWebAppBeanDeploymentArchive().getServices()
+          .add(ResourceInjectionServices.class, new ServletResourceInjectionServices() {});
     } catch (NoClassDefFoundError e) {
       // Support GAE
       log.warn("@Resource injection not available in simple beans");
@@ -188,7 +187,8 @@ public class DevModeCDIBootstrap extends ForwardingServletListener {
     super.contextInitialized(sce);
   }
 
-  @Override protected ServletListener delegate() {
+  @Override
+  protected ServletListener delegate() {
     return weldListener;
   }
 

@@ -73,10 +73,8 @@ public class ConversationMetaData implements Bean {
 
   public Set<Annotation> getQualifiers() {
     Set<Annotation> qualifiers = new HashSet<Annotation>();
-    qualifiers.add(new AnnotationLiteral<Default>() {
-        });
-    qualifiers.add(new AnnotationLiteral<Any>() {
-        });
+    qualifiers.add(new AnnotationLiteral<Default>() {});
+    qualifiers.add(new AnnotationLiteral<Any>() {});
     qualifiers.add(new NamedQualifier("ErraiConversation"));
     return qualifiers;
   }

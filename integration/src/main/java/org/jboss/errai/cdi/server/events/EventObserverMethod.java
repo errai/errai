@@ -91,39 +91,25 @@ public class EventObserverMethod implements ObserverMethod {
 
     if (ctx != null && ctx.containsKey(MessageParts.SessionID.name())) {
       if (qualifiersPart != null && !qualifiersPart.isEmpty()) {
-        MessageBuilder.createMessage()
-                  .toSubject(subject)
-                  .command(CDICommands.CDIEvent)
-                  .with(MessageParts.SessionID.name(), ctx.get(MessageParts.SessionID.name()))
-                  .with(CDIProtocol.TYPE, type.getName())
-                  .with(CDIProtocol.QUALIFIERS, qualifiersPart)
-                  .with(CDIProtocol.OBJECT_REF, event)
-                  .noErrorHandling().sendNowWith(bus);
+        MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
+            .with(MessageParts.SessionID.name(), ctx.get(MessageParts.SessionID.name()))
+            .with(CDIProtocol.TYPE, type.getName()).with(CDIProtocol.QUALIFIERS, qualifiersPart)
+            .with(CDIProtocol.OBJECT_REF, event).noErrorHandling().sendNowWith(bus);
       } else {
-        MessageBuilder.createMessage()
-                  .toSubject(subject)
-                  .command(CDICommands.CDIEvent)
-                  .with(MessageParts.SessionID.name(), ctx.get(MessageParts.SessionID.name()))
-                  .with(CDIProtocol.TYPE, type.getName())
-                  .with(CDIProtocol.OBJECT_REF, event)
-                  .noErrorHandling().sendNowWith(bus);
+        MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
+            .with(MessageParts.SessionID.name(), ctx.get(MessageParts.SessionID.name()))
+            .with(CDIProtocol.TYPE, type.getName()).with(CDIProtocol.OBJECT_REF, event).noErrorHandling()
+            .sendNowWith(bus);
       }
     } else {
       if (qualifiersPart != null && !qualifiersPart.isEmpty()) {
-        MessageBuilder.createMessage()
-                   .toSubject(subject)
-                   .command(CDICommands.CDIEvent)
-                   .with(CDIProtocol.TYPE, type.getName())
-                   .with(CDIProtocol.OBJECT_REF, event)
-                   .with(CDIProtocol.QUALIFIERS, qualifiersPart)
-                   .noErrorHandling().sendNowWith(bus);
+        MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
+            .with(CDIProtocol.TYPE, type.getName()).with(CDIProtocol.OBJECT_REF, event)
+            .with(CDIProtocol.QUALIFIERS, qualifiersPart).noErrorHandling().sendNowWith(bus);
       } else {
-        MessageBuilder.createMessage()
-                      .toSubject(subject)
-                      .command(CDICommands.CDIEvent)
-                      .with(CDIProtocol.TYPE, type.getName())
-                      .with(CDIProtocol.OBJECT_REF, event)
-                      .noErrorHandling().sendNowWith(bus);
+        MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
+            .with(CDIProtocol.TYPE, type.getName()).with(CDIProtocol.OBJECT_REF, event).noErrorHandling()
+            .sendNowWith(bus);
       }
     }
   }

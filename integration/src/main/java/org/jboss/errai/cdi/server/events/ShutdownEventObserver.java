@@ -41,7 +41,8 @@ import org.slf4j.LoggerFactory;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Sep 15, 2010
  */
-@ApplicationScoped public class ShutdownEventObserver implements ObserverMethod {
+@ApplicationScoped
+public class ShutdownEventObserver implements ObserverMethod {
 
   private static final Logger log = LoggerFactory.getLogger(ShutdownEventObserver.class);
 

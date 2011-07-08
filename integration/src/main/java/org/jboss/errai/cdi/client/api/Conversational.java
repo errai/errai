@@ -13,4 +13,8 @@ import javax.interceptor.InterceptorBinding;
 /**
  * @author Mike Brock .
  */
-@InterceptorBinding @Target({METHOD,ElementType.TYPE}) @Retention(RUNTIME) @Documented public @interface Conversational {}
+@InterceptorBinding
+@Target({METHOD,ElementType.TYPE})
+@Retention(RUNTIME)
+@Documented
+public @interface Conversational {}

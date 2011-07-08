@@ -35,15 +35,17 @@ import com.google.gwt.core.ext.typeinfo.JClassType;
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@CodeDecorator public class ConversationExtension extends IOCDecoratorExtension<ConversationContext> {
+@CodeDecorator
+public class ConversationExtension extends IOCDecoratorExtension<ConversationContext> {
   public ConversationExtension(Class<ConversationContext> decoratesWith) {
     super(decoratesWith);
   }
 
-  @Override public Statement generateDecorator(InjectionPoint<ConversationContext> injectionPoint) {
+  @Override
+  public Statement generateDecorator(InjectionPoint<ConversationContext> injectionPoint) {
     final MetaField field = injectionPoint.getField();
-    final JClassType eventClassType = injectionPoint.getInjectionContext()
-                .getProcessingContext().loadClassType(Event.class);
+    final JClassType eventClassType = injectionPoint.getInjectionContext().getProcessingContext()
+        .loadClassType(Event.class);
 
     if (!MetaClassFactory.get(eventClassType).isAssignableFrom(field.getType())) {
       throw new RuntimeException("@ConversationContext should be used with type Event");
@@ -56,11 +58,8 @@ import com.google.gwt.core.ext.typeinfo.JClassType;
 
     MetaClass typeParm = (MetaClass) type.getTypeParameters()[0];
     String toSubject = CDI.getSubjectNameByType(typeParm.getFullyQualifiedName());
-    Statement statement =
-        Stmt.create()
-            .nestedCall(injectionPoint.getValueExpression())
-            .invoke("registerConversation",
-                Stmt.create().invokeStatic(CDI.class, "createConversation", toSubject));
+    Statement statement = Stmt.create().nestedCall(injectionPoint.getValueExpression())
+        .invoke("registerConversation", Stmt.create().invokeStatic(CDI.class, "createConversation", toSubject));
 
     return statement;
   }

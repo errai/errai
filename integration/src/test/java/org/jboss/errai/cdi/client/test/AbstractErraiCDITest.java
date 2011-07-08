@@ -14,7 +14,8 @@ import com.google.gwt.junit.client.GWTTestCase;
  */
 public abstract class AbstractErraiCDITest extends GWTTestCase {
 
-  @Override public void gwtSetUp() throws Exception {
+  @Override
+  public void gwtSetUp() throws Exception {
     super.gwtSetUp();
 
     Bootstrapper bootstrapper = GWT.create(Bootstrapper.class);

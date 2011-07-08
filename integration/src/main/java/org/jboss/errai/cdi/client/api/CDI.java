@@ -42,8 +42,7 @@ import org.jboss.errai.cdi.client.EventHandler;
 public class CDI {
   public static final String DISPATCHER_SUBJECT = "cdi.event:Dispatcher";
 
-  static private Map<String, Conversation> activeConversations =
-            new HashMap<String, Conversation>();
+  static private Map<String, Conversation> activeConversations = new HashMap<String, Conversation>();
 
   static private Set<String> remoteEvents = new HashSet<String>();
 
@@ -59,8 +58,7 @@ public class CDI {
             Object response = message.get(type, CDIProtocol.OBJECT_REF);
             handler.handleEvent(response);
           }
-        }
-        );
+        });
   }
 
   public static String getSubjectNameByType(final Class<?> type) {
@@ -94,50 +92,31 @@ public class CDI {
 
     if (ErraiBus.get().isSubscribed(subject)) {
       if (qualifiersPart != null && !qualifiersPart.isEmpty()) {
-        MessageBuilder.createMessage()
-                  .toSubject(subject)
-                  .command(CDICommands.CDIEvent)
-                  .with(CDIProtocol.TYPE, payload.getClass().getName())
-                  .with(CDIProtocol.OBJECT_REF, payload)
-                  .with(CDIProtocol.QUALIFIERS, qualifiersPart)
-                  .noErrorHandling()
-                  .sendNowWith(ErraiBus.get());
+        MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
+            .with(CDIProtocol.TYPE, payload.getClass().getName()).with(CDIProtocol.OBJECT_REF, payload)
+            .with(CDIProtocol.QUALIFIERS, qualifiersPart).noErrorHandling().sendNowWith(ErraiBus.get());
       } else {
-        MessageBuilder.createMessage()
-                  .toSubject(subject)
-                  .command(CDICommands.CDIEvent)
-                  .with(CDIProtocol.TYPE, payload.getClass().getName())
-                  .with(CDIProtocol.OBJECT_REF, payload)
-                  .noErrorHandling()
-                  .sendNowWith(ErraiBus.get());
+        MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
+            .with(CDIProtocol.TYPE, payload.getClass().getName()).with(CDIProtocol.OBJECT_REF, payload)
+            .noErrorHandling().sendNowWith(ErraiBus.get());
       }
     }
 
     if (remoteEvents.contains(payload.getClass().getName())) {
       if (qualifiersPart != null && !qualifiersPart.isEmpty()) {
-        MessageBuilder.createMessage()
-                      .toSubject(DISPATCHER_SUBJECT)
-                      .command(CDICommands.CDIEvent)
-                      .with(CDIProtocol.TYPE, payload.getClass().getName())
-                      .with(CDIProtocol.OBJECT_REF, payload)
-                      .with(CDIProtocol.QUALIFIERS, qualifiersPart)
-                      .noErrorHandling()
-                      .sendNowWith(ErraiBus.get());
+        MessageBuilder.createMessage().toSubject(DISPATCHER_SUBJECT).command(CDICommands.CDIEvent)
+            .with(CDIProtocol.TYPE, payload.getClass().getName()).with(CDIProtocol.OBJECT_REF, payload)
+            .with(CDIProtocol.QUALIFIERS, qualifiersPart).noErrorHandling().sendNowWith(ErraiBus.get());
       } else {
-        MessageBuilder.createMessage()
-                   .toSubject(DISPATCHER_SUBJECT)
-                   .command(CDICommands.CDIEvent)
-                   .with(CDIProtocol.TYPE, payload.getClass().getName())
-                   .with(CDIProtocol.OBJECT_REF, payload)
-                   .noErrorHandling()
-                   .sendNowWith(ErraiBus.get());
+        MessageBuilder.createMessage().toSubject(DISPATCHER_SUBJECT).command(CDICommands.CDIEvent)
+            .with(CDIProtocol.TYPE, payload.getClass().getName()).with(CDIProtocol.OBJECT_REF, payload)
+            .noErrorHandling().sendNowWith(ErraiBus.get());
       }
     }
   }
 
   public static String generateId() {
-    return String.valueOf(com.google.gwt.user.client.Random.nextInt(1000))
-                + "-" + (System.currentTimeMillis() % 1000);
+    return String.valueOf(com.google.gwt.user.client.Random.nextInt(1000)) + "-" + (System.currentTimeMillis() % 1000);
   }
 
   public static Conversation createConversation(String withSubject) {

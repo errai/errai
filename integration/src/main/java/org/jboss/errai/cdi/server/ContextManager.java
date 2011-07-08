@@ -44,11 +44,9 @@ public class ContextManager {
   private BoundRequestContext requestContext;
   private BoundConversationContext conversationContext;
 
-  private ThreadLocal<Map<String, Object>> requestContextStore =
-            new ThreadLocal<Map<String, Object>>();
+  private ThreadLocal<Map<String, Object>> requestContextStore = new ThreadLocal<Map<String, Object>>();
 
-  private Map<String, ConversationContext> conversationContextStore =
-            new ConcurrentHashMap<String, ConversationContext>();
+  private Map<String, ConversationContext> conversationContextStore = new ConcurrentHashMap<String, ConversationContext>();
 
   private String uuid;
 
@@ -61,11 +59,10 @@ public class ContextManager {
     this.bus = bus;
     this.uuid = uuid;
 
-    this.requestContext = (BoundRequestContext)
-                Util.lookupCallbackBean(beanManager, BoundRequestContext.class);
+    this.requestContext = (BoundRequestContext) Util.lookupCallbackBean(beanManager, BoundRequestContext.class);
 
-    this.conversationContext = (BoundConversationContext)
-                Util.lookupCallbackBean(beanManager, BoundConversationContext.class);
+    this.conversationContext = (BoundConversationContext) Util.lookupCallbackBean(beanManager,
+        BoundConversationContext.class);
 
     this.sessionContext = context;
 
@@ -136,23 +133,22 @@ public class ContextManager {
     // TODO: wire CDI callbacks when conversation ends
     String subject = "cdi.conversation:Manager,conversation=" + conversationId;
     if (!bus.isSubscribed(subject)) {
-      bus.subscribe(subject,
-                    new MessageCallback() {
-                      public void callback(final Message message) {
-                        if ("end".equals(message.getCommandType())) {
-                          try {
-                            activateConversationContext(message);
-                            conversationContext.getCurrentConversation().end();
-                            deactivateConversationContext(message);
+      bus.subscribe(subject, new MessageCallback() {
+        public void callback(final Message message) {
+          if ("end".equals(message.getCommandType())) {
+            try {
+              activateConversationContext(message);
+              conversationContext.getCurrentConversation().end();
+              deactivateConversationContext(message);
 
-                            // TODO: properly cleanup
+              // TODO: properly cleanup
 
-                          } catch (Exception e) {
-                            log.error("Failed to end conversation", e);
-                          }
-                        }
-                      }
-                    });
+            } catch (Exception e) {
+              log.error("Failed to end conversation", e);
+            }
+          }
+        }
+      });
     }
   }
 

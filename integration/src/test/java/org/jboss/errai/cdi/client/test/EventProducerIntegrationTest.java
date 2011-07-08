@@ -14,11 +14,13 @@ import com.google.gwt.user.client.Timer;
  */
 public class EventProducerIntegrationTest extends AbstractEventIntegrationTest {
 
-  @Override public String getModuleName() {
+  @Override
+  public String getModuleName() {
     return "org.jboss.errai.cdi.EventProducerTestModule";
   }
 
-  @Override public void gwtSetUp() throws Exception {
+  @Override
+  public void gwtSetUp() throws Exception {
     super.gwtSetUp();
   }
 
@@ -48,8 +50,7 @@ public class EventProducerIntegrationTest extends AbstractEventIntegrationTest {
 
     final Timer testResultTimer = new Timer() {
       public void run() {
-        Map<String, List<String>> actualEvents = EventProducerTestModule.getInstance()
-                        .getReceivedEventsOnServer();
+        Map<String, List<String>> actualEvents = EventProducerTestModule.getInstance().getReceivedEventsOnServer();
 
         // assert that the server received all events
         EventProducerIntegrationTest.this.verifyEvents(actualEvents);

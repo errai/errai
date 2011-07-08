@@ -49,8 +49,8 @@ public class BootstrapListener implements ServletContextListener {
     final ServletContext context = event.getServletContext();
     if (null == context.getAttribute("errai")) {
       synchronized (context) {
-        managedJndiName = context.getInitParameter("jndiName") != null ?
-                        context.getInitParameter("jndiName") : DEFAULT_JNDI_NAME;
+        managedJndiName = context.getInitParameter("jndiName") != null ? context.getInitParameter("jndiName")
+            : DEFAULT_JNDI_NAME;
 
         ErraiService service = null;
 

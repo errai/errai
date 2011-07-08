@@ -22,37 +22,50 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@EntryPoint public class EventProducerTestModule {
+@EntryPoint
+public class EventProducerTestModule {
   private boolean busReadyEventReceived = false;
   private static EventProducerTestModule instance;
 
   private Map<String, List<String>> receivedEventsOnServer = new HashMap<String, List<String>>();
 
-  @Inject 
+  @Inject
   private Event<String> event;
 
-  @Inject @A
+  @Inject
+  @A
   private Event<String> eventA;
 
-  @Inject @B 
+  @Inject
+  @B
   private Event<String> eventB;
 
-  @Inject @C 
+  @Inject
+  @C
   private Event<String> eventC;
 
-  @Inject @A @B 
+  @Inject
+  @A
+  @B
   private Event<String> eventAB;
 
-  @Inject @B @C 
+  @Inject
+  @B
+  @C
   private Event<String> eventBC;
 
-  @Inject @A @C 
+  @Inject
+  @A
+  @C
   private Event<String> eventAC;
 
-  @Inject @A @B @C 
+  @Inject
+  @A
+  @B
+  @C
   private Event<String> eventABC;
 
-  @PostConstruct 
+  @PostConstruct
   public void doPostConstruct() {
     instance = this;
   }

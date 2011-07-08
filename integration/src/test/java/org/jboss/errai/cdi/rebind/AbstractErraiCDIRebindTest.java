@@ -6,7 +6,7 @@ package org.jboss.errai.cdi.rebind;
 public abstract class AbstractErraiCDIRebindTest {
 
   protected static void assertEquals(String message, String expected, String actual) {
-    org.junit.Assert.assertEquals(message, expected.replaceAll("\\s+", " ").trim(),
-                actual.replaceAll("\\s+", " ").trim());
+    org.junit.Assert.assertEquals(message, expected.replaceAll("\\s+", " ").trim(), actual.replaceAll("\\s+", " ")
+        .trim());
   }
 }

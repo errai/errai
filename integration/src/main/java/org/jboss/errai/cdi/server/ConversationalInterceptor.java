@@ -12,11 +12,15 @@ import org.jboss.errai.cdi.client.api.Conversational;
  * @author Mike Brock .
  */
 
-@Interceptor @Conversational public class ConversationalInterceptor {
+@Interceptor
+@Conversational
+public class ConversationalInterceptor {
 
-  @Inject private ContextManager ctxManager;
+  @Inject
+  private ContextManager ctxManager;
 
-  @AroundInvoke public Object invokeConversationalObserver(InvocationContext context) {
+  @AroundInvoke
+  public Object invokeConversationalObserver(InvocationContext context) {
     try {
       return context.proceed();
     } catch (Exception e) {

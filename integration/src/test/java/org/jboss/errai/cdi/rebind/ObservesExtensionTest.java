@@ -35,32 +35,32 @@ public class ObservesExtensionTest extends AbstractErraiCDIRebindTest implements
   }
 
   private class MockInjector extends Injector {
-    @Override 
+    @Override
     public Statement instantiateOnly(InjectionContext injectContext, InjectionPoint injectionPoint) {
       return null;
     }
 
-    @Override 
+    @Override
     public Statement getType(InjectionContext injectContext, InjectionPoint injectionPoint) {
       return Stmt.create().loadVariable("bus");
     }
 
-    @Override 
+    @Override
     public boolean isInjected() {
       return false;
     }
 
-    @Override 
+    @Override
     public boolean isSingleton() {
       return false;
     }
 
-    @Override 
+    @Override
     public String getVarName() {
       return "var";
     }
 
-    @Override 
+    @Override
     public MetaClass getInjectedType() {
       return null;
     }
@@ -78,31 +78,32 @@ public class ObservesExtensionTest extends AbstractErraiCDIRebindTest implements
     }
   };
 
-  @Test 
+  @Test
   public void testObservesExtensionForObserverWithoutQualifiers() {
-    Statement stmt = new ObservesExtension(null).generateDecorator(getInjectionPoint(HasObserverWithoutQualifiers.class));
+    Statement stmt = new ObservesExtension(null)
+        .generateDecorator(getInjectionPoint(HasObserverWithoutQualifiers.class));
     String s = stmt.generate(Context.create());
     System.out.println(s);
     assertEquals("failed to generate observes extension for Observer without qualifiers",
-                OBSERVES_EXTENSION_WITHOUT_QUALIFIERS, s.replaceAll("inj[0-9]+", "inj"));
+        OBSERVES_EXTENSION_WITHOUT_QUALIFIERS, s.replaceAll("inj[0-9]+", "inj"));
   }
 
-  @Test 
+  @Test
   public void testObservesExtensionForObserverWithQualifiers() {
     Statement stmt = new ObservesExtension(null).generateDecorator(getInjectionPoint(HasObserverWithQualifiers.class));
     String s = stmt.generate(Context.create());
-    
+
     System.out.println(s);
     assertEquals("failed to generate observes extension for Observer with qualifiers",
-                OBSERVES_EXTENSION_WITH_QUALIFIERS, s.replaceAll("inj[0-9]+", "inj"));
+        OBSERVES_EXTENSION_WITH_QUALIFIERS, s.replaceAll("inj[0-9]+", "inj"));
   }
 
   private InjectionPoint getInjectionPoint(Class<?> clazz) {
     MetaClass type = MetaClassFactory.get(clazz);
     MetaMethod method = type.getMethods()[0];
 
-    InjectionPoint injectionPoint = new InjectionPoint(observes, TaskType.Parameter, null, method, null,
-                type, method.getParameters()[0], new TypeInjector(type), mockContext);
+    InjectionPoint injectionPoint = new InjectionPoint(observes, TaskType.Parameter, null, method, null, type,
+        method.getParameters()[0], new TypeInjector(type), mockContext);
 
     return injectionPoint;
   }
