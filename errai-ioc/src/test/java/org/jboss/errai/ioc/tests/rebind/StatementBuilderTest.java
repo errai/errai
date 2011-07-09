@@ -511,9 +511,396 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   @Test
   public void testZZZ() {
 
-
-    System.out.println(PrettyPrinter.prettyPrintJava("try {\n new String[] { \"foo\", " +
-            "\"bar\" };\n}\ncatch (Exception e) {\n\n}\n"));
+    System.out.println(PrettyPrinter.prettyPrintJava("package org.jboss.errai.ioc.client.api;\n" +
+            "\n" +
+            "import org.jboss.errai.ioc.client.api.Bootstrapper;\n" +
+            "import org.jboss.errai.cdi.client.EventProducerTestModule;\n" +
+            "import org.jboss.errai.cdi.client.api.Event;\n" +
+            "import org.jboss.errai.cdi.client.EventObserverTestModule;\n" +
+            "import org.jboss.errai.ioc.client.InterfaceInjectionContext;\n" +
+            "import org.jboss.errai.cdi.client.ProducerTestModule;\n" +
+            "import org.jboss.errai.cdi.client.EventProvider;\n" +
+            "import org.jboss.errai.ioc.client.api.BootstrapperImpl;\n" +
+            "import java.lang.annotation.Annotation;\n" +
+            "import org.jboss.errai.ioc.client.api.builtin.MessageBusProvider;\n" +
+            "import org.jboss.errai.bus.client.api.MessageCallback;\n" +
+            "import org.jboss.errai.bus.client.api.Message;\n" +
+            "import java.util.HashSet;\n" +
+            "import java.util.Set;\n" +
+            "import org.jboss.errai.cdi.client.CDIProtocol;\n" +
+            "import org.jboss.errai.cdi.client.events.BusReadyEvent;\n" +
+            "import org.jboss.errai.cdi.client.event.ReceivedEvent;\n" +
+            "import org.jboss.errai.cdi.client.event.StartEvent;\n" +
+            "\n" +
+            "public class BootstrapperImpl implements Bootstrapper {\n" +
+            "    private native static void EventProducerTestModule_event(EventProducerTestModule instance, Event value) /*-{\n" +
+            "        instance.@org.jboss.errai.cdi.client.EventProducerTestModule::event = value;\n" +
+            "    }-*/;\n" +
+            "\n" +
+            "    private native static Event EventProducerTestModule_event(EventProducerTestModule instance) /*-{\n" +
+            "        return instance.@org.jboss.errai.cdi.client.EventProducerTestModule::event;\n" +
+            "    }-*/;\n" +
+            "\n" +
+            "    private native static void EventProducerTestModule_eventA(EventProducerTestModule instance, Event value) /*-{\n" +
+            "        instance.@org.jboss.errai.cdi.client.EventProducerTestModule::eventA = value;\n" +
+            "    }-*/;\n" +
+            "\n" +
+            "    private native static Event EventProducerTestModule_eventA(EventProducerTestModule instance) /*-{\n" +
+            "        return instance.@org.jboss.errai.cdi.client.EventProducerTestModule::eventA;\n" +
+            "    }-*/;\n" +
+            "\n" +
+            "    private native static void EventProducerTestModule_eventB(EventProducerTestModule instance, Event value) /*-{\n" +
+            "        instance.@org.jboss.errai.cdi.client.EventProducerTestModule::eventB = value;\n" +
+            "    }-*/;\n" +
+            "\n" +
+            "    private native static Event EventProducerTestModule_eventB(EventProducerTestModule instance) /*-{\n" +
+            "        return instance.@org.jboss.errai.cdi.client.EventProducerTestModule::eventB;\n" +
+            "    }-*/;\n" +
+            "\n" +
+            "    private native static void EventProducerTestModule_eventC(EventProducerTestModule instance, Event value) /*-{\n" +
+            "        instance.@org.jboss.errai.cdi.client.EventProducerTestModule::eventC = value;\n" +
+            "    }-*/;\n" +
+            "\n" +
+            "    private native static Event EventProducerTestModule_eventC(EventProducerTestModule instance) /*-{\n" +
+            "        return instance.@org.jboss.errai.cdi.client.EventProducerTestModule::eventC;\n" +
+            "    }-*/;\n" +
+            "\n" +
+            "    private native static void EventProducerTestModule_eventAB(EventProducerTestModule instance, Event value) /*-{\n" +
+            "        instance.@org.jboss.errai.cdi.client.EventProducerTestModule::eventAB = value;\n" +
+            "    }-*/;\n" +
+            "\n" +
+            "    private native static Event EventProducerTestModule_eventAB(EventProducerTestModule instance) /*-{\n" +
+            "        return instance.@org.jboss.errai.cdi.client.EventProducerTestModule::eventAB;\n" +
+            "    }-*/;\n" +
+            "\n" +
+            "    private native static void EventProducerTestModule_eventBC(EventProducerTestModule instance, Event value) /*-{\n" +
+            "        instance.@org.jboss.errai.cdi.client.EventProducerTestModule::eventBC = value;\n" +
+            "    }-*/;\n" +
+            "\n" +
+            "    private native static Event EventProducerTestModule_eventBC(EventProducerTestModule instance) /*-{\n" +
+            "        return instance.@org.jboss.errai.cdi.client.EventProducerTestModule::eventBC;\n" +
+            "    }-*/;\n" +
+            "\n" +
+            "    private native static void EventProducerTestModule_eventAC(EventProducerTestModule instance, Event value) /*-{\n" +
+            "        instance.@org.jboss.errai.cdi.client.EventProducerTestModule::eventAC = value;\n" +
+            "    }-*/;\n" +
+            "\n" +
+            "    private native static Event EventProducerTestModule_eventAC(EventProducerTestModule instance) /*-{\n" +
+            "        return instance.@org.jboss.errai.cdi.client.EventProducerTestModule::eventAC;\n" +
+            "    }-*/;\n" +
+            "\n" +
+            "    private native static void EventProducerTestModule_eventABC(EventProducerTestModule instance, Event value) /*-{\n" +
+            "        instance.@org.jboss.errai.cdi.client.EventProducerTestModule::eventABC = value;\n" +
+            "    }-*/;\n" +
+            "\n" +
+            "    private native static Event EventProducerTestModule_eventABC(EventProducerTestModule instance) /*-{\n" +
+            "        return instance.@org.jboss.errai.cdi.client.EventProducerTestModule::eventABC;\n" +
+            "    }-*/;\n" +
+            "\n" +
+            "    private native static void EventObserverTestModule_startEvent(EventObserverTestModule instance, Event value) /*-{\n" +
+            "        instance.@org.jboss.errai.cdi.client.EventObserverTestModule::startEvent = value;\n" +
+            "    }-*/;\n" +
+            "\n" +
+            "    private native static Event EventObserverTestModule_startEvent(EventObserverTestModule instance) /*-{\n" +
+            "        return instance.@org.jboss.errai.cdi.client.EventObserverTestModule::startEvent;\n" +
+            "    }-*/;\n" +
+            "\n" +
+            "    public InterfaceInjectionContext bootstrapContainer() {\n" +
+            "        InterfaceInjectionContext ctx = new InterfaceInjectionContext();\n" +
+            "        final ProducerTestModule inj9 = new ProducerTestModule();\n" +
+            "        inj9.doPostConstruct();\n" +
+            "        final EventProducerTestModule inj10 = new EventProducerTestModule();\n" +
+            "        final EventProvider inj4 = new EventProvider();\n" +
+            "        BootstrapperImpl.EventProducerTestModule_event(inj10, (inj4).provide(new Class[] {        String.class        }, null));\n" +
+            "        final EventProvider inj12 = new EventProvider();\n" +
+            "        BootstrapperImpl.EventProducerTestModule_eventA(inj10, (inj12).provide(new Class[] {        String.class        }, new Annotation[] {            new org.jboss.errai.cdi.client.qualifier.A() {\n" +
+            "                public String toString() {\n" +
+            "                    return \"@org.jboss.errai.cdi.client.qualifier.A()\";\n" +
+            "                }\n" +
+            "                public Class annotationType() {\n" +
+            "                    return org.jboss.errai.cdi.client.qualifier.A.class;\n" +
+            "                }\n" +
+            "\n" +
+            "            }\n" +
+            "        }));\n" +
+            "        final EventProvider inj13 = new EventProvider();\n" +
+            "        BootstrapperImpl.EventProducerTestModule_eventB(inj10, (inj13).provide(new Class[] {        String.class        }, new Annotation[] {            new org.jboss.errai.cdi.client.qualifier.B() {\n" +
+            "                public String toString() {\n" +
+            "                    return \"@org.jboss.errai.cdi.client.qualifier.B()\";\n" +
+            "                }\n" +
+            "                public Class annotationType() {\n" +
+            "                    return org.jboss.errai.cdi.client.qualifier.B.class;\n" +
+            "                }\n" +
+            "\n" +
+            "            }\n" +
+            "        }));\n" +
+            "        final EventProvider inj14 = new EventProvider();\n" +
+            "        BootstrapperImpl.EventProducerTestModule_eventC(inj10, (inj14).provide(new Class[] {        String.class        }, new Annotation[] {            new org.jboss.errai.cdi.client.qualifier.C() {\n" +
+            "                public String toString() {\n" +
+            "                    return \"@org.jboss.errai.cdi.client.qualifier.C()\";\n" +
+            "                }\n" +
+            "                public Class annotationType() {\n" +
+            "                    return org.jboss.errai.cdi.client.qualifier.C.class;\n" +
+            "                }\n" +
+            "\n" +
+            "            }\n" +
+            "        }));\n" +
+            "        final EventProvider inj15 = new EventProvider();\n" +
+            "        BootstrapperImpl.EventProducerTestModule_eventAB(inj10, (inj15).provide(new Class[] {        String.class        }, new Annotation[] {            new org.jboss.errai.cdi.client.qualifier.B() {\n" +
+            "                public String toString() {\n" +
+            "                    return \"@org.jboss.errai.cdi.client.qualifier.B()\";\n" +
+            "                }\n" +
+            "                public Class annotationType() {\n" +
+            "                    return org.jboss.errai.cdi.client.qualifier.B.class;\n" +
+            "                }\n" +
+            "\n" +
+            "            }\n" +
+            "            , new org.jboss.errai.cdi.client.qualifier.A() {\n" +
+            "                public String toString() {\n" +
+            "                    return \"@org.jboss.errai.cdi.client.qualifier.A()\";\n" +
+            "                }\n" +
+            "                public Class annotationType() {\n" +
+            "                    return org.jboss.errai.cdi.client.qualifier.A.class;\n" +
+            "                }\n" +
+            "\n" +
+            "            }\n" +
+            "        }));\n" +
+            "        final EventProvider inj16 = new EventProvider();\n" +
+            "        BootstrapperImpl.EventProducerTestModule_eventBC(inj10, (inj16).provide(new Class[] {        String.class        }, new Annotation[] {            new org.jboss.errai.cdi.client.qualifier.B() {\n" +
+            "                public String toString() {\n" +
+            "                    return \"@org.jboss.errai.cdi.client.qualifier.B()\";\n" +
+            "                }\n" +
+            "                public Class annotationType() {\n" +
+            "                    return org.jboss.errai.cdi.client.qualifier.B.class;\n" +
+            "                }\n" +
+            "\n" +
+            "            }\n" +
+            "            , new org.jboss.errai.cdi.client.qualifier.C() {\n" +
+            "                public String toString() {\n" +
+            "                    return \"@org.jboss.errai.cdi.client.qualifier.C()\";\n" +
+            "                }\n" +
+            "                public Class annotationType() {\n" +
+            "                    return org.jboss.errai.cdi.client.qualifier.C.class;\n" +
+            "                }\n" +
+            "\n" +
+            "            }\n" +
+            "        }));\n" +
+            "        final EventProvider inj17 = new EventProvider();\n" +
+            "        BootstrapperImpl.EventProducerTestModule_eventAC(inj10, (inj17).provide(new Class[] {        String.class        }, new Annotation[] {            new org.jboss.errai.cdi.client.qualifier.A() {\n" +
+            "                public String toString() {\n" +
+            "                    return \"@org.jboss.errai.cdi.client.qualifier.A()\";\n" +
+            "                }\n" +
+            "                public Class annotationType() {\n" +
+            "                    return org.jboss.errai.cdi.client.qualifier.A.class;\n" +
+            "                }\n" +
+            "\n" +
+            "            }\n" +
+            "            , new org.jboss.errai.cdi.client.qualifier.C() {\n" +
+            "                public String toString() {\n" +
+            "                    return \"@org.jboss.errai.cdi.client.qualifier.C()\";\n" +
+            "                }\n" +
+            "                public Class annotationType() {\n" +
+            "                    return org.jboss.errai.cdi.client.qualifier.C.class;\n" +
+            "                }\n" +
+            "\n" +
+            "            }\n" +
+            "        }));\n" +
+            "        final EventProvider inj18 = new EventProvider();\n" +
+            "        BootstrapperImpl.EventProducerTestModule_eventABC(inj10, (inj18).provide(new Class[] {        String.class        }, new Annotation[] {            new org.jboss.errai.cdi.client.qualifier.B() {\n" +
+            "                public String toString() {\n" +
+            "                    return \"@org.jboss.errai.cdi.client.qualifier.B()\";\n" +
+            "                }\n" +
+            "                public Class annotationType() {\n" +
+            "                    return org.jboss.errai.cdi.client.qualifier.B.class;\n" +
+            "                }\n" +
+            "\n" +
+            "            }\n" +
+            "            , new org.jboss.errai.cdi.client.qualifier.A() {\n" +
+            "                public String toString() {\n" +
+            "                    return \"@org.jboss.errai.cdi.client.qualifier.A()\";\n" +
+            "                }\n" +
+            "                public Class annotationType() {\n" +
+            "                    return org.jboss.errai.cdi.client.qualifier.A.class;\n" +
+            "                }\n" +
+            "\n" +
+            "            }\n" +
+            "            , new org.jboss.errai.cdi.client.qualifier.C() {\n" +
+            "                public String toString() {\n" +
+            "                    return \"@org.jboss.errai.cdi.client.qualifier.C()\";\n" +
+            "                }\n" +
+            "                public Class annotationType() {\n" +
+            "                    return org.jboss.errai.cdi.client.qualifier.C.class;\n" +
+            "                }\n" +
+            "\n" +
+            "            }\n" +
+            "        }));\n" +
+            "        final MessageBusProvider inj8 = new MessageBusProvider();\n" +
+            "        ((inj8).provide()).subscribe(\"cdi.event:org.jboss.errai.cdi.client.events.BusReadyEvent\", new MessageCallback() {\n" +
+            "            public void callback(Message message) {\n" +
+            "                Set methodQualifiers = new HashSet<String>();\n" +
+            "                Set qualifiers = message.get(Set.class, CDIProtocol.QUALIFIERS);\n" +
+            "                if (methodQualifiers.equals((HashSet) qualifiers) || ((qualifiers == null) && methodQualifiers.isEmpty())) {\n" +
+            "                    Object response = message.get(BusReadyEvent.class, CDIProtocol.OBJECT_REF);\n" +
+            "                    inj10.onBusReady((BusReadyEvent) response);\n" +
+            "                };\n" +
+            "            }\n" +
+            "\n" +
+            "        }\n" +
+            "        );\n" +
+            "        ((inj8).provide()).subscribe(\"cdi.event:org.jboss.errai.cdi.client.event.ReceivedEvent\", new MessageCallback() {\n" +
+            "            public void callback(Message message) {\n" +
+            "                Set methodQualifiers = new HashSet<String>();\n" +
+            "                Set qualifiers = message.get(Set.class, CDIProtocol.QUALIFIERS);\n" +
+            "                if (methodQualifiers.equals((HashSet) qualifiers) || ((qualifiers == null) && methodQualifiers.isEmpty())) {\n" +
+            "                    Object response = message.get(ReceivedEvent.class, CDIProtocol.OBJECT_REF);\n" +
+            "                    inj10.collectResults((ReceivedEvent) response);\n" +
+            "                };\n" +
+            "            }\n" +
+            "\n" +
+            "        }\n" +
+            "        );\n" +
+            "        inj10.doPostConstruct();\n" +
+            "        final EventObserverTestModule inj11 = new EventObserverTestModule();\n" +
+            "        final EventProvider inj19 = new EventProvider();\n" +
+            "        BootstrapperImpl.EventObserverTestModule_startEvent(inj11, (inj19).provide(new Class[] {        StartEvent.class        }, null));\n" +
+            "        ((inj8).provide()).subscribe(\"cdi.event:org.jboss.errai.cdi.client.events.BusReadyEvent\", new MessageCallback() {\n" +
+            "            public void callback(Message message) {\n" +
+            "                Set methodQualifiers = new HashSet<String>();\n" +
+            "                Set qualifiers = message.get(Set.class, CDIProtocol.QUALIFIERS);\n" +
+            "                if (methodQualifiers.equals((HashSet) qualifiers) || ((qualifiers == null) && methodQualifiers.isEmpty())) {\n" +
+            "                    Object response = message.get(BusReadyEvent.class, CDIProtocol.OBJECT_REF);\n" +
+            "                    inj11.onBusReady((BusReadyEvent) response);\n" +
+            "                };\n" +
+            "            }\n" +
+            "\n" +
+            "        }\n" +
+            "        );\n" +
+            "        ((inj8).provide()).subscribe(\"cdi.event:java.lang.String\", new MessageCallback() {\n" +
+            "            public void callback(Message message) {\n" +
+            "                Set methodQualifiers = new HashSet<String>();\n" +
+            "                Set qualifiers = message.get(Set.class, CDIProtocol.QUALIFIERS);\n" +
+            "                if (methodQualifiers.equals((HashSet) qualifiers) || ((qualifiers == null) && methodQualifiers.isEmpty())) {\n" +
+            "                    Object response = message.get(String.class, CDIProtocol.OBJECT_REF);\n" +
+            "                    inj11.onEvent((String) response);\n" +
+            "                };\n" +
+            "            }\n" +
+            "\n" +
+            "        }\n" +
+            "        );\n" +
+            "        ((inj8).provide()).subscribe(\"cdi.event:java.lang.String\", new MessageCallback() {\n" +
+            "            public void callback(Message message) {\n" +
+            "                Set methodQualifiers = new HashSet<String>();\n" +
+            "                methodQualifiers.add(\"org.jboss.errai.cdi.client.qualifier.A\");\n" +
+            "                Set qualifiers = message.get(Set.class, CDIProtocol.QUALIFIERS);\n" +
+            "                if (methodQualifiers.equals((HashSet) qualifiers) || ((qualifiers == null) && methodQualifiers.isEmpty())) {\n" +
+            "                    Object response = message.get(String.class, CDIProtocol.OBJECT_REF);\n" +
+            "                    inj11.onEventA((String) response);\n" +
+            "                };\n" +
+            "            }\n" +
+            "\n" +
+            "        }\n" +
+            "        );\n" +
+            "        ((inj8).provide()).subscribe(\"cdi.event:java.lang.String\", new MessageCallback() {\n" +
+            "            public void callback(Message message) {\n" +
+            "                Set methodQualifiers = new HashSet<String>();\n" +
+            "                methodQualifiers.add(\"org.jboss.errai.cdi.client.qualifier.B\");\n" +
+            "                Set qualifiers = message.get(Set.class, CDIProtocol.QUALIFIERS);\n" +
+            "                if (methodQualifiers.equals((HashSet) qualifiers) || ((qualifiers == null) && methodQualifiers.isEmpty())) {\n" +
+            "                    Object response = message.get(String.class, CDIProtocol.OBJECT_REF);\n" +
+            "                    inj11.onEventB((String) response);\n" +
+            "                };\n" +
+            "            }\n" +
+            "\n" +
+            "        }\n" +
+            "        );\n" +
+            "        ((inj8).provide()).subscribe(\"cdi.event:java.lang.String\", new MessageCallback() {\n" +
+            "            public void callback(Message message) {\n" +
+            "                Set methodQualifiers = new HashSet<String>();\n" +
+            "                methodQualifiers.add(\"org.jboss.errai.cdi.client.qualifier.C\");\n" +
+            "                Set qualifiers = message.get(Set.class, CDIProtocol.QUALIFIERS);\n" +
+            "                if (methodQualifiers.equals((HashSet) qualifiers) || ((qualifiers == null) && methodQualifiers.isEmpty())) {\n" +
+            "                    Object response = message.get(String.class, CDIProtocol.OBJECT_REF);\n" +
+            "                    inj11.onEventC((String) response);\n" +
+            "                };\n" +
+            "            }\n" +
+            "\n" +
+            "        }\n" +
+            "        );\n" +
+            "        ((inj8).provide()).subscribe(\"cdi.event:java.lang.String\", new MessageCallback() {\n" +
+            "            public void callback(Message message) {\n" +
+            "                Set methodQualifiers = new HashSet<String>();\n" +
+            "                methodQualifiers.add(\"org.jboss.errai.cdi.client.qualifier.B\");\n" +
+            "                methodQualifiers.add(\"org.jboss.errai.cdi.client.qualifier.A\");\n" +
+            "                Set qualifiers = message.get(Set.class, CDIProtocol.QUALIFIERS);\n" +
+            "                if (methodQualifiers.equals((HashSet) qualifiers) || ((qualifiers == null) && methodQualifiers.isEmpty())) {\n" +
+            "                    Object response = message.get(String.class, CDIProtocol.OBJECT_REF);\n" +
+            "                    inj11.onEventAB((String) response);\n" +
+            "                };\n" +
+            "            }\n" +
+            "\n" +
+            "        }\n" +
+            "        );\n" +
+            "        ((inj8).provide()).subscribe(\"cdi.event:java.lang.String\", new MessageCallback() {\n" +
+            "            public void callback(Message message) {\n" +
+            "                Set methodQualifiers = new HashSet<String>();\n" +
+            "                methodQualifiers.add(\"org.jboss.errai.cdi.client.qualifier.B\");\n" +
+            "                methodQualifiers.add(\"org.jboss.errai.cdi.client.qualifier.A\");\n" +
+            "                Set qualifiers = message.get(Set.class, CDIProtocol.QUALIFIERS);\n" +
+            "                if (methodQualifiers.equals((HashSet) qualifiers) || ((qualifiers == null) && methodQualifiers.isEmpty())) {\n" +
+            "                    Object response = message.get(String.class, CDIProtocol.OBJECT_REF);\n" +
+            "                    inj11.onEventBA((String) response);\n" +
+            "                };\n" +
+            "            }\n" +
+            "\n" +
+            "        }\n" +
+            "        );\n" +
+            "        ((inj8).provide()).subscribe(\"cdi.event:java.lang.String\", new MessageCallback() {\n" +
+            "            public void callback(Message message) {\n" +
+            "                Set methodQualifiers = new HashSet<String>();\n" +
+            "                methodQualifiers.add(\"org.jboss.errai.cdi.client.qualifier.A\");\n" +
+            "                methodQualifiers.add(\"org.jboss.errai.cdi.client.qualifier.C\");\n" +
+            "                Set qualifiers = message.get(Set.class, CDIProtocol.QUALIFIERS);\n" +
+            "                if (methodQualifiers.equals((HashSet) qualifiers) || ((qualifiers == null) && methodQualifiers.isEmpty())) {\n" +
+            "                    Object response = message.get(String.class, CDIProtocol.OBJECT_REF);\n" +
+            "                    inj11.onEventAC((String) response);\n" +
+            "                };\n" +
+            "            }\n" +
+            "\n" +
+            "        }\n" +
+            "        );\n" +
+            "        ((inj8).provide()).subscribe(\"cdi.event:java.lang.String\", new MessageCallback() {\n" +
+            "            public void callback(Message message) {\n" +
+            "                Set methodQualifiers = new HashSet<String>();\n" +
+            "                methodQualifiers.add(\"org.jboss.errai.cdi.client.qualifier.B\");\n" +
+            "                methodQualifiers.add(\"org.jboss.errai.cdi.client.qualifier.C\");\n" +
+            "                Set qualifiers = message.get(Set.class, CDIProtocol.QUALIFIERS);\n" +
+            "                if (methodQualifiers.equals((HashSet) qualifiers) || ((qualifiers == null) && methodQualifiers.isEmpty())) {\n" +
+            "                    Object response = message.get(String.class, CDIProtocol.OBJECT_REF);\n" +
+            "                    inj11.onEventBC((String) response);\n" +
+            "                };\n" +
+            "            }\n" +
+            "\n" +
+            "        }\n" +
+            "        );\n" +
+            "        ((inj8).provide()).subscribe(\"cdi.event:java.lang.String\", new MessageCallback() {\n" +
+            "            public void callback(Message message) {\n" +
+            "                Set methodQualifiers = new HashSet<String>();\n" +
+            "                methodQualifiers.add(\"org.jboss.errai.cdi.client.qualifier.B\");\n" +
+            "                methodQualifiers.add(\"org.jboss.errai.cdi.client.qualifier.A\");\n" +
+            "                methodQualifiers.add(\"org.jboss.errai.cdi.client.qualifier.C\");\n" +
+            "                Set qualifiers = message.get(Set.class, CDIProtocol.QUALIFIERS);\n" +
+            "                if (methodQualifiers.equals((HashSet) qualifiers) || ((qualifiers == null) && methodQualifiers.isEmpty())) {\n" +
+            "                    Object response = message.get(String.class, CDIProtocol.OBJECT_REF);\n" +
+            "                    inj11.onEventABC((String) response);\n" +
+            "                };\n" +
+            "            }\n" +
+            "\n" +
+            "        }\n" +
+            "        );\n" +
+            "        inj11.doPostConstruct();\n" +
+            "        return ctx;\n" +
+            "    }\n" +
+            "}\n\n\n"));
 
   }
 }

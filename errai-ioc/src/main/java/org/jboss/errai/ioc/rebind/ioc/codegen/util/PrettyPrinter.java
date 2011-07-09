@@ -31,37 +31,37 @@ public class PrettyPrinter {
     int indentLevel = 0;
     int statementIndent = 0;
 
-    int la;
-    boolean noIndent = false;
+ //   int la;
 
+    Outer:
     for (int i = 0; i < expr.length; i++) {
       switch (expr[i]) {
         case '{':
           lineBuffer.append('{');
 
-          la = i + 1;
+       //   int st = (la = i + 1);
 
-          Lookahead: while (la != expr.length) {
-            switch (expr[la]) {
-              case '\n':
-                break Lookahead;
-               default:
-                 if (!Character.isWhitespace(expr[la])) {
-                   noIndent = true;
-                   break Lookahead;
-                 }
-            }
-            la++;
-          }
+//          Lookahead:
+//          while (la != expr.length) {
+//            switch (expr[la]) {
+//              case '\n':
+//                break Lookahead;
+//              case '}':
+//                lineBuffer.append(' ').append(new String(expr, st + 1, la - st - 1).trim()).append(" }");
+//                writeToBuffer(out, lineBuffer, indentLevel, statementIndent);
+//                lineBuffer = new StringBuilder();
+//                i = la;
+//                continue Outer;
+//            }
+//            la++;
+//          }
 
-          writeToBuffer(out, lineBuffer, (!noIndent ? indentLevel++ : indentLevel), statementIndent);
-          noIndent = false;
+          writeToBuffer(out, lineBuffer, indentLevel++, statementIndent);
           lineBuffer = new StringBuilder();
           break;
 
         case '}':
-          writeToBuffer(out, lineBuffer, (!noIndent ? --indentLevel : indentLevel), statementIndent);
-     //     noIndent = true;
+          writeToBuffer(out, lineBuffer, --indentLevel, statementIndent);
           lineBuffer = new StringBuilder();
           lineBuffer.append('}');
           break;
@@ -94,10 +94,11 @@ public class PrettyPrinter {
       writeToBuffer(out, lineBuffer, indentLevel, statementIndent);
     }
 
-    return out.toString();
+    return compactinate(out.toString());
   }
 
-  private static void writeToBuffer(StringBuilder out, StringBuilder lineBuffer, int indentLevel, int statementIndent) {
+  private static void writeToBuffer(StringBuilder out, StringBuilder lineBuffer,
+                                    int indentLevel, int statementIndent) {
     String trimmedLineBuffer = lineBuffer.toString().trim();
 
     if (trimmedLineBuffer.length() == 0) {
@@ -105,6 +106,39 @@ public class PrettyPrinter {
     }
 
     out.append(pad((indentLevel + statementIndent) * 4)).append(trimmedLineBuffer);
+  }
+
+  private static String compactinate(String str) {
+    char[] expr = str.toCharArray();
+    StringBuilder buf = new StringBuilder();
+    boolean newLine = false;
+    for (int i = 0; i < expr.length; i++) {
+      switch (expr[i]) {
+        case '"':
+        case '\'':
+          int start = i;
+          i = ParseTools.balancedCapture(expr, i, expr[i]);
+          buf.append(new String(expr, start, i - start + 1));
+          break;
+        case '\n':
+          newLine = true;
+          buf.append('\n');
+          break;
+
+        default:
+          if (Character.isWhitespace(expr[i])) {
+            buf.append(" ");
+            if (!newLine) {
+              i = skipWhitespace(expr, i) - 1;
+            }
+          }
+          else {
+            newLine = false;
+            buf.append(expr[i]);
+          }
+      }
+    }
+    return buf.toString().trim();
   }
 
   private static String pad(int amount) {
@@ -121,8 +155,7 @@ public class PrettyPrinter {
     Skip:
     while (cursor != expr.length) {
       switch (expr[cursor]) {
-        case '\n':
-
+//        case '\n':
         case '\r':
           cursor++;
           continue;
