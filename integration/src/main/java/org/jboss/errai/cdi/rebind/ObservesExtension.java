@@ -106,8 +106,7 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
                 Object.class,
                 Stmt.create()
                     .loadVariable("message")
-                    .invoke("get", parm.getType().asClass(),
-                        CDIProtocol.class.getName() + "." + CDIProtocol.OBJECT_REF.name())))
+                    .invoke("get", parm.getType().asClass(), CDIProtocol.OBJECT_REF)))
         .append(
             Stmt.create().loadVariable(injectionPoint.getInjector().getVarName())
                 .invoke(method.getName(), Cast.to(parm.getType(), Refs.get("response")))).finish());
