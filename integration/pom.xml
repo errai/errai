@@ -268,16 +268,19 @@
 					<groupId>org.mortbay.jetty</groupId>
 					<artifactId>jetty</artifactId>
 					<version>${jetty.version}</version>
+                    <scope>compile</scope>
 				</dependency>
 				<dependency>
 					<groupId>org.mortbay.jetty</groupId>
 					<artifactId>jetty-plus</artifactId>
 					<version>${jetty.version}</version>
+                    <scope>compile</scope>
 				</dependency>
 				<dependency>
 					<groupId>org.mortbay.jetty</groupId>
 					<artifactId>jetty-naming</artifactId>
 					<version>${jetty.version}</version>
+                    <scope>compile</scope>
 				</dependency>
 
 				<!-- Weld Modules -->
@@ -285,11 +288,13 @@
 					<groupId>org.jboss.weld.se</groupId>
 					<artifactId>weld-se-core</artifactId>
 					<version>${weld.version}</version>
+                    <scope>compile</scope>
 				</dependency>
 				<dependency>
 					<groupId>org.jboss.weld.servlet</groupId>
 					<artifactId>weld-servlet</artifactId>
 					<version>${weld.version}</version>
+                    <scope>compile</scope>
 				</dependency>
 				<dependency>
 					<groupId>org.glassfish.web</groupId>
