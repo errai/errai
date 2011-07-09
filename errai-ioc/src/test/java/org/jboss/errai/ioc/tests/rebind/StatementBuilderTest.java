@@ -39,6 +39,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
 import org.jboss.errai.ioc.rebind.ioc.codegen.literal.LiteralFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.PrettyPrinter;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 import org.jboss.errai.ioc.tests.rebind.model.Foo;
 import org.junit.Assert;
@@ -504,5 +505,15 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
 
     assertEquals("failed to generate nested field assignment", 
         "(new Foo()).bar.name = \"test\"", s);
+  }
+
+
+  @Test
+  public void testZZZ() {
+
+
+    System.out.println(PrettyPrinter.prettyPrintJava("try {\n new String[] { \"foo\", " +
+            "\"bar\" };\n}\ncatch (Exception e) {\n\n}\n"));
+
   }
 }

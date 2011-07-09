@@ -31,16 +31,37 @@ public class PrettyPrinter {
     int indentLevel = 0;
     int statementIndent = 0;
 
+    int la;
+    boolean noIndent = false;
+
     for (int i = 0; i < expr.length; i++) {
       switch (expr[i]) {
         case '{':
           lineBuffer.append('{');
-          writeToBuffer(out, lineBuffer, indentLevel++, statementIndent);
+
+          la = i + 1;
+
+          Lookahead: while (la != expr.length) {
+            switch (expr[la]) {
+              case '\n':
+                break Lookahead;
+               default:
+                 if (!Character.isWhitespace(expr[la])) {
+                   noIndent = true;
+                   break Lookahead;
+                 }
+            }
+            la++;
+          }
+
+          writeToBuffer(out, lineBuffer, (!noIndent ? indentLevel++ : indentLevel), statementIndent);
+          noIndent = false;
           lineBuffer = new StringBuilder();
           break;
 
         case '}':
-          writeToBuffer(out, lineBuffer, --indentLevel, statementIndent);
+          writeToBuffer(out, lineBuffer, (!noIndent ? --indentLevel : indentLevel), statementIndent);
+     //     noIndent = true;
           lineBuffer = new StringBuilder();
           lineBuffer.append('}');
           break;
@@ -105,30 +126,7 @@ public class PrettyPrinter {
         case '\r':
           cursor++;
           continue;
-//        case '/':
-//          if (cursor + 1 != expr.length) {
-//            switch (expr[cursor + 1]) {
-//              case '/':
-//                cursor++;
-//                while (cursor != expr.length && expr[cursor] != '\n') cursor++;
-//                if (cursor != expr.length) cursor++;
-//
-//                continue;
-//
-//              case '*':
-//                int len = expr.length - 1;
-//                cursor++;
-//                while (cursor != len && !(expr[cursor] == '*' && expr[cursor + 1] == '/')) {
-//                   cursor++;
-//                }
-//                if (cursor != len) cursor += 2;
-//                continue;
-//
-//              default:
-//                break Skip;
-//
-//            }
-//          }
+
         default:
           if (!Character.isWhitespace(expr[cursor])) break Skip;
 

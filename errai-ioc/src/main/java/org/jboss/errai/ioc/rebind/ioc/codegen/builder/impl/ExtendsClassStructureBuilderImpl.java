@@ -16,20 +16,17 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
-import static org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference.getClassReference;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Callable;
-
 import org.jboss.errai.ioc.rebind.ioc.codegen.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BuildCallback;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.Builder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.Finishable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference.getClassReference;
 
 public class ExtendsClassStructureBuilderImpl implements Finishable<ObjectBuilder> {
   private MetaClass toExtend;
@@ -40,16 +37,10 @@ public class ExtendsClassStructureBuilderImpl implements Finishable<ObjectBuilde
   ExtendsClassStructureBuilderImpl(MetaClass clazz, BuildCallback<ObjectBuilder> builderBuildCallback) {
     this.toExtend = clazz;
 
-//    for (MetaField field : clazz.getFields()) {
-//      this.classContext.addVariable(Variable.create(field.getName(), field.getType()));
-//    }
-
     this.callback = builderBuildCallback;
   }
 
   public BlockBuilder<ExtendsClassStructureBuilderImpl> publicConstructor(final DefParameters parameters) {
-//    final Context context = Context.create(classContext);
-
     return new BlockBuilderImpl<ExtendsClassStructureBuilderImpl>(new BuildCallback<ExtendsClassStructureBuilderImpl>() {
       @Override
       public ExtendsClassStructureBuilderImpl callback(final Statement statement) {
@@ -73,15 +64,12 @@ public class ExtendsClassStructureBuilderImpl implements Finishable<ObjectBuilde
           }
         });
 
-
         return ExtendsClassStructureBuilderImpl.this;
       }
     });
   }
 
   private BlockBuilder<ExtendsClassStructureBuilderImpl> publicOverridesMethod(final MetaMethod method, final DefParameters parameters) {
-
-
     return new BlockBuilderImpl<ExtendsClassStructureBuilderImpl>(new BuildCallback<ExtendsClassStructureBuilderImpl>() {
       @Override
       public ExtendsClassStructureBuilderImpl callback(final Statement statement) {
@@ -106,10 +94,7 @@ public class ExtendsClassStructureBuilderImpl implements Finishable<ObjectBuilde
 
             return buf.toString();
           }
-
-
         });
-
 
         return ExtendsClassStructureBuilderImpl.this;
       }

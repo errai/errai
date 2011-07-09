@@ -29,35 +29,32 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.util.PrettyPrinter;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 
 public class AnnotationEncoder {
-  public static Statement encode(Annotation annotation) {
-    return encode(annotation, Context.create());
-  }
-
-  public static Statement encode(Annotation annotation, Context context) {
+  public static Statement encode(final Annotation annotation) {
     final Class<? extends Annotation> annotationClass = annotation.annotationType();
-    final ExtendsClassStructureBuilderImpl builder = ObjectBuilder.newInstanceOf(annotationClass, context).extend();
-
-    Class<? extends Annotation> annoClass = annotation.getClass();
-
-    for (Method method : annoClass.getDeclaredMethods()) {
-      if (((method.getModifiers() & (Modifier.PRIVATE | Modifier.PROTECTED)) == 0)
-              && (!"equals".equals(method.getName()) && !"hashCode".equals(method.getName()))) {
-        try {
-          builder.publicOverridesMethod(method.getName())
-                  .append(Stmt.create().load(method.invoke(annotation)).returnValue()).finish();
-        }
-        catch (IllegalAccessException e) {
-          throw new RuntimeException("error generation annotation wrapper", e);
-        }
-        catch (InvocationTargetException e) {
-          throw new RuntimeException("error generation annotation wrapper", e);
-        }
-      }
-    }
 
     return new Statement() {
       @Override
       public String generate(Context context) {
+        final ExtendsClassStructureBuilderImpl builder = ObjectBuilder.newInstanceOf(annotationClass, context).extend();
+
+        Class<? extends Annotation> annoClass = annotation.getClass();
+
+        for (Method method : annoClass.getDeclaredMethods()) {
+          if (((method.getModifiers() & (Modifier.PRIVATE | Modifier.PROTECTED)) == 0)
+                  && (!"equals".equals(method.getName()) && !"hashCode".equals(method.getName()))) {
+            try {
+              builder.publicOverridesMethod(method.getName())
+                      .append(Stmt.create().load(method.invoke(annotation)).returnValue()).finish();
+            }
+            catch (IllegalAccessException e) {
+              throw new RuntimeException("error generation annotation wrapper", e);
+            }
+            catch (InvocationTargetException e) {
+              throw new RuntimeException("error generation annotation wrapper", e);
+            }
+          }
+        }
+
         return PrettyPrinter.prettyPrintJava(builder.finish().toJavaString());
       }
 
