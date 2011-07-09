@@ -89,8 +89,7 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
       }
     }
     callBackBlock.append(Stmt.create().declareVariable("qualifiers",new TypeLiteral<Set<String>>() {},
-        Stmt.create().loadVariable("message")
-            .invoke("get", Set.class, CDIProtocol.class.getName() + "." + CDIProtocol.QUALIFIERS.name())));
+        Stmt.create().loadVariable("message").invoke("get", Set.class, CDIProtocol.QUALIFIERS)));
 
     callBackBlock.append(Stmt
         .create()
