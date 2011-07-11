@@ -82,7 +82,8 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   protected static MetaMethod _getMethod(MetaMethod[] methods, String name, MetaClass... parmTypes) {
-    Outer: for (MetaMethod method : methods) {
+    Outer:
+    for (MetaMethod method : methods) {
       if (method.getName().equals(name) && method.getParameters().length == parmTypes.length) {
         for (int i = 0; i < parmTypes.length; i++) {
           if (!method.getParameters()[i].getType().equals(parmTypes[i])) {
@@ -96,7 +97,8 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   protected static MetaConstructor _getConstructor(MetaConstructor[] constructors, MetaClass... parmTypes) {
-    Outer: for (MetaConstructor constructor : constructors) {
+    Outer:
+    for (MetaConstructor constructor : constructors) {
       if (constructor.getParameters().length == parmTypes.length) {
         for (int i = 0; i < parmTypes.length; i++) {
           if (!constructor.getParameters()[i].getType().equals(parmTypes[i])) {
@@ -131,7 +133,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   @Override
   public MetaMethod getBestMatchingMethod(String name, Class... parameters) {
-   return getBestMatchingMethod(null, name, parameters);
+    return getBestMatchingMethod(null, name, parameters);
   }
 
   @Override
@@ -155,8 +157,15 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     if (cls != null) {
       methods = (methods == null) ? cls.getMethods() : methods;
       Method m = ParseTools.getBestCandidate(parameters, name, cls, methods, false);
-      if (m == null)
-        return null;
+      if (m == null) {
+        if (isInterface()) {
+          m = ParseTools.getBestCandidate(parameters, name, Object.class, Object.class.getMethods(), false);
+        }
+
+        if (m == null) {
+          return null;
+        }
+      }
 
       return getMethod(name, m.getParameterTypes());
     }
@@ -164,7 +173,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       return getMethod(name, parameters);
     }
   }
-  
+
   private MetaMethod[] getStaticMethods() {
     List<MetaMethod> methods = new ArrayList<MetaMethod>();
 
