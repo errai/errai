@@ -5,4 +5,8 @@ package org.jboss.errai.ioc.tests.rebind.model;
  */
 public class Bar {
   public String name;
+  
+  public void setName(String name) {
+    
+  }
 }

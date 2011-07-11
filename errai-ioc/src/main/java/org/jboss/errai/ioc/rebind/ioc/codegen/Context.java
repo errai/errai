@@ -176,13 +176,13 @@ public class Context {
     do {
       if (ctx.variables != null) {
         Variable var = ctx.variables.get(name);
-        found = (mustBeClassMember && !var.isClassMember()) ? null : var;
+        found = (mustBeClassMember && var != null && !var.isClassMember()) ? null : var;
       }
     }
     while (found == null && (ctx = ctx.parent) != null);
 
     if (found == null)
-      throw new OutOfScopeException(name);
+      throw new OutOfScopeException((mustBeClassMember)?"this."+name:name);
 
     return found.getReference();
   }

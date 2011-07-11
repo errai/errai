@@ -123,8 +123,8 @@ public class ObjectBuilder extends AbstractStatementBuilder {
     return this;
   }
 
-  public ExtendsClassStructureBuilderImpl extend() {
-    return new ExtendsClassStructureBuilderImpl(type, new BuildCallback<ObjectBuilder>() {
+  public AnonymousClassStructureBuilderImpl extend() {
+    return new AnonymousClassStructureBuilderImpl(type, new BuildCallback<ObjectBuilder>() {
       @Override
       public ObjectBuilder callback(Statement statement) {
         extendsBlock = statement;
@@ -158,6 +158,9 @@ public class ObjectBuilder extends AbstractStatementBuilder {
            buf.append(callParameters.generate(Context.create(context)));
          }
          if (extendsBlock != null) {
+           for (MetaField field : type.getFields()){
+             context.addVariable(Variable.createClassMember(field.getName(), field.getType()));
+           }
            buf.append(" {\n").append(extendsBlock.generate(context)).append("\n}\n");
          }
          writer.append(buf.toString());

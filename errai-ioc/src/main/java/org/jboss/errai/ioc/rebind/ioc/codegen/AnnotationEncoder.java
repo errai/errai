@@ -21,7 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ExtendsClassStructureBuilderImpl;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.AnonymousClassStructureBuilderImpl;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
@@ -35,7 +35,7 @@ public class AnnotationEncoder {
     return new Statement() {
       @Override
       public String generate(Context context) {
-        final ExtendsClassStructureBuilderImpl builder = ObjectBuilder.newInstanceOf(annotationClass, context).extend();
+        final AnonymousClassStructureBuilderImpl builder = ObjectBuilder.newInstanceOf(annotationClass, context).extend();
 
         Class<? extends Annotation> annoClass = annotation.getClass();
 

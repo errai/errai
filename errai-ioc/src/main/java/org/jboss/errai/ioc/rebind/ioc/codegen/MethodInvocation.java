@@ -42,42 +42,37 @@ public class MethodInvocation extends AbstractStatement {
     resolveTypeVariables();
   }
 
-  /**
-   * Resolves type variables by inspecting the call parameters. 
-   * TODO Does not work for nested parameterized types as of now.
-   */
+  
+  //Resolves type variables by inspecting call parameters (TODO nested parameterized type are not supported).
   private void resolveTypeVariables() {
     int methodParmIndex = 0;
     for (MetaType methodParmType : method.getGenericParameterTypes()) {
-
       if (methodParmType instanceof MetaParameterizedType) {
+        int typeParmIndex = 0;
         MetaParameterizedType parameterizedMethodParmType = (MetaParameterizedType) methodParmType;
-
-        int callParmIndex = 0;
         for (MetaType typeParm : parameterizedMethodParmType.getTypeParameters()) {
-          addTypeVariable(typeParm, methodParmIndex, callParmIndex++);
+          resolveTypeVariable(typeParm, methodParmIndex, typeParmIndex++);
         }
       }
       else {
-        addTypeVariable(methodParmType, methodParmIndex, 0);
+        resolveTypeVariable(methodParmType, methodParmIndex, 0);
       }
       methodParmIndex++;
     }
   }
 
-  private void addTypeVariable(MetaType parmType, int methodParmIndex, int callParmIndex) {
+  private void resolveTypeVariable(MetaType parmType, int methodParmIndex, int typeParmIndex) {
     if (parmType instanceof MetaTypeVariable) {
       MetaTypeVariable typeVar = (MetaTypeVariable) parmType;
-
       MetaClass callParmType = callParameters.getParameterTypes()[methodParmIndex];
       MetaParameterizedType parameterizedCallParmType = callParmType.getParameterizedType();
       if (parameterizedCallParmType != null) {
-        typeVariables.put(typeVar.getName(), (MetaClass) parameterizedCallParmType.getTypeParameters()[callParmIndex]);
+        typeVariables.put(typeVar.getName(), (MetaClass) parameterizedCallParmType.getTypeParameters()[typeParmIndex]);
       }
       else {
         Statement parm = callParameters.getParameters().get(methodParmIndex);
         if (parm instanceof ClassLiteral) {
-          callParmType = ((ClassLiteral)parm).getActualType();
+          callParmType = ((ClassLiteral) parm).getActualType();
         }
         typeVariables.put(typeVar.getName(), (MetaClass) callParmType);
       }
@@ -95,9 +90,9 @@ public class MethodInvocation extends AbstractStatement {
   public MetaClass getType() {
     MetaClass returnType = null;
 
+    // Try to resolve the type variable's real type.
+    // TODO Nested parameterized return types are not supported as of now.
     if (method.getGenericReturnType() != null && method.getGenericReturnType() instanceof MetaTypeVariable) {
-      // Try to resolve the type variable's real type. 
-      // TODO Does not work for nested parameterized types as of now.
       MetaTypeVariable typeVar = (MetaTypeVariable) method.getGenericReturnType();
       returnType = typeVariables.get(typeVar.getName());
     }

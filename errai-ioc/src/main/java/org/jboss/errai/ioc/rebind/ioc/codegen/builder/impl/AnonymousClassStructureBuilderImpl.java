@@ -16,63 +16,44 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.*;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BlockBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BuildCallback;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.Finishable;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
+import static org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference.getClassReference;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference.getClassReference;
+import org.jboss.errai.ioc.rebind.ioc.codegen.AbstractStatement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.DefParameters;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Parameter;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BlockBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BuildCallback;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.Finishable;
+import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedMethodException;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 
-public class ExtendsClassStructureBuilderImpl implements Finishable<ObjectBuilder> {
+/**
+ * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
+ */
+public class AnonymousClassStructureBuilderImpl implements Finishable<ObjectBuilder> {
   private MetaClass toExtend;
   private BuildCallback<ObjectBuilder> callback;
 
   private List<DeferredGenerateCallback> callables = new ArrayList<DeferredGenerateCallback>();
 
-  ExtendsClassStructureBuilderImpl(MetaClass clazz, BuildCallback<ObjectBuilder> builderBuildCallback) {
+  AnonymousClassStructureBuilderImpl(MetaClass clazz, BuildCallback<ObjectBuilder> builderBuildCallback) {
     this.toExtend = clazz;
 
     this.callback = builderBuildCallback;
   }
 
-  public BlockBuilder<ExtendsClassStructureBuilderImpl> publicConstructor(final DefParameters parameters) {
-    return new BlockBuilderImpl<ExtendsClassStructureBuilderImpl>(new BuildCallback<ExtendsClassStructureBuilderImpl>() {
+  private BlockBuilder<AnonymousClassStructureBuilderImpl> publicOverridesMethod(final MetaMethod method, final DefParameters parameters) {
+    return new BlockBuilderImpl<AnonymousClassStructureBuilderImpl>(new BuildCallback<AnonymousClassStructureBuilderImpl>() {
       @Override
-      public ExtendsClassStructureBuilderImpl callback(final Statement statement) {
-        addCallable(new DeferredGenerateCallback() {
-          @Override
-          public String doGenerate(Context context) {
-            Context subContext = Context.create(context);
-
-            for (Parameter parm : parameters.getParameters()) {
-              subContext.addVariable(Variable.create(parm.getName(), parm.getType()));
-            }
-
-            StringBuilder buf = new StringBuilder();
-            buf.append("public ").append(getClassReference(toExtend, context))
-                    .append(parameters.generate(context)).append(" {\n");
-            if (statement != null) {
-              buf.append(statement.generate(subContext)).append("\n");
-            }
-            buf.append("}\n");
-            return buf.toString();
-          }
-        });
-
-        return ExtendsClassStructureBuilderImpl.this;
-      }
-    });
-  }
-
-  private BlockBuilder<ExtendsClassStructureBuilderImpl> publicOverridesMethod(final MetaMethod method, final DefParameters parameters) {
-    return new BlockBuilderImpl<ExtendsClassStructureBuilderImpl>(new BuildCallback<ExtendsClassStructureBuilderImpl>() {
-      @Override
-      public ExtendsClassStructureBuilderImpl callback(final Statement statement) {
+      public AnonymousClassStructureBuilderImpl callback(final Statement statement) {
 
         addCallable(new DeferredGenerateCallback() {
           @Override
@@ -96,19 +77,21 @@ public class ExtendsClassStructureBuilderImpl implements Finishable<ObjectBuilde
           }
         });
 
-        return ExtendsClassStructureBuilderImpl.this;
+        return AnonymousClassStructureBuilderImpl.this;
       }
     });
   }
 
-  public BlockBuilder<ExtendsClassStructureBuilderImpl> publicOverridesMethod(String name, Parameter... args) {
+  public BlockBuilder<AnonymousClassStructureBuilderImpl> publicOverridesMethod(String name, Parameter... args) {
     List<MetaClass> types = new ArrayList<MetaClass>();
     for (Parameter arg : args) {
       types.add(arg.getType());
     }
-
-    return publicOverridesMethod(toExtend.getBestMatchingMethod(name,
-            types.toArray(new MetaClass[args.length])), DefParameters.fromParameters(args));
+    MetaMethod method = toExtend.getBestMatchingMethod(name, types.toArray(new MetaClass[args.length]));
+    if (method == null)
+      throw new UndefinedMethodException("Method not found:" + name);
+    
+    return publicOverridesMethod(method, DefParameters.fromParameters(args));
   }
 
   @Override
@@ -131,7 +114,8 @@ public class ExtendsClassStructureBuilderImpl implements Finishable<ObjectBuilde
 
   private String doGenerate(Context context) {
     try {
-      if (callables == null) return null;
+      if (callables == null) 
+        return null;
 
       StringBuilder buf = new StringBuilder();
       for (DeferredGenerateCallback c : callables) {

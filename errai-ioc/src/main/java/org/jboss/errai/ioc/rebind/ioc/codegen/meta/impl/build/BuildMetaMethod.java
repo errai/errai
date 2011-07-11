@@ -17,7 +17,6 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.build;
 
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
